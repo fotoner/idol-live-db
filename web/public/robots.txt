@@ -5,4 +5,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://imas-live-web.tokata3011.workers.dev/sitemap-index.xml
+Sitemap: https://idollivedb.fugalabs.uk/sitemap-index.xml
