@@ -7,7 +7,6 @@ import {
 import { checkRateLimit, dryCheckIpRateLimit, commitIpRateLimit } from "./rate_limit";
 import { upsertUser, checkIsAdmin } from "./users";
 import { handleDeviceAggregates } from "./routes/device_aggregates";
-import { handleChannelVotes } from "./routes/channel_votes";
 import { handlePolls } from "./routes/polls";
 import { handleTags } from "./routes/tags";
 import { handleLyrics } from "./routes/lyrics";
@@ -1178,15 +1177,6 @@ export default {
         request, env, url, path, json, error, rateLimitResponse, rateLimitSimple,
       });
       if (deviceAggregateResponse) return deviceAggregateResponse;
-
-      // ----------------------------------------------------------------
-      // チャンネル (アイマス/ボカロ) のアイドル別投票。device 集計と同じく
-      // 認証不要 (X-Device-Id のみ) で D1 完結。一致しなければ null が返る。
-      // ----------------------------------------------------------------
-      const channelVotesResponse = await handleChannelVotes({
-        request, env, url, path, json, error, rateLimitResponse, rateLimitSimple,
-      });
-      if (channelVotesResponse) return channelVotesResponse;
 
       // ----------------------------------------------------------------
       // ユーザータグ API (song / idol / unit の 3 プール + 類似) は
