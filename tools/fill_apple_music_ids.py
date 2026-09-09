@@ -184,13 +184,17 @@ def main():
             print(f"  ✓ {brand}/{row['id']}: '{title}' -> {track_id} ({chosen.get('trackName')} / {chosen.get('artistName')})")
             matched += 1
             if args.apply and track_id:
-                # apple_music_id と一緒に artwork_url / apple_music_album_id / cd_series も上書き。
-                # cd_series が古いアルバム名のまま残るとUIで「別ブランドのアルバム」に見える事故が起きる。
+                # apple_music_id と一緒に artwork_url / apple_music_album_id も入れる。
+                # cd_series は「今が空のときだけ」入れる: 対象行は apple_music_id が無い行なので、
+                # そこに入っている cd_series は機械が付けた値ではなく手で入れた系列キー
+                # (会場限定 CD の "…#twinlive_nakayoshi" 等) しかありえない。以前は無条件に
+                # Apple のアルバム名で上書きしていて、配信化された会場限定 CD の系列キーを
+                # 毎日潰しては CloudKit にまで push していた。
                 cur.execute(
                     """UPDATE songs SET apple_music_id=?,
                        artwork_url = ?,
                        apple_music_album_id = ?,
-                       cd_series = ?
+                       cd_series = CASE WHEN IFNULL(cd_series, '') = '' THEN ? ELSE cd_series END
                        WHERE id=?""",
                     (str(track_id), artwork or None, str(album_id) if album_id else None, album_name, row["id"]),
                 )
