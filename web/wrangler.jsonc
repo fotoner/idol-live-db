@@ -9,10 +9,21 @@
   // 独自ドメイン 1 本に寄せる。workers.dev を残すと同じ内容が 2 つの URL で引けて
   // 検索評価が割れる (canonical は打っているが、そもそも 1 本の方が単純)。
   "workers_dev": false,
-  // Custom Domain。zone (fugalabs.uk) は同じアカウントの Cloudflare 管理下にあるので、
-  // DNS レコードと証明書は wrangler が用意する。
-  // apex は別のものが動いているのでサブドメインを使う。
-  "routes": [{ "pattern": "idollivedb.fugalabs.uk", "custom_domain": true }],
+  // Custom Domain。zone は同じアカウントの Cloudflare 管理下にあるので、
+  // DNS レコードと証明書は wrangler が用意する。apex は別のものが動いているので
+  // サブドメインを使う。
+  //
+  // 2026-09 fugalabs.uk → fugaapp.site 移行（docs/subdomain-migration-plan.md）。
+  // アダルトサイト(punitter)と同居する fugalabs.uk から分離するため、正規 URL は
+  // idollivedb.fugaapp.site 側（SITE_ORIGIN / astro の site / robots がこれを指す）。
+  //
+  // **旧ホストをこの配列から外さないこと。** 恒久 301（Cloudflare Redirect Rule）の
+  // 受け口として要る。また、ダッシュボードで Custom Domain を足しても、この配列に
+  // 書いていなければ次の `wrangler deploy` で配列の内容に上書きされて消える。
+  "routes": [
+    { "pattern": "idollivedb.fugaapp.site", "custom_domain": true },
+    { "pattern": "idollivedb.fugalabs.uk", "custom_domain": true },
+  ],
   "assets": {
     "directory": "./dist",
     // astro.config.mjs の trailingSlash:"always" と対にする。
