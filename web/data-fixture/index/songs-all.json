@@ -85,8 +85,8 @@
   "seo": {
     "title": "楽曲 (全件) | アイドルライブDB",
     "description": "楽曲の一覧。",
-    "canonical": "https://idollivedb.fugalabs.uk/songs/all/",
-    "ogImage": "https://idollivedb.fugalabs.uk/og/default.png",
+    "canonical": "https://idollivedb.fugaapp.site/songs/all/",
+    "ogImage": "https://idollivedb.fugaapp.site/og/default.png",
     "robots": "noindex,follow",
     "jsonLd": {
       "@context": "https://schema.org",
@@ -94,14 +94,14 @@
         {
           "@type": "WebPage",
           "name": "楽曲 (全件)",
-          "url": "https://idollivedb.fugalabs.uk/songs/all/"
+          "url": "https://idollivedb.fugaapp.site/songs/all/"
         },
         {
           "@type": "BreadcrumbList",
           "itemListElement": [
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/",
+              "item": "https://idollivedb.fugaapp.site/",
               "name": "ホーム",
               "position": 1
             }

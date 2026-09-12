@@ -246,8 +246,8 @@
   "seo": {
     "title": "Thank You! | アイドルライブDB",
     "description": "クレジット・歌唱アイドル・披露履歴。",
-    "canonical": "https://idollivedb.fugalabs.uk/songs/ml_sample/",
-    "ogImage": "https://idollivedb.fugalabs.uk/og/default.png",
+    "canonical": "https://idollivedb.fugaapp.site/songs/ml_sample/",
+    "ogImage": "https://idollivedb.fugaapp.site/og/default.png",
     "robots": "index,follow",
     "jsonLd": {
       "@context": "https://schema.org",
@@ -255,20 +255,20 @@
         {
           "@type": "WebPage",
           "name": "Thank You!",
-          "url": "https://idollivedb.fugalabs.uk/songs/ml_sample/"
+          "url": "https://idollivedb.fugaapp.site/songs/ml_sample/"
         },
         {
           "@type": "BreadcrumbList",
           "itemListElement": [
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/",
+              "item": "https://idollivedb.fugaapp.site/",
               "name": "ホーム",
               "position": 1
             },
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/songs/",
+              "item": "https://idollivedb.fugaapp.site/songs/",
               "name": "楽曲",
               "position": 2
             }

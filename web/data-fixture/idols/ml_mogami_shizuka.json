@@ -165,8 +165,8 @@
   "seo": {
     "title": "最上静香 | アイドルライブDB",
     "description": "プロフィール・CV・所属ユニット・持ち曲・出演公演。",
-    "canonical": "https://idollivedb.fugalabs.uk/idols/ml_mogami_shizuka/",
-    "ogImage": "https://idollivedb.fugalabs.uk/og/default.png",
+    "canonical": "https://idollivedb.fugaapp.site/idols/ml_mogami_shizuka/",
+    "ogImage": "https://idollivedb.fugaapp.site/og/default.png",
     "robots": "index,follow",
     "jsonLd": {
       "@context": "https://schema.org",
@@ -174,20 +174,20 @@
         {
           "@type": "WebPage",
           "name": "最上静香",
-          "url": "https://idollivedb.fugalabs.uk/idols/ml_mogami_shizuka/"
+          "url": "https://idollivedb.fugaapp.site/idols/ml_mogami_shizuka/"
         },
         {
           "@type": "BreadcrumbList",
           "itemListElement": [
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/",
+              "item": "https://idollivedb.fugaapp.site/",
               "name": "ホーム",
               "position": 1
             },
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/idols/",
+              "item": "https://idollivedb.fugaapp.site/idols/",
               "name": "アイドル",
               "position": 2
             }

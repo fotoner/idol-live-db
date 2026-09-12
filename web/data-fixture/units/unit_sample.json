@@ -66,8 +66,8 @@
   "seo": {
     "title": "サンプルユニット | アイドルライブDB",
     "description": "メンバーとユニット曲。",
-    "canonical": "https://idollivedb.fugalabs.uk/units/unit_sample/",
-    "ogImage": "https://idollivedb.fugalabs.uk/og/default.png",
+    "canonical": "https://idollivedb.fugaapp.site/units/unit_sample/",
+    "ogImage": "https://idollivedb.fugaapp.site/og/default.png",
     "robots": "index,follow",
     "jsonLd": {
       "@context": "https://schema.org",
@@ -75,20 +75,20 @@
         {
           "@type": "WebPage",
           "name": "サンプルユニット",
-          "url": "https://idollivedb.fugalabs.uk/units/unit_sample/"
+          "url": "https://idollivedb.fugaapp.site/units/unit_sample/"
         },
         {
           "@type": "BreadcrumbList",
           "itemListElement": [
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/",
+              "item": "https://idollivedb.fugaapp.site/",
               "name": "ホーム",
               "position": 1
             },
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/units/",
+              "item": "https://idollivedb.fugaapp.site/units/",
               "name": "ユニット",
               "position": 2
             }

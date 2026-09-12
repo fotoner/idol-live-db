@@ -5,4 +5,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://idollivedb.fugalabs.uk/sitemap-index.xml
+Sitemap: https://idollivedb.fugaapp.site/sitemap-index.xml

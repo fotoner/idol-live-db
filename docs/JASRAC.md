@@ -488,8 +488,10 @@ SJIS で落ちる主な文字: `♡` (U+2661)、`É`/`é`、ハングル、`Ø`�
 1. **匿名 GET を本番へ出す。** `GET /songs/:id/lyrics` は c8f33c2 で未認証でも通るが、
    2026-09-06 時点の本番は 401 を返す (develop 未取り込み)。出面はログインを持てない。
 2. **CORS の許可 origin。** `imas-live-api/wrangler.jsonc` の `ALLOWED_ORIGINS` に
-   `https://idollivedb.fugalabs.uk` を入れた (デプロイで反映)。空のままだと
+   `https://idollivedb.fugaapp.site` を入れた (デプロイで反映)。空のままだと
    ブラウザから叩けない (preflight に Access-Control-Allow-Origin が付かない)。
+   2026-09 の fugaapp.site 移行中は旧 `https://idollivedb.fugalabs.uk` も並記している
+   (~/dev/fugaapp/docs/subdomain-migration-plan.md §6 フェーズ4で落とす)。
 
 **D1 の読み取り枠**: 歌詞 1 曲 = `song_lyrics` 1 行 + IP 上限のバケット (分・日) 2 行の読みと 2 行の書き。IP 上限は歌詞だけ 120/分 + 1,000/日 (`LYRICS_IP_LIMITS`。会場の NAT 対策)。
 歌詞検索 (`GET /lyrics/search`、n-gram 索引の走査で 1 回あたり数百行) は出面に持たない。

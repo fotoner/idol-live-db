@@ -276,7 +276,7 @@ Cloudflare Workers Static Assets の上限は **20,000 ファイル / 1 ファ�
 | O3 | venues の壊れ id 2 件 (`/` を含む) をデータ側で直すか | (a) フォールバック slug のまま (b) `db/master.sql` を直して CloudKit にも反映 | 別タスクで (b)。id 変更は CloudKit の PK 変更を伴うため慎重に。それまで (a) で正しく動く |
 | O4 | songs/idols/units/venues への deeplink 対応 (iOS `DeeplinkRouter` 拡張) と Universal Links 化 | (a) やらない (b) アプリ側タスクとして起票 | (b)。本タスクでは iOS に触らない |
 | O5 | TypeScript 7 (Go 実装) への追随 | (a) 5.x に pin (b) 7 を試す | (a)。`@astrojs/check` の対応が確認できるまで `~5.9` で固定 |
-| O6 | 独自ドメイン | (a) `workers.dev` のまま (b) ドメイン取得 | (a)。「ランニングコスト 0」が絶対制約。将来ドメインを持つ場合は `astro.config.mjs` の `site` / `robots.txt` / 本書の 3 箇所だけを変える (JSON 側は相対パスなので影響なし) |
+| O6 | 独自ドメイン | (a) `workers.dev` のまま (b) ドメイン取得 | 2026-09 に (b) `idollivedb.fugaapp.site` へ移行済み。ドメインを変えるときに揃える箇所は「3 箇所」ではなく以下 6 箇所 (2026-09 の fugalabs.uk → fugaapp.site 移行で実際に洗い出した数。~/dev/fugaapp/docs/subdomain-migration-plan.md §4-1): `imas-core/src/web_export/content.rs` の `SITE_ORIGIN`、`web/astro.config.mjs` の `site`、`web/public/robots.txt` の `Sitemap:`、`web/wrangler.jsonc` の `routes`、`imas-live-api/wrangler.jsonc` の `ALLOWED_ORIGINS`、`web/tests/no-api-exposure.test.ts` の `ALLOWED_HOSTS`。JSON 側 (`web/data-fixture/**`) は絶対 URL を含むが `SITE_ORIGIN` から `cargo run --bin web-export -- --emit-fixture` で再生成されるだけなので手で直す対象ではない |
 | O7 | `idol_profile_input` (iOS のプロフィール整形規則を imas-core に移送したもの) を iOS/Android 側にも適用し 3 プラットフォーム統一するか | (a) Web だけが使う (b) 3 プラットフォーム統一 | (b) を後続タスクで。(a) のままだと整形ロジックが 3 実装になる |
 
 ---

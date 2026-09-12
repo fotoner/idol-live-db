@@ -69,8 +69,8 @@
   "seo": {
     "title": "未分類の会場 | アイドルライブDB",
     "description": "会場の一覧。",
-    "canonical": "https://idollivedb.fugalabs.uk/venues/pref/%E6%9C%AA%E5%88%86%E9%A1%9E/",
-    "ogImage": "https://idollivedb.fugalabs.uk/og/default.png",
+    "canonical": "https://idollivedb.fugaapp.site/venues/pref/%E6%9C%AA%E5%88%86%E9%A1%9E/",
+    "ogImage": "https://idollivedb.fugaapp.site/og/default.png",
     "robots": "index,follow",
     "jsonLd": {
       "@context": "https://schema.org",
@@ -78,14 +78,14 @@
         {
           "@type": "WebPage",
           "name": "未分類の会場",
-          "url": "https://idollivedb.fugalabs.uk/venues/pref/%E6%9C%AA%E5%88%86%E9%A1%9E/"
+          "url": "https://idollivedb.fugaapp.site/venues/pref/%E6%9C%AA%E5%88%86%E9%A1%9E/"
         },
         {
           "@type": "BreadcrumbList",
           "itemListElement": [
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/",
+              "item": "https://idollivedb.fugaapp.site/",
               "name": "ホーム",
               "position": 1
             }

@@ -182,8 +182,8 @@
   "seo": {
     "title": "ライブ | アイドルライブDB",
     "description": "ライブの一覧。",
-    "canonical": "https://idollivedb.fugalabs.uk/events/",
-    "ogImage": "https://idollivedb.fugalabs.uk/og/default.png",
+    "canonical": "https://idollivedb.fugaapp.site/events/",
+    "ogImage": "https://idollivedb.fugaapp.site/og/default.png",
     "robots": "index,follow",
     "jsonLd": {
       "@context": "https://schema.org",
@@ -191,14 +191,14 @@
         {
           "@type": "WebPage",
           "name": "ライブ",
-          "url": "https://idollivedb.fugalabs.uk/events/"
+          "url": "https://idollivedb.fugaapp.site/events/"
         },
         {
           "@type": "BreadcrumbList",
           "itemListElement": [
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/",
+              "item": "https://idollivedb.fugaapp.site/",
               "name": "ホーム",
               "position": 1
             }

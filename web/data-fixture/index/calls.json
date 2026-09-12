@@ -72,8 +72,8 @@
   "seo": {
     "title": "コールガイドの進捗 | アイドルライブDB",
     "description": "コールガイドがある曲、最近の編集、未整備の曲。",
-    "canonical": "https://idollivedb.fugalabs.uk/calls/",
-    "ogImage": "https://idollivedb.fugalabs.uk/og/default.png",
+    "canonical": "https://idollivedb.fugaapp.site/calls/",
+    "ogImage": "https://idollivedb.fugaapp.site/og/default.png",
     "robots": "index,follow",
     "jsonLd": {
       "@context": "https://schema.org",
@@ -81,14 +81,14 @@
         {
           "@type": "WebPage",
           "name": "コールガイドの進捗",
-          "url": "https://idollivedb.fugalabs.uk/calls/"
+          "url": "https://idollivedb.fugaapp.site/calls/"
         },
         {
           "@type": "BreadcrumbList",
           "itemListElement": [
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/",
+              "item": "https://idollivedb.fugaapp.site/",
               "name": "ホーム",
               "position": 1
             }

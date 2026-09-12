@@ -21,8 +21,8 @@
   "seo": {
     "title": "タグ | アイドルライブDB",
     "description": "アイドルマスターの楽曲に付いたタグの一覧。タグから曲を探せます。",
-    "canonical": "https://idollivedb.fugalabs.uk/tags/",
-    "ogImage": "https://idollivedb.fugalabs.uk/og/default.png",
+    "canonical": "https://idollivedb.fugaapp.site/tags/",
+    "ogImage": "https://idollivedb.fugaapp.site/og/default.png",
     "robots": "index,follow",
     "jsonLd": {
       "@context": "https://schema.org",
@@ -30,20 +30,20 @@
         {
           "@type": "WebPage",
           "name": "タグ",
-          "url": "https://idollivedb.fugalabs.uk/tags/"
+          "url": "https://idollivedb.fugaapp.site/tags/"
         },
         {
           "@type": "BreadcrumbList",
           "itemListElement": [
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/",
+              "item": "https://idollivedb.fugaapp.site/",
               "name": "ホーム",
               "position": 1
             },
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/songs/",
+              "item": "https://idollivedb.fugaapp.site/songs/",
               "name": "楽曲",
               "position": 2
             }

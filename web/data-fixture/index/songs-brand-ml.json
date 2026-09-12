@@ -108,8 +108,8 @@
   "seo": {
     "title": "ミリオンライブ! の楽曲 | アイドルライブDB",
     "description": "楽曲の一覧。",
-    "canonical": "https://idollivedb.fugalabs.uk/songs/brand/ml/",
-    "ogImage": "https://idollivedb.fugalabs.uk/og/default.png",
+    "canonical": "https://idollivedb.fugaapp.site/songs/brand/ml/",
+    "ogImage": "https://idollivedb.fugaapp.site/og/default.png",
     "robots": "index,follow",
     "jsonLd": {
       "@context": "https://schema.org",
@@ -117,14 +117,14 @@
         {
           "@type": "WebPage",
           "name": "ミリオンライブ! の楽曲",
-          "url": "https://idollivedb.fugalabs.uk/songs/brand/ml/"
+          "url": "https://idollivedb.fugaapp.site/songs/brand/ml/"
         },
         {
           "@type": "BreadcrumbList",
           "itemListElement": [
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/",
+              "item": "https://idollivedb.fugaapp.site/",
               "name": "ホーム",
               "position": 1
             }

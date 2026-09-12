@@ -616,8 +616,8 @@
   "seo": {
     "title": "2026年9月 | アイドルライブDB",
     "description": "アイドルマスターのライブ公演・楽曲リリース・誕生日・記念日のカレンダー。",
-    "canonical": "https://idollivedb.fugalabs.uk/calendar/2026-09/",
-    "ogImage": "https://idollivedb.fugalabs.uk/og/default.png",
+    "canonical": "https://idollivedb.fugaapp.site/calendar/2026-09/",
+    "ogImage": "https://idollivedb.fugaapp.site/og/default.png",
     "robots": "index,follow",
     "jsonLd": {
       "@context": "https://schema.org",
@@ -625,20 +625,20 @@
         {
           "@type": "WebPage",
           "name": "2026年9月",
-          "url": "https://idollivedb.fugalabs.uk/calendar/2026-09/"
+          "url": "https://idollivedb.fugaapp.site/calendar/2026-09/"
         },
         {
           "@type": "BreadcrumbList",
           "itemListElement": [
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/",
+              "item": "https://idollivedb.fugaapp.site/",
               "name": "ホーム",
               "position": 1
             },
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/calendar/",
+              "item": "https://idollivedb.fugaapp.site/calendar/",
               "name": "カレンダー",
               "position": 2
             }

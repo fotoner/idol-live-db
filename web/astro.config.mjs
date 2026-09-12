@@ -113,7 +113,7 @@ function copyGeneratedAssets() {
 }
 
 export default defineConfig({
-  site: "https://idollivedb.fugalabs.uk",
+  site: "https://idollivedb.fugaapp.site",
   output: "static",
   trailingSlash: "always",
   // CSP (public/_headers) が `style-src 'self'` = unsafe-inline 無しなので、

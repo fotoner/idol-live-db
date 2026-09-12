@@ -29,7 +29,7 @@ const SKIP_DIRS = new Set(["schema", "fold"]);
 
 /** ソースに書いてよい外部ホスト。増やすときは「なぜ必要か」をレビューで問うこと。 */
 const ALLOWED_HOSTS = new Set([
-  "idollivedb.fugalabs.uk", // 自サイト (astro.config の site。canonical / OGP / sitemap の絶対 URL)
+  "idollivedb.fugaapp.site", // 自サイト (astro.config の site。canonical / OGP / sitemap の絶対 URL)
   "apps.apple.com", // App Store
   "music.apple.com", // Apple Music (曲ページの外部リンク)
   "github.com", // リポジトリ / 生成物のコメント (Aleph-Alpha/ts-rs)

@@ -34,7 +34,7 @@ def main() -> int:
     # Python 既定の UA は Cloudflare に 403 で弾かれる (curl は通る)。名乗りを付ける。
     req = urllib.request.Request(
         args.url,
-        headers={"Accept": "application/json", "User-Agent": "imas-live-db-export/1.0 (+https://idollivedb.fugalabs.uk)"},
+        headers={"Accept": "application/json", "User-Agent": "imas-live-db-export/1.0 (+https://idollivedb.fugaapp.site)"},
     )
     with urllib.request.urlopen(req, timeout=30) as res:
         body = json.load(res)

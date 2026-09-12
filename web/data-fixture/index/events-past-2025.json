@@ -159,8 +159,8 @@
   "seo": {
     "title": "2025年のライブ | アイドルライブDB",
     "description": "ライブの一覧。",
-    "canonical": "https://idollivedb.fugalabs.uk/events/past/2025/",
-    "ogImage": "https://idollivedb.fugalabs.uk/og/default.png",
+    "canonical": "https://idollivedb.fugaapp.site/events/past/2025/",
+    "ogImage": "https://idollivedb.fugaapp.site/og/default.png",
     "robots": "index,follow",
     "jsonLd": {
       "@context": "https://schema.org",
@@ -168,14 +168,14 @@
         {
           "@type": "WebPage",
           "name": "2025年のライブ",
-          "url": "https://idollivedb.fugalabs.uk/events/past/2025/"
+          "url": "https://idollivedb.fugaapp.site/events/past/2025/"
         },
         {
           "@type": "BreadcrumbList",
           "itemListElement": [
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/",
+              "item": "https://idollivedb.fugaapp.site/",
               "name": "ホーム",
               "position": 1
             }

@@ -51,8 +51,8 @@
   "seo": {
     "title": "「かわいい」の曲 | アイドルライブDB",
     "description": "アイドルマスターの楽曲のうち「かわいい」のタグが付いた 2 曲。",
-    "canonical": "https://idollivedb.fugalabs.uk/tags/tag_kawaii/",
-    "ogImage": "https://idollivedb.fugalabs.uk/og/default.png",
+    "canonical": "https://idollivedb.fugaapp.site/tags/tag_kawaii/",
+    "ogImage": "https://idollivedb.fugaapp.site/og/default.png",
     "robots": "index,follow",
     "jsonLd": {
       "@context": "https://schema.org",
@@ -60,26 +60,26 @@
         {
           "@type": "WebPage",
           "name": "「かわいい」の曲",
-          "url": "https://idollivedb.fugalabs.uk/tags/tag_kawaii/"
+          "url": "https://idollivedb.fugaapp.site/tags/tag_kawaii/"
         },
         {
           "@type": "BreadcrumbList",
           "itemListElement": [
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/",
+              "item": "https://idollivedb.fugaapp.site/",
               "name": "ホーム",
               "position": 1
             },
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/songs/",
+              "item": "https://idollivedb.fugaapp.site/songs/",
               "name": "楽曲",
               "position": 2
             },
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/tags/",
+              "item": "https://idollivedb.fugaapp.site/tags/",
               "name": "タグ",
               "position": 3
             }

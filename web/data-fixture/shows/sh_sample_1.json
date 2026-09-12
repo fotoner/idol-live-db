@@ -242,8 +242,8 @@
   "seo": {
     "title": "DAY1 | アイドルライブDB",
     "description": "セットリストと歌唱メンバー。",
-    "canonical": "https://idollivedb.fugalabs.uk/shows/sh_sample_1/",
-    "ogImage": "https://idollivedb.fugalabs.uk/og/default.png",
+    "canonical": "https://idollivedb.fugaapp.site/shows/sh_sample_1/",
+    "ogImage": "https://idollivedb.fugaapp.site/og/default.png",
     "robots": "index,follow",
     "jsonLd": {
       "@context": "https://schema.org",
@@ -251,20 +251,20 @@
         {
           "@type": "WebPage",
           "name": "DAY1",
-          "url": "https://idollivedb.fugalabs.uk/shows/sh_sample_1/"
+          "url": "https://idollivedb.fugaapp.site/shows/sh_sample_1/"
         },
         {
           "@type": "BreadcrumbList",
           "itemListElement": [
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/",
+              "item": "https://idollivedb.fugaapp.site/",
               "name": "ホーム",
               "position": 1
             },
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/events/",
+              "item": "https://idollivedb.fugaapp.site/events/",
               "name": "ライブ",
               "position": 2
             }

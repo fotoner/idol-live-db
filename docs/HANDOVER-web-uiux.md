@@ -1,7 +1,9 @@
 # 引き継ぎ: Web 出面の UI/UX 全面改修
 
 宛先: この後 Web 出面 (`web/`) の UI/UX をがっつり直す担当。
-作成: 2026-09-06 / 対象ブランチ `claude/mac-layout-design-55b2a3` / 公開先 https://idollivedb.fugalabs.uk
+作成: 2026-09-06 / 対象ブランチ `claude/mac-layout-design-55b2a3` / 公開先 https://idollivedb.fugaapp.site
+（作成時点では https://idollivedb.fugalabs.uk。2026-09 に fugaapp.site へ移転。
+~/dev/fugaapp/docs/subdomain-migration-plan.md 参照）
 
 ---
 

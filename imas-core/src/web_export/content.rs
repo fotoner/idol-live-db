@@ -7,9 +7,12 @@ use super::dto::{
     AboutLink, AboutSection, AppLinks, AppOpen, CallGuideClap, CallGuideEmphasis, CallGuideVocabulary,
 };
 
-/// サイトの起点。独自ドメインを取るときに変えるのはここと `astro.config` の `site`、
-/// robots.txt の 3 箇所だけで済むようにしてある。
-pub const SITE_ORIGIN: &str = "https://idollivedb.fugalabs.uk";
+/// サイトの起点。ホストを変えるときは以下も必ず揃える (docs/ARCHITECTURE-web.md O6 /
+/// ~/dev/fugaapp/docs/subdomain-migration-plan.md §4-1 に詳細):
+/// `astro.config.mjs` の `site`、`robots.txt` の `Sitemap:`、
+/// `imas-live-api/wrangler.jsonc` の `ALLOWED_ORIGINS`、`web/wrangler.jsonc` の `routes`、
+/// `web/tests/no-api-exposure.test.ts` の `ALLOWED_HOSTS`。
+pub const SITE_ORIGIN: &str = "https://idollivedb.fugaapp.site";
 
 pub const SITE_NAME: &str = "アイドルライブDB";
 pub const SITE_TAGLINE: &str = "アイマスのライブ・公演・セットリスト・楽曲・アイドルを横断して調べられるデータベースです。";

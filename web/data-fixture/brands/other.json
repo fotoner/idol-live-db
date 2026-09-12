@@ -20,8 +20,8 @@
   "seo": {
     "title": "その他 | アイドルライブDB",
     "description": "ブランドのアイドル・ユニット・ライブ・楽曲。",
-    "canonical": "https://idollivedb.fugalabs.uk/brands/other/",
-    "ogImage": "https://idollivedb.fugalabs.uk/og/default.png",
+    "canonical": "https://idollivedb.fugaapp.site/brands/other/",
+    "ogImage": "https://idollivedb.fugaapp.site/og/default.png",
     "robots": "noindex,follow",
     "jsonLd": {
       "@context": "https://schema.org",
@@ -29,20 +29,20 @@
         {
           "@type": "WebPage",
           "name": "その他",
-          "url": "https://idollivedb.fugalabs.uk/brands/other/"
+          "url": "https://idollivedb.fugaapp.site/brands/other/"
         },
         {
           "@type": "BreadcrumbList",
           "itemListElement": [
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/",
+              "item": "https://idollivedb.fugaapp.site/",
               "name": "ホーム",
               "position": 1
             },
             {
               "@type": "ListItem",
-              "item": "https://idollivedb.fugalabs.uk/brands/",
+              "item": "https://idollivedb.fugaapp.site/brands/",
               "name": "ブランド",
               "position": 2
             }
