@@ -2,6 +2,7 @@
 import type { LineupNote } from "./LineupNote";
 import type { PerformerRef } from "./PerformerRef";
 import type { Ref } from "./Ref";
+import type { SetlistCostume } from "./SetlistCostume";
 
 /**
  * セトリの 1 行。
@@ -39,6 +40,10 @@ lineup: LineupNote | null,
  * `songs.song_type == "cover"` (曲そのものがカバー曲)。
  */
 isCover: boolean, 
+/**
+ * この披露で着ていた衣装。記録が無ければ空。
+ */
+costumes: Array<SetlistCostume>, 
 /**
  * この披露がその曲の初披露 (この DB に載っている範囲で最古) なら「初披露」。
  */

@@ -173,8 +173,6 @@ mod room_parity {
         // Kotlin の Song エンティティと MIGRATION_13_14 は入れてある。app/schemas/**.json は
         // Android ビルド (KSP) の生成物で、このセッションではビルドしない方針のため 13.json の
         // まま。**次に Android をビルドして 14.json が出たら、この 2 行は消すこと。**
-        ("songs", "joint_brand_ids", "Room のスキーマ JSON が未生成 (Android ビルド待ち)"),
-        ("songs", "is_collab", "Room のスキーマ JSON が未生成 (Android ビルド待ち)"),
         ("idol_voice_actors", "*", "Android は entity を持たず、SeedImporter が『両方にある表』しか移さないため実機に無い。CV 名検索が Android で効かない原因"),
         ("song_units", "*", "非同期テーブル。Android は持たない"),
     ];

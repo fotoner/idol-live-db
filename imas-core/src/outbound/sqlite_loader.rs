@@ -17,8 +17,8 @@
 //! 被害が小さい (過去に FK 孤児で起動クラッシュ→審査 reject の事故があった系譜のデータ)。
 
 use crate::domain::snapshot::{
-    Anniversary, Brand, Creator, Event, EventRelease, Idol, IdolVoiceActor, SetlistItem, Show,
-    Snapshot, Song, Staff, Unit, Venue, VenueHall, VenueName,
+    Anniversary, Brand, Costume, CostumeWear, Creator, Event, EventRelease, Idol, IdolVoiceActor,
+    SetlistItem, Show, Snapshot, Song, Staff, Unit, Venue, VenueHall, VenueName,
 };
 use rusqlite::{Connection, OpenFlags};
 use std::collections::{BTreeMap, HashMap, HashSet};
@@ -75,6 +75,20 @@ pub fn load_raw_tables(db_path: &str) -> Result<RawTables, String> {
     let idol_voice_actors = load_voice_actors(&conn, &idol_index_by_id)?;
     let event_releases = load_event_releases(&conn, &event_index_by_id, &show_index_by_id)?;
 
+    // 衣装は setlist_items の添字も要るので、そこまで揃ってから読む。
+    let setlist_item_index_by_id: HashMap<String, u32> =
+        setlist_items.iter().enumerate().map(|(i, it)| (it.id.clone(), i as u32)).collect();
+    let costumes = load_costumes(&conn)?;
+    let costume_index_by_id: HashMap<String, u32> =
+        costumes.iter().enumerate().map(|(i, c)| (c.id.clone(), i as u32)).collect();
+    let costume_wears = load_costume_wears(
+        &conn,
+        &costume_index_by_id,
+        &show_index_by_id,
+        &setlist_item_index_by_id,
+        &idol_index_by_id,
+    )?;
+
     // 結合表は素の行のまま読む (添字への解決と索引構築は domain 側)。
     let song_artists = load_song_artists(&conn)?;
     let setlist_performers = load_setlist_performers(&conn)?;
@@ -100,6 +114,8 @@ pub fn load_raw_tables(db_path: &str) -> Result<RawTables, String> {
         venue_halls,
         idol_voice_actors,
         event_releases,
+        costumes,
+        costume_wears,
         song_artists,
         setlist_performers,
         show_cast,
@@ -542,6 +558,98 @@ fn load_venue_halls(
         halls.push(VenueHall { id, venue, name, capacity });
     }
     Ok(halls)
+}
+
+/// costumes をロードする。表が無い DB (移行前の Documents) では空で続ける。
+fn load_costumes(conn: &Connection) -> Result<Vec<Costume>, String> {
+    if !table_exists(conn, "costumes")? {
+        return Ok(Vec::new());
+    }
+    let mut stmt = conn
+        .prepare(
+            "SELECT id, brand_id, name, name_kana, unit_id, idol_id, description, source_url,
+                    sort_order
+             FROM costumes",
+        )
+        .map_err(|e| e.to_string())?;
+    let rows = stmt
+        .query_map([], |r| {
+            Ok(Costume {
+                id: r.get(0)?,
+                brand_id: r.get(1)?,
+                name: r.get(2)?,
+                name_kana: r.get(3)?,
+                unit_id: r.get(4)?,
+                idol_id: r.get(5)?,
+                description: r.get(6)?,
+                source_url: r.get(7)?,
+                sort_order: r.get::<_, Option<i64>>(8)?.unwrap_or(0),
+            })
+        })
+        .map_err(|e| e.to_string())?;
+    rows.collect::<Result<_, _>>().map_err(|e| e.to_string())
+}
+
+/// costume_wears をロードする。
+///
+/// 衣装・公演は必須なので、どちらかが引けない孤児行は読み飛ばす。
+/// **曲とアイドルは「分からない」が正規の状態**なので、NULL はそのまま None にする。
+/// ただし id が入っているのに引けない (= 消えた曲を指している) 行は、
+/// 「全員・公演どまり」に化けてしまうと嘘になるので落とす。
+fn load_costume_wears(
+    conn: &Connection,
+    costume_index_by_id: &HashMap<String, u32>,
+    show_index_by_id: &HashMap<String, u32>,
+    setlist_item_index_by_id: &HashMap<String, u32>,
+    idol_index_by_id: &HashMap<String, u32>,
+) -> Result<Vec<CostumeWear>, String> {
+    if !table_exists(conn, "costume_wears")? {
+        return Ok(Vec::new());
+    }
+    let mut stmt = conn
+        .prepare(
+            "SELECT id, costume_id, show_id, setlist_item_id, idol_id, sort_order
+             FROM costume_wears",
+        )
+        .map_err(|e| e.to_string())?;
+    let rows = stmt
+        .query_map([], |r| {
+            Ok((
+                r.get::<_, String>(0)?,
+                r.get::<_, String>(1)?,
+                r.get::<_, String>(2)?,
+                r.get::<_, Option<String>>(3)?,
+                r.get::<_, Option<String>>(4)?,
+                r.get::<_, Option<i64>>(5)?.unwrap_or(0),
+            ))
+        })
+        .map_err(|e| e.to_string())?;
+    let mut wears = Vec::new();
+    for row in rows {
+        let (id, costume_id, show_id, item_id, idol_id, sort_order) =
+            row.map_err(|e| e.to_string())?;
+        let (Some(&costume), Some(&show)) =
+            (costume_index_by_id.get(&costume_id), show_index_by_id.get(&show_id))
+        else {
+            continue;
+        };
+        let setlist_item = match &item_id {
+            Some(k) => match setlist_item_index_by_id.get(k) {
+                Some(&i) => Some(i),
+                None => continue,
+            },
+            None => None,
+        };
+        let idol = match &idol_id {
+            Some(k) => match idol_index_by_id.get(k) {
+                Some(&i) => Some(i),
+                None => continue,
+            },
+            None => None,
+        };
+        wears.push(CostumeWear { id, costume, show, setlist_item, idol, sort_order });
+    }
+    Ok(wears)
 }
 
 fn load_staff(conn: &Connection) -> Result<Vec<Staff>, String> {
@@ -1520,6 +1628,52 @@ mod tests {
         // meta: NULL 値の行は「行なし」と同じ観測になる
         assert_eq!(s.meta_value("data_version"), Some("42"));
         assert_eq!(s.meta_value("nil_key"), None);
+    }
+
+    /// 衣装が読めること。**曲と人の NULL は落とさない** (「公演のどこかで全員」が
+    /// 正規の記録)。逆に、消えた曲・消えた人を指す行は「全員」に化けると嘘になるので落とす。
+    #[test]
+    fn costume_wears_keep_null_refs_but_drop_dangling_ones() {
+        let dir = std::env::temp_dir();
+        let path = dir.join(format!("imas_core_costumes_{}.sqlite", std::process::id()));
+        let path_str = path.to_str().unwrap().to_string();
+        let _ = std::fs::remove_file(&path);
+        {
+            let c = Connection::open(&path).unwrap();
+            // 表の形はコアが持つ正本から起こす (ここで DDL を手写しすると、
+            // スキーマを変えたときテストだけ古い形のまま通ってしまう)。
+            c.execute_batch(crate::domain::schema_ddl::MASTER_SCHEMA_SQL).unwrap();
+            c.execute_batch(
+                "INSERT INTO events (id, name, event_type) VALUES ('ev1', 'ライブ', 'live');
+                 INSERT INTO shows (id, event_id, name, date, sort_order)
+                     VALUES ('sh1', 'ev1', 'DAY1', '2026-01-01', 0);
+                 INSERT INTO songs (id, title, song_type) VALUES ('so1', 'READY!!', 'original');
+                 INSERT INTO idols (id, brand_id, name, sort_order)
+                     VALUES ('id1', '765as', '天海春香', 0);
+                 INSERT INTO setlist_items (id, show_id, song_id, position)
+                     VALUES ('it1', 'sh1', 'so1', 1);
+                 INSERT INTO costumes (id, name) VALUES ('c1', '共通衣装');
+                 INSERT INTO costume_wears (id, costume_id, show_id, setlist_item_id, idol_id, sort_order)
+                     VALUES ('w_song_and_idol', 'c1', 'sh1', 'it1', 'id1', 1),
+                            ('w_show_only',     'c1', 'sh1', NULL,  NULL,  2),
+                            ('w_dead_song',     'c1', 'sh1', 'gone', NULL, 3),
+                            ('w_dead_idol',     'c1', 'sh1', NULL,  'gone', 4),
+                            ('w_dead_show',     'c1', 'gone', NULL, NULL,  5),
+                            ('w_dead_costume',  'gone', 'sh1', NULL, NULL, 6);",
+            )
+            .unwrap();
+        }
+        let s = load_snapshot(&path_str).expect("衣装つきの DB もロードできる");
+        let _ = std::fs::remove_file(&path);
+
+        let kept: Vec<&str> = s.costume_wears.iter().map(|w| w.id.as_str()).collect();
+        assert_eq!(kept, vec!["w_song_and_idol", "w_show_only"]);
+
+        let by_show = &s.wears_by_show[s.show_index_by_id["sh1"] as usize];
+        assert_eq!(by_show.len(), 2);
+        let by_item = &s.wears_by_setlist_item[s.setlist_item_index_by_id["it1"] as usize];
+        assert_eq!(by_item.len(), 1, "公演どまりの記録は曲側の索引に入らない");
+        assert_eq!(s.costume("c1").unwrap().name, "共通衣装");
     }
 
     #[test]

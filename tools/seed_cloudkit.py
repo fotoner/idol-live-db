@@ -85,6 +85,10 @@ TABLE_ORDER = [
     "setlist_items",
     "setlist_performers",
     "show_cast",
+    # 衣装の目録は先、着用記録は後。着用記録が costumes / shows / setlist_items /
+    # idols の全部を指すので、最後尾に置く。
+    "costumes",
+    "costume_wears",
     "meta",
 ]
 
@@ -108,6 +112,8 @@ RECORD_TYPE_MAP = {
     "unit_versions": "UnitVersion",
     "creators": "Creator",
     "venue_halls": "VenueHall",
+    "costumes": "Costume",
+    "costume_wears": "CostumeWear",
     "meta": "MetaData",
 }
 

@@ -77,7 +77,10 @@ pub use index::{
     PollEntryDto, PollListPage, PollSummaryDto,
 };
 pub use search::{FoldCase, FoldParity, SearchManifest, SearchRow, SearchShard, SearchShardMeta};
-pub use show::{LineupNote, MissingOriginals, PerformerRef, SetlistRow, SetlistSection, ShowPage};
+pub use show::{
+    LineupNote, MissingOriginals, PerformerRef, SetlistCostume, SetlistRow, SetlistSection,
+    ShowCostume, ShowPage,
+};
 pub use song::{CoOccurRow, CreditGroup, PerformanceRow, SingerRow, SongPage};
 pub use unit::UnitPage;
 pub use venue::{HallRow, VenueNameRow, VenuePage};

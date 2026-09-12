@@ -1,6 +1,7 @@
 //! ライブ (event) と公演 (show) の詳細ページ。
 
 use super::context::{simple_json_ld, Ctx};
+use crate::domain::costume_queries as costume;
 use crate::domain::date_display::{range_with_weekday, short_with_weekday};
 use crate::domain::event_detail_queries as detail;
 use crate::domain::snapshot::Snapshot;
@@ -260,6 +261,28 @@ pub fn show_page(ctx: &Ctx, show_id: &str) -> Option<ShowPage> {
         .map(|(label, rows)| SetlistSection { label, rows })
         .collect();
 
+    // 衣装が指すセトリ行を「公演内で何曲目か」に直す (position は全体通しの値で
+    // そのままでは読めない)。番号の求め方はセトリ行・曲ページと同じ ctx の規則。
+    let costumes: Vec<ShowCostume> = costume::show_costumes(ctx.snap, show_id)
+        .into_iter()
+        .map(|c| ShowCostume {
+            id: c.costume.id,
+            name: c.costume.name,
+            attribution: c.costume.attribution,
+            description: c.costume.description,
+            source_url: c.costume.source_url,
+            where_label: costume_where_label(
+                &c.songs
+                    .iter()
+                    .map(|s| ctx.setlist_number(show_id, s.position))
+                    .filter(|&n| n > 0)
+                    .collect::<Vec<_>>(),
+                c.somewhere_in_show,
+            ),
+            wearers_label: c.wearers_label,
+        })
+        .collect();
+
     let venue = show.venue_id.as_deref().and_then(|v| ctx.venue_ref(v));
     let identity = show_identity(&event.name, &show.name, &show.date);
     let title = identity.title();
@@ -286,6 +309,7 @@ pub fn show_page(ctx: &Ctx, show_id: &str) -> Option<ShowPage> {
         fact_rows: show_fact_rows(&show, venue.as_ref()),
         stat_tiles: show_stat_tiles(setlist_count, cast_ids.len() as u32),
         setlist_sections,
+        costumes,
         cast: cast_ids.iter().filter_map(|id| ctx.idol_ref(id)).collect(),
         sibling_shows: sibling_shows(ctx, &show.event_id, &event.name),
         app: content::app_open_deeplink("show", &url_segment(&show.id)),
@@ -362,6 +386,11 @@ fn setlist_rows(
                 is_cover: ctx.snap.song(&e.song_id).is_some_and(Snapshot::is_cover),
                 first_performance_label: (ctx.snap.ordinal_by_item[item as usize] == 1)
                     .then(|| FIRST_PERFORMANCE_LABEL.to_string()),
+                // チップの文字列は Rust が組んである (着用者の括弧を付けるかも含めて)。
+                costumes: costume::setlist_item_costumes(ctx.snap, &e.id)
+                    .into_iter()
+                    .map(|c| SetlistCostume { id: c.costume.id, label: c.chip_label })
+                    .collect(),
             };
             Some((section_label(e.section.as_deref()), row))
         })
@@ -451,6 +480,18 @@ fn hall_unless_in(hall: Option<&str>, venue: Option<&str>) -> Option<String> {
     (!venue.is_some_and(|v| v.contains(hall))).then(|| hall.to_string())
 }
 
+/// 衣装を「どこで着たか」の 1 行にする。
+///
+/// 曲が分かっている番号を並べ、曲まで特定できていない記録があればそれも足す。
+/// **どちらも無い状態は作れない** (着用記録が 1 件も無い衣装はそもそも出てこない)。
+fn costume_where_label(song_numbers: &[u32], somewhere_in_show: bool) -> String {
+    // 番号の中黒は全角スペースを挟まない (「1・5 曲目」で 1 語に見せたい)。
+    let numbers = song_numbers.iter().map(u32::to_string).collect::<Vec<_>>().join("・");
+    let songs = (!song_numbers.is_empty()).then(|| format!("{numbers} 曲目"));
+    let unplaced = somewhere_in_show.then(|| "公演のどこか".to_string());
+    [songs, unplaced].into_iter().flatten().collect::<Vec<_>>().join(" / ")
+}
+
 /// 「このライブの他の公演」に出すチップ。
 ///
 /// 単日公演のライブでは**空**を返す。自分 1 本しか無いところに「他の公演」を出しても
@@ -517,4 +558,18 @@ pub fn show_ids_by_event(ctx: &Ctx) -> BTreeMap<String, Vec<String>> {
             (e.id.clone(), shows)
         })
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// 「どこで着たか」の 1 行。曲が分かる分と分からない分が混ざる。
+    #[test]
+    fn costume_where_label_joins_songs_and_the_unplaced_wear() {
+        assert_eq!(costume_where_label(&[1], false), "1 曲目");
+        assert_eq!(costume_where_label(&[1, 5, 12], false), "1・5・12 曲目");
+        assert_eq!(costume_where_label(&[], true), "公演のどこか");
+        assert_eq!(costume_where_label(&[3], true), "3 曲目 / 公演のどこか");
+    }
 }

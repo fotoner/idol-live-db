@@ -86,9 +86,15 @@ final class IntroGameSession {
     /// 曲一覧の絞り込みをそのまま出題プールに使う場合のプリセット (nil ならブランド条件でDB取得)。
     @ObservationIgnored var presetPool: [Song]? = nil
 
-    /// IntroDon 出題に使える曲だけに絞る (apple_music_id あり・親曲でない)。
+    /// IntroDon 出題に使える曲だけに絞る (端末の Apple Music 契約状態を差し込むだけ)。
+    ///
+    /// 絞り込みの条件そのものは `IntroQuizChoices.playable` 経由でコアが持つ。
+    /// **ここに条件を書き足さないこと。**
     static func playable(_ songs: [Song]) -> [Song] {
-        songs.filter { ($0.appleMusicId?.isEmpty == false) && $0.parentSongId == nil }
+        IntroQuizChoices.playable(
+            songs,
+            hasAppleMusicSubscription: MusicKitService.shared.hasAppleMusicSubscription
+        )
     }
 
     @ObservationIgnored private var rushTimerTask: Task<Void, Never>? = nil
@@ -176,7 +182,7 @@ final class IntroGameSession {
         rushTimerTask = nil
         stopPlayback()
         phase = .finished
-        saveBestScore()
+        recordFinishedGame()
     }
 
     // MARK: - Playback (共通エンジンに委譲)
@@ -317,7 +323,7 @@ final class IntroGameSession {
             stopPlayback()
             if let s = sessionStart { elapsedTime = Date().timeIntervalSince(s) }
             phase = .finished
-            saveBestScore()
+            recordFinishedGame()
             saveBestTime()
         } else {
             currentIndex = next
@@ -361,7 +367,7 @@ final class IntroGameSession {
             stopPlayback()
             if let s = sessionStart { elapsedTime = Date().timeIntervalSince(s) }
             phase = .finished
-            saveBestScore()
+            recordFinishedGame()
             if isAllSongsChallenge { saveBestTime() }
         } else {
             currentIndex = next
@@ -392,7 +398,7 @@ final class IntroGameSession {
         UserDefaults.standard.integer(forKey: bestScoreKey)
     }
 
-    /// 今回のプレイが新記録だったか。saveBestScore() が更新した**後の** bestScore と比較すると
+    /// 今回のプレイが新記録だったか。recordFinishedGame() が更新した**後の** bestScore と比較すると
     /// 同点タイでも常に true になってしまうため、更新前のベストスコアと比較したスナップショットを保持する。
     private(set) var isNewBest: Bool = false
 
@@ -409,13 +415,22 @@ final class IntroGameSession {
         }
     }
 
-    private func saveBestScore() {
+    /// 1 ゲーム終わったときの記録をまとめて書く (ベストスコア + ゲーム一覧の進捗)。
+    ///
+    /// 終了地点が 3 つ (通常 / ラッシュ / 全曲チャレンジ) あるので、**記録は必ずここ 1 か所に
+    /// 足す。** 画面側から呼ぶ形にしていた進捗記録が一度も呼ばれておらず、何度遊んでも
+    /// 一覧が「未プレイ」のままだった (App Store のレビューで報告済み)。
+    private func recordFinishedGame() {
         let key = bestScoreKey
         let previousBest = UserDefaults.standard.integer(forKey: key)
         isNewBest = score > 0 && score > previousBest
         if score > previousBest {
             UserDefaults.standard.set(score, forKey: key)
         }
+        // ゲーム一覧・連続クリア日数が見るのはこちら。**上のベストスコアとは別の器。**
+        // 母数は結果画面の正答率と同じ「実際に回答した数」。ラッシュは候補曲 (最大 300) を
+        // 全部出せるわけがないので questions.count で割ると常に惨敗の記録になる。
+        GameProgressStore.shared.recordResult(.introDon, score: score, outOf: records.count)
     }
 
     // MARK: - Best Time (全曲チャレンジ: タイムを競う)
