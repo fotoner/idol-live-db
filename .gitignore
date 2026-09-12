@@ -120,3 +120,6 @@ web/wasm/*/pkg/
 
 # 並列エージェント用の共有 cargo ビルドキャッシュ (数GB)
 target-shared/
+
+# 空文字列正規化作業の一時ファイル (再生成できる)
+.normalize-empty-strings/

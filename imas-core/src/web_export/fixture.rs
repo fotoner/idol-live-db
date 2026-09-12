@@ -35,7 +35,7 @@ use super::emit::context::TAGS_PATH;
 use super::emit::calendar::{month_counts, month_grid, month_path, CALENDAR_PATH};
 use crate::domain::date_display::{range_with_weekday, until_display, with_weekday};
 use crate::domain::setlist_lineup::Lineup;
-use crate::domain::idol_list_filtering::IdolQuery;
+use crate::domain::idol_list_filtering::{IdolQuery, IdolSortKind};
 use crate::domain::song_list_queries::{SongListFilter, SongQuery};
 
 const TODAY: &str = "2026-09-04";
@@ -843,13 +843,12 @@ fn brand_page(reference: &Ref, noindex: bool) -> BrandPage {
         units: if noindex { vec![] } else { vec![unit_sample()] },
         recent_events: if noindex { vec![] } else { vec![event_sample()] },
         top_songs: if noindex { vec![] } else { vec![song_sample()] },
-        // `other` (他フランチャイズの合同ライブ曲) は入口を作らない。
-        // `/songs/brand/other/` を作ると「既定フィルタは other を含めない」というコアの
-        // 規則と、一覧の入口が存在するという事実が食い違う。到達はアイドル一覧と
-        // 検索・個別ページからだけにする。
+        // `other` (他フランチャイズの合同ライブ曲) は一覧の入口をひとつも作らない。
+        // 作ると「既定フィルタは other を含めない」というコアの規則と、一覧の入口が
+        // 存在するという事実が食い違う。到達は検索と個別ページからだけ
+        // (`Ctx::brand_list_path` が `other` に None を返す)。
         stat_tiles: if noindex {
-            // `other` はアイドル一覧しか作らないので、入口も 1 本だけ。
-            vec![tile("☺", 12, "アイドル", Some("/idols/brand/other/"))]
+            vec![]
         } else {
             vec![
                 tile("♪", 210, "ライブ", Some("/events/brand/ml/")),
@@ -996,7 +995,8 @@ fn song_list_page(path: &str, title: &str, kind: SongListKind) -> SongListPage {
                 nav("すべて", "/songs/", path == "/songs/", None, Some(2040)),
                 nav("ミリオンライブ!", "/songs/brand/ml/", path == "/songs/brand/ml/", Some("brand:ml"), Some(600)),
             ],
-        )],
+        )
+        .also_in_island("brandIds")],
         all_songs_link: if path == "/songs/" {
             Some(nav("派生曲・ライブ限定曲を含む全件", "/songs/all/", false, None, Some(3153)))
         } else {
@@ -1079,15 +1079,23 @@ fn idol_list_page(path: &str, title: &str, kind: IdolListKind, empty: bool) -> I
         },
         // 本番と同じ並び (`emit::lists::idol_columns` から空の列を落としたもの)。
         columns: [
-            (content::IDOL_COLUMN_VOICE_ACTOR, false),
-            (content::IDOL_COLUMN_BIRTHDAY, false),
-            (content::IDOL_COLUMN_AGE, true),
-            (content::IDOL_COLUMN_HEIGHT, true),
+            (content::IDOL_COLUMN_VOICE_ACTOR, false, None),
+            (content::IDOL_COLUMN_BIRTHDAY, false, Some(IdolSortKind::Birthday)),
+            (content::IDOL_COLUMN_AGE, true, Some(IdolSortKind::Age)),
+            (content::IDOL_COLUMN_HEIGHT, true, Some(IdolSortKind::Height)),
         ]
         .into_iter()
-        .map(|(label, numeric)| IdolColumn { label: label.to_string(), numeric })
+        .map(|(label, numeric, sort): (&str, bool, Option<IdolSortKind>)| IdolColumn {
+            label: label.to_string(),
+            numeric,
+            sort_key: sort.map(|k| k.key().to_string()),
+        })
         .collect(),
-        name_column_label: content::IDOL_COLUMN_NAME.to_string(),
+        name_column: IdolColumn {
+            label: content::IDOL_COLUMN_NAME.to_string(),
+            numeric: false,
+            sort_key: Some(IdolSortKind::NameKana.key().to_string()),
+        },
         filters: vec![
             FilterAxis::new(
                 content::FILTER_AXIS_BRAND,
@@ -1095,13 +1103,15 @@ fn idol_list_page(path: &str, title: &str, kind: IdolListKind, empty: bool) -> I
                     nav("すべて", "/idols/", path == "/idols/", None, Some(394)),
                     nav("ミリオンライブ!", "/idols/brand/ml/", path == "/idols/brand/ml/", Some("brand:ml"), Some(52)),
                 ],
-            ),
+            )
+            .also_in_island("brandIds"),
             FilterAxis::new(
                 content::FILTER_AXIS_BIRTH_MONTH,
                 (1..=12)
                     .map(|m| nav(&format!("{m}月"), &birth_month_path(m), path == birth_month_path(m), None, None))
                     .collect(),
-            ),
+            )
+            .also_in_island("birthMonth"),
         ],
         total: if empty { 0 } else { 2 },
         seo: seo(title, "アイドルの一覧。", path, Robots::IndexFollow, &[("ホーム", "/")]),
@@ -1544,11 +1554,6 @@ pub fn emit(dir: &Path, pretty: bool) -> Result<Stats> {
     w.write_json("index/idols.json", &idol_list_page("/idols/", "アイドル", IdolListKind::Index, false))?;
     w.write_json("index/idols-brand-ml.json", &idol_list_page("/idols/brand/ml/", "ミリオンライブ! のアイドル", IdolListKind::Brand, false))?;
     w.write_json("index/idols-brand-cg.json", &idol_list_page("/idols/brand/cg/", "シンデレラガールズ のアイドル", IdolListKind::Brand, false))?;
-    // `other` 配下は noindex にする (非公式サイトが他フランチャイズ名で流入を取らない)。
-    let mut other_idols = idol_list_page("/idols/brand/other/", "その他のアイドル", IdolListKind::Brand, false);
-    other_idols.brand = Some(brand_other());
-    other_idols.seo.robots = Robots::NoindexFollow;
-    w.write_json("index/idols-brand-other.json", &other_idols)?;
     // 誕生月は 12 ページ全部出す。1 枚だけだと月ナビのリンク切れを web 側で踏む。
     // 4 月だけ空にしてあるのは EmptyState の確認用。
     for month in 1..=12u32 {
@@ -1682,7 +1687,6 @@ fn routes(broken_key: &str) -> RoutesFile {
         param_listing(RouteKind::IdolListBrand, "/idols/brand/ml/", "ml", "index/idols-brand-ml.json", true),
         param_listing(RouteKind::IdolListBrand, "/idols/brand/cg/", "cg", "index/idols-brand-cg.json", true),
         // `other` 配下は掲載するが index させない。
-        param_listing(RouteKind::IdolListBrand, "/idols/brand/other/", "other", "index/idols-brand-other.json", false),
         listing(RouteKind::UnitListIndex, "/units/", "index/units.json", true),
         param_listing(RouteKind::UnitListBrand, "/units/brand/ml/", "ml", "index/units-brand-ml.json", true),
         param_listing(RouteKind::UnitListBrand, "/units/brand/cg/", "cg", "index/units-brand-cg.json", true),
