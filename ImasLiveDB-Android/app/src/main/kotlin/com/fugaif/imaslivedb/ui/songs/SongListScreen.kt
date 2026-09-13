@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -178,6 +179,7 @@ fun SongListScreen(
             RemovableFilterChipRow(uiState = uiState, viewModel = viewModel)
 
             TagFilterErrorBanner(visible = uiState.tagFilterError)
+            KamisabiCompletionBanner(uiState = uiState)
 
             // Count + sort control (件数 / 並び替え。タップでフィルタシートを開く)
             Row(
@@ -459,6 +461,36 @@ private fun TagFilterErrorBanner(visible: Boolean) {
 }
 
 /**
+ * 「KAMISABI収録のみ」絞り込み中だけ出す「カード所持 N / M」のコンプ率 (iOS
+ * SongListView.kamisabiCompletionBanner 相当)。
+ *
+ * 絞り込み結果 (= 収録曲全体) を母数に、その中でカード所持マークが付いた曲を数える。
+ * 絞り込んでいないと母数が収録曲以外まで膨らんで「コンプ率」の意味を失うので、
+ * この絞り込み中にだけ出す。
+ */
+@Composable
+private fun KamisabiCompletionBanner(uiState: SongListUiState) {
+    if (!uiState.filter.kamisabiOnly || uiState.listMode != SongListMode.SONGS ||
+        uiState.isLoading || uiState.songs.isEmpty()
+    ) {
+        return
+    }
+    val total = uiState.songs.size
+    val owned = uiState.songs.count { it.song.id in uiState.ownedSongIds }
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "カード所持 $owned / $total",
+            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+            color = DS.ink2
+        )
+    }
+}
+
+/**
  * 適用中フィルタの removable チップ列 (iOS SongListView.removableFilterBar 相当)。
  * マイマーク / 回収 / シートで選んだ絞り込み / 選択中タグ を横スクロールで一覧し、× で個別解除する。
  */
@@ -478,6 +510,7 @@ private fun RemovableFilterChipRow(uiState: SongListUiState, viewModel: SongList
         !filter.liveName.isNullOrEmpty() ||
         (!filter.songwriter.isNullOrEmpty() && !songwriterOverridden) ||
         filter.songType != null ||
+        filter.kamisabiOnly ||
         (!filter.idolIds.isNullOrEmpty() && !idolOverridden)
     if (!hasChips) return
 
@@ -513,6 +546,12 @@ private fun RemovableFilterChipRow(uiState: SongListUiState, viewModel: SongList
             ImasRemovableChip(
                 text = songTypeLabel(type),
                 onRemove = { viewModel.clearFilterField { f -> f.copy(songType = null) } }
+            )
+        }
+        if (filter.kamisabiOnly) {
+            ImasRemovableChip(
+                text = "KAMISABI収録",
+                onRemove = { viewModel.clearFilterField { f -> f.copy(kamisabiOnly = false) } }
             )
         }
         filter.seriesGroup?.takeIf { it.isNotEmpty() }?.let { value ->

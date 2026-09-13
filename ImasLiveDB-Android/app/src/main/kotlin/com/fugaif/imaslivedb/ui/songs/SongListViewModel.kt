@@ -81,6 +81,8 @@ data class SongListUiState(
     // 行アイコン用のマーク集合・回収数 (song_id ベース)。
     val favoriteSongIds: Set<String> = emptySet(),
     val myPickSongIds: Set<String> = emptySet(),
+    /** カード所持 (KAMISABI 等) をマークした曲 ID。「KAMISABI収録のみ」絞り込み中のコンプ率表示に使う。 */
+    val ownedSongIds: Set<String> = emptySet(),
     val collectedCounts: Map<String, Int> = emptyMap(),
     // タグ絞り込み中(単一タグ選択時のみ)の song_id → 票数。
     val tagVoteCounts: Map<String, Int> = emptyMap(),
@@ -329,6 +331,7 @@ class SongListViewModel : ViewModel() {
             // 行アイコン用のマーク集合・回収数 (マイマーク/回収フィルタにも使う)。
             val marks = module.userMarkRepository
             val favoriteIds = marks.favoriteSongIds()
+            val ownedIds = marks.ownedSongIds()
             // メモ付き song_id。UserMarkRepository には notedIdolIds しか無い (Android に曲メモの
             // 編集導線が無かったため) ので DAO を直に引く。EventListViewModel が brandDao を
             // 直に引いているのと同じ扱い。
@@ -345,6 +348,7 @@ class SongListViewModel : ViewModel() {
                 songs = songs,
                 favoriteSongIds = favoriteIds,
                 myPickSongIds = myPickIds,
+                ownedSongIds = ownedIds,
                 collectedCounts = collectedCounts,
                 tagVoteCounts = tagVoteCounts,
                 tagFilterError = tagFilterError,

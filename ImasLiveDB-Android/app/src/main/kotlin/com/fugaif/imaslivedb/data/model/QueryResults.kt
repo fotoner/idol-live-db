@@ -387,6 +387,7 @@ data class SongSearchFilter(
             if (!(seriesGroup ?: "").isEmpty()) count++
             if (!(liveName ?: "").isEmpty()) count++
             if (songType != null) count++
+            if (kamisabiOnly) count++
             return count
         }
 }
