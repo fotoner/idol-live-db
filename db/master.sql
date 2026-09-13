@@ -117589,4 +117589,6 @@ INSERT INTO "song_artists" VALUES('sidem_reason','sidem_硲道夫','original');
 INSERT INTO "song_artists" VALUES('sidem_reason','sidem_蒼井享介','original');
 INSERT INTO "song_artists" VALUES('sidem_reason','sidem_蒼井悠介','original');
 INSERT INTO "song_artists" VALUES('sidem_reason','sidem_鷹城恭二','original');
+INSERT INTO "song_artists" VALUES('sidem_prize_pinata','sidem_アスランbbⅱ世','original');
+INSERT INTO "song_artists" VALUES('sidem_ミュージアムジカ','sidem_アスランbbⅱ世','original');
 COMMIT;
