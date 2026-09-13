@@ -104,12 +104,13 @@ class SongRepository(
             args.addAll(tagFilterSongIds)
         }
 
-        // 既定ではリミックス・別バージョンを除外。ただし KAMISABI 収録曲だけへの絞り込み中は
-        // 除外しない。収録曲の中に派生曲 (Welcome!! (レジェンドデイズ Ver.) 等) が含まれるため、
-        // ここで除外すると分母がコア (song_list_queries.rs の `!kamisabi_only` 条件) より
-        // 1 件少なくなり、スナップショット経路 (150 件) と食い違う。
-        if (!filter.includeRemixes && !filter.kamisabiOnly) {
-            conditions.add("s.parent_song_id IS NULL")
+        // 既定ではリミックス・別バージョンを除外。ただし「それ自体が商品として立っている曲」
+        // (has_kamisabi_card = 1) は隠さない (コア `is_hidden_variant` と同じ規則を
+        // `song_list_queries.rs` の `run_original_filter_sql` と同じ 1 行で書く。
+        // kamisabiOnly を見て分岐する形は Code Simplifier の指摘で撤去済み — 2 軸を
+        // 絡ませると、写した先のどこか 1 箇所だけ書き忘れて食い違う)。
+        if (!filter.includeRemixes) {
+            conditions.add("(s.parent_song_id IS NULL OR s.has_kamisabi_card = 1)")
         }
 
         if (filter.brandIds.isNotEmpty()) {

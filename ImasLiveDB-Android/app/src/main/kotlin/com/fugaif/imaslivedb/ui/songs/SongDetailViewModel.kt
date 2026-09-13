@@ -188,24 +188,21 @@ class SongDetailViewModel : ViewModel() {
     }
 
     /**
-     * KAMISABI カード所持トグル (端末ローカル)。所持数はコンプ率表示に効くので、
-     * 加減した分だけその場で更新する (全件を引き直さない)。`total` はこの曲のブランドの
-     * 収録曲数で所持数の増減では変わらないので、`owned` だけ加減する。
+     * KAMISABI カード所持トグル (端末ローカル)。
+     *
+     * `owned` を手元で加減しない — 数え方はコア一本 ([SongRepository.fetchKamisabiCompletion])
+     * なので `load()` と同じ呼び方で引き直す。スナップショット上の 150 件走査で十分安く、
+     * 手計算にすると数え方が変わったときに静かにズレる (iOS も引き直す形)。
      */
     fun toggleCardOwned() {
         val songId = currentSongId ?: return
         val module = appModule ?: return
+        val brandId = _uiState.value.song?.brandId
         viewModelScope.launch {
             val now = module.userMarkRepository.toggle(UserMark.SONG, songId, UserMark.OWNED)
-            val current = _uiState.value
-            val completion = current.kamisabiCompletion
-            val delta = if (now) 1 else -1
-            _uiState.value = current.copy(
-                isCardOwned = now,
-                kamisabiCompletion = completion?.copy(
-                    owned = (completion.owned.toInt() + delta).coerceAtLeast(0).toUInt()
-                )
-            )
+            val ownedIds = module.userMarkRepository.ownedSongIds()
+            val completion = module.songRepository.fetchKamisabiCompletion(brandId, ownedIds.toList())
+            _uiState.value = _uiState.value.copy(isCardOwned = now, kamisabiCompletion = completion)
         }
     }
 
