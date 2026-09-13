@@ -117597,4 +117597,6 @@ INSERT INTO "song_artists" VALUES('sidem_流星parade','sidem_硲道夫','origin
 INSERT INTO "song_artists" VALUES('sidem_夏時間グラフィティ','sidem_伊瀬谷四季','original');
 INSERT INTO "song_artists" VALUES('sidem_夏時間グラフィティ','sidem_榊夏来','original');
 INSERT INTO "song_artists" VALUES('sidem_夏時間グラフィティ','sidem_蒼井享介','original');
+INSERT INTO "show_cast" VALUES('sh_L0982','sidem_アスランbbⅱ世','member');
+INSERT INTO "show_cast" VALUES('sh_L0983','sidem_アスランbbⅱ世','member');
 COMMIT;
