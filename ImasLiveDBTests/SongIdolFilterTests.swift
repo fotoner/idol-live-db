@@ -114,16 +114,44 @@ final class SongIdolFilterTests: XCTestCase {
         XCTAssertEqual(titles(rows), ["s_own", "s_shared", "s_cover"])
     }
 
-    // MARK: - kamisabiOnly (GRDB フォールバック経路; 43ac593e の固定化)
+    // MARK: - 派生曲の既定除外と KAMISABI カード (GRDB フォールバック経路)
+    //
+    // コア (`domain::song_list_queries::is_hidden_variant`) は「派生曲は隠す。ただし
+    // それ自体が商品として立っている曲 (= KAMISABI カードが付いている) は隠さない」を
+    // `kamisabiOnly` を見ない無条件の規則にしている (11edcd6f)。
+    // GRDB フォールバックの SQL もこれと同じ無条件 1 行
+    // `(parent_song_id IS NULL OR has_kamisabi_card = 1)` にしてあること、
+    // 「kamisabiOnly のときだけ外す」に後退していないことをここで固定する。
+
+    /// 標準的な曲一覧 (kamisabiOnly なし) でも、カード付きの派生曲は隠れないこと。
+    /// カードの無い派生曲は従来どおり隠れること。
+    func testDefaultListKeepsVariantSongsThatHaveCardsButHidesOthers() throws {
+        let db = try makeKamisabiVariantDatabase()
+
+        let rows = try db.fetchSongs(filter: SongSearchFilter())
+
+        XCTAssertEqual(
+            titles(rows), ["s_original", "s_variant_with_card"],
+            "既定の一覧はカード付き派生曲を含み、カード無し派生曲は隠すはず"
+        )
+    }
 
     /// `parent_song_id` を持つ派生曲でも `has_kamisabi_card=1` なら `kamisabiOnly` で拾えること。
-    ///
-    /// core の `filter_song_indexes` は `kamisabi_only` 中は派生曲除外 (`parent_song_id IS NULL`)
-    /// を効かせない — KAMISABI のカードは派生曲にも付く (`Welcome!! (レジェンドデイズ Ver.)` は
-    /// 全体曲 `Welcome!!` の別録音)。core 未ロード時の GRDB フォールバック
-    /// (`fetchSongsByFilterQuery`) だけこの上書きが無く、収録曲の母数が 1 曲少なく数えていた
-    /// (150曲中149曲)。43ac593e で直した状態をここで固定する。
     func testKamisabiOnlyKeepsDerivedSongsWithCards() throws {
+        let db = try makeKamisabiVariantDatabase()
+
+        var filter = SongSearchFilter()
+        filter.kamisabiOnly = true
+        let rows = try db.fetchSongs(filter: filter)
+
+        XCTAssertEqual(
+            titles(rows), ["s_variant_with_card"],
+            "kamisabiOnly は has_kamisabi_card=1 の曲を返すはず (派生曲でも parent_song_id 除外で落ちてはいけない)"
+        )
+    }
+
+    /// 無印曲 + カード付き派生曲 (`s_variant_with_card`) + カード無し派生曲 (`s_variant_plain`)。
+    private func makeKamisabiVariantDatabase() throws -> AppDatabase {
         let queue = try DatabaseQueue()
         try queue.write { db in
             try db.execute(sql: """
@@ -143,25 +171,21 @@ final class SongIdolFilterTests: XCTestCase {
             try db.execute(sql: "CREATE TABLE shows(id TEXT PRIMARY KEY, event_id TEXT)")
             try db.execute(sql: "CREATE TABLE events(id TEXT PRIMARY KEY, name TEXT)")
 
-            // 無印曲 (カード無し) + その派生曲 (レジェンドデイズ Ver. 相当、カードあり)。
+            // 無印曲 (カード無し) + カード付き派生曲 (レジェンドデイズ Ver. 相当) +
+            // カード無し派生曲 (ただの別バージョン、従来どおり隠れるべき)。
             try db.execute(sql: """
                 INSERT INTO songs(id, brand_id, title, title_kana, song_type, has_kamisabi_card)
                 VALUES('s_original','ml','無印曲','むじるしきよく','all',0)
                 """)
             try db.execute(sql: """
                 INSERT INTO songs(id, brand_id, title, title_kana, song_type, parent_song_id, has_kamisabi_card)
-                VALUES('s_variant','ml','無印曲(Ver.)','むじるしきよくう゛ぇる','all','s_original',1)
+                VALUES('s_variant_with_card','ml','無印曲(Ver.)','むじるしきよくう゛ぇる','all','s_original',1)
+                """)
+            try db.execute(sql: """
+                INSERT INTO songs(id, brand_id, title, title_kana, song_type, parent_song_id, has_kamisabi_card)
+                VALUES('s_variant_plain','ml','無印曲(別Ver.)','むじるしきよくへつう゛ぇる','all','s_original',0)
                 """)
         }
-        let db = try AppDatabase(dbQueue: queue)
-
-        var filter = SongSearchFilter()
-        filter.kamisabiOnly = true
-        let rows = try db.fetchSongs(filter: filter)
-
-        XCTAssertEqual(
-            titles(rows), ["s_variant"],
-            "kamisabiOnly は has_kamisabi_card=1 の曲を返すはず (派生曲でも parent_song_id 除外で落ちてはいけない)"
-        )
+        return try AppDatabase(dbQueue: queue)
     }
 }

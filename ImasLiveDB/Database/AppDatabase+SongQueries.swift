@@ -62,13 +62,15 @@ extension AppDatabase {
         var conditions: [String] = []
         var args: [DatabaseValueConvertible] = []
 
-        // デフォルトではリミックス・別バージョンを除外。
-        // ただし KAMISABI 収録曲だけへの絞り込み中は除外しない。収録 150 曲のうち
-        // 1 曲 (ml_welcome_レジェンドデイズver) が派生曲で、ここを除外すると
-        // 母数が 149 に減って「収録曲の一覧」として不正確になる (core の
-        // `filter_song_indexes` の `!kamisabi_only` 条件と揃える)。
-        if !filter.includeRemixes && !filter.kamisabiOnly {
-            conditions.append("s.parent_song_id IS NULL")
+        // デフォルトでは派生曲 (リミックス・別バージョン) を隠す。ただし**それ自体が
+        // 商品として立っている曲は隠さない** — KAMISABI のカードは派生曲にも付く
+        // (`Welcome!! (レジェンドデイズ Ver.)` は全体曲 `Welcome!!` の別録音)。
+        // これを「kamisabiOnly で絞っているときだけ隠さない」にしてはいけない
+        // (軸が絡むと GRDB 経路・Android・Web にそれぞれ同じ絡みを写す必要が出て、
+        // 実際に一部だけ写し忘れて件数がズレた)。規則はコアの
+        // `domain::song_list_queries::is_hidden_variant` と揃えた無条件 1 行にする。
+        if !filter.includeRemixes {
+            conditions.append("(s.parent_song_id IS NULL OR s.has_kamisabi_card = 1)")
         }
 
         if !filter.brandIds.isEmpty {
