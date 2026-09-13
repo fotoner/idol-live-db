@@ -117580,4 +117580,13 @@ INSERT INTO "setlist_items" VALUES('sh_the_idolmster_sidem_passionable_reading_s
 INSERT INTO "setlist_items" VALUES('sh_the_idolmster_sidem_passionable_reading_show_魂環の人形_1_0002','sh_the_idolmster_sidem_passionable_reading_show_魂環の人形_1','sidem_beyond_the_dream',2,NULL,'魂環の人形ver.',NULL);
 INSERT INTO "setlist_items" VALUES('sh_the_idolmster_sidem_passionable_reading_show_魂環の人形_2_0001','sh_the_idolmster_sidem_passionable_reading_show_魂環の人形_2','sidem_アニマフォルトゥナ',1,NULL,'映画「魂環の人形」主題歌',NULL);
 INSERT INTO "setlist_items" VALUES('sh_the_idolmster_sidem_passionable_reading_show_魂環の人形_2_0002','sh_the_idolmster_sidem_passionable_reading_show_魂環の人形_2','sidem_beyond_the_dream',2,NULL,'魂環の人形ver.',NULL);
+INSERT INTO "song_artists" VALUES('sidem_reason','sidem_伊瀬谷四季','original');
+INSERT INTO "song_artists" VALUES('sidem_reason','sidem_天ヶ瀬冬馬','original');
+INSERT INTO "song_artists" VALUES('sidem_reason','sidem_山下次郎','original');
+INSERT INTO "song_artists" VALUES('sidem_reason','sidem_榊夏来','original');
+INSERT INTO "song_artists" VALUES('sidem_reason','sidem_渡辺みのり','original');
+INSERT INTO "song_artists" VALUES('sidem_reason','sidem_硲道夫','original');
+INSERT INTO "song_artists" VALUES('sidem_reason','sidem_蒼井享介','original');
+INSERT INTO "song_artists" VALUES('sidem_reason','sidem_蒼井悠介','original');
+INSERT INTO "song_artists" VALUES('sidem_reason','sidem_鷹城恭二','original');
 COMMIT;
