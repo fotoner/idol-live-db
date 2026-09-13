@@ -106,7 +106,14 @@ data class Song(
      * 合同と取り違える)。立てるなら [jointBrandIds] も入れる。
      */
     @ColumnInfo(name = "is_collab")
-    val isCollab: Boolean = false
+    val isCollab: Boolean = false,
+
+    /**
+     * KAMISABI (バンダイナムコミュージックライブの音楽カードゲーム) にこの曲のカードが
+     * あるか。カード番号は非公表・ノーマル/レアは同曲の版違いなので真偽値 1 本で足りる。
+     */
+    @ColumnInfo(name = "has_kamisabi_card")
+    val hasKamisabiCard: Boolean = false
 ) {
     val isRemix: Boolean get() = parentSongId != null
 

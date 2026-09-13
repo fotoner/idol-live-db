@@ -75,7 +75,7 @@ import com.fugaif.imaslivedb.data.model.UserMark
         Costume::class,
         CostumeWear::class
     ],
-    version = 15,
+    version = 16,
     // 確定スキーマを app/schemas へ JSON で吐く。共有コア (imas-core) が持つ
     // マスタ DDL と突き合わせて、片方だけスキーマを変えた事故を CI で捕まえるため。
     exportSchema = true
@@ -140,7 +140,7 @@ abstract class AppDatabase : RoomDatabase() {
             )
                 // スキーマ変更時は破壊的再構築せず Room Migration を書く (iOS の DatabaseMigrations と対)。
                 // UserMark 等のローカル唯一データを保全するため (.fallbackToDestructiveMigration は使わない)。
-                .addMigrations(MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15)
+                .addMigrations(MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16)
                 .addCallback(seedCallback)
                 .build()
         }
@@ -410,6 +410,16 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("CREATE INDEX IF NOT EXISTS idx_costume_wears_costume ON costume_wears(costume_id)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS idx_costume_wears_show ON costume_wears(show_id)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS idx_costume_wears_item ON costume_wears(setlist_item_id)")
+            }
+        }
+
+        /**
+         * KAMISABI (音楽カードゲーム) の収録札を songs に足す。カード番号は非公表・
+         * ノーマル/レアは同曲の版違いなので「この曲のカードがあるか」の真偽値 1 本で足りる。
+         */
+        val MIGRATION_15_16 = object : Migration(15, 16) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE songs ADD COLUMN has_kamisabi_card INTEGER NOT NULL DEFAULT 0")
             }
         }
     }

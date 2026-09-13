@@ -330,7 +330,9 @@ object SyncMappers {
                 unitVersionId = row.unitVersionId.emptyToNull(),
                 // 同じ理由。落とすと合同曲の指定が消え、参加ブランドの曲一覧から落ちる。
                 jointBrandIds = row.jointBrandIds.emptyToNull(),
-                isCollab = row.isCollab
+                isCollab = row.isCollab,
+                // 同じ理由。落とすと KAMISABI 収録済みの曲が同期のたびに未収録へ戻る。
+                hasKamisabiCard = row.hasKamisabiCard
             )
         }
 
