@@ -160,7 +160,9 @@ struct SongFilterView: View {
                 if listMode == .songs {
                     Section {
                         Toggle(isOn: $kamisabiOnly) {
-                            Label("KAMISABI収録曲のみ", systemImage: UserMarkKind.owned.activeIcon)
+                            // 収録はカタログの事実、所持 (UserMarkKind.owned) はユーザーのマーク。
+                            // 別物なので同じ記号 (shippingbox) を流用しない。
+                            Label("KAMISABI収録曲のみ", systemImage: "suit.club.fill")
                         }
                     } header: {
                         Text("KAMISABI")

@@ -83,10 +83,11 @@ struct EventReleasesSection: View {
 
             Spacer(minLength: 4)
 
-            // 所有トグル
+            // 所有トグル。アイコンは `UserMarkKind.owned` の見た目を直参照する
+            // (ここで独自に決め打つと、KAMISABI カード所持と二重管理になって食い違う)。
             Button { toggleOwned(release) } label: {
                 VStack(spacing: DS.sp1) {
-                    Image(systemName: owned ? "opticaldisc.fill" : "opticaldisc")
+                    Image(systemName: owned ? UserMarkKind.owned.activeIcon : UserMarkKind.owned.icon)
                         .font(.imasTitle3)
                     Text(owned ? "所有" : "未所有")
                         .font(.imasScaled(10, weight: .semibold))
@@ -112,6 +113,8 @@ struct EventReleasesSection: View {
             default:
                 ZStack {
                     DS.fill
+                    // ジャケ画像が無いときの「円盤である」ことを示す挿絵。所有トグル (上の
+                    // `UserMarkKind.owned` 参照) とは無関係なので固定で opticaldisc のまま。
                     Image(systemName: "opticaldisc")
                         .font(.imasTitle3)
                         .foregroundStyle(DS.ink3)
