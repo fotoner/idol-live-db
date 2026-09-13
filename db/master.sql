@@ -106087,6 +106087,11 @@ INSERT INTO "song_artists" VALUES('765as_私はアイドル','ml_田中琴葉','
 INSERT INTO "song_artists" VALUES('765as_私はアイドル','ml_矢吹可奈','performer');
 INSERT INTO "song_artists" VALUES('gakuen_order_fake','gakuen_月村手毬','original');
 INSERT INTO "song_artists" VALUES('gakuen_め','gakuen_篠澤広','original');
+INSERT INTO "song_artists" VALUES('ml_welcome_レジェンドデイズver','765as_双海亜美','original');
+INSERT INTO "song_artists" VALUES('ml_welcome_レジェンドデイズver','765as_我那覇響','original');
+INSERT INTO "song_artists" VALUES('ml_welcome_レジェンドデイズver','765as_水瀬伊織','original');
+INSERT INTO "song_artists" VALUES('ml_welcome_レジェンドデイズver','765as_秋月律子','original');
+INSERT INTO "song_artists" VALUES('ml_welcome_レジェンドデイズver','765as_高槻やよい','original');
 CREATE TABLE song_units (
   song_id TEXT NOT NULL,
   unit_id TEXT NOT NULL,
@@ -109937,6 +109942,7 @@ INSERT INTO "songs" VALUES('gakuen_修楽旅行_花海咲季月村手毬藤田�
 INSERT INTO "songs" VALUES('gakuen_神かわいい','神かわいい','かみかわいい','gakuen','solo','2026-09-06',NULL,'早川博隆、広島拓弥','早川博隆','広島拓弥','神かわいい - Single',NULL,'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/9e/18/52/9e18526a-3f71-c22e-3e8c-01de142d1127/PA00226558_0_253040_jacket.jpg/600x600bb.jpg','https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/4f/f4/de/4ff4ded1-45e4-7cf3-b185-29e3ba587dd5/mzaf_16460085798974285179.plus.aac.p.m4a','6805791047','6805791040',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0);
 INSERT INTO "songs" VALUES('gakuen_nazonazo','nazonazo','なぞなぞ','gakuen','solo','2026-09-06',NULL,'ladyhood (Digz, Inc. Group)、Connexio (Digz, Inc. Group)','ladyhood (Digz, Inc. Group)','Connexio (Digz, Inc. Group)','nazonazo - Single',NULL,'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/b7/b9/a2/b7b9a282-ada5-6e33-7e6d-8a32b70d937c/PA00226555_0_253036_jacket.jpg/600x600bb.jpg','https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/39/eb/4d/39eb4d88-71e7-599b-5b78-a80e7b4d26b8/mzaf_12061743026635994788.plus.aac.p.m4a','6806126338','6806126330',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0);
 INSERT INTO "songs" VALUES('gakuen_be_proud','Be proud','びーぷらうど','gakuen','solo','2026-09-06',NULL,'kenchang','kenchang','齋藤優輝','Be proud - Single',NULL,'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/d5/34/5c/d5345c66-db8c-dc11-0614-76e92b11fa92/PA00226554_0_253038_jacket.jpg/600x600bb.jpg','https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/f6/6f/da/f66fdac7-7df9-0251-c2bf-20996ce66165/mzaf_22477125482584966.plus.aac.p.m4a','6806126972','6806126668',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0);
+INSERT INTO "songs" VALUES('ml_welcome_レジェンドデイズver','Welcome!! (レジェンドデイズ Ver.)','うぇるかむ','ml','unit','2014-07-30',NULL,'BNSI(佐藤貴文)','佐々木恵梨','BNSI(佐藤貴文)','THE IDOLM@STER LIVE THE@TER HARMONY 01',NULL,'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/c7/f2/8e/c7f28eae-25b0-d908-2b37-f56d42df175f/4540774154319.jpg/600x600bb.jpg',NULL,'1718503198','1718503190',NULL,NULL,'ml_welcome',NULL,'レジェンドデイズ','レジェンドデイズ',NULL,NULL,NULL,NULL,0,1);
 CREATE TABLE staff (
     id TEXT PRIMARY KEY NOT NULL,
     brand_id TEXT NOT NULL REFERENCES brands(id),

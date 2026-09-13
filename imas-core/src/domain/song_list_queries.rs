@@ -315,14 +315,19 @@ pub fn filter_song_indexes(snap: &Snapshot, filter: &SongListFilter) -> Vec<u32>
         .iter()
         .enumerate()
         .filter(|&(i, s)| {
-            // 既定でリミックス・別バージョンを除外 (`parent_song_id IS NULL`。
-            // 空文字は NULL ではないので Some("") は派生扱いのまま — SQL と同じ)。
-            if !filter.include_remixes && s.parent_song_id.is_some() {
-                return false;
-            }
             // KAMISABI 収録だけの一覧。曲の属性ではなく商品への収録なので、
             // ここは列を見るだけ (何が収録かを推測しない)。
             if filter.kamisabi_only && !s.has_kamisabi_card {
+                return false;
+            }
+            // 既定でリミックス・別バージョンを除外 (`parent_song_id IS NULL`。
+            // 空文字は NULL ではないので Some("") は派生扱いのまま — SQL と同じ)。
+            //
+            // ただし KAMISABI で絞っているときは外さない。**カードは派生曲にも付く**
+            // (`Welcome!! (レジェンドデイズ Ver.)` は全体曲 `Welcome!!` の別録音)。
+            // ここで落とすと、一覧に出ない曲が収録 150 曲に混じり、所持コンプの分母が
+            // 実物のカード枚数と合わなくなる。
+            if !filter.include_remixes && !filter.kamisabi_only && s.parent_song_id.is_some() {
                 return false;
             }
             if !brand_set.is_empty() {
@@ -872,15 +877,24 @@ mod tests {
             has_kamisabi_card: flagged,
             ..Song::default()
         };
+        // 派生曲 (別バージョン) にもカードは付く。
+        let variant = Song {
+            id: "s4".into(),
+            title: "s4".into(),
+            parent_song_id: Some("s1".into()),
+            has_kamisabi_card: true,
+            ..Song::default()
+        };
         let mini = Snapshot {
-            songs: vec![song("s1", true), song("s2", false), song("s3", true)],
+            songs: vec![song("s1", true), song("s2", false), song("s3", true), variant],
             ..Snapshot::default()
         };
 
+        // 収録 = 3 曲。派生の s4 も落とさない (落とすとコンプの分母が実物と合わない)。
         let on = SongListFilter { kamisabi_only: true, ..SongListFilter::default() };
-        assert_eq!(filter_song_indexes(&mini, &on), vec![0, 2]);
+        assert_eq!(filter_song_indexes(&mini, &on), vec![0, 2, 3]);
 
-        // 既定は絞らない (軸を足したことで一覧が減らないことの固定)。
+        // 既定は絞らない (軸を足したことで一覧が減らないことの固定)。派生はふつうに隠れる。
         let off = SongListFilter::default();
         assert_eq!(filter_song_indexes(&mini, &off), vec![0, 1, 2]);
     }
