@@ -18,6 +18,15 @@ packages:
     url: https://github.com/firebase/firebase-ios-sdk
     from: "11.0.0"
 
+# 版はここ 1 箇所だけ。ターゲットごとに書くと必ずずれる — 実際、fastlane の
+# 書き戻しが `sub!` (最初の 1 件だけ置換) だったため、本体が 53 に上がっても
+# ウィジェット拡張は 46 のまま取り残されていた (App Store 提出時に
+# 「app extension の CFBundleVersion は本体と一致していること」で弾かれる)。
+settings:
+  base:
+    MARKETING_VERSION: "2.2.0"
+    CURRENT_PROJECT_VERSION: "53"
+
 targets:
   ImasLiveDB:
     type: application
@@ -58,8 +67,6 @@ targets:
         CODE_SIGN_STYLE: Automatic
         PRODUCT_BUNDLE_IDENTIFIER: com.fugaif.ImasLiveDB
         PRODUCT_NAME: ImasLiveDB
-        MARKETING_VERSION: "2.2.0"
-        CURRENT_PROJECT_VERSION: "53"
         INFOPLIST_KEY_CFBundleDisplayName: アイドルライブDB
         INFOPLIST_KEY_CFBundleDevelopmentRegion: ja
         INFOPLIST_KEY_CFBundleAllowMixedLocalizations: YES
@@ -166,8 +173,6 @@ targets:
         CODE_SIGN_STYLE: Automatic
         PRODUCT_BUNDLE_IDENTIFIER: com.fugaif.ImasLiveDB.widget
         PRODUCT_NAME: ImasLiveDBWidget
-        MARKETING_VERSION: "2.2.0"
-        CURRENT_PROJECT_VERSION: "46"
         INFOPLIST_KEY_CFBundleDisplayName: 担当ウィジェット
         SWIFT_VERSION: "6.0"
         SWIFT_STRICT_CONCURRENCY: complete
