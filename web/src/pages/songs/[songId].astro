@@ -43,6 +43,8 @@ const song = page<SongPage>(Astro.props.data);
       <div class="hero__meta">
         {/* 合同曲はその印を先に。続く札が「参加ブランド」だと読めるようにする。 */}
         {song.collabLabel && <TagChip text={song.collabLabel} kind="all" />}
+        {/* KAMISABI (音楽カードゲーム) の収録札。 */}
+        {song.kamisabiLabel && <TagChip text={song.kamisabiLabel} kind="guest" />}
         {song.brand && <Chip text={song.brand.name} href={song.brand.path} variant="themed" themeKey={song.brand.themeKey} />}
         {song.jointBrands.map((b) => (
           <Chip text={b.name} href={b.path} variant="themed" themeKey={b.themeKey} />

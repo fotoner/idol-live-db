@@ -41,6 +41,17 @@ export function mountSongFilter(root: HTMLElement): void {
           { value: "solo", label: "ソロ曲" },
         ],
       },
+      {
+        key: "kamisabiOnly",
+        kind: "toggle",
+        boolean: true,
+        label: "KAMISABI 収録",
+        // 2 択なのでプルダウンではなく帯 (押した方が見える状態で並ぶボタン列)。
+        options: [
+          { value: "", label: "すべて" },
+          { value: "true", label: "収録のみ" },
+        ],
+      },
     ],
     onApply: ({ narrowed, sort, ascending }) => {
       if (kana) kana.hidden = narrowed || sort !== "kana" || ascending === false;

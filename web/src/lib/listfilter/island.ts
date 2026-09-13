@@ -28,10 +28,15 @@ export interface Option {
 export interface FieldSpec {
   /** 条件・状態・URL で共通の鍵。 */
   key: string;
-  kind: "text" | "select";
-  /** プレースホルダ / 「すべて」の前に出す名前。 */
+  /**
+   * `toggle` は 2 択の帯 (押した方が見える状態で並ぶボタン列)。
+   * `options` に「すべて (値 `""`)」「絞る (値 `"true"`)」の 2 件を渡す。
+   * 値の多い軸はプルダウンを開かせる `select` のままにする。
+   */
+  kind: "text" | "select" | "toggle";
+  /** プレースホルダ / 「すべて」の前に出す名前。`toggle` では帯の `aria-label`。 */
   label: string;
-  /** select のときの選択肢。 */
+  /** select / toggle のときの選択肢。 */
   options?: Option[];
   /**
    * 条件側が配列で受ける軸。画面は単一選択で足りる
@@ -40,6 +45,12 @@ export interface FieldSpec {
   multi?: boolean;
   /** 条件側が数値で受ける軸 (誕生月)。 */
   numeric?: boolean;
+  /**
+   * 条件側が真偽値で受ける軸 (KAMISABI 収録)。画面の raw 値は文字列
+   * (`""` / `"true"`) のままで、ここが立っていれば真偽値に変換して渡す。
+   * 未選択 (`""`) は「指定なし」= `null` (土台をそのまま残す) で、`false` は使わない。
+   */
+  boolean?: boolean;
 }
 
 /** 一覧ごとの違いだけを持つ設定。 */
@@ -80,7 +91,7 @@ export interface ListFilterSpec<F> {
 /** wasm ハンドル。ここは呼ぶだけなので、メソッド名は設定側が知っている。 */
 type Engine = unknown;
 
-type Value = string | string[] | number | null;
+type Value = string | string[] | number | boolean | null;
 type State = Record<string, Value> & { __sort: string; __ascending: boolean | null };
 
 const DEBOUNCE_MS = 120;
@@ -327,10 +338,19 @@ export function mountListFilter<F>(
   /** 入力欄。値の集合は wasm (= Snapshot) が出したものをそのまま並べる。 */
   function renderFields(): void {
     el.fields.replaceChildren(...fields.map(fieldElement));
-    el.fields.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-key]").forEach((c) => {
+    el.fields.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input[data-key], select[data-key]").forEach((c) => {
       const field = fields.find((f) => f.key === c.dataset.key)!;
       c.addEventListener(field.kind === "select" ? "change" : "input", () => {
         state[field.key] = toValue(field, c.value);
+        onChange();
+      });
+    });
+    // 帯 (toggle) は 1 鍵に 2 ボタンあるので、上と同じ input/select の一般経路には乗らない。
+    el.fields.querySelectorAll<HTMLButtonElement>("[data-toggle-key]").forEach((b) => {
+      b.addEventListener("click", () => {
+        const field = fields.find((f) => f.key === b.dataset.toggleKey)!;
+        state[field.key] = toValue(field, b.dataset.toggleValue!);
+        syncToggles();
         onChange();
       });
     });
@@ -338,8 +358,17 @@ export function mountListFilter<F>(
   }
 
   function renderFieldValues(): void {
-    el.fields.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-key]").forEach((c) => {
+    el.fields.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input[data-key], select[data-key]").forEach((c) => {
       c.value = toInput(state[c.dataset.key!]);
+    });
+    syncToggles();
+  }
+
+  /** 帯の押した方を今の状態に合わせる。 */
+  function syncToggles(): void {
+    el.fields.querySelectorAll<HTMLButtonElement>("[data-toggle-key]").forEach((b) => {
+      const on = state[b.dataset.toggleKey!] === true;
+      b.setAttribute("aria-pressed", String((b.dataset.toggleValue === "true") === on));
     });
   }
 }
@@ -360,7 +389,24 @@ function option(value: string, label: string): HTMLOptionElement {
   return o;
 }
 
-function fieldElement(f: FieldSpec): HTMLLabelElement {
+function fieldElement(f: FieldSpec): HTMLElement {
+  if (f.kind === "toggle") {
+    const group = document.createElement("div");
+    group.className = "song-filter__toggle";
+    group.setAttribute("role", "group");
+    group.setAttribute("aria-label", f.label);
+    for (const opt of f.options ?? []) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "song-filter__toggle-btn";
+      btn.textContent = opt.label;
+      btn.dataset.toggleKey = f.key;
+      btn.dataset.toggleValue = opt.value;
+      group.appendChild(btn);
+    }
+    return group;
+  }
+
   const label = document.createElement("label");
   label.className = "song-filter__field";
   const name = document.createElement("span");
@@ -390,6 +436,7 @@ function fieldElement(f: FieldSpec): HTMLLabelElement {
 /** 画面の文字列を、条件が受け取る形へ。 */
 function toValue(f: FieldSpec, raw: string): Value {
   if (f.multi) return raw ? [raw] : [];
+  if (f.boolean) return raw === "true" ? true : null;
   if (f.numeric) return raw ? Number(raw) : null;
   return raw;
 }
@@ -402,7 +449,7 @@ function toInput(v: Value | undefined): string {
 
 function emptyState(fields: FieldSpec[], sort: string): State {
   const s = { __sort: sort, __ascending: null } as State;
-  for (const f of fields) s[f.key] = f.multi ? [] : f.numeric ? null : "";
+  for (const f of fields) s[f.key] = f.multi ? [] : f.boolean || f.numeric ? null : "";
   return s;
 }
 
@@ -436,7 +483,13 @@ function readUrl(fields: FieldSpec[], fallbackSort: string): State {
   for (const f of fields) {
     const v = q.get(f.key);
     if (!v) continue;
-    s[f.key] = f.multi ? v.split(",").filter(Boolean) : f.numeric ? Number(v) : v;
+    s[f.key] = f.multi
+      ? v.split(",").filter(Boolean)
+      : f.boolean
+        ? (v === "true" ? true : null)
+        : f.numeric
+          ? Number(v)
+          : v;
   }
   const dir = q.get("dir");
   s.__ascending = dir === "asc" ? true : dir === "desc" ? false : null;
