@@ -101,6 +101,8 @@ import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import com.fugaif.imaslivedb.ui.theme.hexToColor
 import com.fugaif.imaslivedb.ui.filtered.SongFilterKind
+import uniffi.imas_core.kamisabiCardLabel
+import uniffi.imas_core.kamisabiCompletionLabel
 import uniffi.imas_core.shortYearMonth
 import uniffi.imas_core.splitCreditNames
 
@@ -412,8 +414,10 @@ private fun Hero(
                     maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 2.dp))
             }
             if (song.hasKamisabiCard) {
+                // 語はコアの kamisabiCardLabel() をそのまま出す。iOS / Web と語がバラバラだった
+                // (RedTeam M-6) ので、ここで新しい文言を作らない。
                 Text(
-                    "KAMISABI収録", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = t.onAccent,
+                    kamisabiCardLabel(), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = t.onAccent,
                     modifier = Modifier.padding(top = 6.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(t.accent)
@@ -605,10 +609,12 @@ private fun InfoTab(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text("カード所持", fontSize = 15.sp, color = DS.ink)
-                        Text(
-                            "収録曲 ${state.kamisabiTotalCount}枚中 ${state.kamisabiOwnedCount}枚所持",
-                            fontSize = 12.sp, color = DS.ink2
-                        )
+                        // 分母はこの曲のブランド (商品) 単位。KAMISABI は ML/SideM/シャニの
+                        // 別商品なので合算しない (RedTeam H-3/H-4)。言い回しも
+                        // kamisabiCompletionLabel() をそのまま出す (「枚」ではなく「曲」で数える)。
+                        state.kamisabiCompletion?.let { completion ->
+                            Text(kamisabiCompletionLabel(completion), fontSize = 12.sp, color = DS.ink2)
+                        }
                     }
                     Switch(checked = state.isCardOwned, onCheckedChange = { onToggleCardOwned() })
                 }

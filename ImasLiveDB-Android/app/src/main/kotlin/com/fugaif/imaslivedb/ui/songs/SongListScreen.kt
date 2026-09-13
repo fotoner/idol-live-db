@@ -72,6 +72,7 @@ import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.navigation.TopLevelTab
 import com.fugaif.imaslivedb.ui.search.CrossTabCountChips
 import com.fugaif.imaslivedb.ui.search.CrossTabSearch
+import uniffi.imas_core.kamisabiCompletionLabel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -461,29 +462,28 @@ private fun TagFilterErrorBanner(visible: Boolean) {
 }
 
 /**
- * 「KAMISABI収録のみ」絞り込み中だけ出す「カード所持 N / M」のコンプ率 (iOS
- * SongListView.kamisabiCompletionBanner 相当)。
+ * 「KAMISABI収録のみ」絞り込み中だけ出す所持コンプ (iOS `SongListView.kamisabiCompletionBanner` 相当)。
  *
- * 絞り込み結果 (= 収録曲全体) を母数に、その中でカード所持マークが付いた曲を数える。
- * 絞り込んでいないと母数が収録曲以外まで膨らんで「コンプ率」の意味を失うので、
- * この絞り込み中にだけ出す。
+ * **分母は `uiState.songs` を数えない。** KAMISABI はブランドごとの別商品 (ML/SideM/シャニ)
+ * なので、表示行数を分母にすると (ブランド未選択のときは 3 商品合算の行数になり)
+ * 実態と合わない数になる。分母の規則はコア一本 ([SongListViewModel] の
+ * `kamisabiCompletion` = `SongRepository.fetchKamisabiCompletion` の値そのまま)。
  */
 @Composable
 private fun KamisabiCompletionBanner(uiState: SongListUiState) {
+    val completion = uiState.kamisabiCompletion
     if (!uiState.filter.kamisabiOnly || uiState.listMode != SongListMode.SONGS ||
-        uiState.isLoading || uiState.songs.isEmpty()
+        uiState.isLoading || completion == null
     ) {
         return
     }
-    val total = uiState.songs.size
-    val owned = uiState.songs.count { it.song.id in uiState.ownedSongIds }
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "カード所持 $owned / $total",
+            text = kamisabiCompletionLabel(completion),
             style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
             color = DS.ink2
         )

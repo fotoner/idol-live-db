@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import uniffi.imas_core.KamisabiCompletion
 
 data class SongDetailUiState(
     val isLoading: Boolean = true,
@@ -46,10 +47,12 @@ data class SongDetailUiState(
     val isFavorite: Boolean = false,
     /** KAMISABI カードを所持済みか (song.hasKamisabiCard が true の曲でのみ意味を持つ)。 */
     val isCardOwned: Boolean = false,
-    /** KAMISABI 収録曲のうち所持マーク済みの数。 */
-    val kamisabiOwnedCount: Int = 0,
-    /** KAMISABI 収録曲の総数。 */
-    val kamisabiTotalCount: Int = 0
+    /**
+     * この曲のブランド (商品) での所持コンプ。分母の規則はコア一本
+     * (`SnapshotStore.kamisabiCompletion` / [SongRepository.fetchKamisabiCompletion])
+     * なので、ここでは受け取った値をそのまま持つだけで加工しない。
+     */
+    val kamisabiCompletion: KamisabiCompletion? = null
 )
 
 class SongDetailViewModel : ViewModel() {
@@ -87,14 +90,13 @@ class SongDetailViewModel : ViewModel() {
             val videos = module.database.communityDao().videosForSong(songId)
             val isFavorite = module.userMarkRepository.isOn(UserMark.SONG, songId, UserMark.FAVORITE)
             // コンプ率は KAMISABI 収録曲だけが対象。それ以外の曲では無駄な集計を避ける。
+            // 分母は**この曲のブランド (商品)** — KAMISABI は ML/SideM/シャニの別商品なので、
+            // 全商品合算 (brandId=null) を出すと「収録 150 曲中」のような実態と合わない数になる。
             var isCardOwned = false
-            var kamisabiOwnedCount = 0
-            var kamisabiTotalCount = 0
+            var kamisabiCompletion: KamisabiCompletion? = null
             if (song?.hasKamisabiCard == true) {
-                val kamisabiIds = module.songRepository.fetchKamisabiSongIds()
                 val ownedIds = module.userMarkRepository.ownedSongIds()
-                kamisabiTotalCount = kamisabiIds.size
-                kamisabiOwnedCount = kamisabiIds.count { it in ownedIds }
+                kamisabiCompletion = module.songRepository.fetchKamisabiCompletion(song.brandId, ownedIds.toList())
                 isCardOwned = songId in ownedIds
             }
             _uiState.value = SongDetailUiState(
@@ -111,8 +113,7 @@ class SongDetailViewModel : ViewModel() {
                 songVideos = videos,
                 isFavorite = isFavorite,
                 isCardOwned = isCardOwned,
-                kamisabiOwnedCount = kamisabiOwnedCount,
-                kamisabiTotalCount = kamisabiTotalCount
+                kamisabiCompletion = kamisabiCompletion
             )
             // 集計系コミュニティ (Worker D1) はネットワーク。失敗しても本体表示は維持。
             loadCommunity(songId)
@@ -188,7 +189,8 @@ class SongDetailViewModel : ViewModel() {
 
     /**
      * KAMISABI カード所持トグル (端末ローカル)。所持数はコンプ率表示に効くので、
-     * 加減した分だけその場で更新する (全件を引き直さない)。
+     * 加減した分だけその場で更新する (全件を引き直さない)。`total` はこの曲のブランドの
+     * 収録曲数で所持数の増減では変わらないので、`owned` だけ加減する。
      */
     fun toggleCardOwned() {
         val songId = currentSongId ?: return
@@ -196,10 +198,13 @@ class SongDetailViewModel : ViewModel() {
         viewModelScope.launch {
             val now = module.userMarkRepository.toggle(UserMark.SONG, songId, UserMark.OWNED)
             val current = _uiState.value
+            val completion = current.kamisabiCompletion
             val delta = if (now) 1 else -1
             _uiState.value = current.copy(
                 isCardOwned = now,
-                kamisabiOwnedCount = (current.kamisabiOwnedCount + delta).coerceAtLeast(0)
+                kamisabiCompletion = completion?.copy(
+                    owned = (completion.owned.toInt() + delta).coerceAtLeast(0).toUInt()
+                )
             )
         }
     }

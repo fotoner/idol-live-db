@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import uniffi.imas_core.KamisabiCompletion
 import uniffi.imas_core.SongCollectMode
 import uniffi.imas_core.SongListFilterCriteria
 import uniffi.imas_core.SongListFilterEntry
@@ -81,8 +82,11 @@ data class SongListUiState(
     // 行アイコン用のマーク集合・回収数 (song_id ベース)。
     val favoriteSongIds: Set<String> = emptySet(),
     val myPickSongIds: Set<String> = emptySet(),
-    /** カード所持 (KAMISABI 等) をマークした曲 ID。「KAMISABI収録のみ」絞り込み中のコンプ率表示に使う。 */
-    val ownedSongIds: Set<String> = emptySet(),
+    /**
+     * 「KAMISABI収録のみ」絞り込み中だけ入る所持コンプ (分母の規則はコア一本)。
+     * 絞り込んでいないときは null (一覧上部のバナーを出さない)。
+     */
+    val kamisabiCompletion: KamisabiCompletion? = null,
     val collectedCounts: Map<String, Int> = emptyMap(),
     // タグ絞り込み中(単一タグ選択時のみ)の song_id → 票数。
     val tagVoteCounts: Map<String, Int> = emptyMap(),
@@ -332,6 +336,17 @@ class SongListViewModel : ViewModel() {
             val marks = module.userMarkRepository
             val favoriteIds = marks.favoriteSongIds()
             val ownedIds = marks.ownedSongIds()
+            // 「KAMISABI収録のみ」絞り込み中だけコンプ率を引く。分母の規則はコア一本
+            // (SongRepository.fetchKamisabiCompletion) — ここでは表示中の行数を分母にしない
+            // (KAMISABI はブランドごとの別商品なので、全ブランド分の行数を分母にすると
+            // 実態と合わない「150曲中」のような数になる。RedTeam H-3/H-4 と同種の罠)。
+            // ブランドを 1 つだけ選んでいればその商品、複数/未選択なら全商品合算 (iOS と同じ)。
+            val kamisabiCompletion = if (state.filter.kamisabiOnly) {
+                val brandId = state.filter.brandIds.singleOrNull()
+                module.songRepository.fetchKamisabiCompletion(brandId, ownedIds.toList())
+            } else {
+                null
+            }
             // メモ付き song_id。UserMarkRepository には notedIdolIds しか無い (Android に曲メモの
             // 編集導線が無かったため) ので DAO を直に引く。EventListViewModel が brandDao を
             // 直に引いているのと同じ扱い。
@@ -348,7 +363,7 @@ class SongListViewModel : ViewModel() {
                 songs = songs,
                 favoriteSongIds = favoriteIds,
                 myPickSongIds = myPickIds,
-                ownedSongIds = ownedIds,
+                kamisabiCompletion = kamisabiCompletion,
                 collectedCounts = collectedCounts,
                 tagVoteCounts = tagVoteCounts,
                 tagFilterError = tagFilterError,
