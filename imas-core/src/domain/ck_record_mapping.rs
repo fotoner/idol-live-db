@@ -520,6 +520,8 @@ pub struct CkSongRow {
     /// 合同曲 (コラボ曲) の札。人が立てるもので、データから機械的には導けない
     /// (在籍の重なりを合同と取り違える)。
     pub is_collab: bool,
+    /// 音楽カードゲーム「KAMISABI」にこの曲のカードがあるか。
+    pub has_kamisabi_card: bool,
 }
 
 /// units
@@ -917,6 +919,7 @@ pub fn song(record: &CkRecordInput) -> Option<CkSongRow> {
         // 合同曲の指定が消えてブランド別の曲一覧から落ちる (unit_version_id と同じ壊れ方)。
         joint_brand_ids: f.str("jointBrandIds"),
         is_collab: f.bool_value("isCollab", false),
+        has_kamisabi_card: f.bool_value("hasKamisabiCard", false),
     })
 }
 
@@ -1608,6 +1611,18 @@ mod tests {
         let plain = song(&rec("s2", &[("title", text("GO MY WAY!!"))])).unwrap();
         assert_eq!(plain.joint_brand_ids, None);
         assert!(!plain.is_collab);
+    }
+
+    #[test]
+    fn song_reads_kamisabi_card_flag() {
+        // Bool は「nil のプロパティが無いこと」を見る既存のカバレッジ検査をすり抜けるので、
+        // 読んでいることを直に固定する (読み落とすと同期のたび収録フラグが 0 に戻る)。
+        let s = song(&rec("s1", &[("title", text("Thank You!")), ("hasKamisabiCard", int(1))]))
+            .unwrap();
+        assert!(s.has_kamisabi_card);
+
+        let plain = song(&rec("s2", &[("title", text("GO MY WAY!!"))])).unwrap();
+        assert!(!plain.has_kamisabi_card);
     }
 
     #[test]

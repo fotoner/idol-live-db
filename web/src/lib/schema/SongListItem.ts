@@ -23,6 +23,10 @@ songTypeLabel: string | null,
  */
 collabLabel: string | null, 
 /**
+ * KAMISABI の収録札 (`content::SONG_KAMISABI_LABEL`)。収録でなければ `None`。
+ */
+kamisabiLabel: string | null, 
+/**
  * 「作曲 <作曲者>」。語は `content::composer_credit`。行の 3 行目 (幅があるときだけ)。
  */
 composerCredit: string | null, 

@@ -27,6 +27,10 @@ jointBrands: Array<Ref>,
  */
 collabLabel: string | null, 
 /**
+ * KAMISABI の収録札 (`content::SONG_KAMISABI_LABEL`)。収録でなければ `None`。
+ */
+kamisabiLabel: string | null, 
+/**
  * コミュニティ集計 (タグ・お気に入り・ペンライト)。焼き込み。
  */
 community: SongCommunity, 

@@ -64,6 +64,8 @@ pub struct SongDetailRecord {
     pub joint_brand_ids: Option<String>,
     /// シリーズ横断の合同曲か。
     pub is_collab: bool,
+    /// 音楽カードゲーム「KAMISABI」にこの曲のカードがあるか (曲詳細の収録札)。
+    pub has_kamisabi_card: bool,
 }
 
 impl From<&Song> for SongDetailRecord {
@@ -95,6 +97,7 @@ impl From<&Song> for SongDetailRecord {
             jasrac_code: s.jasrac_code.clone(),
             joint_brand_ids: s.joint_brand_ids.clone(),
             is_collab: s.is_collab,
+            has_kamisabi_card: s.has_kamisabi_card,
         }
     }
 }
@@ -902,6 +905,7 @@ mod tests {
             jasrac_code: row.get_unwrap("jasrac_code"),
             joint_brand_ids: row.get_unwrap("joint_brand_ids"),
             is_collab: row.get_unwrap::<_, i64>("is_collab") != 0,
+            has_kamisabi_card: row.get_unwrap::<_, i64>("has_kamisabi_card") != 0,
         }
     }
 

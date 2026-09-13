@@ -36,7 +36,10 @@ use crate::domain::text_search_index::TextSearchIndex;
 //    `build` を通して組み直すこと。
 
 /// songs 全カラム。GRDB Record / Room Entity と同じ「Record = Entity 兼用」の現実的判断。
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+///
+/// `Default` はテストで「見たい列だけ書く」ための足場。列が増えても、関係ない
+/// フィクスチャが全列の書き写しで壊れなくなる (本番の生成経路は必ず全列を埋める)。
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct Song {
     pub id: String,
     pub title: String,
@@ -74,6 +77,12 @@ pub struct Song {
     /// シリーズ横断の合同曲か。判断は人が持つ (原唱者のブランドから導くと、上の
     /// 「在籍の重なり」を合同と取り違える)。立てるなら `joint_brand_ids` も入れる。
     pub is_collab: bool,
+    /// 音楽カードゲーム「KAMISABI」にこの曲のカードがあるか。
+    ///
+    /// KAMISABI はカード 1 枚 = 1 曲なので、収録は曲の真偽値で足りる
+    /// (どのブランドのセットかは `brand_id` で分かる)。曲の性質ではなく
+    /// **商品への収録**なので、データからは導けない。人が公式のカードリストを見て立てる。
+    pub has_kamisabi_card: bool,
 }
 
 /// idols 全カラム (Bundle スキーマ基準)。

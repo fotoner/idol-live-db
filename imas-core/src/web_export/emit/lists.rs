@@ -401,6 +401,7 @@ fn song_list_item(ctx: &Ctx, index: u32, light: bool) -> Option<SongListItem> {
             artists_label: None,
             song_type_label: None,
             collab_label: None,
+            kamisabi_label: None,
             composer_credit: None,
             cd_credit: None,
             performance_count: None,
@@ -426,6 +427,9 @@ fn song_list_item(ctx: &Ctx, index: u32, light: bool) -> Option<SongListItem> {
         artists_label,
         song_type_label: song.song_type.as_deref().and_then(content::song_type_label).map(str::to_string),
         collab_label: song.is_collab.then(|| content::SONG_COLLAB_LABEL.to_string()),
+        kamisabi_label: song
+            .has_kamisabi_card
+            .then(|| content::SONG_KAMISABI_LABEL.to_string()),
         composer_credit: song.composer.as_deref().filter(|c| !c.is_empty()).map(content::composer_credit),
         cd_credit: song.cd_title.as_deref().filter(|c| !c.is_empty()).map(content::cd_credit),
         performance_count: Some(ctx.snap.performance_counts[index as usize]),

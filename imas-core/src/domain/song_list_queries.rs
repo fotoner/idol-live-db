@@ -59,6 +59,8 @@ pub struct SongListFilter {
     pub include_other_brand: bool,
     /// ライブ履歴にしか存在しないファントム曲 (カタログメタ皆無) を隠すか。
     pub exclude_live_only: bool,
+    /// 音楽カードゲーム「KAMISABI」の収録曲だけに絞るか (false = 絞らない)。
+    pub kamisabi_only: bool,
 }
 
 /// 一覧の絞り込み条件を、**出面 (JSON) で運ぶための形**。
@@ -92,6 +94,8 @@ pub struct SongQuery {
     pub include_remixes: bool,
     pub include_other_brand: bool,
     pub exclude_live_only: bool,
+    /// KAMISABI 収録曲だけに絞るか。
+    pub kamisabi_only: bool,
     /// `SongListSort::key()` の値。未知の鍵は既定 (50 音順) に倒れる。
     pub sort: String,
     /// 省略時はその並びの既定方向 (`SongListSort::default_ascending`)。
@@ -115,6 +119,7 @@ impl Default for SongQuery {
             include_remixes: false,
             include_other_brand: false,
             exclude_live_only: true,
+            kamisabi_only: false,
             sort: "kana".to_string(),
             ascending: None,
         }
@@ -137,6 +142,7 @@ impl SongQuery {
             include_remixes: self.include_remixes,
             include_other_brand: self.include_other_brand,
             exclude_live_only: self.exclude_live_only,
+            kamisabi_only: self.kamisabi_only,
         }
     }
 
@@ -160,6 +166,7 @@ impl SongQuery {
             include_remixes: f.include_remixes,
             include_other_brand: f.include_other_brand,
             exclude_live_only: f.exclude_live_only,
+            kamisabi_only: f.kamisabi_only,
             ..Self::default()
         }
     }
@@ -311,6 +318,11 @@ pub fn filter_song_indexes(snap: &Snapshot, filter: &SongListFilter) -> Vec<u32>
             // 既定でリミックス・別バージョンを除外 (`parent_song_id IS NULL`。
             // 空文字は NULL ではないので Some("") は派生扱いのまま — SQL と同じ)。
             if !filter.include_remixes && s.parent_song_id.is_some() {
+                return false;
+            }
+            // KAMISABI 収録だけの一覧。曲の属性ではなく商品への収録なので、
+            // ここは列を見るだけ (何が収録かを推測しない)。
+            if filter.kamisabi_only && !s.has_kamisabi_card {
                 return false;
             }
             if !brand_set.is_empty() {
@@ -848,6 +860,38 @@ mod tests {
             exclude_live_only: true,
             ..SongListFilter::default()
         }
+    }
+
+    /// KAMISABI 軸は列を見るだけで、曲の他の属性からは推測しない。
+    #[test]
+    fn kamisabi_only_keeps_exactly_the_flagged_songs() {
+        use crate::domain::snapshot::Song;
+        let song = |id: &str, flagged: bool| Song {
+            id: id.into(),
+            title: id.into(),
+            has_kamisabi_card: flagged,
+            ..Song::default()
+        };
+        let mini = Snapshot {
+            songs: vec![song("s1", true), song("s2", false), song("s3", true)],
+            ..Snapshot::default()
+        };
+
+        let on = SongListFilter { kamisabi_only: true, ..SongListFilter::default() };
+        assert_eq!(filter_song_indexes(&mini, &on), vec![0, 2]);
+
+        // 既定は絞らない (軸を足したことで一覧が減らないことの固定)。
+        let off = SongListFilter::default();
+        assert_eq!(filter_song_indexes(&mini, &off), vec![0, 1, 2]);
+    }
+
+    /// 出面に運ぶ形 (`SongQuery`) と絞り込み条件の往復で軸が落ちない。
+    #[test]
+    fn song_query_round_trips_the_kamisabi_axis() {
+        let filter = SongListFilter { kamisabi_only: true, ..SongListFilter::default() };
+        assert!(SongQuery::from_filter(&filter).kamisabi_only);
+        assert!(SongQuery::from_filter(&filter).to_filter().kamisabi_only);
+        assert!(!SongQuery::default().kamisabi_only);
     }
 
     /// 回帰 (2026-08-28): 作家の読みで曲を引けなかった。

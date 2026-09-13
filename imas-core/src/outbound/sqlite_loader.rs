@@ -172,12 +172,19 @@ fn load_songs(conn: &Connection) -> Result<Vec<Song>, String> {
         "NULL AS joint_brand_ids"
     };
     let collab = if columns.contains("is_collab") { "is_collab" } else { "0 AS is_collab" };
+    // KAMISABI 収録フラグも同じ扱い (この列を持たない旧 Documents DB でも読めるように)。
+    let kamisabi = if columns.contains("has_kamisabi_card") {
+        "has_kamisabi_card"
+    } else {
+        "0 AS has_kamisabi_card"
+    };
     let mut stmt = conn
         .prepare(
             &format!("SELECT id, title, title_kana, brand_id, song_type, release_date, duration_sec,
                     composer, lyricist, arranger, cd_series, cd_title, artwork_url, preview_url,
                     apple_music_id, apple_music_album_id, isrc, lyrics_url, parent_song_id,
-                    singer_label, unit_name, unit_id, series_group, {jasrac}, {joint}, {collab}
+                    singer_label, unit_name, unit_id, series_group, {jasrac}, {joint}, {collab},
+                    {kamisabi}
              FROM songs"),
         )
         .map_err(|e| e.to_string())?;
@@ -210,6 +217,7 @@ fn load_songs(conn: &Connection) -> Result<Vec<Song>, String> {
                 jasrac_code: r.get(23)?,
                 joint_brand_ids: r.get(24)?,
                 is_collab: r.get::<_, i64>(25)? != 0,
+                has_kamisabi_card: r.get::<_, i64>(26)? != 0,
             })
         })
         .map_err(|e| e.to_string())?;

@@ -168,6 +168,8 @@ web_dto! {
         /// 合同曲の札 (`content::SONG_COLLAB_LABEL`)。合同曲でなければ `None`。
         /// ブランド別の一覧にはそのブランドの曲に混じって出るので、行で見分けられるようにする。
         pub collab_label: Option<String>,
+        /// KAMISABI の収録札 (`content::SONG_KAMISABI_LABEL`)。収録でなければ `None`。
+        pub kamisabi_label: Option<String>,
         /// 「作曲 <作曲者>」。語は `content::composer_credit`。行の 3 行目 (幅があるときだけ)。
         pub composer_credit: Option<String>,
         /// 「収録 <CD 名>」。語は `content::cd_credit`。同上。

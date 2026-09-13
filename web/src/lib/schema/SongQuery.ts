@@ -15,6 +15,10 @@
  */
 export type SongQuery = { brandIds: Array<string>, title: string | null, idolName: string | null, idolIds: Array<string>, songwriter: string | null, cdSeries: string | null, seriesGroup: string | null, liveName: string | null, songType: string | null, includeRemixes: boolean, includeOtherBrand: boolean, excludeLiveOnly: boolean, 
 /**
+ * KAMISABI 収録曲だけに絞るか。
+ */
+kamisabiOnly: boolean, 
+/**
  * `SongListSort::key()` の値。未知の鍵は既定 (50 音順) に倒れる。
  */
 sort: string, 

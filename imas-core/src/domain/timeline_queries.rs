@@ -1091,6 +1091,7 @@ mod tests {
                 jasrac_code: None,
                 joint_brand_ids: None,
                 is_collab: false,
+                has_kamisabi_card: false,
             }
         }
 
