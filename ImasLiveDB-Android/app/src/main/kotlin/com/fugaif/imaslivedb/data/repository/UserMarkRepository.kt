@@ -165,6 +165,9 @@ class UserMarkRepository(private val db: AppDatabase) {
     /** お気に入り曲 ID セット (曲一覧行アイコン/絞り込み用の軽量版)。 */
     suspend fun favoriteSongIds(): Set<String> = dao.idsFor(UserMark.SONG, UserMark.FAVORITE).toSet()
 
+    /** カード所持 (KAMISABI 等) をマークした曲 ID セット。曲詳細のコンプ率計算用。 */
+    suspend fun ownedSongIds(): Set<String> = dao.idsFor(UserMark.SONG, UserMark.OWNED).toSet()
+
     /** お気に入りライブ(イベント)一覧。開催日降順。 */
     suspend fun favoriteEvents(): List<EventWithDateRange> {
         val ids = dao.idsFor(UserMark.EVENT, UserMark.FAVORITE)

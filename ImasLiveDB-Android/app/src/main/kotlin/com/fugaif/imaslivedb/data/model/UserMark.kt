@@ -32,5 +32,6 @@ data class UserMark(
         const val FAVORITE = "favorite"   // お気に入り
         const val ATTENDED = "attended"   // 参加
         const val MEMO = "memo"
+        const val OWNED = "owned"         // 所持 (KAMISABI カード等の収集物)
     }
 }

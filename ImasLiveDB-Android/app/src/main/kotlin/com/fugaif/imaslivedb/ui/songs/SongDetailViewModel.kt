@@ -43,7 +43,13 @@ data class SongDetailUiState(
     val songVideos: List<SongVideo> = emptyList(),
     val tags: List<CommunityApi.SongTag> = emptyList(),
     val penlight: CommunityApi.PenlightResult? = null,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    /** KAMISABI カードを所持済みか (song.hasKamisabiCard が true の曲でのみ意味を持つ)。 */
+    val isCardOwned: Boolean = false,
+    /** KAMISABI 収録曲のうち所持マーク済みの数。 */
+    val kamisabiOwnedCount: Int = 0,
+    /** KAMISABI 収録曲の総数。 */
+    val kamisabiTotalCount: Int = 0
 )
 
 class SongDetailViewModel : ViewModel() {
@@ -80,6 +86,17 @@ class SongDetailViewModel : ViewModel() {
             val evidence = module.performanceEvidenceRepository.fetchSongPerformanceEvidence(songId)
             val videos = module.database.communityDao().videosForSong(songId)
             val isFavorite = module.userMarkRepository.isOn(UserMark.SONG, songId, UserMark.FAVORITE)
+            // コンプ率は KAMISABI 収録曲だけが対象。それ以外の曲では無駄な集計を避ける。
+            var isCardOwned = false
+            var kamisabiOwnedCount = 0
+            var kamisabiTotalCount = 0
+            if (song?.hasKamisabiCard == true) {
+                val kamisabiIds = module.songRepository.fetchKamisabiSongIds()
+                val ownedIds = module.userMarkRepository.ownedSongIds()
+                kamisabiTotalCount = kamisabiIds.size
+                kamisabiOwnedCount = kamisabiIds.count { it in ownedIds }
+                isCardOwned = songId in ownedIds
+            }
             _uiState.value = SongDetailUiState(
                 isLoading = false,
                 song = song,
@@ -92,7 +109,10 @@ class SongDetailViewModel : ViewModel() {
                 relatedSongs = relatedSongs,
                 performanceEvidence = evidence,
                 songVideos = videos,
-                isFavorite = isFavorite
+                isFavorite = isFavorite,
+                isCardOwned = isCardOwned,
+                kamisabiOwnedCount = kamisabiOwnedCount,
+                kamisabiTotalCount = kamisabiTotalCount
             )
             // 集計系コミュニティ (Worker D1) はネットワーク。失敗しても本体表示は維持。
             loadCommunity(songId)
@@ -163,6 +183,24 @@ class SongDetailViewModel : ViewModel() {
         viewModelScope.launch {
             val now = module.userMarkRepository.toggle(UserMark.SONG, songId, UserMark.FAVORITE)
             _uiState.value = _uiState.value.copy(isFavorite = now)
+        }
+    }
+
+    /**
+     * KAMISABI カード所持トグル (端末ローカル)。所持数はコンプ率表示に効くので、
+     * 加減した分だけその場で更新する (全件を引き直さない)。
+     */
+    fun toggleCardOwned() {
+        val songId = currentSongId ?: return
+        val module = appModule ?: return
+        viewModelScope.launch {
+            val now = module.userMarkRepository.toggle(UserMark.SONG, songId, UserMark.OWNED)
+            val current = _uiState.value
+            val delta = if (now) 1 else -1
+            _uiState.value = current.copy(
+                isCardOwned = now,
+                kamisabiOwnedCount = (current.kamisabiOwnedCount + delta).coerceAtLeast(0)
+            )
         }
     }
 

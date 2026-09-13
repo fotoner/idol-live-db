@@ -39,6 +39,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -238,6 +239,7 @@ fun SongDetailScreen(
                 onIdolClick = onIdolClick, onShowClick = onShowClick,
                 onSongClick = { id -> currentSongId = id },
                 onToggleFavorite = viewModel::toggleFavorite,
+                onToggleCardOwned = viewModel::toggleCardOwned,
                 // 外す方向はゲートしない (iOS も自分が付けたタグの取り消しは contextMenu で素通し)。
                 // 付ける方向だけ共通ゲートを通す — チップのタップはタグ投票の書き込みなので、
                 // ボタンを隠すだけでは未ログイン/BAN 済みが投票し続けられてしまう。
@@ -335,6 +337,7 @@ private fun SongSheetContent(
     onShowClick: (String) -> Unit,
     onSongClick: (String) -> Unit,
     onToggleFavorite: () -> Unit,
+    onToggleCardOwned: () -> Unit,
     onToggleTag: (com.fugaif.imaslivedb.data.community.CommunityApi.SongTag) -> Unit,
     onOpenTagPicker: () -> Unit,
     onTagDetailClick: (String) -> Unit,
@@ -361,7 +364,8 @@ private fun SongSheetContent(
             0 -> InfoTab(
                 song, state, seed, onIdolClick, onUnitClick, onSongClick, onShowClick,
                 onRegisterAttendance = { segment = 1 },
-                onFilteredSongsClick = onFilteredSongsClick
+                onFilteredSongsClick = onFilteredSongsClick,
+                onToggleCardOwned = onToggleCardOwned
             )
             1 -> HistoryTab(
                 state.performanceHistory, state.performanceEvidence, seed, song.brandId,
@@ -406,6 +410,15 @@ private fun Hero(
             if (artistLine != null) {
                 Text(artistLine, fontSize = 15.sp, color = DS.ink2, textAlign = TextAlign.Center,
                     maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 2.dp))
+            }
+            if (song.hasKamisabiCard) {
+                Text(
+                    "KAMISABI収録", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = t.onAccent,
+                    modifier = Modifier.padding(top = 6.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(t.accent)
+                        .padding(horizontal = 10.dp, vertical = 3.dp)
+                )
             }
         }
         Row(
@@ -532,7 +545,8 @@ private fun InfoTab(
     onSongClick: (String) -> Unit,
     onShowClick: (String) -> Unit,
     onRegisterAttendance: () -> Unit,
-    onFilteredSongsClick: (String, String) -> Unit
+    onFilteredSongsClick: (String, String) -> Unit,
+    onToggleCardOwned: () -> Unit
 ) {
     val artistLine = when {
         state.originalArtists.isNotEmpty() -> state.originalArtists.joinToString(" / ") { it.name }
@@ -579,6 +593,26 @@ private fun InfoTab(
                         }
                     }
                 }
+            }
+        }
+        // KAMISABI カード所持 (収録曲のみ)
+        if (song.hasKamisabiCard) {
+            Column {
+                ImasSectionHeader("KAMISABIカード", tight = true)
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("カード所持", fontSize = 15.sp, color = DS.ink)
+                        Text(
+                            "収録曲 ${state.kamisabiTotalCount}枚中 ${state.kamisabiOwnedCount}枚所持",
+                            fontSize = 12.sp, color = DS.ink2
+                        )
+                    }
+                    Switch(checked = state.isCardOwned, onCheckedChange = { onToggleCardOwned() })
+                }
+                HorizontalDivider(color = DS.sep, modifier = Modifier.padding(start = 16.dp))
             }
         }
         // 楽曲情報
