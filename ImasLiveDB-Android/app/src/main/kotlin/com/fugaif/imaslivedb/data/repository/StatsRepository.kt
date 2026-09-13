@@ -147,7 +147,8 @@ class StatsRepository(
                     songType = null,
                     includeRemixes = true,
                     includeOtherBrand = true,
-                    excludeLiveOnly = false
+                    excludeLiveOnly = false,
+                    kamisabiOnly = false
                 ),
                 SongListSort.TITLE_KANA,
                 null,

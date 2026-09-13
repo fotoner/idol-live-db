@@ -360,7 +360,9 @@ data class SongSearchFilter(
     val excludeLiveOnly: Boolean = true,
     // brand_id='other' (歌枠カバー等の非ブランド曲) を含めるか。ブランド未選択(全件)時のみ効く。
     // 既定 true (他画面からの検索/絞り込みでは既存挙動を維持)。曲一覧ブラウズだけ false にして既定で隠す。
-    val includeOtherBrand: Boolean = true
+    val includeOtherBrand: Boolean = true,
+    // KAMISABI (音楽カードゲーム) 収録曲だけに絞る。既定 OFF。
+    val kamisabiOnly: Boolean = false
 ) {
     val isEmpty: Boolean
         get() = brandIds.isEmpty() &&

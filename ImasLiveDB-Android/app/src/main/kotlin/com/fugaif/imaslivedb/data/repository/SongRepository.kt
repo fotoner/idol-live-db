@@ -140,6 +140,9 @@ class SongRepository(
             conditions.add("s.song_type = ?")
             args.add(filter.songType)
         }
+        if (filter.kamisabiOnly) {
+            conditions.add("s.has_kamisabi_card = 1")
+        }
         if (filter.excludeLiveOnly) {
             // ライブ履歴のみのファントム曲を除外。カタログメタ(配信ID/原唱者/リリース日/CD/作家)を
             // 1つでも持てば正規曲として出す。何も無い曲(セトリ追加で生まれただけ)だけ隠す。
@@ -669,6 +672,13 @@ class SongRepository(
     }
 
     /**
+     * KAMISABI (音楽カードゲーム) にカードがある曲の id 一覧。曲詳細のコンプ率 (所持 N / M) 用。
+     * カードの有無自体は songs.has_kamisabi_card そのものなので、コアに専用 API を持たない
+     * (絞り込み条件としては [SongSearchFilter.kamisabiOnly] 経由でコアの `songList` を通す)。
+     */
+    suspend fun fetchKamisabiSongIds(): List<String> = db.songDao().fetchKamisabiSongIds()
+
+    /**
      * イントロドン出題プール。Android には Apple Music フル再生の手段が無いため、
      * iOS の `apple_music_id` 条件ではなく実際に再生できる `preview_url` の有無で絞り込む。
      * (Android 固有条件 + RANDOM() のためスナップショット化しない)
@@ -717,7 +727,8 @@ class SongRepository(
         songType = songType,
         includeRemixes = includeRemixes,
         includeOtherBrand = includeOtherBrand,
-        excludeLiveOnly = excludeLiveOnly
+        excludeLiveOnly = excludeLiveOnly,
+        kamisabiOnly = kamisabiOnly
     )
 
     private fun SongSortOrder.toSnapshotSort(): SongListSort = when (this) {
@@ -756,7 +767,8 @@ class SongRepository(
             songType: String? = null,
             includeRemixes: Boolean = false,
             includeOtherBrand: Boolean = true,
-            excludeLiveOnly: Boolean = false
+            excludeLiveOnly: Boolean = false,
+            kamisabiOnly: Boolean = false
         ): SongListFilter = SongListFilter(
             brandIds = brandIds,
             title = title,
@@ -769,7 +781,8 @@ class SongRepository(
             songType = songType,
             includeRemixes = includeRemixes,
             includeOtherBrand = includeOtherBrand,
-            excludeLiveOnly = excludeLiveOnly
+            excludeLiveOnly = excludeLiveOnly,
+            kamisabiOnly = kamisabiOnly
         )
     }
 }

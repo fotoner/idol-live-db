@@ -134,6 +134,7 @@ fun SongFilterSheet(
     var songType by remember { mutableStateOf(currentFilter.songType) }
     var includeRemixes by remember { mutableStateOf(currentFilter.includeRemixes) }
     var excludeLiveOnly by remember { mutableStateOf(currentFilter.excludeLiveOnly) }
+    var kamisabiOnly by remember { mutableStateOf(currentFilter.kamisabiOnly) }
     var showOtherBrand by remember { mutableStateOf(currentShowOtherBrand) }
     var collectFilter by remember { mutableStateOf(currentCollectFilter) }
     var myMarkFilter by remember { mutableStateOf(currentMyMarkFilter) }
@@ -320,6 +321,12 @@ fun SongFilterSheet(
                         checked = includeRemixes,
                         onCheckedChange = { includeRemixes = it }
                     )
+                    SwitchRow(
+                        title = "KAMISABI収録のみ",
+                        subtitle = "音楽カードゲーム KAMISABI にカードがある曲だけ表示",
+                        checked = kamisabiOnly,
+                        onCheckedChange = { kamisabiOnly = it }
+                    )
 
                     HorizontalDivider()
 
@@ -392,6 +399,7 @@ fun SongFilterSheet(
                             songType = null
                             includeRemixes = false
                             excludeLiveOnly = true
+                            kamisabiOnly = false
                             showOtherBrand = false
                             collectFilter = SongCollectFilter.ALL
                             myMarkFilter = SongMyMarkFilter()
@@ -412,7 +420,8 @@ fun SongFilterSheet(
                                     liveName = liveName,
                                     songType = songType,
                                     includeRemixes = includeRemixes,
-                                    excludeLiveOnly = excludeLiveOnly
+                                    excludeLiveOnly = excludeLiveOnly,
+                                    kamisabiOnly = kamisabiOnly
                                 ),
                                 selectedSort,
                                 sortAscending,
