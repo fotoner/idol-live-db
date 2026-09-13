@@ -8,19 +8,12 @@ use crate::domain::kamisabi_cards::{self as cards, KamisabiCompletion};
 
 #[uniffi::export]
 impl SnapshotStore {
-    /// KAMISABI 収録曲の song_id 列。`brand_id` を渡すとその商品だけ。
-    pub fn kamisabi_song_ids(&self, brand_id: Option<String>) -> Result<Vec<String>, SnapshotError> {
-        let snap = self.current()?;
-        Ok(self.ids(&snap, cards::song_indexes(&snap, brand_id.as_deref())))
-    }
-
-    /// 収録曲のある商品 (ブランド id)。
-    pub fn kamisabi_brand_ids(&self) -> Result<Vec<String>, SnapshotError> {
-        let snap = self.current()?;
-        Ok(cards::brand_ids(&snap))
-    }
-
-    /// 所持コンプ。**分母はその商品の収録曲数**で、3 商品の合算ではない。
+    /// 所持コンプ。**分母はその商品の収録曲数**で、`brand_id` を省くと全商品の合算。
+    ///
+    /// 合算を出してよいのは、**画面が 3 商品ぶんを一度に並べているとき**だけ
+    /// (曲一覧をブランド無指定で KAMISABI に絞った場合)。曲詳細のように 1 商品の話を
+    /// しているところで合算を出すと、SideM しか買っていない人に「150 曲中 7 曲」と
+    /// 見せることになる。
     pub fn kamisabi_completion(
         &self,
         brand_id: Option<String>,

@@ -299,6 +299,24 @@ fn non_blank(value: &Option<String>) -> Option<&str> {
 /// 元 SQL の `SELECT DISTINCT s.*` + JOIN は「条件を満たす関連行が 1 つでもあるか」の
 /// 存在判定と等価なので、曲ごとの述語に置き換えている (JOIN の行複製と DISTINCT の
 /// 打ち消し合いを持ち込まない)。
+/// 既定の一覧で隠す派生曲か。
+///
+/// 元 SQL は `parent_song_id IS NULL` だった (空文字は NULL ではないので `Some("")` は
+/// 派生扱いのまま)。そこに 1 つだけ例外を足してある:
+///
+/// **カードが付いている派生曲は隠さない。** KAMISABI のカードは派生曲にも付く
+/// (`Welcome!! (レジェンドデイズ Ver.)` は全体曲 `Welcome!!` の別録音)。隠すと、
+/// 一覧に出てこない曲が収録 150 曲に混じり、所持コンプの分母が実物と合わなくなる。
+///
+/// **これを「KAMISABI で絞っているときだけ隠さない」という形にしてはいけない。**
+/// 軸どうしが絡むと、同じ絡みを iOS の GRDB 経路・Android の SQL 経路・出面の静的土台に
+/// 写す必要が出る (実際に写して、そのうち 2 つが 149 件になった)。ここを「その曲自体が
+/// 商品として立っているか」の規則にしておけば、各 OS の SQL は
+/// `(parent_song_id IS NULL OR has_kamisabi_card = 1)` の**無条件 1 行**で済む。
+pub fn is_hidden_variant(s: &crate::domain::snapshot::Song) -> bool {
+    s.parent_song_id.is_some() && !s.has_kamisabi_card
+}
+
 pub fn filter_song_indexes(snap: &Snapshot, filter: &SongListFilter) -> Vec<u32> {
     let brand_set: HashSet<&str> = filter.brand_ids.iter().map(String::as_str).collect();
     let idol_set: HashSet<&str> = filter.idol_ids.iter().map(String::as_str).collect();
@@ -320,14 +338,8 @@ pub fn filter_song_indexes(snap: &Snapshot, filter: &SongListFilter) -> Vec<u32>
             if filter.kamisabi_only && !s.has_kamisabi_card {
                 return false;
             }
-            // 既定でリミックス・別バージョンを除外 (`parent_song_id IS NULL`。
-            // 空文字は NULL ではないので Some("") は派生扱いのまま — SQL と同じ)。
-            //
-            // ただし KAMISABI で絞っているときは外さない。**カードは派生曲にも付く**
-            // (`Welcome!! (レジェンドデイズ Ver.)` は全体曲 `Welcome!!` の別録音)。
-            // ここで落とすと、一覧に出ない曲が収録 150 曲に混じり、所持コンプの分母が
-            // 実物のカード枚数と合わなくなる。
-            if !filter.include_remixes && !filter.kamisabi_only && s.parent_song_id.is_some() {
+            // 既定で派生曲 (リミックス・別バージョン) を隠す。
+            if !filter.include_remixes && is_hidden_variant(s) {
                 return false;
             }
             if !brand_set.is_empty() {
@@ -756,7 +768,9 @@ mod tests {
         let mut args: Vec<String> = Vec::new();
 
         if !filter.include_remixes {
-            conditions.push("s.parent_song_id IS NULL".into());
+            // `is_hidden_variant` を SQL で書くとこの 1 行。
+            // iOS / Android のフォールバックもこの形を写すこと。
+            conditions.push("(s.parent_song_id IS NULL OR s.has_kamisabi_card = 1)".into());
         }
         if !filter.brand_ids.is_empty() {
             let ph = vec!["?"; filter.brand_ids.len()].join(",");
@@ -894,9 +908,27 @@ mod tests {
         let on = SongListFilter { kamisabi_only: true, ..SongListFilter::default() };
         assert_eq!(filter_song_indexes(&mini, &on), vec![0, 2, 3]);
 
-        // 既定は絞らない (軸を足したことで一覧が減らないことの固定)。派生はふつうに隠れる。
+        // 既定でも同じ 4 件。**カードが付いた派生曲は軸に関係なく隠さない**
+        // (「KAMISABI で絞っているときだけ隠さない」という軸の絡みにすると、
+        // 同じ絡みを各 OS の SQL に写す羽目になる)。
         let off = SongListFilter::default();
-        assert_eq!(filter_song_indexes(&mini, &off), vec![0, 1, 2]);
+        assert_eq!(filter_song_indexes(&mini, &off), vec![0, 1, 2, 3]);
+    }
+
+    /// 派生曲を隠す規則は「その曲自体が商品として立っているか」で決まる。
+    #[test]
+    fn hidden_variant_keeps_derived_songs_that_have_a_card() {
+        use crate::domain::snapshot::Song;
+        let derived = |card: bool| Song {
+            parent_song_id: Some("parent".into()),
+            has_kamisabi_card: card,
+            ..Song::default()
+        };
+        assert!(is_hidden_variant(&derived(false)));
+        assert!(!is_hidden_variant(&derived(true)));
+        // 空文字は NULL ではないので派生扱いのまま (元 SQL と同じ)。
+        assert!(is_hidden_variant(&Song { parent_song_id: Some(String::new()), ..Song::default() }));
+        assert!(!is_hidden_variant(&Song::default()));
     }
 
     /// 出面に運ぶ形 (`SongQuery`) と絞り込み条件の往復で軸が落ちない。
