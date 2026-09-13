@@ -198,9 +198,11 @@ pub fn idol_song_history(snap: &Snapshot, idol_id: &str, song_id: &str) -> Vec<I
 ///
 /// SQL の出力順は未規定だった (呼び出し側も Set として使う) ので、ここでは
 /// 「入力順を保った重複なし列」に固定する。
-/// 意図的な差分: songs.unit_id が units に実在しない FK 孤児 (Bundle DB に少数ある) は
-/// 返さない。呼び出し側 (アイドル詳細の曲あり/曲なし分割) は units 由来の実在 ID しか
-/// 渡さないので観測不能な差であり、ローダの「FK 孤児は読み飛ばす」規約とも揃う。
+/// 意図的な差分: songs.unit_id が units に実在しない ID は返さない。呼び出し側
+/// (アイドル詳細の曲あり/曲なし分割) は units 由来の実在 ID しか渡さないので観測不能な
+/// 差であり、ローダの「FK 孤児は読み飛ばす」規約とも揃う。
+/// なお songs.unit_id の空文字は「ユニットの実体に紐づかない」(複数ユニットの併記など)
+/// であって孤児ではない。ここは実在 ID だけを通すので、どちらも同じく落ちる。
 pub fn unit_ids_with_songs(snap: &Snapshot, unit_ids: &[String]) -> Vec<String> {
     let mut seen: Vec<&str> = Vec::new();
     let mut out: Vec<String> = Vec::new();
@@ -504,22 +506,31 @@ mod tests {
         assert_eq!(sql_ids, got);
     }
 
-    /// unit_ids_with_songs の意図的な差分の固定: songs.unit_id にしかない FK 孤児 ID は
-    /// 返さない (SQL は返すが、ローダの「FK 孤児は読み飛ばす」規約に合わせて除外する)。
+    /// unit_ids_with_songs の意図的な差分の固定: units に実在しない ID は返さない
+    /// (SQL は返すが、ローダの「FK 孤児は読み飛ばす」規約に合わせて除外する)。
     /// 重複入力が 1 回に畳まれること (SQL の DISTINCT 相当) もここで見る。
     #[test]
     fn unit_ids_with_songs_drops_orphans_and_duplicates() {
         let (snap, conn) = load();
+        // 空文字は「ユニットの実体に紐づかない」で孤児ではないので除く。これを入れると
+        // 孤児が 0 件でも常に 1 件拾えてしまい、この分岐を素通りで緑にする。
         let orphan_ids: Vec<String> = conn
-            .prepare("SELECT DISTINCT unit_id FROM songs WHERE unit_id NOT IN (SELECT id FROM units)")
+            .prepare(
+                "SELECT DISTINCT unit_id FROM songs
+                 WHERE unit_id <> '' AND unit_id NOT IN (SELECT id FROM units)",
+            )
             .unwrap()
             .query_map([], |r| r.get(0))
             .unwrap()
             .map(Result::unwrap)
             .collect();
-        // Bundle DB には孤児が実在する前提のテスト。消えたらこの分岐自体が不要になる。
-        assert!(!orphan_ids.is_empty(), "孤児が解消されたらこのテストを整理して良い");
-        assert_eq!(unit_ids_with_songs(&snap, &orphan_ids), Vec::<String>::new());
+        // Bundle DB の孤児は 2026-09-13 に 0 件にした。将来また混ざっても落ちないよう、
+        // 実在しない ID は必ず合成ぶんを 1 つ混ぜて、どちらの状態でも分岐を通す。
+        let absent: Vec<String> = orphan_ids
+            .into_iter()
+            .chain(std::iter::once("units に無いid".to_string()))
+            .collect();
+        assert_eq!(unit_ids_with_songs(&snap, &absent), Vec::<String>::new());
 
         let with_songs = snap
             .units

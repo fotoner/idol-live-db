@@ -64,22 +64,26 @@ UNDECLARED_REFS = [
     ("idol_brands", "idol_id", "idols"),
     ("song_units", "song_id", "songs"),
     ("song_units", "unit_id", "units"),
-    # ("songs", "unit_id", "units") はまだ入れられない。合同曲のクレジット
-    # (「S.E.M、Jupiter」など) を そのまま id にした行が 17 件あり、指す先の
-    # ユニットが存在しない (`unit_semjupiter` 等)。合同ユニットを起こすのか
-    # unit_id を空にするのかの判断が要るので、片付いてから有効にする。
+    # songs.unit_id は「空文字 = ユニットの実体に紐づかない」を正規の値として使う
+    # (「S.E.M＆Jupiter」のような複数ユニットの併記はここが空で、表示は unit_name)。
+    # LEFT JOIN の条件が値の有無を見ないので、空文字を弾くのは check_undeclared_refs 側。
+    ("songs", "unit_id", "units"),
 ]
 
 
 def check_undeclared_refs(db_path: str) -> int:
-    """FK 宣言の無い参照の壊れを出力し、件数を返す。"""
+    """FK 宣言の無い参照の壊れを出力し、件数を返す。
+
+    空文字は「参照しない」であって壊れではないので除く。songs.unit_id が実際そうで、
+    ユニットの実体に紐づかない曲 (複数ユニットの併記、企画もの) はここが空になる。
+    """
     conn = sqlite3.connect(db_path)
     total = 0
     for child, col, parent in UNDECLARED_REFS:
         rows = conn.execute(
             f"SELECT c.{col}, count(*) FROM {child} c"
             f" LEFT JOIN {parent} p ON p.id = c.{col}"
-            f" WHERE c.{col} IS NOT NULL AND p.id IS NULL"
+            f" WHERE c.{col} IS NOT NULL AND c.{col} <> '' AND p.id IS NULL"
             f" GROUP BY c.{col}"
         ).fetchall()
         for value, n in rows:
