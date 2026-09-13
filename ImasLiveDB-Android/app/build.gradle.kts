@@ -101,6 +101,8 @@ android {
     }
 
     testOptions {
+        // Robolectric (SongDao 等の Room テスト) がアプリのマニフェスト/リソースを見られるように。
+        unitTests.isIncludeAndroidResources = true
         unitTests.all {
             // imas-core (Rust) を JVM ユニットテストから叩くため、ホスト向け dylib の場所を JNA に教える。
             // imas-core/build.sh の host ビルドが生成する (未生成ならテスト前に実行)。
@@ -196,6 +198,8 @@ dependencies {
 
     // Test
     testImplementation(libs.junit)
+    // Room DAO (SongDao 等) を Android 実機/エミュ無しで JVM ユニットテストから叩くため。
+    testImplementation(libs.robolectric)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

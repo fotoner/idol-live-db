@@ -18,6 +18,7 @@ import com.fugaif.imaslivedb.data.model.SongSortOrder
 import com.fugaif.imaslivedb.data.model.SongWithArtists
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import uniffi.imas_core.KamisabiCompletion
 import uniffi.imas_core.PerformanceHistoryEntry
 import uniffi.imas_core.SongListFilter
 import uniffi.imas_core.SongListSort
@@ -103,8 +104,11 @@ class SongRepository(
             args.addAll(tagFilterSongIds)
         }
 
-        // Exclude remixes by default
-        if (!filter.includeRemixes) {
+        // 既定ではリミックス・別バージョンを除外。ただし KAMISABI 収録曲だけへの絞り込み中は
+        // 除外しない。収録曲の中に派生曲 (Welcome!! (レジェンドデイズ Ver.) 等) が含まれるため、
+        // ここで除外すると分母がコア (song_list_queries.rs の `!kamisabi_only` 条件) より
+        // 1 件少なくなり、スナップショット経路 (150 件) と食い違う。
+        if (!filter.includeRemixes && !filter.kamisabiOnly) {
             conditions.add("s.parent_song_id IS NULL")
         }
 
@@ -672,11 +676,22 @@ class SongRepository(
     }
 
     /**
-     * KAMISABI (音楽カードゲーム) にカードがある曲の id 一覧。曲詳細のコンプ率 (所持 N / M) 用。
-     * カードの有無自体は songs.has_kamisabi_card そのものなので、コアに専用 API を持たない
-     * (絞り込み条件としては [SongSearchFilter.kamisabiOnly] 経由でコアの `songList` を通す)。
+     * KAMISABI (音楽カードゲーム) の所持コンプ。**分母の規則はコア一本**
+     * (`domain::kamisabi_cards::completion`) — KAMISABI はブランドごとの別商品
+     * (ML 50 / SideM 50 / シャニ 50) なので、`brandId` を渡すとその商品の分母、
+     * `null` なら全商品の合算になる。ここでは規則を持たず、コアの返り値をそのまま返す。
+     *
+     * スナップショット未ロード時だけ、同じ規則 (`has_kamisabi_card` かつ主ブランド一致) を
+     * SQL 側でも守った Room フォールバックへ落ちる (iOS `GRDBSongRepository.kamisabiCompletion`
+     * と対)。
      */
-    suspend fun fetchKamisabiSongIds(): List<String> = db.songDao().fetchKamisabiSongIds()
+    suspend fun fetchKamisabiCompletion(brandId: String?, ownedSongIds: List<String>): KamisabiCompletion {
+        snapshots?.query { store -> store.kamisabiCompletion(brandId, ownedSongIds) }?.let { return it }
+        val ids = db.songDao().fetchKamisabiSongIds(brandId)
+        val owned = ownedSongIds.toSet()
+        val have = ids.count { it in owned }
+        return KamisabiCompletion(owned = have.toUInt(), total = ids.size.toUInt())
+    }
 
     /**
      * イントロドン出題プール。Android には Apple Music フル再生の手段が無いため、

@@ -37,6 +37,9 @@ securityCrypto = "1.1.0-alpha06"
 # imas-core (Rust) の UniFFI バインディングが要求する JNA
 jna = "5.17.0"
 
+# Room DAO を JVM ユニットテストから叩くための Android フレームワークシム
+robolectric = "4.14.1"
+
 [libraries]
 # JNA: @aar は実機/エミュ用、素の jar は JVM ユニットテスト用
 jna = { group = "net.java.dev.jna", name = "jna", version.ref = "jna" }
@@ -89,6 +92,7 @@ androidx-security-crypto = { group = "androidx.security", name = "security-crypt
 junit = { group = "junit", name = "junit", version = "4.13.2" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version = "1.2.1" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version = "3.6.1" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

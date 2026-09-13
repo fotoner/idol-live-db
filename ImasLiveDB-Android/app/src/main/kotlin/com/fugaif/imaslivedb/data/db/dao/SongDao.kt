@@ -42,9 +42,14 @@ interface SongDao {
     """)
     suspend fun fetchAttendedLiveShowIds(): List<String>
 
-    /** KAMISABI (音楽カードゲーム) にカードがある曲の id 一覧。カード所持のコンプ率計算用。 */
-    @Query("SELECT id FROM songs WHERE has_kamisabi_card = 1")
-    suspend fun fetchKamisabiSongIds(): List<String>
+    /**
+     * KAMISABI (音楽カードゲーム) にカードがある曲の id 一覧。`SnapshotStore.kamisabiSongIds`
+     * (コア `domain::kamisabi_cards::song_indexes`) 未ロード時のフォールバックでのみ使う
+     * (規則はコア一本。分母の商品別スコープはここでも同じ列 `brand_id` を見るだけで
+     * 新しい判断はしない)。`brandId` が null なら全商品。
+     */
+    @Query("SELECT id FROM songs WHERE has_kamisabi_card = 1 AND (:brandId IS NULL OR brand_id = :brandId)")
+    suspend fun fetchKamisabiSongIds(brandId: String?): List<String>
 
     @RawQuery
     suspend fun fetchSongsRaw(query: SupportSQLiteQuery): List<Song>
