@@ -79,10 +79,20 @@ performer → original に直して push すると **original のレコードが
 Development へ `xcrun cktool import-schema` してから Dashboard で Production へ昇格する。
 Production に列が無いうちに push すると弾かれる。
 
-> 2026-09-07: `Song` に `jointBrandIds` / `isCollab` を足した (合同曲)。
+> 2026-09-07: `Song` に `jointBrandIds` / `isCollab` を足した (合同曲)。昇格済み。
+>
+> 2026-09-13: `Song` に `hasKamisabiCard` を足した (KAMISABI 収録)。
 > **Development へは import 済み**。残るは Dashboard の **Deploy Schema Changes** で
 > Production へ昇格するところだけ (import-schema は production を受け付けない仕様)。
 > 昇格前に songs を push すると弾かれる。
+> この import では、積み残していた `Costume` / `CostumeWear` も一緒に development へ入った。
+
+**ckdb を編集したら必ず `xcrun cktool validate-schema` を通すこと。**
+2026-09-13 まで、`Creator` と `UnitVersion` の定義が二重に書かれていて
+(「export の全文に追記」を繰り返した跡)、`type 'X' is specified multiple times` で
+**validate も import も通らない状態が放置されていた**。衣装の 2 型が CloudKit の
+どちらの環境にも無かったのはこれが理由。緑を確かめずに「ckdb に足したから済み」と
+書くと、この形で何か月も気づかない。
 
 `tools/cloudkit_schema.ckdb` は **export-schema の出力そのまま**にしておく
 (並び順まで一致させる)。次に export した人が、本当の差分だけを見られるようにするため。
