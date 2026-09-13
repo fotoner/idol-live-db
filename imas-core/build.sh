@@ -58,10 +58,12 @@ cargo build --manifest-path $CRATE/Cargo.toml --release
 HOST_DYLIB=$CRATE/target/release/libimas_core.$HOST_EXT
 
 echo "==> バインディング生成 (Swift + Kotlin)"
-rm -rf $OUT/swift $OUT/headers
-mkdir -p $OUT/swift $OUT/headers
 # uniffi-bindgen は cwd の Cargo.toml から crate 情報を引くため crate 内から実行する
 if [[ $DO_IOS -eq 1 ]]; then
+  # 掃除は再生成する側だけ。ここを無条件にしていたので --android-only が
+  # iOS のバインディングを消して、Xcode ビルドが出来ない状態にしていた。
+  rm -rf $OUT/swift $OUT/headers
+  mkdir -p $OUT/swift $OUT/headers
   (cd $CRATE && cargo run --release --bin uniffi-bindgen -- \
     generate --library target/release/libimas_core.$HOST_EXT --language swift --out-dir ../$OUT/swift)
 fi
