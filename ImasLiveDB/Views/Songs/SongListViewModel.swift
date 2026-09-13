@@ -154,6 +154,7 @@ final class SongListViewModel {
             var queryFilter = request.filter
             queryFilter.includeOtherBrand = request.showOtherBrand
             queryFilter.excludeLiveOnly = request.excludeLiveOnly
+            queryFilter.kamisabiOnly = request.kamisabiOnly
             var results = try await songReading.songs(
                 filter: queryFilter, sortOrder: request.sortOrder, ascending: request.sortAscending)
             try Task.checkCancellation()
@@ -393,6 +394,8 @@ struct SongListRequest {
     var selectedTagCount: Int
     /// 「コールガイドがある曲のみ」が要求されているか。集合の解決自体は VM が持つ。
     var callGuideOnly: Bool = false
+    /// 「KAMISABI 収録曲のみ」が要求されているか。判定はコアに渡すだけ。
+    var kamisabiOnly: Bool = false
     var searchText: String
     /// `searchText` を何に当てるか。歌詞のときは手元で絞れないので空文字が来る。
     var searchScope: SongSearchMode = .title

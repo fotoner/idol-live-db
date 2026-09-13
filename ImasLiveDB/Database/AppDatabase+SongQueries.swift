@@ -115,6 +115,11 @@ extension AppDatabase {
             conditions.append("s.song_type = ?")
             args.append(songType)
         }
+        if filter.kamisabiOnly {
+            // core 未ロード時のフォールバック。判定は core と同じ列 (has_kamisabi_card) を
+            // そのまま見るだけで、ここで新しい規則は作らない。
+            conditions.append("s.has_kamisabi_card = 1")
+        }
 
         // アイドル名フィルタ（song_artists JOIN）
         let hasIdolIds = !(filter.idolIds ?? []).isEmpty

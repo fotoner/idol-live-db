@@ -569,6 +569,9 @@ struct SongSearchFilter: Sendable {
     /// セトリ追加で生まれただけの曲 (カバー・歌枠等) をカタログから隠す。
     /// apple_music_id 未補完でもメタを持つ正規曲は出す (配信有無では切らない)。
     var excludeLiveOnly: Bool = false
+    /// 音楽カードゲーム「KAMISABI」の収録曲だけに絞るか。既定 false (絞らない)。
+    /// 判定はコア (`SongListFilter.kamisabiOnly`) に渡すだけで、Swift 側では判定しない。
+    var kamisabiOnly: Bool = false
 
     init(brandIds: Set<String> = [],
          title: String? = nil,

@@ -89,6 +89,8 @@ struct SongListView: View {
     @AppStorage("songs_show_other_brand") private var showOtherBrand = false
     /// ライブ履歴のみのファントム曲 (セトリにしか無いカバー等) を一覧から隠す。既定 ON。
     @AppStorage("songs_exclude_live_only") private var excludeLiveOnly = true
+    /// 「KAMISABI収録曲のみ」。判定はコアに渡すだけ (showOtherBrand/excludeLiveOnly と同じ流儀)。
+    @AppStorage("songs_kamisabi_only") private var kamisabiOnly = false
     /// マイマーク絞り込み (担当/お気に入り/メモ)。 旧 MyMarks タブの統合後継。
     @State private var myMarkFilter = SongMyMarkFilter()
     /// コミュニティタグ絞り込み (複数指定可)。選択タグ全てが付いた曲 (AND) に絞る。
@@ -122,6 +124,7 @@ struct SongListView: View {
             myMarkFilter: myMarkFilter,
             selectedTagCount: selectedTags.count,
             callGuideOnly: callGuideOnly,
+            kamisabiOnly: kamisabiOnly,
             // 歌詞モードの入力は手元で絞れる語ではない。そのまま渡すと再ロードのたびに
             // 曲名で絞り直され、歌詞で当たった曲まで落ちる。
             searchText: searchMode.isLocal ? searchText : "",
@@ -188,6 +191,7 @@ struct SongListView: View {
                 removableFilterBar
                 tagFilterErrorBanner
                 callGuideFilterErrorBanner
+                kamisabiCompletionBanner
                 introDonLaunchBar
                 listContent
                     .refreshable {
@@ -222,7 +226,8 @@ struct SongListView: View {
                         myMarkFilter: $myMarkFilter,
                         showOtherBrand: $showOtherBrand,
                         excludeLiveOnly: $excludeLiveOnly,
-                        callGuideOnly: $callGuideOnly
+                        callGuideOnly: $callGuideOnly,
+                        kamisabiOnly: $kamisabiOnly
                     )
                     .environment(database)
                     .presentationDetents([.medium, .large])
@@ -263,6 +268,7 @@ struct SongListView: View {
                 .onChange(of: filter.brandIds) { _, _ in reload() }
                 .onChange(of: showOtherBrand) { _, _ in reload() }
                 .onChange(of: excludeLiveOnly) { _, _ in reload() }
+                .onChange(of: kamisabiOnly) { _, _ in reload() }
                 // 集合の解決に通信が要るので、他のトグルと違って解決を待ってから引き直す。
                 .onChange(of: callGuideOnly) { _, enabled in
                     Task {
@@ -511,6 +517,31 @@ struct SongListView: View {
         .padding(.vertical, DS.sp2)
     }
 
+    private var markService: UserMarkService { UserMarkService.shared }
+
+    /// KAMISABI 収録曲だけに絞り込んでいる間だけ出す「所持 N / M」のコンプ率。
+    ///
+    /// 絞り込み結果 (= 収録曲全体) を母数に、その中でカード所持マークが付いた曲を数える。
+    /// 絞り込んでいないと母数が収録曲以外まで膨らんで「コンプ率」の意味を失うので、
+    /// この絞り込み中にだけ出す。
+    @ViewBuilder
+    private var kamisabiCompletionBanner: some View {
+        if kamisabiOnly, listMode == .songs, !vm.isLoading, !vm.songs.isEmpty {
+            let total = vm.songs.count
+            let owned = vm.songs.filter { markService.bool(.owned, entity: .song, id: $0.song.id) }.count
+            HStack(spacing: 6) {
+                Image(systemName: UserMarkKind.owned.activeIcon)
+                    .font(.imasCaption)
+                    .foregroundStyle(DS.ink2)
+                Text("カード所持 \(owned) / \(total)")
+                    .font(.imasCaption.weight(.semibold))
+                    .foregroundStyle(DS.ink2)
+            }
+            .padding(.horizontal, DS.sp5)
+            .padding(.vertical, DS.sp2)
+        }
+    }
+
     @ViewBuilder
     private var removableFilterBar: some View {
         let chips = activeFilterChips
@@ -557,6 +588,10 @@ struct SongListView: View {
         if callGuideOnly, listMode == .songs {
             // 解除の後始末 (集合を捨てて引き直す) は `onChange(of: callGuideOnly)` が担う。
             chips.append(.init(id: "call_guide", label: "コールガイドあり") { callGuideOnly = false })
+        }
+        if kamisabiOnly, listMode == .songs {
+            // 解除の後始末 (再読み込み) は `onChange(of: kamisabiOnly)` が担う。
+            chips.append(.init(id: "kamisabi", label: "KAMISABI収録") { kamisabiOnly = false })
         }
         if let series = filter.seriesGroup, !series.isEmpty {
             chips.append(.init(id: "series", label: series) { filter.seriesGroup = nil; reload() })
@@ -693,6 +728,7 @@ struct SongListView: View {
         // ここでは触らない。結果として reload は 2 回走るが、どちらも同じ条件で同じ一覧を
         // 引き直すだけなので実害は無い (解除の後始末を 2 箇所に書く方が壊れやすい)。
         callGuideOnly = false
+        kamisabiOnly = false
         Task {
             await vm.resolveTagFilter([])
             reload()
@@ -717,6 +753,7 @@ struct SongListView: View {
         if collectFilter != .all { count += 1 }
         if !selectedTags.isEmpty { count += 1 }
         if callGuideOnly, listMode == .songs { count += 1 }
+        if kamisabiOnly, listMode == .songs { count += 1 }
         count += myMarkFilter.activeCount
         return count
     }

@@ -406,7 +406,8 @@ struct CoreSongRepository: SongReading {
             songType: filter.songType,
             includeRemixes: filter.includeRemixes,
             includeOtherBrand: filter.includeOtherBrand,
-            excludeLiveOnly: filter.excludeLiveOnly
+            excludeLiveOnly: filter.excludeLiveOnly,
+            kamisabiOnly: filter.kamisabiOnly
         )
     }
 

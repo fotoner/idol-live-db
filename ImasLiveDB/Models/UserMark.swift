@@ -69,7 +69,9 @@ enum UserMarkKind: String, Codable, CaseIterable, Sendable {
         case .attended:  return "person.crop.circle.badge.checkmark"
         case .note:      return "note.text"
         case .seat:      return "chair"
-        case .owned:     return "opticaldisc"
+        // 円盤 (release) だけでなくカード (song) にも付くようになったため、
+        // 円盤専用の見た目 (opticaldisc) から「所有物」を表す中立なアイコンに変更。
+        case .owned:     return "shippingbox"
         }
     }
 
@@ -81,7 +83,7 @@ enum UserMarkKind: String, Codable, CaseIterable, Sendable {
         case .attended:  return "person.crop.circle.badge.checkmark"
         case .note:      return "note.text.badge.plus"
         case .seat:      return "chair.fill"
-        case .owned:     return "opticaldisc.fill"
+        case .owned:     return "shippingbox.fill"
         }
     }
 
@@ -105,7 +107,8 @@ enum UserMarkKind: String, Codable, CaseIterable, Sendable {
         case .attended:  return [.event, .show]
         case .note:      return [.song, .idol, .event, .show]
         case .seat:      return [.show, .event]
-        case .owned:     return [.release]
+        // 円盤所有と同じ器を KAMISABI カード所持にも使う (CloudKit 同期もそのまま乗る)。
+        case .owned:     return [.release, .song]
         }
     }
 }

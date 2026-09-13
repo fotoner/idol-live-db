@@ -359,6 +359,14 @@ struct SongSheetContent: View {
                 favoriteAction(t)
             }
             .padding(.horizontal, DS.sp5)
+
+            // KAMISABI (音楽カードゲーム) 収録曲のときだけ、カード所持のトグルを出す。
+            // 未収録曲にトグルを出すと「持っていない」のか「そもそも対象外」なのか
+            // 読み取れなくなるので、収録曲以外には出さない。
+            if song.hasKamisabiCard {
+                kamisabiOwnedAction(t)
+                    .padding(.horizontal, DS.sp5)
+            }
         }
         .padding(.top, DS.sp4)
         .padding(.bottom, DS.sp5)
@@ -436,6 +444,37 @@ struct SongSheetContent: View {
             markVersion += 1
         } catch {
             Logger.database.error("toggle_favorite_failed: \(error.localizedDescription)")
+        }
+    }
+
+    /// KAMISABI カード所持トグル。`UserMarkKind.owned` を円盤所有と共有する
+    /// (CloudKit 同期もそのまま乗る)。ON/OFF の判定はここでは持たず、保存済みの値を出すだけ。
+    @ViewBuilder
+    private func kamisabiOwnedAction(_ t: ImasTheme) -> some View {
+        let owned = markService.bool(.owned, entity: .song, id: song.id)
+        Button {
+            AppAnalytics.tap("song_detail.toggle_kamisabi_owned")
+            toggleKamisabiOwned()
+        } label: {
+            Label(owned ? "カード所持済み" : "カード所持を記録",
+                  systemImage: owned ? UserMarkKind.owned.activeIcon : UserMarkKind.owned.icon)
+                .font(.imasSubhead.weight(.semibold))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 11)
+                .foregroundStyle(owned ? t.onAccent : t.accent)
+                .background(owned ? AnyShapeStyle(t.accent) : AnyShapeStyle(t.chipBg),
+                            in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .id(markVersion) // toggle 後に再評価
+    }
+
+    private func toggleKamisabiOwned() {
+        do {
+            try markService.toggle(.owned, entity: .song, id: song.id)
+            markVersion += 1
+        } catch {
+            Logger.database.error("toggle_kamisabi_owned_failed: \(error.localizedDescription)")
         }
     }
 

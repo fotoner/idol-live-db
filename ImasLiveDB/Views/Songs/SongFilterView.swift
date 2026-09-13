@@ -22,6 +22,8 @@ struct SongFilterView: View {
     @Binding var excludeLiveOnly: Bool
     /// コールガイド (歌詞行のコール・手拍子) が書き込まれている曲だけに絞るか。
     @Binding var callGuideOnly: Bool
+    /// 音楽カードゲーム「KAMISABI」の収録曲だけに絞るか。
+    @Binding var kamisabiOnly: Bool
 
     @State private var brands: [Brand] = []
     @State private var idols: [Idol] = []
@@ -153,6 +155,22 @@ struct SongFilterView: View {
                         }
                     }
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                }
+
+                if listMode == .songs {
+                    Section {
+                        Toggle(isOn: $kamisabiOnly) {
+                            Label("KAMISABI収録曲のみ", systemImage: UserMarkKind.owned.activeIcon)
+                        }
+                    } header: {
+                        Text("KAMISABI")
+                    } footer: {
+                        Text("音楽カードゲーム「KAMISABI」にカードが収録されている曲だけを表示します。")
+                            .font(.imasCaption)
+                            .foregroundStyle(DS.ink3)
+                    }
+                    .listRowBackground(DS.surface)
+                    .listRowSeparatorTint(DS.sep)
                 }
 
                 // 曲タイプ
