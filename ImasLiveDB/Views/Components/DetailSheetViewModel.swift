@@ -248,10 +248,11 @@ final class DetailSheetViewModel {
                                     kind: .navigate(value: song.songTypeLabel,
                                                     destination: .filteredSongs(.songType(song.songType)))))
         }
-        // 音楽カードゲーム「KAMISABI」収録曲かどうか。判定はコア (has_kamisabi_card)
-        // からそのまま来た値を出すだけで、ここでは何も判断しない。
+        // 音楽カードゲーム「KAMISABI」収録曲かどうか。判定 (has_kamisabi_card) も語
+        // (`kamisabiCardLabel()` = 「KAMISABI 収録」) もコアが決める。Android/Web と
+        // 同じ語を出すため、ここで手書きしない。
         if song.hasKamisabiCard {
-            rows.append(SongInfoRow(key: "KAMISABI", kind: .plain(value: "収録", mono: false)))
+            rows.append(SongInfoRow(key: kamisabiCardLabel(), kind: .plain(value: "", mono: false)))
         }
         if let composer = song.composer {
             rows.append(SongInfoRow(key: composer == song.arranger ? "作曲 / 編曲" : "作曲",
