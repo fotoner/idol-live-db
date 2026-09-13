@@ -42,6 +42,9 @@ struct Song: Codable, FetchableRecord, PersistableRecord, Identifiable, Hashable
     /// シリーズ横断の合同曲か。判断は人が持つ (原唱者のブランドから導くと在籍の重なりを
     /// 合同と取り違える)。立てるなら `jointBrandIds` も入れる。
     var isCollab: Bool = false
+    /// 音楽カードゲーム「KAMISABI」(バンダイナムコミュージックライブ/Lantis, 2026) にこの曲の
+    /// カードが存在するか。カード番号は非公表・ノーマル/レアは版違いなので真偽値 1 本で足りる。
+    var hasKamisabiCard: Bool = false
 
     enum CodingKeys: String, CodingKey {
         case id, title, composer, lyricist, arranger, isrc
@@ -65,6 +68,7 @@ struct Song: Codable, FetchableRecord, PersistableRecord, Identifiable, Hashable
         case unitVersionId = "unit_version_id"
         case jointBrandIds = "joint_brand_ids"
         case isCollab = "is_collab"
+        case hasKamisabiCard = "has_kamisabi_card"
     }
 
     var isRemix: Bool { parentSongId != nil }

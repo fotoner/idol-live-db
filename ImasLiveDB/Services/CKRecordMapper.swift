@@ -216,7 +216,10 @@ enum CKRecordMapper {
             unitVersionId: row.unitVersionId,
             // 同じ理由。落とすと同期のたびに合同曲の指定が消え、参加ブランドの曲一覧から落ちる。
             jointBrandIds: row.jointBrandIds,
-            isCollab: row.isCollab
+            isCollab: row.isCollab,
+            // 同じ理由。落とすと同期のたびに KAMISABI 収録フラグが消え、フィルタ/バッジが消える。
+            // `CKRecordMapperCoverageTests` がこれを捕まえる。
+            hasKamisabiCard: row.hasKamisabiCard
         )
     }
 

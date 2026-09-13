@@ -960,6 +960,20 @@ enum DatabaseMigrations {
                           columns: ["setlist_item_id"], ifNotExists: true)
         }
 
+        // v31: songs.has_kamisabi_card カラム追加。
+        //
+        // 音楽カードゲーム「KAMISABI」(バンダイナムコミュージックライブ/Lantis, 2026) にこの曲の
+        // カードが収録されているか。カード番号は非公表・ノーマル/レアは版違いなので、
+        // 「この曲のカードがあるか」の真偽値 1 本で足りる。
+        // 同梱 master.sqlite は既にこの列を持つので `PRAGMA table_info` で確認してから
+        // 冪等に足す (v6 の songs 列追加と同じ書き方)。
+        migrator.registerMigration("v31_songs_kamisabi_card") { db in
+            let songsColumns = try Row.fetchAll(db, sql: "PRAGMA table_info(songs)").map { $0["name"] as String? }
+            if !songsColumns.contains("has_kamisabi_card") {
+                try db.execute(sql: "ALTER TABLE songs ADD COLUMN has_kamisabi_card INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         return migrator
     }
 }

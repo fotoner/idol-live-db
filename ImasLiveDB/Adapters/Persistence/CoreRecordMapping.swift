@@ -386,7 +386,8 @@ enum CoreRecordMapping {
             unitId: record.unitId,
             seriesGroup: record.seriesGroup,
             jointBrandIds: record.jointBrandIds,
-            isCollab: record.isCollab
+            isCollab: record.isCollab,
+            hasKamisabiCard: record.hasKamisabiCard
         )
     }
 
