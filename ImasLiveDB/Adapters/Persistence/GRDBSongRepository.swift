@@ -110,10 +110,6 @@ struct GRDBSongRepository: SongReading {
 
     // MARK: - KAMISABI (core 未ロード時のフォールバック)
 
-    func kamisabiSongIds(brandId: String?) async throws -> [String] {
-        try await database.fetchKamisabiSongIdsAsync(brandId: brandId)
-    }
-
     /// core の `kamisabi_completion` と同じ規則 (`has_kamisabi_card` の列を見るだけ、
     /// 主ブランドのみ・合同曲の参加ブランドでは広げない) を SQL 側でも守る。
     func kamisabiCompletion(brandId: String?, ownedSongIds: [String]) async throws -> KamisabiCompletion {

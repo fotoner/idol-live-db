@@ -67,7 +67,6 @@ final class StubSongReading: SongReading, @unchecked Sendable {
     func songIds(brandId: String, includeCovers: Bool, excludeRemixes: Bool) async throws -> [String] { [] }
     func originalSongIds(forShowCastOf showId: String) async throws -> Set<String> { [] }
     func brandedSongIds() async throws -> Set<String> { [] }
-    func kamisabiSongIds(brandId: String?) async throws -> [String] { [] }
     func kamisabiCompletion(brandId: String?, ownedSongIds: [String]) async throws -> KamisabiCompletion {
         KamisabiCompletion(owned: 0, total: 0)
     }
