@@ -2203,7 +2203,11 @@ a.labeled-row .labeled-row__value {
 .song-filter__sort:hover {
   color: var(--ds-ink);
 }
-.song-filter__sort[aria-pressed="true"] {
+/* 選ばれている方の地色。並べ替えの札 (排他だが向きも持つので `aria-pressed`) と
+   `toggle` フィールド (KAMISABI など、純粋な排他選択なので `aria-checked`) の
+   両方がこの帯 (`.song-filter__sort`) を使うので、属性名ごと両方拾う。 */
+.song-filter__sort[aria-pressed="true"],
+.song-filter__sort[aria-checked="true"] {
   background: var(--ds-surface);
   color: var(--ds-ink);
 }
@@ -2218,40 +2222,6 @@ a.labeled-row .labeled-row__value {
   opacity: 0.6;
 }
 .song-filter__sort:focus-visible {
-  outline: 2px solid var(--ds-sys);
-  outline-offset: 1px;
-}
-/* 2 択の帯 (KAMISABI 収録など)。値の多い軸はプルダウン (select) だが、
-   2 択はプルダウンを開かせず、押した方がその場で見えるボタン列にする
-   (`.song-filter__sorts` と同じ「地に浮かせた 2px パディングの帯」)。 */
-.song-filter__toggle {
-  display: flex;
-  gap: var(--sp1);
-  padding: 2px;
-  border-radius: var(--r-sm);
-  background: var(--ds-fill);
-  flex: none;
-}
-.song-filter__toggle-btn {
-  font: inherit;
-  font-size: var(--fs-footnote);
-  font-weight: 600;
-  color: var(--ds-ink2);
-  background: transparent;
-  border: 0;
-  border-radius: 8px;
-  padding: var(--sp3) var(--sp4);
-  cursor: pointer;
-  white-space: nowrap;
-}
-.song-filter__toggle-btn:hover {
-  color: var(--ds-ink);
-}
-.song-filter__toggle-btn[aria-checked="true"] {
-  background: var(--ds-surface);
-  color: var(--ds-ink);
-}
-.song-filter__toggle-btn:focus-visible {
   outline: 2px solid var(--ds-sys);
   outline-offset: 1px;
 }

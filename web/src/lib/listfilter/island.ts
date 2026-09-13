@@ -306,11 +306,8 @@ export function mountListFilter<F>(
     if (!headerScope) {
       el.sorts.replaceChildren(
         ...sorts.map((o) => {
-          const button = document.createElement("button");
-          button.type = "button";
-          button.className = "song-filter__sort";
+          const button = bandButton(o.label);
           button.dataset.sortKey = o.key;
-          button.textContent = o.label;
           button.addEventListener("click", () => pickSort(o.key));
           return button;
         }),
@@ -389,20 +386,34 @@ function option(value: string, label: string): HTMLOptionElement {
   return o;
 }
 
+/**
+ * 帯 (`.song-filter__sorts`) の中の 1 ボタン。並べ替えの札と `toggle` フィールド
+ * (KAMISABI など) は見た目が同じ帯なので、ボタンの組み立てをここに 1 本化する。
+ * どの `data-*` 鍵を持たせるか・選ばれた状態をどの属性で示すかは呼び出し側の責務
+ * (並べ替えは表の見出しとも共有する `data-sort-key` + `aria-pressed`、`toggle` は
+ * 排他選択なので `role="radio"` + `aria-checked`)。
+ */
+function bandButton(label: string, role?: "radio"): HTMLButtonElement {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "song-filter__sort";
+  if (role) b.setAttribute("role", role);
+  b.textContent = label;
+  return b;
+}
+
 function fieldElement(f: FieldSpec): HTMLElement {
   if (f.kind === "toggle") {
     // 排他選択 (どちらか一方だけが真) なので `radiogroup` / `radio` が実体と合う
     // (`group` + `aria-pressed` はトグルボタンの語で、独立に on/off できる場合の語)。
+    // 帯そのもの (`.song-filter__sorts` / `.song-filter__sort`) は並べ替えの札と同じ見た目
+    // なので流用する (別の CSS を足すと、ここがそうだったように padding 等が容易にドリフトする)。
     const group = document.createElement("div");
-    group.className = "song-filter__toggle";
+    group.className = "song-filter__sorts";
     group.setAttribute("role", "radiogroup");
     group.setAttribute("aria-label", f.label);
     for (const opt of f.options ?? []) {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "song-filter__toggle-btn";
-      btn.setAttribute("role", "radio");
-      btn.textContent = opt.label;
+      const btn = bandButton(opt.label, "radio");
       btn.dataset.toggleKey = f.key;
       btn.dataset.toggleValue = opt.value;
       group.appendChild(btn);
