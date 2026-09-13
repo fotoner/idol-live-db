@@ -2247,7 +2247,7 @@ a.labeled-row .labeled-row__value {
 .song-filter__toggle-btn:hover {
   color: var(--ds-ink);
 }
-.song-filter__toggle-btn[aria-pressed="true"] {
+.song-filter__toggle-btn[aria-checked="true"] {
   background: var(--ds-surface);
   color: var(--ds-ink);
 }

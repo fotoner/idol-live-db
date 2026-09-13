@@ -368,7 +368,7 @@ export function mountListFilter<F>(
   function syncToggles(): void {
     el.fields.querySelectorAll<HTMLButtonElement>("[data-toggle-key]").forEach((b) => {
       const on = state[b.dataset.toggleKey!] === true;
-      b.setAttribute("aria-pressed", String((b.dataset.toggleValue === "true") === on));
+      b.setAttribute("aria-checked", String((b.dataset.toggleValue === "true") === on));
     });
   }
 }
@@ -391,14 +391,17 @@ function option(value: string, label: string): HTMLOptionElement {
 
 function fieldElement(f: FieldSpec): HTMLElement {
   if (f.kind === "toggle") {
+    // 排他選択 (どちらか一方だけが真) なので `radiogroup` / `radio` が実体と合う
+    // (`group` + `aria-pressed` はトグルボタンの語で、独立に on/off できる場合の語)。
     const group = document.createElement("div");
     group.className = "song-filter__toggle";
-    group.setAttribute("role", "group");
+    group.setAttribute("role", "radiogroup");
     group.setAttribute("aria-label", f.label);
     for (const opt of f.options ?? []) {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "song-filter__toggle-btn";
+      btn.setAttribute("role", "radio");
       btn.textContent = opt.label;
       btn.dataset.toggleKey = f.key;
       btn.dataset.toggleValue = opt.value;
