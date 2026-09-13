@@ -27,6 +27,12 @@ final class UserMarkBackup {
     private let key = "user_marks_backup_v1"
     private let logger = Logger(subsystem: "com.fugaif.ImasLiveDB", category: "mark_backup")
 
+    /// `NSUbiquitousKeyValueStore` の 1 値あたりの上限 (1MB)。超えると `set` は
+    /// **無言で失敗する** (戻り値も通知も無い) — このクラスが扱う全マーク種別に共通の制約
+    /// (特定の1機能の話ではない。担当/お気に入り/メモ/参加が多いユーザーは元々ここに
+    /// 近づき得る)。余裕を持たせて 9 割で警告する。
+    private static let sizeWarningThresholdBytes = 900_000
+
     private struct Payload: Codable {
         var marks: [UserMark]
         var updatedAt: Double
@@ -38,17 +44,19 @@ final class UserMarkBackup {
     func backup(_ marks: [UserMark]) {
         do {
             let data = try JSONEncoder().encode(Payload(marks: marks, updatedAt: Date().timeIntervalSince1970))
-            // `NSUbiquitousKeyValueStore` の 1 値あたりの上限は 1MB で、超えると `set` は
-            // **無言で失敗する** (戻り値も通知も無い)。KAMISABI で `owned` を曲にも広げたぶん
-            // (1 ユーザー最大 +150 行) 上限に近づき得るので、せめてログに残す。
             let sizeBytes = data.count
-            if sizeBytes > 900_000 {
-                logger.warning("user_marks backup is \(sizeBytes) bytes for \(marks.count) marks — approaching NSUbiquitousKeyValueStore's 1MB per-value limit, writes may silently fail")
+            if sizeBytes > Self.sizeWarningThresholdBytes {
+                logger.warning("user_marks backup is \(sizeBytes) bytes for \(marks.count) marks — approaching the 1MB per-value limit, writes may silently fail")
             } else {
                 logger.debug("user_marks backup: \(sizeBytes) bytes for \(marks.count) marks")
             }
             store.set(data, forKey: key)
-            store.synchronize()
+            // `synchronize()` の戻り値は「ローカルの変更をディスクへ反映できたか」の弱い
+            // シグナル (iCloud への配信成否までは保証しない) だが、KVS がこの API で唯一
+            // 返す確認手段なので、失敗が分かる時だけでも拾ってログに残す。
+            if !store.synchronize() {
+                logger.warning("user_marks backup: store.synchronize() returned false after writing \(sizeBytes) bytes")
+            }
         } catch {
             logger.error("backup encode failed: \(error.localizedDescription)")
         }
