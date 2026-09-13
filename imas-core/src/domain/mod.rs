@@ -7,6 +7,7 @@ pub mod jst_day;
 pub mod prng;
 pub mod snapshot;
 pub mod snapshot_build;
+pub mod kamisabi_cards;
 pub mod song_list_queries;
 pub mod song_tag_queries;
 pub mod song_detail_queries;

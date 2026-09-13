@@ -102,6 +102,8 @@ declare_and_call_checksums! {
     uniffi_imas_core_checksum_func_intro_quiz_playable_indices,
     uniffi_imas_core_checksum_func_jst_is_today_or_later,
     uniffi_imas_core_checksum_func_jst_today,
+    uniffi_imas_core_checksum_func_kamisabi_card_label,
+    uniffi_imas_core_checksum_func_kamisabi_completion_label,
     uniffi_imas_core_checksum_func_is_character_live,
     uniffi_imas_core_checksum_func_performer_display_name,
     uniffi_imas_core_checksum_func_performer_display_name_joined,

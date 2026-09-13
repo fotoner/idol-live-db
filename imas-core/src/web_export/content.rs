@@ -201,8 +201,8 @@ pub fn tag_page_description(name: &str, count: u32) -> String {
 pub const SONG_COLLAB_LABEL: &str = "合同曲";
 
 /// 音楽カードゲーム「KAMISABI」に収録されている曲に付ける札。
-/// 曲の性質ではなく商品への収録なので、札の言い切りは商品名そのものにする。
-pub const SONG_KAMISABI_LABEL: &str = "KAMISABI 収録";
+/// 語の正本は domain 側 (iOS / Android も同じ文字列を FFI で読む)。
+pub const SONG_KAMISABI_LABEL: &str = crate::domain::kamisabi_cards::CARD_LABEL;
 
 // ---- アイドル一覧の表 -----------------------------------------------------------
 /// 表の見出し (名前の列の次から)。値の並びは `emit::lists::idol_list_item` が同じ順で作る。

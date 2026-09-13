@@ -37,9 +37,13 @@ use crate::domain::text_search_index::TextSearchIndex;
 
 /// songs 全カラム。GRDB Record / Room Entity と同じ「Record = Entity 兼用」の現実的判断。
 ///
-/// `Default` はテストで「見たい列だけ書く」ための足場。列が増えても、関係ない
-/// フィクスチャが全列の書き写しで壊れなくなる (本番の生成経路は必ず全列を埋める)。
-#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+/// `Default` は**テストのときだけ**付ける。テストで「見たい列だけ書く」ための足場が要る
+/// 一方、本番の生成経路 (`sqlite_loader` / `web_export::emit`) には付けてはいけない —
+/// 列を足したときにコンパイラが構築漏れを叩くのが、この repo の列落ち対策の柱だから
+/// (`is_collab` の事故がそれ)。`..Default::default()` で埋められるようになると、
+/// 「本番経路が 1 箇所だけ既定値に落ちている」が型検査を素通りする。
+#[cfg_attr(test, derive(Default))]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Song {
     pub id: String,
     pub title: String,

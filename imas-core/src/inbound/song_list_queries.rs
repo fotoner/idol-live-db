@@ -98,7 +98,7 @@ impl SnapshotStore {
 
 impl SnapshotStore {
     /// 添字列 → song_id 列 (uniffi::export の対象外のヘルパ)。
-    fn ids(&self, snap: &crate::domain::snapshot::Snapshot, indexes: Vec<u32>) -> Vec<String> {
+    pub(crate) fn ids(&self, snap: &crate::domain::snapshot::Snapshot, indexes: Vec<u32>) -> Vec<String> {
         indexes.into_iter().map(|i| snap.songs[i as usize].id.clone()).collect()
     }
 }

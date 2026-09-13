@@ -378,6 +378,40 @@ fn default_song_filter(brand_ids: Vec<String>) -> SongListFilter {
     }
 }
 
+/// 一覧ページの**土台**にする添字列。既定フィルタの結果に KAMISABI 収録曲を足す。
+///
+/// 出面の絞り込みはブラウザの wasm がコアの `filter_song_indexes` を回して決めるが、
+/// **土台に無い行は島が出しようがない** (`web/src/lib/listfilter/island.ts` は
+/// DOM に無い id を黙って捨てる)。KAMISABI のカードは派生曲にも付くので
+/// (`Welcome!! (レジェンドデイズ Ver.)`)、既定フィルタ (派生曲を隠す) だけで土台を作ると
+/// 「収録のみ」が 149 件にしかならず、コアが返す 150 ともアプリとも食い違う。
+///
+/// 並びは通常の一覧と同じ規則 (よみ順)。順序の規則を写経しないために、
+/// 全件の並びを一度作ってから土台の集合で濾している。
+fn song_list_base_indexes(ctx: &Ctx, brand_ids: Vec<String>) -> Vec<u32> {
+    let kana = |filter: &SongListFilter| {
+        song_list_indexes(ctx.snap, filter, SongListSort::TitleKana, None, &[], &[])
+    };
+    let listed = kana(&default_song_filter(brand_ids.clone()));
+    let cards = kana(&SongListFilter {
+        kamisabi_only: true,
+        ..default_song_filter(brand_ids)
+    });
+    let want: std::collections::HashSet<u32> = listed.iter().chain(cards.iter()).copied().collect();
+    if want.len() == listed.len() {
+        return listed;
+    }
+    kana(&SongListFilter {
+        include_remixes: true,
+        include_other_brand: true,
+        exclude_live_only: false,
+        ..SongListFilter::default()
+    })
+    .into_iter()
+    .filter(|i| want.contains(i))
+    .collect()
+}
+
 /// 原唱者名を 1 行に畳む。全体曲は 60 人を超えるので、多いときは人数で丸める。
 fn artists_display(names: &[&str]) -> Option<String> {
     join_capped(names, " / ", 4, "名")
@@ -479,14 +513,7 @@ pub fn song_lists(ctx: &Ctx) -> Vec<Emitted<SongListPage>> {
     let total_all = ctx.snap.songs.len() as u32;
     // 既定フィルタを通した件数。ブランド切替の「すべて」に出す数はこれ
     // (全 3,153 曲ではなく、その一覧が実際に並べる 2,035 曲)。
-    let listed = song_list_indexes(
-        ctx.snap,
-        &default_song_filter(vec![]),
-        SongListSort::TitleKana,
-        None,
-        &[],
-        &[],
-    );
+    let listed = song_list_base_indexes(ctx, vec![]);
     let listed_total = listed.len() as u32;
 
     let make = |path: String,
@@ -594,14 +621,7 @@ pub fn song_lists(ctx: &Ctx) -> Vec<Emitted<SongListPage>> {
     for &i in &ctx.snap.brand_order {
         let brand = &ctx.snap.brands[i as usize];
         let Some(path) = ctx.brand_list_path("songs", &brand.id) else { continue };
-        let indexes = song_list_indexes(
-            ctx.snap,
-            &default_song_filter(vec![brand.id.clone()]),
-            SongListSort::TitleKana,
-            None,
-            &[],
-            &[],
-        );
+        let indexes = song_list_base_indexes(ctx, vec![brand.id.clone()]);
         out.push(make(
             path,
             format!("{}の楽曲", brand.name),
