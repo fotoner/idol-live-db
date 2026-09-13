@@ -113,4 +113,55 @@ final class SongIdolFilterTests: XCTestCase {
 
         XCTAssertEqual(titles(rows), ["s_own", "s_shared", "s_cover"])
     }
+
+    // MARK: - kamisabiOnly (GRDB フォールバック経路; 43ac593e の固定化)
+
+    /// `parent_song_id` を持つ派生曲でも `has_kamisabi_card=1` なら `kamisabiOnly` で拾えること。
+    ///
+    /// core の `filter_song_indexes` は `kamisabi_only` 中は派生曲除外 (`parent_song_id IS NULL`)
+    /// を効かせない — KAMISABI のカードは派生曲にも付く (`Welcome!! (レジェンドデイズ Ver.)` は
+    /// 全体曲 `Welcome!!` の別録音)。core 未ロード時の GRDB フォールバック
+    /// (`fetchSongsByFilterQuery`) だけこの上書きが無く、収録曲の母数が 1 曲少なく数えていた
+    /// (150曲中149曲)。43ac593e で直した状態をここで固定する。
+    func testKamisabiOnlyKeepsDerivedSongsWithCards() throws {
+        let queue = try DatabaseQueue()
+        try queue.write { db in
+            try db.execute(sql: """
+                CREATE TABLE songs(
+                    id TEXT PRIMARY KEY, brand_id TEXT, title TEXT, title_kana TEXT,
+                    parent_song_id TEXT, release_date TEXT, cd_series TEXT, series_group TEXT,
+                    song_type TEXT NOT NULL, unit_id TEXT, unit_name TEXT, singer_label TEXT,
+                    apple_music_id TEXT, artwork_url TEXT, lyrics_url TEXT,
+                    lyricist TEXT, composer TEXT, arranger TEXT,
+                    is_collab INTEGER NOT NULL DEFAULT 0,
+                    has_kamisabi_card INTEGER NOT NULL DEFAULT 0
+                )
+                """)
+            try db.execute(sql: "CREATE TABLE idols(id TEXT PRIMARY KEY, brand_id TEXT, name TEXT, name_kana TEXT, sort_order INTEGER NOT NULL DEFAULT 0, is_external INTEGER NOT NULL DEFAULT 0)")
+            try db.execute(sql: "CREATE TABLE song_artists(song_id TEXT, idol_id TEXT, role TEXT, PRIMARY KEY(song_id, idol_id, role))")
+            try db.execute(sql: "CREATE TABLE setlist_items(song_id TEXT, show_id TEXT)")
+            try db.execute(sql: "CREATE TABLE shows(id TEXT PRIMARY KEY, event_id TEXT)")
+            try db.execute(sql: "CREATE TABLE events(id TEXT PRIMARY KEY, name TEXT)")
+
+            // 無印曲 (カード無し) + その派生曲 (レジェンドデイズ Ver. 相当、カードあり)。
+            try db.execute(sql: """
+                INSERT INTO songs(id, brand_id, title, title_kana, song_type, has_kamisabi_card)
+                VALUES('s_original','ml','無印曲','むじるしきよく','all',0)
+                """)
+            try db.execute(sql: """
+                INSERT INTO songs(id, brand_id, title, title_kana, song_type, parent_song_id, has_kamisabi_card)
+                VALUES('s_variant','ml','無印曲(Ver.)','むじるしきよくう゛ぇる','all','s_original',1)
+                """)
+        }
+        let db = try AppDatabase(dbQueue: queue)
+
+        var filter = SongSearchFilter()
+        filter.kamisabiOnly = true
+        let rows = try db.fetchSongs(filter: filter)
+
+        XCTAssertEqual(
+            titles(rows), ["s_variant"],
+            "kamisabiOnly は has_kamisabi_card=1 の曲を返すはず (派生曲でも parent_song_id 除外で落ちてはいけない)"
+        )
+    }
 }

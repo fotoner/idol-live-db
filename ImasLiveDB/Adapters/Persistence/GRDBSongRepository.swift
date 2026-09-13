@@ -108,6 +108,21 @@ struct GRDBSongRepository: SongReading {
         try await database.fetchBrandedSongIdsAsync()
     }
 
+    // MARK: - KAMISABI (core 未ロード時のフォールバック)
+
+    func kamisabiSongIds(brandId: String?) async throws -> [String] {
+        try await database.fetchKamisabiSongIdsAsync(brandId: brandId)
+    }
+
+    /// core の `kamisabi_completion` と同じ規則 (`has_kamisabi_card` の列を見るだけ、
+    /// 主ブランドのみ・合同曲の参加ブランドでは広げない) を SQL 側でも守る。
+    func kamisabiCompletion(brandId: String?, ownedSongIds: [String]) async throws -> KamisabiCompletion {
+        let ids = try await database.fetchKamisabiSongIdsAsync(brandId: brandId)
+        let owned = Set(ownedSongIds)
+        let have = ids.filter { owned.contains($0) }.count
+        return KamisabiCompletion(owned: UInt32(have), total: UInt32(ids.count))
+    }
+
     func songVideos(songId: String) async throws -> [SongVideo] {
         try await database.fetchVideosForSongAsync(songId: songId)
     }

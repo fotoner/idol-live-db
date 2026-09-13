@@ -106,6 +106,15 @@ final class SongListViewModel {
     /// `resolveCallGuideFilter` の世代。`await` の間にトグルが動いていたら古い応答は捨てる。
     private var currentCallGuideResolveId = UUID()
 
+    /// KAMISABI 絞り込み中の所持コンプ。絞っていないときは nil (View 側はこれの有無だけを見る)。
+    /// **分子・分母とも Swift 側では数え直さない** — 値そのものがコアの
+    /// `SnapshotStore.kamisabiCompletion` の返り値そのまま (規則はコア一本)。
+    private(set) var kamisabiCompletion: KamisabiCompletion?
+    /// 直近の `load()` で使った KAMISABI 絞り込み状態。`refreshMarkDisplays()` は
+    /// リクエストを持たないので、同じ条件で引き直すためにここへ控えておく。
+    private var kamisabiFilterActive = false
+    private var kamisabiBrandId: String?
+
     private var loadTask: Task<Void, Never>?
     private var currentTaskId: UUID = UUID()
 
@@ -155,6 +164,11 @@ final class SongListViewModel {
             queryFilter.includeOtherBrand = request.showOtherBrand
             queryFilter.excludeLiveOnly = request.excludeLiveOnly
             queryFilter.kamisabiOnly = request.kamisabiOnly
+            // コンプ率バナーの分母をここで確定する。「表示中の一覧の絞り込み結果」を数えると
+            // ブランド/マイマーク/検索語のたびに分母が動いてしまう (KAMISABI はブランドごとの
+            // 別商品なので、単一ブランド選択中ならその商品の分母、それ以外は nil = 全商品合算)。
+            kamisabiFilterActive = request.kamisabiOnly
+            kamisabiBrandId = request.filter.brandIds.count == 1 ? request.filter.brandIds.first : nil
             var results = try await songReading.songs(
                 filter: queryFilter, sortOrder: request.sortOrder, ascending: request.sortAscending)
             try Task.checkCancellation()
@@ -305,6 +319,19 @@ final class SongListViewModel {
         notedSongIds = Set(markService.allMarked(kind: .note, entity: .song))
         myPickSongIds = await myPickSongIdSet()
         collectedCounts = (try? await songReading.songCollectedCounts()) ?? [:]
+        await refreshKamisabiCompletion()
+    }
+
+    /// KAMISABI 所持コンプの再計算。絞り込んでいないときは nil に戻す。
+    /// `load()` と、マーク変更後の再表示 (`refreshMarkDisplays`) の両方から呼ぶ
+    /// (曲詳細でカードを所持済みにして一覧へ戻ってきたときに数字を追従させるため)。
+    private func refreshKamisabiCompletion() async {
+        guard kamisabiFilterActive else {
+            kamisabiCompletion = nil
+            return
+        }
+        let ownedIds = markService.allMarked(kind: .owned, entity: .song)
+        kamisabiCompletion = try? await songReading.kamisabiCompletion(brandId: kamisabiBrandId, ownedSongIds: ownedIds)
     }
 
     /// 担当アイドルが原唱に絡む曲の song_id 集合。担当未設定なら空集合。

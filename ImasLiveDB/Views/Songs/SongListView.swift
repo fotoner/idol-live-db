@@ -89,8 +89,10 @@ struct SongListView: View {
     @AppStorage("songs_show_other_brand") private var showOtherBrand = false
     /// ライブ履歴のみのファントム曲 (セトリにしか無いカバー等) を一覧から隠す。既定 ON。
     @AppStorage("songs_exclude_live_only") private var excludeLiveOnly = true
-    /// 「KAMISABI収録曲のみ」。判定はコアに渡すだけ (showOtherBrand/excludeLiveOnly と同じ流儀)。
-    @AppStorage("songs_kamisabi_only") private var kamisabiOnly = false
+    /// 「KAMISABI収録曲のみ」。判定はコアに渡すだけ。`showOtherBrand`/`excludeLiveOnly` と違い
+    /// これは「既定の見せ方」ではなく一時的な絞り込みなので `@AppStorage` にしない
+    /// (Android 側もインメモリで再起動すると消える。ここだけ永続化すると挙動が食い違う)。
+    @State private var kamisabiOnly = false
     /// マイマーク絞り込み (担当/お気に入り/メモ)。 旧 MyMarks タブの統合後継。
     @State private var myMarkFilter = SongMyMarkFilter()
     /// コミュニティタグ絞り込み (複数指定可)。選択タグ全てが付いた曲 (AND) に絞る。
@@ -517,23 +519,22 @@ struct SongListView: View {
         .padding(.vertical, DS.sp2)
     }
 
-    private var markService: UserMarkService { UserMarkService.shared }
-
-    /// KAMISABI 収録曲だけに絞り込んでいる間だけ出す「所持 N / M」のコンプ率。
+    /// KAMISABI 収録曲だけに絞り込んでいる間だけ出す所持コンプ。
     ///
-    /// 絞り込み結果 (= 収録曲全体) を母数に、その中でカード所持マークが付いた曲を数える。
-    /// 絞り込んでいないと母数が収録曲以外まで膨らんで「コンプ率」の意味を失うので、
-    /// この絞り込み中にだけ出す。
+    /// **分母は `vm.songs`/`vm.displayedSongs` を数えない。** KAMISABI はブランドごとの
+    /// 別商品 (ML 50 曲 / SideM 50 曲 / シャニ 50 曲) で、150 は「1 商品の収録数」ではない。
+    /// 表示中の一覧 (ブランド/マイマーク/検索語で動く) を分母にすると、絞り込むたびに
+    /// 違う意味の数字になってしまう。分母の規則はコア一本 (`vm.kamisabiCompletion` は
+    /// `SnapshotStore.kamisabiCompletion` の値そのまま) なので、検索語を打って表示行数が
+    /// 減っても分母はブレない — それが正しい挙動 (「収録 50 曲中 7 曲所持」は検索とは無関係)。
     @ViewBuilder
     private var kamisabiCompletionBanner: some View {
-        if kamisabiOnly, listMode == .songs, !vm.isLoading, !vm.songs.isEmpty {
-            let total = vm.songs.count
-            let owned = vm.songs.filter { markService.bool(.owned, entity: .song, id: $0.song.id) }.count
+        if kamisabiOnly, listMode == .songs, !vm.isLoading, let completion = vm.kamisabiCompletion {
             HStack(spacing: 6) {
                 Image(systemName: UserMarkKind.owned.activeIcon)
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink2)
-                Text("\(owned)/\(total) 所持")
+                Text(kamisabiCompletionLabel(completion: completion))
                     .font(.imasCaption.weight(.semibold))
                     .foregroundStyle(DS.ink2)
             }

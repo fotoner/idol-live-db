@@ -203,6 +203,22 @@ extension AppDatabase {
         return results
     }
 
+    /// KAMISABI 収録曲の song_id 列 (core 未ロード時のフォールバック)。
+    ///
+    /// core の `domain::kamisabi_cards::song_indexes` と同じ規則: `has_kamisabi_card` の列
+    /// だけを見て、`brandId` を渡したときは**主ブランド** (`brand_id`) だけで絞る
+    /// (合同曲の `joint_brand_ids` では広げない — カードはどれか 1 商品に入っているもの)。
+    func fetchKamisabiSongIdsAsync(brandId: String?) async throws -> [String] {
+        try await dbQueue.read { db in
+            if let brandId {
+                return try String.fetchAll(
+                    db, sql: "SELECT id FROM songs WHERE has_kamisabi_card = 1 AND brand_id = ?",
+                    arguments: [brandId])
+            }
+            return try String.fetchAll(db, sql: "SELECT id FROM songs WHERE has_kamisabi_card = 1")
+        }
+    }
+
     /// song_id → 全公演での披露回数。並び替えだけでなく、一覧行に数値を出すのにも使う。
     func fetchSongPerformanceCountsAsync() async throws -> [String: Int] {
         try await dbQueue.read { db in try Self.totalSongPerformanceCountMap(db) }

@@ -73,6 +73,16 @@ protocol SongReading: Sendable {
     /// ブランド公式曲の id 集合。
     func brandedSongIds() async throws -> Set<String>
 
+    // MARK: - KAMISABI (音楽カードゲーム)
+
+    /// KAMISABI 収録曲の song_id 列。`brandId` を渡すとその商品だけ、nil なら全商品。
+    func kamisabiSongIds(brandId: String?) async throws -> [String]
+    /// 所持コンプ。**分母の規則はコア一本** (KAMISABI はブランドごとの別商品なので、
+    /// `brandId` が nil のときの合算は「商品の分母」ではないことに注意 — 呼び出し側の
+    /// `KamisabiCompletion` の使い方はコアのドキュメントコメントに従うこと)。
+    /// `ownedSongIds` は `user_marks` がスナップショットに無いための持ち込み引数。
+    func kamisabiCompletion(brandId: String?, ownedSongIds: [String]) async throws -> KamisabiCompletion
+
     // MARK: - コミュニティ構造化 (参考動画。CloudKit 同期のローカルミラー)
 
     /// この曲の参考動画。

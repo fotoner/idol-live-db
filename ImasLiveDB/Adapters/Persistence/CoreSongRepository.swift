@@ -339,6 +339,22 @@ struct CoreSongRepository: SongReading {
         }
     }
 
+    // MARK: - KAMISABI (音楽カードゲーム)
+
+    func kamisabiSongIds(brandId: String?) async throws -> [String] {
+        try await snapshot.withStore(fallbackTo: { try await fallback.kamisabiSongIds(brandId: brandId) }) { store in
+            try store.kamisabiSongIds(brandId: brandId)
+        }
+    }
+
+    /// 分母の規則 (商品ごと / 合算の意味) はコア (`domain/kamisabi_cards.rs`) が持つ。
+    /// ここは `ownedSongIds` (スナップショットに無い user_marks) を渡すだけ。
+    func kamisabiCompletion(brandId: String?, ownedSongIds: [String]) async throws -> KamisabiCompletion {
+        try await snapshot.withStore(fallbackTo: { try await fallback.kamisabiCompletion(brandId: brandId, ownedSongIds: ownedSongIds) }) { store in
+            try store.kamisabiCompletion(brandId: brandId, ownedSongIds: ownedSongIds)
+        }
+    }
+
     // MARK: - コミュニティ構造化 (CloudKit 同期のローカルミラー)
     //
     // 参考動画は **移送しない**。スナップショットが載せていないのは容量の話では
