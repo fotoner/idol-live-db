@@ -351,6 +351,14 @@ struct SongSheetContent: View {
                         .multilineTextAlignment(.center)
                         .lineLimit(2)
                 }
+                // KAMISABI (音楽カードゲーム) 収録曲のときだけ、その札をチップで出す。
+                // 語 (`kamisabiCardLabel()` = 「KAMISABI 収録」) はコアが決めるので手書きしない。
+                // 「楽曲情報」の行 (key: value の並び) にすると値が空になり形が合わないため、
+                // Android (Hero のアクセントチップ) / Web (TagChip) と同じくバッジで出す。
+                if song.hasKamisabiCard {
+                    ImasChip(text: kamisabiCardLabel(), style: .themed, seed: songSeed)
+                        .padding(.top, DS.sp1)
+                }
             }
             .padding(.horizontal, DS.sp5)
 
