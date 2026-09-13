@@ -62,8 +62,12 @@ extension AppDatabase {
         var conditions: [String] = []
         var args: [DatabaseValueConvertible] = []
 
-        // デフォルトではリミックス・別バージョンを除外
-        if !filter.includeRemixes {
+        // デフォルトではリミックス・別バージョンを除外。
+        // ただし KAMISABI 収録曲だけへの絞り込み中は除外しない。収録 150 曲のうち
+        // 1 曲 (ml_welcome_レジェンドデイズver) が派生曲で、ここを除外すると
+        // 母数が 149 に減って「収録曲の一覧」として不正確になる (core の
+        // `filter_song_indexes` の `!kamisabi_only` 条件と揃える)。
+        if !filter.includeRemixes && !filter.kamisabiOnly {
             conditions.append("s.parent_song_id IS NULL")
         }
 

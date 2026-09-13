@@ -533,7 +533,7 @@ struct SongListView: View {
                 Image(systemName: UserMarkKind.owned.activeIcon)
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink2)
-                Text("カード所持 \(owned) / \(total)")
+                Text("\(owned)/\(total) 所持")
                     .font(.imasCaption.weight(.semibold))
                     .foregroundStyle(DS.ink2)
             }
