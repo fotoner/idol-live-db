@@ -38,6 +38,15 @@ final class UserMarkBackup {
     func backup(_ marks: [UserMark]) {
         do {
             let data = try JSONEncoder().encode(Payload(marks: marks, updatedAt: Date().timeIntervalSince1970))
+            // `NSUbiquitousKeyValueStore` の 1 値あたりの上限は 1MB で、超えると `set` は
+            // **無言で失敗する** (戻り値も通知も無い)。KAMISABI で `owned` を曲にも広げたぶん
+            // (1 ユーザー最大 +150 行) 上限に近づき得るので、せめてログに残す。
+            let sizeBytes = data.count
+            if sizeBytes > 900_000 {
+                logger.warning("user_marks backup is \(sizeBytes) bytes for \(marks.count) marks — approaching NSUbiquitousKeyValueStore's 1MB per-value limit, writes may silently fail")
+            } else {
+                logger.debug("user_marks backup: \(sizeBytes) bytes for \(marks.count) marks")
+            }
             store.set(data, forKey: key)
             store.synchronize()
         } catch {

@@ -448,7 +448,9 @@ struct SongSheetContent: View {
     }
 
     /// KAMISABI カード所持トグル。`UserMarkKind.owned` を円盤所有と共有する
-    /// (CloudKit 同期もそのまま乗る)。ON/OFF の判定はここでは持たず、保存済みの値を出すだけ。
+    /// (`user_marks` は端末ローカル唯一データで CloudKit には乗らないが、
+    /// `UserMarkBackup` 経由の iCloud KVS バックアップはそのまま効く)。
+    /// ON/OFF の判定はここでは持たず、保存済みの値を出すだけ。
     @ViewBuilder
     private func kamisabiOwnedAction(_ t: ImasTheme) -> some View {
         let owned = markService.bool(.owned, entity: .song, id: song.id)

@@ -107,7 +107,9 @@ enum UserMarkKind: String, Codable, CaseIterable, Sendable {
         case .attended:  return [.event, .show]
         case .note:      return [.song, .idol, .event, .show]
         case .seat:      return [.show, .event]
-        // 円盤所有と同じ器を KAMISABI カード所持にも使う (CloudKit 同期もそのまま乗る)。
+        // 円盤所有と同じ器を KAMISABI カード所持にも使う。`user_marks` は CloudKit には
+        // 乗らない (端末ローカル唯一データ) が、`UserMarkBackup` 経由の iCloud KVS
+        // バックアップ (機種変・再インストール復元用) はそのまま効く。
         case .owned:     return [.release, .song]
         }
     }
