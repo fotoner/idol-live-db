@@ -383,7 +383,7 @@ struct SongSheetContent: View {
     }
 
     private var isPreviewing: Bool {
-        MusicKitService.shared.isPlaying && MusicKitService.shared.nowPlayingSongId == song.id
+        MusicKitService.shared.isPlaying(songId: song.id)
     }
 
     @ViewBuilder
@@ -411,7 +411,7 @@ struct SongSheetContent: View {
     private func playFull(_ info: MusicKitSongInfo) async {
         if MusicKitService.shared.isPlaying
             && MusicKitService.shared.isFullPlayback
-            && MusicKitService.shared.nowPlayingSongId == song.id {
+            && MusicKitService.shared.isPlaying(songId: song.id) {
             MusicKitService.shared.stop()
             return
         }

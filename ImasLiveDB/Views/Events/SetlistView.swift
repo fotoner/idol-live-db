@@ -704,10 +704,7 @@ struct SetlistView: View {
     /// 全曲プレビューを順番に再生
     private func playAllPreview() async {
         for item in setlist {
-            let info = await MusicKitService.shared.fetchSongInfo(
-                title: item.songTitle,
-                appleMusicId: item.appleMusicId
-            )
+            let info = await MusicKitService.shared.fetchSongInfo(appleMusicId: item.appleMusicId)
             if let previewURL = info?.previewURL {
                 MusicKitService.shared.togglePreview(url: previewURL, songId: item.songId)
                 // プレビューは約30秒、次の曲まで待つ

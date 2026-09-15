@@ -111,7 +111,7 @@ final class DetailSheetViewModel {
             coLimit: Self.coOccurringDisplayCount,
             singerLimit: Self.singerDisplayCount
         )) ?? .empty
-        artworkInfo = await MusicKitService.shared.fetchSongInfo(title: song.title, appleMusicId: song.appleMusicId)
+        artworkInfo = await MusicKitService.shared.fetchSongInfo(appleMusicId: song.appleMusicId)
         await loadServerData(song: song)
     }
 

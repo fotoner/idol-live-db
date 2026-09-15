@@ -18,7 +18,7 @@ struct ArtworkImageView: View {
 
     private var isCurrentlyPlaying: Bool {
         guard let songId else { return false }
-        return MusicKitService.shared.isPlaying && MusicKitService.shared.nowPlayingSongId == songId
+        return MusicKitService.shared.isPlaying(songId: songId)
     }
 
     var body: some View {

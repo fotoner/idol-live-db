@@ -23,6 +23,7 @@ final class AppContainer: Sendable {
 
     /// 楽曲マスタ読み取りの実装。
     let songReading: any SongReading
+    let nowPlayingReading: any NowPlayingReading
 
     /// アイドル(キャスト)マスタ読み取りの実装。
     let idolReading: any IdolReading
@@ -58,6 +59,7 @@ final class AppContainer: Sendable {
         let snapshot = CoreSnapshotManager()
         coreSnapshot = snapshot
         songReading = CoreSongRepository(snapshot: snapshot, fallback: GRDBSongRepository(database: .shared))
+        nowPlayingReading = CoreNowPlayingRepository(snapshot: snapshot)
         idolReading = CoreIdolRepository(snapshot: snapshot, fallback: GRDBIdolRepository(database: .shared))
         brandReading = CoreBrandRepository(snapshot: snapshot, fallback: GRDBBrandRepository(database: .shared))
         unitReading = CoreUnitRepository(snapshot: snapshot, fallback: GRDBUnitRepository(database: .shared))

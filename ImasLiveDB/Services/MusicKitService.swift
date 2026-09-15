@@ -31,6 +31,32 @@ final class MusicKitService {
     private(set) var nowPlayingSongId: String?
     private(set) var isFullPlayback = false
 
+    /// この曲が今このアプリで鳴っているか。
+    ///
+    /// 「`isPlaying` かつ id 一致」という同じ式が 5 画面に写経されていて、
+    /// 曲名 → id の付け替え時に 5 箇所を手で直す羽目になった。突き合わせ方は
+    /// ここ 1 箇所に持つ。
+    func isPlaying(songId: String) -> Bool {
+        isPlaying && nowPlayingSongId == songId
+    }
+
+    /// この曲がフル尺 (Apple Music のカタログ再生) で鳴っているか。
+    func isPlayingFull(songId: String) -> Bool {
+        isPlaying(songId: songId) && isFullPlayback
+    }
+
+    /// 鳴らし方。再生中バーに渡す。
+    var nowPlayingKind: NowPlayingKind { isFullPlayback ? .full : .preview }
+
+    /// 再生状態がひとまとまりで変わったことを表す値。
+    ///
+    /// 3 つのフラグは必ず同時に書き換わる (togglePreview / playFull / stop / pause / resume)
+    /// ので、監視側は 1 つ見れば足りる。`.task(id:)` の鍵にして、バーの引き直しを
+    /// 「状態が変わったとき 1 回」に閉じるために置いている。
+    var playbackKey: String {
+        "\(nowPlayingSongId ?? "-")|\(isPlaying)|\(isFullPlayback)"
+    }
+
     /// LRU キャッシュ（最大500件）
     private let cache: NSCache<NSString, Boxed<MusicKitSongInfo?>> = {
         let c = NSCache<NSString, Boxed<MusicKitSongInfo?>>()
@@ -83,9 +109,10 @@ final class MusicKitService {
 
     /// 楽曲情報取得
     /// DB の `apple_music_id` がある曲のみ MusicKit から info を取得する。
-    /// タイトル検索フォールバックは別曲ヒットの誤検出が多いため撤廃。
+    /// タイトル検索フォールバックは別曲ヒットの誤検出が多いため撤廃。その置き土産で
+    /// `title:` 引数が本体で使われないまま残っていたので落とした (曲名では引き当てない)。
     /// 未登録曲は MusicKit 連携 (アートワーク・プレビュー・Apple Music リンク) を一切表示しない。
-    func fetchSongInfo(title: String, appleMusicId: String? = nil) async -> MusicKitSongInfo? {
+    func fetchSongInfo(appleMusicId: String?) async -> MusicKitSongInfo? {
         guard let appleMusicId, !appleMusicId.isEmpty else { return nil }
         let cacheKey = appleMusicId
         if let boxed = cache.object(forKey: cacheKey as NSString) { return boxed.value }
@@ -96,7 +123,7 @@ final class MusicKitService {
 
     /// プレビュー再生（30秒、誰でも可）
     func togglePreview(url: URL, songId: String) {
-        if isPlaying && nowPlayingSongId == songId {
+        if isPlaying(songId: songId) {
             stop()
         } else {
             stop()
@@ -148,6 +175,37 @@ final class MusicKitService {
         } catch {
             Logger.musickit.error("playback_failed: \(error.localizedDescription)")
         }
+    }
+
+    /// 一時停止。曲は手放さず、音だけ止める。
+    ///
+    /// `stop()` と分けているのは、**再生中バーを残したまま止めたい**から。
+    /// stop は queue ごと解放して `nowPlayingSongId` を nil にするので、
+    /// バーの一時停止ボタンから呼ぶと曲そのものを見失う。
+    func pause() {
+        if isFullPlayback {
+            musicPlayer.pause()
+        } else {
+            player?.pause()
+        }
+        isPlaying = false
+    }
+
+    /// 一時停止からの再開。
+    ///
+    /// 何も鳴らしていないときに呼んでも何も起きない (再生する曲を知らないため)。
+    /// 曲を選び直す経路は `togglePreview` / `playFull` 側。
+    func resume() {
+        guard nowPlayingSongId != nil else { return }
+        if isFullPlayback {
+            // self の musicPlayer を Task に渡すと非 Sendable の送信になる。
+            // playFull と同じく Task の中で shared を取り直す。
+            Task { @MainActor in try? await ApplicationMusicPlayer.shared.play() }
+        } else {
+            guard player != nil else { return }
+            player?.play()
+        }
+        isPlaying = true
     }
 
     /// 停止

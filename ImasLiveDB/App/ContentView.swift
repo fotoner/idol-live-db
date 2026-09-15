@@ -61,32 +61,30 @@ struct ContentView: View {
             // 確定 IA: スケジュール / ライブ / 楽曲 / アイドル / プロデュース。
             // スケジュールがデフォルト着地点。マイ/設定はプロデュース右上の歯車から開く。
             CalendarView()
-                .syncStatusBarInset()
-                .nowPlayingBarInset()
+                .bottomBarsInset()
                 .tabItem { Label("スケジュール", systemImage: "calendar") }
                 .tag(0)
             EventListView()
-                .syncStatusBarInset()
-                .nowPlayingBarInset()
+                .bottomBarsInset()
                 .tabItem { Label("ライブ", systemImage: "music.mic") }
                 .tag(1)
             SongListView()
-                .syncStatusBarInset()
-                .nowPlayingBarInset()
+                .bottomBarsInset()
                 .tabItem { Label("楽曲", systemImage: "music.note.list") }
                 .tag(2)
             IdolListView()
-                .syncStatusBarInset()
-                .nowPlayingBarInset()
+                .bottomBarsInset()
                 .tabItem { Label("アイドル", systemImage: "person.3") }
                 .tag(3)
             ProduceTabView()
-                .syncStatusBarInset()
-                .nowPlayingBarInset()
+                .bottomBarsInset()
                 .tabItem { Label("プロデュース", systemImage: "star.fill") }
                 .tag(4)
         }
         .tint(themeTint)
+        // 再生中バーの引き直し。View ごとに持たせると 5 タブで 5 回引くので、
+        // 状態が変わったとき 1 回だけここで回す。
+        .task(id: MusicKitService.shared.playbackKey) { await NowPlayingModel.shared.refresh() }
         .task {
             AppAnalytics.screen(Self.tabName(selectedTab))
             // 一覧やピッカーは Idol の配列しか持たないので、CV 名は辞書から引く。

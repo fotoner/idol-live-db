@@ -30,8 +30,7 @@ struct FullPlayButton: View {
     }
 
     private var isPlayingFull: Bool {
-        let svc = MusicKitService.shared
-        return svc.isPlaying && svc.isFullPlayback && svc.nowPlayingSongId == songId
+        MusicKitService.shared.isPlayingFull(songId: songId)
     }
 
     private var labelText: String {

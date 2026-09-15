@@ -8,6 +8,15 @@
 /// 項目の区切り。全角スペース込みの中黒。
 pub const PARTS_SEPARATOR: &str = " ・ ";
 
+/// 値として扱える文字列だけを返す。空文字と空白だけの値は無かったことにする。
+///
+/// DB には `NULL` と `''` が混ざっていて、`Option` だけでは「値が無い」を表せない。
+/// 同じ 3 行が `mastery` / `performer_label` / `song_detail_queries` /
+/// `song_list_queries` に別々に書かれていたので、連結規則と一緒にここへ置く。
+pub fn non_empty(v: &Option<String>) -> Option<&str> {
+    v.as_deref().map(str::trim).filter(|s| !s.is_empty())
+}
+
 /// 非 `None` かつ非空の要素を [`PARTS_SEPARATOR`] で繋ぐ。
 ///
 /// 1 つも残らなければ `None` — 呼び出し側は「行ごと出さない」を素直に書ける。

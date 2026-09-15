@@ -28,6 +28,6 @@ struct PreviewPlayButton: View {
     }
 
     private var isCurrentlyPlaying: Bool {
-        MusicKitService.shared.isPlaying && MusicKitService.shared.nowPlayingSongId == songId
+        MusicKitService.shared.isPlaying(songId: songId)
     }
 }

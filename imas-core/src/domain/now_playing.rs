@@ -13,8 +13,15 @@
 //! 「私はアイドル♡ (M@STER VERSION)」は歌唱者の違う 2 録音があり、
 //! 曲名で突き合わせると別バージョンのジャケと名義が出る。
 //! iOS の `MusicKitService` は長らく `nowPlayingTitle: String?` で同一性を見ていた。
+//!
+//! # 材料集めもここでやる
+//!
+//! 曲と原唱者は snapshot にあるので、OS 側に 2 回引かせて詰め替えさせる必要が無い。
+//! `song_id` を 1 つ渡せば 1 枚返る形にしておくと、**1 操作 = 1 FFI 呼び出し**
+//! (docs/ARCHITECTURE.md) が守れて、Android 移植でも同じ手組みを書き直さずに済む。
 
 use crate::domain::performer_label::{performer_label, PerformerNaming};
+use crate::domain::snapshot::Snapshot;
 
 /// 鳴らし方。
 #[derive(uniffi::Enum, Clone, Copy, Debug, PartialEq, Eq)]
@@ -26,190 +33,217 @@ pub enum NowPlayingKind {
     Full,
 }
 
-/// 鳴っている 1 曲の射影。
-///
-/// 曲ごとに FFI を往復させないため、OS 側で 1 回詰めて渡す
-/// (docs/ARCHITECTURE.md の「1 操作 = 1 FFI 呼び出し」)。
-#[derive(uniffi::Record, Clone, Debug)]
-pub struct NowPlayingSong {
-    pub song_id: String,
-    pub title: String,
-    /// 名義の材料。組み立ては [`performer_label`] が唯一の出どころ。
-    pub naming: PerformerNaming,
-    pub artwork_url: Option<String>,
-}
-
 /// バーに出す 1 枚ぶん。これをそのまま描く。
 ///
 /// OS 側に `if` を持たせないため、**出す文字はすべてここで確定させる**。
+/// 出さないものは `None` で返す ([`crate::domain::display_join::join_parts`] と同じ約束)
+/// ので、OS 側は「空文字かどうか」を判定しなくてよい。
 #[derive(uniffi::Record, Clone, Debug, PartialEq)]
 pub struct NowPlayingBar {
     /// タップしたときに開く曲。
     pub song_id: String,
     /// 1 行目。
     pub title: String,
-    /// 2 行目。名義。出せるものが無ければ空文字 (その場合 OS 側は行を描かない)。
-    pub subtitle: String,
+    /// 2 行目の名義。出せるものが無ければ `None`。
+    pub subtitle: Option<String>,
+    /// 試聴中に名義へ添える印。フル尺なら `None`。
+    ///
+    /// 名義と繋げた 1 本の文字列にしないのは、2 行目が 1 行に収まらないとき
+    /// **末尾のこれだけが真っ先に消える**から。伝えたいのは「30 秒で終わる」の方なので、
+    /// OS 側が別の `Text` として優先度を付けられるように分けて返す。
+    pub preview_mark: Option<String>,
     pub artwork_url: Option<String>,
     /// 再生ボタンの向き。false なら「再生」、true なら「一時停止」を出す。
     pub is_playing: bool,
-    /// 試聴中か。バーの見た目は変えず、印を 1 つ足すだけに使う。
-    pub is_preview: bool,
 }
 
-/// 試聴中であることを名義に添える語。
-///
-/// 2 行目に混ぜるのは、Apple Music と同じ「ジャケ + 2 行 + ボタン」の形を崩さずに
-/// 「これは 30 秒で終わる」を伝えられる唯一の場所だから。バッジを足すと形が変わる。
-const PREVIEW_SUFFIX: &str = "試聴";
+/// 試聴中であることを示す語。
+const PREVIEW_MARK: &str = "試聴";
 
-/// 名義と試聴の印をつないで 2 行目にする。
-const SUBTITLE_SEPARATOR: &str = " · ";
-
-/// バーに出す内容。鳴っていなければ `None` = バーごと出さない。
+/// バーに出す内容。鳴らす曲を知らなければ `None` = バーごと出さない。
 ///
 /// 「止めたら消す」ではなく **「鳴らすものが無ければ消す」**。一時停止では
-/// `song` が残るのでバーも残り、再生ボタンだけが向きを変える (Apple Music と同じ)。
+/// `song_id` が残るのでバーも残り、再生ボタンだけが向きを変える (Apple Music と同じ)。
 pub fn now_playing_bar(
-    song: Option<NowPlayingSong>,
+    snap: &Snapshot,
+    song_id: &str,
     kind: NowPlayingKind,
     is_playing: bool,
 ) -> Option<NowPlayingBar> {
-    let song = song?;
-    let is_preview = kind == NowPlayingKind::Preview;
-    let label = performer_label(&song.naming);
-
-    let subtitle = match (label.is_empty(), is_preview) {
-        (true, true) => PREVIEW_SUFFIX.to_string(),
-        (true, false) => String::new(),
-        (false, true) => format!("{label}{SUBTITLE_SEPARATOR}{PREVIEW_SUFFIX}"),
-        (false, false) => label,
-    };
-
-    Some(NowPlayingBar {
-        song_id: song.song_id,
-        title: song.title,
-        subtitle,
-        artwork_url: song.artwork_url.filter(|u| !u.trim().is_empty()),
+    let song = snap.song(song_id)?;
+    let performer_names = snap
+        .song_artists(song_id, Some("original"))
+        .iter()
+        .map(|i| i.name.clone())
+        .collect();
+    Some(compose_bar(
+        &song.id,
+        &song.title,
+        &PerformerNaming {
+            unit_name: song.unit_name.clone(),
+            singer_label: song.singer_label.clone(),
+            performer_names,
+        },
+        song.artwork_url.as_deref(),
+        kind,
         is_playing,
-        is_preview,
-    })
+    ))
+}
+
+/// 材料が揃ったあとの組み立て。snapshot に触らないので、判断だけを試せる。
+fn compose_bar(
+    song_id: &str,
+    title: &str,
+    naming: &PerformerNaming,
+    artwork_url: Option<&str>,
+    kind: NowPlayingKind,
+    is_playing: bool,
+) -> NowPlayingBar {
+    NowPlayingBar {
+        song_id: song_id.to_string(),
+        title: title.to_string(),
+        subtitle: performer_label(naming),
+        preview_mark: (kind == NowPlayingKind::Preview).then(|| PREVIEW_MARK.to_string()),
+        // 空文字の URL を掴ませると、OS 側に壊れた画像枠が出る。
+        artwork_url: artwork_url
+            .map(str::trim)
+            .filter(|u| !u.is_empty())
+            .map(str::to_string),
+        is_playing,
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    fn song(title: &str, unit: Option<&str>, performers: &[&str]) -> NowPlayingSong {
-        NowPlayingSong {
-            song_id: "sc_take_ur_time".to_string(),
-            title: title.to_string(),
-            naming: PerformerNaming {
-                unit_name: unit.map(str::to_string),
-                singer_label: None,
-                performer_names: performers.iter().map(|s| s.to_string()).collect(),
-            },
-            artwork_url: Some("https://example.invalid/600x600bb.jpg".to_string()),
+    fn naming(unit: Option<&str>, performers: &[&str]) -> PerformerNaming {
+        PerformerNaming {
+            unit_name: unit.map(str::to_string),
+            singer_label: None,
+            performer_names: performers.iter().map(|s| s.to_string()).collect(),
         }
     }
 
-    #[test]
-    fn nothing_playing_means_no_bar() {
-        assert!(now_playing_bar(None, NowPlayingKind::Full, true).is_none());
-    }
-
-    #[test]
-    fn full_playback_shows_naming_only() {
-        let bar = now_playing_bar(
-            Some(song("Take Ur Time", None, &["八宮めぐる"])),
-            NowPlayingKind::Full,
-            true,
+    fn bar(kind: NowPlayingKind, is_playing: bool) -> NowPlayingBar {
+        compose_bar(
+            "sc_take_ur_time",
+            "Take Ur Time",
+            &naming(None, &["八宮めぐる"]),
+            Some("https://example.invalid/600x600bb.jpg"),
+            kind,
+            is_playing,
         )
-        .unwrap();
-        assert_eq!(bar.title, "Take Ur Time");
-        assert_eq!(bar.subtitle, "八宮めぐる");
-        assert!(!bar.is_preview);
-        assert!(bar.is_playing);
     }
 
-    /// 試聴は黙って終わるので、必ず 2 行目に印が出る。
     #[test]
-    fn preview_is_marked_in_subtitle() {
-        let bar = now_playing_bar(
-            Some(song("Take Ur Time", None, &["八宮めぐる"])),
+    fn full_playback_shows_naming_without_a_mark() {
+        let b = bar(NowPlayingKind::Full, true);
+        assert_eq!(b.title, "Take Ur Time");
+        assert_eq!(b.subtitle.as_deref(), Some("八宮めぐる"));
+        assert_eq!(b.preview_mark, None);
+        assert!(b.is_playing);
+    }
+
+    /// 試聴は黙って終わるので、必ず印が付く。
+    #[test]
+    fn preview_carries_a_mark() {
+        let b = bar(NowPlayingKind::Preview, true);
+        assert_eq!(b.subtitle.as_deref(), Some("八宮めぐる"));
+        assert_eq!(b.preview_mark.as_deref(), Some("試聴"));
+    }
+
+    /// 名義が無い曲でも印だけは出る。名義と繋いでいないので区切りが浮かない。
+    #[test]
+    fn preview_without_naming_still_marks() {
+        let b = compose_bar(
+            "x",
+            "名義なしの曲",
+            &naming(None, &[]),
+            None,
             NowPlayingKind::Preview,
             true,
-        )
-        .unwrap();
-        assert_eq!(bar.subtitle, "八宮めぐる · 試聴");
-        assert!(bar.is_preview);
-    }
-
-    /// 名義が無い曲でも、試聴の印だけは出す (区切りが先頭に出ない)。
-    #[test]
-    fn preview_without_naming_shows_only_the_mark() {
-        let bar = now_playing_bar(
-            Some(song("名義なしの曲", None, &[])),
-            NowPlayingKind::Preview,
-            true,
-        )
-        .unwrap();
-        assert_eq!(bar.subtitle, "試聴");
+        );
+        assert_eq!(b.subtitle, None);
+        assert_eq!(b.preview_mark.as_deref(), Some("試聴"));
     }
 
     #[test]
-    fn nothing_to_show_leaves_subtitle_empty() {
-        let bar = now_playing_bar(
-            Some(song("名義なしの曲", None, &[])),
-            NowPlayingKind::Full,
-            true,
-        )
-        .unwrap();
-        assert_eq!(bar.subtitle, "");
+    fn nothing_to_show_leaves_subtitle_none() {
+        let b = compose_bar("x", "名義なしの曲", &naming(None, &[]), None, NowPlayingKind::Full, true);
+        assert_eq!(b.subtitle, None);
     }
 
-    /// 一時停止でもバーは残る。消えるのは鳴らすものが無くなったときだけ。
+    /// 一時停止でもバーは残る。消えるのは鳴らす曲が無くなったときだけ。
     #[test]
     fn paused_keeps_the_bar() {
-        let bar = now_playing_bar(
-            Some(song("Take Ur Time", None, &["八宮めぐる"])),
-            NowPlayingKind::Full,
-            false,
-        )
-        .unwrap();
-        assert!(!bar.is_playing);
+        assert!(!bar(NowPlayingKind::Full, false).is_playing);
     }
 
     #[test]
     fn unit_name_is_used_for_unit_songs() {
-        let bar = now_playing_bar(
-            Some(song("SOLAR WAY -10 colors-", Some("Team.Sol"), &["八宮めぐる"])),
+        let b = compose_bar(
+            "sc_solar_way",
+            "SOLAR WAY -10 colors-",
+            &naming(Some("Team.Sol"), &["八宮めぐる"]),
+            None,
             NowPlayingKind::Full,
             true,
-        )
-        .unwrap();
-        assert_eq!(bar.subtitle, "Team.Sol");
+        );
+        assert_eq!(b.subtitle.as_deref(), Some("Team.Sol"));
     }
 
-    /// 空のジャケ URL はキーごと無かったことにする。OS 側で
-    /// 「空文字の URL」を掴ませると、壊れた画像枠が出る。
+    /// 空のジャケ URL はキーごと無かったことにする。
     #[test]
     fn blank_artwork_url_becomes_none() {
-        let mut s = song("Take Ur Time", None, &["八宮めぐる"]);
-        s.artwork_url = Some("   ".to_string());
-        let bar = now_playing_bar(Some(s), NowPlayingKind::Full, true).unwrap();
-        assert!(bar.artwork_url.is_none());
-    }
-
-    /// タップで開く先は必ず id で返す。曲名で引き当てさせない。
-    #[test]
-    fn bar_carries_the_song_id() {
-        let bar = now_playing_bar(
-            Some(song("私はアイドル♡ (M@STER VERSION)", None, &["水瀬伊織"])),
+        let b = compose_bar(
+            "x",
+            "曲",
+            &naming(None, &["八宮めぐる"]),
+            Some("   "),
             NowPlayingKind::Full,
             true,
-        )
-        .unwrap();
-        assert_eq!(bar.song_id, "sc_take_ur_time");
+        );
+        assert!(b.artwork_url.is_none());
+    }
+
+    /// タップで開く先は必ず id。曲名で引き当てさせない。
+    #[test]
+    fn bar_carries_the_song_id() {
+        let b = compose_bar(
+            "765as_私はアイドル",
+            "私はアイドル♡ (M@STER VERSION)",
+            &naming(None, &["水瀬伊織"]),
+            None,
+            NowPlayingKind::Full,
+            true,
+        );
+        assert_eq!(b.song_id, "765as_私はアイドル");
+    }
+
+    /// 知らない曲 id を渡してもバーは出ない (曲を消した直後など)。
+    #[test]
+    fn unknown_song_yields_no_bar() {
+        let snap = crate::outbound::sqlite_loader::load_snapshot(&format!(
+            "{}/../ImasLiveDB/Resources/master.sqlite",
+            env!("CARGO_MANIFEST_DIR")
+        ))
+        .expect("bundle DB はロードできる");
+        assert!(now_playing_bar(&snap, "no_such_song", NowPlayingKind::Full, true).is_none());
+    }
+
+    /// 実データで、原唱者しか無い曲でも名義が出ること。
+    #[test]
+    fn real_song_resolves_naming() {
+        let snap = crate::outbound::sqlite_loader::load_snapshot(&format!(
+            "{}/../ImasLiveDB/Resources/master.sqlite",
+            env!("CARGO_MANIFEST_DIR")
+        ))
+        .expect("bundle DB はロードできる");
+        let b = now_playing_bar(&snap, "sc_take_ur_time", NowPlayingKind::Preview, true)
+            .expect("実データに在る曲");
+        assert_eq!(b.title, "Take Ur Time");
+        assert_eq!(b.subtitle.as_deref(), Some("八宮めぐる"));
+        assert_eq!(b.preview_mark.as_deref(), Some("試聴"));
     }
 }
