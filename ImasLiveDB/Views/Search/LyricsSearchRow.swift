@@ -39,7 +39,7 @@ struct LyricsSearchRow: View {
             url: song.artworkUrl.flatMap { URL(string: $0) },
             size: 44,
             previewURL: song.previewUrl.flatMap { URL(string: $0) },
-            songTitle: song.title
+            songTitle: song.title, songId: song.id
         )
     }
 

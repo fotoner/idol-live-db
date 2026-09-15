@@ -3,7 +3,8 @@ import SwiftUI
 
 struct FullPlayButton: View {
     let songInfo: MusicKitSongInfo
-    let title: String
+    /// 再生中判定に使う `songs.id`。曲名では同名別録音を取り違える。
+    let songId: String
 
     @State private var isRequesting = false
 
@@ -30,7 +31,7 @@ struct FullPlayButton: View {
 
     private var isPlayingFull: Bool {
         let svc = MusicKitService.shared
-        return svc.isPlaying && svc.isFullPlayback && svc.nowPlayingTitle == title
+        return svc.isPlaying && svc.isFullPlayback && svc.nowPlayingSongId == songId
     }
 
     private var labelText: String {
@@ -59,6 +60,6 @@ struct FullPlayButton: View {
             await MusicKitService.shared.requestAuthorization()
             guard MusicKitService.shared.hasAppleMusicSubscription else { return }
         }
-        await MusicKitService.shared.playFull(songInfo: songInfo, title: title)
+        await MusicKitService.shared.playFull(songInfo: songInfo, songId: songId)
     }
 }

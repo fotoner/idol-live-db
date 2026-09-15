@@ -98,7 +98,7 @@ struct SongSingerQuizView: View {
             if hint.showArtwork {
                 ArtworkImageView(url: URL(string: song.artworkUrl ?? ""), size: 132,
                                  previewURL: hint.canPreview ? song.previewUrl.flatMap { URL(string: $0) } : nil,
-                                 songTitle: song.title,
+                                 songTitle: song.title, songId: song.id,
                                  seed: answered ? answer.color : nil)
                     .clipShape(RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
             } else {
@@ -153,7 +153,7 @@ struct SongSingerQuizView: View {
                         refreshHint(song)
                     }
                     if let url = song.previewUrl.flatMap({ URL(string: $0) }) {
-                        MusicKitService.shared.togglePreview(url: url, title: song.title)
+                        MusicKitService.shared.togglePreview(url: url, songId: song.id)
                     }
                 }
             }

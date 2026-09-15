@@ -24,7 +24,7 @@ enum SongRowMetric: Equatable {
 ///
 /// 構成: ImasLeadBar(ブランド) + ArtworkImageView(実ジャケ×ソリッドフォールバック, プレビュー対応)
 ///       + 曲名 + [歌唱者 StackedAvatars + ユニット/演者ラベル]
-///       + マイマーク行 (リリース日 / 担当♥ / メモ / 現地回収✓) + ★お気に入りトグル。
+///       + マイマーク行 (リリース日 / 担当♥ / メモ / 習熟度 / 現地回収✓) + ★お気に入りトグル。
 ///
 /// 実ジャケと「画像なし=ソリッド面+曲名」が同列で違和感なく並ぶよう、ArtworkImageView に
 /// ブランド色 seed を渡してフォールバックをテーマ色で表現する。
@@ -38,6 +38,10 @@ struct SongRowView: View {
     var isMyPick: Bool = false
     /// メモがある
     var hasNote: Bool = false
+    /// 習熟度の段階 (0 = 未設定)。付いているときだけ行に小さく出す。
+    /// 更新したのが分からないと連続で付けていく作業が成立しないので、
+    /// スワイプで変えたら**その場で**行に出る値も変わるようにしている。
+    var masteryLevel: UInt8 = 0
     /// 現地回収バッジをタップしたとき (楽曲詳細の披露履歴へ飛ばす導線)。
     var onCollectedTap: (() -> Void)? = nil
     /// タグ絞り込み中、その曲に付いたタグ票数。nil で非表示。
@@ -103,7 +107,7 @@ struct SongRowView: View {
                 url: artworkURL,
                 size: 50,
                 previewURL: previewURL,
-                songTitle: song.title,
+                songTitle: song.title, songId: song.id,
                 seed: brandHex
             )
 
@@ -267,6 +271,9 @@ struct SongRowView: View {
                         .font(.imasScaled( 11, weight: .semibold))
                         .foregroundStyle(DS.warning)
                 }
+                if masteryLevel > 0 {
+                    MasteryChip(level: masteryLevel, scale: UserMarkService.shared.scale)
+                }
                 if let metric {
                     metricBadge(metric)
                 }
@@ -290,7 +297,7 @@ struct SongRowView: View {
 
     private var hasAnyMark: Bool {
         song.releaseDate != nil || isMyPick || hasNote || (collectedCount ?? 0) > 0
-            || metric != nil
+            || metric != nil || masteryLevel > 0
     }
 
     /// 並び順の根拠 (披露回数 / 回収率)。

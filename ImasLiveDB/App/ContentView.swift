@@ -62,22 +62,27 @@ struct ContentView: View {
             // スケジュールがデフォルト着地点。マイ/設定はプロデュース右上の歯車から開く。
             CalendarView()
                 .syncStatusBarInset()
+                .nowPlayingBarInset()
                 .tabItem { Label("スケジュール", systemImage: "calendar") }
                 .tag(0)
             EventListView()
                 .syncStatusBarInset()
+                .nowPlayingBarInset()
                 .tabItem { Label("ライブ", systemImage: "music.mic") }
                 .tag(1)
             SongListView()
                 .syncStatusBarInset()
+                .nowPlayingBarInset()
                 .tabItem { Label("楽曲", systemImage: "music.note.list") }
                 .tag(2)
             IdolListView()
                 .syncStatusBarInset()
+                .nowPlayingBarInset()
                 .tabItem { Label("アイドル", systemImage: "person.3") }
                 .tag(3)
             ProduceTabView()
                 .syncStatusBarInset()
+                .nowPlayingBarInset()
                 .tabItem { Label("プロデュース", systemImage: "star.fill") }
                 .tag(4)
         }

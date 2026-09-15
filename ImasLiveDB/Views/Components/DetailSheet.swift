@@ -329,7 +329,7 @@ struct SongSheetContent: View {
                 url: vm.artworkInfo?.artworkURL,
                 size: 168,
                 previewURL: vm.artworkInfo?.previewURL,
-                songTitle: song.title,
+                songTitle: song.title, songId: song.id,
                 seed: songSeed
             )
 
@@ -383,7 +383,7 @@ struct SongSheetContent: View {
     }
 
     private var isPreviewing: Bool {
-        MusicKitService.shared.isPlaying && MusicKitService.shared.nowPlayingTitle == song.title
+        MusicKitService.shared.isPlaying && MusicKitService.shared.nowPlayingSongId == song.id
     }
 
     @ViewBuilder
@@ -393,7 +393,7 @@ struct SongSheetContent: View {
             if let info = vm.artworkInfo, info.musicKitId != nil {
                 Task { await playFull(info) }
             } else if let previewURL = vm.artworkInfo?.previewURL {
-                MusicKitService.shared.togglePreview(url: previewURL, title: song.title)
+                MusicKitService.shared.togglePreview(url: previewURL, songId: song.id)
             }
         } label: {
             Label(isPreviewing ? "停止" : "再生", systemImage: isPreviewing ? "stop.fill" : "play.fill")
@@ -411,7 +411,7 @@ struct SongSheetContent: View {
     private func playFull(_ info: MusicKitSongInfo) async {
         if MusicKitService.shared.isPlaying
             && MusicKitService.shared.isFullPlayback
-            && MusicKitService.shared.nowPlayingTitle == song.title {
+            && MusicKitService.shared.nowPlayingSongId == song.id {
             MusicKitService.shared.stop()
             return
         }
@@ -420,12 +420,12 @@ struct SongSheetContent: View {
             guard MusicKitService.shared.hasAppleMusicSubscription else {
                 // サブスク無しは fallback でプレビュー再生。
                 if let previewURL = info.previewURL {
-                    MusicKitService.shared.togglePreview(url: previewURL, title: song.title)
+                    MusicKitService.shared.togglePreview(url: previewURL, songId: song.id)
                 }
                 return
             }
         }
-        await MusicKitService.shared.playFull(songInfo: info, title: song.title)
+        await MusicKitService.shared.playFull(songInfo: info, songId: song.id)
     }
 
     @ViewBuilder

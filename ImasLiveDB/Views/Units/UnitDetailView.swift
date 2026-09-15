@@ -191,7 +191,7 @@ struct UnitDetailView: View {
         return Button(action: action) {
             HStack(spacing: DS.sp3) {
                 ImasLeadBar(seed: nil, brand: brandColor)
-                ArtworkImageView(url: artURL, size: 44, previewURL: prevURL, songTitle: song.title, seed: brandColor)
+                ArtworkImageView(url: artURL, size: 44, previewURL: prevURL, songTitle: song.title, songId: song.id, seed: brandColor)
                 VStack(alignment: .leading, spacing: DS.sp2) {
                     Text(song.title)
                         .font(.imasBody.weight(.semibold))

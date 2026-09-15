@@ -413,7 +413,7 @@ struct SetlistPredictionView: View {
         for prediction in targets {
             guard let previewUrlStr = prediction.previewUrl,
                   let previewURL = URL(string: previewUrlStr) else { continue }
-            MusicKitService.shared.togglePreview(url: previewURL, title: prediction.songTitle)
+            MusicKitService.shared.togglePreview(url: previewURL, songId: prediction.songId)
             try? await Task.sleep(for: .seconds(32))
             if !MusicKitService.shared.isPlaying { break }
         }
@@ -456,7 +456,7 @@ private struct PredictionRowView: View {
                     url: artworkURL,
                     size: 44,
                     previewURL: previewURL,
-                    songTitle: prediction.songTitle,
+                    songTitle: prediction.songTitle, songId: prediction.songId,
                     seed: seed
                 )
 

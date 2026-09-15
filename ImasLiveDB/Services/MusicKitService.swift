@@ -23,7 +23,12 @@ final class MusicKitService {
     private(set) var authorizationStatus: MusicAuthorization.Status = .notDetermined
     private(set) var hasAppleMusicSubscription: Bool = false
     private(set) var isPlaying = false
-    private(set) var nowPlayingTitle: String?
+    /// 鳴っている曲の `songs.id`。
+    ///
+    /// **曲名で持ってはいけない。** 「私はアイドル♡ (M@STER VERSION)」のように
+    /// 同名で歌唱者の違う録音が実在するので、曲名で同一性を見ると別バージョンの
+    /// ジャケと名義が出る。再生中バーの引き当てもここを使う。
+    private(set) var nowPlayingSongId: String?
     private(set) var isFullPlayback = false
 
     /// LRU キャッシュ（最大500件）
@@ -90,8 +95,8 @@ final class MusicKitService {
     // MARK: - Playback
 
     /// プレビュー再生（30秒、誰でも可）
-    func togglePreview(url: URL, title: String) {
-        if isPlaying && nowPlayingTitle == title {
+    func togglePreview(url: URL, songId: String) {
+        if isPlaying && nowPlayingSongId == songId {
             stop()
         } else {
             stop()
@@ -116,12 +121,12 @@ final class MusicKitService {
             player?.play()
             isPlaying = true
             isFullPlayback = false
-            nowPlayingTitle = title
+            nowPlayingSongId = songId
         }
     }
 
     /// フル再生（Apple Musicサブスクユーザーのみ）
-    nonisolated func playFull(songInfo: MusicKitSongInfo, title: String) async {
+    nonisolated func playFull(songInfo: MusicKitSongInfo, songId: String) async {
         guard let musicKitId = songInfo.musicKitId else { return }
         await stop()
 
@@ -138,7 +143,7 @@ final class MusicKitService {
             await MainActor.run {
                 self.isPlaying = true
                 self.isFullPlayback = true
-                self.nowPlayingTitle = title
+                self.nowPlayingSongId = songId
             }
         } catch {
             Logger.musickit.error("playback_failed: \(error.localizedDescription)")
@@ -161,7 +166,7 @@ final class MusicKitService {
         musicPlayer.stop()
         isPlaying = false
         isFullPlayback = false
-        nowPlayingTitle = nil
+        nowPlayingSongId = nil
     }
 
     // MARK: - Search

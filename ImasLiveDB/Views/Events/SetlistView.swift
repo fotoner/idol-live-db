@@ -709,7 +709,7 @@ struct SetlistView: View {
                 appleMusicId: item.appleMusicId
             )
             if let previewURL = info?.previewURL {
-                MusicKitService.shared.togglePreview(url: previewURL, title: item.songTitle)
+                MusicKitService.shared.togglePreview(url: previewURL, songId: item.songId)
                 // プレビューは約30秒、次の曲まで待つ
                 try? await Task.sleep(for: .seconds(32))
                 if !MusicKitService.shared.isPlaying { break } // 手動停止された

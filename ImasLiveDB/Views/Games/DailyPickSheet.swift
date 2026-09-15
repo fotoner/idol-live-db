@@ -129,7 +129,7 @@ struct DailyPickSheet: View {
                 url: URL(string: song.artworkUrl ?? ""),
                 size: 52,
                 previewURL: song.previewUrl.flatMap { URL(string: $0) },
-                songTitle: song.title,
+                songTitle: song.title, songId: song.id,
                 seed: seed
             )
             .clipShape(RoundedRectangle(cornerRadius: DS.rSM, style: .continuous))

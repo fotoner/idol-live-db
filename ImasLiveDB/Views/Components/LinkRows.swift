@@ -71,7 +71,7 @@ struct SongTitleRow: View {
     private var songArtwork: some View {
         let size: CGFloat = 36
         let url = song.artworkUrl.flatMap { URL(string: $0) }
-        return ArtworkImageView(url: url, size: size, previewURL: previewURL, songTitle: song.title)
+        return ArtworkImageView(url: url, size: size, previewURL: previewURL, songTitle: song.title, songId: song.id)
     }
 
     /// タップでプレビュー再生できるよう song.previewUrl を渡す (SongRowView と同じ配線)。

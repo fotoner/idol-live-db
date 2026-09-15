@@ -187,7 +187,7 @@ struct SetlistRowView: View {
                 url: artworkURL,
                 size: 44 * CGFloat(textScale),
                 previewURL: previewURL,
-                songTitle: item.songTitle,
+                songTitle: item.songTitle, songId: item.songId,
                 seed: seed
             )
 

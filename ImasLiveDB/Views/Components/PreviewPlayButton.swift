@@ -3,11 +3,12 @@ import SwiftUI
 /// 30秒プレビュー再生ボタン（アプリ内再生）
 struct PreviewPlayButton: View {
     let url: URL
-    let title: String
+    /// 再生中判定に使う `songs.id`。曲名では同名別録音を取り違える。
+    let songId: String
 
     var body: some View {
         Button {
-            MusicKitService.shared.togglePreview(url: url, title: title)
+            MusicKitService.shared.togglePreview(url: url, songId: songId)
         } label: {
             HStack {
                 Label {
@@ -27,6 +28,6 @@ struct PreviewPlayButton: View {
     }
 
     private var isCurrentlyPlaying: Bool {
-        MusicKitService.shared.isPlaying && MusicKitService.shared.nowPlayingTitle == title
+        MusicKitService.shared.isPlaying && MusicKitService.shared.nowPlayingSongId == songId
     }
 }
