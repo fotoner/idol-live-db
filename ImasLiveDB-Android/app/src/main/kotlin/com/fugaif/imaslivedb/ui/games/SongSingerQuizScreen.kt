@@ -173,7 +173,7 @@ class SongSingerQuizViewModel(app: Application, private val selectedBrandIds: Se
         val song = s.question?.song ?: return
         _uiState.value = withHintState(s.copy(revealed = 2))
         song.previewUrl?.takeIf { it.isNotEmpty() }?.let {
-            AudioPreviewManager.togglePreview(it, song.title)
+            AudioPreviewManager.togglePreview(it, song.id)
         }
     }
 
@@ -311,7 +311,7 @@ private fun SongCard(q: SongQuestion, hintState: SongSingerQuizHintState, answer
             ArtworkImage(
                 url = q.song.artworkUrl, size = 132.dp,
                 previewUrl = if (hintState.canPreview) q.song.previewUrl else null,
-                songTitle = q.song.title
+                songTitle = q.song.title, songId = q.song.id
             )
         } else {
             Box(

@@ -399,13 +399,13 @@ private fun Hero(
         else -> null
     }
     val playbackState by AudioPreviewManager.playbackState.collectAsState()
-    val isPreviewing = playbackState.isPlaying && playbackState.nowPlayingTitle == song.title
+    val isPreviewing = playbackState.isPlaying(song.id)
     Column(
         modifier = Modifier.fillMaxWidth().background(t.heroSurface).padding(top = 16.dp, bottom = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        ArtworkImage(url = song.artworkUrl, size = 168.dp, previewUrl = song.previewUrl, songTitle = song.title)
+        ArtworkImage(url = song.artworkUrl, size = 168.dp, previewUrl = song.previewUrl, songTitle = song.title, songId = song.id)
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(horizontal = 16.dp)) {
             Text(song.title, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = DS.ink,
                 textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
@@ -435,7 +435,7 @@ private fun Hero(
                     .clip(RoundedCornerShape(12.dp))
                     .background(if (canPlay) t.accent else t.accent.copy(alpha = 0.5f))
                     .then(if (canPlay) Modifier.clickable {
-                        AudioPreviewManager.togglePreview(song.previewUrl!!, song.title)
+                        AudioPreviewManager.togglePreview(song.previewUrl!!, song.id)
                     } else Modifier)
                     .padding(vertical = 11.dp),
                 horizontalArrangement = Arrangement.Center,

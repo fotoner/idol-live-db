@@ -176,7 +176,7 @@ class IntroDonGameViewModel(app: Application, private val settings: IntroDonSett
         val url = question.previewUrl
         AudioPreviewManager.stop()
         if (url.isNullOrEmpty()) return
-        AudioPreviewManager.togglePreview(url, question.title)
+        AudioPreviewManager.togglePreview(url, question.id)
         if (isFast) return // 押すまで/次の問題まで流し続ける。自動停止しない。
         playJob = viewModelScope.launch {
             val started = withTimeoutOrNull(3_000) {

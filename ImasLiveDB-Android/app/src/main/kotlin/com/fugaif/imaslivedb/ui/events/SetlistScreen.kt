@@ -772,7 +772,7 @@ private fun SetlistItemRow(
             url = item.artworkUrl,
             size = 44.dp,
             previewUrl = item.previewUrl,
-            songTitle = item.songTitle
+            songTitle = item.songTitle, songId = item.songId
         )
 
         // Content column

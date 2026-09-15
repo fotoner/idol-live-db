@@ -1,6 +1,7 @@
 package com.fugaif.imaslivedb.ui.navigation
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -21,6 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.fugaif.imaslivedb.ui.components.NowPlayingBar
 import com.fugaif.imaslivedb.ui.edit.RecentEditsScreen
 import com.fugaif.imaslivedb.ui.events.EventDetailScreen
 import com.fugaif.imaslivedb.ui.events.EventListScreen
@@ -100,10 +102,18 @@ fun AppNavigation() {
 
     Scaffold(
         bottomBar = {
-            BottomNavBar(
-                currentTab = currentTab,
-                onTabSelected = { currentTab = it }
-            )
+            // 再生中バーはナビゲーションバーの真上。鳴っている間だけ出る。
+            // タップした曲は「楽曲」タブの詳細で開く (どのタブから鳴らしても行き先は同じ)。
+            Column {
+                NowPlayingBar(onSongClick = { songId ->
+                    currentTab = TopLevelTab.Songs
+                    songsNavController.navigate(NavRoutes.SongDetail.createRoute(songId))
+                })
+                BottomNavBar(
+                    currentTab = currentTab,
+                    onTabSelected = { currentTab = it }
+                )
+            }
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {

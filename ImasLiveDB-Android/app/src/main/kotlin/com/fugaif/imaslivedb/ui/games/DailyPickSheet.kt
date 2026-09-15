@@ -174,7 +174,7 @@ fun DailyPickSheet(
                                         url = song.artworkUrl,
                                         size = 52.dp,
                                         previewUrl = song.previewUrl,
-                                        songTitle = song.title
+                                        songTitle = song.title, songId = song.id
                                     )
                                 }
                             )

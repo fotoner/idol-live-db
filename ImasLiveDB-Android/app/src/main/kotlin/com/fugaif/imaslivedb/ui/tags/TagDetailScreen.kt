@@ -157,7 +157,7 @@ fun TagDetailScreen(
                                 TagRankBadge(idx + 1)
                                 if (song != null) {
                                     SongRow(
-                                        title = song.title,
+                                        title = song.title, songId = song.id,
                                         artistNames = song.singerLabel ?: "",
                                         unitName = song.unitName,
                                         artworkUrl = song.artworkUrl,

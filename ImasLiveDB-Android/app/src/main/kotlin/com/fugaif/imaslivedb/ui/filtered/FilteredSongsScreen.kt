@@ -79,7 +79,7 @@ fun FilteredSongsScreen(
                         val song = item.song
                         Column {
                             SongRow(
-                                title = song.title,
+                                title = song.title, songId = song.id,
                                 artistNames = item.artistNames,
                                 unitName = song.unitName,
                                 artworkUrl = song.artworkUrl,

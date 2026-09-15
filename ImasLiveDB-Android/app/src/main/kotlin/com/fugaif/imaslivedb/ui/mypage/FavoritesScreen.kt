@@ -144,7 +144,7 @@ private fun SongsTab(songs: List<Song>, onClick: (String) -> Unit) {
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(vertical = 4.dp)) {
         items(songs, key = { it.id }) { song ->
             SongRow(
-                title = song.title,
+                title = song.title, songId = song.id,
                 artistNames = "",
                 unitName = song.unitName,
                 artworkUrl = song.artworkUrl,

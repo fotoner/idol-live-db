@@ -17,8 +17,23 @@ import kotlinx.coroutines.flow.asStateFlow
 data class PlaybackState(
     val isPlaying: Boolean = false,
     val nowPlayingUrl: String? = null,
-    val nowPlayingTitle: String? = null
-)
+    /**
+     * 鳴っている曲の `songs.id`。
+     *
+     * **曲名で持ってはいけない。**「私はアイドル♡ (M@STER VERSION)」のように
+     * 同名で歌唱者の違う録音が実在するので、曲名で同一性を見ると別バージョンの
+     * ジャケと名義が出る。再生中バーの引き当てもここを使う。
+     */
+    val nowPlayingSongId: String? = null
+) {
+    /**
+     * この曲が今このアプリで鳴っているか。
+     *
+     * 「isPlaying かつ id 一致」という同じ式を画面ごとに書くと、キーを変えるときに
+     * 全部を手で直す羽目になる (iOS で実際に 5 箇所直した)。突き合わせ方はここ 1 つ。
+     */
+    fun isPlaying(songId: String): Boolean = isPlaying && nowPlayingSongId == songId
+}
 
 /**
  * Singleton audio preview manager backed by ExoPlayer (Media3).
@@ -76,13 +91,13 @@ object AudioPreviewManager {
      * - If [url] matches the currently playing track → pause/stop.
      * - Otherwise → start playing the new URL.
      */
-    fun togglePreview(url: String, title: String) {
+    fun togglePreview(url: String, songId: String) {
         val current = _playbackState.value
         if (current.nowPlayingUrl == url && current.isPlaying) {
             stop()
             return
         }
-        playUrl(url, title)
+        playUrl(url, songId)
     }
 
     /** Pause playback without clearing the media item (position is kept, use [resume] to continue). */
@@ -112,14 +127,14 @@ object AudioPreviewManager {
 
     // --- Private helpers ---
 
-    private fun playUrl(url: String, title: String) {
+    private fun playUrl(url: String, songId: String) {
         val exo = player ?: return
         if (!requestAudioFocus()) return
 
         _playbackState.value = PlaybackState(
             isPlaying = false,
             nowPlayingUrl = url,
-            nowPlayingTitle = title
+            nowPlayingSongId = songId
         )
 
         exo.stop()

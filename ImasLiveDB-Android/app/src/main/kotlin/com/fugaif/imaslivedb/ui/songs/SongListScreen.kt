@@ -322,7 +322,7 @@ private fun SongListRow(
     onSongClick: (String) -> Unit
 ) {
     SongRow(
-        title = item.song.title,
+        title = item.song.title, songId = item.song.id,
         artistNames = item.artistNames,
         unitName = item.song.unitName,
         artworkUrl = item.song.artworkUrl,

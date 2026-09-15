@@ -33,7 +33,9 @@ import com.fugaif.imaslivedb.ui.theme.DS
  * @param url       URL of the artwork image (nullable)
  * @param size      Width and height of the square image
  * @param previewUrl If non-null, tapping triggers preview playback via [AudioPreviewManager]
- * @param songTitle  Title used to match the currently playing track
+ * @param songTitle  画像が無いときのフォールバックに出す曲名。**表示専用**
+ * @param songId     再生中の強調と試聴の切り替えに使う `songs.id`。
+ *                   同名で別録音の曲が実在するので、ここを曲名で持つと取り違える
  */
 @Composable
 fun ArtworkImage(
@@ -41,24 +43,23 @@ fun ArtworkImage(
     size: Dp = 50.dp,
     previewUrl: String? = null,
     songTitle: String? = null,
+    songId: String? = null,
     modifier: Modifier = Modifier
 ) {
     val cornerRadius = size * 0.15f
     val shape = RoundedCornerShape(cornerRadius)
 
     val playbackState by AudioPreviewManager.playbackState.collectAsState()
-    val isCurrentlyPlaying = songTitle != null
-        && playbackState.isPlaying
-        && playbackState.nowPlayingTitle == songTitle
+    val isCurrentlyPlaying = songId != null && playbackState.isPlaying(songId)
 
     Box(
         modifier = modifier
             .size(size)
             .clip(shape)
             .then(
-                if (previewUrl != null && songTitle != null) {
+                if (previewUrl != null && songId != null) {
                     Modifier.clickable {
-                        AudioPreviewManager.togglePreview(previewUrl, songTitle)
+                        AudioPreviewManager.togglePreview(previewUrl, songId)
                     }
                 } else Modifier
             ),

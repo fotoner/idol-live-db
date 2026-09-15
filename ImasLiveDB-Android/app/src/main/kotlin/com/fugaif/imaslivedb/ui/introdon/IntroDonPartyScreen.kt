@@ -128,7 +128,7 @@ class IntroDonPartyViewModel(app: Application, private val settings: IntroDonSet
         val url = q.previewUrl
         AudioPreviewManager.stop()
         if (url.isNullOrEmpty()) return
-        AudioPreviewManager.togglePreview(url, q.title)
+        AudioPreviewManager.togglePreview(url, q.id)
         playJob = viewModelScope.launch {
             delay(settings.introDurationMs)
             // 再生が終わっても .playing のまま早押しを受け付ける (本家準拠)。停止のみ行う。

@@ -208,7 +208,7 @@ private fun SongsBody(state: UnitDetailUiState, onSongClick: (String) -> Unit) {
             ImasSectionHeader("楽曲", count = "${state.songs.size}")
             state.songs.forEach { song ->
                 SongRow(
-                    title = song.title, artistNames = song.singerLabel ?: "", unitName = song.unitName,
+                    title = song.title, songId = song.id, artistNames = song.singerLabel ?: "", unitName = song.unitName,
                     artworkUrl = song.artworkUrl, previewUrl = song.previewUrl, brandId = song.brandId,
                     modifier = Modifier.clickable { onSongClick(song.id) }.padding(horizontal = 16.dp)
                 )

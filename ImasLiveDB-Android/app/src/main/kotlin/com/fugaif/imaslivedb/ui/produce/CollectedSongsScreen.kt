@@ -94,7 +94,7 @@ fun CollectedSongsScreen(
                     }
                     items(state.songs, key = { it.id }) { song ->
                         SongRow(
-                            title = song.title,
+                            title = song.title, songId = song.id,
                             artistNames = "",
                             unitName = song.unitName,
                             artworkUrl = song.artworkUrl,
