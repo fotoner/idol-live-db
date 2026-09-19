@@ -516,12 +516,29 @@ fn get_show(snap: &Snapshot, args: &Value) -> Result<Value, ToolError> {
     o.put("setlist_song_count", items.len());
     o.put(
         "setlist",
-        Value::Array(items.iter().map(|&i| setlist_row(snap, i, &cast_ids)).collect()),
+        Value::Array(
+            items
+                .iter()
+                .enumerate()
+                .map(|(rank, &i)| setlist_row(snap, i, rank + 1, &cast_ids))
+                .collect(),
+        ),
     );
     Ok(o.value())
 }
 
-fn setlist_row(snap: &Snapshot, item_index: u32, cast_ids: &BTreeSet<&str>) -> Value {
+/// セトリ 1 行。`position` は**公演内の何曲目か** (1 始まり)。
+///
+/// `setlist_items.position` をそのまま出してはいけない — あれは公演をまたいだ
+/// 通し番号で、実データでは 4 桁・5 桁になる。そのまま読むと「7723 曲目」になる。
+/// 並びは `setlist_items_by_show` が position 昇順に前計算してあるので、
+/// 呼び手が数えた添字をそのまま曲順として使う。
+fn setlist_row(
+    snap: &Snapshot,
+    item_index: u32,
+    position: usize,
+    cast_ids: &BTreeSet<&str>,
+) -> Value {
     let item = &snap.setlist_items[item_index as usize];
     let song = &snap.songs[item.song as usize];
     let performers = &snap.performers_by_item[item_index as usize];
@@ -530,7 +547,7 @@ fn setlist_row(snap: &Snapshot, item_index: u32, cast_ids: &BTreeSet<&str>) -> V
 
     let mut x = Obj::new();
     x.put("id", item.id.as_str());
-    x.put("position", item.position);
+    x.put("position", position);
     x.opt("section", item.section.as_deref());
     x.put("song_id", song.id.as_str());
     x.put("title", song.title.as_str());
@@ -995,12 +1012,12 @@ mod tests {
         assert!(v["cast"].as_array().unwrap().len() > 1);
         let setlist = v["setlist"].as_array().unwrap();
         assert!(!setlist.is_empty(), "セトリが空: {v}");
-        // 曲順は position 昇順で、曲名と song_id が揃っている = そのまま文章にできる。
-        let mut last = 0i64;
+        // 曲順は 1 始まりの連番 = そのまま「N 曲目」と書ける
+        // (生の setlist_items.position は公演をまたぐ通し番号で 4 桁になる)。
+        let mut expected = 0i64;
         for row in setlist {
-            let position = row["position"].as_i64().unwrap();
-            assert!(position >= last, "曲順が崩れている: {row}");
-            last = position;
+            expected += 1;
+            assert_eq!(row["position"].as_i64().unwrap(), expected, "曲順が通し番号のまま: {row}");
             assert!(!row["title"].as_str().unwrap().is_empty());
             assert!(row["song_id"].as_str().unwrap().starts_with(|c: char| c.is_ascii_alphanumeric() || c.is_alphabetic()));
         }
