@@ -263,10 +263,14 @@ struct SetlistRowView: View {
         coverTag != nil || rarityLabel != nil || !unitNames.isEmpty || isFullCast || !performers.isEmpty
     }
 
-    /// カバー種別チップ + 歌唱者 (ユニット / 全員 / アバター) を横一列に。
+    /// カバー種別チップ + 珍しさ + 歌唱者 (ユニット / 全員 / アバター)。
+    ///
+    /// 横一列 (HStack) ではなく回り込み (FlowLayout) にしてある。幅が足りないとき、
+    /// HStack は**札の中の文字を折り返す**ので「1 年 1 か月 / ぶり」と割れて読めなくなる。
+    /// 回り込みなら札ごと次の行に落ちる (札は ideal size で置かれるので中では折れない)。
     @ViewBuilder
     private var metaRow: some View {
-        HStack(alignment: .center, spacing: 6) {
+        FlowLayout(spacing: 6) {
             if let tag = coverTag {
                 ImasTagChip(text: tag.text, kind: tag.kind, seed: seed)
             }
