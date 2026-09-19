@@ -87,3 +87,114 @@ pub fn call_tool(
     }
     Err(ToolError::UnknownTool(name.to_string()))
 }
+
+/// 引数の取り出し。全ツールがここを通ることで、型違いのときの文言が揃う。
+///
+/// LLM は数値を文字列で寄こしたり、配列を 1 個の文字列で寄こしたりする。厳格に
+/// 弾くと会話が 1 往復増えるだけなので、**意味が一意に決まる寄こし方は受ける**
+/// (`"12"` → 12、`"cg"` → `["cg"]`)。曖昧なものだけ `BadArgs` で返す。
+pub mod args {
+    use super::{ToolError, Value};
+
+    /// 文字列。数値・真偽値が来ても綴りに直して受ける。空文字は無いものとして扱う。
+    pub fn str_opt(args: &Value, key: &str) -> Option<String> {
+        match args.get(key) {
+            Some(Value::String(s)) if !s.trim().is_empty() => Some(s.trim().to_string()),
+            Some(Value::Number(n)) => Some(n.to_string()),
+            Some(Value::Bool(b)) => Some(b.to_string()),
+            _ => None,
+        }
+    }
+
+    /// 必須の文字列。
+    pub fn str_req(args: &Value, key: &str) -> Result<String, ToolError> {
+        str_opt(args, key).ok_or_else(|| ToolError::BadArgs(format!("{key} は必須です")))
+    }
+
+    /// 文字列の配列。1 個だけ文字列で来ても 1 要素の配列として受ける。
+    pub fn str_list(args: &Value, key: &str) -> Vec<String> {
+        match args.get(key) {
+            Some(Value::Array(items)) => items
+                .iter()
+                .filter_map(|v| v.as_str().map(|s| s.trim().to_string()))
+                .filter(|s| !s.is_empty())
+                .collect(),
+            Some(Value::String(s)) if !s.trim().is_empty() => vec![s.trim().to_string()],
+            _ => Vec::new(),
+        }
+    }
+
+    /// 上限件数。`max` を超える指定は `max` に丸める (LLM が 10000 と書いても壊れない)。
+    pub fn limit(args: &Value, default: u32, max: u32) -> Result<u32, ToolError> {
+        let Some(v) = args.get("limit") else { return Ok(default) };
+        let n = match v {
+            Value::Number(n) => n.as_u64(),
+            Value::String(s) => s.trim().parse::<u64>().ok(),
+            Value::Null => return Ok(default),
+            _ => None,
+        }
+        .ok_or_else(|| ToolError::BadArgs("limit は 0 以上の整数です".into()))?;
+        Ok(if n == 0 { default } else { (n as u32).min(max) })
+    }
+
+    /// 整数。文字列で来ても受ける。
+    pub fn u32_opt(args: &Value, key: &str) -> Result<Option<u32>, ToolError> {
+        match args.get(key) {
+            None | Some(Value::Null) => Ok(None),
+            Some(Value::Number(n)) => n
+                .as_u64()
+                .map(|n| Some(n as u32))
+                .ok_or_else(|| ToolError::BadArgs(format!("{key} は整数です"))),
+            Some(Value::String(s)) => s
+                .trim()
+                .parse::<u32>()
+                .map(Some)
+                .map_err(|_| ToolError::BadArgs(format!("{key} は整数です"))),
+            _ => Err(ToolError::BadArgs(format!("{key} は整数です"))),
+        }
+    }
+
+    /// 真偽値。`"true"` / `"1"` のような寄こし方も受ける。
+    pub fn bool_or(args: &Value, key: &str, default: bool) -> bool {
+        match args.get(key) {
+            Some(Value::Bool(b)) => *b,
+            Some(Value::String(s)) => matches!(s.trim(), "true" | "1" | "yes"),
+            Some(Value::Number(n)) => n.as_u64().is_some_and(|n| n != 0),
+            _ => default,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn 数値を文字列で寄こしても受ける() {
+        let a = json!({"limit": "25", "month": "7"});
+        assert_eq!(args::limit(&a, 20, 100).unwrap(), 25);
+        assert_eq!(args::u32_opt(&a, "month").unwrap(), Some(7));
+    }
+
+    #[test]
+    fn limit_は上限で丸める_0_は既定に戻す() {
+        assert_eq!(args::limit(&json!({"limit": 10000}), 20, 100).unwrap(), 100);
+        assert_eq!(args::limit(&json!({"limit": 0}), 20, 100).unwrap(), 20);
+        assert_eq!(args::limit(&json!({}), 20, 100).unwrap(), 20);
+    }
+
+    #[test]
+    fn 配列を1個の文字列で寄こしても受ける() {
+        assert_eq!(args::str_list(&json!({"brands": "cg"}), "brands"), vec!["cg"]);
+        assert_eq!(args::str_list(&json!({"brands": ["cg", " ml "]}), "brands"), vec!["cg", "ml"]);
+        assert!(args::str_list(&json!({}), "brands").is_empty());
+    }
+
+    #[test]
+    fn 知らないツール名は_unknown_tool() {
+        let snap = crate::domain::snapshot::Snapshot::default();
+        let err = call_tool(&snap, "存在しない", &json!({}), "2026-09-19").unwrap_err();
+        assert_eq!(err, ToolError::UnknownTool("存在しない".into()));
+    }
+}
