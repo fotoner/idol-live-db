@@ -106,27 +106,23 @@ fn initialize_result(params: &Value) -> Value {
 
 /// `ToolSpec` を MCP の `tools/list` の形に写す。
 ///
-/// `input_schema` は `ToolSpec` では JSON 文字列で持っている (domain 側が文字列で
-/// 定義しているため) が、MCP はオブジェクトとして埋め込む必要がある。パースに
-/// 失敗したツールは一覧から落として stderr に書く — 1 件の定義ミスで `tools/list`
-/// 全体を壊さないため。
+/// `input_schema` は `ToolSpec` (`domain::agent_tools::tool_schema` 経由) の時点で
+/// すでに `serde_json::Value`。以前はここが JSON 文字列を持っていて、パースに失敗した
+/// ツールを一覧から落として stderr に書く縮退が要った (`lookup` が文字列テンプレートで
+/// スキーマを組んでいて、説明文に `"` が 1 つ入るだけで不正な JSON を作れたため)。
+/// domain 側が最初から妥当な `Value` しか作れない形になった今、この縮退は起こりようが
+/// ないので、ここでは鍵の名前を `inputSchema` に変えて写すだけにする。
 fn tools_list_result(ctx: &Ctx) -> Value {
-    let mut tools = Vec::new();
-    for spec in super::catalog(ctx) {
-        match serde_json::from_str::<Value>(&spec.input_schema) {
-            Ok(schema) => tools.push(json!({
+    let tools: Vec<Value> = super::catalog(ctx)
+        .into_iter()
+        .map(|spec| {
+            json!({
                 "name": spec.name,
                 "description": spec.description,
-                "inputSchema": schema,
-            })),
-            Err(e) => {
-                eprintln!(
-                    "imas-mcp: ツール {} の input_schema が不正な JSON なので tools/list から除外: {e}",
-                    spec.name
-                );
-            }
-        }
-    }
+                "inputSchema": spec.input_schema,
+            })
+        })
+        .collect();
     json!({ "tools": tools })
 }
 

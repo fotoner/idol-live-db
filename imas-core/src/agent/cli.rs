@@ -49,9 +49,7 @@ fn print_tools(ctx: &Ctx, as_json: bool) {
                 json!({
                     "name": s.name,
                     "description": s.description,
-                    // 人の目視用なので、壊れていても落とさずそのまま文字列で見せる。
-                    "input_schema": serde_json::from_str::<Value>(&s.input_schema)
-                        .unwrap_or_else(|_| Value::String(s.input_schema.clone())),
+                    "input_schema": s.input_schema,
                 })
             })
             .collect();

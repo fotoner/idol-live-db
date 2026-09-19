@@ -165,17 +165,11 @@ pub fn call(
 }
 
 fn spec(name: &str, description: &str, properties: Value, required: &[&str]) -> ToolSpec {
-    let schema = json!({
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "type": "object",
-        "properties": properties,
-        "required": required,
-        "additionalProperties": false,
-    });
     ToolSpec {
         name: name.to_string(),
         description: description.to_string(),
-        input_schema: schema.to_string(),
+        // 封の組み立ては super::tool_schema に集約 (lookup / proposal と共通)。
+        input_schema: super::tool_schema(properties, required),
     }
 }
 
@@ -1129,9 +1123,13 @@ mod tests {
         let all = catalog();
         assert_eq!(all.len(), 7);
         for tool in &all {
-            let schema: Value = serde_json::from_str(&tool.input_schema)
-                .unwrap_or_else(|e| panic!("{} のスキーマが JSON でない: {e}", tool.name));
-            assert_eq!(schema["type"], "object", "{} のスキーマ", tool.name);
+            assert_eq!(tool.input_schema["type"], "object", "{} のスキーマ", tool.name);
+            assert_eq!(
+                tool.input_schema["additionalProperties"],
+                Value::Bool(false),
+                "{} に additionalProperties: false が無い",
+                tool.name
+            );
             assert!(!tool.description.is_empty(), "{} に説明が無い", tool.name);
         }
     }

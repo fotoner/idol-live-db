@@ -39,7 +39,7 @@ use crate::domain::snapshot::Snapshot;
 use crate::domain::song_detail_queries as songs;
 use crate::domain::costume_queries;
 use crate::domain::performer_label::song_performer_label as credited_as;
-use serde_json::Value;
+use serde_json::{json, Value};
 use std::collections::{BTreeMap, BTreeSet};
 
 /// 一覧の既定件数と上限。LLM が 10000 と書いても上限で丸める (`args::limit`)。
@@ -59,21 +59,31 @@ pub fn catalog() -> Vec<ToolSpec> {
              並びは当たり方の強さ順 (完全一致 → 前方一致 → 部分一致) なので、\
              曲名にも人名にもある語 (「未来」) は曲が上位を占める。\
              探している種別が決まっているなら kinds で絞ること (kind_totals に種別ごとの件数が出る)。",
-            r#"{"type":"object","properties":{
-"query":{"type":"string","description":"探す語。アイドル名・声優名・曲名・ライブ名・会場名など"},
-"kinds":{"type":"array","items":{"type":"string","enum":["idol","song","event","show","unit","brand","creator","venue"]},"description":"種別を絞る。省略すると全種別"},
-"limit":{"type":"integer","description":"既定 10・上限 50"}},
-"required":["query"]}"#,
+            super::tool_schema(
+                json!({
+                    "query": { "type": "string", "description": "探す語。アイドル名・声優名・曲名・ライブ名・会場名など" },
+                    "kinds": {
+                        "type": "array",
+                        "items": { "type": "string", "enum": ["idol", "song", "event", "show", "unit", "brand", "creator", "venue"] },
+                        "description": "種別を絞る。省略すると全種別",
+                    },
+                    "limit": { "type": "integer", "description": "既定 10・上限 50" },
+                }),
+                &["query"],
+            ),
         ),
         spec(
             "search",
             "曲 / アイドル / ライブを横断で検索する。アプリの検索欄と同じ当たり方\
              (大文字小文字と ひらがな↔カタカナを畳む部分一致)。\
              どの種別に何件あるかを一度に知りたいときはこちら、id を 1 つ決めたいときは resolve。",
-            r#"{"type":"object","properties":{
-"query":{"type":"string","description":"検索語"},
-"limit":{"type":"integer","description":"種別ごとの件数。既定 10・上限 50 (実際の上限は 20)"}},
-"required":["query"]}"#,
+            super::tool_schema(
+                json!({
+                    "query": { "type": "string", "description": "検索語" },
+                    "limit": { "type": "integer", "description": "種別ごとの件数。既定 10・上限 50 (実際の上限は 20)" },
+                }),
+                &["query"],
+            ),
         ),
         spec(
             "get_idol",
@@ -97,15 +107,13 @@ pub fn catalog() -> Vec<ToolSpec> {
             "get_show",
             "公演 1 本のセットリスト全文 (曲順・セクション・歌唱者・出演者)。\
              id が要る (resolve の kind=show か get_event で得る)。",
-            r#"{"type":"object","properties":{
-"id":{"type":"string","description":"公演 id"}},
-"required":["id"]}"#,
+            super::tool_schema(json!({ "id": { "type": "string", "description": "公演 id" } }), &["id"]),
         ),
         spec(
             "vocabulary",
             "この DB の語彙と規模 (ブランド一覧・song_type と event kind の取りうる値・\
              各表の件数・データ版・収録しているライブの日付範囲)。引数なし。最初に 1 度引くとよい。",
-            r#"{"type":"object","properties":{}}"#,
+            super::tool_schema(json!({}), &[]),
         ),
     ]
 }
@@ -821,23 +829,35 @@ fn non_blank(text: &str) -> Option<&str> {
     (!text.trim().is_empty()).then_some(text)
 }
 
-fn spec(name: &str, description: &str, input_schema: impl Into<String>) -> ToolSpec {
+fn spec(name: &str, description: &str, input_schema: Value) -> ToolSpec {
     ToolSpec {
         name: name.to_string(),
         description: description.to_string(),
-        input_schema: input_schema.into(),
+        input_schema,
     }
 }
 
 /// `id` と名前のどちらでも受けるツールのスキーマ。どちらも必須にしない
 /// (両方必須にすると id を知っている呼び手が名前を捏造する)。
-fn id_or_name_schema(name_key: &str, name_doc: &str) -> String {
-    format!(
-        r#"{{"type":"object","properties":{{
-"id":{{"type":"string","description":"id が分かっているときはこちら"}},
-"{name_key}":{{"type":"string","description":"{name_doc}"}}}},
-"anyOf":[{{"required":["id"]}},{{"required":["{name_key}"]}}]}}"#
-    )
+///
+/// **以前は `format!` で JSON 文字列を直接組んでいた** (RedTeam 指摘)。`name_doc` に
+/// `"` や改行が 1 つ入っただけで不正な JSON になり、`agent::mcp` の `tools/list` が
+/// パースに失敗してこのツールを一覧から黙って落としていた (`dispatch` は名前で直接
+/// 受け付けるので CLI では動き続け、誰も気づけない形だった)。`serde_json::json!` 経由で
+/// 組めば、エスケープは serde_json に任せられるのでこの種の壊れ方がそもそも起こらない。
+fn id_or_name_schema(name_key: &str, name_doc: &str) -> Value {
+    let mut properties = serde_json::Map::new();
+    properties.insert(
+        "id".to_string(),
+        json!({ "type": "string", "description": "id が分かっているときはこちら" }),
+    );
+    properties.insert(name_key.to_string(), json!({ "type": "string", "description": name_doc }));
+
+    // `required: []` (誰も必須にしない) と `anyOf` (id か name_key のどちらかは要る) は
+    // 共存できる。実際の制約は anyOf 側が持つ。
+    let mut schema = super::tool_schema(Value::Object(properties), &[]);
+    schema["anyOf"] = json!([{ "required": ["id"] }, { "required": [name_key] }]);
+    schema
 }
 
 #[cfg(test)]
@@ -880,9 +900,32 @@ mod tests {
         );
         for tool in catalog() {
             assert!(!tool.description.is_empty(), "{} に説明が無い", tool.name);
-            serde_json::from_str::<Value>(&tool.input_schema)
-                .unwrap_or_else(|e| panic!("{} のスキーマが JSON でない: {e}", tool.name));
+            assert_eq!(tool.input_schema["type"], "object", "{} のスキーマ", tool.name);
+            assert_eq!(
+                tool.input_schema["additionalProperties"],
+                Value::Bool(false),
+                "{} に additionalProperties: false が無い",
+                tool.name
+            );
         }
+    }
+
+    /// `id_or_name_schema` が以前 `format!` で JSON 文字列を組んでいたときの回帰確認。
+    /// 説明文に `"` や改行が入っても (実際の呼び出しは全部固定文字列だが、将来ここを
+    /// 動的な文言に変えても) 壊れた JSON を作らないことを固定する。
+    #[test]
+    fn id_or_name_schema_は特殊文字を含む説明でも妥当な_json_を組む() {
+        let schema = id_or_name_schema("name", "改行\nと \"引用符\" を含む説明");
+        assert_eq!(schema["type"], "object");
+        assert_eq!(schema["additionalProperties"], Value::Bool(false));
+        assert!(schema["properties"]["name"]["description"]
+            .as_str()
+            .unwrap()
+            .contains('"'));
+        assert_eq!(
+            schema["anyOf"],
+            json!([{ "required": ["id"] }, { "required": ["name"] }])
+        );
     }
 
     /// 返った JSON だけで「春日未来は何者か」が書けること。

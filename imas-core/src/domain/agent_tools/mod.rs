@@ -20,7 +20,7 @@ pub mod browse;
 pub mod lookup;
 
 use crate::domain::snapshot::Snapshot;
-use serde_json::Value;
+use serde_json::{json, Value};
 
 /// ツール 1 件の定義。MCP の `tools/list` にも CLI の `--help` にもこれを使う。
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -29,8 +29,11 @@ pub struct ToolSpec {
     pub name: String,
     /// LLM がこれを読んで選ぶ説明。いつ使うか・何が返るかを 1〜3 文で。
     pub description: String,
-    /// 入力の JSON Schema (draft 2020-12) を文字列で持つ。
-    pub input_schema: String,
+    /// 入力の JSON Schema (draft 2020-12)。`tool_schema` を通して組む
+    /// (`serde_json::Value` で持つので、MCP 応答に埋め込むときにパースが要らず、
+    /// 壊れた JSON がそもそも作れない — 以前は `lookup` だけ文字列テンプレートで
+    /// 組んでいて、説明文に `"` や改行が 1 つ入ると不正な JSON になっていた)。
+    pub input_schema: Value,
 }
 
 /// ツール実行の失敗。アダプタはこれを MCP のエラー応答 / CLI の終了コードに写す。
@@ -102,6 +105,29 @@ pub fn call_tool(
         return r;
     }
     Err(ToolError::UnknownTool(name.to_string()))
+}
+
+/// ツール入力スキーマの封を組む。**`lookup` / `browse` / `proposal` の全 20 本がここを通る。**
+///
+/// 以前は `browse` の `spec()` だけがここを自前で組んでいて (`$schema` +
+/// `additionalProperties: false` 付き)、`lookup` は生の JSON 文字列 (`additionalProperties`
+/// 無し、しかも `format!` によるテンプレート組み立て)、`proposal` も `additionalProperties`
+/// 無しだった。同じサーバのツールなのに、引数を打ち間違えたときの挙動が違っていた
+/// (`additionalProperties: false` の 7 本はクライアントのスキーマ検証で弾かれ、
+/// 残り 13 本は黙って無視される)。封の決め事をここ 1 箇所に寄せて、全ツールで揃える。
+///
+/// `required` は「この鍵とこの鍵は必須」という通常のツール向け。id/name のどちらか
+/// (排他必須) が要るツール (`lookup::id_or_name_schema`) は `required: &[]` を渡した後、
+/// 呼び手が `anyOf` を自分で足す — 空の `required: []` と `anyOf` は共存できる
+/// (前者は自明に満たされ、実際の制約は `anyOf` が持つ)。
+pub fn tool_schema(properties: Value, required: &[&str]) -> Value {
+    json!({
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": properties,
+        "required": required,
+        "additionalProperties": false,
+    })
 }
 
 /// 応答 (JSON) を組む道具。**`lookup` も `browse` もここを通す。**
@@ -722,5 +748,35 @@ mod tests {
         let snap = crate::domain::snapshot::Snapshot::default();
         let err = call_tool(&snap, "存在しない", &json!({}), "2026-09-19").unwrap_err();
         assert_eq!(err, ToolError::UnknownTool("存在しない".into()));
+    }
+
+    /// 読み取り 14 本 + 書き込み 6 本、計 20 本すべてで封 (`tool_schema` の出力) が
+    /// 揃っていることを固定する。以前は `additionalProperties: false` が browse の
+    /// 7 本にしか付いておらず、残り 13 本は引数を打ち間違えても黙って無視されていた
+    /// (レビュー指摘)。ここで 1 本でも漏れたら壊れるようにする。
+    #[test]
+    fn 全20本のツールでスキーマの封が揃っている() {
+        let mut all = tool_catalog();
+        all.extend(crate::domain::proposal::proposal_catalog());
+        assert_eq!(all.len(), 20, "ツール数が変わった (この数を変えたら意図的か確認すること)");
+
+        let mut names: Vec<&str> = all.iter().map(|s| s.name.as_str()).collect();
+        names.sort();
+        names.dedup();
+        assert_eq!(names.len(), all.len(), "ツール名が重複している");
+
+        for spec in &all {
+            assert!(!spec.description.is_empty(), "{} に説明が無い", spec.name);
+            let schema = &spec.input_schema;
+            assert_eq!(schema["type"], "object", "{} の type", spec.name);
+            assert!(schema["properties"].is_object(), "{} の properties", spec.name);
+            assert!(schema["$schema"].is_string(), "{} に $schema が無い", spec.name);
+            assert_eq!(
+                schema["additionalProperties"],
+                Value::Bool(false),
+                "{} に additionalProperties: false が無い",
+                spec.name
+            );
+        }
     }
 }

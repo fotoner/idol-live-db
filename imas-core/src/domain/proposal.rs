@@ -24,7 +24,7 @@
 //! 「未知の列」判定 (songs は許すが idols/events は許さない、等) を一切気にしなくて済む
 //! 形にしてある。
 
-use crate::domain::agent_tools::args;
+use crate::domain::agent_tools::{args, tool_schema};
 pub use crate::domain::agent_tools::{ToolError, ToolSpec};
 use serde_json::{json, Value};
 
@@ -160,9 +160,8 @@ pub fn proposal_catalog() -> Vec<ToolSpec> {
                 必須。apple_music_id を入れるなら artwork_url も入れること。\
                 反映 (--apply --push) にはオーナーの操作が別途必要で、ここでは実行しない。"
                 .to_string(),
-            input_schema: json!({
-                "type": "object",
-                "properties": {
+            input_schema: tool_schema(
+                json!({
                     "id": {
                         "type": "string",
                         "description": "曲の id。規則: {brand_id}_{タイトルのsnake_case} \
@@ -201,13 +200,9 @@ pub fn proposal_catalog() -> Vec<ToolSpec> {
                         "description": "source の該当箇所の逐語引用。必須。\
                             URL だけでは人間が中身の裏付けを確認できないため。",
                     },
-                },
-                "required": [
-                    "id", "title", "brand_id", "song_type", "original_singers",
-                    "source", "source_quote",
-                ],
-            })
-            .to_string(),
+                }),
+                &["id", "title", "brand_id", "song_type", "original_singers", "source", "source_quote"],
+            ),
         },
         ToolSpec {
             name: "propose_event".to_string(),
@@ -216,9 +211,8 @@ pub fn proposal_catalog() -> Vec<ToolSpec> {
                 shows (公演) を添える。source/source_quote が必須。\
                 反映にはオーナーの操作が別途必要で、ここでは実行しない。"
                 .to_string(),
-            input_schema: json!({
-                "type": "object",
-                "properties": {
+            input_schema: tool_schema(
+                json!({
                     "id": { "type": "string", "description": "event id。規則: ev_{slug}" },
                     "brand_id": { "type": "string", "enum": BRAND_IDS },
                     "name": { "type": "string", "description": "イベント名" },
@@ -253,10 +247,9 @@ pub fn proposal_catalog() -> Vec<ToolSpec> {
                         "type": "string",
                         "description": "source の該当箇所の逐語引用。必須。",
                     },
-                },
-                "required": ["id", "brand_id", "name", "kind", "shows", "source", "source_quote"],
-            })
-            .to_string(),
+                }),
+                &["id", "brand_id", "name", "kind", "shows", "source", "source_quote"],
+            ),
         },
         ToolSpec {
             name: "propose_setlist".to_string(),
@@ -265,9 +258,8 @@ pub fn proposal_catalog() -> Vec<ToolSpec> {
                 (brand 内一意なら解決できる) のどちらかで指定する。source/source_quote が \
                 必須。反映にはオーナーの操作が別途必要で、ここでは実行しない。"
                 .to_string(),
-            input_schema: json!({
-                "type": "object",
-                "properties": {
+            input_schema: tool_schema(
+                json!({
                     "show_id": { "type": "string", "description": "対象公演の shows.id" },
                     "all_performers": {
                         "type": "array",
@@ -304,10 +296,9 @@ pub fn proposal_catalog() -> Vec<ToolSpec> {
                         "type": "string",
                         "description": "source の該当箇所の逐語引用。必須。",
                     },
-                },
-                "required": ["show_id", "songs", "source", "source_quote"],
-            })
-            .to_string(),
+                }),
+                &["show_id", "songs", "source", "source_quote"],
+            ),
         },
         ToolSpec {
             name: "propose_idol".to_string(),
@@ -315,9 +306,8 @@ pub fn proposal_catalog() -> Vec<ToolSpec> {
                 tools/apply_data.py --check で検証する。source/source_quote が必須。\
                 反映にはオーナーの操作が別途必要で、ここでは実行しない。"
                 .to_string(),
-            input_schema: json!({
-                "type": "object",
-                "properties": {
+            input_schema: tool_schema(
+                json!({
                     "id": { "type": "string", "description": "idol id。規則: {brand_id}_{name}" },
                     "brand_id": { "type": "string", "enum": BRAND_IDS },
                     "name": { "type": "string" },
@@ -350,10 +340,9 @@ pub fn proposal_catalog() -> Vec<ToolSpec> {
                         "type": "string",
                         "description": "source の該当箇所の逐語引用。必須。",
                     },
-                },
-                "required": ["id", "brand_id", "name", "source", "source_quote"],
-            })
-            .to_string(),
+                }),
+                &["id", "brand_id", "name", "source", "source_quote"],
+            ),
         },
         ToolSpec {
             name: "propose_fix".to_string(),
@@ -362,9 +351,8 @@ pub fn proposal_catalog() -> Vec<ToolSpec> {
                 idols/songs/events/shows/units/brands のいずれか。source/source_quote が \
                 必須。反映にはオーナーの操作が別途必要で、ここでは実行しない。"
                 .to_string(),
-            input_schema: json!({
-                "type": "object",
-                "properties": {
+            input_schema: tool_schema(
+                json!({
                     "table": { "type": "string", "enum": FIX_TABLES },
                     "id": { "type": "string", "description": "対象レコードの id" },
                     "fields": {
@@ -381,10 +369,9 @@ pub fn proposal_catalog() -> Vec<ToolSpec> {
                         "type": "string",
                         "description": "source の該当箇所の逐語引用。必須。",
                     },
-                },
-                "required": ["table", "id", "fields", "source", "source_quote"],
-            })
-            .to_string(),
+                }),
+                &["table", "id", "fields", "source", "source_quote"],
+            ),
         },
         ToolSpec {
             name: "check_proposals".to_string(),
@@ -394,16 +381,15 @@ pub fn proposal_catalog() -> Vec<ToolSpec> {
                 (--only を付けずに一括で回すと、無関係な保留中ファイルの問題まで巻き込んで \
                 LLM が誤認するため、常に --only 付きで回す)。何も書き込まない読み取り専用ツール。"
                 .to_string(),
-            input_schema: json!({
-                "type": "object",
-                "properties": {
+            input_schema: tool_schema(
+                json!({
                     "file": {
                         "type": "string",
                         "description": "検証対象を 1 ファイルに絞るときのファイル名 (省略時は全件を個別に検証)",
                     },
-                },
-            })
-            .to_string(),
+                }),
+                &[],
+            ),
         },
     ]
 }
@@ -1042,10 +1028,13 @@ mod tests {
         names.dedup();
         assert_eq!(names.len(), 6);
         for spec in &catalog {
-            // MCP 側が tools/list でパースするので、必ず妥当な JSON でなければならない。
-            let parsed: Value = serde_json::from_str(&spec.input_schema)
-                .unwrap_or_else(|e| panic!("{} の input_schema が壊れている: {e}", spec.name));
-            assert_eq!(parsed["type"], "object", "{} の schema", spec.name);
+            assert_eq!(spec.input_schema["type"], "object", "{} の schema", spec.name);
+            assert_eq!(
+                spec.input_schema["additionalProperties"],
+                Value::Bool(false),
+                "{} に additionalProperties: false が無い",
+                spec.name
+            );
         }
     }
 
