@@ -2,6 +2,8 @@ package com.fugaif.imaslivedb.ui.events
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import uniffi.imas_core.PerformerNameMode
+import uniffi.imas_core.SetlistRowMetaRecord
 import uniffi.imas_core.ShowCostumeRecord
 import androidx.lifecycle.viewModelScope
 import com.fugaif.imaslivedb.data.model.PerformerRow
@@ -25,7 +27,12 @@ data class SetlistUiState(
     val setlist: List<SetlistRow> = emptyList(),
     val performersByItemId: Map<String, List<PerformerRow>> = emptyMap(),
     /** この公演で着られた衣装 (進行順)。畳み方も並びも共有コアが決めている。 */
-    val costumes: List<ShowCostumeRecord> = emptyList()
+    val costumes: List<ShowCostumeRecord> = emptyList(),
+    /**
+     * setlist_items.id → 行の添え物 (名義・ユニットの札・全員・何回目・いつぶり)。
+     * **中身を決めるのは共有コア。** 画面はキーで引いて出すだけ。
+     */
+    val rowMetaByItemId: Map<String, SetlistRowMetaRecord> = emptyMap()
 ) {
     val sections: List<SetlistSection>
         get() {
@@ -48,7 +55,11 @@ class SetlistViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(SetlistUiState())
     val uiState: StateFlow<SetlistUiState> = _uiState.asStateFlow()
 
-    fun load(context: Context, showId: String) {
+    /**
+     * @param nameMode 歌唱者をどの名前で出すか。**行の添え物の中身が変わる**ので、
+     *   設定が変わったら呼び直すこと (画面側が設定を鍵にした LaunchedEffect で呼ぶ)。
+     */
+    fun load(context: Context, showId: String, nameMode: PerformerNameMode) {
         viewModelScope.launch {
             val module = AppModule.from(context)
             val show = module.eventRepository.fetchShow(showId)
@@ -60,6 +71,8 @@ class SetlistViewModel : ViewModel() {
             // 曲ごとのグループ化と並びは共有コア (showSetlistPerformers) が持つ。
             val performersByItemId = module.eventRepository.fetchPerformersByItem(showId)
             val costumes = module.eventRepository.fetchShowCostumes(showId)
+            // 名義も「いつぶりか」も共有コアが決める。ここは受け取って配るだけ。
+            val rowMeta = module.eventRepository.fetchSetlistRowMeta(showId, nameMode)
 
             _uiState.value = SetlistUiState(
                 isLoading = false,
@@ -67,7 +80,8 @@ class SetlistViewModel : ViewModel() {
                 brandId = brandId,
                 setlist = setlist,
                 performersByItemId = performersByItemId,
-                costumes = costumes
+                costumes = costumes,
+                rowMetaByItemId = rowMeta
             )
         }
     }

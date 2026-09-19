@@ -1,6 +1,7 @@
 package com.fugaif.imaslivedb.ui.events
 
 import android.content.Context
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -52,6 +53,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
@@ -89,6 +91,7 @@ import com.fugaif.imaslivedb.ui.theme.BrandPalette
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import uniffi.imas_core.PerformerNameMode
+import uniffi.imas_core.SetlistRowMetaRecord
 import uniffi.imas_core.ShowCostumeRecord
 import com.fugaif.imaslivedb.ui.theme.brandColor
 import com.fugaif.imaslivedb.ui.theme.displayName
@@ -126,7 +129,12 @@ fun SetlistScreen(
     var venues by remember { mutableStateOf(VenueDirectory.EMPTY) }
     LaunchedEffect(Unit) { venues = module.eventRepository.fetchVenueDirectory() }
 
-    LaunchedEffect(showId) { viewModel.load(context, showId) }
+    // 歌唱者をどの名前で出すか。設定画面と同じ 1 箇所から読む。
+    // **行の添え物 (名義) の中身がこれで変わる**ので、読み込みの鍵に入れて
+    // 設定変更に画面を開き直さずに追従させる。
+    val performerName = AppPreferences.performerName
+
+    LaunchedEffect(showId, performerName) { viewModel.load(context, showId, performerName) }
 
     // シンプル表示は公演をまたいで保持する。「1 枚のスクショに収めたい」人は
     // 次の公演でも同じ見方をするので、画面を離れるたびに戻ると毎回押し直しになる。
@@ -222,8 +230,6 @@ fun SetlistScreen(
             }
         } else {
             val isCharacterLive = uiState.show?.isCharacterLive ?: false
-            // 歌唱者をどの名前で出すか。設定画面と同じ 1 箇所から読む。
-            val performerName = AppPreferences.performerName
             val seedHex = BrandPalette.hex(uiState.brandId)
             LazyColumn(
                 modifier = Modifier
@@ -361,16 +367,13 @@ fun SetlistScreen(
                     section.items.forEachIndexed { index, item ->
                         item(key = item.id) {
                             val performers = uiState.performersByItemId[item.id] ?: emptyList()
+                            val meta = uiState.rowMetaByItemId[item.id]
                             if (simpleMode) {
                                 SetlistSimpleRow(
                                     item = item,
                                     displayNumber = index + 1,
-                                    performerLabel = performerLabel(
-                                        item,
-                                        performers,
-                                        performerName,
-                                        isCharacterLive
-                                    ),
+                                    performerLabel = meta?.performerLabel.orEmpty(),
+                                    rarityLabel = rarityLabel(meta),
                                     brandHex = BrandPalette.hex(item.songBrandId) ?: seedHex,
                                     onClick = { onSongClick(item.songId) }
                                 )
@@ -379,6 +382,8 @@ fun SetlistScreen(
                                     item = item,
                                     displayNumber = index + 1,
                                     performers = performers,
+                                    unitNames = meta?.unitNames.orEmpty(),
+                                    rarityLabel = rarityLabel(meta),
                                     performerName = performerName,
                                     isCharacterLive = isCharacterLive,
                                     showName = uiState.show?.name,
@@ -443,7 +448,7 @@ fun SetlistScreen(
                 onDismiss = { showEditDialog = false },
                 onSaved = {
                     showEditDialog = false
-                    viewModel.load(context, showId)
+                    viewModel.load(context, showId, performerName)
                 }
             )
         }
@@ -489,25 +494,15 @@ private fun toggleLike(
 }
 
 /**
- * シンプル表示の演者ラベル。iOS の `performerLabel` と同じ優先順で決める:
- * ユニット単独曲ならユニット名 → それ以外は名前を「／」で連結。
- * 区切りが全角スラッシュなのは公式のセトリ画像に合わせているため。
+ * 行に添える「珍しさ」。初披露か、1 年以上ぶりの披露のときだけ出す。
  *
- * **名前の決め方はここに書かない。** どちらを出すかは閲覧者の設定で変わるので、
- * 1 人分の解決は imas-core の `performerDisplayName` に任せる
- * (ここが `idolName ?: name` を直に読んでいたせいでアイドル名で固定されていた)。
- *
- * iOS にある「出演者全員なら『全員』」は、その判定に要る show_cast の集合を
- * Android のセトリ画面が読んでいないので出さない (名前が並ぶだけで壊れはしない)。
+ * **どちらの文言も閾値も imas-core が決めている** (`performance_gap`)。
+ * ここは「初披露なら回数の言い方、そうでなければ間隔の言い方」を選ぶだけ。
+ * どちらも無い行では null = 何も足さない (全行に賑やかしを足さないため)。
  */
-private fun performerLabel(
-    item: SetlistRow,
-    performers: List<PerformerRow>,
-    setting: PerformerNameMode,
-    isCharacterLive: Boolean
-): String {
-    item.unitName?.takeIf { it.isNotBlank() }?.let { return it }
-    return performers.joinToString("／") { it.displayName(setting, isCharacterLive).joined() }
+private fun rarityLabel(meta: SetlistRowMetaRecord?): String? {
+    if (meta == null) return null
+    return if (meta.isFirstPerformance) meta.ordinalLabel else meta.sinceLabel
 }
 
 /** シンプル表示のオン/オフを端末に残す。画面をまたいで見方を保つためだけの 1 bit。 */
@@ -680,6 +675,8 @@ private fun SetlistSimpleRow(
     item: SetlistRow,
     displayNumber: Int,
     performerLabel: String,
+    /** 「初披露」「3 年 10 か月ぶり」。珍しくない行では null。文言も閾値もコア。 */
+    rarityLabel: String?,
     brandHex: String?,
     onClick: () -> Unit
 ) {
@@ -709,15 +706,24 @@ private fun SetlistSimpleRow(
                 color = titleColor,
                 maxLines = 2
             )
-            if (performerLabel.isNotEmpty()) {
+            if (performerLabel.isNotEmpty() || rarityLabel != null) {
                 // 公式のセトリ画像に倣って ♪ を頭に置く。演者を横に並べると長い名前で
-                // 曲名が潰れるので下段に置く。
-                Text(
-                    text = "♪ $performerLabel",
-                    fontSize = 11.sp,
-                    color = DS.ink2,
-                    maxLines = 2
-                )
+                // 曲名が潰れるので下段に置く。珍しさは演者の後ろに小さく添える
+                // (シンプル表示は 1 枚に収めるのが目的なので行を増やさない)。
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (performerLabel.isNotEmpty()) {
+                        Text(
+                            text = "♪ $performerLabel",
+                            fontSize = 11.sp,
+                            color = DS.ink2,
+                            maxLines = 2,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+                    }
+                    if (rarityLabel != null) {
+                        Text(text = rarityLabel, fontSize = 11.sp, color = DS.ink3, maxLines = 1)
+                    }
+                }
             }
         }
     }
@@ -729,6 +735,13 @@ private fun SetlistItemRow(
     item: SetlistRow,
     displayNumber: Int,
     performers: List<PerformerRow>,
+    /**
+     * ユニット名の札に出す名前。**どのユニット名を出すかはコアが決める**
+     * (その披露の名義 → 曲の名義 → 顔ぶれ推論)。空なら札を出さない。
+     */
+    unitNames: List<String>,
+    /** 「初披露」「3 年 10 か月ぶり」。珍しくない行では null。 */
+    rarityLabel: String?,
     performerName: PerformerNameMode,
     isCharacterLive: Boolean,
     showName: String?,
@@ -788,18 +801,38 @@ private fun SetlistItemRow(
                 modifier = Modifier.clickable(onClick = onSongClick)
             )
 
-            // Unit name capsule
-            if (item.unitName != null) {
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = DS.sys.copy(alpha = 0.1f)
+            // ユニット名の札 + 珍しさの札。名前も「いつぶりか」もコアが決めた文字列で、
+            // ここは並べるだけ。珍しさは塗りつぶしではなく輪郭だけにして、
+            // ユニット名と競わせない (出るのは 3 行に 1 行ほど)。
+            if (unitNames.isNotEmpty() || rarityLabel != null) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text(
-                        text = item.unitName,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = DS.sys,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                    )
+                    unitNames.forEach { name ->
+                        Surface(shape = RoundedCornerShape(50), color = DS.sys.copy(alpha = 0.1f)) {
+                            Text(
+                                text = name,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = DS.sys,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                    if (rarityLabel != null) {
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = Color.Transparent,
+                            border = BorderStroke(1.dp, DS.ink3)
+                        ) {
+                            Text(
+                                text = rarityLabel,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = DS.ink2,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
                 }
             }
 

@@ -20,6 +20,8 @@ import com.fugaif.imaslivedb.data.model.VenueHall
 import com.fugaif.imaslivedb.data.model.VenueName
 import com.fugaif.imaslivedb.data.model.ShowCast
 import com.fugaif.imaslivedb.data.model.ShowWithEventName
+import uniffi.imas_core.PerformerNameMode
+import uniffi.imas_core.SetlistRowMetaRecord
 import uniffi.imas_core.ShowCostumeRecord
 import uniffi.imas_core.EventDetailRecord
 import uniffi.imas_core.EventListRecord
@@ -301,6 +303,24 @@ class EventRepository(
             .groupBy { it.setlistItemId }
             .mapValues { (_, rows) -> rows.map { it.toPerformerRow() } }
     }
+
+    /**
+     * セトリ 1 行ぶんの添え物 (名義・ユニットの札・全員・何回目・いつぶり)。
+     * 並びは [fetchPerformersByItem] の元と同じセトリ順で、キーは setlist_items.id。
+     *
+     * **名義の決め方 (その披露の名義 → 曲の名義 → 個人名併記 → 顔ぶれ推論 → 名前) も、
+     * 「N 年ぶり」の言い回しもコアが持つ。** 画面で組み立てないこと — iOS にだけ規則を
+     * 書いていた時代に、同じ規則が両 OS で食い違った (imas-core/src/domain/performer_label.rs)。
+     *
+     * スナップショットにしか無い判断なので、Room 経路のフォールバックは空。
+     */
+    suspend fun fetchSetlistRowMeta(
+        showId: String,
+        mode: PerformerNameMode
+    ): Map<String, SetlistRowMetaRecord> =
+        snapshots?.query { store ->
+            store.showSetlistRowMeta(showId, mode).associateBy { it.itemId }
+        } ?: emptyMap()
 
     /**
      * その公演で着られた衣装 (進行順)。記録が無ければ空。
