@@ -97,10 +97,10 @@ pub fn catalog() -> Vec<ToolSpec> {
                     "type": "string",
                     "description": "催しの性格。anniversary (周年・ナンバリング本公演) / orchestra (オケ) / \
                                     external_event (他社の催しへの出演) / birthday (生誕・バースデー) / \
-                                    release_event (発売記念) / mini_live (発売記念でないミニライブ) / \
-                                    broadcast (番組・配信) / live (それ以外の自社公演)。\
+                                    release_event (発売記念) / broadcast (番組・配信) / \
+                                    live (それ以外の自社公演)。\
                                     「AS の周年では」のような絞り込みはこちら。\
-                                    配信かどうかは別の軸なので events.is_streaming を見る。",
+                                    配信があったかは別の軸なので shows.stream_platform を見る。",
                 },
                 "when": { "type": "string", "enum": ["upcoming", "past", "all"], "description": "既定 all。upcoming は近い順、それ以外は新しい順。" },
                 "query": { "type": "string", "description": "ライブ名の部分一致。" },

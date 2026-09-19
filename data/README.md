@@ -49,8 +49,9 @@ master.sqlite → CloudKit に一括反映します（直接 CloudKit に書く�
 - **song_type**: `solo` / `unit` / `all` / `tie_in` / `cover`
 - **event kind**: `live` / `festival` / `release_event` / `radio` / `stream` / `other`
 - **event event_type** (催しの性格): `anniversary` / `orchestra` / `external_event` /
-  `birthday` / `release_event` / `mini_live` / `broadcast` / `live`。
-  配信ライブかどうかは別の軸 (`is_streaming`) なのでここには書かない。
+  `birthday` / `release_event` / `broadcast` / `live`。
+  配信があったかどうかは別の軸 (`shows.stream_platform`) なのでここには書かない。
+  ミニライブのような**形式・規模も軸にしない** (理由は docs/DATA_PIPELINE.md)。
   **名前から決められなければ空のまま**にする
   (「オケマスを除けば」「周年では」の答えが推測で変わるため)。
   意味と優先順位は `docs/DATA_PIPELINE.md` 「events の種別 (event_type)」

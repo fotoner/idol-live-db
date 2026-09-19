@@ -55,9 +55,9 @@ val EVENT_KINDS: List<Pair<String, String>> = listOf(
 fun eventKindLabel(kind: String): String = EVENT_KINDS.firstOrNull { it.first == kind }?.second ?: kind
 
 /**
- * 催しの性格 (events.event_type) の内部値と表示ラベル。iOS `EventType` と同じ 8 種。
+ * 催しの性格 (events.event_type) の内部値と表示ラベル。iOS `EventType` と同じ 7 種。
  *
- * 配信ライブかどうかは**この軸ではない** (events.is_streaming が持つ)。
+ * 配信があったかどうかは**この軸ではない** (shows.stream_platform が持つ)。
  *
  * 「オケマスを除けば 10 年ぶり」「AS の周年では 9th のみ」のような**除外・限定**を
  * 機械で出すための軸。どの催しがどれかを決める規則は imas-core 側にあり
@@ -69,7 +69,6 @@ val EVENT_TYPES: List<Pair<String, String>> = listOf(
     "external_event" to "外部イベント",
     "birthday" to "バースデー",
     "release_event" to "リリイベ",
-    "mini_live" to "ミニライブ",
     "broadcast" to "番組・配信",
     "live" to "ライブ"
 )

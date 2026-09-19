@@ -2855,9 +2855,9 @@
    "table": "events",
    "id": "ev_アイドルマスターシャイニーカラーズ_トークミニライブlight_up_illumination_stars",
    "fields": {
-    "event_type": "mini_live"
+    "event_type": "release_event"
    },
-   "note": "名に発売・リリースの語が無いミニライブ (kind=release_event だが、その根拠が名前に出ていない)"
+   "note": "CD「BRILLI@NT WING 01」の発売記念トーク&ミニライブ (kind=release_event)"
   },
   {
    "table": "events",
@@ -2975,17 +2975,17 @@
    "table": "events",
    "id": "ev_アイドルマスター_シンデレラガールズ_スターライトクルーズ_トークライブ_セカンドシーティング",
    "fields": {
-    "event_type": "live"
+    "event_type": "release_event"
    },
-   "note": "クルーズのファンイベント。同じクルーズの生演奏は kind=live"
+   "note": "kind=release_event"
   },
   {
    "table": "events",
    "id": "ev_アイドルマスター_シンデレラガールズ_スターライトクルーズ_トークライブ_ファーストシーティング",
    "fields": {
-    "event_type": "live"
+    "event_type": "release_event"
    },
-   "note": "クルーズのファンイベント。同じクルーズの生演奏は kind=live"
+   "note": "kind=release_event"
   },
   {
    "table": "events",
@@ -4759,9 +4759,9 @@
    "table": "events",
    "id": "ev_学園アイドルマスターエキスポミニライブ",
    "fields": {
-    "event_type": "mini_live"
+    "event_type": "live"
    },
-   "note": "M@STER EXPO 内のミニライブ。発売に紐づかないので release_event ではない"
+   "note": "M@STER EXPO 内のステージ。他ブランドの同 EXPO 公演は kind=live"
   },
   {
    "table": "events",
@@ -5407,9 +5407,9 @@
    "table": "events",
    "id": "ev_生配信lippsneon_sphere発表ミニライブinクロス新宿ビジョンアイドルマスター",
    "fields": {
-    "event_type": "mini_live"
+    "event_type": "release_event"
    },
-   "note": "街頭ビジョンでの発表ミニライブ。頭の【生配信】は配信の注記で、配信そのものは is_streaming=1 が持つ"
+   "note": "新曲『Neon Sphere』の発表に紐づく催し。頭の【生配信】は配信の注記で、配信そのものは配信の軸 (shows.stream_platform) が持つ"
   },
   {
    "table": "events",

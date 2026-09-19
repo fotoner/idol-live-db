@@ -32,7 +32,7 @@ pub fn event_kind_vocab(snap: &Snapshot) -> Vec<String> {
 }
 
 /// 催しの種別 (`anniversary` / `orchestra` / `external_event` / `birthday` /
-/// `release_event` / `mini_live` / `broadcast` / `live`)。
+/// `release_event` / `broadcast` / `live`)。
 /// 意味は docs/DATA_PIPELINE.md 「events の種別 (event_type)」。
 ///
 /// 未分類のイベントは空文字なので `distinct` が落とす。つまり**語彙に「未分類」は

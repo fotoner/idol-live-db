@@ -1,19 +1,511 @@
 {
- "title": "名前が配信ライブだと言っているのに is_streaming=0 の 2 件",
+ "title": "配信があったのに events.is_streaming=0 の 63 件 (stream_platform 由来 62 + 名前由来 1)",
  "author": "fuga-if",
- "_help": "配信かどうかは event_type と直交する軸なので、event_type ではなくこの列で直す。",
+ "_help": "**このファイルは単独で --apply しないこと。** events.is_streaming を今読んでいる唯一の箇所 (Android の「配信を除く」スイッチ) は、この列を「配信のみのイベント」と解釈して一覧から隠す。ここに並ぶのは幕張メッセや東京ガーデンシアターの現地公演を含むので、先にその読み手を event_type='broadcast' に移してから当てる。手順は docs/DATA_PIPELINE.md 「配信の軸 (stream_platform と is_streaming)」。書いているのは「配信があった」ことだけで、現地開催の有無は判断していない。",
  "fixes": [
   {
    "table": "events",
-   "id": "ev_上水流宇宙_birthday_online_live_2026",
-   "fields": { "is_streaming": 1 },
-   "note": "名が ONLINE LIVE。同じシリーズの 2025 年版 3 件 (灯里愛夏 / 上水流宇宙 / レトラ) は is_streaming=1 で shows.stream_platform も ASOBI STAGE"
+   "id": "ev_283_production_music_scene",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「アイドルマスターチャンネル(YouTube 公式チャンネル)で配信」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_283_production_live_performance_uka_larva1",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「ASOBI STAGE」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_283_production_live_performance_liminalmarginaleternal_never1",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「ASOBI STAGE」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_283_production_xxxx_performance_xxx_sn-gul4r1ty",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「ASOBI STAGE」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_961_production_presents_reflame_remembermoon",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「ASOBI STAGE」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_961_production_presents_reflame_追加公演_reflamedusk",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「ASOBI STAGE」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_life_like_a_live10_第一公演",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「オンライン配信・Z-aN」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_life_like_a_live8_第一公演えるすりー8_第一公演",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「オンライン配信・Z-aN」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_life_like_a_live9_エピソードi第一公演",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「オンライン配信・Z-aN / リアルタイム配信・Z-aN」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_music_scene_special_live",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「アイドルマスターチャンネル(YouTube 公式チャンネル)で配信」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_nhk総合naomiの部屋",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「NHK総合」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_project_ims_vα-liv_live_-the_last_statement-",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(配信:ASOBISTAGE / 会場:？？？)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_sanrio_virtual_festival_2026_215sun",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「Virtual Sanrio Puroland（VRChat）、オンライン配信Lemino、SPWN」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_songs_of_tokyo_festival_2020_part2",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「NHKワールドJAPAN」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_stage_for_cinderella_celebration_night",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「配信番組・YouTube アイドルマスターチャンネル」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_tmrevolutionbandai_namco_entertainmentx_innovative_live",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「ASOBI STAGE」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_tamashii_nation_2022_オープニングセレモニー",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(配信YouTube Live(BANDAI SPIRITS)／会場：東京・MIRAIKEN studio)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_10th_anniversary_mgical_wonderland_tour_tropic",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(配信ASOBISTAGE／会場：千葉・幕張メッセイベントホール)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_broadcast_live_happy_new_yell_",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(配信ASOBISTAGE／会場：千葉・幕張メッセ国際展示場 展示ホール1～3)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_next_live発表会_special_stage_miraiken_studio",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(配信ASOBISTAGE／会場：東京・MIRAIKEN studio)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_season-ir_bright_diamond",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(有料イベントパート配信ASOBISTAGE／会場：東京・MIRAIKEN studio)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_season-ir_clever_clover",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(有料イベントパート配信ASOBISTAGE／会場：東京・MIRAIKEN studio)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_season-ir_shade_of_spade",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(有料イベントパート配信ASOBISTAGE／会場：東京・MIRAIKEN studio)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_season-ir_lovers_heart",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(有料イベントパート配信ASOBISTAGE／会場：東京・MIRAIKEN studio)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_283フェス_2021_happy_buffet",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(配信ASOBISTAGE／会場：東京・MIRAIKEN studio)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_3rdlive_tour_piece_on_planet_tokyo",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(配信ASOBISTAGE／会場：東京・東京ガーデンシアター)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_music_dawn",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(会場:千葉・幕張メッセイベントホール)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_tokyo_idol_festival_2022_0806_sat_supported_by_にしたんクリニック",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「東京・お台場・青海周辺エリア(配信：TIFコミュニティ)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_virtual_music_award_2025",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信・Z-aN」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_virtual_music_award_2025_summer_第五公演",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信・Z-aN」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_vδlzdramatic_stars_collaboration_live_劇的演舞",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「ASOBI STAGE」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_web番組今井麻美と中村繪里子のprestarthe_idolmster_49",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「itv24.com（インターネットTV局・生放送）」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_web番組今井麻美と中村繪里子のprestarスペシャル_アイドルマスターロケテ記念今年もお世話になりましたプリスタープチライブ",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「itv24.com（インターネットTV局・生放送）」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_xbox_live_the_party_26回最終回",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「InterFM（生放送）」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_vortex_core",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信・zaiko(オンライン)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_xr_artists_super_fes_2022",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信・一部事前収録(配信dTV、PIA LIVE STREAM、ASOBISTAGE、Streaming+、Veeps)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_bilibili_world2021上海日本特設会場アイドルマスター特別ステージ",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(配信BiliBili／会場：？？？)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_lyered_wing_02発売記念イベント第一回",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(配信ASOBISTAGE／会場：？？？)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_lyered_wing_03発売記念イベント第一回",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(配信ASOBISTAGE／会場：？？？)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_lyered_wing_04発売記念イベント第一回",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(配信ASOBISTAGE／会場：？？？)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_lyered_wing_05発売記念イベント第一回",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(配信ASOBISTAGE／会場：？？？)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイマスマコトーークアイドルマスターアイのキセキweek",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「アイドルマスターチャンネル(YouTube 公式チャンネル)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズ_9th_anniversary_memorial_party",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_シブヤノオト_and_more_fes2020",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「東京・NHK放送センター(生放送)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_スタマス発売直前アイドルマスター_スターリットシーズン_スペシャルトークステージ",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(スペシャルステージ配信ASOBISTAGE／会場：東京・MIRAIKEN studio)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
   },
   {
    "table": "events",
    "id": "ev_ミリシタ感謝祭_20202021_online",
-   "fields": { "is_streaming": 1 },
-   "note": "名が ONLINE。shows.stream_platform に「リアルタイム配信(ニコニコ生放送、YouTube、Periscope、ミリシタアプリ内)」が入っている"
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「リアルタイム配信(配信：ニコニコ生放送、YouTube、Periscope、ミリシタアプリ内／会場：千葉・森のホール21？)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_倉本千奈_生誕ミニライブ2025",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「アイドルマスターチャンネル(YouTube 公式チャンネル)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_十王星南_生誕ミニライブ2025",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「アイドルマスターチャンネル(YouTube 公式チャンネル)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_如月千早_-_msterpiece_the_first_take",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「THE FIRST TAKE (YouTubeチャンネル)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_如月千早_-_約束_the_first_take",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「THE FIRST TAKE (YouTubeチャンネル)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_如月千早約束アイドルマスター",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「収録ムービーを放送(配信YouTube Live(アイドルマスターチャンネル)／会場：？？？)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_姫崎莉波_生誕ミニライブ2026",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「アイドルマスターチャンネル(YouTube 公式チャンネル)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_初星音楽祭",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「YouTube 初星学園チャンネル」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_月村手毬_生誕ミニライブ2025",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「アイドルマスターチャンネル(YouTube 公式チャンネル)で配信」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_有村麻央_生誕ミニライブ2026",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「アイドルマスターチャンネル(YouTube 公式チャンネル)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_異次元フェス開催記念音楽番組_music_bigbang",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「アイドルマスター公式YouTubeチャンネル「アイマスチャンネル」／ラブライブ！シリーズ公式YouTubeチャンネル」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_秦谷美鈴_生誕ミニライブ2026",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「アイドルマスターチャンネル(YouTube 公式チャンネル)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_篠澤_広_生誕ミニライブ2025",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「アイドルマスターチャンネル(YouTube 公式チャンネル)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_紫雲清夏_生誕ミニライブ2025",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「アイドルマスターチャンネル(YouTube 公式チャンネル)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_菊地_真_萩原_雪歩_twin_live_はんげつであえたら_友藍",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「ASOBI STAGE」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_葛城リーリヤ_生誕ミニライブ2025",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「アイドルマスターチャンネル(YouTube 公式チャンネル)」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_高槻_やよい_水瀬_伊織_twin_live_いつまでもなかよし_えがおだね",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "shows.stream_platform に「ASOBI STAGE」が入っており、配信があったことは確か (現地開催の有無は未判断)"
+  },
+  {
+   "table": "events",
+   "id": "ev_上水流宇宙_birthday_online_live_2026",
+   "fields": {
+    "is_streaming": 1
+   },
+   "note": "stream_platform は未入力だが、名が ONLINE LIVE で、同シリーズの 2025 年版 3 件 (灯里愛夏 / 上水流宇宙 / レトラ) は stream_platform=ASOBI STAGE。配信があったことは確か"
   }
  ]
 }

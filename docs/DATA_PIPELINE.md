@@ -115,7 +115,6 @@ dump を作り直してコミットする (cron はデータのみ更新し、�
 | `external_event` | アイマス以外が主催する催しの中で行われたステージ | Animelo Summer Live / リスアニ！LIVE / TGS / ニコニコ超会議 / MONACAフェス |
 | `birthday` | 生誕・バースデーの催し | 月村手毬 生誕ミニライブ2025 / レトラ BIRTHDAY ONLINE LIVE 2025 |
 | `release_event` | 作品・商品のリリースに紐づく催し | 「LIVE THE@TER PERFORMANCE 02」発売イベント / お渡し会 / 舞台挨拶 |
-| `mini_live` | ミニライブと名乗る催しのうち、生誕でも発売記念でもないもの | 学園アイドルマスターエキスポミニライブ |
 | `broadcast` | 番組・配信そのもの (公演として開かれていない) | THE FIRST TAKE / NHK『シブヤノオト』/ 〜生配信 |
 | `live` | 上記以外の、アイマス側が開いた公演 | M@STERS OF IDOL WORLD / CINDERELLA REAL PARTY / SideM GREETING TOUR 2017 |
 
@@ -129,7 +128,7 @@ dump を作り直してコミットする (cron はデータのみ更新し、�
 上から順に当てる。
 
 1. `broadcast` → 2. `external_event` → 3. `orchestra` → 4. `birthday` →
-5. `release_event` → 6. `mini_live` → 7. `anniversary` → 8. `live`
+5. `release_event` → 6. `anniversary` → 7. `live`
 
 - **`orchestra` が `anniversary` より先** … 「THE IDOLM@STER 20th anniversary ORCHESTRA
   CONCERT」を周年側に入れると「オケマスを除けば」が効かなくなる。
@@ -137,10 +136,6 @@ dump を作り直してコミットする (cron はデータのみ更新し、�
   (CygamesFes2018)」のような**他社の催しの中の一コーナー**を周年本公演と同列に数えない。
 - **`birthday` が `release_event` より先** … 「月村手毬 生誕ミニライブ2025」は
   購入者限定の形を取っていても、開かれた目的は生誕。
-- **`release_event` が `mini_live` より先** … ここを逆にすると「発売記念イベント」が
-  *名前にミニライブと書いてあるかどうか*で 2 つに割れる。同じ性格の催しが表記の偶然で
-  分かれる軸は、絞っても意味のある答えにならない。逆に言うと `mini_live` は
-  「ミニライブなのに発売記念ではないもの」という少数の受け皿で、現状 3 件しかない。
 
 判定はイベント名を根拠にする。名前から決められないものは**空のまま置く**
 (推測で埋めない)。「実質ミニライブだろう」のような**名前に書いていない推測で
@@ -154,23 +149,85 @@ dump を作り直してコミットする (cron はデータのみ更新し、�
   「10thLIVE TOUR Act-1〜4」「CG 5thLIVE TOUR」がまるごと周年から落ち、
   「AS の周年では」の答えが変わる。軸にするなら `events` を束ねる series 列を足す
   ほうで、`event_type` の仕事ではない。
-- **配信の有無** … `events.is_streaming` と `shows.stream_platform` が持つ**直交した軸**。
+- **ミニライブ (規模・形式)** … 一度 `mini_live` として入れかけて**取り下げた**。
+  リリイベの多くは形式としてミニライブで、`event_type` に両方を置くと
+  「発売記念イベント」が*名前にミニライブと書いてあるかどうか*で 2 つに割れる。
+  **`release_event` は「何のために開かれたか」、ミニライブは「どういう形式か」で、
+  直交する軸**。直交するものを 1 列に混ぜないのは `is_streaming` を入れないのと同じ理由。
+  そのうえ元の目的 (「オケマスを除けば 10 年ぶり」のような数え直し) に規模は効かない。
+  規模で絞りたくなったら**セトリの曲数**を見る (`setlist_shape` が既にその軸を持つ)。
+  同じ提案が出たらこの段落を読ませること。
+- **配信の有無** … 下の「配信の軸」を見る。`event_type` には入れない。
   ここに入れると 876 の「BIRTHDAY ONLINE LIVE」が `birthday` と「配信」のどちらかしか
-  選べなくなる。正しい持ち方は `event_type='birthday'` かつ `is_streaming=1`。
-  なお `is_streaming` は現状あてにならない (`is_streaming=0` なのに
-  `shows.stream_platform` が埋まっている行が 30 件以上ある)。**どちらが正本かは
-  未決着**で、`Event.swift` / `Event.kt` の `isStreaming` には
-  「互換のため残置。新コードからは参照しない」と書いてある。配信で絞る機能を作る前に
-  ここを片付けること。
+  選べなくなる。正しい持ち方は `event_type='birthday'` かつ配信の軸が立っている状態。
 - **アリーナ / ホールといった会場規模** … `shows.venue_id` から会場マスタで引ける。
 - **上演形態 (朗読劇 / ミュージカル)** … 現状ほぼ SideM と CG の数本で、
   その軸で絞っても「意味のある答え」にならない。必要になったら足す。
+
+## 配信の軸 (`stream_platform` と `is_streaming`)
+
+**正本は `shows.stream_platform`。** 配信は公演ごとに有無が変わる (同じイベントでも
+配信ありの日と無い日がある) ので、イベント単位のフラグでは表せない。
+
+`events.is_streaming` は**信用してはいけない**。初期移行の
+`Scripts/rebuild_db.py` が、**イベント名の正規表現**
+(`配信|生放送|ニコ生|ニコニコ|歌枠|カラオケ|リレー|…`) で機械生成した値がそのまま
+残っているだけで、誰も 1 件ずつ見ていない。実測 (2026-09-20):
+
+| | 件数 |
+|---|---|
+| `stream_platform` が入っているイベント | 80 |
+| ↑ のうち `is_streaming=0` | **62** |
+| `is_streaming=1` だが `stream_platform` が空 | **24** |
+
+### 罠: `is_streaming` の意味は「配信があった」ではない
+
+今この列を**読んで判断している唯一の箇所**は Android の「配信を除く」スイッチ
+(`EventListViewModel.kt`) で、画面には「**配信のみ**のイベント (旧 is_streaming) を
+一覧から隠す」と書いてある。つまり読み手の解釈は「配信のみ」。
+
+一方 `stream_platform` が言えるのは「**配信があった**」までで、現地開催の有無は別の話。
+上の 62 件には幕張メッセや東京ガーデンシアターの現地公演
+(CG 10th ANNIVERSARY … Tropical Land、SHINY COLORS 3rdLIVE TOUR / TOKYO、
+SHINY COLORS MUSIC DAWN 等) が含まれる。**ここに 1 を入れてから読み手を直すと、
+アリーナ公演が一覧から消える。**
+
+### 移行手順 (順序を守る)
+
+「配信のみ」を言いたいスイッチの意味は、いまや `event_type='broadcast'`
+(番組・配信そのもの = 公演として開かれていない) が正確に持っている。そこへ移す。
+
+1. `event_type` のデータを入れる (前節の手順 1〜2)。
+2. Android の「配信を除く」を `is_streaming` から `event_type == "broadcast"` に
+   差し替える。ここまでで `is_streaming` を読んで判断する箇所が 0 になる。
+3. `data/fixes/event_is_streaming_*.json` を当てて、`stream_platform` がある 62 件の
+   `is_streaming` を 1 にする。**2 より先にやらない。**
+4. `is_streaming=1` だが `stream_platform` が空の 24 件を調べ、配信先を
+   `shows.stream_platform` に入れる。全部ニコ生・NHK・生配信の類なので配信自体は
+   あったはずだが、**どこで配信したかは 1 件ずつ確かめる**。
+5. ここで `events.is_streaming` は `EXISTS(shows.stream_platform)` の写しになるので撤去する。
+   CloudKit の `Event.isStreaming`、Room のマイグレーション、`db/master.sql` の dump
+   作り直しがセット (「スキーマを変えた時」の手順)。旧アプリは `isStreaming` が
+   来なくなると `false` に倒れる = スイッチが何も隠さなくなるだけで、**何かが消える
+   向きの壊れ方はしない**。
+
+### `has_streaming` / `has_live_viewing` との関係 (未決着)
+
+`events.has_streaming` / `shows.has_streaming` / `has_live_viewing` は、参加形態 UI の
+ために **Documents DB にだけ**足してある列 (`DatabaseMigrations` v23、
+`sqlite_loader` が `optional_col` で拾う)。マスタにも CloudKit にも無い。初期値は
+`UPDATE events SET has_streaming = is_streaming` — つまり**上の正規表現の孫**。
+
+`stream_platform` と違うのは、`has_streaming = false` で「**配信は無かった**」と
+明示できること (`stream_platform` が空なのは「無かった」のか「未入力」のか区別が
+つかない)。マスタに昇格させるならこの 3 値が要るのか、`stream_platform` の有無で
+足りるのかは**まだ決めていない**。参加形態の機能を進めるときに決めること。
 
 ### `kind` との関係 (畳む予定)
 
 `events.kind` (`live` / `festival` / `release_event`) は `event_type` の**粗い版**に
 なっている: `festival` ≒ `external_event`、`kind=release_event` の大半はそのままだが
-一部は `birthday` / `mini_live` / `broadcast` に割れ、`kind=live` は
+一部は `birthday` / `broadcast` に割れ、`kind=live` は
 `anniversary` / `orchestra` / `external_event` / `birthday` / `broadcast` / `live` に割れる。
 同じことを 2 列で言うのは片方だけ古くなる形なので、`event_type` に一本化する。
 
