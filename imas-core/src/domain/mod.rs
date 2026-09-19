@@ -63,3 +63,10 @@ pub mod auth_rules;
 pub mod share_text;
 pub mod sync_decisions;
 pub mod screen_composition;
+
+// LLM 向けツール面 (MCP / CLI)。規則はここに置き、アダプタ (crate::agent) は
+// JSON を渡して受け取るだけにする。feature ゲートしないのは、既定の cargo test で
+// 規則のテストを回したいため (アダプタと bin の方は feature = "agent" で切ってある)。
+pub mod agent_tools;
+pub mod entity_resolution;
+pub mod proposal;

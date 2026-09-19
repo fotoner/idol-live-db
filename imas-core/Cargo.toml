@@ -22,6 +22,13 @@ name = "web-export"
 path = "src/bin/web-export/main.rs"
 required-features = ["web-export"]
 
+# アイドルライブ DB を LLM から引く MCP サーバ / CLI。web-export と同じ理由で
+# required-features を付ける (付けないと iOS/Android のクロスビルドが巻き込む)。
+[[bin]]
+name = "imas-mcp"
+path = "src/bin/imas-mcp/main.rs"
+required-features = ["agent"]
+
 # 同じ理由で integration test も feature ゲートする。付けないと既存 core-guard の
 # `cargo test --locked` (feature 無し) が web_export.rs のコンパイルで落ちる。
 [[test]]
@@ -32,6 +39,10 @@ required-features = ["web-export"]
 [features]
 # Web 出面の静的エクスポート。既定 off。
 web-export = ["dep:ts-rs"]
+# LLM 向けツール面 (MCP サーバ / CLI) のアダプタと bin。既定 off。
+# domain 側の規則 (agent_tools / entity_resolution / proposal) はこの feature に関係なく
+# 常時コンパイルされ、既定の cargo test で検証される。
+agent = []
 
 [dependencies]
 uniffi = { version = "0.32.0", features = ["cli"] }

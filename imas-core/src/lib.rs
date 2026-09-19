@@ -18,6 +18,12 @@ pub mod inbound;
 #[cfg(not(target_family = "wasm"))]
 pub mod outbound;
 
+// LLM 向けツール面 (MCP / CLI) の driving adapter。既定 off の feature で、
+// iOS/Android のビルドには一切入らない (uniffi も通らない)。
+// 判断の実体は domain::agent_tools / domain::proposal 側にあり、そちらは常時コンパイルされる。
+#[cfg(feature = "agent")]
+pub mod agent;
+
 // Web 出面 (静的サイト) の JSON エクスポータ。既定 off の feature で、
 // iOS/Android のビルドには一切入らない (uniffi も通らない)。
 #[cfg(feature = "web-export")]
