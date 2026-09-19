@@ -354,6 +354,32 @@ mod tests {
     }
 
     #[test]
+    fn 連番になってもsummaryは古い_存在しない_ファイル名を案内しない() {
+        // QA 実測バグ: draft.path は連番後の実ファイル (..._2.json) を正しく指すのに、
+        // draft.summary が連番化される前の (存在しない) ファイル名の文言を含んでいた。
+        // 修正は「summary からファイル名/パスを完全に落とす」方向 (domain::proposal::
+        // ProposalDraft::summary の doc コメント参照) なので、ここでは summary に
+        // ファイル名の痕跡が一切無いこと、かつ path が実在するファイルを指すことを固定する。
+        let repo = TempRepo::new();
+        let ctx = ctx_for(&repo);
+
+        let first = run(&ctx, "propose_song", &song_args("ml_dup_summary_test")).unwrap();
+        let second = run(&ctx, "propose_song", &song_args("ml_dup_summary_test")).unwrap();
+
+        let first_path = first["draft"]["path"].as_str().unwrap().to_string();
+        let second_path = second["draft"]["path"].as_str().unwrap().to_string();
+        assert_ne!(first_path, second_path);
+        assert!(second_path.ends_with("_2.json"), "2 件目は連番化されるはず: {second_path}");
+
+        let summary = second["draft"]["summary"].as_str().unwrap();
+        assert!(!summary.contains(".json"), "summary にファイル名が混ざっている: {summary}");
+        assert!(!summary.contains("data/songs/"), "summary にパスが混ざっている: {summary}");
+
+        // path が指す実ファイルが本当にそこにある (誤案内でないことの本体側の確認)。
+        assert!(repo.root.join(&second_path).exists());
+    }
+
+    #[test]
     fn source_無しは_ファイルを書かずに_bad_args_を返す() {
         let repo = TempRepo::new();
         let ctx = ctx_for(&repo);

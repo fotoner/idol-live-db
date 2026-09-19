@@ -80,7 +80,15 @@ pub struct ProposalDraft {
     pub file_name: String,
     /// そのまま書き出す JSON 本文 (整形済み・末尾改行あり)。
     pub contents: String,
-    /// 人間とLLMに見せる要約。
+    /// 人間とLLMに見せる要約。**ファイル名/パスを一切含めない** (QA 実測バグ)。
+    ///
+    /// ここで `display_path()` を埋め込んで文字列に焼き込むと、書き込み直前に
+    /// 連番衝突回避 (`agent::proposal_io::reserve_file_name`) でファイル名が変わった
+    /// ときに、`summary` だけ存在しない古いファイル名を指したまま残る
+    /// (`draft.path` は正しい実ファイルを指すのに、`draft.summary` は違う場所を
+    /// 案内する、という食い違いが実際に QA で見つかった)。パスを知りたければ
+    /// 呼び手は `path` (アダプタが書き込み後の実ファイル名で組む) を見ればよく、
+    /// `summary` にパスを持たせる理由が無い。ファイル名の置き場所は 1 箇所に絞る。
     pub summary: String,
     /// 出典についての注意書き。**全ドラフトに常時付ける** (RedTeam M4)。
     ///
@@ -467,15 +475,13 @@ fn build_song(a: &Value, today_key: &str) -> Result<ProposalDraft, ToolError> {
     let title_text = format!("曲「{title}」({brand_id}) の追加");
     let top = doc_fields(&title_text, a, &source, "propose_song", vec![("songs", Field::Arr(vec![Field::Obj(song)]))]);
     let source_advisory = source_host_advisory(&source.url);
-    let draft = ProposalDraft {
+    Ok(ProposalDraft {
         kind,
         file_name,
         contents: render(top),
-        summary: String::new(),
+        summary: format!("曲「{title}」({brand_id}) を追加するドラフト"),
         source_advisory,
-    };
-    let summary = format!("曲「{title}」({brand_id}) を追加するドラフト: {}", draft.display_path());
-    Ok(ProposalDraft { summary, ..draft })
+    })
 }
 
 fn build_event(a: &Value, today_key: &str) -> Result<ProposalDraft, ToolError> {
@@ -526,12 +532,11 @@ fn build_event(a: &Value, today_key: &str) -> Result<ProposalDraft, ToolError> {
     let title_text = format!("イベント「{name}」({brand_id}) の追加");
     let top = doc_fields(&title_text, a, &source, "propose_event", vec![("events", Field::Arr(vec![Field::Obj(event)]))]);
     let source_advisory = source_host_advisory(&source.url);
-    let display = format!("data/{}/{file_name}", kind.dir());
     Ok(ProposalDraft {
         kind,
         file_name,
         contents: render(top),
-        summary: format!("イベント「{name}」({brand_id}) + 公演 {show_count} 件を追加するドラフト: {display}"),
+        summary: format!("イベント「{name}」({brand_id}) + 公演 {show_count} 件を追加するドラフト"),
         source_advisory,
     })
 }
@@ -592,12 +597,11 @@ fn build_setlist(a: &Value, today_key: &str) -> Result<ProposalDraft, ToolError>
     let title_text = format!("公演 {show_id} のセットリスト追加");
     let top = doc_fields(&title_text, a, &source, "propose_setlist", payload);
     let source_advisory = source_host_advisory(&source.url);
-    let display = format!("data/{}/{}", kind.dir(), file_name);
     Ok(ProposalDraft {
         kind,
         file_name,
         contents: render(top),
-        summary: format!("公演 {show_id} のセットリスト {song_count} 曲を追加するドラフト: {display}"),
+        summary: format!("公演 {show_id} のセットリスト {song_count} 曲を追加するドラフト"),
         source_advisory,
     })
 }
@@ -633,12 +637,11 @@ fn build_idol(a: &Value, today_key: &str) -> Result<ProposalDraft, ToolError> {
     let title_text = format!("アイドル「{name}」({brand_id}) の追加");
     let top = doc_fields(&title_text, a, &source, "propose_idol", vec![("idols", Field::Arr(vec![Field::Obj(idol)]))]);
     let source_advisory = source_host_advisory(&source.url);
-    let display = format!("data/{}/{}", kind.dir(), file_name);
     Ok(ProposalDraft {
         kind,
         file_name,
         contents: render(top),
-        summary: format!("アイドル「{name}」({brand_id}) を追加するドラフト: {display}"),
+        summary: format!("アイドル「{name}」({brand_id}) を追加するドラフト"),
         source_advisory,
     })
 }
@@ -673,12 +676,11 @@ fn build_fix(a: &Value, today_key: &str) -> Result<ProposalDraft, ToolError> {
     let title_text = format!("{table} の {id} を修正");
     let top = doc_fields(&title_text, a, &source, "propose_fix", vec![("fixes", Field::Arr(vec![Field::Obj(fix)]))]);
     let source_advisory = source_host_advisory(&source.url);
-    let display = format!("data/{}/{}", kind.dir(), file_name);
     Ok(ProposalDraft {
         kind,
         file_name,
         contents: render(top),
-        summary: format!("{table} の {id} を修正するドラフト ({field_count} フィールド): {display}"),
+        summary: format!("{table} の {id} を修正するドラフト ({field_count} フィールド)"),
         source_advisory,
     })
 }
