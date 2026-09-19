@@ -8,12 +8,13 @@ struct SetlistRowView: View {
     var displayNumber: Int? = nil
     var performers: [PerformerRow] = []
     var idolsById: [String: Idol] = [:]
-    var unitIndex: UnitIndex? = nil
-    /// この公演に出演する全 cast_id (= show_cast)。performer 集合がこれと一致したら「全員」表記。
-    var showAllCastIds: Set<String> = []
-    /// この公演でユニット単独曲を披露したユニット ID。
-    /// 偶然メンバーが揃った合唱曲に過剰マッチするのを防ぐ。
-    var activeUnitIds: Set<String> = []
+    /// ユニット名のチップに出す名前。**どのユニット名を出すかは imas-core が決める**
+    /// (その披露の名義 → 曲の名義 → 顔ぶれ推論)。空ならチップを出さない。
+    var unitNames: [String] = []
+    /// 公演の出演者全員で歌う行か (「全員」表記)。判定も imas-core。
+    var isFullCast: Bool = false
+    /// 「初披露」「3 年 10 か月ぶり」。珍しくない行では nil。文言も閾値も imas-core。
+    var rarityLabel: String? = nil
     /// 歌唱者をどの名前で出すか (親が AppStorage から解決して渡す)。
     var performerName: PerformerNameMode = .idolOnly
     /// `shows.performer_type == "character"`。
@@ -69,27 +70,6 @@ struct SetlistRowView: View {
                 name: row.displayName(performerName, isCharacterLive: isCharacterLive)
             )
         }
-    }
-
-    /// 公演に出ている全キャストが歌唱している = 「全員」表記対象。
-    /// show_cast が 1 件以上あって、performer の cast 集合がそれと完全一致した時のみ true。
-    private var isAllPerformers: Bool {
-        guard !showAllCastIds.isEmpty, showAllCastIds.count >= 2 else { return false }
-        // PerformerRow.id は cast_id (fetchAllPerformers SQL での alias)
-        let performerCastIds = Set(performers.map(\.id))
-        return performerCastIds == showAllCastIds
-    }
-
-    /// performer 集合からユニット名を逆引き。セトリでは偶然メンバー揃った
-    /// だけの subset マッチ (TintMe 等) を避けるため、exact match (単独 or
-    /// 2-3 unit の和集合一致) のみ採用。合同曲は両方の unit が返る。
-    private var matchingUnits: [Unit] {
-        guard let unitIndex else { return [] }
-        let perfIds = Set(performerIdols.map(\.id))
-        let candidates = unitIndex.exactMatchingUnits(for: perfIds, requireSongs: true)
-        // activeUnitIds が空の場合 (e.g., プレビュー / 1曲のみのライブ) はフィルタしない
-        if activeUnitIds.isEmpty { return candidates }
-        return candidates.filter { activeUnitIds.contains($0.id) }
     }
 
     /// フォールバック色シード。曲のブランド色。
@@ -149,7 +129,7 @@ struct SetlistRowView: View {
         // 公演の出演者全員で歌う全体曲は、原曲メンバーと完全一致しなくても
         // (新メンバー追加・一部欠席で部分一致になるだけで) カバーではない。
         // この場合「一部カバー」表記を抑制する (全員アンセムの通常パターン)。
-        if isAllPerformers, case .partial = coverType { return nil }
+        if isFullCast, case .partial = coverType { return nil }
         switch coverType {
         case .original, .originalPlus, .unknown: return nil
         case .partial: return ("一部カバー", .partial)
@@ -278,9 +258,9 @@ struct SetlistRowView: View {
         }
     }
 
-    /// メタ行に出すものがあるか (カバー種別チップ or 歌唱者表現)。無ければ行ごと省く。
+    /// メタ行に出すものがあるか (カバー種別チップ or 珍しさ or 歌唱者表現)。無ければ行ごと省く。
     private var hasMeta: Bool {
-        coverTag != nil || !matchingUnits.isEmpty || isAllPerformers || !performers.isEmpty
+        coverTag != nil || rarityLabel != nil || !unitNames.isEmpty || isFullCast || !performers.isEmpty
     }
 
     /// カバー種別チップ + 歌唱者 (ユニット / 全員 / アバター) を横一列に。
@@ -290,18 +270,23 @@ struct SetlistRowView: View {
             if let tag = coverTag {
                 ImasTagChip(text: tag.text, kind: tag.kind, seed: seed)
             }
+            // 「初披露」「N 年ぶり」。出るのは 3 行に 1 行くらいなので、
+            // 塗りつぶしではなく輪郭だけの控えめな札にしてカバー札と競わせない。
+            if let rarityLabel {
+                ImasTagChip(text: rarityLabel, kind: .guest, seed: seed)
+            }
             performerMeta
         }
     }
 
     @ViewBuilder
     private var performerMeta: some View {
-        if !matchingUnits.isEmpty {
-            // ユニット単独曲: ユニット名チップ
-            ForEach(matchingUnits) { unit in
-                ImasTagChip(text: unit.name, kind: .unit, seed: seed)
+        if !unitNames.isEmpty {
+            // ユニット名義の行: ユニット名チップ
+            ForEach(unitNames, id: \.self) { name in
+                ImasTagChip(text: name, kind: .unit, seed: seed)
             }
-        } else if isAllPerformers {
+        } else if isFullCast {
             ImasTagChip(text: "全員", kind: .all, seed: seed)
                 .contentShape(Rectangle())
                 .onTapGesture { showPerformersSheet = true }

@@ -93,47 +93,4 @@ struct UnitIndex: Sendable {
 
         return (chosen, remaining)
     }
-
-    /// セトリ表示用: performerIds に 1 / 2 / 3 unit の「和集合が完全一致」する場合のみ返す。
-    /// subset マッチ (偶然 unit メンバーが全員含まれてるだけの合唱曲で TintMe が誤検出) を防ぐ。
-    /// 合同曲は 2-3 unit の union として検出される (例: アンティーカ×シーズ, 放クラ×ストレイ)。
-    func exactMatchingUnits(for performerIds: Set<String>, requireSongs: Bool = false) -> [Unit] {
-        guard performerIds.count >= 2 else { return [] }
-
-        let cand = units.filter { u in
-            (!requireSongs || unitsWithSongs.contains(u.id)) &&
-            (memberIds[u.id]?.count ?? 0) >= 2 &&
-            (memberIds[u.id]?.isSubset(of: performerIds) ?? false)
-        }
-        // 1 unit
-        if let exact = cand.first(where: { memberIds[$0.id] == performerIds }) {
-            return [exact]
-        }
-        // 2 unit union
-        for i in 0..<cand.count {
-            let u = memberIds[cand[i].id] ?? []
-            for j in (i + 1)..<cand.count {
-                let v = memberIds[cand[j].id] ?? []
-                if u.union(v) == performerIds {
-                    return [cand[i], cand[j]]
-                }
-            }
-        }
-        // 3 unit union (合同で 3 ユニット集結するケース)
-        for i in 0..<cand.count {
-            let u = memberIds[cand[i].id] ?? []
-            for j in (i + 1)..<cand.count {
-                let v = memberIds[cand[j].id] ?? []
-                let uv = u.union(v)
-                if uv.count > performerIds.count { continue }
-                for k in (j + 1)..<cand.count {
-                    let w = memberIds[cand[k].id] ?? []
-                    if uv.union(w) == performerIds {
-                        return [cand[i], cand[j], cand[k]]
-                    }
-                }
-            }
-        }
-        return []
-    }
 }

@@ -12,7 +12,10 @@ struct SetlistSimpleRowView: View {
     let item: SetlistRow
     var displayNumber: Int?
     /// 「ユニット名」「全員」「アイドル名／アイドル名」のいずれか。 空なら演者行を出さない。
+    /// 決め方は imas-core (`setlist_performer_label`)。
     var performerLabel: String
+    /// 「初披露」「3 年 10 か月ぶり」。珍しくない行では nil。文言も閾値も imas-core。
+    var rarityLabel: String? = nil
     /// 曲名の色。 ブランド色 hex。
     var brandHex: String?
 
@@ -37,13 +40,25 @@ struct SetlistSimpleRowView: View {
                     .foregroundStyle(titleColor)
                     .lineLimit(2)
 
-                if !performerLabel.isEmpty {
+                if !performerLabel.isEmpty || rarityLabel != nil {
                     // 公式のセトリ画像に倣って ♪ を頭に置く。 演者は横並びにすると
                     // 長い名前 (アスラン=ベルゼビュートⅡ世 等) で曲名が潰れるため下段に置く。
-                    Text("♪ \(performerLabel)")
-                        .font(.imasCaption2)
-                        .foregroundStyle(DS.ink2)
-                        .lineLimit(2)
+                    // 珍しさは演者の後ろに小さく添える (シンプル表示は 1 枚に収めるのが目的なので
+                    // 行を増やさない)。
+                    HStack(alignment: .firstTextBaseline, spacing: DS.sp2) {
+                        if !performerLabel.isEmpty {
+                            Text("♪ \(performerLabel)")
+                                .font(.imasCaption2)
+                                .foregroundStyle(DS.ink2)
+                                .lineLimit(2)
+                        }
+                        if let rarityLabel {
+                            Text(rarityLabel)
+                                .font(.imasCaption2)
+                                .foregroundStyle(DS.ink3)
+                                .lineLimit(1)
+                        }
+                    }
                 }
             }
         }

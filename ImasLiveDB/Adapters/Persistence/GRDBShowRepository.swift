@@ -58,6 +58,10 @@ struct GRDBShowRepository: ShowReading {
     /// 未ロードの一瞬だけ空になるが、衣装は補助情報なので出ない方が安全。
     func showCostumes(showId: String) async throws -> [ShowCostumeRecord] { [] }
 
+    /// SQL 経路には無い (名義の決め方も披露の間隔も imas-core にしかない)。
+    /// スナップショット未ロードの短い窓では添え物なしで出す。
+    func setlistRowMeta(showId: String, nameMode: PerformerNameMode) async throws -> [SetlistRowMetaRecord] { [] }
+
     func venueDirectory() async throws -> VenueDirectory {
         try await database.fetchVenueDirectoryAsync()
     }

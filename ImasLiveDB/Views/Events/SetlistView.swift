@@ -41,13 +41,11 @@ struct SetlistView: View {
     @State private var isCreatingPlaylist = false
     @State private var playlistProgress: (current: Int, total: Int) = (0, 0)
     @State private var sheetDestination: DetailDestination?
-    @State private var unitIndex: UnitIndex? = nil
-    @State private var showAllCastIds: Set<String> = []
+    /// セトリ 1 行ぶんの添え物 (名義・ユニットのチップ・全員・何回目・いつぶり)。
+    /// **中身を決めるのは imas-core。** 画面はキーで引いて出すだけ。
+    @State private var rowMetaByItemId: [String: SetlistRowMetaRecord] = [:]
     /// この公演で着られた衣装 (進行順)。畳み方も並びも imas-core が決めている。
     @State private var costumes: [ShowCostumeRecord] = []
-    /// この公演で「ユニット単独曲」として披露されたユニット ID 集合。
-    /// 偶然メンバーが揃った合唱曲で誤検出されないよう、unit chip 表示はこの集合内に限定する。
-    @State private var activeUnitIds: Set<String> = []
     @State private var showEditSheet = false
     /// 未ログイン時のログイン誘導 sheet。ログイン後にセトリ編集を再開する。
     @State private var showLoginPrompt = false
@@ -135,11 +133,13 @@ struct SetlistView: View {
     private func setlistRow(item: SetlistRow, index: Int) -> some View {
         let performers = performersByItemId[item.id] ?? []
         let performerIdolIds = Set(performers.compactMap(\.idolId))
+        let meta = rowMetaByItemId[item.id]
         if simpleMode {
             SetlistSimpleRowView(
                 item: item,
                 displayNumber: index + 1,
-                performerLabel: performerLabel(performers: performers, idolIds: performerIdolIds),
+                performerLabel: meta?.performerLabel ?? "",
+                rarityLabel: rarityLabel(meta),
                 brandHex: brandHex(for: item)
             )
             .onTapGesture {
@@ -157,9 +157,9 @@ struct SetlistView: View {
                 displayNumber: index + 1,
                 performers: performers,
                 idolsById: idolsById,
-                unitIndex: unitIndex,
-                showAllCastIds: showAllCastIds,
-                activeUnitIds: activeUnitIds,
+                unitNames: meta?.unitNames ?? [],
+                isFullCast: meta?.isFullCast ?? false,
+                rarityLabel: rarityLabel(meta),
                 performerName: performerName,
                 isCharacterLive: show.isCharacterLive,
                 coverType: classifyCover(originalIds: originalIds, performerIds: performerIdolIds),
@@ -182,25 +182,14 @@ struct SetlistView: View {
         }
     }
 
-    /// シンプル表示の演者ラベル。 通常行の performerMeta と同じ優先順で決める:
-    /// ユニット単独曲ならユニット名 → 出演者全員なら「全員」→ それ以外は名前を「／」で連結。
-    /// 名前の区切りは公式のセトリ画像に合わせて全角スラッシュ。
+    /// 行に添える「珍しさ」。初披露か、1 年以上ぶりの披露のときだけ出す。
     ///
-    /// **名前の決め方はここに書かない。** どちらを出すかは閲覧者の設定で変わるので、
-    /// 1 人分の解決は imas-core の `performerDisplayName` に任せる
-    /// (ここが `idolsById[...]?.name` を直に読んでいたせいで、設定も公演種別も
-    /// 効かずアイドル名で固定されていた)。
-    private func performerLabel(performers: [PerformerRow], idolIds: Set<String>) -> String {
-        if let unitIndex {
-            let units = unitIndex.exactMatchingUnits(for: idolIds, requireSongs: true)
-                .filter { activeUnitIds.isEmpty || activeUnitIds.contains($0.id) }
-            if !units.isEmpty { return units.map(\.name).joined(separator: "／") }
-        }
-        // showAllCastIds は cast_id 集合。 PerformerRow.id が cast_id なのでそのまま比較できる。
-        if showAllCastIds.count >= 2, Set(performers.map(\.id)) == showAllCastIds { return "全員" }
-        return performers
-            .map { $0.displayName(performerName, isCharacterLive: show.isCharacterLive).joined }
-            .joined(separator: "／")
+    /// **どちらの文言も閾値も imas-core が決めている** (`performance_gap`)。
+    /// ここは「初披露なら回数の言い方、そうでなければ間隔の言い方」を選ぶだけ。
+    /// どちらも無い行では nil = 何も足さない (全行に賑やかしを足さないため)。
+    private func rarityLabel(_ meta: SetlistRowMetaRecord?) -> String? {
+        guard let meta else { return nil }
+        return meta.isFirstPerformance ? meta.ordinalLabel : meta.sinceLabel
     }
 
     private func brandHex(for item: SetlistRow) -> String? {
@@ -511,6 +500,7 @@ struct SetlistView: View {
         }
         .animation(.easeInOut(duration: 0.15), value: isCreatingPlaylist)
         .task { await loadSetlist() }
+        .task(id: performerNameRaw) { await loadRowMeta() }
         .task {
             venueDirectory = (try? await AppContainer.shared.showReading.venueDirectory()) ?? .empty
         }
@@ -582,16 +572,7 @@ struct SetlistView: View {
             let fetchedIdols = try await AppContainer.shared.idolReading.idols(ids: allIdolIds)
             idolsById = Dictionary(uniqueKeysWithValues: fetchedIdols.map { ($0.id, $0) })
 
-            // Unit 逆引き用インデックス
-            unitIndex = try await AppContainer.shared.unitReading.unitIndex()
-
-            // この公演の全出演キャスト集合 (「全員」表記の判定用)
-            showAllCastIds = try await showReading.showIdolIds(showId: show.id)
-
             costumes = try await showReading.showCostumes(showId: show.id)
-
-            // この公演で 1-unit exact 一致した = ユニット単独曲として披露された ユニット集合
-            activeUnitIds = computeActiveUnitIds(unitIndex: unitIndex)
 
             myPickIdolIds = Set(UserMarkService.shared.allMarked(kind: .myPick, entity: .idol))
 
@@ -622,21 +603,12 @@ struct SetlistView: View {
         }
     }
 
-    private func computeActiveUnitIds(unitIndex: UnitIndex?) -> Set<String> {
-        guard let unitIndex else { return [] }
-        var active: Set<String> = []
-        for item in setlist {
-            let performers = performersByItemId[item.id] ?? []
-            let perfIds = Set(performers.compactMap(\.idolId))
-            guard perfIds.count >= 2 else { continue }
-            for unit in unitIndex.units {
-                guard let members = unitIndex.memberIds[unit.id], members.count >= 2 else { continue }
-                if members == perfIds {
-                    active.insert(unit.id)
-                }
-            }
-        }
-        return active
+    /// 行の添え物を読み直す。**歌唱者の表示名の設定が変わると答えが変わる**ので、
+    /// 設定を鍵にした `.task(id:)` から呼ぶ (画面を開き直さなくても追従する)。
+    private func loadRowMeta() async {
+        let meta = (try? await AppContainer.shared.showReading
+            .setlistRowMeta(showId: show.id, nameMode: performerName)) ?? []
+        rowMetaByItemId = Dictionary(uniqueKeysWithValues: meta.map { ($0.itemId, $0) })
     }
 
     private func classifyCover(originalIds: Set<String>, performerIds: Set<String>) -> CoverType {

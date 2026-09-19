@@ -17,6 +17,13 @@ protocol ShowReading: Sendable {
     func setlist(showId: String) async throws -> [SetlistRow]
     /// セトリ項目 id → 出演者行。
     func allPerformers(showId: String) async throws -> [String: [PerformerRow]]
+    /// セトリ 1 行ぶんの添え物 (名義・ユニットのチップ・全員・何回目・いつぶり)。
+    /// 並びは `setlist(showId:)` と同じなので、受け側は zip するだけでよい。
+    ///
+    /// **名義の決め方 (その披露の名義 → 曲の名義 → 個人名併記 → 顔ぶれ推論 → 名前) も、
+    /// 「N 年ぶり」の言い回しも imas-core が持つ。** 画面でユニットを逆引きしたり
+    /// 間隔を組み立てたりしないこと (同じ規則を Android にも写経することになる)。
+    func setlistRowMeta(showId: String, nameMode: PerformerNameMode) async throws -> [SetlistRowMetaRecord]
     /// 公演の全出演キャスト idol_id 集合 (「全員」表記の判定用)。
     func showIdolIds(showId: String) async throws -> Set<String>
     /// song_id → 原曲アーティスト idol_id 集合 (一部カバー判定用)。

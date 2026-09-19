@@ -76,6 +76,14 @@ struct CoreShowRepository: ShowReading {
         }
     }
 
+    func setlistRowMeta(showId: String, nameMode: PerformerNameMode) async throws -> [SetlistRowMetaRecord] {
+        try await snapshot.withStore(
+            fallbackTo: { try await fallback.setlistRowMeta(showId: showId, nameMode: nameMode) }
+        ) { store in
+            try store.showSetlistRowMeta(showId: showId, mode: nameMode)
+        }
+    }
+
     func showIdolIds(showId: String) async throws -> Set<String> {
         try await snapshot.withStore(fallbackTo: { try await fallback.showIdolIds(showId: showId) }) { store in
             Set(try store.showCastIdolIds(showId: showId))
