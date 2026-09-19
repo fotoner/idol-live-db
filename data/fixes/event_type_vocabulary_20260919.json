@@ -1,0 +1,5967 @@
+{
+ "title": "events.event_type に語彙を入れる (746 件)",
+ "author": "fuga-if",
+ "_help": "語彙と判定規則は docs/DATA_PIPELINE.md 「events の種別 (event_type)」を見る。",
+ "fixes": [
+  {
+   "table": "events",
+   "id": "ev_bafca9af-8a58-4701-8753-d1166e28d577",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_f937ef42-f307-47f0-927d-8626e4d0f5fb",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "「交響曲」は曲名。実体は発売記念イベント"
+  },
+  {
+   "table": "events",
+   "id": "ev_sidem_cfirst_理由あってリリースイベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「リリースイベント」"
+  },
+  {
+   "table": "events",
+   "id": "ev_web番組今井麻美と中村繪里子のprestarスペシャル_アイドルマスターロケテ記念今年もお世話になりましたプリスタープチライブ",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「Web番組」"
+  },
+  {
+   "table": "events",
+   "id": "ev_web番組今井麻美と中村繪里子のprestarthe_idolmster_49",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「Web番組」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_masterpieceシリーズ発売記念シークレットイベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_1st_anniversary_live",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「1st ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_tgs2006バンダイナムコゲームスイベントステージ_アイドルマスターステージイベントスクープ連発xbox_360版アイドルマスターの秘密に迫る_暴かれた",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「TGS」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_radio_歌姫楽園the_idolmster_master_movie発売記念シークレットイベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "「RADIO」は商品名。実体は発売記念イベント"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_masterwork_第0弾_私はアイドル_発売記念_xmsイベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_xbox_live_the_party_26回最終回",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "InterFM の生放送 (shows.stream_platform)"
+  },
+  {
+   "table": "events",
+   "id": "ev_ワンダーフェスティバル_2007冬三浦あずさフィギュア発売記念イベント",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ワンダーフェスティバル」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_all_star_live_2007",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_ラジオdeアイマshow_2007年夏の感謝祭と言っておけばいいんじゃない_afternoonparty",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "ラジオ番組発だが有観客のホール公演"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_xenoglossiadvd第1巻発売記念イベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_go_to_the_nextstage_the_idolmster_great_party_tokyo",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_go_to_the_nextstage_the_idolmster_great_party_osaka",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_go_to_the_nextstage_the_idolmster_great_party_tokyo_2",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_電撃15年祭アイドルマスタークリスタルステージ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「電撃15年祭」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_ライブフォーユー新曲発表_live_for_press",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "商品の発表会"
+  },
+  {
+   "table": "events",
+   "id": "ev_cdthe_idolmster_radioトークミニライブ",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "「RADIO」は商品名。実体は発売記念イベント"
+  },
+  {
+   "table": "events",
+   "id": "ev_go_to_the_new_stage_the_idolmster_3rd_anniversary_live",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「3rd ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_animelo_summer_live_2008_-challenge-",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Animelo Summer Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sp_presents_765プロ新曲発表会_in_tgs_20081011",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「TGS」"
+  },
+  {
+   "table": "events",
+   "id": "ev_extra_-_hyper_game_music_event_2008",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「HYPER GAME MUSIC EVENT」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_master_special_765_pro_secret_event",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_master_special_961_pro_secret_event",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_ブシロードカードゲームlive2009",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ブシロードカードゲームLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_4th_anniversary_party_special_dream_tours_in_nagoya",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「4th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_4th_anniversary_party_special_dream_tours_in_fukuoka",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「4th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_4th_anniversary_party_special_dream_tours_in_tokyo",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「4th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_4th_anniversary_party_special_dream_tours_in_osaka",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「4th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_今井麻美the_idolmster_radio_long_time_発売記念イベントトークミニライブ大阪",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "「RADIO」は商品名。実体は発売記念イベント"
+  },
+  {
+   "table": "events",
+   "id": "ev_今井麻美the_idolmster_radio_long_time_発売記念イベントトークミニライブ東京",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "「RADIO」は商品名。実体は発売記念イベント"
+  },
+  {
+   "table": "events",
+   "id": "ev_今井麻美the_idolmster_radio_long_time_発売記念イベントアコースティックミニライブ",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "「RADIO」は商品名。実体は発売記念イベント"
+  },
+  {
+   "table": "events",
+   "id": "ev_animelo_summer_live_2009_-rebridge-",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Animelo Summer Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_ヴァイスシュヴァルツ_アイドルマスター発売記念イベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_a_night_in_fantasia_2009エミネンス交響楽団によるオーケストラコンサート",
+   "fields": {
+    "event_type": "orchestra"
+   },
+   "note": "名に「オーケストラ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_tgs2009アイドルマスター_ディアリースターズ_スペシャルステージ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「TGS」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_blu-ray_dvd_release_party",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "商品の発表会"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_2009_hppy_christms_prty",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_ブシロードカードゲームlive2010",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ブシロードカードゲームLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_876pro_secret_vlentine_prty",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_station_first_travel発売記念シークレットイベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_ボーカルコレクション発売記念_ライブトークショー",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_5th_anniversary_the_world_is_all_one_",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「5th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_stationsecond_travelseaside_date発売記念イベント_トークサイコロ占い",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_stationsecond_travelseaside_date_発売記念イベント_トークミニライブ",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター2_presents_765プロダクション_2010年度決起集会",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_tgs2010_初音ミク_-project_diva-_2nd_スペシャルステージ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「TGS」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_2_765pro_hppiness_new_yer_prty_2011",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_台北國際電玩展_偶像大師_2聲優今井麻美來台",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「台北國際電玩展」"
+  },
+  {
+   "table": "events",
+   "id": "ev_ブシロードカードゲームlive2011",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ブシロードカードゲームLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_world_is_all_one_smoky_thrill_発売記念_secret_release_party_in_大阪",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_world_is_all_one_smoky_thrill_発売記念_secret_release_party_in_東京",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_station_third_travel_wanted発売記念シークレットイベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_6th_anniversary_smile_summer_festivl_東京公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「6th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_6th_anniversary_smile_summer_festivl_札幌公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「6th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_6th_anniversary_smile_summer_festivl_名古屋公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「6th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_6th_anniversary_smile_summer_festivl_福岡公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「6th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_6th_anniversary_smile_summer_festivl_大阪公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「6th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_tvアニメアイドルマスターオープニングテーマready発売記念イベントare_you_ready",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_tbsアニメフェスタ2011",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「TBSアニメフェスタ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_animelo_summer_live_2011_-rainbow-",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Animelo Summer Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_ヴァイスシュヴァルツ_ポータブル_スペシャルステージ白黒学園_in_キャラホビ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「キャラホビ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_tgs_special_event_01_ps3版アイドルマスター2の魅力を全部紹介しちゃいまshow",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「TGS」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_tgs_special_event_02_アニメもゲームもグラビアも全部まとめてアイドルマスター",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「TGS」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_tgs_special_event_03_アイドルアイドル",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「TGS」"
+  },
+  {
+   "table": "events",
+   "id": "ev_ローソンアイマスキャンペーン_シークレットイベント",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_マチアソビ_vol7_the_idolmster_autumn_festivl_in_tokushima",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「マチ★アソビ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_tvアニメアイドルマスター新オープニングテーマchange発売記念イベントchange",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive2011",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスターステーションプレゼンツ_シークレットクリスマスパーティ",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_animtion_master_05発売記念イベントspecil_night",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_ローソンアイマスキャンペーン_年忘れシークレットパーティ",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_winter_crnivaldaytime_crnival",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスターアムラックス_コラボレーションイベント生っすかサンデー出張版",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_station_first_live_heart_and_soul",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_アニメコンテンツエキスポ2012_aceスペシャルライブステージ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「アニメコンテンツエキスポ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_ニコニコ超パーティーfirstnight_10_アイドルマスターメドレー超パーティースペシャルバージョン",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ニコニコ超パーティー」"
+  },
+  {
+   "table": "events",
+   "id": "ev_ニコニコ超会議2012_電波研究社live_special",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ニコニコ超会議」"
+  },
+  {
+   "table": "events",
+   "id": "ev_マチアソビ_vol8_一迅社フェブリpresentsアイドルマスター_シンデレラガールズcd大ヒット記念トークショー",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「マチ★アソビ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスターライブインスロットファンミーティング",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "kind=release_event"
+  },
+  {
+   "table": "events",
+   "id": "ev_super_gamesong_live_2012_-new_game-",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「SUPER GAMESONG LIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_7th_anniversary_765pro_allstars_みんなといっしょに",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「7th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_ワンダーフェスティバル2012_summer_アイドルマスター_in_コトブキヤワンフェスへようこそ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ワンダーフェスティバル」"
+  },
+  {
+   "table": "events",
+   "id": "ev_音撃_game_sound_impact_2012",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「音撃」"
+  },
+  {
+   "table": "events",
+   "id": "ev_mega_hobby_life最強figure展示會_偶像大師高槻彌生的聲優仁後真耶子小姐的talk_show與mini_live",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「MEGA Hobby」"
+  },
+  {
+   "table": "events",
+   "id": "ev_バンダイナムコライブtv_アイドルマスター特番夏だ1番アイドルマスター祭りweb番組",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「Web番組」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_festa前夜祭_in_tgs2012_新曲たっぷり聴かせちゃいますスペシャル",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「TGS」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_生っすかサンデー出張版_in_tgs2012_見逃し厳禁驚きの新情報続々スペシャル",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「TGS」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シャイニーフェスタ新作アニメ_プレミアム先行上映会_午前の部",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「先行上映」"
+  },
+  {
+   "table": "events",
+   "id": "ev_マチアソビ_vol9_ニュータイプ_アニメアワード授賞式",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「マチ★アソビ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_マチアソビ_vol9_アイドルマスター_シャイニーフェスタ_スペシャルステージ_in_マチアソビ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「マチ★アソビ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_reanimation-rave_in_新宿歌舞伎町-vol4",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Re:animation」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズお渡し会ミニライブ_13時の回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「お渡し会」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_animtion_master_secret_cover_song_event_生っすかspecial_xmas_prty",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シャイニーフェスタ_シンデレラガールズ_スペシャルパーティー_in_新宿blaze",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive-3",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_music_festivl_of_winter_day_time",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズデレラジスペシャルステージ",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_アニメコンテンツエキスポ2013_redステージ_program8_アイドルマスター",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「アニメコンテンツエキスポ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスターミュージックフェスタ決勝大会joysound_diveアイドルマスターコラボのカラオケ大会",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_masterお願いシンデレラ発売記念イベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_ニコニコ超会議2_ニコニコ超アニソンフェス",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ニコニコ超会議」"
+  },
+  {
+   "table": "events",
+   "id": "ev_マチアソビ_vol10_アイドルマスター_シンデレラガールズデレラジ徳島出張版",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「マチ★アソビ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_performance_02発売イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売イベント」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_performance_02発売イベント_第2回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売イベント」"
+  },
+  {
+   "table": "events",
+   "id": "ev_jam_2013_アニソンday_supported_by_リスアニtv",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_8th_anniversary_hopstepfestivl_nagoya0707",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「8th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_performance_03発売イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売イベント」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_performance_03発売イベント_第2回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売イベント」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_8th_anniversary_hopstepfestivl_osaka0720",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「8th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_8th_anniversary_hopstepfestivl_osaka0721",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「8th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズデレラジスペシャルステージinワンダーフェスティバル2013夏",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ワンダーフェスティバル」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_8th_anniversary_hopstepfestivl_yokohama0804",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「8th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_tbsアニメフェスタ2013",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「TBSアニメフェスタ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_performance_04発売記念イベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_ミリオンライブローソンスペシャルパーティー",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_台北漫画博覧会2013_アイドルマスターミリオンライブステージ_1130の部",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「台北漫画博覧会」"
+  },
+  {
+   "table": "events",
+   "id": "ev_animelo_summer_live_2013_-flag_nine-",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Animelo Summer Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_performance_05発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_8th_anniversary_hopstepfestivl_fukuoka0915",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「8th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_8th_anniversary_hopstepfestivl_makuhari0921",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「8th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_8th_anniversary_hopstepfestivl_makuhari0922",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「8th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_マチアソビ_vol11_アイドルマスターシンデレラガールズ_jewelriesシリーズ発売記念トークショー",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「マチ★アソビ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_performance_06発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_performance_06発売記念イベント_第2回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_劇場版アイドルマスター_in_マチアソビ_vol11",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「マチ★アソビ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_performance_07発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_performance_07発売記念イベント_第2回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズ_2周年記念イベント新宿ステーションスクエア",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "「2周年」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_performance_08発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_radio_special_party_2013年はthank_you",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "ラジオ番組発だが有観客のホール公演"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_performance_09発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive-4_saturday_stage",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_劇場版the_idolmster_movie_輝きの向こう側へ舞台挨拶_梅田ブルク7_1140の回上映終了後",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「舞台挨拶」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズデレラジスペシャルステージ_in_ワンダーフェスティバル2014冬",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ワンダーフェスティバル」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_performance_10発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_msters_of_idol_world2014",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_劇場版the_idolmster_movie_輝きの向こう側へ舞台挨拶_movix日吉津_1000の回上映終了後",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「舞台挨拶」"
+  },
+  {
+   "table": "events",
+   "id": "ev_劇場版the_idolmster_movie輝きの向こう側へスペシャルイベント",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_performance_11発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_1stlive_wonderful_mgic",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「1stLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_performance_12発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_performance_12発売記念イベント_第2回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_ラジオdeアイマchuワールドchuアー",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "ラジオ番組発だが有観客のホール公演"
+  },
+  {
+   "table": "events",
+   "id": "ev_生っすかレボリューション英会話チャレンジニコニコ超会議3",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ニコニコ超会議」"
+  },
+  {
+   "table": "events",
+   "id": "ev_超音楽祭2014ニコニコ超会議3",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ニコニコ超会議」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズトークイベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "kind=release_event"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_performance_13発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_performance_13発売記念イベント_第2回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズcd累計出荷100万枚突破キャラクターシングル第6弾発売記念イベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_1stlive_happyperformnce",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「1stLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスターシンデレラガールズpassionセレクションステージニコニコ23時間テレビ",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "番組・配信そのもの (公演として開かれていない)"
+  },
+  {
+   "table": "events",
+   "id": "ev_ランティス祭り2014_東海公演",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ランティス祭り」"
+  },
+  {
+   "table": "events",
+   "id": "ev_ランティス祭り2014_関西公演",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ランティス祭り」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスターシンデレラガールズ_スペシャルステージ_キュートセレクションワンダーフェスティバル2014夏",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ワンダーフェスティバル」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_masterwere_the_friendsリリース記念_ミニライブハイタッチ会",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「リリース記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_9th_anniversary_we_are_msterpiece_大阪公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「9th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_9th_anniversary_we_are_msterpiece_名古屋公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「9th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_harmony_0102発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_animelo_summer_live_2014_-oneness-",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Animelo Summer Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_キリンビバレッジアイドルマスターワンフォーオールローソンキャンペーンアイドルマスターワンフォーオールspecial_event",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_ランティス祭り2014_関東公演",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ランティス祭り」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_ワンフォーオール_765プロ学祭クイーンへの道スペシャルtgs2014",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「TGS」"
+  },
+  {
+   "table": "events",
+   "id": "ev_バンダイナムコ_アニメキャンプ2014",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「アニメキャンプ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_9th_anniversary_we_are_msterpiece_東京公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「9th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_マチアソビvol13_シンデレラガールズトークイベント_-machiasobi_mgic-",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「マチ★アソビ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_マチアソビnewtype_the_moving_pictures_festival_vol4",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「マチ★アソビ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_マチアソビvol13_アイドルマスタートークイベント_-mchiasopiece-",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「マチ★アソビ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_高橋ゆま_ピアノリサイタル_-アイマスの調べおねシンマスピ-",
+   "fields": {
+    "event_type": "orchestra"
+   },
+   "note": "名に「ピアノリサイタル」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_harmony_0304発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_2ndlive_party_mgic",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「2ndLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_-_featured_anime_showcase_in_anime_festival_asia_2014",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Anime Festival Asia」"
+  },
+  {
+   "table": "events",
+   "id": "ev_i_love_anisong_concertthe_idolmster_in_anime_festival_asia_2014",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Anime Festival Asia」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_harmony_0506発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_radio_special_party_02_welcome_2015年_day_party",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "ラジオ番組発だが有観客のホール公演"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive-5_saturday_stage",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_cinderella_real_party_01_あかるくせいそにかわいくきよく",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_c3日本動玩博覽2015_the_idolmster_cinderella_girls_talklive_in_hong_kong",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「C3日本動玩博覽」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズ346プロ_ワンフェスステージ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ワンフェス」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_movie_輝きの向こう側へ打ち上げパーティー",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_animation_project_01_star発売記念スペシャルイベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_stationぜんぜんあいたかった",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_harmony_0708発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_animejapan2015_アイドルマスター_シンデレラガールズ_ステージ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「AnimeJapan」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_animation_project_0203発売記念イベント_トークミニライブ",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_2ndlive_enjoy_hrmony_day1",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「2ndLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_animation_project_0405発売記念イベント_トークミニライブ",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_anisong_world_tour_lantis_festival_in_taipei",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Lantis」"
+  },
+  {
+   "table": "events",
+   "id": "ev_超音楽祭2015ニコニコ超会議2015",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ニコニコ超会議」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_animation_project_0607発売記念イベント_トークミニライブ",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_harmony_0910発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_strting_line_0102cd発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズstar_キラキラver企画中ですマチアソビvol14",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「マチ★アソビ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_animation_project_08_goincd発売記念イベント_トークミニライブお渡",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズローソン_special_event",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_cinderella_real_party_02イケてる彼女と楽しい公録",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_msters_of_idol_world2015_day1main_world_765pro",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズ346プロ_ワンフェスサマーステージin_2015",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ワンフェス」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_summer_festivl_2015_in_東京",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_strting_line_0304cd発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_special_stge_はじめましてオレたち315キャラホビ2015",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「キャラホビ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_summer_festivl_2015_in_大阪",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_animelo_summer_live_2015_-the_gate-",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Animelo Summer Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_animation_project_2nd_season_01_shine_発売記念スペシャ",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_マストソングス_赤盤青盤アイドルマスターシンデレラガールズ_スターライトステージ_ゲームでバトルしちゃいmstgs2015",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「TGS」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_sidem_ラジオ_315プロnight_ドラマチックミーティング_moon_side",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "ラジオ番組発だが有観客のホール公演"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_dreamers_01_dreamingcd発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_nhk総合music_japan収録放送11月16日深夜0時55分",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「NHK総合」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイマスタジオゲリラ公開収録",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「公開収録」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_strting_line_0506cd発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_帰ってきた今井麻美の華麗なるプロデューサー日記namco中野店",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "番組名を冠した店舗イベント (namco 中野店)"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイステ_in_wonderradio",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "WonderRadio (他社の催し) の中のステージ"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_dreamers_02cd発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_dreamers_02cd発売記念イベント_第2回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_3rdlive_シンデレラの舞踏会_-_power_of_smile_-_day1",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「3rdLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_side_m_1st_stagestrting_夜moon_side",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「1st STAGE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_dreamers_03cd発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_dreamers_03cd発売記念イベント_第2回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive_2016_saturday_stage",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_dreamers_04cd発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_3rdlive_tour_believe_my_dremnagoya0131",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「3rdLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster十週年台北國際電玩展特別舞台活動taipei_game_show_2016",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Taipei Game Show」"
+  },
+  {
+   "table": "events",
+   "id": "ev_nendoroid_10th_anniversary_live",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Nendoroid 10th Anniversary Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_3rdlive_tour_believe_my_drem_sendai0207",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「3rdLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_talk_live_stage_in_c3_hong_kongc3日本動玩博覽2016",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「C3 Hong Kong」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_dreamers_05cd発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_cinderella_real_party_03_あつまれプロデューサー_すてきなパレードin_らんらんホール",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_strting_line_0708cd発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_3rdlive_tour_believe_my_dremosaka0312",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「3rdLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_3rdlive_tour_believe_my_dremosaka0313",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「3rdLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_3rdlive_tour_believe_my_dremfukuoka0403",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「3rdLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_face_to_face_with_asami_shimodakawaii_kon_2016内イベント",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Kawaii Kon」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_3rdlive_tour_believe_my_dremmakuhari0416",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「3rdLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_3rdlive_tour_believe_my_dremmakuhari0417",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「3rdLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_dreamers_06cd発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_sidemライブビューイングステージ応援してみたニコニコ超会議2016",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ニコニコ超会議」"
+  },
+  {
+   "table": "events",
+   "id": "ev_プラチナスターズステージ紹介してみたニコニコ超会議2016",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ニコニコ超会議」"
+  },
+  {
+   "table": "events",
+   "id": "ev_超音楽祭2016",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「超音楽祭」"
+  },
+  {
+   "table": "events",
+   "id": "ev_monacaフェス2016",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「MONACA」"
+  },
+  {
+   "table": "events",
+   "id": "ev_シンデレラガールズステージリズムにノッてみたニコニコ超会議2016",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ニコニコ超会議」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_strting_line_0910cd発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_sidem_ラジオ_315プロnight_ドラマチックミーティング_vol2_moon_side",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "ラジオ番組発だが有観客のホール公演"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_station_summer_night_party",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズワンフェスサマーステージin_2016",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ワンフェス」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズ_コロムビアcd映像作品累計出荷300万枚突破_the_idolmster_cinderella_girls_star",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_platinum_stars_スペシャルステージ偶像大師白金星光特別舞台活動playstation_festival内イベント",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「PlayStation Festival」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_strting_line_1112cd発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_animelo_summer_live_2016_刻_-toki-",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Animelo Summer Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_ミリオンシアターアクティビティーin_c3tokyo",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "C3TOKYO (他社の催し) の中のステージ"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_4thlive_tricastle_story_神戸ワールド記念ホール公演_day1star",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「4thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_プラチナスターズspecial_party",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_4thlive_tricastle_story_さいたまスーパーアリーナ公演_day1bra",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「4thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_theter_activities_01発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_theter_activities_01発売記念イベント_第2回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_5th_anniversary_party_ニコ生sp",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「ニコ生」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_strting_line_131415cd発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_radio_special_party_03_dreaming_for_the_next_day_party",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "ラジオ番組発だが有観客のホール公演"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_activities_02発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_activities_02発売記念イベント_第2回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive_taiwansunday_stage",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_activities_03発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_activities_03発売記念イベント_第2回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_forward_01_sunshine_rhythm発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_forward_01_sunshine_rhythm発売記念イベント_第2回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_producer_meeting_2017_765pro_allstars_-fun_to_the_new_vision-",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_765_millionstars_in_c3_hong_kong",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「C3 Hong Kong」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_2nd_stage_originl_stars_shining_side",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「2nd STAGE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_cinderella_real_party_04_わいわいつどえ_しょねんしょうじょ_いやよいやよもすきのうち_第一部",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_forward_02_bluemoon_harmony発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズワンフェスwinterステージ_2017",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ワンフェス」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_4thlive_thnk_you_for_smile",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「4thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズ_プレミアムイベント",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_aj_night_2017",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「AJ NIGHT」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_greeting_tour_2017_beyond_the_dream_広島公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_live_theter_forward_03_starlight_melody発売記念イベント_第1回公演",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_greeting_tour_2017_beyond_the_dream_大阪公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_765_millionstars_first_time_in_taiwan",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_超音楽祭2017ミリオンスターズ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「超音楽祭」"
+  },
+  {
+   "table": "events",
+   "id": "ev_超音楽祭2017sidem",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「超音楽祭」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_greeting_tour_2017_beyond_the_dream_愛知公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_5thlive_tour_serendipity_parade_宮城公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「5thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_5thlive_tour_serendipity_parade_石川公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「5thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_greeting_tour_2017_beyond_the_dream_東京公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_5thlive_tour_serendipity_parade_大阪公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「5thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_greeting_tour_2017_beyond_the_dream_北海道公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_greeting_tour_2017_beyond_the_dream_石川公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_5thlive_tour_serendipity_parade_静岡公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「5thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_anisong_world_matsuri_at_anime_expo_2017_japan_kawaii_live",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Anime Expo」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_5thlive_tour_serendipity_parade_幕張公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「5thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_3rd_anniversary_strting_signal_2017",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「3rd Anniversary」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_5thlive_tour_serendipity_parade_福岡公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「5thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_5thlive_tour_serendipity_parade_さいたまスーパーアリーナ公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「5thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_animelo_summer_live_2017_-the_card-ミリオンライブ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Animelo Summer Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_animelo_summer_live_2017_-the_card-sidem",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Animelo Summer Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_extra_live_megton_voice_1回目",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_ims_game_show_2017東京ゲームショウ2017",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「東京ゲームショウ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_765_millionstars_hotchpotch_festivl",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_lisoeuf_party_2017_-autumn-sidem",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「LisOeuf」"
+  },
+  {
+   "table": "events",
+   "id": "ev_cinderella_party_デレパ参周年記念祝賀会",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_mster_sparkle_0203発売記念イベント_第1回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_nhk総合naomiの部屋",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「NHK総合」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズ_6th_anniversary_memorial_party",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「6th Anniversary」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスターシンデレラガールズ_with_アサヒ飲料_premium_event",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_5th_live_tour_serendipity_parade上海ファンミーティング",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "ツアー名を冠するが本公演ではない海外ファンミーティング"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_station_winter_premium_party",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_sidem_kizun_on_stgeステージ1回目",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_theter_generation_02_mster_sparkle_04_発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_theter_generation_02_mster_sparkle_04_発売記念イベント_2回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_ニューイヤーライブ_初星宴舞",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_theter_generation_03_mster_sparkle_05_発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_theter_generation_03_mster_sparkle_05_発売記念イベント_2回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive_2018_sunday_stage",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_3rdlive_tour_glorious_stge_幕張公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「3rdLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_765_millionstars_special_stage_in_c3afa_hong_kong_2018",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「C3AFA」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_3rdlive_tour_glorious_stge_仙台公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「3rdLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_theter_generation_04_mster_sparkle_06_発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_theter_generation_04_mster_sparkle_06_発売記念イベント_2回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズ劇場_すぷりんぐふぇすてぃばる_2018",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_theter_generation_05_mster_sparkle_07_発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_theter_generation_05_mster_sparkle_07_発売記念イベント_2回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_live_dam_stadiumアニカラjapanスペシャルステージanimejapan_2018",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「AnimeJapan」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_3rdlive_tour_glorious_stge_福岡公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「3rdLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_initial_messge",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_3rdlive_tourglorious_stge_静岡公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「3rdLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_超音楽祭2018",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「超音楽祭」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_theter_generation_06_mster_sparkle_08_発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_mr_stge_musicgroove第一部430日替わり主演アイドル天海春香",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_アニュータライブ2018あにゅパ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「アニュータライブ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_five-str_party",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_5thlive_brand_new_performnce",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「5thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_theter_generation_0708_発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_theter_generation_0708_発売記念イベント_2回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_brillint_wing_01_spread_the_wings発売記念イベント_東京公演1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_brillint_wing_01_spread_the_wings発売記念イベント_東京公演2回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_ミリオンライブ_シアターデイズミリシタ1周年サンキュー生配信",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「生配信」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_brillint_wing_01_spread_the_wings発売記念イベント_大阪公演1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_brillint_wing_01_spread_the_wings発売記念イベント_大阪公演2回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_anisong_world_matsuri_at_anime_expo_2018_japan_kawaii_liveアイマス出演部分のみ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Anime Expo」"
+  },
+  {
+   "table": "events",
+   "id": "ev_bilibili_macro_link_-star_phase_anisong_world_matsuri_2018シンデレラガールズ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Anisong World」"
+  },
+  {
+   "table": "events",
+   "id": "ev_bilibili_macro_link_-star_phase_anisong_world_matsuri_2018ミリオンライブ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Anisong World」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_brillint_wing_02_ヒカリのdestination発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_brillint_wing_02_ヒカリのdestination発売記念イベント_2回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_ミリオンライブワンフェス_サマーステージ_2018",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ワンフェス」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_producer_meeting_2018_what_is_top",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_motto_anisong_festival_2018アイマス出演パートのみ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「MOTTO ANISONG」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_million_theter_generation_0910_発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_brillint_wing_03_バベルシティグレイス発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_brillint_wing_03_バベルシティグレイス発売記念イベント_2回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズ_u1493巻特別版発売記念イベント_第1回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_animelo_summer_live_2018_oksidem",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Animelo Summer Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_animelo_summer_live_2018_okミリオンスターズ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Animelo Summer Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_ss3a_live_sound_booth",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_mr_stge_musicgroove2nd_season_第一部915日替わり主演アイドル萩原雪歩",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスターシャイニーカラーズ_トークミニライブlight_up_illumination_stars",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "kind=release_event"
+  },
+  {
+   "table": "events",
+   "id": "ev_tvアニメシンデレラガールズ劇場エンディングテーマ発売記念ニコ生_cingeki_night",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「ニコ生」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_brillint_wing_04_夢咲きafter_school発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_brillint_wing_04_夢咲きafter_school発売記念イベント_2回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_theter_boost_01_発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_cinderella_real_party_05_この時をまっていた_うきうき_ようきな_うんどうかい",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_brillint_wing_05_アルストロメリア発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_brillint_wing_05_アルストロメリア発売記念イベント_2回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_リアルステージイベントミリシタ感謝祭",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_6thlive_merry-go-roundome_メットライフドーム公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「6thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アニソンプレミアム",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「アニソン！プレミアム！」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_6thlive_merry-go-roundome_ナゴヤドーム公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「6thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive_taiwan_2018saturday_stage",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズ_7th_anniversary_memorial_stage_cygamesfes2018",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "CygamesFes (他社の催し) の中のステージ"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_theter_boost_02_発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズ_スターライトクルーズ_トークライブ_セカンドシーティング",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "クルーズのファンイベント。同じクルーズの生演奏は kind=live"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズ_スターライトクルーズ_トークライブ_ファーストシーティング",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "クルーズのファンイベント。同じクルーズの生演奏は kind=live"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズ_スターライトクルーズ_ピアノアレンジ生演奏下船時",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive_2019_saturday_stage",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive_2019_sunday_stage",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_theter_boost_03_発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_theter_boost_03_発売記念イベント_2回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_765_millionstars_special_stage_in_c3afa_hong_kong_2019",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「C3AFA」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_station_long_travelbest_of_the_idolmster_station_cd発売記念イベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_million_theter_generation_1213_発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_million_theter_generation_1213_発売記念イベント_2回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_1stlive_fly_to_the_shiny_sky",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「1stLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_producer_meeting_315_sprkling_time_with_all",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_frgment_wing_01発売記念イベント4月_第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_6thlive_tour_uni-onir_仙台公演_angel_station",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「6thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_million_theter_generation_1415_発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_million_theter_generation_1415_発売記念イベント_2回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_frgment_wing_01発売記念イベント5月_第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_4th_stage_tresure_gate",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「4th STAGE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_6thlive_tour_uni-onir_神戸公演_princess_station",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「6thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_frgment_wing_02発売記念イベント_第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズ_コロムビアcd_オリコン週間ランキングトップ10累計100タイトル突破記念_プロデューサーさん感謝祭_in_新木場ス",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「突破記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_教えてimajoさん_青木瑠璃子のギターレッスンアイドルマスター_シンデレラガールズ_コロムビアcd_オリコン週間ランキングトップ10累計100タイトル突",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「突破記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_20th_anniversary_live_ランティス祭り2019_arigato_anisong_day-02sidem出演部分",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ランティス祭り」"
+  },
+  {
+   "table": "events",
+   "id": "ev_20th_anniversary_live_ランティス祭り2019_arigato_anisong_day-02シャイニーカラーズ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ランティス祭り」"
+  },
+  {
+   "table": "events",
+   "id": "ev_20th_anniversary_live_ランティス祭り2019_arigato_anisong_day-03ミリオンスターズ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ランティス祭り」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_6thlive_tour_uni-onir_福岡公演_fairy_station",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「6thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_ミリオンライブ_シアターデイズミリシタ2周年サンキュー生配信",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「生配信」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_frgment_wing_03発売記念イベント_第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_cinderella_real_party_06超excited_ノリ遅れるな_輪になろう",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_frgment_wing_04発売記念イベント_第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アソビストア_presents_the_idolmster_shiny_colors_summer_party_2019",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_theter_generation_18_発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_theter_generation_18_発売記念イベント_2回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_sidem_5th_anniversary_because_of_you_in市原",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「5th Anniversary」"
+  },
+  {
+   "table": "events",
+   "id": "ev_animelo_summer_live_2019_-story-",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Animelo Summer Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_7thlive_tour_special_3chord_comical_pops",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「7thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_frgment_wing_05発売記念イベント_第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_6thlive_uni-onir_special",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「6thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_frgment_wing_06発売記念イベント_第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_バンダイナムコエンターテインメントフェスティバル",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「バンダイナムコエンターテインメントフェスティバル」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シャイニーカラーズ_283プロダクションプロデューサー感謝祭15_anniversary_festival",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_7thlive_tour_special_3chord_funky_dancing",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「7thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_nhk総合シブヤノオト生放送",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「NHK総合」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_million_theter_generation_1617_発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_theter_wave_0203_発売記念イベント_1回目",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_ミリシタ感謝祭_20192020",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_偶像大師_百萬人演唱會_劇場時光_製作人感謝祭_聲優迷你live_stage_見面會_in_tica2020",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「TICA2020」"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive_2020_sunday_stage",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_7thlive_tour_special_3chord_glowing_rock",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「7thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_mr_stge_musicgrooveencore_第一部222日替わり主演アイドル双海亜美真美",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_아이돌마스터_밀리언_라이브_시어터_데이즈_프로듀서_감사제_in한국アイドルマスターミリオンライブシアターデイズ_プロデューサー感謝祭_in_韓国",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_こころの歌人たち第3回弦哲也",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "番組・配信そのもの (公演として開かれていない)"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_livemillionstars特別生配信手作りのthank_you",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「生配信」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_765プロダクション所属星井美希特別生配信in_showroom",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「生配信」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_理由あって特別生配信mke_you_proud",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「生配信」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster765pro_allstars_15周年記念特番_mster_weekend-",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "番組・配信そのもの (公演として開かれていない)"
+  },
+  {
+   "table": "events",
+   "id": "ev_24magic_シンデレラたちの24時間生放送_オープニングthe_idolmster_cinderella_girls_live_broadcast_2",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「生放送」"
+  },
+  {
+   "table": "events",
+   "id": "ev_funky_dancing_nightthe_idolmster_cinderella_girls_live_broadcast_24magic_シンデレ",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「生放送」"
+  },
+  {
+   "table": "events",
+   "id": "ev_僕らのidol_fairthe_idolmster_cinderella_girls_live_broadcast_24magic_シンデレラたちの24時",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「生放送」"
+  },
+  {
+   "table": "events",
+   "id": "ev_フジテレビこの指とまれseason4_tifオンライン2020直前sp",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "番組・配信そのもの (公演として開かれていない)"
+  },
+  {
+   "table": "events",
+   "id": "ev_tokyo_idol_festival_オンライン_2020_day1",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「TOKYO IDOL FESTIVAL」"
+  },
+  {
+   "table": "events",
+   "id": "ev_シブヤノオト_and_more_fes2020",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「シブヤノオト」"
+  },
+  {
+   "table": "events",
+   "id": "ev_songs_of_tokyo_festival_2020_part2",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「SONGS OF TOKYO」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_music_dawn",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズ_9th_anniversary_memorial_party",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「9th Anniversary」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_broadcast_live_happy_new_yell_",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_ミリシタ感謝祭_20202021_online",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_ポップリンクスポプマス生配信_特別版みんなでpoplinks_tune_sp",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「生配信」"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive_2021_saturday_stage",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive_2021_sunday_stage",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_producer_meeting_welcome_to_pleasure_315_grden",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_2ndlive_step_into_the_sunset_sky",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「2ndLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_3rdlive_tour_piece_on_planet_nagoya",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「3rdLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_3rdlive_tour_piece_on_planet_tokyo",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「3rdLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_7thlive_qmp_flyer_reburn",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「7thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_next_live発表会_special_stage_miraiken_studio",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "kind=release_event"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_3rdlive_tour_piece_on_planet_fukuoka",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「3rdLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_lyered_wing_02発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_lyered_wing_03発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_ミリシタ4周年_anniversary4you_生配信",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「生配信」"
+  },
+  {
+   "table": "events",
+   "id": "ev_cinderella_real_party_07_derepa_is_gentle_and_elegant",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_bilibili_world2021上海日本特設会場アイドルマスター特別ステージ",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Bilibili」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_lyered_wing_04発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_animelo_summer_live_2021_-colors-",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Animelo Summer Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_lyered_wing_05発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_10th_anniversary_mgical_wonderland_tour_merrym",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「10th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_season-ir_bright_diamond",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_スタマス発売直前アイドルマスター_スターリットシーズン_スペシャルトークステージ",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "kind=release_event"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_theter_wave_0607_発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_283フェス_2021_happy_buffet",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_theter_wave_0405_発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_lyered_wing_07発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_6thlive_tour_next_destintion_side_kobe",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「6thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_sidem_特別生配信_2021",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「生配信」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_theter_wave_1314_発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_10th_anniversary_mgical_wonderland_tour_celebr",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「10th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_lyered_wing_08発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_ミリシタ感謝祭_20212022",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_xmas_party_-silent_night-",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_theter_challenge_03_発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_10th_anniversary_mgical_wonderland_tour_cosmos",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「10th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_6thlive_tour_next_destintion_side_tokyo",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「6thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_theter_wave_1112_発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_theter_wave_0809_発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_10th_anniversary_mgical_wonderland_tour_tropic",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「10th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_8thlive_twelwve",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「8thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_season-ir_clever_clover",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_producer_meeting_315_bet_of_passion_festival",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_10th_anniversary_mgical_wonderland",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「10th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_6thlive_tour_next_destintion_side_hokkaido",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「6thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_4thlive_空は澄み今を越えて",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「4thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_バンダイナムコエンターテインメントフェスティバル_2nd",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「バンダイナムコエンターテインメントフェスティバル」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_theter_challenge_01_発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_season-ir_lovers_heart",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_ドラマチックライブステージアイドルマスターsidem_6月16日木1800の回初日",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_theter_wave_1516_発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_cinderella_real_party_08_panical_emotioful_land",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_xr_artists_super_fes_2022",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「xR ARTISTS SUPER FES」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_ミリオンライブ_シアターデイズ私たちの描いた軌跡_ミリシタ5周年_生配信",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「生配信」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_765pro_allstars_live_sunrich_colorful",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_17周年生配信_17th_anniversary_prty",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「生配信」"
+  },
+  {
+   "table": "events",
+   "id": "ev_tokyo_idol_festival_2022_0806_sat_supported_by_にしたんクリニック",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「TOKYO IDOL FESTIVAL」"
+  },
+  {
+   "table": "events",
+   "id": "ev_シャニマス初の対バンライブ_283production_unit_live_setsuna_beat",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_theter_wave_1718_発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_theter_challenge_02_発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_like4live_cg_ootd",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_cdtvライブライブフェスティバル",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「CDTVライブ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_イナズマロック_フェス_2022",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「イナズマロック」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_7th_stage_grow_glow_starlight_signl",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「7th STAGE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_season-ir_shade_of_spade",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_シャニマス初の対バンライブ_283production_unit_live_mugen_beat",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_orchestra_concert_symphony_of_five_stars_",
+   "fields": {
+    "event_type": "orchestra"
+   },
+   "note": "名に「ORCHESTRA」"
+  },
+  {
+   "table": "events",
+   "id": "ev_tmrevolutionbandai_namco_entertainmentx_innovative_live",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「X INNOVATIVE LIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_tamashii_nation_2022_オープニングセレモニー",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「TAMASHII NATION」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_twinkle_live_constellation_gradation",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_7th_stage_grow_glow_sunlight_signl",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「7th STAGE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_京_premium_live_2022_12月10日土",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「京 Premium Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_第6回_ももいろ歌合戦",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ももいろ歌合戦」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_9thlive_chorusprkle",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「9thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive_2023_saturday_stage",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_panorma_wingシリーズ完走記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「完走記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスターsidem_315_winter_passion_スペシャルイルカショー",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_如月千早約束アイドルマスター",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "収録ムービーを YouTube Live で放送 (shows.venue)"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_msters_of_idol_world_2023",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_amuse_voice_actors_channel_fes_2023",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「AMUSE VOICE ACTORS CHANNEL FES」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_passionable_reading_show_ー超常事変対立スル正義ー",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_5thlive_if_i_wings",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「5thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_10thlive_tour_act-1_hppy_4_you",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「10thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シャイニーカラーズ_新作ゲーム制作発表会",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "kind=release_event"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_燿城夜祭_-かがやきよまつり-",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_radio_special_party_04_第一回",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "ラジオ番組発だが有観客のホール公演"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_u149_animation_mastercdシリーズ発売記念イベント_in_科学技術館サイ",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_765_millionstars_live_2023_dreamin_groove",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_315_production_presents_fntastic_combination_live_brainpower_神奈川公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_283production_solo_performance_live我儘なまま",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_10thlive_tour_act-2_5_to_sprkle",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「10thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_cinderella_real_party_09御利神オリジン",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_canvas_0104発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_shout_out_live",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_55th_anniversary_live_星が見上げた空_開催直前スペシャル配信",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "番組・配信そのもの (公演として開かれていない)"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_55th_anniversary_live_星が見上げた空",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「5.5th Anniversary」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_8th_stage_all_hnds_together",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「8th STAGE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_10thlive_tour_act-3_rise_the_dream",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「10thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_tvアニメアイドルマスター_シンデレラガールズ_u149_スペシャルトークイベント_トゥインクルパーティー",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "kind=release_event"
+  },
+  {
+   "table": "events",
+   "id": "ev_315_production_presents_fntastic_combination_live_brainpower_幕張公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_315_production_presents_fntastic_combination_live_connectime",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_異次元フェス開催記念音楽番組_music_bigbang",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "番組・配信そのもの (公演として開かれていない)"
+  },
+  {
+   "table": "events",
+   "id": "ev_異次元フェス_アイドルマスターラブライブ歌合戦",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「異次元フェス」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスターシリーズ島根スサノオマジック_スペシャルコラボレーション",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「スサノオマジック」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_canvas_0508発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive_2024_saturday_stage",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_unit_live_tour_connectrip_山形公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_passionable_reading_show_天地四心伝",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_10thlive_tour_act-4_million_theter",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「10thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_6thlive_tour_come_and_unite_brilliant_blooms",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「6thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_unit_live_tour_connectrip_岩手公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_菊地_真_萩原_雪歩_twin_live_はんげつであえたら_友藍",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_project_ims_vα-liv_live_-the_last_statement-",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_unit_live_tour_connectrip_大阪公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_315_production_presents_fntastic_combination_live_heartmaker_believers_match",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_6thlive_tour_come_and_unite_fantastic_fireworks",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「6thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_radio_special_party_05_",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "ラジオ番組発だが有観客のホール公演"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_unit_live_tour_connectrip_福岡公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_stage_for_cinderella_celebration_night",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_unit_live_tour_connectrip_東京公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_unit_live_tour_connectrip_石川公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_fuuryuufes_50_2024",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「FUURYUUFES」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_9th_stage_mir-circle_crescendo",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「9th STAGE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_vδlzdramatic_stars_collaboration_live_劇的演舞",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_live_fun_-beyond_the_blue_sky-",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_tokyo_idol_festival_2024_0804_sun_supported_by_にしたんクリニック",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「TOKYO IDOL FESTIVAL」"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_debut_live_初_tour_-初声公演-_名古屋クラブクアトロ公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_echoes_02発売記念イベント_第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_debut_live_初_tour_-初声公演-_梅田クラブクアトロ公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_961_production_presents_reflame_remembermoon",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_kimchikura_fes_vol03_with_illustar",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「KIMCHIKURA」"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_debut_live_初_tour_-初声公演-_渋谷クラブクアトロ公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_283_production_music_scene",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_animelo_summer_live_2024_-stargazer-",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Animelo Summer Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_life_like_a_live8_第一公演えるすりー8_第一公演",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Life Like a Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_debut_live_初_tour_-初心公演-_名古屋クラブクアトロ公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_joynt_pops_公開収録",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「公開収録」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_starlight_fantasy",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_debut_live_初_tour_-初心公演-_広島クラブクアトロ公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_65th_anniversary_live_chapter_283",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「6.5th Anniversary」"
+  },
+  {
+   "table": "events",
+   "id": "ev_cinderella_real_party_10_拾年の宴舟民の舞ww",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_debut_live_初_tour_-初恋公演-_梅田クラブクアトロ公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_debut_live_初_tour_-初恋公演-_広島クラブクアトロ公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_song_for_prism_happier_枕木の歌_時限式狂騒ワンダーランド_links_連動発",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_echoes_03発売記念イベント_第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_debut_live_初_tour_-初恋公演-_渋谷クラブクアトロ公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_10th_anniversary_meeting_pssion_bang愛媛公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「10th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_echoes_04発売記念イベント_第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_echoes_06発売記念イベント_第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_315_production_presents_fntastic_combination_live_pinatatime",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シャイニーカラーズshiny_piecesスペシャルドルフィンステージ",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_debut_live_初_tour_-初心公演-_梅田クラブクアトロ公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_mster_expo_live_showcase_cinderella_stage",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_mster_expo_live_showcase_haruka_amami_solo_live_start",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_mster_expo_live_showcase_side_pssion",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_mster_expo_live_showcase_the_cube_1535114_",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイマスエキスポ_ヴイアラspソロステージ_レトラ_",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスターエキスポミニライブ",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "M@STER EXPO 内のステージ。他ブランドの同 EXPO 公演は kind=live"
+  },
+  {
+   "table": "events",
+   "id": "ev_mster_expo_live_showcase_million_stage",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_mster_expo_live_showcase_ritsuko_akizuki_solo_live_let_me_hear",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_mster_expo_live_showcase_the_cube_6151851920_",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_10th_anniversary_meeting_pssion_sparks熊本公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「10th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_オールアイマス大感謝祭_2025年までもう待てない生配信",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「生配信」"
+  },
+  {
+   "table": "events",
+   "id": "ev_283_production_live_performance_liminalmarginaleternal_never1",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_movement_of_stardom_road_0103_購入者限定合同リリースイベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「リリースイベント」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_echoes_05発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_echoes_07発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive_2025_saturday_stage",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_virtual_music_award_2025",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Virtual Music Award」"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive_2025_sunday_stage",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_961_production_presents_reflame_追加公演_reflamedusk",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_echoes_01発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_echoes_08発売記念イベント第一回",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_10th_anniversary_meeting_pssion_sundae大阪公演",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「10th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_debut_live_初_tour_-初陣公演-_名古屋クラブクアトロ公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_vα-liv_special_stage_in_illustar",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ILLUSTAR」"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_debut_live_初_tour_-初陣公演-_梅田クラブクアトロ公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_debut_live_初_tour_-初陣公演-_渋谷クラブクアトロ公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスターシリーズ_全国プロデューサー検定午前の部",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_315アニマルpassionステージ_cfirst",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_2nd_season_live_over_the_prism",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_starlight_stage_10th_anniversary_tour_lets_amu",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「10th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_lemino_presents_ultra_anime_fes_2025_day_02",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ULTRA ANIME FES」"
+  },
+  {
+   "table": "events",
+   "id": "ev_music_scene_special_live",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_life_like_a_live9_エピソードi第一公演",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Life Like a Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_10th_anniversary_meeting_pssion_up",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「10th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_project_ims_vα-liv_1stlive_-here_we_are-",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「1stLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_765_millionstars_hotchpotch_festivl_2",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_mainote_festival_2025",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「MaiNote Festival」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_song_for_prism_裸足じゃイラレナイ明日もbeautiful_dayハナムケのハナタバ青",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_starlight_stage_10th_anniversary_tour_lets_amu_2",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「10th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_283_production_live_performance_uka_larva1",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_315_production_presents_fntastic_combination_live_chocofficeranger",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_movement_of_stardom_road_0406_購入者限定合同リリースイベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「リリースイベント」"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_the_1st_period_spotlight_star",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「1st Period」"
+  },
+  {
+   "table": "events",
+   "id": "ev_月村手毬_生誕ミニライブ2025",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "kind=release_event"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_starlight_stage_10th_anniversary_tour_lets_amu_3",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「10th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_vortex_core",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「vortex CORE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_radio_special_party_06",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "ラジオ番組発だが有観客のホール公演"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_7th_unitlive_tour_円環_-halo_around-_first_quadrant",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「7th UNITLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_starlight_stage_10th_anniversary_tour_lets_amu_4",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「10th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_灯里愛夏_birthday_online_live_2025",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_debut_live_初_tour_-初陣公演-_東京追加公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_7th_unitlive_tour_円環_-halo_around-_second_quadrant",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「7th UNITLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_bilibili_macro_link_2025",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「BILIBILI」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_10th_anniversary_stge_pssion-ing",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「10th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_-shiny_party-_in_shanghai_2025",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive_2025_ナツヤスミ_sunday_stage",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_20th_anniversary_orchestra_concert_symphony_of_brilliant_stars",
+   "fields": {
+    "event_type": "orchestra"
+   },
+   "note": "名に「ORCHESTRA」"
+  },
+  {
+   "table": "events",
+   "id": "ev_葛城リーリヤ_生誕ミニライブ2025",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "kind=release_event"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_20th_anniversary_special_party_アイ_must_go_on_これからもアイマスですよ_20th特",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「生配信」"
+  },
+  {
+   "table": "events",
+   "id": "ev_virtual_music_award_2025_summer_第五公演",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Virtual Music Award」"
+  },
+  {
+   "table": "events",
+   "id": "ev_mix_tokyo_dj_party_04",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「MIX TOKYO DJ PARTY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_倉本千奈_生誕ミニライブ2025",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "kind=release_event"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_765pro_allstars_live_never_end_idol",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_7th_unitlive_tour_円環_-halo_around-_third_quadrant",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「7th UNITLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_gold_rush_3巻発売記念イベント_飯田ヒカルさんイベント2部トークショーミニライブ",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_kimchikura_fes_vol4",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「KIMCHIKURA」"
+  },
+  {
+   "table": "events",
+   "id": "ev_animelo_summer_live_2025_thanxx",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Animelo Summer Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_movement_of_stardom_road_0710_購入者限定合同リリースイベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「リリースイベント」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_cinderella_girls_10th_memorial_live_starlight_stage",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "10th のナンバリング本公演 (「10th MEMORIAL LIVE」)"
+  },
+  {
+   "table": "events",
+   "id": "ev_上水流宇宙_birthday_online_live_2025",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_ナガノアニエラフェスタ2025",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「ナガノアニエラフェスタ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_grayscale_-magenta-",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「GRAYSCALE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_クラス対抗初星大運動会",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_7th_unitlive_tour_円環_-halo_around-_fourth_quadrant",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「7th UNITLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_-shiny_stage-_in_beijing_ido",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_315_production_presents_fntastic_battle_fes_who_goes_first_幕張公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_life_like_a_live10_第一公演",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Life Like a Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_12thlive",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「12thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_anirave_halloween",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「AniRAVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_高槻_やよい_水瀬_伊織_twin_live_いつまでもなかよし_えがおだね",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイドルマスター_シンデレラガールズ_15周年イヤー直前生配信",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「生配信」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_7th_live_tour_螺旋_-halo_around-_the_origin_on_the_a",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「7th LIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_レトラ_birthday_online_live_2025",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_紫雲清夏_生誕ミニライブ2025",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "kind=release_event"
+  },
+  {
+   "table": "events",
+   "id": "ev_315_production_presents_fntastic_battle_fes_who_goes_first_大阪公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_ヴイアライヴ灯里愛夏_スペシャルトークライブkpf2025内イベント",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「KPF2025」"
+  },
+  {
+   "table": "events",
+   "id": "ev_生配信lippsneon_sphere発表ミニライブinクロス新宿ビジョンアイドルマスター",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「生配信」"
+  },
+  {
+   "table": "events",
+   "id": "ev_cinderella_real_party_11_shall_we_amusement",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_如月千早_-_約束_the_first_take",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「THE FIRST TAKE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_cinderella_girls_fes_once_upon_a_strs",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_mix_tokyo_dj_party_06",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「MIX TOKYO DJ PARTY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_anirave_merry_time",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「AniRAVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_十王星南_生誕ミニライブ2025",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "kind=release_event"
+  },
+  {
+   "table": "events",
+   "id": "ev_如月千早_-_msterpiece_the_first_take",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "名に「THE FIRST TAKE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_アイマスマコトーークアイドルマスターアイのキセキweek",
+   "fields": {
+    "event_type": "broadcast"
+   },
+   "note": "番組・配信そのもの (公演として開かれていない)"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_msters_of_idol_world_2025_前夜祭djイベント",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_msters_of_idol_world_2025",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_篠澤_広_生誕ミニライブ2025",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "kind=release_event"
+  },
+  {
+   "table": "events",
+   "id": "ev_283_production_musical_performance_騎士団のヴェール_veil_of_order_abnegatio_i_",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_有村麻央_生誕ミニライブ2026",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "kind=release_event"
+  },
+  {
+   "table": "events",
+   "id": "ev_如月千早武道館単独公演oathone124土公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_リスアニlive_2026_saturday_stage",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_秦谷美鈴_生誕ミニライブ2026",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "kind=release_event"
+  },
+  {
+   "table": "events",
+   "id": "ev_315_winter_passion_ステージ_cfirst",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_315_winter_passion_ステージ_legenders",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_bandai_namco_music_live_festival_x_animonium_live_powered_by_crunchyroll",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「BANDAI NAMCO MUSIC LIVE FESTIVAL」"
+  },
+  {
+   "table": "events",
+   "id": "ev_涼風しとらレトラ_虛擬線下演唱會_in_開拓動漫祭_fancy_frontier46",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「開拓動漫祭」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_shiny_colors_シャニマス大感謝祭_283スポーツフェスティバル",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_sanrio_virtual_festival_2026_215sun",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「SANRIO VIRTUAL FESTIVAL」"
+  },
+  {
+   "table": "events",
+   "id": "ev_project_ims_vα-liv_2ndlive_-beyond_the_custom_-",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「2ndLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_dearly_stars_-dearly_dearly_meeting_-",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_dearly_starsvα-liv_live_-under_one_sky_-",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_初星音楽祭",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_315_winter_passion_ステージ_climax",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_姫崎莉波_生誕ミニライブ2026",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "kind=release_event"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_million_live_11thlive",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「11thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_passionable_reading_show_魂環の人形",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_283_production_xxxx_performance_xxx_sn-gul4r1ty",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolm@ster_shiny_colors_8th_live_ito_yume",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「8th LIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolm@ster_million_live_13thlive",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「13thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_cinderella_girls_musical_starlight_high_school",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_miki_hoshii_solo_showcase_the_future_spotlight_anime_central_2026",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Anime Central」"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_the_2nd_period_h_i_f選抜試験_セレクション",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「2nd Period」"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_the_2nd_period_hatsuboshi_idol_festival",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「2nd Period」"
+  },
+  {
+   "table": "events",
+   "id": "ev_e8a2e8ce-261b-43f6-829f-d4b041ddf000",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「リスアニ」"
+  },
+  {
+   "table": "events",
+   "id": "ev_cinderella_girls_musical_第2弾",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_animelo_summer_live_2026_-messenger-",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Animelo Summer Live」"
+  },
+  {
+   "table": "events",
+   "id": "ev_shibuya_lovez_opening_series_lantis_dayz",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Lantis」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolm@ster_20th_anniversary_more_re@lity_live_idol_world_super_festival_2026",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「20th Anniversary」"
+  },
+  {
+   "table": "events",
+   "id": "ev_765pro_allstars_dual_twin_live_tour_ふたごぼしのつばさ_つみまつよるまち",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_animethon_2026_musicfes_アイドルマスター_シャイニーカラーズ出演",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「Animethon」"
+  },
+  {
+   "table": "events",
+   "id": "ev_kimchikura_fes_26",
+   "fields": {
+    "event_type": "external_event"
+   },
+   "note": "名に「KIMCHIKURA」"
+  },
+  {
+   "table": "events",
+   "id": "ev_miki_hoshii_solo_showcase_the_future_spotlight_in_korea",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_cinderella_girls_concept_xr_live_pop_n_toybox",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_live_tour_-標-_福井公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolm@ster_shiny_colors_song_for_prism_karma_naraku_発売記念イベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_live_tour_-標-_福岡公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolmster_sidem_11th_stage_ever_everfter",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「11th STAGE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_上水流宇宙_birthday_online_live_2026",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolm@ster_million_live_14thlive",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「14thLIVE」"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_live_tour_-標-_岩手公演",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_283_production_solo_live_collection_-master_showpiece-",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolm@ster_shiny_colors_song_for_prism_super_duper_dreamer_beast_mode_発売記念イベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolm@ster_shiny_colors_song_for_prism_散花-sanka-_紅花-benibana-_発売記念イベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_学園アイドルマスター_live_tour_-標-_kアリーナ横浜公演_final",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolm@ster_shiny_colors_song_for_prism_ボーダーレス_ノンストレス_oh_yeah_発売記念イベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolm@ster_shiny_colors_song_for_prism_ring_ring_ringの魔法_街角メランコリー_発売記念イベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolm@ster_shiny_colors_song_for_prism_tokyo自由系_ガール_my_time_発売記念イベント",
+   "fields": {
+    "event_type": "release_event"
+   },
+   "note": "名に「発売記念」"
+  },
+  {
+   "table": "events",
+   "id": "ev_シンデレラガールズ_15周年_大型イベント",
+   "fields": {
+    "event_type": "anniversary"
+   },
+   "note": "ナンバリング「15th ANNIVERSARY」"
+  },
+  {
+   "table": "events",
+   "id": "ev_shiny_the_first_refrac7ions_still_blue",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_315_production_presents_f@ntastic_battle_fes_~wanna_step_in~",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolm@ster_cinderella_girls_15th_anniversary_orchestra_concert_~_シンデレラの演奏会_~",
+   "fields": {
+    "event_type": "orchestra"
+   },
+   "note": "名に「ORCHESTRA」"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolm@ster_cinderella_girls_×_million_live_clash_m@tch",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolm@ster_sidem_producer_meeting_~ajewelholic_~",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_the_idolm@ster_sidem_×_shiny_colors_sparkle_showdown",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  },
+  {
+   "table": "events",
+   "id": "ev_765_production_×_961_production_idol_ultimate_once_and_for_all",
+   "fields": {
+    "event_type": "live"
+   },
+   "note": "既定"
+  }
+ ]
+}
