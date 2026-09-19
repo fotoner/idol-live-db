@@ -56,17 +56,21 @@ pub fn performer_label(naming: &PerformerNaming) -> Option<String> {
     if let Some(label) = non_empty(&naming.singer_label) {
         return Some(label.to_string());
     }
+    let joined = join_names(&naming.performer_names, PERFORMER_SEPARATOR);
+    (!joined.is_empty()).then_some(joined)
+}
+
+/// 空白だけの要素を落としてから繋ぐ。区切りだけが並ぶのを防ぐ 1 段で、
+/// 曲一覧の中黒もセトリ行の全角スラッシュもここを通る。
+fn join_names(names: &[String], separator: &str) -> String {
     let mut out = String::new();
-    for name in naming.performer_names.iter().map(|n| n.trim()) {
-        if name.is_empty() {
-            continue;
-        }
+    for name in names.iter().map(|n| n.trim()).filter(|n| !n.is_empty()) {
         if !out.is_empty() {
-            out.push_str(PERFORMER_SEPARATOR);
+            out.push_str(separator);
         }
         out.push_str(name);
     }
-    (!out.is_empty()).then_some(out)
+    out
 }
 
 /// スナップショットの曲 1 行から名義を組む。
@@ -296,18 +300,6 @@ pub fn setlist_performer_label(naming: &SetlistNaming) -> Option<SetlistLabel> {
         source: SetlistLabelSource::PerformerNames,
         unit_names: Vec::new(),
     })
-}
-
-/// 空白だけの要素を落としてから繋ぐ。区切りだけが並ぶのを防ぐ 1 段。
-fn join_names(names: &[String], separator: &str) -> String {
-    let mut out = String::new();
-    for name in names.iter().map(|n| n.trim()).filter(|n| !n.is_empty()) {
-        if !out.is_empty() {
-            out.push_str(separator);
-        }
-        out.push_str(name);
-    }
-    out
 }
 
 #[cfg(test)]
