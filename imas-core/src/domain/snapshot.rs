@@ -515,6 +515,19 @@ pub struct Snapshot {
     pub show_venue_search: Vec<TextSearchIndex>,
     /// 会場: name / name_kana / aliases (改行区切りを 1 行ずつ)。
     pub venue_search: Vec<TextSearchIndex>,
+    /// ユニット: name / name_kana / name_alt。
+    ///
+    /// ユニットは長らく畳み済み索引を持たず、引く側が行ごとに畳んでいた。
+    /// 名前解決 (`domain::entity_resolution`) は 1 語につき 1,539 件を舐めるので、
+    /// 他の一覧と同じ規約 (読み込み時に 1 回だけ畳む) に揃える。
+    pub unit_search: Vec<TextSearchIndex>,
+    /// ブランド: id / name / short_name。
+    ///
+    /// **略称を入れるのが要点。**「ミリオン」「デレマス」は `short_name` にしか無く
+    /// (`name` は `THE IDOLM@STER MILLION LIVE!`)、正式名だけ見ていると
+    /// 人が実際に使う呼び方で 1 件も当たらない。id ("ml") も綴りに入れて、
+    /// LLM が語彙表から拾った id をそのまま投げても当たるようにする。
+    pub brand_search: Vec<TextSearchIndex>,
     pub venues: Vec<Venue>,
     /// 並びはテーブル出現順 (SQL 時代の fetchAll も ORDER BY なし)。
     pub venue_names: Vec<VenueName>,

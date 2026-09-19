@@ -488,6 +488,26 @@ pub fn build(raw: RawTables) -> Snapshot {
         })
         .collect();
 
+    // ユニットとブランドは名前・読み・別表記だけ (メンバー名は混ぜない —
+    // 混ぜるとメンバー 1 人の名前でユニットが並び、当たり方が別の意味になる)。
+    let unit_search = units
+        .iter()
+        .map(|u| {
+            TextSearchIndex::new(
+                [Some(u.name.as_str()), u.name_kana.as_deref(), u.name_alt.as_deref()]
+                    .into_iter()
+                    .flatten(),
+            )
+        })
+        .collect();
+    // 略称と id も綴りに入れる (「ミリオン」「ml」で当たる根拠。詳細は Snapshot の注記)。
+    let brand_search = brands
+        .iter()
+        .map(|b| {
+            TextSearchIndex::new([b.id.as_str(), b.name.as_str(), b.short_name.as_str()])
+        })
+        .collect();
+
     Snapshot {
         song_search,
         idol_search,
@@ -495,6 +515,8 @@ pub fn build(raw: RawTables) -> Snapshot {
         event_search,
         show_venue_search,
         venue_search,
+        unit_search,
+        brand_search,
         songs,
         idols,
         events,
