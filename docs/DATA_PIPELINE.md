@@ -102,6 +102,75 @@ Production に列が無いうちに push すると弾かれる。
 スキーマを変えた時 (列追加等) は、ローカル master.sqlite から `sqlite3 ... .dump > db/master.sql` で
 dump を作り直してコミットする (cron はデータのみ更新し、スキーマは db/master.sql 由来のため)。
 
+## events の種別 (`event_type`)
+
+「**この曲、いつぶり?**」に、オタクが自然に付ける但し書き —
+「オケマスを除けば 10 年ぶり」「AS の周年では 9th のみ」— を機械で出すための軸。
+除外と限定ができて初めて意味のある答えが出るので、**1 イベント = 1 値**で持つ。
+
+| 値 | 意味 | 例 |
+|---|---|---|
+| `anniversary` | 周年、またはブランドがナンバリングして続けている本公演 | 9th ANNIVERSARY / MILLION LIVE! 14thLIVE / SideM 7th STAGE |
+| `orchestra` | オーケストラ・クラシック編成の演奏会 | ORCHESTRA CONCERT 〜SYMPHONY OF FIVE STARS!!!!!〜 |
+| `external_event` | アイマス以外が主催する催しの中で行われたステージ | Animelo Summer Live / リスアニ！LIVE / TGS / ニコニコ超会議 / MONACAフェス |
+| `release_event` | 作品・商品のリリースに紐づく催し | 「LIVE THE@TER PERFORMANCE 02」発売イベント / お渡し会 / 舞台挨拶 |
+| `broadcast` | 番組・配信そのもの (公演として開かれていない) | THE FIRST TAKE / NHK『シブヤノオト』/ 〜生配信 |
+| `live` | 上記以外の、アイマス側が開いた公演 | M@STERS OF IDOL WORLD / CINDERELLA REAL PARTY / SideM GREETING TOUR 2017 |
+
+**未分類は空文字**。「分からない」を `live` に倒すと、分類していないイベントが
+自社公演として数えられ、上の但し書きが静かに嘘をつく。だから新規作成 (アプリの
+イベント編集・`tools/insert_future_events.py`) も、CloudKit に `eventType` が
+無かったときの既定値も **空**にしてある。
+
+### 重なったときの優先順位
+
+上から順に当てる。**`orchestra` が `anniversary` より先**なのは、
+「THE IDOLM@STER 20th anniversary ORCHESTRA CONCERT」を周年側に入れると
+「オケマスを除けば」が効かなくなるため。`external_event` が `anniversary` より先なのは、
+「7th Anniversary Memorial STAGE!! (CygamesFes2018)」のような**他社の催しの中の一コーナー**を
+周年本公演と同列に数えないため。
+
+1. `broadcast` → 2. `external_event` → 3. `orchestra` → 4. `release_event` → 5. `anniversary` → 6. `live`
+
+判定はイベント名を根拠にする。名前から決められないものは**空のまま置く**
+(推測で埋めない)。
+
+### 入れなかった軸と、その理由
+
+- **ツアー** … ツアーは 1 イベントの性格ではなく、**同じ公演名の連番イベント群**。
+  このリポジトリではツアーの各公演地が別 `events` 行になっているので、
+  1 行を見ても巡演かは分からない。しかも `tour` を `anniversary` と並ぶ値にすると
+  「10thLIVE TOUR Act-1〜4」「CG 5thLIVE TOUR」がまるごと周年から落ち、
+  「AS の周年では」の答えが変わる。軸にするなら `events` を束ねる series 列を足す
+  ほうで、`event_type` の仕事ではない。
+- **規模 (ミニライブ / アリーナ)** … `setlist_items` の曲数で出る。
+- **配信の有無** … `events.is_streaming` と `shows.stream_platform` が持っている。
+- **上演形態 (朗読劇 / ミュージカル)** … 現状ほぼ SideM と CG の数本で、
+  その軸で絞っても「意味のある答え」にならない。必要になったら足す。
+
+### `kind` との関係 (畳む予定)
+
+`events.kind` (`live` / `festival` / `release_event`) は `event_type` の**部分集合**に
+なっている: `festival` ≒ `external_event`、`release_event` はそのまま、`live` は
+`anniversary` / `orchestra` / `broadcast` / `live` に割れる。同じことを 2 列で言うのは
+片方だけ古くなる形なので、`event_type` に一本化する。
+
+移行の順は、**データが先・列の撤去は後**:
+
+1. 746 件すべてに `event_type` を入れる (`data/fixes/` → `--apply --push`)。
+   ここまでは `kind` を読む既存クライアントを壊さない。
+2. CloudKit の `Event.eventType` が全レコードに載ったことを確認する
+   (旧クライアントは `eventType` を読まないので、この時点では挙動が変わらない)。
+3. `kind` を読んでいる箇所を `event_type` に差し替える
+   (`event_list_filtering::normalize_kind` / `EventKind` / `EVENT_KINDS` /
+   `InfoWidgetData.NEXT_SHOW_KINDS` / `EventRepository` の一覧仕様)。
+   ここで「ライブタブに出すのは何か」の定義が `live` + `festival` から
+   `external_event` を含むかどうかの判断に変わるので、**この段だけは UX の判断が要る**。
+4. `kind` 列と CloudKit の `kind` フィールドを落とす。Room のマイグレーションと
+   `db/master.sql` の dump 作り直しが要る (「スキーマを変えた時」の手順)。
+
+3 を飛ばして 4 をやると、`kind` を読む旧バージョンのアプリで一覧が空になる。
+
 ### `meta.data_version` (これが落ちるとユーザーに届かない)
 
 アプリの reseed は **bundle 側 `data_version` > 端末側** のときだけ走る

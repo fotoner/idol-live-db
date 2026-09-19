@@ -28,7 +28,8 @@
 use super::json::{brand_ref, joint_brand_refs, listing, listing_with, Obj};
 use super::scope::show_criteria;
 use super::vocab::{
-    brand_vocab, checked, checked_date_bound, distinct, event_kind_vocab, idol_vocab, sample,
+    brand_vocab, checked, checked_date_bound, distinct, event_kind_vocab, event_type_vocab,
+    idol_vocab, sample,
     song_type_vocab,
 };
 use super::{args, ToolError, ToolSpec};
@@ -92,6 +93,13 @@ pub fn catalog() -> Vec<ToolSpec> {
                 "year": { "type": "integer", "description": "初日の開催年。" },
                 "venue": { "type": "string", "description": "会場名。読み・旧名でも当たる。" },
                 "kind": { "type": "string", "description": "live / festival / release_event。" },
+                "event_type": {
+                    "type": "string",
+                    "description": "催しの性格。anniversary (周年・ナンバリング本公演) / orchestra (オケ) / \
+                                    external_event (他社の催しへの出演) / release_event (発売記念) / \
+                                    broadcast (番組・配信) / live (それ以外の自社公演)。\
+                                    「AS の周年では」のような絞り込みはこちら。",
+                },
                 "when": { "type": "string", "enum": ["upcoming", "past", "all"], "description": "既定 all。upcoming は近い順、それ以外は新しい順。" },
                 "query": { "type": "string", "description": "ライブ名の部分一致。" },
                 "limit": { "type": "integer", "description": "既定 30・最大 200。" }
@@ -114,7 +122,9 @@ pub fn catalog() -> Vec<ToolSpec> {
         spec(
             "song_performances",
             "ある曲の披露履歴 (新しい順)。日付・公演・会場・そのときの歌唱者・通算何回目かを返す。\
-             出演者全員で歌った回は歌唱者の名前を並べず full_cast で示す。",
+             出演者全員で歌った回は歌唱者の名前を並べず full_cast で示す。\
+             各行の event_type (周年 / オケ / 外部イベント …) で「オケマスを除けば 10 年ぶり」\
+             のように数え直せる。",
             json!({
                 "song_id": { "type": "string", "description": "曲の id。" },
                 "limit": { "type": "integer", "description": "既定 50・最大 500。" }
@@ -499,6 +509,9 @@ fn list_events(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<Va
     let kind = args::str_opt(arguments, "kind")
         .map(|k| checked("kind", k, &event_kind_vocab(snap)))
         .transpose()?;
+    let event_type = args::str_opt(arguments, "event_type")
+        .map(|t| checked("event_type", t, &event_type_vocab(snap)))
+        .transpose()?;
     let when = args::str_opt(arguments, "when").unwrap_or_else(|| "all".to_string());
     if !matches!(when.as_str(), "upcoming" | "past" | "all") {
         return Err(ToolError::BadArgs("when は upcoming / past / all です".into()));
@@ -540,6 +553,10 @@ fn list_events(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<Va
         .into_iter()
         .filter(|&i| {
             let record = &records[i as usize];
+            event_type.as_ref().is_none_or(|t| &record.event.event_type == t)
+        })
+        .filter(|&i| {
+            let record = &records[i as usize];
             year.is_none_or(|y| year_key(record.first_date.as_deref()) == Some(y.to_string()))
         })
         .filter(|&i| {
@@ -573,6 +590,11 @@ fn list_events(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<Va
             o.opt("brand", brand_ref(snap, record.event.brand_id.as_deref()));
             o.list("joint_brands", joint_brand_refs(snap, record.event.joint_brand_ids.as_deref()));
             o.put("kind", json!(record.event.kind));
+            // 未分類は空なので出さない。空文字を返すと「分類が live でない」と
+            // 読み違えられる。
+            if !record.event.event_type.is_empty() {
+                o.put("event_type", json!(record.event.event_type));
+            }
             o.opt("first_date", record.first_date.clone());
             o.opt("last_date", record.last_date.clone());
             let shows = &snap.shows_by_event[index as usize];
@@ -721,10 +743,18 @@ fn song_performances(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolEr
     let history = performance_history(snap, &song_id);
     let items = performance_item_indices(snap, &song_id).to_vec();
     let total = history.len();
+    // 「いつぶりか」は種別で数え直されるもの (「オケマスを除けば 10 年ぶり」)。
+    // 履歴の各行に催しの種別を添えて、呼び手が除外して数え直せるようにする。
+    let event_type = |event_id: &str| {
+        let index = *snap.event_index_by_id.get(event_id)?;
+        let value = snap.events[index as usize].event_type.as_str();
+        (!value.is_empty()).then(|| json!(value))
+    };
     let performance_end = |entry: &crate::domain::song_detail_queries::PerformanceHistoryEntry| {
         let mut o = Obj::new();
         o.put("date", json!(entry.date));
         o.put("event_name", json!(entry.event_name));
+        o.opt("event_type", event_type(&entry.event_id));
         o.put("show_id", json!(entry.show_id));
         o.put("ordinal", json!(entry.ordinal));
         o.value()
@@ -742,6 +772,7 @@ fn song_performances(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolEr
             o.put("show_id", json!(entry.show_id));
             o.put("event_id", json!(entry.event_id));
             o.put("event_name", json!(entry.event_name));
+            o.opt("event_type", event_type(&entry.event_id));
             o.put("show_name", json!(entry.show_name));
             o.put("date", json!(entry.date));
             o.opt("venue", entry.venue);
@@ -1302,6 +1333,24 @@ mod tests {
         let release = run("list_events", json!({ "kind": "release_event", "limit": 1 }));
         assert!(release["total"].as_u64().unwrap() > 0);
         assert!(all["total"].as_u64().unwrap() > live["total"].as_u64().unwrap());
+    }
+
+    #[test]
+    fn 催しの種別で絞れる() {
+        // 「AS の周年では」のような絞り込みの軸。語彙は実データの DISTINCT なので、
+        // 分類がまだ入っていない DB でも「その値で絞ったらその値だけ返る」は成り立つ。
+        let snapshot = snap();
+        let vocabulary = super::event_type_vocab(snapshot);
+        for value in &vocabulary {
+            let listed = run("list_events", json!({ "event_type": value, "limit": 200 }));
+            assert!(listed["total"].as_u64().unwrap() > 0, "{value} が 0 件");
+            for event in rows(&listed, "events") {
+                assert_eq!(text(event, "event_type"), *value);
+            }
+        }
+        // 語彙外は黙って 0 件にせず、候補つきで突き返す。
+        let error = err("list_events", json!({ "event_type": "オケ" }));
+        assert!(matches!(error, ToolError::BadArgs(m) if m.contains("event_type")));
     }
 
     // ---- idol_songs ----

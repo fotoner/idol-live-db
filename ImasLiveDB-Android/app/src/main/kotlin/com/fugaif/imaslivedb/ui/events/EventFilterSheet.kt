@@ -54,6 +54,26 @@ val EVENT_KINDS: List<Pair<String, String>> = listOf(
 
 fun eventKindLabel(kind: String): String = EVENT_KINDS.firstOrNull { it.first == kind }?.second ?: kind
 
+/**
+ * 催しの性格 (events.event_type) の内部値と表示ラベル。iOS `EventType` と同じ 6 種。
+ *
+ * 「オケマスを除けば 10 年ぶり」「AS の周年では 9th のみ」のような**除外・限定**を
+ * 機械で出すための軸。どの催しがどれかを決める規則は imas-core 側にあり
+ * (docs/DATA_PIPELINE.md 「events の種別 (event_type)」)、ここにあるのは文言だけ。
+ */
+val EVENT_TYPES: List<Pair<String, String>> = listOf(
+    "anniversary" to "周年",
+    "orchestra" to "オーケストラ",
+    "external_event" to "外部イベント",
+    "release_event" to "リリイベ",
+    "broadcast" to "番組・配信",
+    "live" to "ライブ"
+)
+
+/** 未分類 (空文字) と語彙外は null。画面は「種別を出さない」で扱う。 */
+fun eventTypeLabel(eventType: String): String? =
+    EVENT_TYPES.firstOrNull { it.first == eventType }?.second
+
 /** 参加状態フィルタの値。コアの EventFilterCriteria.attendanceFilter がそのまま受ける文字列。 */
 private val ATTENDANCE_OPTIONS = listOf("all" to "すべて", "attended" to "参加済み", "not_attended" to "未参加")
 

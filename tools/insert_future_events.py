@@ -82,7 +82,10 @@ def main() -> None:
         # event INSERT OR IGNORE
         cur.execute(
             "INSERT OR IGNORE INTO events (id, brand_id, name, event_type, kind, is_streaming, is_solo) VALUES (?, ?, ?, ?, ?, 0, 0)",
-            (eid, ev["brand"], ev["name"], "live", ev["kind"]),
+            # event_type は催しの性格 (周年 / オケ / 外部イベント …)。発表段階では
+            # 分からないので**未分類 (空)** で入れる。"live" を既定にすると周年ライブが
+            # 自社の単発公演として数えられ、「周年では」の答えが静かに変わる。
+            (eid, ev["brand"], ev["name"], "", ev["kind"]),
         )
         if cur.rowcount:
             inserted_events += 1
@@ -94,7 +97,7 @@ def main() -> None:
                 "fields": {
                     "name": {"value": ev["name"], "type": "STRING"},
                     "brandId": {"value": ev["brand"], "type": "STRING"},
-                    "eventType": {"value": "live", "type": "STRING"},
+                    "eventType": {"value": "", "type": "STRING"},
                     "kind": {"value": ev["kind"], "type": "STRING"},
                     "isStreaming": {"value": 0, "type": "INT64"},
                     "isSolo": {"value": 0, "type": "INT64"},

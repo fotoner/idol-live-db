@@ -26,7 +26,11 @@ struct FilteredEventsView: View {
                             Button { navigate(.event(ew.event)) } label: {
                                 EventNameRow(
                                     event: ew.event,
-                                    subtitle: [ew.event.eventType, ew.firstDate].compactMap { $0 }.joined(separator: "  ")
+                                    // 種別は生の内部値ではなくラベルで出す。未分類なら日付だけ。
+                                    subtitle: [
+                                        EventType(rawValue: ew.event.eventType)?.displayLabel,
+                                        ew.firstDate,
+                                    ].compactMap { $0 }.joined(separator: "  ")
                                 )
                             }
                             .buttonStyle(.plain)

@@ -32,6 +32,7 @@ import com.fugaif.imaslivedb.ui.components.ImasAvatar
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.ImasLeadBar
 import com.fugaif.imaslivedb.ui.components.MarkToggleAction
+import com.fugaif.imaslivedb.ui.events.eventTypeLabel
 import com.fugaif.imaslivedb.ui.theme.DS
 
 /**
@@ -82,8 +83,9 @@ fun FilteredEventRow(item: EventWithDateRange, onClick: () -> Unit) {
                 fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink,
                 maxLines = 2, overflow = TextOverflow.Ellipsis
             )
-            // 種別 (ライブ/フェス等) と開催日。iOS の EventNameRow subtitle と同じ組み立て。
-            val sub = listOfNotNull(event.eventType.takeIf { it.isNotEmpty() }, item.dateRange)
+            // 種別 (周年/オケ等) と開催日。iOS の EventNameRow subtitle と同じ組み立て。
+            // 生の内部値ではなくラベルで出す。未分類なら日付だけ。
+            val sub = listOfNotNull(eventTypeLabel(event.eventType), item.dateRange)
                 .joinToString("  ")
             if (sub.isNotEmpty()) {
                 Text(sub, fontSize = 12.sp, color = DS.ink2, maxLines = 1, overflow = TextOverflow.Ellipsis)

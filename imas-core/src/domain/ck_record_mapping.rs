@@ -747,7 +747,10 @@ pub fn event(record: &CkRecordInput) -> Option<CkEventRow> {
         id,
         brand_id: f.str("brandId"),
         name,
-        event_type: f.str_or("eventType", "live"),
+        // event_type は「周年 / オケ / 外部イベント …」の分類。未設定を "live" に倒すと
+        // 分類していないイベントが「自社公演」として数えられ、「オケマスを除けば」の
+        // ような絞り込みが静かに嘘をつく。未設定は未設定 (空) のままにする。
+        event_type: f.str_or_empty("eventType"),
         is_streaming: f.bool_value("isStreaming", false),
         // 単独開催が既定 (合同ライブの方が少数派)。
         is_solo: f.bool_value("isSolo", true),
@@ -1363,7 +1366,8 @@ mod tests {
         // 既定値つき項目も空文字なら空文字 ("live"/"solo"/"original" に倒さない)。
         let e = event(&rec("e", &[("name", text("ライブ")), ("kind", text(""))])).unwrap();
         assert_eq!(e.kind, "");
-        assert_eq!(e.event_type, "live");
+        // event_type は既定値を持たない (未設定は未分類)。
+        assert_eq!(e.event_type, "");
 
         let s = song(&rec("s", &[("title", text("GO MY WAY!!")), ("songType", text(""))])).unwrap();
         assert_eq!(s.song_type, "");

@@ -40,6 +40,33 @@ enum EventKind: String, Codable, Sendable, CaseIterable {
     }
 }
 
+/// 催しの性格 (`events.event_type`)。「初恋は、オケマスを除けば 10 年ぶり」「AS の周年では
+/// 9th のみ」のような**除外・限定**を機械で出すための軸。
+///
+/// どの催しがどれかを決める規則は **imas-core 側**にある (docs/DATA_PIPELINE.md
+/// 「events の種別 (event_type)」)。ここにあるのは画面に出す文言だけ。
+/// 未分類のイベントは空文字なので `nil` になる。
+enum EventType: String, Codable, Sendable, CaseIterable {
+    case anniversary
+    case orchestra
+    case externalEvent = "external_event"
+    case releaseEvent = "release_event"
+    case broadcast
+    case live
+
+    /// UI 表示用の短いラベル。
+    var displayLabel: String {
+        switch self {
+        case .anniversary:   return "周年"
+        case .orchestra:     return "オーケストラ"
+        case .externalEvent: return "外部イベント"
+        case .releaseEvent:  return "リリイベ"
+        case .broadcast:     return "番組・配信"
+        case .live:          return "ライブ"
+        }
+    }
+}
+
 struct Event: Codable, FetchableRecord, PersistableRecord, Identifiable, Hashable, Sendable {
     static let databaseTableName = "events"
 

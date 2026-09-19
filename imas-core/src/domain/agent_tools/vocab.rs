@@ -31,6 +31,15 @@ pub fn event_kind_vocab(snap: &Snapshot) -> Vec<String> {
     distinct(snap.events.iter().map(|e| Some(e.kind.as_str())))
 }
 
+/// 催しの種別 (`anniversary` / `orchestra` / `external_event` / `release_event` /
+/// `broadcast` / `live`)。意味は docs/DATA_PIPELINE.md 「events の種別 (event_type)」。
+///
+/// 未分類のイベントは空文字なので `distinct` が落とす。つまり**語彙に「未分類」は
+/// 出ない**: 絞り込みの選択肢として出しても 1 件も意味のある答えにならないため。
+pub fn event_type_vocab(snap: &Snapshot) -> Vec<String> {
+    distinct(snap.events.iter().map(|e| Some(e.event_type.as_str())))
+}
+
 /// 出演の役割 (`member` / `lead` …)。`show_cast.cast_role` の実在値。
 pub fn cast_role_vocab(snap: &Snapshot) -> Vec<String> {
     distinct(snap.cast_by_show.iter().flat_map(|links| {
@@ -102,6 +111,9 @@ mod tests {
         let s = snap();
         assert!(brand_vocab(s).contains(&"ml".to_string()));
         assert!(event_kind_vocab(s).contains(&"live".to_string()));
+        // 種別は定数表でなく実データから。未分類 (空文字) は語彙に出ない。
+        let types = event_type_vocab(s);
+        assert!(!types.iter().any(String::is_empty), "{types:?}");
         // 役割は member が必ずあり、主演が入っている DB なら lead も。
         let roles = cast_role_vocab(s);
         assert!(roles.contains(&"member".to_string()), "{roles:?}");

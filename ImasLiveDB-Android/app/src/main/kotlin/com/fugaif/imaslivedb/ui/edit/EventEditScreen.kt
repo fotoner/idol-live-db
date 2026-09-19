@@ -65,9 +65,10 @@ fun EventEditScreen(
             errorMessage = "イベント名を入力してください"; return
         }
 
-        // 互換フィールド (eventType / isStreaming / isSolo) は既存値を維持し、新規は既定値。
+        // 互換フィールド (isStreaming / isSolo) は既存値を維持し、新規は既定値。
         // フォームに出さないが、サーバ側の create 必須チェックと一覧の絞り込みが見ている。
-        val eventType = original?.eventType ?: "live"
+        // eventType は催しの性格なので新規は**未分類**。iOS EventEditView.save() と同じ。
+        val eventType = original?.eventType ?: ""
         val isStreaming = original?.isStreaming ?: false
         val isSolo = original?.isSolo ?: false
         val resolvedBrandId = brandId.ifEmpty { null }
@@ -168,6 +169,6 @@ private fun emptyEvent(id: String) = Event(
     id = id,
     brandId = null,
     name = "",
-    eventType = "live",
+    eventType = "",
     isStreaming = false
 )

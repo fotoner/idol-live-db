@@ -132,9 +132,12 @@ struct EventEditView: View {
             return
         }
 
-        // 互換フィールド (eventType / isStreaming / isSolo) は既存値を維持。新規は既定値。
+        // 互換フィールド (isStreaming / isSolo) は既存値を維持。新規は既定値。
+        // eventType は催しの性格 (周年 / オケ / 外部イベント …) なので、新規は**未分類**で出す。
+        // "live" を既定にすると、発表されたばかりの周年ライブが自社の単発公演として
+        // 数えられ、「AS の周年では」の答えが静かに変わる。
         let original = mode.original
-        let eventType = original?.eventType ?? "live"
+        let eventType = original?.eventType ?? ""
         let isStreaming = original?.isStreaming ?? false
         let isSolo = original?.isSolo ?? false
 
