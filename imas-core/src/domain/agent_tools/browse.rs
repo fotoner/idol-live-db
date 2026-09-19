@@ -96,10 +96,12 @@ pub fn catalog() -> Vec<ToolSpec> {
         spec(
             "idol_songs",
             "あるアイドルの曲。原唱 (持ち歌) と、ライブで歌った曲は別物なので分けて返す。\
-             ユニット名義の持ち歌も別立てで返す (個人の song_artists には出てこないため)。",
+             ユニット名義の持ち歌も別立てで返す (個人の song_artists には出てこないため)。\
+             原唱の各行には原唱者の人数 (artist_count) が付き、リミックス等の派生曲には derived が立つ。\
+             「その人ひとりの持ち歌」が何曲かは solo_count が答える (role=solo でその曲だけ引ける)。",
             json!({
                 "idol_id": { "type": "string", "description": "アイドルの id。" },
-                "role": { "type": "string", "enum": ["original", "performed", "all"], "description": "既定 all。" },
+                "role": { "type": "string", "enum": ["original", "solo", "performed", "all"], "description": "既定 all。solo は原唱者がその人 1 人だけの曲 (派生曲を除く)。" },
                 "limit": { "type": "integer", "description": "区分ごとの上限。既定 50・最大 300。" }
             }),
             &["idol_id"],
@@ -178,7 +180,7 @@ fn spec(name: &str, description: &str, properties: Value, required: &[&str]) -> 
 // =============================================================================
 
 /// 先頭 `limit` 件だけ残す (総数は呼び出し側が先に控えておく)。
-fn take<T>(mut items: Vec<T>, limit: u32) -> Vec<T> {
+pub(super) fn take<T>(mut items: Vec<T>, limit: u32) -> Vec<T> {
     items.truncate(limit as usize);
     items
 }
@@ -216,12 +218,12 @@ const STATS_KINDS: [&str; 7] = [
 
 /// 空でない値を重複なく昇順で。語彙はデータそのものから作る
 /// (定数で持つと、ブランドや属性が増えたときに黙って古いままになる)。
-fn distinct<'a>(values: impl Iterator<Item = Option<&'a str>>) -> Vec<String> {
+pub(super) fn distinct<'a>(values: impl Iterator<Item = Option<&'a str>>) -> Vec<String> {
     let set: BTreeSet<&str> = values.flatten().filter(|v| !v.is_empty()).collect();
     set.into_iter().map(str::to_string).collect()
 }
 
-fn brand_vocab(snap: &Snapshot) -> Vec<String> {
+pub(super) fn brand_vocab(snap: &Snapshot) -> Vec<String> {
     snap.brand_order.iter().map(|&i| snap.brands[i as usize].id.clone()).collect()
 }
 
@@ -229,7 +231,7 @@ fn song_type_vocab(snap: &Snapshot) -> Vec<String> {
     distinct(snap.songs.iter().map(|s| s.song_type.as_deref()))
 }
 
-fn event_kind_vocab(snap: &Snapshot) -> Vec<String> {
+pub(super) fn event_kind_vocab(snap: &Snapshot) -> Vec<String> {
     distinct(snap.events.iter().map(|e| Some(e.kind.as_str())))
 }
 
@@ -240,7 +242,7 @@ fn idol_vocab(snap: &Snapshot, column: fn(&Idol) -> Option<&str>) -> Vec<String>
 }
 
 /// 語彙に無い値を、候補つきで突き返す。
-fn checked(arg: &str, value: String, allowed: &[String]) -> Result<String, ToolError> {
+pub(super) fn checked(arg: &str, value: String, allowed: &[String]) -> Result<String, ToolError> {
     if allowed.contains(&value) {
         return Ok(value);
     }
@@ -251,7 +253,7 @@ fn checked(arg: &str, value: String, allowed: &[String]) -> Result<String, ToolE
 }
 
 /// 候補の並べ方。全部並べると CD シリーズのように 100 件を超えるものがあるので頭だけ。
-fn sample(allowed: &[String]) -> String {
+pub(super) fn sample(allowed: &[String]) -> String {
     const SHOWN: usize = 40;
     let head = allowed.iter().take(SHOWN).cloned().collect::<Vec<_>>().join(" / ");
     if allowed.len() > SHOWN {
@@ -304,7 +306,7 @@ fn idol_row(snap: &Snapshot, idol: &Idol) -> Value {
 
 /// 曲 1 行。原唱者は人数が多い曲 (全体曲) で名前を並べると読む量が跳ね上がるので、
 /// 数だけを必ず返し、名前は並べても読める人数のときだけ添える。
-fn song_row(snap: &Snapshot, index: u32) -> Value {
+pub(super) fn song_row(snap: &Snapshot, index: u32) -> Value {
     use crate::domain::performer_label::song_performer_label;
     const NAMED_ARTISTS_MAX: usize = 10;
     let song = &snap.songs[index as usize];
@@ -338,8 +340,25 @@ fn original_artists(snap: &Snapshot, song: u32) -> Vec<&crate::domain::snapshot:
     snap.song_artists(&snap.songs[song as usize].id, Some("original"))
 }
 
+/// その曲の原唱者の人数。濾しは `Snapshot::song_artists` が正本。
+fn original_artist_count(snap: &Snapshot, song_id: &str) -> usize {
+    snap.song_artists(song_id, Some("original")).len()
+}
+
+/// 「その人ひとりの持ち歌」か — 原唱者が 1 人だけで、かつ一覧の母集団に居る曲。
+///
+/// 人数の判定は `setlist_shape::is_solo_song`、派生曲かどうかは
+/// `song_list_queries::is_hidden_variant` (曲一覧・Web・iOS が使っているのと同じ規則) に
+/// 任せる。派生を外すのは、`(伊吹 翼 Ver.)` のような別録音まで「持ち歌」に数えると
+/// 曲数が実態の 3 倍になるため。
+fn is_solo_own_song(snap: &Snapshot, song_id: &str) -> bool {
+    use crate::domain::song_list_queries::is_hidden_variant;
+    let Some(&i) = snap.song_index_by_id.get(song_id) else { return false };
+    crate::domain::setlist_shape::is_solo_song(snap, i) && !is_hidden_variant(&snap.songs[i as usize])
+}
+
 /// 公演 1 件の見出し (どの公演かを 1 行で書けるだけの情報)。
-fn show_header(snap: &Snapshot, show_index: u32) -> Value {
+pub(super) fn show_header(snap: &Snapshot, show_index: u32) -> Value {
     let show = &snap.shows[show_index as usize];
     let event = &snap.events[show.event as usize];
     let mut o = Obj::new();
@@ -657,6 +676,7 @@ fn list_events(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<Va
 
 fn idol_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
     use crate::domain::idol_song_queries::{idol_performed_songs, idol_unit_song_ids};
+    use crate::domain::song_list_queries::is_hidden_variant;
 
     let idol_id = args::str_req(arguments, "idol_id")?;
     let Some(idol) = snap.idol(&idol_id) else {
@@ -664,8 +684,8 @@ fn idol_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
     };
     let limit = args::limit(arguments, 50, 300)?;
     let role = args::str_opt(arguments, "role").unwrap_or_else(|| "all".to_string());
-    if !matches!(role.as_str(), "original" | "performed" | "all") {
-        return Err(ToolError::BadArgs("role は original / performed / all です".into()));
+    if !matches!(role.as_str(), "original" | "solo" | "performed" | "all") {
+        return Err(ToolError::BadArgs("role は original / solo / performed / all です".into()));
     }
 
     let mut out = Obj::new();
@@ -674,8 +694,23 @@ fn idol_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
     if role != "performed" {
         // 原唱 (持ち歌)。song_artists.role='original' の行だけ。
         let originals = crate::domain::idol_song_queries::idol_songs(snap, &idol_id, Some("original"));
-        let total = originals.len();
-        let rows = take(originals, limit)
+        // 「持ち歌 84 曲」のうち大半が `(伊吹 翼 Ver.)` のような派生曲で、
+        // 残りも合唱曲、ということが起きる。件数だけでは実態が分からないので、
+        // 行ごとに**原唱者の人数**と**派生曲かどうか**を添える。どちらも既存の正本
+        // (`Snapshot::song_artists` / `song_list_queries::is_hidden_variant`) の判断で、
+        // ここで数え直さない。
+        let solo_only: Vec<_> = originals.iter().filter(|r| is_solo_own_song(snap, &r.song_id)).cloned().collect();
+        // 「その人ひとりの持ち歌が何曲か」は role を問わず 1 回で答えられるようにする
+        // (role=solo をもう一度呼ばせない)。
+        out.put("solo_count", json!(solo_only.len()));
+
+        let (key, listed) = if role == "solo" {
+            ("solo", solo_only)
+        } else {
+            ("original", originals)
+        };
+        let total = listed.len();
+        let rows = take(listed, limit)
             .into_iter()
             .map(|r| {
                 let mut o = Obj::new();
@@ -683,10 +718,14 @@ fn idol_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
                 o.put("title", json!(r.title));
                 o.opt("release_date", r.release_date);
                 o.opt("unit_name", r.unit_name);
+                o.put("artist_count", json!(original_artist_count(snap, &r.song_id)));
+                if snap.song(&r.song_id).is_some_and(is_hidden_variant) {
+                    o.put("derived", json!(true));
+                }
                 o.value()
             })
             .collect();
-        out.capped("original", rows, total);
+        out.capped(key, rows, total);
 
         // ユニット名義の持ち歌 (songs.unit_id 由来)。個人の song_artists には
         // 出てこないことがあるので、原唱とは別立てで返す。
@@ -893,7 +932,7 @@ fn setlist_diff(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> 
 /// 軸の判定はどれも既存の正本を通す — ブランドは合同ライブ込みの
 /// `event_list_filtering`、会場は読み・旧名込みの `event_list_queries`。
 /// ここに述語を書くと、同じ「デレマスのライブ」が一覧と集計で違う集合になる。
-fn scoped_show_indexes(snap: &Snapshot, arguments: &Value) -> Result<Vec<u32>, ToolError> {
+pub(super) fn scoped_show_indexes(snap: &Snapshot, arguments: &Value) -> Result<Vec<u32>, ToolError> {
     use crate::domain::event_list_filtering::{
         filter_event_indices, EventFilterCriteria, EventFilterItem,
     };
@@ -944,7 +983,7 @@ fn scoped_show_indexes(snap: &Snapshot, arguments: &Value) -> Result<Vec<u32>, T
     Ok(shows)
 }
 
-fn show_index(snap: &Snapshot, show_id: &str) -> Result<u32, ToolError> {
+pub(super) fn show_index(snap: &Snapshot, show_id: &str) -> Result<u32, ToolError> {
     snap.show_index_by_id
         .get(show_id)
         .copied()

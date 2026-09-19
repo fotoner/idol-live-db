@@ -64,6 +64,7 @@
    │ imas-core/src/domain/   (唯一の正・純粋・テスト付) │  feature に関係なく常時コンパイル
    │   agent_tools/lookup.rs  … resolve / search / get_* / vocabulary
    │   agent_tools/browse.rs  … list_* / idol_songs / song_performances / setlist_diff / stats
+   │   agent_tools/predict.rs … list_shows / setlist_shape / song_position_profile / co_performed_songs
    │   entity_resolution.rs   … 人の言葉 → エンティティ候補
    │   proposal.rs            … 投入ドラフトの組み立て
    │   (以下は既存) search_queries / idol_queries / song_detail_queries / …
@@ -103,6 +104,27 @@
 確かめるテストを置く。同時に「`tool_catalog()` の全ツール名がその代表引数の表に載っている」ことも
 確かめ、**ツールを足したらテストが落ちる**ようにする。`serde_json::to_value(song)` と 1 行書けば
 漏れる形なので、人の注意ではなく機械で止める。
+
+## 4.5 「予想」は返さない (返すのは過去の事実だけ)
+
+「伊吹翼の主演公演が決まったらどんなセトリになる?」のような問いに、**DB が予想を答えては
+いけない**。スコアリングや重みづけを Rust に書くと、外れたときに直す先が無く、根拠の無い
+数字が「データベースの答え」として流通する。ここが出すのは *過去がどうだったか* だけで、
+予想は呼び手 (LLM) が組み立てる。そのための材料が `agent_tools/predict.rs` の 4 本:
+
+| ツール | 返す事実 |
+|---|---|
+| `list_shows` | 公演 (1 日ぶん) の一覧。`idol_id` × `cast_role=lead` で「その人が主演だった公演」 |
+| `setlist_shape` | 公演群のセトリの型 (曲数・区切り・1 曲目 / アンコール / 締めの常連・ソロ枠の本数) |
+| `song_position_profile` | ある曲が公演の「どこで」歌われるか (1 曲目 / 締め / アンコール / 序中終盤) |
+| `co_performed_songs` | 同じ公演で一緒に歌われやすい曲 (`performance_stats::co_occurring_songs`) |
+
+型の計算そのものは `domain/setlist_shape.rs` (純粋関数 + `#[test]`)。ツール面は呼んで
+JSON にするだけ。`setlist_shape` の応答には**標本にした公演数と公演 id** が必ず付く —
+6 公演から出た中央値を全公演の傾向と取り違えさせないため。
+
+`list_shows` と `setlist_shape` は**同じ絞り込み関数** (`predict::narrow_shows`) を通す。
+「翼が lead の公演の型」が「翼が lead の公演の一覧」と違う集合から出たら、材料として成立しない。
 
 ## 5. 新規データ登録 (どこで止めるか)
 

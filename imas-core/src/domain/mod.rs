@@ -43,6 +43,7 @@ pub mod setlist_diff;
 pub mod setlist_lineup;
 pub mod setlist_notes;
 pub mod setlist_sections;
+pub mod setlist_shape;
 pub mod short_year_month;
 pub mod song_list_filtering;
 pub mod display_join;

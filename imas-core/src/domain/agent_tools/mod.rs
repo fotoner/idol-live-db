@@ -18,6 +18,7 @@
 
 pub mod browse;
 pub mod lookup;
+pub mod predict;
 
 use crate::domain::snapshot::Snapshot;
 use serde_json::{json, Value};
@@ -75,7 +76,10 @@ pub fn server_instructions() -> &'static str {
   ここでは作品コードと掲載の有無までしか扱わない。
 - 新規登録・修正のツールは「提案 (ドラフト) を作る」ところまでで、実データへの反映は
   リポジトリのオーナーの手元の操作が要る。ツールが成功しても「登録した」「直した」とは
-  言わず、「ドラフトを用意した、反映はオーナー側の操作が要る」と伝えること。"
+  言わず、「ドラフトを用意した、反映はオーナー側の操作が要る」と伝えること。
+- セトリ予想を訊かれたら、この DB は予想を持たない。setlist_shape / song_position_profile /
+  co_performed_songs / list_shows が返すのは**過去の実績**なので、それを材料に予想は
+  自分で組み立て、根拠にした公演数・回数を必ず添えること。"
 }
 
 /// 読み取りツールの一覧。並びがそのまま LLM に見える順になる。
@@ -85,6 +89,9 @@ pub fn server_instructions() -> &'static str {
 pub fn tool_catalog() -> Vec<ToolSpec> {
     let mut all = lookup::catalog();
     all.extend(browse::catalog());
+    // 「過去はこうだった」を返す 4 本は最後。まず語をほどき、個別を見て、一覧で
+    // 数え、そのうえで傾向を訊く、という順に並べる。
+    all.extend(predict::catalog());
     all
 }
 
@@ -104,10 +111,13 @@ pub fn call_tool(
     if let Some(r) = browse::call(snap, name, args, today_key) {
         return r;
     }
+    if let Some(r) = predict::call(snap, name, args, today_key) {
+        return r;
+    }
     Err(ToolError::UnknownTool(name.to_string()))
 }
 
-/// ツール入力スキーマの封を組む。**`lookup` / `browse` / `proposal` の全 20 本がここを通る。**
+/// ツール入力スキーマの封を組む。**`lookup` / `browse` / `predict` / `proposal` の全 24 本がここを通る。**
 ///
 /// 以前は `browse` の `spec()` だけがここを自前で組んでいて (`$schema` +
 /// `additionalProperties: false` 付き)、`lookup` は生の JSON 文字列 (`additionalProperties`
@@ -608,6 +618,10 @@ mod tests {
             ("song_performances", json!({"song_id": song})),
             ("setlist_diff", json!({"show_id_a": show_a, "show_id_b": show_b})),
             ("stats", json!({"kind": "song_play_ranking"})),
+            ("list_shows", json!({"cast_role": "lead"})),
+            ("setlist_shape", json!({"cast_role": "lead"})),
+            ("song_position_profile", json!({"song_id": song})),
+            ("co_performed_songs", json!({"song_id": song})),
         ]
     }
 
@@ -750,15 +764,15 @@ mod tests {
         assert_eq!(err, ToolError::UnknownTool("存在しない".into()));
     }
 
-    /// 読み取り 14 本 + 書き込み 6 本、計 20 本すべてで封 (`tool_schema` の出力) が
+    /// 読み取り 18 本 + 書き込み 6 本、計 24 本すべてで封 (`tool_schema` の出力) が
     /// 揃っていることを固定する。以前は `additionalProperties: false` が browse の
     /// 7 本にしか付いておらず、残り 13 本は引数を打ち間違えても黙って無視されていた
     /// (レビュー指摘)。ここで 1 本でも漏れたら壊れるようにする。
     #[test]
-    fn 全20本のツールでスキーマの封が揃っている() {
+    fn 全24本のツールでスキーマの封が揃っている() {
         let mut all = tool_catalog();
         all.extend(crate::domain::proposal::proposal_catalog());
-        assert_eq!(all.len(), 20, "ツール数が変わった (この数を変えたら意図的か確認すること)");
+        assert_eq!(all.len(), 24, "ツール数が変わった (この数を変えたら意図的か確認すること)");
 
         let mut names: Vec<&str> = all.iter().map(|s| s.name.as_str()).collect();
         names.sort();
