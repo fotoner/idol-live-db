@@ -219,7 +219,8 @@ pub fn proposal_catalog() -> Vec<ToolSpec> {
                     "event_type": {
                         "type": "string",
                         "description": "催しの性格 (任意)。anniversary / orchestra / external_event / \
-                                        release_event / broadcast / live。**名前から決められなければ \
+                                        birthday / release_event / mini_live / broadcast / live。\
+                                        **名前から決められなければ \
                                         空のまま**にする (推測で埋めると「オケマスを除けば」\
                                         「周年では」の答えが変わる)。意味と優先順位は \
                                         docs/DATA_PIPELINE.md 「events の種別 (event_type)」",

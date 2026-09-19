@@ -46,11 +46,16 @@ enum EventKind: String, Codable, Sendable, CaseIterable {
 /// どの催しがどれかを決める規則は **imas-core 側**にある (docs/DATA_PIPELINE.md
 /// 「events の種別 (event_type)」)。ここにあるのは画面に出す文言だけ。
 /// 未分類のイベントは空文字なので `nil` になる。
+///
+/// 配信ライブかどうかは**この軸ではない** (`isStreaming` が持つ)。「バースデー」と
+/// 「配信」は直交するので、876 の BIRTHDAY ONLINE LIVE は birthday かつ配信。
 enum EventType: String, Codable, Sendable, CaseIterable {
     case anniversary
     case orchestra
     case externalEvent = "external_event"
+    case birthday
     case releaseEvent = "release_event"
+    case miniLive = "mini_live"
     case broadcast
     case live
 
@@ -60,7 +65,9 @@ enum EventType: String, Codable, Sendable, CaseIterable {
         case .anniversary:   return "周年"
         case .orchestra:     return "オーケストラ"
         case .externalEvent: return "外部イベント"
+        case .birthday:      return "バースデー"
         case .releaseEvent:  return "リリイベ"
+        case .miniLive:      return "ミニライブ"
         case .broadcast:     return "番組・配信"
         case .live:          return "ライブ"
         }

@@ -2855,9 +2855,9 @@
    "table": "events",
    "id": "ev_アイドルマスターシャイニーカラーズ_トークミニライブlight_up_illumination_stars",
    "fields": {
-    "event_type": "release_event"
+    "event_type": "mini_live"
    },
-   "note": "kind=release_event"
+   "note": "名に発売・リリースの語が無いミニライブ (kind=release_event だが、その根拠が名前に出ていない)"
   },
   {
    "table": "events",
@@ -4759,9 +4759,9 @@
    "table": "events",
    "id": "ev_学園アイドルマスターエキスポミニライブ",
    "fields": {
-    "event_type": "live"
+    "event_type": "mini_live"
    },
-   "note": "M@STER EXPO 内のステージ。他ブランドの同 EXPO 公演は kind=live"
+   "note": "M@STER EXPO 内のミニライブ。発売に紐づかないので release_event ではない"
   },
   {
    "table": "events",
@@ -5063,9 +5063,9 @@
    "table": "events",
    "id": "ev_月村手毬_生誕ミニライブ2025",
    "fields": {
-    "event_type": "release_event"
+    "event_type": "birthday"
    },
-   "note": "kind=release_event"
+   "note": "名に「生誕」"
   },
   {
    "table": "events",
@@ -5111,9 +5111,9 @@
    "table": "events",
    "id": "ev_灯里愛夏_birthday_online_live_2025",
    "fields": {
-    "event_type": "live"
+    "event_type": "birthday"
    },
-   "note": "既定"
+   "note": "名に「BIRTHDAY」"
   },
   {
    "table": "events",
@@ -5175,9 +5175,9 @@
    "table": "events",
    "id": "ev_葛城リーリヤ_生誕ミニライブ2025",
    "fields": {
-    "event_type": "release_event"
+    "event_type": "birthday"
    },
-   "note": "kind=release_event"
+   "note": "名に「生誕」"
   },
   {
    "table": "events",
@@ -5207,9 +5207,9 @@
    "table": "events",
    "id": "ev_倉本千奈_生誕ミニライブ2025",
    "fields": {
-    "event_type": "release_event"
+    "event_type": "birthday"
    },
-   "note": "kind=release_event"
+   "note": "名に「生誕」"
   },
   {
    "table": "events",
@@ -5271,9 +5271,9 @@
    "table": "events",
    "id": "ev_上水流宇宙_birthday_online_live_2025",
    "fields": {
-    "event_type": "live"
+    "event_type": "birthday"
    },
-   "note": "既定"
+   "note": "名に「BIRTHDAY」"
   },
   {
    "table": "events",
@@ -5375,17 +5375,17 @@
    "table": "events",
    "id": "ev_レトラ_birthday_online_live_2025",
    "fields": {
-    "event_type": "live"
+    "event_type": "birthday"
    },
-   "note": "既定"
+   "note": "名に「BIRTHDAY」"
   },
   {
    "table": "events",
    "id": "ev_紫雲清夏_生誕ミニライブ2025",
    "fields": {
-    "event_type": "release_event"
+    "event_type": "birthday"
    },
-   "note": "kind=release_event"
+   "note": "名に「生誕」"
   },
   {
    "table": "events",
@@ -5407,9 +5407,9 @@
    "table": "events",
    "id": "ev_生配信lippsneon_sphere発表ミニライブinクロス新宿ビジョンアイドルマスター",
    "fields": {
-    "event_type": "broadcast"
+    "event_type": "mini_live"
    },
-   "note": "名に「生配信」"
+   "note": "街頭ビジョンでの発表ミニライブ。頭の【生配信】は配信の注記で、配信そのものは is_streaming=1 が持つ"
   },
   {
    "table": "events",
@@ -5455,9 +5455,9 @@
    "table": "events",
    "id": "ev_十王星南_生誕ミニライブ2025",
    "fields": {
-    "event_type": "release_event"
+    "event_type": "birthday"
    },
-   "note": "kind=release_event"
+   "note": "名に「生誕」"
   },
   {
    "table": "events",
@@ -5495,9 +5495,9 @@
    "table": "events",
    "id": "ev_篠澤_広_生誕ミニライブ2025",
    "fields": {
-    "event_type": "release_event"
+    "event_type": "birthday"
    },
-   "note": "kind=release_event"
+   "note": "名に「生誕」"
   },
   {
    "table": "events",
@@ -5511,9 +5511,9 @@
    "table": "events",
    "id": "ev_有村麻央_生誕ミニライブ2026",
    "fields": {
-    "event_type": "release_event"
+    "event_type": "birthday"
    },
-   "note": "kind=release_event"
+   "note": "名に「生誕」"
   },
   {
    "table": "events",
@@ -5535,9 +5535,9 @@
    "table": "events",
    "id": "ev_秦谷美鈴_生誕ミニライブ2026",
    "fields": {
-    "event_type": "release_event"
+    "event_type": "birthday"
    },
-   "note": "kind=release_event"
+   "note": "名に「生誕」"
   },
   {
    "table": "events",
@@ -5631,9 +5631,9 @@
    "table": "events",
    "id": "ev_姫崎莉波_生誕ミニライブ2026",
    "fields": {
-    "event_type": "release_event"
+    "event_type": "birthday"
    },
-   "note": "kind=release_event"
+   "note": "名に「生誕」"
   },
   {
    "table": "events",
@@ -5823,9 +5823,9 @@
    "table": "events",
    "id": "ev_上水流宇宙_birthday_online_live_2026",
    "fields": {
-    "event_type": "live"
+    "event_type": "birthday"
    },
-   "note": "既定"
+   "note": "名に「BIRTHDAY」"
   },
   {
    "table": "events",

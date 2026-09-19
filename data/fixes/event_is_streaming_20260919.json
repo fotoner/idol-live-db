@@ -1,0 +1,19 @@
+{
+ "title": "名前が配信ライブだと言っているのに is_streaming=0 の 2 件",
+ "author": "fuga-if",
+ "_help": "配信かどうかは event_type と直交する軸なので、event_type ではなくこの列で直す。",
+ "fixes": [
+  {
+   "table": "events",
+   "id": "ev_上水流宇宙_birthday_online_live_2026",
+   "fields": { "is_streaming": 1 },
+   "note": "名が ONLINE LIVE。同じシリーズの 2025 年版 3 件 (灯里愛夏 / 上水流宇宙 / レトラ) は is_streaming=1 で shows.stream_platform も ASOBI STAGE"
+  },
+  {
+   "table": "events",
+   "id": "ev_ミリシタ感謝祭_20202021_online",
+   "fields": { "is_streaming": 1 },
+   "note": "名が ONLINE。shows.stream_platform に「リアルタイム配信(ニコニコ生放送、YouTube、Periscope、ミリシタアプリ内)」が入っている"
+  }
+ ]
+}

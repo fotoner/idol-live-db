@@ -31,8 +31,9 @@ pub fn event_kind_vocab(snap: &Snapshot) -> Vec<String> {
     distinct(snap.events.iter().map(|e| Some(e.kind.as_str())))
 }
 
-/// 催しの種別 (`anniversary` / `orchestra` / `external_event` / `release_event` /
-/// `broadcast` / `live`)。意味は docs/DATA_PIPELINE.md 「events の種別 (event_type)」。
+/// 催しの種別 (`anniversary` / `orchestra` / `external_event` / `birthday` /
+/// `release_event` / `mini_live` / `broadcast` / `live`)。
+/// 意味は docs/DATA_PIPELINE.md 「events の種別 (event_type)」。
 ///
 /// 未分類のイベントは空文字なので `distinct` が落とす。つまり**語彙に「未分類」は
 /// 出ない**: 絞り込みの選択肢として出しても 1 件も意味のある答えにならないため。

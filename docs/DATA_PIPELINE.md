@@ -113,7 +113,9 @@ dump を作り直してコミットする (cron はデータのみ更新し、�
 | `anniversary` | 周年、またはブランドがナンバリングして続けている本公演 | 9th ANNIVERSARY / MILLION LIVE! 14thLIVE / SideM 7th STAGE |
 | `orchestra` | オーケストラ・クラシック編成の演奏会 | ORCHESTRA CONCERT 〜SYMPHONY OF FIVE STARS!!!!!〜 |
 | `external_event` | アイマス以外が主催する催しの中で行われたステージ | Animelo Summer Live / リスアニ！LIVE / TGS / ニコニコ超会議 / MONACAフェス |
+| `birthday` | 生誕・バースデーの催し | 月村手毬 生誕ミニライブ2025 / レトラ BIRTHDAY ONLINE LIVE 2025 |
 | `release_event` | 作品・商品のリリースに紐づく催し | 「LIVE THE@TER PERFORMANCE 02」発売イベント / お渡し会 / 舞台挨拶 |
+| `mini_live` | ミニライブと名乗る催しのうち、生誕でも発売記念でもないもの | 学園アイドルマスターエキスポミニライブ |
 | `broadcast` | 番組・配信そのもの (公演として開かれていない) | THE FIRST TAKE / NHK『シブヤノオト』/ 〜生配信 |
 | `live` | 上記以外の、アイマス側が開いた公演 | M@STERS OF IDOL WORLD / CINDERELLA REAL PARTY / SideM GREETING TOUR 2017 |
 
@@ -124,16 +126,25 @@ dump を作り直してコミットする (cron はデータのみ更新し、�
 
 ### 重なったときの優先順位
 
-上から順に当てる。**`orchestra` が `anniversary` より先**なのは、
-「THE IDOLM@STER 20th anniversary ORCHESTRA CONCERT」を周年側に入れると
-「オケマスを除けば」が効かなくなるため。`external_event` が `anniversary` より先なのは、
-「7th Anniversary Memorial STAGE!! (CygamesFes2018)」のような**他社の催しの中の一コーナー**を
-周年本公演と同列に数えないため。
+上から順に当てる。
 
-1. `broadcast` → 2. `external_event` → 3. `orchestra` → 4. `release_event` → 5. `anniversary` → 6. `live`
+1. `broadcast` → 2. `external_event` → 3. `orchestra` → 4. `birthday` →
+5. `release_event` → 6. `mini_live` → 7. `anniversary` → 8. `live`
+
+- **`orchestra` が `anniversary` より先** … 「THE IDOLM@STER 20th anniversary ORCHESTRA
+  CONCERT」を周年側に入れると「オケマスを除けば」が効かなくなる。
+- **`external_event` が `anniversary` より先** … 「7th Anniversary Memorial STAGE!!
+  (CygamesFes2018)」のような**他社の催しの中の一コーナー**を周年本公演と同列に数えない。
+- **`birthday` が `release_event` より先** … 「月村手毬 生誕ミニライブ2025」は
+  購入者限定の形を取っていても、開かれた目的は生誕。
+- **`release_event` が `mini_live` より先** … ここを逆にすると「発売記念イベント」が
+  *名前にミニライブと書いてあるかどうか*で 2 つに割れる。同じ性格の催しが表記の偶然で
+  分かれる軸は、絞っても意味のある答えにならない。逆に言うと `mini_live` は
+  「ミニライブなのに発売記念ではないもの」という少数の受け皿で、現状 3 件しかない。
 
 判定はイベント名を根拠にする。名前から決められないものは**空のまま置く**
-(推測で埋めない)。
+(推測で埋めない)。「実質ミニライブだろう」のような**名前に書いていない推測で
+広げない**こと。
 
 ### 入れなかった軸と、その理由
 
@@ -143,21 +154,30 @@ dump を作り直してコミットする (cron はデータのみ更新し、�
   「10thLIVE TOUR Act-1〜4」「CG 5thLIVE TOUR」がまるごと周年から落ち、
   「AS の周年では」の答えが変わる。軸にするなら `events` を束ねる series 列を足す
   ほうで、`event_type` の仕事ではない。
-- **規模 (ミニライブ / アリーナ)** … `setlist_items` の曲数で出る。
-- **配信の有無** … `events.is_streaming` と `shows.stream_platform` が持っている。
+- **配信の有無** … `events.is_streaming` と `shows.stream_platform` が持つ**直交した軸**。
+  ここに入れると 876 の「BIRTHDAY ONLINE LIVE」が `birthday` と「配信」のどちらかしか
+  選べなくなる。正しい持ち方は `event_type='birthday'` かつ `is_streaming=1`。
+  なお `is_streaming` は現状あてにならない (`is_streaming=0` なのに
+  `shows.stream_platform` が埋まっている行が 30 件以上ある)。**どちらが正本かは
+  未決着**で、`Event.swift` / `Event.kt` の `isStreaming` には
+  「互換のため残置。新コードからは参照しない」と書いてある。配信で絞る機能を作る前に
+  ここを片付けること。
+- **アリーナ / ホールといった会場規模** … `shows.venue_id` から会場マスタで引ける。
 - **上演形態 (朗読劇 / ミュージカル)** … 現状ほぼ SideM と CG の数本で、
   その軸で絞っても「意味のある答え」にならない。必要になったら足す。
 
 ### `kind` との関係 (畳む予定)
 
-`events.kind` (`live` / `festival` / `release_event`) は `event_type` の**部分集合**に
-なっている: `festival` ≒ `external_event`、`release_event` はそのまま、`live` は
-`anniversary` / `orchestra` / `broadcast` / `live` に割れる。同じことを 2 列で言うのは
-片方だけ古くなる形なので、`event_type` に一本化する。
+`events.kind` (`live` / `festival` / `release_event`) は `event_type` の**粗い版**に
+なっている: `festival` ≒ `external_event`、`kind=release_event` の大半はそのままだが
+一部は `birthday` / `mini_live` / `broadcast` に割れ、`kind=live` は
+`anniversary` / `orchestra` / `external_event` / `birthday` / `broadcast` / `live` に割れる。
+同じことを 2 列で言うのは片方だけ古くなる形なので、`event_type` に一本化する。
 
 移行の順は、**データが先・列の撤去は後**:
 
-1. 746 件すべてに `event_type` を入れる (`data/fixes/` → `--apply --push`)。
+1. 全 746 件に `event_type` を行き渡らせる (`data/fixes/` → `--apply --push`)。
+   名前から決められない 1 件だけは空のまま残す。
    ここまでは `kind` を読む既存クライアントを壊さない。
 2. CloudKit の `Event.eventType` が全レコードに載ったことを確認する
    (旧クライアントは `eventType` を読まないので、この時点では挙動が変わらない)。
