@@ -94,6 +94,102 @@ pub fn performer_indexes_needing_sync(
         .collect()
 }
 
+// =============================================================================
+// 2 公演のセットリストを比べる
+// =============================================================================
+//
+// 上の差分判定が「同じ公演の編集前後」を比べるのに対し、こちらは **別々の 2 公演**を
+// 比べる。同じ「セトリの差分」なので置き場はここで、入力の形も同じ射影
+// ([`SetlistItemDiffRow`]) を使う。スナップショットは見ない (どの公演の行を渡すかは
+// 呼び出し側の話で、比べ方だけがここの判断)。
+
+/// 両方の公演で歌われた曲。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SharedSong {
+    pub song_id: String,
+    /// A 側での曲順 (同じ公演で 2 回歌われた曲は最初の 1 回)。
+    pub position_a: i64,
+    pub position_b: i64,
+}
+
+/// 片方にしか無かった曲。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SetlistSlot {
+    pub song_id: String,
+    pub position: i64,
+    pub section: Option<String>,
+}
+
+/// 2 公演のセットリストの比較結果。
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct SetlistComparison {
+    /// 両方にある曲 (A の曲順)。
+    pub shared: Vec<SharedSong>,
+    /// A だけにある曲 (A の曲順)。
+    pub only_a: Vec<SetlistSlot>,
+    /// B だけにある曲 (B の曲順)。
+    pub only_b: Vec<SetlistSlot>,
+    /// 共通曲が **両方で同じ並び**に出てくるか。
+    ///
+    /// 「曲順が違う」は曲の入れ替わりとは別の関心で、ツアーで同じセトリを
+    /// 組み替えたのかどうかがこれで分かる。共通曲が 1 曲以下なら並びようがないので true。
+    pub same_order: bool,
+}
+
+/// 2 公演のセットリストを比べる。`a` / `b` は **曲順に並べた**行を渡すこと。
+///
+/// 同じ曲が 1 公演で複数回出る (アンコールの再演) ことがあるので、曲の有無は
+/// 曲 id の集合で見て、位置は最初の 1 回を採る。回数まで数えないのは、
+/// 「この曲はどっちでもやった」という問いに 2 回目が影響しないため。
+pub fn compare_setlists(a: &[SetlistItemDiffRow], b: &[SetlistItemDiffRow]) -> SetlistComparison {
+    let first_position = |rows: &[SetlistItemDiffRow]| -> HashMap<String, i64> {
+        let mut map: HashMap<String, i64> = HashMap::new();
+        for r in rows {
+            map.entry(r.song_id.clone()).or_insert(r.position);
+        }
+        map
+    };
+    let in_b = first_position(b);
+    let in_a = first_position(a);
+
+    let mut shared: Vec<SharedSong> = Vec::new();
+    let mut only_a: Vec<SetlistSlot> = Vec::new();
+    let mut seen: HashSet<&str> = HashSet::new();
+    for r in a {
+        if !seen.insert(r.song_id.as_str()) {
+            continue;
+        }
+        match in_b.get(&r.song_id) {
+            Some(&position_b) => shared.push(SharedSong {
+                song_id: r.song_id.clone(),
+                position_a: r.position,
+                position_b,
+            }),
+            None => only_a.push(SetlistSlot {
+                song_id: r.song_id.clone(),
+                position: r.position,
+                section: r.section.clone(),
+            }),
+        }
+    }
+
+    let mut seen_b: HashSet<&str> = HashSet::new();
+    let only_b: Vec<SetlistSlot> = b
+        .iter()
+        .filter(|r| seen_b.insert(r.song_id.as_str()) && !in_a.contains_key(&r.song_id))
+        .map(|r| SetlistSlot {
+            song_id: r.song_id.clone(),
+            position: r.position,
+            section: r.section.clone(),
+        })
+        .collect();
+
+    // shared は A の曲順に積んであるので、B 側の位置が単調増加なら同じ並び。
+    let same_order = shared.windows(2).all(|w| w[0].position_b < w[1].position_b);
+
+    SetlistComparison { shared, only_a, only_b, same_order }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -269,6 +269,31 @@ pub fn search_events_by_name_or_venue(
     indexes.into_iter().map(|i| EventListRecord::from(&snap.events[i as usize])).collect()
 }
 
+/// その会場で公演があったイベントの id 列 (`EventFilterCriteria::venue_event_ids` の中身)。
+///
+/// 会場は公演 (shows) 側にしか無いので、イベント単位の絞り込みに橋渡しするには
+/// どこかで逆引きが要る。**当たり方は検索と同じ規則でなければならない** —
+/// 生の `shows.venue` だけを見ると「よこはまありーな」でも旧名でも引けない
+/// ([`search_events_by_name_or_venue`] と同じ理由) ので、会場マスタ側の
+/// 読み・別名にも当てる。ここを正本にして、呼び出し側が自前で逆引きを書かないようにする。
+///
+/// 並びはスナップショット順 (集合として使う値なので順序に意味を持たせない)。
+pub fn event_ids_at_venue(snap: &Snapshot, venue: &str) -> Vec<String> {
+    let needle = FoldedNeedle::new(venue);
+    if needle.is_empty() {
+        return Vec::new();
+    }
+    (0..snap.events.len() as u32)
+        .filter(|&i| {
+            snap.shows_by_event[i as usize].iter().any(|&s| {
+                snap.show_venue_search[s as usize].matches(needle.as_bytes())
+                    || venue_spellings_hit(snap, snap.shows[s as usize].venue_id.as_deref(), &needle)
+            })
+        })
+        .map(|i| snap.events[i as usize].id.clone())
+        .collect()
+}
+
 /// 会場マスタ側の綴り (現行名・読み・別名) に当たるか。
 ///
 /// 公演に `venue_id` が無い (会場を特定できていない古い公演) 場合は false。

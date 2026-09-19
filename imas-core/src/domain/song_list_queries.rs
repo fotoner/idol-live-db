@@ -594,6 +594,34 @@ pub fn songs_by_release_year(snap: &Snapshot, year: &str) -> Vec<u32> {
     sort_by_release_then_kana(snap, indexes)
 }
 
+/// リリース日の範囲で引く (`from` <= release_date <= `to`・どちらも省略可)。
+///
+/// [`songs_by_release_year`] は 1 年ちょうどしか取れないので、「2020 年以降」
+/// 「2023〜2024 年」のような問いに答えられない。境界は **文字列の前方比較**で見る:
+/// release_date は `YYYY-MM-DD` 固定なので辞書順がそのまま日付順になり、
+/// `"2024"` / `"2024-05"` のような粗い境界もそのまま「その年/その月ぜんぶ」を含む
+/// (日付側を境界の長さに切ってから比べる)。
+///
+/// release_date を持たない曲は範囲に入れようがないので必ず落とす
+/// (「未定」を「古い」とも「新しい」とも読ませない)。
+/// 並びは criterion 系と同じ (release_date ASC, title_kana ASC)。
+pub fn songs_in_release_range(snap: &Snapshot, from: Option<&str>, to: Option<&str>) -> Vec<u32> {
+    let indexes = (0..snap.songs.len() as u32)
+        .filter(|&i| {
+            let Some(date) = snap.songs[i as usize].release_date.as_deref() else { return false };
+            from.is_none_or(|b| bound_cmp(date, b) != Ordering::Less)
+                && to.is_none_or(|b| bound_cmp(date, b) != Ordering::Greater)
+        })
+        .collect();
+    sort_by_release_then_kana(snap, indexes)
+}
+
+/// 日付を境界の粒度へ切ってから比べる (`"2024-05-01"` を `"2024"` と比べると等しい)。
+fn bound_cmp(date: &str, bound: &str) -> Ordering {
+    let n = bound.len().min(date.len());
+    date[..n].cmp(&bound[..n])
+}
+
 /// 任意の id 集合を 50 音順に並べて引く (iOS `songsByIdsOrderedQuery`)。
 /// SQL の `IN` と同じく、重複 id は 1 回・未知 id は無視。
 pub fn songs_by_ids_ordered(snap: &Snapshot, ids: &[String]) -> Vec<u32> {
