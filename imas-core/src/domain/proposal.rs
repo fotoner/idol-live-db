@@ -216,7 +216,14 @@ pub fn proposal_catalog() -> Vec<ToolSpec> {
                     "id": { "type": "string", "description": "event id。規則: ev_{slug}" },
                     "brand_id": { "type": "string", "enum": BRAND_IDS },
                     "name": { "type": "string", "description": "イベント名" },
-                    "event_type": { "type": "string", "description": "任意" },
+                    "event_type": {
+                        "type": "string",
+                        "description": "催しの性格 (任意)。anniversary / orchestra / external_event / \
+                                        release_event / broadcast / live。**名前から決められなければ \
+                                        空のまま**にする (推測で埋めると「オケマスを除けば」\
+                                        「周年では」の答えが変わる)。意味と優先順位は \
+                                        docs/DATA_PIPELINE.md 「events の種別 (event_type)」",
+                    },
                     "kind": { "type": "string", "enum": EVENT_KINDS },
                     "is_streaming": { "description": "0 か 1 (任意)" },
                     "is_solo": { "description": "0 か 1 (任意)" },
