@@ -134,7 +134,9 @@ pub mod args {
             _ => None,
         }
         .ok_or_else(|| ToolError::BadArgs("limit は 0 以上の整数です".into()))?;
-        Ok(if n == 0 { default } else { (n as u32).min(max) })
+        // 先に u64 のまま丸める。`n as u32` を先にすると 4294967296 が 0 になり、
+        // 「上限で丸める」つもりが 0 件になる (u32 の剰余)。
+        Ok(if n == 0 { default } else { n.min(max as u64) as u32 })
     }
 
     /// 整数。文字列で来ても受ける。
@@ -143,8 +145,9 @@ pub mod args {
             None | Some(Value::Null) => Ok(None),
             Some(Value::Number(n)) => n
                 .as_u64()
-                .map(|n| Some(n as u32))
-                .ok_or_else(|| ToolError::BadArgs(format!("{key} は整数です"))),
+                .and_then(|n| u32::try_from(n).ok())
+                .map(Some)
+                .ok_or_else(|| ToolError::BadArgs(format!("{key} は 0 以上の整数です"))),
             Some(Value::String(s)) => s
                 .trim()
                 .parse::<u32>()
@@ -155,12 +158,25 @@ pub mod args {
     }
 
     /// 真偽値。`"true"` / `"1"` のような寄こし方も受ける。
-    pub fn bool_or(args: &Value, key: &str, default: bool) -> bool {
+    ///
+    /// **読めない綴りは既定に落とさず `BadArgs` にする。**黙って既定に倒すと、
+    /// `"TRUE"` と書いた呼び手は自分の指定が無視されたことに気づけない。
+    pub fn bool_or(args: &Value, key: &str, default: bool) -> Result<bool, ToolError> {
         match args.get(key) {
-            Some(Value::Bool(b)) => *b,
-            Some(Value::String(s)) => matches!(s.trim(), "true" | "1" | "yes"),
-            Some(Value::Number(n)) => n.as_u64().is_some_and(|n| n != 0),
-            _ => default,
+            None | Some(Value::Null) => Ok(default),
+            Some(Value::Bool(b)) => Ok(*b),
+            Some(Value::Number(n)) => n
+                .as_u64()
+                .map(|n| n != 0)
+                .ok_or_else(|| ToolError::BadArgs(format!("{key} は true / false です"))),
+            Some(Value::String(s)) => match s.trim().to_ascii_lowercase().as_str() {
+                "true" | "1" | "yes" => Ok(true),
+                "false" | "0" | "no" => Ok(false),
+                other => Err(ToolError::BadArgs(format!(
+                    "{key} は true / false です ({other} は読めません)"
+                ))),
+            },
+            _ => Err(ToolError::BadArgs(format!("{key} は true / false です"))),
         }
     }
 }
@@ -189,6 +205,21 @@ mod tests {
         assert_eq!(args::str_list(&json!({"brands": "cg"}), "brands"), vec!["cg"]);
         assert_eq!(args::str_list(&json!({"brands": ["cg", " ml "]}), "brands"), vec!["cg", "ml"]);
         assert!(args::str_list(&json!({}), "brands").is_empty());
+    }
+
+    #[test]
+    fn limit_の桁溢れで0件にならない() {
+        // `n as u32` を先にすると 4294967296 → 0 になる。上限で丸まることを固定する。
+        assert_eq!(args::limit(&json!({"limit": 4294967296u64}), 20, 100).unwrap(), 100);
+        assert!(args::u32_opt(&json!({"year": 4294967296u64}), "year").is_err());
+    }
+
+    #[test]
+    fn 読めない真偽値は既定に落とさず弾く() {
+        assert!(args::bool_or(&json!({"exact": "TRUE"}), "exact", false).unwrap());
+        assert!(!args::bool_or(&json!({"exact": "No"}), "exact", true).unwrap());
+        assert!(!args::bool_or(&json!({}), "exact", false).unwrap());
+        assert!(args::bool_or(&json!({"exact": "たぶん"}), "exact", false).is_err());
     }
 
     #[test]

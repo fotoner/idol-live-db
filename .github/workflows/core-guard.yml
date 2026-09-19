@@ -46,3 +46,9 @@ jobs:
       - name: Test
         working-directory: imas-core
         run: cargo test --locked
+
+      # agent feature は既定 off なので、これを足さないと src/agent/** と
+      # bin/imas-mcp が CI で 1 度もコンパイルされない (壊れても緑のまま)。
+      - name: Test (agent feature)
+        working-directory: imas-core
+        run: cargo test --locked --features agent
