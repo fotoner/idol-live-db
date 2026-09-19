@@ -238,6 +238,95 @@ mod tests {
         assert!(args::bool_or(&json!({"exact": "たぶん"}), "exact", false).is_err());
     }
 
+    /// 全ツールを 1 巡させるための代表引数。**ツールを足したらここにも足す**
+    /// (下の 2 つのテストが「カタログの全名がここに載っていること」を確かめる)。
+    ///
+    /// id は実データから取る。固定値を書くと、その行が消えた日にテストが
+    /// 「通らない」ではなく「何も検査していない」状態に静かに変わる。
+    fn 代表引数(snap: &Snapshot) -> Vec<(&'static str, Value)> {
+        let idol = &snap.idols[0].id;
+        let song = snap
+            .songs
+            .iter()
+            .find(|s| !crate::domain::song_detail_queries::performance_item_indices(snap, &s.id).is_empty())
+            .map(|s| s.id.clone())
+            .unwrap_or_else(|| snap.songs[0].id.clone());
+        let shows: Vec<&str> = snap
+            .setlist_items
+            .iter()
+            .map(|it| snap.shows[it.show as usize].id.as_str())
+            .collect();
+        let (show_a, show_b) = (shows[0], shows[shows.len() - 1]);
+        let event = &snap.events[0].id;
+        let brand = &snap.brands[0].id;
+        vec![
+            ("resolve", json!({"query": "春日未来"})),
+            ("search", json!({"query": "夢"})),
+            ("get_idol", json!({"id": idol})),
+            ("get_song", json!({"id": song})),
+            ("get_event", json!({"id": event})),
+            ("get_show", json!({"id": show_a})),
+            ("vocabulary", json!({})),
+            ("list_idols", json!({"brand": brand})),
+            ("list_songs", json!({"brand": brand})),
+            ("list_events", json!({"brand": brand})),
+            ("idol_songs", json!({"idol_id": idol})),
+            ("song_performances", json!({"song_id": song})),
+            ("setlist_diff", json!({"show_id_a": show_a, "show_id_b": show_b})),
+            ("stats", json!({"kind": "song_play_ranking"})),
+        ]
+    }
+
+    fn 実データ() -> Snapshot {
+        let db = format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"));
+        crate::outbound::sqlite_loader::load_snapshot(&db).expect("同梱 DB は読める")
+    }
+
+    /// ツールを足したら代表引数にも足させる。これが無いと、下の禁止フィールド検査が
+    /// 新しいツールを素通りして「緑だが守っていない」状態になる。
+    #[test]
+    fn 全ツールに代表引数がある() {
+        let snap = 実データ();
+        let 表: Vec<&str> = 代表引数(&snap).iter().map(|(n, _)| *n).collect();
+        for spec in tool_catalog() {
+            assert!(表.contains(&spec.name.as_str()), "{} の代表引数が無い", spec.name);
+        }
+        assert_eq!(表.len(), tool_catalog().len(), "代表引数に余分な名前がある");
+    }
+
+    /// 歌詞サイトの URL と試聴 URL はどのツールからも出さない。
+    ///
+    /// 歌詞本文だけの話ではない。`Song::lyrics_url` は大半の曲に歌詞サイトの URL が
+    /// 入っていて、返せば取り込み元サイト名を配ったことになる。`preview_url` は
+    /// アプリの中でだけ鳴らすもの。`serde_json::to_value(song)` と 1 行書けば漏れる形なので、
+    /// 人の注意ではなく機械で止める (Web 出面の T12 と同じ役目)。
+    ///
+    /// 検査する URL は**実データから取る**。ホスト名をこのファイルに書くと、
+    /// 公開リポジトリに取り込み元サイト名を書くことになって本末転倒になる。
+    #[test]
+    fn どのツールも歌詞サイトと試聴の_url_を返さない() {
+        let snap = 実データ();
+        let 禁止値: Vec<&str> = snap
+            .songs
+            .iter()
+            .filter_map(|s| s.lyrics_url.as_deref().or(s.preview_url.as_deref()))
+            .collect();
+        assert!(!禁止値.is_empty(), "実データに検査対象が無い (テストが空振りしている)");
+
+        for (name, args) in 代表引数(&snap) {
+            let out = match call_tool(&snap, name, &args, "2026-09-19") {
+                Ok(v) => v.to_string(),
+                // 引数が実データに合わず引けなかった場合も、その事実を隠さない。
+                Err(e) => panic!("{name} が代表引数で失敗した: {e}"),
+            };
+            assert!(!out.contains("lyrics_url"), "{name} が lyrics_url を返している");
+            assert!(!out.contains("preview_url"), "{name} が preview_url を返している");
+            for 値 in &禁止値 {
+                assert!(!out.contains(値), "{name} が歌詞/試聴の URL を返している");
+            }
+        }
+    }
+
     #[test]
     fn 知らないツール名は_unknown_tool() {
         let snap = crate::domain::snapshot::Snapshot::default();
