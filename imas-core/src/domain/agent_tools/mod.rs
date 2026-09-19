@@ -16,6 +16,9 @@
 //! 歌詞本文は JASRAC の許諾が「D1 に置き、ダウンロードさせない」形で下りている。
 //! ここから本文を返すとその前提を外れるので、扱うのは作品コードと掲載有無まで。
 
+pub mod browse;
+pub mod lookup;
+
 use crate::domain::snapshot::Snapshot;
 use serde_json::Value;
 
@@ -57,8 +60,13 @@ impl std::fmt::Display for ToolError {
 impl std::error::Error for ToolError {}
 
 /// 読み取りツールの一覧。並びがそのまま LLM に見える順になる。
+///
+/// 「まず何を引けばいいか」の順に並べる: 語をほどく `resolve` / `search` を先頭に、
+/// 個別の詳細、条件での一覧、集計、最後に語彙。
 pub fn tool_catalog() -> Vec<ToolSpec> {
-    Vec::new() // TODO(coder-a): 読み取りツール群
+    let mut all = lookup::catalog();
+    all.extend(browse::catalog());
+    all
 }
 
 /// 読み取りツールを 1 件実行する。
@@ -66,10 +74,16 @@ pub fn tool_catalog() -> Vec<ToolSpec> {
 /// `today_key` は JST の「今日」(`YYYY-MM-DD`)。今後/過去の切り分けに使う。
 /// 呼び手が渡すのは、テストで日付を固定できるようにするため。
 pub fn call_tool(
-    _snap: &Snapshot,
+    snap: &Snapshot,
     name: &str,
-    _args: &Value,
-    _today_key: &str,
+    args: &Value,
+    today_key: &str,
 ) -> Result<Value, ToolError> {
-    Err(ToolError::UnknownTool(name.to_string())) // TODO(coder-a)
+    if let Some(r) = lookup::call(snap, name, args, today_key) {
+        return r;
+    }
+    if let Some(r) = browse::call(snap, name, args, today_key) {
+        return r;
+    }
+    Err(ToolError::UnknownTool(name.to_string()))
 }
