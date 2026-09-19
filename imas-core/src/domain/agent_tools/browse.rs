@@ -388,6 +388,18 @@ fn show_header(snap: &Snapshot, show_index: u32) -> Value {
     Value::Object(o)
 }
 
+/// その披露が公演の何曲目か (1 始まり)。
+///
+/// `setlist_items.position` は**公演をまたいだ通し番号**で、そのまま出すと
+/// 「12852 曲目」になって読めない。公演内の並びは前計算済み (position 昇順) なので、
+/// その添字を数えて曲順に直す。
+fn position_in_show(snap: &Snapshot, show: u32, item: u32) -> usize {
+    snap.setlist_items_by_show[show as usize]
+        .iter()
+        .position(|&i| i == item)
+        .map_or(0, |p| p + 1)
+}
+
 // =============================================================================
 // list_idols
 // =============================================================================
@@ -805,7 +817,8 @@ fn song_performances(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolEr
             o.insert("show_name".into(), json!(entry.show_name));
             o.insert("date".into(), json!(entry.date));
             put(&mut o, "venue", entry.venue);
-            o.insert("position".into(), json!(entry.position));
+            let show = snap.setlist_items[item as usize].show;
+            o.insert("position".into(), json!(position_in_show(snap, show, item)));
             put(&mut o, "section", entry.section);
             o.insert("ordinal".into(), json!(entry.ordinal));
             o.insert("ordinal_label".into(), json!(performance_ordinal_label(entry.ordinal)));
@@ -817,7 +830,6 @@ fn song_performances(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolEr
             let performer_set: BTreeSet<&str> = performers.iter().copied().collect();
             o.insert("singer_count".into(), json!(performers.len()));
 
-            let show = snap.setlist_items[item as usize].show;
             let cast: BTreeSet<&str> = snap.cast_by_show[show as usize]
                 .iter()
                 .map(|l| snap.idols[l.idol as usize].id.as_str())
@@ -865,12 +877,15 @@ fn setlist_diff(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> 
     let rows_of = |show: u32| -> Vec<SetlistItemDiffRow> {
         snap.setlist_items_by_show[show as usize]
             .iter()
-            .map(|&i| {
+            .enumerate()
+            .map(|(rank, &i)| {
                 let item = &snap.setlist_items[i as usize];
                 SetlistItemDiffRow {
                     id: item.id.clone(),
                     song_id: snap.songs[item.song as usize].id.clone(),
-                    position: item.position,
+                    // 生の position は公演をまたぐ通し番号なので曲順に直して渡す
+                    // (比較の結果がそのまま「何曲目」として読める)。
+                    position: rank as i64 + 1,
                     section: item.section.clone(),
                 }
             })
@@ -1358,6 +1373,10 @@ mod tests {
             assert!(!text(p, "event_name").is_empty());
             assert!(text(p, "ordinal_label").ends_with("回目") || text(p, "ordinal_label") == "初披露");
             assert!(p["singer_count"].is_number());
+            // 曲順は公演の中での「何曲目」。生の position (公演をまたぐ通し番号) を
+            // そのまま出すと 12852 曲目のような読めない数になる。
+            let position = p["position"].as_u64().unwrap();
+            assert!((1..=60).contains(&position), "曲順が公演内の番号でない: {p}");
             // 全員で歌った回は名前を並べず full_cast で示す。
             assert!(
                 p.get("full_cast").is_some() || p.get("singers").is_some() || p["singer_count"] == json!(0),
@@ -1396,9 +1415,13 @@ mod tests {
 
         assert!(out["shared_count"].as_u64().unwrap() > 0, "同じツアーで共通曲が 0: {out}");
         let shared = rows(&out, "shared");
+        let songs_a = out["a"]["song_count"].as_u64().unwrap();
+        let songs_b = out["b"]["song_count"].as_u64().unwrap();
         for song in shared {
             assert!(!text(song, "title").is_empty(), "曲名が解決できていない: {song}");
-            assert!(song["position_a"].is_number() && song["position_b"].is_number());
+            // 曲順は公演内の「何曲目」に収まる。
+            assert!((1..=songs_a).contains(&song["position_a"].as_u64().unwrap()), "{song}");
+            assert!((1..=songs_b).contains(&song["position_b"].as_u64().unwrap()), "{song}");
         }
         // 片方だけの曲にも曲名が付く (id だけ返して呼び直させない)。
         for song in rows(&out, "only_a").iter().chain(rows(&out, "only_b")) {
