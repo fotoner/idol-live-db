@@ -317,6 +317,21 @@ pub fn is_hidden_variant(s: &crate::domain::snapshot::Song) -> bool {
     s.parent_song_id.is_some() && !s.has_kamisabi_card
 }
 
+/// 原唱者がちょうど 1 人の曲か (= その人ひとりの持ち歌)。
+///
+/// `is_hidden_variant` の隣に置いてあるのは、どちらも「その曲が誰のものか」を
+/// 曲の側から決める述語で、一覧・LLM ツール・セトリの型のどこからも同じ答えが
+/// 要るため。原唱者の濾しは `Snapshot::song_artists` が正本なので、ここで
+/// `role == "original"` を書き直さない。
+///
+/// **`songs.song_type == "solo"` とは別物。**あちらは商品としての名義 (カタログが
+/// 「ソロ曲」と呼んでいるか) で、こちらは `song_artists` から導いた人数。原則は
+/// 一致するが、名義が付いていない曲・共演が後から足された曲ではズレうるので、
+/// 「何人の持ち歌か」を数えるときは必ずこちらを使う。
+pub fn is_solo_song(snap: &Snapshot, song: u32) -> bool {
+    snap.song_artists(&snap.songs[song as usize].id, Some("original")).len() == 1
+}
+
 pub fn filter_song_indexes(snap: &Snapshot, filter: &SongListFilter) -> Vec<u32> {
     let brand_set: HashSet<&str> = filter.brand_ids.iter().map(String::as_str).collect();
     let idol_set: HashSet<&str> = filter.idol_ids.iter().map(String::as_str).collect();

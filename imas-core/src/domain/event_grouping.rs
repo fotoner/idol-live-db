@@ -71,6 +71,51 @@ pub fn is_upcoming_on(date: &str, today_key: &str) -> bool {
     date >= char_prefix(today_key, date.chars().count())
 }
 
+/// 「今後 / 過去 / 全部」の 3 択と、それが決める並び方。
+///
+/// 一覧の軸としての `when` は **語彙・既定・並び方向の 3 つが一組**で、どれか 1 つでも
+/// ズレると「今後の予定が古い順に並ぶ」ような食い違いが出る。イベント一覧と公演一覧で
+/// 同じ 3 行 (`matches!` の検証・`retain`・`reverse`) を別々に書いていたので、
+/// 「今後 / 過去」の判断を持つこのモジュールに一組で置く。
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum Timeframe {
+    Upcoming,
+    Past,
+    /// 既定。何も指定しなければ絞らない。
+    #[default]
+    All,
+}
+
+impl Timeframe {
+    /// 取りうる値。スキーマの `enum` にも `BadArgs` の文面にもこれを使う。
+    pub const KEYS: [&'static str; 3] = ["upcoming", "past", "all"];
+
+    /// 既定は「全部」。何も指定しなければ絞らない。
+    pub fn parse(raw: Option<&str>) -> Option<Self> {
+        match raw {
+            None | Some("all") => Some(Self::All),
+            Some("upcoming") => Some(Self::Upcoming),
+            Some("past") => Some(Self::Past),
+            _ => None,
+        }
+    }
+
+    /// 「今後かどうか」がこの枠に合うか。
+    pub fn accepts(self, upcoming: bool) -> bool {
+        match self {
+            Self::Upcoming => upcoming,
+            Self::Past => !upcoming,
+            Self::All => true,
+        }
+    }
+
+    /// 新しい順に並べるか。**これから来る予定だけは近い順**で読みたいので、
+    /// `Upcoming` のときだけ古い順 (日付昇順) になる。
+    pub fn newest_first(self) -> bool {
+        self != Self::Upcoming
+    }
+}
+
 /// イベントがまだ終わっていないか。
 ///
 /// **最終日で見る** — 初日が過ぎていても会期中なら「今後」。
@@ -315,5 +360,30 @@ mod tests {
     fn empty_input_returns_empty() {
         assert!(group_events_by_year(&[], true, TODAY).is_empty());
         assert!(group_events_by_year(&[], false, TODAY).is_empty());
+    }
+}
+
+#[cfg(test)]
+mod timeframe_tests {
+    use super::Timeframe;
+
+    #[test]
+    fn 語彙と既定と並び方向が一組で決まる() {
+        assert_eq!(Timeframe::parse(None), Some(Timeframe::All));
+        assert_eq!(Timeframe::parse(Some("all")), Some(Timeframe::All));
+        assert_eq!(Timeframe::parse(Some("upcoming")), Some(Timeframe::Upcoming));
+        assert_eq!(Timeframe::parse(Some("past")), Some(Timeframe::Past));
+        assert_eq!(Timeframe::parse(Some("future")), None);
+
+        assert!(Timeframe::All.accepts(true) && Timeframe::All.accepts(false));
+        assert!(Timeframe::Upcoming.accepts(true) && !Timeframe::Upcoming.accepts(false));
+        assert!(Timeframe::Past.accepts(false) && !Timeframe::Past.accepts(true));
+
+        // 今後の予定だけ近い順。
+        assert!(!Timeframe::Upcoming.newest_first());
+        assert!(Timeframe::Past.newest_first() && Timeframe::All.newest_first());
+
+        // 語彙の綴りは parse と揃っている。
+        assert!(Timeframe::KEYS.iter().all(|k| Timeframe::parse(Some(k)).is_some()));
     }
 }

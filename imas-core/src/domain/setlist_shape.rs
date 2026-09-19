@@ -16,8 +16,9 @@
 //! 派生曲の扱いは [`crate::domain::song_list_queries::is_hidden_variant`] が正本で、
 //! **このファイルはそれらを組み合わせて数えるだけ**にする。
 
-use crate::domain::setlist_sections::{numbered_setlist, section_label, ENCORE_LABEL};
+use crate::domain::setlist_sections::{numbered_setlist, section_label, track_number, ENCORE_LABEL};
 use crate::domain::snapshot::Snapshot;
+use crate::domain::song_list_queries::is_solo_song;
 use std::collections::HashMap;
 
 /// 数の散らばり。平均を出さないのは、公演数が一桁の集合で平均を見せると
@@ -63,17 +64,28 @@ pub struct SectionShape {
     /// 見出し。`None` は区切り無し = 本編。綴りの畳み込みは
     /// [`section_label`] が正本 (`encore` / `ENCORE` / `アンコール` は 1 つになる)。
     pub label: Option<String>,
-    /// この区切りがあった公演数。
-    pub shows: u32,
-    /// その区切りの曲数の散らばり (**その区切りがあった公演だけ**が標本)。
+    /// その区切りの曲数の散らばり (**その区切りがあった公演だけ**が標本なので、
+    /// `songs.samples` がそのまま「この区切りがあった公演数」)。
     pub songs: Spread,
+}
+
+impl SectionShape {
+    /// この区切りがあった公演数。標本数と同じものなので欄は持たない
+    /// (持つと片方だけ書き換わる導出フィールドになる)。
+    pub fn shows(&self) -> u32 {
+        self.songs.samples
+    }
 }
 
 /// 公演群のセトリの型。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetlistShape {
-    /// 標本にした公演数 (セトリが入っているもの)。
-    pub shows: u32,
+    /// 標本にした公演 (セトリが入っているものだけ)。渡された並びを保つ。
+    ///
+    /// 公演数ではなく**添字そのもの**を返すのは、呼び手が「どの公演から出た数字か」を
+    /// 応答に載せられるようにするため。以前はツール面が同じ「セトリがあるか」の
+    /// 判定をもう一度回していて、判定が片方だけ変わると標本と内訳が食い違った。
+    pub sampled: Vec<u32>,
     /// 条件には当たるがセトリが未入力の公演数。**0 でも必ず持つ** —
     /// 「まだセトリが無い公演」を標本から落とした事実を隠すと、
     /// 少ない標本から出した型を全公演の型と取り違える。
@@ -92,11 +104,18 @@ pub struct SetlistShape {
     pub solo_slots: Option<Spread>,
 }
 
+impl SetlistShape {
+    /// 標本にした公演数。
+    pub fn shows(&self) -> u32 {
+        self.sampled.len() as u32
+    }
+}
+
 /// 公演群のセトリの型を出す。
 ///
 /// `shows` は公演の添字 (絞り込みは呼び手の責務)。`top` は枠ごとのランキングの件数。
 pub fn setlist_shape(snap: &Snapshot, shows: &[u32], top: usize) -> SetlistShape {
-    let with_setlist: Vec<u32> = shows
+    let sampled: Vec<u32> = shows
         .iter()
         .copied()
         .filter(|&s| !snap.setlist_items_by_show[s as usize].is_empty())
@@ -104,55 +123,64 @@ pub fn setlist_shape(snap: &Snapshot, shows: &[u32], top: usize) -> SetlistShape
 
     let mut song_counts: Vec<u32> = Vec::new();
     let mut solo_counts: Vec<u32> = Vec::new();
-    // 区切り → (それがあった公演数, 公演ごとの曲数)
+    // 区切り → その区切りがあった公演ごとの曲数
     let mut sections: HashMap<Option<String>, Vec<u32>> = HashMap::new();
     let mut openers: HashMap<u32, u32> = HashMap::new();
     let mut encore: HashMap<u32, u32> = HashMap::new();
     let mut closers: HashMap<u32, u32> = HashMap::new();
+    // ソロ判定は曲ごとに一定なので曲単位で覚える。全公演を対象にすると
+    // セトリ行 13,000 件ぶん `song_artists` を引くことになり、そのたびに
+    // 原唱者 (全体曲は 100 人超) の Vec を確保していた。
+    let mut solo_memo: Vec<Option<bool>> = vec![None; snap.songs.len()];
 
-    for &show in &with_setlist {
-        // 曲順は numbered_setlist が正本。生の position は公演をまたぐ通し番号。
-        let rows: Vec<(usize, u32)> = numbered_setlist(snap, show).collect();
-        song_counts.push(rows.len() as u32);
-
+    for &show in &sampled {
+        // 公演内の並びは numbered_setlist が正本 (生の position は公演をまたぐ通し番号)。
+        // 曲順そのものはここでは使わないので、Vec に集めずに 1 度だけ舐める。
+        let (mut first, mut last, mut count) = (None, None, 0u32);
         let mut per_section: HashMap<Option<String>, u32> = HashMap::new();
         let mut solos = 0u32;
-        for &(_, item) in &rows {
+
+        for (_, item) in numbered_setlist(snap, show) {
             let it = &snap.setlist_items[item as usize];
+            first.get_or_insert(it.song);
+            last = Some(it.song);
+            count += 1;
+
             let label = section_label(it.section.as_deref());
-            *per_section.entry(label.clone()).or_insert(0) += 1;
             if label.as_deref() == Some(ENCORE_LABEL) {
                 *encore.entry(it.song).or_insert(0) += 1;
             }
-            if is_solo_song(snap, it.song) {
+            *per_section.entry(label).or_insert(0) += 1;
+
+            let solo = *solo_memo[it.song as usize].get_or_insert_with(|| is_solo_song(snap, it.song));
+            if solo {
                 solos += 1;
             }
         }
+
+        song_counts.push(count);
         solo_counts.push(solos);
         for (label, n) in per_section {
             sections.entry(label).or_default().push(n);
         }
-
-        if let Some(&(_, first)) = rows.first() {
-            *openers.entry(snap.setlist_items[first as usize].song).or_insert(0) += 1;
+        if let Some(song) = first {
+            *openers.entry(song).or_insert(0) += 1;
         }
-        if let Some(&(_, last)) = rows.last() {
-            *closers.entry(snap.setlist_items[last as usize].song).or_insert(0) += 1;
+        if let Some(song) = last {
+            *closers.entry(song).or_insert(0) += 1;
         }
     }
 
     let mut section_rows: Vec<SectionShape> = sections
         .into_iter()
-        .filter_map(|(label, counts)| {
-            Spread::of(counts).map(|songs| SectionShape { label, shows: songs.samples, songs })
-        })
+        .filter_map(|(label, counts)| Spread::of(counts).map(|songs| SectionShape { label, songs }))
         .collect();
     // 公演数の多い順。同数は見出し順 (区切り無し = 本編を先頭に)。
-    section_rows.sort_by(|a, b| b.shows.cmp(&a.shows).then(a.label.cmp(&b.label)));
+    section_rows.sort_by(|a, b| b.shows().cmp(&a.shows()).then(a.label.cmp(&b.label)));
 
     SetlistShape {
-        shows: with_setlist.len() as u32,
-        shows_without_setlist: (shows.len() - with_setlist.len()) as u32,
+        shows_without_setlist: (shows.len() - sampled.len()) as u32,
+        sampled,
         song_count: Spread::of(song_counts),
         sections: section_rows,
         openers: ranked(snap, openers, top),
@@ -160,15 +188,6 @@ pub fn setlist_shape(snap: &Snapshot, shows: &[u32], top: usize) -> SetlistShape
         closers: ranked(snap, closers, top),
         solo_slots: Spread::of(solo_counts),
     }
-}
-
-/// 原唱者が 1 人だけの曲 (= ソロ曲)。
-///
-/// 原唱者の濾しは `Snapshot::song_artists` が正本。ここで `role == "original"` を
-/// 書き直さない。**人数から機械的に「ソロ曲」と決めてよいのはここまで**で、
-/// 「全体曲かどうか」は人数では決まらない (追加メンバーを含む全体曲がある)。
-pub fn is_solo_song(snap: &Snapshot, song: u32) -> bool {
-    snap.song_artists(&snap.songs[song as usize].id, Some("original")).len() == 1
 }
 
 /// 回数の多い順。同数は曲 id 順で決定的に (`performance_stats` と同じ流儀)。
@@ -192,13 +211,17 @@ fn ranked(snap: &Snapshot, tally: HashMap<u32, u32>, top: usize) -> Vec<SlotTall
 /// 公演をまたいで比べられない。`(順番-1) * 3 / 曲数` で割ると、23 曲の公演でも
 /// 12 曲の公演でも同じ「3 等分のどこか」になる。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(usize)]
 pub enum Phase {
-    Early,
-    Middle,
-    Late,
+    Early = 0,
+    Middle = 1,
+    Late = 2,
 }
 
 impl Phase {
+    /// 並びは [`SongPositionProfile::phases`] の添字と同じ。
+    pub const ALL: [Self; 3] = [Self::Early, Self::Middle, Self::Late];
+
     pub fn of(rank: usize, total: usize) -> Self {
         if total == 0 {
             return Self::Early;
@@ -220,7 +243,7 @@ impl Phase {
 }
 
 /// ある曲が「どこで」歌われたか。
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct SongPositionProfile {
     /// 披露回数 (セトリ行の数)。
     pub performances: u32,
@@ -232,37 +255,42 @@ pub struct SongPositionProfile {
     pub encore: u32,
     /// 区切りごとの回数。並びは回数の多い順、同数は見出し順。
     pub sections: Vec<(Option<String>, u32)>,
-    /// 序盤 / 中盤 / 終盤の回数。
-    pub early: u32,
-    pub middle: u32,
-    pub late: u32,
+    /// 序盤 / 中盤 / 終盤の回数。添字は [`Phase`] の順 (`Early` / `Middle` / `Late`)。
+    /// 3 本の平行フィールドにしないのは、鍵の名前 (`early` / …) を呼び手が手書きすると
+    /// [`Phase::key`] と二重管理になるため。
+    pub phases: [u32; 3],
+}
+
+impl SongPositionProfile {
+    /// その位置だった回数。
+    pub fn phase(&self, phase: Phase) -> u32 {
+        self.phases[phase as usize]
+    }
 }
 
 /// 曲ごとの位置の傾向。未知の曲 id は全部 0 (呼び手が「無い」と判断する材料は
 /// id の解決側が持つので、ここでは落ちないことだけを保証する)。
 pub fn song_position_profile(snap: &Snapshot, song_id: &str) -> SongPositionProfile {
-    let mut p = SongPositionProfile {
-        performances: 0,
-        opener: 0,
-        closer: 0,
-        encore: 0,
-        sections: Vec::new(),
-        early: 0,
-        middle: 0,
-        late: 0,
-    };
+    let mut p = SongPositionProfile::default();
     let Some(&song) = snap.song_index_by_id.get(song_id) else { return p };
+    // 披露回数は前計算済みの `performance_counts` が正本 (数え直さない、という
+    // stats_queries の既存規約。数え直すと同じ応答に 2 つの回数が載る)。
+    p.performances = snap.performance_counts[song as usize];
 
     let mut sections: HashMap<Option<String>, u32> = HashMap::new();
     for &item in snap.setlist_items_by_song.get(song as usize).map_or(&[][..], Vec::as_slice) {
         let show = snap.setlist_items[item as usize].show;
-        let rows: Vec<u32> = snap.setlist_items_by_show[show as usize].clone();
-        let Some(rank) = rows.iter().position(|&i| i == item).map(|i| i + 1) else { continue };
-        p.performances += 1;
+        let total = snap.setlist_items_by_show[show as usize].len();
+        // 「その披露が何曲目か」は setlist_sections::track_number が正本。
+        // 同じ数え方をここに書くと、曲順の規則が変わったとき片方だけ古くなる。
+        let rank = track_number(snap, item);
+        if rank == 0 {
+            continue;
+        }
         if rank == 1 {
             p.opener += 1;
         }
-        if rank == rows.len() {
+        if rank == total {
             p.closer += 1;
         }
         let label = section_label(snap.setlist_items[item as usize].section.as_deref());
@@ -270,11 +298,7 @@ pub fn song_position_profile(snap: &Snapshot, song_id: &str) -> SongPositionProf
             p.encore += 1;
         }
         *sections.entry(label).or_insert(0) += 1;
-        match Phase::of(rank, rows.len()) {
-            Phase::Early => p.early += 1,
-            Phase::Middle => p.middle += 1,
-            Phase::Late => p.late += 1,
-        }
+        p.phases[Phase::of(rank, total) as usize] += 1;
     }
 
     let mut rows: Vec<(Option<String>, u32)> = sections.into_iter().collect();
@@ -343,17 +367,19 @@ mod tests {
         let shape = setlist_shape(s, &shows, 5);
 
         // セトリ未入力の公演は標本から外れるが、外した事実は残る。
-        assert_eq!(shape.shows + shape.shows_without_setlist, shows.len() as u32);
-        assert!(shape.shows >= 6, "セトリのある主演公演が少ない: {}", shape.shows);
+        assert_eq!(shape.shows() + shape.shows_without_setlist, shows.len() as u32);
+        assert!(shape.shows() >= 6, "セトリのある主演公演が少ない: {}", shape.shows());
+        // 標本にした公演は必ずセトリを持つ。
+        assert!(shape.sampled.iter().all(|&x| !s.setlist_items_by_show[x as usize].is_empty()));
 
-        let count = shape.song_count.expect("曲数の標本がある");
-        assert_eq!(count.samples, shape.shows);
+        let count = shape.song_count.clone().expect("曲数の標本がある");
+        assert_eq!(count.samples, shape.shows());
         assert!(count.min <= count.median && count.median <= count.max);
         assert!(count.min >= 10, "主演公演が 10 曲未満なのはおかしい: {count:?}");
 
         // 1 曲目・締めは公演ごとに 1 つずつしか立たないので、合計が公演数を超えない。
-        assert!(shape.openers.iter().map(|t| t.times).sum::<u32>() <= shape.shows);
-        assert!(shape.closers.iter().map(|t| t.times).sum::<u32>() <= shape.shows);
+        assert!(shape.openers.iter().map(|t| t.times).sum::<u32>() <= shape.shows());
+        assert!(shape.closers.iter().map(|t| t.times).sum::<u32>() <= shape.shows());
         // 降順に並んでいる。
         for w in shape.openers.windows(2) {
             assert!(w[0].times >= w[1].times);
@@ -361,7 +387,7 @@ mod tests {
         // 区切りには必ず本編 (区切り無し) が含まれ、いちばん多い。
         assert_eq!(shape.sections[0].label, None, "{:?}", shape.sections);
         // ソロ枠は「原唱者 1 人の曲」なので 1 公演の曲数を超えない。
-        let solo = shape.solo_slots.expect("ソロ枠の標本がある");
+        let solo = shape.solo_slots.clone().expect("ソロ枠の標本がある");
         assert!(solo.max <= count.max);
     }
 
@@ -373,6 +399,8 @@ mod tests {
         let labels: Vec<&str> =
             shape.sections.iter().filter_map(|x| x.label.as_deref()).collect();
         assert!(labels.contains(&ENCORE_LABEL), "{labels:?}");
+        // その区切りがあった公演数は標本数そのもの (導出フィールドを持たない)。
+        assert!(shape.sections.iter().all(|x| x.shows() == x.songs.samples));
         assert!(!labels.iter().any(|l| l.eq_ignore_ascii_case("encore")), "{labels:?}");
         assert!(!shape.encore.is_empty(), "アンコール枠の曲が拾えていない");
     }
@@ -391,7 +419,9 @@ mod tests {
         let p = song_position_profile(s, &id);
 
         assert!(p.performances > 0);
-        assert_eq!(p.early + p.middle + p.late, p.performances, "位置の合計が回数と合わない");
+        assert_eq!(p.phases.iter().sum::<u32>(), p.performances, "位置の合計が回数と合わない");
+        // 添字と Phase が一致している (JSON の鍵名は Phase::key が正本)。
+        assert_eq!(p.phase(Phase::Late), p.phases[2]);
         assert_eq!(
             p.sections.iter().map(|(_, n)| n).sum::<u32>(),
             p.performances,
@@ -400,7 +430,7 @@ mod tests {
         assert!(p.opener <= p.performances && p.closer <= p.performances);
         assert!(p.encore <= p.performances);
         // アンコールは終盤に含まれるので、終盤の回数以下になるはず。
-        assert!(p.encore <= p.late, "アンコールが終盤より多い: {p:?}");
+        assert!(p.encore <= p.phase(Phase::Late), "アンコールが終盤より多い: {p:?}");
     }
 
     #[test]
@@ -413,24 +443,10 @@ mod tests {
     #[test]
     fn 公演が無ければ型も空() {
         let shape = setlist_shape(snap(), &[], 5);
-        assert_eq!(shape.shows, 0);
+        assert_eq!(shape.shows(), 0);
         assert_eq!(shape.shows_without_setlist, 0);
         assert!(shape.song_count.is_none());
         assert!(shape.openers.is_empty());
-    }
-
-    #[test]
-    fn ソロ曲の判定は原唱者_1_人() {
-        let s = snap();
-        // 原唱者がちょうど 1 人の曲と、2 人以上の曲を実データから拾って突き合わせる。
-        let solo = (0..s.songs.len() as u32)
-            .find(|&i| s.song_artists(&s.songs[i as usize].id, Some("original")).len() == 1)
-            .expect("ソロ曲がある");
-        let group = (0..s.songs.len() as u32)
-            .find(|&i| s.song_artists(&s.songs[i as usize].id, Some("original")).len() > 1)
-            .expect("複数名義の曲がある");
-        assert!(is_solo_song(s, solo));
-        assert!(!is_solo_song(s, group));
     }
 
     #[test]

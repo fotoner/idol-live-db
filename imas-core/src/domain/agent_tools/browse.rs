@@ -26,6 +26,11 @@
 //! [`ToolError::NotFound`] にして、名前をほどくツールへ送り返す。
 
 use super::json::{brand_ref, joint_brand_refs, listing, listing_with, Obj};
+use super::scope::show_criteria;
+use super::vocab::{
+    brand_vocab, checked, checked_date_bound, distinct, event_kind_vocab, idol_vocab, sample,
+    song_type_vocab,
+};
 use super::{args, ToolError, ToolSpec};
 use crate::domain::snapshot::{Idol, Snapshot};
 use serde_json::{json, Value};
@@ -201,11 +206,9 @@ fn narrow<T: std::hash::Hash + Eq + Clone>(
     });
 }
 
-// =============================================================================
-// 語彙 (取りうる値) と検査
-// =============================================================================
-
 /// `stats` の `kind`。スキーマにも `BadArgs` の文面にも同じ配列を使う。
+/// 他の語彙と違ってデータ由来ではなく**このツールが持つ機能の一覧**なので、
+/// `vocab` (実データから作る語彙) ではなくここに置く。
 const STATS_KINDS: [&str; 7] = [
     "song_play_ranking",
     "cast_show_ranking",
@@ -215,71 +218,6 @@ const STATS_KINDS: [&str; 7] = [
     "monthly_show_counts",
     "cd_series_list",
 ];
-
-/// 空でない値を重複なく昇順で。語彙はデータそのものから作る
-/// (定数で持つと、ブランドや属性が増えたときに黙って古いままになる)。
-pub(super) fn distinct<'a>(values: impl Iterator<Item = Option<&'a str>>) -> Vec<String> {
-    let set: BTreeSet<&str> = values.flatten().filter(|v| !v.is_empty()).collect();
-    set.into_iter().map(str::to_string).collect()
-}
-
-pub(super) fn brand_vocab(snap: &Snapshot) -> Vec<String> {
-    snap.brand_order.iter().map(|&i| snap.brands[i as usize].id.clone()).collect()
-}
-
-fn song_type_vocab(snap: &Snapshot) -> Vec<String> {
-    distinct(snap.songs.iter().map(|s| s.song_type.as_deref()))
-}
-
-pub(super) fn event_kind_vocab(snap: &Snapshot) -> Vec<String> {
-    distinct(snap.events.iter().map(|e| Some(e.kind.as_str())))
-}
-
-/// アイドルの列そのものが語彙。`idols_by_constellation` 等が完全一致で引くので、
-/// **その列の実在値**が取りうる値のすべて。
-fn idol_vocab(snap: &Snapshot, column: fn(&Idol) -> Option<&str>) -> Vec<String> {
-    distinct(snap.idols.iter().map(column))
-}
-
-/// 語彙に無い値を、候補つきで突き返す。
-pub(super) fn checked(arg: &str, value: String, allowed: &[String]) -> Result<String, ToolError> {
-    if allowed.contains(&value) {
-        return Ok(value);
-    }
-    Err(ToolError::BadArgs(format!(
-        "{arg} に「{value}」は無い。取りうる値: {}",
-        sample(allowed)
-    )))
-}
-
-/// 候補の並べ方。全部並べると CD シリーズのように 100 件を超えるものがあるので頭だけ。
-pub(super) fn sample(allowed: &[String]) -> String {
-    const SHOWN: usize = 40;
-    let head = allowed.iter().take(SHOWN).cloned().collect::<Vec<_>>().join(" / ");
-    if allowed.len() > SHOWN {
-        format!("{head} … 他 {} 件", allowed.len() - SHOWN)
-    } else if head.is_empty() {
-        "(該当なし)".to_string()
-    } else {
-        head
-    }
-}
-
-/// `YYYY` / `YYYY-MM` / `YYYY-MM-DD` のいずれか。
-/// 粗い指定を許すのは「2020 年以降」を 1 語で書けるようにするため。
-fn checked_date_bound(arg: &str, value: String) -> Result<String, ToolError> {
-    let ok = matches!(value.len(), 4 | 7 | 10)
-        && value
-            .char_indices()
-            .all(|(i, c)| if i == 4 || i == 7 { c == '-' } else { c.is_ascii_digit() });
-    if ok {
-        Ok(value)
-    } else {
-        Err(ToolError::BadArgs(format!(
-            "{arg} は YYYY / YYYY-MM / YYYY-MM-DD で書く (与えられた値: {value})"
-        )))
-    }
-}
 
 // =============================================================================
 // 行の射影 (名前まで解決する)
@@ -340,21 +278,10 @@ fn original_artists(snap: &Snapshot, song: u32) -> Vec<&crate::domain::snapshot:
     snap.song_artists(&snap.songs[song as usize].id, Some("original"))
 }
 
-/// その曲の原唱者の人数。濾しは `Snapshot::song_artists` が正本。
-fn original_artist_count(snap: &Snapshot, song_id: &str) -> usize {
-    snap.song_artists(song_id, Some("original")).len()
-}
-
-/// 「その人ひとりの持ち歌」か — 原唱者が 1 人だけで、かつ一覧の母集団に居る曲。
-///
-/// 人数の判定は `setlist_shape::is_solo_song`、派生曲かどうかは
-/// `song_list_queries::is_hidden_variant` (曲一覧・Web・iOS が使っているのと同じ規則) に
-/// 任せる。派生を外すのは、`(伊吹 翼 Ver.)` のような別録音まで「持ち歌」に数えると
-/// 曲数が実態の 3 倍になるため。
-fn is_solo_own_song(snap: &Snapshot, song_id: &str) -> bool {
-    use crate::domain::song_list_queries::is_hidden_variant;
-    let Some(&i) = snap.song_index_by_id.get(song_id) else { return false };
-    crate::domain::setlist_shape::is_solo_song(snap, i) && !is_hidden_variant(&snap.songs[i as usize])
+/// 曲 id → 添字。行の射影で 1 行につき 1 度だけ引いて使い回す
+/// (以前は同じ行の `artist_count` / `derived` / ソロ判定が各々引き直していた)。
+fn song_index(snap: &Snapshot, song_id: &str) -> Option<u32> {
+    snap.song_index_by_id.get(song_id).copied()
 }
 
 /// 公演 1 件の見出し (どの公演かを 1 行で書けるだけの情報)。
@@ -676,7 +603,7 @@ fn list_events(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<Va
 
 fn idol_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
     use crate::domain::idol_song_queries::{idol_performed_songs, idol_unit_song_ids};
-    use crate::domain::song_list_queries::is_hidden_variant;
+    use crate::domain::song_list_queries::{is_hidden_variant, is_solo_song};
 
     let idol_id = args::str_req(arguments, "idol_id")?;
     let Some(idol) = snap.idol(&idol_id) else {
@@ -693,33 +620,38 @@ fn idol_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
 
     if role != "performed" {
         // 原唱 (持ち歌)。song_artists.role='original' の行だけ。
-        let originals = crate::domain::idol_song_queries::idol_songs(snap, &idol_id, Some("original"));
+        let mut originals =
+            crate::domain::idol_song_queries::idol_songs(snap, &idol_id, Some("original"));
         // 「持ち歌 84 曲」のうち大半が `(伊吹 翼 Ver.)` のような派生曲で、
         // 残りも合唱曲、ということが起きる。件数だけでは実態が分からないので、
         // 行ごとに**原唱者の人数**と**派生曲かどうか**を添える。どちらも既存の正本
-        // (`Snapshot::song_artists` / `song_list_queries::is_hidden_variant`) の判断で、
+        // (`song_list_queries::is_solo_song` / `is_hidden_variant`) の判断で、
         // ここで数え直さない。
-        let solo_only: Vec<_> = originals.iter().filter(|r| is_solo_own_song(snap, &r.song_id)).cloned().collect();
+        let solo = |song: u32| is_solo_song(snap, song) && !is_hidden_variant(&snap.songs[song as usize]);
         // 「その人ひとりの持ち歌が何曲か」は role を問わず 1 回で答えられるようにする
         // (role=solo をもう一度呼ばせない)。
-        out.put("solo_count", json!(solo_only.len()));
+        let solo_count =
+            originals.iter().filter(|r| song_index(snap, &r.song_id).is_some_and(solo)).count();
+        out.put("solo_count", json!(solo_count));
 
-        let (key, listed) = if role == "solo" {
-            ("solo", solo_only)
+        let key = if role == "solo" {
+            originals.retain(|r| song_index(snap, &r.song_id).is_some_and(solo));
+            "solo"
         } else {
-            ("original", originals)
+            "original"
         };
-        let total = listed.len();
-        let rows = take(listed, limit)
+        let total = originals.len();
+        let rows = take(originals, limit)
             .into_iter()
-            .map(|r| {
+            .filter_map(|r| song_index(snap, &r.song_id).map(|i| (r, i)))
+            .map(|(r, i)| {
                 let mut o = Obj::new();
                 o.put("id", json!(r.song_id));
                 o.put("title", json!(r.title));
                 o.opt("release_date", r.release_date);
                 o.opt("unit_name", r.unit_name);
-                o.put("artist_count", json!(original_artist_count(snap, &r.song_id)));
-                if snap.song(&r.song_id).is_some_and(is_hidden_variant) {
+                o.put("artist_count", json!(original_artists(snap, i).len()));
+                if is_hidden_variant(&snap.songs[i as usize]) {
                     o.put("derived", json!(true));
                 }
                 o.value()
@@ -929,61 +861,19 @@ fn setlist_diff(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> 
 
 /// `stats --kind show_song_count_ranking` の絞り込み (brand / year / venue)。
 ///
-/// 軸の判定はどれも既存の正本を通す — ブランドは合同ライブ込みの
-/// `event_list_filtering`、会場は読み・旧名込みの `event_list_queries`。
+/// 軸のほどき方も絞り込みの規則も、公演を扱う他のツールと同じ経路
+/// (`scope::show_criteria` → `show_list_filtering::filter_show_indexes`) を通す。
 /// ここに述語を書くと、同じ「デレマスのライブ」が一覧と集計で違う集合になる。
-pub(super) fn scoped_show_indexes(snap: &Snapshot, arguments: &Value) -> Result<Vec<u32>, ToolError> {
-    use crate::domain::event_list_filtering::{
-        filter_event_indices, EventFilterCriteria, EventFilterItem,
-    };
-    use crate::domain::event_list_queries::show_indexes_at_venue;
-
-    let mut shows: Vec<u32> = (0..snap.shows.len() as u32).collect();
-
-    if let Some(brand) = args::str_opt(arguments, "brand") {
-        let brand = checked("brand", brand, &brand_vocab(snap))?;
-        let items: Vec<EventFilterItem> = snap
-            .events
-            .iter()
-            .map(|e| EventFilterItem {
-                id: e.id.clone(),
-                brand_id: e.brand_id.clone(),
-                joint_brand_ids: e.joint_brand_ids.clone(),
-                name: e.name.clone(),
-                kind: e.kind.clone(),
-            })
-            .collect();
-        let criteria = EventFilterCriteria {
-            selected_brand_ids: vec![brand],
-            excluded_kinds: Vec::new(),
-            search_text: String::new(),
-            attendance_filter: "all".to_string(),
-            attended_event_ids: Vec::new(),
-            require_favorite: false,
-            favorite_ids: Vec::new(),
-            require_note: false,
-            note_ids: Vec::new(),
-            venue: String::new(),
-            venue_event_ids: Vec::new(),
-        };
-        let events: HashSet<u32> = filter_event_indices(&items, &criteria).into_iter().collect();
-        shows.retain(|&s| events.contains(&snap.shows[s as usize].event));
-    }
-    if let Some(year) = args::u32_opt(arguments, "year")? {
-        let prefix = year.to_string();
-        shows.retain(|&s| snap.shows[s as usize].date.starts_with(&prefix));
-    }
-    if let Some(venue) = args::str_opt(arguments, "venue") {
-        let at_venue: HashSet<u32> = show_indexes_at_venue(snap, &venue).into_iter().collect();
-        if at_venue.is_empty() {
-            return Err(ToolError::NotFound(format!("会場「{venue}」の公演が無い")));
-        }
-        shows.retain(|s| at_venue.contains(s));
-    }
-    Ok(shows)
+fn scoped_show_indexes(snap: &Snapshot, arguments: &Value) -> Result<Vec<u32>, ToolError> {
+    use crate::domain::show_list_filtering::filter_show_indexes;
+    // このランキングが持つ軸は 3 つだけ。他の軸を付けられたら黙って無視せず突き返す
+    // (無視すると「絞ったつもりの数」を答えてしまう)。today_key は when を使わないので
+    // 読まれない。
+    let criteria = show_criteria(snap, arguments, "", &["brand", "year", "venue"])?;
+    Ok(filter_show_indexes(snap, &criteria))
 }
 
-pub(super) fn show_index(snap: &Snapshot, show_id: &str) -> Result<u32, ToolError> {
+fn show_index(snap: &Snapshot, show_id: &str) -> Result<u32, ToolError> {
     snap.show_index_by_id
         .get(show_id)
         .copied()
@@ -1016,13 +906,15 @@ fn stats(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
 
     // 絞り込みの軸を持つのは公演別ランキングだけ。他の kind に付けられたら
     // 黙って無視しない (無視すると「絞ったつもりの数」を答えてしまう)。
-    let scoped = kind == "show_song_count_ranking";
-    for axis in ["brand", "year", "venue"] {
-        if !scoped && arguments.get(axis).is_some_and(|v| !v.is_null()) {
-            return Err(ToolError::BadArgs(format!(
-                "{axis} で絞れるのは kind=show_song_count_ranking のときだけ"
-            )));
-        }
+    // 軸の名前は scope が数え上げるので、ここで並べ直さない。
+    if kind != "show_song_count_ranking" {
+        show_criteria(snap, arguments, "", &[])
+            .map_err(|e| match e {
+                ToolError::BadArgs(m) => ToolError::BadArgs(format!(
+                    "{m} — 公演の絞り込みができるのは kind=show_song_count_ranking のときだけ"
+                )),
+                other => other,
+            })?;
     }
 
     let (total, rows): (usize, Vec<Value>) = match kind.as_str() {
@@ -1053,14 +945,16 @@ fn stats(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
                 .into_iter()
                 .map(|s| {
                     let mut o = Obj::new();
-                    if let Value::Object(header) = show_header(snap, s) {
-                        for (k, v) in header {
-                            o.put(&k, v);
-                        }
-                    }
+                    o.merge(show_header(snap, s));
                     o.put("id", json!(snap.shows[s as usize].id));
                     // 「一番出演者が多かった公演」も同じ 1 回で答えられるように添える。
-                    o.put("cast_count", json!(snap.cast_by_show[s as usize].len()));
+                    // 人数の定義は show_presence (出演者表 ∪ 歌唱メンバー) で、
+                    // get_show / list_shows の cast_count と同じもの。以前はここだけ
+                    // show_cast の行数で、同じ鍵が 2 つの意味を持っていた。
+                    o.put(
+                        "cast_count",
+                        json!(crate::domain::event_detail_queries::show_presence(snap, s).len()),
+                    );
                     o.value()
                 })
                 .collect();

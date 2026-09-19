@@ -65,6 +65,8 @@
    │   agent_tools/lookup.rs  … resolve / search / get_* / vocabulary
    │   agent_tools/browse.rs  … list_* / idol_songs / song_performances / setlist_diff / stats
    │   agent_tools/predict.rs … list_shows / setlist_shape / song_position_profile / co_performed_songs
+   │   agent_tools/scope.rs   … 公演を絞る引数のほどき方 (公演を扱う全ツール共通)
+   │   agent_tools/vocab.rs   … 取りうる値と、語彙外を候補つきで突き返す作法
    │   entity_resolution.rs   … 人の言葉 → エンティティ候補
    │   proposal.rs            … 投入ドラフトの組み立て
    │   (以下は既存) search_queries / idol_queries / song_detail_queries / …
@@ -123,8 +125,14 @@
 JSON にするだけ。`setlist_shape` の応答には**標本にした公演数と公演 id** が必ず付く —
 6 公演から出た中央値を全公演の傾向と取り違えさせないため。
 
-`list_shows` と `setlist_shape` は**同じ絞り込み関数** (`predict::narrow_shows`) を通す。
+公演の絞り込みの正本は **`domain/show_list_filtering.rs`** (`filter_show_indexes`)。曲・イベント・
+アイドルにはそれぞれ絞り込みの正本があるのに公演だけ無く、判断がツール面に直書きされていたので
+足した。引数をほどいて条件型に詰めるのは `agent_tools/scope.rs` の 1 本で、`list_shows` /
+`setlist_shape` / `stats --kind show_song_count_ranking` が**同じ軸の集合**を通る。
 「翼が lead の公演の型」が「翼が lead の公演の一覧」と違う集合から出たら、材料として成立しない。
+
+取りうる値 (`brand` / `event_kind` / `cast_role` …) は `agent_tools/vocab.rs` が実データから作る。
+語彙外は候補つきの `BadArgs` で突き返す (§4)。
 
 ## 5. 新規データ登録 (どこで止めるか)
 

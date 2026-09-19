@@ -11,32 +11,29 @@
 //!
 //! `list_shows` だけなら `browse` に置いてもよかったが、`setlist_shape` は
 //! **`list_shows` とまったく同じ軸で公演を絞る**必要がある (「翼が lead の公演の型」は
-//! 「翼が lead の公演の一覧」と同じ集合でなければ意味が無い)。2 ファイルに割ると
-//! 絞り込みが export 越しになるか、写経になる。同じ絞り込みを共有する 4 本を
-//! 1 ファイルに置き、[`narrow_shows`] をこの中の唯一の入口にする。
+//! 「翼が lead の公演の一覧」と同じ集合でなければ意味が無い)。軸をほどく口
+//! (`super::scope`) と絞り込みの規則 (`domain::show_list_filtering`) を共有する 4 本を
+//! 1 ファイルに置く。
 //!
 //! # 規則は借りる
 //!
-//! - 公演の絞り込み (brand / year / venue) は `browse::scoped_show_indexes`
-//!   (中身は `event_list_filtering` / `event_list_queries` が正本。会場は読み・旧名でも当たる)
-//! - 今後/過去は `event_grouping::is_upcoming_on`
-//! - 「誰がいたか」は `event_detail_queries::show_presence` (出演者表 ∪ 歌唱メンバー)
-//! - 型の計算そのものは `domain::setlist_shape`、共起は `domain::performance_stats`
-//!
-//! このファイルが持つのは引数のほどき方と JSON の組み方だけ。
+//! このファイルが持つのは JSON の組み方だけ。絞り込みは `show_list_filtering`、
+//! 型の計算は `domain::setlist_shape`、共起は `domain::performance_stats`、
+//! 語彙の検査は `super::scope` / `super::vocab` が正本。
 
 use super::json::{brand_ref, listing, listing_with, Obj};
+use super::scope::{show_criteria, show_scope_schema, SHOW_SCOPE_ARGS};
 use super::{args, ToolError, ToolSpec};
 use crate::domain::event_detail_queries::show_presence;
 use crate::domain::event_grouping::is_upcoming_on;
-use crate::domain::setlist_shape as shape;
+use crate::domain::setlist_shape::{self as shape, Phase};
+use crate::domain::show_list_filtering::filter_show_indexes;
 use crate::domain::snapshot::Snapshot;
 use serde_json::{json, Value};
-use std::collections::BTreeSet;
 
 /// 枠ごとのランキングを何件まで並べるか。主演公演が 6 件しかない以上、
 /// 上位 8 件も並べれば「1 回だけ来た曲」まで見えるので十分。
-const SLOT_TOP: usize = 8;
+const SLOT_TOP: u32 = 8;
 
 // =============================================================================
 // カタログ
@@ -53,6 +50,7 @@ pub fn catalog() -> Vec<ToolSpec> {
                 "has_setlist": { "type": "boolean", "description": "セトリが入っている公演だけ / 入っていない公演だけ。" },
                 "limit": { "type": "integer", "description": "既定 30・最大 200。" }
             })),
+            &[],
         ),
         spec(
             "setlist_shape",
@@ -64,6 +62,7 @@ pub fn catalog() -> Vec<ToolSpec> {
             show_scope_schema(json!({
                 "top": { "type": "integer", "description": "枠ごとのランキング件数。既定 8・最大 30。" }
             })),
+            &[],
         ),
         spec(
             "song_position_profile",
@@ -73,6 +72,7 @@ pub fn catalog() -> Vec<ToolSpec> {
             json!({
                 "song_id": { "type": "string", "description": "曲の id。" }
             }),
+            &["song_id"],
         ),
         spec(
             "co_performed_songs",
@@ -82,6 +82,7 @@ pub fn catalog() -> Vec<ToolSpec> {
                 "song_id": { "type": "string", "description": "曲の id。" },
                 "limit": { "type": "integer", "description": "既定 20・最大 100。" }
             }),
+            &["song_id"],
         ),
     ]
 }
@@ -102,11 +103,7 @@ pub fn call(
     })
 }
 
-fn spec(name: &str, description: &str, properties: Value) -> ToolSpec {
-    let required: &[&str] = match name {
-        "song_position_profile" | "co_performed_songs" => &["song_id"],
-        _ => &[],
-    };
+fn spec(name: &str, description: &str, properties: Value, required: &[&str]) -> ToolSpec {
     ToolSpec {
         name: name.to_string(),
         description: description.to_string(),
@@ -114,127 +111,13 @@ fn spec(name: &str, description: &str, properties: Value) -> ToolSpec {
     }
 }
 
-/// `list_shows` と `setlist_shape` が共有する軸。**スキーマも 1 箇所で書く** —
-/// 説明文が 2 つに割れると、同じ `cast_role` の意味が 2 通りに書かれる。
-fn show_scope_schema(extra: Value) -> Value {
-    let mut props = json!({
-        "brand": { "type": "string", "description": "ブランド id (例 ml / cg)。合同ライブは参加ブランドどれでも当たる。" },
-        "year": { "type": "integer", "description": "公演日の年。" },
-        "venue": { "type": "string", "description": "会場名。読み・旧名でも当たる。" },
-        "kind": { "type": "string", "description": "親イベントの種別 (live / festival / release_event)。発売記念イベントを外したいときに使う。" },
-        "event_id": { "type": "string", "description": "親イベント (ライブ) の id。" },
-        "idol_id": { "type": "string", "description": "その人が出ていた公演だけ。cast_role と併せると役割まで絞れる。" },
-        "cast_role": { "type": "string", "description": "出演の役割 (lead = 主演 / member)。idol_id が無ければ「その役割の人がいた公演」。" },
-        "min_cast": { "type": "integer", "description": "出演者数の下限。" },
-        "max_cast": { "type": "integer", "description": "出演者数の上限。少人数公演を探すときに使う。" },
-        "when": { "type": "string", "enum": ["upcoming", "past", "all"], "description": "既定 all。upcoming は近い順、それ以外は新しい順。" }
-    });
-    if let (Some(base), Some(add)) = (props.as_object_mut(), extra.as_object()) {
-        for (k, v) in add {
-            base.insert(k.clone(), v.clone());
-        }
-    }
-    props
-}
-
-// =============================================================================
-// 公演の絞り込み (この 2 本の唯一の入口)
-// =============================================================================
-
-/// 軸で公演を絞る。並びは日付順 (`when=upcoming` なら近い順、それ以外は新しい順)。
-///
-/// brand / year / venue は `browse` の既存の絞り込みをそのまま通す
-/// (`stats --kind show_song_count_ranking` と同じ集合になる)。ここが足すのは
-/// 公演そのものの軸 — 親イベント・出演者・役割・人数・今後/過去。
+/// 公演を絞る。`list_shows` と `setlist_shape` はここを通るので、
+/// 「一覧」と「型」が必ず同じ集合から出る。
 fn narrow_shows(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<Vec<u32>, ToolError> {
-    use super::browse::{checked, event_kind_vocab, scoped_show_indexes};
-
-    let mut shows = scoped_show_indexes(snap, arguments)?;
-
-    // 種別は親イベントが持つ。発売記念イベント (2 曲のミニステージ) が混ざったまま
-    // 型を取ると曲数の中央値が本公演の 1/4 になるので、外せる軸を用意する。
-    if let Some(kind) = args::str_opt(arguments, "kind") {
-        let kind = checked("kind", kind, &event_kind_vocab(snap))?;
-        shows.retain(|&s| snap.events[snap.shows[s as usize].event as usize].kind == kind);
-    }
-
-    if let Some(event_id) = args::str_opt(arguments, "event_id") {
-        let Some(&event) = snap.event_index_by_id.get(&event_id) else {
-            return Err(ToolError::NotFound(format!("ライブ {event_id} が無い")));
-        };
-        shows.retain(|&s| snap.shows[s as usize].event == event);
-    }
-
-    // 役割は show_cast の実在値が語彙 (定数で持つと 'guest' が増えた日に古くなる)。
-    let role = args::str_opt(arguments, "cast_role")
-        .map(|r| checked("cast_role", r, &cast_role_vocab(snap)))
-        .transpose()?;
-    let idol = args::str_opt(arguments, "idol_id")
-        .map(|id| {
-            snap.idol_index_by_id
-                .get(&id)
-                .copied()
-                .ok_or_else(|| ToolError::NotFound(format!("アイドル {id} が無い")))
-        })
-        .transpose()?;
-
-    match (idol, role.as_deref()) {
-        // その人がその役割だった公演。
-        (Some(i), Some(r)) => shows.retain(|&s| snap.show_cast_role(s, i) == Some(r)),
-        // その人がいた公演。「いた」の定義は show_presence が正本
-        // (出演者表が未入力で歌唱だけ入っている公演があるので、show_cast だけでは足りない)。
-        (Some(i), None) => shows.retain(|&s| show_presence(snap, s).contains(&i)),
-        // その役割の人がいた公演 (= 主演公演そのものを探すとき)。
-        (None, Some(r)) => {
-            shows.retain(|&s| snap.cast_by_show[s as usize].iter().any(|l| l.cast_role == r))
-        }
-        (None, None) => {}
-    }
-
-    let min_cast = args::u32_opt(arguments, "min_cast")?;
-    let max_cast = args::u32_opt(arguments, "max_cast")?;
-    if min_cast.is_some() || max_cast.is_some() {
-        shows.retain(|&s| {
-            let n = show_presence(snap, s).len() as u32;
-            min_cast.is_none_or(|m| n >= m) && max_cast.is_none_or(|m| n <= m)
-        });
-    }
-
-    if arguments.get("has_setlist").is_some_and(|v| !v.is_null()) {
-        let want = args::bool_or(arguments, "has_setlist", true)?;
-        shows.retain(|&s| !snap.setlist_items_by_show[s as usize].is_empty() == want);
-    }
-
-    let when = args::str_opt(arguments, "when").unwrap_or_else(|| "all".to_string());
-    if !matches!(when.as_str(), "upcoming" | "past" | "all") {
-        return Err(ToolError::BadArgs("when は upcoming / past / all です".into()));
-    }
-    if when != "all" {
-        let want_upcoming = when == "upcoming";
-        shows.retain(|&s| is_upcoming_on(&snap.shows[s as usize].date, today_key) == want_upcoming);
-    }
-
-    // 日付で並べる。同日は公演の添字で決定的に (ロード時に date/sort_order 順)。
-    shows.sort_by(|&a, &b| {
-        let (x, y) = (&snap.shows[a as usize], &snap.shows[b as usize]);
-        x.date.cmp(&y.date).then(a.cmp(&b))
-    });
-    // これから来る予定は近い順、過去は新しい順 (list_events と同じ読み方)。
-    if when != "upcoming" {
-        shows.reverse();
-    }
-    Ok(shows)
-}
-
-/// `cast_role` の取りうる値。語彙はデータそのものから作る。
-fn cast_role_vocab(snap: &Snapshot) -> Vec<String> {
-    let set: BTreeSet<&str> = snap
-        .cast_by_show
-        .iter()
-        .flat_map(|links| links.iter().map(|l| l.cast_role.as_str()))
-        .filter(|r| !r.is_empty())
-        .collect();
-    set.into_iter().map(str::to_string).collect()
+    let mut allow: Vec<&str> = SHOW_SCOPE_ARGS.to_vec();
+    allow.push("has_setlist");
+    let criteria = show_criteria(snap, arguments, today_key, &allow)?;
+    Ok(filter_show_indexes(snap, &criteria))
 }
 
 // =============================================================================
@@ -255,11 +138,7 @@ fn list_shows(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<Val
             let event = &snap.events[show.event as usize];
             let mut o = Obj::new();
             // 「どの公演か」の書き方は browse と共通 (同じ鍵で同じ意味になる)。
-            if let Value::Object(header) = show_header(snap, s) {
-                for (k, v) in header {
-                    o.put(&k, v);
-                }
-            }
+            o.merge(show_header(snap, s));
             o.put("id", json!(show.id));
             o.opt("brand", brand_ref(snap, event.brand_id.as_deref()));
             o.put("cast_count", json!(show_presence(snap, s).len()));
@@ -293,24 +172,21 @@ fn role_names(snap: &Snapshot, show: u32, role: &str) -> Vec<Value> {
 // =============================================================================
 
 fn setlist_shape(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<Value, ToolError> {
-    // `limit` ではなく `top` で受ける (一覧の件数ではなく「枠ごとの上位いくつ」なので、
-    // 同じ鍵にすると list_shows の limit と意味が混ざる)。
-    let top = args::u32_opt(arguments, "top")?
-        .filter(|&n| n > 0)
-        .map_or(SLOT_TOP, |n| (n as usize).min(30));
+    // 件数ではなく「枠ごとの上位いくつ」なので鍵を limit と分ける
+    // (同じ鍵にすると list_shows の limit と意味が混ざる)。丸め方は args と共通。
+    let top = args::capped(arguments, "top", SLOT_TOP, 30)? as usize;
     let shows = narrow_shows(snap, arguments, today_key)?;
     let s = shape::setlist_shape(snap, &shows, top);
 
     let mut o = Obj::new();
-    o.put("shows", json!(s.shows));
+    o.put("shows", json!(s.shows()));
     // 0 でも載せる。落とすと「条件に当たった公演は全部セトリがあった」と読める。
     o.put("shows_without_setlist", json!(s.shows_without_setlist));
     // どの公演を標本にしたかを言えないと、数字の当否を呼び手が確かめられない。
     o.list(
         "sampled_shows",
-        shows
+        s.sampled
             .iter()
-            .filter(|&&x| !snap.setlist_items_by_show[x as usize].is_empty())
             .map(|&x| {
                 let show = &snap.shows[x as usize];
                 let mut r = Obj::new();
@@ -329,8 +205,8 @@ fn setlist_shape(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<
             .map(|sec| {
                 let mut r = Obj::new();
                 // 区切り無し (= 本編) は label ごと落とす。`null` を載せない規約どおり。
-                o_label(&mut r, sec.label.as_deref());
-                r.put("shows", json!(sec.shows));
+                r.opt("label", sec.label.clone());
+                r.put("shows", json!(sec.shows()));
                 r.put("songs", spread_json(&sec.songs));
                 r.value()
             })
@@ -341,10 +217,6 @@ fn setlist_shape(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<
     o.list("closers", slot_rows(snap, &s.closers));
     o.opt("solo_slots", s.solo_slots.as_ref().map(spread_json));
     Ok(o.value())
-}
-
-fn o_label(o: &mut Obj, label: Option<&str>) {
-    o.opt("label", label.map(str::to_string));
 }
 
 fn spread_json(s: &shape::Spread) -> Value {
@@ -391,18 +263,18 @@ fn song_position_profile(snap: &Snapshot, arguments: &Value) -> Result<Value, To
             .iter()
             .map(|(label, times)| {
                 let mut r = Obj::new();
-                o_label(&mut r, label.as_deref());
+                r.opt("label", label.clone());
                 r.put("times", json!(times));
                 r.value()
             })
             .collect(),
     );
     // 序盤 / 中盤 / 終盤。公演ごとに曲数が違う (1〜34 曲) ので、生の曲順ではなく
-    // 曲数で正規化した 3 等分。割り方は domain::setlist_shape::Phase が正本。
+    // 曲数で正規化した 3 等分。割り方も鍵の名前も setlist_shape::Phase が正本。
     let mut phase = Obj::new();
-    phase.put("early", json!(p.early));
-    phase.put("middle", json!(p.middle));
-    phase.put("late", json!(p.late));
+    for ph in Phase::ALL {
+        phase.put(ph.key(), json!(p.phase(ph)));
+    }
     o.put("position", phase.value());
     Ok(o.value())
 }
@@ -421,10 +293,10 @@ fn co_performed_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolE
     let limit = args::limit(arguments, 20, 100)?;
 
     // 計算は performance_stats が正本。ここは呼ぶだけ (新しい数え方を書かない)。
-    let index_built = CoOccurIndex::build(snap);
+    let stats = CoOccurIndex::build(snap);
     // 総数を返すために打ち切らずに受け、件数はこちらで切る (「何曲と一緒に来たか」に
     // 答えられなくなるので、打ち切った件数だけを返さない — §4 の規約)。
-    let all = index_built.co_occurring(snap, &song_id, u32::MAX);
+    let all = stats.co_occurring(snap, &song_id, u32::MAX);
     let total = all.len();
     let rows: Vec<Value> = all
         .into_iter()
@@ -442,7 +314,7 @@ fn co_performed_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolE
     let mut head = Obj::new();
     head.put("song", super::browse::song_row(snap, index));
     // 「一緒に来る率」の分母になる、対象曲そのものの公演数。
-    head.put("song_shows", json!(index_built.performances(index)));
+    head.put("song_shows", json!(stats.performances(index)));
     Ok(listing_with(head, "co_performed", total, rows))
 }
 
@@ -519,7 +391,7 @@ mod tests {
         // 発売記念イベント (2 曲のミニステージ) が混ざったままだと曲数の中央値が
         // 本公演の型を表さない。kind=live で外れることを固定する。
         let all = call("setlist_shape", json!({ "idol_id": "ml_伊吹翼", "max_cast": 16 }));
-        let live = call("setlist_shape", json!({ "idol_id": "ml_伊吹翼", "max_cast": 16, "kind": "live" }));
+        let live = call("setlist_shape", json!({ "idol_id": "ml_伊吹翼", "max_cast": 16, "event_kind": "live" }));
         assert!(live["shows"].as_u64().unwrap() < all["shows"].as_u64().unwrap(), "{live}");
         assert!(
             live["song_count"]["median"].as_u64().unwrap()

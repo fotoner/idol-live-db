@@ -19,6 +19,8 @@
 pub mod browse;
 pub mod lookup;
 pub mod predict;
+pub mod scope;
+pub mod vocab;
 
 use crate::domain::snapshot::Snapshot;
 use serde_json::{json, Value};
@@ -225,6 +227,17 @@ pub mod json {
             }
         }
 
+        /// 別のオブジェクトの鍵をそのまま取り込む。見出し (公演のヘッダなど) を
+        /// 入れ子にせず平らに並べたいときに使う。入れ子にしないのは、同じ
+        /// 「どの公演か」が一覧でも集計でも同じ鍵で読めるようにするため。
+        pub fn merge(&mut self, value: Value) {
+            if let Value::Object(map) = value {
+                for (k, v) in map {
+                    self.0.insert(k, v);
+                }
+            }
+        }
+
         pub fn value(self) -> Value {
             Value::Object(self.0)
         }
@@ -253,11 +266,7 @@ pub mod json {
     /// [`listing`] の鍵を見出しの隣へ並べる。入れ子にしないのは、列が 1 本のときの
     /// 読み方を `resolve` と同じにそろえるため。
     pub fn listing_with(mut head: Obj, key: &str, total: usize, rows: Vec<Value>) -> Value {
-        if let Value::Object(map) = listing(key, total, rows) {
-            for (k, v) in map {
-                head.0.insert(k, v);
-            }
-        }
+        head.merge(listing(key, total, rows));
         head.value()
     }
 
@@ -474,14 +483,20 @@ pub mod args {
 
     /// 上限件数。`max` を超える指定は `max` に丸める (LLM が 10000 と書いても壊れない)。
     pub fn limit(args: &Value, default: u32, max: u32) -> Result<u32, ToolError> {
-        let Some(v) = args.get("limit") else { return Ok(default) };
+        capped(args, "limit", default, max)
+    }
+
+    /// `limit` と同じ丸め方を別の鍵で。件数ではない上限 (`top` = 枠ごとの上位いくつ) は
+    /// 鍵を分ける — 同じ `limit` にすると「一覧の件数」と意味が混ざる。
+    pub fn capped(args: &Value, key: &str, default: u32, max: u32) -> Result<u32, ToolError> {
+        let Some(v) = args.get(key) else { return Ok(default) };
         let n = match v {
             Value::Number(n) => n.as_u64(),
             Value::String(s) => s.trim().parse::<u64>().ok(),
             Value::Null => return Ok(default),
             _ => None,
         }
-        .ok_or_else(|| ToolError::BadArgs("limit は 0 以上の整数です".into()))?;
+        .ok_or_else(|| ToolError::BadArgs(format!("{key} は 0 以上の整数です")))?;
         // 先に u64 のまま丸める。`n as u32` を先にすると 4294967296 が 0 になり、
         // 「上限で丸める」つもりが 0 件になる (u32 の剰余)。
         Ok(if n == 0 { default } else { n.min(max as u64) as u32 })
@@ -502,6 +517,15 @@ pub mod args {
                 .map(Some)
                 .map_err(|_| ToolError::BadArgs(format!("{key} は整数です"))),
             _ => Err(ToolError::BadArgs(format!("{key} は整数です"))),
+        }
+    }
+
+    /// 真偽値。渡されていなければ `None` (「既定に倒す」のと「指定が無い」のは別物で、
+    /// 3 値の軸 — 有り / 無し / 問わない — はこちらでないと書けない)。
+    pub fn bool_opt(args: &Value, key: &str) -> Result<Option<bool>, ToolError> {
+        match args.get(key) {
+            None | Some(Value::Null) => Ok(None),
+            _ => bool_or(args, key, false).map(Some),
         }
     }
 
