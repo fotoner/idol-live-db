@@ -82,9 +82,15 @@ pub struct ProposalDraft {
     pub contents: String,
     /// 人間とLLMに見せる要約。
     pub summary: String,
-    /// `source` のホストが既知の一次ソース一覧に無いときの注意書き。**拒否はしない**
-    /// (正当な一次ソースを機械的に弾く害の方が大きい) — 人間のレビューへの申し送り。
-    pub source_host_advisory: Option<String>,
+    /// 出典についての注意書き。**全ドラフトに常時付ける** (RedTeam M4)。
+    ///
+    /// 既知の一次ソースホストのときだけ無言にすると、「素朴な捏造 (個人ブログ) は
+    /// 捕まるのに、上手な捏造 (`idolmaster-official.jp/news/<でっち上げ>` のような
+    /// 既知ドメインっぽい URL) ほど無警告になる」という逆インセンティブが生まれる。
+    /// 機械は `source_quote` が本当に URL の中身と一致するかを確認していない、という
+    /// 事実は常に明示し、未知ホストのときだけ追加の注意を足す。拒否はしない
+    /// (正当な一次ソースを機械的に弾く害の方が大きい) — あくまで人間のレビューへの申し送り。
+    pub source_advisory: String,
 }
 
 impl ProposalDraft {
@@ -116,6 +122,24 @@ const KNOWN_SOURCE_HOSTS: &[&str] = &[
     "bandainamcomusiclive.co.jp",
     "jasrac.or.jp",
 ];
+
+/// `check_proposals` を `file` 省略で呼んだときに自動検証する上限件数 (RedTeam M5)。
+///
+/// `tools/apply_data.py --check --only <file>` は python の起動と DB オープンを
+/// 毎回やり直すので 1 回あたり実測 0.29 秒かかる。MCP クライアントのツール呼び出し
+/// タイムアウトは一般に 30〜60 秒なので、上限なく `data/` 全件 (実測 69 件 = 20 秒超) を
+/// 回すとタイムアウトに触れる。20 件なら 0.29 秒 × 20 ≈ 5.8 秒で、遅い環境でも
+/// 十分な余裕を残せる。値そのものは判断なのでここに置き、`agent::proposal_io` は
+/// この定数を読むだけにする。
+pub const MAX_AUTO_CHECK_FILES: usize = 20;
+
+/// `propose_fix` の `fields` に含めてはいけない列 (RedTeam L1)。
+///
+/// `table: "songs"` に任意の `fields` を書ける以上、歌詞/試聴 URL をここ経由で
+/// 混入させる経路が残ってしまう。歌詞本文そのものを返す訳ではないので「漏洩」では
+/// ないが、読み取り側 (`domain::agent_tools`) がこの 2 列を意図的に隠している以上、
+/// 書き込み側でも同じ列は塞いでおく。
+const FORBIDDEN_FIX_FIELDS: &[&str] = &["lyrics_url", "preview_url"];
 
 /// 書き込み (ドラフト作成) ツールの一覧。
 pub fn proposal_catalog() -> Vec<ToolSpec> {
@@ -442,13 +466,13 @@ fn build_song(a: &Value, today_key: &str) -> Result<ProposalDraft, ToolError> {
     let file_name = build_file_name(kind, today_key, &id)?;
     let title_text = format!("曲「{title}」({brand_id}) の追加");
     let top = doc_fields(&title_text, a, &source, "propose_song", vec![("songs", Field::Arr(vec![Field::Obj(song)]))]);
-    let advisory = source_host_advisory(&source.url);
+    let source_advisory = source_host_advisory(&source.url);
     let draft = ProposalDraft {
         kind,
         file_name,
         contents: render(top),
         summary: String::new(),
-        source_host_advisory: advisory,
+        source_advisory,
     };
     let summary = format!("曲「{title}」({brand_id}) を追加するドラフト: {}", draft.display_path());
     Ok(ProposalDraft { summary, ..draft })
@@ -501,21 +525,14 @@ fn build_event(a: &Value, today_key: &str) -> Result<ProposalDraft, ToolError> {
     let file_name = build_file_name(kind, today_key, &id)?;
     let title_text = format!("イベント「{name}」({brand_id}) の追加");
     let top = doc_fields(&title_text, a, &source, "propose_event", vec![("events", Field::Arr(vec![Field::Obj(event)]))]);
-    let advisory = source_host_advisory(&source.url);
-    let display = ProposalDraft {
-        kind,
-        file_name: file_name.clone(),
-        contents: String::new(),
-        summary: String::new(),
-        source_host_advisory: None,
-    }
-    .display_path();
+    let source_advisory = source_host_advisory(&source.url);
+    let display = format!("data/{}/{file_name}", kind.dir());
     Ok(ProposalDraft {
         kind,
         file_name,
         contents: render(top),
         summary: format!("イベント「{name}」({brand_id}) + 公演 {show_count} 件を追加するドラフト: {display}"),
-        source_host_advisory: advisory,
+        source_advisory,
     })
 }
 
@@ -574,14 +591,14 @@ fn build_setlist(a: &Value, today_key: &str) -> Result<ProposalDraft, ToolError>
     let file_name = build_file_name(kind, today_key, &show_id)?;
     let title_text = format!("公演 {show_id} のセットリスト追加");
     let top = doc_fields(&title_text, a, &source, "propose_setlist", payload);
-    let advisory = source_host_advisory(&source.url);
+    let source_advisory = source_host_advisory(&source.url);
     let display = format!("data/{}/{}", kind.dir(), file_name);
     Ok(ProposalDraft {
         kind,
         file_name,
         contents: render(top),
         summary: format!("公演 {show_id} のセットリスト {song_count} 曲を追加するドラフト: {display}"),
-        source_host_advisory: advisory,
+        source_advisory,
     })
 }
 
@@ -615,14 +632,14 @@ fn build_idol(a: &Value, today_key: &str) -> Result<ProposalDraft, ToolError> {
     let file_name = build_file_name(kind, today_key, &id)?;
     let title_text = format!("アイドル「{name}」({brand_id}) の追加");
     let top = doc_fields(&title_text, a, &source, "propose_idol", vec![("idols", Field::Arr(vec![Field::Obj(idol)]))]);
-    let advisory = source_host_advisory(&source.url);
+    let source_advisory = source_host_advisory(&source.url);
     let display = format!("data/{}/{}", kind.dir(), file_name);
     Ok(ProposalDraft {
         kind,
         file_name,
         contents: render(top),
         summary: format!("アイドル「{name}」({brand_id}) を追加するドラフト: {display}"),
-        source_host_advisory: advisory,
+        source_advisory,
     })
 }
 
@@ -634,6 +651,14 @@ fn build_fix(a: &Value, today_key: &str) -> Result<ProposalDraft, ToolError> {
         .and_then(Value::as_object)
         .filter(|m| !m.is_empty())
         .ok_or_else(|| ToolError::BadArgs("fields は 1 件以上のフィールドが必要です。".to_string()))?;
+    // RedTeam L1: table: "songs" に任意の fields を書けるので、歌詞/試聴 URL を
+    // ここ経由で混入させる経路をあらかじめ塞ぐ (どの table でも一律に禁止する —
+    // songs 以外にこの列名が来ること自体が想定外の入力なので、table で場合分けしない)。
+    if let Some(bad) = fields_obj.keys().find(|k| FORBIDDEN_FIX_FIELDS.contains(&k.as_str())) {
+        return Err(ToolError::BadArgs(format!(
+            "fields に '{bad}' は含められません (歌詞/試聴 URL は propose_fix の対象外です)。"
+        )));
+    }
     let field_count = fields_obj.len();
     let source = require_source(a)?;
 
@@ -647,14 +672,14 @@ fn build_fix(a: &Value, today_key: &str) -> Result<ProposalDraft, ToolError> {
     let file_name = build_file_name(kind, today_key, &format!("{table}_{id}"))?;
     let title_text = format!("{table} の {id} を修正");
     let top = doc_fields(&title_text, a, &source, "propose_fix", vec![("fixes", Field::Arr(vec![Field::Obj(fix)]))]);
-    let advisory = source_host_advisory(&source.url);
+    let source_advisory = source_host_advisory(&source.url);
     let display = format!("data/{}/{}", kind.dir(), file_name);
     Ok(ProposalDraft {
         kind,
         file_name,
         contents: render(top),
         summary: format!("{table} の {id} を修正するドラフト ({field_count} フィールド): {display}"),
-        source_host_advisory: advisory,
+        source_advisory,
     })
 }
 
@@ -682,20 +707,28 @@ fn require_source(a: &Value) -> Result<Source, ToolError> {
     Ok(Source { url, quote })
 }
 
-/// `source` のホストが `KNOWN_SOURCE_HOSTS` に無ければ注意書きを返す (拒否はしない)。
-fn source_host_advisory(source: &str) -> Option<String> {
-    let host = extract_host(source)?;
-    let known = KNOWN_SOURCE_HOSTS
-        .iter()
-        .any(|d| host == *d || host.ends_with(&format!(".{d}")));
-    if known {
-        None
-    } else {
-        Some(format!(
-            "source のホスト ({host}) は既知の一次ソース一覧 ({}) に無い。\
-             オーナーのレビューで出典の確認が必要です。",
-            KNOWN_SOURCE_HOSTS.join(" / ")
-        ))
+/// 出典の注意書きを組む。**常に何か返す** (RedTeam M4 — このファイルの
+/// `ProposalDraft::source_advisory` の doc コメントを参照)。既知ホストかどうかで
+/// 「出すか出さないか」を分けない。分けるのは追加の一文だけ。
+fn source_host_advisory(source: &str) -> String {
+    const BASE: &str = "この source は機械が取得・検証していません。反映前にオーナーが \
+        URL を開き、source_quote の引用が実際の中身と一致するか確認してください。";
+    match extract_host(source) {
+        Some(host) => {
+            let known = KNOWN_SOURCE_HOSTS
+                .iter()
+                .any(|d| host == *d || host.ends_with(&format!(".{d}")));
+            if known {
+                BASE.to_string()
+            } else {
+                format!(
+                    "{BASE} さらに、source のホスト ({host}) は既知の一次ソース一覧 ({}) に \
+                     無いので、特に注意して確認してください。",
+                    KNOWN_SOURCE_HOSTS.join(" / ")
+                )
+            }
+        }
+        None => format!("{BASE} (source から URL のホストを取り出せませんでした: {source:?})"),
     }
 }
 
@@ -1077,12 +1110,14 @@ mod tests {
         assert!(v["songs"][0].get("source").is_none());
         assert!(v["songs"][0].get("note").is_none());
         assert!(draft.contents.ends_with('\n'));
-        // 既知ホストなので注意書きは出ない。
-        assert!(draft.source_host_advisory.is_none());
+        // 既知ホストでも注意書き自体は常に出る (RedTeam M4)。ただし未知ホスト向けの
+        // 追加の一文までは付かない。
+        assert!(draft.source_advisory.contains("機械が取得・検証していません"));
+        assert!(!draft.source_advisory.contains("既知の一次ソース一覧"));
     }
 
     #[test]
-    fn 未知ホストの_source_には注意書きが付く_ただし拒否はしない() {
+    fn 未知ホストの_source_には追加の注意書きが付く_ただし拒否はしない() {
         let a = json!({
             "id": "ml_test_song", "title": "テスト曲", "brand_id": "ml", "song_type": "unit",
             "original_singers": ["ml_idol_a"],
@@ -1090,13 +1125,12 @@ mod tests {
             "source_quote": "何か書いてあった",
         });
         let draft = build_proposal("propose_song", &a, "2026-09-19").unwrap();
-        let advisory = draft.source_host_advisory.expect("未知ホストなので注意書きが付くはず");
-        assert!(advisory.contains("random-fan-blog.example.com"));
-        assert!(advisory.contains("レビュー"));
+        assert!(draft.source_advisory.contains("random-fan-blog.example.com"));
+        assert!(draft.source_advisory.contains("既知の一次ソース一覧"));
     }
 
     #[test]
-    fn 既知ホストのサブドメインも認識する() {
+    fn 既知ホストのサブドメインでも基本の注意書きは付く() {
         let a = json!({
             "id": "sc_test_song", "title": "テスト曲", "brand_id": "sc", "song_type": "unit",
             "original_singers": ["sc_idol_a"],
@@ -1104,7 +1138,39 @@ mod tests {
             "source_quote": "配信開始",
         });
         let draft = build_proposal("propose_song", &a, "2026-09-19").unwrap();
-        assert!(draft.source_host_advisory.is_none());
+        assert!(draft.source_advisory.contains("機械が取得・検証していません"));
+        assert!(!draft.source_advisory.contains("既知の一次ソース一覧"));
+    }
+
+    #[test]
+    fn source_advisory_はホストを取り出せなくても何か返す() {
+        // 極端な入力 (スキームだけでホスト部が空) でも空文字列を返して黙り込んだりしない。
+        let advisory = source_host_advisory("https://");
+        assert!(!advisory.is_empty());
+        assert!(advisory.contains("機械が取得・検証していません"));
+    }
+
+    #[test]
+    fn propose_fix_は_lyrics_url_や_preview_url_を弾く() {
+        for key in ["lyrics_url", "preview_url"] {
+            let a = with_source(json!({
+                "table": "songs", "id": "ml_song",
+                "fields": { key: "https://example.com/lyrics" },
+            }));
+            let err = build_proposal("propose_fix", &a, "2026-09-19").unwrap_err();
+            assert!(matches!(err, ToolError::BadArgs(_)), "{key} を弾いていない");
+        }
+        // 無害な列は引き続き通る。
+        let ok = with_source(json!({
+            "table": "songs", "id": "ml_song", "fields": { "release_date": "2024-01-01" },
+        }));
+        assert!(build_proposal("propose_fix", &ok, "2026-09-19").is_ok());
+    }
+
+    #[test]
+    fn max_auto_check_files_は妥当な範囲() {
+        assert!(MAX_AUTO_CHECK_FILES > 0);
+        assert!(MAX_AUTO_CHECK_FILES <= 30, "MCP のツール呼び出しタイムアウトに触れない上限であること");
     }
 
     #[test]

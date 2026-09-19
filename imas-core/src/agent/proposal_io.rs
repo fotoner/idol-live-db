@@ -79,8 +79,14 @@ fn list_pending_files(repo_root: &Path) -> Vec<String> {
 /// 「自分の提案が無効だった」と誤認する (`docs/DATA_PIPELINE.md` に実測 975 件の例がある)。
 /// この関数を含め、`run_apply_check` を `only_file: None` で呼ぶ経路はこのファイルに
 /// 一切作らない。
+///
+/// RedTeam M5: 1 件ごとに python の起動と DB オープンをやり直すので実測 0.29 秒/件かかる。
+/// `data/` に実測 69 件ある状態で無制限に回すと 20 秒を超え、MCP クライアントのツール
+/// 呼び出しタイムアウト (一般に 30〜60 秒) に触れる。`domain::proposal::MAX_AUTO_CHECK_FILES`
+/// で打ち切り、残りは `total_pending` と `message` で「未検証」だとはっきり返す
+/// (打ち切ったことを黙らない)。
 fn run_check_all(ctx: &Ctx) -> Value {
-    let files = list_pending_files(&ctx.repo_root);
+    let mut files = list_pending_files(&ctx.repo_root);
     if files.is_empty() {
         return json!({
             "files_checked": 0,
@@ -88,12 +94,31 @@ fn run_check_all(ctx: &Ctx) -> Value {
             "message": "data/ に未反映のドラフトはありません。",
         });
     }
+    let total = files.len();
+    let capped = total > proposal::MAX_AUTO_CHECK_FILES;
+    files.truncate(proposal::MAX_AUTO_CHECK_FILES);
+
     let results: Vec<Value> = files
         .iter()
         .map(|f| json!({ "file": f, "check": run_apply_check(ctx, Some(f)) }))
         .collect();
     let all_ok = results.iter().all(|r| r["check"]["ok"].as_bool().unwrap_or(false));
-    json!({ "files_checked": files.len(), "all_ok": all_ok, "results": results })
+
+    let mut out = json!({
+        "files_checked": results.len(),
+        "total_pending": total,
+        "all_ok": all_ok,
+        "results": results,
+    });
+    if capped {
+        let remaining = total - proposal::MAX_AUTO_CHECK_FILES;
+        out["message"] = json!(format!(
+            "data/ に {total} 件のドラフトがあるうち先頭 {} 件だけ検証しました。残り {remaining} 件は \
+             未検証です。特定のファイルを確かめるには file 引数を指定してください。",
+            proposal::MAX_AUTO_CHECK_FILES,
+        ));
+    }
+    out
 }
 
 /// ドラフトを書き出し、そのファイルだけを `--check --only` にかけて結果を返す。
@@ -106,7 +131,7 @@ fn write_and_check(ctx: &Ctx, draft: &ProposalDraft) -> Result<Value, ToolError>
         .map_err(|e| ToolError::Failed(format!("ドラフトを書き込めません ({}): {e}", abs_path.display())))?;
 
     let check = run_apply_check(ctx, Some(&final_name));
-    let mut result = json!({
+    let result = json!({
         "draft": {
             "path": format!("data/{}/{final_name}", draft.kind.dir()),
             "summary": draft.summary,
@@ -114,10 +139,10 @@ fn write_and_check(ctx: &Ctx, draft: &ProposalDraft) -> Result<Value, ToolError>
         "check": check,
         "notice": "これは提案 (ドラフト) です。data/ に書いただけで、まだ何も反映されていません。\
             反映にはオーナーが手元で `tools/apply_data.py --apply --push` を実行する必要があります。",
+        // RedTeam M4: 既知ホストのときだけ省くと「上手な捏造ほど無警告」になるので、
+        // ここでは常に draft.source_advisory (常に非空) をそのまま載せる。
+        "source_advisory": draft.source_advisory,
     });
-    if let Some(advisory) = &draft.source_host_advisory {
-        result["source_advisory"] = json!(advisory);
-    }
     Ok(result)
 }
 
@@ -128,18 +153,32 @@ fn write_and_check(ctx: &Ctx, draft: &ProposalDraft) -> Result<Value, ToolError>
 /// 最後の砦としてここでも検算する。`data/<kind>` がシンボリックリンク等で `data/` の外を
 /// 指すよう細工されていたら、`canonicalize` した実体の親ディレクトリが `data/` の実体と
 /// 一致しなくなるので、そこで弾く。
+///
+/// RedTeam L4: それだけでは **`data/` 自体**がシンボリックリンクで外を指しているケースを
+/// すり抜ける (`canon_data` が既にリダイレクト先を指していて、`canon_dir` もその配下に
+/// 矛盾なく収まってしまうため)。`canon_data` が `repo_root` の実体の配下にあることも
+/// 併せて確かめて閉じる。
 fn prepare_kind_dir(repo_root: &Path, kind: ProposalKind) -> Result<PathBuf, ToolError> {
     let dir = repo_root.join("data").join(kind.dir());
     std::fs::create_dir_all(&dir)
         .map_err(|e| ToolError::Failed(format!("ディレクトリを作れません ({}): {e}", dir.display())))?;
 
-    let canon_dir = dir
+    let canon_repo_root = repo_root
         .canonicalize()
-        .map_err(|e| ToolError::Failed(format!("ディレクトリを解決できません ({}): {e}", dir.display())))?;
+        .map_err(|e| ToolError::Failed(format!("repo_root を解決できません: {e}")))?;
     let canon_data = repo_root
         .join("data")
         .canonicalize()
         .map_err(|e| ToolError::Failed(format!("data/ を解決できません: {e}")))?;
+    if !canon_data.starts_with(&canon_repo_root) {
+        return Err(ToolError::Failed(format!(
+            "data/ の実体がリポジトリの外を指しています ({})",
+            canon_data.display(),
+        )));
+    }
+    let canon_dir = dir
+        .canonicalize()
+        .map_err(|e| ToolError::Failed(format!("ディレクトリを解決できません ({}): {e}", dir.display())))?;
     if canon_dir.parent() != Some(canon_data.as_path()) {
         return Err(ToolError::Failed(format!(
             "data/{} の実体が想定外の場所を指しています ({})",
@@ -225,25 +264,30 @@ mod tests {
     use std::sync::atomic::{AtomicU64, Ordering};
 
     /// リポジトリの `data/` を汚さないよう、テストごとに使い捨てのディレクトリを
-    /// `repo_root` に見立てる。`tempfile` crate はこの crate の依存に無い
+    /// `repo_root` に見立てる (`TempRepo`) か、symlink 攻撃のテストで「外」として
+    /// 使う (`unique_temp_dir` 単体)。`tempfile` crate はこの crate の依存に無い
     /// (Cargo.toml を書き換えると並行するビルドと衝突するため足さない) ので
     /// `std::env::temp_dir()` の下に自前でユニークな名前を切って使う。
+    fn unique_temp_dir(tag: &str) -> PathBuf {
+        static COUNTER: AtomicU64 = AtomicU64::new(0);
+        let n = COUNTER.fetch_add(1, Ordering::Relaxed);
+        let pid = std::process::id();
+        let nanos = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_nanos())
+            .unwrap_or(0);
+        let dir = std::env::temp_dir().join(format!("imas_proposal_io_{tag}_{pid}_{n}_{nanos}"));
+        std::fs::create_dir_all(&dir).expect("temp dir を作れない");
+        dir
+    }
+
     struct TempRepo {
         root: PathBuf,
     }
 
     impl TempRepo {
         fn new() -> Self {
-            static COUNTER: AtomicU64 = AtomicU64::new(0);
-            let n = COUNTER.fetch_add(1, Ordering::Relaxed);
-            let pid = std::process::id();
-            let nanos = std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .map(|d| d.as_nanos())
-                .unwrap_or(0);
-            let root = std::env::temp_dir().join(format!("imas_proposal_io_test_{pid}_{n}_{nanos}"));
-            std::fs::create_dir_all(&root).expect("temp repo root を作れない");
-            TempRepo { root }
+            TempRepo { root: unique_temp_dir("test") }
         }
     }
 
@@ -364,15 +408,7 @@ mod tests {
     fn kind_ディレクトリがシンボリックリンクで外を指していると書き込みを拒否する() {
         use std::os::unix::fs::symlink;
         let repo = TempRepo::new();
-        let outside = std::env::temp_dir().join(format!(
-            "imas_proposal_io_outside_{}_{}",
-            std::process::id(),
-            std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .map(|d| d.as_nanos())
-                .unwrap_or(0)
-        ));
-        std::fs::create_dir_all(&outside).unwrap();
+        let outside = unique_temp_dir("outside_kind");
         std::fs::create_dir_all(repo.root.join("data")).unwrap();
         symlink(&outside, repo.root.join("data").join("songs")).unwrap();
 
@@ -381,6 +417,54 @@ mod tests {
         assert!(matches!(err, ToolError::Failed(_)), "symlink 越しの書き込みは拒否されるはず: {err:?}");
 
         let _ = std::fs::remove_dir_all(&outside);
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn data_自体がシンボリックリンクで外を指していると書き込みを拒否する() {
+        // RedTeam L4: 上の kind ディレクトリだけの検算だと、data/ 自体が丸ごと
+        // 外を指しているケース (canon_data が既にリダイレクト先で、canon_dir がその
+        // 配下に矛盾なく収まってしまう) をすり抜ける。
+        use std::os::unix::fs::symlink;
+        let repo = TempRepo::new();
+        let outside = unique_temp_dir("outside_data");
+        symlink(&outside, repo.root.join("data")).unwrap();
+
+        let ctx = ctx_for(&repo);
+        let err = run(&ctx, "propose_song", &song_args("ml_data_symlink_test")).unwrap_err();
+        assert!(matches!(err, ToolError::Failed(_)), "data/ 自体の symlink 越しも拒否されるはず: {err:?}");
+
+        let _ = std::fs::remove_dir_all(&outside);
+    }
+
+    #[test]
+    fn check_proposals_は上限を超えたら打ち切って残り件数を報告する() {
+        let repo = TempRepo::new();
+        let ctx = ctx_for(&repo);
+        let dir = repo.root.join("data").join("songs");
+        std::fs::create_dir_all(&dir).unwrap();
+        let total = proposal::MAX_AUTO_CHECK_FILES + 5;
+        for i in 0..total {
+            std::fs::write(dir.join(format!("dummy_{i:03}.json")), "{}").unwrap();
+        }
+
+        let result = run(&ctx, "check_proposals", &json!({})).unwrap();
+        assert_eq!(result["files_checked"], proposal::MAX_AUTO_CHECK_FILES);
+        assert_eq!(result["total_pending"], total);
+        let message = result["message"].as_str().expect("上限超過なので message があるはず");
+        assert!(message.contains("残り 5 件"));
+    }
+
+    #[test]
+    fn write_and_check_の結果には常に_source_advisory_が入る() {
+        let repo = TempRepo::new();
+        let ctx = ctx_for(&repo);
+        // song_args は既知ホスト (idolmaster-official.jp とは別の example.com だが、
+        // どちらにせよ M4 は「既知/未知を問わず常に載せる」仕様なのでここでは
+        // 「存在して空でない」ことだけを確かめれば十分。
+        let result = run(&ctx, "propose_song", &song_args("ml_advisory_test")).unwrap();
+        let advisory = result["source_advisory"].as_str().expect("source_advisory が無い");
+        assert!(!advisory.is_empty());
     }
 
     #[test]
