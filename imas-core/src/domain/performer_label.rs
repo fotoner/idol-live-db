@@ -69,6 +69,28 @@ pub fn performer_label(naming: &PerformerNaming) -> Option<String> {
     (!out.is_empty()).then_some(out)
 }
 
+/// スナップショットの曲 1 行から名義を組む。
+///
+/// 射影 ([`PerformerNaming`]) を呼ぶ側で詰めると、**「原唱者は `role='original'` だけ」**
+/// という一段が呼ぶ側の数だけ写される。実際に LLM 向けツールの 2 ファイルが
+/// それぞれ `artists_by_song` を `role == "original"` で濾していた。
+/// 詰め方ごとここに置いて、呼ぶ側は曲の添字を渡すだけにする。
+pub fn song_performer_label(
+    snap: &crate::domain::snapshot::Snapshot,
+    song: u32,
+) -> Option<String> {
+    let s = &snap.songs[song as usize];
+    performer_label(&PerformerNaming {
+        unit_name: s.unit_name.clone(),
+        singer_label: s.singer_label.clone(),
+        performer_names: snap
+            .song_artists(&s.id, Some("original"))
+            .iter()
+            .map(|idol| idol.name.clone())
+            .collect(),
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

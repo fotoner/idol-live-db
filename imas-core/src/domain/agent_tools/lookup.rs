@@ -32,10 +32,11 @@ use crate::domain::idol_queries as idols;
 use crate::domain::idol_song_queries as idol_songs;
 use crate::domain::search_queries;
 use crate::domain::setlist_lineup::is_full_cast;
+use crate::domain::setlist_sections::numbered_setlist;
 use crate::domain::snapshot::Snapshot;
 use crate::domain::song_detail_queries as songs;
 use crate::domain::costume_queries;
-use crate::domain::performer_label::{performer_label, PerformerNaming};
+use crate::domain::performer_label::song_performer_label as credited_as;
 use serde_json::{Map, Value};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -517,10 +518,8 @@ fn get_show(snap: &Snapshot, args: &Value) -> Result<Value, ToolError> {
     o.put(
         "setlist",
         Value::Array(
-            items
-                .iter()
-                .enumerate()
-                .map(|(rank, &i)| setlist_row(snap, i, rank + 1, &cast_ids))
+            numbered_setlist(snap, si)
+                .map(|(rank, i)| setlist_row(snap, i, rank, &cast_ids))
                 .collect(),
         ),
     );
@@ -529,10 +528,9 @@ fn get_show(snap: &Snapshot, args: &Value) -> Result<Value, ToolError> {
 
 /// セトリ 1 行。`position` は**公演内の何曲目か** (1 始まり)。
 ///
-/// `setlist_items.position` をそのまま出してはいけない — あれは公演をまたいだ
-/// 通し番号で、実データでは 4 桁・5 桁になる。そのまま読むと「7723 曲目」になる。
-/// 並びは `setlist_items_by_show` が position 昇順に前計算してあるので、
-/// 呼び手が数えた添字をそのまま曲順として使う。
+/// 曲順の出し方は [`crate::domain::setlist_sections::numbered_setlist`] が正本
+/// (生の `setlist_items.position` は公演をまたいだ通し番号で、そのまま読むと
+/// 「7723 曲目」になる)。ここは呼び手が数えた番号を受け取るだけ。
 fn setlist_row(
     snap: &Snapshot,
     item_index: u32,
@@ -558,7 +556,7 @@ fn setlist_row(
     // 「全員」の判定は setlist_lineup が正本。**札を `performers` に混ぜない** —
     // 同じ鍵が配列だったり文字列だったりすると、読む側が型で分岐する羽目になる。
     if is_full_cast(cast_ids, &performer_ids) {
-        x.put("all_cast", true);
+        x.put("full_cast", true);
     } else {
         x.list(
             "performers",
@@ -806,20 +804,6 @@ fn joint_brands(snap: &Snapshot, raw: Option<&str>) -> Vec<Value> {
     .unwrap_or_default()
 }
 
-/// その曲の名義。規則は `performer_label` が正本。
-fn credited_as(snap: &Snapshot, song: u32) -> Option<String> {
-    let s = &snap.songs[song as usize];
-    performer_label(&PerformerNaming {
-        unit_name: s.unit_name.clone(),
-        singer_label: s.singer_label.clone(),
-        performer_names: snap.artists_by_song[song as usize]
-            .iter()
-            .filter(|l| l.role == "original")
-            .map(|l| snap.idols[l.idol as usize].name.clone())
-            .collect(),
-    })
-}
-
 /// 秒を `"4:32"` に。生の秒も別鍵で残すので、こちらは読みやすさのためだけ。
 fn minutes_seconds(seconds: i64) -> String {
     format!("{}:{:02}", seconds / 60, seconds % 60)
@@ -948,7 +932,7 @@ mod tests {
         assert_eq!(v["brand"]["short_name"], "ミリオン");
         assert!(!text(&v, "voice_actor").is_empty());
         assert!(v.get("birthday").is_some(), "誕生日が要る: {v}");
-        assert!(v["units"].as_array().unwrap().len() >= 1, "所属ユニット: {v}");
+        assert!(!v["units"].as_array().unwrap().is_empty(), "所属ユニット: {v}");
         assert!(v["original_song_count"].as_u64().unwrap() > 0);
         assert!(v["performed_song_count"].as_u64().unwrap() > 0);
         let top = &v["top_performed_songs"].as_array().unwrap()[0];
@@ -1021,13 +1005,13 @@ mod tests {
             assert!(!row["title"].as_str().unwrap().is_empty());
             assert!(row["song_id"].as_str().unwrap().starts_with(|c: char| c.is_ascii_alphanumeric() || c.is_alphabetic()));
         }
-        // 歌唱者は「名前の配列」か「全員 (all_cast)」のどちらか。鍵ごとに型が揺れない。
+        // 歌唱者は「名前の配列」か「全員 (full_cast)」のどちらか。鍵ごとに型が揺れない。
         assert!(setlist.iter().any(|r| r.get("performers").is_some()), "歌唱者がどこにも無い");
-        assert!(setlist.iter().any(|r| r["all_cast"] == true), "全員で歌う行がまとまっていない");
+        assert!(setlist.iter().any(|r| r["full_cast"] == true), "全員で歌う行がまとまっていない");
         for row in setlist {
             if let Some(performers) = row.get("performers") {
                 assert!(performers.is_array(), "performers は常に配列: {row}");
-                assert!(row.get("all_cast").is_none(), "全員の行に名前も並べている: {row}");
+                assert!(row.get("full_cast").is_none(), "全員の行に名前も並べている: {row}");
             }
         }
     }

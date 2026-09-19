@@ -183,17 +183,31 @@ fn put(o: &mut Map<String, Value>, key: &str, value: Option<impl Into<Value>>) {
     }
 }
 
-/// 一覧の包み。**総数は必ず返す** —「何件ありますか」に答えられなくなるため、
-/// 打ち切った件数だけを返すことはしない。
+/// 列が 1 本だけの応答の包み。**総数は必ず返す** —「何件ありますか」に
+/// 答えられなくなるため、打ち切った件数だけを返すことはしない。
+///
+/// 打ち切りの書き方は `lookup` と同じ流儀にそろえてある (最上位に `total`、
+/// 切ったときだけ `truncated`)。同じ道具の返り値で形が違うと、読む側が
+/// ツールごとに読み方を覚える羽目になる。
 fn listing(key: &str, total: usize, rows: Vec<Value>) -> Value {
     let mut o = Map::new();
     o.insert("total".into(), json!(total));
-    o.insert("count".into(), json!(rows.len()));
     if rows.len() < total {
         o.insert("truncated".into(), json!(true));
     }
     o.insert(key.to_string(), Value::Array(rows));
     Value::Object(o)
+}
+
+/// 列が複数ある応答に 1 列を足す。`<key>_total` を必ず、切ったときだけ
+/// `<key>_truncated` を列の隣に置く (これも `lookup` と同じ流儀)。
+fn capped(o: &mut Map<String, Value>, key: &str, total: usize, rows: Vec<Value>) {
+    let truncated = rows.len() < total;
+    o.insert(key.to_string(), Value::Array(rows));
+    o.insert(format!("{key}_total"), json!(total));
+    if truncated {
+        o.insert(format!("{key}_truncated"), json!(true));
+    }
 }
 
 /// 先頭 `limit` 件だけ残す (総数は呼び出し側が先に控えておく)。
@@ -328,6 +342,7 @@ fn idol_row(snap: &Snapshot, idol: &Idol) -> Value {
 /// 曲 1 行。原唱者は人数が多い曲 (全体曲) で名前を並べると読む量が跳ね上がるので、
 /// 数だけを必ず返し、名前は並べても読める人数のときだけ添える。
 fn song_row(snap: &Snapshot, index: u32) -> Value {
+    use crate::domain::performer_label::song_performer_label;
     const NAMED_ARTISTS_MAX: usize = 10;
     let song = &snap.songs[index as usize];
     let mut o = Map::new();
@@ -342,32 +357,23 @@ fn song_row(snap: &Snapshot, index: u32) -> Value {
     put(&mut o, "series_group", song.series_group.clone());
     put(&mut o, "unit_name", song.unit_name.clone());
     put(&mut o, "singer_label", song.singer_label.clone());
+    // 1 行で書くときの名義。組み方は performer_label が正本 (画面と同じ言い方になる)。
+    put(&mut o, "credited_as", song_performer_label(snap, index));
     o.insert("performance_count".into(), json!(snap.performance_counts[index as usize]));
 
-    let artists = original_artist_names(snap, index);
+    let artists = original_artists(snap, index);
     o.insert("artist_count".into(), json!(artists.len()));
     if !artists.is_empty() && artists.len() <= NAMED_ARTISTS_MAX {
-        o.insert("artists".into(), json!(artists));
+        let names: Vec<&str> = artists.iter().map(|i| i.name.as_str()).collect();
+        o.insert("artists".into(), json!(names));
     }
     Value::Object(o)
 }
 
-/// 原唱者 (song_artists.role='original') の名前。並びは idol の公式順 (前計算済み)。
-fn original_artist_names(snap: &Snapshot, song: u32) -> Vec<String> {
-    snap.artists_by_song[song as usize]
-        .iter()
-        .filter(|l| l.role == "original")
-        .map(|l| snap.idols[l.idol as usize].name.clone())
-        .collect()
-}
-
-/// 原唱者の idol_id (オリメン判定用。名前ではなく id で比べる)。
-fn original_artist_ids(snap: &Snapshot, song: u32) -> Vec<&str> {
-    snap.artists_by_song[song as usize]
-        .iter()
-        .filter(|l| l.role == "original")
-        .map(|l| snap.idols[l.idol as usize].id.as_str())
-        .collect()
+/// 原唱者 (`song_artists.role='original'`)。並びは idol の公式順 (前計算済み)。
+/// 濾し方は `Snapshot::song_artists` が正本 — ここで `role == "original"` を書かない。
+fn original_artists(snap: &Snapshot, song: u32) -> Vec<&crate::domain::snapshot::Idol> {
+    snap.song_artists(&snap.songs[song as usize].id, Some("original"))
 }
 
 /// 公演 1 件の見出し (どの公演かを 1 行で書けるだけの情報)。
@@ -386,18 +392,6 @@ fn show_header(snap: &Snapshot, show_index: u32) -> Value {
         json!(snap.setlist_items_by_show[show_index as usize].len()),
     );
     Value::Object(o)
-}
-
-/// その披露が公演の何曲目か (1 始まり)。
-///
-/// `setlist_items.position` は**公演をまたいだ通し番号**で、そのまま出すと
-/// 「12852 曲目」になって読めない。公演内の並びは前計算済み (position 昇順) なので、
-/// その添字を数えて曲順に直す。
-fn position_in_show(snap: &Snapshot, show: u32, item: u32) -> usize {
-    snap.setlist_items_by_show[show as usize]
-        .iter()
-        .position(|&i| i == item)
-        .map_or(0, |p| p + 1)
 }
 
 // =============================================================================
@@ -740,7 +734,7 @@ fn idol_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
                 Value::Object(o)
             })
             .collect();
-        out.insert("original".into(), listing("songs", total, rows));
+        capped(&mut out, "original", total, rows);
 
         // ユニット名義の持ち歌 (songs.unit_id 由来)。個人の song_artists には
         // 出てこないことがあるので、原唱とは別立てで返す。
@@ -759,7 +753,7 @@ fn idol_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
                 Value::Object(o)
             })
             .collect();
-        out.insert("unit_songs".into(), listing("songs", total, rows));
+        capped(&mut out, "unit_songs", total, rows);
     }
 
     if role != "original" {
@@ -778,7 +772,7 @@ fn idol_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
                 Value::Object(o)
             })
             .collect();
-        out.insert("performed".into(), listing("songs", total, rows));
+        capped(&mut out, "performed", total, rows);
     }
 
     Ok(Value::Object(out))
@@ -790,6 +784,7 @@ fn idol_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
 
 fn song_performances(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
     use crate::domain::setlist_lineup::{is_full_cast, summarize};
+    use crate::domain::setlist_sections::track_number;
     use crate::domain::song_detail_queries::{
         performance_history, performance_item_indices, performance_ordinal_label,
     };
@@ -803,7 +798,8 @@ fn song_performances(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolEr
     let history = performance_history(snap, &song_id);
     let items = performance_item_indices(snap, &song_id).to_vec();
     let total = history.len();
-    let originals = original_artist_ids(snap, song_index);
+    let original_idols = original_artists(snap, song_index);
+    let originals: Vec<&str> = original_idols.iter().map(|i| i.id.as_str()).collect();
 
     let rows: Vec<Value> = history
         .into_iter()
@@ -818,7 +814,7 @@ fn song_performances(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolEr
             o.insert("date".into(), json!(entry.date));
             put(&mut o, "venue", entry.venue);
             let show = snap.setlist_items[item as usize].show;
-            o.insert("position".into(), json!(position_in_show(snap, show, item)));
+            o.insert("position".into(), json!(track_number(snap, item)));
             put(&mut o, "section", entry.section);
             o.insert("ordinal".into(), json!(entry.ordinal));
             o.insert("ordinal_label".into(), json!(performance_ordinal_label(entry.ordinal)));
@@ -870,22 +866,21 @@ fn song_performances(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolEr
 
 fn setlist_diff(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
     use crate::domain::setlist_diff::{compare_setlists, SetlistItemDiffRow};
+    use crate::domain::setlist_sections::numbered_setlist;
 
     let a = show_index(snap, &args::str_req(arguments, "show_id_a")?)?;
     let b = show_index(snap, &args::str_req(arguments, "show_id_b")?)?;
 
     let rows_of = |show: u32| -> Vec<SetlistItemDiffRow> {
-        snap.setlist_items_by_show[show as usize]
-            .iter()
-            .enumerate()
-            .map(|(rank, &i)| {
+        // 生の position は公演をまたぐ通し番号なので曲順に直して渡す
+        // (比較の結果がそのまま「何曲目」として読める)。曲順の規則は setlist_sections が正本。
+        numbered_setlist(snap, show)
+            .map(|(rank, i)| {
                 let item = &snap.setlist_items[i as usize];
                 SetlistItemDiffRow {
                     id: item.id.clone(),
                     song_id: snap.songs[item.song as usize].id.clone(),
-                    // 生の position は公演をまたぐ通し番号なので曲順に直して渡す
-                    // (比較の結果がそのまま「何曲目」として読める)。
-                    position: rank as i64 + 1,
+                    position: rank as i64,
                     section: item.section.clone(),
                 }
             })
@@ -1323,23 +1318,27 @@ mod tests {
     fn 持ち歌とライブで歌った曲は別に返る() {
         let out = run("idol_songs", json!({ "idol_id": "cg_島村卯月", "limit": 300 }));
         assert_eq!(text(&out["idol"], "name"), "島村卯月");
-        let original = out["original"]["total"].as_u64().unwrap();
-        let performed = out["performed"]["total"].as_u64().unwrap();
+        // 列が複数あるので打ち切りは `<列名>_total` / `<列名>_truncated` (lookup と同じ流儀)。
+        let original = out["original_total"].as_u64().unwrap();
+        let performed = out["performed_total"].as_u64().unwrap();
         assert!(original > 0 && performed > 0);
         assert_ne!(original, performed, "原唱と披露が同数 = どちらかを取り違えている疑い");
+        // limit 300 なので打ち切っていない = truncated の鍵自体が出ない。
+        assert!(out.get("original_truncated").is_none(), "{out}");
+        assert_eq!(rows(&out, "original").len() as u64, original);
 
         // ライブで歌った側には回数が付く (「何回歌ったか」を追加の往復なしで書ける)。
-        assert!(rows(&out["performed"], "songs")[0]["perform_count"].as_u64().unwrap() >= 1);
+        assert!(rows(&out, "performed")[0]["perform_count"].as_u64().unwrap() >= 1);
         // ユニット名義の持ち歌も別立てで返る。
-        assert!(out["unit_songs"].is_object());
+        assert!(out["unit_songs"].is_array() && out["unit_songs_total"].is_number());
     }
 
     #[test]
     fn role_で区分を絞れる() {
         let original = run("idol_songs", json!({ "idol_id": "cg_島村卯月", "role": "original" }));
-        assert!(original.get("performed").is_none());
+        assert!(original.get("performed").is_none() && original.get("performed_total").is_none());
         let performed = run("idol_songs", json!({ "idol_id": "cg_島村卯月", "role": "performed" }));
-        assert!(performed.get("original").is_none());
+        assert!(performed.get("original").is_none() && performed.get("original_total").is_none());
     }
 
     #[test]
