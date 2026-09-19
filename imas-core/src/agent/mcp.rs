@@ -138,7 +138,9 @@ fn tools_call_result(ctx: &Ctx, snap: &Snapshot, params: &Value) -> Result<Value
 
     match super::dispatch(ctx, snap, name, &arguments) {
         Ok(value) => {
-            let text = serde_json::to_string_pretty(&value)
+            // 整形しない。読むのは LLM で、インデントと改行は素の JSON より
+            // 3〜4 割トークンを増やすだけ。人が目で見る CLI 側 (cli.rs) は整形する。
+            let text = serde_json::to_string(&value)
                 .unwrap_or_else(|e| format!("(結果の整形に失敗: {e})"));
             Ok(json!({
                 "content": [{ "type": "text", "text": text }],

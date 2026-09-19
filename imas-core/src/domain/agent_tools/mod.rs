@@ -306,10 +306,13 @@ mod tests {
     #[test]
     fn どのツールも歌詞サイトと試聴の_url_を返さない() {
         let snap = 実データ();
+        // or ではなく chain。両方を持つ曲から片方しか検査値に入らないと、
+        // 欄名を変えられたときに二重の網が片方しか効かない。
         let 禁止値: Vec<&str> = snap
             .songs
             .iter()
-            .filter_map(|s| s.lyrics_url.as_deref().or(s.preview_url.as_deref()))
+            .flat_map(|s| [s.lyrics_url.as_deref(), s.preview_url.as_deref()])
+            .flatten()
             .collect();
         assert!(!禁止値.is_empty(), "実データに検査対象が無い (テストが空振りしている)");
 
