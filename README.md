@@ -25,10 +25,30 @@ iOS / Android ネイティブアプリと、それを支える Cloudflare Worker
 | バックエンド API | `imas-live-api/` | Cloudflare Workers, D1 (SQLite), CloudKit S2S |
 | Web 出面 | `web/` | Astro (静的サイト), Cloudflare Workers Static Assets |
 | データ整備ツール | `tools/` | Python / Ruby (CloudKit seed・Apple Music 補完・整合性チェック) |
+| LLM から引く口 | `imas-core/src/agent/` | Rust (MCP サーバ / CLI・`imas-mcp`) |
 
 iOS と Android はファイル/コンポーネント構成を意図的に揃えており、片方の変更はもう片方に 1:1 で横展開する運用です。
 
-各コンポーネントの設計方針: [iOS](docs/ARCHITECTURE.md) / [Android](docs/ARCHITECTURE-android.md) / [Worker](docs/ARCHITECTURE-worker.md) / [Web](docs/ARCHITECTURE-web.md)。データ所在・同期・マイグレーションの共通思想は [iOS 文書のデータ節](docs/ARCHITECTURE.md) と [DATA_PIPELINE.md](docs/DATA_PIPELINE.md)。
+各コンポーネントの設計方針: [iOS](docs/ARCHITECTURE.md) / [Android](docs/ARCHITECTURE-android.md) / [Worker](docs/ARCHITECTURE-worker.md) / [Web](docs/ARCHITECTURE-web.md) / [MCP](docs/ARCHITECTURE-mcp.md)。データ所在・同期・マイグレーションの共通思想は [iOS 文書のデータ節](docs/ARCHITECTURE.md) と [DATA_PIPELINE.md](docs/DATA_PIPELINE.md)。
+
+## LLM から引く (MCP サーバ / CLI)
+
+`imas-mcp` は、このデータベースを LLM が自然言語で引けるようにする口です。同じバイナリが
+MCP サーバ (stdio) としても CLI としても動きます。判断 (どの語が当たるか・何を返すか・
+何件で切るか) はすべて `imas-core` の `domain` にあり、アプリ・Web と同じ規則を通ります。
+
+```bash
+cd imas-core && cargo build --release --features agent --bin imas-mcp
+./target/release/imas-mcp tools                    # ツール一覧
+./target/release/imas-mcp get_idol --name 春日未来   # 人の手から
+```
+
+リポジトリ直下の [`.mcp.json`](.mcp.json) があるので、上のビルドを 1 度通せば
+MCP クライアント (Claude Code 等) からそのまま使えます。歌詞は扱いません
+(JASRAC の許諾はアプリのストリーム配信に対するもの)。新規データの登録は `data/` への
+**提案ドラフトを作るところまで**で、反映はオーナーの操作が要ります。
+
+---
 
 ## データソースは「2系統」(重要)
 
