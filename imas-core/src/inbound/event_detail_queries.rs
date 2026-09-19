@@ -20,6 +20,7 @@ use crate::domain::event_detail_queries::{
     VenueDirectoryRecord,
 };
 use crate::domain::setlist_lineup::{self, Lineup};
+use crate::domain::setlist_row_meta::{setlist_row_meta, SetlistRowMetaRecord};
 use crate::domain::setlist_sections;
 use std::collections::{BTreeSet, HashMap};
 
@@ -181,6 +182,21 @@ impl SnapshotStore {
     pub fn show_setlist(&self, show_id: String) -> Result<Vec<SetlistEntryRecord>, SnapshotError> {
         let snap = self.current()?;
         Ok(queries::setlist(&snap, &show_id))
+    }
+
+    /// セトリ 1 行ぶんの添え物 (名義・ユニットのチップ・全員・何回目・いつぶり)。
+    /// 並びは [`Self::show_setlist`] と同じなので、受け側は zip するだけでよい。
+    ///
+    /// **名義の決め方 (その披露の名義 → 曲の名義 → 個人名併記 → 顔ぶれ推論 → 名前)
+    /// も、「いつぶりか」の言い回しもコアが持つ。** 画面でユニットを逆引きしたり
+    /// 「N 年ぶり」を組み立てたりしないこと (規則が両 OS に写経される)。
+    pub fn show_setlist_row_meta(
+        &self,
+        show_id: String,
+        mode: PerformerNameMode,
+    ) -> Result<Vec<SetlistRowMetaRecord>, SnapshotError> {
+        let snap = self.current()?;
+        Ok(setlist_row_meta(&snap, &show_id, mode))
     }
 
     /// セトリ項目 id → 歌唱メンバー行 (N+1 防止の一括取得)。

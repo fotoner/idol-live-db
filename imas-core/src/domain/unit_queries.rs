@@ -185,6 +185,73 @@ pub fn performed_unit_ids(snap: &Snapshot, event_id: &str) -> Vec<String> {
     matched
 }
 
+/// 歌唱者の顔ぶれが「曲を持つユニット」1〜3 個の和集合と**ちょうど一致**するときの、
+/// そのユニット (スナップショット添字・units の並び順)。一致しなければ空。
+///
+/// 部分一致 (ユニットのメンバーが全員いるが他の人も歌っている) は採らない。採ると
+/// 全員曲でたまたまメンバーが揃っただけの行にユニット名が付く。
+///
+/// # なぜコアにあるか (回帰: 2026-09-19)
+///
+/// 元は iOS `UnitIndex.exactMatchingUnits` にだけあった。セトリの名義を決める規則の
+/// 一部なので、[`crate::domain::performer_label::setlist_performer_label`] と同じ場所で
+/// 持たないと、Android へ移すときに写経になる。**これは推論**なので、曲が名義を
+/// 持っている行では使われない (順番はあちらの docs)。
+///
+/// `restrict_to` は「その公演でユニット単独曲として披露されたユニット」に絞るための門
+/// (空なら絞らない)。**候補の段階で絞る** — iOS は一致を求めた後で絞っていたため、
+/// 2 ユニット合同の片方だけが門を通った行で「片方のユニット名だけ」が出ていた。
+pub fn exact_matching_units(
+    snap: &Snapshot,
+    performers: &HashSet<u32>,
+    restrict_to: &HashSet<u32>,
+) -> Vec<u32> {
+    if performers.len() < 2 {
+        return vec![];
+    }
+    let candidates: Vec<(u32, HashSet<u32>)> = (0..snap.units.len() as u32)
+        .filter(|&ui| !snap.songs_by_unit[ui as usize].is_empty())
+        .filter(|&ui| restrict_to.is_empty() || restrict_to.contains(&ui))
+        .filter_map(|ui| {
+            let members: HashSet<u32> = snap.members_by_unit[ui as usize].iter().copied().collect();
+            // 1 人ユニット (と unit_members の重複行で人数が水増しされた行) は成立しない。
+            (members.len() >= 2 && members.is_subset(performers)).then_some((ui, members))
+        })
+        .collect();
+
+    if let Some((ui, _)) = candidates.iter().find(|(_, m)| m.len() == performers.len()) {
+        return vec![*ui];
+    }
+    // 2 ユニット合同 → 3 ユニット合同。候補は全員 performers の部分集合なので、
+    // 和集合の人数が performers と同じなら中身も一致する。
+    for i in 0..candidates.len() {
+        for j in (i + 1)..candidates.len() {
+            let pair: HashSet<u32> = candidates[i].1.union(&candidates[j].1).copied().collect();
+            if pair.len() == performers.len() {
+                return vec![candidates[i].0, candidates[j].0];
+            }
+            for k in (j + 1)..candidates.len() {
+                if pair.union(&candidates[k].1).count() == performers.len() {
+                    return vec![candidates[i].0, candidates[j].0, candidates[k].0];
+                }
+            }
+        }
+    }
+    vec![]
+}
+
+/// [`exact_matching_units`] の名前版 (名義を組む側が欲しいのは名前だけ)。
+pub fn exact_matching_unit_names(
+    snap: &Snapshot,
+    performers: &HashSet<u32>,
+    restrict_to: &HashSet<u32>,
+) -> Vec<String> {
+    exact_matching_units(snap, performers, restrict_to)
+        .into_iter()
+        .map(|ui| snap.units[ui as usize].name.clone())
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
 
