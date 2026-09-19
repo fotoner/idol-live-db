@@ -23,7 +23,8 @@
 //! 並べて返す。決めてよいのは「表記そのものの一致がちょうど 1 件」のときだけで、
 //! その判断は `entity_resolution::resolve_unique` が持つ (ここには書かない)。
 
-use super::{args, ToolError, ToolSpec};
+use super::json::{brand_ref, joint_brand_refs, Obj};
+use super::{args, hints, ToolError, ToolSpec};
 use crate::domain::entity_resolution::{
     self as resolution, EntityHit, EntityKind, Resolution,
 };
@@ -32,12 +33,13 @@ use crate::domain::idol_queries as idols;
 use crate::domain::idol_song_queries as idol_songs;
 use crate::domain::search_queries;
 use crate::domain::setlist_lineup::is_full_cast;
+use crate::domain::event_grouping::is_upcoming_on;
 use crate::domain::setlist_sections::numbered_setlist;
 use crate::domain::snapshot::Snapshot;
 use crate::domain::song_detail_queries as songs;
 use crate::domain::costume_queries;
 use crate::domain::performer_label::song_performer_label as credited_as;
-use serde_json::{Map, Value};
+use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};
 
 /// 一覧の既定件数と上限。LLM が 10000 と書いても上限で丸める (`args::limit`)。
@@ -51,9 +53,12 @@ pub fn catalog() -> Vec<ToolSpec> {
     vec![
         spec(
             "resolve",
-            "人の言葉 (「未来」「デレマス」「ミリオン 10th」) からエンティティ候補を引く。\
+            "人の言葉 (「デレマス」「春日未来」「横浜アリーナ」) からエンティティ候補を引く。\
              LLM は id を知らないので、get_* を呼ぶ前にまずこれで id を得る。\
-             候補には kind / id / name と、選ぶための一言 hint が付く。",
+             候補には kind / id / name と、選ぶための一言 hint が付く。\
+             並びは当たり方の強さ順 (完全一致 → 前方一致 → 部分一致) なので、\
+             曲名にも人名にもある語 (「未来」) は曲が上位を占める。\
+             探している種別が決まっているなら kinds で絞ること (kind_totals に種別ごとの件数が出る)。",
             r#"{"type":"object","properties":{
 "query":{"type":"string","description":"探す語。アイドル名・声優名・曲名・ライブ名・会場名など"},
 "kinds":{"type":"array","items":{"type":"string","enum":["idol","song","event","show","unit","brand","creator","venue"]},"description":"種別を絞る。省略すると全種別"},
@@ -135,12 +140,27 @@ fn resolve(snap: &Snapshot, args: &Value) -> Result<Value, ToolError> {
     let found = resolution::resolve_with_total(snap, &query, &kinds, limit);
 
     let mut out = Obj::new();
-    out.put("query", query);
     out.put("total", found.total);
     if found.total as usize > found.hits.len() {
         out.put("truncated", true);
     }
+    // 種別ごとの件数。候補の並びは当たり方の強さ順なので、打ち切ると種別ごと
+    // 見えなくなることがある (「未来」で上位 5 件が全部曲名になり、春日未来 が
+    // 6 番目に落ちる)。件数が見えていれば kinds で絞り直せる。
+    if found.by_kind.len() > 1 {
+        let mut counts = Obj::new();
+        for (kind, n) in &found.by_kind {
+            counts.put(kind.as_str(), *n);
+        }
+        out.put("kind_totals", counts.value());
+    }
     out.put("candidates", Value::Array(found.hits.iter().map(hit_json).collect()));
+    // 0 件を素通りさせない。「当たらなかった」だけだと LLM は
+    // 「その語は DB に無い」と書いてしまう。
+    if found.total == 0 {
+        out.put("no_hits", hints::no_hits(snap, &query, &kinds));
+    }
+    out.put("query", query);
     Ok(out.value())
 }
 
@@ -180,6 +200,9 @@ fn search(snap: &Snapshot, args: &Value) -> Result<Value, ToolError> {
     let counts = search_queries::search_counts(snap, &query);
 
     let mut out = Obj::new();
+    if counts.songs + counts.idols + counts.events == 0 {
+        out.put("no_hits", hints::no_hits(snap, &query, &[]));
+    }
     out.put("query", query);
     out.capped(
         "songs",
@@ -214,13 +237,13 @@ fn get_idol(snap: &Snapshot, args: &Value) -> Result<Value, ToolError> {
     o.opt("name_kana", idol.name_kana.as_deref());
     o.opt("name_romaji", idol.name_romaji.as_deref());
     o.opt("aliases", idol.aliases.as_deref());
-    o.opt("brand", brand_json(snap, idol.brand_id.as_deref()));
+    o.opt("brand", brand_ref(snap, idol.brand_id.as_deref()));
     // 多重所属 (ゲスト出演で別ブランドに紐づく人) は brand 1 つでは書けない。
     o.list(
         "brands",
         snap.brands_by_idol[ii as usize]
             .iter()
-            .filter_map(|link| brand_json(snap, Some(&snap.brands[link.brand as usize].id)))
+            .filter_map(|link| brand_ref(snap, Some(&snap.brands[link.brand as usize].id)))
             .collect(),
     );
     o.opt("birthday", idols::birthday_display(idol.birthday.as_deref()));
@@ -328,8 +351,8 @@ fn get_song(snap: &Snapshot, args: &Value) -> Result<Value, ToolError> {
     o.put("id", song.id.as_str());
     o.put("title", song.title.as_str());
     o.opt("title_kana", song.title_kana.as_deref());
-    o.opt("brand", brand_json(snap, song.brand_id.as_deref()));
-    o.list("joint_brands", joint_brands(snap, song.joint_brand_ids.as_deref()));
+    o.opt("brand", brand_ref(snap, song.brand_id.as_deref()));
+    o.list("joint_brands", joint_brand_refs(snap, song.joint_brand_ids.as_deref()));
     if song.is_collab {
         o.put("is_collab", true);
     }
@@ -423,8 +446,8 @@ fn get_event(snap: &Snapshot, args: &Value) -> Result<Value, ToolError> {
     o.put("name", event.name.as_str());
     o.put("kind", event.kind.as_str());
     o.put("event_type", event.event_type.as_str());
-    o.opt("brand", brand_json(snap, event.brand_id.as_deref()));
-    o.list("joint_brands", joint_brands(snap, event.joint_brand_ids.as_deref()));
+    o.opt("brand", brand_ref(snap, event.brand_id.as_deref()));
+    o.list("joint_brands", joint_brand_refs(snap, event.joint_brand_ids.as_deref()));
     o.put("is_solo", event.is_solo);
     o.put("is_streaming", event.is_streaming);
     if let Some((first, last)) = resolution::event_date_range(snap, ei) {
@@ -592,12 +615,12 @@ fn vocabulary(snap: &Snapshot, today_key: &str) -> Result<Value, ToolError> {
                 .iter()
                 .map(|&b| {
                     let brand = &snap.brands[b as usize];
-                    let mut x = Obj::new();
-                    x.put("id", brand.id.as_str());
-                    x.put("name", brand.name.as_str());
-                    x.put("short_name", brand.short_name.as_str());
-                    x.put("idol_count", snap.idols_by_brand[b as usize].len());
-                    x.value()
+                    // 形は brand_ref (全ツール共通) に揃え、ここは所属人数だけ足す。
+                    let mut x = brand_ref(snap, Some(&brand.id)).unwrap_or_else(|| Value::Object(Default::default()));
+                    if let Value::Object(map) = &mut x {
+                        map.insert("idol_count".into(), snap.idols_by_brand[b as usize].len().into());
+                    }
+                    x
                 })
                 .collect(),
         ),
@@ -626,9 +649,15 @@ fn vocabulary(snap: &Snapshot, today_key: &str) -> Result<Value, ToolError> {
         range.put("first", snap.shows[first as usize].date.as_str());
         range.put("last", snap.shows[last as usize].date.as_str());
         // 末尾は発表済みの未来公演まで含む。「今日まで」と読み違えないよう分けて出す。
+        // 「今後」の判断は event_grouping が正本 (部分日付は精度を揃えて比べる)。
+        // ここで `date < today_key` と書き直すと、日程未定の年だけ決まった公演を
+        // 開催済み側に数える。
         range.put(
             "upcoming",
-            dates.len() - dates.partition_point(|&s| snap.shows[s as usize].date.as_str() < today_key),
+            dates
+                .iter()
+                .filter(|&&s| is_upcoming_on(&snap.shows[s as usize].date, today_key))
+                .count(),
         );
         o.put("show_date_range", range.value());
     }
@@ -783,27 +812,6 @@ fn event_brief(snap: &Snapshot, id: &str) -> Option<Value> {
     Some(x.value())
 }
 
-fn brand_json(snap: &Snapshot, brand_id: Option<&str>) -> Option<Value> {
-    let brand = snap.brand(brand_id?)?;
-    let mut x = Obj::new();
-    x.put("id", brand.id.as_str());
-    x.put("name", brand.name.as_str());
-    x.put("short_name", brand.short_name.as_str());
-    Some(x.value())
-}
-
-/// 合同のときの参加ブランド。`joint_brand_ids` はカンマ区切りの生文字列 ("ml, cg")。
-fn joint_brands(snap: &Snapshot, raw: Option<&str>) -> Vec<Value> {
-    raw.map(|s| {
-        s.split(',')
-            .map(str::trim)
-            .filter(|p| !p.is_empty())
-            .filter_map(|bid| brand_json(snap, Some(bid)))
-            .collect()
-    })
-    .unwrap_or_default()
-}
-
 /// 秒を `"4:32"` に。生の秒も別鍵で残すので、こちらは読みやすさのためだけ。
 fn minutes_seconds(seconds: i64) -> String {
     format!("{}:{:02}", seconds / 60, seconds % 60)
@@ -830,52 +838,6 @@ fn id_or_name_schema(name_key: &str, name_doc: &str) -> String {
 "{name_key}":{{"type":"string","description":"{name_doc}"}}}},
 "anyOf":[{{"required":["id"]}},{{"required":["{name_key}"]}}]}}"#
     )
-}
-
-/// null を落とし、打ち切りを添える JSON オブジェクトの組み立て。
-///
-/// `serde_json::json!` を直に書くと `null` がそのまま残る。読み手が LLM なので、
-/// 値の無い鍵はトークンを食うだけの雑音になる。省く判断をここ 1 か所に集める。
-#[derive(Default)]
-struct Obj(Map<String, Value>);
-
-impl Obj {
-    fn new() -> Self {
-        Self(Map::new())
-    }
-
-    /// 常に載せる。件数・真偽のように「0 / false にも意味がある」欄はこちら。
-    fn put(&mut self, key: &str, value: impl Into<Value>) {
-        self.0.insert(key.to_string(), value.into());
-    }
-
-    /// 値があるときだけ載せる。
-    fn opt<T: Into<Value>>(&mut self, key: &str, value: Option<T>) {
-        if let Some(v) = value {
-            self.put(key, v);
-        }
-    }
-
-    /// 空でないときだけ載せる。空配列を出しても「無い」以上のことは言えない。
-    fn list(&mut self, key: &str, items: Vec<Value>) {
-        if !items.is_empty() {
-            self.put(key, Value::Array(items));
-        }
-    }
-
-    /// 打ち切った列。`<key>_total` を必ず、切ったときだけ `<key>_truncated` を添える。
-    fn capped(&mut self, key: &str, items: Vec<Value>, total: usize) {
-        let shown = items.len();
-        self.put(key, Value::Array(items));
-        self.put(&format!("{key}_total"), total);
-        if total > shown {
-            self.put(&format!("{key}_truncated"), true);
-        }
-    }
-
-    fn value(self) -> Value {
-        Value::Object(self.0)
-    }
 }
 
 #[cfg(test)]
@@ -1014,6 +976,28 @@ mod tests {
                 assert!(row.get("full_cast").is_none(), "全員の行に名前も並べている: {row}");
             }
         }
+    }
+
+    #[test]
+    fn 上位から押し出された種別も件数で見える() {
+        // 「未来」は曲名の前方一致 (未来飛行) が人名の部分一致 (春日未来) に勝つので、
+        // 上位 5 件に人が 1 人も出ない。並びの規則自体は筋が通っているので変えないが、
+        // **当たっているのに見えない**まま返すと LLM は「そんな人はいない」と書く。
+        let v = run("resolve", json!({ "query": "未来", "limit": 5 }));
+        let kinds: Vec<&str> =
+            v["candidates"].as_array().unwrap().iter().map(|c| c["kind"].as_str().unwrap()).collect();
+        assert!(!kinds.contains(&"idol"), "前提が変わった (アイドルが上位に出ている): {kinds:?}");
+        assert!(v["kind_totals"]["idol"].as_u64().unwrap() >= 1, "件数でも見えない: {v}");
+
+        // 件数を見て絞り直せば 1 回で届く。
+        let narrowed = run("resolve", json!({ "query": "未来", "kinds": ["idol"], "limit": 5 }));
+        let names: Vec<&str> = narrowed["candidates"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|c| c["name"].as_str().unwrap())
+            .collect();
+        assert!(names.contains(&"春日未来"), "{names:?}");
     }
 
     #[test]

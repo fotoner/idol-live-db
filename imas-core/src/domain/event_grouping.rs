@@ -57,6 +57,37 @@ fn char_prefix(s: &str, n: usize) -> &str {
     }
 }
 
+/// その日付が「今後」側か (境界日ちょうどは今後)。
+///
+/// **`date >= today_key` と書いてはいけない。** `date` は `"2026"` や `"2026-06"` の
+/// ような部分日付でありうる (日程未定で年だけ決まっているライブが投入される)。
+/// 桁数が揃わないまま文字列比較すると `"2026" < "2026-06-18"` となり、
+/// **今年開催予定のイベントが開催済みへ落ちる**。today_key 側を date と同じ精度に
+/// 切り詰めてから比べる。
+///
+/// ここが「今後 / 開催済み」の唯一の判断。画面の年グルーピングも LLM 向けツールも
+/// これを通す (以前は 3 か所にそれぞれ書かれていて、2 つは切り詰めを持っていなかった)。
+pub fn is_upcoming_on(date: &str, today_key: &str) -> bool {
+    date >= char_prefix(today_key, date.chars().count())
+}
+
+/// イベントがまだ終わっていないか。
+///
+/// **最終日で見る** — 初日が過ぎていても会期中なら「今後」。
+/// 日付が 1 つも決まっていないイベントは今後側に残す ([`group_events_by_year`] の
+/// 「日付不明は開催済みに入れず今後タブにのみ残す」と同じ扱い。登録途中の予定であって
+/// 開催済みではない)。
+pub fn event_is_upcoming(
+    first_date: Option<&str>,
+    last_date: Option<&str>,
+    today_key: &str,
+) -> bool {
+    match last_date.or(first_date) {
+        Some(date) => is_upcoming_on(date, today_key),
+        None => true,
+    }
+}
+
 /// 時系列フィルタ + 年度グルーピングを適用し、年度グループの配列を返す。
 ///
 /// - `first_dates`: 事前フィルタ済みイベント列の初回公演日の射影 ("YYYY-MM-DD"。
@@ -77,11 +108,7 @@ pub fn group_events_by_year(
             // 日付不明は「今後」にのみ残す。
             return upcoming.then_some((i as u32, None));
         };
-        // date が today_key (フル "YYYY-MM-DD") より粒度の粗い部分日付 ("YYYY" や
-        // "YYYY-MM" 等) の場合、桁数が揃わないまま文字列比較すると短い方が辞書順で
-        // 前に来てしまい誤判定になる。today_key 側を date と同じ精度に切り詰めてから比較する。
-        let comparable_today = char_prefix(today_key, date.chars().count());
-        let keep = if upcoming { date >= comparable_today } else { date < comparable_today };
+        let keep = is_upcoming_on(date, today_key) == upcoming;
         keep.then_some((i as u32, Some(date)))
     });
 
@@ -197,6 +224,29 @@ mod tests {
     }
 
     // --- 追加の境界ケース (iOS テストに無い分) ---
+
+    #[test]
+    fn 部分日付は精度を揃えて比べる() {
+        // これが `date >= today_key` だと "2026" < "2026-09-19" で開催済みに落ちる。
+        assert!(is_upcoming_on("2026", TODAY), "今年 (日程未定) は今後");
+        assert!(is_upcoming_on("2026-06", TODAY), "今月 (日未定) は今後");
+        assert!(!is_upcoming_on("2025", TODAY), "昨年は開催済み");
+        assert!(!is_upcoming_on("2026-05", TODAY), "先月は開催済み");
+        assert!(is_upcoming_on(TODAY, TODAY), "今日ちょうどは今後");
+        assert!(!is_upcoming_on("2026-06-17", TODAY));
+        assert!(is_upcoming_on("2026-06-19", TODAY));
+    }
+
+    #[test]
+    fn イベントは最終日で今後かを決める() {
+        // 会期中 (初日は過ぎたが最終日はまだ) は今後。
+        assert!(event_is_upcoming(Some("2026-06-17"), Some("2026-06-19"), TODAY));
+        assert!(!event_is_upcoming(Some("2026-06-16"), Some("2026-06-17"), TODAY));
+        // 最終日が無ければ初日で見る。
+        assert!(event_is_upcoming(Some("2026-12-01"), None, TODAY));
+        // 日付が 1 つも無いイベントは今後 (登録途中の予定)。
+        assert!(event_is_upcoming(None, None, TODAY));
+    }
 
     /// 今日ちょうどの日付は「今後」側 (境界は >=)。
     #[test]

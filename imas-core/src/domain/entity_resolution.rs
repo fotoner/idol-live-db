@@ -23,7 +23,7 @@
 
 use crate::domain::display_join::{join_parts, year_of};
 use crate::domain::event_detail_queries::search_shows_with_event_name;
-use crate::domain::performer_label::{performer_label, PerformerNaming};
+use crate::domain::performer_label::song_performer_label as credited_as;
 use crate::domain::snapshot::Snapshot;
 use crate::domain::text_search_index::{prepare_needle, FoldedNeedle, TextSearchIndex};
 
@@ -94,6 +94,14 @@ pub struct EntityHit {
 pub struct ResolveResult {
     pub hits: Vec<EntityHit>,
     pub total: u32,
+    /// 種別ごとの当たり数 (0 件の種別は入れない)。並びは [`EntityKind::ALL`]。
+    ///
+    /// **打ち切りで種別ごと見えなくなることがある**ため添える。候補の並びは
+    /// 当たり方の強さ順 (完全一致 → 前方一致 → 部分一致) なので、
+    /// 「未来」のように曲名にも人名にもある語だと、曲の前方一致 (未来飛行) が
+    /// 人名の部分一致 (春日未来) を押し出して、上位 5 件に人が 1 人も出ない。
+    /// 件数だけでも見えていれば `kinds` で絞り直せる。
+    pub by_kind: Vec<(EntityKind, u32)>,
 }
 
 /// 名前 1 つから 1 件に決められるか。
@@ -126,7 +134,7 @@ pub fn resolve_with_total(
     let query = query.trim();
     let probe = Probe::new(query);
     if probe.is_empty() {
-        return ResolveResult { hits: Vec::new(), total: 0 };
+        return ResolveResult { hits: Vec::new(), total: 0, by_kind: Vec::new() };
     }
 
     // 指定順ではなく `EntityKind::ALL` の順で巡回する (巡回順が呼び出しごとに
@@ -137,11 +145,57 @@ pub fn resolve_with_total(
     let mut by_kind: Vec<Vec<(Tier, EntityHit)>> =
         wanted.iter().map(|&k| collect(snap, k, &probe)).collect();
     let total = by_kind.iter().map(Vec::len).sum::<usize>() as u32;
+    let counts: Vec<(EntityKind, u32)> = wanted
+        .iter()
+        .zip(by_kind.iter())
+        .filter(|(_, list)| !list.is_empty())
+        .map(|(&kind, list)| (kind, list.len() as u32))
+        .collect();
     for list in &mut by_kind {
         // 安定ソートなので、同じ当たり方の中は各種別の自然順 (添字順・新しい順) のまま。
         list.sort_by_key(|(tier, _)| *tier);
     }
-    ResolveResult { hits: round_robin(by_kind, limit), total }
+    ResolveResult { hits: round_robin(by_kind, limit), total, by_kind: counts }
+}
+
+/// クエリを空白で分けた 1 語ぶんの当たり。1 件も当たらない語は `total == 0` で残す
+/// (**当たらなかった語こそが手がかり**なので、落としてはいけない)。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TermHit {
+    pub term: String,
+    pub total: u32,
+    /// 代表の候補 (先頭いくつか)。
+    pub hits: Vec<EntityHit>,
+}
+
+/// 0 件だったクエリを語に分けて 1 語ずつ引き直す。
+///
+/// **複数語の照合は AND の部分一致なので、1 語でも外すと全体が 0 件になる。**
+/// どの語が外したのかが分かれば、次の一手はたいてい決まる。
+///
+/// 実害の出ていた例: 「ミリオン 10th」は 0 件になる。実イベント名が
+/// `THE IDOLM@STER MILLION LIVE! 10thLIVE TOUR ...` で日本語の「ミリオン」を含まず、
+/// 畳み込みは大文字小文字と ひらがな/カタカナは吸収しても**日英の表記ゆれ
+/// (「ミリオン」↔「MILLION LIVE」) は吸収しない**ため。語に分ければ
+/// 「ミリオン」はブランド `ml` に当たり、「10th」はライブに当たると分かる。
+///
+/// 語が 1 つしか無いクエリは空を返す — 分けようがなく、全体が 0 件という事実以上の
+/// ことを言えないため (定型の言葉だけを返せばよい)。
+pub fn term_hits(snap: &Snapshot, query: &str, kinds: &[EntityKind]) -> Vec<TermHit> {
+    /// 1 語につき並べる候補の数。次の一手を決められればよいので少なくてよい。
+    const PER_TERM: u32 = 3;
+
+    let terms: Vec<&str> = query.split_whitespace().collect();
+    if terms.len() < 2 {
+        return Vec::new();
+    }
+    terms
+        .into_iter()
+        .map(|term| {
+            let found = resolve_with_total(snap, term, kinds, PER_TERM);
+            TermHit { term: term.to_string(), total: found.total, hits: found.hits }
+        })
+        .collect()
 }
 
 /// 名前 1 つを 1 件に決める。
@@ -422,22 +476,9 @@ fn hit(kind: EntityKind, id: &str, name: &str, hint: Option<String>, tier: Tier)
 }
 
 /// ブランドの略称 (「ミリオン」)。正式名は長くて 1 行の手掛かりには向かない。
+/// 解決は `Snapshot::brand_short_name` が正本。
 fn brand_short<'a>(snap: &'a Snapshot, brand_id: Option<&str>) -> Option<&'a str> {
-    snap.brand(brand_id?).map(|b| b.short_name.as_str())
-}
-
-/// その曲の名義。規則は `performer_label` が正本 (ユニット名 → 個人名併記 → 原唱者)。
-fn credited_as(snap: &Snapshot, song: u32) -> Option<String> {
-    let s = &snap.songs[song as usize];
-    performer_label(&PerformerNaming {
-        unit_name: s.unit_name.clone(),
-        singer_label: s.singer_label.clone(),
-        performer_names: snap.artists_by_song[song as usize]
-            .iter()
-            .filter(|l| l.role == "original")
-            .map(|l| snap.idols[l.idol as usize].name.clone())
-            .collect(),
-    })
+    snap.brand_short_name(brand_id)
 }
 
 /// ライブの開催日の範囲 (配下公演の最初と最後)。公演が 1 本も無ければ None。

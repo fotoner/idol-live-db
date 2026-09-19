@@ -104,6 +104,302 @@ pub fn call_tool(
     Err(ToolError::UnknownTool(name.to_string()))
 }
 
+/// 応答 (JSON) を組む道具。**`lookup` も `browse` もここを通す。**
+///
+/// 「どう書くか」はツールごとの都合ではなく、読む側 (LLM) にとっての一貫性の問題。
+/// 各ファイルに小さな組み立て道具を置くと、同じ概念が鍵の名前も型も違う形で出る
+/// (実際に `brand` が片方で文字列・片方でオブジェクト、「全員」が `all_cast` と
+/// `full_cast` に割れていた)。決め事はここに 1 つずつ置く。
+pub mod json {
+    use crate::domain::snapshot::Snapshot;
+    use serde_json::{Map, Value};
+
+    /// 1 つの列に載せてよい大きさの目安 (バイト)。
+    ///
+    /// **件数の上限 (`limit`) だけでは守れない。** 1 行の大きさが可変だから —
+    /// 歌唱者 30 人ぶんを並べる披露履歴の行は、曲一覧の行の 20 倍になる。
+    /// 実測で `song_performances` の 1 回が 31KB (≒8k トークン)、上限指定だと
+    /// 100KB に達していた。読む側の予算はバイトで消えるので、バイトで測って切る。
+    ///
+    /// **これは歯止めであって、主たる制御ではない。** 各ツールの既定件数は
+    /// 「ふつうの問いなら 1 回で足りる」大きさに選んであり、そこではここに当たらない。
+    /// ここが効くのは LLM が `limit=1000` のような大きな数を書いたとき
+    /// (実測: `stats --kind song_play_ranking --limit 1000` が 167KB、
+    /// `list_songs --limit 200` が 132KB)。
+    ///
+    /// 列ごとの目安なので、列が 3 本ある応答はその 3 倍まで伸びうる。
+    /// 「1 応答ぶんの予算」にしないのは、列をまたいで配分を決める判断
+    /// (どの列を削るか) が列の意味に依存していて、ここでは決められないため。
+    pub const MAX_LIST_BYTES: usize = 32 * 1024;
+
+    /// 1 件も当たらなかったときに添える言葉。
+    ///
+    /// 0 件をそのまま返すと、LLM は「その語は DB に無い」と結論して書いてしまう。
+    /// 実際には照合の畳み込み (`text_search_index`) が吸収するのは表記ゆれまでで、
+    /// **略称・愛称は吸収しない** (「トラプリ」は `units.name_alt` に入っていない)。
+    /// 語彙外の値を候補つきで突き返すのと同じ趣旨で、空振りの理由と次の一手を
+    /// 応答自身に持たせる。
+    pub const NO_HITS_MESSAGE: &str = "この語では 1 件も当たらない。照合は表記ゆれ (大文字小文字・ひらがな/カタカナ) を吸収するが、略称・愛称は吸収しない。正式名称かその一部で引き直すか、vocabulary で語彙を確かめること。";
+
+    /// 応答オブジェクト。鍵を足す作法 (`put` / `opt` / `list` / `capped`) をここに集める。
+    #[derive(Default)]
+    pub struct Obj(Map<String, Value>);
+
+    impl Obj {
+        pub fn new() -> Self {
+            Self::default()
+        }
+
+        /// 常に載せる。件数・真偽のように「0 / false にも意味がある」欄はこちら。
+        pub fn put(&mut self, key: &str, value: impl Into<Value>) {
+            self.0.insert(key.to_string(), value.into());
+        }
+
+        /// 値があるときだけ載せる。`null` の羅列は読む量を増やすだけで何も言わない。
+        pub fn opt<T: Into<Value>>(&mut self, key: &str, value: Option<T>) {
+            if let Some(v) = value {
+                self.put(key, v);
+            }
+        }
+
+        /// 空でないときだけ載せる。空配列を出しても「無い」以上のことは言えない。
+        pub fn list(&mut self, key: &str, items: Vec<Value>) {
+            if !items.is_empty() {
+                self.put(key, Value::Array(items));
+            }
+        }
+
+        /// 打ち切った列。`<key>_total` を必ず、切ったときだけ `<key>_truncated` を、
+        /// 件数ではなく**大きさ**で切ったときは `<key>_truncated_reason: "size"` も添える。
+        ///
+        /// 理由を分けるのは、次の一手が違うから: 件数で切れたなら `limit` を上げれば
+        /// 続きが読めるが、大きさで切れたなら上げても無駄で、条件を絞るしかない。
+        pub fn capped(&mut self, key: &str, mut items: Vec<Value>, total: usize) {
+            let fits = rows_within_budget(&items, MAX_LIST_BYTES);
+            let cut_by_size = fits < items.len();
+            items.truncate(fits);
+            let shown = items.len();
+            self.put(key, Value::Array(items));
+            self.put(&format!("{key}_total"), total);
+            if total > shown {
+                self.put(&format!("{key}_truncated"), true);
+            }
+            if cut_by_size {
+                self.put(&format!("{key}_truncated_reason"), "size");
+            }
+        }
+
+        pub fn value(self) -> Value {
+            Value::Object(self.0)
+        }
+    }
+
+    /// 列が 1 本だけの応答の包み。最上位に `total` / `truncated` を置く
+    /// (`resolve` と同じ流儀)。**総数は必ず返す** —「何件ありますか」に
+    /// 答えられなくなるため、打ち切った件数だけを返すことはしない。
+    pub fn listing(key: &str, total: usize, mut rows: Vec<Value>) -> Value {
+        let fits = rows_within_budget(&rows, MAX_LIST_BYTES);
+        let cut_by_size = fits < rows.len();
+        rows.truncate(fits);
+        let mut o = Obj::new();
+        o.put("total", total);
+        if total > rows.len() {
+            o.put("truncated", true);
+        }
+        if cut_by_size {
+            o.put("truncated_reason", "size");
+        }
+        o.put(key, Value::Array(rows));
+        o.value()
+    }
+
+    /// 見出しがあって列は 1 本、という応答 (`song` + `performances`、`kind` + `items`)。
+    /// [`listing`] の鍵を見出しの隣へ並べる。入れ子にしないのは、列が 1 本のときの
+    /// 読み方を `resolve` と同じにそろえるため。
+    pub fn listing_with(mut head: Obj, key: &str, total: usize, rows: Vec<Value>) -> Value {
+        if let Value::Object(map) = listing(key, total, rows) {
+            for (k, v) in map {
+                head.0.insert(k, v);
+            }
+        }
+        head.value()
+    }
+
+    /// 予算 (バイト) に収まる行数。
+    ///
+    /// **1 行以上は必ず返す。** 0 行にすると「そんな公演は無かった」と読まれかねず、
+    /// 予算を守るために嘘をつくことになる。1 行で予算を超える場合はその 1 行を返し、
+    /// 切ったことは呼ぶ側が `truncated_reason` で伝える。
+    pub fn rows_within_budget(rows: &[Value], budget: usize) -> usize {
+        let mut used = 0usize;
+        for (i, row) in rows.iter().enumerate() {
+            // 区切りの 1 バイトを足して、配列としての実寸に近づける。
+            used += serde_json::to_string(row).map_or(0, |s| s.len()) + 1;
+            if used > budget {
+                return i.max(1);
+            }
+        }
+        rows.len()
+    }
+
+    /// ブランドの返し方。**この形が全ツール共通**。
+    ///
+    /// 以前は詳細系が入れ子 (`{"id","name","short_name"}`)、一覧系が平ら
+    /// (`"brand":"cg"` + `"brand_name":"デレマス"`) で、**同じ `brand` という鍵が
+    /// 片方では文字列・片方ではオブジェクト**だった。読む側が鍵ごとに型で分岐する。
+    ///
+    /// オブジェクトに寄せたのは、合同ライブの参加ブランド (`joint_brands`) が
+    /// 元からオブジェクトの配列で、そこだけ形を変えようがないから。
+    /// ブランドを値型として 1 つに決めれば、単数でも複数でも同じ読み方になる。
+    pub fn brand_ref(snap: &Snapshot, brand_id: Option<&str>) -> Option<Value> {
+        let brand = snap.brand(brand_id?)?;
+        let mut o = Obj::new();
+        o.put("id", brand.id.as_str());
+        o.put("name", brand.name.as_str());
+        o.put("short_name", brand.short_name.as_str());
+        Some(o.value())
+    }
+
+    /// 合同のときの参加ブランド。`joint_brand_ids` はカンマ区切りの生文字列 ("ml, cg")。
+    pub fn joint_brand_refs(snap: &Snapshot, raw: Option<&str>) -> Vec<Value> {
+        raw.map(|s| {
+            s.split(',')
+                .map(str::trim)
+                .filter(|p| !p.is_empty())
+                .filter_map(|bid| brand_ref(snap, Some(bid)))
+                .collect()
+        })
+        .unwrap_or_default()
+    }
+}
+
+/// 空振りしたときに何を返すか。
+///
+/// 「語彙外の値は黙って 0 件にしない」は `browse` の `brand` や `stats.kind` では
+/// 守れている (候補つき `BadArgs`) のに、**自由文の検索だけが素通り**していた。
+/// 0 件をそのまま返すと LLM は「その語は DB に無い」と結論して書いてしまう。
+pub mod hints {
+    use super::json::{Obj, NO_HITS_MESSAGE};
+    use crate::domain::entity_resolution::{term_hits, EntityKind, TermHit};
+    use crate::domain::snapshot::Snapshot;
+    use serde_json::Value;
+
+    /// 1 件も当たらなかったときに応答へ添える手がかり。
+    ///
+    /// 定型文だけでは足りない。ユーザーのいちばん自然な聞き方
+    /// (「ミリオンライブ 10th」) が 0 件になるので、**どの語が外したのか**を
+    /// 返さないと会話が一往復まるごと無駄になる。語ごとの当たりと、
+    /// そこから決まる次の呼び出しまで応答に持たせる。
+    pub fn no_hits(snap: &Snapshot, query: &str, kinds: &[EntityKind]) -> Value {
+        let terms = term_hits(snap, query, kinds);
+        let mut o = Obj::new();
+        o.put("message", NO_HITS_MESSAGE);
+
+        o.list(
+            "terms",
+            terms
+                .iter()
+                .filter(|t| t.total > 0)
+                .map(|t| {
+                    let mut x = Obj::new();
+                    x.put("term", t.term.as_str());
+                    x.put("total", t.total);
+                    x.list(
+                        "hits",
+                        t.hits
+                            .iter()
+                            .map(|h| {
+                                let mut y = Obj::new();
+                                y.put("kind", h.kind.as_str());
+                                y.put("id", h.id.as_str());
+                                y.put("name", h.name.as_str());
+                                y.value()
+                            })
+                            .collect(),
+                    );
+                    x.value()
+                })
+                .collect(),
+        );
+        // 当たらなかった語こそ直すべき語。名指しで返す。
+        o.list(
+            "unmatched_terms",
+            terms
+                .iter()
+                .filter(|t| t.total == 0)
+                .map(|t| Value::String(t.term.clone()))
+                .collect(),
+        );
+        o.opt("next", suggested_call(snap, &terms));
+        o.value()
+    }
+
+    /// 語の当たり方から次の 1 手を決める。
+    ///
+    /// 決められるのは「**その語が 1 つのブランドに揃う**語があり、他の語が残っている」
+    /// 形のとき。ブランドは一覧ツールが直接受け取れる軸なので、残りの語を `query` に
+    /// 回せば当たり方が「ブランド AND 語」に変わり、日英の表記ゆれをまたげる。
+    /// それ以外の形では黙る (当てずっぽうの助言をしない)。
+    fn suggested_call(snap: &Snapshot, terms: &[TermHit]) -> Option<String> {
+        let (brand_term, brand_id) =
+            terms.iter().find_map(|t| term_brand(snap, t).map(|b| (t.term.as_str(), b)))?;
+        let rest: Vec<&TermHit> = terms.iter().filter(|t| t.term != brand_term).collect();
+        if rest.is_empty() {
+            return None;
+        }
+        let looks_like = rest
+            .iter()
+            .flat_map(|t| t.hits.iter())
+            .map(|h| h.kind)
+            .find(|k| matches!(k, EntityKind::Event | EntityKind::Show | EntityKind::Song));
+        // ライブ名で聞かれることがいちばん多いので、手がかりが無いときはそちらに倒す。
+        let tool = match looks_like {
+            Some(EntityKind::Song) => "list_songs",
+            _ => "list_events",
+        };
+        let query: Vec<&str> = rest.iter().map(|t| t.term.as_str()).collect();
+        let brand_name = snap.brand(&brand_id).map_or(brand_id.clone(), |b| b.name.clone());
+        Some(format!(
+            "{tool} を brand=\"{brand_id}\"・query=\"{}\" で呼ぶとよい (「{brand_term}」は {brand_name} のこと)。",
+            query.join(" ")
+        ))
+    }
+
+    /// その語が指しているブランド。**当たったものが 1 つのブランドに揃うときだけ**返す。
+    ///
+    /// ブランドそのものに当たる語 (「ミリオン」) はもちろん、ブランドに当たらない語
+    /// (「ミリオンライブ」= ライブ 3 件) でも、指している先が 1 ブランドに揃うなら
+    /// 軸として使える。揃わない語 (「10th」= cg / ml / sidem) は軸にならない。
+    fn term_brand(snap: &Snapshot, term: &TermHit) -> Option<String> {
+        let mut found: Option<&str> = None;
+        for hit in &term.hits {
+            let brand = hit_brand(snap, hit)?;
+            match found {
+                Some(b) if b != brand => return None,
+                _ => found = Some(brand),
+            }
+        }
+        found.map(str::to_string)
+    }
+
+    /// 候補 1 件が属するブランド id。ブランドを持たない種別 (作家・会場) は None。
+    fn hit_brand<'a>(snap: &'a Snapshot, hit: &'a crate::domain::entity_resolution::EntityHit) -> Option<&'a str> {
+        let id = hit.id.as_str();
+        match hit.kind {
+            EntityKind::Brand => Some(id),
+            EntityKind::Event => snap.event(id)?.brand_id.as_deref(),
+            EntityKind::Show => {
+                let show = snap.show(id)?;
+                snap.events[show.event as usize].brand_id.as_deref()
+            }
+            EntityKind::Song => snap.song(id)?.brand_id.as_deref(),
+            EntityKind::Idol => snap.idol(id)?.brand_id.as_deref(),
+            EntityKind::Unit => snap.unit(id).map(|u| u.brand_id.as_str()),
+            EntityKind::Creator | EntityKind::Venue => None,
+        }
+    }
+}
+
 /// 引数の取り出し。全ツールがここを通ることで、型違いのときの文言が揃う。
 ///
 /// LLM は数値を文字列で寄こしたり、配列を 1 個の文字列で寄こしたりする。厳格に
@@ -201,6 +497,18 @@ pub mod args {
 mod tests {
     use super::*;
     use serde_json::json;
+    use std::sync::OnceLock;
+
+    fn loaded() -> &'static Snapshot {
+        static SNAP: OnceLock<Snapshot> = OnceLock::new();
+        SNAP.get_or_init(|| {
+            crate::outbound::sqlite_loader::load_snapshot(&format!(
+                "{}/../ImasLiveDB/Resources/master.sqlite",
+                env!("CARGO_MANIFEST_DIR")
+            ))
+            .expect("bundle DB はロードできる")
+        })
+    }
 
     #[test]
     fn 数値を文字列で寄こしても受ける() {
@@ -328,6 +636,85 @@ mod tests {
                 assert!(!out.contains(値), "{name} が歌詞/試聴の URL を返している");
             }
         }
+    }
+
+    #[test]
+    fn 大きさで切るときは理由を添える() {
+        use json::{rows_within_budget, Obj, MAX_LIST_BYTES};
+        let big = |n: usize| -> Vec<Value> {
+            (0..n).map(|i| json!({ "i": i, "pad": "x".repeat(200) })).collect()
+        };
+        // 予算に収まるぶんだけ残る。
+        assert_eq!(rows_within_budget(&big(1000), 1000), 4);
+        assert_eq!(rows_within_budget(&[], 1000), 0);
+        // 1 行で予算を超えても 0 行にはしない (0 件は「無かった」と読まれる)。
+        assert_eq!(rows_within_budget(&big(3), 10), 1);
+
+        // 件数で切れたときと、大きさで切れたときで理由が分かれる。
+        let mut few = Obj::new();
+        few.capped("rows", big(3), 10);
+        assert_eq!(few.value()["rows_truncated_reason"], Value::Null);
+
+        let mut many = Obj::new();
+        many.capped("rows", big(MAX_LIST_BYTES), MAX_LIST_BYTES);
+        let v = many.value();
+        assert_eq!(v["rows_truncated"], json!(true));
+        assert_eq!(v["rows_truncated_reason"], json!("size"));
+        assert!(serde_json::to_string(&v["rows"]).unwrap().len() <= MAX_LIST_BYTES + 512);
+    }
+
+    #[test]
+    fn ブランドはどこでも同じ形で返る() {
+        let snap = loaded();
+        let brand = json::brand_ref(snap, Some("cg")).expect("cg はある");
+        assert_eq!(brand["id"], "cg");
+        assert_eq!(brand["short_name"], "デレマス");
+        assert!(brand["name"].as_str().unwrap().contains("CINDERELLA"));
+        assert!(json::brand_ref(snap, Some("無いブランド")).is_none());
+        assert!(json::brand_ref(snap, None).is_none());
+
+        // 合同は同じ形の配列。単数と複数で読み方が変わらない。
+        let joint = json::joint_brand_refs(snap, Some("ml, cg"));
+        assert_eq!(joint.len(), 2);
+        assert_eq!(joint[0]["id"], "ml");
+    }
+
+    #[test]
+    fn 当たらない語は分解して手がかりを返す() {
+        let snap = loaded();
+        // QA 実測: ユーザーのいちばん自然な聞き方が 0 件になる。
+        // 実イベント名が "THE IDOLM@STER MILLION LIVE! 10thLIVE TOUR ..." で
+        // 日本語の「ミリオン」を含まないため。
+        for query in ["ミリオンライブ 10th", "ミリオン 10th"] {
+            let help = hints::no_hits(snap, query, &[]);
+            assert!(help["message"].as_str().unwrap().contains("略称"), "{help}");
+
+            let hit_terms: Vec<&str> = help["terms"]
+                .as_array()
+                .map(|a| a.iter().map(|t| t["term"].as_str().unwrap()).collect())
+                .unwrap_or_default();
+            assert!(
+                hit_terms.contains(&"10th"),
+                "どの語が当たるのかを返していない ({query}): {help}"
+            );
+        }
+
+        // 「ミリオン」はブランドに決まるので、次に打つ呼び出しまで名指しできる。
+        let help = hints::no_hits(snap, "ミリオン 10th", &[]);
+        let next = help["next"].as_str().unwrap_or_default();
+        assert!(next.contains("list_events"), "次の一手が無い: {help}");
+        assert!(next.contains("brand=\"ml\""), "ブランドを解けていない: {help}");
+        assert!(next.contains("query=\"10th\""), "残りの語を渡していない: {help}");
+
+        // 「ミリオンライブ」自体はブランドに当たらない (当たるのはライブ 3 件) が、
+        // その 3 件が全部 ml なので軸として使える。ここまで解けて初めて正解に届く。
+        let help = hints::no_hits(snap, "ミリオンライブ 10th", &[]);
+        let next = help["next"].as_str().unwrap_or_default();
+        assert!(next.contains("brand=\"ml\"") && next.contains("query=\"10th\""), "{help}");
+
+        // 語が 1 つだけなら分けようがない (定型の言葉だけを返す)。
+        let single = hints::no_hits(snap, "トラプリ", &[]);
+        assert!(single["terms"].is_null() && single["next"].is_null(), "{single}");
     }
 
     #[test]

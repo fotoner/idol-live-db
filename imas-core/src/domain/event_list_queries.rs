@@ -279,18 +279,31 @@ pub fn search_events_by_name_or_venue(
 ///
 /// 並びはスナップショット順 (集合として使う値なので順序に意味を持たせない)。
 pub fn event_ids_at_venue(snap: &Snapshot, venue: &str) -> Vec<String> {
+    let at_venue: HashSet<u32> = show_indexes_at_venue(snap, venue).into_iter().collect();
+    if at_venue.is_empty() {
+        return Vec::new();
+    }
+    (0..snap.events.len() as u32)
+        .filter(|&i| snap.shows_by_event[i as usize].iter().any(|s| at_venue.contains(s)))
+        .map(|i| snap.events[i as usize].id.clone())
+        .collect()
+}
+
+/// その会場で行われた公演の添字 (スナップショット順)。
+///
+/// 会場の当たり方 (生の `shows.venue` に加えて会場マスタの読み・旧名にも当てる) は
+/// ここが唯一の実装で、[`event_ids_at_venue`] もこれを束ねているだけ。
+/// 公演単位で数えたいとき (「この会場で一番曲数が多かった日」) に使う。
+pub fn show_indexes_at_venue(snap: &Snapshot, venue: &str) -> Vec<u32> {
     let needle = FoldedNeedle::new(venue);
     if needle.is_empty() {
         return Vec::new();
     }
-    (0..snap.events.len() as u32)
-        .filter(|&i| {
-            snap.shows_by_event[i as usize].iter().any(|&s| {
-                snap.show_venue_search[s as usize].matches(needle.as_bytes())
-                    || venue_spellings_hit(snap, snap.shows[s as usize].venue_id.as_deref(), &needle)
-            })
+    (0..snap.shows.len() as u32)
+        .filter(|&s| {
+            snap.show_venue_search[s as usize].matches(needle.as_bytes())
+                || venue_spellings_hit(snap, snap.shows[s as usize].venue_id.as_deref(), &needle)
         })
-        .map(|i| snap.events[i as usize].id.clone())
         .collect()
 }
 

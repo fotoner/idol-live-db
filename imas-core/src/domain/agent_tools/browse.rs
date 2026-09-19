@@ -25,9 +25,11 @@
 //! id 系 (`idol_id` / `unit_id` 等) は値域が広すぎて並べられないので
 //! [`ToolError::NotFound`] にして、名前をほどくツールへ送り返す。
 
+use super::json::{brand_ref, joint_brand_refs, listing, listing_with, Obj};
 use super::{args, ToolError, ToolSpec};
 use crate::domain::snapshot::{Idol, Snapshot};
-use serde_json::{json, Map, Value};
+use serde_json::{json, Value};
+use std::cmp::Reverse;
 use std::collections::{BTreeSet, HashSet};
 
 // =============================================================================
@@ -123,13 +125,19 @@ pub fn catalog() -> Vec<ToolSpec> {
         ),
         spec(
             "stats",
-            "集計。披露回数ランキング・出演公演数ランキング・ブランド別曲数・年別/月別公演数・CD シリーズ一覧。",
+            "集計。披露回数ランキング・出演公演数ランキング・公演別曲数ランキング・\
+             ブランド別曲数・年別/月別公演数・CD シリーズ一覧。\
+             show_song_count_ranking は brand / year / venue で絞れるので、\
+             「2024 年のデレマスのライブで一番曲数が多かった公演」はこれ 1 回で出る。",
             json!({
                 "kind": {
                     "type": "string",
                     "enum": STATS_KINDS,
                     "description": "集計の種類。"
                 },
+                "brand": { "type": "string", "description": "show_song_count_ranking のみ。ブランド id で絞る。" },
+                "year": { "type": "integer", "description": "show_song_count_ranking のみ。公演日の年で絞る。" },
+                "venue": { "type": "string", "description": "show_song_count_ranking のみ。会場名で絞る (読み・旧名でも当たる)。" },
                 "limit": { "type": "integer", "description": "ランキングは既定 20、一覧系は既定で全件。最大 1000。" }
             }),
             &["kind"],
@@ -175,41 +183,6 @@ fn spec(name: &str, description: &str, properties: Value, required: &[&str]) -> 
 // 返す形の共通部品
 // =============================================================================
 
-/// `null` は入れない。読み手はトークンを払って読むので、「値が無い」ことを
-/// わざわざ書いて伝える価値は無い (キーが無い = 未設定、で通じる)。
-fn put(o: &mut Map<String, Value>, key: &str, value: Option<impl Into<Value>>) {
-    if let Some(v) = value {
-        o.insert(key.to_string(), v.into());
-    }
-}
-
-/// 列が 1 本だけの応答の包み。**総数は必ず返す** —「何件ありますか」に
-/// 答えられなくなるため、打ち切った件数だけを返すことはしない。
-///
-/// 打ち切りの書き方は `lookup` と同じ流儀にそろえてある (最上位に `total`、
-/// 切ったときだけ `truncated`)。同じ道具の返り値で形が違うと、読む側が
-/// ツールごとに読み方を覚える羽目になる。
-fn listing(key: &str, total: usize, rows: Vec<Value>) -> Value {
-    let mut o = Map::new();
-    o.insert("total".into(), json!(total));
-    if rows.len() < total {
-        o.insert("truncated".into(), json!(true));
-    }
-    o.insert(key.to_string(), Value::Array(rows));
-    Value::Object(o)
-}
-
-/// 列が複数ある応答に 1 列を足す。`<key>_total` を必ず、切ったときだけ
-/// `<key>_truncated` を列の隣に置く (これも `lookup` と同じ流儀)。
-fn capped(o: &mut Map<String, Value>, key: &str, total: usize, rows: Vec<Value>) {
-    let truncated = rows.len() < total;
-    o.insert(key.to_string(), Value::Array(rows));
-    o.insert(format!("{key}_total"), json!(total));
-    if truncated {
-        o.insert(format!("{key}_truncated"), json!(true));
-    }
-}
-
 /// 先頭 `limit` 件だけ残す (総数は呼び出し側が先に控えておく)。
 fn take<T>(mut items: Vec<T>, limit: u32) -> Vec<T> {
     items.truncate(limit as usize);
@@ -237,9 +210,10 @@ fn narrow<T: std::hash::Hash + Eq + Clone>(
 // =============================================================================
 
 /// `stats` の `kind`。スキーマにも `BadArgs` の文面にも同じ配列を使う。
-const STATS_KINDS: [&str; 6] = [
+const STATS_KINDS: [&str; 7] = [
     "song_play_ranking",
     "cast_show_ranking",
+    "show_song_count_ranking",
     "brand_song_counts",
     "yearly_show_counts",
     "monthly_show_counts",
@@ -315,28 +289,23 @@ fn checked_date_bound(arg: &str, value: String) -> Result<String, ToolError> {
 // 行の射影 (名前まで解決する)
 // =============================================================================
 
-fn brand_short_name(snap: &Snapshot, brand_id: Option<&str>) -> Option<String> {
-    snap.brand(brand_id?).map(|b| b.short_name.clone())
-}
-
 fn idol_row(snap: &Snapshot, idol: &Idol) -> Value {
     use crate::domain::idol_queries::{birthday_display, height_display};
-    let mut o = Map::new();
-    o.insert("id".into(), json!(idol.id));
-    o.insert("name".into(), json!(idol.name));
-    put(&mut o, "name_kana", idol.name_kana.clone());
-    put(&mut o, "brand", idol.brand_id.clone());
-    put(&mut o, "brand_name", brand_short_name(snap, idol.brand_id.as_deref()));
-    put(&mut o, "attribute", idol.attribute.clone());
-    put(&mut o, "birthday", birthday_display(idol.birthday.as_deref()));
-    put(&mut o, "constellation", idol.constellation.clone());
-    put(&mut o, "blood_type", idol.blood_type.clone());
-    put(&mut o, "birth_place", idol.birth_place.clone());
-    put(&mut o, "age", idol.age);
-    put(&mut o, "height", height_display(idol.height));
+    let mut o = Obj::new();
+    o.put("id", json!(idol.id));
+    o.put("name", json!(idol.name));
+    o.opt("name_kana", idol.name_kana.clone());
+    o.opt("brand", brand_ref(snap, idol.brand_id.as_deref()));
+    o.opt("attribute", idol.attribute.clone());
+    o.opt("birthday", birthday_display(idol.birthday.as_deref()));
+    o.opt("constellation", idol.constellation.clone());
+    o.opt("blood_type", idol.blood_type.clone());
+    o.opt("birth_place", idol.birth_place.clone());
+    o.opt("age", idol.age);
+    o.opt("height", height_display(idol.height));
     let index = snap.idol_index_by_id[&idol.id];
-    put(&mut o, "voice_actor", snap.current_voice_actor(index).map(|v| v.name.clone()));
-    Value::Object(o)
+    o.opt("voice_actor", snap.current_voice_actor(index).map(|v| v.name.clone()));
+    o.value()
 }
 
 /// 曲 1 行。原唱者は人数が多い曲 (全体曲) で名前を並べると読む量が跳ね上がるので、
@@ -345,29 +314,28 @@ fn song_row(snap: &Snapshot, index: u32) -> Value {
     use crate::domain::performer_label::song_performer_label;
     const NAMED_ARTISTS_MAX: usize = 10;
     let song = &snap.songs[index as usize];
-    let mut o = Map::new();
-    o.insert("id".into(), json!(song.id));
-    o.insert("title".into(), json!(song.title));
-    put(&mut o, "title_kana", song.title_kana.clone());
-    put(&mut o, "brand", song.brand_id.clone());
-    put(&mut o, "brand_name", brand_short_name(snap, song.brand_id.as_deref()));
-    put(&mut o, "song_type", song.song_type.clone());
-    put(&mut o, "release_date", song.release_date.clone());
-    put(&mut o, "cd_series", song.cd_series.clone());
-    put(&mut o, "series_group", song.series_group.clone());
-    put(&mut o, "unit_name", song.unit_name.clone());
-    put(&mut o, "singer_label", song.singer_label.clone());
+    let mut o = Obj::new();
+    o.put("id", json!(song.id));
+    o.put("title", json!(song.title));
+    o.opt("title_kana", song.title_kana.clone());
+    o.opt("brand", brand_ref(snap, song.brand_id.as_deref()));
+    o.opt("song_type", song.song_type.clone());
+    o.opt("release_date", song.release_date.clone());
+    o.opt("cd_series", song.cd_series.clone());
+    o.opt("series_group", song.series_group.clone());
+    o.opt("unit_name", song.unit_name.clone());
+    o.opt("singer_label", song.singer_label.clone());
     // 1 行で書くときの名義。組み方は performer_label が正本 (画面と同じ言い方になる)。
-    put(&mut o, "credited_as", song_performer_label(snap, index));
-    o.insert("performance_count".into(), json!(snap.performance_counts[index as usize]));
+    o.opt("credited_as", song_performer_label(snap, index));
+    o.put("performance_count", json!(snap.performance_counts[index as usize]));
 
     let artists = original_artists(snap, index);
-    o.insert("artist_count".into(), json!(artists.len()));
+    o.put("artist_count", json!(artists.len()));
     if !artists.is_empty() && artists.len() <= NAMED_ARTISTS_MAX {
         let names: Vec<&str> = artists.iter().map(|i| i.name.as_str()).collect();
-        o.insert("artists".into(), json!(names));
+        o.put("artists", json!(names));
     }
-    Value::Object(o)
+    o.value()
 }
 
 /// 原唱者 (`song_artists.role='original'`)。並びは idol の公式順 (前計算済み)。
@@ -380,18 +348,15 @@ fn original_artists(snap: &Snapshot, song: u32) -> Vec<&crate::domain::snapshot:
 fn show_header(snap: &Snapshot, show_index: u32) -> Value {
     let show = &snap.shows[show_index as usize];
     let event = &snap.events[show.event as usize];
-    let mut o = Map::new();
-    o.insert("show_id".into(), json!(show.id));
-    o.insert("show_name".into(), json!(show.name));
-    o.insert("event_id".into(), json!(event.id));
-    o.insert("event_name".into(), json!(event.name));
-    o.insert("date".into(), json!(show.date));
-    put(&mut o, "venue", show.venue.clone());
-    o.insert(
-        "song_count".into(),
-        json!(snap.setlist_items_by_show[show_index as usize].len()),
-    );
-    Value::Object(o)
+    let mut o = Obj::new();
+    o.put("show_id", json!(show.id));
+    o.put("show_name", json!(show.name));
+    o.put("event_id", json!(event.id));
+    o.put("event_name", json!(event.name));
+    o.put("date", json!(show.date));
+    o.opt("venue", show.venue.clone());
+    o.put("song_count", json!(snap.setlist_items_by_show[show_index as usize].len()));
+    o.value()
 }
 
 // =============================================================================
@@ -581,7 +546,7 @@ fn list_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
 // =============================================================================
 
 fn list_events(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<Value, ToolError> {
-    use crate::domain::event_grouping::year_key;
+    use crate::domain::event_grouping::{event_is_upcoming, year_key};
     use crate::domain::event_list_filtering::{
         filter_event_indices, EventFilterCriteria, EventFilterItem,
     };
@@ -639,9 +604,14 @@ fn list_events(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<Va
         })
         .filter(|&i| {
             let record = &records[i as usize];
+            let upcoming = event_is_upcoming(
+                record.first_date.as_deref(),
+                record.last_date.as_deref(),
+                today_key,
+            );
             match when.as_str() {
-                "upcoming" => is_upcoming(record.first_date.as_deref(), record.last_date.as_deref(), today_key),
-                "past" => !is_upcoming(record.first_date.as_deref(), record.last_date.as_deref(), today_key),
+                "upcoming" => upcoming,
+                "past" => !upcoming,
                 _ => true,
             }
         })
@@ -657,46 +627,34 @@ fn list_events(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<Va
         .map(|i| {
             let record = &records[i as usize];
             let index = snap.event_index_by_id[&record.event.id];
-            let mut o = Map::new();
-            o.insert("id".into(), json!(record.event.id));
-            o.insert("name".into(), json!(record.event.name));
-            put(&mut o, "brand", record.event.brand_id.clone());
-            put(&mut o, "brand_name", brand_short_name(snap, record.event.brand_id.as_deref()));
-            put(&mut o, "joint_brands", record.event.joint_brand_ids.clone());
-            o.insert("kind".into(), json!(record.event.kind));
-            put(&mut o, "first_date", record.first_date.clone());
-            put(&mut o, "last_date", record.last_date.clone());
+            let mut o = Obj::new();
+            o.put("id", json!(record.event.id));
+            o.put("name", json!(record.event.name));
+            o.opt("brand", brand_ref(snap, record.event.brand_id.as_deref()));
+            o.list("joint_brands", joint_brand_refs(snap, record.event.joint_brand_ids.as_deref()));
+            o.put("kind", json!(record.event.kind));
+            o.opt("first_date", record.first_date.clone());
+            o.opt("last_date", record.last_date.clone());
             let shows = &snap.shows_by_event[index as usize];
-            o.insert("show_count".into(), json!(shows.len()));
+            o.put("show_count", json!(shows.len()));
             let venues: Vec<String> = distinct(
                 shows.iter().map(|&s| snap.shows[s as usize].venue.as_deref()),
             );
             if !venues.is_empty() {
-                o.insert("venues".into(), json!(venues));
+                o.put("venues", json!(venues));
             }
-            o.insert(
-                "upcoming".into(),
-                json!(is_upcoming(
+            o.put(
+                "upcoming",
+                json!(event_is_upcoming(
                     record.first_date.as_deref(),
                     record.last_date.as_deref(),
                     today_key
                 )),
             );
-            Value::Object(o)
+            o.value()
         })
         .collect();
     Ok(listing("events", total, rows))
-}
-
-/// まだ終わっていないライブか。最終日で見る (初日が過ぎていても会期中なら「今後」)。
-///
-/// 日付が決まっていないイベントは「今後」に入れる — `event_grouping` の年グルーピングと
-/// 同じ扱いで、日程未定は登録途中の予定であって開催済みではない。
-fn is_upcoming(first_date: Option<&str>, last_date: Option<&str>, today_key: &str) -> bool {
-    match last_date.or(first_date) {
-        Some(date) => date >= today_key,
-        None => true,
-    }
 }
 
 // =============================================================================
@@ -716,8 +674,8 @@ fn idol_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
         return Err(ToolError::BadArgs("role は original / performed / all です".into()));
     }
 
-    let mut out = Map::new();
-    out.insert("idol".into(), idol_row(snap, idol));
+    let mut out = Obj::new();
+    out.put("idol", idol_row(snap, idol));
 
     if role != "performed" {
         // 原唱 (持ち歌)。song_artists.role='original' の行だけ。
@@ -726,15 +684,15 @@ fn idol_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
         let rows = take(originals, limit)
             .into_iter()
             .map(|r| {
-                let mut o = Map::new();
-                o.insert("id".into(), json!(r.song_id));
-                o.insert("title".into(), json!(r.title));
-                put(&mut o, "release_date", r.release_date);
-                put(&mut o, "unit_name", r.unit_name);
-                Value::Object(o)
+                let mut o = Obj::new();
+                o.put("id", json!(r.song_id));
+                o.put("title", json!(r.title));
+                o.opt("release_date", r.release_date);
+                o.opt("unit_name", r.unit_name);
+                o.value()
             })
             .collect();
-        capped(&mut out, "original", total, rows);
+        out.capped("original", rows, total);
 
         // ユニット名義の持ち歌 (songs.unit_id 由来)。個人の song_artists には
         // 出てこないことがあるので、原唱とは別立てで返す。
@@ -745,15 +703,15 @@ fn idol_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
             .filter_map(|id| snap.song_index_by_id.get(&id).copied())
             .map(|i| {
                 let song = &snap.songs[i as usize];
-                let mut o = Map::new();
-                o.insert("id".into(), json!(song.id));
-                o.insert("title".into(), json!(song.title));
-                put(&mut o, "release_date", song.release_date.clone());
-                put(&mut o, "unit_name", song.unit_name.clone());
-                Value::Object(o)
+                let mut o = Obj::new();
+                o.put("id", json!(song.id));
+                o.put("title", json!(song.title));
+                o.opt("release_date", song.release_date.clone());
+                o.opt("unit_name", song.unit_name.clone());
+                o.value()
             })
             .collect();
-        capped(&mut out, "unit_songs", total, rows);
+        out.capped("unit_songs", rows, total);
     }
 
     if role != "original" {
@@ -764,18 +722,18 @@ fn idol_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
         let rows = take(performed, limit)
             .into_iter()
             .map(|r| {
-                let mut o = Map::new();
-                o.insert("id".into(), json!(r.song_id));
-                o.insert("title".into(), json!(r.title));
-                o.insert("perform_count".into(), json!(r.perform_count));
-                put(&mut o, "unit_name", r.unit_name);
-                Value::Object(o)
+                let mut o = Obj::new();
+                o.put("id", json!(r.song_id));
+                o.put("title", json!(r.title));
+                o.put("perform_count", json!(r.perform_count));
+                o.opt("unit_name", r.unit_name);
+                o.value()
             })
             .collect();
-        capped(&mut out, "performed", total, rows);
+        out.capped("performed", rows, total);
     }
 
-    Ok(Value::Object(out))
+    Ok(out.value())
 }
 
 // =============================================================================
@@ -793,11 +751,20 @@ fn song_performances(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolEr
     let Some(&song_index) = snap.song_index_by_id.get(&song_id) else {
         return Err(ToolError::NotFound(format!("曲 {song_id} が無い")));
     };
-    let limit = args::limit(arguments, 50, 500)?;
+    let limit = args::limit(arguments, 20, 500)?;
 
     let history = performance_history(snap, &song_id);
     let items = performance_item_indices(snap, &song_id).to_vec();
     let total = history.len();
+    let performance_end = |entry: &crate::domain::song_detail_queries::PerformanceHistoryEntry| {
+        let mut o = Obj::new();
+        o.put("date", json!(entry.date));
+        o.put("event_name", json!(entry.event_name));
+        o.put("show_id", json!(entry.show_id));
+        o.put("ordinal", json!(entry.ordinal));
+        o.value()
+    };
+    let history_ends = (history.first().map(performance_end), history.last().map(performance_end));
     let original_idols = original_artists(snap, song_index);
     let originals: Vec<&str> = original_idols.iter().map(|i| i.id.as_str()).collect();
 
@@ -806,25 +773,25 @@ fn song_performances(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolEr
         .zip(items)
         .take(limit as usize)
         .map(|(entry, item)| {
-            let mut o = Map::new();
-            o.insert("show_id".into(), json!(entry.show_id));
-            o.insert("event_id".into(), json!(entry.event_id));
-            o.insert("event_name".into(), json!(entry.event_name));
-            o.insert("show_name".into(), json!(entry.show_name));
-            o.insert("date".into(), json!(entry.date));
-            put(&mut o, "venue", entry.venue);
+            let mut o = Obj::new();
+            o.put("show_id", json!(entry.show_id));
+            o.put("event_id", json!(entry.event_id));
+            o.put("event_name", json!(entry.event_name));
+            o.put("show_name", json!(entry.show_name));
+            o.put("date", json!(entry.date));
+            o.opt("venue", entry.venue);
             let show = snap.setlist_items[item as usize].show;
-            o.insert("position".into(), json!(track_number(snap, item)));
-            put(&mut o, "section", entry.section);
-            o.insert("ordinal".into(), json!(entry.ordinal));
-            o.insert("ordinal_label".into(), json!(performance_ordinal_label(entry.ordinal)));
+            o.put("position", json!(track_number(snap, item)));
+            o.opt("section", entry.section);
+            o.put("ordinal", json!(entry.ordinal));
+            o.put("ordinal_label", json!(performance_ordinal_label(entry.ordinal)));
 
             let performers: Vec<&str> = snap.performers_by_item[item as usize]
                 .iter()
                 .map(|&i| snap.idols[i as usize].id.as_str())
                 .collect();
             let performer_set: BTreeSet<&str> = performers.iter().copied().collect();
-            o.insert("singer_count".into(), json!(performers.len()));
+            o.put("singer_count", json!(performers.len()));
 
             let cast: BTreeSet<&str> = snap.cast_by_show[show as usize]
                 .iter()
@@ -834,30 +801,29 @@ fn song_performances(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolEr
             if full_cast {
                 // 「出演者全員」で言い切れるなら名前は並べない。人数の多い全体曲で
                 // 30 人ぶんの名前を毎回積むと、読む側の予算をそれだけで食い潰す。
-                o.insert("full_cast".into(), json!(true));
+                o.put("full_cast", json!(true));
             } else if !performers.is_empty() {
                 let names: Vec<String> = snap.performers_by_item[item as usize]
                     .iter()
                     .map(|&i| snap.idols[i as usize].name.clone())
                     .collect();
-                o.insert("singers".into(), json!(names));
+                o.put("singers", json!(names));
             }
             if let Some(summary) = summarize(&originals, &performer_set, &cast, full_cast) {
-                o.insert("lineup".into(), json!(summary.label()));
+                o.put("lineup", json!(summary.label()));
             }
-            Value::Object(o)
+            o.value()
         })
         .collect();
 
-    let mut out = Map::new();
-    out.insert("song".into(), song_row(snap, song_index));
-    let listed = listing("performances", total, rows);
-    if let Value::Object(map) = listed {
-        for (k, v) in map {
-            out.insert(k, v);
-        }
-    }
-    Ok(Value::Object(out))
+    let mut head = Obj::new();
+    head.put("song", song_row(snap, song_index));
+    // 履歴は新しい順なので、打ち切ると**初披露が必ず落ちる**。「初披露はいつ?」は
+    // よく訊かれるのに、行を全部返さないと答えられないのでは限度を上げ続けるしかない。
+    // 両端だけは見出しに置いて、打ち切りと無関係に答えられるようにする。
+    head.opt("first_performance", history_ends.1);
+    head.opt("latest_performance", history_ends.0);
+    Ok(listing_with(head, "performances", total, rows))
 }
 
 // =============================================================================
@@ -893,39 +859,95 @@ fn setlist_diff(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> 
         slots
             .iter()
             .map(|s| {
-                let mut o = Map::new();
-                o.insert("song_id".into(), json!(s.song_id));
-                put(&mut o, "title", title(&s.song_id));
-                o.insert("position".into(), json!(s.position));
-                put(&mut o, "section", s.section.clone());
-                Value::Object(o)
+                let mut o = Obj::new();
+                o.put("song_id", json!(s.song_id));
+                o.opt("title", title(&s.song_id));
+                o.put("position", json!(s.position));
+                o.opt("section", s.section.clone());
+                o.value()
             })
             .collect()
     };
 
-    let mut out = Map::new();
-    out.insert("a".into(), show_header(snap, a));
-    out.insert("b".into(), show_header(snap, b));
-    out.insert("shared_count".into(), json!(comparison.shared.len()));
-    out.insert("same_order".into(), json!(comparison.same_order));
-    out.insert(
-        "shared".into(),
+    let mut out = Obj::new();
+    out.put("a", show_header(snap, a));
+    out.put("b", show_header(snap, b));
+    out.put("shared_count", json!(comparison.shared.len()));
+    out.put("same_order", json!(comparison.same_order));
+    out.put(
+        "shared",
         json!(comparison
             .shared
             .iter()
             .map(|s| {
-                let mut o = Map::new();
-                o.insert("song_id".into(), json!(s.song_id));
-                put(&mut o, "title", title(&s.song_id));
-                o.insert("position_a".into(), json!(s.position_a));
-                o.insert("position_b".into(), json!(s.position_b));
-                Value::Object(o)
+                let mut o = Obj::new();
+                o.put("song_id", json!(s.song_id));
+                o.opt("title", title(&s.song_id));
+                o.put("position_a", json!(s.position_a));
+                o.put("position_b", json!(s.position_b));
+                o.value()
             })
             .collect::<Vec<_>>()),
     );
-    out.insert("only_a".into(), json!(slot_rows(&comparison.only_a)));
-    out.insert("only_b".into(), json!(slot_rows(&comparison.only_b)));
-    Ok(Value::Object(out))
+    out.put("only_a", json!(slot_rows(&comparison.only_a)));
+    out.put("only_b", json!(slot_rows(&comparison.only_b)));
+    Ok(out.value())
+}
+
+/// `stats --kind show_song_count_ranking` の絞り込み (brand / year / venue)。
+///
+/// 軸の判定はどれも既存の正本を通す — ブランドは合同ライブ込みの
+/// `event_list_filtering`、会場は読み・旧名込みの `event_list_queries`。
+/// ここに述語を書くと、同じ「デレマスのライブ」が一覧と集計で違う集合になる。
+fn scoped_show_indexes(snap: &Snapshot, arguments: &Value) -> Result<Vec<u32>, ToolError> {
+    use crate::domain::event_list_filtering::{
+        filter_event_indices, EventFilterCriteria, EventFilterItem,
+    };
+    use crate::domain::event_list_queries::show_indexes_at_venue;
+
+    let mut shows: Vec<u32> = (0..snap.shows.len() as u32).collect();
+
+    if let Some(brand) = args::str_opt(arguments, "brand") {
+        let brand = checked("brand", brand, &brand_vocab(snap))?;
+        let items: Vec<EventFilterItem> = snap
+            .events
+            .iter()
+            .map(|e| EventFilterItem {
+                id: e.id.clone(),
+                brand_id: e.brand_id.clone(),
+                joint_brand_ids: e.joint_brand_ids.clone(),
+                name: e.name.clone(),
+                kind: e.kind.clone(),
+            })
+            .collect();
+        let criteria = EventFilterCriteria {
+            selected_brand_ids: vec![brand],
+            excluded_kinds: Vec::new(),
+            search_text: String::new(),
+            attendance_filter: "all".to_string(),
+            attended_event_ids: Vec::new(),
+            require_favorite: false,
+            favorite_ids: Vec::new(),
+            require_note: false,
+            note_ids: Vec::new(),
+            venue: String::new(),
+            venue_event_ids: Vec::new(),
+        };
+        let events: HashSet<u32> = filter_event_indices(&items, &criteria).into_iter().collect();
+        shows.retain(|&s| events.contains(&snap.shows[s as usize].event));
+    }
+    if let Some(year) = args::u32_opt(arguments, "year")? {
+        let prefix = year.to_string();
+        shows.retain(|&s| snap.shows[s as usize].date.starts_with(&prefix));
+    }
+    if let Some(venue) = args::str_opt(arguments, "venue") {
+        let at_venue: HashSet<u32> = show_indexes_at_venue(snap, &venue).into_iter().collect();
+        if at_venue.is_empty() {
+            return Err(ToolError::NotFound(format!("会場「{venue}」の公演が無い")));
+        }
+        shows.retain(|s| at_venue.contains(s));
+    }
+    Ok(shows)
 }
 
 fn show_index(snap: &Snapshot, show_id: &str) -> Result<u32, ToolError> {
@@ -953,8 +975,22 @@ fn stats(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
         )));
     }
     // ランキングは「上位いくつか」を見るもの、一覧系は全部見るもの。既定が違う。
-    let ranking = matches!(kind.as_str(), "song_play_ranking" | "cast_show_ranking");
+    let ranking = matches!(
+        kind.as_str(),
+        "song_play_ranking" | "cast_show_ranking" | "show_song_count_ranking"
+    );
     let limit = args::limit(arguments, if ranking { 20 } else { 1000 }, 1000)?;
+
+    // 絞り込みの軸を持つのは公演別ランキングだけ。他の kind に付けられたら
+    // 黙って無視しない (無視すると「絞ったつもりの数」を答えてしまう)。
+    let scoped = kind == "show_song_count_ranking";
+    for axis in ["brand", "year", "venue"] {
+        if !scoped && arguments.get(axis).is_some_and(|v| !v.is_null()) {
+            return Err(ToolError::BadArgs(format!(
+                "{axis} で絞れるのは kind=show_song_count_ranking のときだけ"
+            )));
+        }
+    }
 
     let (total, rows): (usize, Vec<Value>) = match kind.as_str() {
         "song_play_ranking" => {
@@ -962,13 +998,37 @@ fn stats(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
             let rows = song_play_count_ranking(snap, limit)
                 .into_iter()
                 .map(|r| {
-                    let mut o = Map::new();
-                    o.insert("id".into(), json!(r.id));
-                    o.insert("title".into(), json!(r.title));
-                    o.insert("play_count".into(), json!(r.play_count));
-                    put(&mut o, "brand", r.brand_id.clone());
-                    put(&mut o, "brand_name", brand_short_name(snap, r.brand_id.as_deref()));
-                    Value::Object(o)
+                    let mut o = Obj::new();
+                    o.put("id", json!(r.id));
+                    o.put("title", json!(r.title));
+                    o.put("play_count", json!(r.play_count));
+                    o.opt("brand", brand_ref(snap, r.brand_id.as_deref()));
+                    o.value()
+                })
+                .collect();
+            (total, rows)
+        }
+        "show_song_count_ranking" => {
+            let mut shows = scoped_show_indexes(snap, arguments)?;
+            let total = shows.len();
+            // 同数は公演の添字で決定的に (日付順の入力なので、古い方が先に来る)。
+            shows.sort_by_key(|&s| {
+                (Reverse(snap.setlist_items_by_show[s as usize].len()), s)
+            });
+            shows.truncate(limit as usize);
+            let rows = shows
+                .into_iter()
+                .map(|s| {
+                    let mut o = Obj::new();
+                    if let Value::Object(header) = show_header(snap, s) {
+                        for (k, v) in header {
+                            o.put(&k, v);
+                        }
+                    }
+                    o.put("id", json!(snap.shows[s as usize].id));
+                    // 「一番出演者が多かった公演」も同じ 1 回で答えられるように添える。
+                    o.put("cast_count", json!(snap.cast_by_show[s as usize].len()));
+                    o.value()
                 })
                 .collect();
             (total, rows)
@@ -1017,14 +1077,9 @@ fn stats(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
         }
     };
 
-    let mut out = Map::new();
-    out.insert("kind".into(), json!(kind));
-    if let Value::Object(map) = listing("items", total, rows) {
-        for (k, v) in map {
-            out.insert(k, v);
-        }
-    }
-    Ok(Value::Object(out))
+    let mut head = Obj::new();
+    head.put("kind", json!(kind));
+    Ok(listing_with(head, "items", total, rows))
 }
 
 // =============================================================================
@@ -1106,7 +1161,7 @@ mod tests {
         assert!(!text(first, "id").is_empty());
         assert!(!text(first, "name").is_empty());
         assert!(text(first, "birthday").starts_with("7月"), "誕生日が 7 月でない: {first}");
-        assert!(first.get("brand_name").is_some(), "ブランド名が無い: {first}");
+        assert!(first["brand"]["short_name"].is_string(), "ブランド名が無い: {first}");
 
         // null のキーは出さない (年齢未設定のアイドルで確かめる)。
         for idol in idols {
@@ -1121,7 +1176,7 @@ mod tests {
         assert!(cg["total"].as_u64().unwrap() > 0);
         assert!(cg["total"].as_u64().unwrap() < all["total"].as_u64().unwrap());
         for idol in rows(&cg, "idols") {
-            assert_eq!(text(idol, "brand"), "cg");
+            assert_eq!(idol["brand"]["id"], "cg");
             assert!(text(idol, "birthday").starts_with("7月"));
         }
     }
@@ -1214,8 +1269,14 @@ mod tests {
         // 島村卯月の持ち歌 (song_artists.role='original')。
         let out = run("list_songs", json!({ "idol_id": "cg_島村卯月", "limit": 200 }));
         assert!(out["total"].as_u64().unwrap() > 10, "{out}");
-        let titles: Vec<String> = rows(&out, "songs").iter().map(|s| text(s, "title")).collect();
+
+        // 原唱者の絞り込みと曲名の絞り込みが AND で効く。
+        let one = run("list_songs", json!({ "idol_id": "cg_島村卯月", "query": "S(mile)ING" }));
+        let titles: Vec<String> = rows(&one, "songs").iter().map(|s| text(s, "title")).collect();
         assert!(titles.iter().any(|t| t.starts_with("S(mile)ING")), "持ち歌が引けていない: {titles:?}");
+        // 本人の持ち歌でない曲は同じ語でも出ない。
+        let other = run("list_songs", json!({ "idol_id": "cg_渋谷凛", "query": "S(mile)ING" }));
+        assert_eq!(other["total"], 0, "{other}");
     }
 
     #[test]
@@ -1389,9 +1450,20 @@ mod tests {
         let ranking = run("stats", json!({ "kind": "song_play_ranking", "limit": 1 }));
         let song_id = text(&rows(&ranking, "items")[0], "id");
         let out = run("song_performances", json!({ "song_id": song_id, "limit": 500 }));
-        let oldest = rows(&out, "performances").last().unwrap().clone();
-        assert_eq!(oldest["ordinal"], json!(1));
-        assert_eq!(text(&oldest, "ordinal_label"), "初披露");
+
+        // 履歴は新しい順なので、打ち切ると初披露は必ず行から落ちる。
+        // 見出しの first_performance で答えられること (= 限度を上げなくてよいこと) を固定する。
+        assert_eq!(out["first_performance"]["ordinal"], json!(1), "{out}");
+        assert!(
+            out["first_performance"]["date"].as_str().unwrap()
+                < out["latest_performance"]["date"].as_str().unwrap()
+        );
+        // 見出しの「直近」は行の先頭と同じ披露 (別の並びを持ち込んでいない)。
+        assert_eq!(out["latest_performance"]["show_id"], rows(&out, "performances")[0]["show_id"]);
+
+        // 行に載っている範囲でも「何回目」の言い方は守られる。
+        let newest = &rows(&out, "performances")[0];
+        assert!(text(newest, "ordinal_label").ends_with("回目"));
     }
 
     // ---- setlist_diff ----
@@ -1469,6 +1541,63 @@ mod tests {
         // 「何曲が披露されたことがあるか」に答えられる。
         assert!(out["total"].as_u64().unwrap() > 1000);
         assert!(out["truncated"].as_bool().unwrap());
+    }
+
+    #[test]
+    fn 一番曲数が多かった公演が_1_回で出る() {
+        // RedTeam 実測で 11 往復かかっていた問い:
+        // 「2024 年のデレマスのライブで一番曲数が多かった公演は?」
+        let out = run(
+            "stats",
+            json!({ "kind": "show_song_count_ranking", "brand": "cg", "year": 2024, "limit": 3 }),
+        );
+        let items = rows(&out, "items");
+        assert!(!items.is_empty());
+        let counts: Vec<u64> = items.iter().map(|i| i["song_count"].as_u64().unwrap()).collect();
+        assert!(counts.windows(2).all(|w| w[0] >= w[1]), "多い順でない: {counts:?}");
+
+        // 1 行だけで「いつ・どのライブの・どの公演が・何曲」まで書ける。
+        let top = &items[0];
+        assert!(text(top, "date").starts_with("2024"));
+        assert!(!text(top, "event_name").is_empty());
+        assert!(!text(top, "show_id").is_empty());
+        assert!(top["cast_count"].is_number(), "出演者数も同じ 1 回で: {top}");
+        assert!(out["total"].as_u64().unwrap() >= items.len() as u64);
+    }
+
+    #[test]
+    fn 会場で絞った公演別ランキングも引ける() {
+        let out = run(
+            "stats",
+            json!({ "kind": "show_song_count_ranking", "venue": "横浜アリーナ", "limit": 5 }),
+        );
+        assert!(out["total"].as_u64().unwrap() > 0);
+        for item in rows(&out, "items") {
+            assert!(text(item, "venue").contains("横浜アリーナ"), "{item}");
+        }
+        assert!(matches!(
+            err("stats", json!({ "kind": "show_song_count_ranking", "venue": "無い会場" })),
+            ToolError::NotFound(_)
+        ));
+    }
+
+    #[test]
+    fn 絞り込みの軸を使えない集計に付けたら弾く() {
+        // 黙って無視すると「絞ったつもりの数」を答えてしまう。
+        assert!(matches!(
+            err("stats", json!({ "kind": "song_play_ranking", "brand": "cg" })),
+            ToolError::BadArgs(_)
+        ));
+    }
+
+    #[test]
+    fn 大きな_limit_は大きさで切って理由を返す() {
+        // QA 実測: song_play_ranking --limit 1000 が 167KB、list_songs --limit 200 が 132KB。
+        let out = run("stats", json!({ "kind": "song_play_ranking", "limit": 1000 }));
+        assert_eq!(out["truncated_reason"], json!("size"), "{}", &out.to_string()[..200]);
+        assert!(serde_json::to_string(&out).unwrap().len() < 40 * 1024);
+        // 総数は切っても返る (「何曲ありますか」には答えられる)。
+        assert!(out["total"].as_u64().unwrap() > rows(&out, "items").len() as u64);
     }
 
     #[test]

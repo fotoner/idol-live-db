@@ -704,6 +704,15 @@ impl Snapshot {
         self.show_index_by_id.get(id).map(|&i| &self.shows[i as usize])
     }
 
+    /// ブランドの略称 (「ミリオン」)。正式名は長くて 1 行の手掛かりには向かない。
+    ///
+    /// `brand_id` が None / 未知なら None。**`snap.brand(id).map(|b| &b.short_name)` を
+    /// 呼ぶ側で書かない** — 同じ 2 段が別々の層に散っていた (LLM 向けツールと
+    /// 名寄せの hint で 1 本ずつ)。
+    pub fn brand_short_name(&self, brand_id: Option<&str>) -> Option<&str> {
+        self.brand(brand_id?).map(|b| b.short_name.as_str())
+    }
+
     pub fn unit(&self, id: &str) -> Option<&Unit> {
         self.unit_index_by_id.get(id).map(|&i| &self.units[i as usize])
     }
