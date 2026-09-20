@@ -55,7 +55,7 @@ pub fn catalog() -> Vec<ToolSpec> {
         spec(
             "setlist_shape",
             "公演群のセトリの「型」。曲数・区切りごとの曲数・1 曲目 / アンコール / 締めに\
-             来やすい曲・ソロ枠の本数・出演者 1 人あたりの歌唱曲数 (主演 lead_songs と\
+             来やすい曲・ソロ枠の本数 (とそのうち主演が歌った本数)・出演者 1 人あたりの歌唱曲数 (主演 lead_songs と\
              それ以外 member_songs、および公演の全曲に対する割合 *_share_percent) を、\
              指定した公演の集合について返す。\
              絞り込みの軸は list_shows と同じ。\
@@ -235,6 +235,7 @@ fn setlist_shape(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<
     o.list("encore", slot_rows(snap, &s.encore));
     o.list("closers", slot_rows(snap, &s.closers));
     o.opt("solo_slots", s.solo_slots.as_ref().map(spread_json));
+    o.opt("lead_solo_slots", s.lead_solo_slots.as_ref().map(spread_json));
     // 主演が何曲歌うかは「主演公演のセトリ」を尋ねられたときの芯になる数字。
     // 比較対象 (member_songs) と対にして出す — 片方だけでは多い / 少ないが読めない。
     o.opt("lead_songs", s.lead_songs.as_ref().map(spread_json));

@@ -18,8 +18,7 @@
 
 use crate::domain::setlist_sections::{numbered_setlist, section_label, track_number, ENCORE_LABEL};
 use crate::domain::snapshot::Snapshot;
-use crate::domain::song_list_queries::is_solo_song;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 /// 数の散らばり。平均を出さないのは、公演数が一桁の集合で平均を見せると
 /// 「23.17 曲」のような、根拠の回数より精度が高く見える数字になるため。
@@ -100,8 +99,20 @@ pub struct SetlistShape {
     pub encore: Vec<SlotTally>,
     /// 最後の曲 (締め)。アンコールがあればその最後の曲になる。
     pub closers: Vec<SlotTally>,
-    /// 1 公演あたりのソロ枠 (原唱者が 1 人の曲) の本数。
+    /// 1 公演あたりのソロ枠 (**その披露を 1 人で歌った曲**) の本数。
+    ///
+    /// 原唱者が 1 人かどうかでは数えない。14thLIVE DAY2 は原唱者ベースだと 15 本に
+    /// なるが、実際のソロ枠は 7 本しかない — 差の 8 曲は `To...` を 3 人、
+    /// `Be My Boy` を 2 人、のように**ソロ曲を複数人で歌った**回だから。
+    /// 「ソロ枠」と名乗る以上、数えるのはその日 1 人で立った曲。
+    /// 曲そのものの性質 (原唱者が 1 人か) は [`crate::domain::song_list_queries::is_solo_song`]。
     pub solo_slots: Option<Spread>,
+    /// ソロ枠のうち、主演が歌った本数。主演が立っている公演だけを標本にする。
+    ///
+    /// 実データでは 8 公演すべてで [`Self::solo_slots`] と一致する
+    /// (主演公演でソロを歌うのは主演だけ)。一致は規則ではなく今のところの事実なので、
+    /// 2 本の数として返して呼び手に見せる。
+    pub lead_solo_slots: Option<Spread>,
     /// 主演 (`cast_role` が `lead`) 1 人が歌った曲数。主演が 2 人いる公演なら値も 2 つ入る。
     ///
     /// 主演が立っていない公演は標本に入らないので、`samples` は [`Self::shows`] と一致しない。
@@ -141,6 +152,7 @@ pub fn setlist_shape(snap: &Snapshot, shows: &[u32], top: usize) -> SetlistShape
 
     let mut song_counts: Vec<u32> = Vec::new();
     let mut solo_counts: Vec<u32> = Vec::new();
+    let mut lead_solo_counts: Vec<u32> = Vec::new();
     let mut lead = RoleTally::default();
     let mut member = RoleTally::default();
     // 区切り → その区切りがあった公演ごとの曲数
@@ -148,18 +160,18 @@ pub fn setlist_shape(snap: &Snapshot, shows: &[u32], top: usize) -> SetlistShape
     let mut openers: HashMap<u32, u32> = HashMap::new();
     let mut encore: HashMap<u32, u32> = HashMap::new();
     let mut closers: HashMap<u32, u32> = HashMap::new();
-    // ソロ判定は曲ごとに一定なので曲単位で覚える。全公演を対象にすると
-    // セトリ行 13,000 件ぶん `song_artists` を引くことになり、そのたびに
-    // 原唱者 (全体曲は 100 人超) の Vec を確保していた。
-    let mut solo_memo: Vec<Option<bool>> = vec![None; snap.songs.len()];
-
     for &show in &sampled {
         // 公演内の並びは numbered_setlist が正本 (生の position は公演をまたぐ通し番号)。
         // 曲順そのものはここでは使わないので、Vec に集めずに 1 度だけ舐める。
         let (mut first, mut last, mut count) = (None, None, 0u32);
         let mut per_section: HashMap<Option<String>, u32> = HashMap::new();
-        let mut solos = 0u32;
+        let (mut solos, mut lead_solos) = (0u32, 0u32);
         let mut sung_by_idol: HashMap<u32, u32> = HashMap::new();
+        let leads: HashSet<u32> = snap.cast_by_show[show as usize]
+            .iter()
+            .filter(|l| l.cast_role == "lead")
+            .map(|l| l.idol)
+            .collect();
 
         for (_, item) in numbered_setlist(snap, show) {
             let it = &snap.setlist_items[item as usize];
@@ -173,18 +185,27 @@ pub fn setlist_shape(snap: &Snapshot, shows: &[u32], top: usize) -> SetlistShape
             }
             *per_section.entry(label).or_insert(0) += 1;
 
-            let solo = *solo_memo[it.song as usize].get_or_insert_with(|| is_solo_song(snap, it.song));
-            if solo {
+            let performers = &snap.performers_by_item[item as usize];
+            // 歌唱者が未登録の行 (全 13,351 行中 142 行) は 0 人なのでソロに数えない。
+            // 分からないものを数えると、古い公演ほどソロ枠が多いという嘘になる。
+            if let [only] = performers[..] {
                 solos += 1;
+                if leads.contains(&only) {
+                    lead_solos += 1;
+                }
             }
 
-            for &performer in &snap.performers_by_item[item as usize] {
+            for &performer in performers {
                 *sung_by_idol.entry(performer).or_insert(0) += 1;
             }
         }
 
         song_counts.push(count);
         solo_counts.push(solos);
+        // 主演が立っていない公演の 0 本を混ぜない (lead_songs と同じ扱い)。
+        if !leads.is_empty() {
+            lead_solo_counts.push(lead_solos);
+        }
         // 数えるのは出演者表に役割がある人だけ。セトリにしか出てこない人 (ゲスト等) は
         // 主演かどうかが決まらないので、どちらの標本にも入れない。歌っていない出演者は
         // 0 曲として数える — 落とすと「出たのに 1 曲も歌わなかった」が見えなくなる。
@@ -223,6 +244,7 @@ pub fn setlist_shape(snap: &Snapshot, shows: &[u32], top: usize) -> SetlistShape
         encore: ranked(snap, encore, top),
         closers: ranked(snap, closers, top),
         solo_slots: Spread::of(solo_counts),
+        lead_solo_slots: Spread::of(lead_solo_counts),
         lead_songs: Spread::of(lead.songs),
         member_songs: Spread::of(member.songs),
         lead_share_percent: Spread::of(lead.shares),
@@ -375,6 +397,7 @@ pub fn song_position_profile(snap: &Snapshot, song_id: &str) -> SongPositionProf
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::domain::song_list_queries::is_solo_song;
     use std::sync::OnceLock;
 
     fn snap() -> &'static Snapshot {
@@ -433,6 +456,36 @@ mod tests {
             "割合のほうが散らばっている: 曲数 {count:?} / 割合 {share:?}"
         );
         assert!(share.max <= 100, "100 % を超えている: {share:?}");
+    }
+
+    #[test]
+    fn ソロ枠はその日_1_人で歌った曲だけを数える() {
+        let snap = snap();
+        // 14thLIVE DAY2。原唱者ベースなら 15 本になるが、実際のソロ枠は 7 本。
+        let day2 = snap.show_index_by_id["sh_the_idolm@ster_million_live_14thlive_2"];
+        let shape = setlist_shape(snap, &[day2], 5);
+        assert_eq!(shape.solo_slots.as_ref().unwrap().max, 7, "{:?}", shape.solo_slots);
+
+        // 原唱者ベースの本数 (= 以前の数え方) と食い違うことを明示的に固定する。
+        // 一致してしまったら、この公演がテストの題材として役に立たなくなっている。
+        let by_artist = snap.setlist_items_by_show[day2 as usize]
+            .iter()
+            .filter(|&&i| is_solo_song(snap, snap.setlist_items[i as usize].song))
+            .count();
+        assert!(by_artist > 7, "原唱者ベースは {by_artist} 本で、歌唱者ベースより多いはず");
+    }
+
+    #[test]
+    fn 主演公演のソロ枠はすべて主演のもの() {
+        let snap = snap();
+        let shape = setlist_shape(snap, &lead_shows(snap), 5);
+        // 実データでは全公演一致する。崩れたら「主演以外もソロを歌う形式」に
+        // 変わったということなので、予想の前提として気づけるようにしておく。
+        assert_eq!(
+            shape.solo_slots, shape.lead_solo_slots,
+            "主演以外のソロ枠が現れた: {:?} / {:?}",
+            shape.solo_slots, shape.lead_solo_slots
+        );
     }
 
     #[test]
