@@ -20,6 +20,7 @@ use crate::domain::event_detail_queries::{
     VenueDirectoryRecord,
 };
 use crate::domain::setlist_lineup::{self, Lineup};
+use crate::domain::screen_composition::SetlistDisplayMode;
 use crate::domain::setlist_row_meta::{setlist_row_meta, SetlistRowMetaRecord};
 use crate::domain::setlist_sections;
 use std::collections::{BTreeSet, HashMap};
@@ -194,9 +195,10 @@ impl SnapshotStore {
         &self,
         show_id: String,
         mode: PerformerNameMode,
+        display_mode: SetlistDisplayMode,
     ) -> Result<Vec<SetlistRowMetaRecord>, SnapshotError> {
         let snap = self.current()?;
-        Ok(setlist_row_meta(&snap, &show_id, mode))
+        Ok(setlist_row_meta(&snap, &show_id, mode, display_mode))
     }
 
     /// セトリ項目 id → 歌唱メンバー行 (N+1 防止の一括取得)。

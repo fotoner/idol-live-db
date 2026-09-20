@@ -19,6 +19,7 @@ use crate::domain::event_detail_queries::{
 };
 use crate::domain::performance_gap::performance_gap;
 use crate::domain::performer_label::{setlist_performer_label, SetlistNaming};
+use crate::domain::screen_composition::{setlist_history_badges, SetlistDisplayMode};
 use crate::domain::setlist_lineup::is_full_cast;
 use crate::domain::snapshot::Snapshot;
 use crate::domain::unit_queries::exact_matching_unit_names;
@@ -44,6 +45,14 @@ pub struct SetlistRowMetaRecord {
     pub previous_date: Option<String>,
     /// `3 年 10 か月ぶり`。1 年に満たない間隔と初披露では `None`。
     pub since_label: Option<String>,
+    /// **行に出す披露履歴の札**(詳細表示のときだけ中身が入る)。
+    ///
+    /// 上の 4 つ (`ordinal` / `ordinal_label` / `previous_date` / `since_label`) は
+    /// 生の事実で、そこから「どのモードでどれを出すか」を決めた結果がこれ。
+    /// **画面はこれを並べるだけにする** — モードを見て出し分ける条件を
+    /// Swift / Kotlin に書くと、同じ条件が 2 か所に増える
+    /// (`crate::domain::screen_composition::setlist_history_badges`)。
+    pub history_badges: Vec<String>,
 }
 
 /// その公演で「ユニット単独曲」として披露されたユニット (スナップショット添字)。
@@ -79,6 +88,7 @@ pub fn setlist_row_meta(
     snap: &Snapshot,
     show_id: &str,
     mode: PerformerNameMode,
+    display_mode: SetlistDisplayMode,
 ) -> Vec<SetlistRowMetaRecord> {
     let Some(&show) = snap.show_index_by_id.get(show_id) else { return vec![] };
     let is_character_live =
@@ -114,6 +124,12 @@ pub fn setlist_row_meta(
                     .collect(),
             });
             let gap = performance_gap(snap, item);
+            let history_badges = setlist_history_badges(
+                display_mode,
+                gap.is_first,
+                &gap.ordinal_label,
+                gap.since_label.as_deref(),
+            );
 
             SetlistRowMetaRecord {
                 item_id: row.id.clone(),
@@ -124,6 +140,7 @@ pub fn setlist_row_meta(
                 ordinal_label: gap.ordinal_label,
                 is_first_performance: gap.is_first,
                 previous_date: gap.previous_date,
+                history_badges,
                 since_label: gap.since_label,
             }
         })
@@ -156,7 +173,7 @@ mod tests {
             .unwrap_or_else(|| panic!("{song_id} の {date} の披露"));
         let show = &snap.shows[snap.setlist_items[item as usize].show as usize];
         let item_id = snap.setlist_items[item as usize].id.clone();
-        setlist_row_meta(snap, &show.id, PerformerNameMode::IdolOnly)
+        setlist_row_meta(snap, &show.id, PerformerNameMode::IdolOnly, SetlistDisplayMode::Detailed)
             .into_iter()
             .find(|m| m.item_id == item_id)
             .expect("行は返る")
@@ -202,7 +219,7 @@ mod tests {
                 continue;
             }
             let show_id = &snap.shows[show as usize].id;
-            let metas = setlist_row_meta(snap, show_id, PerformerNameMode::IdolOnly);
+            let metas = setlist_row_meta(snap, show_id, PerformerNameMode::IdolOnly, SetlistDisplayMode::Detailed);
             for (&item, meta) in snap.setlist_items_by_show[show as usize].iter().zip(&metas) {
                 let row = &snap.setlist_items[item as usize];
                 let song = &snap.songs[row.song as usize];
@@ -229,7 +246,7 @@ mod tests {
             let show_id = &snap.shows[show as usize].id;
             for (&item, meta) in snap.setlist_items_by_show[show as usize]
                 .iter()
-                .zip(setlist_row_meta(snap, show_id, PerformerNameMode::IdolOnly))
+                .zip(setlist_row_meta(snap, show_id, PerformerNameMode::IdolOnly, SetlistDisplayMode::Detailed))
             {
                 let row = &snap.setlist_items[item as usize];
                 let song = &snap.songs[row.song as usize];
@@ -254,6 +271,38 @@ mod tests {
         assert!(inferred < 50, "推論で出る行が多すぎる: {inferred}");
     }
 
+    /// 札が出るのは詳細表示だけ。普通表示・シンプル表示では 1 行も札を持たない。
+    #[test]
+    fn 札は詳細表示でだけ出る() {
+        let snap = snap();
+        let show = &snap.shows[snap.setlist_items[snap.song_index_by_id
+            .get("765as_初恋_一章_片想いの桜")
+            .map(|&si| snap.setlist_items_by_song[si as usize][0])
+            .expect("初恋には披露がある") as usize]
+            .show as usize]
+            .id;
+        for quiet in [SetlistDisplayMode::Simple, SetlistDisplayMode::Normal] {
+            let metas = setlist_row_meta(snap, show, PerformerNameMode::IdolOnly, quiet);
+            assert!(!metas.is_empty());
+            assert!(
+                metas.iter().all(|m| m.history_badges.is_empty()),
+                "{quiet:?} で札が出ている"
+            );
+        }
+        let detailed =
+            setlist_row_meta(snap, show, PerformerNameMode::IdolOnly, SetlistDisplayMode::Detailed);
+        assert!(
+            detailed.iter().all(|m| !m.history_badges.is_empty()),
+            "詳細表示では全行が何かしらの札を持つ (初披露 か N 回目)"
+        );
+        // 初披露の行は「初披露」1 つだけ (「1 回目」を並べない)。
+        for m in &detailed {
+            if m.is_first_performance {
+                assert_eq!(m.history_badges, vec!["初披露".to_string()]);
+            }
+        }
+    }
+
     /// 行の並びはセトリと同じ (呼び出し側が zip できる)。
     #[test]
     fn 行の並びはセトリと同じ() {
@@ -266,11 +315,11 @@ mod tests {
             .map(|(_, s)| s.id.clone())
             .expect("20 曲以上のセトリがある");
         let entries = detail::setlist(snap, &show);
-        let metas = setlist_row_meta(snap, &show, PerformerNameMode::IdolOnly);
+        let metas = setlist_row_meta(snap, &show, PerformerNameMode::IdolOnly, SetlistDisplayMode::Detailed);
         assert_eq!(entries.len(), metas.len());
         for (e, m) in entries.iter().zip(&metas) {
             assert_eq!(e.id, m.item_id);
         }
-        assert!(setlist_row_meta(snap, "存在しない公演", PerformerNameMode::IdolOnly).is_empty());
+        assert!(setlist_row_meta(snap, "存在しない公演", PerformerNameMode::IdolOnly, SetlistDisplayMode::Normal).is_empty());
     }
 }

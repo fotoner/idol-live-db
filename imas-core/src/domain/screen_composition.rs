@@ -20,6 +20,246 @@
 //! - 画面遷移の実行 (`action` は「押されたら何をしたいか」の**種類**だけを返し、
 //!   実際の遷移は各OSが自分の navigation で行う)
 
+// =============================================================================
+// セトリをどれだけ詳しく出すか
+// =============================================================================
+
+/// セトリの詳しさ。**「どのモードで何を出すか」の判断はこの enum が持つ。**
+///
+/// # なぜコアにあるか
+///
+/// 以前は `setlist_simple_mode` という Bool 1 つで、判断は
+/// 「シンプルなら簡易行、そうでなければ詳細行」と各 OS の View に書いてあった。
+/// 3 値になると「詳細表示のときだけ披露履歴の札を出す」という条件が増え、
+/// これを Swift と Kotlin の両方に書けば必ずいつか片方だけ直る
+/// (`performer_label` で実際に起きた)。出すものの決定は [`setlist_history_badges`]
+/// に集約し、各 OS は返った札を並べるだけにする。
+///
+/// 並びは「情報が少ない順」。設定の選択肢もこの順で出す。
+#[derive(uniffi::Enum, Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SetlistDisplayMode {
+    /// 曲名と歌唱者だけ。20 曲超のセトリを 1 枚のスクショに収めるための形。
+    Simple,
+    /// 既定。ジャケ・歌唱者のアバター・カバーの札・👍。
+    Normal,
+    /// 普通表示に**披露の履歴**(初披露 / いつぶり / 通算何回目) を足したもの。
+    Detailed,
+}
+
+/// モード 1 つぶんの選択肢。切替 UI はこれを並べるだけにする。
+#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
+pub struct SetlistDisplayModeOption {
+    pub mode: SetlistDisplayMode,
+    /// 保存に使う文字列。**序数で保存しない** (並べ替えた瞬間に化ける)。
+    pub raw: String,
+    pub label: String,
+}
+
+impl SetlistDisplayMode {
+    /// 保存値。iOS の UserDefaults / Android の SharedPreferences で同じ文字列を使う。
+    pub fn raw(self) -> &'static str {
+        match self {
+            Self::Simple => "simple",
+            Self::Normal => "normal",
+            Self::Detailed => "detailed",
+        }
+    }
+
+    /// 切替 UI に出す文言。
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Simple => "シンプル表示",
+            Self::Normal => "普通表示",
+            Self::Detailed => "詳細表示",
+        }
+    }
+
+    /// 既定。**これまで Bool が false だった人の見え方と同じ**。
+    pub fn default_mode() -> Self {
+        Self::Normal
+    }
+
+    /// 切替 UI に出す順 (情報が少ない順)。
+    pub fn all() -> Vec<Self> {
+        vec![Self::Simple, Self::Normal, Self::Detailed]
+    }
+
+    /// 保存値からの復元。未知の値・未設定は既定。
+    pub fn from_raw(raw: Option<&str>) -> Self {
+        raw.and_then(|r| Self::all().into_iter().find(|m| m.raw() == r))
+            .unwrap_or_else(Self::default_mode)
+    }
+
+    /// 曲名と歌唱者だけに絞る形か (行の作りそのものが変わる)。
+    ///
+    /// **これは「どちらの行を描くか」で、判断ではない。** 出す/出さないの判断は
+    /// [`setlist_history_badges`] が持つ。
+    pub fn is_compact(self) -> bool {
+        self == Self::Simple
+    }
+
+    /// 披露の履歴 (初披露 / いつぶり / 通算何回目) を出すか。
+    pub fn shows_performance_history(self) -> bool {
+        self == Self::Detailed
+    }
+}
+
+/// 切替 UI に並べる選択肢一式 (順・保存値・文言)。
+pub fn setlist_display_modes() -> Vec<SetlistDisplayModeOption> {
+    SetlistDisplayMode::all()
+        .into_iter()
+        .map(|mode| SetlistDisplayModeOption {
+            mode,
+            raw: mode.raw().to_string(),
+            label: mode.label().to_string(),
+        })
+        .collect()
+}
+
+/// 保存されている値からモードを決める。**移行の判断もここ 1 箇所。**
+///
+/// 3 値にする前は `setlist_simple_mode` という Bool だけを保存していた。
+/// 新しい鍵がまだ書かれていない端末では、その Bool を読んで
+/// `true` → シンプル表示 / `false` → 普通表示 に落とす。
+/// 一度でもモードを選んだ端末は新しい鍵が正で、Bool は見ない。
+///
+/// これを各 OS に書くと「Android だけ移行しそこねて全員が普通表示に戻る」類の
+/// ズレになる。判断は 1 本。
+pub fn setlist_display_mode_from_stored(
+    raw: Option<&str>,
+    legacy_simple_mode: bool,
+) -> SetlistDisplayMode {
+    match raw.filter(|r| !r.is_empty()) {
+        Some(r) => SetlistDisplayMode::from_raw(Some(r)),
+        None if legacy_simple_mode => SetlistDisplayMode::Simple,
+        None => SetlistDisplayMode::default_mode(),
+    }
+}
+
+/// セトリ 1 行に添える披露履歴の札。詳細表示以外では**必ず空**。
+///
+/// 詳細表示では:
+/// - 初披露 … `初披露` だけ (「1 回目」は言わない)
+/// - それ以外 … `3 年 10 か月ぶり` (1 年以上空いたときだけ) と `4 回目`
+///
+/// 文言そのものは [`crate::domain::performance_gap`] と
+/// [`crate::domain::song_detail_queries::performance_ordinal_label`] が持つ。
+/// ここが決めるのは**どれをどの順で出すか**だけ。
+pub fn setlist_history_badges(
+    mode: SetlistDisplayMode,
+    is_first_performance: bool,
+    ordinal_label: &str,
+    since_label: Option<&str>,
+) -> Vec<String> {
+    if !mode.shows_performance_history() {
+        return Vec::new();
+    }
+    if is_first_performance {
+        return vec![ordinal_label.to_string()];
+    }
+    since_label
+        .into_iter()
+        .map(str::to_string)
+        .chain(std::iter::once(ordinal_label.to_string()))
+        .collect()
+}
+
+#[cfg(test)]
+mod setlist_display_mode_tests {
+    use super::*;
+
+    /// 札が出るのは詳細表示だけ。普通表示とシンプル表示では 1 つも出ない。
+    #[test]
+    fn only_the_detailed_mode_carries_history_badges() {
+        for mode in [SetlistDisplayMode::Simple, SetlistDisplayMode::Normal] {
+            assert!(
+                setlist_history_badges(mode, false, "4 回目", Some("3 年 10 か月ぶり")).is_empty(),
+                "{mode:?} で札が出ている"
+            );
+            assert!(setlist_history_badges(mode, true, "初披露", None).is_empty());
+        }
+    }
+
+    #[test]
+    fn the_detailed_mode_puts_the_gap_before_the_count() {
+        assert_eq!(
+            setlist_history_badges(
+                SetlistDisplayMode::Detailed,
+                false,
+                "4 回目",
+                Some("3 年 10 か月ぶり")
+            ),
+            vec!["3 年 10 か月ぶり".to_string(), "4 回目".to_string()]
+        );
+        // 1 年に満たない間隔では「いつぶり」を言わない (回数だけ)。
+        assert_eq!(
+            setlist_history_badges(SetlistDisplayMode::Detailed, false, "9 回目", None),
+            vec!["9 回目".to_string()]
+        );
+    }
+
+    /// 初披露は「初披露」1 つ。「初披露」と「1 回目」を並べない。
+    #[test]
+    fn the_first_performance_says_it_once() {
+        assert_eq!(
+            setlist_history_badges(SetlistDisplayMode::Detailed, true, "初披露", None),
+            vec!["初披露".to_string()]
+        );
+    }
+
+    /// Bool 1 つだった頃の設定が壊れない。
+    #[test]
+    fn the_old_boolean_setting_still_decides_until_a_mode_is_picked() {
+        assert_eq!(
+            setlist_display_mode_from_stored(None, true),
+            SetlistDisplayMode::Simple
+        );
+        assert_eq!(
+            setlist_display_mode_from_stored(None, false),
+            SetlistDisplayMode::Normal,
+            "札が見えていた人も普通表示に落ちる (今回の意図)"
+        );
+        // 新しい鍵があれば Bool は見ない。
+        assert_eq!(
+            setlist_display_mode_from_stored(Some("detailed"), true),
+            SetlistDisplayMode::Detailed
+        );
+        // 空文字・未知の値は「まだ選んでいない」として扱う。
+        assert_eq!(
+            setlist_display_mode_from_stored(Some(""), true),
+            SetlistDisplayMode::Simple
+        );
+        assert_eq!(
+            setlist_display_mode_from_stored(Some("なにこれ"), false),
+            SetlistDisplayMode::Normal
+        );
+    }
+
+    /// 選択肢は情報が少ない順・保存値は序数でない。
+    #[test]
+    fn the_options_are_ordered_and_stored_by_name() {
+        let options = setlist_display_modes();
+        assert_eq!(
+            options.iter().map(|o| o.raw.as_str()).collect::<Vec<_>>(),
+            vec!["simple", "normal", "detailed"]
+        );
+        assert_eq!(
+            options.iter().map(|o| o.label.as_str()).collect::<Vec<_>>(),
+            vec!["シンプル表示", "普通表示", "詳細表示"]
+        );
+        for o in &options {
+            assert_eq!(SetlistDisplayMode::from_raw(Some(&o.raw)), o.mode);
+        }
+    }
+
+    #[test]
+    fn only_the_simple_mode_is_compact() {
+        assert!(SetlistDisplayMode::Simple.is_compact());
+        assert!(!SetlistDisplayMode::Normal.is_compact());
+        assert!(!SetlistDisplayMode::Detailed.is_compact());
+    }
+}
+
 /// 行の値の見せ方。
 #[derive(uniffi::Enum, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RowStyle {
