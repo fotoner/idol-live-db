@@ -102,6 +102,16 @@ pub struct SetlistShape {
     pub closers: Vec<SlotTally>,
     /// 1 公演あたりのソロ枠 (原唱者が 1 人の曲) の本数。
     pub solo_slots: Option<Spread>,
+    /// 主演 (`cast_role` が `lead`) 1 人が歌った曲数。主演が 2 人いる公演なら値も 2 つ入る。
+    ///
+    /// 主演が立っていない公演は標本に入らないので、`samples` は [`Self::shows`] と一致しない。
+    /// 一致しない事実こそが「主演の記録がどれだけあるか」なので、埋めも丸めもしない。
+    pub lead_songs: Option<Spread>,
+    /// 主演以外の出演者 (`cast_role` が `member`) 1 人が歌った曲数。
+    ///
+    /// `lead_songs` だけでは「19 曲」が多いのか並なのか読めない。比較対象を同じ標本から
+    /// 出して必ず添える (呼び手が別ツールで数え直すと、数え方がそこで枝分かれする)。
+    pub member_songs: Option<Spread>,
 }
 
 impl SetlistShape {
@@ -123,6 +133,8 @@ pub fn setlist_shape(snap: &Snapshot, shows: &[u32], top: usize) -> SetlistShape
 
     let mut song_counts: Vec<u32> = Vec::new();
     let mut solo_counts: Vec<u32> = Vec::new();
+    let mut lead_counts: Vec<u32> = Vec::new();
+    let mut member_counts: Vec<u32> = Vec::new();
     // 区切り → その区切りがあった公演ごとの曲数
     let mut sections: HashMap<Option<String>, Vec<u32>> = HashMap::new();
     let mut openers: HashMap<u32, u32> = HashMap::new();
@@ -139,6 +151,7 @@ pub fn setlist_shape(snap: &Snapshot, shows: &[u32], top: usize) -> SetlistShape
         let (mut first, mut last, mut count) = (None, None, 0u32);
         let mut per_section: HashMap<Option<String>, u32> = HashMap::new();
         let mut solos = 0u32;
+        let mut sung_by_idol: HashMap<u32, u32> = HashMap::new();
 
         for (_, item) in numbered_setlist(snap, show) {
             let it = &snap.setlist_items[item as usize];
@@ -156,10 +169,25 @@ pub fn setlist_shape(snap: &Snapshot, shows: &[u32], top: usize) -> SetlistShape
             if solo {
                 solos += 1;
             }
+
+            for &performer in &snap.performers_by_item[item as usize] {
+                *sung_by_idol.entry(performer).or_insert(0) += 1;
+            }
         }
 
         song_counts.push(count);
         solo_counts.push(solos);
+        // 数えるのは出演者表に役割がある人だけ。セトリにしか出てこない人 (ゲスト等) は
+        // 主演かどうかが決まらないので、どちらの標本にも入れない。歌っていない出演者は
+        // 0 曲として数える — 落とすと「出たのに 1 曲も歌わなかった」が見えなくなる。
+        for link in &snap.cast_by_show[show as usize] {
+            let sung = sung_by_idol.get(&link.idol).copied().unwrap_or(0);
+            match link.cast_role.as_str() {
+                "lead" => lead_counts.push(sung),
+                "member" => member_counts.push(sung),
+                _ => {}
+            }
+        }
         for (label, n) in per_section {
             sections.entry(label).or_default().push(n);
         }
@@ -187,6 +215,8 @@ pub fn setlist_shape(snap: &Snapshot, shows: &[u32], top: usize) -> SetlistShape
         encore: ranked(snap, encore, top),
         closers: ranked(snap, closers, top),
         solo_slots: Spread::of(solo_counts),
+        lead_songs: Spread::of(lead_counts),
+        member_songs: Spread::of(member_counts),
     }
 }
 
@@ -328,6 +358,50 @@ mod tests {
         (0..snap.shows.len() as u32)
             .filter(|&s| snap.cast_by_show[s as usize].iter().any(|l| l.cast_role == "lead"))
             .collect()
+    }
+
+    #[test]
+    fn 主演は他の出演者よりはっきり多く歌う() {
+        let snap = snap();
+        let shape = setlist_shape(snap, &lead_shows(snap), 5);
+        let lead = shape.lead_songs.clone().expect("主演公演を標本にしたので主演の標本がある");
+        let member = shape.member_songs.clone().expect("同じ公演の他の出演者も標本になる");
+
+        // 主演は「その公演の主役」なので、最も歌わなかった主演でも
+        // 他の出演者の中央値を上回る。逆転していたら cast_role か歌唱者データが壊れている。
+        assert!(
+            lead.min > member.median,
+            "主演の最小 {} が他の中央値 {} 以下: {lead:?} / {member:?}",
+            lead.min,
+            member.median
+        );
+        // 1 公演に主演が 2 人いる形式なので、標本は公演数より多くなる。
+        assert!(lead.samples >= shape.shows(), "{lead:?} vs shows={}", shape.shows());
+    }
+
+    #[test]
+    fn 主演がいない公演を混ぜても主演の標本は増えない() {
+        let snap = snap();
+        let lead_only = lead_shows(snap);
+        let mut mixed = lead_only.clone();
+        // 主演が立っていない公演を適当に足す。lead_songs は増えず、member_songs だけ増える。
+        mixed.extend(
+            (0..snap.shows.len() as u32)
+                .filter(|&s| {
+                    !snap.cast_by_show[s as usize].iter().any(|l| l.cast_role == "lead")
+                        && !snap.setlist_items_by_show[s as usize].is_empty()
+                        && !snap.cast_by_show[s as usize].is_empty()
+                })
+                .take(20),
+        );
+
+        let a = setlist_shape(snap, &lead_only, 5);
+        let b = setlist_shape(snap, &mixed, 5);
+        assert_eq!(a.lead_songs, b.lead_songs, "主演のいない公演が主演の標本に混ざっている");
+        assert!(
+            b.member_songs.as_ref().unwrap().samples > a.member_songs.as_ref().unwrap().samples,
+            "出演者側の標本は増えるはず"
+        );
     }
 
     #[test]

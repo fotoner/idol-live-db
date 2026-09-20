@@ -55,7 +55,8 @@ pub fn catalog() -> Vec<ToolSpec> {
         spec(
             "setlist_shape",
             "公演群のセトリの「型」。曲数・区切りごとの曲数・1 曲目 / アンコール / 締めに\
-             来やすい曲・ソロ枠の本数を、指定した公演の集合について返す。\
+             来やすい曲・ソロ枠の本数・出演者 1 人あたりの歌唱曲数 (主演 lead_songs と\
+             それ以外 member_songs) を、指定した公演の集合について返す。\
              絞り込みの軸は list_shows と同じ。\
              **これは予想ではなく過去の実績**で、標本にした公演数 (shows) が必ず添うので、\
              少ない標本から出た数字かどうかは呼び手が見て判断すること。",
@@ -216,6 +217,10 @@ fn setlist_shape(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<
     o.list("encore", slot_rows(snap, &s.encore));
     o.list("closers", slot_rows(snap, &s.closers));
     o.opt("solo_slots", s.solo_slots.as_ref().map(spread_json));
+    // 主演が何曲歌うかは「主演公演のセトリ」を尋ねられたときの芯になる数字。
+    // 比較対象 (member_songs) と対にして出す — 片方だけでは多い / 少ないが読めない。
+    o.opt("lead_songs", s.lead_songs.as_ref().map(spread_json));
+    o.opt("member_songs", s.member_songs.as_ref().map(spread_json));
     Ok(o.value())
 }
 
@@ -423,6 +428,29 @@ mod tests {
         assert!(!shaped["openers"].as_array().unwrap().is_empty(), "{shaped}");
         assert!(!shaped["closers"].as_array().unwrap().is_empty(), "{shaped}");
         assert!(shaped["solo_slots"]["max"].as_u64().unwrap() >= 1, "{shaped}");
+    }
+
+    #[test]
+    fn 主演の歌唱曲数は比較対象と対で返る() {
+        let shaped = call("setlist_shape", json!({ "cast_role": "lead" }));
+        let lead = &shaped["lead_songs"];
+        let member = &shaped["member_songs"];
+        assert!(lead.is_object() && member.is_object(), "対で返っていない: {shaped}");
+        // 「19 曲」が多いのかは比較対象があって初めて読める。片方だけ返す形にしない。
+        assert!(
+            lead["min"].as_u64().unwrap() > member["median"].as_u64().unwrap(),
+            "主演が他の出演者を上回らない: {shaped}"
+        );
+    }
+
+    #[test]
+    fn 主演の記録が無い集合では主演の欄ごと消える() {
+        // ソロ公演のような「出演者表はあるが主演が立っていない」集合。
+        let shaped = call("setlist_shape", json!({ "brand": "cg", "cast_role": "member" }));
+        assert!(shaped["member_songs"].is_object(), "{shaped}");
+        // null を置かずキーごと落とす (この DB の返し方の規約)。0 を返すと
+        // 「主演が 0 曲歌った」と読めてしまう。
+        assert!(shaped.get("lead_songs").is_none(), "主演の標本が無いのに欄がある: {shaped}");
     }
 
     #[test]
