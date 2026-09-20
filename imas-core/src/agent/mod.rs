@@ -17,11 +17,13 @@
 //! feature = "agent" でしかコンパイルされず、iOS/Android のバインディングには現れない。
 
 pub mod cli;
+pub mod lyrics_api;
 pub mod mcp;
 pub mod proposal_io;
 pub mod stdio;
 
 use crate::domain::agent_tools::{self, ToolError, ToolSpec};
+use crate::domain::lyrics_search;
 use crate::domain::proposal;
 use crate::domain::snapshot::Snapshot;
 use serde_json::Value;
@@ -61,6 +63,8 @@ impl Ctx {
 /// 出せるツールの一覧 (読み取り + 書き込み)。
 pub fn catalog(ctx: &Ctx) -> Vec<ToolSpec> {
     let mut all = agent_tools::tool_catalog();
+    // 歌詞検索はサーバを叩くので domain の call_tool には通らない (proposal と同じ扱い)。
+    all.extend(lyrics_search::lyrics_catalog());
     if ctx.allow_write {
         all.extend(proposal::proposal_catalog());
     }
@@ -75,6 +79,9 @@ pub fn dispatch(ctx: &Ctx, snap: &Snapshot, name: &str, args: &Value) -> Result<
             return Err(ToolError::UnknownTool(name.to_string()));
         }
         return proposal_io::run(ctx, name, args);
+    }
+    if lyrics_search::is_lyrics_tool(name) {
+        return lyrics_api::run(snap, args);
     }
     agent_tools::call_tool(snap, name, args, &ctx.today_key())
 }
