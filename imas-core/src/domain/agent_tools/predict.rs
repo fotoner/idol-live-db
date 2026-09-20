@@ -21,13 +21,13 @@
 //! 型の計算は `domain::setlist_shape`、共起は `domain::performance_stats`、
 //! 語彙の検査は `super::scope` / `super::vocab` が正本。
 
-use super::json::{brand_ref, listing, listing_with, Obj};
-use super::scope::{show_criteria, show_scope_schema, SHOW_SCOPE_ARGS};
+use super::json::{brand_ref, listing_with, Obj};
+use super::scope::{narrowing_hint, show_criteria, show_scope_schema, SHOW_SCOPE_ARGS};
 use super::{args, ToolError, ToolSpec};
 use crate::domain::event_detail_queries::show_presence;
 use crate::domain::event_grouping::is_upcoming_on;
 use crate::domain::setlist_shape::{self as shape, Phase};
-use crate::domain::show_list_filtering::filter_show_indexes;
+use crate::domain::show_list_filtering::{filter_show_indexes, ShowFilterCriteria};
 use crate::domain::snapshot::Snapshot;
 use serde_json::{json, Value};
 
@@ -114,11 +114,17 @@ fn spec(name: &str, description: &str, properties: Value, required: &[&str]) -> 
 
 /// 公演を絞る。`list_shows` と `setlist_shape` はここを通るので、
 /// 「一覧」と「型」が必ず同じ集合から出る。
-fn narrow_shows(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<Vec<u32>, ToolError> {
+fn narrow_shows(
+    snap: &Snapshot,
+    arguments: &Value,
+    today_key: &str,
+) -> Result<(Vec<u32>, ShowFilterCriteria), ToolError> {
     let mut allow: Vec<&str> = SHOW_SCOPE_ARGS.to_vec();
     allow.push("has_setlist");
     let criteria = show_criteria(snap, arguments, today_key, &allow)?;
-    Ok(filter_show_indexes(snap, &criteria))
+    // 条件も返すのは、0 件だったときに「どの軸が効いて 0 になったか」を
+    // 言うため。呼び手の引数から組み直すと、ほどき方が二重管理になる。
+    Ok((filter_show_indexes(snap, &criteria), criteria))
 }
 
 // =============================================================================
@@ -129,7 +135,7 @@ fn list_shows(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<Val
     use super::browse::{show_header, take};
 
     let limit = args::limit(arguments, 30, 200)?;
-    let shows = narrow_shows(snap, arguments, today_key)?;
+    let (shows, criteria) = narrow_shows(snap, arguments, today_key)?;
     let total = shows.len();
 
     let rows = take(shows, limit)
@@ -150,7 +156,13 @@ fn list_shows(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<Val
             o.value()
         })
         .collect();
-    Ok(listing("shows", total, rows))
+
+    let mut head = Obj::new();
+    if total == 0 {
+        // 空配列だけ返すと「そういう公演は無い」と書かれる。手がかりを先頭に置く。
+        head.put("no_hits", narrowing_hint(snap, &criteria));
+    }
+    Ok(listing_with(head, "shows", total, rows))
 }
 
 /// その公演でその役割だった人の名前。並びは `cast_by_show` の前計算順。
@@ -176,10 +188,15 @@ fn setlist_shape(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<
     // 件数ではなく「枠ごとの上位いくつ」なので鍵を limit と分ける
     // (同じ鍵にすると list_shows の limit と意味が混ざる)。丸め方は args と共通。
     let top = args::capped(arguments, "top", SLOT_TOP, 30)? as usize;
-    let shows = narrow_shows(snap, arguments, today_key)?;
+    let (shows, criteria) = narrow_shows(snap, arguments, today_key)?;
     let s = shape::setlist_shape(snap, &shows, top);
 
     let mut o = Obj::new();
+    // 条件に 1 本も当たらなかったときだけ。当たったがセトリが無い場合は
+    // shows_without_setlist がその事実を言うので、手がかりは要らない。
+    if shows.is_empty() {
+        o.put("no_hits", narrowing_hint(snap, &criteria));
+    }
     o.put("shows", json!(s.shows()));
     // 0 でも載せる。落とすと「条件に当たった公演は全部セトリがあった」と読める。
     o.put("shows_without_setlist", json!(s.shows_without_setlist));
@@ -428,6 +445,46 @@ mod tests {
         assert!(!shaped["openers"].as_array().unwrap().is_empty(), "{shaped}");
         assert!(!shaped["closers"].as_array().unwrap().is_empty(), "{shaped}");
         assert!(shaped["solo_slots"]["max"].as_u64().unwrap() >= 1, "{shaped}");
+    }
+
+    #[test]
+    fn 空振りは外すべき軸を名指しで返す() {
+        // 伊吹翼に主演公演はまだ無い (「翼が主演ならどんなセトリか」の出発点)。
+        let out = call("list_shows", json!({ "idol_id": "ml_伊吹翼", "cast_role": "lead" }));
+        assert_eq!(out["total"].as_u64().unwrap(), 0, "{out}");
+        let hint = &out["no_hits"];
+        assert!(hint.is_object(), "0 件なのに手がかりが無い: {out}");
+
+        let relax: Vec<(&str, u64)> = hint["relax_one"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|r| (r["drop"].as_str().unwrap(), r["total"].as_u64().unwrap()))
+            .collect();
+        // cast_role を外せば翼の出演公演、idol_id を外せば主演公演が出る。
+        // どちらも 0 件ではないので、「翼という人がいない」わけでも
+        // 「主演という概念が無い」わけでもないことが 1 回で分かる。
+        assert!(relax.iter().any(|(d, n)| *d == "cast_role" && *n > 0), "{out}");
+        assert!(relax.iter().any(|(d, n)| *d == "idol_id" && *n > 0), "{out}");
+        assert_eq!(
+            hint["applied"].as_array().unwrap().len(),
+            2,
+            "効いている軸だけを並べる: {out}"
+        );
+    }
+
+    #[test]
+    fn 当たったときは手がかりを付けない() {
+        let out = call("list_shows", json!({ "cast_role": "lead" }));
+        assert!(out["total"].as_u64().unwrap() > 0, "{out}");
+        assert!(out.get("no_hits").is_none(), "当たっているのに手がかりが付く: {out}");
+    }
+
+    #[test]
+    fn 型のツールでも空振りに手がかりが付く() {
+        let out = call("setlist_shape", json!({ "idol_id": "ml_伊吹翼", "cast_role": "lead" }));
+        assert_eq!(out["shows"].as_u64().unwrap(), 0, "{out}");
+        assert!(out["no_hits"].is_object(), "{out}");
     }
 
     #[test]
