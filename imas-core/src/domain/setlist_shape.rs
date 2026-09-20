@@ -141,10 +141,8 @@ pub fn setlist_shape(snap: &Snapshot, shows: &[u32], top: usize) -> SetlistShape
 
     let mut song_counts: Vec<u32> = Vec::new();
     let mut solo_counts: Vec<u32> = Vec::new();
-    let mut lead_counts: Vec<u32> = Vec::new();
-    let mut member_counts: Vec<u32> = Vec::new();
-    let mut lead_shares: Vec<u32> = Vec::new();
-    let mut member_shares: Vec<u32> = Vec::new();
+    let mut lead = RoleTally::default();
+    let mut member = RoleTally::default();
     // 区切り → その区切りがあった公演ごとの曲数
     let mut sections: HashMap<Option<String>, Vec<u32>> = HashMap::new();
     let mut openers: HashMap<u32, u32> = HashMap::new();
@@ -191,18 +189,12 @@ pub fn setlist_shape(snap: &Snapshot, shows: &[u32], top: usize) -> SetlistShape
         // 主演かどうかが決まらないので、どちらの標本にも入れない。歌っていない出演者は
         // 0 曲として数える — 落とすと「出たのに 1 曲も歌わなかった」が見えなくなる。
         for link in &snap.cast_by_show[show as usize] {
-            let sung = sung_by_idol.get(&link.idol).copied().unwrap_or(0);
-            match link.cast_role.as_str() {
-                "lead" => {
-                    lead_counts.push(sung);
-                    lead_shares.push(percent(sung, count));
-                }
-                "member" => {
-                    member_counts.push(sung);
-                    member_shares.push(percent(sung, count));
-                }
-                _ => {}
-            }
+            let tally = match link.cast_role.as_str() {
+                "lead" => &mut lead,
+                "member" => &mut member,
+                _ => continue,
+            };
+            tally.push(sung_by_idol.get(&link.idol).copied().unwrap_or(0), count);
         }
         for (label, n) in per_section {
             sections.entry(label).or_default().push(n);
@@ -231,10 +223,26 @@ pub fn setlist_shape(snap: &Snapshot, shows: &[u32], top: usize) -> SetlistShape
         encore: ranked(snap, encore, top),
         closers: ranked(snap, closers, top),
         solo_slots: Spread::of(solo_counts),
-        lead_songs: Spread::of(lead_counts),
-        member_songs: Spread::of(member_counts),
-        lead_share_percent: Spread::of(lead_shares),
-        member_share_percent: Spread::of(member_shares),
+        lead_songs: Spread::of(lead.songs),
+        member_songs: Spread::of(member.songs),
+        lead_share_percent: Spread::of(lead.shares),
+        member_share_percent: Spread::of(member.shares),
+    }
+}
+
+/// 役割ごとの標本。曲数と割合を必ず対で積む — 別々の Vec に積むと、片方だけ
+/// 積み忘れても動いてしまい、同じ標本から出したはずの数字が食い違う。
+#[derive(Default)]
+struct RoleTally {
+    songs: Vec<u32>,
+    shares: Vec<u32>,
+}
+
+impl RoleTally {
+    /// `sung` = その人が歌った曲数、`total` = その公演の全曲数。
+    fn push(&mut self, sung: u32, total: u32) {
+        self.songs.push(sung);
+        self.shares.push(percent(sung, total));
     }
 }
 

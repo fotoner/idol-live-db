@@ -127,35 +127,44 @@ pub fn show_criteria(
 /// 軸を 1 つずつ外して件数を測る。2 つ以上外さないと当たらない場合は `relax_one` が
 /// 空になり、それ自体が「組み合わせが厳しすぎる」という答えになる。
 pub fn narrowing_hint(snap: &Snapshot, c: &ShowFilterCriteria) -> Value {
-    /// 名前・その軸が効いているか・外し方。`when` と `has_setlist` も入れる
-    /// (どちらも単独で 0 件を作れる)。順序は [`SHOW_SCOPE_ARGS`] に合わせる。
-    type Relaxable = (&'static str, fn(&ShowFilterCriteria) -> bool, fn(&mut ShowFilterCriteria));
+    /// 名前と外し方だけ。「その軸が効いているか」は外して条件が変わるかで判るので
+    /// 別に持たない (別に持つと外し方と食い違ってもコンパイルが通ってしまう)。
+    /// `when` と `has_setlist` も入れる (どちらも単独で 0 件を作れる)。
+    /// 順序は [`SHOW_SCOPE_ARGS`] に合わせる。
+    type Relaxable = (&'static str, fn(&mut ShowFilterCriteria));
     const RELAXABLE: [Relaxable; 11] = [
-        ("brand", |c| c.brand_id.is_some(), |c| c.brand_id = None),
-        ("year", |c| c.year.is_some(), |c| c.year = None),
-        ("venue", |c| c.venue.is_some(), |c| c.venue = None),
-        ("event_id", |c| c.event_id.is_some(), |c| c.event_id = None),
-        ("event_kind", |c| c.event_kind.is_some(), |c| c.event_kind = None),
-        ("idol_id", |c| c.idol.is_some(), |c| c.idol = None),
-        ("cast_role", |c| c.cast_role.is_some(), |c| c.cast_role = None),
-        ("min_cast", |c| c.min_cast.is_some(), |c| c.min_cast = None),
-        ("max_cast", |c| c.max_cast.is_some(), |c| c.max_cast = None),
-        ("when", |c| c.when != Timeframe::All, |c| c.when = Timeframe::All),
-        ("has_setlist", |c| c.has_setlist.is_some(), |c| c.has_setlist = None),
+        ("brand", |c| c.brand_id = None),
+        ("year", |c| c.year = None),
+        ("venue", |c| c.venue = None),
+        ("event_id", |c| c.event_id = None),
+        ("event_kind", |c| c.event_kind = None),
+        ("idol_id", |c| c.idol = None),
+        ("cast_role", |c| c.cast_role = None),
+        ("min_cast", |c| c.min_cast = None),
+        ("max_cast", |c| c.max_cast = None),
+        ("when", |c| c.when = Timeframe::All),
+        ("has_setlist", |c| c.has_setlist = None),
     ];
 
-    let applied: Vec<&Relaxable> = RELAXABLE.iter().filter(|(_, is_set, _)| is_set(c)).collect();
+    // 効いている軸 = 外すと条件が変わる軸。外した後の条件はここで 1 度だけ作る。
+    let applied: Vec<(&str, ShowFilterCriteria)> = RELAXABLE
+        .iter()
+        .filter_map(|&(name, clear)| {
+            let mut relaxed = c.clone();
+            clear(&mut relaxed);
+            (relaxed != *c).then_some((name, relaxed))
+        })
+        .collect();
+
     let mut o = Obj::new();
     o.put("message", NARROWED_TO_ZERO_MESSAGE);
-    o.list("applied", applied.iter().map(|(n, ..)| json!(n)).collect());
+    o.list("applied", applied.iter().map(|(name, _)| json!(name)).collect());
     o.list(
         "relax_one",
         applied
             .iter()
-            .filter_map(|(name, _, clear)| {
-                let mut relaxed = c.clone();
-                clear(&mut relaxed);
-                let total = filter_show_indexes(snap, &relaxed).len();
+            .filter_map(|(name, relaxed)| {
+                let total = filter_show_indexes(snap, relaxed).len();
                 (total > 0).then(|| {
                     let mut r = Obj::new();
                     r.put("drop", json!(name));
