@@ -56,7 +56,8 @@ pub fn catalog() -> Vec<ToolSpec> {
             "setlist_shape",
             "公演群のセトリの「型」。曲数・区切りごとの曲数・1 曲目 / アンコール / 締めに\
              来やすい曲・ソロ枠の本数・出演者 1 人あたりの歌唱曲数 (主演 lead_songs と\
-             それ以外 member_songs) を、指定した公演の集合について返す。\
+             それ以外 member_songs、および公演の全曲に対する割合 *_share_percent) を、\
+             指定した公演の集合について返す。\
              絞り込みの軸は list_shows と同じ。\
              **これは予想ではなく過去の実績**で、標本にした公演数 (shows) が必ず添うので、\
              少ない標本から出た数字かどうかは呼び手が見て判断すること。",
@@ -238,6 +239,10 @@ fn setlist_shape(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<
     // 比較対象 (member_songs) と対にして出す — 片方だけでは多い / 少ないが読めない。
     o.opt("lead_songs", s.lead_songs.as_ref().map(spread_json));
     o.opt("member_songs", s.member_songs.as_ref().map(spread_json));
+    // 曲数は公演の規模 (23 〜 39 曲) に引きずられる。割合も併せて出さないと、
+    // 規模の違う公演をまたいだ min / max が誤読される。
+    o.opt("lead_share_percent", s.lead_share_percent.as_ref().map(spread_json));
+    o.opt("member_share_percent", s.member_share_percent.as_ref().map(spread_json));
     Ok(o.value())
 }
 

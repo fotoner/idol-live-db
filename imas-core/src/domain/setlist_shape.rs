@@ -112,6 +112,14 @@ pub struct SetlistShape {
     /// `lead_songs` だけでは「19 曲」が多いのか並なのか読めない。比較対象を同じ標本から
     /// 出して必ず添える (呼び手が別ツールで数え直すと、数え方がそこで枝分かれする)。
     pub member_songs: Option<Spread>,
+    /// 主演 1 人が歌った曲が、その公演の全曲の何 % か。
+    ///
+    /// 曲数だけでは公演をまたいで比べられない。同じ「主演公演」でも全 23 曲の回と
+    /// 全 39 曲の回があり、23 曲中 14 曲と 39 曲中 17 曲では後者のほうが数は多いのに
+    /// 割合は小さい。**規模の違う公演を 1 つの Spread に混ぜた瞬間に絶対値は嘘になる**。
+    pub lead_share_percent: Option<Spread>,
+    /// 主演以外 1 人が歌った曲の割合 (%)。[`Self::lead_share_percent`] の比較対象。
+    pub member_share_percent: Option<Spread>,
 }
 
 impl SetlistShape {
@@ -135,6 +143,8 @@ pub fn setlist_shape(snap: &Snapshot, shows: &[u32], top: usize) -> SetlistShape
     let mut solo_counts: Vec<u32> = Vec::new();
     let mut lead_counts: Vec<u32> = Vec::new();
     let mut member_counts: Vec<u32> = Vec::new();
+    let mut lead_shares: Vec<u32> = Vec::new();
+    let mut member_shares: Vec<u32> = Vec::new();
     // 区切り → その区切りがあった公演ごとの曲数
     let mut sections: HashMap<Option<String>, Vec<u32>> = HashMap::new();
     let mut openers: HashMap<u32, u32> = HashMap::new();
@@ -183,8 +193,14 @@ pub fn setlist_shape(snap: &Snapshot, shows: &[u32], top: usize) -> SetlistShape
         for link in &snap.cast_by_show[show as usize] {
             let sung = sung_by_idol.get(&link.idol).copied().unwrap_or(0);
             match link.cast_role.as_str() {
-                "lead" => lead_counts.push(sung),
-                "member" => member_counts.push(sung),
+                "lead" => {
+                    lead_counts.push(sung);
+                    lead_shares.push(percent(sung, count));
+                }
+                "member" => {
+                    member_counts.push(sung);
+                    member_shares.push(percent(sung, count));
+                }
                 _ => {}
             }
         }
@@ -217,7 +233,18 @@ pub fn setlist_shape(snap: &Snapshot, shows: &[u32], top: usize) -> SetlistShape
         solo_slots: Spread::of(solo_counts),
         lead_songs: Spread::of(lead_counts),
         member_songs: Spread::of(member_counts),
+        lead_share_percent: Spread::of(lead_shares),
+        member_share_percent: Spread::of(member_shares),
     }
+}
+
+/// 割合 (%) を四捨五入で。`total` が 0 の公演は標本に入らないので 0 除算は起きないが、
+/// 呼び違いで落ちるより 0 を返すほうがよい (割合 0 % は「歌っていない」と同じ意味)。
+fn percent(part: u32, total: u32) -> u32 {
+    if total == 0 {
+        return 0;
+    }
+    (part * 100 + total / 2) / total
 }
 
 /// 回数の多い順。同数は曲 id 順で決定的に (`performance_stats` と同じ流儀)。
@@ -377,6 +404,38 @@ mod tests {
         );
         // 1 公演に主演が 2 人いる形式なので、標本は公演数より多くなる。
         assert!(lead.samples >= shape.shows(), "{lead:?} vs shows={}", shape.shows());
+    }
+
+    #[test]
+    fn 割合は公演の規模に左右されない() {
+        let snap = snap();
+        let shape = setlist_shape(snap, &lead_shows(snap), 5);
+        let songs = shape.song_count.clone().unwrap();
+        let share = shape.lead_share_percent.clone().unwrap();
+        let count = shape.lead_songs.clone().unwrap();
+
+        // 標本の公演は規模がばらつく (23 曲の回も 39 曲の回もある)。
+        assert!(songs.max > songs.min, "規模が一定なら割合を足す意味がない: {songs:?}");
+        // 曲数の散らばりより割合の散らばりのほうが小さい = 主演の重さは規模より安定している。
+        // ここが逆転するなら、割合ではなく曲数で読むべきということなので気づけるようにする。
+        let count_spread = count.max - count.min;
+        let share_spread = share.max - share.min;
+        assert!(
+            share_spread * 100 / share.median < count_spread * 100 / count.median,
+            "割合のほうが散らばっている: 曲数 {count:?} / 割合 {share:?}"
+        );
+        assert!(share.max <= 100, "100 % を超えている: {share:?}");
+    }
+
+    #[test]
+    fn 割合は四捨五入する() {
+        // 23 曲中 14 曲 = 60.87 % → 61
+        assert_eq!(percent(14, 23), 61);
+        // 39 曲中 17 曲 = 43.59 % → 44
+        assert_eq!(percent(17, 39), 44);
+        assert_eq!(percent(0, 23), 0);
+        assert_eq!(percent(23, 23), 100);
+        assert_eq!(percent(1, 0), 0, "0 除算で落ちない");
     }
 
     #[test]
