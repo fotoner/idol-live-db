@@ -5,7 +5,7 @@
 > データ所在・投入の全体像は [`DATA_PIPELINE.md`](DATA_PIPELINE.md)。
 > 規則を写経しない考え方は [`SHARED_CORE_STUDY.md`](SHARED_CORE_STUDY.md)。
 
-> 状態: **設計確定・実装中** (2026-09-19 着手)。数値と実例は実装完了後に §9 で埋める。
+> 状態: **実装済み** (2026-09-19 着手 / 2026-09-21 実測を §9 に記録)。Phase 2 (リモート公開) は未着手。
 
 ---
 
@@ -204,4 +204,67 @@ cargo build --release --features agent --bin imas-mcp
 
 ## 9. 実装の記録
 
-(実装完了後に追記: ツール一覧・実データでの応答例・Snapshot ロード時間・テストの本数)
+### 9.1 規模 (2026-09-21 実測)
+
+| | |
+|---|---|
+| ツール | **24 本** — 読み 18 / 書き (ドラフト) 6 |
+| Snapshot ロード | **91〜170 ms** (曲 3,068 / アイドル 394 / イベント 747)。プロセス起動ごとに 1 度 |
+| テスト | `agent_tools` 86 / `setlist_shape` 14 / `entity_resolution` + `proposal` 37。`cargo test --lib` 全体で 1,349 |
+
+読み: `resolve` `search` `get_idol` `get_song` `get_event` `get_show` `vocabulary`
+`list_idols` `list_songs` `list_events` `idol_songs` `song_performances` `setlist_diff`
+`stats` `list_shows` `setlist_shape` `song_position_profile` `co_performed_songs`
+書き: `propose_song` `propose_event` `propose_setlist` `propose_idol` `propose_fix` `check_proposals`
+
+### 9.2 実例: 「翼の主演公演が決まったらどんなセトリになるか」
+
+この問いに答えられるかがツール面の設計目標だった (§4.5 のとおり**予想そのものは返さない**。
+返すのは過去の事実で、組み立てるのは呼び手)。実際の 2 手:
+
+```
+list_shows --idol_id ml_伊吹翼 --cast_role lead
+→ {"no_hits": {"relax_one": [{"drop":"idol_id","total":8},
+                             {"drop":"cast_role","total":96}]},
+   "shows": [], "total": 0}
+```
+
+0 件だが、**主演公演は 8 本ある / 翼は 96 公演に出ている、その積が 0** と 1 回で分かる。
+空配列だけを返していた頃は「翼に主演公演が無い」のか「主演というデータが無い」のかを
+呼び手が区別できず、ここで会話が 1 往復むだになっていた (`scope::narrowing_hint`)。
+
+```
+setlist_shape --cast_role lead
+→ song_count           23 / 23 / 39      (min / median / max、標本 8 公演)
+  solo_slots            1 /  2 /  7
+  lead_solo_slots       1 /  2 /  7      ← ソロ枠は全部主演のもの
+  lead_songs           10 / 17 / 22      (標本 10 = 1 公演に主演 1〜2 人)
+  lead_share_percent   43 / 51 / 74
+  member_songs          6 /  8 / 10      (標本 103)
+  member_share_percent 17 / 35 / 43
+```
+
+**割合を必ず対で返す**のは、主演公演の規模が全 23 曲 (11th〜13th) と全 35〜39 曲 (14th) で
+割れているため。曲数だけを 1 つの Spread に混ぜると、23 曲中 14 曲 (61 %) と
+39 曲中 17 曲 (44 %) が「14 < 17」と読めて min / max が嘘になる。
+
+### 9.3 数え方で足をすくわれた所
+
+- **「ソロ枠」を原唱者で数えていた。** 14thLIVE DAY2 は原唱者が 1 人の曲が 15 本あるが、
+  実際にその日 1 人で立ったのは 7 本。差の 8 曲は `To...` を 3 人、`Be My Boy` を 2 人…と
+  **ソロ曲を複数人で歌った**回。ライブの枠の話をしているときは歌唱者で数える
+  (曲の性質は `song_list_queries::is_solo_song` が正本で、そちらは変えていない)。
+- **主演の記録が 8 公演しか無いのは欠けではない。** 主演を立てる形式のライブが
+  12th / 11th / 13th / 14th の 4 本だけで、9th や 10thLIVE TOUR Act-1〜4 はその形式ではない。
+  なお 11th が 12th より後の日付なのは**延期公演**だから (振替で 2026-03 開催)。
+  ナンバリングで時系列を推測しないこと。
+- **`setlist_items.position` は公演をまたぐ通し番号。** 曲順は `setlist_sections` の
+  `numbered_setlist` / `track_number` が正本。生の値を出すと「12852 曲目」になる。
+
+### 9.4 運用上の罠
+
+**バイナリを作り直しても、動いている MCP クライアントには反映されない。** `.mcp.json` の
+サーバはクライアント起動時に 1 度立ち上がったプロセスに繋がったままなので、ツールを
+足しても `tools/list` に出てこない (2026-09-21 に、サーバ側 24 本に対しクライアント側
+20 本という状態が実際に起きた)。`imas-mcp tools` で出るのにクライアントから見えない、
+という食い違いが起きたらこれを疑い、クライアント側で再接続する。
