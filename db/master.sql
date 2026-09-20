@@ -900,7 +900,7 @@ CREATE TABLE events (id TEXT PRIMARY KEY NOT NULL, brand_id TEXT, name TEXT NOT 
 INSERT INTO "events" VALUES('ev_bafca9af-8a58-4701-8753-d1166e28d577','sidem','THE IDOLM@STER SideM PASSIONABLE READING SHOW 魂環の人形','live',0,0,'live',NULL,NULL,NULL,NULL,NULL,NULL);
 INSERT INTO "events" VALUES('ev_f937ef42-f307-47f0-927d-8626e4d0f5fb','sc','「THE IDOLM@STER SHINY COLORS Song for Prism カウントダウンラブ / KAWAII♡めたもる交響曲」発売記念イベント','release_event',0,0,'release_event',NULL,NULL,NULL,NULL,NULL,NULL);
 INSERT INTO "events" VALUES('ev_web番組今井麻美と中村繪里子のprestarスペシャル_アイドルマスターロケテ記念今年もお世話になりましたプリスタープチライブ','765as','Web番組「今井麻美と中村繪里子のPreStar」スペシャル アイドルマスターロケテ記念＆今年もお世話になりましたプリスタープチライブ','broadcast',1,1,'live',NULL,NULL,NULL,NULL,NULL,'ばんぐみいまいあさみとなかむらえりこのすぺしゃるあいどるますたーろけてきねんことしもおせわになりましたぷりすたーぷちらいぶ');
-INSERT INTO "events" VALUES('ev_アイドルマスター6911時の回13時の回15時30分の回','765as','アイドルマスター6/9（11時の回、13時の回、15時30分の回）','live',0,1,'live',NULL,NULL,NULL,NULL,NULL,'あいどるますたーじのかいじのかいじふんのかい');
+INSERT INTO "events" VALUES('ev_アイドルマスター6911時の回13時の回15時30分の回','765as','アイドルマスター6/9（11時の回、13時の回、15時30分の回）','external_event',0,1,'live',NULL,NULL,NULL,NULL,NULL,'あいどるますたーじのかいじのかいじふんのかい');
 INSERT INTO "events" VALUES('ev_web番組今井麻美と中村繪里子のprestarthe_idolmster_49','765as','Web番組「今井麻美と中村繪里子のPreStar」THE IDOLM@STER 4/9','broadcast',1,1,'live',NULL,NULL,NULL,NULL,NULL,'ばんぐみいまいあさみとなかむらえりこの');
 INSERT INTO "events" VALUES('ev_the_idolmster_masterpieceシリーズ発売記念シークレットイベント','765as','「THE IDOLM@STER MASTERPIECE」シリーズ発売記念シークレットイベント','release_event',0,1,'release_event',NULL,NULL,NULL,NULL,NULL,'しりーずはつばいきねんしーくれっといべんと');
 INSERT INTO "events" VALUES('ev_the_idolmster_1st_anniversary_live','765as','THE IDOLM@STER 1st ANNIVERSARY LIVE','anniversary',0,1,'live',NULL,NULL,NULL,NULL,NULL,NULL);
