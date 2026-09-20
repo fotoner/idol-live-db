@@ -535,6 +535,7 @@ fn list_events(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<Va
             joint_brand_ids: r.event.joint_brand_ids.clone(),
             name: r.event.name.clone(),
             kind: r.event.kind.clone(),
+            event_type: r.event.event_type.clone(),
         })
         .collect();
     let criteria = EventFilterCriteria {
@@ -549,6 +550,8 @@ fn list_events(snap: &Snapshot, arguments: &Value, today_key: &str) -> Result<Va
         note_ids: Vec::new(),
         venue: venue.clone().unwrap_or_default(),
         venue_event_ids: venue.map(|v| event_ids_at_venue(snap, &v)).unwrap_or_default(),
+        // 種別の絞り込みは下の event_type 引数 (完全一致) が担うので、ここでは畳まない。
+        exclude_broadcast: false,
     };
 
     let mut kept: Vec<u32> = filter_event_indices(&items, &criteria)

@@ -139,6 +139,7 @@ fn events_of_brand(snap: &Snapshot, brand_id: &str) -> HashSet<u32> {
             joint_brand_ids: e.joint_brand_ids.clone(),
             name: e.name.clone(),
             kind: e.kind.clone(),
+            event_type: e.event_type.clone(),
         })
         .collect();
     // ブランド以外の軸は使わない (uniffi::Record なので Default が無く、全欄を書く)。
@@ -154,6 +155,7 @@ fn events_of_brand(snap: &Snapshot, brand_id: &str) -> HashSet<u32> {
         note_ids: Vec::new(),
         venue: String::new(),
         venue_event_ids: Vec::new(),
+        exclude_broadcast: false,
     };
     filter_event_indices(&items, &criteria).into_iter().collect()
 }

@@ -17,7 +17,7 @@ data class YearGroup(
  *
  * 本体は imas-core の domain/event_list_filtering.rs (合同ブランド判定・未知 kind の
  * live フォールバック・venue の on/off 判定もそちら参照)。ここはエンティティ全体を
- * FFI へ渡さないための薄いラッパ: [EventWithDateRange] を判定に要る 5 フィールドの射影
+ * FFI へ渡さないための薄いラッパ: [EventWithDateRange] を判定に要る 6 フィールドの射影
  * ([EventFilterItem]) へ落とし、返ってきた index 列で自前の配列を引き直すだけ。
  */
 fun filterEvents(
@@ -59,5 +59,6 @@ private fun eventFilterItem(ew: EventWithDateRange): EventFilterItem = EventFilt
     brandId = ew.event.brandId,
     jointBrandIds = ew.event.jointBrandIds,
     name = ew.event.name,
-    kind = ew.event.kind
+    kind = ew.event.kind,
+    eventType = ew.event.eventType
 )

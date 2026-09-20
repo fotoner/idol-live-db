@@ -22,13 +22,16 @@ struct EventFilterContext {
     /// `venue` で公演があったイベントの id 集合 (呼び出し側が DB から解決して渡す)。
     /// 会場は show 単位・絞り込み対象は event 単位なので、ここで橋渡しする。
     var venueEventIds: Set<String> = []
+    /// 「配信のみのイベントを隠す」。判定は imas-core の `isBroadcastOnly`
+    /// (= `event_type == "broadcast"`)。iOS には現状この UI が無いので常に false。
+    var excludeBroadcast: Bool = false
 }
 
 /// イベント一覧へブランド/kind/検索/参加状態/お気に入り/メモ/会場絞り込みを適用する。
 ///
 /// 本体は imas-core の domain/event_list_filtering.rs (合同ブランド判定・未知 kind の
 /// live フォールバック・venue の on/off 判定もそちら参照)。ここはエンティティ全体を
-/// FFI へ渡さないための薄いラッパ: `EventWithDate` を判定に要る 5 フィールドの射影
+/// FFI へ渡さないための薄いラッパ: `EventWithDate` を判定に要る 6 フィールドの射影
 /// (`EventFilterItem`) へ落とし、返ってきた index 列で自国の配列を引き直すだけ。
 /// `excludedKinds` は Rust 側が生文字列比較なので rawValue へ落として渡す。
 func filterEvents(_ events: [EventWithDate], _ ctx: EventFilterContext) -> [EventWithDate] {
@@ -38,7 +41,8 @@ func filterEvents(_ events: [EventWithDate], _ ctx: EventFilterContext) -> [Even
             brandId: $0.event.brandId,
             jointBrandIds: $0.event.jointBrandIds,
             name: $0.event.name,
-            kind: $0.event.kind)
+            kind: $0.event.kind,
+            eventType: $0.event.eventType)
     }
     let criteria = EventFilterCriteria(
         selectedBrandIds: Array(ctx.selectedBrandIds),
@@ -51,6 +55,7 @@ func filterEvents(_ events: [EventWithDate], _ ctx: EventFilterContext) -> [Even
         requireNote: ctx.requireNote,
         noteIds: Array(ctx.noteIds),
         venue: ctx.venue,
-        venueEventIds: Array(ctx.venueEventIds))
+        venueEventIds: Array(ctx.venueEventIds),
+        excludeBroadcast: ctx.excludeBroadcast)
     return filterEventIndices(items: items, criteria: criteria).map { events[Int($0)] }
 }

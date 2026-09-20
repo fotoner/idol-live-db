@@ -224,7 +224,7 @@ fun EventFilterSheet(
             )
             SwitchRow(
                 title = "配信を除く",
-                subtitle = "配信のみのイベント (旧 is_streaming) を一覧から隠す",
+                subtitle = "配信・番組だけのイベント (公演として開かれていないもの) を一覧から隠す",
                 checked = hideStreaming,
                 onCheckedChange = { hideStreaming = it }
             )

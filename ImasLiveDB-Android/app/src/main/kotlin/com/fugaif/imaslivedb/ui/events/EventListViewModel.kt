@@ -282,7 +282,13 @@ class EventListViewModel : ViewModel() {
             noteIds = notedEventIds.toList(),
             // コアはこの文字列を on/off 判定にしか使わないので、会場名でなく venue_id を渡してよい。
             venue = state.venue.orEmpty(),
-            venueEventIds = venueEventIds.toList()
+            venueEventIds = venueEventIds.toList(),
+            // 「配信のみ」= 公演として開かれていないもの。判定はコアの isBroadcastOnly
+            // (event_type == "broadcast")。events.is_streaming は読まない — あれは
+            // イベント名の正規表現で機械生成された値で、幕張メッセ等の現地公演まで
+            // 立っており、これで隠すとアリーナ公演が一覧から消える
+            // (docs/DATA_PIPELINE.md「配信の軸」)。
+            excludeBroadcast = state.hideStreaming
         )
         val groups = withContext(Dispatchers.Default) {
             // 純粋関数だが FFI は呼び元スレッドをブロックするので UI スレッドから外す。
@@ -292,12 +298,6 @@ class EventListViewModel : ViewModel() {
                 // eventsWithFirstDate は include_empty で同じことをするが、この一覧の母集合は
                 // kind を絞らないため SQL 経路のままなので、ここで落とす。
                 filtered = filtered.filter { !it.firstDate.isNullOrEmpty() }
-            }
-            if (state.hideStreaming) {
-                // events.is_streaming は互換のため残っている legacy 列で、コアの criteria にも
-                // iOS の UI にも対応する軸が無い ("配信を除く" は Android だけのチップ)。
-                // チップの意味を変えないため Kotlin 側の後段フィルタとして残す。
-                filtered = filtered.filter { !it.event.isStreaming }
             }
             // 公演日との比較なので JST 固定 (端末ローカルだと海外で 1 日ずれる)。
             groupEventsByYear(filtered, upcoming = state.timeFilter == 0, todayKey = JstDay.today())

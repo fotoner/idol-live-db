@@ -30,6 +30,10 @@ pub struct EventFilterItem {
     /// イベント種別の生文字列 ("live" / "festival" / "release_event" / "radio" / "stream")。
     /// 未知値は "live" として扱う (iOS `Event.eventKind` の `?? .live` フォールバック)。
     pub kind: String,
+    /// `events.event_type` の生文字列 (`anniversary` / `orchestra` / `external_event` /
+    /// `birthday` / `release_event` / `broadcast` / `live`、未分類は空)。
+    /// 語彙と判定規則は docs/DATA_PIPELINE.md 「events の種別 (event_type)」。
+    pub event_type: String,
 }
 
 /// イベント一覧の絞り込みに必要な、解決済みの条件・集合。
@@ -59,6 +63,25 @@ pub struct EventFilterCriteria {
     /// `venue` で公演があったイベントの id 集合 (呼び出し側が DB から解決して渡す)。
     /// 会場は show 単位・絞り込み対象は event 単位なので、ここで橋渡しする。
     pub venue_event_ids: Vec<String>,
+    /// 「配信のみのイベントを隠す」= 公演として開かれていないものを落とす。
+    /// 判定は [`is_broadcast_only`] (= `event_type == "broadcast"`)。
+    pub exclude_broadcast: bool,
+}
+
+/// 「配信のみ」= 公演として開かれていないイベントか。
+///
+/// **`events.is_streaming` で判定しない。** あの列は初期移行の `Scripts/rebuild_db.py` が
+/// イベント名の正規表現で機械生成した値がそのまま残っているだけで、誰も 1 件ずつ見ていない。
+/// しかも意味が「配信があった」寄りで、幕張メッセや東京ガーデンシアターの現地公演
+/// (CG 10th ANNIVERSARY / SHINY COLORS 3rdLIVE TOUR 等) を含む。これで一覧を隠すと
+/// アリーナ公演が消える。`event_type='broadcast'` (番組・配信そのもの = 公演として
+/// 開かれていない) が「配信のみ」を正確に持つので、そちらで判定する。
+/// 経緯は docs/DATA_PIPELINE.md 「配信の軸 (stream_platform と is_streaming)」。
+///
+/// 未分類 (空文字) は broadcast ではない側に倒す。分類が行き渡っていないイベントを
+/// 隠す向きに倒すと、データの欠けが「一覧から消える」という形で出るため。
+pub fn is_broadcast_only(event_type: &str) -> bool {
+    event_type == "broadcast"
 }
 
 /// 絞り込みを適用し、残すイベントの index 列 (入力順) を返す純粋ロジック。
@@ -100,6 +123,9 @@ pub fn filter_event_indices(items: &[EventFilterItem], c: &EventFilterCriteria) 
             // venue の on/off は名前 (venue) で決める。集合の空判定にすると
             // 「未選択」と「該当なし」を取り違えて全件消してしまう。
             if !c.venue.is_empty() && !venue_ids.contains(id) {
+                return false;
+            }
+            if c.exclude_broadcast && is_broadcast_only(&item.event_type) {
                 return false;
             }
             true
@@ -171,6 +197,7 @@ mod tests {
             joint_brand_ids: None,
             name: format!("E{id}"),
             kind: "live".to_string(),
+            event_type: "live".to_string(),
         }
     }
 
@@ -196,6 +223,7 @@ mod tests {
             note_ids: vec![],
             venue: String::new(),
             venue_event_ids: vec![],
+            exclude_broadcast: false,
         }
     }
 
@@ -434,5 +462,59 @@ mod tests {
     #[test]
     fn empty_items_yield_empty() {
         assert!(filter_event_indices(&[], &criteria()).is_empty());
+    }
+
+    fn item_type(id: &str, event_type: &str) -> EventFilterItem {
+        EventFilterItem { event_type: event_type.to_string(), ..item(id) }
+    }
+
+    /// 「配信のみ」は broadcast だけ。番組・配信そのもの以外は残る。
+    #[test]
+    fn broadcast_only_is_event_type_broadcast() {
+        assert!(is_broadcast_only("broadcast"));
+        for other in ["live", "anniversary", "orchestra", "external_event", "birthday",
+                      "release_event", ""] {
+            assert!(!is_broadcast_only(other), "{other} を配信のみに数えてはいけない");
+        }
+    }
+
+    /// exclude_broadcast は broadcast だけを落とす。
+    #[test]
+    fn exclude_broadcast_drops_only_broadcast() {
+        let items = [
+            item_type("bc", "broadcast"),
+            item_type("anniv", "anniversary"),
+            item_type("orch", "orchestra"),
+            item_type("unclassified", ""),
+        ];
+        let mut c = criteria();
+        c.exclude_broadcast = true;
+        assert_eq!(filtered_ids(&items, &c), vs(&["anniv", "orch", "unclassified"]));
+    }
+
+    /// 既定 (off) では broadcast も残る。
+    #[test]
+    fn exclude_broadcast_off_keeps_broadcast() {
+        let items = [item_type("bc", "broadcast"), item_type("a", "live")];
+        assert_eq!(filtered_ids(&items, &criteria()), vs(&["bc", "a"]));
+    }
+
+    /// 現地公演が「配信を除く」で消えないことの番人。
+    ///
+    /// 旧実装は `events.is_streaming` を読んでいて、この 3 件はいずれも
+    /// `shows.stream_platform` 由来で is_streaming=1 が入る対象だった
+    /// (幕張メッセ / 東京ガーデンシアターの現地公演)。event_type で判定する限り
+    /// 隠れない、というのがこの移行の肝。
+    #[test]
+    fn exclude_broadcast_keeps_on_site_arena_shows() {
+        let items = [
+            item_type("cg10th", "anniversary"),   // CG 10th ANNIVERSARY (幕張メッセ)
+            item_type("sc3rd_tokyo", "live"),     // SHINY COLORS 3rdLIVE TOUR / TOKYO
+            item_type("sc_music_dawn", "live"),   // SHINY COLORS MUSIC DAWN (幕張メッセ)
+            item_type("first_take", "broadcast"), // THE FIRST TAKE (公演ではない)
+        ];
+        let mut c = criteria();
+        c.exclude_broadcast = true;
+        assert_eq!(filtered_ids(&items, &c), vs(&["cg10th", "sc3rd_tokyo", "sc_music_dawn"]));
     }
 }
