@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
@@ -91,7 +92,11 @@ import com.fugaif.imaslivedb.ui.theme.BrandPalette
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import uniffi.imas_core.PerformerNameMode
+import uniffi.imas_core.SetlistDisplayMode
 import uniffi.imas_core.SetlistRowMetaRecord
+import uniffi.imas_core.setlistDisplayModeIsCompact
+import uniffi.imas_core.setlistDisplayModeFromStored
+import uniffi.imas_core.setlistDisplayModes
 import uniffi.imas_core.ShowCostumeRecord
 import com.fugaif.imaslivedb.ui.theme.brandColor
 import com.fugaif.imaslivedb.ui.theme.displayName
@@ -134,11 +139,16 @@ fun SetlistScreen(
     // 設定変更に画面を開き直さずに追従させる。
     val performerName = AppPreferences.performerName
 
-    LaunchedEffect(showId, performerName) { viewModel.load(context, showId, performerName) }
-
-    // シンプル表示は公演をまたいで保持する。「1 枚のスクショに収めたい」人は
+    // 表示の詳しさは公演をまたいで保持する。「1 枚のスクショに収めたい」人は
     // 次の公演でも同じ見方をするので、画面を離れるたびに戻ると毎回押し直しになる。
-    var simpleMode by remember { mutableStateOf(SetlistViewPrefs.simpleMode(context)) }
+    // **保存値からモードを決めるのも、旧 Bool からの移行も共有コアが担う。**
+    var displayMode by remember { mutableStateOf(SetlistViewPrefs.displayMode(context)) }
+    // 曲名と歌唱者だけに絞る形か。どのモードがそれに当たるかもコアが決める。
+    val simpleMode = setlistDisplayModeIsCompact(displayMode)
+
+    LaunchedEffect(showId, performerName, displayMode) {
+        viewModel.load(context, showId, performerName, displayMode)
+    }
 
     // --- マーク (参加 / お気に入り / メモ / 座席)。実体は Room なのでここで読み書きする ---
     var attendance by remember(showId) { mutableStateOf<AttendanceType?>(null) }
@@ -193,15 +203,26 @@ fun SetlistScreen(
                         Icon(Icons.Filled.MoreVert, contentDescription = "その他")
                     }
                     DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                        DropdownMenuItem(
-                            text = { Text(if (simpleMode) "通常表示に戻す" else "シンプル表示") },
-                            leadingIcon = { Icon(Icons.AutoMirrored.Filled.List, null) },
-                            onClick = {
-                                menuOpen = false
-                                simpleMode = !simpleMode
-                                SetlistViewPrefs.setSimpleMode(context, simpleMode)
-                            }
-                        )
+                        // 3 値なのでトグルではなく選ぶ形にする。メニューの中なので
+                        // 画面の行は 1 行も増えず、いま選んでいるものにチェックが付く。
+                        // 並びも文言もコア (setlistDisplayModes) が持つ。
+                        setlistDisplayModes().forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option.label) },
+                                leadingIcon = {
+                                    Icon(
+                                        if (option.mode == displayMode) Icons.Filled.Check
+                                        else Icons.AutoMirrored.Filled.List,
+                                        null
+                                    )
+                                },
+                                onClick = {
+                                    menuOpen = false
+                                    displayMode = option.mode
+                                    SetlistViewPrefs.setDisplayMode(context, option.raw)
+                                }
+                            )
+                        }
                         if (canShowEditActions) {
                             DropdownMenuItem(
                                 text = { Text("セトリを編集") },
@@ -373,7 +394,7 @@ fun SetlistScreen(
                                     item = item,
                                     displayNumber = index + 1,
                                     performerLabel = meta?.performerLabel.orEmpty(),
-                                    rarityLabel = rarityLabel(meta),
+                                    historyBadges = meta?.historyBadges.orEmpty(),
                                     brandHex = BrandPalette.hex(item.songBrandId) ?: seedHex,
                                     onClick = { onSongClick(item.songId) }
                                 )
@@ -383,7 +404,7 @@ fun SetlistScreen(
                                     displayNumber = index + 1,
                                     performers = performers,
                                     unitNames = meta?.unitNames.orEmpty(),
-                                    rarityLabel = rarityLabel(meta),
+                                    historyBadges = meta?.historyBadges.orEmpty(),
                                     performerName = performerName,
                                     isCharacterLive = isCharacterLive,
                                     showName = uiState.show?.name,
@@ -448,7 +469,7 @@ fun SetlistScreen(
                 onDismiss = { showEditDialog = false },
                 onSaved = {
                     showEditDialog = false
-                    viewModel.load(context, showId, performerName)
+                    viewModel.load(context, showId, performerName, displayMode)
                 }
             )
         }
@@ -493,30 +514,31 @@ private fun toggleLike(
     }
 }
 
-/**
- * 行に添える「珍しさ」。初披露か、1 年以上ぶりの披露のときだけ出す。
- *
- * **どちらの文言も閾値も imas-core が決めている** (`performance_gap`)。
- * ここは「初披露なら回数の言い方、そうでなければ間隔の言い方」を選ぶだけ。
- * どちらも無い行では null = 何も足さない (全行に賑やかしを足さないため)。
- */
-private fun rarityLabel(meta: SetlistRowMetaRecord?): String? {
-    if (meta == null) return null
-    return if (meta.isFirstPerformance) meta.ordinalLabel else meta.sinceLabel
-}
-
 /** シンプル表示のオン/オフを端末に残す。画面をまたいで見方を保つためだけの 1 bit。 */
+/**
+ * セトリの詳しさを端末に残す。画面をまたいで見方を保つためだけの設定。
+ *
+ * 3 値にする前は [KEY_SIMPLE] という Bool 1 つだった。新しい鍵がまだ無い端末は
+ * その Bool から移行するが、**その判断はコア (setlistDisplayModeFromStored) が持つ**
+ * — iOS と Android で別々に書くと片方だけ移行しそこねる。
+ */
 private object SetlistViewPrefs {
     private const val PREFS_NAME = "setlist_view_prefs"
     private const val KEY_SIMPLE = "simple_mode"
+    private const val KEY_MODE = "display_mode"
 
-    fun simpleMode(context: Context): Boolean =
-        context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .getBoolean(KEY_SIMPLE, false)
+    fun displayMode(context: Context): SetlistDisplayMode {
+        val prefs = context.applicationContext
+            .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return setlistDisplayModeFromStored(
+            prefs.getString(KEY_MODE, null),
+            prefs.getBoolean(KEY_SIMPLE, false)
+        )
+    }
 
-    fun setSimpleMode(context: Context, value: Boolean) {
+    fun setDisplayMode(context: Context, raw: String) {
         context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit().putBoolean(KEY_SIMPLE, value).apply()
+            .edit().putString(KEY_MODE, raw).apply()
     }
 }
 
@@ -675,8 +697,11 @@ private fun SetlistSimpleRow(
     item: SetlistRow,
     displayNumber: Int,
     performerLabel: String,
-    /** 「初披露」「3 年 10 か月ぶり」。珍しくない行では null。文言も閾値もコア。 */
-    rarityLabel: String?,
+    /**
+     * 披露履歴の札。**出すかどうかはコアが表示モードから決める**ので、
+     * シンプル表示では常に空で来る (この行は曲名と歌唱者だけのための形)。
+     */
+    historyBadges: List<String>,
     brandHex: String?,
     onClick: () -> Unit
 ) {
@@ -706,7 +731,7 @@ private fun SetlistSimpleRow(
                 color = titleColor,
                 maxLines = 2
             )
-            if (performerLabel.isNotEmpty() || rarityLabel != null) {
+            if (performerLabel.isNotEmpty() || historyBadges.isNotEmpty()) {
                 // 公式のセトリ画像に倣って ♪ を頭に置く。演者を横に並べると長い名前で
                 // 曲名が潰れるので下段に置く。珍しさは演者の後ろに小さく添える
                 // (シンプル表示は 1 枚に収めるのが目的なので行を増やさない)。
@@ -720,8 +745,8 @@ private fun SetlistSimpleRow(
                             modifier = Modifier.weight(1f, fill = false)
                         )
                     }
-                    if (rarityLabel != null) {
-                        Text(text = rarityLabel, fontSize = 11.sp, color = DS.ink3, maxLines = 1)
+                    historyBadges.forEach { badge ->
+                        Text(text = badge, fontSize = 11.sp, color = DS.ink3, maxLines = 1)
                     }
                 }
             }
@@ -740,8 +765,8 @@ private fun SetlistItemRow(
      * (その披露の名義 → 曲の名義 → 顔ぶれ推論)。空なら札を出さない。
      */
     unitNames: List<String>,
-    /** 「初披露」「3 年 10 か月ぶり」。珍しくない行では null。 */
-    rarityLabel: String?,
+    /** 披露履歴の札。出すかどうかもコアが表示モードから決める (詳細表示だけ中身が入る)。 */
+    historyBadges: List<String>,
     performerName: PerformerNameMode,
     isCharacterLive: Boolean,
     showName: String?,
@@ -804,7 +829,7 @@ private fun SetlistItemRow(
             // ユニット名の札 + 珍しさの札。名前も「いつぶりか」もコアが決めた文字列で、
             // ここは並べるだけ。珍しさは塗りつぶしではなく輪郭だけにして、
             // ユニット名と競わせない (出るのは 3 行に 1 行ほど)。
-            if (unitNames.isNotEmpty() || rarityLabel != null) {
+            if (unitNames.isNotEmpty() || historyBadges.isNotEmpty()) {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -819,14 +844,14 @@ private fun SetlistItemRow(
                             )
                         }
                     }
-                    if (rarityLabel != null) {
+                    historyBadges.forEach { badge ->
                         Surface(
                             shape = RoundedCornerShape(50),
                             color = Color.Transparent,
                             border = BorderStroke(1.dp, DS.ink3)
                         ) {
                             Text(
-                                text = rarityLabel,
+                                text = badge,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = DS.ink2,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)

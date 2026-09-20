@@ -21,6 +21,7 @@ import com.fugaif.imaslivedb.data.model.VenueName
 import com.fugaif.imaslivedb.data.model.ShowCast
 import com.fugaif.imaslivedb.data.model.ShowWithEventName
 import uniffi.imas_core.PerformerNameMode
+import uniffi.imas_core.SetlistDisplayMode
 import uniffi.imas_core.SetlistRowMetaRecord
 import uniffi.imas_core.ShowCostumeRecord
 import uniffi.imas_core.EventDetailRecord
@@ -316,10 +317,11 @@ class EventRepository(
      */
     suspend fun fetchSetlistRowMeta(
         showId: String,
-        mode: PerformerNameMode
+        mode: PerformerNameMode,
+        displayMode: SetlistDisplayMode
     ): Map<String, SetlistRowMetaRecord> =
         snapshots?.query { store ->
-            store.showSetlistRowMeta(showId, mode).associateBy { it.itemId }
+            store.showSetlistRowMeta(showId, mode, displayMode).associateBy { it.itemId }
         } ?: emptyMap()
 
     /**

@@ -3,6 +3,7 @@ package com.fugaif.imaslivedb.ui.events
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import uniffi.imas_core.PerformerNameMode
+import uniffi.imas_core.SetlistDisplayMode
 import uniffi.imas_core.SetlistRowMetaRecord
 import uniffi.imas_core.ShowCostumeRecord
 import androidx.lifecycle.viewModelScope
@@ -58,8 +59,14 @@ class SetlistViewModel : ViewModel() {
     /**
      * @param nameMode 歌唱者をどの名前で出すか。**行の添え物の中身が変わる**ので、
      *   設定が変わったら呼び直すこと (画面側が設定を鍵にした LaunchedEffect で呼ぶ)。
+     * @param displayMode どこまで詳しく出すか。履歴の札を出すかどうかもコアがこれで決める。
      */
-    fun load(context: Context, showId: String, nameMode: PerformerNameMode) {
+    fun load(
+        context: Context,
+        showId: String,
+        nameMode: PerformerNameMode,
+        displayMode: SetlistDisplayMode
+    ) {
         viewModelScope.launch {
             val module = AppModule.from(context)
             val show = module.eventRepository.fetchShow(showId)
@@ -72,7 +79,7 @@ class SetlistViewModel : ViewModel() {
             val performersByItemId = module.eventRepository.fetchPerformersByItem(showId)
             val costumes = module.eventRepository.fetchShowCostumes(showId)
             // 名義も「いつぶりか」も共有コアが決める。ここは受け取って配るだけ。
-            val rowMeta = module.eventRepository.fetchSetlistRowMeta(showId, nameMode)
+            val rowMeta = module.eventRepository.fetchSetlistRowMeta(showId, nameMode, displayMode)
 
             _uiState.value = SetlistUiState(
                 isLoading = false,
