@@ -25,9 +25,23 @@ struct SetlistView: View {
     @State private var venueDirectory: VenueDirectory = .empty
     /// 予想/実セトリ両方ある時の内部タブ (0=セットリスト / 1=予想)。
     @State private var contentTab = 0
-    /// シンプル表示 (番号・曲名・演者だけ)。 20 曲超のセトリを 1 枚のスクショに
-    /// 収めたい用途向け。 公演をまたいで保持したいので AppStorage。
-    @AppStorage("setlist_simple_mode") private var simpleMode = false
+    /// セトリの詳しさ (シンプル / 普通 / 詳細)。公演をまたいで保持したいので AppStorage。
+    /// 保存値は文字列 (**序数で保存しない** — 並べ替えた瞬間に化ける)。
+    @AppStorage("setlist_display_mode") private var displayModeRaw = ""
+    /// 3 値にする前の保存値 (Bool)。**読むのは移行のためだけで、二度と書かない。**
+    @AppStorage("setlist_simple_mode") private var legacySimpleMode = false
+
+    /// 解決済みの表示モード。**移行の判断も含めて imas-core が決める**
+    /// (`screen_composition::setlist_display_mode_from_stored`)。
+    private var displayMode: SetlistDisplayMode {
+        setlistDisplayModeFromStored(
+            raw: displayModeRaw.isEmpty ? nil : displayModeRaw,
+            legacySimpleMode: legacySimpleMode
+        )
+    }
+
+    /// 曲名と歌唱者だけに絞る形か。**どのモードがそれに当たるかもコアが決める。**
+    private var simpleMode: Bool { setlistDisplayModeIsCompact(mode: displayMode) }
     /// 歌唱者をどの名前で出すか。マイページの設定と同じ鍵を読む
     /// (公演をまたいで効く「表示の好み」なので画面には持たせない)。
     @AppStorage(PerformerNamePref.storageKey) private var performerNameRaw = PerformerNamePref.defaultRaw
@@ -126,7 +140,7 @@ struct SetlistView: View {
     }
 
     /// 曲のフォールバックジャケ/チップ色シード。曲のブランド色 → 公演ブランド色の順。
-    /// セトリ 1 行。 通常表示とシンプル表示の分岐ごと ForEach の外に出す。
+    /// セトリ 1 行。 シンプル表示とそれ以外の分岐ごと ForEach の外に出す。
     /// ForEach のクロージャ内に両方の巨大な View 生成式を並べると
     /// 「unable to type-check this expression in reasonable time」で通らなくなる。
     @ViewBuilder
@@ -139,7 +153,7 @@ struct SetlistView: View {
                 item: item,
                 displayNumber: index + 1,
                 performerLabel: meta?.performerLabel ?? "",
-                rarityLabel: rarityLabel(meta),
+                historyBadges: meta?.historyBadges ?? [],
                 brandHex: brandHex(for: item)
             )
             .onTapGesture {
@@ -159,7 +173,7 @@ struct SetlistView: View {
                 idolsById: idolsById,
                 unitNames: meta?.unitNames ?? [],
                 isFullCast: meta?.isFullCast ?? false,
-                rarityLabel: rarityLabel(meta),
+                historyBadges: meta?.historyBadges ?? [],
                 performerName: performerName,
                 isCharacterLive: show.isCharacterLive,
                 coverType: classifyCover(originalIds: originalIds, performerIds: performerIdolIds),
@@ -182,15 +196,21 @@ struct SetlistView: View {
         }
     }
 
-    /// 行に添える「珍しさ」。初披露か、1 年以上ぶりの披露のときだけ出す。
+    /// 表示モードのピッカーに渡す束縛。選ばれた保存値をそのまま書く
+    /// (文字列 → モードの解釈はコアがやるので、ここで enum に直さない)。
     ///
-    /// **どちらの文言も閾値も imas-core が決めている** (`performance_gap`)。
-    /// ここは「初披露なら回数の言い方、そうでなければ間隔の言い方」を選ぶだけ。
-    /// どちらも無い行では nil = 何も足さない (全行に賑やかしを足さないため)。
-    private func rarityLabel(_ meta: SetlistRowMetaRecord?) -> String? {
-        guard let meta else { return nil }
-        return meta.isFirstPerformance ? meta.ordinalLabel : meta.sinceLabel
+    /// get 側が `displayModeRaw` そのままでないのは、移行直後 (保存値が空で
+    /// 旧 Bool から解決している状態) にピッカーの選択が外れないようにするため。
+    private var displayModeBinding: Binding<String> {
+        Binding(
+            get: { setlistDisplayModes().first { $0.mode == displayMode }?.raw ?? "" },
+            set: { raw in
+                AppAnalytics.tap("setlist.display_mode.\(raw)")
+                withAnimation(.easeInOut(duration: 0.15)) { displayModeRaw = raw }
+            }
+        )
     }
+
 
     private func brandHex(for item: SetlistRow) -> String? {
         if let bid = item.songBrandId, let hex = brandHexById[bid] { return hex }
@@ -403,15 +423,15 @@ struct SetlistView: View {
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    Button {
-                        AppAnalytics.tap("setlist.toggle_simple")
-                        withAnimation(.easeInOut(duration: 0.15)) { simpleMode.toggle() }
-                    } label: {
-                        Label(
-                            simpleMode ? "通常表示に戻す" : "シンプル表示",
-                            systemImage: simpleMode ? "list.bullet.rectangle" : "list.bullet"
-                        )
+                    // 3 値なのでトグルではなく選ぶ形にする。Menu の中の Picker なので
+                    // 画面の行は 1 行も増えず、いま選んでいるものにチェックが付く。
+                    // 並びも文言も imas-core (`setlistDisplayModes`) が持つ。
+                    Picker("表示", selection: displayModeBinding) {
+                        ForEach(setlistDisplayModes(), id: \.raw) { option in
+                            Text(option.label).tag(option.raw)
+                        }
                     }
+                    .pickerStyle(.inline)
 
                     if EditPermission.showEditAffordance {
                         Button { startEdit() } label: {
@@ -500,7 +520,7 @@ struct SetlistView: View {
         }
         .animation(.easeInOut(duration: 0.15), value: isCreatingPlaylist)
         .task { await loadSetlist() }
-        .task(id: performerNameRaw) { await loadRowMeta() }
+        .task(id: "\(performerNameRaw)|\(displayModeRaw)|\(legacySimpleMode)") { await loadRowMeta() }
         .task {
             venueDirectory = (try? await AppContainer.shared.showReading.venueDirectory()) ?? .empty
         }
@@ -603,11 +623,12 @@ struct SetlistView: View {
         }
     }
 
-    /// 行の添え物を読み直す。**歌唱者の表示名の設定が変わると答えが変わる**ので、
-    /// 設定を鍵にした `.task(id:)` から呼ぶ (画面を開き直さなくても追従する)。
+    /// 行の添え物を読み直す。**歌唱者の表示名の設定と表示モードで答えが変わる**ので、
+    /// その 2 つを鍵にした `.task(id:)` から呼ぶ (画面を開き直さなくても追従する)。
     private func loadRowMeta() async {
-        let meta = (try? await AppContainer.shared.showReading
-            .setlistRowMeta(showId: show.id, nameMode: performerName)) ?? []
+        let meta = (try? await AppContainer.shared.showReading.setlistRowMeta(
+            showId: show.id, nameMode: performerName, displayMode: displayMode
+        )) ?? []
         rowMetaByItemId = Dictionary(uniqueKeysWithValues: meta.map { ($0.itemId, $0) })
     }
 

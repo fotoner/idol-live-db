@@ -23,7 +23,14 @@ protocol ShowReading: Sendable {
     /// **名義の決め方 (その披露の名義 → 曲の名義 → 個人名併記 → 顔ぶれ推論 → 名前) も、
     /// 「N 年ぶり」の言い回しも imas-core が持つ。** 画面でユニットを逆引きしたり
     /// 間隔を組み立てたりしないこと (同じ規則を Android にも写経することになる)。
-    func setlistRowMeta(showId: String, nameMode: PerformerNameMode) async throws -> [SetlistRowMetaRecord]
+    ///
+    /// `displayMode` は「どこまで詳しく出すか」。履歴の札を出すかどうかもコアが
+    /// これで決めるので、モードが変わったら読み直すこと。
+    func setlistRowMeta(
+        showId: String,
+        nameMode: PerformerNameMode,
+        displayMode: SetlistDisplayMode
+    ) async throws -> [SetlistRowMetaRecord]
     /// 公演の全出演キャスト idol_id 集合 (「全員」表記の判定用)。
     func showIdolIds(showId: String) async throws -> Set<String>
     /// song_id → 原曲アーティスト idol_id 集合 (一部カバー判定用)。

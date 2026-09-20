@@ -60,7 +60,11 @@ struct GRDBShowRepository: ShowReading {
 
     /// SQL 経路には無い (名義の決め方も披露の間隔も imas-core にしかない)。
     /// スナップショット未ロードの短い窓では添え物なしで出す。
-    func setlistRowMeta(showId: String, nameMode: PerformerNameMode) async throws -> [SetlistRowMetaRecord] { [] }
+    func setlistRowMeta(
+        showId: String,
+        nameMode: PerformerNameMode,
+        displayMode: SetlistDisplayMode
+    ) async throws -> [SetlistRowMetaRecord] { [] }
 
     func venueDirectory() async throws -> VenueDirectory {
         try await database.fetchVenueDirectoryAsync()

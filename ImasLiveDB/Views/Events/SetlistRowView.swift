@@ -13,8 +13,10 @@ struct SetlistRowView: View {
     var unitNames: [String] = []
     /// 公演の出演者全員で歌う行か (「全員」表記)。判定も imas-core。
     var isFullCast: Bool = false
-    /// 「初披露」「3 年 10 か月ぶり」。珍しくない行では nil。文言も閾値も imas-core。
-    var rarityLabel: String? = nil
+    /// 披露履歴の札 (「初披露」「3 年 10 か月ぶり」「4 回目」)。
+    /// **中身も、そもそも出すかどうかも imas-core が表示モードから決める** ので、
+    /// ここは受け取った順に並べるだけ。詳細表示以外では必ず空で来る。
+    var historyBadges: [String] = []
     /// 歌唱者をどの名前で出すか (親が AppStorage から解決して渡す)。
     var performerName: PerformerNameMode = .idolOnly
     /// `shows.performer_type == "character"`。
@@ -258,9 +260,10 @@ struct SetlistRowView: View {
         }
     }
 
-    /// メタ行に出すものがあるか (カバー種別チップ or 珍しさ or 歌唱者表現)。無ければ行ごと省く。
+    /// メタ行に出すものがあるか (カバー種別チップ or 履歴の札 or 歌唱者表現)。無ければ行ごと省く。
     private var hasMeta: Bool {
-        coverTag != nil || rarityLabel != nil || !unitNames.isEmpty || isFullCast || !performers.isEmpty
+        coverTag != nil || !historyBadges.isEmpty || !unitNames.isEmpty || isFullCast
+            || !performers.isEmpty
     }
 
     /// カバー種別チップ + 珍しさ + 歌唱者 (ユニット / 全員 / アバター)。
@@ -274,10 +277,10 @@ struct SetlistRowView: View {
             if let tag = coverTag {
                 ImasTagChip(text: tag.text, kind: tag.kind, seed: seed)
             }
-            // 「初披露」「N 年ぶり」。出るのは 3 行に 1 行くらいなので、
-            // 塗りつぶしではなく輪郭だけの控えめな札にしてカバー札と競わせない。
-            if let rarityLabel {
-                ImasTagChip(text: rarityLabel, kind: .guest, seed: seed)
+            // 披露履歴の札 (詳細表示のときだけ来る)。塗りつぶしではなく輪郭だけにして、
+            // カバーの札やユニット名と競わせない。
+            ForEach(historyBadges, id: \.self) { badge in
+                ImasTagChip(text: badge, kind: .guest, seed: seed)
             }
             performerMeta
         }

@@ -14,8 +14,9 @@ struct SetlistSimpleRowView: View {
     /// 「ユニット名」「全員」「アイドル名／アイドル名」のいずれか。 空なら演者行を出さない。
     /// 決め方は imas-core (`setlist_performer_label`)。
     var performerLabel: String
-    /// 「初披露」「3 年 10 か月ぶり」。珍しくない行では nil。文言も閾値も imas-core。
-    var rarityLabel: String? = nil
+    /// 披露履歴の札。**出すかどうかは imas-core が表示モードから決める**ので、
+    /// シンプル表示では常に空で来る (この行は曲名と歌唱者だけのための形)。
+    var historyBadges: [String] = []
     /// 曲名の色。 ブランド色 hex。
     var brandHex: String?
 
@@ -40,7 +41,7 @@ struct SetlistSimpleRowView: View {
                     .foregroundStyle(titleColor)
                     .lineLimit(2)
 
-                if !performerLabel.isEmpty || rarityLabel != nil {
+                if !performerLabel.isEmpty || !historyBadges.isEmpty {
                     // 公式のセトリ画像に倣って ♪ を頭に置く。 演者は横並びにすると
                     // 長い名前 (アスラン=ベルゼビュートⅡ世 等) で曲名が潰れるため下段に置く。
                     // 珍しさは演者の後ろに小さく添える (シンプル表示は 1 枚に収めるのが目的なので
@@ -52,8 +53,8 @@ struct SetlistSimpleRowView: View {
                                 .foregroundStyle(DS.ink2)
                                 .lineLimit(2)
                         }
-                        if let rarityLabel {
-                            Text(rarityLabel)
+                        ForEach(historyBadges, id: \.self) { badge in
+                            Text(badge)
                                 .font(.imasCaption2)
                                 .foregroundStyle(DS.ink3)
                                 .lineLimit(1)
