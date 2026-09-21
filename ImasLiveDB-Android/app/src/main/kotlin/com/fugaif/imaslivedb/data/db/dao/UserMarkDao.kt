@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.fugaif.imaslivedb.data.model.AttendanceMarkProjection
+import com.fugaif.imaslivedb.data.model.TextMarkProjection
 import com.fugaif.imaslivedb.data.model.UserMark
 
 @Dao
@@ -32,6 +33,17 @@ interface UserMarkDao {
         WHERE entity_type = :type AND entity_id = :id AND kind = :kind AND bool_value = 1 LIMIT 1
     """)
     suspend fun textValue(type: String, id: String, kind: String): String?
+
+    /**
+     * ある kind の (entity_id, text_value) を全部返す。習熟度のように
+     * **一覧の全行が読む値**は、行ごとに [textValue] を叩くと件数ぶんクエリが走るので、
+     * 起動時に 1 回だけ読んでメモリに持つ。
+     */
+    @Query("""
+        SELECT entity_id AS entityId, text_value AS textValue FROM user_marks
+        WHERE entity_type = :type AND kind = :kind AND bool_value = 1
+    """)
+    suspend fun textValues(type: String, kind: String): List<TextMarkProjection>
 
     /** 指定 ID 群のうち ON になっているものだけを返す (公演単位の参加判定用)。 */
     @Query("""

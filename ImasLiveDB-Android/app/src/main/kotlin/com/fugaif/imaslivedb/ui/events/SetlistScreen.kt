@@ -1,7 +1,6 @@
 package com.fugaif.imaslivedb.ui.events
 
 import android.content.Context
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -56,12 +55,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -87,17 +94,19 @@ import com.fugaif.imaslivedb.ui.components.ImasSectionHeader
 import com.fugaif.imaslivedb.ui.components.ImasTagChip
 import com.fugaif.imaslivedb.ui.components.PerformerChip
 import com.fugaif.imaslivedb.ui.edit.SetlistEditScreen
+import com.fugaif.imaslivedb.ui.filtered.EventFilterKind
 import com.fugaif.imaslivedb.ui.filtered.ShowFilterKind
 import com.fugaif.imaslivedb.ui.share.SetlistCommentComposeSheet
 import com.fugaif.imaslivedb.ui.theme.AppPreferences
 import com.fugaif.imaslivedb.ui.theme.BrandPalette
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
-import uniffi.imas_core.CollectionBadgeRecord
-import uniffi.imas_core.CollectionBadgeRole
 import uniffi.imas_core.PerformerNameMode
+import uniffi.imas_core.RowNoteTone
 import uniffi.imas_core.SetlistDisplayMode
 import uniffi.imas_core.SetlistRowMetaRecord
+import uniffi.imas_core.SetlistRowNoteGroupRecord
+import uniffi.imas_core.SetlistRowNoteRecord
 import uniffi.imas_core.setlistDisplayModeIsCompact
 import uniffi.imas_core.setlistDisplayModeFromStored
 import uniffi.imas_core.setlistDisplayModes
@@ -120,6 +129,13 @@ fun SetlistScreen(
      * [com.fugaif.imaslivedb.ui.filtered.ShowFilterKind] の定義に従う)。
      */
     onFilteredShowsClick: (String, String) -> Unit = { _, _ -> },
+    /** パンくずの「イベント名」から、そのイベントの詳細へ (同じイベントの他公演もそこから)。 */
+    onEventClick: (String) -> Unit = {},
+    /**
+     * パンくずの「ブランド」から、そのブランドのライブ一覧へ (kind は
+     * [com.fugaif.imaslivedb.ui.filtered.EventFilterKind] の定義に従う。ここでは常に `BRAND`)。
+     */
+    onFilteredEventsClick: (String, String) -> Unit = { _, _ -> },
     viewModel: SetlistViewModel = viewModel(key = showId)
 ) {
     val context = LocalContext.current
@@ -184,11 +200,20 @@ fun SetlistScreen(
         if (hasSetlist) likes = likeService.fetch(showId).associateBy { it.songId }
     }
 
-    // セトリ編集シートに渡すイベント名 (編集画面の見出し)。
+    // セトリ編集シートに渡すイベント名 (編集画面の見出し)。パンくずの 2 段目にも使う。
     var eventName by remember(showId) { mutableStateOf("") }
     LaunchedEffect(uiState.show?.eventId) {
         val id = uiState.show?.eventId ?: return@LaunchedEffect
         eventName = module.eventRepository.fetchEvent(id)?.name.orEmpty()
+    }
+
+    // パンくずの 1 段目 (ブランドの短縮名)。ナビの戻るは「どこから来たか」しか辿れない
+    // (深リンクや検索から直接開くと戻り先が無い) ので、この画面がライブの木の
+    // どこに居るのかを示して、上の階層へ直接行けるようにする。
+    var brandShortName by remember(showId) { mutableStateOf<String?>(null) }
+    LaunchedEffect(uiState.brandId) {
+        val id = uiState.brandId ?: return@LaunchedEffect
+        brandShortName = module.eventRepository.fetchBrand(id)?.shortName
     }
 
     var menuOpen by remember { mutableStateOf(false) }
@@ -271,11 +296,33 @@ fun SetlistScreen(
                     .padding(innerPadding)
             ) {
                 item {
+                    // 上の階層 (ブランド → イベント) へのパンくず。ナビの戻るは「どこから来たか」
+                    // しか辿れない (深リンクや検索から直接開くと戻り先が無い)。この画面がライブの
+                    // 木のどこに居るのかを示して、上の階層へ直接行けるようにする。
+                    // 現在地 (公演) はすぐ下の大見出しが言うので、ここには出さない。
+                    val breadcrumb: @Composable () -> Unit = {
+                        uiState.show?.eventId?.let { eventId ->
+                            if (eventName.isNotEmpty()) {
+                                SetlistBreadcrumb(
+                                    brandName = brandShortName,
+                                    eventName = eventName,
+                                    accent = ImasTheme.derive(seedHex, null, dark = true).accent,
+                                    onBrandClick = {
+                                        uiState.brandId?.let {
+                                            onFilteredEventsClick(EventFilterKind.BRAND, it)
+                                        }
+                                    },
+                                    onEventClick = { onEventClick(eventId) }
+                                )
+                            }
+                        }
+                    }
                     if (simpleMode) {
                         // シンプル表示ではヒーローと会場カードを畳み、会場・日付の 1 行に落とす。
                         // ここが 250dp 前後あり、残したままだと 20 曲超のセトリが 1 枚の
                         // スクショに収まらない (シンプル表示を作った意味が無くなる)。
                         Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 4.dp)) {
+                            breadcrumb()
                             Text(
                                 uiState.show?.name ?: "",
                                 style = MaterialTheme.typography.titleMedium,
@@ -295,7 +342,8 @@ fun SetlistScreen(
                     } else {
                         Box(modifier = Modifier.fillMaxWidth()) {
                             GradientHeader(color = brandColor(uiState.brandId), height = 88.dp)
-                            Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 40.dp, bottom = 8.dp)) {
+                            Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 32.dp, bottom = 8.dp)) {
+                                breadcrumb()
                                 Text(
                                     uiState.show?.name ?: "",
                                     style = MaterialTheme.typography.titleLarge,
@@ -415,7 +463,6 @@ fun SetlistScreen(
                                     item = item,
                                     displayNumber = index + 1,
                                     performerLabel = meta?.performerLabel.orEmpty(),
-                                    historyBadges = meta?.historyBadges.orEmpty(),
                                     brandHex = BrandPalette.hex(item.songBrandId) ?: seedHex,
                                     onClick = { onSongClick(item.songId) }
                                 )
@@ -425,8 +472,7 @@ fun SetlistScreen(
                                     displayNumber = index + 1,
                                     performers = performers,
                                     unitNames = meta?.unitNames.orEmpty(),
-                                    historyBadges = meta?.historyBadges.orEmpty(),
-                                    collectionBadges = meta?.collectionBadges.orEmpty(),
+                                    noteGroups = meta?.noteGroups.orEmpty(),
                                     performerName = performerName,
                                     isCharacterLive = isCharacterLive,
                                     showName = uiState.show?.name,
@@ -607,6 +653,47 @@ private fun AttendanceDialog(
     )
 }
 
+/**
+ * ブランド → イベント のパンくず。現在地 (公演) はすぐ下の大見出しが言うので、
+ * ここには出さない (同じ名前を 2 度書かない)。
+ *
+ * 名前が長いイベント (「THE IDOLM@STER MILLION LIVE! 14thLIVE」等) があるので、
+ * 1 行に収めて末尾を詰める。畳んだ先は見出しと会場カードが補う。
+ */
+@Composable
+private fun SetlistBreadcrumb(
+    brandName: String?,
+    eventName: String,
+    accent: Color,
+    onBrandClick: () -> Unit,
+    onEventClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        if (brandName != null) {
+            Text(
+                text = brandName,
+                fontSize = 12.sp,
+                color = accent,
+                maxLines = 1,
+                modifier = Modifier.clickable(onClick = onBrandClick)
+            )
+            Text(text = "›", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3)
+        }
+        Text(
+            text = eventName,
+            fontSize = 12.sp,
+            color = accent,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f).clickable(onClick = onEventClick)
+        )
+    }
+}
+
 /** 「👍 で投票しよう」の案内 (未ログインならログイン導線)。 */
 @Composable
 private fun VoteHintRow(isSignedIn: Boolean, onLoginClick: () -> Unit) {
@@ -629,27 +716,100 @@ private fun VoteHintRow(isSignedIn: Boolean, onLoginClick: () -> Unit) {
 }
 
 /**
- * セトリ行に添える「自分の回収」の札 1 つ。
+ * **この披露についての事実**の段 (詳細表示のときだけ中身が来る)。
  *
- * 色は共有コアが付けた [CollectionBadgeRole] で決める — **文字列を見て分岐しない**
- * (札の文言が増えたときに片方だけ色が付かない、という壊れ方をしないため)。
- * 未回収の文字色は枠用の薄い ink3 ではなく ink2 (AA のコントラストを満たすため)。
+ * ```text
+ * ────────────────────────
+ * 披露   3 回目   2 年 6 か月ぶり
+ * 回収   初回収
+ * ```
+ *
+ * 歌唱者との間にヘアラインを 1 本引いて、「この曲が何か」と「この披露がどうだったか」を
+ * 別のブロックとして読ませる。軸の名前は固定幅で左に置くので、39 曲のセトリでも
+ * 同じ位置に同じ軸が来る (縦に流し読みできる)。軸の分け方・ラベル・順・強調は
+ * すべて共有コアが決める (`setlist_row_note_groups`) — ここは並べるだけ。
  */
 @Composable
-private fun CollectionBadgeChip(badge: CollectionBadgeRecord) {
-    val collected = badge.role == CollectionBadgeRole.COLLECTED
-    Surface(
-        shape = RoundedCornerShape(50),
-        color = if (collected) DS.success.copy(alpha = 0.16f) else DS.fill
+private fun NoteGroupsBlock(noteGroups: List<SetlistRowNoteGroupRecord>, seed: String?) {
+    if (noteGroups.isEmpty()) return
+    val accent = ImasTheme.derive(seed, null, dark = true).accent
+    Column(
+        modifier = Modifier.padding(top = 1.dp),
+        verticalArrangement = Arrangement.spacedBy(3.dp)
     ) {
-        Text(
-            text = badge.text,
-            style = MaterialTheme.typography.labelSmall,
-            color = if (collected) DS.success else DS.ink2,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-        )
+        HorizontalDivider(color = DS.sep, thickness = 0.5.dp, modifier = Modifier.padding(bottom = 2.dp))
+        noteGroups.forEach { group ->
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                // 軸ラベル。固定幅・字間を少し開けて沈める (本文と張り合わない)。
+                Text(
+                    text = group.label,
+                    fontSize = 11.sp,
+                    letterSpacing = 0.4.sp,
+                    color = DS.ink3,
+                    modifier = Modifier.width(26.dp)
+                )
+                NoteGroupValues(notes = group.notes, accent = accent, modifier = Modifier.weight(1f))
+            }
+        }
     }
 }
+
+/**
+ * 1 つの軸の値を 1 本の [Text] に連結する。連結した `Text` は普通の文として折り返すので、
+ * 幅が足りなくても語の途中で割れない (「1 年 1 か月 / ぶり」のような割れ方をしない)。
+ *
+ * 強調は共有コアが付けた [RowNoteTone] の対応表だけで決める。**判断はしない** — 色だけに
+ * 意味を持たせず、自分の記録 (`MINE` / `MISSING`) には印 (チェック / 点線の丸) を添える。
+ */
+@Composable
+private fun NoteGroupValues(notes: List<SetlistRowNoteRecord>, accent: Color, modifier: Modifier = Modifier) {
+    val text = buildAnnotatedString {
+        notes.forEachIndexed { index, note ->
+            if (index > 0) append("  ")
+            when (note.tone) {
+                RowNoteTone.VALUE ->
+                    withStyle(SpanStyle(color = DS.ink, fontWeight = FontWeight.Medium)) { append(note.text) }
+                RowNoteTone.DETAIL ->
+                    withStyle(SpanStyle(color = DS.ink3)) { append(note.text) }
+                RowNoteTone.DEBUT ->
+                    withStyle(SpanStyle(color = accent, fontWeight = FontWeight.SemiBold)) { append(note.text) }
+                RowNoteTone.MINE -> {
+                    appendInlineContent(MINE_MARK_ID, "[v]")
+                    append(" ")
+                    withStyle(SpanStyle(color = DS.success, fontWeight = FontWeight.SemiBold)) { append(note.text) }
+                }
+                RowNoteTone.MISSING -> {
+                    appendInlineContent(MISSING_MARK_ID, "[o]")
+                    append(" ")
+                    withStyle(SpanStyle(color = DS.ink2)) { append(note.text) }
+                }
+            }
+        }
+    }
+    Text(
+        text = text,
+        fontSize = 12.sp,
+        modifier = modifier,
+        inlineContent = mapOf(
+            MINE_MARK_ID to InlineTextContent(
+                Placeholder(10.sp, 10.sp, PlaceholderVerticalAlign.TextCenter)
+            ) { Icon(Icons.Filled.Check, contentDescription = null, tint = DS.success, modifier = Modifier.fillMaxSize()) },
+            MISSING_MARK_ID to InlineTextContent(
+                Placeholder(10.sp, 10.sp, PlaceholderVerticalAlign.TextCenter)
+            ) {
+                Icon(
+                    Icons.Outlined.RadioButtonUnchecked,
+                    contentDescription = null,
+                    tint = DS.ink3,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        )
+    )
+}
+
+private const val MINE_MARK_ID = "mine_mark"
+private const val MISSING_MARK_ID = "missing_mark"
 
 /**
  * 公演の頭に出す「自分の回収」の要約 (「この公演で 12 曲回収・初回収 4 曲」
@@ -781,11 +941,6 @@ private fun SetlistSimpleRow(
     item: SetlistRow,
     displayNumber: Int,
     performerLabel: String,
-    /**
-     * 披露履歴の札。**出すかどうかはコアが表示モードから決める**ので、
-     * シンプル表示では常に空で来る (この行は曲名と歌唱者だけのための形)。
-     */
-    historyBadges: List<String>,
     brandHex: String?,
     onClick: () -> Unit
 ) {
@@ -815,24 +970,18 @@ private fun SetlistSimpleRow(
                 color = titleColor,
                 maxLines = 2
             )
-            if (performerLabel.isNotEmpty() || historyBadges.isNotEmpty()) {
+            if (performerLabel.isNotEmpty()) {
                 // 公式のセトリ画像に倣って ♪ を頭に置く。演者を横に並べると長い名前で
-                // 曲名が潰れるので下段に置く。珍しさは演者の後ろに小さく添える
-                // (シンプル表示は 1 枚に収めるのが目的なので行を増やさない)。
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    if (performerLabel.isNotEmpty()) {
-                        Text(
-                            text = "♪ $performerLabel",
-                            fontSize = 11.sp,
-                            color = DS.ink2,
-                            maxLines = 2,
-                            modifier = Modifier.weight(1f, fill = false)
-                        )
-                    }
-                    historyBadges.forEach { badge ->
-                        Text(text = badge, fontSize = 11.sp, color = DS.ink3, maxLines = 1)
-                    }
-                }
+                // 曲名が潰れるので下段に置く。
+                //
+                // 披露の履歴と自分の回収はこの行には出ない (コアがシンプル表示では
+                // 空を返す)。1 枚のスクショに収めるための形なので、行を増やさない。
+                Text(
+                    text = "♪ $performerLabel",
+                    fontSize = 11.sp,
+                    color = DS.ink2,
+                    maxLines = 2
+                )
             }
         }
     }
@@ -849,15 +998,16 @@ private fun SetlistItemRow(
      * (その披露の名義 → 曲の名義 → 顔ぶれ推論)。空なら札を出さない。
      */
     unitNames: List<String>,
-    /** 披露履歴の札。出すかどうかもコアが表示モードから決める (詳細表示だけ中身が入る)。 */
-    historyBadges: List<String>,
     /**
-     * **自分の回収**の札 (「初回収」「回収 3 回目 (2 年ぶり)」「未回収」)。行あたり多くても 1 つ。
-     * 中身も出す/出さないも、色に使う `role` も共有コアが決める
-     * (`collection_gap` / `setlist_collection_badges`)。ここは並べて role で色分けするだけ
-     * (文字列を見て色を決めない)。
+     * この披露についての事実を、軸 (`披露` / `回収`) ごとにまとめたもの。
+     * **軸の分け方も、ラベルも、順も、どれを強く見せるか (`tone`) も共有コアが決める**
+     * ので、ここは受け取った順に並べるだけ。詳細表示以外では必ず空で来る。
+     *
+     * 丸い札にはしない。曲の属性 (カバー・ユニット名) と同じ形で並べると 1 行に丸が
+     * 何個も並び、構造にならない。軸の名前を左に固定幅で置き、値を右に流す
+     * ([`NoteGroupsBlock`])。
      */
-    collectionBadges: List<CollectionBadgeRecord> = emptyList(),
+    noteGroups: List<SetlistRowNoteGroupRecord> = emptyList(),
     performerName: PerformerNameMode,
     isCharacterLive: Boolean,
     showName: String?,
@@ -917,10 +1067,11 @@ private fun SetlistItemRow(
                 modifier = Modifier.clickable(onClick = onSongClick)
             )
 
-            // ユニット名の札 + 珍しさの札。名前も「いつぶりか」もコアが決めた文字列で、
-            // ここは並べるだけ。珍しさは塗りつぶしではなく輪郭だけにして、
-            // ユニット名と競わせない (出るのは 3 行に 1 行ほど)。
-            if (unitNames.isNotEmpty() || historyBadges.isNotEmpty() || collectionBadges.isNotEmpty()) {
+            // 「この曲が何か」の札 (ユニット名)。名前はコアが決めた文字列で、ここは並べるだけ。
+            //
+            // 披露の履歴と自分の回収はここに入れない ([`NoteGroupsBlock`])。同じ形の札で
+            // 混ぜると「ユニット名」と「4 回目」が同じ重みに見えて、行が札の羅列になる。
+            if (unitNames.isNotEmpty()) {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -934,25 +1085,6 @@ private fun SetlistItemRow(
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                             )
                         }
-                    }
-                    historyBadges.forEach { badge ->
-                        Surface(
-                            shape = RoundedCornerShape(50),
-                            color = Color.Transparent,
-                            border = BorderStroke(1.dp, DS.ink3)
-                        ) {
-                            Text(
-                                text = badge,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = DS.ink2,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                            )
-                        }
-                    }
-                    // 自分の回収の札。世の中の履歴 (輪郭) の次に置き、色で「自分の記録」と分ける。
-                    // どちらの色かは共有コアが付けた role で決める (文字列を見て分岐しない)。
-                    collectionBadges.forEach { badge ->
-                        CollectionBadgeChip(badge = badge)
                     }
                 }
             }
@@ -974,6 +1106,9 @@ private fun SetlistItemRow(
                     }
                 }
             }
+
+            // 「この披露はどうだったか」(披露の履歴・自分の回収) の段。
+            NoteGroupsBlock(noteGroups = noteGroups, seed = seed)
 
             // Notes
             if (item.notes != null) {

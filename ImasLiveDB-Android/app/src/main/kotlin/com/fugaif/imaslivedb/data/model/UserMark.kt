@@ -33,6 +33,8 @@ data class UserMark(
         const val ATTENDED = "attended"   // 参加
         const val MEMO = "memo"
         const val OWNED = "owned"         // 所持 (KAMISABI カード等の収集物)
+        /** 楽曲の習熟度。text_value に序数 "1".."8" を入れる (ラベルは設定側)。 */
+        const val MASTERY = "mastery"
     }
 }
 
@@ -45,4 +47,10 @@ data class UserMark(
 data class AttendanceMarkProjection(
     @ColumnInfo(name = "entity_id") val entityId: String,
     @ColumnInfo(name = "text_value") val textValue: String?
+)
+
+/** [com.fugaif.imaslivedb.data.db.dao.UserMarkDao.textValues] の射影。 */
+data class TextMarkProjection(
+    val entityId: String,
+    val textValue: String?,
 )

@@ -220,6 +220,12 @@ private fun NavGraphBuilder.eventsNavGraph(navController: NavHostController) {
             },
             onFilteredShowsClick = { kind, value ->
                 navController.navigate(NavRoutes.FilteredShows.createRoute(kind, value))
+            },
+            onEventClick = { eventId ->
+                navController.navigate(NavRoutes.EventDetail.createRoute(eventId))
+            },
+            onFilteredEventsClick = { kind, value ->
+                navController.navigate(NavRoutes.FilteredEvents.createRoute(kind, value))
             }
         )
     }
@@ -398,6 +404,12 @@ private fun NavGraphBuilder.songsNavGraph(navController: NavHostController) {
             },
             onFilteredShowsClick = { kind, value ->
                 navController.navigate(NavRoutes.FilteredShows.createRoute(kind, value))
+            },
+            onEventClick = { eventId ->
+                navController.navigate(NavRoutes.EventDetail.createRoute(eventId))
+            },
+            onFilteredEventsClick = { kind, value ->
+                navController.navigate(NavRoutes.FilteredEvents.createRoute(kind, value))
             }
         )
     }
@@ -504,6 +516,12 @@ private fun NavGraphBuilder.idolsNavGraph(navController: NavHostController) {
             },
             onFilteredShowsClick = { kind, value ->
                 navController.navigate(NavRoutes.FilteredShows.createRoute(kind, value))
+            },
+            onEventClick = { eventId ->
+                navController.navigate(NavRoutes.EventDetail.createRoute(eventId))
+            },
+            onFilteredEventsClick = { kind, value ->
+                navController.navigate(NavRoutes.FilteredEvents.createRoute(kind, value))
             }
         )
     }
@@ -841,6 +859,12 @@ private fun NavGraphBuilder.detailRoutes(navController: NavHostController) {
             onIdolClick = { navController.navigate(NavRoutes.IdolDetail.createRoute(it)) },
             onFilteredShowsClick = { kind, value ->
                 navController.navigate(NavRoutes.FilteredShows.createRoute(kind, value))
+            },
+            onEventClick = { eventId ->
+                navController.navigate(NavRoutes.EventDetail.createRoute(eventId))
+            },
+            onFilteredEventsClick = { kind, value ->
+                navController.navigate(NavRoutes.FilteredEvents.createRoute(kind, value))
             }
         )
     }

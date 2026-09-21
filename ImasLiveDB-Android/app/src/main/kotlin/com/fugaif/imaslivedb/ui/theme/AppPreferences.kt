@@ -29,6 +29,9 @@ object AppPreferences {
 
     // iOS `MyPageView` の @AppStorage キーと 1:1。
     private const val KEY_TEXT_SCALE = "text_scale"
+    private const val KEY_MASTERY_LABELS = "mastery_scale_labels_v1"
+    /** ラベルに出てこない区切り (段の名前は 4 文字以内の日本語想定)。 */
+    private const val LABEL_SEPARATOR = "\u001F"
     private const val KEY_EVENT_NAME_ABBREVIATE = "event_name_abbreviate"
     private const val KEY_COLLECTION_INCLUDE_STREAM = "collection_include_stream"
     private const val KEY_THEME_USE_OSHI_COLOR = "theme_use_oshi_color"
@@ -56,6 +59,7 @@ object AppPreferences {
     private var oshiIdolIdState by mutableStateOf("")
     private var oshiColorHexState by mutableStateOf("")
     private var performerNameRawState by mutableStateOf(PerformerNamePref.defaultRaw)
+    private var masteryLabelsState by mutableStateOf(MasteryScale.defaultLabels)
 
     /**
      * アプリ内の文字サイズ倍率。OS のフォントサイズ設定に**乗算**で重ねる追加倍率で、
@@ -102,8 +106,22 @@ object AppPreferences {
         oshiColorHexState = p.getString(KEY_THEME_OSHI_COLOR, "").orEmpty()
         performerNameRawState = p.getString(PerformerNamePref.STORAGE_KEY, null)
             ?: PerformerNamePref.defaultRaw
+        masteryLabelsState = p.getString(KEY_MASTERY_LABELS, null)
+            ?.split(LABEL_SEPARATOR)?.filter { it.isNotBlank() }
+            ?.takeIf { it.isNotEmpty() }
+            ?: MasteryScale.defaultLabels
 
         pushCollectionScope(context)
+    }
+
+    /** 習熟度の段階。保存は序数なので、ここを変えても付けた記録は壊れない。 */
+    val masteryScale: MasteryScale get() = MasteryScale(masteryLabelsState)
+
+    fun setMasteryLabels(value: List<String>) {
+        val cleaned = value.map { it.trim() }.filter { it.isNotEmpty() }.take(8)
+        if (cleaned.isEmpty()) return
+        masteryLabelsState = cleaned
+        prefs?.edit()?.putString(KEY_MASTERY_LABELS, cleaned.joinToString(LABEL_SEPARATOR))?.apply()
     }
 
     fun setTextScale(value: Float) {

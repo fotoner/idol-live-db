@@ -65,6 +65,34 @@ class UserMarkRepository(private val db: AppDatabase) {
     suspend fun setSeat(type: String, id: String, text: String?) =
         setText(type, id, SEAT, text)
 
+    // ---- 習熟度 (段階) ----
+    //
+    // 保存するのは**序数だけ** (text_value に "1".."8")。ラベルはユーザーが設定で決めるので
+    // 保存値に入れない (入れると「ラベルを直したら記録が迷子になる」が必ず起きる)。
+    // 段数から導ける規則 (次の段 / 重み / 段数を変えたときの寄せ先) と群化・集計は
+    // 共有コア (imas-core `domain/mastery.rs`) にある。ここは読み書きだけ。
+
+    /** 全曲の習熟度。一覧の全行が読むので、行ごとに引かずまとめて 1 回。 */
+    suspend fun masteryLevels(): Map<String, UByte> =
+        dao.textValues(UserMark.SONG, UserMark.MASTERY)
+            .mapNotNull { row ->
+                val level = row.textValue?.toUByteOrNull() ?: return@mapNotNull null
+                if (level > 0u) row.entityId to level else null
+            }
+            .toMap()
+
+    /** 1 曲の段階を決める。0 で未設定に戻す (行ごと消す)。 */
+    suspend fun setMastery(songId: String, level: UByte) {
+        setText(UserMark.SONG, songId, UserMark.MASTERY,
+                if (level.toInt() == 0) null else level.toString())
+    }
+
+    /** まとめて決める。1 曲ずつ書くのと同じ結果だが、呼び出し側の再読込を 1 回で済ませる。 */
+    suspend fun setMastery(songIds: List<String>, level: UByte) {
+        val text = if (level.toInt() == 0) null else level.toString()
+        songIds.forEach { setText(UserMark.SONG, it, UserMark.MASTERY, text) }
+    }
+
     /**
      * text_value を持つマークの共通の書き込み口。
      *
