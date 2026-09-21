@@ -38,13 +38,31 @@ struct StackedAvatars: View {
                     )
                     .zIndex(Double(maxVisible - idx))
             }
-            if idols.count > maxVisible {
-                Text("+\(idols.count - maxVisible)")
-                    .font(.imasCaption2.bold())
-                    .foregroundStyle(DS.ink2)
-                    .padding(.leading, DS.sp2)
-                    .zIndex(0)
-            }
+            overflowChip
+        }
+    }
+
+    /// 入り切らなかった人数。**アバターと同じ丸**にして列の最後に置く。
+    ///
+    /// 以前は素のテキスト (`+9`) だった。`HStack` の負のスペーシングは
+    /// **このテキストにも掛かる**ので左に 4 割ぶん引き寄せられ、しかも `zIndex` が
+    /// 最前のアバターより下だったため、**「+」が隣の円の下に潜って数字だけが見えていた**
+    /// (「9」とだけ出ていて、何の 9 なのか分からない)。
+    ///
+    /// 丸にして列の最後に置く。**重なりは打ち消す** — アバターどうしの重なりは
+    /// 「同じ集団」の合図だが、これは人ではなく「あと何人いるか」の注記なので、
+    /// 同じように重ねると隠れているように見える (実際そう見えるという指摘を受けた)。
+    /// 負のスペーシングぶんを左余白で戻し、わずかに離して置く。
+    @ViewBuilder
+    private var overflowChip: some View {
+        if idols.count > maxVisible {
+            Text("+\(idols.count - maxVisible)")
+                .font(.imasCaption2.weight(.semibold))
+                .foregroundStyle(DS.ink2)
+                .frame(width: size, height: size)
+                .background(DS.fill, in: Circle())
+                .padding(.leading, size * 0.4 + DS.sp2)
+                .zIndex(Double(maxVisible + 1))
         }
     }
 }
