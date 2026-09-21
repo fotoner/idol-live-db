@@ -29,6 +29,8 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.Verified
+import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -91,12 +93,15 @@ import com.fugaif.imaslivedb.ui.theme.AppPreferences
 import com.fugaif.imaslivedb.ui.theme.BrandPalette
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
+import uniffi.imas_core.CollectionBadgeRecord
+import uniffi.imas_core.CollectionBadgeRole
 import uniffi.imas_core.PerformerNameMode
 import uniffi.imas_core.SetlistDisplayMode
 import uniffi.imas_core.SetlistRowMetaRecord
 import uniffi.imas_core.setlistDisplayModeIsCompact
 import uniffi.imas_core.setlistDisplayModeFromStored
 import uniffi.imas_core.setlistDisplayModes
+import uniffi.imas_core.ShowCollectionRecord
 import uniffi.imas_core.ShowCostumeRecord
 import com.fugaif.imaslivedb.ui.theme.brandColor
 import com.fugaif.imaslivedb.ui.theme.displayName
@@ -146,15 +151,13 @@ fun SetlistScreen(
     // 曲名と歌唱者だけに絞る形か。どのモードがそれに当たるかもコアが決める。
     val simpleMode = setlistDisplayModeIsCompact(displayMode)
 
-    LaunchedEffect(showId, performerName, displayMode) {
-        viewModel.load(context, showId, performerName, displayMode)
-    }
-
     // --- マーク (参加 / お気に入り / メモ / 座席)。実体は Room なのでここで読み書きする ---
     var attendance by remember(showId) { mutableStateOf<AttendanceType?>(null) }
     var favoriteOn by remember(showId) { mutableStateOf(false) }
     var note by remember(showId) { mutableStateOf<String?>(null) }
     var seat by remember(showId) { mutableStateOf<String?>(null) }
+    // 参加を付け外しすると回収の札と要約が変わるので、行の添え物を読み直す鍵に使う。
+    var attendanceVersion by remember(showId) { mutableStateOf(0) }
 
     suspend fun reloadMarks() {
         attendance = marks.attendance(UserMark.SHOW, showId)
@@ -163,6 +166,16 @@ fun SetlistScreen(
         seat = marks.seat(UserMark.SHOW, showId)
     }
     LaunchedEffect(showId) { reloadMarks() }
+
+    // 参加の付け外し・「配信も回収に含める」設定でも回収の札と要約が変わるので、
+    // 表示モード・歌唱者の設定と同じ扱いで読み直しの鍵に入れる。
+    LaunchedEffect(
+        showId, performerName, displayMode, attendanceVersion, AppPreferences.includeStreamInCollection
+    ) {
+        viewModel.load(
+            context, showId, performerName, displayMode, AppPreferences.includeStreamInCollection
+        )
+    }
 
     // --- 「良かった」投票 (post-vote)。セトリが埋まっている公演だけ取りに行く ---
     var likes by remember(showId) { mutableStateOf<Map<String, SetlistLikeService.LikeEntry>>(emptyMap()) }
@@ -370,6 +383,14 @@ fun SetlistScreen(
                     }
                 }
 
+                // 自分の回収の要約。セトリの真上に置いて、この下の並びの読み方を先に言う。
+                // 出すかどうかも文言も共有コアが決める (null なら何も出さない)。
+                uiState.collectionSummary?.let { summary ->
+                    item(key = "collection_summary") {
+                        CollectionSummaryRow(summary = summary)
+                    }
+                }
+
                 uiState.sections.forEach { section ->
                     stickyHeader(key = section.sectionName) {
                         Surface(
@@ -405,6 +426,7 @@ fun SetlistScreen(
                                     performers = performers,
                                     unitNames = meta?.unitNames.orEmpty(),
                                     historyBadges = meta?.historyBadges.orEmpty(),
+                                    collectionBadges = meta?.collectionBadges.orEmpty(),
                                     performerName = performerName,
                                     isCharacterLive = isCharacterLive,
                                     showName = uiState.show?.name,
@@ -445,6 +467,7 @@ fun SetlistScreen(
                 scope.launch {
                     marks.setAttendance(UserMark.SHOW, showId, type)
                     reloadMarks()
+                    attendanceVersion++
                 }
             }
         )
@@ -469,7 +492,10 @@ fun SetlistScreen(
                 onDismiss = { showEditDialog = false },
                 onSaved = {
                     showEditDialog = false
-                    viewModel.load(context, showId, performerName, displayMode)
+                    viewModel.load(
+                        context, showId, performerName, displayMode,
+                        AppPreferences.includeStreamInCollection
+                    )
                 }
             )
         }
@@ -599,6 +625,64 @@ private fun VoteHintRow(isSignedIn: Boolean, onLoginClick: () -> Unit) {
             style = MaterialTheme.typography.bodySmall,
             color = DS.ink2
         )
+    }
+}
+
+/**
+ * セトリ行に添える「自分の回収」の札 1 つ。
+ *
+ * 色は共有コアが付けた [CollectionBadgeRole] で決める — **文字列を見て分岐しない**
+ * (札の文言が増えたときに片方だけ色が付かない、という壊れ方をしないため)。
+ * 未回収の文字色は枠用の薄い ink3 ではなく ink2 (AA のコントラストを満たすため)。
+ */
+@Composable
+private fun CollectionBadgeChip(badge: CollectionBadgeRecord) {
+    val collected = badge.role == CollectionBadgeRole.COLLECTED
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = if (collected) DS.success.copy(alpha = 0.16f) else DS.fill
+    ) {
+        Text(
+            text = badge.text,
+            style = MaterialTheme.typography.labelSmall,
+            color = if (collected) DS.success else DS.ink2,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+        )
+    }
+}
+
+/**
+ * 公演の頭に出す「自分の回収」の要約 (「この公演で 12 曲回収・初回収 4 曲」
+ * 「このセトリに未回収 7 曲」)。**出すかどうかも文言も共有コアが決める** — ここは
+ * `summary.attended` でアイコンと色を選ぶだけ (文言を組み立てない)。
+ */
+@Composable
+private fun CollectionSummaryRow(summary: ShowCollectionRecord) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = if (summary.attended) DS.success.copy(alpha = 0.10f) else DS.fill,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+        ) {
+            Icon(
+                imageVector = if (summary.attended) Icons.Filled.Verified else Icons.Outlined.RadioButtonUnchecked,
+                contentDescription = null,
+                tint = if (summary.attended) DS.success else DS.ink3,
+                modifier = Modifier.size(16.dp)
+            )
+            Text(
+                text = summary.label,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = if (summary.attended) DS.ink else DS.ink2
+            )
+        }
     }
 }
 
@@ -767,6 +851,13 @@ private fun SetlistItemRow(
     unitNames: List<String>,
     /** 披露履歴の札。出すかどうかもコアが表示モードから決める (詳細表示だけ中身が入る)。 */
     historyBadges: List<String>,
+    /**
+     * **自分の回収**の札 (「初回収」「回収 3 回目 (2 年ぶり)」「未回収」)。行あたり多くても 1 つ。
+     * 中身も出す/出さないも、色に使う `role` も共有コアが決める
+     * (`collection_gap` / `setlist_collection_badges`)。ここは並べて role で色分けするだけ
+     * (文字列を見て色を決めない)。
+     */
+    collectionBadges: List<CollectionBadgeRecord> = emptyList(),
     performerName: PerformerNameMode,
     isCharacterLive: Boolean,
     showName: String?,
@@ -829,7 +920,7 @@ private fun SetlistItemRow(
             // ユニット名の札 + 珍しさの札。名前も「いつぶりか」もコアが決めた文字列で、
             // ここは並べるだけ。珍しさは塗りつぶしではなく輪郭だけにして、
             // ユニット名と競わせない (出るのは 3 行に 1 行ほど)。
-            if (unitNames.isNotEmpty() || historyBadges.isNotEmpty()) {
+            if (unitNames.isNotEmpty() || historyBadges.isNotEmpty() || collectionBadges.isNotEmpty()) {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -857,6 +948,11 @@ private fun SetlistItemRow(
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                             )
                         }
+                    }
+                    // 自分の回収の札。世の中の履歴 (輪郭) の次に置き、色で「自分の記録」と分ける。
+                    // どちらの色かは共有コアが付けた role で決める (文字列を見て分岐しない)。
+                    collectionBadges.forEach { badge ->
+                        CollectionBadgeChip(badge = badge)
                     }
                 }
             }

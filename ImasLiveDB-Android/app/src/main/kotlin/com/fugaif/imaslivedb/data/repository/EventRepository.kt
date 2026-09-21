@@ -28,8 +28,19 @@ import uniffi.imas_core.EventDetailRecord
 import uniffi.imas_core.EventListRecord
 import uniffi.imas_core.EventWithDateRecord
 import uniffi.imas_core.SetlistPerformerRecord
+import uniffi.imas_core.ShowCollectionRecord
 import uniffi.imas_core.ShowRecord
 import uniffi.imas_core.TimelineBarRecord
+
+/**
+ * [EventRepository.fetchSetlistRowMeta] の結果。行の添え物と、公演の頭に出す
+ * 自分の回収の要約を 1 回で返す (要約は行の回収から数えるので、別の呼び出しに
+ * 分けるとズレを作れてしまう — 共有コアの `SetlistRowMetaBundle` と同じ理由)。
+ */
+data class SetlistRowMetaResult(
+    val rowsByItemId: Map<String, SetlistRowMetaRecord> = emptyMap(),
+    val collection: ShowCollectionRecord? = null
+)
 
 /**
  * ライブ (イベント/公演/セトリ/会場) の読み取り口。
@@ -306,23 +317,38 @@ class EventRepository(
     }
 
     /**
-     * セトリ 1 行ぶんの添え物 (名義・ユニットの札・全員・何回目・いつぶり)。
-     * 並びは [fetchPerformersByItem] の元と同じセトリ順で、キーは setlist_items.id。
+     * セトリ 1 行ぶんの添え物 (名義・ユニットの札・全員・何回目・いつぶり・自分の回収) と、
+     * 公演の頭に出す回収の要約。並びは [fetchPerformersByItem] の元と同じセトリ順で、
+     * 行のキーは setlist_items.id。
      *
      * **名義の決め方 (その披露の名義 → 曲の名義 → 個人名併記 → 顔ぶれ推論 → 名前) も、
-     * 「N 年ぶり」の言い回しもコアが持つ。** 画面で組み立てないこと — iOS にだけ規則を
-     * 書いていた時代に、同じ規則が両 OS で食い違った (imas-core/src/domain/performer_label.rs)。
+     * 「N 年ぶり」の言い回しも、「初回収 / 回収 N 回目 / 未回収」の判断もコアが持つ。**
+     * 画面で組み立てないこと — iOS にだけ規則を書いていた時代に、同じ規則が両 OS で
+     * 食い違った (imas-core/src/domain/performer_label.rs)。
+     *
+     * 参加マーク (user_marks) の解決は [CollectionAttendance] へ寄せてある
+     * (どのマークを回収に数えるかの規則はコア一本)。`includeStreamInCollection` は
+     * 設定「配信参加も回収に含める」の現在値で、変わったら呼び直すこと。
      *
      * スナップショットにしか無い判断なので、Room 経路のフォールバックは空。
      */
     suspend fun fetchSetlistRowMeta(
         showId: String,
         mode: PerformerNameMode,
-        displayMode: SetlistDisplayMode
-    ): Map<String, SetlistRowMetaRecord> =
-        snapshots?.query { store ->
-            store.showSetlistRowMeta(showId, mode, displayMode).associateBy { it.itemId }
-        } ?: emptyMap()
+        displayMode: SetlistDisplayMode,
+        includeStreamInCollection: Boolean
+    ): SetlistRowMetaResult {
+        val provider = snapshots ?: return SetlistRowMetaResult()
+        val attendedShowIds = CollectionAttendance.showIds(db, includeStreamInCollection)
+        val attendedEventIds = CollectionAttendance.eventIds(db, includeStreamInCollection)
+        val bundle = provider.query { store ->
+            store.showSetlistRowMeta(showId, mode, displayMode, attendedShowIds, attendedEventIds)
+        } ?: return SetlistRowMetaResult()
+        return SetlistRowMetaResult(
+            rowsByItemId = bundle.rows.associateBy { it.itemId },
+            collection = bundle.collection
+        )
+    }
 
     /**
      * その公演で着られた衣装 (進行順)。記録が無ければ空。

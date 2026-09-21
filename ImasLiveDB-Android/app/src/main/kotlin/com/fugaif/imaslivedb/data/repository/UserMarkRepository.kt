@@ -104,9 +104,13 @@ class UserMarkRepository(private val db: AppDatabase) {
      * 設定の保存先 ([com.fugaif.imaslivedb.ui.theme.AppPreferences]) は Context を要るので、
      * リポジトリから読みに行かず**押し込んでもらう**。逆向き (data → ui) の依存を作らずに
      * 済ませるための向きで、押し込みは設定の読み込み時と変更時の 2 箇所。
+     *
+     * 実体は [CollectionPreferences] (回収の判定に絡む [SongRepository] / [EventRepository]
+     * とも共有するため、このリポジトリのインスタンスには閉じ込めていない)。
      */
-    @Volatile
-    var includeStreamInCollection: Boolean = false
+    var includeStreamInCollection: Boolean
+        get() = CollectionPreferences.includeStream
+        set(value) { CollectionPreferences.includeStream = value }
 
     /**
      * attended ライブのセトリから自動判定した「回収済み」song_id セット (回収ダッシュボード用)。

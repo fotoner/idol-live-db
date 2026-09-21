@@ -16,6 +16,7 @@ import com.fugaif.imaslivedb.data.model.SongPlayCount
 import com.fugaif.imaslivedb.data.model.SongSearchFilter
 import com.fugaif.imaslivedb.data.model.SongSortOrder
 import com.fugaif.imaslivedb.data.model.SongWithArtists
+import com.fugaif.imaslivedb.data.model.UserMark
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uniffi.imas_core.KamisabiCompletion
@@ -290,11 +291,17 @@ class SongRepository(
     /** song_id → 現地回収回数 (行アイコン/回収済みフィルタ用の bulk 取得)。 */
     suspend fun fetchSongCollectedCounts(): Map<String, Int> {
         if (snapshots != null) {
-            // バッジは「現地参加 (text_value NULL/'live') の show + 参加イベント配下の show」を
-            // リアルライブ (event.kind=live/festival) 限定で数える — SQL 版と同一条件。
-            // 参加マークの解決はプラットフォーム側、集計はコア側という分担。
-            val attendedShowIds = db.songDao().fetchAttendedLiveShowIds()
-            val attendedEventIds = db.userMarkDao().idsFor("event", "attended")
+            // バッジは「参加した show + 参加イベント配下の show」をリアルライブ
+            // (event.kind=live/festival) 限定で数える — 集計はコア側 (songCollectedCountMap
+            // 内の attended_real_live_shows)、参加マークの解決はプラットフォーム側という分担。
+            //
+            // show 側の「現地のみ / 配信も含める」の条件選びは CollectionAttendance (= コアの
+            // collectionAttendedShows) に一本化してある。以前はここが SongDao.fetchAttendedLiveShowIds
+            // という別 SQL (常に現地のみ固定で、設定「配信参加も回収に含める」を無視していた) を
+            // 使っていて、セトリ側の回収表示と条件が食い違う元だった。
+            // event 側は種別条件を掛けない (SQL 時代の fetchSongCollectedCountsQuery と同じ母集合)。
+            val attendedShowIds = CollectionAttendance.showIds(db, CollectionPreferences.includeStream)
+            val attendedEventIds = db.userMarkDao().idsFor(UserMark.EVENT, UserMark.ATTENDED)
             snapshots.query { store ->
                 store.songCollectedCountMap(attendedShowIds, attendedEventIds, true)
                     .mapValues { (_, count) -> count.toInt() }

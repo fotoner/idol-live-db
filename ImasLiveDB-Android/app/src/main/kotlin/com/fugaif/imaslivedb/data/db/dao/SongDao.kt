@@ -29,18 +29,6 @@ interface SongDao {
     @Query("SELECT * FROM idols WHERE id IN (:ids)")
     suspend fun fetchIdolsByIds(ids: List<String>): List<Idol>
 
-    /**
-     * 現地参加 (text_value NULL または 'live') でマークした show の id 集合。
-     * user_marks はスナップショットに載せない規約のため、回収バッジ系のスナップショット
-     * クエリ (songCollectedCountMap) へ渡す入力をプラットフォーム側で解決する。
-     * 曲スライスの都合で使う解決クエリなので UserMarkDao ではなくここに置く。
-     */
-    @Query("""
-        SELECT entity_id FROM user_marks
-        WHERE entity_type = 'show' AND kind = 'attended' AND bool_value = 1
-          AND (text_value IS NULL OR text_value = 'live')
-    """)
-    suspend fun fetchAttendedLiveShowIds(): List<String>
 
     /**
      * KAMISABI (音楽カードゲーム) にカードがある曲の id 一覧。`SnapshotStore.kamisabiCompletion`

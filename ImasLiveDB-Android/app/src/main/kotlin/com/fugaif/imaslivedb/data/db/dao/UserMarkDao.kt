@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.fugaif.imaslivedb.data.model.AttendanceMarkProjection
 import com.fugaif.imaslivedb.data.model.UserMark
 
 @Dao
@@ -38,6 +39,17 @@ interface UserMarkDao {
         WHERE entity_type = :type AND kind = :kind AND bool_value = 1 AND entity_id IN (:ids)
     """)
     suspend fun onIdsIn(type: String, kind: String, ids: List<String>): List<String>
+
+    /**
+     * ON になっているマークを (entity_id, text_value) の射影で取り出す。[textValue] は
+     * 種別 1 件しか返さないため、参加形態 (live/stream/live_viewing) を保ったまま
+     * 複数件まとめて引きたい経路 (回収の判定を共有コアへ渡す入力) はこちらを使う。
+     */
+    @Query("""
+        SELECT entity_id, text_value FROM user_marks
+        WHERE entity_type = :type AND kind = :kind AND bool_value = 1
+    """)
+    suspend fun attendedMarks(type: String, kind: String): List<AttendanceMarkProjection>
 
     /** メモ本文が入っているエンティティID一覧 (「メモがあるアイドルのみ」等の絞り込み用)。 */
     @Query("SELECT entity_id FROM user_marks WHERE entity_type = :type AND kind = 'memo' AND text_value IS NOT NULL AND text_value != ''")
