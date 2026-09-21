@@ -161,6 +161,27 @@ pub fn catalog() -> Vec<ToolSpec> {
             }),
             &["kind"],
         ),
+        spec(
+            "songs_for_cast",
+            "出演者の顔ぶれで歌える曲を探す。**原唱者が全員そろう曲**を返す。\
+             list_songs の idol_id は「その人が入っている曲」なので、残りの原唱者が\
+             その日いるかを見ていない — 編成から曲を決めるときはこちら。\
+             max_missing を 1 にすると「あと 1 人呼べば歌える曲」も出て、\
+             誰が足りないかが missing に入る (「この曲をやるには誰が要るか」の向きに使える)。\
+             並びは欠員の少ない順 → 披露回数の多い順。派生曲 ((◯◯ Ver.) 等) は外す。",
+            json!({
+                "idol_ids": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "出演者のアイドル id の配列。resolve か get_show で得ること。"
+                },
+                "max_missing": { "type": "integer", "description": "原唱者が何人まで欠けてよいか。既定 0 (完全にそろう曲だけ)・最大 3。" },
+                "min_artists": { "type": "integer", "description": "原唱者の人数の下限。ソロを外したいときに 2。" },
+                "max_artists": { "type": "integer", "description": "原唱者の人数の上限。全体曲を外したいときに 5 など。" },
+                "limit": { "type": "integer", "description": "既定 40・最大 200。" }
+            }),
+            &["idol_ids"],
+        ),
     ]
 }
 
@@ -179,6 +200,7 @@ pub fn call(
         "song_performances" => song_performances(snap, args),
         "setlist_diff" => setlist_diff(snap, args),
         "stats" => stats(snap, args),
+        "songs_for_cast" => songs_for_cast(snap, args),
         _ => return None,
     })
 }
@@ -256,6 +278,66 @@ fn idol_row(snap: &Snapshot, idol: &Idol) -> Value {
 
 /// 曲 1 行。原唱者は人数が多い曲 (全体曲) で名前を並べると読む量が跳ね上がるので、
 /// 数だけを必ず返し、名前は並べても読める人数のときだけ添える。
+// =============================================================================
+// songs_for_cast
+// =============================================================================
+
+fn songs_for_cast(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
+    use crate::domain::cast_song_matching::songs_for_cast as match_songs;
+
+    let ids = arguments
+        .get("idol_ids")
+        .and_then(|v| v.as_array())
+        .ok_or_else(|| ToolError::BadArgs("idol_ids (配列) が要る".into()))?;
+    if ids.is_empty() {
+        return Err(ToolError::BadArgs("idol_ids が空".into()));
+    }
+    // 未知の id を黙って落とさない。落とすと「その顔ぶれでは歌える曲が少ない」と
+    // 読めてしまい、綴り違いが結果の違いに化ける。
+    let cast: Vec<u32> = ids
+        .iter()
+        .map(|v| {
+            let id = v.as_str().ok_or_else(|| ToolError::BadArgs("idol_ids は文字列の配列".into()))?;
+            snap.idol_index_by_id
+                .get(id)
+                .copied()
+                .ok_or_else(|| ToolError::NotFound(format!("アイドル {id} が無い")))
+        })
+        .collect::<Result<_, _>>()?;
+
+    let max_missing = args::capped(arguments, "max_missing", 0, 3)?;
+    let min_artists = args::u32_opt(arguments, "min_artists")?;
+    let max_artists = args::u32_opt(arguments, "max_artists")?;
+    let limit = args::limit(arguments, 40, 200)?;
+
+    let hits = match_songs(snap, &cast, max_missing, min_artists, max_artists, limit as usize);
+    let rows: Vec<Value> = hits
+        .iter()
+        .map(|h| {
+            let song = &snap.songs[h.song as usize];
+            let mut o = Obj::new();
+            o.put("song_id", json!(song.id));
+            o.put("title", json!(song.title));
+            o.opt("unit_name", song.unit_name.clone());
+            o.put("artist_count", json!(h.artists.len()));
+            o.put(
+                "artists",
+                json!(h.artists.iter().map(|&a| snap.idols[a as usize].name.as_str()).collect::<Vec<_>>()),
+            );
+            // 空なら載せない (この DB の返し方の規約)。載っていれば「足りない人」。
+            if !h.missing.is_empty() {
+                o.put(
+                    "missing",
+                    json!(h.missing.iter().map(|&a| snap.idols[a as usize].name.as_str()).collect::<Vec<_>>()),
+                );
+            }
+            o.put("performance_count", json!(h.performances));
+            o.value()
+        })
+        .collect();
+    Ok(listing("songs", rows.len(), rows))
+}
+
 pub(super) fn song_row(snap: &Snapshot, index: u32) -> Value {
     use crate::domain::performer_label::song_performer_label;
     const NAMED_ARTISTS_MAX: usize = 10;
@@ -1088,9 +1170,9 @@ mod tests {
     // ---- カタログ ----
 
     #[test]
-    fn カタログは_7_件で_スキーマは_json() {
+    fn カタログは_8_件で_スキーマは_json() {
         let all = catalog();
-        assert_eq!(all.len(), 7);
+        assert_eq!(all.len(), 8);
         for tool in &all {
             assert_eq!(tool.input_schema["type"], "object", "{} のスキーマ", tool.name);
             assert_eq!(

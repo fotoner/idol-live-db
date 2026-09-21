@@ -642,6 +642,7 @@ mod tests {
             ("song_performances", json!({"song_id": song})),
             ("setlist_diff", json!({"show_id_a": show_a, "show_id_b": show_b})),
             ("stats", json!({"kind": "song_play_ranking"})),
+            ("songs_for_cast", json!({"idol_ids": [idol], "max_missing": 1})),
             ("list_shows", json!({"cast_role": "lead"})),
             ("setlist_shape", json!({"cast_role": "lead"})),
             ("song_position_profile", json!({"song_id": song})),
@@ -793,10 +794,10 @@ mod tests {
     /// 7 本にしか付いておらず、残り 13 本は引数を打ち間違えても黙って無視されていた
     /// (レビュー指摘)。ここで 1 本でも漏れたら壊れるようにする。
     #[test]
-    fn 全24本のツールでスキーマの封が揃っている() {
+    fn 全25本のツールでスキーマの封が揃っている() {
         let mut all = tool_catalog();
         all.extend(crate::domain::proposal::proposal_catalog());
-        assert_eq!(all.len(), 24, "ツール数が変わった (この数を変えたら意図的か確認すること)");
+        assert_eq!(all.len(), 25, "ツール数が変わった (この数を変えたら意図的か確認すること)");
 
         let mut names: Vec<&str> = all.iter().map(|s| s.name.as_str()).collect();
         names.sort();

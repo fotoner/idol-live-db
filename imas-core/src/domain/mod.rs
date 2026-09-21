@@ -20,6 +20,7 @@ pub mod unit_queries;
 pub mod event_list_queries;
 pub mod event_detail_queries;
 pub mod calendar_queries;
+pub mod cast_song_matching;
 pub mod stats_queries;
 pub mod timeline_queries;
 pub mod search_queries;
