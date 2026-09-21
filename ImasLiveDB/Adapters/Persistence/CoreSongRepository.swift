@@ -96,8 +96,8 @@ struct CoreSongRepository: SongReading {
         try await withStore(fallbackTo: { try await fallback.songCollectedCounts() }) { store in
             // バッジ用は「参加種別 (現地のみ等) の条件を適用済み」の show id を渡す規約。
             // event の attended マークには種別条件を掛けない (SQL 時代の fetchSongCollectedCountsQuery と同じ)。
-            let showIds = try await attendedShowIdsForCollection()
-            let eventIds = try await database.fetchMarkedEntityIdsAsync(entity: .event, kind: .attended)
+            let showIds = try await CollectionAttendance.showIds(database: database)
+            let eventIds = try await CollectionAttendance.eventIds(database: database)
             return try store.songCollectedCountMap(
                 attendedShowIds: showIds,
                 attendedEventIds: eventIds,
@@ -362,27 +362,6 @@ struct CoreSongRepository: SongReading {
     }
 
     // MARK: - user_marks の解決 (スナップショットに無いユーザーデータ)
-
-    /// 回収バッジ用の参加 show id (参加種別条件を適用済み)。
-    /// `AppDatabase+UserMarks` の `attendedTypeCondition` と同じ規則:
-    /// 既定は現地参加のみ (text_value 無し = 旧 bool 参加も現地扱い)、
-    /// 「配信参加も回収に含める」設定 ON なら全種別。
-    /// (原本が private のため規則をここに複製している。変更時は両方を揃えること)
-    private func attendedShowIdsForCollection() async throws -> [String] {
-        let marks = try await database.dbQueue.read { db in
-            try UserMark.filter(
-                UserMark.Columns.entityType == UserMarkEntity.show.rawValue &&
-                UserMark.Columns.kind == UserMarkKind.attended.rawValue &&
-                UserMark.Columns.boolValue == true
-            ).fetchAll(db)
-        }
-        if UserDefaults.standard.bool(forKey: AppDatabase.collectionIncludeStreamKey) {
-            return marks.map(\.entityId)
-        }
-        return marks
-            .filter { $0.textValue == nil || $0.textValue == AttendanceType.live.rawValue }
-            .map(\.entityId)
-    }
 
     // MARK: - FFI 型 ⇄ iOS 型の変換
 

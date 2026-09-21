@@ -12,6 +12,10 @@ struct CoreShowRepository: ShowReading {
     /// 未ロード時の受け皿 (Strangler の旧経路)。
     let fallback: GRDBShowRepository
 
+    /// 参加マーク (`user_marks`) の引き先。ユーザーデータはスナップショットに載らない
+    /// (書き込みが頻繁でプラットフォームが正) ので、core 経路でも DB から解決して渡す。
+    private var database: AppDatabase { fallback.database }
+
     // MARK: - 公演
 
     func shows(eventId: String) async throws -> [Show] {
@@ -80,8 +84,12 @@ struct CoreShowRepository: ShowReading {
         showId: String,
         nameMode: PerformerNameMode,
         displayMode: SetlistDisplayMode
-    ) async throws -> [SetlistRowMetaRecord] {
-        try await snapshot.withStore(
+    ) async throws -> SetlistRowMetaBundle {
+        // 参加マーク (user_marks) はスナップショットに無いので、ここで解決して渡す。
+        // 何を回収と数えるかの規則は core (`CollectionAttendance` 参照)。
+        let attendedShowIds = (try? await CollectionAttendance.showIds(database: database)) ?? []
+        let attendedEventIds = (try? await CollectionAttendance.eventIds(database: database)) ?? []
+        return try await snapshot.withStore(
             fallbackTo: {
                 try await fallback.setlistRowMeta(
                     showId: showId, nameMode: nameMode, displayMode: displayMode
@@ -89,7 +97,11 @@ struct CoreShowRepository: ShowReading {
             }
         ) { store in
             try store.showSetlistRowMeta(
-                showId: showId, mode: nameMode, displayMode: displayMode
+                showId: showId,
+                mode: nameMode,
+                displayMode: displayMode,
+                attendedShowIds: attendedShowIds,
+                attendedEventIds: attendedEventIds
             )
         }
     }

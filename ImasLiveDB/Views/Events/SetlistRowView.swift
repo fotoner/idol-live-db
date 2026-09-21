@@ -17,6 +17,13 @@ struct SetlistRowView: View {
     /// **中身も、そもそも出すかどうかも imas-core が表示モードから決める** ので、
     /// ここは受け取った順に並べるだけ。詳細表示以外では必ず空で来る。
     var historyBadges: [String] = []
+    /// **自分の回収**の札 (「初回収」「回収 3 回目」「2 年ぶりの回収」「未回収」)。
+    /// 中身も出す/出さないも imas-core が表示モードと参加記録から決める
+    /// (`collection_gap` / `setlist_collection_badges`)。ここは並べるだけ。
+    var collectionBadges: [String] = []
+    /// この公演に自分が参加しているか。**札の色だけに使う** (回収できた札は緑、
+    /// 未回収は控えめ)。何を出すかの判断はコアが済ませてある。
+    var isCollectedHere: Bool = false
     /// 歌唱者をどの名前で出すか (親が AppStorage から解決して渡す)。
     var performerName: PerformerNameMode = .idolOnly
     /// `shows.performer_type == "character"`。
@@ -262,8 +269,8 @@ struct SetlistRowView: View {
 
     /// メタ行に出すものがあるか (カバー種別チップ or 履歴の札 or 歌唱者表現)。無ければ行ごと省く。
     private var hasMeta: Bool {
-        coverTag != nil || !historyBadges.isEmpty || !unitNames.isEmpty || isFullCast
-            || !performers.isEmpty
+        coverTag != nil || !historyBadges.isEmpty || !collectionBadges.isEmpty
+            || !unitNames.isEmpty || isFullCast || !performers.isEmpty
     }
 
     /// カバー種別チップ + 珍しさ + 歌唱者 (ユニット / 全員 / アバター)。
@@ -281,6 +288,10 @@ struct SetlistRowView: View {
             // カバーの札やユニット名と競わせない。
             ForEach(historyBadges, id: \.self) { badge in
                 ImasTagChip(text: badge, kind: .guest, seed: seed)
+            }
+            // 自分の回収の札。世の中の履歴 (輪郭) の次に置き、色で「自分の記録」と分ける。
+            ForEach(collectionBadges, id: \.self) { badge in
+                ImasTagChip(text: badge, kind: isCollectedHere ? .collected : .uncollected, seed: seed)
             }
             performerMeta
         }

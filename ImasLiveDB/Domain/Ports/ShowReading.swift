@@ -17,20 +17,24 @@ protocol ShowReading: Sendable {
     func setlist(showId: String) async throws -> [SetlistRow]
     /// セトリ項目 id → 出演者行。
     func allPerformers(showId: String) async throws -> [String: [PerformerRow]]
-    /// セトリ 1 行ぶんの添え物 (名義・ユニットのチップ・全員・何回目・いつぶり)。
-    /// 並びは `setlist(showId:)` と同じなので、受け側は zip するだけでよい。
+    /// セトリ 1 行ぶんの添え物 (名義・ユニットのチップ・全員・何回目・いつぶり・
+    /// 自分の回収) と、公演の頭に出す回収の要約。
+    /// 行の並びは `setlist(showId:)` と同じなので、受け側は zip するだけでよい。
     ///
     /// **名義の決め方 (その披露の名義 → 曲の名義 → 個人名併記 → 顔ぶれ推論 → 名前) も、
-    /// 「N 年ぶり」の言い回しも imas-core が持つ。** 画面でユニットを逆引きしたり
-    /// 間隔を組み立てたりしないこと (同じ規則を Android にも写経することになる)。
+    /// 「N 年ぶり」の言い回しも、「初回収 / 回収 N 回目 / 未回収」の判断も imas-core が
+    /// 持つ。** 画面でユニットを逆引きしたり間隔を組み立てたり、参加記録と突き合わせたり
+    /// しないこと (同じ規則を Android にも写経することになる)。
     ///
-    /// `displayMode` は「どこまで詳しく出すか」。履歴の札を出すかどうかもコアが
-    /// これで決めるので、モードが変わったら読み直すこと。
+    /// 参加マークの解決はアダプタの仕事 (`CollectionAttendance`)。画面は渡さない。
+    ///
+    /// `displayMode` は「どこまで詳しく出すか」。履歴の札・回収の札・要約を出すかどうかも
+    /// コアがこれで決めるので、モードが変わったら読み直すこと。
     func setlistRowMeta(
         showId: String,
         nameMode: PerformerNameMode,
         displayMode: SetlistDisplayMode
-    ) async throws -> [SetlistRowMetaRecord]
+    ) async throws -> SetlistRowMetaBundle
     /// 公演の全出演キャスト idol_id 集合 (「全員」表記の判定用)。
     func showIdolIds(showId: String) async throws -> Set<String>
     /// song_id → 原曲アーティスト idol_id 集合 (一部カバー判定用)。

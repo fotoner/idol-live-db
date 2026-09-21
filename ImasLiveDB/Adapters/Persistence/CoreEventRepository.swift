@@ -139,15 +139,8 @@ struct CoreEventRepository: EventReading {
     }
 
     /// attended マークを (entity_id, text_value) の射影で取り出す。
-    /// `fetchMarkedEntityIdsAsync` は id しか返さないため、種別が要る経路だけここで直接引く。
+    /// 引き方は `CollectionAttendance` が持つ (同じクエリを画面ごとに書かない)。
     private func attendanceMarks(entity: UserMarkEntity) async throws -> [AttendanceMarkRecord] {
-        let marks = try await database.dbQueue.read { db in
-            try UserMark.filter(
-                UserMark.Columns.entityType == entity.rawValue &&
-                UserMark.Columns.kind == UserMarkKind.attended.rawValue &&
-                UserMark.Columns.boolValue == true
-            ).fetchAll(db)
-        }
-        return marks.map { AttendanceMarkRecord(entityId: $0.entityId, attendanceType: $0.textValue) }
+        try await CollectionAttendance.marks(entity: entity, database: database)
     }
 }

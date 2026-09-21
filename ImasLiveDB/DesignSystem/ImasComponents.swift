@@ -659,7 +659,9 @@ extension ImasSegmented where Selection == Int {
 // MARK: - TagChip (セトリ行のユニット/カバー/全員)
 
 struct ImasTagChip: View {
-    enum Kind { case unit, all, cover, partial, lead, guest }
+    /// 札の役割。`collected` / `uncollected` は**自分の記録**の札 (セトリの「初回収」
+    /// 「回収 3 回目」「未回収」) で、曲そのものの属性 (カバー・ユニット) と色で分ける。
+    enum Kind { case unit, all, cover, partial, lead, guest, collected, uncollected }
     let text: String
     let kind: Kind
     var seed: String? = nil
@@ -677,6 +679,10 @@ struct ImasTagChip: View {
             case .partial: return (DS.warning.opacity(0.14), DS.warning, nil)
             case .lead:    return (t.accent, .white, nil)
             case .guest:   return (.clear, DS.ink2, DS.ink3)
+            // 回収できた札は「手に入れた」の緑。披露履歴の輪郭札と並んでも読み分けられる。
+            case .collected:   return (DS.success.opacity(0.14), DS.success, nil)
+            // 未回収は急かさない。塗りは薄く、文字も本文より落とす。
+            case .uncollected: return (DS.fill, DS.ink3, nil)
             }
         }()
         Text(text)

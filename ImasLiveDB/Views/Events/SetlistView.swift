@@ -58,6 +58,10 @@ struct SetlistView: View {
     /// セトリ 1 行ぶんの添え物 (名義・ユニットのチップ・全員・何回目・いつぶり)。
     /// **中身を決めるのは imas-core。** 画面はキーで引いて出すだけ。
     @State private var rowMetaByItemId: [String: SetlistRowMetaRecord] = [:]
+    /// 公演の頭に出す「自分の回収」の要約 (この公演で N 曲回収 / 未回収 N 曲)。
+    /// **出すかどうかも文言も imas-core が決める。** nil なら何も出さない
+    /// (参加記録が無い人・回収の対象でない催し・シンプル表示)。
+    @State private var collectionSummary: ShowCollectionRecord? = nil
     /// この公演で着られた衣装 (進行順)。畳み方も並びも imas-core が決めている。
     @State private var costumes: [ShowCostumeRecord] = []
     @State private var showEditSheet = false
@@ -174,6 +178,8 @@ struct SetlistView: View {
                 unitNames: meta?.unitNames ?? [],
                 isFullCast: meta?.isFullCast ?? false,
                 historyBadges: meta?.historyBadges ?? [],
+                collectionBadges: meta?.collectionBadges ?? [],
+                isCollectedHere: meta?.isCollectedHere ?? false,
                 performerName: performerName,
                 isCharacterLive: show.isCharacterLive,
                 coverType: classifyCover(originalIds: originalIds, performerIds: performerIdolIds),
@@ -382,6 +388,31 @@ struct SetlistView: View {
                 }
             }
 
+            // 自分の回収の要約。セトリの真上に置いて、この下の並びの読み方を先に言う。
+            if let summary = collectionSummary, !setlist.isEmpty,
+               !(isFutureShow && contentTab == 1) {
+                Section {
+                    HStack(spacing: DS.sp2) {
+                        Image(systemName: summary.attended ? "checkmark.seal.fill" : "circle.dashed")
+                            .font(.imasCaption)
+                            .foregroundStyle(summary.attended ? DS.success : DS.ink3)
+                        Text(summary.label)
+                            .font(.imasCaption.weight(.semibold))
+                            .foregroundStyle(summary.attended ? DS.ink : DS.ink2)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, DS.sp3)
+                    .padding(.vertical, DS.sp2)
+                    .background(
+                        summary.attended ? AnyShapeStyle(DS.success.opacity(0.10)) : AnyShapeStyle(DS.fill),
+                        in: Capsule()
+                    )
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 0, trailing: 16))
+                    .listRowSeparator(.hidden)
+                }
+            }
+
             // 実セトリ: 両方ありで予想タブ選択中は隠す。それ以外は表示。
             ForEach((isFutureShow && !setlist.isEmpty && contentTab == 1) ? [] : sections) { section in
                 Section(header: ImasSectionHeader(title: section.sectionName, tight: true).textCase(nil)) {
@@ -520,7 +551,10 @@ struct SetlistView: View {
         }
         .animation(.easeInOut(duration: 0.15), value: isCreatingPlaylist)
         .task { await loadSetlist() }
-        .task(id: "\(performerNameRaw)|\(displayModeRaw)|\(legacySimpleMode)") { await loadRowMeta() }
+        // 参加を付け外しすると回収の札と要約が変わるので、参加も鍵に含める。
+        .task(id: "\(performerNameRaw)|\(displayModeRaw)|\(legacySimpleMode)|\(attendanceVersion)") {
+            await loadRowMeta()
+        }
         .task {
             venueDirectory = (try? await AppContainer.shared.showReading.venueDirectory()) ?? .empty
         }
@@ -623,13 +657,17 @@ struct SetlistView: View {
         }
     }
 
-    /// 行の添え物を読み直す。**歌唱者の表示名の設定と表示モードで答えが変わる**ので、
-    /// その 2 つを鍵にした `.task(id:)` から呼ぶ (画面を開き直さなくても追従する)。
+    /// 行の添え物と回収の要約を読み直す。**歌唱者の表示名の設定・表示モード・
+    /// 参加記録で答えが変わる**ので、その 3 つを鍵にした `.task(id:)` から呼ぶ
+    /// (画面を開き直さなくても追従する)。
     private func loadRowMeta() async {
-        let meta = (try? await AppContainer.shared.showReading.setlistRowMeta(
+        let bundle = try? await AppContainer.shared.showReading.setlistRowMeta(
             showId: show.id, nameMode: performerName, displayMode: displayMode
-        )) ?? []
-        rowMetaByItemId = Dictionary(uniqueKeysWithValues: meta.map { ($0.itemId, $0) })
+        )
+        rowMetaByItemId = Dictionary(
+            uniqueKeysWithValues: (bundle?.rows ?? []).map { ($0.itemId, $0) }
+        )
+        collectionSummary = bundle?.collection
     }
 
     private func classifyCover(originalIds: Set<String>, performerIds: Set<String>) -> CoverType {

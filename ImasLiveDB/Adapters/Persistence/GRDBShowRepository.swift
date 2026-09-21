@@ -64,7 +64,9 @@ struct GRDBShowRepository: ShowReading {
         showId: String,
         nameMode: PerformerNameMode,
         displayMode: SetlistDisplayMode
-    ) async throws -> [SetlistRowMetaRecord] { [] }
+    ) async throws -> SetlistRowMetaBundle {
+        SetlistRowMetaBundle(rows: [], collection: nil)
+    }
 
     func venueDirectory() async throws -> VenueDirectory {
         try await database.fetchVenueDirectoryAsync()
