@@ -14,6 +14,8 @@ import com.fugaif.imaslivedb.data.model.SongSortOrder
 import com.fugaif.imaslivedb.data.model.SongWithArtists
 import com.fugaif.imaslivedb.data.model.UserMark
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.ui.theme.AppPreferences
+import com.fugaif.imaslivedb.ui.theme.MasteryScale
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -88,6 +90,10 @@ data class SongListUiState(
      */
     val kamisabiCompletion: KamisabiCompletion? = null,
     val collectedCounts: Map<String, Int> = emptyMap(),
+    /** 習熟度の段階 (0 = 未設定)。一覧の行に出す。 */
+    val masteryLevels: Map<String, UByte> = emptyMap(),
+    /** 段階の呼び名 (設定で変えられる)。段数もここから取る。 */
+    val masteryScale: MasteryScale = MasteryScale.standard,
     // タグ絞り込み中(単一タグ選択時のみ)の song_id → 票数。
     val tagVoteCounts: Map<String, Int> = emptyMap(),
     /**
@@ -266,6 +272,21 @@ class SongListViewModel : ViewModel() {
     }
 
     /**
+     * 行の長押しメニューから習熟度を付け替える。
+     *
+     * 一覧を取り直さずに手元の段階だけ差し替える (2,000 行の再取得は体感で止まる)。
+     */
+    fun setMastery(songId: String, level: UByte) {
+        val ctx = appContext ?: return
+        viewModelScope.launch {
+            AppModule.from(ctx).userMarkRepository.setMastery(songId, level)
+            _uiState.value = _uiState.value.copy(
+                masteryLevels = _uiState.value.masteryLevels + (songId to level)
+            )
+        }
+    }
+
+    /**
      * 検索語を現在のスコープの絞り込み条件へ載せる。
      *
      * 一箇所に閉じておくのは、表示中スコープの取得と「ほかのスコープの件数」が
@@ -354,6 +375,7 @@ class SongListViewModel : ViewModel() {
             val pickIdolIds = marks.pickedIdolIds()
             val myPickIds = module.songRepository.fetchSongIdsWithAnyArtist(pickIdolIds)
             val collectedCounts = module.songRepository.fetchSongCollectedCounts()
+            val masteryLevels = module.userMarkRepository.masteryLevels()
 
             val criteria = markFilterCriteria(state, favoriteIds, notedIds, myPickIds, collectedCounts)
             songs = applyMarkFilters(songs, criteria)
@@ -365,6 +387,8 @@ class SongListViewModel : ViewModel() {
                 myPickSongIds = myPickIds,
                 kamisabiCompletion = kamisabiCompletion,
                 collectedCounts = collectedCounts,
+                masteryLevels = masteryLevels,
+                masteryScale = AppPreferences.masteryScale,
                 tagVoteCounts = tagVoteCounts,
                 tagFilterError = tagFilterError,
                 // 前の語の「もしかして」を残さない (打ち直した直後だけ関係ない曲が下にぶら下がる)。

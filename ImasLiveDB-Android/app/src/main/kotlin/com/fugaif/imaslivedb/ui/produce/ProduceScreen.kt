@@ -91,6 +91,7 @@ fun ProduceScreen(
     onNavigateToFavorites: () -> Unit,
     onNavigateToAttendedEvents: () -> Unit,
     onNavigateToCollectedSongs: () -> Unit,
+    onNavigateToMastery: () -> Unit,
     onNavigateToTimeline: (String?) -> Unit,
     onNavigateToMyContributions: () -> Unit,
     onNavigateToMyVotes: () -> Unit,
@@ -170,6 +171,8 @@ fun ProduceScreen(
             HubRow(Icons.Filled.EventAvailable, "参加したライブ", "", DS.ink2, state.attendedCount, onNavigateToAttendedEvents)
             HorizontalDivider(color = DS.sep)
             HubRow(Icons.Filled.MusicNote, "回収した楽曲", "現地で聴けた曲だけの一覧", DS.ink2, state.collectedCount, onNavigateToCollectedSongs)
+            HorizontalDivider(color = DS.sep)
+            HubRow(Icons.Filled.BarChart, "習熟度", "どこまで覚えたかをシリーズ・ユニット別に", DS.ink2, state.masteryCount, onNavigateToMastery)
             HorizontalDivider(color = DS.sep)
             // 年表は担当アイドルのブランドから開く (見たい歴史はたいてい担当の歴史)。
             // 担当がいなければブランド指定なしで開き、年表側が先頭ブランドを選ぶ。

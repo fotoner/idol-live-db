@@ -56,6 +56,7 @@ import com.fugaif.imaslivedb.ui.polls.MyVotesScreen
 import com.fugaif.imaslivedb.ui.polls.PollDetailScreen
 import com.fugaif.imaslivedb.ui.polls.PollHallOfFameScreen
 import com.fugaif.imaslivedb.ui.polls.PollsScreen
+import com.fugaif.imaslivedb.ui.mastery.MasteryScreen
 import com.fugaif.imaslivedb.ui.produce.CollectedSongsScreen
 import com.fugaif.imaslivedb.ui.produce.ProduceScreen
 import com.fugaif.imaslivedb.ui.produce.RecentsStore
@@ -556,6 +557,7 @@ private fun NavGraphBuilder.produceNavGraph(navController: NavHostController) {
             onNavigateToFavorites = { navController.navigate(NavRoutes.Favorites.route) },
             onNavigateToAttendedEvents = { navController.navigate(NavRoutes.AttendedEvents.route) },
             onNavigateToCollectedSongs = { navController.navigate(ROUTE_COLLECTED_SONGS) },
+            onNavigateToMastery = { navController.navigate(NavRoutes.Mastery.route) },
             // ブランド未指定は "all"。年表側が先頭ブランドを選ぶ (ルート引数は必須なので番人役の値)。
             onNavigateToTimeline = {
                 navController.navigate(NavRoutes.BrandTimeline.createRoute(it ?: ALL_BRANDS))
@@ -584,6 +586,9 @@ private fun NavGraphBuilder.produceNavGraph(navController: NavHostController) {
                 navController.navigate(NavRoutes.FilteredSongs.createRoute(kind, value))
             }
         )
+    }
+    composable(NavRoutes.Mastery.route) {
+        MasteryScreen(onOpenSong = { navController.navigate(NavRoutes.SongDetail.createRoute(it)) })
     }
     composable(NavRoutes.Stats.route) { StatsScreen() }
     composable(NavRoutes.Settings.route) { SettingsScreen() }

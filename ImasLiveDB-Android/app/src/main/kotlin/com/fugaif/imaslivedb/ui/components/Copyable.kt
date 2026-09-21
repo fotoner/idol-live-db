@@ -24,6 +24,14 @@ import com.fugaif.imaslivedb.ui.theme.DS
 data class CopyItem(val label: String, val text: String?)
 
 /**
+ * 長押しメニューに足す、コピー以外の操作。
+ *
+ * 行の長押しは既にコピーが取っているので、行から直に何かを変えたい画面
+ * (曲一覧から習熟度を付ける等) は別のジェスチャを生やさずここに足す。
+ */
+data class RowAction(val label: String, val onSelect: () -> Unit)
+
+/**
  * 名前・曲名などを長押しでコピーできるようにするラッパ (iOS `imasCopyable` の移植)。
  *
  * 「正式な曲名で外部検索したい」「アイドル名をそのまま貼りたい」といった用途で、
@@ -38,12 +46,13 @@ fun Copyable(
     items: List<CopyItem>,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    actions: List<RowAction> = emptyList(),
     content: @Composable () -> Unit
 ) {
     val valid = items.mapNotNull { item ->
         item.text?.trim()?.takeIf { it.isNotEmpty() }?.let { item.label to it }
     }
-    if (valid.isEmpty()) {
+    if (valid.isEmpty() && actions.isEmpty()) {
         Box(modifier) { content() }
         return
     }
@@ -73,6 +82,15 @@ fun Copyable(
                     }
                 )
             }
+            actions.forEach { action ->
+                DropdownMenuItem(
+                    text = { Text(action.label, color = DS.ink) },
+                    onClick = {
+                        action.onSelect()
+                        expanded = false
+                    }
+                )
+            }
         }
     }
 }
@@ -85,7 +103,7 @@ fun Copyable(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
-) = Copyable(listOf(CopyItem(label, text)), modifier, onClick, content)
+) = Copyable(listOf(CopyItem(label, text)), modifier, onClick, content = content)
 
 private fun copyToClipboard(context: Context, label: String, text: String) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager

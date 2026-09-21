@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.core.TextSearch
 import com.fugaif.imaslivedb.ui.songs.SongSearchMode
 import com.fugaif.imaslivedb.ui.theme.DS
+import com.fugaif.imaslivedb.ui.theme.MasteryScale
+import com.fugaif.imaslivedb.ui.mastery.MasteryChip
 
 /**
  * 行がなぜ結果に入っているか。絞り込みの対象と入力語 (iOS `SongRowMatch` と 1:1)。
@@ -58,6 +60,10 @@ fun SongRow(
     isFavorite: Boolean = false,
     isMyPick: Boolean = false,
     collectedCount: Int? = null,
+    /** 習熟度の段階 (0 = 未設定)。付いているときだけ行に小さく出す。
+     *  更新したのが分からないと連続で付けていく作業が成立しない。 */
+    masteryLevel: UByte = 0u,
+    masteryScale: MasteryScale = MasteryScale.standard,
     tagVoteCount: Int? = null,
     // 作詞作曲スコープで絞ったときに「どの役割で当たったか」を出すために要る。
     // 出すのは当たった行だけなので、渡していない画面は今までどおり何も増えない。
@@ -66,6 +72,8 @@ fun SongRow(
     arranger: String? = null,
     searchMatch: SongRowMatch? = null,
     onFavoriteToggle: (() -> Unit)? = null,
+    /** 渡すと長押しメニューに「習熟度を変える」が出る (行から直に段階を付けるため)。 */
+    onEditMastery: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     // 長押しで曲名などをコピーできるようにする (正式な曲名で外部検索したい用途)。
@@ -74,6 +82,7 @@ fun SongRow(
             CopyItem("曲名をコピー", title),
             CopyItem("歌唱者をコピー", artistNames.ifEmpty { unitName }),
         ),
+        actions = onEditMastery?.let { listOf(RowAction("習熟度を変える", it)) } ?: emptyList(),
         modifier = modifier.fillMaxWidth()
     ) {
     Row(
@@ -112,8 +121,9 @@ fun SongRow(
                 needle = searchMatch.needleFor(SongSearchMode.CREATOR),
                 lyricist = lyricist, composer = composer, arranger = arranger
             )
-            if (releaseDate != null || isMyPick || (collectedCount ?: 0) > 0) {
-                MarkRow(releaseDate = releaseDate, isMyPick = isMyPick, collectedCount = collectedCount)
+            if (releaseDate != null || isMyPick || (collectedCount ?: 0) > 0 || masteryLevel > 0u) {
+                MarkRow(releaseDate = releaseDate, isMyPick = isMyPick, collectedCount = collectedCount,
+                        masteryLevel = masteryLevel, masteryScale = masteryScale)
             }
         }
         if (onFavoriteToggle != null) {
@@ -164,7 +174,10 @@ private fun CreatorLine(needle: String?, lyricist: String?, composer: String?, a
 
 /** マイマーク行 (リリース日 / 担当♥ / 現地回収✓)。iOS SongRowView.markRow 相当。 */
 @Composable
-private fun MarkRow(releaseDate: String?, isMyPick: Boolean, collectedCount: Int?) {
+private fun MarkRow(
+    releaseDate: String?, isMyPick: Boolean, collectedCount: Int?,
+    masteryLevel: UByte = 0u, masteryScale: MasteryScale = MasteryScale.standard,
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -177,6 +190,9 @@ private fun MarkRow(releaseDate: String?, isMyPick: Boolean, collectedCount: Int
                 Icon(imageVector = Icons.Filled.Favorite, contentDescription = null, tint = DS.pick, modifier = Modifier.size(11.dp))
                 Text(text = "担当", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = DS.pick)
             }
+        }
+        if (masteryLevel > 0u) {
+            MasteryChip(masteryLevel, masteryScale)
         }
         if ((collectedCount ?: 0) > 0) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {

@@ -96,6 +96,10 @@ import com.fugaif.imaslivedb.ui.theme.joined
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.foundation.layout.Spacer
+import com.fugaif.imaslivedb.ui.components.ImasFilterChip
+import com.fugaif.imaslivedb.ui.theme.MasteryPalette
+import com.fugaif.imaslivedb.ui.theme.MasteryScale
 
 private enum class SettingsInfoScreen { HELP, INBOX, PRIVACY, TERMS, SUPPORT, LICENSES }
 
@@ -158,6 +162,13 @@ fun SettingsScreen(
             item {
                 SettingsSectionTitle("表示")
                 DisplaySettingsSection()
+                HorizontalDivider()
+            }
+
+            // 習熟度の段階 (ラベルの好みは人によるので触れるようにする)
+            item {
+                SettingsSectionTitle("習熟度")
+                MasteryScaleSection()
                 HorizontalDivider()
             }
 
@@ -1350,4 +1361,77 @@ private fun SettingsToggleRow(label: String, checked: Boolean, onCheckedChange: 
         )
     }
     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+}
+
+
+/**
+ * 習熟度の段階。段数とラベルを決める。
+ *
+ * **保存されているのは序数だけ**なので、ラベルを書き換えても記録には触らない。
+ * 段を減らしたときだけ、その段にいた曲が 1 つ下へ寄る (規則は共有コアの
+ * `remapMasteryLevel`)。iOS `MasteryScaleSettingsView` の移植。
+ */
+@Composable
+private fun MasteryScaleSection() {
+    var labels by remember { mutableStateOf(AppPreferences.masteryScale.labels) }
+
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            MasteryScale.presets.forEach { (name, preset) ->
+                ImasFilterChip(name, labels == preset.labels, {
+                    labels = preset.labels
+                    AppPreferences.setMasteryLabels(preset.labels)
+                })
+            }
+        }
+        labels.forEachIndexed { index, label ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    Modifier.size(14.dp).clip(RoundedCornerShape(4.dp))
+                        .background(MasteryPalette.fill((index + 1).toUByte(),
+                                                        labels.size.toUByte()))
+                )
+                OutlinedTextField(
+                    value = label,
+                    onValueChange = { v ->
+                        labels = labels.toMutableList().also { it[index] = v }
+                    },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f),
+                )
+                // 削除できるのは**最上段だけ**。真ん中を抜くと序数の意味がずれて、
+                // 寄せ先の規則 (上限で丸める) と噛み合わなくなる。
+                if (index == labels.lastIndex && labels.size > 1) {
+                    TextButton(onClick = {
+                        labels = labels.dropLast(1)
+                        AppPreferences.setMasteryLabels(labels)
+                    }) { Text("削除") }
+                }
+            }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (labels.size < 8) {
+                TextButton(onClick = { labels = labels + "" }) { Text("段を追加") }
+            }
+            Spacer(Modifier.weight(1f))
+            TextButton(
+                onClick = { AppPreferences.setMasteryLabels(labels) },
+                enabled = labels.all { it.isNotBlank() } &&
+                    labels.map { it.trim() }.toSet().size == labels.size &&
+                    labels != AppPreferences.masteryScale.labels,
+            ) { Text("この段階にする") }
+        }
+        Text(
+            "下から順に積み上がります。段を減らすと、その段の曲は 1 つ下に移ります (記録は消えません)。" +
+                "どのラベルも 4 文字以内にしておくと一覧で切れません。",
+            style = MaterialTheme.typography.bodySmall,
+            color = DS.ink2
+        )
+    }
 }

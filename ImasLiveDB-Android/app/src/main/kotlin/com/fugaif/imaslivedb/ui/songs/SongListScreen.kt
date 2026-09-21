@@ -67,6 +67,7 @@ import com.fugaif.imaslivedb.ui.components.SkeletonThumb
 import com.fugaif.imaslivedb.ui.components.SongRow
 import com.fugaif.imaslivedb.ui.components.SongRowMatch
 import com.fugaif.imaslivedb.ui.edit.SongEditScreen
+import com.fugaif.imaslivedb.ui.mastery.MasteryLevelPickerSheet
 import com.fugaif.imaslivedb.ui.tags.TagFilterSheet
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.navigation.TopLevelTab
@@ -86,6 +87,8 @@ fun SongListScreen(
     var showTagFilter by remember { mutableStateOf(false) }
     var showSongCreate by remember { mutableStateOf(false) }
     var showLoginPrompt by remember { mutableStateOf(false) }
+    // 長押しで習熟度を付け替える対象の曲 (null = ピッカーを出さない)。
+    var masteryTarget by remember { mutableStateOf<SongWithArtists?>(null) }
     val authState by AppModule.from(context).authService.state.collectAsState()
     // 権限フラグは認証状態が変わった時だけコアへ問い合わせる (詳細は data/auth/EditPermission.kt)。
     val canEditHere = remember(authState) { authState.showEditAffordance }
@@ -237,7 +240,7 @@ fun SongListScreen(
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(uiState.songs, key = { it.song.id }) { item ->
-                        SongListRow(item, uiState, viewModel, onSongClick)
+                        SongListRow(item, uiState, viewModel, onSongClick, onEditMastery = { masteryTarget = it })
                     }
                     if (uiState.fuzzySongs.isNotEmpty()) {
                         item {
@@ -248,7 +251,7 @@ fun SongListScreen(
                         // key を分けるのは、同じ曲が両方に出た時に LazyColumn が落ちないため
                         // (VM 側で重複は除いているが、key の衝突は例外になるので保険をかける)。
                         items(uiState.fuzzySongs, key = { "fuzzy_${it.song.id}" }) { item ->
-                            SongListRow(item, uiState, viewModel, onSongClick)
+                            SongListRow(item, uiState, viewModel, onSongClick, onEditMastery = { masteryTarget = it })
                         }
                     }
                 }
@@ -302,6 +305,21 @@ fun SongListScreen(
         }
     }
 
+    // 行の長押しメニューから開く段階ピッカー。習熟度画面まで戻らずに付けられないと、
+    // 一覧を眺めながら順に付けていく作業が続かない。
+    masteryTarget?.let { target ->
+        MasteryLevelPickerSheet(
+            title = target.song.title,
+            current = uiState.masteryLevels[target.song.id] ?: 0u,
+            scale = uiState.masteryScale,
+            onPick = { level ->
+                viewModel.setMastery(target.song.id, level)
+                masteryTarget = null
+            },
+            onDismiss = { masteryTarget = null }
+        )
+    }
+
     if (showLoginPrompt) {
         CommunityLoginPromptDialog(
             message = "楽曲の追加にはログインが必要です。",
@@ -319,7 +337,8 @@ private fun SongListRow(
     item: SongWithArtists,
     uiState: SongListUiState,
     viewModel: SongListViewModel,
-    onSongClick: (String) -> Unit
+    onSongClick: (String) -> Unit,
+    onEditMastery: (SongWithArtists) -> Unit
 ) {
     SongRow(
         title = item.song.title, songId = item.song.id,
@@ -332,6 +351,8 @@ private fun SongListRow(
         isFavorite = uiState.favoriteSongIds.contains(item.song.id),
         isMyPick = uiState.myPickSongIds.contains(item.song.id),
         collectedCount = uiState.collectedCounts[item.song.id],
+        masteryLevel = uiState.masteryLevels[item.song.id] ?: 0u,
+        masteryScale = uiState.masteryScale,
         tagVoteCount = if (uiState.selectedTags.size == 1) uiState.tagVoteCounts[item.song.id] else null,
         lyricist = item.song.lyricist,
         composer = item.song.composer,
@@ -340,6 +361,7 @@ private fun SongListRow(
         searchMatch = uiState.searchText.takeIf { it.isNotEmpty() }
             ?.let { SongRowMatch(text = it, scope = uiState.searchMode) },
         onFavoriteToggle = { viewModel.toggleFavorite(item.song.id) },
+        onEditMastery = { onEditMastery(item) },
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onSongClick(item.song.id) }

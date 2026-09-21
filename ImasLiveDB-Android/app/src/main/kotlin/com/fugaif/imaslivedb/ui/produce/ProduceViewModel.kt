@@ -34,6 +34,7 @@ data class ProduceUiState(
     /** お気に入りの合計 (曲 + アイドル + ライブ)。内訳はお気に入り一覧側のタブ。 */
     val favoriteCount: Int = 0,
     val collectedCount: Int = 0,
+    val masteryCount: Int = 0,
     val voteCount: Int = 0,
     val contributionCount: Int = 0,
     val recents: List<RecentChip> = emptyList(),
@@ -75,6 +76,7 @@ class ProduceViewModel(app: Application) : AndroidViewModel(app) {
                 attendedEvents = attended,
                 favoriteCount = favoriteCount,
                 collectedCount = marks.autoCollectedSongIds().size,
+                masteryCount = marks.masteryLevels().size,
                 voteCount = module.localPollVoteLog.allEntries().size,
                 contributionCount = module.localContributionLog.total,
                 recents = resolveRecents(),
