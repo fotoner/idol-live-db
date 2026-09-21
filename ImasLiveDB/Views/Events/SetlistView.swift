@@ -15,6 +15,7 @@ struct SetlistView: View {
     }
 
     @Environment(AppDatabase.self) private var database
+    @Environment(\.colorScheme) private var scheme
     let show: Show
     /// DetailSheetView の NavigationStack 内に置かれた時に渡される push クロージャ。
     /// 非 nil なら遷移は自前 sheet ではなく共有 path への push にする (sheet 多重化回避)。
@@ -79,6 +80,8 @@ struct SetlistView: View {
     @State private var myPickIdolIds: Set<String> = []
     /// brand_id → イメージカラー hex。曲のフォールバックジャケ/チップ色のシードに使う。
     @State private var brandHexById: [String: String] = [:]
+    /// brand_id → 短い表示名。パンくずの 1 段目に出す。
+    @State private var brandNameById: [String: String] = [:]
     /// この公演自体のブランド色 hex (会場/日付の lcRow シード)。
     @State private var showBrandHex: String? = nil
     /// イベント名 (シェア文を「イベント名 + 公演名」にするため保持)。
@@ -217,6 +220,49 @@ struct SetlistView: View {
     }
 
 
+    /// ブランド → イベント のパンくず。現在地 (公演) はすぐ下の大見出しが言うので、
+    /// ここには出さない (同じ名前を 2 度書かない)。
+    ///
+    /// 名前が長いイベント (「THE IDOLM@STER MILLION LIVE! 14thLIVE」等) があるので、
+    /// 1 行に収めて末尾を詰める。畳んだ先は見出しと会場カードが補う。
+    @ViewBuilder
+    private var breadcrumb: some View {
+        if let event {
+            let accent = ImasTheme.derive(seed: showBrandHex, brand: nil, scheme: scheme).accent
+            HStack(spacing: 5) {
+                if let brandId = event.brandId, let brandName = brandNameById[brandId] {
+                    Button {
+                        AppAnalytics.tap("setlist.breadcrumb.brand")
+                        go(.filteredEvents(.brand(id: brandId, label: brandName)))
+                    } label: {
+                        Text(brandName)
+                            .font(.imasCaption)
+                            .foregroundStyle(accent)
+                            .lineLimit(1)
+                    }
+                    .buttonStyle(.borderless)
+                    Image(systemName: "chevron.right")
+                        .font(.imasScaled(9, weight: .semibold))
+                        .foregroundStyle(DS.ink3)
+                }
+                Button {
+                    AppAnalytics.tap("setlist.breadcrumb.event")
+                    go(.event(event))
+                } label: {
+                    Text(event.name)
+                        .font(.imasCaption)
+                        .foregroundStyle(accent)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
+                .buttonStyle(.borderless)
+                Spacer(minLength: 0)
+            }
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel("上の階層")
+        }
+    }
+
     private func brandHex(for item: SetlistRow) -> String? {
         if let bid = item.songBrandId, let hex = brandHexById[bid] { return hex }
         return showBrandHex
@@ -237,15 +283,21 @@ struct SetlistView: View {
 
     var body: some View {
         List {
-            // 公演名 大見出し (デザイン 03: 本文先頭の t-title2)。ナビは「セットリスト」。
+            // 上の階層 (ブランド → イベント) へのパンくず + 公演名 大見出し。
+            // ナビの戻るは「どこから来たか」しか辿れない (深リンクや検索から直接開くと
+            // 戻り先が無い)。この画面がライブの木のどこに居るのかを示して、
+            // 上の階層へ直接行けるようにする。
             Section {
-                Text(show.name)
-                    .font(.imasTitle2)
-                    .foregroundStyle(DS.ink)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 0, trailing: 16))
-                    .listRowSeparator(.hidden)
+                VStack(alignment: .leading, spacing: 2) {
+                    breadcrumb
+                    Text(show.name)
+                        .font(.imasTitle2)
+                        .foregroundStyle(DS.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 0, trailing: 16))
+                .listRowSeparator(.hidden)
             }
 
             // シンプル表示では会場カードとマークバーを畳み、 会場・日付だけの 1 行にする。
@@ -645,6 +697,7 @@ struct SetlistView: View {
             brandHexById = Dictionary(uniqueKeysWithValues: brands.compactMap { brand in
                 brand.color.map { (brand.id, $0) }
             })
+            brandNameById = Dictionary(uniqueKeysWithValues: brands.map { ($0.id, $0.shortName) })
             if let event = try await AppContainer.shared.eventReading.event(id: show.eventId) {
                 self.event = event
                 eventName = event.name
