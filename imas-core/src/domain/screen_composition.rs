@@ -181,34 +181,66 @@ pub fn setlist_history_badges(
         .collect()
 }
 
+/// 「自分の回収」の札の役割。**色の出し分けはこれで行う。**
+///
+/// 文字列を見て色を決めると (`text == "未回収"` 等)、同じ条件が Swift と Kotlin に増える。
+/// 札が増えたときに片方だけ灰色のまま、という壊れ方もする。
+#[derive(uniffi::Enum, Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CollectionBadgeRole {
+    /// 手に入れた (初回収 / 回収 N 回目)。
+    Collected,
+    /// まだ持っていない (未回収)。
+    Uncollected,
+}
+
+/// 行に出す「自分の回収」の札 1 つ。
+#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
+pub struct CollectionBadgeRecord {
+    pub text: String,
+    pub role: CollectionBadgeRole,
+}
+
 /// セトリ 1 行に添える**自分の回収**の札。詳細表示以外では必ず空。
 ///
-/// - 参加した公演の行 … `初回収` だけ / `2 年ぶりの回収` + `回収 3 回目`
+/// - 参加した公演の行 … `初回収` / `回収 3 回目 (2 年ぶり)` を 1 つ
 /// - 参加していない公演の行 … まだ一度も回収していない曲にだけ `未回収`
 ///
 /// 「回収済みです」とは言わない — 参加していない公演のセトリで目に留めたいのは
 /// **まだ持っていない曲**で、既に持っている曲にも札を付けると全行が埋まる。
 ///
+/// `is_real_live` が偽 (リリイベ・配信番組など回収の対象でない催し) では**必ず空**。
+/// ここを通さないと、**自分で参加記録を付けた公演で全行が「未回収」になる**
+/// (参加した公演の集合はリアルライブだけに絞られているので、参加した行が
+/// 「未参加 かつ 未回収」に化ける)。セトリを持つ公演の 2 割強はリリイベ。
+///
 /// 文言は [`crate::domain::collection_gap`] が持つ。ここが決めるのは
-/// **どれをどの順で出すか**だけ ([`setlist_history_badges`] と同じ分担)。
+/// **どれを出すか**だけ ([`setlist_history_badges`] と同じ分担)。
 pub fn setlist_collection_badges(
     mode: SetlistDisplayMode,
+    is_real_live: bool,
     attended: bool,
-    ordinal_label: Option<&str>,
-    since_label: Option<&str>,
+    collected_label: Option<&str>,
     collected_count: u32,
-) -> Vec<String> {
-    if !mode.shows_collection_history() {
+) -> Vec<CollectionBadgeRecord> {
+    if !mode.shows_collection_history() || !is_real_live {
         return Vec::new();
     }
-    if !attended {
-        return if collected_count == 0 { vec![UNCOLLECTED_BADGE.to_string()] } else { Vec::new() };
+    if attended {
+        return collected_label
+            .map(|text| CollectionBadgeRecord {
+                text: text.to_string(),
+                role: CollectionBadgeRole::Collected,
+            })
+            .into_iter()
+            .collect();
     }
-    since_label
-        .into_iter()
-        .chain(ordinal_label)
-        .map(str::to_string)
-        .collect()
+    if collected_count == 0 {
+        return vec![CollectionBadgeRecord {
+            text: UNCOLLECTED_BADGE.to_string(),
+            role: CollectionBadgeRole::Uncollected,
+        }];
+    }
+    Vec::new()
 }
 
 /// まだ一度も回収していない曲の札。
@@ -218,31 +250,35 @@ pub const UNCOLLECTED_BADGE: &str = "未回収";
 mod setlist_collection_badge_tests {
     use super::*;
 
+    fn badge(text: &str, role: CollectionBadgeRole) -> CollectionBadgeRecord {
+        CollectionBadgeRecord { text: text.to_string(), role }
+    }
+
     /// 詳細表示以外では 1 つも出ない (自分の回収も披露履歴と同じ扱い)。
     #[test]
     fn 詳細表示以外では自分の回収も出さない() {
         for mode in [SetlistDisplayMode::Simple, SetlistDisplayMode::Normal] {
-            assert!(setlist_collection_badges(mode, true, Some("初回収"), None, 1).is_empty());
-            assert!(setlist_collection_badges(mode, false, None, None, 0).is_empty());
+            assert!(setlist_collection_badges(mode, true, true, Some("初回収"), 1).is_empty());
+            assert!(setlist_collection_badges(mode, true, false, None, 0).is_empty());
         }
     }
 
+    /// 参加した行の札は 1 つ (間隔は回数の括弧に入っている)。
     #[test]
-    fn 参加した行は間隔のあとに回数を出す() {
+    fn 参加した行の札は_1_つ() {
         assert_eq!(
             setlist_collection_badges(
                 SetlistDisplayMode::Detailed,
                 true,
-                Some("回収 3 回目"),
-                Some("2 年ぶりの回収"),
+                true,
+                Some("回収 3 回目 (2 年ぶり)"),
                 3
             ),
-            vec!["2 年ぶりの回収".to_string(), "回収 3 回目".to_string()]
+            vec![badge("回収 3 回目 (2 年ぶり)", CollectionBadgeRole::Collected)]
         );
-        // 初回収は 1 つだけ (間隔は無い)。
         assert_eq!(
-            setlist_collection_badges(SetlistDisplayMode::Detailed, true, Some("初回収"), None, 1),
-            vec!["初回収".to_string()]
+            setlist_collection_badges(SetlistDisplayMode::Detailed, true, true, Some("初回収"), 1),
+            vec![badge("初回収", CollectionBadgeRole::Collected)]
         );
     }
 
@@ -250,11 +286,24 @@ mod setlist_collection_badge_tests {
     #[test]
     fn 参加していない行は未回収だけを出す() {
         assert_eq!(
-            setlist_collection_badges(SetlistDisplayMode::Detailed, false, None, None, 0),
-            vec!["未回収".to_string()]
+            setlist_collection_badges(SetlistDisplayMode::Detailed, true, false, None, 0),
+            vec![badge("未回収", CollectionBadgeRole::Uncollected)]
         );
-        assert!(setlist_collection_badges(SetlistDisplayMode::Detailed, false, None, None, 2)
+        assert!(setlist_collection_badges(SetlistDisplayMode::Detailed, true, false, None, 2)
             .is_empty());
+    }
+
+    /// 回収の対象でない催し (リリイベ等) では、参加していても札を出さない。
+    /// **参加した公演で「未回収」と言わないための門。**
+    #[test]
+    fn 回収の対象でない催しでは札を出さない() {
+        // 参加記録があっても (attended は絞り込みで落ちて false になる) 何も出さない。
+        assert!(setlist_collection_badges(SetlistDisplayMode::Detailed, false, false, None, 0)
+            .is_empty());
+        assert!(
+            setlist_collection_badges(SetlistDisplayMode::Detailed, false, true, Some("初回収"), 1)
+                .is_empty()
+        );
     }
 
     /// 要約はシンプル表示でだけ伏せる (スクショに自分の記録を焼き込まない)。

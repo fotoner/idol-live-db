@@ -21,7 +21,7 @@ use crate::domain::event_detail_queries::{
 };
 use crate::domain::setlist_lineup::{self, Lineup};
 use crate::domain::screen_composition::SetlistDisplayMode;
-use crate::domain::collection_gap::{collection_attended_show_ids, AttendanceMarkRecord};
+use crate::domain::collection_gap::{self as collection, AttendanceMarkRecord};
 use crate::domain::setlist_row_meta::{setlist_row_meta, SetlistRowMetaBundle};
 use crate::domain::setlist_sections;
 use std::collections::{BTreeSet, HashMap};
@@ -52,7 +52,23 @@ pub fn collection_attended_shows(
     marks: Vec<AttendanceMarkRecord>,
     include_stream: bool,
 ) -> Vec<String> {
-    collection_attended_show_ids(marks, include_stream)
+    collection::collection_attended_show_ids(marks, include_stream)
+}
+
+/// 回収の対象になる催しの `events.kind`。
+///
+/// **SQL 経路が IN 句を組むために引く。** 同じ値を Swift / Kotlin のリテラルで持つと、
+/// 対象を足したときに片方だけ古いまま残る (回収バッジと「未回収」が食い違う)。
+#[uniffi::export]
+pub fn collection_real_live_kinds() -> Vec<String> {
+    collection::collection_real_live_kinds()
+}
+
+/// 回収に数える参加形態 (`user_marks.text_value`)。**空なら形態を問わない。**
+/// SQL 経路が `text_value IS NULL OR text_value IN (…)` を組むために引く。
+#[uniffi::export]
+pub fn collection_attendance_types(include_stream: bool) -> Vec<String> {
+    collection::collection_attendance_types(include_stream)
 }
 
 /// 2 段に積めない場所 (簡易表示・共有文) 向けの 1 行表記。

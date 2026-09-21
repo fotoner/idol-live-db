@@ -43,6 +43,30 @@ use std::collections::HashSet;
 /// (形態を選べるようにする前のマークはすべて現地参加の意味で付いている)。
 const LOCAL_ATTENDANCE: &str = "live";
 
+/// 回収の対象になる催し (`events.kind`)。歌枠・配信番組・ラジオ・リリイベは入らない。
+pub const REAL_LIVE_KINDS: [&str; 2] = ["live", "festival"];
+
+/// 回収の対象になる催しの `events.kind`。
+///
+/// **SQL 経路 (`AppDatabase+UserMarks`) が IN 句を組むためにこれを引く。**
+/// 同じ値を Swift のリテラルで持つと、対象を足したときに片方だけ古いまま残る。
+pub fn collection_real_live_kinds() -> Vec<String> {
+    REAL_LIVE_KINDS.iter().map(|k| k.to_string()).collect()
+}
+
+/// 回収に数える参加形態 (`user_marks.text_value`)。**空なら形態を問わない。**
+///
+/// SQL 経路が `text_value IS NULL OR text_value IN (…)` を組むために引く。
+/// `NULL` を現地扱いにする規則は [`collection_attended_show_ids`] と同じで、
+/// 絞るときは必ず [`LOCAL_ATTENDANCE`] が並びに入るので両者は同じ集合を選ぶ。
+pub fn collection_attendance_types(include_stream: bool) -> Vec<String> {
+    if include_stream {
+        Vec::new()
+    } else {
+        vec![LOCAL_ATTENDANCE.to_string()]
+    }
+}
+
 /// 回収に数える参加マークを選ぶ。**この規則の正本はここ 1 つ。**
 ///
 /// 既定は現地参加のみ。`include_stream` (設定「配信参加も回収に含める」) が真なら
@@ -55,11 +79,12 @@ pub fn collection_attended_show_ids(
     marks: Vec<AttendanceMarkRecord>,
     include_stream: bool,
 ) -> Vec<String> {
+    let kept = collection_attendance_types(include_stream);
     marks
         .into_iter()
         .filter(|m| {
-            include_stream
-                || m.attendance_type.as_deref().unwrap_or(LOCAL_ATTENDANCE) == LOCAL_ATTENDANCE
+            kept.is_empty()
+                || kept.iter().any(|k| k == m.attendance_type.as_deref().unwrap_or(LOCAL_ATTENDANCE))
         })
         .map(|m| m.entity_id)
         .collect()
@@ -67,8 +92,8 @@ pub fn collection_attended_show_ids(
 
 /// その公演は回収の対象か (リアルライブか)。歌枠・配信番組・ラジオ・リリイベは対象外。
 pub fn is_real_live(snap: &Snapshot, show: u32) -> bool {
-    let kind = &snap.events[snap.shows[show as usize].event as usize].kind;
-    kind == "live" || kind == "festival"
+    let kind = snap.events[snap.shows[show as usize].event as usize].kind.as_str();
+    REAL_LIVE_KINDS.contains(&kind)
 }
 
 /// 参加マークの id 列 → 参加した公演 (スナップショット添字) の集合。
@@ -114,10 +139,9 @@ pub struct CollectionGap {
     pub previous_date: Option<String>,
     /// 前の回収からの間隔 (か月)。
     pub months_since: Option<u32>,
-    /// `3 年 10 か月ぶりの回収`。1 年に満たない間隔と初回収では `None`。
-    pub since_label: Option<String>,
-    /// これまでに回収した回数 (公演の異なり数)。**参加していない行では「今」から見た数**で、
-    /// 0 なら未回収。参加した行ではこの行を含む [`Self::ordinal`] を見ること。
+    /// これまでに回収した回数 (公演の異なり数)。**参加の有無によらず「今」から見た数**
+    /// (参加した行では、その行より後の回収も入る)。0 なら一度も回収していない。
+    /// 「その公演時点で何回目か」を知りたいときは [`Self::ordinal`] を見ること。
     pub collected_count: u32,
 }
 
@@ -130,10 +154,23 @@ pub fn collection_ordinal_label(ordinal: u32) -> String {
     }
 }
 
-/// 前の回収からの間隔の言い回し。披露の「3 年 10 か月ぶり」と同じ線引き
-/// ([`crate::domain::performance_gap::NOTABLE_GAP_MONTHS`]) を使う。
-pub fn collection_interval_label(months: u32) -> Option<String> {
-    notable_interval_label(months).map(|label| format!("{label}の回収"))
+/// 行に出す「自分の回収」の言い回し。**必ず 1 つに畳む。**
+///
+/// 回収していない行では `None`。
+///
+/// # なぜ 1 つか
+///
+/// 詳細表示の行には既に世の中の履歴 (`3 年 10 か月ぶり` `4 回目`) が並ぶ。そこへ
+/// `2 年ぶりの回収` `回収 3 回目` を足すと、**似た言い回しが 4 つ**横に並んで、
+/// どれが自分のものか色でしか分からなくなる (11pt の札を色だけで読み分けさせない)。
+/// 間隔は括弧に入れて回数に従える。
+pub fn collection_badge_label(gap: &CollectionGap) -> Option<String> {
+    let ordinal = gap.ordinal_label.as_deref()?;
+    // 間隔の線引きは披露の「3 年 10 か月ぶり」と同じ (1 年以上)。
+    match gap.months_since.and_then(notable_interval_label) {
+        Some(interval) => Some(format!("{ordinal} ({interval})")),
+        None => Some(ordinal.to_string()),
+    }
 }
 
 /// その披露 (`setlist_items` の添字) を、自分の参加記録から見る。
@@ -174,7 +211,6 @@ pub fn collection_gap(snap: &Snapshot, item: u32, attended: &HashSet<u32>) -> Co
         is_first: ordinal == 1,
         previous_date,
         months_since,
-        since_label: months_since.and_then(collection_interval_label),
         collected_count: collected.len() as u32,
     }
 }
@@ -321,6 +357,21 @@ mod tests {
         assert_eq!(collection_attended_show_ids(marks, true), vec!["a", "b", "c", "d"]);
     }
 
+    /// SQL 経路 (`AppDatabase+UserMarks`) が IN 句に使う値は、Rust の判定と同じ集合を指す。
+    #[test]
+    fn sql_経路に配る値は判定と同じものを指す() {
+        let snap = snap();
+        // 催しの種別: collection_real_live_kinds の並びだけが is_real_live を通る。
+        let kinds = collection_real_live_kinds();
+        for show in (0..snap.shows.len() as u32).step_by(53) {
+            let kind = &snap.events[snap.shows[show as usize].event as usize].kind;
+            assert_eq!(is_real_live(snap, show), kinds.contains(kind), "{kind}");
+        }
+        // 参加形態: 絞るときは必ず「現地」が並びに入る (NULL を現地扱いにする規則と揃う)。
+        assert_eq!(collection_attendance_types(false), vec!["live".to_string()]);
+        assert!(collection_attendance_types(true).is_empty(), "設定 ON では形態を問わない");
+    }
+
     // ---- 1 行ぶんの事実 ----
 
     /// 参加した公演の行は、その公演時点で数える。
@@ -356,7 +407,10 @@ mod tests {
         assert_eq!(second.ordinal_label.as_deref(), Some("回収 2 回目"));
         assert!(!second.is_first);
         assert_eq!(second.previous_date.as_deref(), Some("2014-10-05"));
-        assert_eq!(second.since_label.as_deref(), Some("8 年 1 か月ぶりの回収"));
+        assert_eq!(
+            collection_badge_label(&second).as_deref(),
+            Some("回収 2 回目 (8 年 1 か月ぶり)")
+        );
     }
 
     /// 1 度も回収していない曲は `collected_count == 0` (= 未回収の根拠)。
@@ -414,10 +468,31 @@ mod tests {
     fn 回数と間隔の言い方は_1_箇所で決まる() {
         assert_eq!(collection_ordinal_label(1), "初回収");
         assert_eq!(collection_ordinal_label(2), "回収 2 回目");
-        assert_eq!(collection_interval_label(46).as_deref(), Some("3 年 10 か月ぶりの回収"));
-        assert_eq!(collection_interval_label(12).as_deref(), Some("1 年ぶりの回収"));
-        assert_eq!(collection_interval_label(11), None, "1 年未満は言わない");
-        assert_eq!(collection_interval_label(0), None);
+
+        let with_gap = CollectionGap {
+            attended: true,
+            ordinal: 3,
+            ordinal_label: Some(collection_ordinal_label(3)),
+            months_since: Some(46),
+            ..CollectionGap::default()
+        };
+        assert_eq!(
+            collection_badge_label(&with_gap).as_deref(),
+            Some("回収 3 回目 (3 年 10 か月ぶり)")
+        );
+        // 1 年未満の間隔は言わない (回数だけ)。
+        let recent = CollectionGap { months_since: Some(11), ..with_gap.clone() };
+        assert_eq!(collection_badge_label(&recent).as_deref(), Some("回収 3 回目"));
+        // 初回収は間隔を持たない。
+        let first = CollectionGap {
+            attended: true,
+            ordinal: 1,
+            ordinal_label: Some(collection_ordinal_label(1)),
+            ..CollectionGap::default()
+        };
+        assert_eq!(collection_badge_label(&first).as_deref(), Some("初回収"));
+        // 回収していない行には言い回しが無い。
+        assert_eq!(collection_badge_label(&CollectionGap::default()), None);
     }
 
     // ---- 公演 1 つぶんの要約 ----

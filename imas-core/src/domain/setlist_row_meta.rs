@@ -19,13 +19,13 @@ use crate::domain::event_detail_queries::{
     self as detail, PerformerNameMode, SetlistPerformerRecord,
 };
 use crate::domain::collection_gap::{
-    attended_real_live_shows, collection_gap, is_real_live, show_collection_summary, CollectionGap,
-    ShowCollectionRecord,
+    attended_real_live_shows, collection_badge_label, collection_gap, is_real_live,
+    show_collection_summary, CollectionGap, ShowCollectionRecord,
 };
 use crate::domain::performance_gap::performance_gap;
 use crate::domain::performer_label::{setlist_performer_label, SetlistNaming};
 use crate::domain::screen_composition::{
-    setlist_collection_badges, setlist_history_badges, SetlistDisplayMode,
+    setlist_collection_badges, setlist_history_badges, CollectionBadgeRecord, SetlistDisplayMode,
 };
 use crate::domain::setlist_lineup::is_full_cast;
 use crate::domain::snapshot::Snapshot;
@@ -60,20 +60,14 @@ pub struct SetlistRowMetaRecord {
     /// Swift / Kotlin に書くと、同じ条件が 2 か所に増える
     /// (`crate::domain::screen_composition::setlist_history_badges`)。
     pub history_badges: Vec<String>,
-    /// **行に出す「自分の回収」の札** (`初回収` / `回収 3 回目` / `未回収`)。
-    /// 下の生の事実から「どのモードでどれを出すか」を決めた結果
-    /// ([`crate::domain::screen_composition::setlist_collection_badges`])。
-    pub collection_badges: Vec<String>,
-    /// この公演に自分が参加しているか (= この行はその場で回収した曲)。
-    pub is_collected_here: bool,
-    /// 自分にとって何回目の回収か (1 = 初回収)。参加していない公演では 0。
-    pub collection_ordinal: u32,
-    pub is_first_collection: bool,
-    /// 自分が前にこの曲を回収した公演の日。初回収・未参加では `None`。
-    pub collection_previous_date: Option<String>,
-    /// これまでに回収した回数 (公演の異なり数)。未参加の行では「今」から見た数で、
-    /// 0 なら未回収 (理由は [`crate::domain::collection_gap`] のモジュール解説)。
-    pub collected_count: u32,
+    /// **行に出す「自分の回収」の札** (`初回収` / `回収 3 回目 (2 年ぶり)` / `未回収`)。
+    /// 多くても 1 つ。色は `role` で決める。
+    ///
+    /// 回数や前回の日といった**生の事実はここでは出さない**。出せば各 OS が
+    /// 「N 回目」を自前で組み立てる口になり、文言が 3 面に散る
+    /// (披露履歴の `ordinal` / `since_label` は既に出してしまっているが、
+    /// あれも画面は `history_badges` しか読んでいない)。
+    pub collection_badges: Vec<CollectionBadgeRecord>,
 }
 
 /// 公演 1 つぶんの添え物ひとまとめ。
@@ -140,7 +134,11 @@ pub fn setlist_row_meta(
     let performers_by_item = detail::setlist_performers_by_item(snap, show_id);
     let attended =
         attended_real_live_shows(snap, attended_show_ids, attended_event_ids, true);
-    let has_marks = !attended_show_ids.is_empty() || !attended_event_ids.is_empty();
+    // 回収の表示を出す門は**解決後の集合**で決める。生の id 列で見ると、
+    // 「配信参加しか記録していない人 (既定は現地のみ)」と「リリイベだけ記録した人」で
+    // 答えが割れる (前者は無言、後者は全行に未回収)。どちらも回収は 0 件なのに。
+    let has_marks = !attended.is_empty();
+    let real_live = is_real_live(snap, show);
     // 要約を数えるための材料 (曲 id と回収) を行を組みながら集める。
     let mut collection_rows: Vec<(String, CollectionGap)> = Vec::new();
 
@@ -180,9 +178,9 @@ pub fn setlist_row_meta(
             let collection_badges = if has_marks {
                 setlist_collection_badges(
                     display_mode,
+                    real_live,
                     mine.attended,
-                    mine.ordinal_label.as_deref(),
-                    mine.since_label.as_deref(),
+                    collection_badge_label(&mine).as_deref(),
                     mine.collected_count,
                 )
             } else {
@@ -203,18 +201,13 @@ pub fn setlist_row_meta(
                 history_badges,
                 since_label: gap.since_label,
                 collection_badges,
-                is_collected_here: mine.attended,
-                collection_ordinal: if mine.attended { mine.ordinal } else { 0 },
-                is_first_collection: mine.is_first,
-                collection_previous_date: mine.previous_date,
-                collected_count: mine.collected_count,
             }
         })
         .collect();
 
     let collection = display_mode
         .shows_collection_summary()
-        .then(|| show_collection_summary(&collection_rows, has_marks, is_real_live(snap, show)))
+        .then(|| show_collection_summary(&collection_rows, has_marks, real_live))
         .flatten();
     SetlistRowMetaBundle { rows, collection }
 }
@@ -234,6 +227,8 @@ mod tests {
             .expect("bundle DB はロードできる")
         })
     }
+
+    use crate::domain::screen_composition::CollectionBadgeRole;
 
     /// 参加記録なしで行だけ取る (既存テストの読み方)。
     fn rows_of(
@@ -431,17 +426,16 @@ mod tests {
             std::slice::from_ref(&show),
             &[],
         );
-        assert!(bundle.rows.iter().all(|r| r.is_collected_here), "全行がその場の回収");
         assert!(
-            bundle.rows.iter().all(|r| r.collection_ordinal >= 1),
-            "参加した公演の行は必ず何回目かを持つ"
+            bundle.rows.iter().all(|r| r.collection_badges.len() == 1),
+            "詳細表示では全行に回収の札が 1 つ付く"
         );
         assert!(
-            bundle.rows.iter().all(|r| !r.collection_badges.is_empty()),
-            "詳細表示では全行に回収の札が付く"
-        );
-        assert!(
-            bundle.rows.iter().all(|r| !r.collection_badges.contains(&"未回収".to_string())),
+            bundle
+                .rows
+                .iter()
+                .flat_map(|r| &r.collection_badges)
+                .all(|b| b.role == CollectionBadgeRole::Collected),
             "その場で回収している行に未回収は出さない"
         );
         let summary = bundle.collection.expect("要約が出る");
@@ -454,43 +448,44 @@ mod tests {
     #[test]
     fn 参加していない公演では未回収だけが出る() {
         let snap = snap();
-        // 参加した扱いにする公演と、開く公演を別々に選ぶ。
-        let live_shows: Vec<String> = snap
-            .shows
-            .iter()
-            .enumerate()
-            .filter(|(i, _)| {
-                snap.setlist_items_by_show[*i].len() >= 10
-                    && crate::domain::collection_gap::is_real_live(snap, *i as u32)
+        // 開く公演と、参加した扱いにする公演を選ぶ。**曲が 1 曲以上重なる 2 公演**にする
+        // (重なりが無いと「別公演で回収済みなら札が付かない」を確かめられない)。
+        let real_live = |i: usize| crate::domain::collection_gap::is_real_live(snap, i as u32);
+        let songs_of = |i: usize| -> HashSet<u32> {
+            snap.setlist_items_by_show[i]
+                .iter()
+                .map(|&item| snap.setlist_items[item as usize].song)
+                .collect()
+        };
+        let (open, attended_elsewhere) = (0..snap.shows.len())
+            .filter(|&i| snap.setlist_items_by_show[i].len() >= 10 && real_live(i))
+            .find_map(|i| {
+                let mine = songs_of(i);
+                (0..snap.shows.len())
+                    .filter(|&j| j != i && snap.setlist_items_by_show[j].len() >= 10 && real_live(j))
+                    .find(|&j| !songs_of(j).is_disjoint(&mine))
+                    .map(|j| (snap.shows[i].id.clone(), snap.shows[j].id.clone()))
             })
-            .map(|(_, s)| s.id.clone())
-            .take(2)
-            .collect();
-        assert_eq!(live_shows.len(), 2, "リアルライブが 2 公演は要る");
+            .expect("曲が重なるリアルライブが 2 公演ある");
 
         let bundle = setlist_row_meta(
             snap,
-            &live_shows[0],
+            &open,
             PerformerNameMode::IdolOnly,
             SetlistDisplayMode::Detailed,
-            &live_shows[1..],
+            std::slice::from_ref(&attended_elsewhere),
             &[],
         );
-        assert!(bundle.rows.iter().all(|r| !r.is_collected_here));
         assert!(
-            bundle
-                .rows
-                .iter()
-                .all(|r| r.collection_badges.is_empty()
-                    || r.collection_badges == vec!["未回収".to_string()]),
+            bundle.rows.iter().flat_map(|r| &r.collection_badges).all(|b| {
+                b.role == CollectionBadgeRole::Uncollected && b.text == "未回収"
+            }),
             "参加していない公演で出る札は未回収だけ"
         );
-        // 別公演で回収済みの曲には札が付かない。
-        for row in &bundle.rows {
-            if row.collected_count > 0 {
-                assert!(row.collection_badges.is_empty());
-            }
-        }
+        assert!(
+            bundle.rows.iter().any(|r| r.collection_badges.is_empty()),
+            "別公演で回収済みの曲には札が付かない (この 2 公演には共通の曲がある)"
+        );
         let summary = bundle.collection.expect("要約が出る");
         assert!(!summary.attended);
         assert!(summary.label.contains("未回収") || summary.label.contains("全曲回収済み"));
@@ -516,6 +511,34 @@ mod tests {
             &[],
         );
         assert!(bundle.rows.iter().all(|r| r.collection_badges.is_empty()));
+        assert_eq!(bundle.collection, None);
+    }
+
+    /// **回収の対象でない催し (リリイベ等) に参加していても「未回収」と言わない。**
+    ///
+    /// 回帰: 参加した公演の集合はリアルライブだけに絞られるので、リリイベの行は
+    /// 「未参加 かつ 回収 0 回」に化け、自分で付けた参加記録を全行が否定していた。
+    #[test]
+    fn 回収の対象でない催しでは参加していても札を出さない() {
+        let snap = snap();
+        let target = snap.shows.iter().enumerate().find(|(i, _)| {
+            !snap.setlist_items_by_show[*i].is_empty()
+                && !crate::domain::collection_gap::is_real_live(snap, *i as u32)
+        });
+        let Some((_, show)) = target else { return };
+        let bundle = setlist_row_meta(
+            snap,
+            &show.id,
+            PerformerNameMode::IdolOnly,
+            SetlistDisplayMode::Detailed,
+            std::slice::from_ref(&show.id),
+            &[],
+        );
+        assert!(!bundle.rows.is_empty());
+        assert!(
+            bundle.rows.iter().all(|r| r.collection_badges.is_empty()),
+            "回収の対象でない催しで札が出ている"
+        );
         assert_eq!(bundle.collection, None);
     }
 
