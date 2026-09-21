@@ -119,19 +119,22 @@ class MasteryViewModel(app: Application) : AndroidViewModel(app) {
             val targets = masteryBulkTargets(group.songIds, group.levels, scope)
             if (targets.isEmpty()) return@launch
             marks.setMastery(targets, level)
-            levels = marks.masteryLevels()
-            recompute(immediate = true)
-            refreshDetail()
+            onMarksChanged()
         }
     }
 
     fun setMastery(songId: String, level: UByte) {
         viewModelScope.launch {
             marks.setMastery(songId, level)
-            levels = marks.masteryLevels()
-            recompute(immediate = true)
-            refreshDetail()
+            onMarksChanged()
         }
+    }
+
+    /** 段階を書き換えた後の後始末 (再集計 + 開いていれば詳細も差し替え)。 */
+    private suspend fun onMarksChanged() {
+        levels = marks.masteryLevels()
+        recompute(immediate = true)
+        refreshDetail()
     }
 
     // ---- 群の詳細 (画面内で完結させる。ナビは触らない = StatsScreen と同じ流儀) ----

@@ -5,13 +5,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -123,12 +122,6 @@ fun MasteryScreen(
         MasteryFilterSheet(state, viewModel) { showFilter = false }
     }
 }
-
-/** `itemsIndexed` は foundation.lazy のものを使う (import を 1 箇所にまとめるための薄い別名)。 */
-private inline fun <T> androidx.compose.foundation.lazy.LazyListScope.itemsIndexed(
-    items: List<T>,
-    crossinline itemContent: @Composable (Int, T) -> Unit
-) = items(items.size) { i -> itemContent(i, items[i]) }
 
 @Composable
 private fun SummarySection(state: MasteryUiState) {
