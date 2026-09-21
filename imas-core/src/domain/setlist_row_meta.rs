@@ -19,13 +19,13 @@ use crate::domain::event_detail_queries::{
     self as detail, PerformerNameMode, SetlistPerformerRecord,
 };
 use crate::domain::collection_gap::{
-    attended_real_live_shows, collection_badge_label, collection_gap, is_real_live,
-    show_collection_summary, CollectionGap, ShowCollectionRecord,
+    attended_real_live_shows, collection_gap, is_real_live, show_collection_summary, CollectionGap,
+    ShowCollectionRecord,
 };
 use crate::domain::performance_gap::performance_gap;
 use crate::domain::performer_label::{setlist_performer_label, SetlistNaming};
 use crate::domain::screen_composition::{
-    setlist_collection_badges, setlist_history_badges, CollectionBadgeRecord, SetlistDisplayMode,
+    setlist_row_note_groups, SetlistDisplayMode, SetlistRowNoteGroupRecord,
 };
 use crate::domain::setlist_lineup::is_full_cast;
 use crate::domain::snapshot::Snapshot;
@@ -52,22 +52,15 @@ pub struct SetlistRowMetaRecord {
     pub previous_date: Option<String>,
     /// `3 年 10 か月ぶり`。1 年に満たない間隔と初披露では `None`。
     pub since_label: Option<String>,
-    /// **行に出す披露履歴の札**(詳細表示のときだけ中身が入る)。
+    /// **行に出すこの披露についての事実**を、軸ごとにまとめたもの
+    /// (詳細表示のときだけ中身が入る)。`披露` → `回収` の順で、多くても 2 つ。
     ///
     /// 上の 4 つ (`ordinal` / `ordinal_label` / `previous_date` / `since_label`) は
     /// 生の事実で、そこから「どのモードでどれを出すか」を決めた結果がこれ。
-    /// **画面はこれを並べるだけにする** — モードを見て出し分ける条件を
-    /// Swift / Kotlin に書くと、同じ条件が 2 か所に増える
-    /// (`crate::domain::screen_composition::setlist_history_badges`)。
-    pub history_badges: Vec<String>,
-    /// **行に出す「自分の回収」の札** (`初回収` / `回収 3 回目 (2 年ぶり)` / `未回収`)。
-    /// 多くても 1 つ。色は `role` で決める。
-    ///
-    /// 回数や前回の日といった**生の事実はここでは出さない**。出せば各 OS が
-    /// 「N 回目」を自前で組み立てる口になり、文言が 3 面に散る
-    /// (披露履歴の `ordinal` / `since_label` は既に出してしまっているが、
-    /// あれも画面は `history_badges` しか読んでいない)。
-    pub collection_badges: Vec<CollectionBadgeRecord>,
+    /// **画面はこれを並べるだけにする** — モードを見て出し分ける条件や、
+    /// どれを強く見せるかの判断を Swift / Kotlin に書くと、同じ条件が 2 か所に増える
+    /// (`crate::domain::screen_composition::setlist_row_note_groups`)。
+    pub note_groups: Vec<SetlistRowNoteGroupRecord>,
 }
 
 /// 公演 1 つぶんの添え物ひとまとめ。
@@ -169,25 +162,11 @@ pub fn setlist_row_meta(
                     .collect(),
             });
             let gap = performance_gap(snap, item);
-            let history_badges = setlist_history_badges(
-                display_mode,
-                gap.is_first,
-                &gap.ordinal_label,
-                gap.since_label.as_deref(),
-            );
             let mine = collection_gap(snap, item, &attended);
-            let collection_badges = if has_marks {
-                setlist_collection_badges(
-                    display_mode,
-                    real_live,
-                    mine.attended,
-                    collection_badge_label(&mine).as_deref(),
-                    mine.collected_count,
-                )
-            } else {
-                // 参加記録を 1 件も付けていない人に「未回収」を並べても情報にならない。
-                Vec::new()
-            };
+            // 参加記録を 1 件も付けていない人に「未回収」を並べても情報にならないので、
+            // そのときは回収の対象でない催しと同じ扱いにして自分の事実を伏せる。
+            let note_groups =
+                setlist_row_note_groups(display_mode, real_live && has_marks, &gap, &mine);
             collection_rows.push((song.id.clone(), mine));
 
             SetlistRowMetaRecord {
@@ -199,9 +178,8 @@ pub fn setlist_row_meta(
                 ordinal_label: gap.ordinal_label,
                 is_first_performance: gap.is_first,
                 previous_date: gap.previous_date,
-                history_badges,
                 since_label: gap.since_label,
-                collection_badges,
+                note_groups,
             }
         })
         .collect();
@@ -229,7 +207,21 @@ mod tests {
         })
     }
 
-    use crate::domain::screen_composition::CollectionBadgeRole;
+    use crate::domain::screen_composition::{RowNoteTone, SetlistRowNoteRecord};
+
+    /// その行に「回収」の軸が出ていないか (世の中から見た披露の履歴だけか)。
+    fn has_no_collection_axis(meta: &SetlistRowMetaRecord) -> bool {
+        meta.note_groups.iter().all(|g| g.label != "回収")
+    }
+
+    /// 行の「回収」の軸に並ぶ事実。無ければ空。
+    fn collection_notes(meta: &SetlistRowMetaRecord) -> &[SetlistRowNoteRecord] {
+        meta.note_groups
+            .iter()
+            .find(|g| g.label == "回収")
+            .map(|g| g.notes.as_slice())
+            .unwrap_or_default()
+    }
 
     /// 参加記録なしで行だけ取る (既存テストの読み方)。
     fn rows_of(
@@ -363,20 +355,24 @@ mod tests {
             let metas = rows_of(snap, show, PerformerNameMode::IdolOnly, quiet);
             assert!(!metas.is_empty());
             assert!(
-                metas.iter().all(|m| m.history_badges.is_empty()),
+                metas.iter().all(|m| m.note_groups.is_empty()),
                 "{quiet:?} で札が出ている"
             );
         }
         let detailed =
             rows_of(snap, show, PerformerNameMode::IdolOnly, SetlistDisplayMode::Detailed);
         assert!(
-            detailed.iter().all(|m| !m.history_badges.is_empty()),
-            "詳細表示では全行が何かしらの札を持つ (初披露 か N 回目)"
+            detailed.iter().all(|m| !m.note_groups.is_empty()),
+            "詳細表示では全行が何かしらの事実を持つ (初披露 か N 回目)"
         );
         // 初披露の行は「初披露」1 つだけ (「1 回目」を並べない)。
         for m in &detailed {
             if m.is_first_performance {
-                assert_eq!(m.history_badges, vec!["初披露".to_string()]);
+                let performance = &m.note_groups[0];
+                assert_eq!(performance.label, "披露");
+                assert_eq!(performance.notes.len(), 1);
+                assert_eq!(performance.notes[0].text, "初披露");
+                assert_eq!(performance.notes[0].tone, RowNoteTone::Debut);
             }
         }
     }
@@ -428,16 +424,11 @@ mod tests {
             &[],
         );
         assert!(
-            bundle.rows.iter().all(|r| r.collection_badges.len() == 1),
-            "詳細表示では全行に回収の札が 1 つ付く"
-        );
-        assert!(
             bundle
                 .rows
                 .iter()
-                .flat_map(|r| &r.collection_badges)
-                .all(|b| b.role == CollectionBadgeRole::Collected),
-            "その場で回収している行に未回収は出さない"
+                .all(|r| collection_notes(r).first().map(|n| n.tone) == Some(RowNoteTone::Mine)),
+            "詳細表示では全行に回収の軸が付き、その頭は自分の回数"
         );
         let summary = bundle.collection.expect("要約が出る");
         assert!(summary.attended);
@@ -478,14 +469,14 @@ mod tests {
             &[],
         );
         assert!(
-            bundle.rows.iter().flat_map(|r| &r.collection_badges).all(|b| {
-                b.role == CollectionBadgeRole::Uncollected && b.text == "未回収"
+            bundle.rows.iter().flat_map(collection_notes).all(|n| {
+                n.tone == RowNoteTone::Missing && n.text == "未回収"
             }),
-            "参加していない公演で出る札は未回収だけ"
+            "参加していない公演で出る回収の軸は未回収だけ"
         );
         assert!(
-            bundle.rows.iter().any(|r| r.collection_badges.is_empty()),
-            "別公演で回収済みの曲には札が付かない (この 2 公演には共通の曲がある)"
+            bundle.rows.iter().any(has_no_collection_axis),
+            "別公演で回収済みの曲には回収の軸が付かない (この 2 公演には共通の曲がある)"
         );
         let summary = bundle.collection.expect("要約が出る");
         assert!(!summary.attended);
@@ -511,7 +502,7 @@ mod tests {
             &[],
             &[],
         );
-        assert!(bundle.rows.iter().all(|r| r.collection_badges.is_empty()));
+        assert!(bundle.rows.iter().all(has_no_collection_axis));
         assert_eq!(bundle.collection, None);
     }
 
@@ -537,7 +528,7 @@ mod tests {
         );
         assert!(!bundle.rows.is_empty());
         assert!(
-            bundle.rows.iter().all(|r| r.collection_badges.is_empty()),
+            bundle.rows.iter().all(has_no_collection_axis),
             "回収の対象でない催しで札が出ている"
         );
         assert_eq!(bundle.collection, None);
@@ -566,7 +557,7 @@ mod tests {
             &[],
         );
         assert_eq!(simple.collection, None);
-        assert!(simple.rows.iter().all(|r| r.collection_badges.is_empty()));
+        assert!(simple.rows.iter().all(|r| r.note_groups.is_empty()));
         // 普通表示では札は出ないが要約は出る。
         let normal = setlist_row_meta(
             snap,
@@ -577,6 +568,6 @@ mod tests {
             &[],
         );
         assert!(normal.collection.is_some());
-        assert!(normal.rows.iter().all(|r| r.collection_badges.is_empty()));
+        assert!(normal.rows.iter().all(|r| r.note_groups.is_empty()));
     }
 }

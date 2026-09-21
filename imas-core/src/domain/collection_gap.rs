@@ -147,31 +147,21 @@ pub struct CollectionGap {
 }
 
 /// 回収の回数の言い回し。**言い方はここ 1 箇所**。
+///
+/// 「回収 3 回目」とは言わない — 行では「回収」という軸のラベルの右に出るので、
+/// 値の側でもう一度「回収」と言うと同じ語が 2 度並ぶ
+/// (`crate::domain::screen_composition::setlist_row_note_groups`)。
 pub fn collection_ordinal_label(ordinal: u32) -> String {
     if ordinal <= 1 {
         "初回収".to_string()
     } else {
-        format!("回収 {ordinal} 回目")
+        format!("{ordinal} 回目")
     }
 }
 
-/// 行に出す「自分の回収」の言い回し。**必ず 1 つに畳む。**
-///
-/// 回収していない行では `None`。
-///
-/// # なぜ 1 つか
-///
-/// 詳細表示の行には既に世の中の履歴 (`3 年 10 か月ぶり` `4 回目`) が並ぶ。そこへ
-/// `2 年ぶりの回収` `回収 3 回目` を足すと、**似た言い回しが 4 つ**横に並んで、
-/// どれが自分のものか色でしか分からなくなる (11pt の札を色だけで読み分けさせない)。
-/// 間隔は括弧に入れて回数に従える。
-pub fn collection_badge_label(gap: &CollectionGap) -> Option<String> {
-    let ordinal = gap.ordinal_label.as_deref()?;
-    // 間隔の線引きは披露の「3 年 10 か月ぶり」と同じ (1 年以上)。
-    match gap.months_since.and_then(notable_interval_label) {
-        Some(interval) => Some(format!("{ordinal} ({interval})")),
-        None => Some(ordinal.to_string()),
-    }
+/// 前の回収からの間隔の言い回し。線引きは披露の「3 年 10 か月ぶり」と同じ (1 年以上)。
+pub fn collection_interval_label(gap: &CollectionGap) -> Option<String> {
+    gap.months_since.and_then(notable_interval_label)
 }
 
 /// その披露 (`setlist_items` の添字) を、自分の参加記録から見る。
@@ -405,13 +395,10 @@ mod tests {
         let second = collection_gap(snap, c, &attended);
         assert!(second.attended);
         assert_eq!(second.ordinal, 2);
-        assert_eq!(second.ordinal_label.as_deref(), Some("回収 2 回目"));
         assert!(!second.is_first);
         assert_eq!(second.previous_date.as_deref(), Some("2014-10-05"));
-        assert_eq!(
-            collection_badge_label(&second).as_deref(),
-            Some("回収 2 回目 (8 年 1 か月ぶり)")
-        );
+        assert_eq!(second.ordinal_label.as_deref(), Some("2 回目"));
+        assert_eq!(collection_interval_label(&second).as_deref(), Some("8 年 1 か月ぶり"));
     }
 
     /// 1 度も回収していない曲は `collected_count == 0` (= 未回収の根拠)。
@@ -467,33 +454,16 @@ mod tests {
     /// 言い回し。
     #[test]
     fn 回数と間隔の言い方は_1_箇所で決まる() {
+        // 「回収」は行の軸ラベルが言うので、値の側では言わない。
         assert_eq!(collection_ordinal_label(1), "初回収");
-        assert_eq!(collection_ordinal_label(2), "回収 2 回目");
+        assert_eq!(collection_ordinal_label(2), "2 回目");
 
-        let with_gap = CollectionGap {
-            attended: true,
-            ordinal: 3,
-            ordinal_label: Some(collection_ordinal_label(3)),
-            months_since: Some(46),
-            ..CollectionGap::default()
-        };
-        assert_eq!(
-            collection_badge_label(&with_gap).as_deref(),
-            Some("回収 3 回目 (3 年 10 か月ぶり)")
-        );
-        // 1 年未満の間隔は言わない (回数だけ)。
-        let recent = CollectionGap { months_since: Some(11), ..with_gap.clone() };
-        assert_eq!(collection_badge_label(&recent).as_deref(), Some("回収 3 回目"));
-        // 初回収は間隔を持たない。
-        let first = CollectionGap {
-            attended: true,
-            ordinal: 1,
-            ordinal_label: Some(collection_ordinal_label(1)),
-            ..CollectionGap::default()
-        };
-        assert_eq!(collection_badge_label(&first).as_deref(), Some("初回収"));
-        // 回収していない行には言い回しが無い。
-        assert_eq!(collection_badge_label(&CollectionGap::default()), None);
+        let with_gap = CollectionGap { months_since: Some(46), ..CollectionGap::default() };
+        assert_eq!(collection_interval_label(&with_gap).as_deref(), Some("3 年 10 か月ぶり"));
+        // 1 年未満の間隔は言わない。
+        let recent = CollectionGap { months_since: Some(11), ..CollectionGap::default() };
+        assert_eq!(collection_interval_label(&recent), None);
+        assert_eq!(collection_interval_label(&CollectionGap::default()), None);
     }
 
     // ---- 公演 1 つぶんの要約 ----

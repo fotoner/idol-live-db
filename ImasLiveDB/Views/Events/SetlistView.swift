@@ -159,7 +159,6 @@ struct SetlistView: View {
                 item: item,
                 displayNumber: index + 1,
                 performerLabel: meta?.performerLabel ?? "",
-                historyBadges: meta?.historyBadges ?? [],
                 brandHex: brandHex(for: item)
             )
             .onTapGesture {
@@ -179,8 +178,7 @@ struct SetlistView: View {
                 idolsById: idolsById,
                 unitNames: meta?.unitNames ?? [],
                 isFullCast: meta?.isFullCast ?? false,
-                historyBadges: meta?.historyBadges ?? [],
-                collectionBadges: meta?.collectionBadges ?? [],
+                noteGroups: meta?.noteGroups ?? [],
                 performerName: performerName,
                 isCharacterLive: show.isCharacterLive,
                 coverType: classifyCover(originalIds: originalIds, performerIds: performerIdolIds),

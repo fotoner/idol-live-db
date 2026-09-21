@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SetlistRowView: View {
     @Environment(AppDatabase.self) private var database
+    @Environment(\.colorScheme) private var scheme
     /// 文字サイズ設定。曲名 (生 .system) のスケールに使い、変更時の行再評価の依存源も兼ねる。
     @AppStorage("text_scale") private var textScale: Double = 1.0
     let item: SetlistRow
@@ -13,14 +14,14 @@ struct SetlistRowView: View {
     var unitNames: [String] = []
     /// 公演の出演者全員で歌う行か (「全員」表記)。判定も imas-core。
     var isFullCast: Bool = false
-    /// 披露履歴の札 (「初披露」「3 年 10 か月ぶり」「4 回目」)。
-    /// **中身も、そもそも出すかどうかも imas-core が表示モードから決める** ので、
-    /// ここは受け取った順に並べるだけ。詳細表示以外では必ず空で来る。
-    var historyBadges: [String] = []
-    /// **自分の回収**の札 (「初回収」「回収 3 回目 (2 年ぶり)」「未回収」)。多くても 1 つ。
-    /// 中身も出す/出さないも、色に使う `role` も imas-core が決める
-    /// (`collection_gap` / `setlist_collection_badges`)。ここは並べるだけ。
-    var collectionBadges: [CollectionBadgeRecord] = []
+    /// この披露についての事実を、軸 (`披露` / `回収`) ごとにまとめたもの。
+    /// **軸の分け方も、ラベルも、順も、どれを強く見せるか (`tone`) も imas-core が決める**
+    /// ので、ここは受け取った順に並べるだけ。詳細表示以外では必ず空で来る。
+    ///
+    /// 丸い札にはしない。曲の属性 (カバー・ユニット名) と同じ形で並べると 1 行に丸が
+    /// 5 つ並び、「・」で繋いだ 1 行にしても並列に並ぶだけで構造にならない。
+    /// 軸の名前を左に固定幅で置き、値を右に流す。
+    var noteGroups: [SetlistRowNoteGroupRecord] = []
     /// 歌唱者をどの名前で出すか (親が AppStorage から解決して渡す)。
     var performerName: PerformerNameMode = .idolOnly
     /// `shows.performer_type == "character"`。
@@ -197,10 +198,13 @@ struct SetlistRowView: View {
                 // List セル内に複数ボタンが同居するため .borderless でタップをスコープ。
                 .buttonStyle(.borderless)
 
-                // カバー種別 + 歌唱者 (ユニット / 全員 / アバター) を 1 行にまとめる。
+                // 「この曲が何か」(カバー・ユニット・歌唱者) の行。
                 if hasMeta {
                     metaRow
                 }
+
+                // 「この披露はどうだったか」(披露の履歴・自分の回収) の段。
+                noteGroupsBlock
 
                 if let notes = item.notes {
                     Text(notes)
@@ -266,11 +270,13 @@ struct SetlistRowView: View {
 
     /// メタ行に出すものがあるか (カバー種別チップ or 履歴の札 or 歌唱者表現)。無ければ行ごと省く。
     private var hasMeta: Bool {
-        coverTag != nil || !historyBadges.isEmpty || !collectionBadges.isEmpty
-            || !unitNames.isEmpty || isFullCast || !performers.isEmpty
+        coverTag != nil || !unitNames.isEmpty || isFullCast || !performers.isEmpty
     }
 
-    /// カバー種別チップ + 珍しさ + 歌唱者 (ユニット / 全員 / アバター)。
+    /// **この曲が何か**の行 — カバー種別チップ + 歌唱者 (ユニット / 全員 / アバター)。
+    ///
+    /// 披露の履歴と自分の回収はここに入れない ([`notesLine`])。同じ形の札で混ぜると
+    /// 「カバー」と「4 回目」が同じ重みに見えて、行が札の羅列になる。
     ///
     /// 横一列 (HStack) ではなく回り込み (FlowLayout) にしてある。幅が足りないとき、
     /// HStack は**札の中の文字を折り返す**ので「1 年 1 か月 / ぶり」と割れて読めなくなる。
@@ -281,25 +287,83 @@ struct SetlistRowView: View {
             if let tag = coverTag {
                 ImasTagChip(text: tag.text, kind: tag.kind, seed: seed)
             }
-            // 披露履歴の札 (詳細表示のときだけ来る)。塗りつぶしではなく輪郭だけにして、
-            // カバーの札やユニット名と競わせない。
-            ForEach(historyBadges, id: \.self) { badge in
-                ImasTagChip(text: badge, kind: .guest, seed: seed)
-            }
-            // 自分の回収の札。世の中の履歴 (輪郭) の次に置き、色で「自分の記録」と分ける。
-            // どちらの色かは core が付けた role で決める (文字列を見て分岐しない)。
-            ForEach(collectionBadges, id: \.text) { badge in
-                ImasTagChip(text: badge.text, kind: Self.chipKind(badge.role), seed: seed)
-            }
             performerMeta
         }
     }
 
-    /// 回収の札の役割 → 見た目。**対応表だけを持ち、判断はしない。**
-    private static func chipKind(_ role: CollectionBadgeRole) -> ImasTagChip.Kind {
-        switch role {
-        case .collected:   return .collected
-        case .uncollected: return .uncollected
+    /// **この披露についての事実**の段 (詳細表示のときだけ来る)。
+    ///
+    /// ```text
+    /// ────────────────────────
+    /// 披露   3 回目   2 年 6 か月ぶり
+    /// 回収   初回収
+    /// ```
+    ///
+    /// 歌唱者との間にヘアラインを 1 本引いて、「この曲が何か」と「この披露がどうだったか」を
+    /// 別のブロックとして読ませる。軸の名前は固定幅で左に置くので、39 曲のセトリでも
+    /// 同じ位置に同じ軸が来る (縦に流し読みできる)。
+    @ViewBuilder
+    private var noteGroupsBlock: some View {
+        if !noteGroups.isEmpty {
+            VStack(alignment: .leading, spacing: 3) {
+                Rectangle()
+                    .fill(DS.sep)
+                    .frame(height: 0.5)
+                    .padding(.top, 3)
+                    .padding(.bottom, 2)
+                ForEach(noteGroups, id: \.label) { group in
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        Text(group.label)
+                            .font(.imasCaption2)
+                            .kerning(0.4)
+                            .foregroundStyle(DS.ink3)
+                            .frame(width: 26, alignment: .leading)
+                        Self.notesText(group.notes, accent: accent)
+                            .font(.imasCaption)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+        }
+    }
+
+    private var accent: Color { ImasTheme.derive(seed: seed, scheme: scheme).accent }
+
+    /// 1 つの軸の値を 1 本の `Text` に連結する。
+    /// 連結した `Text` は普通の文として折り返すので、幅が足りなくても語の途中で割れない。
+    private static func notesText(_ notes: [SetlistRowNoteRecord], accent: Color) -> Text {
+        notes.enumerated().reduce(Text("")) { acc, pair in
+            let (index, note) = pair
+            return acc + (index == 0 ? Text("") : Text("  ")) + noteText(note, accent: accent)
+        }
+    }
+
+    /// 事実 1 つの見え方。**判断はしない** — core が付けた `tone` に対応表を当てるだけ。
+    ///
+    /// 色だけで意味を分けると、色が見分けづらい人には全部同じ文字列に見える。
+    /// 自分の記録 (回収 / 未回収) には印を付けて、色に頼らず分かるようにする。
+    private static func noteText(_ note: SetlistRowNoteRecord, accent: Color) -> Text {
+        switch note.tone {
+        case .value:
+            return Text(note.text).font(.imasCaption.weight(.medium)).foregroundColor(DS.ink)
+        case .detail:
+            return Text(note.text).foregroundColor(DS.ink3)
+        case .debut:
+            return Text(note.text).font(.imasCaption.weight(.semibold)).foregroundColor(accent)
+        case .mine:
+            // 印は細いチェックマークだけ。塗りつぶしのシールはこの大きさだとシール然として
+            // 行から浮く (行に貼るのは「済み」の合図であって、賞ではない)。
+            return Text(Image(systemName: "checkmark"))
+                .font(.imasCaption2.weight(.semibold))
+                .foregroundColor(DS.successInk)
+                + Text(" ")
+                + Text(note.text).font(.imasCaption.weight(.semibold)).foregroundColor(DS.successInk)
+        case .missing:
+            return Text(Image(systemName: "circle.dotted"))
+                .font(.imasCaption2)
+                .foregroundColor(DS.ink3)
+                + Text(" ")
+                + Text(note.text).foregroundColor(DS.ink2)
         }
     }
 

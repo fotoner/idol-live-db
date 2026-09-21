@@ -20,6 +20,9 @@
 //! - 画面遷移の実行 (`action` は「押されたら何をしたいか」の**種類**だけを返し、
 //!   実際の遷移は各OSが自分の navigation で行う)
 
+use crate::domain::collection_gap::{collection_interval_label, CollectionGap};
+use crate::domain::performance_gap::PerformanceGap;
+
 // =============================================================================
 // セトリをどれだけ詳しく出すか
 // =============================================================================
@@ -153,156 +156,276 @@ pub fn setlist_display_mode_from_stored(
     }
 }
 
-/// セトリ 1 行に添える披露履歴の札。詳細表示以外では**必ず空**。
+/// セトリ 1 行に添える事実を、**軸ごとにまとめた**もの。詳細表示以外では必ず空。
 ///
-/// 詳細表示では:
-/// - 初披露 … `初披露` だけ (「1 回目」は言わない)
-/// - それ以外 … `3 年 10 か月ぶり` (1 年以上空いたときだけ) と `4 回目`
+/// ```text
+/// 披露   3 回目   2 年 6 か月ぶり
+/// 回収   初回収
+/// ```
 ///
+/// 軸は「披露」(世の中から見た事実) と「回収」(自分の参加記録から見た事実) の 2 つ。
+/// 中身が無い軸は返さない。
+///
+/// # なぜ「札」をやめて軸にしたか
+///
+/// 以前はこれらを 1 つずつ丸い札 (chip) で返していて、カバーの札・ユニット名と
+/// 合わせて**1 行に丸が 5 つ**並んだ。全部同じ形・同じ大きさなので、どれが珍しくて
+/// どれが当たり前なのか読めなかった。「・」で繋いだ 1 行にしても、並列に並ぶだけで
+/// **構造にはならない**。
+///
+/// 軸の名前を左に固定して値を右に置くと、どの行も同じ位置に同じ軸が来るので、
+/// 39 曲のセトリを縦に流し読みできる。だから**軸の分け方とラベルもここで決める** —
+/// 各 OS が tone を見て「これは自分の事実だから回収の段」と振り分けると、
+/// 同じ対応表が Swift と Kotlin に増える。
+///
+/// 値の中の主従 ([`RowNoteTone`]) も決める: 回数が主 (`Value`)、間隔は補足 (`Detail`)。
 /// 文言そのものは [`crate::domain::performance_gap`] と
-/// [`crate::domain::song_detail_queries::performance_ordinal_label`] が持つ。
-/// ここが決めるのは**どれをどの順で出すか**だけ。
-pub fn setlist_history_badges(
+/// [`crate::domain::collection_gap`] が持つ。
+pub fn setlist_row_note_groups(
     mode: SetlistDisplayMode,
-    is_first_performance: bool,
-    ordinal_label: &str,
-    since_label: Option<&str>,
-) -> Vec<String> {
+    is_real_live: bool,
+    performance: &PerformanceGap,
+    mine: &CollectionGap,
+) -> Vec<SetlistRowNoteGroupRecord> {
     if !mode.shows_performance_history() {
         return Vec::new();
     }
-    if is_first_performance {
-        return vec![ordinal_label.to_string()];
+    let mut groups = Vec::new();
+    groups.push(SetlistRowNoteGroupRecord {
+        label: PERFORMANCE_AXIS.to_string(),
+        notes: performance_notes(performance),
+    });
+    let mine_notes = collection_notes(is_real_live, mine);
+    if !mine_notes.is_empty() {
+        groups.push(SetlistRowNoteGroupRecord {
+            label: COLLECTION_AXIS.to_string(),
+            notes: mine_notes,
+        });
     }
-    since_label
-        .into_iter()
-        .map(str::to_string)
-        .chain(std::iter::once(ordinal_label.to_string()))
-        .collect()
+    groups
 }
 
-/// 「自分の回収」の札の役割。**色の出し分けはこれで行う。**
-///
-/// 文字列を見て色を決めると (`text == "未回収"` 等)、同じ条件が Swift と Kotlin に増える。
-/// 札が増えたときに片方だけ灰色のまま、という壊れ方もする。
-#[derive(uniffi::Enum, Clone, Copy, Debug, PartialEq, Eq)]
-pub enum CollectionBadgeRole {
-    /// 手に入れた (初回収 / 回収 N 回目)。
-    Collected,
-    /// まだ持っていない (未回収)。
-    Uncollected,
+/// 世の中から見た事実。初披露なら 1 つだけ (「1 回目」は言わない)。
+fn performance_notes(performance: &PerformanceGap) -> Vec<SetlistRowNoteRecord> {
+    if performance.is_first {
+        return vec![SetlistRowNoteRecord::new(&performance.ordinal_label, RowNoteTone::Debut)];
+    }
+    let mut notes = vec![SetlistRowNoteRecord::new(&performance.ordinal_label, RowNoteTone::Value)];
+    // 間隔は回数の補足。1 年に満たなければ言わない。
+    if let Some(since) = &performance.since_label {
+        notes.push(SetlistRowNoteRecord::new(since, RowNoteTone::Detail));
+    }
+    notes
 }
 
-/// 行に出す「自分の回収」の札 1 つ。
-#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
-pub struct CollectionBadgeRecord {
-    pub text: String,
-    pub role: CollectionBadgeRole,
-}
-
-/// まだ一度も回収していない曲の札。
-pub const UNCOLLECTED_BADGE: &str = "未回収";
-
-/// セトリ 1 行に添える**自分の回収**の札。詳細表示以外では必ず空。
-///
-/// - 参加した公演の行 … `初回収` / `回収 3 回目 (2 年ぶり)` を 1 つ
-/// - 参加していない公演の行 … まだ一度も回収していない曲にだけ `未回収`
+/// 自分の参加記録から見た事実。出ないこともある (そのときは軸ごと出さない)。
 ///
 /// 「回収済みです」とは言わない — 参加していない公演のセトリで目に留めたいのは
-/// **まだ持っていない曲**で、既に持っている曲にも札を付けると全行が埋まる。
+/// **まだ持っていない曲**で、既に持っている曲にも印を付けると全行が埋まる。
 ///
-/// `is_real_live` が偽 (リリイベ・配信番組など回収の対象でない催し) では**必ず空**。
+/// `is_real_live` が偽 (リリイベ・配信番組など回収の対象でない催し) では必ず空。
 /// ここを通さないと、**自分で参加記録を付けた公演で全行が「未回収」になる**
 /// (参加した公演の集合はリアルライブだけに絞られているので、参加した行が
 /// 「未参加 かつ 未回収」に化ける)。セトリを持つ公演の 2 割強はリリイベ。
-///
-/// 文言は [`crate::domain::collection_gap`] が持つ。ここが決めるのは
-/// **どれを出すか**だけ ([`setlist_history_badges`] と同じ分担)。
-pub fn setlist_collection_badges(
-    mode: SetlistDisplayMode,
-    is_real_live: bool,
-    attended: bool,
-    collected_label: Option<&str>,
-    collected_count: u32,
-) -> Vec<CollectionBadgeRecord> {
-    if !mode.shows_collection_history() || !is_real_live {
+fn collection_notes(is_real_live: bool, mine: &CollectionGap) -> Vec<SetlistRowNoteRecord> {
+    if !is_real_live {
         return Vec::new();
     }
-    // 出るとしても多くても 1 つ (Vec なのは各 OS が並べるだけにするための形)。
-    let badge = if attended {
-        collected_label.map(|text| CollectionBadgeRecord {
-            text: text.to_string(),
-            role: CollectionBadgeRole::Collected,
-        })
-    } else if collected_count == 0 {
-        Some(CollectionBadgeRecord {
-            text: UNCOLLECTED_BADGE.to_string(),
-            role: CollectionBadgeRole::Uncollected,
-        })
-    } else {
-        None
-    };
-    badge.into_iter().collect()
+    if !mine.attended {
+        return if mine.collected_count == 0 {
+            vec![SetlistRowNoteRecord::new(UNCOLLECTED_NOTE, RowNoteTone::Missing)]
+        } else {
+            Vec::new()
+        };
+    }
+    let Some(ordinal) = mine.ordinal_label.as_deref() else { return Vec::new() };
+    let mut notes = vec![SetlistRowNoteRecord::new(ordinal, RowNoteTone::Mine)];
+    // 自分の間隔も、披露と同じく回数の補足として添える。
+    if let Some(since) = collection_interval_label(mine) {
+        notes.push(SetlistRowNoteRecord::new(&since, RowNoteTone::Detail));
+    }
+    notes
+}
+
+/// 軸のラベル。**行の左に固定幅で並ぶ**ので、2 文字で揃えてある。
+pub const PERFORMANCE_AXIS: &str = "披露";
+pub const COLLECTION_AXIS: &str = "回収";
+
+/// まだ一度も回収していない曲の文言。
+pub const UNCOLLECTED_NOTE: &str = "未回収";
+
+/// 事実 1 つをどれだけ強く出すか。**色や太さの出し分けはこれで行う。**
+///
+/// 文字列を見て強調を決めると (`text == "未回収"` 等)、同じ条件が Swift と Kotlin に
+/// 増える。文が増えたときに片方だけ地味なまま、という壊れ方もする。
+#[derive(uniffi::Enum, Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RowNoteTone {
+    /// その軸の主な値 (`4 回目`)。本文の色で出す。
+    Value,
+    /// 主な値の補足 (`3 年ぶり`)。沈める。
+    Detail,
+    /// 初披露。この行でいちばん珍しい。
+    Debut,
+    /// 自分が回収した (`初回収` `3 回目`)。
+    Mine,
+    /// 自分がまだ持っていない (`未回収`)。
+    Missing,
+}
+
+/// 行に添える事実 1 つ。
+#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
+pub struct SetlistRowNoteRecord {
+    pub text: String,
+    pub tone: RowNoteTone,
+}
+
+/// 軸 1 つぶん (ラベルと、その軸の値の並び)。
+#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
+pub struct SetlistRowNoteGroupRecord {
+    /// 行の左に出す軸の名前 (`披露` / `回収`)。
+    pub label: String,
+    pub notes: Vec<SetlistRowNoteRecord>,
+}
+
+impl SetlistRowNoteRecord {
+    fn new(text: &str, tone: RowNoteTone) -> Self {
+        Self { text: text.to_string(), tone }
+    }
 }
 
 #[cfg(test)]
-mod setlist_collection_badge_tests {
+mod setlist_row_note_tests {
     use super::*;
+    use crate::domain::collection_gap::collection_ordinal_label;
 
-    fn badge(text: &str, role: CollectionBadgeRole) -> CollectionBadgeRecord {
-        CollectionBadgeRecord { text: text.to_string(), role }
-    }
-
-    /// 詳細表示以外では 1 つも出ない (自分の回収も披露履歴と同じ扱い)。
-    #[test]
-    fn 詳細表示以外では自分の回収も出さない() {
-        for mode in [SetlistDisplayMode::Simple, SetlistDisplayMode::Normal] {
-            assert!(setlist_collection_badges(mode, true, true, Some("初回収"), 1).is_empty());
-            assert!(setlist_collection_badges(mode, true, false, None, 0).is_empty());
+    fn gap(is_first: bool, ordinal: &str, since: Option<&str>) -> PerformanceGap {
+        PerformanceGap {
+            ordinal: if is_first { 1 } else { 4 },
+            ordinal_label: ordinal.to_string(),
+            is_first,
+            previous_date: None,
+            months_since: None,
+            since_label: since.map(str::to_string),
         }
     }
 
-    /// 参加した行の札は 1 つ (間隔は回数の括弧に入っている)。
+    fn mine(attended: bool, ordinal: u32, collected: u32, months: Option<u32>) -> CollectionGap {
+        CollectionGap {
+            attended,
+            ordinal,
+            ordinal_label: attended.then(|| collection_ordinal_label(ordinal)),
+            is_first: attended && ordinal == 1,
+            previous_date: None,
+            months_since: months,
+            collected_count: collected,
+        }
+    }
+
+    /// 軸ごとに (ラベル, 値の並び, 調子の並び) へ畳む。
+    fn axes(
+        groups: &[SetlistRowNoteGroupRecord],
+    ) -> Vec<(&str, Vec<&str>, Vec<RowNoteTone>)> {
+        groups
+            .iter()
+            .map(|g| {
+                (
+                    g.label.as_str(),
+                    g.notes.iter().map(|n| n.text.as_str()).collect(),
+                    g.notes.iter().map(|n| n.tone).collect(),
+                )
+            })
+            .collect()
+    }
+
+    fn groups(
+        is_real_live: bool,
+        performance: &PerformanceGap,
+        mine: &CollectionGap,
+    ) -> Vec<SetlistRowNoteGroupRecord> {
+        setlist_row_note_groups(SetlistDisplayMode::Detailed, is_real_live, performance, mine)
+    }
+
+    /// 詳細表示以外では 1 つも出ない。
     #[test]
-    fn 参加した行の札は_1_つ() {
-        assert_eq!(
-            setlist_collection_badges(
-                SetlistDisplayMode::Detailed,
+    fn 詳細表示以外では何も出さない() {
+        for mode in [SetlistDisplayMode::Simple, SetlistDisplayMode::Normal] {
+            assert!(setlist_row_note_groups(
+                mode,
                 true,
-                true,
-                Some("回収 3 回目 (2 年ぶり)"),
-                3
-            ),
-            vec![badge("回収 3 回目 (2 年ぶり)", CollectionBadgeRole::Collected)]
+                &gap(false, "4 回目", Some("3 年 10 か月ぶり")),
+                &mine(true, 1, 1, None)
+            )
+            .is_empty());
+        }
+    }
+
+    /// 軸は「披露 → 回収」の順。回数が主で、間隔はその補足。
+    #[test]
+    fn 披露の軸のあとに回収の軸を置く() {
+        let g = groups(
+            true,
+            &gap(false, "4 回目", Some("3 年 10 か月ぶり")),
+            &mine(true, 3, 3, Some(24)),
         );
         assert_eq!(
-            setlist_collection_badges(SetlistDisplayMode::Detailed, true, true, Some("初回収"), 1),
-            vec![badge("初回収", CollectionBadgeRole::Collected)]
+            axes(&g),
+            vec![
+                (
+                    "披露",
+                    vec!["4 回目", "3 年 10 か月ぶり"],
+                    vec![RowNoteTone::Value, RowNoteTone::Detail]
+                ),
+                ("回収", vec!["3 回目", "2 年ぶり"], vec![RowNoteTone::Mine, RowNoteTone::Detail]),
+            ]
         );
     }
 
-    /// 参加していない公演では「未回収」だけ。回収済みの曲には何も付けない。
+    /// 初披露は 1 つだけ (「1 回目」を並べない)。強調は Debut。
+    #[test]
+    fn 初披露は_1_つだけで強く出す() {
+        let g = groups(true, &gap(true, "初披露", None), &mine(false, 0, 2, None));
+        assert_eq!(
+            axes(&g),
+            vec![("披露", vec!["初披露"], vec![RowNoteTone::Debut])],
+            "回収済みの曲には回収の軸を出さない"
+        );
+    }
+
+    /// 1 年に満たない間隔では「いつぶり」を言わない (回数だけ)。
+    #[test]
+    fn 短い間隔は言わない() {
+        let g = groups(true, &gap(false, "9 回目", None), &mine(true, 2, 2, Some(3)));
+        assert_eq!(
+            axes(&g),
+            vec![
+                ("披露", vec!["9 回目"], vec![RowNoteTone::Value]),
+                ("回収", vec!["2 回目"], vec![RowNoteTone::Mine]),
+            ]
+        );
+    }
+
+    /// 参加していない公演では、まだ持っていない曲にだけ「未回収」。
     #[test]
     fn 参加していない行は未回収だけを出す() {
+        let g = groups(true, &gap(false, "4 回目", None), &mine(false, 0, 0, None));
         assert_eq!(
-            setlist_collection_badges(SetlistDisplayMode::Detailed, true, false, None, 0),
-            vec![badge("未回収", CollectionBadgeRole::Uncollected)]
+            axes(&g),
+            vec![
+                ("披露", vec!["4 回目"], vec![RowNoteTone::Value]),
+                ("回収", vec!["未回収"], vec![RowNoteTone::Missing]),
+            ]
         );
-        assert!(setlist_collection_badges(SetlistDisplayMode::Detailed, true, false, None, 2)
-            .is_empty());
     }
 
-    /// 回収の対象でない催し (リリイベ等) では、参加していても札を出さない。
+    /// 回収の対象でない催し (リリイベ等) では、回収の軸ごと出さない。
     /// **参加した公演で「未回収」と言わないための門。**
     #[test]
-    fn 回収の対象でない催しでは札を出さない() {
-        // 参加記録があっても (attended は絞り込みで落ちて false になる) 何も出さない。
-        assert!(setlist_collection_badges(SetlistDisplayMode::Detailed, false, false, None, 0)
-            .is_empty());
-        assert!(
-            setlist_collection_badges(SetlistDisplayMode::Detailed, false, true, Some("初回収"), 1)
-                .is_empty()
-        );
+    fn 回収の対象でない催しでは回収の軸を出さない() {
+        for m in [mine(false, 0, 0, None), mine(true, 1, 1, None)] {
+            let g = groups(false, &gap(false, "4 回目", None), &m);
+            assert_eq!(g.len(), 1, "披露の軸だけが残る");
+            assert_eq!(g[0].label, "披露");
+        }
     }
 
     /// 要約はシンプル表示でだけ伏せる (スクショに自分の記録を焼き込まない)。
@@ -317,45 +440,6 @@ mod setlist_collection_badge_tests {
 #[cfg(test)]
 mod setlist_display_mode_tests {
     use super::*;
-
-    /// 札が出るのは詳細表示だけ。普通表示とシンプル表示では 1 つも出ない。
-    #[test]
-    fn only_the_detailed_mode_carries_history_badges() {
-        for mode in [SetlistDisplayMode::Simple, SetlistDisplayMode::Normal] {
-            assert!(
-                setlist_history_badges(mode, false, "4 回目", Some("3 年 10 か月ぶり")).is_empty(),
-                "{mode:?} で札が出ている"
-            );
-            assert!(setlist_history_badges(mode, true, "初披露", None).is_empty());
-        }
-    }
-
-    #[test]
-    fn the_detailed_mode_puts_the_gap_before_the_count() {
-        assert_eq!(
-            setlist_history_badges(
-                SetlistDisplayMode::Detailed,
-                false,
-                "4 回目",
-                Some("3 年 10 か月ぶり")
-            ),
-            vec!["3 年 10 か月ぶり".to_string(), "4 回目".to_string()]
-        );
-        // 1 年に満たない間隔では「いつぶり」を言わない (回数だけ)。
-        assert_eq!(
-            setlist_history_badges(SetlistDisplayMode::Detailed, false, "9 回目", None),
-            vec!["9 回目".to_string()]
-        );
-    }
-
-    /// 初披露は「初披露」1 つ。「初披露」と「1 回目」を並べない。
-    #[test]
-    fn the_first_performance_says_it_once() {
-        assert_eq!(
-            setlist_history_badges(SetlistDisplayMode::Detailed, true, "初披露", None),
-            vec!["初披露".to_string()]
-        );
-    }
 
     /// Bool 1 つだった頃の設定が壊れない。
     #[test]
