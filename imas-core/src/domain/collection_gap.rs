@@ -1,0 +1,496 @@
+//! 「自分の回収」— セトリ 1 行を**自分の参加記録から見た**ときの事実。
+//!
+//! [`crate::domain::performance_gap`] が扱うのは世の中の披露 (「通算 4 回目」
+//! 「3 年 10 か月ぶり」)。ここが扱うのは同じ行を自分だけの目盛りで見たもの
+//! (「初回収」「回収 3 回目」「2 年ぶりの回収」「未回収」)。
+//!
+//! # 回収とは何か (ここが正本)
+//!
+//! **参加した「リアルライブ」(`events.kind` が `live` / `festival`) で披露された曲**を
+//! 回収したと数える。歌枠・配信番組・ラジオ・リリイベは数えない — これは
+//! 一覧の回収バッジ ([`crate::domain::song_list_queries::collected_counts_by_song`])
+//! と同じ定義で、**両方ともここの [`attended_real_live_shows`] を通る**。
+//! 定義を 2 か所に書くと、一覧が「回収済み」でセトリが「未回収」と言う日が来る。
+//!
+//! 現地参加だけを数えるか配信参加も数えるかは**ユーザー設定**で、参加マークを
+//! id 列に解決する時点で効く ([`collection_attended_show_ids`])。
+//!
+//! # 「その公演時点」と「今」を使い分ける (意図的)
+//!
+//! - **参加した公演の行** … その公演時点で数える。2016 年に参加した公演を開いて
+//!   「初回収」と出るのは、2022 年にもう一度聴いていても正しい
+//!   (その日は確かに初めてだった)。
+//! - **参加していない公演の行** … 今から見て一度も回収していない曲にだけ「未回収」。
+//!   古いセトリを眺めて知りたいのは「この曲、自分はまだ持っていない」であって、
+//!   「2016 年の時点では持っていなかった」ではない。
+//!
+//! 片方だけの流儀に揃えると、どちらかが嘘になる。**この非対称は意図であって
+//! 抜け漏れではない**ので、揃えたくなったらこの段落を先に読むこと。
+//!
+//! # 同じ公演で 2 回歌われた曲
+//!
+//! 回収は**公演の異なり数**で数える (アンコールの再披露は 1 回)。一覧の回収数
+//! (`COUNT(DISTINCT show_id)`) と同じ数え方。行としては 2 行とも同じ札が付く。
+
+// 参加マークの射影は一覧側と同じ型を使う (同じものを 2 つ定義しない)。
+pub use crate::domain::event_list_queries::AttendanceMarkRecord;
+use crate::domain::performance_gap::{months_between, notable_interval_label};
+use crate::domain::snapshot::Snapshot;
+use std::collections::HashSet;
+
+
+/// 参加形態を持たない古いマークの扱い。**現地参加**とみなす
+/// (形態を選べるようにする前のマークはすべて現地参加の意味で付いている)。
+const LOCAL_ATTENDANCE: &str = "live";
+
+/// 回収に数える参加マークを選ぶ。**この規則の正本はここ 1 つ。**
+///
+/// 既定は現地参加のみ。`include_stream` (設定「配信参加も回収に含める」) が真なら
+/// 形態を問わない — 地方勢のための設定なので、LV も配信もまとめて含める。
+///
+/// 以前はこの規則が iOS の `AppDatabase+UserMarks.attendedTypeCondition` と
+/// `CoreSongRepository` に 2 つ書かれていて、片方が private という理由で
+/// 「変更時は両方を揃えること」という但し書きまで付いていた。Android を足せば 3 つ目になる。
+pub fn collection_attended_show_ids(
+    marks: Vec<AttendanceMarkRecord>,
+    include_stream: bool,
+) -> Vec<String> {
+    marks
+        .into_iter()
+        .filter(|m| {
+            include_stream
+                || m.attendance_type.as_deref().unwrap_or(LOCAL_ATTENDANCE) == LOCAL_ATTENDANCE
+        })
+        .map(|m| m.entity_id)
+        .collect()
+}
+
+/// その公演は回収の対象か (リアルライブか)。歌枠・配信番組・ラジオ・リリイベは対象外。
+pub fn is_real_live(snap: &Snapshot, show: u32) -> bool {
+    let kind = &snap.events[snap.shows[show as usize].event as usize].kind;
+    kind == "live" || kind == "festival"
+}
+
+/// 参加マークの id 列 → 参加した公演 (スナップショット添字) の集合。
+///
+/// - `attended_show_ids`: show 単位の参加マーク (参加形態の条件は解決済みで渡す)。
+/// - `attended_event_ids`: event 単位の参加マーク。配下の全公演に展開する
+///   (`shows` はマスタなので展開はコアの仕事)。
+/// - `real_live_only`: 回収の定義どおり `live` / `festival` だけに絞るか。
+///   一覧の並び替えだけは「参加した公演」を種別で絞らずに数える (既存挙動) ため、
+///   そこだけ `false` で呼ぶ。
+pub fn attended_real_live_shows(
+    snap: &Snapshot,
+    attended_show_ids: &[String],
+    attended_event_ids: &[String],
+    real_live_only: bool,
+) -> HashSet<u32> {
+    let mut attended: HashSet<u32> = attended_show_ids
+        .iter()
+        .filter_map(|id| snap.show_index_by_id.get(id).copied())
+        .collect();
+    for event_id in attended_event_ids {
+        if let Some(&e) = snap.event_index_by_id.get(event_id) {
+            attended.extend(snap.shows_by_event[e as usize].iter().copied());
+        }
+    }
+    if real_live_only {
+        attended.retain(|&show| is_real_live(snap, show));
+    }
+    attended
+}
+
+/// セトリ 1 行を自分の参加記録から見た事実。
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct CollectionGap {
+    /// この行の公演に自分が参加しているか (= この行は回収そのもの)。
+    pub attended: bool,
+    /// 自分にとって何回目の回収か (1 = 初回収)。参加していない行では 0。
+    pub ordinal: u32,
+    /// `初回収` / `回収 3 回目`。参加していない行では `None`。
+    pub ordinal_label: Option<String>,
+    pub is_first: bool,
+    /// 自分が前にこの曲を回収した公演の日。初回収と未参加の行では `None`。
+    pub previous_date: Option<String>,
+    /// 前の回収からの間隔 (か月)。
+    pub months_since: Option<u32>,
+    /// `3 年 10 か月ぶりの回収`。1 年に満たない間隔と初回収では `None`。
+    pub since_label: Option<String>,
+    /// これまでに回収した回数 (公演の異なり数)。**参加していない行では「今」から見た数**で、
+    /// 0 なら未回収。参加した行ではこの行を含む [`Self::ordinal`] を見ること。
+    pub collected_count: u32,
+}
+
+/// 回収の回数の言い回し。**言い方はここ 1 箇所**。
+pub fn collection_ordinal_label(ordinal: u32) -> String {
+    if ordinal <= 1 {
+        "初回収".to_string()
+    } else {
+        format!("回収 {ordinal} 回目")
+    }
+}
+
+/// 前の回収からの間隔の言い回し。披露の「3 年 10 か月ぶり」と同じ線引き
+/// ([`crate::domain::performance_gap::NOTABLE_GAP_MONTHS`]) を使う。
+pub fn collection_interval_label(months: u32) -> Option<String> {
+    notable_interval_label(months).map(|label| format!("{label}の回収"))
+}
+
+/// その披露 (`setlist_items` の添字) を、自分の参加記録から見る。
+///
+/// `attended` は [`attended_real_live_shows`] で解決した公演集合。
+pub fn collection_gap(snap: &Snapshot, item: u32, attended: &HashSet<u32>) -> CollectionGap {
+    let row = &snap.setlist_items[item as usize];
+    let here = row.show;
+
+    // この曲を回収した公演を古い順に (同じ公演での再披露は 1 回)。
+    let mut collected: Vec<u32> = snap.setlist_items_by_song[row.song as usize]
+        .iter()
+        .map(|&i| snap.setlist_items[i as usize].show)
+        .filter(|show| attended.contains(show))
+        .collect();
+    collected.sort_by_key(|&show| chronological_key(snap, show));
+    collected.dedup();
+
+    if !attended.contains(&here) {
+        return CollectionGap {
+            attended: false,
+            collected_count: collected.len() as u32,
+            ..CollectionGap::default()
+        };
+    }
+
+    let position = collected.iter().position(|&show| show == here).unwrap_or(0);
+    let previous_date =
+        position.checked_sub(1).map(|p| snap.shows[collected[p] as usize].date.clone());
+    let date = &snap.shows[here as usize].date;
+    let months_since =
+        previous_date.as_deref().map(|prev| months_between(prev, date).unwrap_or(0));
+    let ordinal = position as u32 + 1;
+    CollectionGap {
+        attended: true,
+        ordinal,
+        ordinal_label: Some(collection_ordinal_label(ordinal)),
+        is_first: ordinal == 1,
+        previous_date,
+        months_since,
+        since_label: months_since.and_then(collection_interval_label),
+        collected_count: collected.len() as u32,
+    }
+}
+
+/// 公演を古い順に並べるキー。同じ日の昼夜は `shows.sort_order` の順。
+fn chronological_key(snap: &Snapshot, show: u32) -> (&str, i64, u32) {
+    let s = &snap.shows[show as usize];
+    (s.date.as_str(), s.sort_order, show)
+}
+
+// =============================================================================
+// 公演 1 つぶんの要約
+// =============================================================================
+
+/// セトリの頭に出す「自分の回収」の要約。出すものが無ければ [`show_collection_summary`]
+/// が `None` を返す。
+#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
+pub struct ShowCollectionRecord {
+    /// この公演に自分が参加しているか。
+    pub attended: bool,
+    /// この公演で回収した曲数 (曲の異なり数)。参加していなければ 0。
+    pub collected_songs: u32,
+    /// そのうち初回収だった曲数。
+    pub first_collected_songs: u32,
+    /// まだ回収していない曲数 (参加していない公演のときだけ数える)。
+    pub uncollected_songs: u32,
+    /// セトリの曲数 (曲の異なり数)。
+    pub total_songs: u32,
+    /// 1 行で出す文言。
+    pub label: String,
+}
+
+/// 行ごとの [`CollectionGap`] から公演 1 つぶんの要約を組む。
+///
+/// `has_marks` が偽 (参加記録を 1 件も付けていない) のときは `None` —
+/// 使い始めの人に「未回収 35 曲」と言っても何の情報でもない。
+/// `is_real_live` が偽 (回収の対象でない催し) のときも `None`。
+///
+/// 引数は `(song_id, gap)` の列で、**セトリの並びそのまま**渡してよい
+/// (同じ曲が 2 行あっても曲の異なり数で数える)。
+pub fn show_collection_summary(
+    rows: &[(String, CollectionGap)],
+    has_marks: bool,
+    is_real_live: bool,
+) -> Option<ShowCollectionRecord> {
+    if rows.is_empty() || !has_marks || !is_real_live {
+        return None;
+    }
+    let mut seen: HashSet<&str> = HashSet::new();
+    let mut total = 0u32;
+    let mut collected = 0u32;
+    let mut first = 0u32;
+    let mut uncollected = 0u32;
+    let mut attended = false;
+    for (song_id, gap) in rows {
+        if !seen.insert(song_id.as_str()) {
+            continue;
+        }
+        total += 1;
+        attended |= gap.attended;
+        if gap.attended {
+            collected += 1;
+            if gap.is_first {
+                first += 1;
+            }
+        } else if gap.collected_count == 0 {
+            uncollected += 1;
+        }
+    }
+    let label = if attended {
+        let mut text = format!("この公演で {collected} 曲回収");
+        if first > 0 {
+            text.push_str(&format!("・初回収 {first} 曲"));
+        }
+        text
+    } else if uncollected > 0 {
+        format!("このセトリに未回収 {uncollected} 曲")
+    } else {
+        "このセトリは全曲回収済み".to_string()
+    };
+    Some(ShowCollectionRecord {
+        attended,
+        collected_songs: collected,
+        first_collected_songs: first,
+        uncollected_songs: uncollected,
+        total_songs: total,
+        label,
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::OnceLock;
+
+    fn snap() -> &'static Snapshot {
+        static SNAP: OnceLock<Snapshot> = OnceLock::new();
+        SNAP.get_or_init(|| {
+            crate::outbound::sqlite_loader::load_snapshot(&format!(
+                "{}/../ImasLiveDB/Resources/master.sqlite",
+                env!("CARGO_MANIFEST_DIR")
+            ))
+            .expect("バンドル DB はロードできる")
+        })
+    }
+
+    /// 曲 × 公演日 から披露 (`setlist_items` 添字) を引く。
+    fn item_of(song_id: &str, date: &str) -> u32 {
+        let snap = snap();
+        let si = snap.song_index_by_id[song_id];
+        snap.setlist_items_by_song[si as usize]
+            .iter()
+            .copied()
+            .find(|&i| snap.shows[snap.setlist_items[i as usize].show as usize].date == date)
+            .unwrap_or_else(|| panic!("{song_id} の {date} の披露"))
+    }
+
+    fn show_id_of(item: u32) -> String {
+        let snap = snap();
+        snap.shows[snap.setlist_items[item as usize].show as usize].id.clone()
+    }
+
+    /// 参加した公演の集合を show id から組む。
+    fn attending(show_ids: &[String]) -> HashSet<u32> {
+        attended_real_live_shows(snap(), show_ids, &[], true)
+    }
+
+    // ---- 参加マークの選び方 ----
+
+    /// 既定は現地だけ。形態を持たない古いマークは現地として残す。
+    #[test]
+    fn 既定では現地参加だけを回収に数える() {
+        let marks = vec![
+            AttendanceMarkRecord { entity_id: "a".into(), attendance_type: Some("live".into()) },
+            AttendanceMarkRecord { entity_id: "b".into(), attendance_type: Some("stream".into()) },
+            AttendanceMarkRecord {
+                entity_id: "c".into(),
+                attendance_type: Some("live_viewing".into()),
+            },
+            AttendanceMarkRecord { entity_id: "d".into(), attendance_type: None },
+        ];
+        assert_eq!(collection_attended_show_ids(marks.clone(), false), vec!["a", "d"]);
+        // 設定を入れた人は形態を問わない (LV も配信も含む)。
+        assert_eq!(collection_attended_show_ids(marks, true), vec!["a", "b", "c", "d"]);
+    }
+
+    // ---- 1 行ぶんの事実 ----
+
+    /// 参加した公演の行は、その公演時点で数える。
+    #[test]
+    fn 参加した公演では何回目の回収かをその日時点で数える() {
+        let snap = snap();
+        let song = "765as_初恋_一章_片想いの桜";
+        // 4 回の披露: 2014-10-05 / 2016-04-30 / 2022-11-13 / 2026-09-19。
+        let (a, b, c) = (
+            item_of(song, "2014-10-05"),
+            item_of(song, "2016-04-30"),
+            item_of(song, "2022-11-13"),
+        );
+        // 2014 と 2022 に参加したことにする。
+        let attended = attending(&[show_id_of(a), show_id_of(c)]);
+
+        let first = collection_gap(snap, a, &attended);
+        assert!(first.attended);
+        assert_eq!(first.ordinal, 1);
+        assert_eq!(first.ordinal_label.as_deref(), Some("初回収"));
+        assert!(first.is_first);
+        assert_eq!(first.previous_date, None);
+
+        // 行っていない 2016 の行は回収ではない。ただし 2014 に回収済みなので「未回収」でもない。
+        let skipped = collection_gap(snap, b, &attended);
+        assert!(!skipped.attended);
+        assert_eq!(skipped.ordinal, 0);
+        assert_eq!(skipped.collected_count, 2, "今から見た回収数 (2014 と 2022)");
+
+        let second = collection_gap(snap, c, &attended);
+        assert!(second.attended);
+        assert_eq!(second.ordinal, 2);
+        assert_eq!(second.ordinal_label.as_deref(), Some("回収 2 回目"));
+        assert!(!second.is_first);
+        assert_eq!(second.previous_date.as_deref(), Some("2014-10-05"));
+        assert_eq!(second.since_label.as_deref(), Some("8 年 1 か月ぶりの回収"));
+    }
+
+    /// 1 度も回収していない曲は `collected_count == 0` (= 未回収の根拠)。
+    #[test]
+    fn 参加記録が無ければ全部未回収になる() {
+        let snap = snap();
+        let item = item_of("765as_初恋_一章_片想いの桜", "2016-04-30");
+        let gap = collection_gap(snap, item, &HashSet::new());
+        assert!(!gap.attended);
+        assert_eq!(gap.collected_count, 0);
+        assert_eq!(gap.ordinal_label, None, "回収していない行に回数の文言は出さない");
+    }
+
+    /// 回収はリアルライブだけ。参加マークが付いていても歌枠等は数えない。
+    #[test]
+    fn リアルライブ以外の参加は回収に数えない() {
+        let snap = snap();
+        let non_live = snap
+            .shows
+            .iter()
+            .enumerate()
+            .find(|(i, s)| {
+                !s.date.is_empty()
+                    && !is_real_live(snap, *i as u32)
+                    && !snap.setlist_items_by_show[*i].is_empty()
+            })
+            .map(|(i, s)| (i as u32, s.id.clone()));
+        let Some((index, id)) = non_live else { return };
+        assert!(attending(&[id.clone()]).is_empty(), "{id} は回収の対象外");
+        // 種別を絞らない呼び方 (一覧の並び替え) では残る。
+        assert!(attended_real_live_shows(snap, &[id], &[], false).contains(&index));
+    }
+
+    /// イベント単位の参加マークは配下の公演に展開される。
+    #[test]
+    fn イベントの参加マークは配下の公演に広がる() {
+        let snap = snap();
+        let (event, shows) = snap
+            .events
+            .iter()
+            .enumerate()
+            .map(|(i, e)| (e.id.clone(), snap.shows_by_event[i].clone()))
+            .find(|(_, shows)| {
+                shows.len() >= 2 && shows.iter().all(|&s| is_real_live(snap, s))
+            })
+            .expect("公演が 2 つ以上のリアルライブがある");
+        let attended = attended_real_live_shows(snap, &[], &[event], true);
+        for show in shows {
+            assert!(attended.contains(&show));
+        }
+    }
+
+    /// 言い回し。
+    #[test]
+    fn 回数と間隔の言い方は_1_箇所で決まる() {
+        assert_eq!(collection_ordinal_label(1), "初回収");
+        assert_eq!(collection_ordinal_label(2), "回収 2 回目");
+        assert_eq!(collection_interval_label(46).as_deref(), Some("3 年 10 か月ぶりの回収"));
+        assert_eq!(collection_interval_label(12).as_deref(), Some("1 年ぶりの回収"));
+        assert_eq!(collection_interval_label(11), None, "1 年未満は言わない");
+        assert_eq!(collection_interval_label(0), None);
+    }
+
+    // ---- 公演 1 つぶんの要約 ----
+
+    fn gap(attended: bool, ordinal: u32, collected: u32) -> CollectionGap {
+        CollectionGap {
+            attended,
+            ordinal,
+            ordinal_label: attended.then(|| collection_ordinal_label(ordinal)),
+            is_first: attended && ordinal == 1,
+            collected_count: collected,
+            ..CollectionGap::default()
+        }
+    }
+
+    #[test]
+    fn 参加した公演の要約は回収数と初回収数を言う() {
+        let rows = vec![
+            ("a".to_string(), gap(true, 1, 1)),
+            ("b".to_string(), gap(true, 3, 3)),
+            ("c".to_string(), gap(true, 1, 1)),
+        ];
+        let summary = show_collection_summary(&rows, true, true).expect("要約が出る");
+        assert!(summary.attended);
+        assert_eq!(summary.collected_songs, 3);
+        assert_eq!(summary.first_collected_songs, 2);
+        assert_eq!(summary.label, "この公演で 3 曲回収・初回収 2 曲");
+    }
+
+    /// 初回収が 0 曲なら、その節は言わない。
+    #[test]
+    fn 初回収が無い公演では回収数だけ言う() {
+        let rows = vec![("a".to_string(), gap(true, 2, 2))];
+        let summary = show_collection_summary(&rows, true, true).expect("要約が出る");
+        assert_eq!(summary.label, "この公演で 1 曲回収");
+    }
+
+    /// 同じ公演で 2 回歌われた曲は 1 曲として数える。
+    #[test]
+    fn 同じ曲が_2_行あっても_1_曲と数える() {
+        let rows = vec![("a".to_string(), gap(true, 1, 1)), ("a".to_string(), gap(true, 1, 1))];
+        let summary = show_collection_summary(&rows, true, true).expect("要約が出る");
+        assert_eq!(summary.total_songs, 1);
+        assert_eq!(summary.collected_songs, 1);
+        assert_eq!(summary.first_collected_songs, 1);
+    }
+
+    #[test]
+    fn 参加していない公演の要約は未回収の曲数を言う() {
+        let rows = vec![
+            ("a".to_string(), gap(false, 0, 0)),
+            ("b".to_string(), gap(false, 0, 2)),
+            ("c".to_string(), gap(false, 0, 0)),
+        ];
+        let summary = show_collection_summary(&rows, true, true).expect("要約が出る");
+        assert!(!summary.attended);
+        assert_eq!(summary.uncollected_songs, 2);
+        assert_eq!(summary.label, "このセトリに未回収 2 曲");
+
+        // 全部回収済みなら、そう言う。
+        let all = vec![("a".to_string(), gap(false, 0, 1))];
+        assert_eq!(
+            show_collection_summary(&all, true, true).expect("要約が出る").label,
+            "このセトリは全曲回収済み"
+        );
+    }
+
+    /// 参加記録が 1 件も無い人、回収の対象でない催し、空のセトリでは何も出さない。
+    #[test]
+    fn 出すものが無ければ要約を出さない() {
+        let rows = vec![("a".to_string(), gap(false, 0, 0))];
+        assert_eq!(show_collection_summary(&rows, false, true), None, "参加記録が無い人");
+        assert_eq!(show_collection_summary(&rows, true, false), None, "回収の対象でない催し");
+        assert_eq!(show_collection_summary(&[], true, true), None, "セトリが空");
+    }
+}

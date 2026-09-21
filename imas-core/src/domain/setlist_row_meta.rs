@@ -6,6 +6,7 @@
 //! - 顔ぶれからのユニット逆引き … [`crate::domain::unit_queries::exact_matching_units`]
 //! - 出演者全員か … [`crate::domain::setlist_lineup::is_full_cast`]
 //! - 何回目・いつぶり … [`crate::domain::performance_gap`]
+//! - 自分の回収 (初回収・回収 N 回目・未回収) … [`crate::domain::collection_gap`]
 //!
 //! # なぜ 1 公演ぶんまとめて返すか
 //!
@@ -17,9 +18,15 @@
 use crate::domain::event_detail_queries::{
     self as detail, PerformerNameMode, SetlistPerformerRecord,
 };
+use crate::domain::collection_gap::{
+    attended_real_live_shows, collection_gap, is_real_live, show_collection_summary, CollectionGap,
+    ShowCollectionRecord,
+};
 use crate::domain::performance_gap::performance_gap;
 use crate::domain::performer_label::{setlist_performer_label, SetlistNaming};
-use crate::domain::screen_composition::{setlist_history_badges, SetlistDisplayMode};
+use crate::domain::screen_composition::{
+    setlist_collection_badges, setlist_history_badges, SetlistDisplayMode,
+};
 use crate::domain::setlist_lineup::is_full_cast;
 use crate::domain::snapshot::Snapshot;
 use crate::domain::unit_queries::exact_matching_unit_names;
@@ -53,6 +60,32 @@ pub struct SetlistRowMetaRecord {
     /// Swift / Kotlin に書くと、同じ条件が 2 か所に増える
     /// (`crate::domain::screen_composition::setlist_history_badges`)。
     pub history_badges: Vec<String>,
+    /// **行に出す「自分の回収」の札** (`初回収` / `回収 3 回目` / `未回収`)。
+    /// 下の生の事実から「どのモードでどれを出すか」を決めた結果
+    /// ([`crate::domain::screen_composition::setlist_collection_badges`])。
+    pub collection_badges: Vec<String>,
+    /// この公演に自分が参加しているか (= この行はその場で回収した曲)。
+    pub is_collected_here: bool,
+    /// 自分にとって何回目の回収か (1 = 初回収)。参加していない公演では 0。
+    pub collection_ordinal: u32,
+    pub is_first_collection: bool,
+    /// 自分が前にこの曲を回収した公演の日。初回収・未参加では `None`。
+    pub collection_previous_date: Option<String>,
+    /// これまでに回収した回数 (公演の異なり数)。未参加の行では「今」から見た数で、
+    /// 0 なら未回収 (理由は [`crate::domain::collection_gap`] のモジュール解説)。
+    pub collected_count: u32,
+}
+
+/// 公演 1 つぶんの添え物ひとまとめ。
+///
+/// **行と要約を 1 回で返す。** 要約は行の回収から数えたものなので、別の呼び出しに
+/// 分けると「行は初回収と言っているのに要約は 0 曲」というズレを作れてしまう。
+#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
+pub struct SetlistRowMetaBundle {
+    /// セトリと同じ並び (呼び出し側は zip するだけ)。
+    pub rows: Vec<SetlistRowMetaRecord>,
+    /// 公演の頭に出す自分の回収の要約。出すものが無ければ `None`。
+    pub collection: Option<ShowCollectionRecord>,
 }
 
 /// その公演で「ユニット単独曲」として披露されたユニット (スナップショット添字)。
@@ -82,23 +115,36 @@ fn active_units(snap: &Snapshot, show: u32) -> HashSet<u32> {
     active
 }
 
-/// 公演のセトリ行ぜんぶぶんの添え物 (`setlist_items_by_show` = position 昇順)。
-/// 未知の show_id は空。
+/// 公演のセトリ行ぜんぶぶんの添え物 (`setlist_items_by_show` = position 昇順) と、
+/// 自分の回収の要約。未知の show_id は空。
+///
+/// `attended_show_ids` / `attended_event_ids` は参加マーク (`user_marks`) を
+/// プラットフォーム側で解決した id 列。**参加形態の条件は解決済みで渡す**
+/// ([`crate::domain::collection_gap::collection_attended_show_ids`])。
+/// 空で渡せば回収の札も要約も出ない (参加記録を付けていない人の見え方)。
 pub fn setlist_row_meta(
     snap: &Snapshot,
     show_id: &str,
     mode: PerformerNameMode,
     display_mode: SetlistDisplayMode,
-) -> Vec<SetlistRowMetaRecord> {
-    let Some(&show) = snap.show_index_by_id.get(show_id) else { return vec![] };
+    attended_show_ids: &[String],
+    attended_event_ids: &[String],
+) -> SetlistRowMetaBundle {
+    let empty_bundle = SetlistRowMetaBundle { rows: vec![], collection: None };
+    let Some(&show) = snap.show_index_by_id.get(show_id) else { return empty_bundle };
     let is_character_live =
         detail::is_character_live(snap.shows[show as usize].performer_type.as_deref());
     let cast_ids = detail::show_cast_idol_ids(snap, show_id);
     let cast: BTreeSet<&str> = cast_ids.iter().map(String::as_str).collect();
     let active = active_units(snap, show);
     let performers_by_item = detail::setlist_performers_by_item(snap, show_id);
+    let attended =
+        attended_real_live_shows(snap, attended_show_ids, attended_event_ids, true);
+    let has_marks = !attended_show_ids.is_empty() || !attended_event_ids.is_empty();
+    // 要約を数えるための材料 (曲 id と回収) を行を組みながら集める。
+    let mut collection_rows: Vec<(String, CollectionGap)> = Vec::new();
 
-    snap.setlist_items_by_show[show as usize]
+    let rows: Vec<SetlistRowMetaRecord> = snap.setlist_items_by_show[show as usize]
         .iter()
         .map(|&item| {
             let row = &snap.setlist_items[item as usize];
@@ -130,6 +176,20 @@ pub fn setlist_row_meta(
                 &gap.ordinal_label,
                 gap.since_label.as_deref(),
             );
+            let mine = collection_gap(snap, item, &attended);
+            let collection_badges = if has_marks {
+                setlist_collection_badges(
+                    display_mode,
+                    mine.attended,
+                    mine.ordinal_label.as_deref(),
+                    mine.since_label.as_deref(),
+                    mine.collected_count,
+                )
+            } else {
+                // 参加記録を 1 件も付けていない人に「未回収」を並べても情報にならない。
+                Vec::new()
+            };
+            collection_rows.push((song.id.clone(), mine.clone()));
 
             SetlistRowMetaRecord {
                 item_id: row.id.clone(),
@@ -142,9 +202,21 @@ pub fn setlist_row_meta(
                 previous_date: gap.previous_date,
                 history_badges,
                 since_label: gap.since_label,
+                collection_badges,
+                is_collected_here: mine.attended,
+                collection_ordinal: if mine.attended { mine.ordinal } else { 0 },
+                is_first_collection: mine.is_first,
+                collection_previous_date: mine.previous_date,
+                collected_count: mine.collected_count,
             }
         })
-        .collect()
+        .collect();
+
+    let collection = display_mode
+        .shows_collection_summary()
+        .then(|| show_collection_summary(&collection_rows, has_marks, is_real_live(snap, show)))
+        .flatten();
+    SetlistRowMetaBundle { rows, collection }
 }
 
 #[cfg(test)]
@@ -163,6 +235,16 @@ mod tests {
         })
     }
 
+    /// 参加記録なしで行だけ取る (既存テストの読み方)。
+    fn rows_of(
+        snap: &Snapshot,
+        show_id: &str,
+        mode: PerformerNameMode,
+        display_mode: SetlistDisplayMode,
+    ) -> Vec<SetlistRowMetaRecord> {
+        setlist_row_meta(snap, show_id, mode, display_mode, &[], &[]).rows
+    }
+
     fn meta_of(song_id: &str, date: &str) -> SetlistRowMetaRecord {
         let snap = snap();
         let si = snap.song_index_by_id[song_id];
@@ -173,7 +255,7 @@ mod tests {
             .unwrap_or_else(|| panic!("{song_id} の {date} の披露"));
         let show = &snap.shows[snap.setlist_items[item as usize].show as usize];
         let item_id = snap.setlist_items[item as usize].id.clone();
-        setlist_row_meta(snap, &show.id, PerformerNameMode::IdolOnly, SetlistDisplayMode::Detailed)
+        rows_of(snap, &show.id, PerformerNameMode::IdolOnly, SetlistDisplayMode::Detailed)
             .into_iter()
             .find(|m| m.item_id == item_id)
             .expect("行は返る")
@@ -219,7 +301,7 @@ mod tests {
                 continue;
             }
             let show_id = &snap.shows[show as usize].id;
-            let metas = setlist_row_meta(snap, show_id, PerformerNameMode::IdolOnly, SetlistDisplayMode::Detailed);
+            let metas = rows_of(snap, show_id, PerformerNameMode::IdolOnly, SetlistDisplayMode::Detailed);
             for (&item, meta) in snap.setlist_items_by_show[show as usize].iter().zip(&metas) {
                 let row = &snap.setlist_items[item as usize];
                 let song = &snap.songs[row.song as usize];
@@ -246,7 +328,7 @@ mod tests {
             let show_id = &snap.shows[show as usize].id;
             for (&item, meta) in snap.setlist_items_by_show[show as usize]
                 .iter()
-                .zip(setlist_row_meta(snap, show_id, PerformerNameMode::IdolOnly, SetlistDisplayMode::Detailed))
+                .zip(rows_of(snap, show_id, PerformerNameMode::IdolOnly, SetlistDisplayMode::Detailed))
             {
                 let row = &snap.setlist_items[item as usize];
                 let song = &snap.songs[row.song as usize];
@@ -282,7 +364,7 @@ mod tests {
             .show as usize]
             .id;
         for quiet in [SetlistDisplayMode::Simple, SetlistDisplayMode::Normal] {
-            let metas = setlist_row_meta(snap, show, PerformerNameMode::IdolOnly, quiet);
+            let metas = rows_of(snap, show, PerformerNameMode::IdolOnly, quiet);
             assert!(!metas.is_empty());
             assert!(
                 metas.iter().all(|m| m.history_badges.is_empty()),
@@ -290,7 +372,7 @@ mod tests {
             );
         }
         let detailed =
-            setlist_row_meta(snap, show, PerformerNameMode::IdolOnly, SetlistDisplayMode::Detailed);
+            rows_of(snap, show, PerformerNameMode::IdolOnly, SetlistDisplayMode::Detailed);
         assert!(
             detailed.iter().all(|m| !m.history_badges.is_empty()),
             "詳細表示では全行が何かしらの札を持つ (初披露 か N 回目)"
@@ -315,11 +397,162 @@ mod tests {
             .map(|(_, s)| s.id.clone())
             .expect("20 曲以上のセトリがある");
         let entries = detail::setlist(snap, &show);
-        let metas = setlist_row_meta(snap, &show, PerformerNameMode::IdolOnly, SetlistDisplayMode::Detailed);
+        let metas = rows_of(snap, &show, PerformerNameMode::IdolOnly, SetlistDisplayMode::Detailed);
         assert_eq!(entries.len(), metas.len());
         for (e, m) in entries.iter().zip(&metas) {
             assert_eq!(e.id, m.item_id);
         }
-        assert!(setlist_row_meta(snap, "存在しない公演", PerformerNameMode::IdolOnly, SetlistDisplayMode::Normal).is_empty());
+        assert!(rows_of(snap, "存在しない公演", PerformerNameMode::IdolOnly, SetlistDisplayMode::Normal).is_empty());
+    }
+
+    // ---- 自分の回収 ----
+
+    /// 参加した公演では、行に自分の回収が乗り、頭の要約もその公演のものになる。
+    #[test]
+    fn 参加した公演では行に回収が乗り要約が出る() {
+        let snap = snap();
+        // 曲数が多く、リアルライブの公演を 1 つ選ぶ。
+        let show = snap
+            .shows
+            .iter()
+            .enumerate()
+            .find(|(i, _)| {
+                snap.setlist_items_by_show[*i].len() >= 10
+                    && crate::domain::collection_gap::is_real_live(snap, *i as u32)
+            })
+            .map(|(_, s)| s.id.clone())
+            .expect("10 曲以上のリアルライブがある");
+
+        let bundle = setlist_row_meta(
+            snap,
+            &show,
+            PerformerNameMode::IdolOnly,
+            SetlistDisplayMode::Detailed,
+            std::slice::from_ref(&show),
+            &[],
+        );
+        assert!(bundle.rows.iter().all(|r| r.is_collected_here), "全行がその場の回収");
+        assert!(
+            bundle.rows.iter().all(|r| r.collection_ordinal >= 1),
+            "参加した公演の行は必ず何回目かを持つ"
+        );
+        assert!(
+            bundle.rows.iter().all(|r| !r.collection_badges.is_empty()),
+            "詳細表示では全行に回収の札が付く"
+        );
+        assert!(
+            bundle.rows.iter().all(|r| !r.collection_badges.contains(&"未回収".to_string())),
+            "その場で回収している行に未回収は出さない"
+        );
+        let summary = bundle.collection.expect("要約が出る");
+        assert!(summary.attended);
+        assert!(summary.label.starts_with("この公演で"));
+        assert_eq!(summary.collected_songs, summary.total_songs);
+    }
+
+    /// 参加記録があっても、その公演に行っていなければ未回収の札と要約になる。
+    #[test]
+    fn 参加していない公演では未回収だけが出る() {
+        let snap = snap();
+        // 参加した扱いにする公演と、開く公演を別々に選ぶ。
+        let live_shows: Vec<String> = snap
+            .shows
+            .iter()
+            .enumerate()
+            .filter(|(i, _)| {
+                snap.setlist_items_by_show[*i].len() >= 10
+                    && crate::domain::collection_gap::is_real_live(snap, *i as u32)
+            })
+            .map(|(_, s)| s.id.clone())
+            .take(2)
+            .collect();
+        assert_eq!(live_shows.len(), 2, "リアルライブが 2 公演は要る");
+
+        let bundle = setlist_row_meta(
+            snap,
+            &live_shows[0],
+            PerformerNameMode::IdolOnly,
+            SetlistDisplayMode::Detailed,
+            &live_shows[1..],
+            &[],
+        );
+        assert!(bundle.rows.iter().all(|r| !r.is_collected_here));
+        assert!(
+            bundle
+                .rows
+                .iter()
+                .all(|r| r.collection_badges.is_empty()
+                    || r.collection_badges == vec!["未回収".to_string()]),
+            "参加していない公演で出る札は未回収だけ"
+        );
+        // 別公演で回収済みの曲には札が付かない。
+        for row in &bundle.rows {
+            if row.collected_count > 0 {
+                assert!(row.collection_badges.is_empty());
+            }
+        }
+        let summary = bundle.collection.expect("要約が出る");
+        assert!(!summary.attended);
+        assert!(summary.label.contains("未回収") || summary.label.contains("全曲回収済み"));
+    }
+
+    /// 参加記録が 1 件も無い人には、回収の札も要約も出ない。
+    #[test]
+    fn 参加記録が無ければ回収の表示は何も出ない() {
+        let snap = snap();
+        let show = snap
+            .shows
+            .iter()
+            .enumerate()
+            .find(|(i, _)| !snap.setlist_items_by_show[*i].is_empty())
+            .map(|(_, s)| s.id.clone())
+            .expect("セトリのある公演がある");
+        let bundle = setlist_row_meta(
+            snap,
+            &show,
+            PerformerNameMode::IdolOnly,
+            SetlistDisplayMode::Detailed,
+            &[],
+            &[],
+        );
+        assert!(bundle.rows.iter().all(|r| r.collection_badges.is_empty()));
+        assert_eq!(bundle.collection, None);
+    }
+
+    /// 要約はシンプル表示では出さない (スクショに自分の記録を焼き込まない)。
+    #[test]
+    fn シンプル表示では要約を出さない() {
+        let snap = snap();
+        let show = snap
+            .shows
+            .iter()
+            .enumerate()
+            .find(|(i, _)| {
+                !snap.setlist_items_by_show[*i].is_empty()
+                    && crate::domain::collection_gap::is_real_live(snap, *i as u32)
+            })
+            .map(|(_, s)| s.id.clone())
+            .expect("セトリのあるリアルライブがある");
+        let simple = setlist_row_meta(
+            snap,
+            &show,
+            PerformerNameMode::IdolOnly,
+            SetlistDisplayMode::Simple,
+            std::slice::from_ref(&show),
+            &[],
+        );
+        assert_eq!(simple.collection, None);
+        assert!(simple.rows.iter().all(|r| r.collection_badges.is_empty()));
+        // 普通表示では札は出ないが要約は出る。
+        let normal = setlist_row_meta(
+            snap,
+            &show,
+            PerformerNameMode::IdolOnly,
+            SetlistDisplayMode::Normal,
+            std::slice::from_ref(&show),
+            &[],
+        );
+        assert!(normal.collection.is_some());
+        assert!(normal.rows.iter().all(|r| r.collection_badges.is_empty()));
     }
 }

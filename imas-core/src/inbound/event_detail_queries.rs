@@ -21,7 +21,8 @@ use crate::domain::event_detail_queries::{
 };
 use crate::domain::setlist_lineup::{self, Lineup};
 use crate::domain::screen_composition::SetlistDisplayMode;
-use crate::domain::setlist_row_meta::{setlist_row_meta, SetlistRowMetaRecord};
+use crate::domain::collection_gap::{collection_attended_show_ids, AttendanceMarkRecord};
+use crate::domain::setlist_row_meta::{setlist_row_meta, SetlistRowMetaBundle};
 use crate::domain::setlist_sections;
 use std::collections::{BTreeSet, HashMap};
 
@@ -39,6 +40,19 @@ pub fn performer_display_name(
     is_character_live: bool,
 ) -> PerformerDisplayName {
     queries::performer_display_name(&record, mode, is_character_live)
+}
+
+/// 回収に数える参加マークを選ぶ (既定は現地のみ・設定で配信も含める)。
+///
+/// **スナップショットを要らない純関数として出す。** 参加マークはプラットフォームが
+/// 持っているので、渡された射影から id 列を作るだけ。規則をアプリ側に書くと
+/// iOS / Android / 一覧 / セトリ で 4 つに増える (実際 iOS には 2 つあった)。
+#[uniffi::export]
+pub fn collection_attended_shows(
+    marks: Vec<AttendanceMarkRecord>,
+    include_stream: bool,
+) -> Vec<String> {
+    collection_attended_show_ids(marks, include_stream)
 }
 
 /// 2 段に積めない場所 (簡易表示・共有文) 向けの 1 行表記。
@@ -185,20 +199,35 @@ impl SnapshotStore {
         Ok(queries::setlist(&snap, &show_id))
     }
 
-    /// セトリ 1 行ぶんの添え物 (名義・ユニットのチップ・全員・何回目・いつぶり)。
-    /// 並びは [`Self::show_setlist`] と同じなので、受け側は zip するだけでよい。
+    /// セトリ 1 行ぶんの添え物 (名義・ユニットのチップ・全員・何回目・いつぶり・
+    /// 自分の回収) と、公演の頭に出す回収の要約。
+    /// 行の並びは [`Self::show_setlist`] と同じなので、受け側は zip するだけでよい。
     ///
     /// **名義の決め方 (その披露の名義 → 曲の名義 → 個人名併記 → 顔ぶれ推論 → 名前)
-    /// も、「いつぶりか」の言い回しもコアが持つ。** 画面でユニットを逆引きしたり
-    /// 「N 年ぶり」を組み立てたりしないこと (規則が両 OS に写経される)。
+    /// も、「いつぶりか」の言い回しも、「初回収 / 回収 N 回目 / 未回収」の判断もコアが持つ。**
+    /// 画面でユニットを逆引きしたり「N 年ぶり」を組み立てたりしないこと
+    /// (規則が両 OS に写経される)。
+    ///
+    /// `attended_*` は参加マーク (`user_marks`) をプラットフォーム側で解決した id 列。
+    /// show 側は参加形態の条件を適用済みで渡す ([`collection_attended_show_ids`])。
+    /// 空で渡せば回収の表示は何も出ない。
     pub fn show_setlist_row_meta(
         &self,
         show_id: String,
         mode: PerformerNameMode,
         display_mode: SetlistDisplayMode,
-    ) -> Result<Vec<SetlistRowMetaRecord>, SnapshotError> {
+        attended_show_ids: Vec<String>,
+        attended_event_ids: Vec<String>,
+    ) -> Result<SetlistRowMetaBundle, SnapshotError> {
         let snap = self.current()?;
-        Ok(setlist_row_meta(&snap, &show_id, mode, display_mode))
+        Ok(setlist_row_meta(
+            &snap,
+            &show_id,
+            mode,
+            display_mode,
+            &attended_show_ids,
+            &attended_event_ids,
+        ))
     }
 
     /// セトリ項目 id → 歌唱メンバー行 (N+1 防止の一括取得)。

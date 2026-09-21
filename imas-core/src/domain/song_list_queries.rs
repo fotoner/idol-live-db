@@ -21,6 +21,7 @@
 //! **user_marks はスナップショットに無い** (書き込みが頻繁でプラットフォームが正)。
 //! 回収系は「参加済みの show/event id 集合」を解決済みで受け取る (SongListFiltering と同じ流儀)。
 
+use crate::domain::collection_gap::attended_real_live_shows;
 use crate::domain::snapshot::Snapshot;
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
@@ -678,20 +679,9 @@ pub fn collected_counts_by_song(
     attended_event_ids: &[String],
     real_live_only: bool,
 ) -> Vec<u32> {
-    let mut attended: HashSet<u32> = attended_show_ids
-        .iter()
-        .filter_map(|id| snap.show_index_by_id.get(id).copied())
-        .collect();
-    for event_id in attended_event_ids {
-        if let Some(&e) = snap.event_index_by_id.get(event_id) {
-            attended.extend(snap.shows_by_event[e as usize].iter().copied());
-        }
-    }
-
-    let is_real_live = |show: u32| {
-        let kind = &snap.events[snap.shows[show as usize].event as usize].kind;
-        kind == "live" || kind == "festival"
-    };
+    // 「参加した公演」と「回収の対象になる催し」の定義は collection_gap が正本
+    // (セトリの「初回収 / 未回収」と一覧の回収バッジが違う数を言わないように)。
+    let attended = attended_real_live_shows(snap, attended_show_ids, attended_event_ids, real_live_only);
 
     let mut counts = vec![0u32; snap.songs.len()];
     let mut seen: HashSet<u32> = HashSet::new();
@@ -700,9 +690,6 @@ pub fn collected_counts_by_song(
         for &item in items {
             let show = snap.setlist_items[item as usize].show;
             if !attended.contains(&show) {
-                continue;
-            }
-            if real_live_only && !is_real_live(show) {
                 continue;
             }
             // COUNT(DISTINCT show_id): 同一公演でのアンコール再披露は 1 回。

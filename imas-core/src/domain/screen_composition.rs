@@ -102,6 +102,23 @@ impl SetlistDisplayMode {
     pub fn shows_performance_history(self) -> bool {
         self == Self::Detailed
     }
+
+    /// 行に**自分の回収**(初回収 / 回収 N 回目 / 未回収) を重ねるか。
+    ///
+    /// 披露の履歴と同じ詳細表示に乗せる。「世の中で 4 回目」と「自分は 2 回目」は
+    /// 同じ行の同じ種類の情報で、別の設定に分けると「詳しく出しているのに
+    /// 自分の回収だけ出ない」状態が作れてしまう。
+    pub fn shows_collection_history(self) -> bool {
+        self.shows_performance_history()
+    }
+
+    /// 公演の頭に**自分の回収の要約**(この公演で N 曲回収 / 未回収 N 曲) を出すか。
+    ///
+    /// 行の札と違って**シンプル表示以外なら出す**。シンプル表示はセトリを 1 枚の
+    /// スクショに収めるための形なので、自分にしか意味のない行を焼き込まない。
+    pub fn shows_collection_summary(self) -> bool {
+        !self.is_compact()
+    }
 }
 
 /// 切替 UI に並べる選択肢一式 (順・保存値・文言)。
@@ -162,6 +179,91 @@ pub fn setlist_history_badges(
         .map(str::to_string)
         .chain(std::iter::once(ordinal_label.to_string()))
         .collect()
+}
+
+/// セトリ 1 行に添える**自分の回収**の札。詳細表示以外では必ず空。
+///
+/// - 参加した公演の行 … `初回収` だけ / `2 年ぶりの回収` + `回収 3 回目`
+/// - 参加していない公演の行 … まだ一度も回収していない曲にだけ `未回収`
+///
+/// 「回収済みです」とは言わない — 参加していない公演のセトリで目に留めたいのは
+/// **まだ持っていない曲**で、既に持っている曲にも札を付けると全行が埋まる。
+///
+/// 文言は [`crate::domain::collection_gap`] が持つ。ここが決めるのは
+/// **どれをどの順で出すか**だけ ([`setlist_history_badges`] と同じ分担)。
+pub fn setlist_collection_badges(
+    mode: SetlistDisplayMode,
+    attended: bool,
+    ordinal_label: Option<&str>,
+    since_label: Option<&str>,
+    collected_count: u32,
+) -> Vec<String> {
+    if !mode.shows_collection_history() {
+        return Vec::new();
+    }
+    if !attended {
+        return if collected_count == 0 { vec![UNCOLLECTED_BADGE.to_string()] } else { Vec::new() };
+    }
+    since_label
+        .into_iter()
+        .chain(ordinal_label)
+        .map(str::to_string)
+        .collect()
+}
+
+/// まだ一度も回収していない曲の札。
+pub const UNCOLLECTED_BADGE: &str = "未回収";
+
+#[cfg(test)]
+mod setlist_collection_badge_tests {
+    use super::*;
+
+    /// 詳細表示以外では 1 つも出ない (自分の回収も披露履歴と同じ扱い)。
+    #[test]
+    fn 詳細表示以外では自分の回収も出さない() {
+        for mode in [SetlistDisplayMode::Simple, SetlistDisplayMode::Normal] {
+            assert!(setlist_collection_badges(mode, true, Some("初回収"), None, 1).is_empty());
+            assert!(setlist_collection_badges(mode, false, None, None, 0).is_empty());
+        }
+    }
+
+    #[test]
+    fn 参加した行は間隔のあとに回数を出す() {
+        assert_eq!(
+            setlist_collection_badges(
+                SetlistDisplayMode::Detailed,
+                true,
+                Some("回収 3 回目"),
+                Some("2 年ぶりの回収"),
+                3
+            ),
+            vec!["2 年ぶりの回収".to_string(), "回収 3 回目".to_string()]
+        );
+        // 初回収は 1 つだけ (間隔は無い)。
+        assert_eq!(
+            setlist_collection_badges(SetlistDisplayMode::Detailed, true, Some("初回収"), None, 1),
+            vec!["初回収".to_string()]
+        );
+    }
+
+    /// 参加していない公演では「未回収」だけ。回収済みの曲には何も付けない。
+    #[test]
+    fn 参加していない行は未回収だけを出す() {
+        assert_eq!(
+            setlist_collection_badges(SetlistDisplayMode::Detailed, false, None, None, 0),
+            vec!["未回収".to_string()]
+        );
+        assert!(setlist_collection_badges(SetlistDisplayMode::Detailed, false, None, None, 2)
+            .is_empty());
+    }
+
+    /// 要約はシンプル表示でだけ伏せる (スクショに自分の記録を焼き込まない)。
+    #[test]
+    fn 要約はシンプル表示でだけ伏せる() {
+        assert!(!SetlistDisplayMode::Simple.shows_collection_summary());
+        assert!(SetlistDisplayMode::Normal.shows_collection_summary());
+        assert!(SetlistDisplayMode::Detailed.shows_collection_summary());
+    }
 }
 
 #[cfg(test)]
