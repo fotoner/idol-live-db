@@ -20,6 +20,9 @@ enum DS {
 
     // MARK: - セマンティック
     static let success   = solid(light: 0x2FA84F, dark: 0x34D364)
+    /// 薄い塗りの上に載せる緑。`success` は塗りの上だと白地で 3.4:1 しか出ず、
+    /// 11pt の札の文字には足りない (WCAG AA は 4.5:1)。ダークは `success` のままで足りる。
+    static let successInk = solid(light: 0x1F7A38, dark: 0x34D364)
     static let warning   = solid(light: 0xE08600, dark: 0xFFB23E)
     static let danger    = solid(light: 0xE5342B, dark: 0xFF5247)
     /// システムクロムは「ほぼ無彩」。色は常にエンティティ側から来る → けばけばしさ回避。

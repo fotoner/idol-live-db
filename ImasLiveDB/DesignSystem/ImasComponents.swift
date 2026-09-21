@@ -680,9 +680,10 @@ struct ImasTagChip: View {
             case .lead:    return (t.accent, .white, nil)
             case .guest:   return (.clear, DS.ink2, DS.ink3)
             // 回収できた札は「手に入れた」の緑。披露履歴の輪郭札と並んでも読み分けられる。
-            case .collected:   return (DS.success.opacity(0.14), DS.success, nil)
-            // 未回収は急かさない。塗りは薄く、文字も本文より落とす。
-            case .uncollected: return (DS.fill, DS.ink3, nil)
+            // 文字は塗りの上で読める濃さの緑 (success そのままだと AA に届かない)。
+            case .collected:   return (DS.success.opacity(0.16), DS.successInk, nil)
+            // 未回収は急かさない。ただし情報なので、読めなくはしない (ink3 は枠だけ)。
+            case .uncollected: return (DS.fill, DS.ink2, nil)
             }
         }()
         Text(text)

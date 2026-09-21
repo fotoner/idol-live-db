@@ -73,6 +73,8 @@ struct SetlistView: View {
     @State private var showAttendanceDialog = false
     /// 参加変更後に UserMarkBar の表示を更新するためのバージョン。
     @State private var attendanceVersion = 0
+    /// 「配信参加も回収に含める」設定。**回収の答えが変わる**ので、変わったら読み直す。
+    @AppStorage(AppDatabase.collectionIncludeStreamKey) private var collectionIncludeStream = false
     /// 担当アイドル ID 集合。 担当認知はアバターの二重輪 (isPick) に委ねる。
     @State private var myPickIdolIds: Set<String> = []
     /// brand_id → イメージカラー hex。曲のフォールバックジャケ/チップ色のシードに使う。
@@ -179,7 +181,6 @@ struct SetlistView: View {
                 isFullCast: meta?.isFullCast ?? false,
                 historyBadges: meta?.historyBadges ?? [],
                 collectionBadges: meta?.collectionBadges ?? [],
-                isCollectedHere: meta?.isCollectedHere ?? false,
                 performerName: performerName,
                 isCharacterLive: show.isCharacterLive,
                 coverType: classifyCover(originalIds: originalIds, performerIds: performerIdolIds),
@@ -551,8 +552,11 @@ struct SetlistView: View {
         }
         .animation(.easeInOut(duration: 0.15), value: isCreatingPlaylist)
         .task { await loadSetlist() }
-        // 参加を付け外しすると回収の札と要約が変わるので、参加も鍵に含める。
-        .task(id: "\(performerNameRaw)|\(displayModeRaw)|\(legacySimpleMode)|\(attendanceVersion)") {
+        // 参加の付け外しと「配信も回収に含める」設定で回収の札と要約が変わるので、
+        // それも鍵に含める (表示モードと歌唱者の設定と同じ扱い)。
+        .task(
+            id: "\(performerNameRaw)|\(displayModeRaw)|\(legacySimpleMode)|\(attendanceVersion)|\(collectionIncludeStream)"
+        ) {
             await loadRowMeta()
         }
         .task {

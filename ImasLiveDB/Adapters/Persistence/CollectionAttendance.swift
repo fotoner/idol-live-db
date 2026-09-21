@@ -15,21 +15,29 @@ import GRDB
 /// 書いてあった。セトリの「初回収 / 未回収」で 3 つ目になるところだったので 1 本に畳む。
 enum CollectionAttendance {
 
+    /// 「配信参加も回収に含める」設定 (既定 = 現地のみ)。
+    static var includeStream: Bool {
+        UserDefaults.standard.bool(forKey: AppDatabase.collectionIncludeStreamKey)
+    }
+
     /// 回収に数える参加 show id (参加形態の条件を適用済み)。
     static func showIds(database: AppDatabase) async throws -> [String] {
-        let marks = try await marks(entity: .show, database: database)
-        return collectionAttendedShows(
-            marks: marks,
-            includeStream: UserDefaults.standard.bool(forKey: AppDatabase.collectionIncludeStreamKey)
+        collectionAttendedShows(
+            marks: try await marks(entity: .show, database: database),
+            includeStream: includeStream
         )
     }
 
-    /// イベント単位の参加マーク。配下の公演への展開は core がやる。
+    /// 回収に数えるイベント単位の参加マーク。配下の公演への展開は core がやる。
     ///
-    /// 参加形態の条件は掛けない (SQL 時代の `fetchSongCollectedCountsQuery` と同じ。
-    /// イベント単位のマークは「そのイベントに行った」以上の意味を持たない)。
+    /// **show マークと同じ条件を掛ける。** イベントの参加マークも `text_value` に
+    /// 参加形態を持つ (`attendedEventTypeSets` がそれを読んでいる) ので、素通しにすると
+    /// 「配信で見た」と記録したイベントが既定「現地のみ」でも回収に数えられる。
     static func eventIds(database: AppDatabase) async throws -> [String] {
-        try await database.fetchMarkedEntityIdsAsync(entity: .event, kind: .attended)
+        collectionAttendedShows(
+            marks: try await marks(entity: .event, database: database),
+            includeStream: includeStream
+        )
     }
 
     /// attended マークを (entity_id, text_value) の射影で取り出す。

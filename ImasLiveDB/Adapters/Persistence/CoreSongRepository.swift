@@ -94,8 +94,8 @@ struct CoreSongRepository: SongReading {
 
     func songCollectedCounts() async throws -> [String: Int] {
         try await withStore(fallbackTo: { try await fallback.songCollectedCounts() }) { store in
-            // バッジ用は「参加種別 (現地のみ等) の条件を適用済み」の show id を渡す規約。
-            // event の attended マークには種別条件を掛けない (SQL 時代の fetchSongCollectedCountsQuery と同じ)。
+            // 「参加種別 (現地のみ等) の条件を適用済み」の id を渡す規約。
+            // show / event のどちらのマークにも同じ条件が掛かる (CollectionAttendance 参照)。
             let showIds = try await CollectionAttendance.showIds(database: database)
             let eventIds = try await CollectionAttendance.eventIds(database: database)
             return try store.songCollectedCountMap(
@@ -360,8 +360,6 @@ struct CoreSongRepository: SongReading {
     func songVideos(songId: String) async throws -> [SongVideo] {
         try await fallback.songVideos(songId: songId)
     }
-
-    // MARK: - user_marks の解決 (スナップショットに無いユーザーデータ)
 
     // MARK: - FFI 型 ⇄ iOS 型の変換
 

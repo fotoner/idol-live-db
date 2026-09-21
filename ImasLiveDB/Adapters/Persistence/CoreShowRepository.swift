@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// `ShowReading` ポートの共有コア (imas-core インメモリスナップショット) アダプタ。
 ///
@@ -87,8 +88,18 @@ struct CoreShowRepository: ShowReading {
     ) async throws -> SetlistRowMetaBundle {
         // 参加マーク (user_marks) はスナップショットに無いので、ここで解決して渡す。
         // 何を回収と数えるかの規則は core (`CollectionAttendance` 参照)。
-        let attendedShowIds = (try? await CollectionAttendance.showIds(database: database)) ?? []
-        let attendedEventIds = (try? await CollectionAttendance.eventIds(database: database)) ?? []
+        // 読めなかったときは「参加記録なし」と同じ見え方になる (回収の表示が丸ごと消える)。
+        // 黙って消えると原因が分からないので、必ず残す。
+        var attendedShowIds: [String] = []
+        var attendedEventIds: [String] = []
+        do {
+            attendedShowIds = try await CollectionAttendance.showIds(database: database)
+            attendedEventIds = try await CollectionAttendance.eventIds(database: database)
+        } catch {
+            Logger.database.error(
+                "attendance_marks_failed setlistRowMeta: \(error.localizedDescription)"
+            )
+        }
         return try await snapshot.withStore(
             fallbackTo: {
                 try await fallback.setlistRowMeta(

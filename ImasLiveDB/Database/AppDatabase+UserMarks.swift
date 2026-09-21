@@ -242,6 +242,7 @@ extension AppDatabase {
                     SELECT id FROM shows WHERE event_id IN (
                         SELECT entity_id FROM user_marks
                         WHERE entity_type='event' AND kind='attended' AND bool_value=1
+                          AND \(attendedTypeCondition)
                     )
                 )
             )
@@ -263,11 +264,24 @@ extension AppDatabase {
         UserDefaults.standard.bool(forKey: Self.collectionIncludeStreamKey)
     }
     /// 回収対象とするリアルライブの kind (歌枠/配信番組/リリイベ/ラジオ等は除外)。
-    private static let realLiveKinds = "'live','festival'"
+    /// **どれが対象かは imas-core が持つ** (`collectionRealLiveKinds`)。ここは IN 句にするだけ。
+    private static var realLiveKinds: String { sqlList(collectionRealLiveKinds()) }
 
     /// 参加した公演の .attended 種別条件 (現地のみ / 設定により配信も)。
+    /// **どの形態を数えるかも imas-core が持つ** (`collectionAttendanceTypes`)。
+    /// 形態を持たない古いマーク (NULL) は現地扱い — 絞るときは必ず「現地」が並びに入るので、
+    /// core の `collection_attended_show_ids` と同じ集合を選ぶ。
     private var attendedTypeCondition: String {
-        collectionIncludeStream ? "1=1" : "(text_value IS NULL OR text_value='live')"
+        let types = collectionAttendanceTypes(includeStream: collectionIncludeStream)
+        guard !types.isEmpty else { return "1=1" }
+        return "(text_value IS NULL OR text_value IN (\(Self.sqlList(types))))"
+    }
+
+    /// 文字列の並びを SQL のリテラル並びにする (値は core 由来の固定語だが、素通しにしない)。
+    private static func sqlList(_ values: [String]) -> String {
+        values
+            .map { "'\($0.replacingOccurrences(of: "'", with: "''"))'" }
+            .joined(separator: ",")
     }
 
     /// ユーザが参加した「リアルライブ」のセトリに含まれる全 song_id を返す (回収済み)。
@@ -299,6 +313,7 @@ extension AppDatabase {
                 OR sh.event_id IN (
                     SELECT entity_id FROM user_marks
                     WHERE entity_type='event' AND kind='attended' AND bool_value=1
+                      AND \(attendedTypeCondition)
                 )
             )
             """
@@ -306,12 +321,23 @@ extension AppDatabase {
         return Set(rows.compactMap { row -> String? in row["song_id"] })
     }
 
-    /// その曲を披露した、ユーザが参加済みの show 一覧 (親 event 名込み)
+    /// その曲を回収した (参加したリアルライブで聴いた) show 一覧 (親 event 名込み)。
+    ///
+    /// 曲詳細の「現地回収 N 公演」はこの件数。**一覧の回収バッジ・セトリの「未回収」と
+    /// 同じ規則で絞る** — ここだけ催しの種別も参加形態も見ていなかったため、
+    /// 「現地回収 3 公演」なのに一覧では未回収、という食い違いが作れていた。
     func fetchCollectedShowsAsync(for songId: String) async throws -> [ShowWithEventName] {
-        try await dbQueue.read { db in try Self.fetchCollectedShowsQuery(db, for: songId) }
+        let condition = attendedTypeCondition
+        return try await dbQueue.read { db in
+            try Self.fetchCollectedShowsQuery(db, for: songId, attendedTypeCondition: condition)
+        }
     }
 
-    private static func fetchCollectedShowsQuery(_ db: Database, for songId: String) throws -> [ShowWithEventName] {
+    private static func fetchCollectedShowsQuery(
+        _ db: Database,
+        for songId: String,
+        attendedTypeCondition: String
+    ) throws -> [ShowWithEventName] {
         let sql = """
             SELECT DISTINCT sh.id, sh.event_id, sh.name, sh.date, sh.venue,
                             e.name AS event_name
@@ -319,14 +345,17 @@ extension AppDatabase {
             JOIN setlist_items si ON si.show_id = sh.id
             JOIN events e ON e.id = sh.event_id
             WHERE si.song_id = ?
+            AND e.kind IN (\(Self.realLiveKinds))
             AND (
                 sh.id IN (
                     SELECT entity_id FROM user_marks
                     WHERE entity_type='show' AND kind='attended' AND bool_value=1
+                      AND \(attendedTypeCondition)
                 )
                 OR sh.event_id IN (
                     SELECT entity_id FROM user_marks
                     WHERE entity_type='event' AND kind='attended' AND bool_value=1
+                      AND \(attendedTypeCondition)
                 )
             )
             ORDER BY sh.date DESC

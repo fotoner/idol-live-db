@@ -17,13 +17,10 @@ struct SetlistRowView: View {
     /// **中身も、そもそも出すかどうかも imas-core が表示モードから決める** ので、
     /// ここは受け取った順に並べるだけ。詳細表示以外では必ず空で来る。
     var historyBadges: [String] = []
-    /// **自分の回収**の札 (「初回収」「回収 3 回目」「2 年ぶりの回収」「未回収」)。
-    /// 中身も出す/出さないも imas-core が表示モードと参加記録から決める
+    /// **自分の回収**の札 (「初回収」「回収 3 回目 (2 年ぶり)」「未回収」)。多くても 1 つ。
+    /// 中身も出す/出さないも、色に使う `role` も imas-core が決める
     /// (`collection_gap` / `setlist_collection_badges`)。ここは並べるだけ。
-    var collectionBadges: [String] = []
-    /// この公演に自分が参加しているか。**札の色だけに使う** (回収できた札は緑、
-    /// 未回収は控えめ)。何を出すかの判断はコアが済ませてある。
-    var isCollectedHere: Bool = false
+    var collectionBadges: [CollectionBadgeRecord] = []
     /// 歌唱者をどの名前で出すか (親が AppStorage から解決して渡す)。
     var performerName: PerformerNameMode = .idolOnly
     /// `shows.performer_type == "character"`。
@@ -290,10 +287,19 @@ struct SetlistRowView: View {
                 ImasTagChip(text: badge, kind: .guest, seed: seed)
             }
             // 自分の回収の札。世の中の履歴 (輪郭) の次に置き、色で「自分の記録」と分ける。
-            ForEach(collectionBadges, id: \.self) { badge in
-                ImasTagChip(text: badge, kind: isCollectedHere ? .collected : .uncollected, seed: seed)
+            // どちらの色かは core が付けた role で決める (文字列を見て分岐しない)。
+            ForEach(collectionBadges, id: \.text) { badge in
+                ImasTagChip(text: badge.text, kind: Self.chipKind(badge.role), seed: seed)
             }
             performerMeta
+        }
+    }
+
+    /// 回収の札の役割 → 見た目。**対応表だけを持ち、判断はしない。**
+    private static func chipKind(_ role: CollectionBadgeRole) -> ImasTagChip.Kind {
+        switch role {
+        case .collected:   return .collected
+        case .uncollected: return .uncollected
         }
     }
 
