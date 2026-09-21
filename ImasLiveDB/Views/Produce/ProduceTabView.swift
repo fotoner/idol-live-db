@@ -9,6 +9,7 @@ import SwiftUI
 struct ProduceTabView: View {
     @Environment(AppDatabase.self) private var database
     @Environment(CloudKitSyncEngine.self) private var syncEngine
+    private var userMarks: UserMarkService { UserMarkService.shared }
 
     // 担当アイドル (マイピック)。各カードが自色をまとうヒーロー。
     @State private var pickIdols: [Idol] = []
@@ -20,6 +21,8 @@ struct ProduceTabView: View {
     @State private var predictionCount: Int = 0
     @State private var favoriteCount: Int = 0    // 曲+アイドル+ライブの合計
     @State private var collectedCount: Int = 0
+    /// 習熟度を 1 段でも付けた曲数 (タイルの数字)。集計は core、ここは件数だけ。
+    private var masteryCount: Int { userMarks.masteryCounts().reduce(0, +) }
     @State private var collectedSongIds: [String] = []
     // ローカル履歴 (投稿・投票) は @Observable で参照するだけでカウントが見える。
     @State private var voteLog = LocalPollVoteLog.shared
@@ -220,13 +223,16 @@ struct ProduceTabView: View {
                 statTileLink(route: .collectedSongs) {
                     ImasStatTile(systemImage: "music.note", value: numberString(collectedCount), label: "回収", brand: pickBrandSeed, tappable: true)
                 }
+                statTileLink(route: .mastery) {
+                    ImasStatTile(systemImage: "chart.bar.fill", value: numberString(masteryCount), label: "習熟度", brand: pickBrandSeed, tappable: true)
+                }
             }
         }
     }
 
     /// あなたの活動タイルの遷移先。値ベース push にして二重 push をスロットルで防ぐ。
     enum ActivityRoute: Hashable {
-        case attendedEvents, myPredictions, favorites, myVotes, myContributions, collectedSongs
+        case attendedEvents, myPredictions, favorites, myVotes, myContributions, collectedSongs, mastery
     }
 
     @ViewBuilder
@@ -238,6 +244,7 @@ struct ProduceTabView: View {
         case .myVotes: MyVotesView().environment(database)
         case .myContributions: MyContributionsView()
         case .collectedSongs: songListDestination(ids: collectedSongIds, title: "回収した楽曲")
+        case .mastery: MasteryView().environment(database)
         }
     }
 

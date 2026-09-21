@@ -20,6 +20,7 @@
 
 use crate::domain::display_join::non_empty;
 use crate::domain::performer_label::{performer_label, PerformerNaming};
+use crate::domain::text_search_index::FoldedNeedle;
 use std::collections::HashMap;
 
 /// 群の縦軸。
@@ -45,6 +46,11 @@ pub struct MasterySong {
     pub release_date: Option<String>,
     /// 0 = 未設定、1..=steps。
     pub level: u8,
+    /// 参加したライブで披露された曲か (現地回収)。
+    ///
+    /// 「聴いたことはあるのにまだ覚えていない曲」は覚える優先度が高い。
+    /// 判定そのものは参加記録から各 OS が解決して渡す (DB 依存なのでここには置けない)。
+    pub collected: bool,
 }
 
 /// 群 1 つ。ヒートマップの 1 行。
@@ -61,6 +67,10 @@ pub struct MasteryGroup {
     pub percent: u32,
     /// 最上段に到達した曲数。
     pub done_count: u32,
+    /// 現地で聴いたことのある曲数。
+    pub collected_count: u32,
+    /// 現地で聴いたのに未設定のままの曲数。ここが多い群は覚え時。
+    pub heard_but_unset_count: u32,
     pub total: u32,
 }
 
@@ -72,6 +82,37 @@ pub struct MasterySummary {
     /// 1 段でも付いている曲数。
     pub set_count: u32,
     pub total: u32,
+}
+
+/// 群の並び。
+///
+/// 既定は曲数順だが、実際に一番使うのは**手を付けていない群から潰す**動き
+/// なので「進み具合が低い順」を用意する。並べ替えの規則を画面に書くと
+/// Android で写経になるのでここに置く。
+#[derive(uniffi::Enum, Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MasteryGroupSort {
+    /// 曲数の多い順 (同数はラベル昇順)。
+    SongCount,
+    /// 進み具合の低い順。
+    ProgressAsc,
+    /// 進み具合の高い順。
+    ProgressDesc,
+    /// ラベル昇順。
+    Name,
+}
+
+/// 群の絞り込み。どの群を残すか。
+#[derive(uniffi::Enum, Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MasteryProgressFilter {
+    All,
+    /// 未設定の曲が 1 曲でもある群。
+    HasUnset,
+    /// 全曲が未設定の群 (まだ手を付けていない)。
+    Untouched,
+    /// 全曲が最上段に届いている群。
+    Complete,
+    /// 現地で聴いたのに未設定の曲がある群。
+    HeardButUnset,
 }
 
 /// 一括更新の対象の選び方。
@@ -214,7 +255,12 @@ fn percent_of(levels: &[u8], steps: u8) -> u32 {
     (sum / levels.len() as f64 * 100.0).round() as u32
 }
 
-/// 群を作って集計する。並びは **曲数の多い順 → 同数ならラベル昇順**。
+/// 群を作って集計する。
+///
+/// `name_filter` は群の名前での絞り込み。畳み方は `text_search_index` と同じ
+/// (画面で `contains` を書くと照合規則が二重持ちになる)。空文字は絞らない。
+/// `progress` は「未設定あり」「手つかず」等の絞り込み、`sort` は並び。
+/// どれも判断なので画面に置かない。
 ///
 /// 群の中の曲は入力順を保つ (呼び出し側が発売順/トラック順で渡す前提)。
 /// 「シリーズなし」等の受け皿は、数が多くても**必ず末尾**に置く
@@ -223,6 +269,9 @@ pub fn build_mastery_groups(
     songs: &[MasterySong],
     axis: MasteryAxis,
     steps: u8,
+    sort: MasteryGroupSort,
+    progress: MasteryProgressFilter,
+    name_filter: &str,
 ) -> Vec<MasteryGroup> {
     let max = clamp_steps(steps);
     let mut order: Vec<String> = Vec::new();
@@ -242,12 +291,20 @@ pub fn build_mastery_groups(
                 levels: Vec::new(),
                 percent: 0,
                 done_count: 0,
+                collected_count: 0,
+                heard_but_unset_count: 0,
                 total: 0,
             }
         });
         entry.song_ids.push(song.song_id.clone());
         entry.titles.push(song.title.clone());
         entry.levels.push(song.level.min(max));
+        if song.collected {
+            entry.collected_count += 1;
+            if song.level == 0 {
+                entry.heard_but_unset_count += 1;
+            }
+        }
         if axis == MasteryAxis::Series {
             if let Some(cd) = non_empty(&song.cd_series) {
                 let n = normalize_disc_name(cd);
@@ -271,13 +328,32 @@ pub fn build_mastery_groups(
         })
         .collect();
 
+    // 名前での絞り込み → 進み具合での絞り込み → 並べ替え、の順。
+    let needle = FoldedNeedle::new(name_filter);
+    if !needle.is_empty() {
+        groups.retain(|g| needle.matches(&g.label));
+    }
+    groups.retain(|g| match progress {
+        MasteryProgressFilter::All => true,
+        MasteryProgressFilter::HasUnset => g.levels.iter().any(|&l| l == 0),
+        MasteryProgressFilter::Untouched => g.levels.iter().all(|&l| l == 0),
+        MasteryProgressFilter::Complete => !g.levels.is_empty() && g.done_count == g.total,
+        MasteryProgressFilter::HeardButUnset => g.heard_but_unset_count > 0,
+    });
+
     groups.sort_by(|a, b| {
+        // 受け皿 (シリーズなし 等) は数が多くても必ず末尾。一番上に来ると
+        // 画面が受け皿で埋まって、軸の意味が読めなくなる。
         let a_none = a.key == "__none__";
         let b_none = b.key == "__none__";
-        a_none
-            .cmp(&b_none)
-            .then(b.total.cmp(&a.total))
-            .then(a.label.cmp(&b.label))
+        let primary = a_none.cmp(&b_none);
+        let by_name = a.label.cmp(&b.label);
+        match sort {
+            MasteryGroupSort::SongCount => primary.then(b.total.cmp(&a.total)).then(by_name),
+            MasteryGroupSort::ProgressAsc => primary.then(a.percent.cmp(&b.percent)).then(by_name),
+            MasteryGroupSort::ProgressDesc => primary.then(b.percent.cmp(&a.percent)).then(by_name),
+            MasteryGroupSort::Name => primary.then(by_name),
+        }
     });
     groups
 }
@@ -310,6 +386,7 @@ mod tests {
             singer_label: None,
             release_date: None,
             level,
+            collected: false,
         }
     }
 
@@ -385,7 +462,7 @@ mod tests {
         let mut c = song("c", 0);
         c.series_group = Some("   ".into()); // 空白だけは「無し」扱い
 
-        let groups = build_mastery_groups(&[a, b, c], MasteryAxis::Series, 4);
+        let groups = build_mastery_groups(&[a, b, c], MasteryAxis::Series, 4, MasteryGroupSort::SongCount, MasteryProgressFilter::All, "");
         let labels: Vec<&str> = groups.iter().map(|g| g.label.as_str()).collect();
         assert!(labels.contains(&"CANVAS"));
         assert!(labels.contains(&"Over the prism"));
@@ -408,6 +485,9 @@ mod tests {
             ],
             MasteryAxis::Series,
             4,
+            MasteryGroupSort::SongCount,
+            MasteryProgressFilter::All,
+            "",
         );
         assert_eq!(groups.len(), 1);
         assert_eq!(groups[0].disc_count, 2);
@@ -421,7 +501,7 @@ mod tests {
         let b = song("b", 0); // 受け皿行き
         let c = song("c", 0);
         let d = song("d", 0);
-        let groups = build_mastery_groups(&[a, b, c, d], MasteryAxis::Series, 4);
+        let groups = build_mastery_groups(&[a, b, c, d], MasteryAxis::Series, 4, MasteryGroupSort::SongCount, MasteryProgressFilter::All, "");
         // 受け皿は 3 曲で最多だが、末尾に置く
         assert_eq!(groups.last().unwrap().label, "シリーズなし");
         assert_eq!(groups[0].label, "CANVAS");
@@ -433,7 +513,7 @@ mod tests {
         a.series_group = Some("S".into());
         let mut b = song("b", 2);
         b.series_group = Some("S".into());
-        let groups = build_mastery_groups(&[a, b], MasteryAxis::Series, 4);
+        let groups = build_mastery_groups(&[a, b], MasteryAxis::Series, 4, MasteryGroupSort::SongCount, MasteryProgressFilter::All, "");
         // 「覚えた」は 0 曲だが、LV.2 が 2 曲なので 50%
         assert_eq!(groups[0].percent, 50);
         assert_eq!(groups[0].done_count, 0);
@@ -445,7 +525,7 @@ mod tests {
         a.unit_name = Some("アンティーカ".into());
         let mut b = song("b", 0);
         b.singer_label = Some("櫻木真乃".into());
-        let groups = build_mastery_groups(&[a, b], MasteryAxis::Unit, 4);
+        let groups = build_mastery_groups(&[a, b], MasteryAxis::Unit, 4, MasteryGroupSort::SongCount, MasteryProgressFilter::All, "");
         let labels: Vec<&str> = groups.iter().map(|g| g.label.as_str()).collect();
         assert!(labels.contains(&"アンティーカ"));
         assert!(labels.contains(&"櫻木真乃"));
@@ -457,7 +537,7 @@ mod tests {
         a.release_date = Some("2023-03-20".into());
         let mut b = song("b", 0);
         b.release_date = Some("こわれた".into());
-        let groups = build_mastery_groups(&[a, b], MasteryAxis::Year, 4);
+        let groups = build_mastery_groups(&[a, b], MasteryAxis::Year, 4, MasteryGroupSort::SongCount, MasteryProgressFilter::All, "");
         assert_eq!(groups[0].label, "2023年");
         assert_eq!(groups.last().unwrap().label, "発売日なし");
     }
@@ -475,14 +555,122 @@ mod tests {
     #[test]
     fn levels_above_the_scale_are_clamped() {
         // 段数を減らした直後に古い値が残っていても、集計は新しい上限で見る
-        let groups = build_mastery_groups(&[song("a", 7)], MasteryAxis::Series, 2);
+        let groups = build_mastery_groups(&[song("a", 7)], MasteryAxis::Series, 2, MasteryGroupSort::SongCount, MasteryProgressFilter::All, "");
         assert_eq!(groups[0].levels, vec![2]);
         assert_eq!(groups[0].percent, 100);
     }
 
+    fn series(id: &str, name: &str, level: u8) -> MasterySong {
+        let mut s = song(id, level);
+        s.series_group = Some(name.into());
+        s
+    }
+
+    /// 照合は `imas-text-fold` に一本化してあること。畳むのは大文字小文字と
+    /// ひらがな↔カタカナだけで、**全角半角は畳まない** (あちらの規則がそう決めている)。
+    /// 画面側で `contains` を書くとこの規則から外れるので、ここを通す。
+    #[test]
+    fn name_filter_uses_the_shared_folding_not_raw_contains() {
+        let songs = [
+            series("a", "CANVAS", 0),
+            series("b", "ＣＡＮＶＡＳ", 0),
+            series("c", "シャイニーPRオファー", 0),
+        ];
+        let got = |needle: &str| {
+            build_mastery_groups(&songs, MasteryAxis::Series, 4,
+                                 MasteryGroupSort::Name, MasteryProgressFilter::All, needle)
+                .len()
+        };
+        assert_eq!(got("canvas"), 1, "大文字小文字は畳む");
+        assert_eq!(got("ＣＡＮＶＡＳ"), 1, "全角は全角にだけ当たる (畳まない規則)");
+        assert_eq!(got("しゃいにー"), 1, "ひらがな↔カタカナは畳む");
+        assert_eq!(got(""), 3, "空は絞らない");
+    }
+
+    #[test]
+    fn progress_filter_picks_the_right_groups() {
+        let songs = [
+            series("a", "手つかず", 0),
+            series("b", "手つかず", 0),
+            series("c", "途中", 0),
+            series("d", "途中", 4),
+            series("e", "完了", 4),
+        ];
+        let labels = |f: MasteryProgressFilter| -> Vec<String> {
+            build_mastery_groups(&songs, MasteryAxis::Series, 4,
+                                 MasteryGroupSort::Name, f, "")
+                .iter().map(|g| g.label.clone()).collect()
+        };
+        assert_eq!(labels(MasteryProgressFilter::All).len(), 3);
+        assert_eq!(labels(MasteryProgressFilter::HasUnset), vec!["手つかず", "途中"]);
+        assert_eq!(labels(MasteryProgressFilter::Untouched), vec!["手つかず"]);
+        assert_eq!(labels(MasteryProgressFilter::Complete), vec!["完了"]);
+    }
+
+    #[test]
+    fn sort_modes_order_by_the_named_key() {
+        let songs = [
+            series("a", "低い", 0),
+            series("b", "低い", 0),
+            series("c", "低い", 0),
+            series("d", "高い", 4),
+        ];
+        let labels = |sort: MasteryGroupSort| -> Vec<String> {
+            build_mastery_groups(&songs, MasteryAxis::Series, 4, sort,
+                                 MasteryProgressFilter::All, "")
+                .iter().map(|g| g.label.clone()).collect()
+        };
+        assert_eq!(labels(MasteryGroupSort::SongCount), vec!["低い", "高い"]);
+        assert_eq!(labels(MasteryGroupSort::ProgressAsc), vec!["低い", "高い"]);
+        assert_eq!(labels(MasteryGroupSort::ProgressDesc), vec!["高い", "低い"]);
+        assert_eq!(labels(MasteryGroupSort::Name), vec!["低い", "高い"], "50音ではなくコードポイント順");
+    }
+
+    #[test]
+    fn catch_all_stays_last_under_every_sort() {
+        let songs = [series("a", "CANVAS", 4), song("b", 0), song("c", 0), song("d", 0)];
+        for sort in [MasteryGroupSort::SongCount, MasteryGroupSort::ProgressAsc,
+                     MasteryGroupSort::ProgressDesc, MasteryGroupSort::Name] {
+            let groups = build_mastery_groups(&songs, MasteryAxis::Series, 4, sort,
+                                              MasteryProgressFilter::All, "");
+            assert_eq!(groups.last().unwrap().label, "シリーズなし",
+                       "受け皿はどの並びでも末尾に残る");
+        }
+    }
+
+    #[test]
+    fn collected_counts_separate_heard_from_learned() {
+        let mut a = series("a", "S", 0);
+        a.collected = true;                      // 聴いたのに未設定 → 覚え時
+        let mut b = series("b", "S", 4);
+        b.collected = true;                      // 聴いて覚えた
+        let c = series("c", "S", 0);             // 聴いてもいない
+
+        let groups = build_mastery_groups(&[a, b, c], MasteryAxis::Series, 4,
+                                          MasteryGroupSort::Name, MasteryProgressFilter::All, "");
+        assert_eq!(groups[0].collected_count, 2);
+        assert_eq!(groups[0].heard_but_unset_count, 1);
+        assert_eq!(groups[0].total, 3);
+    }
+
+    #[test]
+    fn heard_but_unset_filter_picks_groups_worth_learning() {
+        let mut heard = series("a", "聴いた", 0);
+        heard.collected = true;
+        let mut done = series("b", "済", 4);
+        done.collected = true;
+        let unheard = series("c", "未聴", 0);
+
+        let labels: Vec<String> = build_mastery_groups(
+            &[heard, done, unheard], MasteryAxis::Series, 4,
+            MasteryGroupSort::Name, MasteryProgressFilter::HeardButUnset, "")
+            .iter().map(|g| g.label.clone()).collect();
+        assert_eq!(labels, vec!["聴いた"], "聴いたのに未設定の曲がある群だけ残す");
+    }
+
     #[test]
     fn empty_input_is_zero_not_a_panic() {
-        assert_eq!(build_mastery_groups(&[], MasteryAxis::Series, 4), vec![]);
+        assert_eq!(build_mastery_groups(&[], MasteryAxis::Series, 4, MasteryGroupSort::SongCount, MasteryProgressFilter::All, ""), vec![]);
         let s = mastery_summary(&[], 4);
         assert_eq!(s, MasterySummary { percent: 0, done_count: 0, set_count: 0, total: 0 });
     }

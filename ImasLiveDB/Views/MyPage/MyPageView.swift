@@ -403,6 +403,7 @@ struct MyPageView: View {
         helpSection
         generalSettingsSection
         collectionSettingsSection
+        masterySection
         notificationSection
         themeSection
         imageImportSection
@@ -492,6 +493,30 @@ struct MyPageView: View {
             Text("披露回収")
         } footer: {
             Text("回収はリアルライブ(ライブ/フェス)の現地参加のみが対象です。配信でしか観られない方は、配信参加も回収に含められます。")
+        }
+        .listRowBackground(DS.surface)
+        .listRowSeparatorTint(DS.sep)
+    }
+
+    /// 習熟度の段階。ラベルの好みは人によるので、既定 (聞いた / 覚えた / 完璧) を
+    /// 触れるようにしてある。保存は序数なのでラベルを直しても記録は壊れない。
+    @ViewBuilder
+    private var masterySection: some View {
+        Section {
+            NavigationLink {
+                MasteryScaleSettingsView()
+            } label: {
+                HStack {
+                    Label("習熟度の段階", systemImage: "chart.bar")
+                    Spacer()
+                    Text(UserMarkService.shared.scale.labels.joined(separator: " / "))
+                        .font(.imasCaption).foregroundStyle(DS.ink3).lineLimit(1)
+                }
+            }
+        } header: {
+            Text("習熟度")
+        } footer: {
+            Text("段の数と名前を変えられます。段を減らすと、その段の曲は 1 つ下に移ります (記録は消えません)。")
         }
         .listRowBackground(DS.surface)
         .listRowSeparatorTint(DS.sep)

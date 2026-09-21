@@ -48,6 +48,9 @@ enum UserMarkKind: String, Codable, CaseIterable, Sendable {
     case note
     case seat
     case owned
+    /// 楽曲の習熟度 (段階)。`text_value` に序数 "0".."8" を入れる。
+    /// bool 系マークと違って**順序がある**ので、ラベルはユーザー設定から引く。
+    case mastery
 
     var label: String {
         switch self {
@@ -58,6 +61,7 @@ enum UserMarkKind: String, Codable, CaseIterable, Sendable {
         case .note:      return "メモ"
         case .seat:      return "座席"
         case .owned:     return "所有"
+        case .mastery:   return "習熟度"
         }
     }
 
@@ -72,6 +76,7 @@ enum UserMarkKind: String, Codable, CaseIterable, Sendable {
         // 円盤 (release) だけでなくカード (song) にも付くようになったため、
         // 円盤専用の見た目 (opticaldisc) から「所有物」を表す中立なアイコンに変更。
         case .owned:     return "shippingbox"
+        case .mastery:   return "chart.bar"
         }
     }
 
@@ -84,6 +89,7 @@ enum UserMarkKind: String, Codable, CaseIterable, Sendable {
         case .note:      return "note.text.badge.plus"
         case .seat:      return "chair.fill"
         case .owned:     return "shippingbox.fill"
+        case .mastery:   return "chart.bar.fill"
         }
     }
 
@@ -96,6 +102,7 @@ enum UserMarkKind: String, Codable, CaseIterable, Sendable {
         case .note:      return .orange
         case .seat:      return .teal
         case .owned:     return .purple
+        case .mastery:   return .indigo
         }
     }
 
@@ -111,6 +118,7 @@ enum UserMarkKind: String, Codable, CaseIterable, Sendable {
         // 乗らない (端末ローカル唯一データ) が、`UserMarkBackup` 経由の iCloud KVS
         // バックアップ (機種変・再インストール復元用) はそのまま効く。
         case .owned:     return [.release, .song]
+        case .mastery:   return [.song]
         }
     }
 }

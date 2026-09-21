@@ -884,6 +884,7 @@ struct SongListView: View {
             isFavorite: vm.favoriteSongIds.contains(item.song.id),
             isMyPick: vm.myPickSongIds.contains(item.song.id),
             hasNote: vm.notedSongIds.contains(item.song.id),
+            masteryLevel: UserMarkService.shared.mastery(songId: item.song.id),
             onCollectedTap: { sheetDestination = .songHistory(item.song) },
             tagVoteCount: selectedTags.count == 1 ? vm.tagVoteCounts[item.song.id] : nil,
             lyricsSnippets: vm.lyricsHits?[item.song.id] ?? [],
@@ -895,6 +896,7 @@ struct SongListView: View {
         .onTapGesture {
             sheetDestination = .song(item.song)
         }
+        .masterySwipe(songId: item.song.id)
         .listRowInsets(EdgeInsets(top: 0, leading: DS.sp5, bottom: 0, trailing: DS.sp5))
         .listRowBackground(DS.surface)
         .listRowSeparatorTint(DS.sep)
