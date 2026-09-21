@@ -147,6 +147,23 @@ SCOPED_ID_SPACE = {
     "units": "unit",
 }
 
+def scope_id(conn, table, row_id):
+    """その表の 1 行の id → `--ids` に渡す値。
+
+    `--ids` が見るのは行の id ではなく ID_FILTER_COLUMN[table] の列 (shows なら
+    event_id)。行 id をそのまま渡すと `WHERE event_id IN (<show id>)` が 0 行に当たり、
+    **push が成功したように見えて 1 行も送られない**。読み替えはこの契約を持つ
+    ここに置く (呼び出し側で書くと、呼び出し元が増えるたび同じ穴に落ちる)。
+
+    呼び出し側は ID_FILTER_COLUMN にある表だけを渡すこと。
+    """
+    col = ID_FILTER_COLUMN[table]
+    row = conn.execute(f"SELECT {col} FROM {table} WHERE id = ?", (row_id,)).fetchone()
+    if row is None:
+        raise KeyError(f"{table}.id = {row_id!r} が無い (絞り込む値を決められない)")
+    return row[0]
+
+
 # ---------------------------------------------------------------------------
 # Schema introspection helpers
 # ---------------------------------------------------------------------------

@@ -8,7 +8,7 @@ master.sqlite → CloudKit に一括反映します（直接 CloudKit に書く�
 
 | やりたいこと | 置き場所 | 例 |
 |---|---|---|
-| **無いものを追加** | `data/<種類>/`（songs/setlists/events/idols/units） | 新しい曲・ライブ・セトリ・アイドルを足す |
+| **無いものを追加** | `data/<種類>/`（songs/setlists/events/shows/idols/units） | 新しい曲・ライブ・公演・セトリ・アイドルを足す |
 | **あるものを修正** | `data/fixes/` | 配信日が違う・名前の誤字を直す |
 
 ## 流れ
@@ -30,6 +30,7 @@ master.sqlite → CloudKit に一括反映します（直接 CloudKit に書く�
 | | 合同曲なら + | `joint_brand_ids` (参加ブランドをカンマ区切り、`brand_id` 以外) `is_collab` |
 | `data/setlists/` | セットリスト | `show_id` `songs[]`（`position` + `title`/`song_id` + `performers`） |
 | `data/events/` | ライブ/イベント + 公演 | `events[]`（`id` `brand_id` `name` `kind` + `shows[]`） |
+| `data/shows/` | 既にあるライブに公演を足す（ツアーの追加公演など） | `shows[]`（`id` `event_id` `name` `date` + 任意で `venue` `venue_id` `start_time` `sort_order`） |
 | `data/idols/` | アイドル | `id` `name` `brand_id` `brands[]` |
 | `data/units/` | ユニット | `id` `name` `brand_id` `members[]` |
 | `data/creators/` | 作詞・作曲・編曲の作家 | `id` `name` `name_kana` |

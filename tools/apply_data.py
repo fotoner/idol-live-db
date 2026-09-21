@@ -37,7 +37,7 @@ SEED_SCRIPT = Path(__file__).resolve().parent / "seed_cloudkit.py"
 
 # 絞り込みの知識は seed_cloudkit.py が持つ。**写さずに読む** (片方だけ古くならないように)。
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from seed_cloudkit import SCOPED_ID_SPACE, TABLE_ORDER as TABLE_PUSH_ORDER  # noqa: E402
+from seed_cloudkit import SCOPED_ID_SPACE, TABLE_ORDER as TABLE_PUSH_ORDER, scope_id  # noqa: E402
 DUMP_PATH = ROOT / "db" / "master.sql"
 
 
@@ -57,6 +57,9 @@ KIND_TABLES = {
     "songs": ["songs", "song_artists"],
     "setlists": ["setlist_items", "setlist_performers"],
     "events": ["events", "shows"],
+    # 既存ライブに公演だけを足す入口。event は親の id で参照するだけで触らない
+    # (ツアーの追加公演は後から発表される)。data/setlists/ が show_id で子を足すのと同じ形。
+    "shows": ["shows"],
     "idols": ["idols", "idol_brands"],
     "units": ["units", "unit_members"],
     "unit_versions": ["unit_versions"],
@@ -202,6 +205,20 @@ def validate(conn):
                 for k in sh:
                     if k not in scol:
                         problems.append(f"{tag}: shows に未知の列 '{k}'")
+
+    for path, data in load("shows"):
+        scol = cols(conn, "shows")
+        for i, sh in enumerate(data.get("shows", [])):
+            tag = f"shows/{path.name}[{i}]"
+            if not sh.get("event_id") or not exists(conn, "events", sh.get("event_id", "")):
+                problems.append(f"{tag}: event_id '{sh.get('event_id')}' が存在しない")
+            if not sh.get("id") or exists(conn, "shows", sh.get("id", "")):
+                problems.append(f"{tag}: show id が空 or 既存 ({sh.get('id')})")
+            if not sh.get("date"):
+                problems.append(f"{tag}: date は必須")
+            for k in sh:
+                if k not in scol and k != "note":
+                    problems.append(f"{tag}: shows に未知の列 '{k}'")
 
     for path, data in load("idols"):
         icol = cols(conn, "idols")
@@ -462,6 +479,14 @@ def apply_all(conn):
             affected["shows"].add(ev["id"])
         print(f"  ✓ events/{path.name}: {len(data['events'])} 件")
 
+    for path, data in load("shows"):
+        for sh in data["shows"]:
+            sh.pop("note", None)
+            insert_row(conn, "shows", {k: v for k, v in sh.items() if k in shcol})
+            # shows は event_id で絞って push する (ID_FILTER_COLUMN)。
+            affected["shows"].add(sh["event_id"])
+        print(f"  ✓ shows/{path.name}: {len(data['shows'])} 公演")
+
     icol = cols(conn, "idols")
     for path, data in load("idols"):
         for idol in data["idols"]:
@@ -495,9 +520,10 @@ def apply_all(conn):
             table, rid, fields = fx["table"], fx["id"], fx["fields"]
             sets = ", ".join(f"{k} = ?" for k in fields)
             conn.execute(f"UPDATE {table} SET {sets} WHERE id = ?", list(fields.values()) + [rid])
-            # fixes は id 列で 1 行を直すので、その表が id で絞れるならその id だけ押す。
+            # fixes は id 列で 1 行を直す。その表が絞れるなら、その 1 行だけを押す
+            # (押すときに見る列は表ごとに違うので scope_id で読み替える)。
             if SCOPED_ID_SPACE.get(table):
-                affected[table].add(rid)
+                affected[table].add(scope_id(conn, table, rid))
             else:
                 affected[table]
         print(f"  ✓ fixes/{path.name}: {len(data['fixes'])} 件修正")
