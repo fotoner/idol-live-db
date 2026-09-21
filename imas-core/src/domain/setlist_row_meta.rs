@@ -124,8 +124,9 @@ pub fn setlist_row_meta(
     attended_show_ids: &[String],
     attended_event_ids: &[String],
 ) -> SetlistRowMetaBundle {
-    let empty_bundle = SetlistRowMetaBundle { rows: vec![], collection: None };
-    let Some(&show) = snap.show_index_by_id.get(show_id) else { return empty_bundle };
+    let Some(&show) = snap.show_index_by_id.get(show_id) else {
+        return SetlistRowMetaBundle { rows: Vec::new(), collection: None };
+    };
     let is_character_live =
         detail::is_character_live(snap.shows[show as usize].performer_type.as_deref());
     let cast_ids = detail::show_cast_idol_ids(snap, show_id);
@@ -187,7 +188,7 @@ pub fn setlist_row_meta(
                 // 参加記録を 1 件も付けていない人に「未回収」を並べても情報にならない。
                 Vec::new()
             };
-            collection_rows.push((song.id.clone(), mine.clone()));
+            collection_rows.push((song.id.clone(), mine));
 
             SetlistRowMetaRecord {
                 item_id: row.id.clone(),
@@ -413,7 +414,7 @@ mod tests {
             .enumerate()
             .find(|(i, _)| {
                 snap.setlist_items_by_show[*i].len() >= 10
-                    && crate::domain::collection_gap::is_real_live(snap, *i as u32)
+                    && is_real_live(snap, *i as u32)
             })
             .map(|(_, s)| s.id.clone())
             .expect("10 曲以上のリアルライブがある");
@@ -450,7 +451,7 @@ mod tests {
         let snap = snap();
         // 開く公演と、参加した扱いにする公演を選ぶ。**曲が 1 曲以上重なる 2 公演**にする
         // (重なりが無いと「別公演で回収済みなら札が付かない」を確かめられない)。
-        let real_live = |i: usize| crate::domain::collection_gap::is_real_live(snap, i as u32);
+        let real_live = |i: usize| is_real_live(snap, i as u32);
         let songs_of = |i: usize| -> HashSet<u32> {
             snap.setlist_items_by_show[i]
                 .iter()
@@ -523,7 +524,7 @@ mod tests {
         let snap = snap();
         let target = snap.shows.iter().enumerate().find(|(i, _)| {
             !snap.setlist_items_by_show[*i].is_empty()
-                && !crate::domain::collection_gap::is_real_live(snap, *i as u32)
+                && !is_real_live(snap, *i as u32)
         });
         let Some((_, show)) = target else { return };
         let bundle = setlist_row_meta(
@@ -552,7 +553,7 @@ mod tests {
             .enumerate()
             .find(|(i, _)| {
                 !snap.setlist_items_by_show[*i].is_empty()
-                    && crate::domain::collection_gap::is_real_live(snap, *i as u32)
+                    && is_real_live(snap, *i as u32)
             })
             .map(|(_, s)| s.id.clone())
             .expect("セトリのあるリアルライブがある");

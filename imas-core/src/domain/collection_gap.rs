@@ -83,8 +83,9 @@ pub fn collection_attended_show_ids(
     marks
         .into_iter()
         .filter(|m| {
-            kept.is_empty()
-                || kept.iter().any(|k| k == m.attendance_type.as_deref().unwrap_or(LOCAL_ATTENDANCE))
+            // 形態を持たない古いマークは現地参加として扱う。
+            let attendance = m.attendance_type.as_deref().unwrap_or(LOCAL_ATTENDANCE);
+            kept.is_empty() || kept.iter().any(|k| k == attendance)
         })
         .map(|m| m.entity_id)
         .collect()

@@ -389,30 +389,7 @@ struct SetlistView: View {
                 }
             }
 
-            // 自分の回収の要約。セトリの真上に置いて、この下の並びの読み方を先に言う。
-            if let summary = collectionSummary, !setlist.isEmpty,
-               !(isFutureShow && contentTab == 1) {
-                Section {
-                    HStack(spacing: DS.sp2) {
-                        Image(systemName: summary.attended ? "checkmark.seal.fill" : "circle.dashed")
-                            .font(.imasCaption)
-                            .foregroundStyle(summary.attended ? DS.success : DS.ink3)
-                        Text(summary.label)
-                            .font(.imasCaption.weight(.semibold))
-                            .foregroundStyle(summary.attended ? DS.ink : DS.ink2)
-                        Spacer(minLength: 0)
-                    }
-                    .padding(.horizontal, DS.sp3)
-                    .padding(.vertical, DS.sp2)
-                    .background(
-                        summary.attended ? AnyShapeStyle(DS.success.opacity(0.10)) : AnyShapeStyle(DS.fill),
-                        in: Capsule()
-                    )
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 0, trailing: 16))
-                    .listRowSeparator(.hidden)
-                }
-            }
+            collectionSummarySection
 
             // 実セトリ: 両方ありで予想タブ選択中は隠す。それ以外は表示。
             ForEach((isFutureShow && !setlist.isEmpty && contentTab == 1) ? [] : sections) { section in
@@ -580,6 +557,37 @@ struct SetlistView: View {
         attendanceVersion &+= 1
     }
 
+    /// 自分の回収の要約。セトリの真上に置いて、この下の並びの読み方を先に言う。
+    ///
+    /// **文言も出す/出さないも imas-core が決める** (`collectionSummary` が nil なら
+    /// 何も出さない)。ここが持つのは「参加した公演は緑」という見た目だけ。
+    @ViewBuilder
+    private var collectionSummarySection: some View {
+        if let summary = collectionSummary, !setlist.isEmpty,
+           !(isFutureShow && contentTab == 1) {
+            Section {
+                HStack(spacing: DS.sp2) {
+                    Image(systemName: summary.attended ? "checkmark.seal.fill" : "circle.dashed")
+                        .font(.imasCaption)
+                        .foregroundStyle(summary.attended ? DS.success : DS.ink3)
+                    Text(summary.label)
+                        .font(.imasCaption.weight(.semibold))
+                        .foregroundStyle(summary.attended ? DS.ink : DS.ink2)
+                    Spacer(minLength: 0)
+                }
+                .padding(.horizontal, DS.sp3)
+                .padding(.vertical, DS.sp2)
+                .background(
+                    summary.attended ? AnyShapeStyle(DS.success.opacity(0.10)) : AnyShapeStyle(DS.fill),
+                    in: Capsule()
+                )
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 0, trailing: 16))
+                .listRowSeparator(.hidden)
+            }
+        }
+    }
+
     /// 衣装 1 着ぶんの行。
     ///
     /// **文言はコアが組んだものをそのまま出す。** 「1・5 曲目」「公演のどこか」も
@@ -661,9 +669,9 @@ struct SetlistView: View {
         }
     }
 
-    /// 行の添え物と回収の要約を読み直す。**歌唱者の表示名の設定・表示モード・
-    /// 参加記録で答えが変わる**ので、その 3 つを鍵にした `.task(id:)` から呼ぶ
-    /// (画面を開き直さなくても追従する)。
+    /// 行の添え物と回収の要約を読み直す。**歌唱者の表示名の設定・表示モード・参加記録・
+    /// 「配信も回収に含める」設定で答えが変わる**ので、それらを鍵にした `.task(id:)` から
+    /// 呼ぶ (画面を開き直さなくても追従する)。
     private func loadRowMeta() async {
         let bundle = try? await AppContainer.shared.showReading.setlistRowMeta(
             showId: show.id, nameMode: performerName, displayMode: displayMode

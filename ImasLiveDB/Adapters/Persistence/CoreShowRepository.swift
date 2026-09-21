@@ -86,20 +86,7 @@ struct CoreShowRepository: ShowReading {
         nameMode: PerformerNameMode,
         displayMode: SetlistDisplayMode
     ) async throws -> SetlistRowMetaBundle {
-        // 参加マーク (user_marks) はスナップショットに無いので、ここで解決して渡す。
-        // 何を回収と数えるかの規則は core (`CollectionAttendance` 参照)。
-        // 読めなかったときは「参加記録なし」と同じ見え方になる (回収の表示が丸ごと消える)。
-        // 黙って消えると原因が分からないので、必ず残す。
-        var attendedShowIds: [String] = []
-        var attendedEventIds: [String] = []
-        do {
-            attendedShowIds = try await CollectionAttendance.showIds(database: database)
-            attendedEventIds = try await CollectionAttendance.eventIds(database: database)
-        } catch {
-            Logger.database.error(
-                "attendance_marks_failed setlistRowMeta: \(error.localizedDescription)"
-            )
-        }
+        let attended = await attendedIds()
         return try await snapshot.withStore(
             fallbackTo: {
                 try await fallback.setlistRowMeta(
@@ -111,9 +98,28 @@ struct CoreShowRepository: ShowReading {
                 showId: showId,
                 mode: nameMode,
                 displayMode: displayMode,
-                attendedShowIds: attendedShowIds,
-                attendedEventIds: attendedEventIds
+                attendedShowIds: attended.shows,
+                attendedEventIds: attended.events
             )
+        }
+    }
+
+    /// 参加マーク (user_marks) はスナップショットに無いので、ここで解決して渡す。
+    /// 何を回収と数えるかの規則は core (`CollectionAttendance` 参照)。
+    ///
+    /// 読めなかったときは「参加記録なし」と同じ見え方になる (回収の表示が丸ごと消える)。
+    /// 黙って消えると原因が分からないので、必ず log を残す。
+    private func attendedIds() async -> (shows: [String], events: [String]) {
+        do {
+            return (
+                shows: try await CollectionAttendance.showIds(database: database),
+                events: try await CollectionAttendance.eventIds(database: database)
+            )
+        } catch {
+            Logger.database.error(
+                "attendance_marks_failed setlistRowMeta: \(error.localizedDescription)"
+            )
+            return ([], [])
         }
     }
 

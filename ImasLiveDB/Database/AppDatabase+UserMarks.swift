@@ -234,16 +234,10 @@ extension AppDatabase {
             JOIN events e ON e.id = sh.event_id
             WHERE e.kind IN (\(Self.realLiveKinds))
             AND (
-                si.show_id IN (
-                    SELECT entity_id FROM user_marks
-                    WHERE entity_type='show' AND kind='attended' AND bool_value=1
-                      AND \(attendedTypeCondition)
-                ) OR si.show_id IN (
-                    SELECT id FROM shows WHERE event_id IN (
-                        SELECT entity_id FROM user_marks
-                        WHERE entity_type='event' AND kind='attended' AND bool_value=1
-                          AND \(attendedTypeCondition)
-                    )
+                si.show_id IN (\(Self.attendedIdsSubquery(.show, attendedTypeCondition)))
+                OR si.show_id IN (
+                    SELECT id FROM shows
+                    WHERE event_id IN (\(Self.attendedIdsSubquery(.event, attendedTypeCondition)))
                 )
             )
             GROUP BY si.song_id
@@ -277,6 +271,22 @@ extension AppDatabase {
         return "(text_value IS NULL OR text_value IN (\(Self.sqlList(types))))"
     }
 
+    /// 参加マークの entity_id を引く副問い合わせ。**回収を数える SQL はここを通す。**
+    ///
+    /// 参加形態の条件 (現地のみ / 配信も) を掛け忘れると「配信で見た」と記録した公演が
+    /// 既定でも回収に数えられる。実際イベント側のマークで掛け忘れていたので、
+    /// 条件ごとこの 1 箇所に畳んで、書き写しで落ちないようにする。
+    private static func attendedIdsSubquery(
+        _ entity: UserMarkEntity,
+        _ attendedTypeCondition: String
+    ) -> String {
+        """
+        SELECT entity_id FROM user_marks
+        WHERE entity_type='\(entity.rawValue)' AND kind='attended' AND bool_value=1
+          AND \(attendedTypeCondition)
+        """
+    }
+
     /// 文字列の並びを SQL のリテラル並びにする (値は core 由来の固定語だが、素通しにしない)。
     private static func sqlList(_ values: [String]) -> String {
         values
@@ -305,16 +315,8 @@ extension AppDatabase {
             JOIN events e ON e.id = sh.event_id
             WHERE e.kind IN (\(Self.realLiveKinds))
             AND (
-                sh.id IN (
-                    SELECT entity_id FROM user_marks
-                    WHERE entity_type='show' AND kind='attended' AND bool_value=1
-                      AND \(attendedTypeCondition)
-                )
-                OR sh.event_id IN (
-                    SELECT entity_id FROM user_marks
-                    WHERE entity_type='event' AND kind='attended' AND bool_value=1
-                      AND \(attendedTypeCondition)
-                )
+                sh.id IN (\(Self.attendedIdsSubquery(.show, attendedTypeCondition)))
+                OR sh.event_id IN (\(Self.attendedIdsSubquery(.event, attendedTypeCondition)))
             )
             """
         let rows = try Row.fetchAll(db, sql: sql)
@@ -347,16 +349,8 @@ extension AppDatabase {
             WHERE si.song_id = ?
             AND e.kind IN (\(Self.realLiveKinds))
             AND (
-                sh.id IN (
-                    SELECT entity_id FROM user_marks
-                    WHERE entity_type='show' AND kind='attended' AND bool_value=1
-                      AND \(attendedTypeCondition)
-                )
-                OR sh.event_id IN (
-                    SELECT entity_id FROM user_marks
-                    WHERE entity_type='event' AND kind='attended' AND bool_value=1
-                      AND \(attendedTypeCondition)
-                )
+                sh.id IN (\(Self.attendedIdsSubquery(.show, attendedTypeCondition)))
+                OR sh.event_id IN (\(Self.attendedIdsSubquery(.event, attendedTypeCondition)))
             )
             ORDER BY sh.date DESC
             """

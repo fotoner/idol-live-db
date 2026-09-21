@@ -22,20 +22,24 @@ enum CollectionAttendance {
 
     /// 回収に数える参加 show id (参加形態の条件を適用済み)。
     static func showIds(database: AppDatabase) async throws -> [String] {
-        collectionAttendedShows(
-            marks: try await marks(entity: .show, database: database),
-            includeStream: includeStream
-        )
+        try await collectionIds(entity: .show, database: database)
     }
 
     /// 回収に数えるイベント単位の参加マーク。配下の公演への展開は core がやる。
-    ///
-    /// **show マークと同じ条件を掛ける。** イベントの参加マークも `text_value` に
-    /// 参加形態を持つ (`attendedEventTypeSets` がそれを読んでいる) ので、素通しにすると
-    /// 「配信で見た」と記録したイベントが既定「現地のみ」でも回収に数えられる。
     static func eventIds(database: AppDatabase) async throws -> [String] {
+        try await collectionIds(entity: .event, database: database)
+    }
+
+    /// 参加マーク → 回収に数える id 列。**show とイベントで同じ条件を通す。**
+    /// イベントの参加マークも `text_value` に参加形態を持つ
+    /// (`attendedEventTypeSets` がそれを読んでいる) ので、素通しにすると
+    /// 「配信で見た」と記録したイベントが既定「現地のみ」でも回収に数えられる。
+    private static func collectionIds(
+        entity: UserMarkEntity,
+        database: AppDatabase
+    ) async throws -> [String] {
         collectionAttendedShows(
-            marks: try await marks(entity: .event, database: database),
+            marks: try await marks(entity: entity, database: database),
             includeStream: includeStream
         )
     }

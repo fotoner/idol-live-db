@@ -200,6 +200,9 @@ pub struct CollectionBadgeRecord {
     pub role: CollectionBadgeRole,
 }
 
+/// まだ一度も回収していない曲の札。
+pub const UNCOLLECTED_BADGE: &str = "未回収";
+
 /// セトリ 1 行に添える**自分の回収**の札。詳細表示以外では必ず空。
 ///
 /// - 参加した公演の行 … `初回収` / `回収 3 回目 (2 年ぶり)` を 1 つ
@@ -225,26 +228,22 @@ pub fn setlist_collection_badges(
     if !mode.shows_collection_history() || !is_real_live {
         return Vec::new();
     }
-    if attended {
-        return collected_label
-            .map(|text| CollectionBadgeRecord {
-                text: text.to_string(),
-                role: CollectionBadgeRole::Collected,
-            })
-            .into_iter()
-            .collect();
-    }
-    if collected_count == 0 {
-        return vec![CollectionBadgeRecord {
+    // 出るとしても多くても 1 つ (Vec なのは各 OS が並べるだけにするための形)。
+    let badge = if attended {
+        collected_label.map(|text| CollectionBadgeRecord {
+            text: text.to_string(),
+            role: CollectionBadgeRole::Collected,
+        })
+    } else if collected_count == 0 {
+        Some(CollectionBadgeRecord {
             text: UNCOLLECTED_BADGE.to_string(),
             role: CollectionBadgeRole::Uncollected,
-        }];
-    }
-    Vec::new()
+        })
+    } else {
+        None
+    };
+    badge.into_iter().collect()
 }
-
-/// まだ一度も回収していない曲の札。
-pub const UNCOLLECTED_BADGE: &str = "未回収";
 
 #[cfg(test)]
 mod setlist_collection_badge_tests {
