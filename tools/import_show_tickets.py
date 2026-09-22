@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import re
 import sqlite3
 import sys
@@ -89,8 +90,14 @@ def load(paths: list[Path], known_shows: set[str]) -> tuple[list[tuple], list[st
             order[(show_id, kind)] = seq
 
             note_full = note if not source else (f"{note} / 出典: {source}" if note else f"出典: {source}")
+            # id は (公演, 形態, 券種名) で決まる。券種名の畳み方 (slug) だけだと
+            # 「全席指定」と「全席指定 一般チケット」が同じ id になって、
+            # **片方が黙って消える** (実際に 1112 行が 988 行に減った)。
+            # 名前のハッシュを足して一意にする。並べ替えても id が動かないよう、
+            # 順番ではなくハッシュを使う。
+            digest = hashlib.sha1(name.encode("utf-8")).hexdigest()[:6]
             rows.append((
-                f"tkt_{show_id}_{kind}_{slug(name)}"[:120],
+                f"tkt_{show_id}_{kind}_{slug(name)}"[:110] + f"_{digest}",
                 show_id, kind, name, int(price_s), int(estimate_s), note_full, seq,
             ))
     return rows, errors
