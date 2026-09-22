@@ -12,6 +12,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import uniffi.imas_core.ExpenseEntry
+import uniffi.imas_core.LedgerFilter
+import uniffi.imas_core.LedgerLinkage
+import uniffi.imas_core.LedgerPeriod
+import uniffi.imas_core.buildLedgerSummary
+import uniffi.imas_core.formatYen
 
 /** 「最近見た」チップ 1 件 (id を名前まで解決したもの)。 */
 data class RecentChip(val kind: RecentKind, val entityId: String, val name: String)
@@ -39,6 +45,8 @@ data class ProduceUiState(
     val contributionCount: Int = 0,
     val recents: List<RecentChip> = emptyList(),
     val featuredPoll: FeaturedPoll? = null,
+    /** 収支 (家計簿) の合計。金額の表記はコア (`formatYen`) 一本。 */
+    val ledgerTotalLabel: String = formatYen(0),
     val isLoading: Boolean = true
 ) {
     val attendedCount: Int get() = attendedEvents.size
@@ -69,6 +77,17 @@ class ProduceViewModel(app: Application) : AndroidViewModel(app) {
             val favoriteCount = marks.favoriteSongIds().size +
                 marks.favoriteIdolIds().size +
                 marks.favoriteEvents().size
+            // 合計はコアに出させる (画面で足し算しない)。
+            val expenses = module.expenseRepository.getAll().map {
+                ExpenseEntry(
+                    id = it.id, date = it.date, category = it.categoryValue, amount = it.amount,
+                    showId = it.showId, eventId = it.eventId, showLabel = null, note = it.note
+                )
+            }
+            val ledgerTotal = buildLedgerSummary(
+                expenses, LedgerPeriod.ALL,
+                LedgerFilter(year = "", categories = emptyList(), linkage = LedgerLinkage.ALL, eventId = "")
+            ).total
             _uiState.value = _uiState.value.copy(
                 pickedIdols = marks.pickedIdols(),
                 favoriteIdols = marks.favoriteIdols(),
@@ -80,6 +99,7 @@ class ProduceViewModel(app: Application) : AndroidViewModel(app) {
                 voteCount = module.localPollVoteLog.allEntries().size,
                 contributionCount = module.localContributionLog.total,
                 recents = resolveRecents(),
+                ledgerTotalLabel = formatYen(ledgerTotal),
                 isLoading = false
             )
         }

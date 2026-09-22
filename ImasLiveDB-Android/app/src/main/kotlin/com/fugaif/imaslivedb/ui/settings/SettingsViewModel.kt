@@ -93,14 +93,15 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
     /** バックアップをファイルエクスポート/引き継ぎコード発行用の envelope JSON 文字列にまとめる。 */
     suspend fun exportBackupJson(): String =
         BackupExportImportService.buildEnvelopeJson(
-            getApplication(), module.userMarkRepository, module.localPollVoteLog, module.personalTagRepository
+            getApplication(), module.userMarkRepository, module.localPollVoteLog,
+            module.personalTagRepository, module.expenseRepository
         )
 
     /** ファイル/引き継ぎコードから取得した envelope JSON を非破壊マージで取り込む。 */
     suspend fun importBackup(json: String, restoreDeviceId: Boolean): BackupImportResult =
         BackupExportImportService.importEnvelopeJson(
             getApplication(), json, module.userMarkRepository, module.localPollVoteLog,
-            module.personalTagRepository, restoreDeviceId
+            module.personalTagRepository, module.expenseRepository, restoreDeviceId
         )
 
     /** 現在のバックアップを envelope 化してサーバーに送り、引き継ぎコードを発行する。 */

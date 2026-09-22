@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.ListAlt
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material.icons.filled.Favorite
@@ -92,6 +93,7 @@ fun ProduceScreen(
     onNavigateToAttendedEvents: () -> Unit,
     onNavigateToCollectedSongs: () -> Unit,
     onNavigateToMastery: () -> Unit,
+    onNavigateToLedger: () -> Unit,
     onNavigateToTimeline: (String?) -> Unit,
     onNavigateToMyContributions: () -> Unit,
     onNavigateToMyVotes: () -> Unit,
@@ -173,6 +175,9 @@ fun ProduceScreen(
             HubRow(Icons.Filled.MusicNote, "回収した楽曲", "現地で聴けた曲だけの一覧", DS.ink2, state.collectedCount, onNavigateToCollectedSongs)
             HorizontalDivider(color = DS.sep)
             HubRow(Icons.Filled.BarChart, "習熟度", "どこまで覚えたかをシリーズ・ユニット別に", DS.ink2, state.masteryCount, onNavigateToMastery)
+            HorizontalDivider(color = DS.sep)
+            // 件数ではなく金額を出す — 「いくら使ったか」は件数では読めない。
+            HubRow(Icons.Filled.AttachMoney, "収支", "使った額 ${state.ledgerTotalLabel}", DS.ink2, null, onNavigateToLedger)
             HorizontalDivider(color = DS.sep)
             // 年表は担当アイドルのブランドから開く (見たい歴史はたいてい担当の歴史)。
             // 担当がいなければブランド指定なしで開き、年表側が先頭ブランドを選ぶ。

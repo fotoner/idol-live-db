@@ -4,10 +4,13 @@ import android.content.Context
 import android.content.pm.PackageManager
 import com.fugaif.imaslivedb.data.community.DeviceIdentity
 import com.fugaif.imaslivedb.data.community.LocalPollVoteLog
+import com.fugaif.imaslivedb.data.model.Expense
 import com.fugaif.imaslivedb.data.model.PersonalTag
 import com.fugaif.imaslivedb.data.model.UserMark
+import com.fugaif.imaslivedb.data.repository.ExpenseRepository
 import com.fugaif.imaslivedb.data.repository.PersonalTagRepository
 import com.fugaif.imaslivedb.data.repository.UserMarkRepository
+import uniffi.imas_core.BackupExpenseRecord
 import uniffi.imas_core.BackupExportInput
 import uniffi.imas_core.BackupImportException
 import uniffi.imas_core.BackupKindDialect
@@ -29,6 +32,7 @@ data class BackupImportResult(
     val addedMarks: Int,
     val addedVotes: Int,
     val addedPersonalTags: Int,
+    val addedExpenses: Int,
     val deviceIdRestored: Boolean,
     val skippedMarks: Int
 )
@@ -56,7 +60,8 @@ object BackupExportImportService {
         context: Context,
         userMarkRepository: UserMarkRepository,
         pollVoteLog: LocalPollVoteLog,
-        personalTagRepository: PersonalTagRepository
+        personalTagRepository: PersonalTagRepository,
+        expenseRepository: ExpenseRepository
     ): String {
         val input = BackupExportInput(
             // OS 時刻・端末 ID・アプリ版はコアが取らない規約なのでここで渡す。
@@ -73,6 +78,10 @@ object BackupExportImportService {
             },
             personalTags = personalTagRepository.getAll().map {
                 BackupPersonalTagRecord(it.entityType, it.entityId, it.tagName, it.createdAt)
+            },
+            // 収支も端末にしか無いデータなので、機種変で置いていかない。
+            expenses = expenseRepository.getAll().map {
+                BackupExpenseRecord(it.id, it.date, it.category, it.amount, it.showId, it.eventId, it.note, it.updatedAt)
             }
         )
         return buildBackupEnvelope(input, BackupKindDialect.ANDROID).envelopeJson
@@ -84,6 +93,7 @@ object BackupExportImportService {
         userMarkRepository: UserMarkRepository,
         pollVoteLog: LocalPollVoteLog,
         personalTagRepository: PersonalTagRepository,
+        expenseRepository: ExpenseRepository,
         restoreDeviceId: Boolean
     ): BackupImportResult {
         val local = BackupLocalState(
@@ -95,7 +105,9 @@ object BackupExportImportService {
             },
             pollVotes = pollVoteLog.allEntries().map { (pollId, entityIds) ->
                 BackupPollVoteRecord(pollId, entityIds.toList())
-            }
+            },
+            // 収支は id (UUID) で重複を見る。同じ id を 2 回入れると帳簿の額が倍になる。
+            expenseIds = expenseRepository.allIds()
         )
 
         val plan = try {
@@ -119,14 +131,21 @@ object BackupExportImportService {
                 PersonalTag(it.entityType, it.entityId, it.tagName, it.createdAt)
             }
         )
+        val addedExpenses = expenseRepository.restoreIfAbsent(
+            plan.expensesToInsert.map {
+                Expense(it.id, it.date, it.category, it.amount, it.showId, it.eventId, it.note, it.updatedAt)
+            }
+        )
         if (plan.restoreDeviceId) DeviceIdentity.restore(context, plan.info.deviceId)
 
         return BackupImportResult(
             addedMarks = plan.addedMarks.toInt(),
             addedVotes = plan.addedVotes.toInt(),
             addedPersonalTags = plan.addedPersonalTags.toInt(),
+            // 件数は書き込み側の戻り値を正とする (「入っていないのに入ったと言う」事故が起きない)。
+            addedExpenses = addedExpenses,
             deviceIdRestored = plan.restoreDeviceId,
-            // コアは marks 以外 (投票・マイタグ) の壊れた要素も数える。旧実装は marks だけ
+            // コアは marks 以外 (投票・マイタグ・収支) の壊れた要素も数える。旧実装は marks だけ
             // 数えていたので、壊れたファイルでの表示件数がその分だけ増えることがある。
             skippedMarks = plan.info.skippedEntries.toInt()
         )

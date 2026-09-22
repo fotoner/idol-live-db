@@ -991,6 +991,7 @@ private fun BackupSection(viewModel: SettingsViewModel) {
                     Text("追加されたマーク: ${r.addedMarks}件")
                     Text("追加された投票履歴: ${r.addedVotes}件")
                     Text("追加されたマイタグ: ${r.addedPersonalTags}件")
+                    Text("追加された収支: ${r.addedExpenses}件")
                     if (r.skippedMarks > 0) Text("一部のデータの形式が読み取れず、${r.skippedMarks}件をスキップしました")
                     if (r.deviceIdRestored) Text("端末IDを引き継ぎました")
                 }
