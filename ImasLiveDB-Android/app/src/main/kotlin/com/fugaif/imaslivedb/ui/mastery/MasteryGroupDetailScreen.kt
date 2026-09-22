@@ -26,6 +26,7 @@ import com.fugaif.imaslivedb.ui.components.*
 import com.fugaif.imaslivedb.ui.theme.*
 import uniffi.imas_core.MasteryBulkScope
 import uniffi.imas_core.MasteryGroup
+import uniffi.imas_core.nextMasteryLevel
 
 /**
  * 群の中の曲一覧。**段階を変えるのはここ**。iOS `MasteryGroupDetailView` の移植。
@@ -132,7 +133,11 @@ fun MasteryGroupDetailScreen(
                 val song = shown[index]
                 SongMasteryRow(song, levelOf(song), scale, song.id in collectedIds,
                                onClick = { onOpenSong(song.id) },
-                               onLongClick = { editing = song })
+                               onLongClick = { editing = song },
+                               onCycle = {
+                                   onSetLevel(song.id,
+                                              nextMasteryLevel(levelOf(song), scale.steps))
+                               })
                 if (index < shown.size - 1) {
                     HorizontalDivider(Modifier.padding(start = 70.dp), color = DS.sep)
                 }
@@ -154,16 +159,18 @@ fun MasteryGroupDetailScreen(
 }
 
 /**
- * 曲 1 行。段階は**長押しでピッカー**。
+ * 曲 1 行。的を 2 つに分ける: 行は曲の詳細へ、**末尾の段階チップは押すたびに 1 段上がる**。
  *
- * iOS は行を左スワイプして swipe actions を出すが、Android の一覧に同じ手つきは無い
- * (`SwipeToDismissBox` は消す操作の合図になる)。ここは長押しに置き換える。
+ * ピッカーだけだと、続けて付けていく作業が 1 曲ごとに (長押し→待つ→選ぶ→閉じる) で止まる。
+ * 上げるのが一番多い操作なので 1 タップに置き、下げる/特定の段へ飛ぶのは長押しに残した。
+ * iOS の行スワイプに当たる手つきは Android の一覧に無いので
+ * (`SwipeToDismissBox` は消す操作の合図になる)、そこは長押しが受け持つ。
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SongMasteryRow(
     song: Song, level: UByte, scale: MasteryScale, collected: Boolean,
-    onClick: () -> Unit, onLongClick: () -> Unit,
+    onClick: () -> Unit, onLongClick: () -> Unit, onCycle: () -> Unit,
 ) {
     Row(
         Modifier.fillMaxWidth().background(DS.surface)
@@ -182,7 +189,13 @@ private fun SongMasteryRow(
             // 現地で聴いた曲。既存の一覧と同じ ✓ の意味で揃える。
             Icon(Icons.Filled.Check, "現地で聴いた", tint = DS.success, modifier = Modifier.size(14.dp))
         }
-        MasteryChip(level, scale, showsUnset = true)
+        // チップだけを別の的にする。最上段では上がらない (連打で記録が飛ばないのはコアの規則)。
+        Box(
+            Modifier.combinedClickable(onClick = onCycle, onLongClick = onLongClick)
+                .padding(start = 4.dp, top = 6.dp, bottom = 6.dp, end = 0.dp)
+        ) {
+            MasteryChip(level, scale, showsUnset = true)
+        }
     }
 }
 

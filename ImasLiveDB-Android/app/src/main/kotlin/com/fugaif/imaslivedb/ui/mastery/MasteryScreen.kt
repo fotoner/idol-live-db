@@ -1,7 +1,9 @@
 package com.fugaif.imaslivedb.ui.mastery
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.ui.components.*
 import com.fugaif.imaslivedb.ui.theme.*
 import uniffi.imas_core.MasteryAxis
+import uniffi.imas_core.MasteryBulkScope
 import uniffi.imas_core.MasteryGroup
 import uniffi.imas_core.MasteryGroupSort
 import uniffi.imas_core.MasteryProgressFilter
@@ -66,6 +69,8 @@ fun MasteryScreen(
     val state by viewModel.uiState.collectAsState()
     val detail by viewModel.detail.collectAsState()
     var showFilter by remember { mutableStateOf(false) }
+    // 長押しされた群 (null = シートを出さない)。まだ付けていない曲だけをまとめて付ける。
+    var bulkTarget by remember { mutableStateOf<MasteryGroup?>(null) }
 
     // 群の詳細はナビを増やさず画面内で差し替える (StatsScreen と同じ流儀)。
     detail?.let { d ->
@@ -102,7 +107,9 @@ fun MasteryScreen(
                 item { SummarySection(state) }
                 item { GroupHeader(state, viewModel) }
                 itemsIndexed(state.groups) { index, group ->
-                    GroupRow(group, state) { viewModel.openGroup(group) }
+                    GroupRow(group, state,
+                             onClick = { viewModel.openGroup(group) },
+                             onLongClick = { bulkTarget = group })
                     if (index < state.groups.size - 1) {
                         HorizontalDivider(Modifier.padding(start = 16.dp), color = DS.sep)
                     }
@@ -118,8 +125,54 @@ fun MasteryScreen(
         }
     }
 
+    bulkTarget?.let { group ->
+        UnsetBulkSheet(group, state.scale,
+                       onPick = { level ->
+                           viewModel.applyBulk(group, MasteryBulkScope.UNSET_ONLY, level)
+                           bulkTarget = null
+                       },
+                       onDismiss = { bulkTarget = null })
+    }
+
     if (showFilter) {
         MasteryFilterSheet(state, viewModel) { showFilter = false }
+    }
+}
+
+/**
+ * 群の長押しで出す一括更新。**未設定の曲だけ**を対象にする。
+ *
+ * 既に付いている記録に触らない操作だけを置いているので、誤って押しても失うものがない。
+ * 段を塗り替える/未設定に戻すのは、直前の 1 回を戻せる群の詳細に残す。
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun UnsetBulkSheet(group: MasteryGroup, scale: MasteryScale,
+                           onPick: (UByte) -> Unit, onDismiss: () -> Unit) {
+    val unset = group.levels.count { it.toInt() == 0 }
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = DS.bg) {
+        Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
+            Text(group.label, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink, maxLines = 2)
+            Spacer(Modifier.height(12.dp))
+            if (unset == 0) {
+                Text("全部に段階が付いています", fontSize = 13.sp, color = DS.ink2)
+            } else {
+                Text("未設定の $unset 曲だけ", fontSize = 12.sp, color = DS.ink2)
+                Spacer(Modifier.height(6.dp))
+                for (i in scale.steps.toInt() downTo 1) {
+                    val level = i.toUByte()
+                    Row(
+                        Modifier.fillMaxWidth().clickable { onPick(level) }.padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Box(Modifier.size(14.dp).clip(RoundedCornerShape(4.dp))
+                                .background(MasteryPalette.fill(level, scale.steps)))
+                        Text(scale.label(level), fontSize = 15.sp, color = DS.ink)
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -190,10 +243,18 @@ private fun GroupHeader(state: MasteryUiState, vm: MasteryViewModel) {
     }
 }
 
+/**
+ * 群 1 行。タップで中の曲一覧へ、**長押しでまだ付けていない曲だけをまとめて**付けられる。
+ *
+ * 「このシリーズは一通り聞いた」を一覧から 2 手で終わらせるための口。
+ */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun GroupRow(g: MasteryGroup, state: MasteryUiState, onClick: () -> Unit) {
+private fun GroupRow(g: MasteryGroup, state: MasteryUiState,
+                     onClick: () -> Unit, onLongClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().background(DS.surface).clickable(onClick = onClick)
+        Modifier.fillMaxWidth().background(DS.surface)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
             .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
