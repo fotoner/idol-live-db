@@ -11,6 +11,7 @@ func backupImportSummary(
     addedMarks: Int,
     addedVotes: Int,
     addedPersonalTags: Int,
+    addedExpenses: Int,
     skippedMarks: Int,
     deviceIdRestored: Bool
 ) -> String {
@@ -18,6 +19,7 @@ func backupImportSummary(
         addedMarks: Int64(addedMarks),
         addedVotes: Int64(addedVotes),
         addedPersonalTags: Int64(addedPersonalTags),
+        addedExpenses: Int64(addedExpenses),
         skippedMarks: Int64(skippedMarks),
         deviceIdRestored: deviceIdRestored
     )

@@ -485,6 +485,10 @@ struct ImasStatTile: View {
             }
             HStack(alignment: .firstTextBaseline, spacing: 3) {
                 Text(value).font(.imasDisplay(26, weight: .bold)).foregroundStyle(DS.ink)
+                    // 金額のように桁が伸びる値でも**折り返さない**。2 行になると
+                    // タイルの高さが揃わず、グリッドが階段状に崩れる。
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
                 if let unit { Text(unit).font(.imasFootnote).foregroundStyle(DS.ink3) }
             }
             Text(label).font(.imasScaled( 12.5, weight: .medium)).foregroundStyle(DS.ink2)
@@ -535,6 +539,8 @@ struct ImasStatBar: View {
     let percent: Double
     var seed: String? = nil
     var brand: String? = nil
+    /// 右端の値の幅。金額のように桁が伸びる値は広げる (既定の 44pt だと折り返す)。
+    var valueWidth: CGFloat = 44
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
@@ -553,7 +559,10 @@ struct ImasStatBar: View {
             }
             .frame(height: 8)
             Text(value).font(.imasDisplay(13, weight: .semibold)).foregroundStyle(DS.ink2)
-                .frame(width: 44, alignment: .trailing)
+                // 値は**折り返さない**。2 行になると帯と高さが合わず、行が飛び飛びに見える。
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .frame(width: valueWidth, alignment: .trailing)
         }
         .padding(.vertical, 8)
     }

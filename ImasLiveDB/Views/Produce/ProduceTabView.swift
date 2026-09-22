@@ -23,6 +23,8 @@ struct ProduceTabView: View {
     @State private var collectedCount: Int = 0
     /// 習熟度を 1 段でも付けた曲数 (タイルの数字)。集計は core、ここは件数だけ。
     private var masteryCount: Int { userMarks.masteryCounts().reduce(0, +) }
+    /// 収支の合計。タイルには金額を出す — 件数では「いくら使ったか」が読めない。
+    @State private var ledgerTotal: Int64 = 0
     @State private var collectedSongIds: [String] = []
     // ローカル履歴 (投稿・投票) は @Observable で参照するだけでカウントが見える。
     @State private var voteLog = LocalPollVoteLog.shared
@@ -226,13 +228,16 @@ struct ProduceTabView: View {
                 statTileLink(route: .mastery) {
                     ImasStatTile(systemImage: "chart.bar.fill", value: numberString(masteryCount), label: "習熟度", brand: pickBrandSeed, tappable: true)
                 }
+                statTileLink(route: .ledger) {
+                    ImasStatTile(systemImage: "yensign.circle.fill", value: formatYen(amount: ledgerTotal), label: "収支", brand: pickBrandSeed, tappable: true)
+                }
             }
         }
     }
 
     /// あなたの活動タイルの遷移先。値ベース push にして二重 push をスロットルで防ぐ。
     enum ActivityRoute: Hashable {
-        case attendedEvents, myPredictions, favorites, myVotes, myContributions, collectedSongs, mastery
+        case attendedEvents, myPredictions, favorites, myVotes, myContributions, collectedSongs, mastery, ledger
     }
 
     @ViewBuilder
@@ -245,6 +250,7 @@ struct ProduceTabView: View {
         case .myContributions: MyContributionsView()
         case .collectedSongs: songListDestination(ids: collectedSongIds, title: "回収した楽曲")
         case .mastery: MasteryView().environment(database)
+        case .ledger: LedgerView().environment(database)
         }
     }
 
@@ -514,6 +520,18 @@ struct ProduceTabView: View {
             let idolFav = try await mark.markedEntityIds(entity: .idol, kind: .favorite).count
             let eventFav = try await mark.markedEntityIds(entity: .event, kind: .favorite).count
             favoriteCount = songFav + idolFav + eventFav
+
+            // 合計はコアに出させる (画面で足し算しない)。
+            let expenses = try await database.allExpensesAsync().map {
+                ExpenseEntry(id: $0.id, date: $0.date, category: $0.categoryValue,
+                             amount: $0.amount, showId: $0.showId, eventId: $0.eventId,
+                             showLabel: nil, note: $0.note)
+            }
+            ledgerTotal = buildLedgerSummary(
+                entries: expenses,
+                period: .all,
+                filter: LedgerFilter(year: "", categories: [], linkage: .all, eventId: "")
+            ).total
         } catch {
             Logger.database.error("load_failed produce_local: \(error.localizedDescription)")
         }

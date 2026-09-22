@@ -1050,6 +1050,7 @@ struct MyPageView: View {
                 addedMarks: result.addedMarks,
                 addedVotes: result.addedVotes,
                 addedPersonalTags: result.addedPersonalTags,
+                addedExpenses: result.addedExpenses,
                 skippedMarks: result.skippedMarks,
                 deviceIdRestored: result.deviceIdRestored
             )

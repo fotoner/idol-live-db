@@ -48,6 +48,7 @@ struct BackupImportResult {
     var addedMarks: Int
     var addedVotes: Int
     var addedPersonalTags: Int
+    var addedExpenses: Int
     var deviceIdRestored: Bool
     var skippedMarks: Int
 }
@@ -97,6 +98,19 @@ enum BackupExportImportService {
                 createdAt: $0.createdAt
             )
         }
+        // 収支も端末にしか無いデータなので、機種変で置いていかない。
+        let expenses = try database.allExpenses().map {
+            BackupExpenseRecord(
+                id: $0.id,
+                date: $0.date,
+                category: $0.category,
+                amount: $0.amount,
+                showId: $0.showId,
+                eventId: $0.eventId,
+                note: $0.note,
+                updatedAt: $0.updatedAt
+            )
+        }
 
         // 時刻・アプリ版・端末 ID は OS からしか分からないので引数で渡す (共有コアは時刻を取らない)。
         let input = BackupExportInput(
@@ -106,7 +120,8 @@ enum BackupExportImportService {
             deviceId: DeviceIdentity.shared,
             userMarks: marks,
             pollVotes: votes,
-            personalTags: personalTags
+            personalTags: personalTags,
+            expenses: expenses
         )
         // iOS の kind 表記 (UserMarkKind.rawValue) がそのまま JSON の canonical 表記。
         return buildBackupEnvelope(input: input, dialect: .canonical).envelopeJson
@@ -169,7 +184,9 @@ enum BackupExportImportService {
             },
             pollVotes: LocalPollVoteLog.shared.allEntries().map {
                 BackupPollVoteRecord(pollId: $0.pollId, entityIds: $0.entityIds)
-            }
+            },
+            // 収支は id (UUID) で重複を見る。同じ id を 2 回入れると帳簿の額が倍になる。
+            expenseIds: try database.allExpenseIds()
         )
 
         let plan: BackupImportPlan
@@ -200,12 +217,25 @@ enum BackupExportImportService {
             )
         }
         let votes = plan.pollVotesToAdd.map { BackupPollVote(pollId: $0.pollId, entityIds: $0.entityIds) }
+        let expensesToInsert = plan.expensesToInsert.map {
+            Expense(
+                id: $0.id,
+                date: $0.date,
+                category: $0.category,
+                amount: $0.amount,
+                showId: $0.showId,
+                eventId: $0.eventId,
+                note: $0.note,
+                updatedAt: $0.updatedAt
+            )
+        }
 
         // 件数は書き込み側の戻り値を正とする (共有コアの計画件数と一致するが、
         // 実際に入った数を報告する方が「入っていないのに入ったと言う」事故が起きない)。
         let addedMarks = try database.restoreUserMarksIfAbsent(marks)
         let addedVotes = LocalPollVoteLog.shared.mergeIfAbsent(votes)
         let addedPersonalTags = try database.restorePersonalTagsIfAbsent(personalTags)
+        let addedExpenses = try database.restoreExpensesIfAbsent(expensesToInsert)
 
         if plan.restoreDeviceId {
             DeviceIdentity.restore(plan.info.deviceId)
@@ -219,6 +249,7 @@ enum BackupExportImportService {
             addedMarks: addedMarks,
             addedVotes: addedVotes,
             addedPersonalTags: addedPersonalTags,
+            addedExpenses: addedExpenses,
             deviceIdRestored: plan.restoreDeviceId,
             skippedMarks: Int(plan.info.skippedEntries)
         )

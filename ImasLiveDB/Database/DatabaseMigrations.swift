@@ -974,6 +974,27 @@ enum DatabaseMigrations {
             }
         }
 
+        // アイマス関連の収支 (家計簿)。**端末ローカル唯一データ**で、
+        // クラウドにもサーバにも無い (user_marks / personal_tags と同じ扱い)。
+        // 金額は円の整数。小数で持つと集計のたびに誤差が乗る。
+        // show_id が入っていればその公演の遠征費、NULL なら単独の支出 (課金・通販)。
+        // 費目は domain/ledger.rs の英字キー (ラベルを変えても記録が迷子にならない)。
+        migrator.registerMigration("v32_expenses") { db in
+            try db.create(table: "expenses", ifNotExists: true) { t in
+                t.column("id", .text).primaryKey()
+                t.column("date", .text).notNull()
+                t.column("category", .text).notNull()
+                t.column("amount", .integer).notNull()
+                t.column("show_id", .text)
+                t.column("event_id", .text)
+                t.column("note", .text)
+                t.column("updated_at", .text).notNull()
+            }
+            // 期間の集計と公演別の集計がそれぞれ全表走査にならないように。
+            try db.create(index: "idx_expenses_date", on: "expenses", columns: ["date"], ifNotExists: true)
+            try db.create(index: "idx_expenses_show", on: "expenses", columns: ["show_id"], ifNotExists: true)
+        }
+
         return migrator
     }
 }
