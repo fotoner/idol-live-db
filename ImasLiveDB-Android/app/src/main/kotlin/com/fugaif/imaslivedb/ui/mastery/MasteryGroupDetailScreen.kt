@@ -131,13 +131,21 @@ fun MasteryGroupDetailScreen(
 
             items(shown.size) { index ->
                 val song = shown[index]
-                SongMasteryRow(song, levelOf(song), scale, song.id in collectedIds,
-                               onClick = { onOpenSong(song.id) },
-                               onLongClick = { editing = song },
-                               onCycle = {
-                                   onSetLevel(song.id,
-                                              nextMasteryLevel(levelOf(song), scale.steps))
-                               })
+                val level = levelOf(song)
+                val next = nextMasteryLevel(level, scale.steps)
+                // 左スワイプは割り当てない。**端から引くと OS の「戻る」に取られる**ので
+                // (エミュで実測。画面ごと閉じてしまう)、逆向きは信用できない。
+                // 未設定に戻すのは長押しのピッカーが受け持つ。
+                MasterySwipeRow(
+                    onStart = { onSetLevel(song.id, next) },
+                    startLabel = scale.label(next),
+                    startColor = MasteryPalette.fill(next, scale.steps),
+                ) {
+                    SongMasteryRow(song, level, scale, song.id in collectedIds,
+                                   onClick = { onOpenSong(song.id) },
+                                   onLongClick = { editing = song },
+                                   onCycle = { onSetLevel(song.id, next) })
+                }
                 if (index < shown.size - 1) {
                     HorizontalDivider(Modifier.padding(start = 70.dp), color = DS.sep)
                 }

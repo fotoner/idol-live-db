@@ -107,9 +107,18 @@ fun MasteryScreen(
                 item { SummarySection(state) }
                 item { GroupHeader(state, viewModel) }
                 itemsIndexed(state.groups) { index, group ->
-                    GroupRow(group, state,
-                             onClick = { viewModel.openGroup(group) },
-                             onLongClick = { bulkTarget = group })
+                    // 右スワイプでも長押しでも同じ一括更新を出す。
+                    // iOS は右スワイプに段ごとのボタンが並ぶが、Compose のスワイプは
+                    // 向きしか区別できないので、段を選ぶのはシートに任せる。
+                    MasterySwipeRow(
+                        onStart = { bulkTarget = group },
+                        startLabel = "まとめて付ける",
+                        startColor = DS.fill,
+                    ) {
+                        GroupRow(group, state,
+                                 onClick = { viewModel.openGroup(group) },
+                                 onLongClick = { bulkTarget = group })
+                    }
                     if (index < state.groups.size - 1) {
                         HorizontalDivider(Modifier.padding(start = 16.dp), color = DS.sep)
                     }
