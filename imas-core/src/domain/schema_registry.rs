@@ -102,6 +102,10 @@ pub fn expected_tables() -> Vec<TableSpec> {
               同梱 DB には入れない。壊すと復旧手段が無いので破壊的移行は禁止"),
         spec("personal_tags", LocalOnly, &["entity_type", "entity_id", "tag_name"],
              "マイタグ。端末ローカル専用"),
+        spec("expenses", LocalOnly, &["id", "date", "category", "amount"],
+             "アイマス関連の収支 (家計簿)。**クラウドにもサーバにも無い端末唯一データ**。\
+              show_id が入っていればその公演の遠征費、NULL なら単独の支出 (課金・通販)。\
+              費目キーと集計は domain/ledger.rs"),
         spec("song_videos", Community, &["song_id"], "動画リンク。同期で後から入る"),
         spec("idol_voice_actors", Auxiliary, &["idol_id", "name"],
              "声優履歴。**iOS にしか無い**。Android は Room の entity を持たず、SeedImporter が\

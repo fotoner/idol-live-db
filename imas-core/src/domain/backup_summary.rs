@@ -109,6 +109,24 @@ pub enum BackupKindDialect {
     Android,
 }
 
+/// 収支 1 件 (家計簿)。`expenses` 表の行をそのまま運ぶ。
+///
+/// 費目は**英字キー** (`domain::ledger::expense_category_key`) で持つ。
+/// ラベルで持つと、費目の呼び方を変えた版で取り込んだときに迷子になる。
+/// 知らないキーは取り込み側で「その他」に落ちるので、金額は消えない。
+#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
+pub struct BackupExpenseRecord {
+    pub id: String,
+    /// `YYYY-MM-DD`。
+    pub date: String,
+    pub category: String,
+    pub amount: i64,
+    pub show_id: Option<String>,
+    pub event_id: Option<String>,
+    pub note: Option<String>,
+    pub updated_at: String,
+}
+
 /// 書き出しの入力。時刻・端末 ID・アプリ版は OS から受け取る。
 #[derive(uniffi::Record, Clone, Debug)]
 pub struct BackupExportInput {
@@ -121,6 +139,7 @@ pub struct BackupExportInput {
     pub user_marks: Vec<BackupUserMarkRecord>,
     pub poll_votes: Vec<BackupPollVoteRecord>,
     pub personal_tags: Vec<BackupPersonalTagRecord>,
+    pub expenses: Vec<BackupExpenseRecord>,
 }
 
 /// 書き出し結果。`envelope_json` をそのままファイル/引き継ぎコードにすればよい。
@@ -158,6 +177,8 @@ pub struct BackupLocalState {
     pub mark_keys: Vec<BackupMarkKey>,
     pub tag_keys: Vec<BackupTagKey>,
     pub poll_votes: Vec<BackupPollVoteRecord>,
+    /// 既にある収支の id。同じ id は入れ直さない (二重計上を防ぐ)。
+    pub expense_ids: Vec<String>,
 }
 
 /// envelope を検証して取り出したメタ情報 (取り込み前のプレビュー用)。
@@ -174,6 +195,7 @@ pub struct BackupEnvelopeInfo {
     pub mark_count: i64,
     pub vote_count: i64,
     pub personal_tag_count: i64,
+    pub expense_count: i64,
     /// 形式不正で捨てた要素数 (marks / votes / personalTags の合計)。
     /// `backup_import_summary` の `skipped_marks` に渡す値。
     pub skipped_entries: i64,
@@ -188,9 +210,11 @@ pub struct BackupImportPlan {
     /// お題ごとの「まだ持っていない entity_id」だけ。空になったお題は落とす。
     pub poll_votes_to_add: Vec<BackupPollVoteRecord>,
     pub personal_tags_to_insert: Vec<BackupPersonalTagRecord>,
+    pub expenses_to_insert: Vec<BackupExpenseRecord>,
     pub added_marks: i64,
     pub added_votes: i64,
     pub added_personal_tags: i64,
+    pub added_expenses: i64,
     /// 端末 ID を復元してよいか (要求されていて、かつ payload の deviceId が非空)。
     pub restore_device_id: bool,
 }
@@ -330,10 +354,39 @@ fn build_payload_json(input: &BackupExportInput, dialect: BackupKindDialect) -> 
         .collect::<Vec<_>>()
         .join(",");
 
+    // 任意の列はキーごと落とす (personalTags と同じ扱い)。
+    let expenses = input
+        .expenses
+        .iter()
+        .map(|e| {
+            let optional = [
+                ("eventId", &e.event_id),
+                ("note", &e.note),
+                ("showId", &e.show_id),
+            ]
+            .into_iter()
+            .filter_map(|(key, value)| {
+                value.as_ref().map(|v| format!(",\"{key}\":{}", json_string_literal(v)))
+            })
+            .collect::<String>();
+            format!(
+                "{{\"amount\":{},\"category\":{},\"date\":{},\"id\":{}{},\"updatedAt\":{}}}",
+                e.amount,
+                json_string_literal(&e.category),
+                json_string_literal(&e.date),
+                json_string_literal(&e.id),
+                optional,
+                json_string_literal(&e.updated_at),
+            )
+        })
+        .collect::<Vec<_>>()
+        .join(",");
+
     format!(
-        "{{\"appVersion\":{},\"deviceId\":{},\"exportedAt\":{},\"personalTags\":[{}],\"platform\":{},\"pollVotes\":[{}],\"schemaVersion\":{},\"userMarks\":[{}]}}",
+        "{{\"appVersion\":{},\"deviceId\":{},\"expenses\":[{}],\"exportedAt\":{},\"personalTags\":[{}],\"platform\":{},\"pollVotes\":[{}],\"schemaVersion\":{},\"userMarks\":[{}]}}",
         json_string_literal(&input.app_version),
         json_string_literal(&input.device_id),
+        expenses,
         json_string_literal(&input.exported_at),
         tags,
         json_string_literal(&input.platform),
@@ -351,6 +404,7 @@ struct ParsedBackup {
     marks: Vec<BackupUserMarkRecord>,
     votes: Vec<BackupPollVoteRecord>,
     tags: Vec<BackupPersonalTagRecord>,
+    expenses: Vec<BackupExpenseRecord>,
 }
 
 /// envelope を検証し、中身の件数とメタ情報だけを返す (書き込み前のプレビュー用)。
@@ -436,9 +490,19 @@ pub fn plan_backup_import(
         })
         .collect();
 
+    // 収支は id (UUID) で同一性を見る。同じ id を 2 回入れると金額が倍になる。
+    let mut seen_expenses: HashSet<String> = local.expense_ids.iter().cloned().collect();
+    let mut expenses_to_insert = Vec::new();
+    for expense in parsed.expenses {
+        if seen_expenses.insert(expense.id.clone()) {
+            expenses_to_insert.push(expense);
+        }
+    }
+
     let added_marks = marks_to_insert.len() as i64;
     let added_personal_tags = personal_tags_to_insert.len() as i64;
     let added_votes: i64 = poll_votes_to_add.iter().map(|v| v.entity_ids.len() as i64).sum();
+    let added_expenses = expenses_to_insert.len() as i64;
     let restore_device_id = restore_device_id && !parsed.info.device_id.is_empty();
 
     Ok(BackupImportPlan {
@@ -446,9 +510,11 @@ pub fn plan_backup_import(
         marks_to_insert,
         poll_votes_to_add,
         personal_tags_to_insert,
+        expenses_to_insert,
         added_marks,
         added_votes,
         added_personal_tags,
+        added_expenses,
         restore_device_id,
     })
 }
@@ -487,6 +553,9 @@ fn parse_backup(envelope_json: &str) -> Result<ParsedBackup, BackupImportError> 
     let votes = parse_array(payload.get("pollVotes"), &mut skipped, parse_vote);
     // personalTags は schemaVersion 1 の途中で足した項目なので、無いときは空扱い。
     let tags = parse_array(payload.get("personalTags"), &mut skipped, parse_tag);
+    // expenses も同じ。**版は上げない**ので、収支を知らない版のアプリでも
+    // このキーを黙って無視して残りを取り込める (逆向きも同じ)。
+    let expenses = parse_array(payload.get("expenses"), &mut skipped, parse_expense);
 
     Ok(ParsedBackup {
         info: BackupEnvelopeInfo {
@@ -499,11 +568,13 @@ fn parse_backup(envelope_json: &str) -> Result<ParsedBackup, BackupImportError> 
             mark_count: marks.len() as i64,
             vote_count: votes.len() as i64,
             personal_tag_count: tags.len() as i64,
+            expense_count: expenses.len() as i64,
             skipped_entries: skipped,
         },
         marks,
         votes,
         tags,
+        expenses,
     })
 }
 
@@ -567,6 +638,31 @@ fn parse_tag(value: &serde_json::Value) -> Option<BackupPersonalTagRecord> {
         tag_name: string_field(object, "tagName")?,
         created_at: string_field(object, "createdAt")?,
     })
+}
+
+fn parse_expense(value: &serde_json::Value) -> Option<BackupExpenseRecord> {
+    let object = value.as_object()?;
+    // 金額は整数だけ受ける。小数や文字列が来たらその 1 件を捨てる
+    // (丸めて取り込むと、直した覚えのない額が帳簿に載る)。
+    let amount = object.get("amount").and_then(integral_number)?;
+    Some(BackupExpenseRecord {
+        id: string_field(object, "id")?,
+        date: string_field(object, "date")?,
+        category: string_field(object, "category")?,
+        amount,
+        show_id: optional_field(object, "showId"),
+        event_id: optional_field(object, "eventId"),
+        note: optional_field(object, "note"),
+        updated_at: string_field(object, "updatedAt")?,
+    })
+}
+
+/// 任意の文字列列。無い/null は None、型違いも None (行は捨てない)。
+fn optional_field(
+    object: &serde_json::Map<String, serde_json::Value>,
+    key: &str,
+) -> Option<String> {
+    object.get(key)?.as_str().map(|s| s.to_string())
 }
 
 fn string_field(object: &serde_json::Map<String, serde_json::Value>, key: &str) -> Option<String> {
@@ -641,6 +737,20 @@ mod tests {
             user_marks: vec![mark("idol_1", "myPick")],
             poll_votes: vec![vote("poll_1", &["b", "a"])],
             personal_tags: vec![tag("song_1", "神曲")],
+            expenses: vec![expense("exp_1", 9_000)],
+        }
+    }
+
+    fn expense(id: &str, amount: i64) -> BackupExpenseRecord {
+        BackupExpenseRecord {
+            id: id.to_string(),
+            date: "2026-09-19".to_string(),
+            category: "ticket".to_string(),
+            amount,
+            show_id: Some("show_1".to_string()),
+            event_id: Some("event_1".to_string()),
+            note: None,
+            updated_at: "2026-09-19T12:00:00Z".to_string(),
         }
     }
 
@@ -675,12 +785,65 @@ mod tests {
         assert_eq!(
             doc.payload_json,
             concat!(
-                r#"{"appVersion":"1.7.0","deviceId":"device-1","exportedAt":"2026-08-25T00:00:00Z","#,
+                r#"{"appVersion":"1.7.0","deviceId":"device-1","#,
+                r#""expenses":[{"amount":9000,"category":"ticket","date":"2026-09-19","id":"exp_1","#,
+                r#""eventId":"event_1","showId":"show_1","updatedAt":"2026-09-19T12:00:00Z"}],"#,
+                r#""exportedAt":"2026-08-25T00:00:00Z","#,
                 r#""personalTags":[{"createdAt":"2026-01-02T03:04:05Z","entityId":"song_1","entityType":"song","tagName":"神曲"}],"#,
                 r#""platform":"ios","pollVotes":[{"entityIds":["a","b"],"pollId":"poll_1"}],"schemaVersion":1,"#,
                 r#""userMarks":[{"boolValue":true,"entityId":"idol_1","entityType":"idol","kind":"myPick","updatedAt":"2026-01-02T03:04:05Z"}]}"#
             )
         );
+    }
+
+    /// 収支は id で重複を弾き、ローカルに無いものだけ入れる計画になる。
+    #[test]
+    fn expenses_are_planned_by_id() {
+        let mut input = export_input();
+        input.expenses = vec![expense("exp_1", 9_000), expense("exp_2", 12_000)];
+        let doc = build_backup_envelope(&input, BackupKindDialect::Canonical);
+
+        let local = BackupLocalState {
+            expense_ids: vec!["exp_1".to_string()],
+            ..BackupLocalState::default()
+        };
+        let plan =
+            plan_backup_import(&doc.envelope_json, &local, false, BackupKindDialect::Canonical)
+                .expect("読める");
+
+        assert_eq!(plan.info.expense_count, 2);
+        assert_eq!(plan.added_expenses, 1);
+        assert_eq!(plan.expenses_to_insert.len(), 1);
+        assert_eq!(plan.expenses_to_insert[0].id, "exp_2");
+        assert_eq!(plan.expenses_to_insert[0].amount, 12_000);
+        assert_eq!(plan.expenses_to_insert[0].show_id.as_deref(), Some("show_1"));
+    }
+
+    /// 収支を知らない版が書いたファイル (expenses キーが無い) も、そのまま取り込める。
+    #[test]
+    fn older_backup_without_expenses_still_imports() {
+        let mut input = export_input();
+        input.expenses = vec![];
+        let doc = build_backup_envelope(&input, BackupKindDialect::Canonical);
+        let stripped = doc.payload_json.replace("\"expenses\":[],", "");
+        let checksum = format!("sha256:{}", sha256_hex(&stripped));
+        let envelope = format!(
+            "{{\"checksum\":{},\"envelopeVersion\":1,\"payload\":{}}}",
+            json_string_literal(&checksum),
+            json_string_literal(&stripped),
+        );
+
+        let plan = plan_backup_import(
+            &envelope,
+            &BackupLocalState::default(),
+            false,
+            BackupKindDialect::Canonical,
+        )
+        .expect("読める");
+        assert_eq!(plan.info.expense_count, 0);
+        assert_eq!(plan.added_expenses, 0);
+        assert_eq!(plan.added_marks, 1);
+        assert_eq!(plan.info.skipped_entries, 0);
     }
 
     /// checksum を外部の SHA-256 実装 (`shasum -a 256`) で計算した値に固定する。
@@ -690,7 +853,7 @@ mod tests {
         let doc = build_backup_envelope(&export_input(), BackupKindDialect::Canonical);
         assert_eq!(
             doc.checksum,
-            "sha256:cf2e1aa392de9184b59bf2514a9307fd16288be47e5fc0f0a4b8f84a59dd99f0"
+            "sha256:c68eccaca9f998fb7d76029a3ba067d9818275eb0e6f541a1bfb945cc3647e0a"
         );
     }
 

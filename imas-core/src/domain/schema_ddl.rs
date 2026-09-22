@@ -15,7 +15,7 @@
 //!
 //! # ここに載るのはマスタだけ
 //!
-//! 端末ローカル専用の `user_marks` / `personal_tags` は**含めない**。あれらは
+//! 端末ローカル専用の `user_marks` / `personal_tags` / `expenses` は**含めない**。あれらは
 //! 配布物 (同梱 DB) に器すら置かず、各 OS が自分で作る。コアがマスタ側の DDL を
 //! 流しても、ローカルデータの表には一切触れない — これが「壊さない」ことの担保になる。
 
@@ -126,7 +126,7 @@ mod tests {
     #[test]
     fn local_only_tables_are_not_in_the_master_ddl() {
         let tables = table_names();
-        for forbidden in ["user_marks", "personal_tags"] {
+        for forbidden in ["user_marks", "personal_tags", "expenses"] {
             assert!(
                 !tables.iter().any(|t| t == forbidden),
                 "端末ローカル専用の `{forbidden}` がマスタ DDL に入っている"

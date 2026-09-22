@@ -7,6 +7,7 @@ pub fn backup_import_summary(
     added_marks: i64,
     added_votes: i64,
     added_personal_tags: i64,
+    added_expenses: i64,
     skipped_marks: i64,
     device_id_restored: bool,
 ) -> String {
@@ -14,6 +15,7 @@ pub fn backup_import_summary(
         added_marks,
         added_votes,
         added_personal_tags,
+        added_expenses,
         skipped_marks,
         device_id_restored,
     )
