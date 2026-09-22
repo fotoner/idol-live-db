@@ -101,7 +101,7 @@ fun LedgerScreen(viewModel: LedgerViewModel = viewModel()) {
                 } else {
                     state.summary.buckets.forEach { bucket ->
                         item(key = "header_${bucket.key}") { BucketHeader(bucket) }
-                        val rows = state.entries(bucket.key)
+                        val rows = state.entries(bucket)
                         rows.forEachIndexed { index, expense ->
                             item(key = expense.id) {
                                 MasterySwipeRow(

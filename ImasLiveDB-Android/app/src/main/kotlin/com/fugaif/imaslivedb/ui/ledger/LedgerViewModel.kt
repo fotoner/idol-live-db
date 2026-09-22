@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import uniffi.imas_core.ExpenseEntry
+import uniffi.imas_core.LedgerBucket
 import uniffi.imas_core.LedgerFilter
 import uniffi.imas_core.LedgerLinkage
 import uniffi.imas_core.LedgerPeriod
@@ -47,25 +48,15 @@ data class LedgerUiState(
         .distinct()
         .sortedDescending()
 
-    /** その箱に入る明細。コアが決めた集計 (箱のキー = 日付の頭) と同じ規則で選ぶ。 */
-    fun entries(bucketKey: String): List<Expense> = expenses.filter { expense ->
-        if (!keeps(expense)) return@filter false
-        when (bucketKey) {
-            "all" -> true
-            "unknown" -> expense.date.length != 10 || !expense.date.startsWith("2")
-            else -> expense.date.startsWith(bucketKey)
-        }
-    }
+    /** id → 支出。`entries(bucket:)` の引き直し用。 */
+    private val expensesById: Map<String, Expense> get() = expenses.associateBy { it.id }
 
-    /** 画面の絞り込み。コアに渡している [LedgerFilter] と同じ条件を明細にも効かせる。 */
-    private fun keeps(expense: Expense): Boolean {
-        if (yearFilter.isNotEmpty() && !expense.date.startsWith(yearFilter)) return false
-        return when (linkage) {
-            LedgerLinkage.ALL -> true
-            LedgerLinkage.LINKED_ONLY -> !expense.showId.isNullOrEmpty()
-            LedgerLinkage.UNLINKED_ONLY -> expense.showId.isNullOrEmpty()
-        }
-    }
+    /**
+     * その箱に入る明細。絞り込みも「どの箱に入るか」もコアが `bucket.entryIds` として
+     * 既に決めている ([buildLedgerSummary])。ここは id を引くだけで、条件を書き直さない
+     * (書き直すと iOS と Android で必ず食い違う)。
+     */
+    fun entries(bucket: LedgerBucket): List<Expense> = bucket.entryIds.mapNotNull { expensesById[it] }
 }
 
 /**

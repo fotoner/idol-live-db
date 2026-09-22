@@ -131,6 +131,12 @@ pub struct LedgerBucket {
     pub total: i64,
     pub count: u32,
     pub by_category: Vec<CategoryTotal>,
+    /// この箱に入る明細の id (絞り込み後・元の並び順のまま)。
+    ///
+    /// 「どの明細がどの箱に入るか」はここに出た規則 (絞り込み + 日付の頭で括る) が
+    /// 唯一の出どころ。各 OS はこの id 列で元の配列を引くだけにして、
+    /// 同じ規則を画面側で書き直さない (書き直すと iOS と Android で必ず食い違う)。
+    pub entry_ids: Vec<String>,
 }
 
 /// 公演 1 つぶんの合計 (「この遠征でいくら使ったか」)。
@@ -315,6 +321,7 @@ pub fn build_ledger_summary(
             total: group.iter().map(|e| e.amount).sum(),
             count: group.len() as u32,
             by_category: category_totals(&group),
+            entry_ids: group.iter().map(|e| e.id.clone()).collect(),
             key,
         })
         .collect();
@@ -558,7 +565,10 @@ mod tests {
         assert_eq!(s.buckets[0].key, "2026-09");
         assert_eq!(s.buckets[0].label, "2026年9月");
         assert_eq!(s.buckets[0].total, 23_000);
+        // entry_ids は元の並びのまま (各 OS がここで明細を引き直す)。
+        assert_eq!(s.buckets[0].entry_ids, vec!["b", "c"]);
         assert_eq!(s.buckets[1].label, "2026年8月");
+        assert_eq!(s.buckets[1].entry_ids, vec!["a"]);
         // 遠征の費用はチケット + 交通 (グッズは入らない)
         assert_eq!(s.travel_total, 23_000);
     }

@@ -182,9 +182,10 @@ struct LedgerView: View {
 
     @ViewBuilder
     private var bucketSections: some View {
+        let byId = expensesById
         ForEach(summary.buckets, id: \.key) { bucket in
             Section {
-                ForEach(entries(in: bucket), id: \.id) { expense in
+                ForEach(entries(in: bucket, byId: byId), id: \.id) { expense in
                     row(expense)
                         .listRowInsets(EdgeInsets(top: 0, leading: DS.sp5, bottom: 0, trailing: DS.sp5))
                         .listRowBackground(DS.surface)
@@ -209,27 +210,16 @@ struct LedgerView: View {
         }
     }
 
-    /// その箱に入る明細。**どの箱に入るかはコアが決めた集計と同じ規則**で選ぶ
-    /// (箱のキーが日付の頭 = `2026-09` / `2026` / `all`)。
-    private func entries(in bucket: LedgerBucket) -> [Expense] {
-        expenses.filter { expense in
-            guard keeps(expense) else { return false }
-            switch bucket.key {
-            case "all": return true
-            case "unknown": return !expense.date.hasPrefix("2") || expense.date.count != 10
-            default: return expense.date.hasPrefix(bucket.key)
-            }
-        }
+    /// その箱に入る明細。絞り込みも「どの箱に入るか」もコアが `bucket.entryIds` として
+    /// 既に決めている (`buildLedgerSummary`)。ここは id を引くだけで、条件を書き直さない
+    /// (書き直すと iOS と Android で必ず食い違う)。
+    private func entries(in bucket: LedgerBucket, byId: [String: Expense]) -> [Expense] {
+        bucket.entryIds.compactMap { byId[$0] }
     }
 
-    /// 画面の絞り込み。コアに渡している [LedgerFilter] と同じ条件を明細にも効かせる。
-    private func keeps(_ expense: Expense) -> Bool {
-        if !yearFilter.isEmpty && !expense.date.hasPrefix(yearFilter) { return false }
-        switch linkage {
-        case .all: return true
-        case .linkedOnly: return expense.showId?.isEmpty == false
-        case .unlinkedOnly: return expense.showId?.isEmpty != false
-        }
+    /// id → 支出。バケットごとに `entries(in:)` で引き直すための索引。
+    private var expensesById: [String: Expense] {
+        Dictionary(uniqueKeysWithValues: expenses.map { ($0.id, $0) })
     }
 
     private func row(_ expense: Expense) -> some View {
