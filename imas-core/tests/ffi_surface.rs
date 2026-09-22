@@ -76,6 +76,7 @@ declare_and_call_checksums! {
     uniffi_imas_core_checksum_func_daily_pick_song_index,
     uniffi_imas_core_checksum_func_daily_pick_song_indices,
     uniffi_imas_core_checksum_func_daily_pick_stable_index,
+    uniffi_imas_core_checksum_func_default_ticket,
     uniffi_imas_core_checksum_func_edit_permission_can_edit,
     uniffi_imas_core_checksum_func_edit_permission_outcome_on_edit_tap,
     uniffi_imas_core_checksum_func_edit_permission_should_prompt_login,
@@ -202,6 +203,11 @@ declare_and_call_checksums! {
     uniffi_imas_core_checksum_func_theme_on_color,
     uniffi_imas_core_checksum_func_theme_on_color_over,
     uniffi_imas_core_checksum_func_theme_variant_hex,
+    uniffi_imas_core_checksum_func_ticket_kind_from_attendance,
+    uniffi_imas_core_checksum_func_ticket_kind_label,
+    uniffi_imas_core_checksum_func_ticket_price_range,
+    uniffi_imas_core_checksum_func_ticket_price_ranges,
+    uniffi_imas_core_checksum_func_tickets_for_kind,
     uniffi_imas_core_checksum_func_timeline_epoch_at_x,
     uniffi_imas_core_checksum_func_timeline_fit_points_per_day,
     uniffi_imas_core_checksum_func_timeline_hit_index,
@@ -211,6 +217,7 @@ declare_and_call_checksums! {
     uniffi_imas_core_checksum_func_timeline_year_boundaries,
     uniffi_imas_core_checksum_func_timeline_year_range,
     uniffi_imas_core_checksum_func_validate_expense,
+    uniffi_imas_core_checksum_func_validate_ticket,
     uniffi_imas_core_checksum_func_weighted_sample_indices,
 }
 

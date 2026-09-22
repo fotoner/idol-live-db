@@ -460,6 +460,24 @@ pub struct CkCostumeWearRow {
     pub sort_order: i64,
 }
 
+/// show_tickets
+///
+/// 公演のチケット価格。**税込・手数料抜きの定価**を持ち、席種は自由文字列
+/// (S席 / 立見 / 配信 (アーカイブ付き) …公演ごとに呼び方が違う)。
+/// `isEstimate` は公式に出ていない推定値の札で、実額と同じ顔で出さないために要る。
+#[derive(uniffi::Record, Clone, Debug, PartialEq)]
+pub struct CkShowTicketRow {
+    pub id: String,
+    pub show_id: String,
+    /// `live` / `stream` / `live_viewing`。
+    pub kind: String,
+    pub name: String,
+    pub price: i64,
+    pub is_estimate: bool,
+    pub note: Option<String>,
+    pub sort_order: i64,
+}
+
 /// unit_versions
 #[derive(uniffi::Record, Clone, Debug, PartialEq)]
 pub struct CkUnitVersionRow {
@@ -623,6 +641,7 @@ pub enum CkRow {
     SetlistItem { row: CkSetlistItemRow },
     SetlistPerformer { row: CkSetlistPerformerRow },
     SongVideo { row: CkSongVideoRow },
+    ShowTicket { row: CkShowTicketRow },
 }
 
 /// 1 recordType 分のバッチを「取り込む行 / 削除する recordName / 捨てた recordName」に
@@ -1016,6 +1035,25 @@ pub fn song_video(record: &CkRecordInput, now_millis: i64) -> Option<CkSongVideo
     })
 }
 
+pub fn show_ticket(record: &CkRecordInput) -> Option<CkShowTicketRow> {
+    let f = Fields::new(record);
+    let show_id = f.required("showId")?;
+    let name = f.required("name")?;
+    // 価格が無い/数でない行は取り込まない。0 円で入れると帳簿と価格帯が静かに狂う。
+    let price = f.optional_int_value("price")?;
+    Some(CkShowTicketRow {
+        id: record.record_name.clone(),
+        show_id,
+        // 形態が欠けていれば現地扱い (参加形態の既定と同じ約束)。
+        kind: f.str("kind").unwrap_or_else(|| "live".to_string()),
+        name,
+        price,
+        is_estimate: f.bool_value("isEstimate", false),
+        note: f.str("note"),
+        sort_order: f.int_value("sortOrder"),
+    })
+}
+
 /// recordType による振り分け。iOS `CloudKitSyncEngine.upsertRecords` の switch と同じ。
 ///
 /// 取り込まない recordType は None:
@@ -1044,6 +1082,7 @@ pub fn map_record(record_type: &str, record: &CkRecordInput, now_millis: i64) ->
         "SetlistItem" => setlist_item(record).map(|row| CkRow::SetlistItem { row }),
         "SetlistPerformer" => setlist_performer(record).map(|row| CkRow::SetlistPerformer { row }),
         "SongVideo" => song_video(record, now_millis).map(|row| CkRow::SongVideo { row }),
+        "ShowTicket" => show_ticket(record).map(|row| CkRow::ShowTicket { row }),
         _ => None,
     }
 }
@@ -1212,6 +1251,55 @@ mod tests {
         assert_eq!(row.description.as_deref(), Some("白基調"));
         assert_eq!(row.source_url.as_deref(), Some("https://example.test/"));
         assert_eq!(row.sort_order, 3);
+    }
+
+    #[test]
+    fn show_ticket_reads_every_column() {
+        let r = rec(
+            "t1",
+            &[
+                ("showId", text("show_14th_day2")),
+                ("kind", text("stream")),
+                ("name", text("配信 (アーカイブ付き)")),
+                ("price", int(6_600)),
+                ("isEstimate", CkValue::Bool { value: true }),
+                ("note", text("見逃し 1 週間")),
+                ("sortOrder", int(2)),
+            ],
+        );
+        let row = show_ticket(&r).unwrap();
+        assert_eq!(row.id, "t1");
+        assert_eq!(row.show_id, "show_14th_day2");
+        assert_eq!(row.kind, "stream");
+        assert_eq!(row.name, "配信 (アーカイブ付き)");
+        assert_eq!(row.price, 6_600);
+        assert!(row.is_estimate);
+        assert_eq!(row.note.as_deref(), Some("見逃し 1 週間"));
+        assert_eq!(row.sort_order, 2);
+    }
+
+    /// 形態が欠けていれば現地扱い (参加形態の既定と同じ約束)。
+    #[test]
+    fn show_ticket_defaults_to_live() {
+        let r = rec("t2", &[("showId", text("s1")), ("name", text("S席")), ("price", int(13_200))]);
+        let row = show_ticket(&r).unwrap();
+        assert_eq!(row.kind, "live");
+        assert!(!row.is_estimate);
+        assert_eq!(row.sort_order, 0);
+    }
+
+    /// 価格が無い / 数でない行は取り込まない (0 円で入れると価格帯が静かに狂う)。
+    #[test]
+    fn show_ticket_without_price_is_rejected() {
+        assert!(show_ticket(&rec("t3", &[("showId", text("s1")), ("name", text("S席"))])).is_none());
+        assert!(show_ticket(&rec(
+            "t4",
+            &[("showId", text("s1")), ("name", text("S席")), ("price", text("13200"))]
+        ))
+        .is_none());
+        // 公演 id と券種名は必須。
+        assert!(show_ticket(&rec("t5", &[("name", text("S席")), ("price", int(1))])).is_none());
+        assert!(show_ticket(&rec("t6", &[("showId", text("s1")), ("price", int(1))])).is_none());
     }
 
     #[test]

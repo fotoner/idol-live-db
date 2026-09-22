@@ -90,6 +90,10 @@ pub fn expected_tables() -> Vec<TableSpec> {
              "その公演で衣装を着た記録。setlist_item_id を持てば「この曲で着た」まで分かり、\n\
               NULL なら公演で使われたことだけが分かっている。idol_id が NULL なら\n\
               その場の全員 (共通衣装)、入っていればその人だけ (着替えの分岐)"),
+        spec("show_tickets", Master, &["id", "show_id", "kind", "name", "price"],
+             "公演のチケット価格。席種は自由文字列 (S席 / 立見 / 配信 (アーカイブ付き) …)、\
+              kind は live / stream / live_viewing。価格は**税込・手数料抜きの定価**で、\
+              is_estimate は公式に出ていない推定値の札。規則は domain/ticket_prices.rs"),
         spec("venues", Master, &["id", "name"], "会場"),
         spec("venue_names", Master, &["venue_id", "name"], "会場の別名・改称"),
         spec("venue_halls", Master, &["venue_id", "name"], "会場内のホール"),

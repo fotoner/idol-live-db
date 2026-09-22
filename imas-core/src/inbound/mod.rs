@@ -7,6 +7,7 @@ pub mod song_queries;
 pub mod kamisabi_cards;
 pub mod ledger;
 pub mod show_naming;
+pub mod ticket_prices;
 pub mod mastery;
 pub mod song_list_queries;
 pub mod song_detail_queries;
