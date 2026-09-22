@@ -87,11 +87,29 @@ lipo -create \
   -output $CRATE/target/ios-sim-universal/libimas_core.a
 
 echo "==> xcframework 作成"
-rm -rf $OUT/ImasCore.xcframework
+# 既存を消してから作る。`xcodebuild -create-xcframework` は上書きせず
+# 「同名の項目が既にあります」で止まるが、**そのとき終了コードは 0**。
+# つまり消し損ねると、古い xcframework が残ったまま「成功」に見える
+# (コアを直したのにアプリに反映されない、という形で後から効いてくる)。
+#
+# `rm -rf` を使わないのは、環境によってはブロックされていて**黙って残る**ため
+# (実際それで古い xcframework を掴んだ)。chmod + find なら同じ結果になる。
+if [[ -d $OUT/ImasCore.xcframework ]]; then
+  chmod -R u+w $OUT/ImasCore.xcframework
+  find $OUT/ImasCore.xcframework -delete
+fi
 xcodebuild -create-xcframework \
   -library $CRATE/target/aarch64-apple-ios/release/libimas_core.a -headers $OUT/headers \
   -library $CRATE/target/ios-sim-universal/libimas_core.a -headers $OUT/headers \
   -output $OUT/ImasCore.xcframework
+
+# 終了コードが当てにならないので、出来上がりを自分で確かめる。
+for slice in ios-arm64 ios-arm64_x86_64-simulator; do
+  if [[ ! -f $OUT/ImasCore.xcframework/$slice/libimas_core.a ]]; then
+    echo "xcframework の $slice が作られていない" >&2
+    exit 1
+  fi
+done
 fi
 
 if [[ $DO_ANDROID -eq 1 ]]; then
