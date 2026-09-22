@@ -3,7 +3,8 @@ import SwiftUI
 /// 群 (シリーズ / ユニット / 年代) の中の曲一覧。**段階を変えるのはここ**。
 ///
 /// 一覧は「どの群を見るか」までしか出さないので、曲名が要る操作は全部この画面に集める。
-/// 1 曲は行を左スワイプ、群ごとは右上の ⋯ から。一括更新は直前の 1 回だけ戻せる
+/// 1 曲は行末のチップをタップ (1 段上がる) / 長押しで段を選ぶ / 行を左スワイプ、
+/// 群ごとは右上の ⋯ から。一括更新は直前の 1 回だけ戻せる
 /// (履歴は持たない — まとめて動くのは一括更新のときだけなので、それ以上は要らない)。
 ///
 /// 行は既存の `SongTitleRow` をそのまま使う (ジャケ写・プレビュー再生・コピーメニューが
@@ -140,10 +141,7 @@ struct MasteryGroupDetailView: View {
                 // ジャケ写つきの行を全部一度に組むので、開いた瞬間に固まる。
                 LazyVStack(spacing: 0) {
                     ForEach(Array(shown.enumerated()), id: \.element.element.id) { index, pair in
-                        Button { sheetDestination = .song(pair.element) } label: {
-                            row(pair.element, level: levels[pair.offset])
-                        }
-                        .buttonStyle(.plain)
+                        row(pair.element, level: levels[pair.offset])
                         if index < shown.count - 1 {
                             ImasRowDivider(inset: 70)
                         }
@@ -201,24 +199,59 @@ struct MasteryGroupDetailView: View {
 
     // MARK: - 行
 
+    /// 行は的を 2 つに分ける: 左 (曲名) は曲の詳細へ、右の段階チップは**押すたびに 1 段上がる**。
+    ///
+    /// スワイプでしか変えられないと、続けて付けていく作業が 1 曲ごとに止まる
+    /// (引っ張って・狙って・離す)。上げるのが一番多い操作なので 1 タップに置き、
+    /// 下げる/特定の段へ飛ぶのはチップの長押しと行のスワイプに残した。
     private func row(_ song: Song, level: UInt8) -> some View {
-        SongTitleRow(song: song, showsChevron: false)
-            .overlay(alignment: .trailing) {
-                HStack(spacing: DS.sp3) {
-                    if marks.isAutoCollected(songId: song.id) {
-                        // 現地で聴いた曲。既存の一覧と同じ ✓ の意味で揃える。
-                        Image(systemName: "checkmark")
-                            .font(.imasScaled(11, weight: .semibold))
-                            .foregroundStyle(DS.success)
-                            .accessibilityLabel("現地で聴いた")
-                    }
-                    MasteryChip(level: level, scale: marks.scale, showsUnset: true)
-                }
+        HStack(spacing: 0) {
+            SongTitleRow(song: song, showsChevron: false)
+                .contentShape(Rectangle())
+                .onTapGesture { sheetDestination = .song(song) }
+            if marks.isAutoCollected(songId: song.id) {
+                // 現地で聴いた曲。既存の一覧と同じ ✓ の意味で揃える。
+                Image(systemName: "checkmark")
+                    .font(.imasScaled(11, weight: .semibold))
+                    .foregroundStyle(DS.success)
+                    .accessibilityLabel("現地で聴いた")
             }
-            .padding(.horizontal, DS.sp4)
-            .padding(.vertical, DS.sp3)
-            .contentShape(Rectangle())
-            .masterySwipe(songId: song.id)
+            stageChip(song: song, level: level)
+        }
+        .padding(.horizontal, DS.sp4)
+        .padding(.vertical, DS.sp3)
+        .masterySwipe(songId: song.id)
+    }
+
+    /// 押すと 1 段上がるチップ。最上段では動かない (連打で記録が飛ばないのは core の規則)。
+    /// 行全体ではなくチップだけを的にしているので、詳細を見たいだけのときに書き換わらない。
+    private func stageChip(song: Song, level: UInt8) -> some View {
+        Button {
+            setLevel(song.id, to: nextMasteryLevel(current: level, steps: marks.scale.steps))
+        } label: {
+            MasteryChip(level: level, scale: marks.scale, showsUnset: true)
+                .padding(.vertical, DS.sp2)
+                .padding(.leading, DS.sp4)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .sensoryFeedback(.increase, trigger: level)
+        .contextMenu { stageMenu(song.id) }
+        .accessibilityHint("押すと 1 段上がります。長押しで段を選べます")
+    }
+
+    /// チップの長押し。特定の段へ飛ばす・未設定に戻すのはここ。
+    @ViewBuilder
+    private func stageMenu(_ songId: String) -> some View {
+        ForEach(Array((1...Int(marks.scale.steps)).reversed()), id: \.self) { level in
+            Button(marks.scale.label(UInt8(level))) { setLevel(songId, to: UInt8(level)) }
+        }
+        Button("未設定に戻す", role: .destructive) { setLevel(songId, to: 0) }
+    }
+
+    private func setLevel(_ songId: String, to level: UInt8) {
+        do { try marks.setMastery(songId: songId, level: level) }
+        catch { /* 失敗しても一覧は前の値のまま。無言で壊れた値を見せない */ }
     }
 
     // MARK: - 一括更新

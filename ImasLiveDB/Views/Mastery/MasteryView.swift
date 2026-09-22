@@ -238,6 +238,7 @@ struct MasteryView: View {
                             groupRow(group)
                         }
                         .buttonStyle(.plain)
+                        .contextMenu { groupMenu(group) }
                         if index < groups.count - 1 {
                             ImasRowDivider(inset: DS.sp4)
                         }
@@ -248,6 +249,35 @@ struct MasteryView: View {
                 .clipShape(RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
             }
         }
+    }
+
+    /// 群の行の長押し。詳細に入らずに、その群の**まだ付けていない曲だけ**をまとめて付ける。
+    ///
+    /// 「このシリーズは一通り聞いた」を一覧から 2 手で終わらせるための口。
+    /// 既に付いている記録には触らない操作だけを置いているので、誤って押しても
+    /// 失われるものがない (段を塗り替える/未設定に戻すのは、直前の 1 回を戻せる詳細画面に残す)。
+    @ViewBuilder
+    private func groupMenu(_ g: MasteryGroup) -> some View {
+        let unset = g.levels.filter { $0 == 0 }.count
+        if unset > 0 {
+            Section("未設定の \(unset) 曲だけ") {
+                ForEach(Array((1...Int(marks.scale.steps)).reversed()), id: \.self) { level in
+                    Button(marks.scale.label(UInt8(level))) {
+                        applyToUnset(g, level: UInt8(level))
+                    }
+                }
+            }
+        } else {
+            Text("全部に段階が付いています")
+        }
+    }
+
+    /// 未設定の曲だけに段階を付ける。対象の選び方は core の `masteryBulkTargets` 一本。
+    private func applyToUnset(_ g: MasteryGroup, level: UInt8) {
+        let targets = masteryBulkTargets(songIds: g.songIds, levels: g.levels, scope: .unsetOnly)
+        guard !targets.isEmpty else { return }
+        do { try marks.setMastery(songIds: targets, level: level) }
+        catch { /* 失敗しても一覧は前の値のまま */ }
     }
 
     /// ブランド絞り込み。複数選択は OR、空集合は全ブランド (既存の絞り込みと同じ意味)。
