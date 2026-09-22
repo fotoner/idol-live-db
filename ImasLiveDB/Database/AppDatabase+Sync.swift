@@ -63,6 +63,7 @@ extension AppDatabase {
     func upsertVenueHalls(_ halls: [VenueHall]) throws { try upsertChunked(halls) }
     func upsertCostumes(_ rows: [Costume]) throws { try upsertChunked(rows) }
     func upsertCostumeWears(_ rows: [CostumeWear]) throws { try upsertChunked(rows) }
+    func upsertShowTickets(_ rows: [ShowTicketRecord]) throws { try upsertChunked(rows) }
     func upsertShows(_ shows: [Show]) throws { try upsertChunked(shows) }
     func upsertShowsAsync(_ shows: [Show]) async throws { try await upsertChunkedAsync(shows) }
     func upsertSongs(_ songs: [Song]) throws { try upsertChunked(songs) }

@@ -65,6 +65,8 @@ struct SetlistView: View {
     @State private var collectionSummary: ShowCollectionRecord? = nil
     /// この公演で着られた衣装 (進行順)。畳み方も並びも imas-core が決めている。
     @State private var costumes: [ShowCostumeRecord] = []
+    /// この公演の券種 (マスタ)。「どんな価格の券があったか」を出す。
+    @State private var tickets: [ShowTicket] = []
     @State private var showEditSheet = false
     /// 未ログイン時のログイン誘導 sheet。ログイン後にセトリ編集を再開する。
     @State private var showLoginPrompt = false
@@ -341,6 +343,42 @@ struct SetlistView: View {
                     ImasLabeledRow(key: "日付", value: show.date, showChevron: true, tappable: true, seed: showBrandHex)
                         .contentShape(Rectangle())
                         .onTapGesture { go(.filteredShows(.date(show.date))) }
+                }
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 0, trailing: 16))
+                .listRowSeparator(.hidden)
+            }
+
+            if !tickets.isEmpty {
+                Section {
+                    ImasSectionHeader(title: "チケット", tight: true)
+                    ImasListContainer {
+                        // 並びと価格帯の作り方はコア (domain/ticket_prices.rs) 一本。
+                        ForEach(Array(ticketPriceRanges(tickets: tickets).enumerated()),
+                                id: \.element.kind) { rangeIndex, range in
+                            if rangeIndex > 0 { ImasRowDivider(inset: 16) }
+                            // 券種が 1 つだけの形態は帯を出さない (「配信 ¥6,500」が
+                            // 2 行並んで、同じ数字を 2 回読ませることになる)。
+                            if range.count > 1 {
+                                ImasLabeledRow(
+                                    key: ticketKindLabel(kind: range.kind),
+                                    value: range.hasEstimate ? "\(range.label) (推定含む)" : range.label,
+                                    seed: showBrandHex
+                                )
+                            }
+                            ForEach(Array(ticketsForKind(tickets: tickets, kind: range.kind).enumerated()),
+                                    id: \.element.id) { index, ticket in
+                                if range.count > 1 || index > 0 { ImasRowDivider(inset: range.count > 1 ? 32 : 16) }
+                                ImasLabeledRow(
+                                    key: range.count > 1
+                                        ? (ticket.isEstimate ? "\(ticket.name) (推定)" : ticket.name)
+                                        : "\(ticketKindLabel(kind: range.kind))・\(ticket.name)",
+                                    value: formatYen(amount: ticket.price),
+                                    seed: showBrandHex
+                                )
+                            }
+                        }
+                    }
                 }
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 0, trailing: 16))
@@ -689,6 +727,7 @@ struct SetlistView: View {
             idolsById = Dictionary(uniqueKeysWithValues: fetchedIdols.map { ($0.id, $0) })
 
             costumes = try await showReading.showCostumes(showId: show.id)
+            tickets = (try? await database.showTicketsAsync(showId: show.id))?.map(\.ticket) ?? []
 
             myPickIdolIds = Set(UserMarkService.shared.allMarked(kind: .myPick, entity: .idol))
 

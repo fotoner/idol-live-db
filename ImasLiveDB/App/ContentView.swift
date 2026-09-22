@@ -113,6 +113,10 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .openSettings)) { _ in
             showSettings = true
         }
+        // 参加を付けた直後の「チケット代を記録しますか」。参加登録の入口は
+        // 一覧のスワイプ・公演の参加シート・セトリ画面と複数あるので、
+        // 出すのは**アプリのルート 1 箇所**にまとめる。
+        .ticketExpensePrompt(database: database)
         .sheet(isPresented: $showSettings, onDismiss: presentPendingDeeplink) {
             MyPageView().environment(database).environment(syncEngine)
         }

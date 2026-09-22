@@ -166,6 +166,16 @@ enum CKRecordMapper {
         )
     }
 
+    /// 公演のチケット価格。席種は自由文字列、kind は live / stream / live_viewing。
+    static func showTicket(from record: CKRecord) -> ShowTicketRecord? {
+        guard case .showTicket(let row)? = mapped(record, as: "ShowTicket") else { return nil }
+        return ShowTicketRecord(
+            id: row.id, showId: row.showId, kind: row.kind, name: row.name,
+            price: row.price, isEstimate: row.isEstimate, note: row.note,
+            sortOrder: row.sortOrder
+        )
+    }
+
     /// 会場名と有効期間。表示を「公演日時点の名前」にするために使う。
     static func venueName(from record: CKRecord) -> VenueName? {
         guard case .venueName(let row)? = mapped(record, as: "VenueName") else { return nil }

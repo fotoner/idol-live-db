@@ -479,6 +479,8 @@ final class CloudKitSyncEngine: @unchecked Sendable {
             try database.upsertCostumes(mapped(CKRecordMapper.costume))
         case "CostumeWear":
             try database.upsertCostumeWears(mapped(CKRecordMapper.costumeWear))
+        case "ShowTicket":
+            try database.upsertShowTickets(mapped(CKRecordMapper.showTicket))
         case "VenueName":
             try database.upsertVenueNames(mapped(CKRecordMapper.venueName))
         case "VenueHall":

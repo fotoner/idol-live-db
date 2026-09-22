@@ -294,6 +294,16 @@ final class UserMarkService {
         // 参加ライブの登録は「一区切りついた瞬間」なのでレビュー依頼の好機に数える。
         // 取り消しは数えない (良い体験ではないので)。
         if type != nil { ReviewPrompt.noteMilestone() }
+        // 付けた直後だけ「チケット代を記録しますか」を出す土台にする。
+        // ここに出す条件 (価格が分かっているか / もう記録済みか) は持たせない —
+        // DB を引く判断なので、受け取った画面側 (TicketPromptCenter) が決める。
+        if entity == .show, let type {
+            NotificationCenter.default.post(
+                name: .attendanceMarked,
+                object: nil,
+                userInfo: [AttendanceMarkedKey.showId: id, AttendanceMarkedKey.type: type.rawValue]
+            )
+        }
         refreshAutoCollected()
         version &+= 1
         scheduleBackup()

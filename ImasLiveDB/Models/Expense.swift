@@ -59,6 +59,14 @@ struct Expense: Codable, FetchableRecord, PersistableRecord, Identifiable, Hasha
         )
     }
 
+    /// 今日の日付 (`YYYY-MM-DD`)。日付が分からない支出の既定値。
+    static var today: String {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        return f.string(from: Date())
+    }
+
     /// 保存値 → 費目。知らないキーは「その他」に落ちる (コアの規則)。
     var categoryValue: ExpenseCategory { expenseCategoryFromKey(key: category) }
 }

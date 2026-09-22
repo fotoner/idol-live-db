@@ -26,7 +26,10 @@ struct AttendanceSwipeActions: ViewModifier {
                         AppAnalytics.tap("attendance_swipe.set_\(type.rawValue)")
                         set(type)
                     } label: {
-                        Label("\(type.label)で参加", systemImage: type.icon)
+                        // ⚠️ ラベルは**文字だけ**。`Label(_, systemImage:)` にすると
+                        // 幅が足りないときにアイコンだけが残り、どれを押すのか読めなくなる
+                        // (現地/配信/LV + 取消の 4 つで実機の幅を超える)。
+                        Text(type.label)
                     }
                     .tint(current == type ? DS.ink3 : UserMarkKind.attended.tint)
                 }
@@ -35,7 +38,7 @@ struct AttendanceSwipeActions: ViewModifier {
                         AppAnalytics.tap("attendance_swipe.cancel")
                         set(nil)
                     } label: {
-                        Label("参加を取り消す", systemImage: "xmark.circle")
+                        Text("取消")
                     }
                 }
             }

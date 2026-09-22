@@ -995,6 +995,25 @@ enum DatabaseMigrations {
             try db.create(index: "idx_expenses_show", on: "expenses", columns: ["show_id"], ifNotExists: true)
         }
 
+        // 公演のチケット価格 (マスタ)。同期で後から入るので器だけ作る。
+        // 端末ローカルの収支 (expenses) と違い**みんなで共有する事実**。
+        // 席種は自由文字列 (S席 / 立見 / 配信 (アーカイブ付き) …)、機械で扱うのは
+        // kind (live / stream / live_viewing) だけ。規則は domain/ticket_prices.rs。
+        migrator.registerMigration("v33_show_tickets") { db in
+            try db.create(table: "show_tickets", ifNotExists: true) { t in
+                t.column("id", .text).primaryKey()
+                t.column("show_id", .text).notNull()
+                t.column("kind", .text).notNull().defaults(to: "live")
+                t.column("name", .text).notNull()
+                t.column("price", .integer).notNull()
+                t.column("is_estimate", .integer).notNull().defaults(to: 0)
+                t.column("note", .text)
+                t.column("sort_order", .integer).notNull().defaults(to: 0)
+            }
+            try db.create(index: "idx_show_tickets_show", on: "show_tickets",
+                          columns: ["show_id"], ifNotExists: true)
+        }
+
         return migrator
     }
 }
