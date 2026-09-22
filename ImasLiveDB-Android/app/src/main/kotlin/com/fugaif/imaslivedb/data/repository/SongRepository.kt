@@ -420,7 +420,8 @@ class SongRepository(
                     id = it.id,
                     title = it.title,
                     playCount = it.playCount.toInt(),
-                    brandId = it.brandId
+                    brandId = it.brandId,
+                    artworkUrl = it.artworkUrl
                 )
             }
         }?.let { return it }

@@ -56,6 +56,11 @@ pub struct SongPlayCountRecord {
     pub title: String,
     pub play_count: u32,
     pub brand_id: Option<String>,
+    /// ジャケット画像。**この行に無いと画面はジャケを出しようがない** —
+    /// 実際に回収率ダッシュボードの披露回数ランキングだけが `imageURL: nil` を
+    /// 渡していて、同じ画面の他のランキングと見た目が食い違っていた。
+    /// 一覧のジャケは `songs.artwork_url` の直参照が正本 (組み立てない)。
+    pub artwork_url: Option<String>,
 }
 
 /// 出演公演数ランキング 1 行 (iOS `CastShowCount`)。
@@ -136,6 +141,7 @@ pub fn song_play_count_ranking(snap: &Snapshot, limit: u32) -> Vec<SongPlayCount
                 title: s.title.clone(),
                 play_count: snap.performance_counts[i as usize],
                 brand_id: s.brand_id.clone(),
+                artwork_url: s.artwork_url.clone(),
             }
         })
         .collect()
@@ -325,7 +331,7 @@ mod tests {
     /// LIMIT -1 = 無制限 (SQLite の負値 LIMIT)。タイ込みの全順序を得るのに使う。
     fn sql_play_count_ranking(db: &Connection, limit: i64) -> Vec<SongPlayCountRecord> {
         db.prepare(
-            "SELECT s.id, s.title, COUNT(si.id) AS play_count, s.brand_id
+            "SELECT s.id, s.title, COUNT(si.id) AS play_count, s.brand_id, s.artwork_url
              FROM songs s JOIN setlist_items si ON s.id = si.song_id
              GROUP BY s.id ORDER BY play_count DESC LIMIT ?",
         )
@@ -336,6 +342,7 @@ mod tests {
                 title: r.get(1)?,
                 play_count: r.get::<_, i64>(2)? as u32,
                 brand_id: r.get(3)?,
+                artwork_url: r.get(4)?,
             })
         })
         .unwrap()

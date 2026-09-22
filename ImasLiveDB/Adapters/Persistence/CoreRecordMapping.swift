@@ -303,7 +303,8 @@ enum CoreRecordMapping {
             id: record.id,
             title: record.title,
             playCount: Int(record.playCount),
-            brandId: record.brandId
+            brandId: record.brandId,
+            artworkUrl: record.artworkUrl
         )
     }
 

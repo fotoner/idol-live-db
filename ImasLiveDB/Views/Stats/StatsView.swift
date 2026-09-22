@@ -435,7 +435,7 @@ struct StatsView: View {
                     ForEach(Array(songPlayCounts.enumerated()), id: \.offset) { index, item in
                         ImasRankingRow(
                             rank: index + 1,
-                            lead: .artwork(title: item.title, imageURL: nil),
+                            lead: .artwork(title: item.title, imageURL: artworkURL(item.artworkUrl)),
                             title: item.title,
                             sub: brandShortName(for: item.brandId),
                             metric: "\(item.playCount)",

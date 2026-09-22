@@ -162,7 +162,7 @@ interface SongDao {
     suspend fun fetchSongsSharingOriginalArtist(songId: String): List<Song>
 
     @Query("""
-        SELECT s.id, s.title, COUNT(si.id) AS play_count, s.brand_id
+        SELECT s.id, s.title, COUNT(si.id) AS play_count, s.brand_id, s.artwork_url
         FROM songs s
         JOIN setlist_items si ON s.id = si.song_id
         GROUP BY s.id

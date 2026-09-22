@@ -155,11 +155,16 @@ struct SongPlayCount: Codable, FetchableRecord, Identifiable, Sendable {
     var title: String
     var playCount: Int
     var brandId: String?
+    /// 一覧のジャケは `songs.artwork_url` の直参照が正本 (URL を組み立てない)。
+    /// **ここに無いと画面は出しようがない** — 実際、この型にだけ無かったせいで
+    /// 回収率ダッシュボードの披露回数ランキングだけジャケが出ていなかった。
+    var artworkUrl: String?
 
     enum CodingKeys: String, CodingKey {
         case id, title
         case playCount = "play_count"
         case brandId = "brand_id"
+        case artworkUrl = "artwork_url"
     }
 }
 

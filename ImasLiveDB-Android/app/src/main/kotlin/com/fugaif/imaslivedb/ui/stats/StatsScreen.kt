@@ -163,7 +163,7 @@ fun StatsScreen(viewModel: StatsViewModel = viewModel()) {
                         state.songPlayCounts.forEachIndexed { i, s ->
                             ImasRankingRow(rank = i + 1, title = s.title, metric = "${s.playCount}", brand = s.brandId,
                                 onClick = { selectedSongId = s.id }) {
-                                ImasArtwork(title = s.title, brand = s.brandId, size = 44.dp)
+                                ImasArtwork(title = s.title, brand = s.brandId, size = 44.dp, imageUrl = s.artworkUrl)
                             }
                             if (i < state.songPlayCounts.size - 1) Divider(color = DS.sep)
                         }

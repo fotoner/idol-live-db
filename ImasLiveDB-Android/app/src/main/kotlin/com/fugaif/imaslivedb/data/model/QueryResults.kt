@@ -125,7 +125,11 @@ data class SongPlayCount(
     @ColumnInfo(name = "id") val id: String,
     @ColumnInfo(name = "title") val title: String,
     @ColumnInfo(name = "play_count") val playCount: Int,
-    @ColumnInfo(name = "brand_id") val brandId: String?
+    @ColumnInfo(name = "brand_id") val brandId: String?,
+    /** 一覧のジャケは songs.artwork_url の直参照が正本 (URL を組み立てない)。
+     *  **ここに無いと画面は出しようがない** — この型にだけ無かったせいで
+     *  回収率ダッシュボードの披露回数ランキングだけジャケが出ていなかった。 */
+    @ColumnInfo(name = "artwork_url") val artworkUrl: String? = null
 )
 
 data class SongPerfCount(
