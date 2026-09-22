@@ -192,7 +192,7 @@ private fun SongMasteryRow(
         // チップだけを別の的にする。最上段では上がらない (連打で記録が飛ばないのはコアの規則)。
         Box(
             Modifier.combinedClickable(onClick = onCycle, onLongClick = onLongClick)
-                .padding(start = 4.dp, top = 6.dp, bottom = 6.dp, end = 0.dp)
+                .padding(start = 4.dp, top = 6.dp, bottom = 6.dp)
         ) {
             MasteryChip(level, scale, showsUnset = true)
         }
