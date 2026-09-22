@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.model.CalendarEntry
+import com.fugaif.imaslivedb.ui.components.AttendanceSwipeRow
 import com.fugaif.imaslivedb.ui.theme.DS
 import java.time.LocalDate
 
@@ -83,45 +84,53 @@ fun DayDetailSheet(
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
                 items(entries) { entry ->
-                    CalendarEntryRow(
-                        entry = entry,
-                        showDetail = (entry as? CalendarEntry.Show)
-                            ?.let { state.showDetails[it.row.showId] },
-                        onNavigateToShow = onNavigateToShow,
-                        onNavigateToSong = onNavigateToSong,
-                        onNavigateToIdol = onNavigateToIdol,
-                        onNavigateToEvent = onNavigateToEvent,
-                        trailing = if (entry is CalendarEntry.Show) {
-                            {
-                                Row(horizontalArrangement = Arrangement.spacedBy(0.dp)) {
-                                    IconButton(onClick = {
-                                        DeviceCalendar.addShow(
-                                            context,
-                                            entry.row,
-                                            state.showDetails[entry.row.showId]
-                                        )
-                                    }) {
-                                        Icon(
-                                            Icons.Filled.EditCalendar,
-                                            contentDescription = "カレンダーに追加",
-                                            tint = DS.success,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                    }
-                                    IconButton(onClick = { onNavigateToShow(entry.row.showId) }) {
-                                        Icon(
-                                            Icons.Filled.QueueMusic,
-                                            contentDescription = "セトリ",
-                                            tint = DS.ink2,
-                                            modifier = Modifier.size(20.dp)
-                                        )
+                    val row: @Composable () -> Unit = {
+                        CalendarEntryRow(
+                            entry = entry,
+                            showDetail = (entry as? CalendarEntry.Show)
+                                ?.let { state.showDetails[it.row.showId] },
+                            onNavigateToShow = onNavigateToShow,
+                            onNavigateToSong = onNavigateToSong,
+                            onNavigateToIdol = onNavigateToIdol,
+                            onNavigateToEvent = onNavigateToEvent,
+                            trailing = if (entry is CalendarEntry.Show) {
+                                {
+                                    Row(horizontalArrangement = Arrangement.spacedBy(0.dp)) {
+                                        IconButton(onClick = {
+                                            DeviceCalendar.addShow(
+                                                context,
+                                                entry.row,
+                                                state.showDetails[entry.row.showId]
+                                            )
+                                        }) {
+                                            Icon(
+                                                Icons.Filled.EditCalendar,
+                                                contentDescription = "カレンダーに追加",
+                                                tint = DS.success,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                        IconButton(onClick = { onNavigateToShow(entry.row.showId) }) {
+                                            Icon(
+                                                Icons.Filled.QueueMusic,
+                                                contentDescription = "セトリ",
+                                                tint = DS.ink2,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
                                     }
                                 }
+                            } else {
+                                null
                             }
-                        } else {
-                            null
-                        }
-                    )
+                        )
+                    }
+                    // 公演行だけ右スワイプで参加登録 (カレンダー月画面の選択日リストと同じ規則)。
+                    if (entry is CalendarEntry.Show) {
+                        AttendanceSwipeRow(showId = entry.row.showId, showName = entry.row.showName) { row() }
+                    } else {
+                        row()
+                    }
                 }
             }
         }

@@ -348,7 +348,6 @@ private fun SongListRow(
         previewUrl = item.song.previewUrl,
         brandId = item.song.brandId,
         releaseDate = item.song.releaseDate,
-        isFavorite = uiState.favoriteSongIds.contains(item.song.id),
         isMyPick = uiState.myPickSongIds.contains(item.song.id),
         collectedCount = uiState.collectedCounts[item.song.id],
         masteryLevel = uiState.masteryLevels[item.song.id] ?: 0u,
@@ -360,7 +359,6 @@ private fun SongListRow(
         // 何で絞っているかを行に渡す。当たった箇所に色が敷かれ、スコープに応じた補足が出る。
         searchMatch = uiState.searchText.takeIf { it.isNotEmpty() }
             ?.let { SongRowMatch(text = it, scope = uiState.searchMode) },
-        onFavoriteToggle = { viewModel.toggleFavorite(item.song.id) },
         onEditMastery = { onEditMastery(item) },
         modifier = Modifier
             .fillMaxWidth()

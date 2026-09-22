@@ -82,7 +82,6 @@ data class SongListUiState(
     // タグ絞り込み (TagFilterSheet) で選択中のタグ。複数選択時は AND (全タグを含む曲) で絞る。
     val selectedTags: List<CommunityApi.CommunityTag> = emptyList(),
     // 行アイコン用のマーク集合・回収数 (song_id ベース)。
-    val favoriteSongIds: Set<String> = emptySet(),
     val myPickSongIds: Set<String> = emptySet(),
     /**
      * 「KAMISABI収録のみ」絞り込み中だけ入る所持コンプ (分母の規則はコア一本)。
@@ -259,18 +258,6 @@ class SongListViewModel : ViewModel() {
         loadSongs()
     }
 
-    /** 一覧行のお気に入り☆をタップしたときの ON/OFF トグル。 */
-    fun toggleFavorite(songId: String) {
-        val ctx = appContext ?: return
-        viewModelScope.launch {
-            val on = AppModule.from(ctx).userMarkRepository.toggle(UserMark.SONG, songId, UserMark.FAVORITE)
-            val current = _uiState.value.favoriteSongIds
-            _uiState.value = _uiState.value.copy(
-                favoriteSongIds = if (on) current + songId else current - songId
-            )
-        }
-    }
-
     /**
      * 行の長押しメニューから習熟度を付け替える。
      *
@@ -383,7 +370,6 @@ class SongListViewModel : ViewModel() {
             _uiState.value = _uiState.value.copy(
                 isLoading = false,
                 songs = songs,
-                favoriteSongIds = favoriteIds,
                 myPickSongIds = myPickIds,
                 kamisabiCompletion = kamisabiCompletion,
                 collectedCounts = collectedCounts,

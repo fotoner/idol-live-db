@@ -21,8 +21,6 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -48,13 +46,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.model.EventWithDateRange
-import com.fugaif.imaslivedb.data.model.UserMark
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.ImasLeadBar
+import com.fugaif.imaslivedb.ui.components.EventAttendanceSwipeRow
 import com.fugaif.imaslivedb.ui.components.ImasListSkeleton
 import com.fugaif.imaslivedb.ui.components.ImasRemovableChip
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
-import com.fugaif.imaslivedb.ui.components.MarkToggleAction
 import com.fugaif.imaslivedb.ui.components.NameFilterField
 import com.fugaif.imaslivedb.ui.components.SkeletonThumb
 import com.fugaif.imaslivedb.ui.theme.DS
@@ -221,10 +218,17 @@ fun EventListScreen(
                             YearSectionHeader(year = group.year)
                         }
                         items(group.events, key = { it.event.id }) { ew ->
-                            EventRow(
-                                eventWithDate = ew,
-                                onClick = { onEventClick(ew.event.id) }
-                            )
+                            // 行の右スワイプで参加登録 (イベントは公演を複数束ねるので、
+                            // 既存の EventAttendanceSheet をそのまま開く)。
+                            EventAttendanceSwipeRow(
+                                eventId = ew.event.id,
+                                brand = ew.event.brandId
+                            ) {
+                                EventRow(
+                                    eventWithDate = ew,
+                                    onClick = { onEventClick(ew.event.id) }
+                                )
+                            }
                             HorizontalDivider(modifier = Modifier.padding(start = 72.dp))
                         }
                     }
@@ -322,6 +326,13 @@ private fun YearSectionHeader(year: String) {
     )
 }
 
+/**
+ * ライブ一覧の 1 行。ブランド色のリードバー + ライブ名 + 日付レンジ。
+ * 参加登録は行のスワイプ ([EventAttendanceSwipeRow]) から。
+ *
+ * ★お気に入りトグルは行から撤去済み (2026-09、iOS と同じ)。お気に入り自体は
+ * 詳細画面・お気に入り一覧・絞り込みに残るので機能は消えていない。
+ */
 @Composable
 private fun EventRow(
     eventWithDate: EventWithDateRange,
@@ -352,16 +363,5 @@ private fun EventRow(
                 Text(text = d, style = MaterialTheme.typography.bodySmall, color = DS.ink2)
             }
         }
-
-        Spacer(modifier = Modifier.width(4.dp))
-        MarkToggleAction(
-            entityType = UserMark.EVENT,
-            entityId = event.id,
-            kind = UserMark.FAVORITE,
-            activeIcon = Icons.Filled.Star,
-            inactiveIcon = Icons.Filled.StarBorder,
-            activeTint = DS.favorite,
-            contentDescription = "お気に入り"
-        )
     }
 }

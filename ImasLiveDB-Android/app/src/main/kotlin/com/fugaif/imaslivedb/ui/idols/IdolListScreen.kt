@@ -29,8 +29,6 @@ import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Badge
@@ -249,14 +247,12 @@ fun IdolListScreen(
                                     IdolRow(
                                         idol = idol,
                                         isPick = state.pickIds.contains(idol.id),
-                                        isFavorite = state.favoriteIds.contains(idol.id),
                                         displayName = displayName(idol),
                                         secondary = secondaryText(idol),
                                         cvLine = cvLine(idol),
                                         metric = state.sortOrder.metricLabel(idol),
                                         onClick = { onNavigateToIdolDetail(idol.id) },
-                                        onToggleMyPick = { viewModel.toggleMyPick(idol.id) },
-                                        onToggleFavorite = { viewModel.toggleFavorite(idol.id) }
+                                        onToggleMyPick = { viewModel.toggleMyPick(idol.id) }
                                     )
                                 }
                             }
@@ -271,13 +267,11 @@ fun IdolListScreen(
                                         IdolRow(
                                             idol = idol,
                                             isPick = state.pickIds.contains(idol.id),
-                                            isFavorite = state.favoriteIds.contains(idol.id),
                                             displayName = displayName(idol),
                                             secondary = secondaryText(idol),
                                             cvLine = cvLine(idol),
                                             onClick = { onNavigateToIdolDetail(idol.id) },
-                                            onToggleMyPick = { viewModel.toggleMyPick(idol.id) },
-                                            onToggleFavorite = { viewModel.toggleFavorite(idol.id) }
+                                            onToggleMyPick = { viewModel.toggleMyPick(idol.id) }
                                         )
                                     }
                                 }
@@ -328,19 +322,22 @@ private fun BrandSectionHeader(brand: Brand, count: Int, expanded: Boolean, onTo
     }
 }
 
+/**
+ * アイドル一覧の行。★お気に入りトグルは行から撤去済み (2026-09、iOS と同じ)。
+ * お気に入り自体は詳細画面のボタン・お気に入り一覧・絞り込みに残しているので
+ * 機能は消えていない。グリッド表示は元々お気に入りを出していないので変更なし。
+ */
 @Composable
 private fun IdolRow(
     idol: Idol,
     isPick: Boolean,
-    isFavorite: Boolean,
     displayName: String,
     secondary: String?,
     cvLine: String?,
     /** 並び替えのキー値 (「17歳」「158cm」等)。公式順/五十音順のときは null。 */
     metric: String? = null,
     onClick: () -> Unit,
-    onToggleMyPick: () -> Unit,
-    onToggleFavorite: () -> Unit
+    onToggleMyPick: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 8.dp, vertical = 4.dp),
@@ -373,8 +370,6 @@ private fun IdolRow(
         }
         MarkIconButton(active = isPick, activeIcon = Icons.Filled.Favorite, inactiveIcon = Icons.Filled.FavoriteBorder,
             tint = DS.pick, contentDescription = if (isPick) "担当解除" else "担当に追加", onClick = onToggleMyPick)
-        MarkIconButton(active = isFavorite, activeIcon = Icons.Filled.Star, inactiveIcon = Icons.Filled.StarBorder,
-            tint = DS.favorite, contentDescription = if (isFavorite) "お気に入り解除" else "お気に入りに追加", onClick = onToggleFavorite)
         Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = DS.ink3, modifier = Modifier.size(16.dp))
     }
 }

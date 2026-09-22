@@ -10,10 +10,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -39,7 +37,11 @@ data class SongRowMatch(val text: String, val scope: SongSearchMode)
 
 /**
  * 楽曲一覧の行。iOS SongRowView 構成: ImasLeadBar(ブランド) + ImasArtwork(プレビュー対応) +
- * 曲名(+タグ票数バッジ) + 歌唱者/ユニット + マイマーク行(担当/現地回収) + お気に入りトグル。
+ * 曲名(+タグ票数バッジ) + 歌唱者/ユニット + マイマーク行(担当/現地回収)。
+ *
+ * ★お気に入りトグルは行から撤去済み (2026-09、iOS と同じ)。一覧で毎行トグルできても
+ * 実際にはほとんど使われず、行の情報密度だけが上がっていた。お気に入り自体は
+ * 曲詳細のボタン・お気に入り一覧・絞り込みに残しているので機能は消えていない。
  *
  * 絞り込み中は [searchMatch] を渡すと、当たった箇所に色を敷き、スコープに応じて
  * 「なぜこの行が出ているか」の補足 (当たった歌唱者を先頭に / 当たった作家の役割行) を出す。
@@ -57,7 +59,6 @@ fun SongRow(
     previewUrl: String? = null,
     brandId: String? = null,
     releaseDate: String? = null,
-    isFavorite: Boolean = false,
     isMyPick: Boolean = false,
     collectedCount: Int? = null,
     /** 習熟度の段階 (0 = 未設定)。付いているときだけ行に小さく出す。
@@ -71,7 +72,6 @@ fun SongRow(
     composer: String? = null,
     arranger: String? = null,
     searchMatch: SongRowMatch? = null,
-    onFavoriteToggle: (() -> Unit)? = null,
     /** 渡すと長押しメニューに「習熟度を変える」が出る (行から直に段階を付けるため)。 */
     onEditMastery: (() -> Unit)? = null,
     modifier: Modifier = Modifier
@@ -124,15 +124,6 @@ fun SongRow(
             if (releaseDate != null || isMyPick || (collectedCount ?: 0) > 0 || masteryLevel > 0u) {
                 MarkRow(releaseDate = releaseDate, isMyPick = isMyPick, collectedCount = collectedCount,
                         masteryLevel = masteryLevel, masteryScale = masteryScale)
-            }
-        }
-        if (onFavoriteToggle != null) {
-            IconButton(onClick = onFavoriteToggle) {
-                Icon(
-                    imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                    contentDescription = if (isFavorite) "お気に入り解除" else "お気に入りに追加",
-                    tint = if (isFavorite) DS.favorite else DS.ink3
-                )
             }
         }
     }

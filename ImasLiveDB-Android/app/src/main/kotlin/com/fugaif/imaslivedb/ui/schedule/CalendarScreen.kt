@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.model.CalendarEntry
+import com.fugaif.imaslivedb.ui.components.AttendanceSwipeRow
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
 import com.fugaif.imaslivedb.ui.theme.DS
 import java.time.LocalDate
@@ -273,14 +274,28 @@ private fun MonthPane(
             }
             LazyColumn(modifier = Modifier.weight(1f), contentPadding = PaddingValues(bottom = 16.dp)) {
                 items(entries) { entry ->
-                    CalendarEntryRow(
-                        entry = entry,
-                        showDetail = (entry as? CalendarEntry.Show)?.let { state.showDetails[it.row.showId] },
-                        onNavigateToShow = onNavigateToShow,
-                        onNavigateToSong = onNavigateToSong,
-                        onNavigateToIdol = onNavigateToIdol,
-                        onNavigateToEvent = onNavigateToEvent
-                    )
+                    // 公演行だけ右スワイプで参加登録 (日詳細シートと同じ規則)。
+                    if (entry is CalendarEntry.Show) {
+                        AttendanceSwipeRow(showId = entry.row.showId, showName = entry.row.showName) {
+                            CalendarEntryRow(
+                                entry = entry,
+                                showDetail = state.showDetails[entry.row.showId],
+                                onNavigateToShow = onNavigateToShow,
+                                onNavigateToSong = onNavigateToSong,
+                                onNavigateToIdol = onNavigateToIdol,
+                                onNavigateToEvent = onNavigateToEvent
+                            )
+                        }
+                    } else {
+                        CalendarEntryRow(
+                            entry = entry,
+                            showDetail = null,
+                            onNavigateToShow = onNavigateToShow,
+                            onNavigateToSong = onNavigateToSong,
+                            onNavigateToIdol = onNavigateToIdol,
+                            onNavigateToEvent = onNavigateToEvent
+                        )
+                    }
                 }
                 if (selectedDate != null && entries.isEmpty()) {
                     item {

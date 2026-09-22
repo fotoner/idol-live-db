@@ -217,14 +217,9 @@ class IdolListViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun toggleFavorite(idolId: String) {
-        viewModelScope.launch {
-            val now = marksRepo.toggle(UserMark.IDOL, idolId, UserMark.FAVORITE)
-            val current = _uiState.value.favoriteIds.toMutableSet()
-            if (now) current.add(idolId) else current.remove(idolId)
-            _uiState.value = _uiState.value.copy(favoriteIds = current).rebuilt()
-        }
-    }
+    // お気に入りのトグルは一覧の行から撤去済み (2026-09、iOS と同じ)。詳細画面の
+    // トグルが別に持っているので、ここには残さない (使わない操作を残すと二重管理になる)。
+    // favoriteIds 自体はグリッド表示・絞り込みが引き続き使うので消さない。
 
     fun setSearchText(text: String) {
         _uiState.value = _uiState.value.copy(searchText = text).rebuilt()

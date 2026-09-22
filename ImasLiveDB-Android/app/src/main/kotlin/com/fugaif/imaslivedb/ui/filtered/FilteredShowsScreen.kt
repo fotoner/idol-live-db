@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fugaif.imaslivedb.ui.components.AttendanceSwipeRow
 import com.fugaif.imaslivedb.ui.components.ImasSectionHeader
 import com.fugaif.imaslivedb.ui.theme.DS
 
@@ -74,12 +75,15 @@ fun FilteredShowsScreen(
                             ImasSectionHeader(title = "${group.year}年", tight = true)
                         }
                         items(group.rows, key = { it.showId }) { row ->
-                            FilteredShowRow(
-                                title = row.title,
-                                subtitle = row.subtitle,
-                                brandId = row.brandId,
-                                rainbow = row.rainbow
-                            ) { onShowClick(row.showId) }
+                            // 行の右スワイプで参加登録 (ライブ一覧・イベント詳細の公演一覧と同じ規則)。
+                            AttendanceSwipeRow(showId = row.showId, showName = row.title) {
+                                FilteredShowRow(
+                                    title = row.title,
+                                    subtitle = row.subtitle,
+                                    brandId = row.brandId,
+                                    rainbow = row.rainbow
+                                ) { onShowClick(row.showId) }
+                            }
                             HorizontalDivider(color = DS.sep, modifier = Modifier.padding(start = 16.dp))
                         }
                     }

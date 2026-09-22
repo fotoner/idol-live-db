@@ -43,7 +43,6 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -109,7 +108,6 @@ import com.fugaif.imaslivedb.ui.components.ImasSectionHeader
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
 import com.fugaif.imaslivedb.ui.components.ImasChip
 import com.fugaif.imaslivedb.ui.components.ImasChipStyle
-import com.fugaif.imaslivedb.ui.components.MarkToggleAction
 import com.fugaif.imaslivedb.ui.filtered.IdolFilterKind
 import com.fugaif.imaslivedb.ui.tags.IdolTagPickerSheet
 import com.fugaif.imaslivedb.ui.theme.BrandPalette
@@ -852,6 +850,11 @@ private fun GalleryThumb(
     }
 }
 
+/**
+ * アイドル詳細内の楽曲行 (ライブ歌唱曲 / 楽曲原曲)。★お気に入りトグルは行から撤去済み
+ * (2026-09、iOS `IdolDetailView.songRow` と同じ)。お気に入り自体は曲詳細のボタン・
+ * お気に入り一覧・絞り込みに残しているので機能は消えていない。
+ */
 @Composable
 private fun SongRow(song: Song, seed: String?, performCount: Int? = null, onClick: () -> Unit) {
     Row(
@@ -867,11 +870,6 @@ private fun SongRow(song: Song, seed: String?, performCount: Int? = null, onClic
                 Text("${performCount}回", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3)
             }
         }
-        MarkToggleAction(
-            entityType = UserMark.SONG, entityId = song.id, kind = UserMark.FAVORITE,
-            activeIcon = Icons.Filled.Star, inactiveIcon = Icons.Filled.StarBorder,
-            activeTint = DS.favorite, contentDescription = "お気に入り"
-        )
     }
 }
 
