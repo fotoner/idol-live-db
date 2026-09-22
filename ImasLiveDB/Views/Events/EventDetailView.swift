@@ -142,17 +142,23 @@ struct EventDetailView: View {
             .background(DS.bg)
             .imasTheme(seed: seed, brand: brandSeed)
 
-            // 内部だけスクロール
-            ScrollView {
-                Group {
-                    switch segment {
-                    case 0: showsPanel
-                    case 1: castPanel
-                    default: infoPanel
+            // 内部だけスクロール。公演一覧 (segment 0) だけ List (スワイプ参加登録に必要)、
+            // 他パネルは従来通り ScrollView。
+            Group {
+                if segment == 0 {
+                    showsList
+                } else {
+                    ScrollView {
+                        Group {
+                            switch segment {
+                            case 1: castPanel
+                            default: infoPanel
+                            }
+                        }
+                        .padding(.top, DS.sp3)
+                        .padding(.bottom, DS.sp7)
                     }
                 }
-                .padding(.top, DS.sp3)
-                .padding(.bottom, DS.sp7)
             }
             .imasTheme(seed: seed, brand: brandSeed)
         }
@@ -264,9 +270,13 @@ struct EventDetailView: View {
 
     // MARK: - Panel 0: 公演・セトリ
 
+    /// ⚠️ ここは **List でなければならない**。行をスワイプしての参加登録 (`attendanceSwipe`)
+    /// は List の行にしか効かず、ScrollView + LazyVStack に付けても無言で消える
+    /// (習熟度画面のスワイプが同じ理由で一度死んでいる)。見出し・追加ボタン・空状態も
+    /// 同じ理由で List の行として差す (`plainRow`)。
     @ViewBuilder
-    private var showsPanel: some View {
-        VStack(alignment: .leading, spacing: DS.sp3) {
+    private var showsList: some View {
+        List {
             HStack {
                 ImasSectionHeader(title: "公演 ・ \(vm.shows.count) 公演 → セトリへ", tight: true)
                 Spacer(minLength: 8)
@@ -281,30 +291,34 @@ struct EventDetailView: View {
                     }
                 }
             }
-            .padding(.horizontal, DS.sp5)
+            .plainRow(background: DS.bg)
 
             if vm.shows.isEmpty {
-                ImasListContainer {
-                    ImasEmptyState(
-                        systemImage: "music.mic",
-                        title: "公演がまだありません",
-                        message: EditPermission.showEditAffordance ? "「追加」から公演を登録できます" : nil,
-                        actionTitle: EditPermission.showEditAffordance ? "公演を追加" : nil,
-                        action: EditPermission.showEditAffordance ? { start(.createShow) } : nil,
-                        seed: seed, brand: brandSeed
-                    )
-                }
-                .padding(.horizontal, DS.sp5)
+                ImasEmptyState(
+                    systemImage: "music.mic",
+                    title: "公演がまだありません",
+                    message: EditPermission.showEditAffordance ? "「追加」から公演を登録できます" : nil,
+                    actionTitle: EditPermission.showEditAffordance ? "公演を追加" : nil,
+                    action: EditPermission.showEditAffordance ? { start(.createShow) } : nil,
+                    seed: seed, brand: brandSeed
+                )
+                .plainRow(background: DS.bg)
             } else {
-                ImasListContainer {
-                    ForEach(Array(vm.shows.enumerated()), id: \.element.id) { idx, show in
-                        if idx > 0 { ImasRowDivider(inset: DS.sp5) }
-                        showRow(show)
-                    }
+                ForEach(vm.shows) { show in
+                    showRow(show)
+                        .listRowInsets(EdgeInsets(top: 0, leading: DS.sp5, bottom: 0, trailing: DS.sp5))
+                        .listRowBackground(DS.surface)
+                        .listRowSeparatorTint(DS.sep)
+                        .attendanceSwipe(show: show, event: event) {
+                            vm.recomputeAttendedShows()
+                        }
                 }
-                .padding(.horizontal, DS.sp5)
             }
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .background(DS.bg)
+        .environment(\.defaultMinListRowHeight, 0)
     }
 
     @ViewBuilder

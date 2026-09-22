@@ -157,27 +157,43 @@ struct EventListView: View {
             VStack(spacing: 0) {
                 // 同じ語が曲・アイドルに何件あるか (虫眼鏡を畳んだ代わりの導線)。
                 CrossTabCountChips(query: appliedSearchText, from: .events)
-                ScrollView {
-                LazyVStack(alignment: .leading, spacing: 0) {
+                // ⚠️ ここは **List でなければならない**。公演行のスワイプ参加登録
+                // (`eventAttendanceSwipe`) は List の行にしか効かず、ScrollView + LazyVStack
+                // に付けても無言で消える (習熟度画面で一度踏んだ罠と同じ)。
+                List {
                     ImasSegmented(labels: ["今後の予定", "開催済み"], selection: $timeFilter)
                         .padding(.horizontal, DS.sp5)
                         .padding(.top, 6)
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(DS.bg)
+                        .listRowSeparator(.hidden)
 
-                    activeFilterChips
+                    if hasActiveFilterChips {
+                        activeFilterChips
+                            .listRowInsets(EdgeInsets())
+                            .listRowBackground(DS.bg)
+                            .listRowSeparator(.hidden)
+                    }
 
                     if vm.isLoading {
                         ImasListSkeleton(rows: 10, thumb: .none)
+                            .padding(.horizontal, DS.sp5)
                             .padding(.top, DS.sp3)
+                            .listRowInsets(EdgeInsets())
+                            .listRowBackground(DS.bg)
+                            .listRowSeparator(.hidden)
                     }
 
                     ForEach(listItems) { item in
                         switch item {
                         case .yearHeader(let year, let isFirstGroup):
                             ImasSectionHeader(title: year, tight: true)
-                                .padding(.horizontal, DS.sp5)
                                 // 従来の「グループ VStack に付けていた上余白」と同じ値
                                 .padding(.top, isFirstGroup && !hasActiveFilterChips ? 6 : 18)
                                 .padding(.bottom, DS.sp3)
+                                .listRowInsets(EdgeInsets(top: 0, leading: DS.sp5, bottom: 0, trailing: DS.sp5))
+                                .listRowBackground(DS.bg)
+                                .listRowSeparator(.hidden)
 
                         case .row(let ew, let isFirst, let isLast):
                             VStack(spacing: 0) {
@@ -206,22 +222,42 @@ struct EventListView: View {
                                 )
                             )
                             .padding(.horizontal, DS.sp5)
+                            .listRowInsets(EdgeInsets())
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                            // イベントは公演 (show) を複数束ねることがあり、参加は show 単位でしか
+                            // 保存できない。ここで「1 公演なら直接登録」等の判定を新設すると
+                            // 出し分け規則の二重管理になるので、公演ごとの参加管理は既存の
+                            // `EventAttendanceSheet` (EventDetailView と共有) にそのまま委ねる。
+                            .eventAttendanceSwipe(
+                                event: ew.event,
+                                seed: brandColorMap[ew.event.brandId ?? ""],
+                                brand: ew.event.brandId
+                            )
                         }
                     }
 
                     if vm.groupedByYear.isEmpty && !vm.isLoading {
                         emptyState
+                            .listRowInsets(EdgeInsets())
+                            .listRowBackground(DS.bg)
+                            .listRowSeparator(.hidden)
                     }
 
                     Color.clear.frame(height: 24)
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(DS.bg)
+                        .listRowSeparator(.hidden)
                 }
-            }
-            .background(DS.bg)
-            .scrollDismissesKeyboard(.immediately)
-            .refreshable {
-                await syncEngine.performIncrementalSync(database: database)
-                await vm.loadData(includeEmpty: showEmptyEvents, query: listQuery)
-            }
+                .listStyle(.plain)
+                .environment(\.defaultMinListRowHeight, 0)
+                .scrollContentBackground(.hidden)
+                .background(DS.bg)
+                .scrollDismissesKeyboard(.immediately)
+                .refreshable {
+                    await syncEngine.performIncrementalSync(database: database)
+                    await vm.loadData(includeEmpty: showEmptyEvents, query: listQuery)
+                }
             }
             .navigationTitle("ライブ")
             // 絞り込みフィールドはナビバーの中 (standardListToolbar の principal)。
@@ -432,8 +468,9 @@ struct EventListView: View {
 // MARK: - Supporting types
 // YearGroup は Domain/UseCases/EventGrouping.swift に移動 (純粋ロジックとして単体テスト対象)。
 
-/// ライブ一覧の 1 行。行頭の細いリードバー (合同 = rainbow) + ライブ名 + 日付レンジ +
-/// ★お気に入りトグル。エンティティ色は seed (ブランドカラー hex) で控えめに供給する。
+/// ライブ一覧の 1 行。行頭の細いリードバー (合同 = rainbow) + ライブ名 + 日付レンジ。
+/// エンティティ色は seed (ブランドカラー hex) で控えめに供給する。
+/// 参加登録は行のスワイプ (`eventAttendanceSwipe`) から。
 private struct EventRowView: View {
     let event: Event
     var dateText: String? = nil
@@ -444,13 +481,18 @@ private struct EventRowView: View {
     private var isJoint: Bool { !event.jointBrandIdList.isEmpty }
 
     var body: some View {
+        // ★お気に入りトグルは行から撤去済み (2026-09)。お気に入り自体は
+        // 詳細画面・お気に入り一覧・絞り込みに残る。
+        //
+        // 矢印は**この行では描かない**。一覧が List になったので NavigationLink 側が
+        // 標準の矢印を出しており、行にも付けると 2 本並ぶ (実機で確認)。
         ImasLeadRow(
             title: eventDisplayName(event.name),
             subtitle: dateText,
             seed: seedHex,
             rainbow: isJoint
         ) {
-            FavoriteToggleButton(entity: .event, id: event.id, size: 20)
+            EmptyView()
         }
         .background(DS.surface)
     }

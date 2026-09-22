@@ -385,23 +385,32 @@ struct CalendarDayDetailView: View {
 
     @ViewBuilder
     private func entryRow(for entry: CalendarEntry) -> some View {
-        DayEntryRow(entry: entry, onSelect: onSelect, onSelectPersonal: onSelectPersonal, displayDate: selectedDate)
-            .environment(database)
-            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-            .listRowBackground(DS.surface)
-            .listRowSeparatorTint(DS.sep)
-            // 公演行だけ「カレンダーに追加」スワイプアクションを付ける
-            .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                if case .show(let row) = entry {
-                    Button {
-                        AppAnalytics.tap("calendar_day.calendar_add")
-                        exportTarget = CalendarShowEntry(showRow: row)
-                    } label: {
-                        Label("カレンダー", systemImage: "calendar.badge.plus")
-                    }
-                    .tint(DS.success)
-                }
+        Group {
+            if case .show(let row) = entry {
+                // 公演行だけ参加登録のスワイプを付ける (右)。カレンダー追加 (左) と規則を共有。
+                DayEntryRow(entry: entry, onSelect: onSelect, onSelectPersonal: onSelectPersonal, displayDate: selectedDate)
+                    .environment(database)
+                    .attendanceSwipe(show: row.show)
+            } else {
+                DayEntryRow(entry: entry, onSelect: onSelect, onSelectPersonal: onSelectPersonal, displayDate: selectedDate)
+                    .environment(database)
             }
+        }
+        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+        .listRowBackground(DS.surface)
+        .listRowSeparatorTint(DS.sep)
+        // 公演行だけ「カレンダーに追加」スワイプアクションを付ける
+        .swipeActions(edge: .leading, allowsFullSwipe: false) {
+            if case .show(let row) = entry {
+                Button {
+                    AppAnalytics.tap("calendar_day.calendar_add")
+                    exportTarget = CalendarShowEntry(showRow: row)
+                } label: {
+                    Label("カレンダー", systemImage: "calendar.badge.plus")
+                }
+                .tint(DS.success)
+            }
+        }
     }
 
     // MARK: - カレンダーエクスポート実行

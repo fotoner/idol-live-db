@@ -82,7 +82,6 @@ final class SongListViewModel {
     /// 「披露回数順 / 回収率順」で並べている時だけ読む。それ以外の並びでは行に出さないので、
     /// 取っても捨てるだけ (タブを開くたびに setlist_items 全体を数える必要はない)。
     private(set) var performanceCounts: [String: Int] = [:]
-    private(set) var favoriteSongIds: Set<String> = []
     private(set) var myPickSongIds: Set<String> = []
     private(set) var notedSongIds: Set<String> = []
 
@@ -315,7 +314,6 @@ final class SongListViewModel {
     /// 一覧行アイコン用のマイマーク集合・回収数を bulk 取得する。
     /// 曲データ本体の再取得を伴わないので、タブ再表示時の軽量リフレッシュにも使う。
     func refreshMarkDisplays() async {
-        favoriteSongIds = Set(markService.allMarked(kind: .favorite, entity: .song))
         notedSongIds = Set(markService.allMarked(kind: .note, entity: .song))
         myPickSongIds = await myPickSongIdSet()
         collectedCounts = (try? await songReading.songCollectedCounts()) ?? [:]

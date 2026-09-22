@@ -927,7 +927,6 @@ struct IdolDetailView: View {
         action: @escaping () -> Void
     ) -> some View {
         let collected = markService.bool(.collected, entity: .song, id: song.id)
-        let favorited = markService.bool(.favorite, entity: .song, id: song.id)
         let artURL = song.artworkUrl.flatMap { URL(string: $0) }
         let prevURL = song.previewUrl.flatMap { URL(string: $0) }
         return Button(action: action) {
@@ -962,16 +961,6 @@ struct IdolDetailView: View {
                     }
                 }
                 Spacer(minLength: 0)
-                Button {
-                    try? markService.toggle(.favorite, entity: .song, id: song.id)
-                } label: {
-                    Image(systemName: favorited ? "star.fill" : "star")
-                        .font(.imasScaled( 18))
-                        .foregroundStyle(favorited ? DS.favorite : DS.ink3)
-                        .frame(width: 32, height: 32)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
             }
             .padding(.horizontal, DS.sp4)
             .padding(.vertical, 9)

@@ -881,7 +881,6 @@ struct SongListView: View {
         SongRowView(
             item: item,
             collectedCount: vm.collectedCounts[item.song.id],
-            isFavorite: vm.favoriteSongIds.contains(item.song.id),
             isMyPick: vm.myPickSongIds.contains(item.song.id),
             hasNote: vm.notedSongIds.contains(item.song.id),
             masteryLevel: UserMarkService.shared.mastery(songId: item.song.id),

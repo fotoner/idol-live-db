@@ -452,13 +452,27 @@ struct CalendarView: View {
         } else {
             List {
                 ForEach(entries) { entry in
-                    DayEntryRow(
-                        entry: entry,
-                        onSelect: { dest in sheetDestination = dest },
-                        onSelectPersonal: { event in personalDetail = event },
-                        displayDate: selectedDate
-                    )
-                    .environment(database)
+                    Group {
+                        if case .show(let row) = entry {
+                            // 公演行だけ参加登録のスワイプを付ける (CalendarDayDetailView と同じ規則)。
+                            DayEntryRow(
+                                entry: entry,
+                                onSelect: { dest in sheetDestination = dest },
+                                onSelectPersonal: { event in personalDetail = event },
+                                displayDate: selectedDate
+                            )
+                            .environment(database)
+                            .attendanceSwipe(show: row.show)
+                        } else {
+                            DayEntryRow(
+                                entry: entry,
+                                onSelect: { dest in sheetDestination = dest },
+                                onSelectPersonal: { event in personalDetail = event },
+                                displayDate: selectedDate
+                            )
+                            .environment(database)
+                        }
+                    }
                     .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                     .listRowBackground(DS.surface)
                     .listRowSeparatorTint(DS.sep)

@@ -53,31 +53,48 @@ struct FilteredShowsView: View {
         .trackScreen("filtered_shows")
     }
 
+    // ⚠️ ここは **List でなければならない**。行をスワイプしての参加登録 (`attendanceSwipe`) は
+    // List の行にしか効かず、ScrollView + LazyVStack に付けても無言で消える
+    // (習熟度画面のスワイプが同じ理由で一度死んでいる)。
     private var content: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 0) {
-                ForEach(Array(groupedByYear.enumerated()), id: \.element.year) { index, group in
-                    VStack(alignment: .leading, spacing: DS.sp3) {
-                        // tight は count を描画しないので渡さない (イベント一覧と同じ見出し)。
-                        ImasSectionHeader(title: "\(group.year)年", tight: true)
-                            .padding(.horizontal, DS.sp5)
-
-                        ImasListContainer {
-                            ForEach(Array(group.shows.enumerated()), id: \.element.id) { rowIndex, show in
-                                if rowIndex > 0 {
-                                    ImasRowDivider(inset: 16)
-                                }
-                                Button { navigate(.show(show)) } label: { showRow(show) }
-                                    .buttonStyle(.plain)
-                            }
-                        }
-                        .padding(.horizontal, DS.sp5)
-                    }
+        List {
+            ForEach(Array(groupedByYear.enumerated()), id: \.element.year) { index, group in
+                ImasSectionHeader(title: "\(group.year)年", tight: true)
                     .padding(.top, index == 0 ? 8 : 18)
+                    .plainRow(background: DS.bg)
+
+                ForEach(Array(group.shows.enumerated()), id: \.element.id) { rowIndex, show in
+                    VStack(spacing: 0) {
+                        if rowIndex > 0 {
+                            ImasRowDivider(inset: 16)
+                        }
+                        Button { navigate(.show(show)) } label: { showRow(show) }
+                            .buttonStyle(.plain)
+                    }
+                    .background(DS.surface)
+                    .clipShape(
+                        .rect(
+                            topLeadingRadius: rowIndex == 0 ? DS.rMD : 0,
+                            bottomLeadingRadius: rowIndex == group.shows.count - 1 ? DS.rMD : 0,
+                            bottomTrailingRadius: rowIndex == group.shows.count - 1 ? DS.rMD : 0,
+                            topTrailingRadius: rowIndex == 0 ? DS.rMD : 0
+                        )
+                    )
+                    .listRowInsets(EdgeInsets(top: 0, leading: DS.sp5, bottom: 0, trailing: DS.sp5))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .attendanceSwipe(show: show, event: events[show.eventId])
                 }
-                Color.clear.frame(height: 24)
             }
+            Color.clear.frame(height: 24)
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(DS.bg)
+                .listRowSeparator(.hidden)
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .background(DS.bg)
+        .environment(\.defaultMinListRowHeight, 0)
     }
 
     @ViewBuilder

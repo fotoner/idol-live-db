@@ -506,7 +506,6 @@ private struct IdolRowView: View {
             }
 
             MyPickToggleButton(id: idol.id)
-            FavoriteToggleButton(entity: .idol, id: idol.id)
 
             ImasRowChevron()
                 .padding(.trailing, DS.sp2)

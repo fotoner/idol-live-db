@@ -182,10 +182,9 @@ struct UnitDetailView: View {
         .padding(.top, DS.sp4)
     }
 
-    /// 楽曲行 (現地回収✓バッジ + お気に入りトグル)。IdolDetailView.songRow と同じ構成。
+    /// 楽曲行 (現地回収✓バッジ)。IdolDetailView.songRow と同じ構成。
     private func songRow(_ song: Song, action: @escaping () -> Void) -> some View {
         let collected = markService.bool(.collected, entity: .song, id: song.id)
-        let favorited = markService.bool(.favorite, entity: .song, id: song.id)
         let artURL = song.artworkUrl.flatMap { URL(string: $0) }
         let prevURL = song.previewUrl.flatMap { URL(string: $0) }
         return Button(action: action) {
@@ -205,17 +204,6 @@ struct UnitDetailView: View {
                     }
                 }
                 Spacer(minLength: 0)
-                Button {
-                    try? markService.toggle(.favorite, entity: .song, id: song.id)
-                } label: {
-                    Image(systemName: favorited ? "star.fill" : "star")
-                        .font(.imasScaled( 18))
-                        .foregroundStyle(favorited ? DS.favorite : DS.ink3)
-                        .frame(width: 32, height: 32)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(favorited ? "お気に入り解除" : "お気に入りに追加")
             }
             .padding(.horizontal, DS.sp4)
             .padding(.vertical, 9)

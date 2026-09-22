@@ -24,7 +24,11 @@ enum SongRowMetric: Equatable {
 ///
 /// 構成: ImasLeadBar(ブランド) + ArtworkImageView(実ジャケ×ソリッドフォールバック, プレビュー対応)
 ///       + 曲名 + [歌唱者 StackedAvatars + ユニット/演者ラベル]
-///       + マイマーク行 (リリース日 / 担当♥ / メモ / 習熟度 / 現地回収✓) + ★お気に入りトグル。
+///       + マイマーク行 (リリース日 / 担当♥ / メモ / 習熟度 / 現地回収✓)。
+///
+/// ★お気に入りトグルは行から撤去済み (2026-09)。一覧で毎行トグルできても
+/// 実際にはほとんど使われず、行の情報密度だけが上がっていた。お気に入り自体は
+/// 曲詳細のボタン・お気に入り一覧・絞り込みに残しているので機能は消えていない。
 ///
 /// 実ジャケと「画像なし=ソリッド面+曲名」が同列で違和感なく並ぶよう、ArtworkImageView に
 /// ブランド色 seed を渡してフォールバックをテーマ色で表現する。
@@ -32,8 +36,6 @@ struct SongRowView: View {
     let item: SongWithArtists
     /// 現地回収 N 回 (参加ライブで披露された回数)。 0 / nil なら非表示。
     var collectedCount: Int? = nil
-    /// お気に入りマーク
-    var isFavorite: Bool = false
     /// 担当アイドルが歌唱者にいる (歌唱アイドル ∩ 担当 ≠ 空)
     var isMyPick: Bool = false
     /// メモがある
@@ -143,8 +145,6 @@ struct SongRowView: View {
             .padding(.top, 1)
 
             Spacer(minLength: 0)
-
-            FavoriteToggleButton(entity: .song, id: song.id)
         }
         .padding(.vertical, 6)
         .contentShape(Rectangle())
