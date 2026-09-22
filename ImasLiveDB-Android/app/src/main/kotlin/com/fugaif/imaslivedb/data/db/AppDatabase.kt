@@ -11,6 +11,7 @@ import com.fugaif.imaslivedb.data.db.dao.CalendarDao
 import com.fugaif.imaslivedb.data.db.dao.CommunityDao
 import com.fugaif.imaslivedb.data.db.dao.EventDao
 import com.fugaif.imaslivedb.data.db.dao.ExpenseDao
+import com.fugaif.imaslivedb.data.db.dao.ShowTicketDao
 import com.fugaif.imaslivedb.data.db.dao.IdolDao
 import com.fugaif.imaslivedb.data.db.dao.MetaDao
 import com.fugaif.imaslivedb.data.db.dao.PersonalTagDao
@@ -103,6 +104,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun userMarkDao(): UserMarkDao
     abstract fun personalTagDao(): PersonalTagDao
     abstract fun expenseDao(): ExpenseDao
+    abstract fun showTicketDao(): ShowTicketDao
 
     companion object {
         @Volatile

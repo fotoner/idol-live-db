@@ -10,10 +10,12 @@ import com.fugaif.imaslivedb.data.image.CustomImageStore
 import com.fugaif.imaslivedb.data.repository.CalendarRepository
 import com.fugaif.imaslivedb.data.repository.EditFeedRepository
 import com.fugaif.imaslivedb.data.repository.EventRepository
+import com.fugaif.imaslivedb.data.repository.ExpenseRepository
 import com.fugaif.imaslivedb.data.repository.IdolRepository
 import com.fugaif.imaslivedb.data.repository.PerformanceEvidenceRepository
 import com.fugaif.imaslivedb.data.repository.PersonalTagRepository
 import com.fugaif.imaslivedb.data.repository.SearchRepository
+import com.fugaif.imaslivedb.data.repository.ShowTicketRepository
 import com.fugaif.imaslivedb.data.repository.SongRepository
 import com.fugaif.imaslivedb.data.repository.StatsRepository
 import com.fugaif.imaslivedb.data.repository.UnitRepository
@@ -60,6 +62,8 @@ class AppModule private constructor(context: Context) {
     val customImageStore: CustomImageStore by lazy { CustomImageStore(appContext) }
     val userMarkRepository: UserMarkRepository by lazy { UserMarkRepository(database) }
     val personalTagRepository: PersonalTagRepository by lazy { PersonalTagRepository(database) }
+    val expenseRepository: ExpenseRepository by lazy { ExpenseRepository(database) }
+    val showTicketRepository: ShowTicketRepository by lazy { ShowTicketRepository(database) }
     val authService: AuthService by lazy { AuthService(appContext) }
     val communityApi: CommunityApi by lazy { CommunityApi(appContext, authService) }
     val editApi: EditApi by lazy { EditApi(appContext, authService) }

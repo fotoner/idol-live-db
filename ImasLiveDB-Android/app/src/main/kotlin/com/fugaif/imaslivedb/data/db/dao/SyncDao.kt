@@ -22,6 +22,7 @@ import com.fugaif.imaslivedb.data.model.VenueHall
 import com.fugaif.imaslivedb.data.model.Costume
 import com.fugaif.imaslivedb.data.model.CostumeWear
 import com.fugaif.imaslivedb.data.model.Creator
+import com.fugaif.imaslivedb.data.model.ShowTicket
 import com.fugaif.imaslivedb.data.model.UnitVersion
 import com.fugaif.imaslivedb.data.model.VenueName
 
@@ -56,6 +57,7 @@ interface SyncDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun upsertVenueHalls(rows: List<VenueHall>)
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun upsertCostumes(rows: List<Costume>)
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun upsertCostumeWears(rows: List<CostumeWear>)
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun upsertShowTickets(rows: List<ShowTicket>)
 
     @Query("DELETE FROM brands WHERE id IN (:ids)") suspend fun deleteBrands(ids: List<String>)
     @Query("DELETE FROM idols WHERE id IN (:ids)") suspend fun deleteIdols(ids: List<String>)
@@ -72,6 +74,7 @@ interface SyncDao {
     @Query("DELETE FROM venue_halls WHERE id IN (:ids)") suspend fun deleteVenueHalls(ids: List<String>)
     @Query("DELETE FROM costumes WHERE id IN (:ids)") suspend fun deleteCostumes(ids: List<String>)
     @Query("DELETE FROM costume_wears WHERE id IN (:ids)") suspend fun deleteCostumeWears(ids: List<String>)
+    @Query("DELETE FROM show_tickets WHERE id IN (:ids)") suspend fun deleteShowTickets(ids: List<String>)
 
     // 複合 PK の tombstone。列の並びはコアの syncTableInfo(pkColumns) と同順にしてある
     // (呼び出し側は分解結果を先頭から順に渡すだけでよい)。
@@ -115,4 +118,5 @@ interface SyncDao {
     @Query("SELECT id FROM venue_halls") suspend fun venueHallIds(): List<String>
     @Query("SELECT id FROM costumes") suspend fun costumeIds(): List<String>
     @Query("SELECT id FROM costume_wears") suspend fun costumeWearIds(): List<String>
+    @Query("SELECT id FROM show_tickets") suspend fun showTicketIds(): List<String>
 }

@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.fugaif.imaslivedb.data.model.PerformerRow
 import com.fugaif.imaslivedb.data.model.SetlistRow
 import com.fugaif.imaslivedb.data.model.Show
+import com.fugaif.imaslivedb.data.model.ShowTicket
 import com.fugaif.imaslivedb.di.AppModule
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,6 +31,11 @@ data class SetlistUiState(
     val performersByItemId: Map<String, List<PerformerRow>> = emptyMap(),
     /** この公演で着られた衣装 (進行順)。畳み方も並びも共有コアが決めている。 */
     val costumes: List<ShowCostumeRecord> = emptyList(),
+    /**
+     * この公演の券種 (マスタ・生の行)。「どんな価格の券があったか」を出す。
+     * 絞り込み・並び・価格帯の判断は画面側で共有コア (`ticketsForKind` 等) へ委ねる。
+     */
+    val tickets: List<ShowTicket> = emptyList(),
     /**
      * setlist_items.id → 行の添え物 (名義・ユニットの札・全員・何回目・いつぶり・自分の回収)。
      * **中身を決めるのは共有コア。** 画面はキーで引いて出すだけ。
@@ -89,6 +95,7 @@ class SetlistViewModel : ViewModel() {
             // 曲ごとのグループ化と並びは共有コア (showSetlistPerformers) が持つ。
             val performersByItemId = module.eventRepository.fetchPerformersByItem(showId)
             val costumes = module.eventRepository.fetchShowCostumes(showId)
+            val tickets = module.showTicketRepository.forShow(showId)
             // 名義も「いつぶりか」も「自分の回収」も共有コアが決める。ここは受け取って配るだけ。
             val rowMeta = module.eventRepository.fetchSetlistRowMeta(
                 showId, nameMode, displayMode, includeStreamInCollection
@@ -101,6 +108,7 @@ class SetlistViewModel : ViewModel() {
                 setlist = setlist,
                 performersByItemId = performersByItemId,
                 costumes = costumes,
+                tickets = tickets,
                 rowMetaByItemId = rowMeta.rowsByItemId,
                 collectionSummary = rowMeta.collection
             )

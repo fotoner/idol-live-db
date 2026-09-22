@@ -4,6 +4,8 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import uniffi.imas_core.ShowTicket as CoreShowTicket
+import uniffi.imas_core.ticketKindFromAttendance
 
 /**
  * 公演のチケット価格。
@@ -48,4 +50,20 @@ data class ShowTicket(
 
     @ColumnInfo(name = "sort_order", defaultValue = "0")
     val sortOrder: Long = 0,
-)
+) {
+    /**
+     * コアに渡す形。形態の読み替え (欠けていれば現地扱い) も含めてコアの規則
+     * ([ticketKindFromAttendance]) に任せる — 参加形態の既定と同じ約束なので、
+     * ここで別の変換を書くと iOS `ShowTicketRecord.ticket` と規則が二重管理になる。
+     */
+    fun toCore(): CoreShowTicket = CoreShowTicket(
+        id = id,
+        showId = showId,
+        kind = ticketKindFromAttendance(kind),
+        name = name,
+        price = price,
+        isEstimate = isEstimate,
+        note = note,
+        sortOrder = sortOrder
+    )
+}

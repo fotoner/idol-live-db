@@ -82,6 +82,7 @@ import com.fugaif.imaslivedb.data.model.JstDay
 import com.fugaif.imaslivedb.data.model.PerformerRow
 import com.fugaif.imaslivedb.data.model.SetlistRow
 import com.fugaif.imaslivedb.data.model.Show
+import com.fugaif.imaslivedb.data.model.ShowTicket
 import com.fugaif.imaslivedb.data.model.UserMark
 import com.fugaif.imaslivedb.data.model.VenueDirectory
 import com.fugaif.imaslivedb.di.AppModule
@@ -112,6 +113,10 @@ import uniffi.imas_core.setlistDisplayModeFromStored
 import uniffi.imas_core.setlistDisplayModes
 import uniffi.imas_core.ShowCollectionRecord
 import uniffi.imas_core.ShowCostumeRecord
+import uniffi.imas_core.formatYen
+import uniffi.imas_core.ticketKindLabel
+import uniffi.imas_core.ticketPriceRanges
+import uniffi.imas_core.ticketsForKind
 import com.fugaif.imaslivedb.ui.theme.brandColor
 import com.fugaif.imaslivedb.ui.theme.displayName
 import com.fugaif.imaslivedb.ui.theme.joined
@@ -366,6 +371,11 @@ fun SetlistScreen(
                                 brandId = uiState.brandId,
                                 onFilteredShowsClick = onFilteredShowsClick
                             )
+                        }
+                        if (uiState.tickets.isNotEmpty()) {
+                            item(key = "tickets") {
+                                TicketCard(tickets = uiState.tickets, brandId = uiState.brandId)
+                            }
                         }
                         if (uiState.costumes.isNotEmpty()) {
                             item(key = "costumes") {
@@ -879,6 +889,57 @@ private fun VenueDateCard(
                 key = "日付", value = show.date, brand = brandId, tappable = true,
                 onClick = { onFilteredShowsClick(ShowFilterKind.DATE, show.date) }
             )
+        }
+    }
+}
+
+/**
+ * この公演のチケット価格。iOS `SetlistView` のチケットセクションと対。
+ *
+ * 券種の絞り込み・並び・価格帯・推定の札は共有コア (`domain/ticket_prices.rs`) が
+ * 一本で決める。ここは受け取ったものをそのまま並べるだけ。
+ */
+@Composable
+private fun TicketCard(tickets: List<ShowTicket>, brandId: String?) {
+    val coreTickets = remember(tickets) { tickets.map { it.toCore() } }
+    val ranges = remember(coreTickets) { ticketPriceRanges(coreTickets) }
+    Column(Modifier.padding(bottom = 8.dp).fillMaxWidth()) {
+        ImasSectionHeader(title = "チケット", tight = true)
+        Column(
+            Modifier.padding(horizontal = 16.dp).fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp)).background(DS.surface)
+        ) {
+            ranges.forEachIndexed { rangeIndex, range ->
+                if (rangeIndex > 0) HorizontalDivider(color = DS.sep, modifier = Modifier.padding(start = 16.dp))
+                val kindTickets = ticketsForKind(coreTickets, range.kind)
+                // 券種が 1 つだけの形態は帯を出さない (「配信 ¥6,500」が 2 行並んで、
+                // 同じ数字を 2 回読ませることになる)。
+                val showsBand = range.count.toInt() > 1
+                if (showsBand) {
+                    ImasLabeledRow(
+                        key = ticketKindLabel(range.kind),
+                        value = if (range.hasEstimate) "${range.label} (推定含む)" else range.label,
+                        brand = brandId
+                    )
+                }
+                kindTickets.forEachIndexed { index, ticket ->
+                    if (showsBand || index > 0) {
+                        HorizontalDivider(
+                            color = DS.sep,
+                            modifier = Modifier.padding(start = if (showsBand) 32.dp else 16.dp)
+                        )
+                    }
+                    ImasLabeledRow(
+                        key = if (showsBand) {
+                            if (ticket.isEstimate) "${ticket.name} (推定)" else ticket.name
+                        } else {
+                            "${ticketKindLabel(range.kind)}・${ticket.name}"
+                        },
+                        value = formatYen(ticket.price),
+                        brand = brandId
+                    )
+                }
+            }
         }
     }
 }

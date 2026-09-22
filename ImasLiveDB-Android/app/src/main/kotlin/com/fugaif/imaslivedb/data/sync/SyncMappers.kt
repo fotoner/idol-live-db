@@ -9,6 +9,7 @@ import com.fugaif.imaslivedb.data.model.SetlistItem
 import com.fugaif.imaslivedb.data.model.SetlistPerformer
 import com.fugaif.imaslivedb.data.model.Show
 import com.fugaif.imaslivedb.data.model.ShowCast
+import com.fugaif.imaslivedb.data.model.ShowTicket
 import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.data.model.SongArtist
 import com.fugaif.imaslivedb.data.model.SongVideo
@@ -72,6 +73,7 @@ object SyncMappers {
             is CkRow.Venue -> row.row.id
             is CkRow.VenueName -> row.row.id
             is CkRow.VenueHall -> row.row.id
+            is CkRow.ShowTicket -> row.row.id
             else -> null
         }
     }
@@ -287,6 +289,27 @@ object SyncMappers {
                 setlistItemId = row.setlistItemId.emptyToNull(),
                 idolId = row.idolId.emptyToNull(),
                 sortOrder = row.sortOrder.toInt()
+            )
+        }
+
+    /**
+     * 公演のチケット価格 (マスタ)。`kind` は生文字列のまま持つ — 選び方・並びの判断は
+     * 呼び出し側が [ShowTicket.toCore] で共有コアへ渡してから行うので、ここで
+     * `TicketKind` へ変換しない。価格が無い/数でない CloudKit 行はコア
+     * (`ck_ingest_web_services_batch`) が取り込まない (`invalidRecordNames` に落ちる) ので、
+     * ここに来る時点で price は正の整数。
+     */
+    fun showTickets(rows: List<CkRow>): List<ShowTicket> =
+        rows.filterIsInstance<CkRow.ShowTicket>().map { (row) ->
+            ShowTicket(
+                id = row.id,
+                showId = row.showId,
+                kind = row.kind,
+                name = row.name,
+                price = row.price,
+                isEstimate = row.isEstimate,
+                note = row.note.emptyToNull(),
+                sortOrder = row.sortOrder
             )
         }
 

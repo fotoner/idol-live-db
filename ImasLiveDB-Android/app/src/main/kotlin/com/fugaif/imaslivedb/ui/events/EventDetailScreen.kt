@@ -78,6 +78,7 @@ import com.fugaif.imaslivedb.data.model.JstDay
 import com.fugaif.imaslivedb.data.model.Show
 import com.fugaif.imaslivedb.data.model.UserMark
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.ui.components.AttendanceSwipeRow
 import com.fugaif.imaslivedb.ui.components.CommunityLoginPromptDialog
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
@@ -258,7 +259,8 @@ fun EventDetailScreen(
                             uiState, seed, brand, onShowClick,
                             canEdit = canEditHere,
                             onEditShow = { show -> startEdit { editingShow = show } },
-                            onShowHistory = { show -> historyShow = show }
+                            onShowHistory = { show -> historyShow = show },
+                            onAttendanceChange = { scope.launch { reloadAttendance() } }
                         )
                         1 -> castSection(uiState, seed, brand, onIdolClick)
                         else -> infoSection(uiState, seed, brand, brandId, onFilteredEventsClick)
@@ -472,7 +474,8 @@ private fun LazyListScope.showsSection(
     onShowClick: (String) -> Unit,
     canEdit: Boolean,
     onEditShow: (Show) -> Unit,
-    onShowHistory: (Show) -> Unit
+    onShowHistory: (Show) -> Unit,
+    onAttendanceChange: () -> Unit
 ) {
     item { ImasSectionHeader(title = "公演 ・ ${state.shows.size} 公演 → セトリへ", tight = true) }
     if (state.shows.isEmpty()) {
@@ -485,13 +488,16 @@ private fun LazyListScope.showsSection(
         }
     } else {
         items(state.shows, key = { it.id }) { show ->
-            ShowRow(
-                show, seed, brand, state.isJoint,
-                canEdit = canEdit,
-                onEdit = { onEditShow(show) },
-                onHistory = { onShowHistory(show) },
-                onClick = { onShowClick(show.id) }
-            )
+            // 行の右スワイプで参加登録 (EventListScreen・カレンダーと同じ規則)。
+            AttendanceSwipeRow(showId = show.id, showName = show.name, onChange = onAttendanceChange) {
+                ShowRow(
+                    show, seed, brand, state.isJoint,
+                    canEdit = canEdit,
+                    onEdit = { onEditShow(show) },
+                    onHistory = { onShowHistory(show) },
+                    onClick = { onShowClick(show.id) }
+                )
+            }
             HorizontalDivider(color = DS.sep, modifier = Modifier.padding(start = 16.dp))
         }
     }

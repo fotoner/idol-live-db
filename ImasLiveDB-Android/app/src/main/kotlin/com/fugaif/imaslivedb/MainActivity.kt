@@ -30,6 +30,7 @@ import com.fugaif.imaslivedb.data.notification.NotificationScheduler
 import com.fugaif.imaslivedb.data.sync.CloudKitSyncEngine
 import com.fugaif.imaslivedb.di.AppModule
 import com.fugaif.imaslivedb.ui.games.DailyPickSheet
+import com.fugaif.imaslivedb.ui.ledger.TicketExpensePrompt
 import com.fugaif.imaslivedb.ui.navigation.AppNavigation
 import com.fugaif.imaslivedb.ui.theme.ImasLiveDBTheme
 import kotlinx.coroutines.launch
@@ -68,6 +69,10 @@ class MainActivity : ComponentActivity() {
                     // ボトムシートの中からボトムシートを開くと重なりとタッチ処理が壊れる。
                     Box(modifier = Modifier.fillMaxSize()) {
                         AppNavigation()
+                        // 参加を付けた直後の「チケット代を記録しますか」。参加登録の入口は
+                        // 一覧のスワイプ・公演の参加シート・セトリ画面と複数あるので、
+                        // 出すのは**アプリのルート 1 箇所**にまとめる (iOS ContentView と同じ)。
+                        TicketExpensePrompt()
                         if (showDailyPick) {
                             DailyPickSheet(onDismiss = { showDailyPick = false })
                         }

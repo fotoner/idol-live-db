@@ -153,6 +153,12 @@ class CloudKitSyncEngine(context: Context, private val db: AppDatabase) {
             { d, rows, _ -> d.upsertSongVideos(SyncMappers.songVideos(rows)) },
             { d, keys -> d.deleteSongVideos(singlePk(keys)) },
             { d -> d.songVideoIds() }),
+        // 公演のチケット価格。shows にだけ依存するので、公演が入った後ならいつでもよい
+        // (コアの STEPS_IN_FK_ORDER と同じ理由づけ)。
+        "ShowTicket" to StepIo(
+            { d, rows, _ -> d.upsertShowTickets(SyncMappers.showTickets(rows)) },
+            { d, keys -> d.deleteShowTickets(singlePk(keys)) },
+            { d -> d.showTicketIds() }),
     )
 
     /**

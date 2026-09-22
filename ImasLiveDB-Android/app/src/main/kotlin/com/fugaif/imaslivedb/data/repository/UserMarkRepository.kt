@@ -7,13 +7,29 @@ import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.data.model.UserMark
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.withContext
 import java.time.Instant
+
+/** 参加が付いた (取り消しではない) 直後の通知。iOS `.attendanceMarked` 通知と対。 */
+data class AttendanceMarkedEvent(val showId: String, val type: AttendanceType)
 
 /** 担当/お気に入り等のユーザーマークを管理 (端末ローカル)。 */
 class UserMarkRepository(private val db: AppDatabase) {
 
     private val dao get() = db.userMarkDao()
+
+    private val _attendanceMarked = MutableSharedFlow<AttendanceMarkedEvent>(extraBufferCapacity = 1)
+
+    /**
+     * 参加登録の入口は複数ある (行のスワイプ / 公演の参加シート / セトリ画面) が、
+     * どこから付けても [setAttendance] を必ず通るので、ここ 1 箇所に集めて流す。
+     * 「チケット代を記録するか」の判断はここに持たせない (DB を引く判断なので、
+     * 受け手 ([com.fugaif.imaslivedb.ui.ledger.TicketExpensePrompt]) に任せる)。
+     */
+    val attendanceMarked: SharedFlow<AttendanceMarkedEvent> = _attendanceMarked.asSharedFlow()
 
     suspend fun isOn(type: String, id: String, kind: String): Boolean = dao.isOn(type, id, kind)
 
@@ -43,6 +59,12 @@ class UserMarkRepository(private val db: AppDatabase) {
             dao.delete(type, id, UserMark.ATTENDED)
         } else {
             dao.upsert(UserMark(type, id, UserMark.ATTENDED, true, value.raw, Instant.now().toString()))
+            // 公演単位で付いたときだけ流す。取り消しは対象外 (チケット代の確認は
+            // 「付けた直後」の一度きりでよい) — イベント単位の互換マークも対象外
+            // (どの公演のチケットか特定できない)。
+            if (type == UserMark.SHOW) {
+                _attendanceMarked.tryEmit(AttendanceMarkedEvent(id, value))
+            }
         }
     }
 
