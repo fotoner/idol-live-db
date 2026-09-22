@@ -18,7 +18,7 @@
 //! 同じ流儀にそろえた。`--data-urlencode` があるので語の組み立ても自分で書かずに済む。
 
 use crate::domain::agent_tools::{args, ToolError};
-use crate::domain::lyrics_search::{self, ApiHit, MAX_SONGS};
+use crate::domain::lyrics_search::{self, ApiHit, LyricsFilter, Scope, MAX_SONGS};
 use crate::domain::snapshot::Snapshot;
 use serde_json::Value;
 use std::process::{Command, Stdio};
@@ -39,7 +39,7 @@ pub fn run(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
     let query = args::str_opt(arguments, "query")
         .ok_or_else(|| ToolError::BadArgs("query が要る".into()))?;
     let limit = args::limit(arguments, 20, MAX_SONGS as u32)? as usize;
-    let brand = args::str_opt(arguments, "brand");
+    let filter = build_filter(snap, arguments)?;
 
     let body = fetch(&base_url(), &query)?;
     let parsed: Value = serde_json::from_str(&body)
@@ -57,7 +57,55 @@ pub fn run(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
         .map(|rows| rows.iter().filter_map(api_hit).collect())
         .unwrap_or_default();
 
-    Ok(lyrics_search::response(snap, &query, &hits, brand.as_deref(), hits.len(), limit))
+    Ok(lyrics_search::response(snap, &query, &hits, &filter, hits.len(), limit))
+}
+
+/// 引数 → 絞り込み条件。id はここで添字に解決する (domain に id 解決を持たせない)。
+///
+/// 母集団の軸は 3 つのうち 1 つだけ。同時に渡されたら突き返す — 黙って片方を採ると
+/// 「絞ったつもりの数」を答えることになる (`scope.rs` の軸の扱いと同じ)。
+fn build_filter(snap: &Snapshot, arguments: &Value) -> Result<LyricsFilter, ToolError> {
+    let show = args::str_opt(arguments, "show_id");
+    let event = args::str_opt(arguments, "event_id");
+    let idol = args::str_opt(arguments, "idol_id");
+    if [show.is_some(), event.is_some(), idol.is_some()].iter().filter(|x| **x).count() > 1 {
+        return Err(ToolError::BadArgs(
+            "show_id / event_id / idol_id は同時に使えない (母集団はどれか 1 つ)".into(),
+        ));
+    }
+
+    let scope = if let Some(id) = show {
+        Some(Scope::Show(
+            snap.show_index_by_id
+                .get(&id)
+                .copied()
+                .ok_or_else(|| ToolError::NotFound(format!("公演 {id} が無い")))?,
+        ))
+    } else if let Some(id) = event {
+        Some(Scope::Event(
+            snap.event_index_by_id
+                .get(&id)
+                .copied()
+                .ok_or_else(|| ToolError::NotFound(format!("ライブ {id} が無い")))?,
+        ))
+    } else if let Some(id) = idol {
+        Some(Scope::Idol(
+            snap.idol_index_by_id
+                .get(&id)
+                .copied()
+                .ok_or_else(|| ToolError::NotFound(format!("アイドル {id} が無い")))?,
+        ))
+    } else {
+        None
+    };
+
+    Ok(LyricsFilter {
+        brand: args::str_opt(arguments, "brand"),
+        song_type: args::str_opt(arguments, "song_type"),
+        scope,
+        min_performances: args::u32_opt(arguments, "min_performances")?,
+        max_performances: args::u32_opt(arguments, "max_performances")?,
+    })
 }
 
 /// サーバの 1 行を [`ApiHit`] にほどく。鍵の綴りはサーバ側 (camelCase) に合わせる。
