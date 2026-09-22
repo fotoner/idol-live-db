@@ -84319,6 +84319,26 @@ INSERT INTO "show_cast" VALUES('sh_シンデレラガールズ_15周年_大型�
 INSERT INTO "show_cast" VALUES('sh_シンデレラガールズ_15周年_大型イベント_2','cg_辻野あかり','member');
 INSERT INTO "show_cast" VALUES('sh_シンデレラガールズ_15周年_大型イベント_2','cg_速水奏','member');
 INSERT INTO "show_cast" VALUES('sh_シンデレラガールズ_15周年_大型イベント_2','cg_関裕美','member');
+CREATE TABLE show_tickets (
+  id TEXT PRIMARY KEY NOT NULL,
+  show_id TEXT NOT NULL,
+  kind TEXT NOT NULL DEFAULT 'live',
+  name TEXT NOT NULL,
+  price INTEGER NOT NULL,
+  is_estimate INTEGER NOT NULL DEFAULT 0,
+  note TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  FOREIGN KEY (show_id) REFERENCES shows(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_show_tickets_show ON show_tickets(show_id);
+INSERT INTO show_tickets (id, show_id, kind, name, price, is_estimate, note, sort_order) VALUES ('tkt_14th_day1_seat', 'sh_the_idolm@ster_million_live_14thlive_1', 'live', '全席指定', 14000, 0, '当日券 14,500円', 1);
+INSERT INTO show_tickets (id, show_id, kind, name, price, is_estimate, note, sort_order) VALUES ('tkt_14th_day1_standing', 'sh_the_idolm@ster_million_live_14thlive_1', 'live', '立見指定', 13500, 0, '当日券 14,000円', 2);
+INSERT INTO show_tickets (id, show_id, kind, name, price, is_estimate, note, sort_order) VALUES ('tkt_14th_day1_stageside', 'sh_the_idolm@ster_million_live_14thlive_1', 'live', 'ステージサイド席', 13500, 0, '見切れの可能性あり・当日券 14,000円', 3);
+INSERT INTO show_tickets (id, show_id, kind, name, price, is_estimate, note, sort_order) VALUES ('tkt_14th_day1_stream', 'sh_the_idolm@ster_million_live_14thlive_1', 'stream', '配信', 6500, 0, 'アーカイブ視聴込み・両日通しは 13,000円', 1);
+INSERT INTO show_tickets (id, show_id, kind, name, price, is_estimate, note, sort_order) VALUES ('tkt_14th_day2_seat', 'sh_the_idolm@ster_million_live_14thlive_2', 'live', '全席指定', 14000, 0, '当日券 14,500円', 1);
+INSERT INTO show_tickets (id, show_id, kind, name, price, is_estimate, note, sort_order) VALUES ('tkt_14th_day2_standing', 'sh_the_idolm@ster_million_live_14thlive_2', 'live', '立見指定', 13500, 0, '当日券 14,000円', 2);
+INSERT INTO show_tickets (id, show_id, kind, name, price, is_estimate, note, sort_order) VALUES ('tkt_14th_day2_stageside', 'sh_the_idolm@ster_million_live_14thlive_2', 'live', 'ステージサイド席', 13500, 0, '見切れの可能性あり・当日券 14,000円', 3);
+INSERT INTO show_tickets (id, show_id, kind, name, price, is_estimate, note, sort_order) VALUES ('tkt_14th_day2_stream', 'sh_the_idolm@ster_million_live_14thlive_2', 'stream', '配信', 6500, 0, 'アーカイブ視聴込み・両日通しは 13,000円', 1);
 CREATE TABLE shows (id TEXT PRIMARY KEY NOT NULL, event_id TEXT NOT NULL, name TEXT NOT NULL, date TEXT NOT NULL, venue TEXT, venue_city TEXT, start_time TEXT, sort_order INTEGER NOT NULL, performer_type TEXT DEFAULT 'cast', venue_id TEXT, hall TEXT, stream_platform TEXT);
 INSERT INTO "shows" VALUES('sh_cinderella_girls_musical_starlight_high_school_0','ev_cinderella_girls_musical_starlight_high_school','DAY1','2026-05-08','森のホール21 (松戸市文化会館) 大ホール','千葉県松戸市','15:20',-1,'cast',NULL,NULL,NULL);
 INSERT INTO "shows" VALUES('sh_e656e30e-e4a6-4f8e-84fe-ab83bc7f7eb8','ev_e8a2e8ce-261b-43f6-829f-d4b041ddf000','リスアニ！LIVE on TOKYO ANIME MUSIC','2026-06-09','TOYOTA ARENA TOKYO','東京都江東区青海１丁目３−３−１','19:00',0,'cast',NULL,NULL,NULL);

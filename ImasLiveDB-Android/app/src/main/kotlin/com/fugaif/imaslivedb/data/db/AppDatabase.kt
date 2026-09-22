@@ -10,6 +10,7 @@ import com.fugaif.imaslivedb.data.db.dao.BrandDao
 import com.fugaif.imaslivedb.data.db.dao.CalendarDao
 import com.fugaif.imaslivedb.data.db.dao.CommunityDao
 import com.fugaif.imaslivedb.data.db.dao.EventDao
+import com.fugaif.imaslivedb.data.db.dao.ExpenseDao
 import com.fugaif.imaslivedb.data.db.dao.IdolDao
 import com.fugaif.imaslivedb.data.db.dao.MetaDao
 import com.fugaif.imaslivedb.data.db.dao.PersonalTagDao
@@ -31,6 +32,8 @@ import com.fugaif.imaslivedb.data.model.UnitVersion
 import com.fugaif.imaslivedb.data.model.VenueName
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.Event
+import com.fugaif.imaslivedb.data.model.Expense
+import com.fugaif.imaslivedb.data.model.ShowTicket
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.IdolBrand
 import com.fugaif.imaslivedb.data.model.ImasUnit
@@ -73,9 +76,11 @@ import com.fugaif.imaslivedb.data.model.UserMark
         UnitVersion::class,
         Creator::class,
         Costume::class,
-        CostumeWear::class
+        CostumeWear::class,
+        Expense::class,
+        ShowTicket::class
     ],
-    version = 16,
+    version = 18,
     // 確定スキーマを app/schemas へ JSON で吐く。共有コア (imas-core) が持つ
     // マスタ DDL と突き合わせて、片方だけスキーマを変えた事故を CI で捕まえるため。
     exportSchema = true
@@ -97,6 +102,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun syncDao(): SyncDao
     abstract fun userMarkDao(): UserMarkDao
     abstract fun personalTagDao(): PersonalTagDao
+    abstract fun expenseDao(): ExpenseDao
 
     companion object {
         @Volatile
@@ -140,7 +146,7 @@ abstract class AppDatabase : RoomDatabase() {
             )
                 // スキーマ変更時は破壊的再構築せず Room Migration を書く (iOS の DatabaseMigrations と対)。
                 // UserMark 等のローカル唯一データを保全するため (.fallbackToDestructiveMigration は使わない)。
-                .addMigrations(MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16)
+                .addMigrations(MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18)
                 .addCallback(seedCallback)
                 .build()
         }
@@ -420,6 +426,55 @@ abstract class AppDatabase : RoomDatabase() {
         val MIGRATION_15_16 = object : Migration(15, 16) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE songs ADD COLUMN has_kamisabi_card INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        // 収支 (家計簿)。iOS `v32_expenses` (GRDB) と同一スキーマ。
+        val MIGRATION_16_17 = object : Migration(16, 17) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS expenses (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        date TEXT NOT NULL,
+                        category TEXT NOT NULL,
+                        amount INTEGER NOT NULL,
+                        show_id TEXT,
+                        event_id TEXT,
+                        note TEXT,
+                        updated_at TEXT NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                // 期間の集計と公演別の集計がそれぞれ全表走査にならないように。
+                db.execSQL("CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(date)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS idx_expenses_show ON expenses(show_id)")
+            }
+        }
+
+        /**
+         * 公演のチケット価格 (マスタ)。同期で後から入るので、器だけ作る。
+         *
+         * 端末ローカルの収支と違い**みんなで共有する事実**なので、
+         * CloudKit から降ってくる行を受ける表として作っておく。
+         */
+        val MIGRATION_17_18 = object : Migration(17, 18) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS show_tickets (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        show_id TEXT NOT NULL,
+                        kind TEXT NOT NULL DEFAULT 'live',
+                        name TEXT NOT NULL,
+                        price INTEGER NOT NULL,
+                        is_estimate INTEGER NOT NULL DEFAULT 0,
+                        note TEXT,
+                        sort_order INTEGER NOT NULL DEFAULT 0
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS idx_show_tickets_show ON show_tickets(show_id)")
             }
         }
     }
