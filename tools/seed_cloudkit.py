@@ -89,6 +89,8 @@ TABLE_ORDER = [
     # idols の全部を指すので、最後尾に置く。
     "costumes",
     "costume_wears",
+    # チケット価格は shows にだけぶら下がる。公演の後ならどこでもよい。
+    "show_tickets",
     "meta",
 ]
 
@@ -114,6 +116,7 @@ RECORD_TYPE_MAP = {
     "venue_halls": "VenueHall",
     "costumes": "Costume",
     "costume_wears": "CostumeWear",
+    "show_tickets": "ShowTicket",
     "meta": "MetaData",
 }
 
