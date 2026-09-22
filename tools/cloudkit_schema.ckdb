@@ -312,6 +312,27 @@ DEFINE SCHEMA
         GRANT READ TO "_world"
     );
 
+    RECORD TYPE ShowTicket (
+        "___createTime" TIMESTAMP,
+        "___createdBy"  REFERENCE,
+        "___etag"       STRING,
+        "___modTime"    TIMESTAMP,
+        "___modifiedBy" REFERENCE,
+        "___recordID"   REFERENCE,
+        deletedAt       TIMESTAMP QUERYABLE SORTABLE,
+        isEstimate      INT64 QUERYABLE SORTABLE,
+        kind            STRING QUERYABLE SEARCHABLE SORTABLE,
+        modifiedAt      TIMESTAMP QUERYABLE SORTABLE,
+        name            STRING QUERYABLE SEARCHABLE SORTABLE,
+        note            STRING QUERYABLE SEARCHABLE SORTABLE,
+        price           INT64 QUERYABLE SORTABLE,
+        showId          STRING QUERYABLE SEARCHABLE SORTABLE,
+        sortOrder       INT64 QUERYABLE SORTABLE,
+        GRANT WRITE TO "_creator",
+        GRANT CREATE TO "_icloud",
+        GRANT READ TO "_world"
+    );
+
     RECORD TYPE Song (
         "___createTime"   TIMESTAMP,
         "___createdBy"    REFERENCE,
@@ -515,3 +536,4 @@ DEFINE SCHEMA
         GRANT CREATE TO "_icloud",
         GRANT READ TO "_world"
     );
+
