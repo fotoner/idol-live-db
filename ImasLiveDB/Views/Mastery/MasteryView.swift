@@ -44,14 +44,15 @@ struct MasteryView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: DS.sp7) {
-                summarySection
-                groupSection
-            }
-            .padding(.horizontal, DS.sp5)
-            .padding(.vertical, DS.sp5)
+        // ⚠️ **List でなければならない**。群の行のスワイプ (`swipeActions`) は
+        // List の行にしか効かず、ScrollView + LazyVStack だと無言で消える。
+        List {
+            summarySection.plainRow(background: DS.bg)
+            groupHeader.plainRow(background: DS.bg)
+            groupRows
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
         .background(DS.bg.ignoresSafeArea())
         .scrollDismissesKeyboard(.immediately)
         .navigationTitle("習熟度")
@@ -191,7 +192,8 @@ struct MasteryView: View {
 
     // MARK: - 群の一覧
 
-    private var groupSection: some View {
+    /// 一覧の見出しと絞り込み。List の 1 行として差す。
+    private var groupHeader: some View {
         VStack(alignment: .leading, spacing: DS.sp4) {
             HStack(alignment: .firstTextBaseline) {
                 ImasSectionHeader(title: "グループ別", tight: true)
@@ -212,63 +214,61 @@ struct MasteryView: View {
             if filter.progress != .all || filter.sort != .songCount {
                 activeFilterChips
             }
+        }
+    }
 
-            if !loaded {
-                ImasInlineLoading().padding(.vertical, DS.sp6)
-            } else if groups.isEmpty {
-                ImasEmptyState(
-                    systemImage: "line.3.horizontal.decrease",
-                    title: "該当するグループがありません",
-                    message: "絞り込みを緩めてください。"
-                )
-                .background(DS.surface, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
-            } else {
-                // ⚠️ `ImasListContainer` (= VStack) に直接積んではいけない。
-                // ユニット軸は **1,047 群** あり、非遅延だと全行ぶんの
-                // NavigationLink と destination が一度に組まれて操作が止まる。
-                // 見た目 (角丸サーフェス + 行間の罫) はそのままに、中身だけ遅延にする。
-                LazyVStack(spacing: 0) {
-                    ForEach(Array(groups.enumerated()), id: \.element.key) { index, group in
-                        NavigationLink {
-                            // destination は**押されたときに**組む。ここで
-                            // `songIds.compactMap` すると行ごとに群の曲数ぶん走る。
-                            MasteryGroupDetailView(title: group.label, songIds: group.songIds)
-                                .environment(database)
-                        } label: {
-                            groupRow(group)
-                        }
-                        .buttonStyle(.plain)
-                        .contextMenu { groupMenu(group) }
-                        if index < groups.count - 1 {
-                            ImasRowDivider(inset: DS.sp4)
-                        }
-                    }
+    /// 群の行。List の行なので、ユニット軸の 1,047 群でも必要なぶんしか組まれない。
+    @ViewBuilder
+    private var groupRows: some View {
+        if !loaded {
+            ImasInlineLoading().padding(.vertical, DS.sp6).plainRow(background: DS.bg)
+        } else if groups.isEmpty {
+            ImasEmptyState(
+                systemImage: "line.3.horizontal.decrease",
+                title: "該当するグループがありません",
+                message: "絞り込みを緩めてください。"
+            )
+            .plainRow(background: DS.bg)
+        } else {
+            ForEach(groups, id: \.key) { group in
+                NavigationLink {
+                    // destination は**押されたときに**組む。ここで
+                    // `songIds.compactMap` すると行ごとに群の曲数ぶん走る。
+                    MasteryGroupDetailView(title: group.label, songIds: group.songIds)
+                        .environment(database)
+                } label: {
+                    groupRow(group)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(DS.surface, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
-                .clipShape(RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
+                .listRowInsets(EdgeInsets(top: 0, leading: DS.sp5, bottom: 0, trailing: DS.sp5))
+                .listRowBackground(DS.surface)
+                .listRowSeparatorTint(DS.sep)
+                .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                    unsetBulkButtons(group)
+                }
             }
         }
     }
 
-    /// 群の行の長押し。詳細に入らずに、その群の**まだ付けていない曲だけ**をまとめて付ける。
+    /// 群の行を**右スワイプ**したときに出る一括更新。その群の
+    /// **まだ付けていない曲だけ**をまとめて付ける。
     ///
     /// 「このシリーズは一通り聞いた」を一覧から 2 手で終わらせるための口。
-    /// 既に付いている記録には触らない操作だけを置いているので、誤って押しても
-    /// 失われるものがない (段を塗り替える/未設定に戻すのは、直前の 1 回を戻せる詳細画面に残す)。
+    /// 既に付いている記録に触らない操作だけなので、誤って押しても失うものがない
+    /// (段の塗り替え・未設定に戻すは、直前の 1 回を戻せる詳細画面に残す)。
     @ViewBuilder
-    private func groupMenu(_ g: MasteryGroup) -> some View {
+    private func unsetBulkButtons(_ g: MasteryGroup) -> some View {
         let unset = g.levels.filter { $0 == 0 }.count
         if unset > 0 {
-            Section("未設定の \(unset) 曲だけ") {
-                ForEach(Array((1...Int(marks.scale.steps)).reversed()), id: \.self) { level in
-                    Button(marks.scale.label(UInt8(level))) {
-                        applyToUnset(g, level: UInt8(level))
-                    }
+            // スワイプで出るボタンは左から並ぶので、押しやすい手前に低い段を置く
+            // (「聞いた」を付ける回数が一番多い)。
+            ForEach(1...Int(marks.scale.steps), id: \.self) { level in
+                Button {
+                    applyToUnset(g, level: UInt8(level))
+                } label: {
+                    Text(marks.scale.swipeLabel(UInt8(level)))
                 }
+                .tint(MasteryPalette.fill(level: UInt8(level), steps: marks.scale.steps))
             }
-        } else {
-            Text("全部に段階が付いています")
         }
     }
 
@@ -328,12 +328,10 @@ struct MasteryView: View {
     /// 行の数だけ全曲走査が走る (一覧全体で O(曲数×群数) になっていた)。
     private func groupRow(_ g: MasteryGroup) -> some View {
         let brandId = g.songIds.first.flatMap { songsById[$0]?.brandId }
+        // 矢印は List の NavigationLink が出すので、行の側では描かない (二重になる)。
         return ImasLeadRow(title: g.label, subtitle: subtitle(g), brand: brandId, titleLineLimit: 2) {
-            HStack(spacing: DS.sp3) {
-                ImasMetricBadge(value: "\(g.percent)", unit: "%",
-                                emphasized: g.percent > 0, seed: nil)
-                ImasRowChevron()
-            }
+            ImasMetricBadge(value: "\(g.percent)", unit: "%",
+                            emphasized: g.percent > 0, seed: nil)
         }
     }
 
@@ -500,5 +498,17 @@ struct MasteryCell: View {
                 }
             }
             .frame(width: size, height: size)
+    }
+}
+
+
+// MARK: - List の行装飾
+
+private extension View {
+    /// List の中で「カードではない帯」を出す行装飾 (見出し・要約用)。
+    func plainRow(background: Color) -> some View {
+        listRowInsets(EdgeInsets(top: 0, leading: DS.sp5, bottom: DS.sp5, trailing: DS.sp5))
+            .listRowBackground(background)
+            .listRowSeparator(.hidden)
     }
 }

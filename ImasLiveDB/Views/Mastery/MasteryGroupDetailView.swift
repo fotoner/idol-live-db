@@ -3,7 +3,7 @@ import SwiftUI
 /// 群 (シリーズ / ユニット / 年代) の中の曲一覧。**段階を変えるのはここ**。
 ///
 /// 一覧は「どの群を見るか」までしか出さないので、曲名が要る操作は全部この画面に集める。
-/// 1 曲は行末のチップをタップ (1 段上がる) / 長押しで段を選ぶ / 行を左スワイプ、
+/// 1 曲は行末のチップをタップ (1 段上がる) / 行をスワイプ (左で段を選ぶ・右で未設定に戻す)、
 /// 群ごとは右上の ⋯ から。一括更新は直前の 1 回だけ戻せる
 /// (履歴は持たない — まとめて動くのは一括更新のときだけなので、それ以上は要らない)。
 ///
@@ -42,18 +42,34 @@ struct MasteryGroupDetailView: View {
             return levelFilter == nil || levels[pair.offset] == levelFilter
         }
 
-        return ScrollView {
-            VStack(alignment: .leading, spacing: DS.sp7) {
-                if loaded {
-                    summarySection(levels)
-                    songSection(shown, levels: levels)
+        // ⚠️ ここは **List でなければならない**。`swipeActions` は List の行にしか効かず、
+        // ScrollView + LazyVStack に付けても無言で消える (曲一覧 `SongListView` が List
+        // なのでそちらだけ動いていた)。行のスワイプが段階を変える主な口なので、
+        // 見た目より先にこの条件を満たす。
+        return List {
+            if loaded {
+                summarySection(levels).plainRow(background: DS.bg)
+                songHeader(shown).plainRow(background: DS.bg)
+                if shown.isEmpty {
+                    ImasEmptyState(systemImage: "line.3.horizontal.decrease",
+                                   title: "該当する曲がありません",
+                                   message: "段階の絞り込みを外してください。")
+                        .plainRow(background: DS.bg)
                 } else {
-                    ImasInlineLoading().padding(.vertical, DS.sp8)
+                    ForEach(Array(shown), id: \.element.id) { pair in
+                        row(pair.element, level: levels[pair.offset])
+                            .listRowInsets(EdgeInsets(top: 0, leading: DS.sp5,
+                                                      bottom: 0, trailing: DS.sp5))
+                            .listRowBackground(DS.surface)
+                            .listRowSeparatorTint(DS.sep)
+                    }
                 }
+            } else {
+                ImasInlineLoading().padding(.vertical, DS.sp8).plainRow(background: DS.bg)
             }
-            .padding(.horizontal, DS.sp5)
-            .padding(.vertical, DS.sp5)
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
         .background(DS.bg.ignoresSafeArea())
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
@@ -119,7 +135,8 @@ struct MasteryGroupDetailView: View {
 
     // MARK: - 曲一覧
 
-    private func songSection(_ shown: [(offset: Int, element: Song)], levels: [UInt8]) -> some View {
+    /// 曲一覧の見出し (件数 + 段階の絞り込み)。List の 1 行として差す。
+    private func songHeader(_ shown: [(offset: Int, element: Song)]) -> some View {
         VStack(alignment: .leading, spacing: DS.sp4) {
             HStack(alignment: .firstTextBaseline) {
                 ImasSectionHeader(title: "収録曲", tight: true)
@@ -128,30 +145,9 @@ struct MasteryGroupDetailView: View {
                      ? "\(songs.count)曲" : "\(shown.count) / \(songs.count)曲")
                     .font(.imasCaption.weight(.semibold)).foregroundStyle(DS.ink3)
             }
-
-            filterChips(levels)
-
-            if shown.isEmpty {
-                ImasEmptyState(systemImage: "line.3.horizontal.decrease",
-                               title: "該当する曲がありません",
-                               message: "段階の絞り込みを外してください。")
-                .background(DS.surface, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
-            } else {
-                // 群は最大 650 曲 (ユニット軸の「その他」) になる。非遅延の VStack だと
-                // ジャケ写つきの行を全部一度に組むので、開いた瞬間に固まる。
-                LazyVStack(spacing: 0) {
-                    ForEach(Array(shown.enumerated()), id: \.element.element.id) { index, pair in
-                        row(pair.element, level: levels[pair.offset])
-                        if index < shown.count - 1 {
-                            ImasRowDivider(inset: 70)
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(DS.surface, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
-                .clipShape(RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
-            }
+            filterChips(songs.map { marks.mastery(songId: $0.id) })
         }
+        .padding(.top, DS.sp5)
     }
 
     // MARK: - ヘッダ
@@ -236,17 +232,7 @@ struct MasteryGroupDetailView: View {
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.increase, trigger: level)
-        .contextMenu { stageMenu(song.id) }
-        .accessibilityHint("押すと 1 段上がります。長押しで段を選べます")
-    }
-
-    /// チップの長押し。特定の段へ飛ばす・未設定に戻すのはここ。
-    @ViewBuilder
-    private func stageMenu(_ songId: String) -> some View {
-        ForEach(Array((1...Int(marks.scale.steps)).reversed()), id: \.self) { level in
-            Button(marks.scale.label(UInt8(level))) { setLevel(songId, to: UInt8(level)) }
-        }
-        Button("未設定に戻す", role: .destructive) { setLevel(songId, to: 0) }
+        .accessibilityHint("押すと 1 段上がります。行を左スワイプすると段を選べます")
     }
 
     private func setLevel(_ songId: String, to level: UInt8) {
@@ -325,5 +311,19 @@ struct MasteryGroupDetailView: View {
             try? marks.setMastery(songId: id, level: level)
         }
         withAnimation { undo = nil }
+    }
+}
+
+
+// MARK: - List の行装飾
+
+private extension View {
+    /// List の中で「カードではない帯」を出す行装飾。
+    /// この画面は **List でないと `swipeActions` が効かない**ので、見出しや要約も
+    /// List の行として差す必要がある。
+    func plainRow(background: Color) -> some View {
+        listRowInsets(EdgeInsets(top: 0, leading: DS.sp5, bottom: DS.sp5, trailing: DS.sp5))
+            .listRowBackground(background)
+            .listRowSeparator(.hidden)
     }
 }
