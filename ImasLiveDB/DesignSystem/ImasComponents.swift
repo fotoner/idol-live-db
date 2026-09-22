@@ -893,6 +893,20 @@ private extension View {
     func accentEnvironment(_ t: ImasTheme) -> some View { self }
 }
 
+// MARK: - List の行装飾
+
+extension View {
+    /// List の中で「カードではない帯」を出す行装飾 (見出し・要約・空状態用)。
+    ///
+    /// `swipeActions` は List の行にしか効かないため、見出しや要約も List の行として
+    /// 差さざるを得ない画面 (習熟度の 2 画面など) で使う。
+    func plainRow(background: Color) -> some View {
+        listRowInsets(EdgeInsets(top: 0, leading: DS.sp5, bottom: DS.sp5, trailing: DS.sp5))
+            .listRowBackground(background)
+            .listRowSeparator(.hidden)
+    }
+}
+
 // MARK: - inset-grouped リスト風コンテナ
 
 /// iOS inset grouped を模した角丸サーフェス。中の行は `Divider().overlay(DS.sep)` で区切る。

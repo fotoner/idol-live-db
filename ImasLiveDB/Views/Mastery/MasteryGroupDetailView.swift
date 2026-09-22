@@ -49,14 +49,14 @@ struct MasteryGroupDetailView: View {
         return List {
             if loaded {
                 summarySection(levels).plainRow(background: DS.bg)
-                songHeader(shown).plainRow(background: DS.bg)
+                songHeader(shown, levels: levels).plainRow(background: DS.bg)
                 if shown.isEmpty {
                     ImasEmptyState(systemImage: "line.3.horizontal.decrease",
                                    title: "該当する曲がありません",
                                    message: "段階の絞り込みを外してください。")
                         .plainRow(background: DS.bg)
                 } else {
-                    ForEach(Array(shown), id: \.element.id) { pair in
+                    ForEach(shown, id: \.element.id) { pair in
                         row(pair.element, level: levels[pair.offset])
                             .listRowInsets(EdgeInsets(top: 0, leading: DS.sp5,
                                                       bottom: 0, trailing: DS.sp5))
@@ -136,7 +136,8 @@ struct MasteryGroupDetailView: View {
     // MARK: - 曲一覧
 
     /// 曲一覧の見出し (件数 + 段階の絞り込み)。List の 1 行として差す。
-    private func songHeader(_ shown: [(offset: Int, element: Song)]) -> some View {
+    /// `levels` は body で既に出している段階配列をそのまま受け取る (ここで引き直さない)。
+    private func songHeader(_ shown: [(offset: Int, element: Song)], levels: [UInt8]) -> some View {
         VStack(alignment: .leading, spacing: DS.sp4) {
             HStack(alignment: .firstTextBaseline) {
                 ImasSectionHeader(title: "収録曲", tight: true)
@@ -145,7 +146,7 @@ struct MasteryGroupDetailView: View {
                      ? "\(songs.count)曲" : "\(shown.count) / \(songs.count)曲")
                     .font(.imasCaption.weight(.semibold)).foregroundStyle(DS.ink3)
             }
-            filterChips(songs.map { marks.mastery(songId: $0.id) })
+            filterChips(levels)
         }
         .padding(.top, DS.sp5)
     }
@@ -311,19 +312,5 @@ struct MasteryGroupDetailView: View {
             try? marks.setMastery(songId: id, level: level)
         }
         withAnimation { undo = nil }
-    }
-}
-
-
-// MARK: - List の行装飾
-
-private extension View {
-    /// List の中で「カードではない帯」を出す行装飾。
-    /// この画面は **List でないと `swipeActions` が効かない**ので、見出しや要約も
-    /// List の行として差す必要がある。
-    func plainRow(background: Color) -> some View {
-        listRowInsets(EdgeInsets(top: 0, leading: DS.sp5, bottom: DS.sp5, trailing: DS.sp5))
-            .listRowBackground(background)
-            .listRowSeparator(.hidden)
     }
 }

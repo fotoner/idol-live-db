@@ -500,15 +500,3 @@ struct MasteryCell: View {
             .frame(width: size, height: size)
     }
 }
-
-
-// MARK: - List の行装飾
-
-private extension View {
-    /// List の中で「カードではない帯」を出す行装飾 (見出し・要約用)。
-    func plainRow(background: Color) -> some View {
-        listRowInsets(EdgeInsets(top: 0, leading: DS.sp5, bottom: DS.sp5, trailing: DS.sp5))
-            .listRowBackground(background)
-            .listRowSeparator(.hidden)
-    }
-}
