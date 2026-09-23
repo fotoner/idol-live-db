@@ -413,6 +413,23 @@ pub fn attended_events_with_date(
     with_date_records(snap, &sort_by_first_date_desc(snap, indexes), true)
 }
 
+/// 参加済みの show id 群 → 所属イベントの id (初出順・重複なし)。
+///
+/// 一覧の絞り込みで、公演単位の参加マークをイベントに畳むのに使う。
+/// 未知の show id は黙って捨てる (マークだけ残ってマスタから消えた公演)。
+pub fn event_ids_for_shows(snap: &Snapshot, show_ids: &[String]) -> Vec<String> {
+    let mut seen = HashSet::new();
+    let mut out = Vec::new();
+    for id in show_ids {
+        let Some(&si) = snap.show_index_by_id.get(id) else { continue };
+        let event = &snap.events[snap.shows[si as usize].event as usize];
+        if seen.insert(event.id.as_str()) {
+            out.push(event.id.clone());
+        }
+    }
+    out
+}
+
 /// 参加イベントを現地/配信/LV の 3 集合に分類 (iOS fetchAttendedEventTypeSetsQuery)。
 /// 1 イベント内で種別が混在すれば複数集合に入る。
 ///
@@ -1028,5 +1045,45 @@ mod tests {
         // Swift からは来ない入力 (SQL では IN () が構文エラー)。空集合として安全側に。
         let empty: Vec<String> = vec![];
         assert!(events_with_first_date(snap(), None, true, false, Some(&empty)).is_empty());
+    }
+
+    // ---- event_ids_for_shows ----
+
+    /// 同じイベントの公演を複数渡しても、event id は 1 つに畳まれる。
+    #[test]
+    fn event_ids_for_shows_dedupes_shows_of_the_same_event() {
+        let snap = snap();
+        let (event, shows) = snap
+            .shows_by_event
+            .iter()
+            .enumerate()
+            .find(|(_, shows)| shows.len() >= 2)
+            .expect("公演が 2 つ以上あるイベントが 1 つはある");
+        let show_ids: Vec<String> =
+            shows.iter().map(|&i| snap.shows[i as usize].id.clone()).collect();
+        assert_eq!(event_ids_for_shows(snap, &show_ids), vec![snap.events[event].id.clone()]);
+    }
+
+    /// マークだけ残ってマスタから消えた公演は、エラーにせず捨てる。
+    #[test]
+    fn event_ids_for_shows_drops_unknown_show_ids() {
+        assert!(event_ids_for_shows(snap(), &["存在しない".to_string()]).is_empty());
+    }
+
+    /// 公演を 1 件ずつ引いて所属イベントを集めた結果 (初出順・重複なし) と同じになる。
+    #[test]
+    fn event_ids_for_shows_matches_per_show_lookup() {
+        let snap = snap();
+        let show_ids: Vec<String> = snap.shows.iter().take(200).map(|s| s.id.clone()).collect();
+        let mut one_by_one: Vec<String> = Vec::new();
+        for id in &show_ids {
+            let event_id = crate::domain::event_detail_queries::show_record(snap, id)
+                .expect("マスタの公演は引ける")
+                .event_id;
+            if !one_by_one.contains(&event_id) {
+                one_by_one.push(event_id);
+            }
+        }
+        assert_eq!(event_ids_for_shows(snap, &show_ids), one_by_one);
     }
 }

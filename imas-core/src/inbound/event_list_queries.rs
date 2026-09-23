@@ -93,6 +93,17 @@ impl SnapshotStore {
         Ok(queries::attended_event_type_sets(&snap, &event_marks, &show_marks))
     }
 
+    /// 参加済み show id 群 → 所属 event id 集合を 1 呼び出しで解決する。
+    ///
+    /// 以前は呼び出し側 (EventListViewModel) が show ごとに `show_record` を並行 fetch していた。
+    /// FFI 境界を要素数ぶん跨ぐ設計は「1 ユーザー操作 = 1 呼び出し」規約違反で、
+    /// 参加記録が多いユーザーほど一覧の絞り込みが重くなる。
+    /// 未知の show id は黙って捨てる (マークだけ残ってマスタから消えた公演)。
+    pub fn event_ids_for_shows(&self, show_ids: Vec<String>) -> Result<Vec<String>, SnapshotError> {
+        let snap = self.current()?;
+        Ok(queries::event_ids_for_shows(&snap, &show_ids))
+    }
+
     /// イベント名一覧 (フィルタ補完用)。SQL 時代の fetchEventNames 相当 (name 昇順)。
     /// ライブ名 または 公演会場 の部分一致検索 (検索スコープ「ライブ」)。
     /// searchEventsByNameOrVenue(query:limit:) 相当。
