@@ -278,14 +278,6 @@
   },
   {
    "table": "songs",
-   "id": "765as_smoky_thrill",
-   "fields": {
-    "song_type": "unit"
-   },
-   "note": "竜宮小町の曲"
-  },
-  {
-   "table": "songs",
    "id": "765as_funny_logic",
    "fields": {
     "song_type": "unit"
@@ -323,6 +315,72 @@
     "song_type": "all"
    },
    "note": "ら♪ら♪ら♪わんだぁらんど の Remix。原曲と同じく全員曲"
+  },
+  {
+   "table": "songs",
+   "id": "765as_smoky_thrill",
+   "fields": {
+    "song_type": "unit",
+    "singer_label": "竜宮小町",
+    "unit_name": "竜宮小町",
+    "unit_id": "竜宮小町"
+   },
+   "note": "竜宮小町 (水瀬伊織・三浦あずさ・双海亜美) の曲",
+   "source": "https://www.uta-net.com/song/125289/"
+  },
+  {
+   "table": "songs",
+   "id": "765as_ハニカミファーストバイト",
+   "fields": {
+    "song_type": "unit",
+    "singer_label": "竜宮小町",
+    "unit_name": "竜宮小町",
+    "unit_id": "竜宮小町"
+   },
+   "note": "竜宮小町の曲。アニメ 8 話 ED",
+   "source": [
+    "https://imas-db.jp/song/detail/171.html",
+    "https://recochoku.jp/song/S21189157/"
+   ]
+  },
+  {
+   "table": "songs",
+   "id": "cg_私色ギフト",
+   "fields": {
+    "song_type": "unit",
+    "singer_label": "凸レーション with 城ヶ崎美嘉",
+    "unit_name": "凸レーション",
+    "unit_id": "凸レーション"
+   },
+   "note": "アニメ 2nd Season 17 話 ED の書き下ろし (カバーではない)。凸レーション (莉嘉・きらり・みりあ) with 城ヶ崎美嘉",
+   "source": [
+    "https://cinderellagirls.idolmaster-official.jp/discography/cocc-17062/",
+    "https://www.uta-net.com/movie/196017/"
+   ]
+  },
+  {
+   "table": "songs",
+   "id": "cg_heart_voice",
+   "fields": {
+    "song_type": "unit",
+    "singer_label": "CANDY ISLAND with 輿水幸子",
+    "unit_name": "CANDY ISLAND",
+    "unit_id": "unit_candy_island"
+   },
+   "note": "アニメ 2nd Season 18 話 ED の書き下ろし (カバーではない)。CANDY ISLAND (杏・かな子・智絵里) with 輿水幸子",
+   "source": [
+    "https://cinderellagirls.idolmaster-official.jp/discography/cocc-17062/",
+    "https://dere-ken.com/?p=27616"
+   ]
+  },
+  {
+   "table": "songs",
+   "id": "765as_maybe_tomorrow",
+   "fields": {
+    "singer_label": "水瀬伊織"
+   },
+   "note": "Twelve Seasons! Vol.9 収録の水瀬伊織のソロ版。solo のままで正しく、表記だけ 765PRO ALLSTARS になっていた",
+   "source": "https://www.uta-net.com/song/148330/"
   }
  ]
 }
