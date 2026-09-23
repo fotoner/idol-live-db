@@ -341,6 +341,7 @@ declare_and_call_checksums! {
     uniffi_imas_core_checksum_method_snapshotstore_search_songs,
     uniffi_imas_core_checksum_method_snapshotstore_series_group_names,
     uniffi_imas_core_checksum_method_snapshotstore_series_summaries,
+    uniffi_imas_core_checksum_method_snapshotstore_setlist_forecast,
     uniffi_imas_core_checksum_method_snapshotstore_setlist_item_costume_records,
     uniffi_imas_core_checksum_method_snapshotstore_show_cast_idol_ids,
     uniffi_imas_core_checksum_method_snapshotstore_show_costume_records,

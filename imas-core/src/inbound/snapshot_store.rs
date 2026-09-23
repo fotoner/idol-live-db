@@ -7,7 +7,8 @@
 //! 分割して生やす。ロジックは domain 側に置き、ここと各 impl は委譲に徹する。
 
 use crate::domain::snapshot::Snapshot;
-use std::sync::{Arc, RwLock};
+use crate::inbound::setlist_forecast::ForecastCache;
+use std::sync::{Arc, Mutex, RwLock};
 
 #[derive(Debug, thiserror::Error, uniffi::Error)]
 #[uniffi(flat_error)]
@@ -28,13 +29,15 @@ pub struct SnapshotStats {
 #[derive(uniffi::Object)]
 pub struct SnapshotStore {
     inner: RwLock<Option<Arc<Snapshot>>>,
+    /// セトリ予想の下ごしらえと重み (`inbound::setlist_forecast`)。世代が変わったら作り直す。
+    pub(crate) forecast: Mutex<ForecastCache>,
 }
 
 #[uniffi::export]
 impl SnapshotStore {
     #[uniffi::constructor]
     pub fn new() -> Arc<Self> {
-        Arc::new(Self { inner: RwLock::new(None) })
+        Arc::new(Self { inner: RwLock::new(None), forecast: Mutex::default() })
     }
 
     /// DB を読み切って新スナップショットへ差し替える。失敗時は現行を維持する
@@ -47,6 +50,7 @@ impl SnapshotStore {
             idols: snapshot.idols.len() as u32,
         };
         *self.inner.write().expect("snapshot lock poisoned") = Some(Arc::new(snapshot));
+        self.clear_forecast_cache();
         Ok(stats)
     }
 
@@ -57,6 +61,7 @@ impl SnapshotStore {
     /// メモリ警告時の明示破棄 (次の load まで未ロードに戻る)。
     pub fn unload(&self) {
         *self.inner.write().expect("snapshot lock poisoned") = None;
+        self.clear_forecast_cache();
     }
 }
 
@@ -68,5 +73,9 @@ impl SnapshotStore {
             .expect("snapshot lock poisoned")
             .clone()
             .ok_or(SnapshotError::NotLoaded)
+    }
+
+    fn clear_forecast_cache(&self) {
+        self.forecast.lock().expect("forecast cache lock poisoned").clear();
     }
 }

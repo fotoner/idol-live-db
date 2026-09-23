@@ -37,6 +37,7 @@ pub mod image_template_json;
 pub mod intro_quiz_choices;
 pub mod oshi_theme_resolution;
 pub mod setlist_diff;
+pub mod setlist_forecast;
 pub mod short_year_month;
 pub mod song_list_filtering;
 pub mod text_search_index;
