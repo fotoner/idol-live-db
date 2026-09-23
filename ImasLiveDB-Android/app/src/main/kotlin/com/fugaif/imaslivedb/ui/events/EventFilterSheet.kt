@@ -1,6 +1,5 @@
 package com.fugaif.imaslivedb.ui.events
 
-import com.fugaif.imaslivedb.data.model.Vocab
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -32,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.fugaif.imaslivedb.data.model.Brand
+import com.fugaif.imaslivedb.data.model.Vocab
 import com.fugaif.imaslivedb.ui.components.ImasFilterChip
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
 import com.fugaif.imaslivedb.ui.theme.DS

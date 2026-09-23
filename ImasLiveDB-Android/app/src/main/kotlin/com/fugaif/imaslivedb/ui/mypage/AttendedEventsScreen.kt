@@ -1,6 +1,5 @@
 package com.fugaif.imaslivedb.ui.mypage
 
-import com.fugaif.imaslivedb.data.model.AttendanceType
 import android.app.Application
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,6 +41,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fugaif.imaslivedb.data.model.AttendanceType
 import com.fugaif.imaslivedb.data.model.EventWithDateRange
 import com.fugaif.imaslivedb.data.repository.AttendedEventTypeSets
 import com.fugaif.imaslivedb.di.AppModule

@@ -1,6 +1,5 @@
 package com.fugaif.imaslivedb.ui.polls
 
-import com.fugaif.imaslivedb.data.model.Vocab
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -56,6 +55,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.data.model.SongWithArtists
+import com.fugaif.imaslivedb.data.model.Vocab
 import com.fugaif.imaslivedb.ui.components.BrandFilterChips
 import com.fugaif.imaslivedb.ui.components.BrandFilterItem
 import com.fugaif.imaslivedb.ui.components.ImasArtwork

@@ -1,6 +1,5 @@
 package com.fugaif.imaslivedb.ui.schedule
 
-import com.fugaif.imaslivedb.data.model.Vocab
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +34,7 @@ import com.fugaif.imaslivedb.data.model.CalendarEntry
 import com.fugaif.imaslivedb.data.model.TicketCalendarRow
 import com.fugaif.imaslivedb.data.model.TicketDateKind
 import com.fugaif.imaslivedb.data.model.TicketPeriodRow
+import com.fugaif.imaslivedb.data.model.Vocab
 import com.fugaif.imaslivedb.data.repository.CalendarShowDetail
 import com.fugaif.imaslivedb.ui.theme.AppPreferences
 import com.fugaif.imaslivedb.ui.theme.DS

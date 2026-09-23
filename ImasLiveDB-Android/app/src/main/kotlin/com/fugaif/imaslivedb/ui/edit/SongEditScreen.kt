@@ -1,6 +1,5 @@
 package com.fugaif.imaslivedb.ui.edit
 
-import com.fugaif.imaslivedb.data.model.Vocab
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,6 +24,7 @@ import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.data.model.SongArtist
+import com.fugaif.imaslivedb.data.model.Vocab
 import com.fugaif.imaslivedb.di.AppModule
 import com.fugaif.imaslivedb.ui.theme.DS
 import kotlinx.coroutines.launch

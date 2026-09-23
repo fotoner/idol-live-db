@@ -1,6 +1,5 @@
 package com.fugaif.imaslivedb.ui.edit
 
-import com.fugaif.imaslivedb.data.model.Vocab
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -14,6 +13,7 @@ import com.fugaif.imaslivedb.data.edit.EditApi
 import com.fugaif.imaslivedb.data.edit.putClearable
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.Event
+import com.fugaif.imaslivedb.data.model.Vocab
 import com.fugaif.imaslivedb.di.AppModule
 import com.fugaif.imaslivedb.ui.events.EVENT_KINDS
 import kotlinx.coroutines.launch

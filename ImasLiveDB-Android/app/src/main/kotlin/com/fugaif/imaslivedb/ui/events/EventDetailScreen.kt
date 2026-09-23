@@ -1,6 +1,5 @@
 package com.fugaif.imaslivedb.ui.events
 
-import com.fugaif.imaslivedb.data.model.Vocab
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -78,6 +77,7 @@ import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.JstDay
 import com.fugaif.imaslivedb.data.model.Show
 import com.fugaif.imaslivedb.data.model.UserMark
+import com.fugaif.imaslivedb.data.model.Vocab
 import com.fugaif.imaslivedb.di.AppModule
 import com.fugaif.imaslivedb.ui.components.AttendanceSwipeRow
 import com.fugaif.imaslivedb.ui.components.CommunityLoginPromptDialog

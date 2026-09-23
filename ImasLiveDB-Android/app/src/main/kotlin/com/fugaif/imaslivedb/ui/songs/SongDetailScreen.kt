@@ -1,6 +1,5 @@
 package com.fugaif.imaslivedb.ui.songs
 
-import com.fugaif.imaslivedb.data.model.Vocab
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -77,6 +76,7 @@ import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.data.model.SongVideo
 import com.fugaif.imaslivedb.data.model.SongPerformanceEvidence
 import com.fugaif.imaslivedb.data.model.SongSingerTally
+import com.fugaif.imaslivedb.data.model.Vocab
 import com.fugaif.imaslivedb.player.AudioPreviewManager
 import com.fugaif.imaslivedb.di.AppModule
 import com.fugaif.imaslivedb.ui.components.ArtworkImage

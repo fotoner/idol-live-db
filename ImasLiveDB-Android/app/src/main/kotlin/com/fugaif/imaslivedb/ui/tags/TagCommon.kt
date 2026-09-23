@@ -1,7 +1,5 @@
 package com.fugaif.imaslivedb.ui.tags
 
-import uniffi.imas_core.VocabularyTerm
-import com.fugaif.imaslivedb.data.model.Vocab
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
@@ -16,7 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fugaif.imaslivedb.data.model.Vocab
 import com.fugaif.imaslivedb.ui.theme.DS
+import uniffi.imas_core.VocabularyTerm
 
 // タグ画面群 (TagListScreen / TagDetailScreen / TagCreateSheet / TagEditSheet / TagFilterSheet /
 // SongTagPickerSheet) 共通のカテゴリ定義・色・順位バッジ。iOS Views/Tags/*.swift の移植。
