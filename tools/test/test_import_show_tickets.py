@@ -83,7 +83,10 @@ class ImportShowTicketsTest(unittest.TestCase):
 
     def test_a_show_missing_from_the_canonical_dump_is_rejected(self):
         before = support.sha256(self.master_sql)
-        self.assertNotEqual(self.run_main(ticket_line("sh_b")), 0)
+        # 0 以外なら何でもよいのではなく、検査で弾いた (1) ことと、その理由を見る。
+        # 例外で落ちても 0 以外になるので、それと区別する。
+        self.assertEqual(self.run_main(ticket_line("sh_b")), 1)
+        self.assertIn("知らない公演 id: sh_b", self.output)
         self.assertEqual(support.sha256(self.master_sql), before)
 
     def test_apply_writes_the_canonical_dump_and_the_bundle(self):

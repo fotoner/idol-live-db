@@ -75,7 +75,10 @@ class CliTest(unittest.TestCase):
         before = support.sha256(self.db)
         proc = self.run_tool("--production")
         self.assertEqual(support.sha256(self.db), before, "鍵が無いのに DB を書き換えた")
-        self.assertNotEqual(proc.returncode, 0)
+        # 例外で落ちても終了コードは 1 になるので、止めた理由まで見て区別する。
+        self.assertEqual(proc.returncode, 1, proc.stderr)
+        self.assertIn("鍵の ID が無い", proc.stderr)
+        self.assertNotIn("Traceback", proc.stderr)
 
 
 class PushTest(unittest.TestCase):
