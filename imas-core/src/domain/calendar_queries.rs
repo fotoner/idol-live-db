@@ -21,10 +21,8 @@
 //! ## SQL / Foundation の暗黙挙動をコードで明示して固定する
 //! - `ORDER BY` の NULL 位置: ASC で NULL 先頭 (title_kana)。Rust の `Option` (None < Some) と同じ。
 //! - 文字列比較は BINARY 照合 = バイト列比較。Rust の `str` の `Ord` と同じ。
-//! - Foundation `Calendar.date(from:)` は不正な日を検証せず翌月へ繰り越す
-//!   (非閏年の 2/29 → 3/1)。View 側の日付解決 (`entryDate`) も同じ API を通るため、
-//!   繰り越しを再現しないと表示位置とソートがずれる。誕生日の 2/28 フォールバックは
-//!   Swift コードの分岐到達条件どおり「繰り越し先が範囲外のときだけ」効く。
+//! - 非閏年の 2/29 (誕生日・記念日) は 2/28 に出す ([`month_day_in_year`]、Q-08j)。
+//!   出現日は `occurs_on` に入れて返すので、View 側で月日を展開し直さない。
 //! - SQL が未規定だった同順位の並びは投入順 (= テーブル出現順 = rowid 読み込み順) を
 //!   安定ソートで保って決定的にする (プラットフォーム間で同一結果を返すのが共有コアの目的)。
 //!
@@ -242,12 +240,19 @@ fn parse_month_day(md: &str) -> Option<(u32, i64)> {
     Some((month, day))
 }
 
-/// Foundation `Calendar.date(from:)` の日繰り越しを再現: 月初 + (day - 1) 日。
-/// 非閏年の 2/29 → 3/1、2/30 → 3/2。月が 1..=12 の外は from_ymd_opt が None を返す
-/// (Swift は年へ繰り越すが実データに無く、その暦計算を持ち込む価値がない)。
-fn rolled_day(year: i32, month: u32, day: i64) -> Option<String> {
-    let first = NaiveDate::from_ymd_opt(year, month, 1)?;
-    let date = first.checked_add_signed(chrono::Duration::days(day - 1))?;
+/// 毎年めぐる月日 (誕生日・記念日) の、その年の日付 (Q-08j / Q-08m)。
+///
+/// **非閏年の 2/29 は 2/28** に出す (2 月のうちに祝う。3/1 に繰り越すと月が変わる)。
+/// それ以外の実在しない月日 (2/30 など) は `None`。カレンダーと通知の予定表が同じ規則を使う。
+///
+/// 以前は Foundation の `Calendar.date(from:)` の繰り越しを写して 3/1 に出し、
+/// 「繰り越し先が範囲外のときだけ 2/28」に落としていた (閏年でも 2/29 が範囲外なら
+/// 2/28 に出る、という到達条件の副作用まであった)。iOS の View とコアのコメントが
+/// 逆のことを言っていたのを、ここで 1 つに決める。
+pub fn month_day_in_year(year: i32, month: u32, day: u32) -> Option<String> {
+    let date = NaiveDate::from_ymd_opt(year, month, day).or_else(|| {
+        (month == 2 && day == 29).then(|| NaiveDate::from_ymd_opt(year, 2, 28)).flatten()
+    })?;
     Some(date.format("%Y-%m-%d").to_string())
 }
 
@@ -255,26 +260,14 @@ fn rolled_day(year: i32, month: u32, day: i64) -> Option<String> {
 ///
 /// WHY 候補 2 年: 月グリッドが前年 12 月から始まる月 (特に 1 月) では範囲先頭の年だけで
 /// 解決すると年がずれて誕生日が丸ごと消える。範囲年 / 範囲年+1 の両方を試す。
-/// 2/29 の 2/28 フォールバックは「繰り越し先 (3/1 等) が範囲外のときだけ」効く —
-/// 閏年でも 2/29 自体が範囲外なら 2/28 に落ちる (Swift の分岐到達条件をそのまま固定)。
 fn expand_month_day(month_day: &str, start_day: &str, end_day: &str) -> Option<String> {
     let md = month_day.strip_prefix("--")?;
     let (month, day) = parse_month_day(md)?;
     let year = grid_year(start_day)?;
-    for y in [year, year + 1] {
-        if let Some(date) = rolled_day(y, month, day) {
-            if in_range(&date, start_day, end_day) {
-                return Some(date);
-            }
-        }
-        if month == 2 && day == 29 {
-            let fallback = format!("{y:04}-02-28");
-            if in_range(&fallback, start_day, end_day) {
-                return Some(fallback);
-            }
-        }
-    }
-    None
+    [year, year + 1]
+        .into_iter()
+        .filter_map(|y| month_day_in_year(y, month, day.try_into().ok()?))
+        .find(|date| in_range(date, start_day, end_day))
 }
 
 /// アイドル誕生日 (`Idol.filter(birthday != nil)` — is_external も対象。SQL 時代と同じ)。
@@ -340,8 +333,7 @@ fn parse_anniversary_month_day(date: &str) -> Option<(u32, i64)> {
 ///
 /// ソートキーは起点日そのもの (Swift `CalendarEntry.dateString` の仕様。誕生日と違い
 /// resolvedOccurrence に退避されないため、記念日は日グループ内で常に先頭へ来る)。
-/// 誕生日側と違い 2/28 フォールバックは無い (Swift の記念日分岐にも無い —
-/// 非閏年の 2/29 起点は繰り越しで 3/1 に出る)。
+/// 非閏年の 2/29 起点は 2/28 に出る ([`month_day_in_year`])。
 fn collect_anniversaries(snap: &Snapshot, start_day: &str, end_day: &str, out: &mut Vec<Keyed>) {
     let Some(year) = grid_year(start_day) else { return };
     for ann in &snap.anniversaries {
@@ -351,7 +343,7 @@ fn collect_anniversaries(snap: &Snapshot, start_day: &str, end_day: &str, out: &
         }
         let Some((month, day)) = parse_anniversary_month_day(&ann.date) else { continue };
         for y in [year, year + 1] {
-            let Some(recurring) = rolled_day(y, month, day) else { continue };
+            let Some(recurring) = u32::try_from(day).ok().and_then(|d| month_day_in_year(y, month, d)) else { continue };
             if recurring.as_str() < ann.date.as_str() {
                 continue;
             }
@@ -906,27 +898,21 @@ mod tests {
     }
 
     #[test]
-    fn expand_month_day_fixes_foundation_edge_cases() {
+    fn expand_month_day_puts_feb_29_on_feb_28_in_common_years() {
         // 閏年: 2/29 はそのまま
         assert_eq!(
             expand_month_day("--02-29", "2024-02-01", "2024-03-10"),
             Some("2024-02-29".into())
         );
-        // 非閏年: Calendar.date(from:) の繰り越しどおり 3/1 に出る (2/28 ではない)
+        // 非閏年: 2/28 に出る (Q-08j。以前は 3/1 に繰り越していた)
         assert_eq!(
             expand_month_day("--02-29", "2025-02-01", "2025-03-10"),
-            Some("2025-03-01".into())
-        );
-        // 繰り越し先 (3/1) が範囲外のときだけ 2/28 フォールバックが効く
-        assert_eq!(
-            expand_month_day("--02-29", "2025-02-01", "2025-02-28"),
             Some("2025-02-28".into())
         );
-        // 閏年でも 2/29 自体が範囲外なら 2/28 に落ちる (Swift の分岐到達条件の再現)
-        assert_eq!(
-            expand_month_day("--02-29", "2024-02-01", "2024-02-28"),
-            Some("2024-02-28".into())
-        );
+        assert_eq!(expand_month_day("--02-29", "2025-03-01", "2025-03-31"), None, "3 月には出ない");
+        // 閏年で 2/29 が範囲外なら出ない (2/28 に落とさない)
+        assert_eq!(expand_month_day("--02-29", "2024-02-01", "2024-02-28"), None);
+        assert_eq!(month_day_in_year(2025, 2, 30), None, "実在しない月日は出さない");
         // 12 月開始グリッドの 1 月誕生日は範囲年+1 に展開される
         assert_eq!(
             expand_month_day("--01-15", "2025-12-28", "2026-02-07"),
