@@ -379,22 +379,18 @@ export async function handlePolls(ctx: RouteContext): Promise<Response | null> {
       const user = await getAuthUser(request, env);
       if (!user) return error("Unauthorized", 401);
 
-      const [dbUser, rl] = await Promise.all([
-        env.DB.prepare("SELECT is_banned FROM users WHERE id = ?")
-          .bind(user.uid)
-          .first<{ is_banned: number }>(),
-        checkRateLimit(env.DB, user.uid, "poll_vote"),
-      ]);
-      if (dbUser?.is_banned) return error("Banned", 403);
-      if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
-
-      await upsertUser(env, user.uid, user.email);
-
+      // 投票の枠 (poll_vote) は、実際に票を入れると決まってから消費する (出演者予想と同じ順)。
+      // 本文やお題の状態で断る投票・再投票まで数えると、正しい投票が枠切れになる。
       const body = (await request.json().catch(() => null)) as any;
       if (body === null) return error("invalid JSON body");
       const { entity_id } = body;
       const entityIdErr = validateOpaqueKey(entity_id, "entity_id");
       if (entityIdErr) return error(entityIdErr);
+
+      const dbUser = await env.DB.prepare("SELECT is_banned FROM users WHERE id = ?")
+        .bind(user.uid)
+        .first<{ is_banned: number }>();
+      if (dbUser?.is_banned) return error("Banned", 403);
 
       // poll 存在確認 + active チェック
       const poll = await env.DB.prepare(
@@ -462,40 +458,43 @@ export async function handlePolls(ctx: RouteContext): Promise<Response | null> {
         return json({ entity_id, vote_count: entry?.vote_count ?? 0, my_vote_count: myVoteCount }, 200);
       }
 
-      // 投票レコード追加
-      await env.DB.prepare(
-        `INSERT INTO poll_votes (poll_id, entity_id, user_id, voted_at)
-         VALUES (?, ?, ?, datetime('now'))`
-      )
-        .bind(pollId, entity_id, user.uid)
-        .run();
+      const rl = await checkRateLimit(env.DB, user.uid, "poll_vote");
+      if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
-      // poll_entries upsert
-      const entryExists = await env.DB.prepare(
+      await upsertUser(env, user.uid, user.email);
+
+      // 応答の票数は、書く前に読んだ値 + 1 (従来どおり)。
+      const entry = await env.DB.prepare(
         "SELECT vote_count FROM poll_entries WHERE poll_id = ? AND entity_id = ?"
       )
         .bind(pollId, entity_id)
         .first<{ vote_count: number }>();
 
-      let newVoteCount: number;
-      if (entryExists) {
-        newVoteCount = (entryExists.vote_count ?? 0) + 1;
-        await env.DB.prepare(
-          "UPDATE poll_entries SET vote_count = ? WHERE poll_id = ? AND entity_id = ?"
-        )
-          .bind(newVoteCount, pollId, entity_id)
-          .run();
-      } else {
-        newVoteCount = 1;
-        await env.DB.prepare(
+      // 票の INSERT と集計の +1 を 1 つの batch (= 1 トランザクション) で書く。集計は読んだ値を
+      // 書き戻さず相対で +1 し、票が実際に入ったとき (changes() > 0) だけ動かす。
+      // 同時の投票で票を取りこぼさず、同じ候補への同時の再送で二重に数えない。
+      const [inserted] = await env.DB.batch([
+        env.DB.prepare(
+          `INSERT OR IGNORE INTO poll_votes (poll_id, entity_id, user_id, voted_at)
+           VALUES (?, ?, ?, datetime('now'))`
+        ).bind(pollId, entity_id, user.uid),
+        env.DB.prepare(
           `INSERT INTO poll_entries (poll_id, entity_id, vote_count, first_voted_by, first_voted_at)
-           VALUES (?, ?, 1, ?, datetime('now'))`
+           SELECT ?, ?, 1, ?, datetime('now') WHERE changes() > 0
+           ON CONFLICT(poll_id, entity_id) DO UPDATE SET vote_count = vote_count + 1`
+        ).bind(pollId, entity_id, user.uid),
+      ]);
+      if (!inserted.meta.changes) {
+        // 同じ候補への同時の投票が先に入った。再投票と同じ 200 を返す。
+        const current = await env.DB.prepare(
+          "SELECT vote_count FROM poll_entries WHERE poll_id = ? AND entity_id = ?"
         )
-          .bind(pollId, entity_id, user.uid)
-          .run();
+          .bind(pollId, entity_id)
+          .first<{ vote_count: number }>();
+        return json({ entity_id, vote_count: current?.vote_count ?? 0, my_vote_count: myVoteCount + 1 }, 200);
       }
 
-      return json({ entity_id, vote_count: newVoteCount, my_vote_count: myVoteCount + 1 }, 201);
+      return json({ entity_id, vote_count: (entry?.vote_count ?? 0) + 1, my_vote_count: myVoteCount + 1 }, 201);
     }
 
     // ----------------------------------------------------------------
@@ -528,12 +527,6 @@ export async function handlePolls(ctx: RouteContext): Promise<Response | null> {
         return json({ entity_id: entityId, vote_count: entry?.vote_count ?? 0, my_vote_count: myVoteRow?.c ?? 0 });
       }
 
-      await env.DB.prepare(
-        "DELETE FROM poll_votes WHERE poll_id = ? AND entity_id = ? AND user_id = ?"
-      )
-        .bind(pollId, entityId, user.uid)
-        .run();
-
       const currentEntry = await env.DB.prepare(
         "SELECT vote_count FROM poll_entries WHERE poll_id = ? AND entity_id = ?"
       )
@@ -542,27 +535,31 @@ export async function handlePolls(ctx: RouteContext): Promise<Response | null> {
 
       const newCount = (currentEntry?.vote_count ?? 1) - 1;
 
-      if (newCount <= 0) {
-        await env.DB.prepare(
-          "DELETE FROM poll_entries WHERE poll_id = ? AND entity_id = ?"
-        )
-          .bind(pollId, entityId)
-          .run();
-      } else {
-        await env.DB.prepare(
-          "UPDATE poll_entries SET vote_count = ? WHERE poll_id = ? AND entity_id = ?"
-        )
-          .bind(newCount, pollId, entityId)
-          .run();
-      }
+      // 票の DELETE と集計の変更を 1 つの batch で書く。集計は票が実際に消えたとき
+      // (changes() > 0) だけ動かすので、同じ票の同時の取り消しで二重に減らない。
+      // 最後の 1 票なら候補の行ごと消し、そうでなければ相対で -1 する (読んだ値を書き戻さない)。
+      // 行を消すかは読んだ票数で決める (読み直すと D1 の読み取り行数が増えるため)。
+      const updateEntry =
+        newCount <= 0
+          ? env.DB.prepare(
+              `DELETE FROM poll_entries
+                WHERE poll_id = ? AND entity_id = ? AND vote_count <= 1 AND changes() > 0`
+            )
+          : env.DB.prepare(
+              `UPDATE poll_entries SET vote_count = MAX(0, vote_count - 1)
+                WHERE poll_id = ? AND entity_id = ? AND changes() > 0`
+            );
+      const [, , mine] = await env.DB.batch<{ c: number }>([
+        env.DB.prepare(
+          "DELETE FROM poll_votes WHERE poll_id = ? AND entity_id = ? AND user_id = ?"
+        ).bind(pollId, entityId, user.uid),
+        updateEntry.bind(pollId, entityId),
+        env.DB.prepare(
+          "SELECT COUNT(*) AS c FROM poll_votes WHERE poll_id = ? AND user_id = ?"
+        ).bind(pollId, user.uid),
+      ]);
 
-      const myVoteRow = await env.DB.prepare(
-        "SELECT COUNT(*) AS c FROM poll_votes WHERE poll_id = ? AND user_id = ?"
-      )
-        .bind(pollId, user.uid)
-        .first<{ c: number }>();
-
-      return json({ entity_id: entityId, vote_count: Math.max(0, newCount), my_vote_count: myVoteRow?.c ?? 0 });
+      return json({ entity_id: entityId, vote_count: Math.max(0, newCount), my_vote_count: mine.results[0]?.c ?? 0 });
     }
 
     // ----------------------------------------------------------------
