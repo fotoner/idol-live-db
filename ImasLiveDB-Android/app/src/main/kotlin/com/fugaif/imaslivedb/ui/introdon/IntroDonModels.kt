@@ -45,10 +45,6 @@ data class IntroDonAnswerRecord(
 
 enum class IntroDonPhase { LOADING, PLAYING, ANSWERING, REVEALED, FINISHED }
 
-/** イントロドン出題に使える曲だけに絞る (preview_url あり・親曲でない)。リポジトリ側で既に絞っているが二重防御。 */
-fun introDonPlayable(songs: List<Song>): List<Song> =
-    songs.filter { !it.previewUrl.isNullOrEmpty() && it.parentSongId == null }
-
 /**
  * 出題曲それぞれの選択肢 (正解 1 + 不正解 [wrongCount]) をまとめて生成する。
  * 戻り値は [answers] と同順・同数。候補が足りない設問はその分だけ少ない選択肢になる

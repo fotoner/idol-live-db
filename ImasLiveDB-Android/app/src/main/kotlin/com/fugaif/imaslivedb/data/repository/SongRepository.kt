@@ -19,10 +19,12 @@ import com.fugaif.imaslivedb.data.model.SongWithArtists
 import com.fugaif.imaslivedb.data.model.UserMark
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import uniffi.imas_core.IntroQuizPlayability
 import uniffi.imas_core.KamisabiCompletion
 import uniffi.imas_core.PerformanceHistoryEntry
 import uniffi.imas_core.SongListFilter
 import uniffi.imas_core.SongListSort
+import uniffi.imas_core.introQuizPlayableIndices
 import uniffi.imas_core.splitCreditNames
 
 /**
@@ -703,19 +705,21 @@ class SongRepository(
     }
 
     /**
-     * イントロドン出題プール。Android には Apple Music フル再生の手段が無いため、
-     * iOS の `apple_music_id` 条件ではなく実際に再生できる `preview_url` の有無で絞り込む。
-     * (Android 固有条件 + RANDOM() のためスナップショット化しない)
+     * イントロドン出題プール (並びは無作為)。[brandIds] が空なら全ブランド。
+     *
+     * 出題できるかの規則はコア (`introQuizPlayableIndices`) が持つ (iOS と同じ規則)。
+     * Android には Apple Music のフル再生の手段が無いので、常に「契約なし」
+     * (= preview_url が唯一の音源) として渡す。
      */
     suspend fun fetchIntroDonSongs(brandIds: Set<String> = emptySet()): List<Song> {
-        var sql = "SELECT * FROM songs WHERE preview_url IS NOT NULL AND preview_url != '' AND parent_song_id IS NULL"
-        val args = mutableListOf<Any>()
-        if (brandIds.isNotEmpty()) {
-            sql += " AND brand_id IN (${brandIds.joinToString(",") { "?" }})"
-            args.addAll(brandIds)
-        }
-        sql += " ORDER BY RANDOM()"
-        return db.songDao().fetchSongsRaw(SimpleSQLiteQuery(sql, args.toTypedArray()))
+        var sql = "SELECT * FROM songs"
+        if (brandIds.isNotEmpty()) sql += " WHERE brand_id IN (${brandIds.joinToString(",") { "?" }})"
+        val candidates = db.songDao().fetchSongsRaw(SimpleSQLiteQuery(sql, brandIds.toTypedArray()))
+        val playable = introQuizPlayableIndices(
+            candidates.map { IntroQuizPlayability(it.appleMusicId, it.previewUrl, it.parentSongId) },
+            hasAppleMusicSubscription = false
+        )
+        return playable.map { candidates[it.toInt()] }.shuffled()
     }
 
     // ---- スナップショット経路のヘルパ ----
