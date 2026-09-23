@@ -17,6 +17,7 @@
 //!   プラットフォーム側が song_id で引く (この層は関与しない)。
 
 use crate::domain::snapshot::Snapshot;
+use crate::domain::vocabulary;
 use std::cmp::Reverse;
 use std::collections::HashMap;
 
@@ -275,6 +276,93 @@ pub fn song_ids_with_any_artist(snap: &Snapshot, idol_ids: &[String]) -> Vec<Str
         .enumerate()
         .filter(|&(_, &h)| h)
         .map(|(si, _)| snap.songs[si].id.clone())
+        .collect()
+}
+
+/// アイドル詳細「楽曲 (原曲)」の節分け。songs.song_type によって並べる棚を固定する。
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum IdolSongSectionKind {
+    /// `song_type == "solo"`。
+    Solo,
+    /// `song_type == "unit"` (旧端末 DB の `"group"` も含む。vocabulary::song_type 参照)。
+    Unit,
+    /// `song_type == "all"`。
+    All,
+    /// 上記 3 つ以外 (`cover` / `tie_in` / 未分類など)。
+    Other,
+}
+
+/// 1 節ぶん: 見出し (vocabulary の正式な形) と、その節に属する持ち歌 (idol_songs と同じ並び)。
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct IdolSongSectionRecord {
+    pub kind: IdolSongSectionKind,
+    pub heading: String,
+    pub songs: Vec<IdolSongRecord>,
+}
+
+/// 節に属さない (曲が 0 件の) 節を持たないための固定見出し。song_type の値 1 つに
+/// 対応しない棚 (cover と tie_in をまとめる) なので vocabulary::SONG_TYPES から引けない。
+const OTHER_SECTION_HEADING: &str = "その他";
+
+fn song_type_of<'a>(snap: &'a Snapshot, song_id: &str) -> Option<&'a str> {
+    let &si = snap.song_index_by_id.get(song_id)?;
+    snap.songs[si as usize].song_type.as_deref()
+}
+
+fn section_kind_of(song_type: Option<&str>) -> IdolSongSectionKind {
+    match song_type {
+        Some("solo") => IdolSongSectionKind::Solo,
+        Some("unit") | Some("group") => IdolSongSectionKind::Unit,
+        Some("all") => IdolSongSectionKind::All,
+        _ => IdolSongSectionKind::Other,
+    }
+}
+
+fn section_heading(kind: IdolSongSectionKind) -> String {
+    match kind {
+        IdolSongSectionKind::Solo => {
+            vocabulary::song_type("solo").map(|t| t.label.to_string()).unwrap_or_default()
+        }
+        IdolSongSectionKind::Unit => {
+            vocabulary::song_type("unit").map(|t| t.label.to_string()).unwrap_or_default()
+        }
+        IdolSongSectionKind::All => {
+            vocabulary::song_type("all").map(|t| t.label.to_string()).unwrap_or_default()
+        }
+        IdolSongSectionKind::Other => OTHER_SECTION_HEADING.to_string(),
+    }
+}
+
+/// アイドルの原曲を「ソロ曲 / ユニット曲 / 全体曲 / その他」の 4 節に分ける。
+/// アイドル詳細画面「楽曲 (原曲)」の顧客 (旧: 1 本のリストだった節を分割)。
+///
+/// 節の中の並びは `idol_songs(snap, idol_id, Some("original"))` の並び (release_date
+/// DESC) をそのまま保つ。曲が 0 件の節は出力に含めない。役割は `original` 固定
+/// (この画面が持ち歌として出すのは原曲歌唱者ぶんだけ、という既存の顧客の使い方に揃える)。
+pub fn idol_original_song_sections(snap: &Snapshot, idol_id: &str) -> Vec<IdolSongSectionRecord> {
+    let songs = idol_songs(snap, idol_id, Some("original"));
+    let mut buckets: [Vec<IdolSongRecord>; 4] = Default::default();
+    for song in songs {
+        let kind = section_kind_of(song_type_of(snap, &song.song_id));
+        let idx = match kind {
+            IdolSongSectionKind::Solo => 0,
+            IdolSongSectionKind::Unit => 1,
+            IdolSongSectionKind::All => 2,
+            IdolSongSectionKind::Other => 3,
+        };
+        buckets[idx].push(song);
+    }
+    let kinds = [
+        IdolSongSectionKind::Solo,
+        IdolSongSectionKind::Unit,
+        IdolSongSectionKind::All,
+        IdolSongSectionKind::Other,
+    ];
+    kinds
+        .into_iter()
+        .zip(buckets)
+        .filter(|(_, songs)| !songs.is_empty())
+        .map(|(kind, songs)| IdolSongSectionRecord { kind, heading: section_heading(kind), songs })
         .collect()
 }
 
@@ -668,5 +756,63 @@ mod tests {
         assert!(idol_song_history(snap, real_idol, "居ない曲").is_empty());
         assert!(idol_unit_song_ids(snap, "居ないアイドル").is_empty());
         assert!(unit_ids_with_songs(snap, &[]).is_empty());
+        assert!(idol_original_song_sections(snap, "居ないアイドル").is_empty());
+    }
+
+    /// idol_original_song_sections: 節の割り当て・順序・見出し・0 件の節の省略を、
+    /// idol_songs(role="original") から手で再計算した結果と突き合わせて固定する。
+    #[test]
+    fn idol_original_song_sections_groups_by_song_type_in_fixed_order() {
+        let (snap, _conn) = load();
+        let mut checked_all_four = false;
+        for idol in &snap.idols {
+            let originals = idol_songs(snap, &idol.id, Some("original"));
+            if originals.is_empty() {
+                continue;
+            }
+            let mut want: [Vec<IdolSongRecord>; 4] = Default::default();
+            for song in &originals {
+                let idx = match song_type_of(snap, &song.song_id) {
+                    Some("solo") => 0,
+                    Some("unit") | Some("group") => 1,
+                    Some("all") => 2,
+                    _ => 3,
+                };
+                want[idx].push(song.clone());
+            }
+            let want_headings = ["ソロ曲", "ユニット曲", "全体曲", "その他"];
+            let want_kinds = [
+                IdolSongSectionKind::Solo,
+                IdolSongSectionKind::Unit,
+                IdolSongSectionKind::All,
+                IdolSongSectionKind::Other,
+            ];
+
+            let got = idol_original_song_sections(snap, &idol.id);
+
+            // 節の並びが固定順 (ソロ→ユニット→全体曲→その他) の部分列になっていること、
+            // 0 件の節が出ないこと、節内の並びが idol_songs と同じであることを確認する。
+            let mut want_iter = want_kinds.iter().zip(want.iter()).zip(want_headings.iter());
+            for section in &got {
+                let (kind, songs, heading) = loop {
+                    let ((k, s), h) =
+                        want_iter.next().expect("got の節は want に無いものを含まない");
+                    if !s.is_empty() {
+                        break (k, s, h);
+                    }
+                };
+                assert_eq!(section.kind, *kind, "idol={}", idol.id);
+                assert_eq!(&section.heading, heading, "idol={}", idol.id);
+                assert_eq!(&section.songs, songs, "idol={}", idol.id);
+            }
+            // 残りは全部空節 (got に出てきていない節)
+            for ((_, s), _) in want_iter {
+                assert!(s.is_empty(), "idol={} の空でない節が got から漏れた", idol.id);
+            }
+            if want.iter().all(|s| !s.is_empty()) {
+                checked_all_four = true;
+            }
+        }
+        assert!(checked_all_four, "4 節すべて持つアイドルのサンプルが 1 件も無い");
     }
 }

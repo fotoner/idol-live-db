@@ -510,7 +510,7 @@ private fun UpcomingCard(row: CastShowRow, idol: Idol, onClick: (String) -> Unit
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SongsBody(state: IdolDetailUiState, idol: Idol, onUnit: (String) -> Unit, onSong: (String) -> Unit) {
-    if (state.unitsWithSongs.isEmpty() && state.unitsWithoutSongs.isEmpty() && state.originalSongs.isEmpty()) {
+    if (state.unitsWithSongs.isEmpty() && state.unitsWithoutSongs.isEmpty() && state.originalSongSections.isEmpty()) {
         ImasEmptyState(Icons.Filled.MusicNote, "楽曲・ユニットがありません",
             "原曲・所属ユニットの情報はまだ登録されていません。", seed = idol.color, brand = idol.brandId)
         return
@@ -554,10 +554,10 @@ private fun SongsBody(state: IdolDetailUiState, idol: Idol, onUnit: (String) -> 
                 }
             }
         }
-        if (state.originalSongs.isNotEmpty()) {
+        state.originalSongSections.forEach { section ->
             Column {
-                ImasSectionHeader("楽曲（原曲）", count = "${state.originalSongs.size}", tight = true)
-                state.originalSongs.forEach { song -> SongRow(song, idol.color) { onSong(song.id) } }
+                ImasSectionHeader(section.heading, count = "${section.songs.size}", tight = true)
+                section.songs.forEach { song -> SongRow(song, idol.color) { onSong(song.id) } }
             }
         }
     }

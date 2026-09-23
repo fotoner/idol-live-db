@@ -401,23 +401,25 @@ struct IdolDetailView: View {
     @ViewBuilder
     private var songsBody: some View {
         VStack(spacing: DS.sp6) {
-            if !vm.originalSongs.isEmpty {
-                VStack(spacing: DS.sp3) {
-                    ImasSectionHeader(title: "楽曲（原曲）", count: "\(vm.originalSongs.count)", tight: true)
-                    ImasListContainer {
-                        ForEach(Array(vm.originalSongs.enumerated()), id: \.element.id) { idx, song in
-                            if idx > 0 { ImasRowDivider(inset: 66) }
-                            songRow(
-                                song: song,
-                                detailLabel: song.unitName ?? "",
-                                performCount: nil
-                            ) {
-                                go(.song(song))
+            if !vm.originalSongSections.isEmpty {
+                ForEach(vm.originalSongSections) { section in
+                    VStack(spacing: DS.sp3) {
+                        ImasSectionHeader(title: section.heading, count: "\(section.songs.count)", tight: true)
+                        ImasListContainer {
+                            ForEach(Array(section.songs.enumerated()), id: \.element.id) { idx, song in
+                                if idx > 0 { ImasRowDivider(inset: 66) }
+                                songRow(
+                                    song: song,
+                                    detailLabel: song.unitName ?? "",
+                                    performCount: nil
+                                ) {
+                                    go(.song(song))
+                                }
                             }
                         }
                     }
+                    .padding(.horizontal, DS.sp5)
                 }
-                .padding(.horizontal, DS.sp5)
             } else {
                 ImasEmptyState(
                     systemImage: "music.note.list",

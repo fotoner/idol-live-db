@@ -8,10 +8,10 @@ import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.CastShowRow
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.IdolPerformedSong
+import com.fugaif.imaslivedb.data.model.IdolSongSection
 import com.fugaif.imaslivedb.data.model.ImasUnit
 import com.fugaif.imaslivedb.data.model.JstDay
 import com.fugaif.imaslivedb.data.model.PersonalTag
-import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +26,7 @@ import com.fugaif.imaslivedb.data.local.localWrite
 data class IdolDetailUiState(
     val idol: Idol? = null,
     val brand: Brand? = null,
-    val originalSongs: List<Song> = emptyList(),
+    val originalSongSections: List<IdolSongSection> = emptyList(),
     val performedSongs: List<IdolPerformedSong> = emptyList(),
     val unitsWithSongs: List<ImasUnit> = emptyList(),
     val unitsWithoutSongs: List<ImasUnit> = emptyList(),
@@ -61,7 +61,7 @@ class IdolDetailViewModel(app: Application, private val idolId: String) : Androi
         viewModelScope.launch {
             val idol = repo.fetchIdol(idolId) ?: return@launch
             val brand = repo.fetchBrand(idol.brandId)
-            val originalSongs = songRepo.fetchIdolSongs(idolId, "original")
+            val originalSongSections = songRepo.fetchIdolOriginalSongSections(idolId)
             val performedSongs = repo.fetchIdolPerformedSongs(idolId)
             val units = unitRepo.fetchUnitsForIdol(idolId)
             val unitIdsWithSongs = unitRepo.fetchUnitIdsForIdolWithSongs(idolId)
@@ -70,7 +70,7 @@ class IdolDetailViewModel(app: Application, private val idolId: String) : Androi
             _uiState.value = IdolDetailUiState(
                 idol = idol,
                 brand = brand,
-                originalSongs = originalSongs,
+                originalSongSections = originalSongSections,
                 performedSongs = performedSongs,
                 unitsWithSongs = units.filter { it.id in unitIdsWithSongs },
                 unitsWithoutSongs = units.filter { it.id !in unitIdsWithSongs },

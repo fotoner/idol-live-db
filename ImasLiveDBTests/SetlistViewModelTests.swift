@@ -68,6 +68,7 @@ final class SetlistViewModelTests: XCTestCase {
         func idolsByVoiceActor(name: String) async throws -> [Idol] { [] }
         func searchIdols(query: String, limit: Int) async throws -> [Idol] { [] }
         func idolSongs(idolId: String, role: String?) async throws -> [Song] { [] }
+        func idolOriginalSongSections(idolId: String) async throws -> [IdolSongSection] { [] }
         func idolPerformedSongs(idolId: String) async throws -> [IdolPerformedSong] { [] }
         func idolUnits(idolId: String) async throws -> [ImasLiveDB.Unit] { [] }
         func idolShows(idolId: String) async throws -> [CastShowRow] { [] }

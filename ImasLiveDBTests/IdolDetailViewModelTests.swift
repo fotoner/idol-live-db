@@ -13,10 +13,12 @@ final class IdolDetailViewModelTests: XCTestCase {
 
     private struct FakeIdolReading: IdolReading {
         var unitsToReturn: [ImasLiveDB.Unit] = []
+        var sectionsToReturn: [IdolSongSection] = []
 
         func idolUnits(idolId: String) async throws -> [ImasLiveDB.Unit] { unitsToReturn }
         // 詳細ロードで呼ばれるが本テストでは空で十分。
         func idolSongs(idolId: String, role: String?) async throws -> [Song] { [] }
+        func idolOriginalSongSections(idolId: String) async throws -> [IdolSongSection] { sectionsToReturn }
         func idolPerformedSongs(idolId: String) async throws -> [IdolPerformedSong] { [] }
         func idolShows(idolId: String) async throws -> [CastShowRow] { [] }
 
@@ -86,6 +88,23 @@ final class IdolDetailViewModelTests: XCTestCase {
         XCTAssertEqual(vm.units.map(\.id), ["u1", "u2", "u3"])
         XCTAssertEqual(vm.unitsWithSongs.map(\.id), ["u1", "u3"])
         XCTAssertEqual(vm.unitsWithoutSongs.map(\.id), ["u2"])
+    }
+
+    func testLoadKeepsOriginalSongSectionsInCoreOrder() async {
+        let sections = [
+            IdolSongSection(heading: "ソロ曲", songs: [makeStubSong("s1")]),
+            IdolSongSection(heading: "全体曲", songs: [makeStubSong("s2"), makeStubSong("s3")]),
+        ]
+        let vm = IdolDetailViewModel(
+            idolReading: FakeIdolReading(sectionsToReturn: sections),
+            brandReading: FakeBrandReading(),
+            unitReading: FakeUnitReading())
+
+        await vm.loadDetails(idol: makeIdol("i", brandId: "cg"))
+
+        // VM はコアが返した節の並び・中身をそのまま保持する (並び替え・フィルタは行わない)。
+        XCTAssertEqual(vm.originalSongSections.map(\.heading), ["ソロ曲", "全体曲"])
+        XCTAssertEqual(vm.originalSongSections.map { $0.songs.map(\.id) }, [["s1"], ["s2", "s3"]])
     }
 
     func testLoadResolvesBrandByIdolBrandId() async {

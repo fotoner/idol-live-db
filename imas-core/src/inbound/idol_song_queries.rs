@@ -6,7 +6,7 @@
 //! domain::idol_song_queries に置く。
 
 use crate::domain::idol_song_queries::{
-    self, IdolPerformedSongRecord, IdolSongRecord, IdolSongShowRecord,
+    self, IdolPerformedSongRecord, IdolSongRecord, IdolSongSectionRecord, IdolSongShowRecord,
 };
 use super::snapshot_store::{SnapshotError, SnapshotStore};
 
@@ -57,6 +57,16 @@ impl SnapshotStore {
         Ok(idol_song_queries::idol_unit_song_ids(&snap, &idol_id))
     }
 
+    /// アイドル詳細「楽曲 (原曲)」の節分け (ソロ曲/ユニット曲/全体曲/その他)。
+    /// 0 件の節は出力に含めない。role は `original` 固定 (idol_song_queries 参照)。
+    pub fn idol_original_song_sections(
+        &self,
+        idol_id: String,
+    ) -> Result<Vec<IdolSongSectionRecord>, SnapshotError> {
+        let snap = self.current()?;
+        Ok(idol_song_queries::idol_original_song_sections(&snap, &idol_id))
+    }
+
     /// 指定アイドルのいずれかが原曲歌唱者として立つ曲の song_id 列
     /// (songs 添字昇順・重複なし)。SQL 時代の fetchSongIdsWithAnyArtist 相当。
     /// 曲一覧の担当アイドル絞り込みが顧客で、集合化は呼び出し側 (iOS は Set<String>)。
@@ -92,6 +102,10 @@ mod tests {
         ));
         assert!(matches!(store.unit_ids_with_songs(vec![]), Err(SnapshotError::NotLoaded)));
         assert!(matches!(store.idol_unit_song_ids("x".into()), Err(SnapshotError::NotLoaded)));
+        assert!(matches!(
+            store.idol_original_song_sections("x".into()),
+            Err(SnapshotError::NotLoaded)
+        ));
     }
 
     /// FFI 面の疎通: 実データで空でない結果が委譲越しに返る (ロジック検証は domain 側)。
@@ -111,9 +125,13 @@ mod tests {
             .unwrap();
         assert!(!history.is_empty());
         // original 縛り (アイドル詳細「楽曲 (原曲)」タブの実引数) も疎通確認
-        let originals = store.idol_song_records(idol_id, Some("original".into())).unwrap();
+        let originals = store.idol_song_records(idol_id.clone(), Some("original".into())).unwrap();
         for r in &originals {
             assert_eq!(r.role, "original");
         }
+        // 節分け FFI: 全部の節の曲数の合計が originals の件数と一致する (中身は domain 側で検証済み)
+        let sections = store.idol_original_song_sections(idol_id).unwrap();
+        let total: usize = sections.iter().map(|s| s.songs.len()).sum();
+        assert_eq!(total, originals.len());
     }
 }

@@ -8,6 +8,7 @@ import com.fugaif.imaslivedb.data.core.hydrateInOrder
 import com.fugaif.imaslivedb.data.db.AppDatabase
 import com.fugaif.imaslivedb.data.model.AlbumSummary
 import com.fugaif.imaslivedb.data.model.Idol
+import com.fugaif.imaslivedb.data.model.IdolSongSection
 import com.fugaif.imaslivedb.data.model.PerformanceHistoryRow
 import com.fugaif.imaslivedb.data.model.SeriesSummary
 import com.fugaif.imaslivedb.data.model.Song
@@ -391,6 +392,24 @@ class SongRepository(
         return fetchSongsPreservingOrder(
             snapshots.query { store -> store.idolSongRecords(idolId, role).map { it.songId } }
         )
+    }
+
+    /**
+     * アイドルの原曲を「ソロ曲/ユニット曲/全体曲/その他」に節分けしたもの (0 件の節は含まない)。
+     * アイドル詳細「楽曲（原曲）」用。節分け・見出し・節内の並びは共有コアが決める
+     * (idolOriginalSongSections)。節をまたいで 1 回だけ Room で実体化し (Song::id で分配)、
+     * 節の数だけクエリを往復させない。
+     */
+    suspend fun fetchIdolOriginalSongSections(idolId: String): List<IdolSongSection> {
+        val sections = snapshots.query { store -> store.idolOriginalSongSections(idolId) }
+        val allIds = sections.flatMap { section -> section.songs.map { it.songId } }
+        val songsById = fetchSongsPreservingOrder(allIds).associateBy { it.id }
+        return sections.map { section ->
+            IdolSongSection(
+                heading = section.heading,
+                songs = section.songs.mapNotNull { songsById[it.songId] }
+            )
+        }
     }
 
     /** ソロ曲クイズ用: ソロ曲と原唱アイドルの対応行 (song_id, idol_id)。 */

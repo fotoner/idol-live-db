@@ -167,6 +167,17 @@ data class IdolPerformedSong(
     @ColumnInfo(name = "perform_count") val performCount: Int
 )
 
+/**
+ * アイドル詳細「楽曲（原曲）」の 1 節 (ソロ曲/ユニット曲/全体曲/その他)。
+ * 節分け・見出し・並びは共有コア (idol_original_song_sections) が決める。iOS IdolSongSection の移植。
+ * Room の直接クエリ結果ではなく FFI の射影を Song に実体化して組み立てるので、
+ * [IdolPerformedSong] と違って Room アノテーションは付けない。
+ */
+data class IdolSongSection(
+    val heading: String,
+    val songs: List<Song>
+)
+
 data class CastShowCount(
     @ColumnInfo(name = "id") val id: String,
     @ColumnInfo(name = "name") val name: String,

@@ -340,6 +340,15 @@ struct IdolPerformedSong: Identifiable, Sendable {
     var performCount: Int
 }
 
+/// アイドル詳細「楽曲（原曲）」の 1 節 (ソロ曲/ユニット曲/全体曲/その他)。
+/// 節分け・見出し・並びは共有コア (`idol_original_song_sections`) が決める。
+/// 見出しは節ごとに異なるので Identifiable の id にそのまま使える。
+struct IdolSongSection: Identifiable, Sendable {
+    var id: String { heading }
+    var heading: String
+    var songs: [Song]
+}
+
 enum IdolFilterCriterion: Hashable, Sendable {
     case brand(id: String, label: String)
     case birthMonth(Int)

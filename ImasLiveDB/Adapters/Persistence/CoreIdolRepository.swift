@@ -93,6 +93,23 @@ struct CoreIdolRepository: IdolReading {
         }
     }
 
+    func idolOriginalSongSections(idolId: String) async throws -> [IdolSongSection] {
+        try await snapshot.withStore { store in
+            let sections = try store.idolOriginalSongSections(idolId: idolId)
+            // 節をまたいで 1 回の songRecordsByIds でまとめて実体化してから、節ごとに配り直す
+            // (節の数だけ FFI を往復させない)。
+            let allIds = sections.flatMap { $0.songs.map(\.songId) }
+            let songs = try CoreRecordMapping.songs(store: store, orderedIds: allIds)
+            let songsById = Dictionary(songs.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+            return sections.map { section in
+                IdolSongSection(
+                    heading: section.heading,
+                    songs: section.songs.compactMap { songsById[$0.songId] }
+                )
+            }
+        }
+    }
+
     func idolPerformedSongs(idolId: String) async throws -> [IdolPerformedSong] {
         try await snapshot.withStore { store in
             let records = try store.idolPerformedSongRecords(idolId: idolId)
