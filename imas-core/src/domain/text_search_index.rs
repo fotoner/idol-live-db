@@ -124,8 +124,12 @@ pub struct FoldedNeedle {
 }
 
 impl FoldedNeedle {
+    /// 検索語は先に NFC へ寄せてから畳む。打った語 (macOS の Finder からの貼り付け等) が
+    /// NFD でも、NFC で入っている DB の名前に当たるようにするため (`e` + 結合アキュートでも
+    /// `é` に当たる)。かなの濁点の合成は畳み込み自体も持っているが、ラテン文字は持たない。
     pub fn new(needle: &str) -> Self {
-        Self { folded: fold_lowercase(needle) }
+        use unicode_normalization::UnicodeNormalization;
+        Self { folded: fold_lowercase(&needle.nfc().collect::<String>()) }
     }
 
     /// 畳み済みのバイト列。読み込み時に畳んである索引
