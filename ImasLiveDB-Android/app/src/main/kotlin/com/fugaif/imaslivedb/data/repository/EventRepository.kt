@@ -34,6 +34,8 @@ import uniffi.imas_core.ShowCollectionRecord
 import uniffi.imas_core.ShowRecord
 import uniffi.imas_core.AttendanceMarkRecord
 import uniffi.imas_core.TimelineBarRecord
+import uniffi.imas_core.EventHeroRecord
+import com.fugaif.imaslivedb.data.model.JstDay
 
 /**
  * [EventRepository.fetchSetlistRowMeta] の結果。行の添え物と、公演の頭に出す
@@ -184,6 +186,13 @@ class EventRepository(
     // コアは (date, sort_order) 順 (iOS と同じ並び)。
     suspend fun fetchShows(eventId: String): List<Show> =
         snapshots.query { store -> store.showsByEvent(eventId).map { it.toShow() } }
+
+    /**
+     * イベント詳細のヒーロー (開催期間・会場・今後か・参加の札)。参加の札の判定
+     * (公演単位のマーク優先、無ければイベント単位のマークで全公演) もコア。
+     */
+    suspend fun fetchEventHero(eventId: String, attendedShowIds: Collection<String>, eventMarked: Boolean): EventHeroRecord? =
+        snapshots.query { store -> store.eventHero(eventId, attendedShowIds.toList(), eventMarked, JstDay.today()) }
 
     /** イベントと、コアが決めた属性 (合同か)。 */
     suspend fun fetchEventInfo(id: String): EventInfo? =

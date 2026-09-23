@@ -2,6 +2,7 @@ package com.fugaif.imaslivedb.data.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
+import uniffi.imas_core.dateRangeDisplay
 
 // MARK: - Event Query Results
 
@@ -33,13 +34,11 @@ data class EventWithDateRange(
     /** 合同ライブか (参加ブランドの割り方はコア。虹色のリードバーに使う)。 */
     val isJoint: Boolean = false
 ) {
-    /** 表示用の開催日。複数日なら "first〜last"、単日なら first のみ。 */
-    val dateRange: String?
-        get() {
-            val first = firstDate?.takeIf { it.isNotEmpty() } ?: return null
-            val last = lastDate?.takeIf { it.isNotEmpty() && it != first }
-            return if (last != null) "$first〜$last" else first
-        }
+    /**
+     * 表示用の開催期間 (曜日付き、複数日なら ` 〜 ` で繋ぐ)。組み立てはコア (dateRangeDisplay)。
+     * 行が描かれたときに 1 回だけ引いて覚える (一覧の読み込みで全件ぶん FFI を跨がない)。
+     */
+    val dateRange: String? by lazy { dateRangeDisplay(firstDate, lastDate) }
 
     // 「今後 / 開催済み」の判定は共有コアの groupEventIndicesByYear が持つ (firstDate 基準)。
     // ここに lastDate 基準の isUpcoming があると二重実装になるので置かない。
@@ -438,16 +437,10 @@ data class AlbumSummary(
     val earliestDate: String?,
     val latestDate: String?,
     /** 含まれる曲のブランド id (重複なし)。1 枚に複数ブランドが混ざることがある。 */
-    val brandIds: List<String>
-) {
-    /** カードの副題に出す発売年。年跨ぎは "2019-2021"。 */
-    val displayYear: String?
-        get() {
-            val from = earliestDate?.take(4)?.takeIf { it.length == 4 } ?: return null
-            val to = latestDate?.take(4)?.takeIf { it.length == 4 }
-            return if (to != null && to != from) "$from-$to" else from
-        }
-}
+    val brandIds: List<String>,
+    /** カードの副題に出す発売年 (`2019` / `2019 – 2021`)。幅の出し方はコア。 */
+    val yearDisplay: String? = null
+)
 
 /**
  * 上位シリーズ (series_group) 単位の集計 1 件。曲一覧の「シリーズ」表示のカード 1 枚ぶん。
@@ -461,12 +454,7 @@ data class SeriesSummary(
     val earliestDate: String?,
     val latestDate: String?,
     val artworkUrl: String?,
-    val brandIds: List<String>
-) {
-    val yearRange: String?
-        get() {
-            val from = earliestDate?.take(4)?.takeIf { it.length == 4 } ?: return null
-            val to = latestDate?.take(4)?.takeIf { it.length == 4 }
-            return if (to != null && to != from) "$from-$to" else from
-        }
-}
+    val brandIds: List<String>,
+    /** カードの副題に出す年の幅 (`2019` / `2019 – 2021`)。幅の出し方はコア。 */
+    val yearDisplay: String? = null
+)

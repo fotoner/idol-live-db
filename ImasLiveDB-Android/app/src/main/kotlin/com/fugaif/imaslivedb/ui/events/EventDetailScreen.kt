@@ -74,7 +74,6 @@ import com.fugaif.imaslivedb.data.model.EventAttendance
 import com.fugaif.imaslivedb.data.model.Event
 import com.fugaif.imaslivedb.data.model.EventStats
 import com.fugaif.imaslivedb.data.model.Idol
-import com.fugaif.imaslivedb.data.model.JstDay
 import com.fugaif.imaslivedb.data.model.Show
 import com.fugaif.imaslivedb.data.model.UserMark
 import com.fugaif.imaslivedb.data.model.Vocab
@@ -97,9 +96,9 @@ import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 import com.fugaif.imaslivedb.ui.share.SocialShare
 import uniffi.imas_core.shareEventText
+import uniffi.imas_core.AttendanceState
 
 /**
  * イベント詳細。iOS EventDetailView の構成を 1:1 で写す。
@@ -184,6 +183,10 @@ fun EventDetailScreen(
         legacyEventAttended = marks.isOn(UserMark.EVENT, eventId, UserMark.ATTENDED)
     }
     LaunchedEffect(uiState.shows) { reloadAttendance() }
+    // 参加の札・開催期間はマークに依るので、マークが変わるたびにコアへ問い直す。
+    LaunchedEffect(eventId, attendedShowIds, legacyEventAttended, reloadToken) {
+        viewModel.refreshHero(context, eventId, attendedShowIds, legacyEventAttended)
+    }
 
     Scaffold(
         topBar = {
@@ -237,7 +240,6 @@ fun EventDetailScreen(
             Column(Modifier.fillMaxSize().padding(innerPadding)) {
                 Hero(
                     state = uiState, t = t, favOn = favOn, attendOn = attendOn,
-                    attendedShowIds = attendedShowIds,
                     onFavToggle = { scope.launch { favOn = marks.toggle(UserMark.EVENT, eventId, UserMark.FAVORITE) } },
                     onAttendToggle = { showAttendanceSheet = true }
                 )
@@ -346,42 +348,12 @@ fun EventDetailScreen(
 
 // MARK: - Hero
 
-private data class AttendanceStatusUi(val label: String, val planned: Boolean)
-
-/**
- * 参加マークの付いた公演の日付から「参加予定 (あとN日) / 参加済み」を導く。
- * iOS `AttendanceStatus.derive(attendedShowDates:)` と同じ判定。
- * 公演単位のマークが無く旧いイベント単位のマークだけある場合は、全公演を対象にする。
- */
-private fun attendanceStatus(
-    state: EventDetailUiState,
-    marked: Boolean,
-    attendedShowIds: Set<String>
-): AttendanceStatusUi? {
-    if (!marked) return null
-    val today = JstDay.date()
-    val targets = if (attendedShowIds.isEmpty()) state.shows
-    else state.shows.filter { it.id in attendedShowIds }
-    val futureDates = targets.map { it.date }
-        .filter { it.isNotEmpty() }
-        .mapNotNull { runCatching { LocalDate.parse(it) }.getOrNull() }
-        .filter { !it.isBefore(today) }
-    val nearest = futureDates.minOrNull()
-    return if (nearest != null) {
-        val days = ChronoUnit.DAYS.between(today, nearest)
-        AttendanceStatusUi(if (days <= 0) "参加予定・今日" else "参加予定・あと${days}日", planned = true)
-    } else {
-        AttendanceStatusUi("参加済み", planned = false)
-    }
-}
-
 @Composable
 private fun Hero(
     state: EventDetailUiState,
     t: ImasTheme,
     favOn: Boolean,
     attendOn: Boolean,
-    attendedShowIds: Set<String>,
     onFavToggle: () -> Unit,
     onAttendToggle: () -> Unit
 ) {
@@ -405,12 +377,13 @@ private fun Hero(
         }
         Spacer(Modifier.height(10.dp))
         Text(state.eventName, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = DS.ink)
-        if (state.heroSub.isNotEmpty()) {
+        val subLine = state.hero?.subLine.orEmpty()
+        if (subLine.isNotEmpty()) {
             Spacer(Modifier.height(6.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Filled.CalendarMonth, null, tint = DS.ink2, modifier = Modifier.size(14.dp))
                 Spacer(Modifier.width(4.dp))
-                Text(state.heroSub, fontSize = 13.sp, color = DS.ink2)
+                Text(subLine, fontSize = 13.sp, color = DS.ink2)
                 if (state.isJoint) Text(" ・ 合同", fontSize = 13.sp, color = t.accent)
             }
         }
@@ -419,24 +392,26 @@ private fun Hero(
             HeroToggle("お気に入り", favOn, DS.favorite, onFavToggle)
             HeroToggle("参加", attendOn, t.accent, onAttendToggle)
         }
-        attendanceStatus(state, attendOn, attendedShowIds)?.let { status ->
+        // 参加の札 (参加予定・あと N 日 / 参加済み) の判定と文言はコア。
+        state.hero?.attendance?.takeIf { it.state != AttendanceState.NONE }?.let { attendance ->
+            val planned = attendance.state == AttendanceState.PLANNED
             Spacer(Modifier.height(10.dp))
             Row(
                 modifier = Modifier.clip(RoundedCornerShape(50.dp))
-                    .background(if (status.planned) t.accent else DS.fill)
+                    .background(if (planned) t.accent else DS.fill)
                     .padding(horizontal = 12.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    if (status.planned) Icons.Filled.Schedule else Icons.Filled.CheckCircle,
+                    if (planned) Icons.Filled.Schedule else Icons.Filled.CheckCircle,
                     contentDescription = null,
-                    tint = if (status.planned) t.onAccent else DS.ink2,
+                    tint = if (planned) t.onAccent else DS.ink2,
                     modifier = Modifier.size(13.dp)
                 )
                 Spacer(Modifier.width(6.dp))
                 Text(
-                    status.label, fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
-                    color = if (status.planned) t.onAccent else DS.ink2
+                    attendance.label, fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
+                    color = if (planned) t.onAccent else DS.ink2
                 )
             }
         }

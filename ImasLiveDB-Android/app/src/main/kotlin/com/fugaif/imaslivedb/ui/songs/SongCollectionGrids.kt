@@ -40,7 +40,7 @@ fun AlbumGrid(albums: List<AlbumSummary>, onSelect: (AlbumSummary) -> Unit) {
     SummaryGrid(items = albums, key = { it.cdSeries }) { album ->
         SummaryCard(
             title = album.cdSeries,
-            subtitle = listOfNotNull("${album.songCount}曲", album.displayYear).joinToString(" / "),
+            subtitle = listOfNotNull("${album.songCount}曲", album.yearDisplay).joinToString(" / "),
             artworkUrl = album.artworkUrl,
             brandId = album.brandIds.firstOrNull(),
             onClick = { onSelect(album) }
@@ -60,7 +60,7 @@ fun SeriesGrid(series: List<SeriesSummary>, onSelect: (SeriesSummary) -> Unit) {
     SummaryGrid(items = series, key = { it.name }) { s ->
         SummaryCard(
             title = s.name,
-            subtitle = listOfNotNull("${s.cdCount}枚 / ${s.songCount}曲", s.yearRange).joinToString(" · "),
+            subtitle = listOfNotNull("${s.cdCount}枚 / ${s.songCount}曲", s.yearDisplay).joinToString(" · "),
             artworkUrl = s.artworkUrl,
             brandId = s.brandIds.firstOrNull(),
             onClick = { onSelect(s) }

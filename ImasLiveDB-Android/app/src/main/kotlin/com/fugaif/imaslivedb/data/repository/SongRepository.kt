@@ -323,7 +323,8 @@ class SongRepository(
                     songCount = it.songCount.toInt(),
                     earliestDate = it.earliestDate,
                     latestDate = it.latestDate,
-                    brandIds = it.brandIds
+                    brandIds = it.brandIds,
+                    yearDisplay = it.yearDisplay
                 )
             }
         }
@@ -339,7 +340,8 @@ class SongRepository(
                     earliestDate = it.earliestDate,
                     latestDate = it.latestDate,
                     artworkUrl = it.artworkUrl,
-                    brandIds = it.brandIds
+                    brandIds = it.brandIds,
+                    yearDisplay = it.yearDisplay
                 )
             }
         }
