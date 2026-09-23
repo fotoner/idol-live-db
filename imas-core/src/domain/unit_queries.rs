@@ -737,10 +737,13 @@ mod covering_tests {
             }
             covered_events += 1;
             let performed: HashSet<String> = performed_unit_ids(snap, &event.id).into_iter().collect();
+            // 覆う対象は「出た人 ∩ 母集団」(R-C-01)。
+            let population: HashSet<&String> = record.brand_idol_ids.iter().collect();
             let mut remaining: HashSet<u32> = record
                 .presence_by_show
                 .values()
                 .flatten()
+                .filter(|id| population.contains(id))
                 .map(|id| snap.idol_index_by_id[id])
                 .collect();
             let mut previous_size = usize::MAX;
