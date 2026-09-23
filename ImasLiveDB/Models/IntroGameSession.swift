@@ -325,7 +325,14 @@ final class IntroGameSession {
         stopPlayback()
         selectedTitle = nil
         isCorrect = false
-        combo = 0
+        // 飛ばしは不正解と同じ進め方 (コンボ 0)。規則はコア。
+        let next = introScoreAfterAnswer(
+            current: IntroScore(score: UInt32(clamping: score), combo: UInt32(clamping: combo),
+                                bestCombo: UInt32(clamping: bestCombo)),
+            correct: false)
+        score = Int(next.score)
+        combo = Int(next.combo)
+        bestCombo = Int(next.bestCombo)
         records.append(IntroAnswerRecord(id: q.id, title: q.title, selectedTitle: nil, correct: false))
         if settings.mode == .rush {
             advanceRush()

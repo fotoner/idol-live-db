@@ -83,15 +83,12 @@ enum CoreRecordMapping {
 
     static func unitIndex(from record: UnitIndexRecord) -> UnitIndex {
         var memberIds: [String: Set<String>] = [:]
-        var byIdol: [String: Set<String>] = [:]
         for link in record.memberLinks {
             memberIds[link.unitId, default: []].insert(link.idolId)
-            byIdol[link.idolId, default: []].insert(link.unitId)
         }
         return UnitIndex(
             units: record.units.map(unit(from:)),
             memberIds: memberIds,
-            byIdol: byIdol,
             unitsWithSongs: Set(record.songUnitIds)
         )
     }

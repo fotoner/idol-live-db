@@ -72,7 +72,7 @@ final class MyPageViewModelTests: XCTestCase {
         var units: [ImasLiveDB.Unit] = []
 
         func unitIndex() async throws -> UnitIndex {
-            UnitIndex(units: units, memberIds: [:], byIdol: [:], unitsWithSongs: [])
+            UnitIndex(units: units, memberIds: [:], unitsWithSongs: [])
         }
         func unit(id: String) async throws -> ImasLiveDB.Unit? { nil }
         func unitMembers(unitId: String) async throws -> [Idol] { [] }

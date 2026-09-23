@@ -21,7 +21,6 @@ final class UnitListViewModelTests: XCTestCase {
             UnitIndex(
                 units: unitsToReturn,
                 memberIds: [:],
-                byIdol: [:],
                 unitsWithSongs: Set(unitsToReturn.map(\.id))
             )
         }
