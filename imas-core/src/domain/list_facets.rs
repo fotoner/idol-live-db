@@ -10,7 +10,9 @@
 
 use crate::domain::idol_list_filtering::{sort_order_table, IdolListEntry, IdolSortKind};
 use crate::domain::snapshot::Snapshot;
-use crate::domain::song_list_queries::{song_list_sort_options_without_user_marks, SongListSort};
+use crate::domain::song_list_queries::{
+    filter_song_indexes, song_list_sort_options_without_user_marks, SongListSort, SongQuery,
+};
 use crate::domain::{idol_queries, song_detail_queries, vocabulary};
 use std::collections::{BTreeSet, HashSet};
 
@@ -56,7 +58,7 @@ pub struct SongFacets {
     pub idols: Vec<FacetOption>,
     pub cd_series: Vec<FacetOption>,
     pub series_groups: Vec<FacetOption>,
-    /// 曲種別。`vocabulary::SONG_TYPES` の 5 種すべてを、その並びと正式な形で (Q-08f)。
+    /// 曲種別。一覧に実在する種別だけを、`vocabulary::SONG_TYPES` の並びと正式な形で (Q-08f)。
     pub song_types: Vec<FacetOption>,
     /// ログインもユーザーデータも持たない出面で選べる並べ替え。
     pub sorts: Vec<SortOption>,
@@ -108,6 +110,20 @@ fn present_brands(snap: &Snapshot, idol_entries: &[IdolListEntry]) -> Vec<FacetO
         .collect()
 }
 
+/// 一覧 (`SongQuery::default()` の母集団) に実在する曲種別だけを、語彙の並びで
+/// (ブランドと同じ規則。一覧に居ない種別を選べても 0 件になるだけ)。
+fn present_song_types(snap: &Snapshot) -> Vec<FacetOption> {
+    let present: HashSet<&str> = filter_song_indexes(snap, &SongQuery::default().to_filter())
+        .into_iter()
+        .filter_map(|i| snap.songs[i as usize].song_type.as_deref())
+        .collect();
+    vocabulary::SONG_TYPES
+        .iter()
+        .filter(|t| present.contains(t.value))
+        .map(|t| option(t.value, t.label))
+        .collect()
+}
+
 /// 楽曲一覧の選択肢。`idol_entries` は `idol_list_entries(snap)` (出面の島が 1 度だけ組むもの)。
 pub fn song_facets(snap: &Snapshot, idol_entries: &[IdolListEntry]) -> SongFacets {
     SongFacets {
@@ -123,7 +139,7 @@ pub fn song_facets(snap: &Snapshot, idol_entries: &[IdolListEntry]) -> SongFacet
                 .collect(),
         ),
         series_groups: same_value_options(song_detail_queries::series_group_names(snap, &[])),
-        song_types: vocabulary::SONG_TYPES.iter().map(|t| option(t.value, t.label)).collect(),
+        song_types: present_song_types(snap),
         sorts: song_list_sort_options_without_user_marks()
             .into_iter()
             .map(|o| SortOption { key: o.key, label: o.label, default_ascending: o.default_ascending })
@@ -168,13 +184,7 @@ mod tests {
     fn empty_snapshot_still_offers_the_fixed_choices() {
         let snap = Snapshot::default();
         let songs = song_facets(&snap, &[]);
-        assert!(songs.brands.is_empty() && songs.idols.is_empty());
-        let types: Vec<(&str, &str)> =
-            songs.song_types.iter().map(|o| (o.value.as_str(), o.label.as_str())).collect();
-        assert_eq!(
-            types,
-            [("solo", "ソロ曲"), ("unit", "ユニット曲"), ("all", "全体曲"), ("cover", "カバー"), ("tie_in", "タイアップ")]
-        );
+        assert!(songs.brands.is_empty() && songs.idols.is_empty() && songs.song_types.is_empty());
         assert_eq!(songs.default_sort, "kana");
         assert!(songs.sorts.iter().any(|s| s.key == songs.default_sort));
         // ユーザーデータの要る並び (回収数・回収率) は出面に出さない。
@@ -215,5 +225,20 @@ mod tests {
             .collect();
         assert_eq!(every, picker);
         assert!(every.len() > 1);
+    }
+
+    #[test]
+    fn song_types_are_those_the_list_actually_has_in_vocabulary_order() {
+        let snap = crate::test_support::bundle_snapshot();
+        let listed = filter_song_indexes(snap, &SongQuery::default().to_filter());
+        let got: Vec<String> = song_facets(snap, &[]).song_types.into_iter().map(|t| t.value).collect();
+        assert!(!got.is_empty());
+        // 語彙の並びの部分列で、どの種別も一覧に 1 曲以上ある (選んで 0 件の選択肢を出さない)。
+        let order: Vec<&str> =
+            vocabulary::SONG_TYPES.iter().map(|t| t.value).filter(|v| got.iter().any(|g| g == v)).collect();
+        assert_eq!(got, order);
+        for t in &got {
+            assert!(listed.iter().any(|&i| snap.songs[i as usize].song_type.as_deref() == Some(t.as_str())), "{t}");
+        }
     }
 }
