@@ -72,21 +72,6 @@ struct EventStats: Codable, FetchableRecord, Sendable {
     }
 }
 
-struct EventCastRow: Codable, FetchableRecord, Identifiable, Sendable {
-    var id: String
-    var name: String
-    var idolColor: String?
-    var idolName: String?
-    var idolId: String?
-
-    enum CodingKeys: String, CodingKey {
-        case id, name
-        case idolColor = "idol_color"
-        case idolName = "idol_name"
-        case idolId = "idol_id"
-    }
-}
-
 // MARK: - Setlist Query Types
 
 struct SetlistRow: Codable, FetchableRecord, Identifiable, Sendable {
@@ -688,17 +673,6 @@ enum SongSortOrder: String, CaseIterable, Sendable {
     var showsPerformanceCount: Bool {
         self == .performanceCount || self == .collectedRate
     }
-}
-
-// MARK: - Event Absence Info
-
-struct EventAbsenceInfo: Sendable {
-    let totalIdols: Int
-    let presentIdols: [Idol]
-    let absentIdols: [Idol]
-
-    var brandTotal: Int { totalIdols }
-    var isFullAttendance: Bool { absentIdols.isEmpty && totalIdols > 0 }
 }
 
 // MARK: - Event Attendance (show-level)

@@ -8,15 +8,6 @@ import GRDB
 
 extension AppDatabase {
 
-    /// その公演の券種。並べ替えはコアに任せるのでここでは取るだけ。
-    func showTickets(showId: String) throws -> [ShowTicketRecord] {
-        try dbQueue.read { db in
-            try ShowTicketRecord
-                .filter(ShowTicketRecord.Columns.showId == showId)
-                .fetchAll(db)
-        }
-    }
-
     func showTicketsAsync(showId: String) async throws -> [ShowTicketRecord] {
         try await dbQueue.read { db in
             try ShowTicketRecord
@@ -36,10 +27,4 @@ extension AppDatabase {
         return Dictionary(grouping: rows, by: \.showId)
     }
 
-    /// 券種が 1 件でもある公演の数 (「価格が分かっている公演」の件数表示用)。
-    func showTicketCoverage() throws -> Int {
-        try dbQueue.read { db in
-            try Int.fetchOne(db, sql: "SELECT COUNT(DISTINCT show_id) FROM show_tickets") ?? 0
-        }
-    }
 }

@@ -9,66 +9,6 @@ extension AppDatabase {
 
     // MARK: - Event Queries
 
-    /// イベントの出演キャスト一覧（アイドル情報付き）
-    func fetchEventCastMembers(eventId: String) throws -> [EventCastRow] {
-        try dbQueue.read { db in
-            // Cast 廃止後: show_cast 直結で idol を引く。 EventCastRow.id/name は idol を採用。
-            let sql = """
-                SELECT DISTINCT i.id, i.name, i.color AS idol_color, i.name AS idol_name, i.id AS idol_id
-                FROM show_cast sc
-                JOIN shows sh ON sc.show_id = sh.id
-                JOIN idols i ON i.id = sc.idol_id
-                WHERE sh.event_id = ?
-                ORDER BY i.sort_order
-                """
-            return try EventCastRow.fetchAll(db, sql: sql, arguments: [eventId])
-        }
-    }
-
-    /// イベントのメンバー出席状況（不在アイドル情報）
-    /// ブランド全体のアイドル数が60名以下のイベントのみ意味を持つ。
-    func fetchEventAbsenceInfo(eventId: String) throws -> EventAbsenceInfo? {
-        try dbQueue.read { db in
-            // 1. イベントの brand_id を取得
-            guard let brandId = try Row.fetchOne(db, sql: "SELECT brand_id FROM events WHERE id = ?", arguments: [eventId])?["brand_id"] as? String
-            else { return nil }
-
-            // 2. ブランド全体のアイドル一覧（idol_brands 経由で多重所属に対応）
-            //    例: ML ライブで 765AS13 が「ブランド全体」に含まれる。
-            //    外部ゲスト演者 (is_external) はブランドの一部ではないので除外。
-            let allIdolsSQL = """
-                SELECT DISTINCT i.* FROM idols i
-                JOIN idol_brands ib ON ib.idol_id = i.id
-                WHERE ib.brand_id = ? AND i.is_external = 0
-                ORDER BY i.sort_order
-                """
-            let allIdols = try Idol.fetchAll(db, sql: allIdolsSQL, arguments: [brandId])
-
-            guard !allIdols.isEmpty else { return nil }
-
-            // 3. このイベントに出演したアイドル (show_cast 直結、 idol_brands 経由でブランド絞り込み)
-            let presentSQL = """
-                SELECT DISTINCT i.* FROM idols i
-                JOIN show_cast sc ON sc.idol_id = i.id
-                JOIN shows sh ON sh.id = sc.show_id
-                JOIN idol_brands ib ON ib.idol_id = i.id
-                WHERE sh.event_id = ? AND ib.brand_id = ?
-                ORDER BY i.sort_order
-                """
-            let presentIdols = try Idol.fetchAll(db, sql: presentSQL, arguments: [eventId, brandId])
-            let presentIds = Set(presentIdols.map(\.id))
-
-            // 4. 不在アイドル = 全体 - 出演
-            let absentIdols = allIdols.filter { !presentIds.contains($0.id) }
-
-            return EventAbsenceInfo(
-                totalIdols: allIdols.count,
-                presentIdols: presentIdols,
-                absentIdols: absentIdols
-            )
-        }
-    }
-
     /// 公演をイベント名・公演名で検索（コミュニティ投稿用）
     func searchShows(query: String, limit: Int = 30) throws -> [ShowWithEventName] {
         try dbQueue.read { db in try Self.searchShowsQuery(db, query: query, limit: limit) }

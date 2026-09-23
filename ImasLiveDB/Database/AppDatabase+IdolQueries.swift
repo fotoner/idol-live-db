@@ -30,41 +30,6 @@ extension AppDatabase {
             .fetchAll(db)
     }
 
-    /// アイドル詳細のCV取得。現任 (`valid_to IS NULL`) を返す。
-    ///
-    /// 声優は `idol_voice_actors` に期間つきで持つ (旧 `idols.voice_actors` は廃止)。
-    /// 交代しても前任者が残るので、過去の楽曲やライブが誰の声だったか辿れる。
-    /// 交代が発表されて後任が未定の間は現任が居ないので nil になる。
-    func fetchCurrentVoiceActor(idolId: String) throws -> String? {
-        try dbQueue.read { db in
-            try String.fetchOne(
-                db,
-                sql: """
-                    SELECT name FROM idol_voice_actors
-                     WHERE idol_id = ? AND valid_to IS NULL
-                     ORDER BY IFNULL(valid_from, '') DESC
-                     LIMIT 1
-                    """,
-                arguments: [idolId]
-            )
-        }
-    }
-
-    /// アイドルの歴代声優 (新しい順)。交代の履歴を出す画面用。
-    func fetchVoiceActorHistory(idolId: String) throws -> [IdolVoiceActor] {
-        try dbQueue.read { db in
-            try IdolVoiceActor.fetchAll(
-                db,
-                sql: """
-                    SELECT * FROM idol_voice_actors
-                     WHERE idol_id = ?
-                     ORDER BY IFNULL(valid_from, '') DESC
-                    """,
-                arguments: [idolId]
-            )
-        }
-    }
-
     /// 編集フィード用: recordType + recordName から人間可読のタイトル(曲名/公演名/アイドル名 等)を引く。
     /// 解決できない recordType (コミュニティ投稿等) は nil。
     func fetchEditRecordTitleAsync(recordType: String, recordName: String) async throws -> String? {

@@ -82,15 +82,6 @@ extension AppDatabase {
         }
     }
 
-    func fetchUserMarks(entity: UserMarkEntity, id: String) throws -> [UserMark] {
-        try dbQueue.read { db in
-            try UserMark.filter(
-                UserMark.Columns.entityType == entity.rawValue &&
-                UserMark.Columns.entityId == id
-            ).fetchAll(db)
-        }
-    }
-
     func fetchMarkedEntityIds(entity: UserMarkEntity, kind: UserMarkKind) throws -> [String] {
         try dbQueue.read { db in try Self.fetchMarkedEntityIdsQuery(db, entity: entity, kind: kind) }
     }
@@ -213,19 +204,6 @@ extension AppDatabase {
         let sql = "SELECT DISTINCT song_id FROM song_artists WHERE role='original' AND idol_id IN (\(placeholders))"
         let rows = try Row.fetchAll(db, sql: sql, arguments: StatementArguments(Array(idolIds)))
         return Set(rows.compactMap { row -> String? in row["song_id"] })
-    }
-
-    /// 一覧表示用に Song を SongWithArtists 化 (artistNames + performerIdols を一括解決)。
-    /// 単一 fetch クエリ + N+1 防止の performer map 結合。
-    func fetchSongsWithArtists(ids: [String]) throws -> [SongWithArtists] {
-        guard !ids.isEmpty else { return [] }
-        let songs = try fetchSongs(ids: ids)
-        let perfMap = try fetchSongPerformerIdolsMap(songIds: ids)
-        return songs.map { song in
-            var x = SongWithArtists(song: song, artistNames: song.singerLabel ?? "")
-            x.performerIdols = perfMap[song.id] ?? []
-            return x
-        }
     }
 
     /// 回収に配信参加も含めるユーザー設定 (既定=現地のみ)。地方勢など配信中心の人向け。

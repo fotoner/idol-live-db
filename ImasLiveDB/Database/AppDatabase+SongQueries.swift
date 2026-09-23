@@ -9,36 +9,6 @@ extension AppDatabase {
 
     // MARK: - Song Queries
 
-    /// 楽曲一覧
-    /// 指定 song_id のリストに対して、各 song に紐付く performer idol 配列を返す。
-    /// song_artists は (song_id, idol_id) 直接マッピング。
-    /// 一覧表示でアイドルアイコンを並べるため一括取得する。
-    func fetchSongPerformerIdolsMap(songIds: [String]) throws -> [String: [Idol]] {
-        guard !songIds.isEmpty else { return [:] }
-        return try dbQueue.read { db in try Self.fetchSongPerformerIdolsMapQuery(db, songIds: songIds) }
-    }
-
-    private static func fetchSongPerformerIdolsMapQuery(_ db: Database, songIds: [String]) throws -> [String: [Idol]] {
-        let placeholders = songIds.map { _ in "?" }.joined(separator: ", ")
-        let sql = """
-            SELECT sa.song_id AS sid, i.*
-            FROM song_artists sa
-            JOIN idols i ON i.id = sa.idol_id
-            WHERE sa.song_id IN (\(placeholders))
-              AND sa.role = 'original'
-            ORDER BY sa.song_id, i.sort_order
-            """
-        var result: [String: [Idol]] = [:]
-        for row in try Row.fetchAll(db, sql: sql, arguments: StatementArguments(songIds)) {
-            let sid: String = row["sid"]
-            let idol = try Idol(row: row)
-            if !(result[sid]?.contains(where: { $0.id == idol.id }) ?? false) {
-                result[sid, default: []].append(idol)
-            }
-        }
-        return result
-    }
-
     func fetchSongs(
         filter: SongSearchFilter = SongSearchFilter(),
         sortOrder: SongSortOrder = .titleKana,
