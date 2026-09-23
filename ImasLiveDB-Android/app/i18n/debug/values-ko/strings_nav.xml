@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/nav.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources>
+    <string name="nav_settings_button_a11y">설정·마이페이지</string>
+    <string name="nav_tab_events">라이브</string>
+    <string name="nav_tab_idols">아이돌</string>
+    <string name="nav_tab_produce">프로듀스</string>
+    <string name="nav_tab_schedule">스케줄</string>
+    <string name="nav_tab_songs">곡</string>
+</resources>

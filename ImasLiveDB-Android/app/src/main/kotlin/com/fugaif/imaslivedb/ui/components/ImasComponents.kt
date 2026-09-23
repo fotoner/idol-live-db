@@ -45,6 +45,9 @@ import com.fugaif.imaslivedb.data.image.CustomImageStore
 import com.fugaif.imaslivedb.data.image.GalleryKind
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.BrandColors
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
@@ -203,11 +206,14 @@ fun ImasLeadBar(
     )
 }
 
-/** セクション見出し (タイトル + 件数 + すべて見る)。tight で小さめサブ見出し。 */
+/**
+ * セクション見出し (タイトル + 件数 + すべて見る)。tight で小さめサブ見出し。
+ * 文言は `L10n.*`、データは [DisplayText.Verbatim]、コア由来は [DisplayText.Core] で渡す。
+ */
 @Composable
 fun ImasSectionHeader(
-    title: String,
-    count: String? = null,
+    title: DisplayText,
+    count: DisplayText? = null,
     tight: Boolean = false,
     onSeeAll: (() -> Unit)? = null,
     modifier: Modifier = Modifier
@@ -217,22 +223,44 @@ fun ImasSectionHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (tight) {
-            Text(title, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
+            Text(title.resolve(), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
         } else {
-            Text(title, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+            Text(title.resolve(), fontSize = 20.sp, fontWeight = FontWeight.Bold, color = DS.ink)
             if (count != null) {
-                Text(count, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3,
+                Text(count.resolve(), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3,
                     modifier = Modifier.padding(start = 8.dp))
             }
         }
         Box(Modifier.weight(1f))
         if (onSeeAll != null) {
             Row(Modifier.clickable(onClick = onSeeAll), verticalAlignment = Alignment.CenterVertically) {
-                Text("すべて見る", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = DS.ink2)
+                Text(L10n.Common.actionSeeAll.resolve(), fontSize = 14.sp, fontWeight = FontWeight.Medium, color = DS.ink2)
                 Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = DS.ink2, modifier = Modifier.size(16.dp))
             }
         }
     }
+}
+
+/**
+ * 移行中だけ残す String の入口。まだ移していない呼び出しを今と同じに描く ([DisplayText.Verbatim])。
+ * この警告の数が残りの作業量。画面の移行が全部終わったら消す。
+ */
+@Deprecated("文言は L10n.*、データは DisplayText.Verbatim / Core で渡す (i18n 移行中)")
+@Composable
+fun ImasSectionHeader(
+    title: String,
+    count: String? = null,
+    tight: Boolean = false,
+    onSeeAll: (() -> Unit)? = null,
+    modifier: Modifier = Modifier
+) {
+    ImasSectionHeader(
+        title = DisplayText.Verbatim(title),
+        count = count?.let { DisplayText.Verbatim(it) },
+        tight = tight,
+        onSeeAll = onSeeAll,
+        modifier = modifier
+    )
 }
 
 /** 活動サマリの統計タイル (アイコン + 値 + 単位 + ラベル)。 */

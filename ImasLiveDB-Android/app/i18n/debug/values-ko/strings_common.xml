@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/common.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources>
+    <string name="common_action_back">뒤로</string>
+    <string name="common_action_collapse">접기</string>
+    <string name="common_action_expand">펼치기</string>
+    <string name="common_action_retry">다시 시도</string>
+    <string name="common_action_see_all">모두 보기</string>
+    <string name="common_personal_tags_add_a11y">마이 태그 추가</string>
+    <string name="common_personal_tags_empty">아직 마이 태그가 없어요</string>
+    <string name="common_personal_tags_header">마이 태그 (나에게만 보여요)</string>
+    <string name="common_personal_tags_placeholder">예: 들었음</string>
+    <string name="common_personal_tags_remove_a11y">삭제</string>
+    <string name="common_personal_tags_remove_hint">길게 눌러 삭제</string>
+</resources>

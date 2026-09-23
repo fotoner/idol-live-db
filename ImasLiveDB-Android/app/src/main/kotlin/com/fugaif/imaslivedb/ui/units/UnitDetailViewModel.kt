@@ -11,6 +11,8 @@ import com.fugaif.imaslivedb.data.model.ImasUnit
 import com.fugaif.imaslivedb.data.model.PersonalTag
 import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,8 +29,11 @@ data class UnitDetailUiState(
     /** 個人用タグ (端末ローカルのみ、サーバーには送信しない)。 */
     val personalTags: List<PersonalTag> = emptyList(),
     val isLoading: Boolean = true,
-    /** 直近ロードの失敗メッセージ。null なら未失敗 (成功 or 未ロード)。iOS UnitDetailViewModel.loadError 相当。 */
-    val loadError: String? = null
+    /**
+     * 直近ロードの失敗メッセージ。null なら未失敗 (成功 or 未ロード)。iOS UnitDetailViewModel.loadError 相当。
+     * 解決済みの String ではなく文言の値で持ち、画面で resolve() する (言語を切り替えても旧言語が残らない)。
+     */
+    val loadError: DisplayText? = null
 )
 
 class UnitDetailViewModel(app: Application, private val unitId: String) : AndroidViewModel(app) {
@@ -51,7 +56,7 @@ class UnitDetailViewModel(app: Application, private val unitId: String) : Androi
             try {
                 val unit = unitRepo.fetchUnit(unitId)
                 if (unit == null) {
-                    _uiState.value = _uiState.value.copy(isLoading = false, loadError = "ユニットが見つかりませんでした。")
+                    _uiState.value = _uiState.value.copy(isLoading = false, loadError = L10n.Units.detailNotFoundMessage)
                     return@launch
                 }
                 val members = unitRepo.fetchUnitMembers(unitId)
@@ -68,7 +73,7 @@ class UnitDetailViewModel(app: Application, private val unitId: String) : Androi
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    loadError = "読み込みに失敗しました。通信状況を確認してもう一度お試しください。"
+                    loadError = L10n.Units.detailLoadErrorMessage
                 )
             }
         }

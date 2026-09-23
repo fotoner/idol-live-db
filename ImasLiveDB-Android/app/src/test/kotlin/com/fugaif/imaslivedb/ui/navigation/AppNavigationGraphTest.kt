@@ -37,7 +37,7 @@ class AppNavigationGraphTest {
             TopLevelTab.Produce to graph(NavRoutes.Produce.route) { produceNavGraph(it) },
         )
         val missing = tabs.flatMap { (tab, graph) ->
-            DETAIL_DESTINATIONS.filter { graph.findNode(it) == null }.map { "${tab.label}: $it" }
+            DETAIL_DESTINATIONS.filter { graph.findNode(it) == null }.map { "${tab.name}: $it" }
         }
         assertTrue("登録されていない行き先:\n" + missing.joinToString("\n"), missing.isEmpty())
     }

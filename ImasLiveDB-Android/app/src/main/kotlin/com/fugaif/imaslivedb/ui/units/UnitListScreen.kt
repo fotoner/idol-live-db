@@ -46,6 +46,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.ImasUnit
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.ImasGridSkeleton
@@ -116,7 +118,7 @@ fun UnitListBody(
 
     Column(modifier = Modifier.fillMaxSize()) {
         NameFilterField(
-            prompt = "ユニット名で絞り込み",
+            prompt = L10n.Units.listNameFilterPrompt.resolve(),
             value = state.searchText,
             onValueChange = viewModel::setSearchText
         )
@@ -130,15 +132,15 @@ fun UnitListBody(
             q.isNotEmpty() && filteredUnits.isEmpty() -> {
                 ImasEmptyState(
                     icon = Icons.Filled.Groups,
-                    title = "見つかりませんでした",
-                    message = "「${state.searchText}」に一致するユニットはいません。"
+                    title = L10n.Units.listFilterEmptyTitleAndroid.resolve(),
+                    message = L10n.Units.listFilterEmptyMessageAndroid(query = state.searchText).resolve()
                 )
             }
             filteredUnits.isEmpty() -> {
                 ImasEmptyState(
                     icon = Icons.Filled.Groups,
-                    title = "ユニットがありません",
-                    message = "登録されているユニットがまだありません。"
+                    title = L10n.Units.listEmptyTitle.resolve(),
+                    message = L10n.Units.listEmptyMessage.resolve()
                 )
             }
             state.listMode == UnitListMode.GRID -> {
@@ -193,7 +195,8 @@ private fun BrandSectionHeader(brand: Brand, count: Int, expanded: Boolean, onTo
         Text(" $count", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3)
         Box(Modifier.weight(1f))
         Icon(if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-            contentDescription = if (expanded) "折りたたむ" else "展開", tint = DS.ink2)
+            contentDescription = (if (expanded) L10n.Common.actionCollapse else L10n.Common.actionExpand).resolve(),
+            tint = DS.ink2)
     }
 }
 

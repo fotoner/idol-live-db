@@ -1,5 +1,8 @@
 package com.fugaif.imaslivedb.ui.navigation
 
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+
 sealed class NavRoutes(val route: String) {
     data object EventList : NavRoutes("event_list")
     data class EventDetail(val eventId: String) : NavRoutes("event_detail/{eventId}") {
@@ -199,12 +202,13 @@ fun decodeGameBrandIds(raw: String?): Set<String> =
     if (raw.isNullOrEmpty() || raw == "all") emptySet() else raw.split(",").filter { it.isNotEmpty() }.toSet()
 
 // Top-level tab routes (iOS の確定 IA に合わせる: スケジュール/ライブ/楽曲/アイドル/プロデュース)
-enum class TopLevelTab(val route: String, val label: String) {
-    Schedule("tab_schedule", "スケジュール"),
-    Events("tab_events", "ライブ"),
-    Songs("tab_songs", "楽曲"),
-    Idols("tab_idols", "アイドル"),
-    Produce("tab_produce", "プロデュース");
+// label はタブバー (BottomNavBar) と同じカタログの文言 (i18n/catalog/nav.json)。表示するところで resolve() する
+enum class TopLevelTab(val route: String, val label: DisplayText) {
+    Schedule("tab_schedule", L10n.Nav.tabSchedule),
+    Events("tab_events", L10n.Nav.tabEvents),
+    Songs("tab_songs", L10n.Nav.tabSongs),
+    Idols("tab_idols", L10n.Nav.tabIdols),
+    Produce("tab_produce", L10n.Nav.tabProduce);
 
     companion object {
         /** 「他のタブに N 件」で押せる先。検索欄を持つ一覧だけ。 */

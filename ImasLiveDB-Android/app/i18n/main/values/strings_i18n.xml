@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/i18n.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- i18n.language_tag: 実際に解決された表示言語のコード。訳文ではなく言語コードを入れる (DisplayLocale がこれを読む) -->
+    <string name="i18n_language_tag">ja</string>
+</resources>

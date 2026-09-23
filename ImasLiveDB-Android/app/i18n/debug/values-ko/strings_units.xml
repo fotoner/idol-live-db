@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/units.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources>
+    <string name="units_detail_community_login_dialog">태그를 달거나 투표하려면 로그인해야 해요.</string>
+    <string name="units_detail_community_login_prompt">태그를 달거나 투표하려면 로그인해야 해요</string>
+    <string name="units_detail_load_error_message">불러오지 못했어요. 통신 상태를 확인하고 다시 시도해 주세요.</string>
+    <string name="units_detail_load_error_title">불러오지 못했어요</string>
+    <string name="units_detail_members_empty_title_android">멤버 정보가 없어요</string>
+    <string name="units_detail_members_header">멤버</string>
+    <string name="units_detail_not_found_message">유닛을 찾지 못했어요.</string>
+    <string name="units_detail_similar_header">태그가 비슷한 유닛</string>
+    <plurals name="units_detail_similar_shared_tags">
+        <item quantity="other">태그 %1$,d개 일치</item>
+    </plurals>
+    <string name="units_detail_songs_empty_title">곡이 없어요</string>
+    <string name="units_detail_songs_header">곡</string>
+    <string name="units_detail_tab_community">커뮤니티</string>
+    <string name="units_detail_tab_members">멤버</string>
+    <string name="units_detail_tab_songs">곡</string>
+    <string name="units_detail_tags_action_add">태그 추가</string>
+    <string name="units_detail_tags_empty_title">아직 태그가 없어요</string>
+    <string name="units_detail_tags_header">태그</string>
+    <string name="units_list_empty_message">등록된 유닛이 아직 없어요.</string>
+    <string name="units_list_empty_title">유닛이 없어요</string>
+    <string name="units_list_filter_empty_message_android">“%1$s”에 해당하는 유닛이 없어요.</string>
+    <string name="units_list_filter_empty_title_android">찾지 못했어요</string>
+    <string name="units_list_name_filter_prompt">유닛 이름으로 찾기</string>
+</resources>

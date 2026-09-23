@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/config.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="ja" />
+    <locale android:name="ko" />
+</locale-config>

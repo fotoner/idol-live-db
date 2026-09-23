@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/nav.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- nav.settings_button.a11y: 各タブ右上の歯車ボタン (設定・マイページを開く) の読み上げ -->
+    <string name="nav_settings_button_a11y">設定・マイ</string>
+    <!-- nav.tab.events: 下のタブバーのラベル (ライブ・公演の一覧) -->
+    <string name="nav_tab_events">ライブ</string>
+    <!-- nav.tab.idols: 下のタブバーのラベル (アイドルの一覧) -->
+    <string name="nav_tab_idols">アイドル</string>
+    <!-- nav.tab.produce: 下のタブバーのラベル (プロデュース = マイページ的なハブ) -->
+    <string name="nav_tab_produce">プロデュース</string>
+    <!-- nav.tab.schedule: 下のタブバーのラベル (スケジュール = カレンダー) -->
+    <string name="nav_tab_schedule">スケジュール</string>
+    <!-- nav.tab.songs: 下のタブバーのラベル (楽曲の一覧) -->
+    <string name="nav_tab_songs">楽曲</string>
+</resources>

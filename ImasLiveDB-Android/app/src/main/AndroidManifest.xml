@@ -16,22 +16,27 @@
       詳細は NotificationScheduler の KDoc。
     -->
 
+    <!--
+      android:localeConfig は Android 13+ の「アプリの言語」に出す言語の一覧。xml/locale_config.xml は
+      i18n/config.json から生成する (app/i18n/<main|debug>/xml/。debug のものが main を上書きする)。
+    -->
     <application
         android:name=".ImasLiveDBApplication"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="@string/system_app_display_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:localeConfig="@xml/locale_config"
         android:theme="@style/Theme.ImasLiveDB"
         android:enableOnBackInvokedCallback="true">
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
+            android:label="@string/system_app_display_name"
             android:theme="@style/Theme.ImasLiveDB"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -85,13 +90,14 @@
           exported="true" が必須 (非 exported だと一覧に出ない)。受け取るのは
           APPWIDGET_UPDATE だけで、中身は Glance が組み立てる。
           ラベル・説明・サイズは res/xml/*_widget_info.xml 側。
+          ラベル (android:label) と説明の文言は i18n/catalog/widget.json から生成した @string/widget_* を引く。
         -->
 
         <!-- 担当の画像。タップで次の画像へ送る。 -->
         <receiver
             android:name=".widget.OshiImageWidgetReceiver"
             android:exported="true"
-            android:label="担当の画像（タップで切替）">
+            android:label="@string/widget_oshi_image_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -104,7 +110,7 @@
         <receiver
             android:name=".widget.OshiLauncherWidgetReceiver"
             android:exported="true"
-            android:label="担当の画像（タップでアプリ）">
+            android:label="@string/widget_oshi_launcher_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -116,7 +122,7 @@
         <receiver
             android:name=".widget.NextLiveWidgetReceiver"
             android:exported="true"
-            android:label="次のライブ">
+            android:label="@string/widget_next_live_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -128,7 +134,7 @@
         <receiver
             android:name=".widget.TodaySongWidgetReceiver"
             android:exported="true"
-            android:label="今日の1曲">
+            android:label="@string/widget_today_song_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -140,7 +146,7 @@
         <receiver
             android:name=".widget.TicketDeadlineWidgetReceiver"
             android:exported="true"
-            android:label="チケット締切">
+            android:label="@string/widget_ticket_deadline_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -156,7 +162,7 @@
         <activity
             android:name=".widget.OshiWidgetConfigureActivity"
             android:exported="true"
-            android:label="担当を選ぶ"
+            android:label="@string/widget_select_oshi_title"
             android:theme="@style/Theme.ImasLiveDB">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />

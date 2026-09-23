@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/common.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- common.action.back: 画面左上の戻るボタンの読み上げ (contentDescription)。iOS は OS が出すので Android だけ -->
+    <string name="common_action_back">戻る</string>
+    <!-- common.action.collapse: 開いている節を閉じるボタンの読み上げ -->
+    <string name="common_action_collapse">折りたたむ</string>
+    <!-- common.action.expand: 閉じている節を開くボタンの読み上げ -->
+    <string name="common_action_expand">展開</string>
+    <!-- common.action.retry: 読み込み失敗などの空状態に出す再試行ボタン -->
+    <string name="common_action_retry">再試行</string>
+    <!-- common.action.see_all: セクション見出し右の導線 -->
+    <string name="common_action_see_all">すべて見る</string>
+    <!-- common.personal_tags.add.a11y: 共通部品 PersonalTagsSection (アイドル・ユニット詳細のコミュニティ)。入力欄の右の ＋ ボタンの読み上げ -->
+    <string name="common_personal_tags_add_a11y">マイタグを追加</string>
+    <!-- common.personal_tags.empty: 共通部品 PersonalTagsSection (アイドル・ユニット詳細のコミュニティ)。1 つも無いときの案内 -->
+    <string name="common_personal_tags_empty">マイタグはまだありません</string>
+    <!-- common.personal_tags.header: 共通部品 PersonalTagsSection (アイドル・ユニット詳細のコミュニティ)。節の見出し。自分だけのタグで、コミュニティには送らない -->
+    <string name="common_personal_tags_header">マイタグ(自分だけに表示)</string>
+    <!-- common.personal_tags.placeholder: 共通部品 PersonalTagsSection (アイドル・ユニット詳細のコミュニティ)。入力欄のプレースホルダ。例の語も訳す -->
+    <string name="common_personal_tags_placeholder">例: 聞いた</string>
+    <!-- common.personal_tags.remove.a11y: 共通部品 PersonalTagsSection (アイドル・ユニット詳細のコミュニティ)。チップの × の読み上げ (削除は長押し) -->
+    <string name="common_personal_tags_remove_a11y">削除</string>
+    <!-- common.personal_tags.remove.hint: 共通部品 PersonalTagsSection (アイドル・ユニット詳細のコミュニティ)。チップの下の操作の案内 -->
+    <string name="common_personal_tags_remove_hint">長押しで削除</string>
+</resources>

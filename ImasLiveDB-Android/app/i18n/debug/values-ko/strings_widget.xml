@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/widget.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources>
+    <string name="widget_next_live_description">다음 라이브까지 남은 날을 보여 줘요.</string>
+    <string name="widget_next_live_name">다음 라이브</string>
+    <string name="widget_oshi_image_description">가져온 담당 아이돌 이미지를 홈 화면에 보여 줘요. 탭하면 다음 이미지로 바뀌어요.</string>
+    <string name="widget_oshi_image_name">담당 이미지 (탭으로 전환)</string>
+    <string name="widget_oshi_launcher_description">가져온 담당 아이돌 이미지를 홈 화면에 보여 줘요. 탭하면 앱이 열려요.</string>
+    <string name="widget_oshi_launcher_name">담당 이미지 (탭으로 앱 열기)</string>
+    <string name="widget_select_oshi_title">담당 고르기</string>
+    <string name="widget_ticket_deadline_description">마감이 가까운 티켓 선행 접수를 보여 줘요.</string>
+    <string name="widget_ticket_deadline_name">티켓 마감</string>
+    <string name="widget_today_song_description">날마다 한 곡을 재킷과 함께 보여 줘요.</string>
+    <string name="widget_today_song_name">오늘의 한 곡</string>
+</resources>
