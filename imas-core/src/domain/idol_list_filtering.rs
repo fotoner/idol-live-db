@@ -130,7 +130,8 @@ pub struct IdolListEntry {
     pub aliases: Option<String>,
     /// ブランド内サブ属性 (cute/cool/passion 等)。
     pub attribute: Option<String>,
-    /// 公式順。同値時の安定化にも使う。
+    /// 公式順。同値時の安定化にも使う。`sort_order` が NULL のアイドルは `i64::MAX`
+    /// (末尾。Q-07) を入れる。
     pub sort_order: i64,
     pub age: Option<i64>,
     pub height: Option<f64>,
@@ -203,7 +204,8 @@ pub fn idol_list_entries(snap: &crate::domain::snapshot::Snapshot) -> Vec<IdolLi
             nickname: r.nickname,
             aliases: r.aliases,
             attribute: r.attribute,
-            sort_order: r.sort_order.unwrap_or(0),
+            // NULL は末尾 (Q-07)。コアの他の公式順と同じキー。
+            sort_order: r.sort_order.unwrap_or(i64::MAX),
             age: r.age,
             height: r.height,
             weight: r.weight,

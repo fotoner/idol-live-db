@@ -131,6 +131,13 @@ pub struct Idol {
     pub aliases: Option<String>,
 }
 
+impl Idol {
+    /// 公式順 (`sort_order`) の並べ替えキー。NULL のアイドルは末尾に置く (Q-07)。
+    pub fn official_order_key(&self) -> i64 {
+        self.sort_order.unwrap_or(i64::MAX)
+    }
+}
+
 impl Song {
     /// 参加ブランドを順に (`brand_id` が先頭、続いて `joint_brand_ids`)。
     pub fn brand_ids(&self) -> impl Iterator<Item = &str> {

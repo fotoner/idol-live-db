@@ -594,9 +594,9 @@ pub fn build(raw: RawTables) -> Snapshot {
     }
 }
 
-/// sort_order NULL は末尾 (SQL の ORDER BY と同じ NULLS LAST 相当)。同値は添字で決定的に。
+/// sort_order NULL は末尾 (Q-07。出席表など他の並びも同じキーを使う)。同値は添字で決定的に。
 fn idol_sort_key(idols: &[Idol], idol: u32) -> (i64, u32) {
-    (idols[idol as usize].sort_order.unwrap_or(i64::MAX), idol)
+    (idols[idol as usize].official_order_key(), idol)
 }
 
 /// release_date DESC のキー。NULL は末尾 (SQLite の DESC は NULL を最後に置く)。

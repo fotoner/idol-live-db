@@ -461,10 +461,10 @@ pub struct VenueDirectoryRecord {
 /// SQLite の `LIKE '%needle%'` 相当: ASCII のみ大文字小文字を無視する部分一致。
 /// (song_list_queries と同じ実装。needle 先頭バイトは UTF-8 継続バイトと衝突しないため
 /// バイト列照合でも文字境界を跨いだ誤一致は起きない。)
-/// `ORDER BY sort_order` (idols) の明示キー。NULL 先頭 (Option の None < Some) +
-/// 添字タイブレークで決定的にする。
-fn idol_sort_key(snap: &Snapshot, idol: u32) -> (Option<i64>, u32) {
-    (snap.idols[idol as usize].sort_order, idol)
+/// `ORDER BY sort_order` (idols) の明示キー。NULL は末尾 (一覧と同じ。Q-07) +
+/// 添字 (= id 順) のタイブレークで決定的にする。
+fn idol_sort_key(snap: &Snapshot, idol: u32) -> (i64, u32) {
+    (snap.idols[idol as usize].official_order_key(), idol)
 }
 
 /// idol 添字集合 → sort_order 順の idol_id 列。SQL が Set で返していた (並び未規定の)
@@ -1201,6 +1201,22 @@ mod attendance_group_tests {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// sort_order が NULL のアイドルは、出席表でも一覧と同じく末尾に並ぶ (Q-07)。
+    #[test]
+    fn idols_without_sort_order_come_last() {
+        let idol = |id: &str, order: Option<i64>| crate::domain::snapshot::Idol {
+            id: id.into(),
+            sort_order: order,
+            ..Default::default()
+        };
+        let snap = Snapshot {
+            idols: vec![idol("guest", None), idol("b", Some(2)), idol("a", Some(1))],
+            ..Snapshot::default()
+        };
+        let all: HashSet<u32> = [0, 1, 2].into_iter().collect();
+        assert_eq!(idol_set_to_sorted_ids(&snap, &all), vec!["a", "b", "guest"]);
+    }
     use crate::test_support::{bundle_conn, bundle_path, bundle_snapshot};
     use crate::outbound::sqlite_loader::load_snapshot;
     use rusqlite::Connection;
