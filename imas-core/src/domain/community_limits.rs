@@ -62,6 +62,15 @@ fn measure(text: &str, unit: Unit) -> u32 {
     text.chars().map(|c| units(c, unit)).sum()
 }
 
+/// サーバ (Worker) の `String.prototype.trim()` と同じ集合で前後を落とす。
+///
+/// Rust の `str::trim` (Unicode の White_Space) とは 2 文字違う: JS は U+FEFF (BOM) を
+/// 落とし、U+0085 (NEL) を落とさない。`str::trim` のままだと BOM だけの名前が
+/// 画面では送れて、サーバで「空」として弾かれる。
+fn js_trim(text: &str) -> &str {
+    text.trim_matches(|c: char| c == '\u{feff}' || (c.is_whitespace() && c != '\u{85}'))
+}
+
 /// その欄の上限。
 pub fn input_max(field: InputField) -> u32 {
     rule(field).max
@@ -70,7 +79,7 @@ pub fn input_max(field: InputField) -> u32 {
 /// 画面の「N / 上限」に出す N。サーバが数えるのと同じもの (空白を除く欄は除いてから)。
 pub fn input_length(field: InputField, text: &str) -> u32 {
     let r = rule(field);
-    let counted = if r.trimmed_and_required { text.trim() } else { text };
+    let counted = if r.trimmed_and_required { js_trim(text) } else { text };
     measure(counted, r.unit)
 }
 
@@ -95,7 +104,7 @@ pub fn clamp_input(field: InputField, text: &str) -> String {
 pub fn input_is_acceptable(field: InputField, text: &str) -> bool {
     let r = rule(field);
     let length = input_length(field, text);
-    let non_empty = !r.trimmed_and_required || !text.trim().is_empty();
+    let non_empty = !r.trimmed_and_required || !js_trim(text).is_empty();
     non_empty && length <= r.max
 }
 
@@ -158,6 +167,26 @@ pub fn plan_vote_selection(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// JS の `trim()` が落とす文字 (node で全 BMP を舐めて得た一覧) とちょうど同じ。
+    #[test]
+    fn js_trim_matches_the_worker_trim_set() {
+        const JS_TRIMMED: &[u32] = &[
+            0x9, 0xa, 0xb, 0xc, 0xd, 0x20, 0xa0, 0x1680, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004,
+            0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200a, 0x2028, 0x2029, 0x202f, 0x205f, 0x3000,
+            0xfeff,
+        ];
+        let trimmed: Vec<u32> = (0u32..0x10000)
+            .filter_map(char::from_u32)
+            .filter(|&c| js_trim(&format!("a{c}")) == "a")
+            .map(u32::from)
+            .collect();
+        assert_eq!(trimmed, JS_TRIMMED);
+        // BOM だけの名前はサーバで空として弾かれるので、画面でも送れない。
+        assert!(!input_is_acceptable(InputField::DisplayName, "\u{feff}"));
+        // NEL はサーバが落とさないので 1 文字として数える。
+        assert_eq!(input_length(InputField::TagName, "\u{85}"), 1);
+    }
 
     fn ids(values: &[&str]) -> Vec<String> {
         values.iter().map(|v| v.to_string()).collect()
