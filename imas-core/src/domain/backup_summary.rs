@@ -398,6 +398,34 @@ fn build_payload_json(input: &BackupExportInput, dialect: BackupKindDialect) -> 
 
 // MARK: - 読み込み (整合判定)
 
+// MARK: - iCloud KVS のミラー (iOS)
+
+/// iCloud KVS のミラーに載せる価値のある行か。
+///
+/// 復元はどの経路も「ローカルに無いキーの行を足すだけ」(`restoreUserMarksIfAbsent` /
+/// [`plan_backup_import`]) で、既存の行を上書きも削除もしない。そのため**解除済みの行**
+/// (bool が false で、文字も空か空白だけ) は、入れても何も変わらない — 担当・お気に入り・
+/// 参加・回収は bool が true の行だけを、メモ・座席・習熟度は文字のある行だけを読む。
+/// 習熟度 (`mastery`) は bool を false のまま `text_value` に段階を入れるので、
+/// bool だけで判定すると記録を落とす。
+///
+/// 載せないことで変わるのは 1 点だけ: 解除済みの行を先に復元した端末では、その行が
+/// 「既にあるキー」になって、後で別の端末で付け直したマークが届かなかった。
+/// 載せなければそれが届く (復元が増える向きなので、非破壊の大前提は崩れない)。
+pub fn is_meaningful_mark(mark: &BackupUserMarkRecord) -> bool {
+    mark.bool_value || crate::domain::display_join::non_empty(&mark.text_value).is_some()
+}
+
+/// [`is_meaningful_mark`] を満たす行の添字 (入力順)。KVS に書く前に 1 回呼ぶ。
+pub fn meaningful_mark_indices(marks: &[BackupUserMarkRecord]) -> Vec<u32> {
+    marks
+        .iter()
+        .enumerate()
+        .filter(|(_, mark)| is_meaningful_mark(mark))
+        .map(|(i, _)| i as u32)
+        .collect()
+}
+
 /// 中断理由を判定して payload の中身まで取り出した結果。
 struct ParsedBackup {
     info: BackupEnvelopeInfo,
@@ -726,6 +754,28 @@ mod tests {
             poll_id: poll_id.to_string(),
             entity_ids: ids.iter().map(|s| s.to_string()).collect(),
         }
+    }
+
+    #[test]
+    fn kvs_mirror_keeps_only_rows_that_change_something_on_restore() {
+        let unset = |kind: &str, text: Option<&str>| BackupUserMarkRecord {
+            bool_value: false,
+            text_value: text.map(str::to_string),
+            ..mark("x", kind)
+        };
+        let marks = vec![
+            mark("a", "myPick"),                                         // 0 付いている
+            unset("myPick", None),                                       // 1 外した担当
+            unset("attended", None),                                     // 2 取り消した参加
+            BackupUserMarkRecord { text_value: Some("live".into()), ..mark("b", "attended") }, // 3
+            unset("mastery", Some("3")),                                 // 4 習熟度は bool が false
+            unset("mastery", None),                                      // 5 未設定に戻した習熟度
+            unset("note", Some("")),                                     // 6 消したメモ
+            unset("note", Some("  ")),                                   // 7 空白だけのメモ
+            unset("seat", Some("アリーナ A3")),                            // 8
+        ];
+        assert_eq!(meaningful_mark_indices(&marks), vec![0, 3, 4, 8]);
+        assert!(meaningful_mark_indices(&[]).is_empty());
     }
 
     fn export_input() -> BackupExportInput {

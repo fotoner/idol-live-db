@@ -58,6 +58,7 @@ declare_and_call_checksums! {
     uniffi_imas_core_checksum_func_backup_import_summary,
     uniffi_imas_core_checksum_func_backup_kind_to_android,
     uniffi_imas_core_checksum_func_backup_kind_to_canonical,
+    uniffi_imas_core_checksum_func_backup_meaningful_mark_indices,
     uniffi_imas_core_checksum_func_build_backup_envelope,
     uniffi_imas_core_checksum_func_build_ledger_summary,
     uniffi_imas_core_checksum_func_build_mastery_groups,

@@ -29,6 +29,13 @@ pub fn backup_kind_to_canonical(android: String) -> String {
     domain::backup_kind_to_canonical(&android)
 }
 
+/// iCloud KVS のミラーに載せる行の添字 (入力順)。解除済みの行 (bool が false で文字も無い)
+/// は復元しても何も変わらないので落とす。規則は [`domain::is_meaningful_mark`]。
+#[uniffi::export]
+pub fn backup_meaningful_mark_indices(marks: Vec<domain::BackupUserMarkRecord>) -> Vec<u32> {
+    domain::meaningful_mark_indices(&marks)
+}
+
 /// payload JSON・checksum・envelope JSON を組み立てる。
 #[uniffi::export]
 pub fn build_backup_envelope(
