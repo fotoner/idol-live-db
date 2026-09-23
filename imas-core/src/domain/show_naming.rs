@@ -140,6 +140,65 @@ pub fn show_identity(event_name: &str, show_name: &str, date: &str) -> ShowIdent
     ShowIdentity { heading, label, short }
 }
 
+/// 公演の正式な呼び名 (「ライブ名 見分け」。重ならない)。端末のカレンダーに足す予定の
+/// タイトルや編集履歴の行に出す (Q-08h)。未知の id は `None`。
+pub fn show_title(snap: &crate::domain::snapshot::Snapshot, show_id: &str) -> Option<String> {
+    let &show = snap.show_index_by_id.get(show_id)?;
+    let s = &snap.shows[show as usize];
+    let event = &snap.events[s.event as usize];
+    Some(show_identity(&event.name, &s.name, &s.date).title())
+}
+
+/// 編集履歴の 1 行が指すもの。
+#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
+pub struct EditRecordTarget {
+    /// 行に出す名前 (曲名・アイドル名・ライブ名・公演の正式な呼び名)。引けなければ `None`。
+    pub title: Option<String>,
+    /// セトリ系の編集なら、そのセトリの公演 (押したときの行き先)。
+    pub show_id: Option<String>,
+}
+
+/// 編集履歴の `record_type` / `record_name` から、行に出す名前と行き先の公演を引く。
+///
+/// - `Song` / `Idol` / `Event`: 名前。
+/// - `Show` / `ShowSetlist`: `record_name` が公演 id。名前は [`show_title`]。
+/// - `SetlistItem` / `SetlistPerformer`: `record_name` がセトリの行 id。その行の公演。
+/// - `SongVideo` などスナップショットに無いものは両方 `None` (OS 側で引く)。
+pub fn edit_record_target(
+    snap: &crate::domain::snapshot::Snapshot,
+    record_type: &str,
+    record_name: &str,
+) -> EditRecordTarget {
+    let none = EditRecordTarget { title: None, show_id: None };
+    let show_target = |show_id: &str| EditRecordTarget {
+        title: show_title(snap, show_id),
+        show_id: snap.show_index_by_id.contains_key(show_id).then(|| show_id.to_string()),
+    };
+    match record_type {
+        "Song" => EditRecordTarget {
+            title: snap.song_index_by_id.get(record_name).map(|&i| snap.songs[i as usize].title.clone()),
+            show_id: None,
+        },
+        "Idol" => EditRecordTarget {
+            title: snap.idol_index_by_id.get(record_name).map(|&i| snap.idols[i as usize].name.clone()),
+            show_id: None,
+        },
+        "Event" => EditRecordTarget {
+            title: snap.event_index_by_id.get(record_name).map(|&i| snap.events[i as usize].name.clone()),
+            show_id: None,
+        },
+        "Show" | "ShowSetlist" => show_target(record_name),
+        "SetlistItem" | "SetlistPerformer" => match snap.setlist_item_index_by_id.get(record_name) {
+            Some(&item) => {
+                let show = snap.setlist_items[item as usize].show;
+                show_target(&snap.shows[show as usize].id)
+            }
+            None => none,
+        },
+        _ => none,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -225,5 +284,41 @@ mod tests {
     fn a_short_coincidental_overlap_does_not_eat_the_name() {
         assert_eq!(distinguishing_show_name("ライブ 2nd", "2nd 昼公演"), Some("2nd 昼公演"));
         assert_eq!(distinguishing_show_name("A LIVE!!", "!! DAY1"), Some("!! DAY1"));
+    }
+
+    #[test]
+    fn show_title_does_not_repeat_the_live_name() {
+        let snap = crate::test_support::bundle_snapshot();
+        // 公演名がライブ名を丸ごと頭に含む公演。
+        let (show, event) = snap
+            .shows
+            .iter()
+            .map(|s| (s, &snap.events[s.event as usize]))
+            .find(|(s, e)| s.name.starts_with(&e.name) && s.name.len() > e.name.len())
+            .expect("ライブ名を含む公演名がある");
+        let title = show_title(snap, &show.id).unwrap();
+        assert_eq!(title.matches(event.name.as_str()).count(), 1, "{title}");
+        assert_eq!(title, show_identity(&event.name, &show.name, &show.date).title());
+        assert_eq!(show_title(snap, "存在しない"), None);
+    }
+
+    #[test]
+    fn edit_record_targets_resolve_names_and_the_show() {
+        let snap = crate::test_support::bundle_snapshot();
+        let item = &snap.setlist_items[0];
+        let show_id = snap.shows[item.show as usize].id.clone();
+        let expected = show_title(snap, &show_id);
+        for kind in ["SetlistItem", "SetlistPerformer"] {
+            let t = edit_record_target(snap, kind, &item.id);
+            assert_eq!((t.title, t.show_id), (expected.clone(), Some(show_id.clone())), "{kind}");
+        }
+        let t = edit_record_target(snap, "ShowSetlist", &show_id);
+        assert_eq!((t.title, t.show_id.as_deref()), (expected, Some(show_id.as_str())));
+        let song = &snap.songs[0];
+        assert_eq!(edit_record_target(snap, "Song", &song.id).title.as_deref(), Some(song.title.as_str()));
+        assert_eq!(edit_record_target(snap, "Idol", &snap.idols[0].id).title, Some(snap.idols[0].name.clone()));
+        assert_eq!(edit_record_target(snap, "Event", &snap.events[0].id).title, Some(snap.events[0].name.clone()));
+        assert_eq!(edit_record_target(snap, "SongVideo", "ytref_x"), EditRecordTarget { title: None, show_id: None });
+        assert_eq!(edit_record_target(snap, "Show", "存在しない"), EditRecordTarget { title: None, show_id: None });
     }
 }
