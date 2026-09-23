@@ -304,9 +304,10 @@ pub const CALENDAR_KIND_SHOW: &str = "公演";
 pub const CALENDAR_KIND_RELEASE: &str = "リリース";
 pub const CALENDAR_KIND_BIRTHDAY: &str = "誕生日";
 pub const CALENDAR_KIND_ANNIVERSARY: &str = "記念日";
-pub const CALENDAR_KIND_TICKET_DEADLINE: &str = "申込締切";
-pub const CALENDAR_KIND_TICKET_LOTTERY: &str = "当落発表";
-pub const CALENDAR_KIND_TICKET_OPEN: &str = "受付開始";
+/// チケットの日程の札。語は `vocabulary::TICKET_DATES` にしか書かない (Q-08g)。
+pub const CALENDAR_KIND_TICKET_OPEN: &str = vocabulary::TICKET_DATES[0].label;
+pub const CALENDAR_KIND_TICKET_DEADLINE: &str = vocabulary::TICKET_DATES[1].label;
+pub const CALENDAR_KIND_TICKET_LOTTERY: &str = vocabulary::TICKET_DATES[2].label;
 /// 件数の 1 行での「リリース曲」(予定の札は「リリース」。公演・誕生日・記念日は札と同じ語)。
 pub const CALENDAR_SUMMARY_RELEASES: &str = "リリース曲";
 
@@ -685,6 +686,14 @@ mod tests {
         // 人数の分からないホール (0 / 無し) には添えない。
         assert_eq!(capacity_display(Some(0)), None);
         assert_eq!(capacity_display(None), None);
+    }
+
+    #[test]
+    fn calendar_ticket_words_are_the_vocabulary_terms_of_their_columns() {
+        let term = |column: &str| vocabulary::TICKET_DATES.iter().find(|t| t.value == column).unwrap().label;
+        assert_eq!(CALENDAR_KIND_TICKET_OPEN, term("ticket_open_date"));
+        assert_eq!(CALENDAR_KIND_TICKET_DEADLINE, term("ticket_deadline"));
+        assert_eq!(CALENDAR_KIND_TICKET_LOTTERY, term("ticket_lottery_date"));
     }
 
     #[test]

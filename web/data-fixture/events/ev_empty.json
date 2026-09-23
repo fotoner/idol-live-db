@@ -20,9 +20,16 @@
   "dateDisplay": "2026-04-03 (金) 〜 2026-04-04 (土)",
   "isUpcoming": true,
   "ticket": {
-    "openDate": "2026-02-01",
-    "deadline": "2026-02-20",
-    "lotteryDate": null,
+    "dates": [
+      {
+        "label": "受付開始",
+        "date": "2026-02-01"
+      },
+      {
+        "label": "申込締切",
+        "date": "2026-02-20"
+      }
+    ],
     "url": "https://example.com/ticket"
   },
   "statTiles": [],

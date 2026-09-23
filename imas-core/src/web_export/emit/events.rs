@@ -10,6 +10,7 @@ use crate::domain::setlist_lineup::{row_lineup, LineupSummary, FULL_CAST_LABEL, 
 use crate::domain::setlist_sections::{group_consecutive, section_label};
 use crate::domain::show_naming::show_identity;
 use crate::domain::song_detail_queries::FIRST_PERFORMANCE_LABEL;
+use crate::domain::vocabulary;
 use crate::web_export::content;
 use crate::web_export::dto::*;
 use crate::web_export::url::url_segment;
@@ -60,12 +61,7 @@ pub fn event_page(ctx: &Ctx, event_id: &str) -> Option<EventPage> {
         kind_label: content::kind_label(&record.kind).to_string(),
         is_upcoming: is_upcoming(ctx, first_date.as_deref()),
         date_display: range_with_weekday(first_date.as_deref(), last_date.as_deref()),
-        ticket: TicketInfo {
-            open_date: record.ticket_open_date.clone(),
-            deadline: record.ticket_deadline.clone(),
-            lottery_date: record.ticket_lottery_date.clone(),
-            url: record.ticket_url.clone(),
-        },
+        ticket: ticket_info(&record),
         stat_tiles: event_stat_tiles(detail::event_stats(ctx.snap, event_id)),
         cast: event_cast(ctx, event_id),
         releases: detail::event_releases(ctx.snap, event_id)
@@ -569,9 +565,75 @@ pub fn show_ids_by_event(ctx: &Ctx) -> BTreeMap<String, Vec<String>> {
         .collect()
 }
 
+/// チケットの案内。日程も公式の案内も無ければ出さない。
+fn ticket_info(record: &detail::EventDetailRecord) -> Option<TicketInfo> {
+    let dates = ticket_dates(|column| match column {
+        "ticket_open_date" => record.ticket_open_date.as_deref(),
+        "ticket_deadline" => record.ticket_deadline.as_deref(),
+        "ticket_lottery_date" => record.ticket_lottery_date.as_deref(),
+        _ => None,
+    });
+    let url = record.ticket_url.clone().filter(|u| !u.is_empty());
+    (!dates.is_empty() || url.is_some()).then_some(TicketInfo { dates, url })
+}
+
+/// チケットの日程を語彙の順 (受付開始 → 申込締切 → 当落発表) に、日付のあるものだけ並べる。
+/// `date_of` は `events` の列名 (`vocabulary::Term::value`) からその値を引く。
+pub(crate) fn ticket_dates<'a>(date_of: impl Fn(&str) -> Option<&'a str>) -> Vec<TicketDate> {
+    vocabulary::TICKET_DATES
+        .iter()
+        .filter_map(|term| {
+            let date = date_of(term.value).filter(|d| !d.is_empty())?;
+            Some(TicketDate { label: term.label.to_string(), date: date.to_string() })
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn ticket_dates_follow_the_vocabulary_and_skip_blank_columns() {
+        let record = detail::EventDetailRecord {
+            id: "e".into(),
+            brand_id: None,
+            name: "e".into(),
+            event_type: String::new(),
+            is_streaming: false,
+            is_solo: false,
+            kind: "live".into(),
+            ticket_open_date: Some("2026-02-01".into()),
+            ticket_deadline: Some(String::new()),
+            ticket_lottery_date: Some("2026-02-25".into()),
+            ticket_url: None,
+            joint_brand_ids: None,
+            has_streaming: None,
+            has_live_viewing: None,
+            brand_ids: vec![],
+            is_joint: false,
+        };
+        let rows = |r: &detail::EventDetailRecord| -> Vec<(String, String)> {
+            ticket_info(r).map(|t| t.dates.into_iter().map(|d| (d.label, d.date)).collect()).unwrap_or_default()
+        };
+        assert_eq!(
+            rows(&record),
+            [("受付開始".to_string(), "2026-02-01".to_string()), ("当落発表".to_string(), "2026-02-25".to_string())]
+        );
+        // 3 列とも埋まっていれば語彙の 3 語が全部出る (列の対応に抜けが無い)。
+        let full = detail::EventDetailRecord { ticket_deadline: Some("2026-02-20".into()), ..record.clone() };
+        assert_eq!(rows(&full).len(), vocabulary::TICKET_DATES.len());
+        // 日程も案内も無ければ枠ごと出さない。案内だけならリンクだけ出す。
+        let bare = detail::EventDetailRecord {
+            ticket_open_date: None,
+            ticket_deadline: None,
+            ticket_lottery_date: None,
+            ..record
+        };
+        assert_eq!(ticket_info(&bare), None);
+        let link_only = detail::EventDetailRecord { ticket_url: Some("https://example.com/".into()), ..bare };
+        assert_eq!(ticket_info(&link_only).map(|t| t.dates.len()), Some(0));
+    }
 
     #[test]
     fn sibling_shows_go_to_segments_up_to_the_limit_then_to_a_pager() {

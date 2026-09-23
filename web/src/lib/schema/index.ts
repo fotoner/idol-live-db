@@ -116,6 +116,7 @@ export type { TagSongRow } from "./TagSongRow";
 export type { ThemePair } from "./ThemePair";
 export type { ThemeTable } from "./ThemeTable";
 export type { ThemeTokens } from "./ThemeTokens";
+export type { TicketDate } from "./TicketDate";
 export type { TicketInfo } from "./TicketInfo";
 export type { UnitListItem } from "./UnitListItem";
 export type { UnitListPage } from "./UnitListPage";

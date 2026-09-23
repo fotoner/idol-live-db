@@ -347,12 +347,14 @@ fn event_page(reference: &Ref, empty: bool) -> EventPage {
         kind_label: content::kind_label("live").to_string(),
         date_display: range_with_weekday(Some("2026-04-03"), Some("2026-04-04")),
         is_upcoming: true,
-        ticket: TicketInfo {
-            open_date: Some("2026-02-01".to_string()),
-            deadline: Some("2026-02-20".to_string()),
-            lottery_date: None,
+        ticket: Some(TicketInfo {
+            dates: super::emit::events::ticket_dates(|column| match column {
+                "ticket_open_date" => Some("2026-02-01"),
+                "ticket_deadline" => Some("2026-02-20"),
+                _ => None,
+            }),
             url: Some("https://example.com/ticket".to_string()),
-        },
+        }),
         // 0 の数は落とす規則なので、公演ゼロのライブでは帯そのものが無い。
         stat_tiles: if empty {
             vec![]

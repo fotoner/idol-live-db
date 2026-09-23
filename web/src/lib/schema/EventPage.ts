@@ -34,7 +34,11 @@ dateDisplay: string | null,
  * `first_date >= todayJst`。判定は `event_grouping::group_events_by_year` を
  * 1 要素で呼んだ結果で、**`>=` をここに書かない** (規則を二重に持たないため)。
  */
-isUpcoming: boolean, ticket: TicketInfo, 
+isUpcoming: boolean, 
+/**
+ * チケットの案内。日程も公式の案内も無いライブでは `None` (枠ごと出さない)。
+ */
+ticket: TicketInfo | null, 
 /**
  * 数の帯 (公演 / のべ曲数 / 異なり曲数 / 出演者)。**0 は落としてある**
  * (開催前は曲数が全部 0 で、並べても「まだ無い」以上のことを言わない)。

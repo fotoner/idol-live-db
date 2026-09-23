@@ -24,7 +24,8 @@ web_dto! {
         /// `first_date >= todayJst`。判定は `event_grouping::group_events_by_year` を
         /// 1 要素で呼んだ結果で、**`>=` をここに書かない** (規則を二重に持たないため)。
         pub is_upcoming: bool,
-        pub ticket: TicketInfo,
+        /// チケットの案内。日程も公式の案内も無いライブでは `None` (枠ごと出さない)。
+        pub ticket: Option<TicketInfo>,
         /// 数の帯 (公演 / のべ曲数 / 異なり曲数 / 出演者)。**0 は落としてある**
         /// (開催前は曲数が全部 0 で、並べても「まだ無い」以上のことを言わない)。
         pub stat_tiles: Vec<StatTile>,
@@ -44,13 +45,22 @@ web_dto! {
 }
 
 web_dto! {
-    /// チケット情報 (列をそのまま写す)。
+    /// チケットの案内 (ライブ詳細の脇)。
     #[derive(Eq)]
     pub struct TicketInfo {
-        pub open_date: Option<String>,
-        pub deadline: Option<String>,
-        pub lottery_date: Option<String>,
+        /// 日付の入っている日程だけ、受付開始 → 申込締切 → 当落発表 の順。
+        pub dates: Vec<TicketDate>,
         pub url: Option<String>,
+    }
+}
+
+web_dto! {
+    /// チケットの日程 1 行。語は `vocabulary::TICKET_DATES` (Q-08g)。
+    #[derive(Eq)]
+    pub struct TicketDate {
+        pub label: String,
+        /// `yyyy-MM-dd` (列の値のまま)。
+        pub date: String,
     }
 }
 

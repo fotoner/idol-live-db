@@ -16,13 +16,6 @@ import TagChip from "../../components/TagChip.astro";
 export const getStaticPaths = () => pathsFor("event", "eventId");
 
 const ev = page<EventPage>(Astro.props.data);
-
-const ticketRows = [
-  { label: "チケット発売", value: ev.ticket.openDate },
-  { label: "申込締切", value: ev.ticket.deadline },
-  { label: "抽選発表", value: ev.ticket.lotteryDate },
-];
-const hasTicket = ticketRows.some((r) => r.value) || ev.ticket.url;
 ---
 
 <DetailLayout seo={ev.seo} themeKey={ev.themeKey} app={ev.app} asideAfterMain>
@@ -110,10 +103,11 @@ const hasTicket = ticketRows.some((r) => r.value) || ev.ticket.url;
   }
 
   {
-    hasTicket && (
+    /* 日程の語 (受付開始 / 申込締切 / 当落発表) と、出すかどうかは Rust が決める。 */
+    ev.ticket && (
       <Section slot="aside" id="event-ticket" title="チケット">
         <ListContainer>
-          {ticketRows.map((r) => (r.value ? <LabeledRow label={r.label} value={r.value} mono /> : null))}
+          {ev.ticket.dates.map((d) => <LabeledRow label={d.label} value={d.date} mono />)}
           {ev.ticket.url && <LabeledRow label="公式情報" value="チケット情報" href={ev.ticket.url} />}
         </ListContainer>
       </Section>
