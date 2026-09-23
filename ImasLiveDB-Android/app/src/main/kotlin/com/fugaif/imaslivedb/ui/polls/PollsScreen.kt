@@ -9,15 +9,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.HowToVote
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -41,7 +38,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
@@ -49,6 +45,8 @@ import com.fugaif.imaslivedb.ui.share.ShareMessage
 import com.fugaif.imaslivedb.ui.share.SocialShareIconButton
 import com.fugaif.imaslivedb.ui.theme.DS
 import kotlinx.coroutines.launch
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.ui.text.style.TextOverflow
 
 /** 投票・予想。Worker D1 のポールを表示し、選択肢に投票できる (端末ベース)。 */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,7 +58,6 @@ fun PollsScreen(
     viewModel: PollsViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
-    var pickerForPollId by remember { mutableStateOf<String?>(null) }
     var showCreateSheet by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
@@ -124,13 +121,8 @@ fun PollsScreen(
                         item { LoginPromptBanner(onSignIn = ::signIn) }
                     }
                     items(state.cards, key = { it.poll.id }) { card ->
-                        PollCardView(
-                            card = card,
-                            isSignedIn = authState.isSignedIn,
-                            onToggleVote = { entityId, mine -> viewModel.toggleVote(card.poll.id, entityId, mine) },
-                            onAddCandidate = { pickerForPollId = card.poll.id },
-                            onClick = { onPollClick(card.poll.id) }
-                        )
+                        PollRow(card = card, onClick = { onPollClick(card.poll.id) })
+                        HorizontalDivider(color = DS.sep, modifier = Modifier.padding(start = 16.dp))
                     }
                 }
             }
@@ -143,112 +135,42 @@ fun PollsScreen(
             onCreated = { viewModel.insertCreated(it) }
         )
     }
-
-    val pickerCard = state.cards.firstOrNull { it.poll.id == pickerForPollId }
-    if (pickerCard != null) {
-        val remaining = (3 - (pickerCard.detail?.myVoteCount ?: 0)).coerceAtLeast(0)
-        val alreadySelected = pickerCard.detail?.entries?.filter { it.mine }?.map { it.entityId }?.toSet() ?: emptySet()
-        when (pickerCard.poll.targetType) {
-            "idol" -> IdolPollCandidatePicker(
-                alreadySelected = alreadySelected,
-                remaining = remaining,
-                onDismiss = { pickerForPollId = null },
-                onConfirm = { newIds ->
-                    viewModel.voteForNewEntities(pickerCard.poll.id, newIds)
-                    pickerForPollId = null
-                }
-            )
-            "unit" -> UnitPollCandidatePicker(
-                alreadySelected = alreadySelected,
-                remaining = remaining,
-                onDismiss = { pickerForPollId = null },
-                onConfirm = { newIds ->
-                    viewModel.voteForNewEntities(pickerCard.poll.id, newIds)
-                    pickerForPollId = null
-                }
-            )
-            else -> {
-                val scope2 = pickerCard.detail?.candidateScope
-                val restrictedBrandIds = if (scope2 == CommunityApi.PollCandidateScope.BRAND) {
-                    pickerCard.detail.scopeBrandIds.toSet()
-                } else null
-                SongPollCandidatePicker(
-                    alreadySelected = alreadySelected,
-                    remaining = remaining,
-                    restrictedBrandIds = restrictedBrandIds,
-                    onDismiss = { pickerForPollId = null },
-                    onConfirm = { newIds ->
-                        viewModel.voteForNewEntities(pickerCard.poll.id, newIds)
-                        pickerForPollId = null
-                    }
-                )
-            }
-        }
-    }
 }
 
+/**
+ * 一覧の 1 行 (要約だけ)。題・状態・票の合計・候補の範囲・いまの 1 位を出し、押すと詳細へ。
+ * 候補ごとの票と投票は詳細画面で行う (iOS の PollRowView と同じ役割)。
+ */
 @Composable
-private fun PollCardView(
-    card: PollCard,
-    isSignedIn: Boolean,
-    onToggleVote: (String, Boolean) -> Unit,
-    onAddCandidate: () -> Unit,
-    onClick: () -> Unit
-) {
-    val detail = card.detail
-    val remaining = (3 - (detail?.myVoteCount ?: 0)).coerceAtLeast(0)
-    // 終了セグメントには締切済みのお題が並ぶ。投票はサーバが弾くので、押せる導線は出さない
-    // (詳細画面 PollDetailScreen も同じ isActive で出し分けている)。
-    val canVote = isSignedIn && detail?.isActive == true
-    Column(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(16.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                card.poll.title,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold,
-                color = DS.ink,
-                modifier = Modifier.weight(1f)
-            )
-            // 一覧から直接お題を拡散できるように (詳細を開かずに誘える)。
-            SocialShareIconButton(
-                payload = ShareMessage.pollInvitePayload(
-                    card.poll.id, card.poll.title, detail?.endsAtMs, detail?.isActive == true
-                ),
-                contentDescription = "このお題をシェア"
-            )
-        }
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 8.dp)) {
-            Text("${detail?.totalVotes ?: 0}票", fontSize = 12.sp, color = DS.ink3)
-            if (detail != null) {
+private fun PollRow(card: PollCard, onClick: () -> Unit) {
+    val poll = card.poll
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(start = 16.dp, top = 12.dp, bottom = 12.dp)
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(poll.title, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
                 Text(
-                    detail.statusLabel, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
-                    color = if (detail.isActive) DS.pick else DS.ink3,
-                    modifier = Modifier.padding(start = 8.dp)
+                    poll.statusLabel, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                    color = if (poll.isActive) DS.pick else DS.ink3
                 )
-                ScopeBadge(detail)
+                if (poll.totalVotes > 0) {
+                    Text("計${poll.totalVotes}票", fontSize = 12.sp, color = DS.ink3, modifier = Modifier.padding(start = 8.dp))
+                }
+                ScopeBadge(poll)
             }
-        }
-        if (detail != null) {
-            PollEntriesList(detail.entries, card.entityNames, detail.totalVotes, canVote, onToggleVote)
-        }
-        if (canVote) {
-            Text("タップで投票/取消 (残り${remaining}/3)", fontSize = 11.sp, color = DS.ink3, modifier = Modifier.padding(top = 6.dp))
-        }
-
-        // 候補が指定制 (manual) でなければ、新規候補を追加できる (曲・アイドル共通)。
-        if (canVote && detail?.candidateScope != CommunityApi.PollCandidateScope.MANUAL) {
-            Button(
-                onClick = onAddCandidate,
-                enabled = remaining > 0,
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-            ) {
-                Icon(Icons.Filled.AddCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+            card.topEntityName?.let { name ->
                 Text(
-                    if (remaining > 0) "候補を追加して投票 (残り${remaining}/3)" else "投票済み (3/3)",
-                    fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(start = 6.dp)
+                    "1位 $name", fontSize = 13.sp, color = DS.ink2, maxLines = 1,
+                    overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp)
                 )
             }
         }
+        // 一覧から直接お題を拡散できるように (詳細を開かずに誘える)。
+        SocialShareIconButton(
+            payload = ShareMessage.pollInvitePayload(poll.id, poll.title, poll.endsAtMs, poll.isActive),
+            contentDescription = "このお題をシェア"
+        )
     }
 }

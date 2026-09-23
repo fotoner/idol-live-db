@@ -10,10 +10,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * 一覧の 1 行。お題の要約と、いま 1 位の候補の名前 (まだ票が無ければ null)。
+ * 候補ごとの票と投票は詳細画面で扱う (iOS の一覧と同じ)。
+ */
 data class PollCard(
     val poll: CommunityApi.PollSummary,
-    val detail: CommunityApi.PollDetail?,
-    val entityNames: Map<String, String>
+    val topEntityName: String?
 )
 
 data class PollsUiState(
@@ -25,19 +28,25 @@ data class PollsUiState(
     val loadError: String? = null
 )
 
-class PollsViewModel(app: Application) : AndroidViewModel(app) {
+/**
+ * 投票のお題の一覧。`GET /polls` を 1 回呼ぶだけで、要約 (票の合計・状態・候補の範囲・1 位) を出す。
+ *
+ * 以前はお題ごとに `GET /polls/:id` を順に取り、一覧に候補と投票のボタンまで並べていた。
+ * 画面が前面に来るたびに Worker (D1) を 1+N 回読んでいたので、iOS と同じく要約だけにした。
+ */
+class PollsViewModel internal constructor(
+    app: Application,
+    private val api: CommunityApi,
+    /** (種別, ID) → 表示名。端末の DB で引く (通信しない)。 */
+    private val entityName: suspend (String, String) -> String
+) : AndroidViewModel(app) {
 
-    private val api = AppModule.from(app).communityApi
-    private val songRepo = AppModule.from(app).songRepository
-    private val idolRepo = AppModule.from(app).idolRepository
-    private val unitRepo = AppModule.from(app).unitRepository
-    private val voteLog = AppModule.from(app).localPollVoteLog
+    constructor(app: Application) : this(app, AppModule.from(app).communityApi, localNameResolver(app))
 
     private val _uiState = MutableStateFlow(PollsUiState())
     val uiState: StateFlow<PollsUiState> = _uiState.asStateFlow()
 
-    // セグメントごとのキャッシュ。1 お題につき詳細を 1 リクエスト引くので、
-    // 切り替えのたびに取り直すと開催中/終了を往復するだけで通信が積み上がる。
+    // セグメントごとのキャッシュ。開催中/終了を往復するだけで取り直さない。
     private var activeCards: List<PollCard>? = null
     private var pastCards: List<PollCard>? = null
 
@@ -97,82 +106,19 @@ class PollsViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    private suspend fun buildCard(poll: CommunityApi.PollSummary): PollCard {
-        val detail = runCatching { api.pollDetail(poll.id) }.getOrNull()
-        return PollCard(poll, detail, resolveNames(poll.targetType, detail))
-    }
+    private suspend fun buildCard(poll: CommunityApi.PollSummary) =
+        PollCard(poll, poll.topEntityId?.let { entityName(poll.targetType, it) })
 
-    private suspend fun resolveNames(targetType: String, detail: CommunityApi.PollDetail?): Map<String, String> {
-        val ids = detail?.entries?.map { it.entityId } ?: return emptyMap()
-        return ids.associateWith { resolveOneName(targetType, it) }
-    }
-
-    /** 既存候補へワンタップ投票/取消のトグル。 */
-    fun toggleVote(pollId: String, entityId: String, currentlyMine: Boolean) {
-        if (currentlyMine) unvote(pollId, entityId) else vote(pollId, entityId)
-    }
-
-    fun vote(pollId: String, entityId: String) {
-        viewModelScope.launch {
-            val result = runCatching { api.votePoll(pollId, entityId) }.getOrNull() ?: return@launch
-            voteLog.recordVote(pollId, entityId)
-            applyVoteResult(pollId, entityId, result, mine = true)
-        }
-    }
-
-    fun unvote(pollId: String, entityId: String) {
-        viewModelScope.launch {
-            val result = runCatching { api.unvotePoll(pollId, entityId) }.getOrNull() ?: return@launch
-            voteLog.removeVote(pollId, entityId)
-            applyVoteResult(pollId, entityId, result, mine = false)
-        }
-    }
-
-    /** ピッカーから新規候補へまとめて投票 (残り票数分だけ呼び出し側が絞って渡す想定)。 */
-    fun voteForNewEntities(pollId: String, entityIds: List<String>) {
-        viewModelScope.launch {
-            for (id in entityIds) {
-                val result = runCatching { api.votePoll(pollId, id) }.getOrNull() ?: continue
-                voteLog.recordVote(pollId, id)
-                applyVoteResult(pollId, id, result, mine = true)
+    private companion object {
+        fun localNameResolver(app: Application): suspend (String, String) -> String {
+            val module = AppModule.from(app)
+            return { targetType, id ->
+                when (targetType) {
+                    "idol" -> module.idolRepository.fetchIdol(id)?.name ?: id
+                    "unit" -> module.unitRepository.fetchUnit(id)?.displayName ?: id
+                    else -> module.songRepository.fetchSong(id)?.title ?: id
+                }
             }
         }
-    }
-
-    /** 投票/取消の結果をローカルに楽観反映 (票数降順で並べ替え)。新規候補は名前を解決して追加する。 */
-    private suspend fun applyVoteResult(
-        pollId: String,
-        entityId: String,
-        result: CommunityApi.PollVoteResult,
-        mine: Boolean
-    ) {
-        val card = _uiState.value.cards.firstOrNull { it.poll.id == pollId } ?: return
-        val detail = card.detail ?: return
-        val keepZeroVote = detail.candidateScope == CommunityApi.PollCandidateScope.MANUAL
-        val entries = detail.entries.toMutableList()
-        val idx = entries.indexOfFirst { it.entityId == entityId }
-        val updated = CommunityApi.PollEntry(entityId, result.voteCount, mine)
-        if (idx >= 0) {
-            if (result.voteCount == 0 && !mine && !keepZeroVote) entries.removeAt(idx) else entries[idx] = updated
-        } else if (result.voteCount > 0 || keepZeroVote) {
-            entries.add(updated)
-        }
-        entries.sortByDescending { it.voteCount }
-        val newDetail = detail.copy(entries = entries, myVoteCount = result.myVoteCount)
-        val names = if (card.entityNames.containsKey(entityId)) card.entityNames
-        else card.entityNames + (entityId to resolveOneName(card.poll.targetType, entityId))
-
-        val cards = _uiState.value.cards.map {
-            if (it.poll.id == pollId) it.copy(detail = newDetail, entityNames = names) else it
-        }
-        // 楽観反映はキャッシュにも書き戻す。さもないとセグメントを往復した瞬間に票が巻き戻る。
-        if (_uiState.value.showActive) activeCards = cards else pastCards = cards
-        _uiState.value = _uiState.value.copy(cards = cards)
-    }
-
-    private suspend fun resolveOneName(targetType: String, id: String): String = when (targetType) {
-        "idol" -> idolRepo.fetchIdol(id)?.name ?: id
-        "unit" -> unitRepo.fetchUnit(id)?.displayName ?: id
-        else -> songRepo.fetchSong(id)?.title ?: id
     }
 }

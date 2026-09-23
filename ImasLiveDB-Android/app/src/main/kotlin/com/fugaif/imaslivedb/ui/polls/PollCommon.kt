@@ -48,16 +48,22 @@ fun LoginPromptBanner(onSignIn: () -> Unit) {
 
 /** お題の候補スコープ (ブランド限定 / 指定候補) を示す小さなチップ。 `all` の時は何も出さない。 */
 @Composable
-fun ScopeBadge(detail: CommunityApi.PollDetail) {
-    val (icon, label) = when (detail.candidateScope) {
+fun ScopeBadge(detail: CommunityApi.PollDetail) =
+    ScopeBadge(detail.candidateScope, detail.scopeBrandIds.size, detail.scopeEntityIds.size)
+
+/** 一覧の行 (要約だけを持つ) 用。 */
+@Composable
+fun ScopeBadge(poll: CommunityApi.PollSummary) =
+    ScopeBadge(poll.candidateScope, poll.scopeBrandIds.size, poll.scopeEntityIds.size)
+
+@Composable
+private fun ScopeBadge(scope: CommunityApi.PollCandidateScope, brandCount: Int, entityCount: Int) {
+    val (icon, label) = when (scope) {
         CommunityApi.PollCandidateScope.ALL -> return
-        CommunityApi.PollCandidateScope.BRAND -> {
-            val n = detail.scopeBrandIds.size
-            Icons.Filled.Sell to if (n <= 1) "ブランド限定" else "ブランド限定×$n"
-        }
-        CommunityApi.PollCandidateScope.MANUAL -> {
-            Icons.AutoMirrored.Filled.List to "指定候補${detail.scopeEntityIds.size}件"
-        }
+        CommunityApi.PollCandidateScope.BRAND ->
+            Icons.Filled.Sell to if (brandCount <= 1) "ブランド限定" else "ブランド限定×$brandCount"
+        CommunityApi.PollCandidateScope.MANUAL ->
+            Icons.AutoMirrored.Filled.List to "指定候補${entityCount}件"
     }
     Row(
         verticalAlignment = Alignment.CenterVertically,

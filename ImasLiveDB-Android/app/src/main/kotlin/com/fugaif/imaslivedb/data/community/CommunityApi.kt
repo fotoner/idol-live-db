@@ -25,9 +25,19 @@ class CommunityApi(private val http: WorkerHttpClient, private val authService: 
         val status: String = "active",
         /** 締切日時 (epoch millis)。未知/欠損なら Long.MAX_VALUE (常に「開催中」扱い)。 */
         val endsAtMs: Long = Long.MAX_VALUE,
+        /** 全候補の票の合計。 */
+        val totalVotes: Int = 0,
+        val candidateScope: PollCandidateScope = PollCandidateScope.ALL,
+        val scopeBrandIds: List<String> = emptyList(),
+        val scopeEntityIds: List<String> = emptyList(),
+        /** いま 1 位の曲/アイドル/ユニットの ID。まだ票が無ければ null。 */
+        val topEntityId: String? = null,
     ) {
         /** iOS Poll.isActive の移植: サーバが active かつ締切前。 */
         val isActive: Boolean get() = status == "active" && endsAtMs > System.currentTimeMillis()
+
+        /** iOS Poll.statusLabel の移植。 */
+        val statusLabel: String get() = pollStatusLabel(isActive, endsAtMs)
     }
     data class PollEntry(val entityId: String, val voteCount: Int, val mine: Boolean)
     /** 終了お題の優勝者 1 件 (殿堂)。iOS PollResult の移植。 */
@@ -90,11 +100,7 @@ class CommunityApi(private val http: WorkerHttpClient, private val authService: 
         val isActive: Boolean get() = status == "active" && endsAtMs > System.currentTimeMillis()
 
         /** iOS Poll.statusLabel の移植。 */
-        val statusLabel: String get() {
-            if (!isActive) return "終了"
-            val days = ((endsAtMs - System.currentTimeMillis()) / 86_400_000L)
-            return if (days <= 0) "本日締切" else "残り${days}日"
-        }
+        val statusLabel: String get() = pollStatusLabel(isActive, endsAtMs)
     }
     /** 投票/取消のレスポンス (対象 entity の確定票数 + 自分の合計投票数)。 */
     data class PollVoteResult(val entityId: String, val voteCount: Int, val myVoteCount: Int)
@@ -742,6 +748,11 @@ class CommunityApi(private val http: WorkerHttpClient, private val authService: 
             targetType = o.optString("target_type"),
             status = o.strOrNull("status") ?: "active",
             endsAtMs = epochSecToMs(o.optLong("ends_at")),
+            totalVotes = o.optInt("total_votes"),
+            candidateScope = PollCandidateScope.fromRaw(o.strOrNull("candidate_scope")),
+            scopeBrandIds = o.optJSONArray("scope_brand_ids")?.toStringList().orEmpty(),
+            scopeEntityIds = o.optJSONArray("scope_entity_ids")?.toStringList().orEmpty(),
+            topEntityId = o.strOrNull("top_entity_id"),
         )
     }
 
@@ -898,4 +909,11 @@ class CommunityApi(private val http: WorkerHttpClient, private val authService: 
     companion object {
         private const val TAG = "CommunityApi"
     }
+}
+
+/** お題の状態の札 (iOS Poll.statusLabel の移植)。一覧と詳細で同じ文言にする。 */
+private fun pollStatusLabel(isActive: Boolean, endsAtMs: Long): String {
+    if (!isActive) return "終了"
+    val days = ((endsAtMs - System.currentTimeMillis()) / 86_400_000L)
+    return if (days <= 0) "本日締切" else "残り${days}日"
 }
