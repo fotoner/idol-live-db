@@ -400,6 +400,7 @@ fn write_all(
             footer_notes: crate::web_export::content::footer_notes(),
             lyrics_license_notice: crate::web_export::content::lyrics_license_notice(),
             lyrics_search_url: crate::web_export::content::lyrics_search_url(),
+            connect_origins: crate::web_export::content::connect_origins(),
             site_name: crate::web_export::content::SITE_NAME.to_string(),
             not_found: lists::not_found(),
         },

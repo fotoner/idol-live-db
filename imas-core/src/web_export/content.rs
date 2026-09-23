@@ -126,6 +126,12 @@ pub fn call_guide_vocabulary() -> CallGuideVocabulary {
     }
 }
 
+/// ブラウザが自分以外に通信してよい origin (CSP の connect-src)。
+/// 出面が通信するのは歌詞 (1 曲ずつ・検索) だけなので、歌詞を出す間だけ歌詞 API が入る。
+pub fn connect_origins() -> Vec<String> {
+    if LYRICS_ON_WEB { vec![API_ORIGIN.to_string()] } else { vec![] }
+}
+
 /// 歌詞の中の言葉で曲を探す API (検索ページの「歌詞」)。出面で歌詞を出すときだけ。
 /// 応答は曲 id と一致箇所の窓だけで、本文は 1 曲ずつの GET と同じ経路。
 pub fn lyrics_search_url() -> Option<String> {
@@ -673,6 +679,12 @@ mod tests {
         // 人数の分からないホール (0 / 無し) には添えない。
         assert_eq!(capacity_display(Some(0)), None);
         assert_eq!(capacity_display(None), None);
+    }
+
+    #[test]
+    fn the_browser_may_call_the_lyrics_api_only_while_lyrics_are_on_the_web() {
+        assert_eq!(connect_origins().is_empty(), !LYRICS_ON_WEB);
+        assert_eq!(connect_origins().is_empty(), lyrics_search_url().is_none());
     }
 
     #[test]

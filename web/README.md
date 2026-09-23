@@ -62,7 +62,7 @@ src/
     search/     /search/ の island と、畳み込み wasm への差し替え可能な import 面
     schema/     ★生成物★ ts-rs が Rust の DTO から出す TS 型。手で編集しない
     fold/       (未使用。wasm の出力先は public/fold/)
-public/         そのまま配信されるもの (アイコン / OGP / フォント / robots.txt / _headers)
+public/         そのまま配信されるもの (アイコン / OGP / フォント / robots.txt)。_headers はビルドが組む (scripts/headers.mjs)
   fold/         ★生成物★ wasm-pack の出力
   themes.css    ★生成物★ Rust が出すテーマ変数
 data/           ★生成物★ web-export が出すページ JSON (約 7,600 個)

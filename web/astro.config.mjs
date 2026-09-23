@@ -4,6 +4,7 @@ import path from "node:path";
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 import { dataRoot } from "./scripts/data-root.mjs";
+import { buildHeaders } from "./scripts/headers.mjs";
 
 /**
  * sitemap のための routes.json の索引。
@@ -112,16 +113,38 @@ function copyGeneratedAssets() {
   };
 }
 
+/**
+ * 配信ヘッダ (`dist/_headers`: CSP など) をビルドのたびに組む。
+ *
+ * ブラウザが自分以外のどこと通信してよいか (CSP の connect-src) は Rust が `meta.json` の
+ * `connectOrigins` で決める (歌詞を出す間だけ歌詞 API が入る)。手書きの _headers だと、
+ * 歌詞を開け閉めするたびに人が CSP を直す必要があった。書式は scripts/headers.mjs。
+ */
+function writeHeaders() {
+  return {
+    name: "imas:write-headers",
+    hooks: {
+      /** @param {{ dir: URL, logger: { info: (m: string) => void } }} ctx */
+      "astro:build:done": ({ dir, logger }) => {
+        const meta = JSON.parse(fs.readFileSync(path.join(dataRoot(), "meta.json"), "utf8"));
+        fs.writeFileSync(new URL("_headers", dir), buildHeaders(meta));
+        logger.info(`_headers を組みました (connect-src の外部: ${meta.connectOrigins.length} 件)`);
+      },
+    },
+  };
+}
+
 export default defineConfig({
   site: "https://idollivedb.fugaapp.site",
   output: "static",
   trailingSlash: "always",
-  // CSP (public/_headers) が `style-src 'self'` = unsafe-inline 無しなので、
+  // CSP (scripts/headers.mjs が組む _headers) が `style-src 'self'` = unsafe-inline 無しなので、
   // CSS は必ず外部ファイルにする ("auto" だと小さい CSS が <style> に入って全ページで死ぬ)。
   build: { format: "directory", inlineStylesheets: "never" },
   compressHTML: true,
   integrations: [
     copyGeneratedAssets(),
+    writeHeaders(),
     sitemap({
       filter: (page) =>
         !page.includes("/404") && !routes().noindex.has(decodePath(new URL(page).pathname)),

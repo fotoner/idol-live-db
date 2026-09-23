@@ -29,7 +29,7 @@ const REQUIRED_FILES = [
   "sitemap-index.xml", // @astrojs/sitemap の出力
   "robots.txt",
   "404.html",
-  "_headers", // CSP / キャッシュ / X-Robots-Tag (web/public/_headers がそのままコピーされる)
+  "_headers", // CSP / キャッシュ / X-Robots-Tag (astro.config の write-headers が scripts/headers.mjs で組む)
 ];
 
 if (!fs.existsSync(DIST)) {

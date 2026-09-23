@@ -6,7 +6,7 @@ import { meta as siteMeta } from "../lib/data";
  * プライバシー / サポート / 利用規約は既存の GitHub Pages にリンクする (複製しない)。
  * 外部リンクも **同一タブ**で開く (target="_blank" を使わない = 戻る操作を奪わない)。
  * したがって `rel="noopener"` は効果が無いので付けない。リファラは
- * `Referrer-Policy: strict-origin-when-cross-origin` (public/_headers) が絞る。
+ * `Referrer-Policy: strict-origin-when-cross-origin` (ビルドが組む _headers) が絞る。
  * 生成日時はここに出さない (DECISIONS A17: 日次再ビルドで全 HTML が変わるのを避ける)。
  * 基準日 (`todayJst`) は日次で変わる値だが、「いつ時点のデータか」は閲覧者に要る情報なので出す。
  * サイト全体のメタ (`meta.json`) はヘッダと同じく自分で読む (ページから受け渡さない)。

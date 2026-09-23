@@ -55,6 +55,11 @@ lyricsLicenseNotice: string | null,
  */
 lyricsSearchUrl: string | null, 
 /**
+ * ブラウザが自分以外に通信してよい origin (CSP の connect-src)。ビルドが `_headers` を
+ * 組むときに使う。歌詞を出す間だけ歌詞 API の origin が入り、閉じている間は空。
+ */
+connectOrigins: Array<string>, 
+/**
  * サイト名。ヘッダ・フッタ・OGP の site_name・「アプリで開く」が同じ 1 本を描く。
  */
 siteName: string, 

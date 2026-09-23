@@ -285,6 +285,7 @@ fn site_meta() -> SiteMeta {
         footer_notes: content::footer_notes(),
         lyrics_license_notice: content::lyrics_license_notice(),
         lyrics_search_url: content::lyrics_search_url(),
+        connect_origins: content::connect_origins(),
         site_name: content::SITE_NAME.to_string(),
         not_found: super::emit::lists::not_found(),
     }

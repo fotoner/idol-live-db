@@ -57,6 +57,9 @@ web_dto! {
         /// 歌詞の中の言葉で曲を探す API (検索ページの「歌詞」が押されたときだけ叩く)。
         /// 出面で歌詞を出すときだけ入る。TS は URL を組まず、ここに来たものを使う。
         pub lyrics_search_url: Option<String>,
+        /// ブラウザが自分以外に通信してよい origin (CSP の connect-src)。ビルドが `_headers` を
+        /// 組むときに使う。歌詞を出す間だけ歌詞 API の origin が入り、閉じている間は空。
+        pub connect_origins: Vec<String>,
         /// サイト名。ヘッダ・フッタ・OGP の site_name・「アプリで開く」が同じ 1 本を描く。
         pub site_name: String,
         /// 見つからないページ (`404.html`)。routes.json に載らない唯一のページなので、

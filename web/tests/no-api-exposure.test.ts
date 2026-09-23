@@ -219,6 +219,23 @@ describe("配信物 (dist)", () => {
   });
 });
 
+describe("配信ヘッダ (CSP)", () => {
+  /**
+   * ブラウザが自分以外と通信してよい宛先 (connect-src) は、Rust が `meta.json` に出した
+   * `connectOrigins` だけ。歌詞を出していない間は空 (歌詞 API の Worker を許さない)。
+   * _headers はビルドが組む (scripts/headers.mjs) ので、手で足した宛先はここで落ちる。
+   */
+  it.skipIf(!distExists)("connect-src は自分と、Rust が出した宛先だけ", () => {
+    const headers = fs.readFileSync(path.join(DIST, "_headers"), "utf8");
+    const csp = /Content-Security-Policy: (.*)/.exec(headers)?.[1];
+    expect(csp, "_headers に CSP が無い").toBeDefined();
+    const connect = /connect-src ([^;]*)/.exec(csp!)?.[1]?.trim().split(/\s+/);
+    const meta = readJson<{ connectOrigins: string[]; lyricsSearchUrl: string | null }>("meta.json");
+    expect(connect).toEqual(["'self'", ...meta.connectOrigins]);
+    if (meta.lyricsSearchUrl === null) expect(meta.connectOrigins).toEqual([]);
+  });
+});
+
 describe("検索索引の参照", () => {
   it("manifest の path が同一オリジンの相対パス", () => {
     const manifest = readJson<SearchManifest>("search/manifest.json");
