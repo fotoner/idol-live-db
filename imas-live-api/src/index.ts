@@ -5,7 +5,7 @@ import {
   SESSION_JWT_ISSUER, SESSION_JWT_TTL_SECONDS,
 } from "./auth";
 import { checkRateLimit, dryCheckIpRateLimit, commitIpRateLimit } from "./rate_limit";
-import { upsertUser, checkIsAdmin } from "./users";
+import { upsertUser, checkIsAdmin, isAllowlistedAdmin } from "./users";
 import { handleDeviceAggregates } from "./routes/device_aggregates";
 import { handlePolls } from "./routes/polls";
 import { handleTags } from "./routes/tags";
@@ -773,7 +773,8 @@ export default {
             contribution_count: number;
             goods_received: number;
           }>();
-        const isAdmin = (await checkIsAdmin(env, user.uid)) || !!row?.is_admin;
+        // admin の判定は、読んだ行の is_admin と env の許可リストで済ませる (同じ行を読み直さない)。
+        const isAdmin = isAllowlistedAdmin(env, user.uid) || !!row?.is_admin;
         // editCount = source='app' の編集 batch 件数。contribution_count は finalizeEditBatch で
         // source='app' のみ +1 されるため同値 (revert/seed では加算しない=現状維持。確定契約 §3)。
         const editCount = row?.contribution_count ?? 0;

@@ -22,14 +22,15 @@ export async function upsertUser(env: Env, uid: string, name?: string, picture?:
     .run();
 }
 
+/** env の許可リスト (ADMIN_USER_IDS) に載っているか。D1 を読まない。 */
+export function isAllowlistedAdmin(env: Env, uid: string): boolean {
+  if (!env.ADMIN_USER_IDS) return false;
+  return env.ADMIN_USER_IDS.split(",").map((s) => s.trim()).filter(Boolean).includes(uid);
+}
+
 /** env の allowlist または users.is_admin でモデレーター判定。 */
 export async function checkIsAdmin(env: Env, uid: string): Promise<boolean> {
-  // allowlist check via env var
-  if (env.ADMIN_USER_IDS) {
-    const allowed = env.ADMIN_USER_IDS.split(",").map((s) => s.trim()).filter(Boolean);
-    if (allowed.includes(uid)) return true;
-  }
-  // DB check
+  if (isAllowlistedAdmin(env, uid)) return true;
   const row = await env.DB.prepare("SELECT is_admin FROM users WHERE id = ?")
     .bind(uid)
     .first<{ is_admin: number }>();

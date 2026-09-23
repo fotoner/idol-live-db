@@ -6,7 +6,7 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
 import { mintAppToken } from "../src/appattest";
 import { signSessionToken } from "../src/auth";
 import { bearer, call, callJson, makeEnv, TEST_IP, TEST_SECRET } from "./support/worker";
-import { exec, insertUser, row, rows } from "./support/d1";
+import { exec, insertUser, meterD1, row, rows } from "./support/d1";
 import {
   APPLE_JWKS_PATH, APPLE_ORIGIN, decodeHeader, decodePayload, FakeIdProvider,
   GOOGLE_JWKS_PATH, GOOGLE_ORIGIN, nowSec, sessionPayload, signHs256,
@@ -204,6 +204,15 @@ describe("GET /auth/me とトークンの検証", () => {
     expect(byEnv.body.isAdmin).toBe(true);
     await exec("UPDATE users SET is_admin = 1 WHERE id = ?", UID);
     expect((await callJson("GET", "/auth/me", { headers: await bearer(UID) })).body.isAdmin).toBe(true);
+  });
+
+  it("users の行は 1 回だけ読む (admin の判定もその行と env の許可リストで済ませる)", async () => {
+    await insertUser(UID);
+    await exec("UPDATE users SET is_admin = 1 WHERE id = ?", UID);
+    const m = meterD1();
+    const res = await callJson("GET", "/auth/me", { headers: await bearer(UID), env: makeEnv({ DB: m.db }) });
+    expect(res.body.isAdmin).toBe(true);
+    expect(m.usage.log.filter((l) => /FROM users/.test(l.sql))).toHaveLength(1);
   });
 
   it("未ログイン・期限切れ・aud 無し・alg 違い・未来の iat は 401", async () => {
