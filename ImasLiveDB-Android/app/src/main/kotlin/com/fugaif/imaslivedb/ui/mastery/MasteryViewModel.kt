@@ -81,7 +81,7 @@ class MasteryViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             allSongs = songRepo.fetchMasterySongs()
             levels = marks.masteryLevels()
-            collected = marks.autoCollectedSongIds()
+            collected = songRepo.fetchCollectedSongIds()
             _uiState.value = _uiState.value.copy(
                 brands = stats.fetchBrands(),
                 scale = AppPreferences.masteryScale,

@@ -122,6 +122,12 @@ class SongRepository(
         return fetchSongsPreservingOrder(ids)
     }
 
+    /**
+     * 回収済みの曲 (一覧の回収バッジと同じ集合)。参加の条件 (設定「配信も回収に含める」) と
+     * リアルライブに絞るのは [fetchSongCollectedCounts] と同じくコア。
+     */
+    suspend fun fetchCollectedSongIds(): Set<String> = fetchSongCollectedCounts().keys
+
     /** song_id → 現地回収回数 (行アイコン/回収済みフィルタ用の bulk 取得)。 */
     suspend fun fetchSongCollectedCounts(): Map<String, Int> {
         // バッジは「参加した show + 参加イベント配下の show」をリアルライブ

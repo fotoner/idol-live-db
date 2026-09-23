@@ -95,7 +95,7 @@ class ProduceViewModel(app: Application) : AndroidViewModel(app) {
                 favoriteSongs = marks.favoriteSongs(),
                 attendedEvents = attended,
                 favoriteCount = favoriteCount,
-                collectedCount = marks.autoCollectedSongIds().size,
+                collectedCount = module.songRepository.fetchCollectedSongIds().size,
                 masteryCount = marks.masteryLevels().size,
                 voteCount = module.localPollVoteLog.allEntries().size,
                 contributionCount = module.localContributionLog.total,

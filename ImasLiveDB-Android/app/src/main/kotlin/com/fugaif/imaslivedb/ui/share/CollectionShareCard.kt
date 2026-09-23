@@ -80,7 +80,7 @@ data class CollectionShareStats(
          */
         suspend fun load(context: Context, overallCollected: Int, overallTotal: Int): CollectionShareStats {
             val module = AppModule.from(context)
-            val collected = module.userMarkRepository.autoCollectedSongIds()
+            val collected = module.songRepository.fetchCollectedSongIds()
             val lines = module.userMarkRepository.pickedIdols().take(4).map { idol ->
                 val songIds = module.songRepository.fetchIdolSongs(idol.id, role = "original").map { it.id }
                 IdolLine(

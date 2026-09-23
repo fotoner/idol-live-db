@@ -127,9 +127,9 @@ class CollectedSongsViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         viewModelScope.launch {
-            // 回収済みの判定 (どの参加形態を数えるか) はマークのリポジトリが持っている。
+            // 回収済みの判定 (どの参加形態を数えるか・リアルライブか) はコア。
             // ここで参加形態を見て絞り直すと、設定「配信も回収に含める」と食い違う。
-            val ids = module.userMarkRepository.autoCollectedSongIds()
+            val ids = module.songRepository.fetchCollectedSongIds()
             val songs = module.songRepository.fetchSongsByIds(ids.toList())
                 .sortedBy { it.title }
             _uiState.value = CollectedSongsUiState(songs = songs, isLoading = false)

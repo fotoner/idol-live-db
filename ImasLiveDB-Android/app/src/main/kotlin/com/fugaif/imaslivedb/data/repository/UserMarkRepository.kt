@@ -5,11 +5,9 @@ import com.fugaif.imaslivedb.data.model.AttendanceType
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.data.model.UserMark
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.withContext
 import uniffi.imas_core.BackupUserMarkRecord
 import uniffi.imas_core.backupMeaningfulMarkIndices
 import java.time.Instant
@@ -188,49 +186,6 @@ class UserMarkRepository(
     var includeStreamInCollection: Boolean
         get() = CollectionPreferences.includeStream
         set(value) { CollectionPreferences.includeStream = value }
-
-    /**
-     * attended ライブのセトリから自動判定した「回収済み」song_id セット (回収ダッシュボード用)。
-     *
-     * 現地のみ (既定) は Room の DAO をそのまま使う。配信を含める場合だけ、参加種別の条件を
-     * 外した同じ SQL を直接引く — 条件が SQL の WHERE 句にある以上、Kotlin 側で後から
-     * 足し引きできないため。DAO に 2 本目を生やせない事情での分岐なので、SQL は
-     * [com.fugaif.imaslivedb.data.db.dao.StatsDao.fetchAutoCollectedSongIds] の写しを保つこと。
-     */
-    suspend fun autoCollectedSongIds(): Set<String> {
-        if (!includeStreamInCollection) return db.statsDao().fetchAutoCollectedSongIds().toSet()
-        return withContext(Dispatchers.IO) {
-            val ids = mutableSetOf<String>()
-            // Room の生クエリは呼び出し元スレッドで走る (suspend DAO と違いディスパッチされない)。
-            db.query(SQL_AUTO_COLLECTED_ANY_ATTENDANCE, null).use { cursor ->
-                while (cursor.moveToNext()) ids.add(cursor.getString(0))
-            }
-            ids
-        }
-    }
-
-    /**
-     * 参加種別を問わない版の自動回収クエリ (現地・配信・LV すべて回収に数える)。
-     * DAO 版との違いは公演マークの `text_value` 条件を落とした 1 点だけで、
-     * 対象を「リアルライブ (live/festival)」に絞るところは同じ。
-     */
-    private val SQL_AUTO_COLLECTED_ANY_ATTENDANCE = """
-        SELECT DISTINCT si.song_id
-        FROM setlist_items si
-        JOIN shows sh ON si.show_id = sh.id
-        JOIN events e ON e.id = sh.event_id
-        WHERE e.kind IN ('live','festival')
-        AND (
-            sh.id IN (
-                SELECT entity_id FROM user_marks
-                WHERE entity_type='show' AND kind='attended' AND bool_value=1
-            )
-            OR sh.event_id IN (
-                SELECT entity_id FROM user_marks
-                WHERE entity_type='event' AND kind='attended' AND bool_value=1
-            )
-        )
-    """
 
     /** お気に入りアイドル一覧。 */
     suspend fun favoriteIdols(): List<Idol> =

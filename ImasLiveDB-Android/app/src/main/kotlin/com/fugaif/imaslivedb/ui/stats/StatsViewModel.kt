@@ -116,7 +116,7 @@ class StatsViewModel(app: Application) : AndroidViewModel(app) {
     private fun loadDashboard() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoadingDashboard = true)
-            val collectedIds = userMarkRepo.autoCollectedSongIds()
+            val collectedIds = songRepo.fetchCollectedSongIds()
             val pickIdolIds = userMarkRepo.pickedIdolIds()
             val dashboard = statsRepo.fetchCollectionDashboard(collectedIds, pickIdolIds)
             _uiState.value = _uiState.value.copy(
