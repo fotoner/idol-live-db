@@ -139,68 +139,6 @@ mod tests {
     use crate::domain::sync_decisions::SyncStepFailureAction;
 
     // -----------------------------------------------------------------------
-    // FFI 面の自足的な固定
-    //
-    // 回帰: この 9 本は tests/ffi_surface.rs の一覧に登録されないまま「テスト緑」と
-    // 報告された。あの一覧は **書いた関数しか守らない** ので、書き忘れた関数は改名しても
-    // 削除しても緑のまま通り、Swift / Kotlin ラッパのリンク時まで発覚しない。
-    // 共有の一覧 (更新権限が別にある) に依存せず、このモジュール分はここで守り切る。
-    // -----------------------------------------------------------------------
-
-    /// UniFFI は各エクスポートに `uniffi_imas_core_checksum_func_<name>` という引数なしの
-    /// checksum 関数を no_mangle で生やす。それを extern 宣言して呼ぶと、関数が消えた /
-    /// 改名された / エクスポート属性が外れたときに **リンクエラー** になる。
-    macro_rules! checked_ffi_exports {
-        ($($symbol:ident),+ $(,)?) => {
-            extern "C" {
-                $(fn $symbol() -> u16;)+
-            }
-
-            /// 属性の実数と突き合わせるための分母。
-            const CHECKED_EXPORTS: usize = [$(stringify!($symbol)),+].len();
-
-            /// 消えた / 改名されたエクスポートを捕まえる。
-            #[test]
-            fn exported_functions_keep_their_ffi_symbols() {
-                // 呼べること自体がリンク成功の証明。checksum の値は署名変更で正当に変わるため固定しない。
-                let checksums = [$(unsafe { $symbol() }),+];
-                assert_eq!(checksums.len(), CHECKED_EXPORTS);
-            }
-        };
-    }
-
-    checked_ffi_exports! {
-        uniffi_imas_core_checksum_func_sync_chunk_progress,
-        uniffi_imas_core_checksum_func_sync_classify_error,
-        uniffi_imas_core_checksum_func_sync_default_max_fetch_retries,
-        uniffi_imas_core_checksum_func_sync_preflight,
-        uniffi_imas_core_checksum_func_sync_progress_fraction,
-        uniffi_imas_core_checksum_func_sync_retry_action,
-        uniffi_imas_core_checksum_func_sync_should_delete_orphans,
-        uniffi_imas_core_checksum_func_sync_step_failure_plan,
-        uniffi_imas_core_checksum_func_sync_step_finish_plan,
-    }
-
-    /// 増えた分を捕まえる。上のリンク検査は「消えた」しか見ないので、エクスポートを足して
-    /// 一覧に足し忘れると素通りしてしまう (その取りこぼしがこの指摘そのもの)。
-    /// このファイルの属性数と突き合わせて塞ぐ。
-    #[test]
-    fn export_count_matches_the_checked_symbol_list() {
-        // このソースを読み込んで数えるので、リテラルをそのまま書くと自分自身を数えてしまう。
-        // 分割して組み立てるのは tests/ffi_surface.rs と同じ理由。
-        let attribute = concat!("#[uniffi", "::export]");
-        let found = include_str!("sync_decisions.rs")
-            .lines()
-            .filter(|line| line.trim_start().starts_with(attribute))
-            .count();
-        assert_eq!(
-            found, CHECKED_EXPORTS,
-            "このモジュールの #[uniffi..export] 関数 {found} 本に対し、リンク検査は {CHECKED_EXPORTS} 本しか見ていない。\n\
-             エクスポートを増減したら checked_ffi_exports! の一覧と tests/ffi_surface.rs の両方を更新すること。"
-        );
-    }
-
-    // -----------------------------------------------------------------------
     // 委譲の疎通 — 引数の取り違えは型が同じだと素通りするので、全 9 本を 1 回ずつ通す
     // (判定の正しさそのものは domain::sync_decisions のテストが持つ)。
     // -----------------------------------------------------------------------

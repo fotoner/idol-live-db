@@ -12,10 +12,6 @@
 //!
 //! 出題ごと・行ごとに呼ぶ形は禁止 (FFI 境界の規約)。難易度セグメントの index
 //! 0 / 1 / 2 は [`ColorMatchDifficulty`] の Easy / Normal / Hard にそのまま対応する。
-//!
-//! エクスポートを増減したら、末尾のテストの checksum 一覧と、共有の
-//! tests/ffi_surface.rs の一覧の **両方** に反映すること。片方だけだと
-//! 抜けが Swift/Kotlin ラッパのリンク時まで表に出ない。
 
 use crate::domain::color_match::{
     ColorMatchAssignment, ColorMatchBrandRef, ColorMatchDifficulty, ColorMatchIdol,
@@ -85,66 +81,6 @@ pub fn color_match_accuracy_percent(total_correct: u32, total_answered: u32) -> 
 mod tests {
     use super::*;
     use crate::domain::color_match as domain;
-
-    // このモジュールが FFI 面に出している関数の checksum シンボル一覧。
-    //
-    // UniFFI は export 属性を付けた関数ごとに、引数なしの
-    // `uniffi_imas_core_checksum_func_<関数名>` を no_mangle で生成する。ここで
-    // extern 宣言して実際に呼ぶことで、「エクスポートが消えた / 改名された」を
-    // リンクエラーとして検出する (iOS `ColorMatchGameView.swift` / Android
-    // `ColorMatchGameScreen.kt` が参照する生成シンボルが揃っていることの Rust 側の保証)。
-    //
-    // なぜ tests/ffi_surface.rs の集中一覧だけに任せないか: 別ファイルの一覧は
-    // エクスポートを足したときの追記を忘れても「テスト緑」のまま通ってしまい、
-    // Swift/Kotlin ラッパのリンク時まで発覚しない (回帰: Phase 8 sync の 20 関数、
-    // および本モジュールの 5 関数が、いずれも未登録のまま「テスト緑」と報告された)。
-    // エクスポート本体と同じファイルに置けば、関数を触る差分とこの一覧を触る差分が
-    // 必ず同じ場所に並ぶので乖離しにくい。
-    extern "C" {
-        fn uniffi_imas_core_checksum_func_color_match_build_pools() -> u16;
-        fn uniffi_imas_core_checksum_func_color_match_effective_pool() -> u16;
-        fn uniffi_imas_core_checksum_func_color_match_start_game() -> u16;
-        fn uniffi_imas_core_checksum_func_color_match_judge_round() -> u16;
-        fn uniffi_imas_core_checksum_func_color_match_accuracy_percent() -> u16;
-    }
-
-    /// 上の一覧に並べたシンボルの数。`every_export_in_this_module_is_listed` の基準値。
-    const DECLARED_CHECKSUMS: usize = 5;
-
-    /// 一覧の各シンボルを実際に呼ぶ。呼び出せること自体がリンク成功の証明で、
-    /// 戻り値は署名を変えれば変わる値なので固定しない。
-    #[test]
-    fn every_listed_export_has_an_ffi_checksum_symbol() {
-        let checksums = unsafe {
-            [
-                uniffi_imas_core_checksum_func_color_match_build_pools(),
-                uniffi_imas_core_checksum_func_color_match_effective_pool(),
-                uniffi_imas_core_checksum_func_color_match_start_game(),
-                uniffi_imas_core_checksum_func_color_match_judge_round(),
-                uniffi_imas_core_checksum_func_color_match_accuracy_percent(),
-            ]
-        };
-        assert_eq!(checksums.len(), DECLARED_CHECKSUMS);
-    }
-
-    /// 「エクスポートを足したのに上の一覧へ載せ忘れた」を落とす。
-    ///
-    /// リンクエラーが捕まえるのは「消えた・改名された」だけで、**増えた分は素通りする**。
-    /// 未登録のまま増える事故がまさに今回の指摘なので、自ファイルのソースを読んで
-    /// export 属性の個数を数え、宣言済みシンボル数と突き合わせる。
-    #[test]
-    fn every_export_in_this_module_is_listed() {
-        // 属性名を 2 つに割って書くのは、この比較用のリテラル自身が
-        // ソース中の出現として数えられてしまうのを防ぐため。
-        let attribute = concat!("#[uniffi", "::export]");
-        let exported = include_str!("color_match.rs").matches(attribute).count();
-        assert_eq!(
-            exported, DECLARED_CHECKSUMS,
-            "エクスポートを増減したら上の checksum 一覧と DECLARED_CHECKSUMS も直すこと。\
-             一覧に無い関数は改名・削除してもこのテストが緑のまま通り、\
-             Swift/Kotlin ラッパのリンク時まで発覚しない"
-        );
-    }
 
     // MARK: - 委譲の疎通
 

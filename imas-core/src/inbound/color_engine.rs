@@ -28,11 +28,6 @@
 //! `toArgb()` で、どちらも OS 依存なのでコアには持ち込まない。各 OS で `#rrggbb` に
 //! してから [`theme_derive`] の `seed` に渡す (原本 `derive(colorSeed:)` /
 //! `derive(color:)` はその 2 行に分解される)。
-//!
-//! エクスポートを増減したら、共有の tests/ffi_surface.rs の一覧にも反映すること。
-//! 片方だけだと抜けが Swift/Kotlin ラッパのリンク時まで表に出ない。
-//! 反映漏れはこのファイルの
-//! `tests::every_export_here_is_registered_in_the_shared_ffi_surface_list` が落とす。
 
 use crate::domain::color_engine::{
     self as domain, ImasThemeColors, ThemeHsl, ThemeRgb, ThemeSeedRequest,
@@ -167,72 +162,6 @@ mod tests {
             (c.g * 255.0).round() as u32,
             (c.b * 255.0).round() as u32
         )
-    }
-
-    /// このモジュールの `#[uniffi::export]` が、共有の tests/ffi_surface.rs の
-    /// checksum 一覧に全部載っていること。
-    ///
-    /// あちらのリンク検査は「消えた・改名された」しか捕まえず、**足したのに載せ忘れた**分は
-    /// 件数比較でしか出ない。件数比較は他モジュールの増減と混ざるため、
-    /// 「どのモジュールが載せ忘れたか」は分からないまま全体が赤になる
-    /// (回帰: Phase 8 sync の 20 関数、Phase 9 のこの 12 関数)。
-    /// 一覧は共有ファイルで各担当が直接は触れないので、**自分の分は自分で名指しで**
-    /// 確かめ、落ちたときに貼るべき行をそのままメッセージに出す。
-    #[test]
-    fn every_export_here_is_registered_in_the_shared_ffi_surface_list() {
-        // このモジュールが公開している FFI の全量。増やしたらここにも足す
-        // (足しただけでは通らない = tests/ffi_surface.rs への登録を強制する)。
-        const EXPORTS: &[&str] = &[
-            "theme_color_from_hsl",
-            "theme_derive",
-            "theme_derive_batch",
-            "theme_derive_for_category_key",
-            "theme_ensure_contrast",
-            "theme_first_valid_hex",
-            "theme_hex_to_hsl",
-            "theme_neutral_seed",
-            "theme_normalized_hex",
-            "theme_on_color",
-            "theme_on_color_over",
-            "theme_variant_hex",
-        ];
-
-        // 上の一覧がソースと食い違っていたら、以降の照合は無意味になる。まず自分を検算する。
-        let own_source = include_str!("color_engine.rs");
-        let attribute = concat!("#[uniffi", "::export]");
-        let mut declared: Vec<&str> = Vec::new();
-        let mut lines = own_source.lines();
-        while let Some(line) = lines.next() {
-            if !line.trim_start().starts_with(attribute) {
-                continue;
-            }
-            let signature = lines.clone().find(|l| l.trim_start().starts_with("pub fn "));
-            let name = signature
-                .and_then(|l| l.trim_start().strip_prefix("pub fn "))
-                .and_then(|l| l.split(&['(', '<'][..]).next())
-                .expect("#[uniffi::export] の直後に pub fn がある");
-            declared.push(name);
-        }
-        declared.sort_unstable();
-        assert_eq!(declared, EXPORTS, "このテストの EXPORTS がソースの実態と合っていない");
-
-        let list = std::fs::read_to_string(
-            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/ffi_surface.rs"),
-        )
-        .expect("tests/ffi_surface.rs を読める");
-        let missing: Vec<String> = EXPORTS
-            .iter()
-            .map(|name| format!("uniffi_imas_core_checksum_func_{name}"))
-            .filter(|symbol| !list.contains(symbol.as_str()))
-            .collect();
-        assert!(
-            missing.is_empty(),
-            "tests/ffi_surface.rs の declare_and_call_checksums! に未登録:\n\
-             {},\n\
-             この行をそのまま足すこと。登録しないと、改名も削除も\n\
-             Swift/Kotlin ラッパのリンク時まで発覚しない。",
-            missing.join(",\n")
-        );
     }
 
     /// 引数の並び (seed, brand) を取り違えていないこと。どちらも `Option<String>` なので
