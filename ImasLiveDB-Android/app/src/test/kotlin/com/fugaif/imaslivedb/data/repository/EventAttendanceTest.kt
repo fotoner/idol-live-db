@@ -48,6 +48,9 @@ class EventAttendanceTest {
         assertEquals(record.presenceByShow.mapValues { it.value.toSet() }, attendance.presenceByShow)
         assertEquals(record.leadByShow.mapValues { it.value.toSet() }, attendance.leadByShow)
         assertEquals(record.guestByShow.mapValues { it.value.toSet() }, attendance.guestByShow)
+        // 塊はコアのものをそのまま (見出し・並び・顔ぶれ)。
+        assertEquals(record.groups.map { it.label }, attendance.groups.map { it.label })
+        assertEquals(record.groups.map { it.idolIds }, attendance.groups.map { g -> g.idols.map { it.id } })
     }
 
     /** ML のライブの欠席に、所属が ML でない人 (多重所属の 765AS) を出さない。 */

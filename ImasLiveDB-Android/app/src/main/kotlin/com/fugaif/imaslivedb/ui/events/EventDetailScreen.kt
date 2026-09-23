@@ -596,7 +596,7 @@ private fun LazyListScope.castSection(
     if (attendance.isFullAttendance) {
         item { FullAttendanceBanner(attendance) }
     }
-    items(attendance.grouped(), key = { it.id }) { group ->
+    items(attendance.groups, key = { it.id }) { group ->
         Column {
             ImasSectionHeader(title = "${group.label} ・ ${group.idols.size}名", tight = true)
             AvatarGrid(

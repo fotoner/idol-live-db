@@ -1,5 +1,7 @@
 package com.fugaif.imaslivedb.data.model
 
+import uniffi.imas_core.AttendanceGroupRecord
+
 /**
  * イベント内の出演状況。iOS `EventAttendance` (Database/QueryTypes.swift) の 1:1 移植。
  * 母集団と出席の判定はコアの `eventAttendance` が持ち、ここは表示用の集計だけ
@@ -11,7 +13,8 @@ data class EventAttendance(
     val shows: List<Show>,
     val presenceByShow: Map<String, Set<String>>,
     val leadByShow: Map<String, Set<String>>,
-    val guestByShow: Map<String, Set<String>>
+    val guestByShow: Map<String, Set<String>>,
+    private val groupRecords: List<AttendanceGroupRecord> = emptyList()
 ) {
     val leadIdolIds: Set<String> = leadByShow.values.flatten().toSet()
     val guestIdolIds: Set<String> = guestByShow.values.flatten().toSet()
@@ -27,52 +30,13 @@ data class EventAttendance(
 
     data class Group(val id: String, val label: String, val idols: List<Idol>)
 
-    /** 「全日 / DAYn のみ / 欠席」でアイドルをグループ化する (複数日公演の場合のみ意味を持つ)。 */
-    fun grouped(): List<Group> {
-        if (brandIdols.isEmpty()) return emptyList()
-        val totalDays = shows.size
-
-        val showsByIdol = mutableMapOf<String, MutableList<String>>()
-        shows.forEach { show ->
-            (presenceByShow[show.id] ?: emptySet()).forEach { idolId ->
-                showsByIdol.getOrPut(idolId) { mutableListOf() }.add(show.id)
-            }
+    /**
+     * 「全日 / DAYn のみ / 欠席」の塊 (単日公演は「出演 / 欠席」)。塊の切り方・見出し・並びは
+     * コア (`EventAttendanceRecord.groups`)。ここは id を [brandIdols] の実体に引き直すだけ。
+     */
+    val groups: List<Group> = brandIdols.associateBy { it.id }.let { byId ->
+        groupRecords.map { record ->
+            Group(id = record.label, label = record.label, idols = record.idolIds.mapNotNull { byId[it] })
         }
-
-        val showLabelById = shows.mapIndexed { idx, sh ->
-            sh.id to if (totalDays > 1) "DAY${idx + 1}" else sh.name
-        }.toMap()
-        val showIndexById = shows.mapIndexed { idx, sh -> sh.id to idx }.toMap()
-
-        data class Bucket(val order: Int, val label: String, val idols: MutableList<Idol>)
-        val buckets = mutableListOf<Bucket>()
-        val indexByLabel = mutableMapOf<String, Int>()
-
-        fun bucket(label: String, order: Int, idol: Idol) {
-            val idx = indexByLabel[label]
-            if (idx != null) {
-                buckets[idx].idols.add(idol)
-            } else {
-                buckets.add(Bucket(order, label, mutableListOf(idol)))
-                indexByLabel[label] = buckets.size - 1
-            }
-        }
-
-        brandIdols.forEach { idol ->
-            val attended = showsByIdol[idol.id] ?: emptyList()
-            when {
-                attended.isEmpty() -> bucket("欠席", 999, idol)
-                attended.size == totalDays -> bucket(if (totalDays > 1) "全日" else "出演", 0, idol)
-                else -> {
-                    val labels = attended.mapNotNull { showLabelById[it] }
-                    val combined = labels.joinToString("・")
-                    val firstIdx = attended.mapNotNull { showIndexById[it] }.minOrNull() ?: 0
-                    val order = 100 + firstIdx * 10 + attended.size
-                    bucket("${combined} のみ", order, idol)
-                }
-            }
-        }
-
-        return buckets.sortedBy { it.order }.map { Group(it.label, it.label, it.idols) }
     }
 }

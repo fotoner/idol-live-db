@@ -172,7 +172,8 @@ class EventRepository(
             shows = record.shows.map { it.toShow() },
             presenceByShow = record.presenceByShow.mapValues { it.value.toSet() },
             leadByShow = record.leadByShow.mapValues { it.value.toSet() },
-            guestByShow = record.guestByShow.mapValues { it.value.toSet() }
+            guestByShow = record.guestByShow.mapValues { it.value.toSet() },
+            groupRecords = record.groups
         )
     }
 
