@@ -140,6 +140,7 @@ declare_and_call_checksums! {
     uniffi_imas_core_checksum_func_quiz_brand_ids_decode,
     uniffi_imas_core_checksum_func_quiz_brand_ids_encode,
     uniffi_imas_core_checksum_func_quiz_session_length,
+    uniffi_imas_core_checksum_func_recents_after_visit,
     uniffi_imas_core_checksum_func_remap_mastery_level,
     uniffi_imas_core_checksum_func_reseed_common_columns,
     uniffi_imas_core_checksum_func_reseed_default_preserved_tables,

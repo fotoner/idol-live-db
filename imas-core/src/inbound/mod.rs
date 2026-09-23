@@ -47,6 +47,7 @@ pub mod schema_apply;
 pub mod color_engine;
 pub mod brand_theme;
 pub mod vocabulary;
+pub mod recents;
 pub mod auth_rules;
 pub mod share_text;
 pub mod sync_decisions;
