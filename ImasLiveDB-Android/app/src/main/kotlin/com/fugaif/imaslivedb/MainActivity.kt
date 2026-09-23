@@ -45,6 +45,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import com.fugaif.imaslivedb.data.local.LocalWriteFailure
+import com.fugaif.imaslivedb.data.sync.LocalDataStartup
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,12 +74,7 @@ class MainActivity : ComponentActivity() {
         val module = AppModule.from(this)
         lifecycleScope.launch {
             module.databaseBoot.prepare()
-            if (module.databaseBoot.state.value != DatabaseBoot.State.Ready) return@launch
-            // ローカル通知を毎回まるごと組み直す (iOS ImasLiveDBApp と同じ起動時フック)。
-            // AlarmManager の予約はアプリ更新や端末再起動で消えるうえ、担当/お気に入りの
-            // 増減も起動のたびに拾い直したいので、差分更新ではなく全消去 → 全再スケジュール。
-            // 未許可なら中で何もしないので、ここで権限を要求することはない。
-            NotificationScheduler.rescheduleAll(this@MainActivity)
+            // 通知の積み直しはスナップショットを読むので、seed の投入・入れ直しの後 (AppRoot) に回す。
         }
     }
 
@@ -95,18 +91,25 @@ class MainActivity : ComponentActivity() {
             loadError = null
             // 初回 (データ無し) は seed DB を投入してから判定する。これで CloudKit token
             // 未設定でも実データで起動できる (token はリリース版の最新化のためだけ)。
-            val prepared = sync.ensureLocalData()
+            val module = AppModule.from(this@MainActivity)
+            // マスタの読み取りはスナップショットだけが答えるので、seed の投入・入れ直しを済ませてから
+            // 読み直したものを画面に出す (先に誰かが読んだ空・古いスナップショットを出さない)。
+            // 読み込めなければ再試行の画面へ。
+            val prepared = try {
+                LocalDataStartup.prepare(sync, module.snapshotStoreProvider) != null
+            } catch (e: SnapshotUnavailableException) {
+                loadError = "${e.message}\n(詳細: ${e.cause?.message ?: "不明"})"
+                return@LaunchedEffect
+            }
             // データありなら即UI表示してバックグラウンド差分同期 (アプリのスコープで走る)。
             sync.requestSync()
             if (prepared) {
-                // マスタの読み取りはスナップショットだけが答えるので、画面を出す前に読み込んでおく
-                // (seed の投入・入れ直しを済ませた DB を読む)。読み込めなければ再試行の画面へ。
-                try {
-                    AppModule.from(this@MainActivity).snapshotStoreProvider.loadedStore()
-                } catch (e: SnapshotUnavailableException) {
-                    loadError = "${e.message}\n(詳細: ${e.cause?.message ?: "不明"})"
-                    return@LaunchedEffect
-                }
+                // ローカル通知を毎回まるごと組み直す (iOS ImasLiveDBApp と同じ起動時フック)。
+                // AlarmManager の予約はアプリ更新や端末再起動で消えるうえ、担当/お気に入りの
+                // 増減も起動のたびに拾い直したいので、差分更新ではなく全消去 → 全再スケジュール。
+                // 未許可なら中で何もしないので、ここで権限を要求することはない。
+                // マスタを読み直した後に回す (RedTeam A-M3)。画面は待たない。
+                module.appScope.launch { NotificationScheduler.rescheduleAll(this@MainActivity) }
             }
             hasData = prepared
         }
