@@ -46,7 +46,11 @@ struct MyPickToggleButton: View {
     var body: some View {
         Button {
             AppAnalytics.tap("my_pick.toggle")
-            try? UserMarkService.shared.toggle(.myPick, entity: .idol, id: id)
+            do {
+                try UserMarkService.shared.toggle(.myPick, entity: .idol, id: id)
+            } catch {
+                LocalWriteFailure.report(error, action: "担当の切り替え")
+            }
             refresh.toggle()
         } label: {
             Image(systemName: isMyPick ? "heart.fill" : "heart")
