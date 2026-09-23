@@ -5,7 +5,8 @@
 //! `EventDetailScreen.attendanceStatus`)。
 //!
 //! - 開催期間は Web のイベント詳細と同じ書式 ([`range_with_weekday`]、Q-08e)。
-//! - 会場は公演の順 (日付順) で最初のもの (以前は会場名の 50 音順で最初のものだった)。
+//! - 会場は、公演の会場名を並べて最初のもの (iOS `Set(venues).sorted().first` と同じ。
+//!   Q-08e は書式だけの許可なので、選び方は変えない。空の会場名は数えない)。
 //! - 参加マークが event 単位にしか無いときは、全公演の日付で判定する (Q-08d)。
 
 use chrono::NaiveDate;
@@ -90,7 +91,7 @@ fn days_between(from: &str, to: &str) -> Option<u32> {
 pub struct EventHeroRecord {
     /// 開催期間 (`2026-09-19 (土) 〜 2026-09-20 (日)`)。公演が無ければ `None`。
     pub date_display: Option<String>,
-    /// 公演の順で最初の会場 (会場名が入っている公演のうち)。
+    /// 会場名を並べて最初のもの (会場名が入っている公演のうち。コードポイント順)。
     pub venue: Option<String>,
     /// ヒーローのサブ行 (開催期間 ・ 会場)。
     pub sub_line: String,
@@ -115,7 +116,7 @@ pub fn event_hero(
         snap.shows_by_event[event as usize].iter().map(|&s| &snap.shows[s as usize]).collect();
     let dates: Vec<String> = shows.iter().map(|s| s.date.clone()).filter(|d| !d.is_empty()).collect();
     let date_display = range_with_weekday(dates.first().map(String::as_str), dates.last().map(String::as_str));
-    let venue = shows.iter().find_map(|s| s.venue.clone().filter(|v| !v.is_empty()));
+    let venue = shows.iter().filter_map(|s| s.venue.as_deref().filter(|v| !v.is_empty())).min().map(str::to_owned);
     let sub_line = [date_display.clone(), venue.clone()].into_iter().flatten().collect::<Vec<_>>().join(" ・ ");
     let is_upcoming = dates.first().is_some_and(|d| is_upcoming_on(d, today));
     let attended: Vec<String> = shows
@@ -179,8 +180,27 @@ mod tests {
         assert_eq!(this_year.state, AttendanceState::Planned, "年だけの今年の公演は今後");
     }
 
+    /// 公演の順で先に来る会場ではなく、会場名の並びで先のものを出す (L-2。iOS と同じ)。
     #[test]
-    fn hero_uses_the_web_range_and_the_first_venue_in_show_order() {
+    fn hero_venue_is_the_first_by_name_not_by_show_order() {
+        let snap = bundle_snapshot();
+        let (event, by_name) = snap
+            .shows_by_event
+            .iter()
+            .enumerate()
+            .find_map(|(e, shows)| {
+                let venues: Vec<&str> =
+                    shows.iter().filter_map(|&s| snap.shows[s as usize].venue.as_deref()).collect();
+                let min = *venues.iter().min()?;
+                (venues[0] != min).then(|| (e, min.to_owned()))
+            })
+            .expect("公演順の先頭と名前順の先頭が違うイベントがある");
+        let hero = event_hero(snap, &snap.events[event].id, &[], false, "2000-01-01").unwrap();
+        assert_eq!(hero.venue, Some(by_name));
+    }
+
+    #[test]
+    fn hero_uses_the_web_range_and_the_first_venue_by_name() {
         let snap = bundle_snapshot();
         let (event, shows) = snap
             .shows_by_event
@@ -199,8 +219,9 @@ mod tests {
         let last = &snap.shows[*shows.last().unwrap() as usize];
         let hero = event_hero(snap, &event_id, &[], false, "2000-01-01").unwrap();
         assert_eq!(hero.date_display, range_with_weekday(Some(&first.date), Some(&last.date)));
-        assert_eq!(hero.venue, first.venue);
-        assert_eq!(hero.sub_line, format!("{} ・ {}", hero.date_display.clone().unwrap(), first.venue.clone().unwrap()));
+        let by_name = shows.iter().filter_map(|&s| snap.shows[s as usize].venue.clone()).min();
+        assert_eq!(hero.venue, by_name);
+        assert_eq!(hero.sub_line, format!("{} ・ {}", hero.date_display.clone().unwrap(), by_name.unwrap()));
         assert!(hero.is_upcoming);
         assert_eq!(hero.attendance.state, AttendanceState::None);
 
