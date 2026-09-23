@@ -229,6 +229,7 @@ declare_and_call_checksums! {
     uniffi_imas_core_checksum_func_timeline_year_range,
     uniffi_imas_core_checksum_func_validate_expense,
     uniffi_imas_core_checksum_func_validate_ticket,
+    uniffi_imas_core_checksum_func_vocabulary,
     uniffi_imas_core_checksum_func_weighted_sample_indices,
     uniffi_imas_core_checksum_method_snapshotstore_album_summaries,
     uniffi_imas_core_checksum_method_snapshotstore_all_idols_for_picker,

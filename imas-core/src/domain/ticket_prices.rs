@@ -150,13 +150,15 @@ pub fn ticket_kind_from_attendance(text_value: &str) -> TicketKind {
     }
 }
 
-/// 形態の表示名。
+/// 形態の表示名。語は参加形態と同じ ([`crate::domain::vocabulary::ATTENDANCE_TYPES`] の短い形)。
 pub fn ticket_kind_label(kind: TicketKind) -> String {
+    let [live, stream, live_viewing] = &crate::domain::vocabulary::ATTENDANCE_TYPES;
     match kind {
-        TicketKind::Live => "現地",
-        TicketKind::Stream => "配信",
-        TicketKind::LiveViewing => "LV",
+        TicketKind::Live => live,
+        TicketKind::Stream => stream,
+        TicketKind::LiveViewing => live_viewing,
     }
+    .short_label
     .to_string()
 }
 
