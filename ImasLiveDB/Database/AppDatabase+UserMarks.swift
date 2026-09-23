@@ -99,17 +99,17 @@ extension AppDatabase {
         try await dbQueue.read { db in try Self.fetchMarkedEntityIdsQuery(db, entity: entity, kind: kind) }
     }
 
+    /// 付いているマークの対象 id。何を付いているとみなすかはコアの規則 (`UserMark.meaningful`)。
+    /// メモのように中身を文字で持つ kind もあるので、フラグで絞らない。
     private static func fetchMarkedEntityIdsQuery(_ db: Database, entity: UserMarkEntity, kind: UserMarkKind) throws -> [String] {
-        try UserMark.filter(
+        let rows = try UserMark.filter(
             UserMark.Columns.entityType == entity.rawValue &&
-            UserMark.Columns.kind == kind.rawValue &&
-            UserMark.Columns.boolValue == true
-        ).fetchAll(db).map(\.entityId)
+            UserMark.Columns.kind == kind.rawValue
+        ).fetchAll(db)
+        return UserMark.meaningful(rows).map(\.entityId)
     }
 
-    /// entity 横断で kind に一致する全 UserMark を返す。
-    /// note 種別は textValue が非空のもの、それ以外は boolValue == true のもの。
-    /// 全ユーザーマーク (全 kind・bool false 行も含む) を返す。iCloud バックアップ用。
+    /// 全ユーザーマーク (全 kind・解除済みの行も含む)。バックアップ用。
     func allUserMarks() throws -> [UserMark] {
         try dbQueue.read { db in try UserMark.fetchAll(db) }
     }
@@ -135,14 +135,12 @@ extension AppDatabase {
         }
     }
 
+    /// entity 横断で kind に一致する、付いているマーク (`UserMark.meaningful`)。
     func fetchAllUserMarks(kind: UserMarkKind) throws -> [UserMark] {
-        try dbQueue.read { db in
-            let base = UserMark.filter(UserMark.Columns.kind == kind.rawValue)
-            let request = kind == .note
-                ? base.filter(UserMark.Columns.textValue != nil && UserMark.Columns.textValue != "")
-                : base.filter(UserMark.Columns.boolValue == true)
-            return try request.fetchAll(db)
+        let rows = try dbQueue.read { db in
+            try UserMark.filter(UserMark.Columns.kind == kind.rawValue).fetchAll(db)
         }
+        return UserMark.meaningful(rows)
     }
 
     // MARK: - PersonalTag Methods (個人用タグ、完全ローカル専用・サーバー非送信)

@@ -152,4 +152,19 @@ struct UserMark: Codable, FetchableRecord, PersistableRecord, Sendable {
         case textValue  = "text_value"
         case updatedAt  = "updated_at"
     }
+
+    /// バックアップとコアに渡す射影。
+    var backupRecord: BackupUserMarkRecord {
+        BackupUserMarkRecord(
+            entityType: entityType, entityId: entityId, kind: kind,
+            boolValue: boolValue, textValue: textValue, updatedAt: updatedAt)
+    }
+
+    /// 付いている行だけを残す (フラグが立っているか、空白以外の文字がある)。
+    ///
+    /// 規則はコア (`backupMeaningfulMarkIndices`) 1 本で、iCloud KVS に載せる行と同じ。
+    /// 習熟度・メモ・座席はフラグを立てずに中身を文字で持つので、フラグだけで絞ると落ちる。
+    static func meaningful(_ marks: [UserMark]) -> [UserMark] {
+        backupMeaningfulMarkIndices(marks: marks.map(\.backupRecord)).map { marks[Int($0)] }
+    }
 }
