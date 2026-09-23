@@ -39,12 +39,13 @@ final class EventListViewModel {
     func loadData(includeEmpty: Bool, query: EventListQuery) async {
         defer { isLoading = false }
         do {
-            // 全 kind を取ってきて、表示時に excludedKinds で client-side filter。
+            // 全 kind (語彙の 6 種。最後が「その他」) を取ってきて、表示時に excludedKinds で絞る。
+            // 知らない種別はコアが「その他」に寄せて返す (Q-08l)。
             eventsWithDate = try await eventReading.eventsWithFirstDate(
                 brandId: nil,
                 includeEmpty: includeEmpty,
                 liveOnly: false,
-                kinds: EventKind.allCases
+                kinds: Vocab.table.eventKinds.compactMap { EventKind(rawValue: $0.value) }
             )
             brands = try await brandReading.brands()
             await rebuild(query: query)

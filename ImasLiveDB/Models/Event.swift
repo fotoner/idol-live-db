@@ -16,6 +16,8 @@ enum EventKind: String, Codable, Sendable, CaseIterable {
     case releaseEvent = "release_event"
     case radio
     case stream
+    /// 知らない種別の受け皿 (語彙の `other`)。コアは知らない種別をこれに寄せて絞る (Q-08l)。
+    case other
 
     /// UI 表示用の短いラベル (語はコアの vocabulary)。
     var displayLabel: String {
@@ -30,6 +32,7 @@ enum EventKind: String, Codable, Sendable, CaseIterable {
         case .releaseEvent: return "opticaldisc"
         case .radio:        return "radio"
         case .stream:       return "play.tv"
+        case .other:        return "ellipsis.circle"
         }
     }
 }
@@ -102,8 +105,8 @@ struct Event: Codable, FetchableRecord, PersistableRecord, Identifiable, Hashabl
             .filter { !$0.isEmpty }
     }
 
-    /// `kind` 文字列を列挙型として返す。未知値は `.live` にフォールバック。
-    var eventKind: EventKind { EventKind(rawValue: kind) ?? .live }
+    /// `kind` 文字列を列挙型として返す。未知値は `.other` (コアの語彙と同じ寄せ方)。
+    var eventKind: EventKind { EventKind(rawValue: kind) ?? .other }
 
     /// 既存呼び出し（CloudKit 等）との互換のため `kind` をデフォルト値付きにした明示 init。
     init(

@@ -64,7 +64,8 @@ struct EventEditView: View {
                         }
                     }
                     Picker("種別", selection: $kind) {
-                        ForEach(EventKind.allCases, id: \.self) {
+                        // 「その他」は知らない種別の受け皿なので、書き込む値としては出さない。
+                        ForEach(EventKind.allCases.filter { $0 != .other }, id: \.self) {
                             Text($0.displayLabel).tag($0)
                         }
                     }
