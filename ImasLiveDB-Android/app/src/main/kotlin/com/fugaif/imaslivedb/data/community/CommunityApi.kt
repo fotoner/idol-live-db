@@ -653,6 +653,17 @@ class CommunityApi(private val http: WorkerHttpClient, private val authService: 
 
     data class FavoriteRankingDto(val songId: String, val count: Int)
 
+    /**
+     * POST /favorites/toggle — 曲のお気に入りの付け外しを、みんなの集計に送る (端末単位で重複を除く)。
+     * 失敗は例外にする (送り直しの判断は [FavoriteAggregation])。
+     */
+    suspend fun toggleFavorite(songId: String, value: Boolean): Unit = withContext(Dispatchers.IO) {
+        val response = http.request(
+            "POST", "/favorites/toggle", JSONObject().put("song_id", songId).put("value", value)
+        )
+        check(response.isSuccess) { "favorites/toggle -> HTTP ${response.code}" }
+    }
+
     /** GET /favorites/ranking — お気に入りの曲別集計 (曲メタは呼び出し側でローカルカタログから解決する)。 */
     suspend fun favoritesRanking(): List<FavoriteRankingDto> = withContext(Dispatchers.IO) {
         val arr = getArray("/favorites/ranking") ?: return@withContext emptyList()

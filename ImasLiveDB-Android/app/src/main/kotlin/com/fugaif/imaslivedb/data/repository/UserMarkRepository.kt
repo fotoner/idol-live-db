@@ -18,8 +18,15 @@ import java.time.Instant
 /** 参加が付いた (取り消しではない) 直後の通知。iOS `.attendanceMarked` 通知と対。 */
 data class AttendanceMarkedEvent(val showId: String, val type: AttendanceType)
 
-/** 担当/お気に入り等のユーザーマークを管理 (端末ローカル)。 */
-class UserMarkRepository(private val db: AppDatabase) {
+/**
+ * 担当/お気に入り等のユーザーマークを管理 (端末ローカル)。
+ *
+ * @param onSongFavoriteChanged 曲のお気に入りを付け外ししたときに呼ぶ (みんなの集計に送る。iOS と同じ)。
+ */
+class UserMarkRepository(
+    private val db: AppDatabase,
+    private val onSongFavoriteChanged: (songId: String, value: Boolean) -> Unit = { _, _ -> }
+) {
 
     private val dao get() = db.userMarkDao()
 
@@ -43,6 +50,7 @@ class UserMarkRepository(private val db: AppDatabase) {
         } else {
             dao.delete(type, id, kind)
         }
+        if (type == UserMark.SONG && kind == UserMark.FAVORITE) onSongFavoriteChanged(id, now)
         return now
     }
 

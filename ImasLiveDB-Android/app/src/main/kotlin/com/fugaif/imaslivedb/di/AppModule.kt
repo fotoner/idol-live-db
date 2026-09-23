@@ -25,6 +25,7 @@ import com.fugaif.imaslivedb.data.repository.StatsRepository
 import com.fugaif.imaslivedb.data.repository.UnitRepository
 import com.fugaif.imaslivedb.data.repository.UserMarkRepository
 import com.fugaif.imaslivedb.data.community.CommunityApi
+import com.fugaif.imaslivedb.data.community.FavoriteAggregation
 import com.fugaif.imaslivedb.data.community.LocalContributionLog
 import com.fugaif.imaslivedb.data.community.LocalPollVoteLog
 import com.fugaif.imaslivedb.data.community.SetlistLikeService
@@ -92,7 +93,13 @@ class AppModule private constructor(context: Context) {
             snapshots = snapshotStoreProvider,
         )
     }
-    val userMarkRepository: UserMarkRepository by lazy { UserMarkRepository(database) }
+    val userMarkRepository: UserMarkRepository by lazy {
+        UserMarkRepository(database, onSongFavoriteChanged = favoriteAggregation::report)
+    }
+    /** 曲のお気に入りをみんなの集計に送る (失敗は端末に積んで送り直す)。 */
+    val favoriteAggregation: FavoriteAggregation by lazy {
+        FavoriteAggregation(appContext, appScope, communityApi::toggleFavorite)
+    }
     val personalTagRepository: PersonalTagRepository by lazy { PersonalTagRepository(database) }
     val expenseRepository: ExpenseRepository by lazy { ExpenseRepository(database) }
     val showTicketRepository: ShowTicketRepository by lazy { ShowTicketRepository(database) }

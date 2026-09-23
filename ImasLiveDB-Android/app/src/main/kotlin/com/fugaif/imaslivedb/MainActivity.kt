@@ -132,6 +132,8 @@ class MainActivity : ComponentActivity() {
             module.authService.refreshSessionIfDue()
             module.authService.refreshMeIfDue()
         }
+        // 送れなかったお気に入りの集計を送り直す。
+        module.appScope.launch { module.favoriteAggregation.flushPending() }
     }
 }
 
