@@ -4,6 +4,7 @@ import DateBadge from "./DateBadge.astro";
 import TagChip from "./TagChip.astro";
 import RefList from "./RefList.astro";
 import EmptyState from "./EmptyState.astro";
+import Pager from "./Pager.astro";
 import type { CalendarPage } from "../lib/schema/CalendarPage";
 
 /**
@@ -29,33 +30,19 @@ const anchor = (date: string) => `d-${date}`;
 >
   {page.summary && <p slot="lede" class="u-muted">{page.summary}</p>}
 
-  <nav class="pager" aria-label="前後の月">
+  <Pager label="前後の月" prev={page.prev?.path} next={page.next?.path}>
+    <Fragment slot="prev">{page.prev?.label}</Fragment>
     {
-      page.prev && (
-        <a class="pager__link" rel="prev" href={page.prev.path}>
-          ‹ {page.prev.label}
+      page.todayLink ? (
+        <a class="u-underline-hover" href={page.todayLink.path}>
+          {page.todayLink.label}
         </a>
+      ) : (
+        page.title
       )
     }
-    <span class="pager__pos">
-      {
-        page.todayLink ? (
-          <a class="u-underline-hover" href={page.todayLink.path}>
-            {page.todayLink.label}
-          </a>
-        ) : (
-          page.title
-        )
-      }
-    </span>
-    {
-      page.next && (
-        <a class="pager__link pager__link--next" rel="next" href={page.next.path}>
-          {page.next.label} ›
-        </a>
-      )
-    }
-  </nav>
+    <Fragment slot="next">{page.next?.label}</Fragment>
+  </Pager>
 
   <div class="cal">
     <table class="cal__table">

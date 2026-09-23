@@ -12,6 +12,7 @@ import Facts from "../../components/Facts.astro";
 import StatStrip from "../../components/StatStrip.astro";
 import Count from "../../components/Count.astro";
 import EmptyState from "../../components/EmptyState.astro";
+import Pager from "../../components/Pager.astro";
 import { page, pathsFor } from "../../lib/data";
 import type { ShowPage } from "../../lib/schema/ShowPage";
 
@@ -79,23 +80,17 @@ const setlistCount = show.setlistSections.reduce((n, section) => n + section.row
       </div>
       {
         siblingsAsPager && (
-          <nav class="pager" aria-label="このライブの公演">
-            {prev && (
-              <a class="pager__link" rel="prev" href={prev.path}>
-                ‹ {prev.name}
-                <Count value={prev.sub} dim />
-              </a>
-            )}
-            <span class="pager__pos u-num">
-              {position + 1} / {siblings.length} 公演
-            </span>
-            {next && (
-              <a class="pager__link pager__link--next" rel="next" href={next.path}>
-                {next.name}
-                <Count value={next.sub} dim /> ›
-              </a>
-            )}
-          </nav>
+          <Pager label="このライブの公演" prev={prev?.path} next={next?.path} numeric>
+            <Fragment slot="prev">
+              {prev?.name}{" "}
+              <Count value={prev?.sub} dim />
+            </Fragment>
+            {position + 1} / {siblings.length} 公演
+            <Fragment slot="next">
+              {next?.name}{" "}
+              <Count value={next?.sub} dim />
+            </Fragment>
+          </Pager>
         )
       }
       <StatStrip items={show.statTiles} label="この公演の数" />
