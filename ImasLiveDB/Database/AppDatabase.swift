@@ -157,7 +157,8 @@ final class AppDatabase: @unchecked Sendable {
             reseedState.withLock {
                 $0.summary = "失敗: \(detail)"
                 // ユーザーには「マスタ更新が反映されず旧データで動作している」ことを伝える。
-                $0.failureDetail = "最新のデータ更新の取り込みに失敗しました。アプリを再起動しても直らない場合は再インストールをお試しください。\n(詳細: \(error.localizedDescription))"
+                // 再インストールは勧めない。マイタグと家計簿は iCloud に無く、消えると戻せない。
+                $0.failureDetail = "最新のデータ更新を取り込めませんでした。これまでのデータのまま使えます (次に起動したときにもう一度試します)。\n(詳細: \(error.localizedDescription))"
             }
             Logger.database.error("reseedMasterTablesIfNeeded failed: \(detail, privacy: .public)")
         }
