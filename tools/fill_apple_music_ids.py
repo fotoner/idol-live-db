@@ -19,13 +19,13 @@ Usage:
 """
 
 import argparse
-import json
 import sqlite3
 import sys
 import time
-import urllib.parse
-import urllib.request
 from pathlib import Path
+
+from lib import itunes
+from lib.text import drop_spaces_lower as normalize
 
 DB = Path(__file__).parent.parent / "ImasLiveDB/Resources/master.sqlite"
 
@@ -65,11 +65,6 @@ def load_brand_names(conn, brand_id: str) -> list:
     return sorted(names)
 
 
-def normalize(text: str) -> str:
-    """全角/半角スペースを落として比較用に正規化。"""
-    return (text or "").replace(" ", "").replace("\u3000", "").lower()
-
-
 def has_imas_signal(artist: str, brand_id: str, brand_names: list) -> bool:
     """artistName にアイマス側の手がかり (ブランド語 / アイドル / ユニット / 声優) があるか。"""
     a = normalize(artist)
@@ -82,17 +77,9 @@ def has_imas_signal(artist: str, brand_id: str, brand_names: list) -> bool:
 
 
 def itunes_search(term: str) -> list:
-    url = "https://itunes.apple.com/search?" + urllib.parse.urlencode({
-        "term": term,
-        "entity": "song",
-        "country": "jp",
-        "limit": 10,
-    })
-    req = urllib.request.Request(url, headers={"User-Agent": "ImasLiveDB/1.0"})
     try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.load(resp)
-            return data.get("results", [])
+        return itunes.results("search", itunes.song_search(term, 10),
+                              user_agent="ImasLiveDB/1.0", timeout=10)
     except Exception as e:
         print(f"  ERROR: itunes lookup failed: {e}", file=sys.stderr)
         return []
@@ -178,7 +165,7 @@ def main():
             chosen = pick(title, brand, results, brand_names)
         if chosen:
             track_id = chosen.get("trackId")
-            artwork = (chosen.get("artworkUrl100") or "").replace("100x100bb", "600x600bb")
+            artwork = itunes.artwork_600(chosen)
             album_id = chosen.get("collectionId")
             album_name = chosen.get("collectionName")
             print(f"  ✓ {brand}/{row['id']}: '{title}' -> {track_id} ({chosen.get('trackName')} / {chosen.get('artistName')})")

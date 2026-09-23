@@ -25,8 +25,9 @@ import re
 import sqlite3
 import sys
 import time
-import urllib.parse
-import urllib.request
+
+from lib import itunes as itunes_api
+from lib.text import squash_spaces_lower as squash
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(ROOT, "ImasLiveDB", "Resources", "master.sqlite")
@@ -37,25 +38,13 @@ VERSION_RE = re.compile(r"^(?P<base>.+?)\s*[(（](?P<who>.+?)\s*Ver\.?[)）]\s*$
 ARRANGE_LABELS = {"brandnew", "brandnewyear"}
 
 
-def squash(text: str) -> str:
-    """比較用。空白を潰し、大小文字も畳む。
-
-    畳まないと `765PRO ALLSTARS` (Apple Music) と `765ProAllstars` (units) が
-    別物になる。日本語名には影響しない。
-    """
-    return re.sub(r"\s+", "", text).lower()
-
-
 def itunes(term: str) -> list[dict]:
-    url = "https://itunes.apple.com/search?" + urllib.parse.urlencode(
-        {"term": term, "entity": "song", "country": "jp", "limit": 200})
-    req = urllib.request.Request(url, headers={"User-Agent": "imas-live-db/1.0"})
-    with urllib.request.urlopen(req, timeout=30) as res:
-        return json.load(res).get("results", [])
+    return itunes_api.results("search", itunes_api.song_search(term),
+                              user_agent="imas-live-db/1.0", timeout=30)
 
 
 def artwork_url(result: dict) -> str:
-    return (result.get("artworkUrl100") or "").replace("100x100bb", "600x600bb")
+    return itunes_api.artwork_600(result)
 
 
 def main() -> None:

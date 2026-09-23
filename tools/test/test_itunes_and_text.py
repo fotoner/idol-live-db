@@ -1,0 +1,164 @@
+"""iTunes の呼び出しと名前の畳み方 (lib/itunes.py・lib/text.py) のテスト。
+
+    python3 -m unittest discover -s tools/test -p 'test_*.py'
+
+各ツールの関数の入出力を固定する (共有の部品に寄せても変わらないことの確認)。
+iTunes の応答は Search API の応答と同じ形のものに差し替え、外へは出ない。
+"""
+
+import contextlib
+import io
+import json
+import unittest
+import urllib.request
+
+import support  # noqa: F401 (通信の番人)
+from lib import itunes, text
+
+import apply_official_idol_order
+import check_apple_music_links
+import collect_solo_records
+import collect_song_versions
+import collect_unit_versions
+import discover_new_songs
+import fill_apple_music_ids
+import fill_artwork_urls
+import link_song_variants
+
+# Search API の応答の形 (使う項目だけ)。
+TRACK = {"wrapperType": "track", "kind": "song", "trackId": 1440000001, "trackName": "曲 (Ver.)",
+         "artistName": "アイドル (CV: 声優)", "collectionName": "アルバム",
+         "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/x/100x100bb.jpg",
+         "releaseDate": "2026-01-01T12:00:00Z"}
+RESPONSE = {"resultCount": 1, "results": [TRACK]}
+
+INPUTS = ["所 恵美", "765PRO　ALLSTARS", "a\tb\nc", "Ａｂｃ　ｄ", "x y", "ｱｲﾄﾞﾙ ﾏｽﾀｰ"]
+
+
+class TextRulesTest(unittest.TestCase):
+    def check(self, fn, expected):
+        self.assertEqual([fn(x) for x in INPUTS], expected)
+
+    def test_squash_spaces(self):
+        expected = ["所恵美", "765PROALLSTARS", "abc", "Ａｂｃｄ", "xy", "ｱｲﾄﾞﾙﾏｽﾀｰ"]
+        for fn in (text.squash_spaces, collect_solo_records.squash, collect_song_versions.squash):
+            self.check(fn, expected)
+
+    def test_squash_spaces_lower(self):
+        expected = ["所恵美", "765proallstars", "abc", "ａｂｃｄ", "xy", "ｱｲﾄﾞﾙﾏｽﾀｰ"]
+        for fn in (text.squash_spaces_lower, collect_unit_versions.squash,
+                   link_song_variants.normalize, check_apple_music_links.normalize):
+            self.check(fn, expected)
+        self.assertEqual(check_apple_music_links.normalize(None), "")
+
+    def test_drop_spaces_lower_keeps_tabs_and_newlines(self):
+        expected = ["所恵美", "765proallstars", "a\tb\nc", "ａｂｃｄ", "x y", "ｱｲﾄﾞﾙﾏｽﾀｰ"]
+        for fn in (text.drop_spaces_lower, fill_apple_music_ids.normalize):
+            self.check(fn, expected)
+        self.assertEqual(fill_apple_music_ids.normalize(None), "")
+
+    def test_nfkc_drop_spaces(self):
+        expected = ["所恵美", "765PROALLSTARS", "a\tb\nc", "Abcd", "xy", "アイドルマスター"]
+        for fn in (text.nfkc_drop_spaces, apply_official_idol_order.key):
+            self.check(fn, expected)
+
+
+class FakeUrlopen:
+    def __init__(self, testcase, response=RESPONSE, error=None):
+        self.requests = []
+        self.response, self.error = response, error
+        for obj in (urllib.request, itunes):
+            testcase.addCleanup(setattr, obj, "urlopen", obj.urlopen)
+            obj.urlopen = self
+
+    def __call__(self, req, timeout=None):
+        self.requests.append((req.full_url, req.get_header("User-agent"), timeout))
+        if self.error:
+            raise self.error
+        return io.BytesIO(json.dumps(self.response).encode("utf-8"))
+
+
+class ITunesClientsTest(unittest.TestCase):
+    """ツールごとの URL・User-Agent・待ち時間・失敗の扱いを固定する。"""
+
+    def test_collectors(self):
+        http = FakeUrlopen(self)
+        self.assertEqual(collect_solo_records.itunes("search", term="曲", entity="album", limit=200), [TRACK])
+        self.assertEqual(collect_unit_versions.itunes("曲"), [TRACK])
+        self.assertEqual(collect_song_versions.itunes_search("曲"), [TRACK])
+        song = "https://itunes.apple.com/search?term=%E6%9B%B2&entity=song&country=jp&limit=200"
+        self.assertEqual(http.requests, [
+            ("https://itunes.apple.com/search?term=%E6%9B%B2&entity=album&limit=200&country=jp",
+             "imas-live-db/1.0", 30),
+            (song, "imas-live-db/1.0", 30),
+            (song, "imas-live-db/1.0", 30),
+        ])
+
+    def test_discover_new_songs(self):
+        http = FakeUrlopen(self)
+        self.assertEqual(discover_new_songs.itunes_search("曲", limit=50), [TRACK])
+        self.assertEqual(http.requests, [(
+            "https://itunes.apple.com/search?term=%E6%9B%B2&entity=song&country=jp&limit=50",
+            "ImasLiveDB-discover/1.0", 15)])
+
+    def test_fill_apple_music_ids(self):
+        http = FakeUrlopen(self)
+        self.assertEqual(fill_apple_music_ids.itunes_search("曲"), [TRACK])
+        self.assertEqual(http.requests, [(
+            "https://itunes.apple.com/search?term=%E6%9B%B2&entity=song&country=jp&limit=10",
+            "ImasLiveDB/1.0", 10)])
+
+    def test_fill_artwork_urls(self):
+        http = FakeUrlopen(self)
+        self.assertEqual(fill_artwork_urls.itunes_lookup("1440000001"), TRACK)
+        self.assertEqual(http.requests, [(
+            "https://itunes.apple.com/lookup?id=1440000001&country=jp", "ImasLiveDB-artwork/1.0", 10)])
+
+    def test_check_apple_music_links(self):
+        http = FakeUrlopen(self)
+        self.addCleanup(setattr, check_apple_music_links.time, "sleep",
+                        check_apple_music_links.time.sleep)
+        check_apple_music_links.time.sleep = lambda seconds: None
+        with contextlib.redirect_stderr(io.StringIO()):
+            found = check_apple_music_links.fetch_tracks({"1440000001", "1440000002"})
+        self.assertEqual(found, {"1440000001": TRACK})
+        self.assertEqual(http.requests, [(
+            "https://itunes.apple.com/lookup?country=jp&entity=song&limit=200&id=1440000001,1440000002",
+            "ImasLiveDB/1.0", 60)])
+
+    def test_failures_that_continue_with_nothing(self):
+        FakeUrlopen(self, error=OSError("offline"))
+        with contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(discover_new_songs.itunes_search("曲"), [])
+            self.assertEqual(fill_apple_music_ids.itunes_search("曲"), [])
+            self.assertIsNone(fill_artwork_urls.itunes_lookup("1"))
+
+    def test_failures_that_stop(self):
+        FakeUrlopen(self, error=OSError("offline"))
+        for call in (lambda: collect_unit_versions.itunes("曲"),
+                     lambda: collect_song_versions.itunes_search("曲"),
+                     lambda: collect_solo_records.itunes("search", term="曲")):
+            with self.assertRaises(OSError):
+                call()
+
+
+class ArtworkTest(unittest.TestCase):
+    URL100 = "https://example.com/a/100x100bb.jpg"
+    URL60 = "https://example.com/a/60x60bb.jpg"
+
+    def test_the_100px_url_is_enlarged(self):
+        for fn in (itunes.artwork_600, collect_solo_records.artwork_url,
+                   collect_song_versions.artwork_url, collect_unit_versions.artwork_url):
+            self.assertEqual(fn({"artworkUrl100": self.URL100}), "https://example.com/a/600x600bb.jpg")
+
+    def test_the_60px_fallback_is_used_only_where_it_was(self):
+        only60 = {"artworkUrl60": self.URL60}
+        self.assertEqual(collect_solo_records.artwork_url(only60), self.URL60)
+        self.assertEqual(collect_song_versions.artwork_url(only60), self.URL60)
+        self.assertEqual(collect_unit_versions.artwork_url(only60), "")
+        self.assertEqual(itunes.artwork_600(only60), "")
+        self.assertEqual(itunes.artwork_600(only60, fallback_60=True), self.URL60)
+
+
+if __name__ == "__main__":
+    unittest.main()

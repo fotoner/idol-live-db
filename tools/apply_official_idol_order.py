@@ -65,9 +65,9 @@ import argparse
 import os
 import sqlite3
 import sys
-import unicodedata
 
 from lib import masterdb
+from lib.text import nfkc_drop_spaces as key
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -76,11 +76,6 @@ DUMP_PATH = os.path.join(REPO, "db", "master.sql")
 ORDER_PATH = os.path.join(HERE, "data", "official_idol_order.tsv")
 
 BLOCK = 1000
-
-
-def key(name: str) -> str:
-    """照合用の名前。全角/半角と空白の揺れだけを均す (別人を寄せない)。"""
-    return unicodedata.normalize("NFKC", name).replace(" ", "").replace("　", "")
 
 
 def load_official() -> dict[str, int]:

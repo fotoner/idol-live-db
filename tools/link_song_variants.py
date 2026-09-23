@@ -38,6 +38,8 @@ import re
 import sqlite3
 from collections import defaultdict
 
+from lib.text import squash_spaces_lower as normalize
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 DB_PATH = os.path.join(REPO, "ImasLiveDB", "Resources", "master.sqlite")
@@ -75,11 +77,6 @@ MANUAL_LINKS = {
     "765as_ポジティブremster-a": "765as_ポジティブ",
     "765as_ポジティブremster-b": "765as_ポジティブ",
 }
-
-
-def normalize(title: str) -> str:
-    """比較用。空白と大小文字の揺れだけ吸収する (それ以上は同一視しない)。"""
-    return re.sub(r"\s+", "", title).lower()
 
 
 def lyrics_based_pairs(rows, already_linked):

@@ -22,13 +22,14 @@ track と album が別になっている曲が 267 件あり、そちらは誤�
 """
 
 import argparse
-import json
 import re
 import sqlite3
 import sys
 import time
-import urllib.request
 from pathlib import Path
+
+from lib import itunes
+from lib.text import squash_spaces_lower
 
 DB = Path(__file__).resolve().parent.parent / "ImasLiveDB/Resources/master.sqlite"
 LOOKUP = "https://itunes.apple.com/lookup?country=jp&entity=song&limit=200&id="
@@ -44,7 +45,7 @@ EXTRA_SIGNALS = [
 
 
 def normalize(text):
-    return re.sub(r"[\s　]", "", (text or "")).lower()
+    return squash_spaces_lower(text or "")
 
 
 def load_signals(conn, brand_id=None):
@@ -61,9 +62,7 @@ def fetch_tracks(track_ids):
     ids = sorted(track_ids)
     for i in range(0, len(ids), CHUNK):
         url = LOOKUP + ",".join(ids[i:i + CHUNK])
-        req = urllib.request.Request(url, headers={"User-Agent": "ImasLiveDB/1.0"})
-        with urllib.request.urlopen(req, timeout=60) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
+        data = itunes.get_json(url, user_agent="ImasLiveDB/1.0", timeout=60)
         for res in data.get("results", []):
             if res.get("wrapperType") == "track":
                 found[str(res["trackId"])] = res

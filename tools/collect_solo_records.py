@@ -27,9 +27,10 @@ import re
 import sqlite3
 import sys
 import time
-import urllib.parse
-import urllib.request
 from collections import defaultdict
+
+from lib import itunes as itunes_api
+from lib.text import squash_spaces as squash
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(ROOT, "ImasLiveDB", "Resources", "master.sqlite")
@@ -40,23 +41,14 @@ ALBUM_MARK = "SOLO RECORDS"
 VERSION_RE = re.compile(r"^(?P<base>.+?)\s*[(（](?P<who>.+?)\s*Ver\.?[)）]\s*$", re.IGNORECASE)
 
 
-def squash(text: str) -> str:
-    """比較用に空白を潰す。「所 恵美」と「所恵美」を同じ人として扱うため。"""
-    return re.sub(r"\s+", "", text)
-
-
 def itunes(path: str, **params) -> list[dict]:
     params.setdefault("country", "jp")
-    url = f"https://itunes.apple.com/{path}?{urllib.parse.urlencode(params)}"
-    req = urllib.request.Request(url, headers={"User-Agent": "imas-live-db/1.0"})
-    with urllib.request.urlopen(req, timeout=30) as res:
-        return json.load(res).get("results", [])
+    return itunes_api.results(path, params, user_agent="imas-live-db/1.0", timeout=30)
 
 
 def artwork_url(result: dict) -> str:
     """一覧で使える大きさに差し替える (既定の 100x100 は粗い)。"""
-    return (result.get("artworkUrl100") or result.get("artworkUrl60") or "") \
-        .replace("100x100bb", "600x600bb")
+    return itunes_api.artwork_600(result, fallback_60=True)
 
 
 def main() -> None:
