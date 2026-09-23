@@ -5,10 +5,13 @@ package com.fugaif.imaslivedb.data.model
  *
  * 種別なし (旧データ) は現地扱い — 集計側 (コアの attendedEventTypeSets) と同じ解釈。
  */
-enum class AttendanceType(val raw: String, val label: String) {
-    LIVE("live", "現地"),
-    STREAM("stream", "配信"),
-    LIVE_VIEWING("live_viewing", "LV");
+enum class AttendanceType(val raw: String) {
+    LIVE("live"),
+    STREAM("stream"),
+    LIVE_VIEWING("live_viewing");
+
+    /** 画面に出す語 (券の形態も同じ語)。語はコアの vocabulary。 */
+    val label: String get() = Vocab.attendanceType(raw)?.shortLabel ?: raw
 
     companion object {
         fun from(raw: String?): AttendanceType? = entries.firstOrNull { it.raw == raw }

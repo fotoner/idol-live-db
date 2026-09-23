@@ -1,5 +1,6 @@
 package com.fugaif.imaslivedb.ui.events
 
+import com.fugaif.imaslivedb.data.model.Vocab
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -751,12 +752,12 @@ private fun TicketInfoSection(state: EventDetailUiState, seed: String?, brand: S
         ) {
             var shown = false
             state.ticketDeadline?.let {
-                ImasLabeledRow(key = "申込期限", value = it, seed = seed, brand = brand)
+                ImasLabeledRow(key = Vocab.ticketDate("ticket_deadline")?.label.orEmpty(), value = it, seed = seed, brand = brand)
                 shown = true
             }
             state.ticketLotteryDate?.let {
                 if (shown) HorizontalDivider(color = DS.sep, modifier = Modifier.padding(start = 16.dp))
-                ImasLabeledRow(key = "当落発表", value = it, seed = seed, brand = brand)
+                ImasLabeledRow(key = Vocab.ticketDate("ticket_lottery_date")?.label.orEmpty(), value = it, seed = seed, brand = brand)
                 shown = true
             }
             state.ticketUrl?.let { url ->

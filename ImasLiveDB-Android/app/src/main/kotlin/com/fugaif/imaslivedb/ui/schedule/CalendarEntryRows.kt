@@ -1,5 +1,6 @@
 package com.fugaif.imaslivedb.ui.schedule
 
+import com.fugaif.imaslivedb.data.model.Vocab
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -139,7 +140,7 @@ private fun TicketPeriodRowView(
     IconEntryRow(
         accent = TicketColor,
         icon = Icons.Filled.DateRange,
-        label = "受付期間 ・ ${AppPreferences.eventDisplayName(row.eventName)}",
+        label = "${Vocab.table.ticketPeriodLabel} ・ ${AppPreferences.eventDisplayName(row.eventName)}",
         sub = if (range.isEmpty()) "チケット受付期間" else "チケット受付  $range",
         brand = row.brandColor?.let(::hexToColor) ?: Color.Gray,
         trailing = trailing,

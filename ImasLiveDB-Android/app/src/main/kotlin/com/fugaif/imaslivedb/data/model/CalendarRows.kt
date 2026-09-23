@@ -47,9 +47,12 @@ data class CalAnniversaryRow(
 )
 
 /** チケット日程の種別 (カレンダーに出す申込締切 / 当落発表)。iOS `TicketDateKind` の移植。 */
-enum class TicketDateKind(val label: String) {
-    DEADLINE("申込締切"),
-    LOTTERY("当落発表")
+enum class TicketDateKind(private val column: String) {
+    DEADLINE("ticket_deadline"),
+    LOTTERY("ticket_lottery_date");
+
+    /** 語はコアの vocabulary (値は events の列名)。 */
+    val label: String get() = Vocab.ticketDate(column)?.label.orEmpty()
 }
 
 /** カレンダー用: チケット日程 1 件 (events の ticket_deadline / ticket_lottery_date 由来)。 */

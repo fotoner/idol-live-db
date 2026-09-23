@@ -1,5 +1,6 @@
 package com.fugaif.imaslivedb.ui.songs
 
+import com.fugaif.imaslivedb.data.model.Vocab
 import android.app.Application
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -57,8 +58,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-/** 曲タイプ (songs.song_type) の内部値と表示ラベル。iOS SongFilterView の songTypeChip と同じ並び。 */
-private val SONG_TYPES = listOf("solo" to "ソロ", "unit" to "ユニット", "all" to "全体曲")
+/** 曲タイプの絞り込み。今までどおり先頭の 3 種 (ソロ / ユニット / 全体曲)。語はコアの vocabulary。 */
+private val SONG_TYPES: List<Pair<String, String>>
+    get() = Vocab.table.songTypes.take(3).map { it.value to it.shortLabel }
 
 /** フィルタシートで開いている「ページ」。[FilterPickerPage] の push/pop 相当。 */
 private enum class FilterPage { MAIN, IDOLS, SERIES, CD_SERIES, LIVE }

@@ -1,5 +1,6 @@
 package com.fugaif.imaslivedb.ui.events
 
+import com.fugaif.imaslivedb.data.model.Vocab
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -37,45 +38,21 @@ import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.brandColor
 
 /**
- * イベント種別 (events.kind) の内部値と表示ラベル。iOS `EventKind` と同じ 5 種。
- *
- * DB の kind は生文字列で、この 5 種以外 ('other' 等) も入っている。コアの
- * `normalize_kind` はそれらを **"live" 扱い**にするので (新しい kind が増えても旧
- * クライアントから消えないためのフォールバック)、「ライブ」を除外すると未知 kind の
- * イベントも一緒に落ちる。iOS と同じ挙動なので揃えてある。
+ * イベント種別 (events.kind) の値と語。並び・語はコアの vocabulary (最後が「その他」)。
+ * 知らない種別は「その他」として扱う (コアの event_kind。Q-08l)。
  */
-val EVENT_KINDS: List<Pair<String, String>> = listOf(
-    "live" to "ライブ",
-    "festival" to "フェス",
-    "release_event" to "リリイベ",
-    "radio" to "ラジオ",
-    "stream" to "配信"
-)
+val EVENT_KINDS: List<Pair<String, String>>
+    get() = Vocab.table.eventKinds.map { it.value to it.shortLabel }
 
-fun eventKindLabel(kind: String): String = EVENT_KINDS.firstOrNull { it.first == kind }?.second ?: kind
+fun eventKindLabel(kind: String): String = Vocab.eventKind(kind)?.shortLabel ?: kind
 
 /**
- * 催しの性格 (events.event_type) の内部値と表示ラベル。iOS `EventType` と同じ 7 種。
+ * 催しの性格 (events.event_type) の語。コアの vocabulary。
  *
  * 配信があったかどうかは**この軸ではない** (shows.stream_platform が持つ)。
- *
- * 「オケマスを除けば 10 年ぶり」「AS の周年では 9th のみ」のような**除外・限定**を
- * 機械で出すための軸。どの催しがどれかを決める規則は imas-core 側にあり
- * (docs/DATA_PIPELINE.md 「events の種別 (event_type)」)、ここにあるのは文言だけ。
+ * 未分類 (空文字) と語彙外は null。画面は「種別を出さない」で扱う。
  */
-val EVENT_TYPES: List<Pair<String, String>> = listOf(
-    "anniversary" to "周年",
-    "orchestra" to "オーケストラ",
-    "external_event" to "外部イベント",
-    "birthday" to "バースデー",
-    "release_event" to "リリイベ",
-    "broadcast" to "番組・配信",
-    "live" to "ライブ"
-)
-
-/** 未分類 (空文字) と語彙外は null。画面は「種別を出さない」で扱う。 */
-fun eventTypeLabel(eventType: String): String? =
-    EVENT_TYPES.firstOrNull { it.first == eventType }?.second
+fun eventTypeLabel(eventType: String): String? = Vocab.eventType(eventType)?.shortLabel
 
 /** 参加状態フィルタの値。コアの EventFilterCriteria.attendanceFilter がそのまま受ける文字列。 */
 private val ATTENDANCE_OPTIONS = listOf("all" to "すべて", "attended" to "参加済み", "not_attended" to "未参加")

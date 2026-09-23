@@ -1,5 +1,6 @@
 package com.fugaif.imaslivedb.ui.edit
 
+import com.fugaif.imaslivedb.data.model.Vocab
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,13 +30,9 @@ import com.fugaif.imaslivedb.ui.theme.DS
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-/** 曲種別の内部値と表示ラベル。iOS `SongEditView.songTypes` / `songTypeLabel` と同じ 4 種。 */
-private val SONG_TYPES = listOf(
-    "solo" to "ソロ",
-    "unit" to "ユニット",
-    "all" to "全体曲",
-    "original" to "オリジナル"
-)
+/** 選べる曲種別 (値と語はコアの vocabulary。マスタにある 5 種)。 */
+private val SONG_TYPES: List<Pair<String, String>>
+    get() = Vocab.table.songTypes.map { it.value to it.shortLabel }
 
 /**
  * 曲の新規作成 / 編集。iOS `SongEditView` の移植。ログイン済みユーザーが使える

@@ -1,5 +1,6 @@
 package com.fugaif.imaslivedb.ui.mypage
 
+import com.fugaif.imaslivedb.data.model.AttendanceType
 import android.app.Application
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -84,8 +85,11 @@ class AttendedEventsViewModel(app: Application) : AndroidViewModel(app) {
     }
 }
 
-private enum class AttendanceFilter(val label: String) {
-    ALL("すべて"), LIVE("現地"), STREAM("配信"), LIVE_VIEWING("LV")
+private enum class AttendanceFilter(private val type: AttendanceType?) {
+    ALL(null), LIVE(AttendanceType.LIVE), STREAM(AttendanceType.STREAM), LIVE_VIEWING(AttendanceType.LIVE_VIEWING);
+
+    /** 形態の語はコアの vocabulary ([AttendanceType.label])。 */
+    val label: String get() = type?.label ?: "すべて"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

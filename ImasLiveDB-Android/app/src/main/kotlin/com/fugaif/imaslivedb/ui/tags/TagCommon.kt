@@ -1,5 +1,7 @@
 package com.fugaif.imaslivedb.ui.tags
 
+import uniffi.imas_core.VocabularyTerm
+import com.fugaif.imaslivedb.data.model.Vocab
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
@@ -23,19 +25,18 @@ import com.fugaif.imaslivedb.ui.theme.DS
  * それぞれ別マスタなので、UI は共通のままこのフラグで作成 API・カテゴリ候補だけ切り替える。iOS TagDomain の移植。 */
 enum class TagDomain { SONG, IDOL, UNIT }
 
-val TAG_CATEGORIES: List<Pair<String, String>> = listOf(
-    "" to "なし", "mood" to "ムード", "scene" to "シーン", "special" to "特別", "free" to "フリー"
-)
+/** タグのカテゴリの候補 (先頭は「なし」= 空文字)。語と並びはコアの vocabulary。 */
+private fun categoryOptions(terms: List<VocabularyTerm>): List<Pair<String, String>> =
+    listOf("" to Vocab.table.tagCategoryNoneLabel) + terms.map { it.value to it.label }
 
-/** アイドルタグのカテゴリ候補。曲タグ (ムード/ジャンル等) とは語彙が別なので分ける。 */
-val TAG_CATEGORIES_IDOL: List<Pair<String, String>> = listOf(
-    "" to "なし", "personality" to "性格", "charm" to "魅力・外見", "talent" to "特技", "free" to "フリー"
-)
+/** 曲タグのカテゴリ候補。 */
+val TAG_CATEGORIES: List<Pair<String, String>> get() = categoryOptions(Vocab.table.songTagCategories)
 
-/** ユニットタグのカテゴリ候補。iOS `TagCategoryOptions.unit` と同一語彙 (concept/mood/charm/free)。 */
-val TAG_CATEGORIES_UNIT: List<Pair<String, String>> = listOf(
-    "" to "なし", "concept" to "コンセプト", "mood" to "雰囲気", "charm" to "魅力", "free" to "フリー"
-)
+/** アイドルタグのカテゴリ候補。曲タグとは語彙が別。 */
+val TAG_CATEGORIES_IDOL: List<Pair<String, String>> get() = categoryOptions(Vocab.table.idolTagCategories)
+
+/** ユニットタグのカテゴリ候補。 */
+val TAG_CATEGORIES_UNIT: List<Pair<String, String>> get() = categoryOptions(Vocab.table.unitTagCategories)
 
 fun tagCategoryOptions(domain: TagDomain): List<Pair<String, String>> = when (domain) {
     TagDomain.IDOL -> TAG_CATEGORIES_IDOL

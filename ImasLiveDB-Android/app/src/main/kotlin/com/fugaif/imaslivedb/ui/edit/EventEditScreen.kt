@@ -1,5 +1,6 @@
 package com.fugaif.imaslivedb.ui.edit
 
+import com.fugaif.imaslivedb.data.model.Vocab
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -150,9 +151,10 @@ fun EventEditScreen(
             EditTextField("合同ブランド (カンマ区切り)", jointBrandIds, { jointBrandIds = it })
         }
         EditSection("チケット") {
-            EditTextField("受付開始 (YYYY-MM-DD)", ticketOpenDate, { ticketOpenDate = it })
-            EditTextField("先行締切 (YYYY-MM-DD)", ticketDeadline, { ticketDeadline = it })
-            EditTextField("当落発表 (YYYY-MM-DD)", ticketLotteryDate, { ticketLotteryDate = it })
+            // 語はコアの vocabulary (値は events の列名)。
+            EditTextField("${Vocab.ticketDate("ticket_open_date")?.label} (YYYY-MM-DD)", ticketOpenDate, { ticketOpenDate = it })
+            EditTextField("${Vocab.ticketDate("ticket_deadline")?.label} (YYYY-MM-DD)", ticketDeadline, { ticketDeadline = it })
+            EditTextField("${Vocab.ticketDate("ticket_lottery_date")?.label} (YYYY-MM-DD)", ticketLotteryDate, { ticketLotteryDate = it })
             EditTextField("URL", ticketUrl, { ticketUrl = it })
         }
     }

@@ -1,5 +1,6 @@
 package com.fugaif.imaslivedb.ui.songs
 
+import com.fugaif.imaslivedb.data.model.Vocab
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -475,14 +476,7 @@ private fun Hero(
  * 曲一覧の絞り込みチップと絞り込み一覧のタイトルも同じラベルを出すので internal で共有する
  * (画面ごとに書き直すと、同じ生値が二通りの日本語で出る)。
  */
-internal fun songTypeLabel(songType: String): String = when (songType) {
-    "solo" -> "ソロ"
-    "unit", "group" -> "ユニット"
-    "all" -> "全体曲"
-    "original" -> "オリジナル"
-    "unknown" -> "不明"
-    else -> songType
-}
+internal fun songTypeLabel(songType: String): String = Vocab.songType(songType)?.shortLabel ?: songType
 
 private fun formatDuration(sec: Int?): String? {
     if (sec == null || sec <= 0) return null

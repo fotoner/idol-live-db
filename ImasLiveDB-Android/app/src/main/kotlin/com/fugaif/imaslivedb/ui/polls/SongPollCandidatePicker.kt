@@ -1,5 +1,6 @@
 package com.fugaif.imaslivedb.ui.polls
 
+import com.fugaif.imaslivedb.data.model.Vocab
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -181,12 +182,11 @@ fun SongPollCandidatePicker(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    ImasFilterChip(label = "ソロ", selected = selectedSongType == "solo",
-                        onClick = { selectedSongType = if (selectedSongType == "solo") null else "solo" })
-                    ImasFilterChip(label = "ユニット", selected = selectedSongType == "unit",
-                        onClick = { selectedSongType = if (selectedSongType == "unit") null else "unit" })
-                    ImasFilterChip(label = "全体曲", selected = selectedSongType == "all",
-                        onClick = { selectedSongType = if (selectedSongType == "all") null else "all" })
+                    // 絞り込みは先頭の 3 種 (ソロ / ユニット / 全体曲)。語はコアの vocabulary。
+                    Vocab.table.songTypes.take(3).forEach { term ->
+                        ImasFilterChip(label = term.shortLabel, selected = selectedSongType == term.value,
+                            onClick = { selectedSongType = if (selectedSongType == term.value) null else term.value })
+                    }
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
