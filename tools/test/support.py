@@ -6,7 +6,10 @@
 data/ は読むだけで、書き換えない。外部への通信もしない。
 """
 
+import hashlib
 import os
+import shutil
+import socket
 import sqlite3
 import sys
 from pathlib import Path
@@ -17,6 +20,16 @@ MASTER_SQL = REPO / "db" / "master.sql"
 
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+
+
+def _no_network(*args, **kwargs):
+    raise AssertionError("テストから外へ通信しようとした: %r" % (args,))
+
+
+# テストのプロセスからは 1 本も外へ出さない。通信を偽物に差し替え損ねたら、
+# 本番に届く前にここで落ちる。
+socket.socket.connect = _no_network
+socket.create_connection = _no_network
 
 _master_text = None
 
@@ -55,3 +68,22 @@ def write_json(path, obj):
     os.makedirs(os.path.dirname(str(path)), exist_ok=True)
     with open(str(path), "w", encoding="utf-8") as f:
         json.dump(obj, f, ensure_ascii=False)
+
+
+def sha256(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def copy_tools(root, *names):
+    """tools/ の一部を root/tools/ へ写す (lib/ は常に写す)。
+
+    既定のパス (tools/ の隣の ImasLiveDB/Resources/master.sqlite など) を
+    root の下に向けて、スクリプトを本物の手元の DB に触らせずに起動するため。
+    """
+    dst = Path(root) / "tools"
+    dst.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(str(TOOLS / "lib"), str(dst / "lib"),
+                    ignore=shutil.ignore_patterns("__pycache__"))
+    for name in names:
+        shutil.copy2(str(TOOLS / name), str(dst / name))
+    return dst
