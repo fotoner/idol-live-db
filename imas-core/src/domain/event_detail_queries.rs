@@ -60,6 +60,8 @@ pub struct ShowRecord {
     pub has_streaming: Option<bool>,
     /// Documents 専用列。Bundle DB では None。
     pub has_live_viewing: Option<bool>,
+    /// キャラライブか ([`is_character_live`])。画面で `performer_type` を比べない。
+    pub is_character_live: bool,
 }
 
 /// events 1 行の全域射影 (GRDB `Event` 相当)。イベント詳細と単一取得で使う。
@@ -81,6 +83,10 @@ pub struct EventDetailRecord {
     pub has_streaming: Option<bool>,
     /// Documents 専用列。Bundle DB では None。
     pub has_live_viewing: Option<bool>,
+    /// 参加ブランド (`brand_id` が先頭、続いて合同の追加ブランド)。
+    pub brand_ids: Vec<String>,
+    /// 合同ライブか。
+    pub is_joint: bool,
 }
 
 /// セトリ 1 行 (iOS `SetlistRow`: setlist_items × songs の射影)。
@@ -407,6 +413,7 @@ fn show_record_at(snap: &Snapshot, show: u32) -> ShowRecord {
         stream_platform: s.stream_platform.clone(),
         has_streaming: s.has_streaming,
         has_live_viewing: s.has_live_viewing,
+        is_character_live: is_character_live(s.performer_type.as_deref()),
     }
 }
 
@@ -797,6 +804,8 @@ pub fn event_record(snap: &Snapshot, id: &str) -> Option<EventDetailRecord> {
             joint_brand_ids: event.joint_brand_ids.clone(),
             has_streaming: event.has_streaming,
             has_live_viewing: event.has_live_viewing,
+            brand_ids: event.brand_ids().map(str::to_string).collect(),
+            is_joint: event.is_joint(),
         }
     })
 }
@@ -1135,6 +1144,7 @@ mod tests {
                         stream_platform: r.get(11)?,
                         has_streaming: None,
                         has_live_viewing: None,
+                        is_character_live: r.get::<_, Option<String>>(8)?.as_deref() == Some("character"),
                     })
                 })
                 .unwrap();
@@ -1616,6 +1626,17 @@ mod tests {
                         joint_brand_ids: r.get(11)?,
                         has_streaming: None,
                         has_live_viewing: None,
+                        brand_ids: Vec::new(),
+                        is_joint: false,
+                    })
+                    .map(|mut e| {
+                        use crate::domain::snapshot::split_brand_ids;
+                        e.brand_ids = e.brand_id.iter().map(String::as_str)
+                            .chain(split_brand_ids(e.joint_brand_ids.as_deref()))
+                            .map(str::to_string)
+                            .collect();
+                        e.is_joint = split_brand_ids(e.joint_brand_ids.as_deref()).next().is_some();
+                        e
                     })
                 })
                 .unwrap();

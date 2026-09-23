@@ -158,14 +158,9 @@ fn matches_brand_filter(item: &EventFilterItem, selected: &HashSet<&str>) -> boo
             return true;
         }
     }
-    // joint_brand_ids はカンマ区切りの生文字列 (例 "ml, cg")。
-    // iOS `jointBrandIdList` と同じく trim して空要素は捨てる (末尾カンマ等の耐性)。
-    item.joint_brand_ids
-        .as_deref()
-        .unwrap_or("")
-        .split(',')
-        .map(str::trim)
-        .filter(|s| !s.is_empty())
+    // joint_brand_ids はカンマ区切りの生文字列 (例 "ml, cg")。割り方は 1 つ
+    // (trim して空要素を捨てる。末尾カンマ等の耐性)。
+    crate::domain::snapshot::split_brand_ids(item.joint_brand_ids.as_deref())
         .any(|s| selected.contains(s))
 }
 

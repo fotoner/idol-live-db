@@ -63,6 +63,11 @@ pub struct EventListRecord {
     pub has_streaming: Option<bool>,
     /// Documents 専用列。同上。
     pub has_live_viewing: Option<bool>,
+    /// 参加ブランド (`brand_id` が先頭、続いて合同の追加ブランド)。`joint_brand_ids` を
+    /// 画面で割らない (割り方は [`crate::domain::snapshot::split_brand_ids`])。
+    pub brand_ids: Vec<String>,
+    /// 合同ライブか (一覧のリードバーを虹色にする)。
+    pub is_joint: bool,
 }
 
 impl From<&Event> for EventListRecord {
@@ -82,6 +87,8 @@ impl From<&Event> for EventListRecord {
             joint_brand_ids: e.joint_brand_ids.clone(),
             has_streaming: e.has_streaming,
             has_live_viewing: e.has_live_viewing,
+            brand_ids: e.brand_ids().map(str::to_string).collect(),
+            is_joint: e.is_joint(),
         }
     }
 }
@@ -554,6 +561,21 @@ mod tests {
             OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
         )
         .expect("bundle DB を開ける")
+    }
+
+    /// 一覧の行は参加ブランドと「合同か」を持つ (画面で joint_brand_ids を割らない)。
+    #[test]
+    fn records_carry_brand_ids_and_the_joint_flag() {
+        let snap = snap();
+        let joint = snap.events.iter().find(|e| e.is_joint()).expect("合同ライブがある");
+        let record = EventListRecord::from(joint);
+        assert!(record.is_joint);
+        assert_eq!(record.brand_ids.first(), joint.brand_id.as_ref(), "主ブランドが先頭");
+        assert!(record.brand_ids.len() >= 2, "{:?}", record.brand_ids);
+        let single = snap.events.iter().find(|e| !e.is_joint() && e.brand_id.is_some()).unwrap();
+        let record = EventListRecord::from(single);
+        assert!(!record.is_joint);
+        assert_eq!(record.brand_ids, vec![single.brand_id.clone().unwrap()]);
     }
 
     /// Swift `String.likeEscaped` の写経。

@@ -66,6 +66,8 @@ pub struct SongDetailRecord {
     pub is_collab: bool,
     /// 音楽カードゲーム「KAMISABI」にこの曲のカードがあるか (曲詳細の収録札)。
     pub has_kamisabi_card: bool,
+    /// 参加ブランド (`brand_id` が先頭、続いて `joint_brand_ids`)。画面で割らない。
+    pub brand_ids: Vec<String>,
 }
 
 impl From<&Song> for SongDetailRecord {
@@ -98,6 +100,7 @@ impl From<&Song> for SongDetailRecord {
             joint_brand_ids: s.joint_brand_ids.clone(),
             is_collab: s.is_collab,
             has_kamisabi_card: s.has_kamisabi_card,
+            brand_ids: s.brand_ids().map(str::to_string).collect(),
         }
     }
 }
@@ -906,6 +909,17 @@ mod tests {
             joint_brand_ids: row.get_unwrap("joint_brand_ids"),
             is_collab: row.get_unwrap::<_, i64>("is_collab") != 0,
             has_kamisabi_card: row.get_unwrap::<_, i64>("has_kamisabi_card") != 0,
+            brand_ids: row
+                .get_unwrap::<_, Option<String>>("brand_id")
+                .into_iter()
+                .chain(
+                    row.get_unwrap::<_, Option<String>>("joint_brand_ids")
+                        .unwrap_or_default()
+                        .split(',')
+                        .map(str::to_string),
+                )
+                .filter(|b| !b.is_empty())
+                .collect(),
         }
     }
 

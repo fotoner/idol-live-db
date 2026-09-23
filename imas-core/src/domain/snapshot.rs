@@ -144,6 +144,27 @@ impl Song {
     }
 }
 
+/// `joint_brand_ids` (カンマ区切りの生値) を割る。前後の空白と空要素は捨てる
+/// (`"ml, cg,"` → `ml` / `cg`)。合同ライブの追加ブランドの読み方はここ 1 つ。
+pub fn split_brand_ids(raw: Option<&str>) -> impl Iterator<Item = &str> {
+    raw.unwrap_or_default().split(',').map(str::trim).filter(|b| !b.is_empty())
+}
+
+impl Event {
+    /// 参加ブランドを順に (`brand_id` が先頭、続いて合同の追加ブランド)。
+    pub fn brand_ids(&self) -> impl Iterator<Item = &str> {
+        self.brand_id
+            .as_deref()
+            .into_iter()
+            .chain(split_brand_ids(self.joint_brand_ids.as_deref()))
+    }
+
+    /// 合同ライブか (追加ブランドが 1 つでもある)。一覧のリードバーを虹色にする根拠。
+    pub fn is_joint(&self) -> bool {
+        split_brand_ids(self.joint_brand_ids.as_deref()).next().is_some()
+    }
+}
+
 /// 表示用の短い名: nickname > given_name > name。空文字は「無い」扱い。
 ///
 /// アバターのモノグラム (iOS `ImasAvatar` / Android) に出す文字。Web は丸を置かないので使わない。
@@ -166,6 +187,18 @@ impl Idol {
     /// [`idol_short_name`] をこの行に当てたもの。
     pub fn short_name(&self) -> &str {
         idol_short_name(&self.name, self.given_name.as_deref(), self.nickname.as_deref())
+    }
+}
+
+#[cfg(test)]
+mod brand_ids_tests {
+    use super::*;
+
+    #[test]
+    fn joint_brand_ids_are_trimmed_and_blank_entries_dropped() {
+        assert_eq!(split_brand_ids(Some(" ml , cg ,")).collect::<Vec<_>>(), ["ml", "cg"]);
+        assert_eq!(split_brand_ids(Some("")).count(), 0);
+        assert_eq!(split_brand_ids(None).count(), 0);
     }
 }
 
