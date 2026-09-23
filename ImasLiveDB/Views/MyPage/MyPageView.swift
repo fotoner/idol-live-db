@@ -103,7 +103,7 @@ struct MyPageView: View {
         // この画面は「設定」。参加ライブ/貢献バッジ/編集履歴 等の個人アクティビティは
         // プロデュースタブ「あなたの活動」と重複するため、ここには置かない。
         accountSection
-        if AuthService.shared.isAdmin {
+        if AuthService.shared.adminCapabilities.canModerateUsers {
             adminSection
         }
     }
