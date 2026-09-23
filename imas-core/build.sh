@@ -53,23 +53,38 @@ if [[ $DO_ANDROID -eq 1 ]]; then
   [[ -d "${ANDROID_NDK_HOME:-}" ]] || { echo "NDK が見つからない。ANDROID_NDK_HOME を設定するか sdkmanager 'ndk;27.2.12479018' を実行" >&2; exit 1; }
 fi
 
+# ディレクトリを中身ごと消す。`rm -rf` を使わないのは、環境によってはブロックされていて
+# **黙って残る**ため (実際それで古い xcframework を掴んだ)。chmod + find なら同じ結果になる。
+remove_dir() {
+  [[ -d "$1" ]] || return 0
+  chmod -R u+w "$1"
+  find "$1" -delete
+}
+
+# 成果物の置き場所は cargo に訊く。`$CRATE/target` と決め打ちすると、CARGO_TARGET_DIR や
+# 別の場所への共有で target が移ったとき、古い成果物を黙って読む。
+TARGET_DIR=$(cargo metadata --locked --format-version 1 --no-deps --manifest-path $CRATE/Cargo.toml |
+  sed -n 's/.*"target_directory":"\([^"]*\)".*/\1/p')
+[[ -n "$TARGET_DIR" ]] || { echo "cargo metadata から target_directory を読めない" >&2; exit 1; }
+
 echo "==> host ビルド (バインディング生成用 cdylib)"
-cargo build --manifest-path $CRATE/Cargo.toml --release
-HOST_DYLIB=$CRATE/target/release/libimas_core.$HOST_EXT
+cargo build --locked --manifest-path $CRATE/Cargo.toml --release
+HOST_DYLIB=$TARGET_DIR/release/libimas_core.$HOST_EXT
 
 echo "==> バインディング生成 (Swift + Kotlin)"
 # uniffi-bindgen は cwd の Cargo.toml から crate 情報を引くため crate 内から実行する
 if [[ $DO_IOS -eq 1 ]]; then
   # 掃除は再生成する側だけ。ここを無条件にしていたので --android-only が
   # iOS のバインディングを消して、Xcode ビルドが出来ない状態にしていた。
-  rm -rf $OUT/swift $OUT/headers
+  remove_dir $OUT/swift
+  remove_dir $OUT/headers
   mkdir -p $OUT/swift $OUT/headers
-  (cd $CRATE && cargo run --release --bin uniffi-bindgen -- \
-    generate --library target/release/libimas_core.$HOST_EXT --language swift --out-dir ../$OUT/swift)
+  (cd $CRATE && cargo run --locked --release --bin uniffi-bindgen -- \
+    generate --library "$HOST_DYLIB" --language swift --out-dir ../$OUT/swift)
 fi
 if [[ $DO_ANDROID -eq 1 ]]; then
-  (cd $CRATE && cargo run --release --bin uniffi-bindgen -- \
-    generate --library target/release/libimas_core.$HOST_EXT --language kotlin --out-dir ../$ANDROID_APP/src/main/kotlin)
+  (cd $CRATE && cargo run --locked --release --bin uniffi-bindgen -- \
+    generate --library "$HOST_DYLIB" --language kotlin --out-dir ../$ANDROID_APP/src/main/kotlin)
 fi
 if [[ $DO_IOS -eq 1 ]]; then
 # ヘッダと modulemap は xcframework 側に同梱する (Swift ファイルだけ sources に残す)
@@ -77,30 +92,24 @@ mv $OUT/swift/imas_coreFFI.h $OUT/headers/
 mv $OUT/swift/imas_coreFFI.modulemap $OUT/headers/module.modulemap
 
 echo "==> iOS ビルド (device + simulator universal)"
-cargo build --manifest-path $CRATE/Cargo.toml --release --target aarch64-apple-ios
-cargo build --manifest-path $CRATE/Cargo.toml --release --target aarch64-apple-ios-sim
-cargo build --manifest-path $CRATE/Cargo.toml --release --target x86_64-apple-ios
-mkdir -p $CRATE/target/ios-sim-universal
+cargo build --locked --manifest-path $CRATE/Cargo.toml --release --target aarch64-apple-ios
+cargo build --locked --manifest-path $CRATE/Cargo.toml --release --target aarch64-apple-ios-sim
+cargo build --locked --manifest-path $CRATE/Cargo.toml --release --target x86_64-apple-ios
+mkdir -p $TARGET_DIR/ios-sim-universal
 lipo -create \
-  $CRATE/target/aarch64-apple-ios-sim/release/libimas_core.a \
-  $CRATE/target/x86_64-apple-ios/release/libimas_core.a \
-  -output $CRATE/target/ios-sim-universal/libimas_core.a
+  $TARGET_DIR/aarch64-apple-ios-sim/release/libimas_core.a \
+  $TARGET_DIR/x86_64-apple-ios/release/libimas_core.a \
+  -output $TARGET_DIR/ios-sim-universal/libimas_core.a
 
 echo "==> xcframework 作成"
 # 既存を消してから作る。`xcodebuild -create-xcframework` は上書きせず
 # 「同名の項目が既にあります」で止まるが、**そのとき終了コードは 0**。
 # つまり消し損ねると、古い xcframework が残ったまま「成功」に見える
 # (コアを直したのにアプリに反映されない、という形で後から効いてくる)。
-#
-# `rm -rf` を使わないのは、環境によってはブロックされていて**黙って残る**ため
-# (実際それで古い xcframework を掴んだ)。chmod + find なら同じ結果になる。
-if [[ -d $OUT/ImasCore.xcframework ]]; then
-  chmod -R u+w $OUT/ImasCore.xcframework
-  find $OUT/ImasCore.xcframework -delete
-fi
+remove_dir $OUT/ImasCore.xcframework
 xcodebuild -create-xcframework \
-  -library $CRATE/target/aarch64-apple-ios/release/libimas_core.a -headers $OUT/headers \
-  -library $CRATE/target/ios-sim-universal/libimas_core.a -headers $OUT/headers \
+  -library $TARGET_DIR/aarch64-apple-ios/release/libimas_core.a -headers $OUT/headers \
+  -library $TARGET_DIR/ios-sim-universal/libimas_core.a -headers $OUT/headers \
   -output $OUT/ImasCore.xcframework
 
 # 終了コードが当てにならないので、出来上がりを自分で確かめる。
@@ -117,7 +126,7 @@ if [[ $DO_ANDROID -eq 1 ]]; then
   (cd $CRATE && cargo ndk \
     -t arm64-v8a -t x86_64 \
     -o ../$ANDROID_APP/src/main/jniLibs \
-    build --release)
+    build --locked --release)
 fi
 
 echo "==> 完了 ($([[ $DO_IOS -eq 1 ]] && echo -n "iOS ")$([[ $DO_ANDROID -eq 1 ]] && echo -n "Android"))"
