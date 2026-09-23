@@ -141,6 +141,11 @@ val generateSeedDb by tasks.registering(Exec::class) {
 
 tasks.named("preBuild") { dependsOn(generateSeedDb) }
 
+// app/schemas は KSP (Room) が書き出し、debug の assets がそれを読む (移行テスト用)。
+// Gradle はこの受け渡しを知らないので、版を上げた回のビルドでも新しい JSON が assets に
+// 載るよう、assets の統合を KSP の後にする。
+tasks.matching { it.name == "mergeDebugAssets" }.configureEach { dependsOn("kspDebugKotlin") }
+
 dependencies {
     // imas-core (Rust) の UniFFI バインディング用 JNA。
     // @aar は実機/エミュ (jniLibs の libimas_core.so をロード)、
