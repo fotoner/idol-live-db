@@ -13,13 +13,18 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import com.fugaif.imaslivedb.data.model.EventWithDateRange
 import com.fugaif.imaslivedb.di.AppModule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
+import java.time.ZoneId
 import java.time.ZonedDateTime
+import kotlin.random.Random
+import uniffi.imas_core.NotificationKind
+import uniffi.imas_core.NotificationPlanInput
+import uniffi.imas_core.PlannedNotificationRecord
 
 /**
  * ローカル通知の予約と貼り替え。iOS `NotificationService.rescheduleAll` の移植。
@@ -102,46 +107,33 @@ object NotificationScheduler {
         val module = AppModule.from(app)
         val now = ZonedDateTime.now()
 
-        // カテゴリごとに独立したグループとして組み立てる (iOS と同じ 3 グループ)。
-        // 1. 担当アイドル誕生日
-        val birthdayPlans = if (prefs.isEnabled(NotificationCategory.OSHI_BIRTHDAY)) {
-            runCatching { NotificationPlanner.birthdayPlans(module.userMarkRepository.pickedIdols(), now) }
-                .onFailure { Log.e(TAG, "notif_birthday_fetch_failed", it) }
-                .getOrDefault(emptyList())
-        } else {
-            emptyList()
-        }
-        // 2. 月曜ミーム (回ごとにレア文言を抽選するため個別に積む)
-        val mondayPlans = if (prefs.isEnabled(NotificationCategory.MONDAY)) {
-            NotificationPlanner.mondayMemePlans(now)
-        } else {
-            emptyList()
-        }
-        // 3. ライブ1週間前 + 4. チケット締切/当落 (近い順ソート済み)
-        val eventPlans = runCatching {
-            NotificationPlanner.eventPlans(
-                sources = eventSources(module),
+        // 何を・いつ・どの文言で積むか (誕生日・月曜のミーム・ライブ 1 週間前・チケット、
+        // 60 件の上限とカテゴリ間の round-robin) は全部コアの予定表 (notificationPlan)。
+        // ここは設定とマークを詰めて 1 回呼び、返ってきた「その地の暦」の日時を端末のゾーンで
+        // 絶対時刻に直して積むだけ。
+        val plans = runCatching {
+            val input = NotificationPlanInput(
+                today = now.toLocalDate().toString(),
+                nowMinutes = (now.hour * 60 + now.minute).toUInt(),
+                birthdayEnabled = prefs.isEnabled(NotificationCategory.OSHI_BIRTHDAY),
+                mondayEnabled = prefs.isEnabled(NotificationCategory.MONDAY),
                 liveWeekEnabled = prefs.isEnabled(NotificationCategory.LIVE_WEEK),
                 ticketEnabled = prefs.isEnabled(NotificationCategory.TICKET),
-                now = now
+                pickIdolIds = module.userMarkRepository.pickedIdolIds().toList(),
+                eventIds = markedEventIds(module),
+                seed = Random.nextLong().toULong()
             )
-        }.onFailure { Log.e(TAG, "notif_event_fetch_failed", it) }.getOrDefault(emptyList())
-
-        // 合計 60 件 cap。単純連結 + 先頭 60 件だと誕生日が枠を食い尽くしうるので、
-        // カテゴリを round-robin で混ぜてどのカテゴリも枠を独占しないようにする。
-        val capped = NotificationPlanner.roundRobinMerge(
-            listOf(birthdayPlans, mondayPlans, eventPlans),
-            NotificationPlanner.MAX_SCHEDULED
-        )
+            module.snapshotStoreProvider.query { store -> store.notificationPlan(input) }
+        }.onFailure { Log.e(TAG, "notif_plan_failed", it) }.getOrDefault(emptyList())
 
         cancelAllScheduled(app, prefs)
 
         // 過去時刻のアラームは「即発火」になる。組み立て側でも未来だけを通しているが、
         // 端末の時刻がずれていた場合に通知が一気に降ってくるのを防ぐ最後の関門。
         val nowMillis = System.currentTimeMillis()
-        val armed = capped.filter { it.triggerAtMillis > nowMillis }
-        armed.forEach { schedule(app, it) }
-        prefs.setScheduledIds(armed.map { it.id })
+        val armed = plans.map { it to triggerAtMillis(it, now.zone) }.filter { (_, at) -> at > nowMillis }
+        armed.forEach { (plan, at) -> schedule(app, plan, at) }
+        prefs.setScheduledIds(armed.map { (plan, _) -> plan.id })
 
         Log.i(TAG, "notif_rescheduled total=${armed.size}")
     }
@@ -176,30 +168,33 @@ object NotificationScheduler {
         }
     }
 
-    /**
-     * お気に入り ∪ 参加マークのイベントを、チケット日程まで揃った形で返す。
-     *
-     * 一覧クエリ (`fetchEventsWithDateRangeByIds` 等) は ticket_deadline /
-     * ticket_lottery_date を SELECT していないので、iOS が `fetchFullEvents` で
-     * 取り直しているのと同じ理由でイベント本体を引き直す。
-     */
-    private suspend fun eventSources(module: AppModule): List<EventNotificationSource> {
+    /** お気に入り ∪ 参加マーク (公演単位のマークはそのイベント) のイベント id。 */
+    private suspend fun markedEventIds(module: AppModule): List<String> {
         val events = module.eventRepository
-        val byId = LinkedHashMap<String, EventWithDateRange>()
-        (events.fetchFavoriteEvents() + events.fetchAttendedEvents()).forEach { byId.putIfAbsent(it.event.id, it) }
-        return byId.values.mapNotNull { withDate ->
-            val full = module.eventRepository.fetchEvent(withDate.event.id) ?: return@mapNotNull null
-            EventNotificationSource(event = full, firstDate = withDate.firstDate)
-        }
+        return (events.fetchFavoriteEvents() + events.fetchAttendedEvents()).map { it.event.id }.distinct()
     }
 
-    private fun schedule(context: Context, plan: PlannedNotification) {
+    /**
+     * 予定表の日時 (その地の暦の日付 + 時・分) を端末のゾーンで絶対時刻に直す。
+     *
+     * `repeatsYearly` (毎年くり返してよい誕生日) も、AlarmManager に年次の繰り返しは無いので
+     * 次の 1 回だけを積む。発火のたびに [NotificationAlarmReceiver] が全体を積み直し、
+     * そのときコアが翌年の同じ月日を返すので、アプリを開かなくても翌年も鳴る。
+     */
+    private fun triggerAtMillis(plan: PlannedNotificationRecord, zone: ZoneId): Long =
+        LocalDate.parse(plan.date)
+            .atTime(plan.hour.toInt(), plan.minute.toInt())
+            .atZone(zone)
+            .toInstant()
+            .toEpochMilli()
+
+    private fun schedule(context: Context, plan: PlannedNotificationRecord, triggerAtMillis: Long) {
         val alarmManager = context.getSystemService(AlarmManager::class.java) ?: return
         val intent = fireIntent(context, plan.id).apply {
             putExtra(EXTRA_ID, plan.id)
             putExtra(EXTRA_TITLE, plan.title)
             putExtra(EXTRA_BODY, plan.body)
-            putExtra(EXTRA_CHANNEL_ID, plan.category.channelId)
+            putExtra(EXTRA_CHANNEL_ID, plan.kind.category.channelId)
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
@@ -208,7 +203,7 @@ object NotificationScheduler {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         // 権限不要で Doze も越える組み合わせ。精度は数分の幅を許容する (クラス冒頭の理由)。
-        alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, plan.triggerAtMillis, pendingIntent)
+        alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
     }
 
     /** 積んである予約を全部取り消す。iOS の `removeAllPendingNotificationRequests()` 相当。 */
@@ -242,3 +237,12 @@ object NotificationScheduler {
             data = Uri.parse("imas-notif://$id")
         }
 }
+
+/** コアの通知の種類 → チャンネル (設定の単位)。 */
+private val NotificationKind.category: NotificationCategory
+    get() = when (this) {
+        NotificationKind.OSHI_BIRTHDAY -> NotificationCategory.OSHI_BIRTHDAY
+        NotificationKind.MONDAY -> NotificationCategory.MONDAY
+        NotificationKind.LIVE_WEEK -> NotificationCategory.LIVE_WEEK
+        NotificationKind.TICKET -> NotificationCategory.TICKET
+    }

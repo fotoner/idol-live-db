@@ -97,7 +97,7 @@ class NotificationAlarmReceiver : BroadcastReceiver() {
             // 長いライブ名が「…」で切れないよう、展開時は全文を出す。
             builder.setStyle(NotificationCompat.BigTextStyle().bigText(body))
         }
-        // TODO: 画像ギャラリー基盤が入ったら、PlannedNotification.imageIdolId の
+        // TODO: 画像ギャラリー基盤が入ったら、PlannedNotificationRecord.imageIdolId の
         //       ユーザー取込画像を NotificationCompat.BigPictureStyle で添える
         //       (iOS の UNNotificationAttachment 相当)。運営同梱画像は使わない。
 
