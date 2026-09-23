@@ -7,7 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.IOException
 import java.net.URLEncoder
 
 /** 集計系コミュニティ (タグ / ペンライト投票 / お題) の Worker D1 クライアント。iOS CommunityAPI の移植。
@@ -887,10 +886,7 @@ class CommunityApi(private val http: WorkerHttpClient, private val authService: 
     ): Pair<Int, JSONObject?> {
         return try {
             val response = http.request(method, path, body)
-            // 今の挙動: allowedExtra (400 以上) の本文は inputStream から読もうとして例外になり、
-            // 通信失敗 (-1) と同じ扱いになっている (Android は 400 以上で inputStream が投げる)。
-            if (response.code in allowedExtra) throw IOException("HTTP ${response.code}")
-            val ok = response.isSuccess
+            val ok = response.isSuccess || response.code in allowedExtra
             if (!ok) Log.w(TAG, "$method $path -> HTTP ${response.code} body=${response.body}")
             response.code to (if (ok && !response.body.isNullOrEmpty()) JSONObject(response.body) else null)
         } catch (e: Exception) {
