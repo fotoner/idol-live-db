@@ -73,7 +73,8 @@ jobs:
             ~/.cargo/bin
             imas-core/target
             web/wasm/imas-fold-wasm/target
-          key: web-cargo-${{ runner.os }}-${{ hashFiles('imas-core/Cargo.lock', 'web/wasm/imas-fold-wasm/Cargo.lock') }}
+            web/wasm/imas-query-wasm/target
+          key: web-cargo-${{ runner.os }}-${{ hashFiles('imas-core/Cargo.lock', 'web/wasm/imas-fold-wasm/Cargo.lock', 'web/wasm/imas-query-wasm/Cargo.lock') }}
           restore-keys: |
             web-cargo-${{ runner.os }}-
 
@@ -97,6 +98,12 @@ jobs:
       - name: Rust tests (web-export)
         working-directory: imas-core
         run: cargo test --locked --features web-export
+
+      # 一覧の絞り込み wasm。imas-core とは別の Cargo プロジェクトなので上では走らない。
+      # 配った生テーブルから組んだ Snapshot が DB から組んだものと同じ答えを出すことを
+      # 同梱 master.sqlite で確かめる。
+      - name: Rust tests (imas-query-wasm)
+        run: cargo test --locked --manifest-path web/wasm/imas-query-wasm/Cargo.toml
 
       # ts-rs が生成する TS 型 (web/src/lib/schema/**) は commit 済みのものが正。
       # 生成先が空のまま `git diff --exit-code` を通すと「差分ゼロ」で誤って緑になるため、
@@ -149,13 +156,15 @@ jobs:
         working-directory: web
         run: npm run check
 
-      - name: Unit tests (fold parity / fixture schema)
-        working-directory: web
-        run: npm test
-
       - name: Build site
         working-directory: web
         run: npm run build # astro build (prebuild が require-data.mjs) + check-limits.mjs
+
+      # build の後に回す。dist を読むテストは dist が無いと skip されるので、
+      # build より前に置くと常に skip になり、CI で 1 度も走らない。
+      - name: Unit tests (fold parity / fixture schema / dist)
+        working-directory: web
+        run: npm test
 
       - name: Deploy to Cloudflare
         if: >-
