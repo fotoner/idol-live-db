@@ -102,7 +102,7 @@ mod tests {
     /// 組み直す方式なので、「配ったもので組んだ Snapshot」と「DB から組んだ Snapshot」が
     /// 同じ答えを出すことを固定しておく。ズレたら派生の組み直しが壊れている。
     #[test]
-    fn 配った生テーブルから組んでもDBから組んだのと同じ結果になる() {
+    fn tables_shipped_to_the_browser_give_the_same_answers_as_the_db() {
         let db = format!("{}/../../../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"));
         let raw = imas_core::outbound::sqlite_loader::load_raw_tables(&db).expect("生テーブル");
         let from_db = imas_core::outbound::sqlite_loader::load_snapshot(&db).expect("DB から");
