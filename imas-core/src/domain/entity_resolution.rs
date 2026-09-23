@@ -25,7 +25,7 @@ use crate::domain::display_join::{join_parts, year_of};
 use crate::domain::event_detail_queries::search_shows_with_event_name;
 use crate::domain::performer_label::song_performer_label as credited_as;
 use crate::domain::snapshot::Snapshot;
-use crate::domain::text_search_index::{prepare_needle, FoldedNeedle, TextSearchIndex};
+use crate::domain::text_search_index::{FoldedNeedle, MatchTier, TextSearchIndex};
 
 /// 引き当てたエンティティの種別。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -142,7 +142,7 @@ pub fn resolve_with_total(
     let wanted: Vec<EntityKind> =
         EntityKind::ALL.into_iter().filter(|k| kinds.is_empty() || kinds.contains(k)).collect();
 
-    let mut by_kind: Vec<Vec<(Tier, EntityHit)>> =
+    let mut by_kind: Vec<Vec<(MatchTier, EntityHit)>> =
         wanted.iter().map(|&k| collect(snap, k, &probe)).collect();
     let total = by_kind.iter().map(Vec::len).sum::<usize>() as u32;
     let counts: Vec<(EntityKind, u32)> = wanted
@@ -223,17 +223,6 @@ pub fn resolve_unique(snap: &Snapshot, query: &str, kind: EntityKind) -> Resolut
 // 照合
 // ---------------------------------------------------------------------------
 
-/// 当たり方の強さ。並べる第 1 キー。
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-enum Tier {
-    /// 表記そのもの (畳み込み後) と一致。
-    Exact,
-    /// 表記の頭に付いている。
-    Prefix,
-    /// どこかに含まれる。
-    Substring,
-}
-
 /// 検索語を 1 度だけ畳んだもの。畳み込みの実体は `text_search_index`
 /// (ここで小文字化やかなの寄せを書くと、画面の検索と当たる語が割れる)。
 struct Probe {
@@ -241,7 +230,6 @@ struct Probe {
     /// そのまま渡すために持つ (畳み込みはあちらが自分で行う)。
     raw: String,
     needle: FoldedNeedle,
-    folded: Vec<u8>,
 }
 
 impl Probe {
@@ -249,7 +237,6 @@ impl Probe {
         Self {
             raw: query.to_string(),
             needle: FoldedNeedle::new(query),
-            folded: prepare_needle(query),
         }
     }
 
@@ -268,27 +255,17 @@ impl Probe {
 
     /// 表記との関係。`spellings` は「その行の名前と言える綴り」だけを渡すこと
     /// (別名や CV 名まで入れると、別人の名前で完全一致が立つ)。
-    fn tier(&self, spellings: &[Option<&str>]) -> Tier {
-        let mut best = Tier::Substring;
-        for spelling in spellings.iter().filter_map(|s| *s) {
-            let folded = prepare_needle(spelling);
-            if folded == self.folded {
-                return Tier::Exact;
-            }
-            if folded.starts_with(&self.folded) {
-                best = Tier::Prefix;
-            }
-        }
-        best
+    fn tier(&self, spellings: &[Option<&str>]) -> MatchTier {
+        self.needle.tier(spellings)
     }
 }
 
 /// 当たり方の強さごとに、種別を順ぐりに取る。
-fn round_robin(by_kind: Vec<Vec<(Tier, EntityHit)>>, limit: u32) -> Vec<EntityHit> {
+fn round_robin(by_kind: Vec<Vec<(MatchTier, EntityHit)>>, limit: u32) -> Vec<EntityHit> {
     let limit = limit as usize;
     let mut out: Vec<EntityHit> = Vec::new();
     let mut cursor = vec![0usize; by_kind.len()];
-    for tier in [Tier::Exact, Tier::Prefix, Tier::Substring] {
+    for tier in [MatchTier::Exact, MatchTier::Prefix, MatchTier::Substring] {
         loop {
             let mut took = false;
             for (k, list) in by_kind.iter().enumerate() {
@@ -312,7 +289,7 @@ fn round_robin(by_kind: Vec<Vec<(Tier, EntityHit)>>, limit: u32) -> Vec<EntityHi
     out
 }
 
-fn collect(snap: &Snapshot, kind: EntityKind, probe: &Probe) -> Vec<(Tier, EntityHit)> {
+fn collect(snap: &Snapshot, kind: EntityKind, probe: &Probe) -> Vec<(MatchTier, EntityHit)> {
     match kind {
         EntityKind::Idol => collect_idols(snap, probe),
         EntityKind::Song => collect_songs(snap, probe),
@@ -328,7 +305,7 @@ fn collect(snap: &Snapshot, kind: EntityKind, probe: &Probe) -> Vec<(Tier, Entit
 /// アイドルは `idol_picker_search` (名前・読み・ローマ字・別名 + CV 名) で引く。
 /// 横断検索用の `idol_search` は名前と読みしか見ないので、「山崎はるか」で
 /// 担当アイドルに辿り着けない — 人の言葉をほどくのがこの入口の役目なので広いほうを取る。
-fn collect_idols(snap: &Snapshot, probe: &Probe) -> Vec<(Tier, EntityHit)> {
+fn collect_idols(snap: &Snapshot, probe: &Probe) -> Vec<(MatchTier, EntityHit)> {
     snap.idols
         .iter()
         .enumerate()
@@ -343,7 +320,7 @@ fn collect_idols(snap: &Snapshot, probe: &Probe) -> Vec<(Tier, EntityHit)> {
         .collect()
 }
 
-fn collect_songs(snap: &Snapshot, probe: &Probe) -> Vec<(Tier, EntityHit)> {
+fn collect_songs(snap: &Snapshot, probe: &Probe) -> Vec<(MatchTier, EntityHit)> {
     snap.songs
         .iter()
         .enumerate()
@@ -360,7 +337,7 @@ fn collect_songs(snap: &Snapshot, probe: &Probe) -> Vec<(Tier, EntityHit)> {
         .collect()
 }
 
-fn collect_events(snap: &Snapshot, probe: &Probe) -> Vec<(Tier, EntityHit)> {
+fn collect_events(snap: &Snapshot, probe: &Probe) -> Vec<(MatchTier, EntityHit)> {
     snap.events
         .iter()
         .enumerate()
@@ -382,7 +359,7 @@ fn collect_events(snap: &Snapshot, probe: &Probe) -> Vec<(Tier, EntityHit)> {
 /// 公演は「公演名 または ライブ名」で引く。その照合はピッカーの
 /// [`search_shows_with_event_name`] が持っているので、ここでは呼ぶだけにする。
 /// 打ち切らずに全件受けるのは、`total` を正しく数えるため (公演は 1,217 件で全走査は誤差)。
-fn collect_shows(snap: &Snapshot, probe: &Probe) -> Vec<(Tier, EntityHit)> {
+fn collect_shows(snap: &Snapshot, probe: &Probe) -> Vec<(MatchTier, EntityHit)> {
     search_shows_with_event_name(snap, probe.needle_text(), u32::MAX)
         .into_iter()
         .map(|show| {
@@ -394,7 +371,7 @@ fn collect_shows(snap: &Snapshot, probe: &Probe) -> Vec<(Tier, EntityHit)> {
         .collect()
 }
 
-fn collect_units(snap: &Snapshot, probe: &Probe) -> Vec<(Tier, EntityHit)> {
+fn collect_units(snap: &Snapshot, probe: &Probe) -> Vec<(MatchTier, EntityHit)> {
     snap.units
         .iter()
         .enumerate()
@@ -414,7 +391,7 @@ fn collect_units(snap: &Snapshot, probe: &Probe) -> Vec<(Tier, EntityHit)> {
 
 /// 略称 (「ミリオン」) と id ("ml") も `brand_search` の綴りに入っている。
 /// 人はブランドを正式名で呼ばないので、正式名だけ見ると 1 件も当たらない。
-fn collect_brands(snap: &Snapshot, probe: &Probe) -> Vec<(Tier, EntityHit)> {
+fn collect_brands(snap: &Snapshot, probe: &Probe) -> Vec<(MatchTier, EntityHit)> {
     snap.brand_order
         .iter()
         .map(|&b| (b as usize, &snap.brands[b as usize]))
@@ -430,7 +407,7 @@ fn collect_brands(snap: &Snapshot, probe: &Probe) -> Vec<(Tier, EntityHit)> {
 
 /// 作家は読み込み時に組んである綴り列 (名前・読み・別表記) で引く。
 /// 曲の作詞作曲欄は自由文字列で読みが書かれていないので、この綴り列が唯一の導線。
-fn collect_creators(snap: &Snapshot, probe: &Probe) -> Vec<(Tier, EntityHit)> {
+fn collect_creators(snap: &Snapshot, probe: &Probe) -> Vec<(MatchTier, EntityHit)> {
     snap.creator_spellings
         .iter()
         .enumerate()
@@ -447,7 +424,7 @@ fn collect_creators(snap: &Snapshot, probe: &Probe) -> Vec<(Tier, EntityHit)> {
         .collect()
 }
 
-fn collect_venues(snap: &Snapshot, probe: &Probe) -> Vec<(Tier, EntityHit)> {
+fn collect_venues(snap: &Snapshot, probe: &Probe) -> Vec<(MatchTier, EntityHit)> {
     snap.venues
         .iter()
         .enumerate()
@@ -465,13 +442,13 @@ fn collect_venues(snap: &Snapshot, probe: &Probe) -> Vec<(Tier, EntityHit)> {
         .collect()
 }
 
-fn hit(kind: EntityKind, id: &str, name: &str, hint: Option<String>, tier: Tier) -> EntityHit {
+fn hit(kind: EntityKind, id: &str, name: &str, hint: Option<String>, tier: MatchTier) -> EntityHit {
     EntityHit {
         kind,
         id: id.to_string(),
         name: name.to_string(),
         hint: hint.unwrap_or_default(),
-        exact: tier == Tier::Exact,
+        exact: tier == MatchTier::Exact,
     }
 }
 

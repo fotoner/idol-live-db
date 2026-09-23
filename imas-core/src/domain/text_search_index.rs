@@ -152,6 +152,38 @@ impl FoldedNeedle {
     pub fn matches_opt(&self, value: Option<&str>) -> bool {
         value.is_some_and(|v| self.matches(v))
     }
+
+    /// 当たった行の綴りとの関係 (完全一致 / 前方一致 / 部分一致)。並べる第 1 キーに使う。
+    ///
+    /// `spellings` は「その行の名前と言える綴り」だけを渡すこと (別名や CV 名まで入れると、
+    /// 別人の名前で完全一致が立つ)。当たっていることは呼び手が確かめてある前提で、
+    /// どの綴りとも頭が合わなければ部分一致を返す。
+    pub fn tier(&self, spellings: &[Option<&str>]) -> MatchTier {
+        let mut best = MatchTier::Substring;
+        for spelling in spellings.iter().filter_map(|s| *s) {
+            let folded = fold_lowercase(spelling);
+            if folded == self.folded {
+                return MatchTier::Exact;
+            }
+            if folded.starts_with(&self.folded) {
+                best = MatchTier::Prefix;
+            }
+        }
+        best
+    }
+}
+
+/// 当たり方の強さ。強い順に並ぶ (`Exact < Prefix < Substring`)。
+///
+/// 名前の曖昧解決 (`entity_resolution`) と横断検索 (`search_queries`) が同じ規則で並べる。
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum MatchTier {
+    /// 表記そのもの (畳み込み後) と一致。
+    Exact,
+    /// 表記の頭に付いている。
+    Prefix,
+    /// どこかに含まれる。
+    Substring,
 }
 
 // ---------------------------------------------------------------------------
