@@ -42,11 +42,11 @@ pub fn song_indexes(snap: &Snapshot, brand_id: Option<&str>) -> Vec<u32> {
         .collect()
 }
 
-/// 収録曲のある商品 (ブランド id)。`brands` の並び順で返す。
+/// 収録曲のある商品 (ブランド id)。ブランドの表示順 (`brands.sort_order`) で返す。
 pub fn brand_ids(snap: &Snapshot) -> Vec<String> {
-    snap.brands
+    snap.brand_order
         .iter()
-        .map(|b| b.id.as_str())
+        .map(|&b| snap.brands[b as usize].id.as_str())
         .filter(|b| !song_indexes(snap, Some(b)).is_empty())
         .map(str::to_string)
         .collect()
@@ -108,7 +108,9 @@ mod tests {
 
     fn snap() -> Snapshot {
         Snapshot {
-            brands: vec![brand("ml", 1), brand("sidem", 2), brand("cg", 3)],
+            // 配列の並びは表示順 (sort_order) とわざと違えてある。
+            brands: vec![brand("sidem", 2), brand("ml", 1), brand("cg", 3)],
+            brand_order: vec![1, 0, 2],
             songs: vec![
                 song("ml1", "ml", true),
                 song("ml2", "ml", true),
@@ -141,7 +143,7 @@ mod tests {
 
     #[test]
     fn brand_ids_lists_only_products_that_exist() {
-        // cg は収録曲が無いので商品として出さない。並びは brands の順。
+        // cg は収録曲が無いので商品として出さない。並びはブランドの表示順 (sort_order)。
         assert_eq!(brand_ids(&snap()), vec!["ml".to_string(), "sidem".to_string()]);
     }
 
