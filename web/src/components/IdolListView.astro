@@ -30,7 +30,7 @@ const { list } = Astro.props;
   filters={list.filters}
   wide
 >
-  <ListFilterBar kind="idols" queryBase={list.queryBase} total={list.total} />
+  <ListFilterBar kind="idols" queryBase={list.queryBase} fixedAxes={list.fixedAxes} total={list.total} />
   {
     list.empty ? (
       <EmptyState {...list.empty} />

@@ -28,7 +28,11 @@ const sectionStarts = new Set(list.kanaSections.map((s) => s.startIndex));
 >
   <KanaIndex sections={list.kanaSections} />
 
-  {list.queryBase && <ListFilterBar kind="songs" queryBase={list.queryBase} total={list.total} />}
+  {
+    list.queryBase && (
+      <ListFilterBar kind="songs" queryBase={list.queryBase} fixedAxes={list.fixedAxes} total={list.total} />
+    )
+  }
 
   {
     list.empty ? (

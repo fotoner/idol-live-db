@@ -122,6 +122,9 @@ web_dto! {
         /// 決めるため。JS 側で「/songs/ なら既定フィルタ」と書き直すと二重定義になる。
         /// 行を `ref` だけに削った一覧 (`/songs/all/`) には無い。
         pub query_base: Option<SongQuery>,
+        /// ページが値を決めている軸の鍵 (ブランド別の一覧の `brandIds`)。島はこの軸を出さない
+        /// (切り替えは畳んだメニューのリンク = 別のページ)。鍵は島の `FieldSpec.key` と同じ。
+        pub fixed_axes: Vec<String>,
         pub kana_sections: Vec<KanaSection>,
         /// 畳んだメニューにする軸 (ブランド)。
         pub filters: Vec<FilterAxis>,
@@ -289,10 +292,16 @@ web_dto! {
         /// 畳んだメニューにする軸 (ブランド・誕生月)。
         pub filters: Vec<FilterAxis>,
         pub total: u32,
-        /// この一覧を組んだときの条件。ブラウザの wasm がこれを土台に
-        /// 条件を足して `filter_idol_list` / `sort_idol_list` を回す
-        /// (曲一覧の `SongListPage.query_base` と同じ仕掛け)。
+        /// 島の絞り込みの土台。ブラウザの wasm がこれに入力された軸を足して
+        /// `filter_idol_list` / `sort_idol_list` を回す。
+        ///
+        /// **ブランドと誕生月は入れない。** この一覧の行は `idol_queries::idol_list` /
+        /// `idols_by_birth_month` が組んでいて (2 つ目のブランドのアイドルも載る)、島の条件
+        /// (主ブランドだけで当たる) で絞り直すと行が消える。島が絞る母集団はページの行で、
+        /// 土台は「ページの行を必ず含む」条件であればよい。
         pub query_base: IdolQuery,
+        /// ページが値を決めている軸の鍵 (`brandIds` / `birthMonth`)。島はこの軸を出さない。
+        pub fixed_axes: Vec<String>,
         /// 1 人も居ないときの案内。
         pub empty: Option<EmptyText>,
         pub seo: SeoBlock,

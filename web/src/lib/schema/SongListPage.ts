@@ -29,7 +29,12 @@ rowsAreLight: boolean,
  * 決めるため。JS 側で「/songs/ なら既定フィルタ」と書き直すと二重定義になる。
  * 行を `ref` だけに削った一覧 (`/songs/all/`) には無い。
  */
-queryBase: SongQuery | null, kanaSections: Array<KanaSection>, 
+queryBase: SongQuery | null, 
+/**
+ * ページが値を決めている軸の鍵 (ブランド別の一覧の `brandIds`)。島はこの軸を出さない
+ * (切り替えは畳んだメニューのリンク = 別のページ)。鍵は島の `FieldSpec.key` と同じ。
+ */
+fixedAxes: Array<string>, kanaSections: Array<KanaSection>, 
 /**
  * 畳んだメニューにする軸 (ブランド)。
  */

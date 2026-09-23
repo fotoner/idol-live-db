@@ -192,15 +192,16 @@
   ],
   "total": 2,
   "queryBase": {
-    "brandIds": [
-      "ml"
-    ],
+    "brandIds": [],
     "attribute": null,
     "birthMonth": null,
     "searchText": "",
     "sort": "",
     "ascending": null
   },
+  "fixedAxes": [
+    "brandIds"
+  ],
   "empty": null,
   "seo": {
     "title": "シンデレラガールズ のアイドル | アイドルライブDB",

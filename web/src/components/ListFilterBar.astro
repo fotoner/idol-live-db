@@ -15,11 +15,13 @@ import type { SongQuery } from "../lib/schema/SongQuery";
 interface Props {
   /** どの一覧か。島の実装をこれで選ぶ。 */
   kind: "songs" | "idols";
-  /** この一覧を組んだときの条件。Rust が `*ListPage.queryBase` で出す。 */
+  /** 島の絞り込みの土台。Rust が `*ListPage.queryBase` で出す (ページの行を必ず含む条件)。 */
   queryBase: SongQuery | IdolQuery;
+  /** ページが値を決めている軸 (島に出さない)。Rust の `*ListPage.fixedAxes`。 */
+  fixedAxes: readonly string[];
   total: number;
 }
-const { kind, queryBase, total } = Astro.props;
+const { kind, queryBase, fixedAxes, total } = Astro.props;
 ---
 
 <section
@@ -27,6 +29,7 @@ const { kind, queryBase, total } = Astro.props;
   data-list-filter
   data-filter-kind={kind}
   data-query-base={JSON.stringify(queryBase)}
+  data-fixed-axes={JSON.stringify(fixedAxes)}
   data-state="loading"
   hidden
 >

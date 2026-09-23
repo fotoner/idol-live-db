@@ -186,11 +186,14 @@
   "queryBase": {
     "brandIds": [],
     "attribute": null,
-    "birthMonth": 1,
+    "birthMonth": null,
     "searchText": "",
     "sort": "",
     "ascending": null
   },
+  "fixedAxes": [
+    "birthMonth"
+  ],
   "empty": null,
   "seo": {
     "title": "1月生まれのアイドル | アイドルライブDB",

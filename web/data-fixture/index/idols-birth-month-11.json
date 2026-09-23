@@ -186,11 +186,14 @@
   "queryBase": {
     "brandIds": [],
     "attribute": null,
-    "birthMonth": 11,
+    "birthMonth": null,
     "searchText": "",
     "sort": "",
     "ascending": null
   },
+  "fixedAxes": [
+    "birthMonth"
+  ],
   "empty": null,
   "seo": {
     "title": "11月生まれのアイドル | アイドルライブDB",

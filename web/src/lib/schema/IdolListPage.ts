@@ -29,11 +29,19 @@ nameColumn: IdolColumn,
  */
 filters: Array<FilterAxis>, total: number, 
 /**
- * この一覧を組んだときの条件。ブラウザの wasm がこれを土台に
- * 条件を足して `filter_idol_list` / `sort_idol_list` を回す
- * (曲一覧の `SongListPage.query_base` と同じ仕掛け)。
+ * 島の絞り込みの土台。ブラウザの wasm がこれに入力された軸を足して
+ * `filter_idol_list` / `sort_idol_list` を回す。
+ *
+ * **ブランドと誕生月は入れない。** この一覧の行は `idol_queries::idol_list` /
+ * `idols_by_birth_month` が組んでいて (2 つ目のブランドのアイドルも載る)、島の条件
+ * (主ブランドだけで当たる) で絞り直すと行が消える。島が絞る母集団はページの行で、
+ * 土台は「ページの行を必ず含む」条件であればよい。
  */
 queryBase: IdolQuery, 
+/**
+ * ページが値を決めている軸の鍵 (`brandIds` / `birthMonth`)。島はこの軸を出さない。
+ */
+fixedAxes: Array<string>, 
 /**
  * 1 人も居ないときの案内。
  */

@@ -186,11 +186,14 @@
   "queryBase": {
     "brandIds": [],
     "attribute": null,
-    "birthMonth": 5,
+    "birthMonth": null,
     "searchText": "",
     "sort": "",
     "ascending": null
   },
+  "fixedAxes": [
+    "birthMonth"
+  ],
   "empty": null,
   "seo": {
     "title": "5月生まれのアイドル | アイドルライブDB",

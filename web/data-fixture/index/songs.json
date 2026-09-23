@@ -66,6 +66,7 @@
     "sort": "kana",
     "ascending": null
   },
+  "fixedAxes": [],
   "kanaSections": [
     {
       "label": "さ",

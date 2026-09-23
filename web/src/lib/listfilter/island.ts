@@ -5,9 +5,12 @@
  * 呼び、返ってきた id の順に行を並べ替えて見せ隠しするだけ。アプリと同じ関数を
  * 通るので、当たり方も並びも食い違わない。
  *
- * 土台の条件 (`queryBase`) はページを組んだ Rust が出す。JS が
- * 「/songs/ なら既定フィルタ」と書き直すと、ページの中身と絞り込みの出発点が
- * 二重定義になる。
+ * **絞り込む母集団はページに描かれた行そのもの。** エンジンが返した id のうち、ページに無いものは
+ * 捨てる。土台の条件 (`queryBase`) は Rust が「ページの行を必ず含む」ように組んで出す
+ * (アイドルのブランド別ページには 2 つ目のブランドの人も載るので、ブランドで絞った条件を
+ * 土台にすると行が消える)。JS が「/songs/ なら既定フィルタ」と書き直すと二重定義になる。
+ * ページが値を決めている軸 (`fixedAxes`: ブランド別ページのブランド等) は島に出さない。
+ * 切り替えは畳んだメニューのリンク (= 別のページ) が受け持つ。
  *
  * 状態は URL のクエリに置く。戻る/進むで復元でき、絞った状態のまま共有できる
  * (「選択 = URL」という、この出面の基本を崩さない)。
@@ -98,6 +101,7 @@ export function mountListFilter<F>(
   const base = root.dataset.queryBase;
   const container = document.querySelector<HTMLElement>(spec.container);
   if (!base || !container) return;
+  const fixedAxes = new Set(JSON.parse(root.dataset.fixedAxes ?? "[]") as string[]);
 
   const el = {
     root,
@@ -139,7 +143,8 @@ export function mountListFilter<F>(
     try {
       engine = await loadEngine();
       const facets = spec.facets(engine);
-      fields = spec.fields(facets);
+      // ページが決めている軸 (ブランド別ページのブランド・誕生月別ページの誕生月) は出さない。
+      fields = spec.fields(facets).filter((f) => !fixedAxes.has(f.key));
       sorts = spec.sorts(facets);
       // 軸が確定してから URL を読む (未知の鍵を拾わない)。
       state = readUrl(fields, spec.fallbackSort);
@@ -148,11 +153,7 @@ export function mountListFilter<F>(
       bindSortHeaders();
       renderSorts();
       setEnabled(true);
-      // 開いた直後が既定の状態 (絞り込みなし・既定の並び・向きの指定なし) なら、行は
-      // Rust が組んだ順のまま正しい。数千行を同じ順に付け替えるだけの DOM 移動をしない。
-      if (isNarrowed(fields, state) || state.__sort !== spec.fallbackSort || state.__ascending !== null) {
-        apply();
-      }
+      apply();
     } catch (e) {
       // 絞り込めないだけで一覧は読める。壊れた見た目のまま黙らない。
       el.status.textContent = "絞り込みを読み込めませんでした。再読み込みしてください。";
@@ -191,9 +192,8 @@ export function mountListFilter<F>(
   function apply(): void {
     if (!engine) return;
 
-    // 土台 (ページを組んだ条件) に、**入力のあった軸だけ**を重ねる。
-    // 空の軸で土台を上書きしない (ブランド別ページで名前を打った瞬間に
-    // 全ブランドへ広がってしまう)。
+    // 土台 (ページの行を必ず含む条件) に、**入力のあった軸だけ**を重ねる。
+    // 空の軸で土台を上書きしない。返ってきた id のうちページに無いものは下で捨てる。
     const query = {
       ...baseQuery,
       ...filled(fields, state),
@@ -210,26 +210,37 @@ export function mountListFilter<F>(
       return;
     }
 
-    // 返ってきた順に並べ、載っていない行は隠す。
-    const shown = new Set(ids);
-    const frag = document.createDocumentFragment();
-    let visible = 0;
+    // 返ってきた順に並べ、載っていない行は隠す。ページに無い id (母集団の外) は無視する。
+    const order: HTMLElement[] = [];
     for (const id of ids) {
       const row = rows.get(id);
-      if (!row) continue; // 一覧に載っていない行 (土台の外) は無視する。
-      row.hidden = false;
-      frag.appendChild(row);
-      visible += 1;
+      if (row) order.push(row);
     }
-    for (const [id, row] of rows) if (!shown.has(id)) row.hidden = true;
-    // appendChild で frag は空になるので、件数はここへ来る前に数えておく。
-    el.container.appendChild(frag);
+    const visible = order.length;
+    // 並びも見え方も今と同じなら DOM を動かさない (開いた直後の既定の状態がほとんどこれ。
+    // 数千行を同じ順に付け替えるだけの移動をしない)。
+    if (!sameAsShown(order)) {
+      const shown = new Set(order);
+      const frag = document.createDocumentFragment();
+      for (const row of order) {
+        row.hidden = false;
+        frag.appendChild(row);
+      }
+      for (const row of rows.values()) if (!shown.has(row)) row.hidden = true;
+      el.container.appendChild(frag);
+    }
 
     const narrowed = isNarrowed(fields, state);
     el.status.textContent = narrowed ? `${visible} 件 / ${total} 件` : `${total} 件`;
     el.root.dataset.filtered = String(narrowed);
     spec.onApply?.({ narrowed, sort: state.__sort, ascending: state.__ascending });
     writeUrl(fields, state, spec.fallbackSort);
+  }
+
+  /** 今見えている行が、この順のまま `order` と同じか。 */
+  function sameAsShown(order: readonly HTMLElement[]): boolean {
+    const shown = [...el.container.querySelectorAll<HTMLElement>(spec.item)].filter((r) => !r.hidden);
+    return shown.length === order.length && shown.every((row, i) => row === order[i]);
   }
 
   // --- 描画 ---------------------------------------------------------------

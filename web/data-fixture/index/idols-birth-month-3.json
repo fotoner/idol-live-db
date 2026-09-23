@@ -186,11 +186,14 @@
   "queryBase": {
     "brandIds": [],
     "attribute": null,
-    "birthMonth": 3,
+    "birthMonth": null,
     "searchText": "",
     "sort": "",
     "ascending": null
   },
+  "fixedAxes": [
+    "birthMonth"
+  ],
   "empty": null,
   "seo": {
     "title": "3月生まれのアイドル | アイドルライブDB",

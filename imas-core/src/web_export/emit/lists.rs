@@ -481,6 +481,15 @@ fn kana_sections_of(sources: impl Iterator<Item = String>) -> Vec<KanaSection> {
 
 
 
+/// 島 (絞り込みバー) の軸の鍵。`web/src/lib/listfilter/*.ts` の `FieldSpec.key` と同じ文字列。
+const ISLAND_KEY_BRAND: &str = "brandIds";
+const ISLAND_KEY_BIRTH_MONTH: &str = "birthMonth";
+
+/// ページが値を決めている軸だけを並べる (島に出さない軸)。
+fn fixed_axes(axes: impl IntoIterator<Item = (bool, &'static str)>) -> Vec<String> {
+    axes.into_iter().filter(|&(fixed, _)| fixed).map(|(_, key)| key.to_string()).collect()
+}
+
 pub fn song_lists(ctx: &Ctx) -> Vec<Emitted<SongListPage>> {
     let total_all = ctx.snap.songs.len() as u32;
     // 既定フィルタを通した件数。ブランド切替の「すべて」に出す数はこれ
@@ -539,6 +548,7 @@ pub fn song_lists(ctx: &Ctx) -> Vec<Emitted<SongListPage>> {
                 kind,
                 brand,
                 rows_are_light: light,
+                fixed_axes: fixed_axes([(!base.brand_ids.is_empty(), ISLAND_KEY_BRAND)]),
                 query_base,
                 kana_sections: kana_sections(ctx, &items),
                 total: items.len() as u32,
@@ -553,7 +563,7 @@ pub fn song_lists(ctx: &Ctx) -> Vec<Emitted<SongListPage>> {
                     content::FILTER_AXIS_BRAND,
                     brand_links(ctx, "songs", &path, "すべて", listed_total),
                 )
-                .also_in_island("brandIds")]),
+                .also_in_island(ISLAND_KEY_BRAND)]),
                 seo,
             },
         }
@@ -846,27 +856,27 @@ pub fn idol_lists(ctx: &Ctx) -> Vec<Emitted<IdolListPage>> {
                 birth_month,
                 total: items.len() as u32,
                 empty: content::empty_text(items.is_empty(), content::EMPTY_IDOLS, Some(content::EMPTY_IDOLS_BODY)),
-                // 絞り込みの出発点。ページの中身を決めた条件をそのまま渡す
-                // (JS 側で「/idols/brand/cg/ ならブランド cg」と書き直すと二重定義になる)。
-                query_base: IdolQuery {
-                    brand_ids: brand_id.iter().cloned().collect(),
-                    birth_month,
-                    ..IdolQuery::default()
-                },
+                // 島の土台はページの行を必ず含む条件 (ブランド・誕生月で絞らない)。どの軸を
+                // ページが決めているかは `fixed_axes` で渡す (JS 側で URL から推し量らない)。
+                query_base: IdolQuery::default(),
+                fixed_axes: fixed_axes([
+                    (brand_id.is_some(), ISLAND_KEY_BRAND),
+                    (birth_month.is_some(), ISLAND_KEY_BIRTH_MONTH),
+                ]),
                 items,
                 columns,
                 name_column: column(content::IDOL_COLUMN_NAME, false, Some(IdolSortKind::NameKana)),
                 // 島 (絞り込みバー) が同じ 2 軸を持つので、島が動く環境では隠れる。
-                // 鍵は `web/src/lib/listfilter/idols.ts` の `FieldSpec.key` と揃える。
+                // ページが決めている軸 (`fixed_axes`) は島に出ないので、そのメニューは残る。
                 filters: filter_axes([
                     FilterAxis::new(content::FILTER_AXIS_BRAND, brand_links(ctx, "idols", &path, "すべて", all_total))
-                        .also_in_island("brandIds"),
+                        .also_in_island(ISLAND_KEY_BRAND),
                     FilterAxis::new(content::FILTER_AXIS_BIRTH_MONTH, {
                         let mut links = birth_month_links.clone();
                         mark_current(&mut links, &path);
                         links
                     })
-                    .also_in_island("birthMonth"),
+                    .also_in_island(ISLAND_KEY_BIRTH_MONTH),
                 ]),
                 seo: ctx.seo(
                     &title,

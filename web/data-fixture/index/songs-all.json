@@ -50,6 +50,7 @@
   ],
   "rowsAreLight": true,
   "queryBase": null,
+  "fixedAxes": [],
   "kanaSections": [
     {
       "label": "さ",

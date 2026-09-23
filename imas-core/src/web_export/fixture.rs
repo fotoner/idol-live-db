@@ -1030,8 +1030,14 @@ fn song_list_page(path: &str, title: &str, kind: SongListKind) -> SongListPage {
         brand: if matches!(kind, SongListKind::Brand) { Some(brand_ml()) } else { None },
         rows_are_light: matches!(kind, SongListKind::All),
         // 代表値でも本番と同じ関数を通す (フィクスチャだけ違うキーが出ない)。
-        query_base: (!matches!(kind, SongListKind::All))
-            .then(|| SongQuery::from_filter(&SongListFilter::default())),
+        // ブランド別の一覧はブランドの軸をページが決めている (本番と同じ組み方)。
+        query_base: (!matches!(kind, SongListKind::All)).then(|| {
+            SongQuery::from_filter(&SongListFilter {
+                brand_ids: if matches!(kind, SongListKind::Brand) { vec![brand_ml().id] } else { vec![] },
+                ..SongListFilter::default()
+            })
+        }),
+        fixed_axes: if matches!(kind, SongListKind::Brand) { vec!["brandIds".to_string()] } else { vec![] },
         kana_sections: vec![
             KanaSection { label: "さ".to_string(), start_index: 0 },
             KanaSection { label: "英数".to_string(), start_index: 1 },
@@ -1104,19 +1110,12 @@ fn idol_list_page(path: &str, title: &str, kind: IdolListKind, empty: bool) -> I
         } else {
             None
         },
-        // 代表値でも本番と同じ組み方 (ページを決めた条件がそのまま土台)。
-        query_base: IdolQuery {
-            brand_ids: if matches!(kind, IdolListKind::Brand) {
-                vec![brand_ml().id]
-            } else {
-                vec![]
-            },
-            birth_month: if matches!(kind, IdolListKind::BirthMonth) {
-                path.trim_end_matches('/').rsplit('/').next().and_then(|m| m.parse().ok())
-            } else {
-                None
-            },
-            ..IdolQuery::default()
+        // 代表値でも本番と同じ組み方 (土台は絞らず、ページが決めている軸は `fixed_axes`)。
+        query_base: IdolQuery::default(),
+        fixed_axes: match kind {
+            IdolListKind::Brand => vec!["brandIds".to_string()],
+            IdolListKind::BirthMonth => vec!["birthMonth".to_string()],
+            IdolListKind::Index => vec![],
         },
         items: if empty {
             vec![]

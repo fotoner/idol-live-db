@@ -58,7 +58,9 @@
   ],
   "rowsAreLight": false,
   "queryBase": {
-    "brandIds": [],
+    "brandIds": [
+      "ml"
+    ],
     "title": null,
     "idolName": null,
     "idolIds": [],
@@ -74,6 +76,9 @@
     "sort": "kana",
     "ascending": null
   },
+  "fixedAxes": [
+    "brandIds"
+  ],
   "kanaSections": [
     {
       "label": "さ",

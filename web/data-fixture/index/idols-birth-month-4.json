@@ -149,11 +149,14 @@
   "queryBase": {
     "brandIds": [],
     "attribute": null,
-    "birthMonth": 4,
+    "birthMonth": null,
     "searchText": "",
     "sort": "",
     "ascending": null
   },
+  "fixedAxes": [
+    "birthMonth"
+  ],
   "empty": {
     "title": "該当するアイドルがいません",
     "body": "別のブランドや誕生月に切り替えてみてください。"
