@@ -18,7 +18,6 @@ web_dto! {
         pub brand: Option<Ref>,
         /// `idol_brands` (primary 先頭)。掛け持ちのアイドルが居る。
         pub brands: Vec<Ref>,
-        pub color: Option<String>,
         /// `screen_composition::idol_profile_rows` の結果。
         /// **並べる判断はコアが持つ**ので、web は行を上から出すだけ。
         pub profile_rows: Vec<ProfileRow>,
@@ -61,9 +60,6 @@ web_dto! {
     #[derive(Eq)]
     pub struct VoiceActorRow {
         pub name: String,
-        pub start_date: Option<String>,
-        pub end_date: Option<String>,
-        pub is_current: bool,
         /// 行の見出し (「現任」/「歴代」)。
         pub label: String,
         /// 1 行で出すときの表記 (名前と在任期間を `" ・ "` で繋いだもの)。

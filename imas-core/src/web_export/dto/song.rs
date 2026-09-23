@@ -32,18 +32,11 @@ web_dto! {
         /// 曲種別の表示名 (`全体曲` / `ソロ曲` …)。語彙に無い値なら `None`。
         pub song_type_label: Option<String>,
         pub release_date: Option<String>,
-        /// `"4:32"`。整形だけなのでここで作る。
-        pub duration_display: Option<String>,
         /// `credit_names::split_credits` 済み。
         pub credits: Vec<CreditGroup>,
-        pub cd_title: Option<String>,
-        /// 「シリーズ」行に出す 1 つの値 (`cd_series` が無ければ `series_group`)。
-        /// どちらを優先するかは表示の判断なので Rust 側で解決しておく。
-        pub series_display: Option<String>,
         /// Apple Music CDN。サイト唯一の外部画像。
         pub artwork_url: Option<String>,
         pub apple_music_url: Option<String>,
-        pub jasrac_code: Option<String>,
         pub original_artists: Vec<Ref>,
         pub other_artists: Vec<Ref>,
         pub unit: Option<Ref>,

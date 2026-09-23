@@ -11,11 +11,7 @@ import type { SeoBlock } from "./SeoBlock";
 /**
  * アイドル一覧ページ。`/idols/` `/idols/brand/<brandId>/` `/idols/birth-month/<m>/`。
  */
-export type IdolListPage = { schemaVersion: number, path: string, title: string, kind: IdolListKind, brand: Ref | null, 
-/**
- * 誕生月別のときだけ入る (1–12)。
- */
-birthMonth: number | null, items: Array<IdolListItem>, 
+export type IdolListPage = { schemaVersion: number, path: string, title: string, kind: IdolListKind, brand: Ref | null, items: Array<IdolListItem>, 
 /**
  * 表の見出し (名前の列の次から)。全行が空になる列は出さない。
  */

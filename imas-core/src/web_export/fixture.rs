@@ -275,7 +275,6 @@ fn site_meta() -> SiteMeta {
         today_jst: TODAY.to_string(),
         data_version: Some("2026090401".to_string()),
         content_hash: Some("6c41f0e2b9d4a7c8e5f1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7".to_string()),
-        counts: counts(),
         app: content::app_links(),
         // 代表値でも本番と同じ関数を通す (フィクスチャだけ違う文言が出ない)。
         performer_name_options: super::emit::performer_name_options(),
@@ -552,7 +551,6 @@ fn show_page() -> ShowPage {
                 description: Some("白基調にブランドカラーのライン".to_string()),
                 source_url: Some("https://example.com/costume".to_string()),
                 where_label: "1 曲目".to_string(),
-                wearers_label: None,
             },
             // 人ごとに違う衣装 (ソロコーナー)。曲までは特定できていない記録。
             ShowCostume {
@@ -562,7 +560,6 @@ fn show_page() -> ShowPage {
                 description: None,
                 source_url: None,
                 where_label: "公演のどこか".to_string(),
-                wearers_label: Some("春日未来".to_string()),
             },
         ],
         cast: vec![idol_mirai(), idol_shizuka()],
@@ -588,7 +585,6 @@ fn song_page(reference: &Ref, minimal: bool) -> SongPage {
             status_label: content::lyrics_status_label(),
             note: content::lyrics_note(),
             // 掲示するのは出面の許諾番号だけ (アプリの番号を出面に掲示しない)。
-            license_number: content::web_license_number().map(str::to_string),
             license_note: content::web_license_number().map(content::lyrics_on_web_note),
             source_url: content::LYRICS_ON_WEB
                 .then(|| format!("{}/songs/ml_mirai/lyrics", content::API_ORIGIN)),
@@ -616,7 +612,6 @@ fn song_page(reference: &Ref, minimal: bool) -> SongPage {
         song_type_label: content::song_type_label(if minimal { "cover" } else { "all" })
             .map(str::to_string),
         release_date: if minimal { None } else { Some("2019-03-13".to_string()) },
-        duration_display: if minimal { None } else { Some("4:32".to_string()) },
         credits: if minimal {
             vec![]
         } else {
@@ -631,15 +626,12 @@ fn song_page(reference: &Ref, minimal: bool) -> SongPage {
                 },
             ]
         },
-        series_display: if minimal { None } else { Some("THE IDOLM@STER MILLION THE@TER WAVE".to_string()) },
-        cd_title: if minimal { None } else { Some("Thank You!".to_string()) },
         artwork_url: reference.artwork_url.clone(),
         apple_music_url: if minimal {
             None
         } else {
             Some("https://music.apple.com/jp/song/1451234567".to_string())
         },
-        jasrac_code: if minimal { None } else { Some("123-4567-8".to_string()) },
         original_artists: if minimal { vec![] } else { vec![idol_mirai(), idol_shizuka()] },
         other_artists: vec![],
         unit: if minimal { None } else { Some(unit_sample()) },
@@ -734,7 +726,6 @@ fn idol_page(reference: &Ref) -> IdolPage {
         theme_key: reference.theme_key.clone(),
         brand: Some(brand_ml()),
         brands: vec![brand_ml()],
-        color: Some("#f39800".to_string()),
         profile_rows: vec![
             ProfileRow {
                 label: "よみ".to_string(),
@@ -803,7 +794,6 @@ fn unit_page(reference: &Ref, empty: bool) -> UnitPage {
         name_kana: if empty { None } else { Some("さんぷるゆにっと".to_string()) },
         name_alt: if empty { None } else { Some("Sample Unit".to_string()) },
         theme_key: reference.theme_key.clone(),
-        is_permanent: !empty,
         kind_label: content::unit_kind_label(!empty).to_string(),
         brand: if empty { None } else { Some(brand_ml()) },
         members: if empty { vec![] } else { vec![idol_mirai(), idol_shizuka()] },
@@ -831,10 +821,8 @@ fn venue_page(reference: &Ref, minimal: bool) -> VenuePage {
         theme_key: "neutral".to_string(),
         // 都道府県が空の会場が 35 件ある。一覧では「未分類」に集める。
         prefecture: if minimal { None } else { Some("千葉県".to_string()) },
-        city: if minimal { None } else { Some("千葉市美浜区".to_string()) },
         location_display: if minimal { None } else { Some("千葉県 千葉市美浜区".to_string()) },
         capacity: if minimal { None } else { Some(9000) },
-        aliases_display: if minimal { None } else { Some("幕張".to_string()) },
         halls: if minimal {
             vec![]
         } else {
@@ -845,8 +833,6 @@ fn venue_page(reference: &Ref, minimal: bool) -> VenuePage {
         } else {
             vec![VenueNameRow {
                 name: "日本コンベンションセンター".to_string(),
-                start_date: None,
-                end_date: Some("1999-03-31".to_string()),
                 period_display: Some("〜 1999-03-31".to_string()),
             }]
         },
@@ -1106,12 +1092,6 @@ fn idol_list_page(path: &str, title: &str, kind: IdolListKind, empty: bool) -> I
         title: title.to_string(),
         kind,
         brand: if matches!(kind, IdolListKind::Brand) { Some(brand_ml()) } else { None },
-        birth_month: if matches!(kind, IdolListKind::BirthMonth) {
-            // path から月を読み戻す (代表値では 1〜12 のページを全部出す)。
-            path.trim_end_matches('/').rsplit('/').next().and_then(|m| m.parse().ok())
-        } else {
-            None
-        },
         // 代表値でも本番と同じ組み方 (土台は絞らず、ページが決めている軸は `fixed_axes`)。
         query_base: IdolQuery::default(),
         fixed_axes: match kind {
@@ -1411,7 +1391,6 @@ fn venue_list_page(path: &str, title: &str, prefecture: Option<&str>) -> VenueLi
             VenueListItem {
                 reference: venue_sample(),
                 prefecture: Some("千葉県".to_string()),
-                city: Some("千葉市美浜区".to_string()),
                 location_display: Some("千葉県 千葉市美浜区".to_string()),
                 capacity: Some(9000),
                 show_count: 24,
@@ -1419,7 +1398,6 @@ fn venue_list_page(path: &str, title: &str, prefecture: Option<&str>) -> VenueLi
             VenueListItem {
                 reference: venue_broken_id(),
                 prefecture: None,
-                city: None,
                 location_display: None,
                 capacity: None,
                 show_count: 1,

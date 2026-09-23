@@ -20,8 +20,4 @@ sourceUrl: string | null,
  * **文にするのは Rust の仕事。** 曲番号の列を持たせて出面で繋ぐと、
  * 区切りも「どこかで着た」の言い方も画面ごとに割れる。
  */
-whereLabel: string, 
-/**
- * 着ていた人の 1 行。共通衣装なら `None` (「全員」とは書かない)。
- */
-wearersLabel: string | null, };
+whereLabel: string, };

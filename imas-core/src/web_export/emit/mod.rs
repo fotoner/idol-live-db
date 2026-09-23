@@ -392,7 +392,6 @@ fn write_all(
             today_jst: ctx.today.clone(),
             data_version: ctx.data_version.clone(),
             content_hash: ctx.content_hash.clone(),
-            counts,
             app: crate::web_export::content::app_links(),
             performer_name_options: performer_name_options(),
             primary_nav: lists::primary_nav(has_polls, has_calls),

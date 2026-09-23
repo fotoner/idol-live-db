@@ -14,10 +14,6 @@ targetLabel: string,
  */
 endsOn: string | null, 
 /**
- * 締切前か。**判定は Rust** (TS に `new Date()` を書かせない)。
- */
-isOpen: boolean, 
-/**
  * 締切の日付に添える語 (締切前は「締切」、過ぎたら「終了」)。無期限なら `None`。
  */
 endsLabel: string | null, totalVotes: number, 

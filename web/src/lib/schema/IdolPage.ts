@@ -23,7 +23,7 @@ tags: Array<TagChipDto>, brand: Ref | null,
 /**
  * `idol_brands` (primary 先頭)。掛け持ちのアイドルが居る。
  */
-brands: Array<Ref>, color: string | null, 
+brands: Array<Ref>, 
 /**
  * `screen_composition::idol_profile_rows` の結果。
  * **並べる判断はコアが持つ**ので、web は行を上から出すだけ。

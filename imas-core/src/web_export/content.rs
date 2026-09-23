@@ -505,7 +505,6 @@ pub fn about_sections() -> Vec<AboutSection> {
             links: vec![AboutLink {
                 label: "App Store でアプリを見る".to_string(),
                 href: APP_STORE_URL.to_string(),
-                external: true,
             }],
         },
         AboutSection {
@@ -514,10 +513,10 @@ pub fn about_sections() -> Vec<AboutSection> {
                 app_note(),
             ],
             links: vec![
-                AboutLink { label: "X (@idollivedb)".to_string(), href: X_URL.to_string(), external: true },
-                AboutLink { label: "プライバシーポリシー".to_string(), href: PRIVACY_URL.to_string(), external: true },
-                AboutLink { label: "サポート".to_string(), href: SUPPORT_URL.to_string(), external: true },
-                AboutLink { label: "利用規約".to_string(), href: TERMS_URL.to_string(), external: true },
+                AboutLink { label: "X (@idollivedb)".to_string(), href: X_URL.to_string() },
+                AboutLink { label: "プライバシーポリシー".to_string(), href: PRIVACY_URL.to_string() },
+                AboutLink { label: "サポート".to_string(), href: SUPPORT_URL.to_string() },
+                AboutLink { label: "利用規約".to_string(), href: TERMS_URL.to_string() },
             ],
         },
         AboutSection {
@@ -531,7 +530,6 @@ pub fn about_sections() -> Vec<AboutSection> {
                 label: "SIL Open Font License 1.1 (全文)".to_string(),
                 href: FONT_LICENSE_URL.to_string(),
                 // 配布物に同梱しているので同一サイト内。
-                external: false,
             }],
         },
         AboutSection {
@@ -542,7 +540,6 @@ pub fn about_sections() -> Vec<AboutSection> {
             links: vec![AboutLink {
                 label: "GitHub リポジトリ".to_string(),
                 href: REPOSITORY_URL.to_string(),
-                external: true,
             }],
         },
     ]

@@ -33,7 +33,6 @@ web_dto! {
         pub today_jst: String,
         pub data_version: Option<String>,
         pub content_hash: Option<String>,
-        pub counts: Counts,
         pub app: AppLinks,
         /// セトリの歌唱者をどの名前で出すかの選択肢 (順・保存値・文言)。
         ///
@@ -550,8 +549,6 @@ web_dto! {
         pub status_label: Option<String>,
         /// 出さないときの案内文 (アプリへ誘導する)。
         pub note: String,
-        /// 出すときに必ず掲示する許諾番号。
-        pub license_number: Option<String>,
         /// 出すときに添える説明 (許諾番号つき)。
         pub license_note: Option<String>,
         /// 歌詞 1 曲の取得先 (絶対 URL)。**1 曲ぶんだけ返る。**

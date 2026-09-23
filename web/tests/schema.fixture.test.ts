@@ -192,7 +192,7 @@ describe("絶対制約: 歌詞の本文とプレビュー音源を出力に含�
   // callGuide は記号・札・凡例の語彙 (Rust content::call_guide_vocabulary) で、本文ではない。
   // `statusLabel` は状態の札 (`JASRAC 許諾待ち`) で、歌詞そのものではない。
   const LYRICS_BLOCK_KEYS = new Set([
-    "available", "statusLabel", "note", "licenseNumber", "licenseNote", "sourceUrl", "readLabel",
+    "available", "statusLabel", "note", "licenseNote", "sourceUrl", "readLabel",
     "callGuide",
   ]);
 

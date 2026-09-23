@@ -51,7 +51,6 @@
     "available": false,
     "statusLabel": "JASRAC 許諾待ち",
     "note": "本サイトでの歌詞の掲載には JASRAC の許諾が別に必要なため、いまは見合わせています。歌詞はアプリ『アイドルライブDB』でご覧いただけます（アプリは JASRAC 許諾番号 J260943703 のもとで歌詞を配信しています）。",
-    "licenseNumber": null,
     "licenseNote": null,
     "sourceUrl": null,
     "readLabel": null,
@@ -59,7 +58,6 @@
   },
   "songTypeLabel": "ソロ曲",
   "releaseDate": "2019-03-13",
-  "durationDisplay": "4:32",
   "credits": [
     {
       "role": "作詞",
@@ -70,11 +68,8 @@
       "display": "睦月周平 / EFFY"
     }
   ],
-  "cdTitle": "Thank You!",
-  "seriesDisplay": "THE IDOLM@STER MILLION THE@TER WAVE",
   "artworkUrl": null,
   "appleMusicUrl": "https://music.apple.com/jp/song/1451234567",
-  "jasracCode": "123-4567-8",
   "originalArtists": [
     {
       "kind": "idol",

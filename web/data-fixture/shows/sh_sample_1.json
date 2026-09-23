@@ -244,8 +244,7 @@
       "attribution": null,
       "description": "白基調にブランドカラーのライン",
       "sourceUrl": "https://example.com/costume",
-      "whereLabel": "1 曲目",
-      "wearersLabel": null
+      "whereLabel": "1 曲目"
     },
     {
       "id": "cos_sample_solo",
@@ -253,8 +252,7 @@
       "attribution": "春日未来",
       "description": null,
       "sourceUrl": null,
-      "whereLabel": "公演のどこか",
-      "wearersLabel": "春日未来"
+      "whereLabel": "公演のどこか"
     }
   ],
   "siblingShows": [

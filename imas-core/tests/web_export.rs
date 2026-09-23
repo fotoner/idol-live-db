@@ -186,11 +186,10 @@ fn t12_no_lyrics_or_preview_audio_anywhere_in_the_output() {
     /// `callGuide` はコールガイドの語彙 (記号・札・凡例の語。`content::call_guide_vocabulary`) で、
     /// 歌詞にもコールの本文にも触れない。
     /// `statusLabel` は状態の札 (`JASRAC 許諾待ち`) で、歌詞そのものではない。
-    const LYRICS_BLOCK_KEYS: [&str; 8] = [
+    const LYRICS_BLOCK_KEYS: [&str; 7] = [
         "available",
         "statusLabel",
         "note",
-        "licenseNumber",
         "licenseNote",
         "sourceUrl",
         "readLabel",
@@ -324,10 +323,10 @@ fn fixture_covers_the_boundary_cases_the_web_needs() {
     assert!(no_art.lyrics.note.contains("J260943703"));
     if no_art.lyrics.available {
         assert!(no_art.lyrics.source_url.is_some(), "出すなら取得先が要る");
-        assert!(no_art.lyrics.license_number.is_some(), "出すなら許諾番号の掲示が要る");
+        assert!(no_art.lyrics.license_note.is_some(), "出すなら許諾番号の掲示が要る");
     } else {
         assert!(no_art.lyrics.source_url.is_none(), "出さないなら取得先を配らない");
-        assert!(no_art.lyrics.license_number.is_none());
+        assert!(no_art.lyrics.license_note.is_none());
     }
 
     // 歌唱メンバーが空のセトリ行。
@@ -1408,7 +1407,7 @@ mod real {
             .iter()
             .find(|l| l.href == "/fonts/OFL.txt")
             .expect("OFL 全文へのリンクが無い");
-        assert!(!link.external, "同梱物なので外部リンクにしない");
+        assert!(link.href.starts_with('/'), "同梱物なので自サイトの path で指す");
 
         // 配布物にライセンス文が実在すること (リンク切れは OFL 違反になる)。
         let ofl = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -1590,7 +1589,6 @@ mod real {
         // 生成時刻は today から作る (実時刻だと 2 回の実行でバイト一致しない)。
         assert_eq!(meta.generated_at, format!("{TODAY}T00:00:00Z"));
         assert!(meta.data_version.is_some(), "data_version が meta に無い");
-        assert_eq!(meta.counts.songs, snap().songs.len() as u32);
     }
 
     #[test]

@@ -49,22 +49,13 @@ lyrics: LyricsBlock,
  */
 songTypeLabel: string | null, releaseDate: string | null, 
 /**
- * `"4:32"`。整形だけなのでここで作る。
- */
-durationDisplay: string | null, 
-/**
  * `credit_names::split_credits` 済み。
  */
-credits: Array<CreditGroup>, cdTitle: string | null, 
-/**
- * 「シリーズ」行に出す 1 つの値 (`cd_series` が無ければ `series_group`)。
- * どちらを優先するかは表示の判断なので Rust 側で解決しておく。
- */
-seriesDisplay: string | null, 
+credits: Array<CreditGroup>, 
 /**
  * Apple Music CDN。サイト唯一の外部画像。
  */
-artworkUrl: string | null, appleMusicUrl: string | null, jasracCode: string | null, originalArtists: Array<Ref>, otherArtists: Array<Ref>, unit: Ref | null, 
+artworkUrl: string | null, appleMusicUrl: string | null, originalArtists: Array<Ref>, otherArtists: Array<Ref>, unit: Ref | null, 
 /**
  * `songs.unit_name` (マスタに無いユニット表記)。
  */

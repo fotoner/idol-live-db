@@ -3,8 +3,4 @@
 /**
  * About から外に出るリンク。
  */
-export type AboutLink = { label: string, href: string, 
-/**
- * 外部サイトか (`rel="noopener"` と外部アイコンの材料)。
- */
-external: boolean, };
+export type AboutLink = { label: string, href: string, };

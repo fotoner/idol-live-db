@@ -84,8 +84,7 @@
       "links": [
         {
           "label": "App Store でアプリを見る",
-          "href": "https://apps.apple.com/jp/app/id6763342297",
-          "external": true
+          "href": "https://apps.apple.com/jp/app/id6763342297"
         }
       ]
     },
@@ -97,23 +96,19 @@
       "links": [
         {
           "label": "X (@idollivedb)",
-          "href": "https://x.com/idollivedb",
-          "external": true
+          "href": "https://x.com/idollivedb"
         },
         {
           "label": "プライバシーポリシー",
-          "href": "https://fuga-if.github.io/imas-live-privacy/privacy.html",
-          "external": true
+          "href": "https://fuga-if.github.io/imas-live-privacy/privacy.html"
         },
         {
           "label": "サポート",
-          "href": "https://fuga-if.github.io/imas-live-privacy/support.html",
-          "external": true
+          "href": "https://fuga-if.github.io/imas-live-privacy/support.html"
         },
         {
           "label": "利用規約",
-          "href": "https://fuga-if.github.io/imas-live-privacy/terms.html",
-          "external": true
+          "href": "https://fuga-if.github.io/imas-live-privacy/terms.html"
         }
       ]
     },
@@ -126,8 +121,7 @@
       "links": [
         {
           "label": "SIL Open Font License 1.1 (全文)",
-          "href": "/fonts/OFL.txt",
-          "external": false
+          "href": "/fonts/OFL.txt"
         }
       ]
     },
@@ -139,8 +133,7 @@
       "links": [
         {
           "label": "GitHub リポジトリ",
-          "href": "https://github.com/fuga-if/idol-live-db",
-          "external": true
+          "href": "https://github.com/fuga-if/idol-live-db"
         }
       ]
     }

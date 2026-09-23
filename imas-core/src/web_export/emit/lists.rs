@@ -853,7 +853,6 @@ pub fn idol_lists(ctx: &Ctx) -> Vec<Emitted<IdolListPage>> {
                 title: title.clone(),
                 kind,
                 brand,
-                birth_month,
                 total: items.len() as u32,
                 empty: content::empty_text(items.is_empty(), content::EMPTY_IDOLS, Some(content::EMPTY_IDOLS_BODY)),
                 // 島の土台はページの行を必ず含む条件 (ブランド・誕生月で絞らない)。どの軸を
@@ -1091,7 +1090,6 @@ pub fn venue_lists(ctx: &Ctx) -> Vec<Emitted<VenueListPage>> {
             reference: ctx.venue_ref(&v.id)?,
             location_display: location_display(v.prefecture.as_deref(), v.city.as_deref()),
             prefecture: v.prefecture.clone(),
-            city: v.city.clone(),
             capacity: v.capacity.map(|c| c as i32),
             show_count: show_counts.get(v.id.as_str()).copied().unwrap_or(0),
         })
@@ -1258,7 +1256,6 @@ pub fn poll_list(ctx: &Ctx) -> PollListPage {
                 // 時刻は落として日付だけ見せる (分単位の締切に意味は無い)。
                 ends_on: poll.ends_at.as_ref().map(|e| e[..10.min(e.len())].to_string()),
                 // 締切前か。`ends_at` が無いお題は開いたまま。
-                is_open,
                 ends_label: poll.ends_at.as_ref().map(|_| content::poll_ends_label(is_open).to_string()),
                 total_votes: all.iter().map(|e| e.vote_count.max(0) as u32).sum(),
                 entries,

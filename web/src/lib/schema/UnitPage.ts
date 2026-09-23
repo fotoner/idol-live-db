@@ -14,10 +14,6 @@ export type UnitPage = { schemaVersion: number, id: string, path: string, name: 
  */
 nameAlt: string | null, themeKey: string, 
 /**
- * 常設ユニットか (false = ライブ限定などの期間限定)。
- */
-isPermanent: boolean, 
-/**
  * その言い方 (「常設ユニット」/「公演限定」)。一覧の札と同じ語 (`content::unit_kind_label`)。
  */
 kindLabel: string, 

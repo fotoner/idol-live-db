@@ -51,8 +51,6 @@ impl VenueDirectory {
                 .map(|n| VenueNameRow {
                     period_display: period_display(n.valid_from.as_deref(), n.valid_to.as_deref()),
                     name: n.name,
-                    start_date: n.valid_from,
-                    end_date: n.valid_to,
                 })
                 .collect();
             if !past.is_empty() {
@@ -98,7 +96,6 @@ pub fn venue_page(ctx: &Ctx, venue_id: &str, directory: &VenueDirectory) -> Opti
         name_kana: venue.name_kana.clone(),
         theme_key: ctx.brand_theme(None),
         prefecture: venue.prefecture.clone(),
-        city: venue.city.clone(),
         fact_rows: venue_fact_rows(
             location_display.as_deref(),
             venue.capacity,
@@ -106,7 +103,6 @@ pub fn venue_page(ctx: &Ctx, venue_id: &str, directory: &VenueDirectory) -> Opti
         ),
         location_display,
         capacity: venue.capacity.map(|c| c as i32),
-        aliases_display,
         halls: directory.halls_by_venue.get(venue_id).cloned().unwrap_or_default(),
         past_names: directory.names_by_venue.get(venue_id).cloned().unwrap_or_default(),
         events: detail::event_ids_at_venue(ctx.snap, venue_id)

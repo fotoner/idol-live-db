@@ -15,15 +15,11 @@ export type VenuePage = { schemaVersion: number, id: string, path: string, name:
 /**
  * 都道府県 (文字列。空のものは一覧では `未分類` に集める)。
  */
-prefecture: string | null, city: string | null, 
+prefecture: string | null, 
 /**
  * 「千葉県 千葉市美浜区」。都道府県と市区町村の連結を TS に書かせない。
  */
-locationDisplay: string | null, capacity: number | null, 
-/**
- * 別名を `" ・ "` で繋いだもの。空なら `None`。
- */
-aliasesDisplay: string | null, halls: Array<HallRow>, 
+locationDisplay: string | null, capacity: number | null, halls: Array<HallRow>, 
 /**
  * 旧称。
  */

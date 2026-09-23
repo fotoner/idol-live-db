@@ -22,10 +22,6 @@ statusLabel: string | null,
  */
 note: string, 
 /**
- * 出すときに必ず掲示する許諾番号。
- */
-licenseNumber: string | null, 
-/**
  * 出すときに添える説明 (許諾番号つき)。
  */
 licenseNote: string | null, 

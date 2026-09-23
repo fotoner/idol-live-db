@@ -128,7 +128,6 @@ pub fn song_page(ctx: &Ctx, song_id: &str) -> Option<SongPage> {
             status_label: content::lyrics_status_label(),
             note: content::lyrics_note(),
             // 掲示するのは出面の許諾番号だけ (アプリの番号を出面に掲示しない)。
-            license_number: content::web_license_number().map(str::to_string),
             license_note: content::web_license_number().map(content::lyrics_on_web_note),
             // 1 リクエスト 1 曲。まとめて取れる形の URL は出さない。
             source_url: content::LYRICS_ON_WEB.then(|| {
@@ -157,17 +156,13 @@ pub fn song_page(ctx: &Ctx, song_id: &str) -> Option<SongPage> {
             .and_then(content::song_type_label)
             .map(str::to_string),
         release_date: record.release_date.clone(),
-        duration_display: duration_display.clone(),
         credits,
         // 「シリーズ」行に出すのは 1 つ。CD シリーズを優先し、無ければ系列名。
-        series_display: series_display.clone(),
-        cd_title: record.cd_title.clone(),
         artwork_url: record.artwork_url.clone(),
         apple_music_url: record
             .apple_music_id
             .as_deref()
             .map(|id| format!("https://music.apple.com/jp/song/{id}")),
-        jasrac_code: record.jasrac_code.clone(),
         original_artists,
         other_artists,
         unit: record.unit_id.as_deref().and_then(|u| ctx.unit_ref(u)),

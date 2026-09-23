@@ -282,8 +282,6 @@ web_dto! {
         pub title: String,
         pub kind: IdolListKind,
         pub brand: Option<Ref>,
-        /// 誕生月別のときだけ入る (1–12)。
-        pub birth_month: Option<u32>,
         pub items: Vec<IdolListItem>,
         /// 表の見出し (名前の列の次から)。全行が空になる列は出さない。
         pub columns: Vec<IdolColumn>,
@@ -335,8 +333,6 @@ web_dto! {
         pub target_label: String,
         /// 締切 (`YYYY-MM-DD`)。無期限なら None。
         pub ends_on: Option<String>,
-        /// 締切前か。**判定は Rust** (TS に `new Date()` を書かせない)。
-        pub is_open: bool,
         /// 締切の日付に添える語 (締切前は「締切」、過ぎたら「終了」)。無期限なら `None`。
         pub ends_label: Option<String>,
         pub total_votes: u32,
@@ -451,7 +447,6 @@ web_dto! {
         #[serde(rename = "ref")]
         pub reference: Ref,
         pub prefecture: Option<String>,
-        pub city: Option<String>,
         /// 「千葉県 千葉市美浜区」。
         pub location_display: Option<String>,
         pub capacity: Option<i32>,
@@ -558,8 +553,6 @@ web_dto! {
     pub struct AboutLink {
         pub label: String,
         pub href: String,
-        /// 外部サイトか (`rel="noopener"` と外部アイコンの材料)。
-        pub external: bool,
     }
 }
 

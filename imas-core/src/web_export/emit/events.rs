@@ -277,7 +277,6 @@ pub fn show_page(ctx: &Ctx, show_id: &str) -> Option<ShowPage> {
                     .collect::<Vec<_>>(),
                 c.somewhere_in_show,
             ),
-            wearers_label: c.wearers_label,
         })
         .collect();
 

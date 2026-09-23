@@ -89,7 +89,6 @@ pub fn idol_page(ctx: &Ctx, idol_id: &str) -> Option<IdolPage> {
         theme_key: ctx.idol_theme(idol_id),
         brand: brand_id.as_deref().and_then(|b| ctx.brand_ref(b)),
         brands,
-        color: record.color.clone(),
         profile_rows: profile_rows(&record),
         voice_actor_history: voice_actor_history(ctx, idol_id, voice_actor.as_deref()),
         current_voice_actor: voice_actor,
@@ -206,12 +205,9 @@ fn voice_actor_history(ctx: &Ctx, idol_id: &str, current: Option<&str>) -> Vec<V
             let period = period_display(v.valid_from.as_deref(), v.valid_to.as_deref());
             let is_current = current == Some(v.name.as_str()) && v.valid_to.is_none();
             VoiceActorRow {
-                is_current,
                 label: content::voice_actor_label(is_current).to_string(),
                 display: join_parts([Some(v.name.clone()), period]).unwrap_or_else(|| v.name.clone()),
                 name: v.name,
-                start_date: v.valid_from,
-                end_date: v.valid_to,
             }
         })
         .collect()
@@ -248,7 +244,6 @@ pub fn unit_page(ctx: &Ctx, unit_id: &str) -> Option<UnitPage> {
         name_kana: record.name_kana.clone(),
         name_alt: record.name_alt.clone(),
         theme_key: ctx.brand_theme(Some(&record.brand_id)),
-        is_permanent: record.is_permanent,
         kind_label: content::unit_kind_label(record.is_permanent).to_string(),
         brand: ctx.brand_ref(&record.brand_id),
         members_empty: content::empty_text(members.is_empty(), content::EMPTY_UNIT_MEMBERS, None),

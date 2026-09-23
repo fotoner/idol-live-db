@@ -6,10 +6,8 @@
   "nameKana": "まくはりめっせ",
   "themeKey": "neutral",
   "prefecture": "千葉県",
-  "city": "千葉市美浜区",
   "locationDisplay": "千葉県 千葉市美浜区",
   "capacity": 9000,
-  "aliasesDisplay": "幕張",
   "halls": [
     {
       "name": "イベントホール",
@@ -20,8 +18,6 @@
   "pastNames": [
     {
       "name": "日本コンベンションセンター",
-      "startDate": null,
-      "endDate": "1999-03-31",
       "periodDisplay": "〜 1999-03-31"
     }
   ],

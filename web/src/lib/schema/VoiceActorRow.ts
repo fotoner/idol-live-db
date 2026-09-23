@@ -3,7 +3,7 @@
 /**
  * CV の履歴 1 行。
  */
-export type VoiceActorRow = { name: string, startDate: string | null, endDate: string | null, isCurrent: boolean, 
+export type VoiceActorRow = { name: string, 
 /**
  * 行の見出し (「現任」/「歴代」)。
  */
