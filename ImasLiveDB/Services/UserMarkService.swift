@@ -130,14 +130,7 @@ final class UserMarkService {
         }
         // 楽曲お気に入りはコミュニティ集計にも背景送信（失敗時はキューに積む）
         if kind == .favorite && entity == .song {
-            Task {
-                do {
-                    try await CommunityAPI.shared.toggleFavorite(songId: id, value: value)
-                } catch {
-                    logger.warning("toggleFavorite failed, enqueuing: songId=\(id) error=\(error.localizedDescription)")
-                    PendingCommunityActions.shared.enqueue(songId: id, value: value)
-                }
-            }
+            Task { await PendingCommunityActions.shared.send(songId: id, value: value) }
         }
         version &+= 1
         scheduleBackup()
