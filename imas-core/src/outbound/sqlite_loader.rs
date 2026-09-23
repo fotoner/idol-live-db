@@ -178,13 +178,16 @@ fn load_songs(conn: &Connection) -> Result<Vec<Song>, String> {
     } else {
         "0 AS has_kamisabi_card"
     };
+    // ユニットの版も同じ扱い。
+    let unit_version =
+        if columns.contains("unit_version_id") { "unit_version_id" } else { "NULL AS unit_version_id" };
     let mut stmt = conn
         .prepare(
             &format!("SELECT id, title, title_kana, brand_id, song_type, release_date, duration_sec,
                     composer, lyricist, arranger, cd_series, cd_title, artwork_url, preview_url,
                     apple_music_id, apple_music_album_id, isrc, lyrics_url, parent_song_id,
                     singer_label, unit_name, unit_id, series_group, {jasrac}, {joint}, {collab},
-                    {kamisabi}
+                    {kamisabi}, {unit_version}
              FROM songs"),
         )
         .map_err(|e| e.to_string())?;
@@ -213,6 +216,7 @@ fn load_songs(conn: &Connection) -> Result<Vec<Song>, String> {
                 singer_label: r.get(19)?,
                 unit_name: r.get(20)?,
                 unit_id: r.get(21)?,
+                unit_version_id: r.get(27)?,
                 series_group: r.get(22)?,
                 jasrac_code: r.get(23)?,
                 joint_brand_ids: r.get(24)?,
@@ -1167,6 +1171,18 @@ mod tests {
             let names: Vec<&String> = list.iter().map(|&i| &s.units[i as usize].name).collect();
             assert!(names.windows(2).all(|w| w[0] <= w[1]));
         }
+        // songs.unit_version_id は SQL の値のまま載る (版を持つ曲はまだ少ないので全件で比べる)
+        let conn = bundle_conn();
+        let mut stmt =
+            conn.prepare("SELECT id, unit_version_id FROM songs WHERE unit_version_id IS NOT NULL").unwrap();
+        let versioned: Vec<(String, String)> =
+            stmt.query_map([], |r| Ok((r.get(0)?, r.get(1)?))).unwrap().map(Result::unwrap).collect();
+        assert!(!versioned.is_empty(), "版を持つ曲が無いと、この照合が空振りする");
+        for (id, version) in &versioned {
+            let song = &s.songs[s.song_index_by_id[id] as usize];
+            assert_eq!(song.unit_version_id.as_deref(), Some(version.as_str()), "{id}");
+        }
+        assert_eq!(s.songs.iter().filter(|x| x.unit_version_id.is_some()).count(), versioned.len());
     }
 
     #[test]

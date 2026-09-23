@@ -72,6 +72,10 @@ pub struct Song {
     pub singer_label: Option<String>,
     pub unit_name: Option<String>,
     pub unit_id: Option<String>,
+    /// ユニットの版 (`unit_versions.id`)。同じユニットでも時期で顔ぶれが違うとき、
+    /// どの版の曲かを指す。**出面には配らない** (`web_export::emit::shippable_song`)。
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit_version_id: Option<String>,
     pub series_group: Option<String>,
     pub jasrac_code: Option<String>,
     /// 合同曲 (コラボ曲) で、`brand_id` 以外に参加しているブランド (カンマ区切り)。

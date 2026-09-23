@@ -215,6 +215,8 @@ fn shippable_song(song: crate::domain::snapshot::Song) -> crate::domain::snapsho
         singer_label,
         unit_name,
         unit_id,
+        // ユニットの版。出面は版を出し分けていない (使わない列は配らない)。
+        unit_version_id: _,
         series_group,
         jasrac_code,
         joint_brand_ids,
@@ -244,6 +246,7 @@ fn shippable_song(song: crate::domain::snapshot::Song) -> crate::domain::snapsho
         singer_label,
         unit_name,
         unit_id,
+        unit_version_id: None,
         series_group,
         jasrac_code,
         // 合同曲の印。どのブランドの一覧に出すかを出面が決めるのに要る。

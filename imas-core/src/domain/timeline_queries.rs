@@ -1033,6 +1033,7 @@ mod tests {
                 singer_label: None,
                 unit_name: None,
                 unit_id: None,
+                unit_version_id: None,
                 series_group: series.map(Into::into),
                 jasrac_code: None,
                 joint_brand_ids: None,
