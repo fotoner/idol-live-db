@@ -73,9 +73,7 @@ import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
 import com.fugaif.imaslivedb.ui.theme.DS
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import uniffi.imas_core.relativeTimes
 
 /**
  * 「最近の編集」= コミュニティのオープン編集機能。iOS `RecentEditsView` の移植。
@@ -163,10 +161,15 @@ fun RecentEditsScreen(onBack: () -> Unit, viewModel: RecentEditsViewModel = view
                     )
                 }
             } else {
+                // 相対時刻の言い回しはコア。一覧ぶんを 1 回で引く (行ごとに呼ばない)。
+                val times = remember(state.entries) {
+                    relativeTimes(state.entries.map { it.createdAt }, System.currentTimeMillis())
+                }
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     itemsIndexed(state.entries, key = { _, entry -> entry.batchId }) { index, entry ->
                         val (gooded, goodCount) = viewModel.goodState(entry)
                         EditFeedCard(
+                            timeText = times.getOrElse(index) { "" },
                             entry = entry,
                             gooded = gooded,
                             goodCount = goodCount,
@@ -414,12 +417,13 @@ fun RecordHistorySheet(recordType: String, recordName: String, onDismiss: () -> 
                 }
                 history!!.isEmpty() -> Text("履歴がありません", fontSize = 13.sp, color = DS.ink2, modifier = Modifier.padding(16.dp))
                 else -> {
-                    history!!.forEach { h ->
+                    val times = relativeTimes(history!!.map { it.createdAt }, System.currentTimeMillis())
+                    history!!.forEachIndexed { i, h ->
                         Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 val (label, color) = EditFeedFormat.opDesign(h.op)
                                 Text(label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = color)
-                                Text(EditFeedFormat.relativeTime(h.createdAt), fontSize = 11.sp, color = DS.ink3)
+                                Text(times[i], fontSize = 11.sp, color = DS.ink3)
                                 if (h.reverted) Text("(差戻し済み)", fontSize = 11.sp, color = DS.ink3)
                             }
                             if (h.changedFields.isNotEmpty()) {
@@ -437,6 +441,7 @@ fun RecordHistorySheet(recordType: String, recordName: String, onDismiss: () -> 
 
 @Composable
 private fun EditFeedCard(
+    timeText: String,
     entry: EditApi.EditFeedEntry,
     gooded: Boolean,
     goodCount: Int,
@@ -476,7 +481,7 @@ private fun EditFeedCard(
                         )
                     }
                     Spacer(Modifier.weight(1f))
-                    Text(EditFeedFormat.relativeTime(entry.createdAt), fontSize = 11.sp, color = DS.ink2)
+                    Text(timeText, fontSize = 11.sp, color = DS.ink2)
                 }
                 Text(
                     recordTitle ?: EditFeedFormat.recordTypeLabel(entry.recordType),
@@ -603,17 +608,5 @@ private object EditFeedFormat {
         "revert" -> "差戻し" to DS.warning
         "snapshot" -> "セトリ更新" to Color(0xFF2FB8A8)
         else -> op to DS.ink3
-    }
-
-    fun relativeTime(epochMs: Long): String {
-        val now = System.currentTimeMillis()
-        val diffSec = (now - epochMs) / 1000
-        return when {
-            diffSec < 60 -> "今"
-            diffSec < 3600 -> "${diffSec / 60}分前"
-            diffSec < 86_400 -> "${diffSec / 3600}時間前"
-            diffSec < 86_400 * 30 -> "${diffSec / 86_400}日前"
-            else -> SimpleDateFormat("yyyy/MM/dd", Locale.JAPAN).format(Date(epochMs))
-        }
     }
 }

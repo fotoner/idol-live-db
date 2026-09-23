@@ -50,10 +50,7 @@ import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.ImasSectionHeader
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
 import com.fugaif.imaslivedb.ui.theme.DS
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.concurrent.TimeUnit
+import uniffi.imas_core.relativeTimes
 
 private enum class ActivityTab(val label: String) {
     SONG("曲"), IDOL("アイドル")
@@ -164,9 +161,12 @@ fun TagActivityScreen(
                             }
                             if (events.isNotEmpty()) {
                                 item { ImasSectionHeader(title = "最近つけられたタグ", tight = true) }
-                                itemsIndexedWithDivider(events) { _, event ->
+                                // 相対時刻の言い回しはコア。一覧ぶんを 1 回で引く。
+                                val times = relativeTimes(events.map { it.createdAtMs }, System.currentTimeMillis())
+                                itemsIndexedWithDivider(events) { index, event ->
                                     RecentRow(
                                         event = event,
+                                        timeText = times.getOrElse(index) { "" },
                                         song = uiState.songs[event.entityId],
                                         idol = uiState.idols[event.entityId],
                                         onClick = {
@@ -267,6 +267,7 @@ private fun RiseRow(
 @Composable
 private fun RecentRow(
     event: CommunityApi.TagActivityEvent,
+    timeText: String,
     song: Song?,
     idol: Idol?,
     onClick: () -> Unit
@@ -297,7 +298,7 @@ private fun RecentRow(
                 overflow = TextOverflow.Ellipsis
             )
         }
-        Text(relativeTime(event.createdAtMs), style = androidx.compose.material3.MaterialTheme.typography.labelSmall, color = DS.ink3)
+        Text(timeText, style = androidx.compose.material3.MaterialTheme.typography.labelSmall, color = DS.ink3)
     }
 }
 
@@ -314,19 +315,4 @@ private fun EntityLead(domain: CommunityApi.TagActivityDomain, song: Song?, idol
 private fun entityName(domain: CommunityApi.TagActivityDomain, song: Song?, idol: Idol?): String = when (domain) {
     CommunityApi.TagActivityDomain.SONG -> song?.title ?: "曲を読み込み中"
     CommunityApi.TagActivityDomain.IDOL -> idol?.name ?: "アイドルを読み込み中"
-}
-
-private fun relativeTime(epochMs: Long): String {
-    val diff = System.currentTimeMillis() - epochMs
-    if (diff < 0) return "たった今"
-    val minutes = TimeUnit.MILLISECONDS.toMinutes(diff)
-    val hours = TimeUnit.MILLISECONDS.toHours(diff)
-    val days = TimeUnit.MILLISECONDS.toDays(diff)
-    return when {
-        minutes < 1 -> "たった今"
-        minutes < 60 -> "${minutes}分前"
-        hours < 24 -> "${hours}時間前"
-        days < 30 -> "${days}日前"
-        else -> SimpleDateFormat("yyyy/M/d", Locale.JAPAN).format(Date(epochMs))
-    }
 }

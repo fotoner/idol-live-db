@@ -32,9 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.fugaif.imaslivedb.data.edit.EditApi
 import com.fugaif.imaslivedb.di.AppModule
 import com.fugaif.imaslivedb.ui.theme.DS
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import uniffi.imas_core.relativeTimes
 
 /**
  * この公演のセトリの変更履歴。iOS の `EditHistoryView(recordType: "ShowSetlist", …)` にあたる。
@@ -81,21 +79,25 @@ fun SetlistEditHistorySheet(showId: String, showName: String, onDismiss: () -> U
                     "まだ編集されていません", fontSize = 13.sp, color = DS.ink2,
                     modifier = Modifier.padding(16.dp)
                 )
-                else -> entries.forEach { h ->
-                    Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            val (label, color) = opDesign(h.op)
-                            Text(label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = color)
-                            Text(relativeTime(h.createdAt), fontSize = 11.sp, color = DS.ink3)
-                            if (h.reverted) Text("(差戻し済み)", fontSize = 11.sp, color = DS.ink3)
+                else -> {
+                    // 相対時刻の言い回しはコア。一覧ぶんを 1 回で引く。
+                    val times = relativeTimes(entries.map { it.createdAt }, System.currentTimeMillis())
+                    entries.forEachIndexed { i, h ->
+                        Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                val (label, color) = opDesign(h.op)
+                                Text(label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = color)
+                                Text(times[i], fontSize = 11.sp, color = DS.ink3)
+                                if (h.reverted) Text("(差戻し済み)", fontSize = 11.sp, color = DS.ink3)
+                            }
+                            if (h.changedFields.isNotEmpty()) {
+                                Text(h.changedFields.joinToString(", "), fontSize = 12.sp, color = DS.ink2)
+                            }
+                            h.editorName?.let { Text(it, fontSize = 11.sp, color = DS.ink3) }
                         }
-                        if (h.changedFields.isNotEmpty()) {
-                            Text(h.changedFields.joinToString(", "), fontSize = 12.sp, color = DS.ink2)
-                        }
-                        h.editorName?.let { Text(it, fontSize = 11.sp, color = DS.ink3) }
                     }
                 }
             }
@@ -117,14 +119,3 @@ private fun opDesign(op: String): Pair<String, Color> = when (op) {
     else -> op to DS.ink3
 }
 
-/** 「3日前」形式の相対時刻。1 か月以上前は日付そのもの。 */
-private fun relativeTime(epochMs: Long): String {
-    val diffSec = (System.currentTimeMillis() - epochMs) / 1000
-    return when {
-        diffSec < 60 -> "今"
-        diffSec < 3600 -> "${diffSec / 60}分前"
-        diffSec < 86_400 -> "${diffSec / 3600}時間前"
-        diffSec < 86_400 * 30 -> "${diffSec / 86_400}日前"
-        else -> SimpleDateFormat("yyyy/MM/dd", Locale.JAPAN).format(Date(epochMs))
-    }
-}
