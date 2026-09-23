@@ -74,6 +74,9 @@ import com.fugaif.imaslivedb.ui.navigation.TopLevelTab
 import com.fugaif.imaslivedb.ui.search.CrossTabCountChips
 import com.fugaif.imaslivedb.ui.search.CrossTabSearch
 import uniffi.imas_core.kamisabiCompletionLabel
+import uniffi.imas_core.SearchMatchRowInput
+import uniffi.imas_core.SearchMatchScope
+import uniffi.imas_core.searchMatchTexts
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -238,9 +241,14 @@ fun SongListScreen(
                     }
                 )
             } else {
+                // 歌唱・作詞作曲で絞っているときの「なぜ出ているか」の説明は、画面の行ぶんを
+                // コアで 1 回に作る (行ごとに呼ばない)。
+                val matchDetails = remember(uiState.songs, uiState.fuzzySongs, uiState.searchText, uiState.searchMode) {
+                    searchMatchDetails(uiState.songs + uiState.fuzzySongs, uiState.searchText, uiState.searchMode)
+                }
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(uiState.songs, key = { it.song.id }) { item ->
-                        SongListRow(item, uiState, viewModel, onSongClick, onEditMastery = { masteryTarget = it })
+                        SongListRow(item, uiState, matchDetails[item.song.id], viewModel, onSongClick, onEditMastery = { masteryTarget = it })
                     }
                     if (uiState.fuzzySongs.isNotEmpty()) {
                         item {
@@ -251,7 +259,7 @@ fun SongListScreen(
                         // key を分けるのは、同じ曲が両方に出た時に LazyColumn が落ちないため
                         // (VM 側で重複は除いているが、key の衝突は例外になるので保険をかける)。
                         items(uiState.fuzzySongs, key = { "fuzzy_${it.song.id}" }) { item ->
-                            SongListRow(item, uiState, viewModel, onSongClick, onEditMastery = { masteryTarget = it })
+                            SongListRow(item, uiState, matchDetails[item.song.id], viewModel, onSongClick, onEditMastery = { masteryTarget = it })
                         }
                     }
                 }
@@ -336,6 +344,7 @@ fun SongListScreen(
 private fun SongListRow(
     item: SongWithArtists,
     uiState: SongListUiState,
+    matchDetail: String?,
     viewModel: SongListViewModel,
     onSongClick: (String) -> Unit,
     onEditMastery: (SongWithArtists) -> Unit
@@ -353,12 +362,9 @@ private fun SongListRow(
         masteryLevel = uiState.masteryLevels[item.song.id] ?: 0u,
         masteryScale = uiState.masteryScale,
         tagVoteCount = if (uiState.selectedTags.size == 1) uiState.tagVoteCounts[item.song.id] else null,
-        lyricist = item.song.lyricist,
-        composer = item.song.composer,
-        arranger = item.song.arranger,
         // 何で絞っているかを行に渡す。当たった箇所に色が敷かれ、スコープに応じた補足が出る。
         searchMatch = uiState.searchText.takeIf { it.isNotEmpty() }
-            ?.let { SongRowMatch(text = it, scope = uiState.searchMode) },
+            ?.let { SongRowMatch(text = it, scope = uiState.searchMode, detail = matchDetail) },
         onEditMastery = { onEditMastery(item) },
         modifier = Modifier
             .fillMaxWidth()
@@ -618,3 +624,33 @@ private val SongSortOrder.label: String
         SongSortOrder.COLLECTED_COUNT -> "現地回収回数順"
         SongSortOrder.COLLECTED_RATE -> "回収率順"
     }
+
+/**
+ * 歌唱・作詞作曲で絞っているときの行の説明 (当たった 1 人を先頭に「ほか N 人」/
+ * 当たった役割と名前)。組み立ても照合もコア (searchMatchTexts)。曲名で絞っているときは空。
+ */
+private fun searchMatchDetails(
+    songs: List<SongWithArtists>,
+    searchText: String,
+    mode: SongSearchMode
+): Map<String, String> {
+    val needle = searchText.trim()
+    val scope = when (mode) {
+        SongSearchMode.PERFORMER -> SearchMatchScope.PERFORMER
+        SongSearchMode.CREATOR -> SearchMatchScope.CREATOR
+        SongSearchMode.TITLE -> return emptyMap()
+    }
+    if (needle.isEmpty() || songs.isEmpty()) return emptyMap()
+    val rows = songs.map { item ->
+        SearchMatchRowInput(
+            // 優先順: ユニット名 → 歌唱者表記。
+            performerLabels = listOfNotNull(item.song.unitName, item.artistNames).filter { it.isNotBlank() },
+            lyricist = item.song.lyricist,
+            composer = item.song.composer,
+            arranger = item.song.arranger
+        )
+    }
+    return searchMatchTexts(rows, scope, needle)
+        .mapIndexedNotNull { index, text -> text?.let { songs[index].song.id to it } }
+        .toMap()
+}
