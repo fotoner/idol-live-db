@@ -36,8 +36,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.MoreVert
@@ -50,7 +48,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -75,7 +72,6 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -90,7 +86,6 @@ import com.fugaif.imaslivedb.data.image.CustomImageStore
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.CastShowRow
 import com.fugaif.imaslivedb.data.model.Idol
-import com.fugaif.imaslivedb.data.model.IdolPerformedSong
 import com.fugaif.imaslivedb.data.model.ImasUnit
 import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.data.model.UserMark
@@ -126,7 +121,6 @@ import com.fugaif.imaslivedb.data.local.localWrite
  * [ライブ][楽曲・ユニット][プロフィール] に切り替える。
  *
  * iOS にあって Android にまだ無いもの (対応基盤が無いため未実装):
- * - CV (声優) 表示 — idols テーブルに voice_actors 列が無く、CloudKit マッパー側の追加が必要
  * - メモ (UserMarkBar note) — テキスト入力 UI が Android に無い
  * - ホーム画面ウィジェット — 画像基盤 (CustomImageStore) は入ったが、ウィジェット本体は未実装
  */
@@ -422,7 +416,8 @@ private fun Hero(idol: Idol, brandShortName: String?, t: ImasTheme) {
             if (!brandShortName.isNullOrEmpty()) {
                 Text(brandShortName, fontSize = 13.sp, color = DS.ink2)
             }
-            voiceActorLabel(idol.voiceActors)?.let { cv ->
+            // 現任の声優 (iOS と同じく今の 1 人)。選び方はコア。
+            idol.currentVoiceActor?.let { name -> "CV $name" }?.let { cv ->
                 Text(cv, fontSize = 12.sp, color = DS.ink3, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
@@ -907,12 +902,6 @@ private fun RoleTag(text: String, t: ImasTheme) {
         text, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = t.chipText,
         modifier = Modifier.clip(RoundedCornerShape(6.dp)).background(t.chipBg).padding(horizontal = 6.dp, vertical = 2.dp)
     )
-}
-
-/** "CV 声優A / 声優B" 形式のラベル (voice_actors はカンマ区切りで先頭が現役)。iOS voiceActorList の移植。 */
-private fun voiceActorLabel(voiceActors: String?): String? {
-    val names = voiceActors?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList()
-    return names.takeIf { it.isNotEmpty() }?.joinToString(" / ")?.let { "CV $it" }
 }
 
 /** "2026-06-21" → "6/21" */

@@ -294,7 +294,7 @@ fun IdolMultiSelectSheet(
 
     // 語で絞ってからブランドで絞る (索引は母集団全体で組んであるため)。並びは入力順のまま。
     val matched = rememberSearchFiltered(state.idols, query) {
-        listOf(it.name, it.nameKana, it.voiceActors, it.aliases)
+        listOf(it.name, it.nameKana, it.currentVoiceActor, it.aliases)
     }
     val filtered = remember(matched, selectedBrandId) {
         matched.filter { selectedBrandId == null || it.brandId == selectedBrandId }

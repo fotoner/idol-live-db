@@ -5,6 +5,7 @@ import android.util.Log
 import com.fugaif.imaslivedb.data.auth.AuthService
 import com.fugaif.imaslivedb.data.backup.BackupTransferApi
 import com.fugaif.imaslivedb.data.core.SnapshotStoreProvider
+import com.fugaif.imaslivedb.data.core.VoiceActorDirectory
 import com.fugaif.imaslivedb.data.db.AppDatabase
 import com.fugaif.imaslivedb.data.db.DatabaseBoot
 import com.fugaif.imaslivedb.data.edit.EditApi
@@ -74,6 +75,8 @@ class AppModule private constructor(context: Context) {
                     runCatching { store.brandRecords() }.getOrNull()?.let { generation to it }
                 }
             }
+            // 現任の声優も同じく描画から同期で引く (声優の履歴 idol_voice_actors が正)。
+            VoiceActorDirectory.install { provider.currentGeneration() }
         }
     }
 

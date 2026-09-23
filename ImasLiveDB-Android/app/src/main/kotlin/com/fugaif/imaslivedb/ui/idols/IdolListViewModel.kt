@@ -96,9 +96,7 @@ private fun IdolListUiState.rebuilt(): IdolListUiState {
         requireNote = requireNote,
         noteIds = noteIds.toList(),
         searchText = searchText,
-        // CV 名は Android 側で解決して渡す。コアの store.idolCastNames() は
-        // idol_voice_actors テーブル由来だが Android はそれを同期しておらず常に空になり、
-        // 委譲すると CV 名検索・CV 名表示が両方死ぬ (供給元は idols.voice_actors の先頭)。
+        // CV 名は現任の声優 (声優の履歴 idol_voice_actors からコアが選ぶ。iOS と同じ)。
         castNames = castNames
     )
     val sorted = sortIdols(filterIdols(idols, criteria), sortOrder, sortAscending)
@@ -180,7 +178,7 @@ class IdolListViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             val brands = statsRepo.fetchBrands()
             val idols = repo.fetchIdolsForList()
-            val castNames = idols.mapNotNull { idol -> idol.currentVoiceActor?.let { idol.id to it } }.toMap()
+            val castNames = repo.fetchIdolCastNames()
             _uiState.value = _uiState.value.copy(
                 brands = brands,
                 idols = idols,

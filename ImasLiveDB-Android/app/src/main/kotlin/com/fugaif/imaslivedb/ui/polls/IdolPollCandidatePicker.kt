@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items as lazyGridItems
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Circle
@@ -125,7 +124,7 @@ fun IdolPollCandidatePicker(
     // 語で絞ってからブランドで絞る (索引は母集団全体で組んであるため)。並びは入力順のまま。
     // CV 名・別名でも引けるようにする (声優名で探すのは主要な導線)。
     val matched = rememberSearchFiltered(state.idols, query) {
-        listOf(it.name, it.nameKana, it.voiceActors, it.aliases)
+        listOf(it.name, it.nameKana, it.currentVoiceActor, it.aliases)
     }
     val filtered = remember(matched, selectedBrandId) {
         matched.filter { selectedBrandId == null || it.brandId == selectedBrandId }

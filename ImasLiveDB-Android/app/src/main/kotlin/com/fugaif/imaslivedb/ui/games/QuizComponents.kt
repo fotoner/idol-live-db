@@ -92,8 +92,7 @@ val QUIZ_SESSION_LENGTH: Int by lazy { quizSessionLength().toInt() }
  * 選ぶ規則はコアの `idolCastNames` が持つ。画面につき 1 回だけ呼ぶ
  * (アイドル 1 人ずつ引くと N+1 の FFI になる)。
  *
- * 声優の履歴 (idol_voice_actors) は seed で入る。履歴が無いアイドルはマップに載らず、
- * 呼び出し側は `idols.voice_actors` へ落ちる。
+ * 声優の履歴 (idol_voice_actors) は seed で入る。履歴が無いアイドルはマップに載らない (CV 無し)。
  */
 suspend fun fetchIdolCastNames(snapshots: SnapshotStoreProvider): Map<String, String> =
     snapshots.query { store -> store.idolCastNames() }
@@ -103,10 +102,8 @@ suspend fun fetchIdolCastNames(snapshots: SnapshotStoreProvider): Map<String, St
  * 出題設定画面の見積り (`idolQuizPoolEstimate`) とゲーム本体 (`idolQuizSession`) が
  * 同じ母集団を見るよう、変換もこの 1 か所に置く。
  *
- * CV は [castNames] (= 現任の声優) を第一に見る。iOS が `VoiceActorDirectory` 経由で
- * 渡しているのと同じ値で、期間つき履歴が正だから。`idols.voice_actors` はカンマ列の
- * 先頭を現任と見なす旧表現で、CloudKit の Idol 同期でしか埋まらないため、
- * 履歴が引けない時のフォールバックとしてだけ残す。
+ * CV は [castNames] (= 現任の声優) だけを見る。iOS が `VoiceActorDirectory` 経由で
+ * 渡しているのと同じ値で、期間つき履歴が正だから (`idols.voice_actors` 列は使わない)。
  *
  * 誕生日は生の `--MM-DD` のまま渡す (「4月3日」への整形はコア側の規則)。
  */
@@ -125,7 +122,7 @@ fun idolQuizRefs(idols: List<Idol>, castNames: Map<String, String>): List<IdolQu
             hobbies = idol.hobbies,
             talents = idol.talents,
             birthday = idol.birthday,
-            voiceActor = castNames[idol.id] ?: idol.currentVoiceActor
+            voiceActor = castNames[idol.id]
         )
     }
 

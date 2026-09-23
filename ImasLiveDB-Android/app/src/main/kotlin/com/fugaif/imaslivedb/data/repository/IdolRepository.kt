@@ -18,9 +18,8 @@ import uniffi.imas_core.SimilarIdolCandidate
  * 読み取りは共有コア (imas-core) のインメモリスナップショットが答える (SQL の代わりの
  * 経路は持たない)。コアに対応する API が無いもの ([fetchIdols] のブランド指定) だけ Room で引く。
  *
- * コアの IdolRecord は idols 表の射影で、Room の [Idol] が持つ voice_actors
- * (CV 名のカンマ区切り = `currentVoiceActor` の素) を持たない。そのため一覧系は
- * **コアから表示順の id 列だけ受け取り、実体は Room で引き直す** (hydration)。
+ * 一覧系は **コアから表示順の id 列だけ受け取り、実体は Room で引き直す** (hydration)。
+ * 声優は Room の列ではなく、コアの `idolCastNames` (声優の履歴 idol_voice_actors) が正。
  */
 class IdolRepository(
     private val db: AppDatabase,
@@ -76,6 +75,10 @@ class IdolRepository(
     /** タグ類似の候補 (サーバの並び) から出すものを選ぶ (手元に無い id・外部ゲストを除いて 10 件)。 */
     suspend fun pickSimilarIdols(candidates: List<SimilarIdolCandidate>): List<SimilarIdolCandidate> =
         snapshots.query { store -> store.pickSimilarIdols(candidates) }
+
+    /** 現任の声優名 (idol id → 名前)。画面につき 1 回。選び方はコア。 */
+    suspend fun fetchIdolCastNames(): Map<String, String> =
+        snapshots.query { store -> store.idolCastNames() }
 
     suspend fun fetchIdolsByIds(ids: List<String>): List<Idol> {
         if (ids.isEmpty()) return emptyList()
