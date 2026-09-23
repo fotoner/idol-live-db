@@ -9,24 +9,28 @@ struct GRDBEditFeedRepository: EditFeedReading {
     let database: AppDatabase
     let snapshot: CoreSnapshotManager
 
-    func editRecordShowId(recordType: String, recordName: String) async throws -> String? {
-        try await target(recordType: recordType, recordName: recordName)?.showId
+    func editRecordTargets(_ keys: [EditRecordKey]) async throws -> [EditRecordKey: EditRecordResolution] {
+        var result: [EditRecordKey: EditRecordResolution] = [:]
+        let unique = Array(Set(keys))
+        for key in unique where key.recordType == "SongVideo" {
+            let title = try await database.fetchSongVideoSongTitleAsync(videoId: key.recordName)
+            result[key] = EditRecordResolution(title: title, showId: nil)
+        }
+        // スナップショットを 1 回待って、レコードごとに 1 回ずつ引く
+        // (まとめて引く FFI はまだ無い)。
+        let others = unique.filter { $0.recordType != "SongVideo" }
+        guard !others.isEmpty else { return result }
+        let resolved: [(EditRecordKey, EditRecordResolution)] = try await snapshot.withStore { store in
+            try others.map { key in
+                let target = try store.editRecordTarget(recordType: key.recordType, recordName: key.recordName)
+                return (key, EditRecordResolution(title: target.title, showId: target.showId))
+            }
+        }
+        for (key, value) in resolved { result[key] = value }
+        return result
     }
 
     func editRecordSongId(recordType: String, recordName: String) async throws -> String? {
         try await database.fetchEditRecordSongIdAsync(recordType: recordType, recordName: recordName)
-    }
-
-    func editRecordTitle(recordType: String, recordName: String) async throws -> String? {
-        if recordType == "SongVideo" {
-            return try await database.fetchSongVideoSongTitleAsync(videoId: recordName)
-        }
-        return try await target(recordType: recordType, recordName: recordName)?.title
-    }
-
-    private func target(recordType: String, recordName: String) async throws -> EditRecordTarget? {
-        try await snapshot.withStore { store in
-            try store.editRecordTarget(recordType: recordType, recordName: recordName)
-        }
     }
 }

@@ -41,11 +41,13 @@ struct RecentEditsView: View {
     private let limit = 20
 
     var body: some View {
-        ScrollView {
+        let times = EditFeedFormat.relativeTimes(entries.map { ($0.id, $0.createdDate) })
+        return ScrollView {
             LazyVStack(spacing: 10) {
                 ForEach(entries) { entry in
                     EditFeedCard(
                         entry: entry,
+                        timeLabel: times[entry.id] ?? "",
                         gooded: isGooded(entry),
                         goodCount: goodCount(entry),
                         isOwn: entry.isOwnEdit,
@@ -140,17 +142,17 @@ struct RecentEditsView: View {
         }
     }
 
-    /// 対象レコードの可読タイトル + 該当ページ遷移先をローカル DB から解決する。
+    /// 対象レコードの可読タイトル + 該当ページ遷移先を解決する (タイトルと公演はまとめて 1 回)。
     private func resolveTitles(for items: [EditFeedEntry]) async {
-        let editFeed = AppContainer.shared.editFeedReading
-        for e in items where recordTitles[e.id] == nil {
-            if let t = try? await editFeed.editRecordTitle(recordType: e.recordType, recordName: e.recordName),
-               !t.isEmpty {
+        let pending = items.filter { recordTitles[$0.id] == nil || destinations[$0.id] == nil }
+        let targets = (try? await AppContainer.shared.editFeedReading.editRecordTargets(
+            pending.map { EditRecordKey(recordType: $0.recordType, recordName: $0.recordName) })) ?? [:]
+        for e in pending {
+            let target = targets[EditRecordKey(recordType: e.recordType, recordName: e.recordName)]
+            if recordTitles[e.id] == nil, let t = target?.title, !t.isEmpty {
                 recordTitles[e.id] = t
             }
-        }
-        for e in items where destinations[e.id] == nil {
-            if let dest = await resolveDestination(for: e) {
+            if destinations[e.id] == nil, let dest = await resolveDestination(for: e, showId: target?.showId) {
                 destinations[e.id] = dest
             }
         }
@@ -158,7 +160,7 @@ struct RecentEditsView: View {
 
     /// 編集レコード → 該当ページ (曲/アイドル/ライブ/セトリ) の遷移先を解決する。
     /// セトリ系 (Show/ShowSetlist/SetlistItem/SetlistPerformer) は該当公演のセトリへ。
-    private func resolveDestination(for entry: EditFeedEntry) async -> DetailDestination? {
+    private func resolveDestination(for entry: EditFeedEntry, showId: String?) async -> DetailDestination? {
         let songReading = AppContainer.shared.songReading
         let showReading = AppContainer.shared.showReading
         let editFeed = AppContainer.shared.editFeedReading
@@ -170,8 +172,7 @@ struct RecentEditsView: View {
         case "Event":
             if let event = try? await AppContainer.shared.eventReading.event(id: entry.recordName) { return .event(event) }
         case "Show", "ShowSetlist", "SetlistItem", "SetlistPerformer":
-            if let showId = (try? await editFeed.editRecordShowId(recordType: entry.recordType, recordName: entry.recordName)) ?? nil,
-               let show = try? await showReading.show(id: showId) {
+            if let showId, let show = try? await showReading.show(id: showId) {
                 return .show(show)
             }
         case "SongVideo":
@@ -289,6 +290,8 @@ struct RecentEditsView: View {
 
 private struct EditFeedCard: View {
     let entry: EditFeedEntry
+    /// 相対時刻 (一覧がまとめて作る)。
+    let timeLabel: String
     let gooded: Bool
     let goodCount: Int
     let isOwn: Bool
@@ -317,7 +320,7 @@ private struct EditFeedCard: View {
                                 .lineLimit(1)
                             EditOpBadge(op: entry.op)
                             Spacer(minLength: 4)
-                            Text(EditFeedFormat.relativeTime(entry.createdDate))
+                            Text(timeLabel)
                                 .font(.imasCaption2)
                                 .foregroundStyle(DS.ink2)
                         }
@@ -517,6 +520,13 @@ enum EditFeedFormat {
     /// `relative_time` (Android と同じ)。
     static func relativeTime(_ date: Date, now: Date = .now) -> String {
         ImasLiveDB.relativeTime(epochMs: epochMillis(date), nowMs: epochMillis(now))
+    }
+
+    /// 一覧の相対時刻をまとめて 1 回で作る (`relative_times`。行ごとに FFI を呼ばない)。
+    static func relativeTimes<ID: Hashable>(_ items: [(id: ID, date: Date)], now: Date = .now) -> [ID: String] {
+        guard !items.isEmpty else { return [:] }
+        let labels = ImasLiveDB.relativeTimes(epochMs: items.map { epochMillis($0.date) }, nowMs: epochMillis(now))
+        return Dictionary(zip(items.map(\.id), labels), uniquingKeysWith: { first, _ in first })
     }
 
     private static func epochMillis(_ date: Date) -> Int64 {

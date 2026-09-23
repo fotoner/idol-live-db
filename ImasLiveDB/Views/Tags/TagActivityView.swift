@@ -176,10 +176,11 @@ struct TagActivityView: View {
             if !events.isEmpty {
                 VStack(alignment: .leading, spacing: DS.sp3) {
                     ImasSectionHeader(title: "最近つけられたタグ", tight: true)
+                    let times = EditFeedFormat.relativeTimes(events.map { ($0.id, $0.createdAt) })
                     ImasListContainer {
                         ForEach(Array(events.enumerated()), id: \.element.id) { idx, event in
                             if idx > 0 { ImasRowDivider(inset: DS.sp4) }
-                            recentRow(event)
+                            recentRow(event, timeLabel: times[event.id] ?? "")
                         }
                     }
                 }
@@ -187,7 +188,7 @@ struct TagActivityView: View {
         }
     }
 
-    private func recentRow(_ event: TagActivityEvent) -> some View {
+    private func recentRow(_ event: TagActivityEvent, timeLabel: String) -> some View {
         Button {
             openEntity(domain: event.domain, entityId: event.entityId)
         } label: {
@@ -204,7 +205,7 @@ struct TagActivityView: View {
                         .lineLimit(1)
                 }
                 Spacer(minLength: 0)
-                Text(relativeTime(event.createdAt))
+                Text(timeLabel)
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink3)
             }
@@ -267,10 +268,6 @@ struct TagActivityView: View {
         case .song: TagDetailView(tagId: tagId, tagName: tagName)
         case .idol: IdolTagDetailView(tagId: tagId, tagName: tagName)
         }
-    }
-
-    private func relativeTime(_ date: Date) -> String {
-        EditFeedFormat.relativeTime(date)
     }
 
     // MARK: - Load

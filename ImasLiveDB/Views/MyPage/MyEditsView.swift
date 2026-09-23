@@ -28,11 +28,13 @@ struct MyEditsView: View {
     private let limit = 20
 
     var body: some View {
-        ScrollView {
+        let times = EditFeedFormat.relativeTimes(entries.map { ($0.id, $0.createdDate) })
+        return ScrollView {
             LazyVStack(spacing: 10) {
                 ForEach(entries) { entry in
                     MyEditRow(
                         entry: entry,
+                        timeLabel: times[entry.id] ?? "",
                         isReverted: isReverted(entry),
                         isReverting: revertingId == entry.id,
                         onRevert: { revertTarget = entry }
@@ -190,6 +192,8 @@ struct MyEditsView: View {
 
 private struct MyEditRow: View {
     let entry: EditFeedEntry
+    /// 相対時刻 (一覧がまとめて作る)。
+    let timeLabel: String
     let isReverted: Bool
     let isReverting: Bool
     let onRevert: () -> Void
@@ -210,7 +214,7 @@ private struct MyEditRow: View {
                             .background(DS.fill, in: Capsule())
                     }
                     Spacer(minLength: 4)
-                    Text(EditFeedFormat.relativeTime(entry.createdDate))
+                    Text(timeLabel)
                         .font(.imasCaption2)
                         .foregroundStyle(DS.ink2)
                 }

@@ -23,10 +23,11 @@ struct EditHistoryView: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        ScrollView {
+        let times = EditFeedFormat.relativeTimes(entries.map { ($0.id, $0.createdDate) })
+        return ScrollView {
             LazyVStack(spacing: 10) {
                 ForEach(entries) { entry in
-                    HistoryRow(entry: entry, recordType: recordType)
+                    HistoryRow(entry: entry, recordType: recordType, timeLabel: times[entry.id] ?? "")
                 }
             }
             .padding(.horizontal, DS.sp5)
@@ -84,6 +85,8 @@ struct EditHistoryView: View {
 private struct HistoryRow: View {
     let entry: RecordHistoryEntry
     let recordType: String
+    /// 相対時刻 (一覧がまとめて作る)。
+    let timeLabel: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
@@ -105,7 +108,7 @@ private struct HistoryRow: View {
                         .background(DS.fill, in: Capsule())
                 }
                 Spacer(minLength: 4)
-                Text(EditFeedFormat.relativeTime(entry.createdDate))
+                Text(timeLabel)
                     .font(.imasCaption2)
                     .foregroundStyle(DS.ink2)
             }

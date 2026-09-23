@@ -248,6 +248,7 @@ struct UserModerationView: View {
                     .font(.imasSubhead)
                     .foregroundStyle(DS.ink2)
             } else {
+                let times = EditFeedFormat.relativeTimes(edits.map { ($0.id, $0.createdDate) })
                 ForEach(edits) { edit in
                     HStack(spacing: 10) {
                         Image(systemName: EditFeedFormat.recordTypeIcon(edit.recordType))
@@ -265,7 +266,7 @@ struct UserModerationView: View {
                                         .foregroundStyle(DS.ink2)
                                 }
                             }
-                            Text(EditFeedFormat.relativeTime(edit.createdDate))
+                            Text(times[edit.id] ?? "")
                                 .font(.imasCaption)
                                 .foregroundStyle(DS.ink2)
                         }

@@ -67,7 +67,7 @@ struct CallGuideDashboardView: View {
                 if let generatedAt = vm.generatedAt {
                     // 全端末で共有するキャッシュ (最大 30 分) 越しなので「今」ではない。
                     // 自分が書いた直後に出てこない理由が、ここを見れば分かるようにする。
-                    Text("\(relativeTime(generatedAt))時点の情報です (最大 30 分ほど遅れます)。")
+                    Text("\(EditFeedFormat.relativeTime(generatedAt))時点の情報です (最大 30 分ほど遅れます)。")
                 }
                 if vm.droppedCount > 0 {
                     // 派生曲・「その他」ブランド・手元に未同期の曲。曲一覧と同じ母集合に
@@ -107,10 +107,12 @@ struct CallGuideDashboardView: View {
                     message: "「コール曲」タグの付いた曲から書き始められます。"
                 )
             } else {
+                let times = EditFeedFormat.relativeTimes(
+                    vm.withCalls.compactMap { row in row.updatedAt.map { (row.id, $0) } })
                 ImasListContainer {
                     ForEach(Array(vm.withCalls.enumerated()), id: \.element.id) { idx, row in
                         if idx > 0 { ImasRowDivider(inset: DS.sp4) }
-                        songRow(row.song, subtitle: subtitle(for: row)) {
+                        songRow(row.song, subtitle: subtitle(for: row, time: times[row.id])) {
                             open(row.song, from: "with_calls")
                         }
                     }
@@ -124,9 +126,9 @@ struct CallGuideDashboardView: View {
         }
     }
 
-    private func subtitle(for row: CallGuideSongRow) -> String {
+    private func subtitle(for row: CallGuideSongRow, time: String?) -> String {
         var parts = [row.detailLabel]
-        if let updatedAt = row.updatedAt { parts.append(relativeTime(updatedAt)) }
+        if let time { parts.append(time) }
         parts.append(row.updatedBy)
         return parts.joined(separator: " ・ ")
     }
@@ -144,11 +146,12 @@ struct CallGuideDashboardView: View {
                     message: "誰かがコールを書き込むと、ここに残ります。"
                 )
             } else {
+                let times = EditFeedFormat.relativeTimes(vm.recentEdits.map { ($0.id, $0.at) })
                 ImasListContainer {
                     ForEach(Array(vm.recentEdits.enumerated()), id: \.element.id) { idx, row in
                         if idx > 0 { ImasRowDivider(inset: DS.sp4) }
                         songRow(row.song,
-                                subtitle: "\(row.label) ・ \(relativeTime(row.at)) ・ \(row.by)") {
+                                subtitle: "\(row.label) ・ \(times[row.id] ?? "") ・ \(row.by)") {
                             open(row.song, from: "recent_edit")
                         }
                     }
@@ -276,12 +279,5 @@ struct CallGuideDashboardView: View {
     private func open(_ song: Song, from source: String) {
         AppAnalytics.tap("call_guide_dashboard.\(source)")
         sheetDestination = .songLyrics(song)
-    }
-
-    private func relativeTime(_ date: Date) -> String {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .short
-        formatter.locale = Locale(identifier: "ja_JP")
-        return formatter.localizedString(for: date, relativeTo: Date())
     }
 }
