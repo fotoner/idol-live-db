@@ -952,7 +952,13 @@ private fun NotificationToggleRow(
                 checked = value
                 prefs.setEnabled(category, value)
                 // 設定を変えたら即座に予定表を作り直す (iOS の onChange と同じ)。
-                scope.launch { NotificationScheduler.rescheduleAll(context.applicationContext) }
+                // OFF にしたときは、予定表を作れなくても予約を消す (OFF にした通知を鳴らさない)。
+                val reason = if (value) {
+                    NotificationScheduler.RescheduleReason.REFRESH
+                } else {
+                    NotificationScheduler.RescheduleReason.SETTING_TURNED_OFF
+                }
+                scope.launch { NotificationScheduler.rescheduleAll(context.applicationContext, reason) }
             },
             // システムクロムは無彩 (DS の方針)。色はエンティティ側からしか出さない。
             colors = SwitchDefaults.colors(checkedTrackColor = DS.sys, checkedThumbColor = DS.onSys)

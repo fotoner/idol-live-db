@@ -87,41 +87,73 @@ object NotificationScheduler {
      * 予約を全消去してから、設定が ON の通知を組み直して積む。
      * 通知が許可されていない場合は積まない (iOS の `guard status == .authorized` と同じ)。
      */
-    suspend fun rescheduleAll(context: Context): Unit = rescheduleAll(context, ::buildPlan)
+    suspend fun rescheduleAll(context: Context, reason: RescheduleReason = RescheduleReason.REFRESH): Unit =
+        rescheduleAll(context, reason, ::buildPlan)
 
     /** [plan] を差し替えられる入口 (テスト用)。本番は [buildPlan]。 */
     internal suspend fun rescheduleAll(
         context: Context,
+        reason: RescheduleReason,
         plan: suspend (Context, NotificationPrefs, ZonedDateTime) -> List<PlannedNotificationRecord>
     ): Unit = withContext(Dispatchers.IO) {
-        rescheduleMutex.withLock { rescheduleAllLocked(context, plan) }
+        rescheduleMutex.withLock { rescheduleAllLocked(context, reason, plan) }
     }
+
+    /** 再予約を頼む理由。予定表を作れなかったときの扱いが変わる (iOS と同じ)。 */
+    enum class RescheduleReason {
+        /** 起動時・許可した直後・設定を ON にしたとき・発火や再起動の後。 */
+        REFRESH,
+        /** 通知の設定を OFF にしたとき。 */
+        SETTING_TURNED_OFF
+    }
+
+    /** 今の予約をどうするか。 */
+    enum class PendingUpdate { KEEP, CLEAR, REPLACE }
+
+    /**
+     * 権限が無ければ消す (鳴らしてはいけない)。予定表を作れたら全部消して積み直す。
+     * 作れなかったときは、OFF にした直後なら消す (OFF にした通知が鳴り続けないように)。
+     * それ以外は今の予約を残す (読み込みの一時的な失敗で、鳴るはずの通知を消さない)。
+     * iOS `NotificationService.pendingUpdate` と同じ。
+     */
+    internal fun pendingUpdate(authorized: Boolean, planBuilt: Boolean, reason: RescheduleReason): PendingUpdate =
+        when {
+            !authorized -> PendingUpdate.CLEAR
+            planBuilt -> PendingUpdate.REPLACE
+            reason == RescheduleReason.SETTING_TURNED_OFF -> PendingUpdate.CLEAR
+            else -> PendingUpdate.KEEP
+        }
 
     private suspend fun rescheduleAllLocked(
         context: Context,
+        reason: RescheduleReason,
         plan: suspend (Context, NotificationPrefs, ZonedDateTime) -> List<PlannedNotificationRecord>
     ) {
         val app = context.applicationContext
         val prefs = NotificationPrefs(app)
 
-        // 未許可なら「積んであるものを消して終わり」。許可を切った直後に残骸が
-        // 発火し続けるのを防ぐ (通知自体はシステムが握り潰すが、予約は残るため)。
-        if (!areNotificationsEnabled(app)) {
-            cancelAllScheduled(app, prefs)
-            return
+        val authorized = areNotificationsEnabled(app)
+        val now = ZonedDateTime.now()
+        val plans = if (authorized) {
+            ensureChannels(app)
+            runCatching { plan(app, prefs, now) }
+                .onFailure { Log.e(TAG, "notif_plan_failed", it) }
+                .getOrNull()
+        } else {
+            null
         }
 
-        ensureChannels(app)
-
-        val now = ZonedDateTime.now()
-        val plans = runCatching { plan(app, prefs, now) }
-            .onFailure { Log.e(TAG, "notif_plan_failed", it) }
-            .getOrNull()
-            // 予定表を作れなかったら、今の予約を消さずに残す (次に積み直せるときまで鳴らす)。
-            // 「全部消してから登録し直す」は、組み立てが成功したときだけ。
-            ?: return
-
-        cancelAllScheduled(app, prefs)
+        // 未許可なら消して終わり (許可を切った直後に残骸が発火し続けるのを防ぐ)。
+        // 予定表を作れなかったら、OFF にした直後だけ消し、それ以外は今の予約を残す。
+        when (pendingUpdate(authorized, plans != null, reason)) {
+            PendingUpdate.KEEP -> return
+            PendingUpdate.CLEAR -> {
+                cancelAllScheduled(app, prefs)
+                return
+            }
+            PendingUpdate.REPLACE -> cancelAllScheduled(app, prefs)
+        }
+        if (plans == null) return
 
         // 過去時刻のアラームは「即発火」になる。組み立て側でも未来だけを通しているが、
         // 端末の時刻がずれていた場合に通知が一気に降ってくるのを防ぐ最後の関門。
