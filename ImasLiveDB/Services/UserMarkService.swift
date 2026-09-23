@@ -63,15 +63,21 @@ final class UserMarkService {
         }
     }
 
-    /// ローカル全マークを iCloud KVS にミラーする (デバウンス)。マーク変更後に呼ぶ。
+    /// ローカルのマークを iCloud KVS にミラーする (デバウンス)。マーク変更後に呼ぶ。
     private func scheduleBackup() {
         backupTask?.cancel()
         backupTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(1))
             guard !Task.isCancelled, let self else { return }
-            if let marks = try? self.db.allUserMarks() {
-                UserMarkBackup.shared.backup(marks)
-            }
+            self.backupMarks()
+        }
+    }
+
+    /// 載せるのは付いている行だけ (`UserMark.meaningful`)。解除済みの行は復元しても何も
+    /// 変わらないうえ、KVS の 1 値 1MB の枠を食う。キーと Payload の形は変えない。
+    private func backupMarks() {
+        if let marks = try? db.allUserMarks() {
+            UserMarkBackup.shared.backup(UserMark.meaningful(marks))
         }
     }
 
@@ -346,7 +352,7 @@ final class UserMarkService {
 
     /// 今すぐ iCloud にバックアップ (デバウンスせず即実行)。
     func backupNow() {
-        if let marks = try? db.allUserMarks() { UserMarkBackup.shared.backup(marks) }
+        backupMarks()
     }
 
     /// iCloud から非破壊復元を試みる (デバッグ/手動トリガ)。

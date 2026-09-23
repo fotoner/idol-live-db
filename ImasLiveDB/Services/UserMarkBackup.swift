@@ -40,7 +40,7 @@ final class UserMarkBackup {
 
     private init() {}
 
-    /// 現在のローカル全マークを KVS にミラーする (上書き)。マーク変更のたびに呼ぶ。
+    /// 渡されたマーク (付いている行だけ) を KVS にミラーする (上書き)。マーク変更のたびに呼ぶ。
     func backup(_ marks: [UserMark]) {
         do {
             let data = try JSONEncoder().encode(Payload(marks: marks, updatedAt: Date().timeIntervalSince1970))
