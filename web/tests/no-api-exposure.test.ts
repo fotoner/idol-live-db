@@ -13,7 +13,7 @@ import { describe, expect, it } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import { walk } from "../scripts/walk.mjs";
-import { readJson } from "../src/lib/data";
+import { dataRoot, readJson } from "../src/lib/data";
 import type { SearchManifest } from "../src/lib/schema/SearchManifest";
 
 import astroConfig from "../astro.config.mjs";
@@ -163,7 +163,7 @@ const distExists = fs.existsSync(DIST);
 const lyricsSource = ((): { origin: string; attrs: RegExp[] } | null => {
   const meta = readJson<{ lyricsLicenseNotice: string | null; lyricsSearchUrl: string | null }>("meta.json");
   if (!meta.lyricsLicenseNotice) return null;
-  const songs = walk(path.resolve("./data/songs"), { include: (p) => p.endsWith(".json") });
+  const songs = walk(path.join(dataRoot(), "songs"), { include: (p) => p.endsWith(".json") });
   const first = JSON.parse(fs.readFileSync(songs[0]!, "utf8")) as { lyrics: { sourceUrl: string | null } };
   const url = new URL(first.lyrics.sourceUrl!);
   const origin = url.origin.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

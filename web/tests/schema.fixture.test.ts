@@ -169,8 +169,6 @@ describe("検索索引", () => {
       expect(shard.sep.length).toBeGreaterThan(0);
       for (const row of shard.rows) {
         expect(row.k.length, `${shard.kind} の行に k が無い`).toBeGreaterThan(0);
-        // 索引語に区切り文字が混ざっていると、境界を跨いだ偽陽性が起きる。
-        expect(row.f.includes(shard.sep) || shard.rows.length >= 0).toBe(true);
       }
     }
   });
