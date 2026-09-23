@@ -7,6 +7,7 @@ use super::dto::{
     AboutLink, AboutSection, AppLinks, AppOpen, CallGuideClap, CallGuideEmphasis, CallGuideVocabulary,
     EmptyText,
 };
+use crate::domain::vocabulary;
 
 /// サイトの起点。ホストを変えるときは以下も必ず揃える (docs/ARCHITECTURE-web.md O6 /
 /// ~/dev/fugaapp/docs/subdomain-migration-plan.md §4-1 に詳細):
@@ -441,29 +442,16 @@ pub fn kind_chip(kind: &str) -> Option<&'static str> {
     (kind != DEFAULT_EVENT_KIND).then(|| kind_label(kind))
 }
 
-/// ライブ種別の日本語表記。
+/// ライブ種別の日本語表記。出面は正式な形 (「リリースイベント」)。語は `vocabulary` にしか
+/// 書かない (Q-08f)。知らない値は「その他」(一覧から消さずに出す。Q-08l)。
 pub fn kind_label(kind: &str) -> &'static str {
-    match kind {
-        "live" => "ライブ",
-        "festival" => "フェス",
-        "release_event" => "リリースイベント",
-        "radio" => "ラジオ",
-        "stream" => "配信",
-        _ => "その他",
-    }
+    vocabulary::event_kind(kind).label
 }
 
-/// 曲種別の日本語表記 (`songs.song_type` の語彙: solo / unit / all / cover / tie_in)。
+/// 曲種別の日本語表記。出面は正式な形 (「ソロ曲」)。語は `vocabulary` にしか書かない (Q-08f)。
 /// 知らない値は捏造せず `None` (受け手は出さない)。
 pub fn song_type_label(song_type: &str) -> Option<&'static str> {
-    match song_type {
-        "solo" => Some("ソロ曲"),
-        "unit" => Some("ユニット曲"),
-        "all" => Some("全体曲"),
-        "cover" => Some("カバー"),
-        "tie_in" => Some("タイアップ"),
-        _ => None,
-    }
+    vocabulary::song_type(song_type).map(|t| t.label)
 }
 
 /// 楽曲一覧の行に添える作家の記載。「作曲」の語はここだけ (受け手は置くだけ)。

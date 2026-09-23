@@ -56,7 +56,7 @@ pub struct SongFacets {
     pub idols: Vec<FacetOption>,
     pub cd_series: Vec<FacetOption>,
     pub series_groups: Vec<FacetOption>,
-    /// 曲種別。語は `vocabulary` の正式な形。
+    /// 曲種別。`vocabulary::SONG_TYPES` の 5 種すべてを、その並びと正式な形で (Q-08f)。
     pub song_types: Vec<FacetOption>,
     /// ログインもユーザーデータも持たない出面で選べる並べ替え。
     pub sorts: Vec<SortOption>,
@@ -88,9 +88,6 @@ pub struct IdolFacets {
 pub const SONG_DEFAULT_SORT: SongListSort = SongListSort::TitleKana;
 /// アイドル一覧の既定の並び。`IdolSortKind::from_key` が未知の鍵を倒す先と同じ。
 pub const IDOL_DEFAULT_SORT: IdolSortKind = IdolSortKind::Official;
-
-/// 楽曲一覧の曲種別の選択肢に出す値と並び。語は `vocabulary` から引く。
-const SONG_TYPE_CHOICES: [&str; 3] = ["all", "unit", "solo"];
 
 fn option(value: impl Into<String>, label: impl Into<String>) -> FacetOption {
     FacetOption { value: value.into(), label: label.into() }
@@ -126,11 +123,7 @@ pub fn song_facets(snap: &Snapshot, idol_entries: &[IdolListEntry]) -> SongFacet
                 .collect(),
         ),
         series_groups: same_value_options(song_detail_queries::series_group_names(snap, &[])),
-        song_types: SONG_TYPE_CHOICES
-            .iter()
-            .filter_map(|&value| vocabulary::song_type(value))
-            .map(|t| option(t.value, t.label))
-            .collect(),
+        song_types: vocabulary::SONG_TYPES.iter().map(|t| option(t.value, t.label)).collect(),
         sorts: song_list_sort_options_without_user_marks()
             .into_iter()
             .map(|o| SortOption { key: o.key, label: o.label, default_ascending: o.default_ascending })
@@ -178,7 +171,10 @@ mod tests {
         assert!(songs.brands.is_empty() && songs.idols.is_empty());
         let types: Vec<(&str, &str)> =
             songs.song_types.iter().map(|o| (o.value.as_str(), o.label.as_str())).collect();
-        assert_eq!(types, [("all", "全体曲"), ("unit", "ユニット曲"), ("solo", "ソロ曲")]);
+        assert_eq!(
+            types,
+            [("solo", "ソロ曲"), ("unit", "ユニット曲"), ("all", "全体曲"), ("cover", "カバー"), ("tie_in", "タイアップ")]
+        );
         assert_eq!(songs.default_sort, "kana");
         assert!(songs.sorts.iter().any(|s| s.key == songs.default_sort));
         // ユーザーデータの要る並び (回収数・回収率) は出面に出さない。

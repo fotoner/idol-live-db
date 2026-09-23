@@ -11,7 +11,7 @@ export type SongFacets = {
  */
 brands: Array<FacetOption>, idols: Array<FacetOption>, cdSeries: Array<FacetOption>, seriesGroups: Array<FacetOption>, 
 /**
- * 曲種別。語は `vocabulary` の正式な形。
+ * 曲種別。`vocabulary::SONG_TYPES` の 5 種すべてを、その並びと正式な形で (Q-08f)。
  */
 songTypes: Array<FacetOption>, 
 /**
