@@ -37,6 +37,8 @@ import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.NameFilterField
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.components.rememberSearchFiltered
+import uniffi.imas_core.VenueAreaEntry
+import uniffi.imas_core.groupVenuesByArea
 
 /**
  * 会場を 1 つ選ぶピッカー (iOS `VenuePickerView` の移植)。
@@ -64,10 +66,10 @@ fun VenuePickerSheet(
         listOf(v.name, v.nameKana, v.prefecture) + v.aliasList
     }
     // 都道府県ごとにまとめる。244件あるので地域で塊にしないと探せない。
+    // 塊の切り方・並び・「その他」はコア (groupVenuesByArea)。
     val grouped = remember(filtered) {
-        filtered.groupBy { it.prefecture ?: "その他" }
-            .toList()
-            .sortedWith(compareBy({ it.first == "その他" }, { it.second.minOf { v -> v.sortOrder } }))
+        groupVenuesByArea(filtered.map { VenueAreaEntry(it.prefecture, it.sortOrder.toLong()) })
+            .map { group -> group.label to group.indices.map { filtered[it.toInt()] } }
     }
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {

@@ -71,8 +71,8 @@ fun FilteredShowsScreen(
                 else -> LazyColumn(Modifier.fillMaxSize()) {
                     item(key = "count") { FilteredCountHeader("${state.showCount}公演") }
                     state.groups.forEach { group ->
-                        item(key = "year_${group.year}") {
-                            ImasSectionHeader(title = "${group.year}年", tight = true)
+                        item(key = "year_${group.label}") {
+                            ImasSectionHeader(title = group.label, tight = true)
                         }
                         items(group.rows, key = { it.showId }) { row ->
                             // 行の右スワイプで参加登録 (ライブ一覧・イベント詳細の公演一覧と同じ規則)。

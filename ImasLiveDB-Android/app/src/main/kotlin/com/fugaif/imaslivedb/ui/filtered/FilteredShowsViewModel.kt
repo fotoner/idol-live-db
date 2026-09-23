@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import com.fugaif.imaslivedb.ui.theme.AppPreferences
+import uniffi.imas_core.groupIndicesByYearDesc
 
 /** 一覧に出す公演 1 行ぶんの表示値。整形はすべて ViewModel 側で済ませる。 */
 data class FilteredShowRowUi(
@@ -24,7 +25,8 @@ data class FilteredShowRowUi(
 )
 
 /** 年見出しと、その年の公演。 */
-data class FilteredShowYearGroup(val year: String, val rows: List<FilteredShowRowUi>)
+/** 年の塊。見出し (`2026年` / `日程未定`) はコアが付ける。 */
+data class FilteredShowYearGroup(val label: String, val rows: List<FilteredShowRowUi>)
 
 data class FilteredShowsUiState(
     val title: String = "",
@@ -74,12 +76,12 @@ class FilteredShowsViewModel(
         // 日付での一覧は行ごとに会場が違うので出す。
         val showsVenueInRow = kind != ShowFilterKind.VENUE
 
-        val groups = shows.groupBy { it.date.take(4) }
-            .toSortedMap(compareByDescending { it })
-            .map { (year, yearShows) ->
+        // 年ごとの塊・新しい年が上・読めない日付は末尾の「日程未定」はコア。
+        val groups = groupIndicesByYearDesc(shows.map { it.date })
+            .map { group ->
                 FilteredShowYearGroup(
-                    year = year,
-                    rows = yearShows.map { show ->
+                    label = group.label,
+                    rows = group.indices.map { shows[it.toInt()] }.map { show ->
                         val eventWithDate = eventsById[show.eventId]
                         val event = eventWithDate?.event
                         FilteredShowRowUi(
