@@ -329,6 +329,7 @@ fn venue_spellings_hit(snap: &Snapshot, venue_id: Option<&str>, needle: &FoldedN
 /// iOS fetchEventsWithFirstDateQuery の移送。
 ///
 /// - kind フィルタ: `kinds` 明示指定 > `live_only` > 既定 (live+festival)。
+///   知らない種別は `other` として比べる (語彙の `event_kind`。Q-08l)。
 ///   Swift 側は nil / 非空しか渡さない (空配列は SQL の `IN ()` が構文エラーになるため
 ///   存在しない入力) — ここでは空集合 = 全滅として安全側に倒す。
 /// - `include_empty`: false なら公演なしイベントを落とす (EXISTS shows)。
@@ -347,7 +348,10 @@ pub fn events_with_first_date(
     let indexes = (0..snap.events.len() as u32)
         .filter(|&i| {
             let e = &snap.events[i as usize];
-            target_kinds.contains(e.kind.as_str())
+            // 知らない種別は語彙で「その他」(`other`) に寄せてから比べる (Q-08l)。
+            // `other` を渡せば一覧に出る — 全種別を列挙して渡しても、将来増えた種別が
+            // 一覧から静かに消えない。
+            target_kinds.contains(crate::domain::vocabulary::event_kind(&e.kind).value)
                 && brand_id.is_none_or(|b| e.brand_id.as_deref() == Some(b))
                 && (include_empty || has_shows(snap, i))
         })
@@ -1094,5 +1098,19 @@ mod tests {
             }
         }
         assert_eq!(event_ids_for_shows(snap, &show_ids), one_by_one);
+    }
+
+    /// Q-08l: 語彙の 6 種 (最後が `other`) を渡せば、種別に関わらず全イベントが出る。
+    /// 知らない種別は `event_kind` で `other` に寄るので、将来増えた種別も消えない。
+    #[test]
+    fn all_vocabulary_kinds_list_every_event() {
+        let snap = bundle_snapshot();
+        let all: Vec<String> =
+            crate::domain::vocabulary::EVENT_KINDS.iter().map(|t| t.value.to_string()).collect();
+        let listed = events_with_first_date(snap, None, true, false, Some(&all));
+        assert_eq!(listed.len(), snap.events.len());
+        assert_eq!(crate::domain::vocabulary::event_kind("hologram_live").value, "other");
+        let known = events_with_first_date(snap, None, true, false, Some(&["live".to_string()]));
+        assert!(known.iter().all(|r| r.event.kind == "live"), "既知の種別の絞り込みは変わらない");
     }
 }
