@@ -22,6 +22,17 @@ use crate::domain::display_join::non_empty;
 use crate::domain::performer_label::{performer_label, PerformerNaming};
 use crate::domain::text_search_index::FoldedNeedle;
 use std::collections::HashMap;
+use crate::domain::song_list_queries::SongListFilter;
+
+/// 習熟度の分母にする曲の絞り込み (Q-08b)。楽曲一覧の既定と同じで、リミックス・別バージョン、
+/// ライブ履歴にしか無い曲 (カタログのメタを持たない)、`brand_id = 'other'` の曲 (歌枠のカバーなど) は
+/// 数えない。「覚える対象の曲」は一覧に出る曲、という決め方。
+///
+/// 以前は iOS が既定の `SongSearchFilter` (other ブランドとライブ履歴のみの曲を含む) で、
+/// Android は `excludeLiveOnly` だけ立てて読んでいて、分母が OS で違った。
+pub fn mastery_song_filter() -> SongListFilter {
+    SongListFilter { include_other_brand: false, exclude_live_only: true, ..SongListFilter::default() }
+}
 
 /// 群の縦軸。
 #[derive(uniffi::Enum, Clone, Copy, Debug, PartialEq, Eq)]
@@ -725,5 +736,20 @@ mod tests {
         assert_eq!(build_mastery_groups(&[], MasteryAxis::Series, 4, MasteryGroupSort::SongCount, MasteryProgressFilter::All, ""), vec![]);
         let s = mastery_summary(&[], 4);
         assert_eq!(s, MasterySummary { percent: 0, done_count: 0, set_count: 0, total: 0 });
+    }
+
+    #[test]
+    fn mastery_universe_leaves_out_live_only_and_other_brand_songs() {
+        use crate::domain::song_list_queries::filter_song_indexes;
+        let snap = crate::test_support::bundle_snapshot();
+        let songs = filter_song_indexes(snap, &mastery_song_filter());
+        assert!(songs.len() > 1000, "{}", songs.len());
+        assert!(songs.iter().all(|&i| snap.songs[i as usize].brand_id.as_deref() != Some("other")));
+        assert!(
+            songs.iter().all(|&i| !crate::domain::song_list_queries::is_hidden_variant(&snap.songs[i as usize])),
+            "派生は数えない"
+        );
+        let wider = filter_song_indexes(snap, &SongListFilter { include_other_brand: true, ..SongListFilter::default() });
+        assert!(wider.len() > songs.len(), "other ブランドとライブ履歴のみの曲の分だけ減る");
     }
 }

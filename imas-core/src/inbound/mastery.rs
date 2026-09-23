@@ -8,6 +8,12 @@ use crate::domain::mastery::{
     MasterySong, MasterySummary,
 };
 
+/// 習熟度の分母にする曲の絞り込み。この条件で `song_list` を引いた曲を `MasterySong` に詰める。
+#[uniffi::export]
+pub fn mastery_song_filter() -> crate::domain::song_list_queries::SongListFilter {
+    crate::domain::mastery::mastery_song_filter()
+}
+
 #[uniffi::export]
 pub fn build_mastery_groups(
     songs: Vec<MasterySong>,

@@ -142,6 +142,7 @@ declare_and_call_checksums! {
     uniffi_imas_core_checksum_func_lyric_chunk_at,
     uniffi_imas_core_checksum_func_lyric_chunks,
     uniffi_imas_core_checksum_func_mastery_bulk_targets,
+    uniffi_imas_core_checksum_func_mastery_song_filter,
     uniffi_imas_core_checksum_func_mastery_summary,
     uniffi_imas_core_checksum_func_next_mastery_level,
     uniffi_imas_core_checksum_func_next_show_index,
