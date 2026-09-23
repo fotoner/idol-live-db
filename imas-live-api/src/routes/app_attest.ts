@@ -15,7 +15,8 @@ import {
 import { base64ToBytes, bytesToBase64Url } from "../bytes";
 import { checkRateLimit } from "../rate_limit";
 import type { RouteContext } from "./context";
-import { clientIp } from "./guards";
+import { isNonEmptyString } from "../validation";
+import { clientIp, readJsonBody } from "./guards";
 
 /** アプリ証明 (App Attest) の口。IP 単位の日次上限 (app_attest) を掛ける。 */
 const APP_ATTEST_PATHS = new Set(["/app/challenge", "/app/attest", "/app/assert"]);
@@ -38,39 +39,64 @@ export async function handleAppAttest(ctx: RouteContext): Promise<Response | nul
   }
   if (path === "/app/attest" && request.method === "POST") {
     if (!secret) return error("server not configured", 500);
-    const body: any = await request.json().catch(() => null);
-    if (!body?.keyId || !body?.attestation || !body?.challenge) return error("bad request", 400);
-    const challenge = base64ToBytes(body.challenge);
+    const req = await readProof(ctx, "attestation");
+    if (req instanceof Response) return req;
+    const { keyId, proof, challenge } = req;
     if (!(await checkChallenge(challenge, secret))) return error("bad challenge", 400);
     try {
-      const { spki, counter } = await verifyAttestation(challenge, base64ToBytes(body.keyId), body.attestation, env.APP_ATTEST_ALLOW_DEV === "true");
+      const { spki, counter } = await verifyAttestation(challenge, base64ToBytes(keyId), proof, env.APP_ATTEST_ALLOW_DEV === "true");
       const now = Date.now();
       // OR IGNORE: 既存 keyId への再 attest (リプレイ) で counter を 0 に戻させない
       await env.DB.prepare(
         "INSERT OR IGNORE INTO app_attest_keys (key_id, public_key, counter, created_at, updated_at) VALUES (?,?,?,?,?)"
-      ).bind(body.keyId, bytesToBase64Url(spki), counter, now, now).run();
-      return json({ appToken: await mintAppToken(body.keyId, secret) });
+      ).bind(keyId, bytesToBase64Url(spki), counter, now, now).run();
+      return json({ appToken: await mintAppToken(keyId, secret) });
     } catch (e) {
       return error("attestation failed: " + (e as Error).message, 401);
     }
   }
   if (path === "/app/assert" && request.method === "POST") {
     if (!secret) return error("server not configured", 500);
-    const body: any = await request.json().catch(() => null);
-    if (!body?.keyId || !body?.assertion || !body?.challenge) return error("bad request", 400);
-    const challenge = base64ToBytes(body.challenge);
+    const req = await readProof(ctx, "assertion");
+    if (req instanceof Response) return req;
+    const { keyId, proof, challenge } = req;
     if (!(await checkChallenge(challenge, secret))) return error("bad challenge", 400);
-    const row: any = await env.DB.prepare("SELECT public_key, counter FROM app_attest_keys WHERE key_id=?").bind(body.keyId).first();
+    const row = await env.DB.prepare("SELECT public_key, counter FROM app_attest_keys WHERE key_id=?")
+      .bind(keyId)
+      .first<{ public_key: string; counter: number }>();
     if (!row) return error("unknown key", 401);
     try {
-      const newCounter = await verifyAssertion(challenge, body.assertion, base64ToBytes(row.public_key), row.counter as number);
-      await env.DB.prepare("UPDATE app_attest_keys SET counter=?, updated_at=? WHERE key_id=?").bind(newCounter, Date.now(), body.keyId).run();
-      return json({ appToken: await mintAppToken(body.keyId, secret) });
+      const newCounter = await verifyAssertion(challenge, proof, base64ToBytes(row.public_key), row.counter);
+      await env.DB.prepare("UPDATE app_attest_keys SET counter=?, updated_at=? WHERE key_id=?").bind(newCounter, Date.now(), keyId).run();
+      return json({ appToken: await mintAppToken(keyId, secret) });
     } catch (e) {
       return error("assertion failed: " + (e as Error).message, 401);
     }
   }
   return null;
+}
+
+/**
+ * /app/attest・/app/assert の本文: keyId・challenge と、証明 (attestation / assertion) の文字列。
+ * どれかが無い・文字列でなければ 400 "bad request"、challenge が base64 として読めなければ
+ * 400 "bad challenge" (チャレンジの検証に通らないときと同じ応答)。
+ */
+async function readProof(
+  ctx: RouteContext,
+  field: "attestation" | "assertion"
+): Promise<{ keyId: string; proof: string; challenge: Uint8Array } | Response> {
+  const body = await readJsonBody(ctx, "bad request");
+  if (body instanceof Response) return body;
+  const { keyId, challenge } = body;
+  const proof = body[field];
+  if (!isNonEmptyString(keyId) || !isNonEmptyString(proof) || !isNonEmptyString(challenge)) {
+    return ctx.error("bad request", 400);
+  }
+  try {
+    return { keyId, proof, challenge: base64ToBytes(challenge) };
+  } catch {
+    return ctx.error("bad challenge", 400);
+  }
 }
 
 /** ゲートの対象 = 認証不要で開いているコミュニティ集計の読み取り。 */

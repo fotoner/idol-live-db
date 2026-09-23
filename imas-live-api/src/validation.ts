@@ -3,6 +3,11 @@
 // 複数のルートから使うため独立させている (index.ts に置くと
 // ルートモジュールからの import が循環する)。
 
+/** 空でない文字列か (unknown を string に絞る)。 */
+export function isNonEmptyString(v: unknown): v is string {
+  return typeof v === "string" && v.length > 0;
+}
+
 /** クエリの正整数。範囲外・非数値は defaultValue、上限は max で頭打ち。 */
 export function parsePositiveInt(v: string | null, defaultValue: number, max: number = 1000): number {
   const n = parseInt(v ?? "");
