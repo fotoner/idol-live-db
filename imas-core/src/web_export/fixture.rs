@@ -584,11 +584,10 @@ fn song_page(reference: &Ref, minimal: bool) -> SongPage {
         lyrics: LyricsBlock {
             available: content::LYRICS_ON_WEB,
             status_label: content::lyrics_status_label(),
-            note: content::lyrics_note().to_string(),
-            license_number: content::LYRICS_ON_WEB
-                .then(|| content::JASRAC_LICENSE_NUMBER.to_string()),
-            license_note: content::LYRICS_ON_WEB
-                .then(|| content::LYRICS_ON_WEB_NOTE.to_string()),
+            note: content::lyrics_note(),
+            // 掲示するのは出面の許諾番号だけ (アプリの番号を出面に掲示しない)。
+            license_number: content::web_license_number().map(str::to_string),
+            license_note: content::web_license_number().map(content::lyrics_on_web_note),
             source_url: content::LYRICS_ON_WEB
                 .then(|| format!("{}/songs/ml_mirai/lyrics", content::API_ORIGIN)),
             read_label: content::LYRICS_ON_WEB.then(|| content::LYRICS_READ_LABEL.to_string()),

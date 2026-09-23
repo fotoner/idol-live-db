@@ -31,8 +31,23 @@ pub const SUPPORT_URL: &str = "https://fuga-if.github.io/imas-live-privacy/suppo
 pub const TERMS_URL: &str = "https://fuga-if.github.io/imas-live-privacy/terms.html";
 pub const REPOSITORY_URL: &str = "https://github.com/fuga-if/idol-live-db";
 
-/// JASRAC 非商用配信の許諾番号。掲示が許諾の条件。
-pub const JASRAC_LICENSE_NUMBER: &str = "J260943703";
+/// **アプリの** JASRAC 非商用配信の許諾番号。出面の断り書き (「アプリは … のもとで配信」) にだけ使う。
+pub const APP_JASRAC_LICENSE_NUMBER: &str = "J260943703";
+
+/// **この出面 (Web) の** JASRAC 許諾番号。Web の許諾はまだ無いので `None` (D-WEB-13)。
+///
+/// 出面で歌詞を出すときに掲示する番号 (フッタ・曲ページ) は必ずこれを使う。アプリの番号を
+/// 使うと、許諾の無い出面にアプリの番号を掲示してしまう。許諾が下りたらここに番号を入れ、
+/// それから [`LYRICS_ON_WEB`] を開ける (番号が無いまま開けるとコンパイルが通らない)。
+pub const WEB_JASRAC_LICENSE_NUMBER: Option<&str> = None;
+
+// 出面で歌詞を出すなら、出面の許諾番号の掲示が要る (掲示が許諾の条件)。
+const _: () = assert!(!LYRICS_ON_WEB || WEB_JASRAC_LICENSE_NUMBER.is_some());
+
+/// 出面に掲示する許諾番号。歌詞を出している間だけ `Some` (出面の番号)。
+pub fn web_license_number() -> Option<&'static str> {
+    if LYRICS_ON_WEB { WEB_JASRAC_LICENSE_NUMBER } else { None }
+}
 
 /// **この出面で歌詞を出すか。**
 ///
@@ -63,22 +78,25 @@ pub const LYRICS_PENDING_LABEL: &str = "JASRAC 許諾待ち";
 ///
 /// **主語がアプリであることを崩さないこと。** この文が出るのは出面が歌詞を配って
 /// いないときで、そのとき JASRAC の許諾のもとで歌詞を配信しているのはアプリだけ。
-/// 許諾番号 J260943703 は**アプリの**もので、この出面のものではない。
-pub const LYRICS_OFF_NOTE: &str = "本サイトでの歌詞の掲載には JASRAC の許諾が別に必要なため、いまは見合わせています。歌詞はアプリ『アイドルライブDB』でご覧いただけます（アプリは JASRAC 許諾番号 J260943703 のもとで歌詞を配信しています）。";
+/// 添える番号は [`APP_JASRAC_LICENSE_NUMBER`] (**アプリの**もので、この出面のものではない)。
+fn lyrics_off_note() -> String {
+    format!("本サイトでの歌詞の掲載には JASRAC の許諾が別に必要なため、いまは見合わせています。歌詞はアプリ『アイドルライブDB』でご覧いただけます（アプリは JASRAC 許諾番号 {APP_JASRAC_LICENSE_NUMBER} のもとで歌詞を配信しています）。")
+}
 
 /// 歌詞を取りに行くボタンの文言。使われ方はコールガイド目的が多いので、歌詞だけの
 /// ボタンに見せない (About の説明文もこれを引く)。
 pub const LYRICS_READ_LABEL: &str = "歌詞とコールガイドを読む";
 
-/// 出面で歌詞を出すときの文言。許諾番号を必ず添える (掲示が許諾の条件)。
-pub const LYRICS_ON_WEB_NOTE: &str = "JASRAC 許諾番号 J260943703 のもとで掲載しています。1 曲ずつの表示のみで、まとめての取得はできません。";
+/// 出面で歌詞を出すときの文言。出面の許諾番号を必ず添える (掲示が許諾の条件)。
+pub fn lyrics_on_web_note(license_number: &str) -> String {
+    format!("JASRAC 許諾番号 {license_number} のもとで掲載しています。1 曲ずつの表示のみで、まとめての取得はできません。")
+}
 
 /// 今の設定での歌詞の断り書き (曲ページ・About)。
-pub fn lyrics_note() -> &'static str {
-    if LYRICS_ON_WEB {
-        LYRICS_ON_WEB_NOTE
-    } else {
-        LYRICS_OFF_NOTE
+pub fn lyrics_note() -> String {
+    match web_license_number() {
+        Some(number) => lyrics_on_web_note(number),
+        None => lyrics_off_note(),
     }
 }
 
@@ -142,7 +160,7 @@ pub fn lyrics_search_url() -> Option<String> {
 /// 「お申込みいただいたサイトのトップページ等の見やすい位置に表示」が許諾の条件で、
 /// 全ページ共通のフッタに置けばトップにも載る。
 pub fn lyrics_license_notice() -> Option<String> {
-    LYRICS_ON_WEB.then(|| format!("JASRAC 許諾番号 {JASRAC_LICENSE_NUMBER}"))
+    web_license_number().map(|number| format!("JASRAC 許諾番号 {number}"))
 }
 
 /// 載せていないものの断り。歌詞を出しているときは歌詞を含めない。
@@ -486,12 +504,12 @@ pub fn about_sections() -> Vec<AboutSection> {
             heading: "歌詞について".to_string(),
             paragraphs: if LYRICS_ON_WEB {
                 vec![
-                    lyrics_note().to_string(),
+                    lyrics_note(),
                     format!("曲ページで「{LYRICS_READ_LABEL}」を押すと、その 1 曲の歌詞とコールガイドが表示されます。歌詞の中の言葉から曲を探すには、検索ページの「歌詞」を使ってください。コールガイドの編集はアプリでご利用いただけます。"),
                 ]
             } else {
                 vec![
-                    lyrics_note().to_string(),
+                    lyrics_note(),
                     "歌詞の中の言葉から曲を探す検索も、同じ理由で止めています（一致した箇所の前後を返すため、歌詞の掲載と同じ扱いになります）。許諾が得られ次第、どちらも本サイトで開きます。".to_string(),
                 ]
             },
@@ -679,6 +697,18 @@ mod tests {
         // 人数の分からないホール (0 / 無し) には添えない。
         assert_eq!(capacity_display(Some(0)), None);
         assert_eq!(capacity_display(None), None);
+    }
+
+    #[test]
+    fn the_web_never_displays_the_app_licence_as_its_own() {
+        // 閉じている間の断り書きの主語はアプリで、番号もアプリのもの。
+        assert!(lyrics_off_note().contains(&format!("アプリは JASRAC 許諾番号 {APP_JASRAC_LICENSE_NUMBER}")));
+        // 出面の掲示 (フッタ・曲ページ) は出面の番号だけ。今は許諾が無いので何も掲示しない。
+        assert_eq!(web_license_number(), if LYRICS_ON_WEB { WEB_JASRAC_LICENSE_NUMBER } else { None });
+        assert_eq!(lyrics_license_notice().is_some(), web_license_number().is_some());
+        if let Some(number) = WEB_JASRAC_LICENSE_NUMBER {
+            assert_ne!(number, APP_JASRAC_LICENSE_NUMBER, "Web の許諾はアプリとは別の番号");
+        }
     }
 
     #[test]

@@ -126,11 +126,10 @@ pub fn song_page(ctx: &Ctx, song_id: &str) -> Option<SongPage> {
         lyrics: LyricsBlock {
             available: content::LYRICS_ON_WEB,
             status_label: content::lyrics_status_label(),
-            note: content::lyrics_note().to_string(),
-            license_number: content::LYRICS_ON_WEB
-                .then(|| content::JASRAC_LICENSE_NUMBER.to_string()),
-            license_note: content::LYRICS_ON_WEB
-                .then(|| content::LYRICS_ON_WEB_NOTE.to_string()),
+            note: content::lyrics_note(),
+            // 掲示するのは出面の許諾番号だけ (アプリの番号を出面に掲示しない)。
+            license_number: content::web_license_number().map(str::to_string),
+            license_note: content::web_license_number().map(content::lyrics_on_web_note),
             // 1 リクエスト 1 曲。まとめて取れる形の URL は出さない。
             source_url: content::LYRICS_ON_WEB.then(|| {
                 format!("{}/songs/{}/lyrics", content::API_ORIGIN, url::url_segment(&record.id))
