@@ -624,9 +624,14 @@ pub fn search_lede() -> String {
         base.to_string()
     }
 }
-/// 検索ページの `<meta name="description">`。
+/// 検索ページの `<meta name="description">`。**歌詞検索を閉じている間は歌詞に触れない**
+/// (閉じているのに「歌詞の中の言葉で検索します」と書いていた)。
 pub fn search_description() -> &'static str {
-    "アイマスの楽曲・アイドル・ライブ・会場を名前で、または歌詞の中の言葉で検索します。ひらがな / カタカナ / 英字の違いは自動で吸収します。"
+    if LYRICS_ON_WEB {
+        "アイマスの楽曲・アイドル・ライブ・会場を名前で、または歌詞の中の言葉で検索します。ひらがな / カタカナ / 英字の違いは自動で吸収します。"
+    } else {
+        "アイマスの楽曲・アイドル・ライブ・会場を名前で検索します。ひらがな / カタカナ / 英字の違いは自動で吸収します。"
+    }
 }
 
 // ---- 見つからないページ (404) --------------------------------------------------------
@@ -671,7 +676,8 @@ mod tests {
     }
 
     #[test]
-    fn search_lede_mentions_lyrics_only_when_lyrics_search_is_open() {
+    fn search_page_mentions_lyrics_only_when_lyrics_search_is_open() {
         assert_eq!(search_lede().contains("歌詞"), LYRICS_ON_WEB);
+        assert_eq!(search_description().contains("歌詞"), LYRICS_ON_WEB);
     }
 }
