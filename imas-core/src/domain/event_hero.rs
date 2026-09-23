@@ -204,7 +204,7 @@ mod tests {
         assert!(hero.is_upcoming);
         assert_eq!(hero.attendance.state, AttendanceState::None);
 
-        let marked = event_hero(snap, &event_id, &[last.id.clone()], false, "9999-01-01").unwrap();
+        let marked = event_hero(snap, &event_id, std::slice::from_ref(&last.id), false, "9999-01-01").unwrap();
         assert_eq!(marked.attendance.state, AttendanceState::Attended);
         assert!(!marked.is_upcoming);
         assert!(event_hero(snap, "存在しない", &[], false, "2026-01-01").is_none());
