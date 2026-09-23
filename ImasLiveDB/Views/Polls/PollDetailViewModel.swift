@@ -31,7 +31,7 @@ final class PollDetailViewModel {
     var poll: Poll? { detail?.poll }
 
     /// 残り投票可能数 (上限は CommunityVoteLimit が正)。
-    var remaining: Int { detail.map { max(0, CommunityVoteLimit.perTarget - $0.myVoteCount) } ?? 0 }
+    var remaining: Int { detail.map { CommunityVoteLimit.remaining(myVoteCount: $0.myVoteCount) } ?? 0 }
 
     func load() async {
         isLoading = true

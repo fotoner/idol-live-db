@@ -33,7 +33,8 @@ struct TagEditSheet: View {
                                 .padding(.horizontal, DS.sp4)
                                 .padding(.vertical, DS.sp3)
                                 .onChange(of: description) { _, new in
-                                    if new.count > 300 { description = String(new.prefix(300)) }
+                                    let clamped = InputLimits.clamp(.tagDescription, new)
+                                    if clamped != new { description = clamped }
                                 }
                         }
                     }

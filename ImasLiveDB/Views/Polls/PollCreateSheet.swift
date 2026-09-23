@@ -48,7 +48,7 @@ struct PollCreateSheet: View {
     private var targetLabel: String { targetType.label }
 
     private var canSubmit: Bool {
-        guard !trimmedTitle.isEmpty, !isSubmitting else { return false }
+        guard InputLimits.isAcceptable(.pollTitle, title), !isSubmitting else { return false }
         switch scope {
         case .all: return true
         case .brand: return !selectedBrandIds.isEmpty
@@ -60,28 +60,30 @@ struct PollCreateSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: DS.sp6) {
-                    Text("お題を作って、みんなに推しを投票してもらおう。期間中は誰でも3票まで投票できます。")
+                    Text("お題を作って、みんなに推しを投票してもらおう。期間中は誰でも\(CommunityVoteLimit.perTarget)票まで投票できます。")
                         .font(.imasFootnote)
                         .foregroundStyle(DS.ink2)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    fieldSection(header: "タイトル", counter: "\(title.count)/80") {
+                    fieldSection(header: "タイトル", counter: InputLimits.counter(.pollTitle, title, separator: "/", unit: "")) {
                         TextField("例: 夏に聴きたい曲は？", text: $title, axis: .vertical)
                             .font(.imasSubhead)
                             .foregroundStyle(DS.ink)
                             .lineLimit(1...3)
                             .onChange(of: title) { _, new in
-                                if new.count > 80 { title = String(new.prefix(80)) }
+                                let clamped = InputLimits.clamp(.pollTitle, new)
+                                if clamped != new { title = clamped }
                             }
                     }
 
-                    fieldSection(header: "説明（任意）", counter: "\(description.count)/280") {
+                    fieldSection(header: "説明（任意）", counter: InputLimits.counter(.pollDescription, description, separator: "/", unit: "")) {
                         TextField("補足やルールがあれば（任意）", text: $description, axis: .vertical)
                             .font(.imasSubhead)
                             .foregroundStyle(DS.ink)
                             .lineLimit(2...5)
                             .onChange(of: description) { _, new in
-                                if new.count > 280 { description = String(new.prefix(280)) }
+                                let clamped = InputLimits.clamp(.pollDescription, new)
+                                if clamped != new { description = clamped }
                             }
                     }
 

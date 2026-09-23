@@ -400,11 +400,16 @@ struct SongTagApplyResponse: Decodable, Sendable {
 
 // MARK: - Community Polls
 
-/// コミュニティ投票の 1人あたり票数上限。
-/// 「みんなの投票」(お題1件) と「セトリ予想」(公演1件) で同じ 3 票に揃えており、
-/// サーバ側 (imas-live-api の VOTE_LIMIT) と同値。片方だけ動かさないよう1箇所で持つ。
+/// コミュニティ投票の 1人あたり票数上限と残り票数。
+/// 「みんなの投票」(お題1件) と「セトリ予想」(公演1件) で同じ上限。値と数え方はコア
+/// (`vote_limit_per_target` / `votes_remaining`、サーバの VOTE_LIMIT と同値)。
 enum CommunityVoteLimit {
-    static let perTarget = 3
+    static let perTarget = Int(voteLimitPerTarget())
+
+    /// 残り票数 (0 未満にしない)。
+    static func remaining(myVoteCount: Int) -> Int {
+        Int(votesRemaining(myVoteCount: UInt32(clamping: max(0, myVoteCount))))
+    }
 }
 
 enum PollTargetType: String, Codable, Sendable {

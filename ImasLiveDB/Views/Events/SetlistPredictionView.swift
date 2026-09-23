@@ -54,7 +54,7 @@ struct SetlistPredictionView: View {
     private var myVotedPredictions: [SetlistPrediction] { predictions.filter(\.hasUserVoted) }
 
     /// 残り投票可能数 (1公演3票まで)。上限導入前に3票超で投票済みなら 0 に丸める。
-    private var remaining: Int { max(0, CommunityVoteLimit.perTarget - myVotedPredictions.count) }
+    private var remaining: Int { CommunityVoteLimit.remaining(myVoteCount: myVotedPredictions.count) }
 
     /// 「予想を追加」を押せるか。未ログインはログイン誘導のため常に押せる (残票は投票後に効く)。
     private var canAddVote: Bool { !authService.isSignedIn || remaining > 0 }
@@ -296,18 +296,18 @@ struct SetlistPredictionView: View {
     /// (サーバも 409 で弾くが、何票入ったのかを画面側で確定させる)。
     private func addPredictions(songs: [Song]) async {
         guard authService.isSignedIn, !songs.isEmpty else { return }
-        // 既に投票済みの曲は残票を消費しないので、新規分だけを残票で切り出す。
-        let alreadyVoted = Set(myVotedPredictions.map(\.songId))
-        let newSongs = songs.filter { !alreadyVoted.contains($0.id) }
-        let accepted = Array(newSongs.prefix(remaining))
-        let overflow = newSongs.count - accepted.count
+        // 投票済みの曲は残票を消費しない。どれを入れてどれが溢れるかはコア (`planVoteSelection`)。
+        let plan = planVoteSelection(
+            alreadyVoted: myVotedPredictions.map(\.songId), selectedInOrder: songs.map(\.id),
+            myVoteCount: UInt32(clamping: myVotedPredictions.count), unvoteDeselected: false)
+        let overflow = Int(plan.overflow)
         var failed = 0
-        for song in accepted {
+        for songId in plan.toVote {
             do {
-                _ = try await predictionService.vote(showId: showId, songId: song.id)
+                _ = try await predictionService.vote(showId: showId, songId: songId)
             } catch {
                 failed += 1
-                Logger.community.error("add_prediction_failed song=\(song.id, privacy: .public): \(error.localizedDescription)")
+                Logger.community.error("add_prediction_failed song=\(songId, privacy: .public): \(error.localizedDescription)")
             }
         }
         // loadPredictions() が errorMessage をクリアするので、メッセージは再読込の後に立てる。

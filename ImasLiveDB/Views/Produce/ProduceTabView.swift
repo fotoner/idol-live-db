@@ -492,7 +492,7 @@ struct ProduceTabView: View {
         let polls = (try? await AppContainer.shared.communityVoting.polls(status: "active")) ?? []
         // 全票(3票)使い切ったお題はバナーに出さない。残票のあるものだけ対象。
         // (匿名は myVoteCount=nil=0 扱いなので常に対象)
-        let votable = polls.filter { ($0.myVoteCount ?? 0) < 3 }
+        let votable = polls.filter { CommunityVoteLimit.remaining(myVoteCount: $0.myVoteCount ?? 0) > 0 }
         // 未投票を優先、その中からランダム。全部投票済みなら非表示 (nil)。
         let unvoted = votable.filter { ($0.myVoteCount ?? 0) == 0 }
         activePoll = (unvoted.isEmpty ? votable : unvoted).randomElement()

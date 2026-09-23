@@ -305,25 +305,26 @@ struct PollDetailView: View {
                 }
             }
             .sheet(isPresented: $showVotePicker) {
-                votePicker(detail: detail, remaining: remaining)
+                votePicker(detail: detail)
             }
         }
         // 終了済みの場合は投票 UI なし（ランキングのみ表示）
     }
 
     @ViewBuilder
-    private func votePicker(detail: PollDetail, remaining: Int) -> some View {
+    private func votePicker(detail: PollDetail) -> some View {
         let scope = detail.poll.scope
         let brandIds = scope == .brand ? Set(detail.poll.scopeBrandIds ?? []) : nil
         switch detail.poll.targetType {
         case .song:
-            // 投票済みの曲を除外してから残票分だけ切り出す (除外しないと votePoll が
-            // 無言 no-op になり残票を無駄撃ちしてしまう)。
+            // 投票済みの曲は除き、残票分だけ入れる (選び方はコアの planVoteSelection)。
             SongSearchPickerView(restrictedBrandIds: brandIds) { songs in
                 showVotePicker = false
-                let alreadyVoted = Set(detail.entries.filter(\.hasUserVoted).map(\.entityId))
-                let ids = Array(songs.filter { !alreadyVoted.contains($0.id) }.prefix(remaining)).map(\.id)
-                Task { await vm.voteForEntities(ids) }
+                let plan = planVoteSelection(
+                    alreadyVoted: detail.entries.filter(\.hasUserVoted).map(\.entityId),
+                    selectedInOrder: songs.map(\.id),
+                    myVoteCount: UInt32(clamping: detail.myVoteCount), unvoteDeselected: false)
+                Task { await vm.voteForEntities(plan.toVote) }
             }
             .environment(database)
         case .idol:
@@ -339,7 +340,7 @@ struct PollDetailView: View {
                 selected: Set(detail.entries.filter(\.hasUserVoted).map(\.entityId))
             ) { selectedIds in
                 showVotePicker = false
-                applyPickerSelection(selectedIds, ordered: pickIdols.map(\.id), detail: detail, remaining: remaining)
+                applyPickerSelection(selectedIds, ordered: pickIdols.map(\.id), detail: detail)
             }
             .environment(database)
         case .unit:
@@ -354,24 +355,21 @@ struct PollDetailView: View {
                 units: pickUnits
             ) { selectedIds in
                 showVotePicker = false
-                applyPickerSelection(selectedIds, ordered: pickUnits.map(\.id), detail: detail, remaining: remaining)
+                applyPickerSelection(selectedIds, ordered: pickUnits.map(\.id), detail: detail)
             }
         }
     }
 
-    /// アイドル/ユニット共通のまとめ投票ロジック。選択差分から投票/取消をまとめて発火する。
-    private func applyPickerSelection(_ selectedIds: Set<String>, ordered: [String], detail: PollDetail, remaining: Int) {
-        let alreadyVoted = Set(detail.entries.filter(\.hasUserVoted).map(\.entityId))
-        // 外された (投票済みなのに選択解除された) 候補は取消を発火する。
-        let removed = Array(alreadyVoted.subtracting(selectedIds))
-        // 新規追加分。Set のままだと prefix の結果が実行毎に変わりうるので、
-        // ピッカーの表示順で並べ替えてから切り出す (可能な範囲での決定的化)。
-        let addedSet = selectedIds.subtracting(alreadyVoted)
-        let orderedAdded = ordered.filter { addedSet.contains($0) }
-        let newIds = Array(orderedAdded.prefix(remaining))
+    /// アイドル/ユニット共通のまとめ投票。選択差分から投票/取消をまとめて発火する。
+    /// 何を入れて何を取り消すかはコア (`planVoteSelection`)。選択は選択肢の表示順で渡す。
+    private func applyPickerSelection(_ selectedIds: Set<String>, ordered: [String], detail: PollDetail) {
+        let plan = planVoteSelection(
+            alreadyVoted: detail.entries.filter(\.hasUserVoted).map(\.entityId),
+            selectedInOrder: ordered.filter(selectedIds.contains),
+            myVoteCount: UInt32(clamping: detail.myVoteCount), unvoteDeselected: true)
         Task {
-            if !removed.isEmpty { await vm.unvoteForEntities(removed) }
-            if !newIds.isEmpty { await vm.voteForEntities(newIds) }
+            if !plan.toUnvote.isEmpty { await vm.unvoteForEntities(plan.toUnvote) }
+            if !plan.toVote.isEmpty { await vm.voteForEntities(plan.toVote) }
         }
     }
 

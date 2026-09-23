@@ -43,33 +43,32 @@ struct TagCreateSheet: View {
     @State private var isCreating = false
     @State private var errorMessage: String?
 
-    private var isNameValid: Bool {
-        let trimmed = name.trimmingCharacters(in: .whitespaces)
-        return trimmed.count >= 1 && trimmed.count <= 30
-    }
+    private var isNameValid: Bool { InputLimits.isAcceptable(.tagName, name) }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: DS.sp6) {
-                    fieldSection(header: "タグ名", counter: "\(name.trimmingCharacters(in: .whitespaces).count) / 30文字", counterIsError: !isNameValid && !name.isEmpty) {
+                    fieldSection(header: "タグ名", counter: InputLimits.counter(.tagName, name), counterIsError: !isNameValid && !name.isEmpty) {
                         TextField("例: エモい", text: $name)
                             .font(.imasSubhead)
                             .foregroundStyle(DS.ink)
                             .autocorrectionDisabled()
                             .onAppear { if name.isEmpty { name = initialName } }
                             .onChange(of: name) { _, new in
-                                if new.count > 30 { name = String(new.prefix(30)) }
+                                let clamped = InputLimits.clamp(.tagName, new)
+                                if clamped != new { name = clamped }
                             }
                     }
 
-                    fieldSection(header: "説明文（任意）", counter: "\(description.count) / 300文字", counterIsError: false) {
+                    fieldSection(header: "説明文（任意）", counter: InputLimits.counter(.tagDescription, description), counterIsError: false) {
                         TextField("どんな時に使うタグか（任意）", text: $description, axis: .vertical)
                             .font(.imasSubhead)
                             .foregroundStyle(DS.ink)
                             .lineLimit(2...5)
                             .onChange(of: description) { _, new in
-                                if new.count > 300 { description = String(new.prefix(300)) }
+                                let clamped = InputLimits.clamp(.tagDescription, new)
+                                if clamped != new { description = clamped }
                             }
                     }
 

@@ -192,16 +192,17 @@ struct MyPageView: View {
                 TextField("表示名", text: $editingName)
                     .textInputAutocapitalization(.never)
                     .onChange(of: editingName) { _, new in
-                        // アラート文言「40文字以内」に実際の入力を追従させる (無制限に打てるとサーバ側で弾かれる)。
-                        if new.count > 40 { editingName = String(new.prefix(40)) }
+                        // 上限と数え方 (コードポイント) はコア。無制限に打てるとサーバ側で弾かれる。
+                        let clamped = InputLimits.clamp(.displayName, new)
+                        if clamped != new { editingName = clamped }
                     }
                 Button("保存") {
                     Task { await saveDisplayName() }
                 }
-                .disabled(editingName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSavingName)
+                .disabled(!InputLimits.isAcceptable(.displayName, editingName) || isSavingName)
                 Button("キャンセル", role: .cancel) {}
             } message: {
-                Text("コミュニティ投稿で表示される名前です (40文字以内)")
+                Text("コミュニティ投稿で表示される名前です (\(InputLimits.max(.displayName))文字以内)")
             }
             .alert("表示名の保存に失敗", isPresented: Binding(
                 get: { nameErrorMessage != nil },
