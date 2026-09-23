@@ -11,6 +11,11 @@
 //! sqlite_master で有無を動的検出して「あれば読む・無ければ既定値 (None / 空)」にする。
 //! これで Bundle DB と移行済み Documents DB のどちらを渡されても同じコードが通る。
 //!
+//! 行は**主キー順**で読む (ORDER BY id。複合主キーの表はその列の順)。スナップショットの
+//! 添字の順 = 主キー順にしておくと、並べ替えの最後のタイブレーク (添字) が id 順になり、
+//! 同順位の並びが DB の物理的な行順 (同梱 DB と、Android の同期で作られた DB で違う) に
+//! 左右されない。Web の生テーブルもこの順で配るので、3 つの面で同じ並びになる。
+//!
 //! song_videos は意図して読まない (理由は domain/snapshot.rs 冒頭)。
 //!
 //! FK 孤児 (参照整合が壊れた行) は黙って捨てて継続する。起動を壊すより読み飛ばす方が
@@ -188,7 +193,7 @@ fn load_songs(conn: &Connection) -> Result<Vec<Song>, String> {
                     apple_music_id, apple_music_album_id, isrc, lyrics_url, parent_song_id,
                     singer_label, unit_name, unit_id, series_group, {jasrac}, {joint}, {collab},
                     {kamisabi}, {unit_version}
-             FROM songs"),
+             FROM songs ORDER BY id"),
         )
         .map_err(|e| e.to_string())?;
     let rows = stmt
@@ -236,7 +241,7 @@ fn load_idols(conn: &Connection) -> Result<Vec<Idol>, String> {
                     constellation, hobbies, talents, description, gender, handedness,
                     family_name, given_name, nickname, debut_date, attribute, is_external,
                     aliases
-             FROM idols",
+             FROM idols ORDER BY id",
         )
         .map_err(|e| e.to_string())?;
     let rows = stmt
@@ -283,7 +288,7 @@ fn load_events(conn: &Connection) -> Result<Vec<Event>, String> {
         "SELECT id, brand_id, name, event_type, is_streaming, is_solo, kind,
                 ticket_open_date, ticket_deadline, ticket_lottery_date, ticket_url,
                 joint_brand_ids, {has_streaming}, {has_live_viewing}, {name_kana}
-         FROM events",
+         FROM events ORDER BY id",
         has_streaming = optional_col(&cols, "has_streaming"),
         has_live_viewing = optional_col(&cols, "has_live_viewing"),
         // 後から足した列。移行前の DB (Android の Room 版が上がる前) には無いので守る。
@@ -327,7 +332,7 @@ fn load_shows(
         "SELECT id, event_id, name, date, venue, venue_city, start_time, sort_order,
                 performer_type, venue_id, hall, stream_platform,
                 {has_streaming}, {has_live_viewing}
-         FROM shows",
+         FROM shows ORDER BY id",
         has_streaming = optional_col(&cols, "has_streaming"),
         has_live_viewing = optional_col(&cols, "has_live_viewing"),
     );
@@ -386,7 +391,7 @@ fn load_setlist_items(
     let mut stmt = conn
         .prepare(
             "SELECT id, show_id, song_id, position, section, notes, unit_name
-             FROM setlist_items",
+             FROM setlist_items ORDER BY id",
         )
         .map_err(|e| e.to_string())?;
     let rows = stmt
@@ -429,7 +434,7 @@ fn load_units(conn: &Connection) -> Result<Vec<Unit>, String> {
     // 落ちないよう、列の有無を見てから引く (brands の icon_url と同じ扱い)。
     let cols = table_columns(conn, "units")?;
     let sql = format!(
-        "SELECT id, brand_id, name, is_permanent, name_alt, {name_kana} FROM units",
+        "SELECT id, brand_id, name, is_permanent, name_alt, {name_kana} FROM units ORDER BY id",
         name_kana = optional_col(&cols, "name_kana"),
     );
     let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
@@ -451,7 +456,7 @@ fn load_units(conn: &Connection) -> Result<Vec<Unit>, String> {
 fn load_brands(conn: &Connection) -> Result<Vec<Brand>, String> {
     let cols = table_columns(conn, "brands")?;
     let sql = format!(
-        "SELECT id, name, short_name, color, sort_order, {icon_url} FROM brands",
+        "SELECT id, name, short_name, color, sort_order, {icon_url} FROM brands ORDER BY id",
         icon_url = optional_col(&cols, "icon_url"),
     );
     let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
@@ -476,7 +481,7 @@ fn load_brands(conn: &Connection) -> Result<Vec<Brand>, String> {
 /// ここで読み込みを失敗させて**スナップショット全体を落とす方が損失が大きい**。
 /// Android は `idol_voice_actors` を持たない等、端末ごとに表が欠けることが実際にある。
 fn load_creators(conn: &Connection) -> Result<Vec<Creator>, String> {
-    let mut stmt = match conn.prepare("SELECT id, name, name_kana, aliases FROM creators") {
+    let mut stmt = match conn.prepare("SELECT id, name, name_kana, aliases FROM creators ORDER BY id") {
         Ok(s) => s,
         Err(_) => return Ok(Vec::new()),
     };
@@ -497,7 +502,7 @@ fn load_venues(conn: &Connection) -> Result<Vec<Venue>, String> {
     let mut stmt = conn
         .prepare(
             "SELECT id, name, name_kana, prefecture, city, aliases, capacity, sort_order
-             FROM venues",
+             FROM venues ORDER BY id",
         )
         .map_err(|e| e.to_string())?;
     let rows = stmt
@@ -523,7 +528,7 @@ fn load_venue_names(
     venue_index_by_id: &HashMap<String, u32>,
 ) -> Result<Vec<VenueName>, String> {
     let mut stmt = conn
-        .prepare("SELECT id, venue_id, name, valid_from, valid_to FROM venue_names")
+        .prepare("SELECT id, venue_id, name, valid_from, valid_to FROM venue_names ORDER BY id")
         .map_err(|e| e.to_string())?;
     let rows = stmt
         .query_map([], |r| {
@@ -551,7 +556,7 @@ fn load_venue_halls(
     venue_index_by_id: &HashMap<String, u32>,
 ) -> Result<Vec<VenueHall>, String> {
     let mut stmt = conn
-        .prepare("SELECT id, venue_id, name, capacity FROM venue_halls")
+        .prepare("SELECT id, venue_id, name, capacity FROM venue_halls ORDER BY id")
         .map_err(|e| e.to_string())?;
     let rows = stmt
         .query_map([], |r| {
@@ -581,7 +586,7 @@ fn load_costumes(conn: &Connection) -> Result<Vec<Costume>, String> {
         .prepare(
             "SELECT id, brand_id, name, name_kana, unit_id, idol_id, description, source_url,
                     sort_order
-             FROM costumes",
+             FROM costumes ORDER BY id",
         )
         .map_err(|e| e.to_string())?;
     let rows = stmt
@@ -621,7 +626,7 @@ fn load_costume_wears(
     let mut stmt = conn
         .prepare(
             "SELECT id, costume_id, show_id, setlist_item_id, idol_id, sort_order
-             FROM costume_wears",
+             FROM costume_wears ORDER BY id",
         )
         .map_err(|e| e.to_string())?;
     let rows = stmt
@@ -668,7 +673,7 @@ fn load_staff(conn: &Connection) -> Result<Vec<Staff>, String> {
     let mut stmt = conn
         .prepare(
             "SELECT id, brand_id, name, name_kana, name_romaji, role, birthday, sort_order
-             FROM staff",
+             FROM staff ORDER BY id",
         )
         .map_err(|e| e.to_string())?;
     let rows = stmt
@@ -690,7 +695,7 @@ fn load_staff(conn: &Connection) -> Result<Vec<Staff>, String> {
 
 fn load_anniversaries(conn: &Connection) -> Result<Vec<Anniversary>, String> {
     let mut stmt = conn
-        .prepare("SELECT id, brand_id, label, date, kind, sort_order FROM anniversaries")
+        .prepare("SELECT id, brand_id, label, date, kind, sort_order FROM anniversaries ORDER BY id")
         .map_err(|e| e.to_string())?;
     let rows = stmt
         .query_map([], |r| {
@@ -721,7 +726,7 @@ fn load_voice_actors(
         return Ok(Vec::new());
     }
     let mut stmt = conn
-        .prepare("SELECT id, idol_id, name, valid_from, valid_to FROM idol_voice_actors")
+        .prepare("SELECT id, idol_id, name, valid_from, valid_to FROM idol_voice_actors ORDER BY id")
         .map_err(|e| e.to_string())?;
     let rows = stmt
         .query_map([], |r| {
@@ -758,7 +763,7 @@ fn load_event_releases(
         .prepare(
             "SELECT id, event_id, show_id, product_type, title, catalog_number, release_date,
                     jacket_url, purchase_url, sort_order
-             FROM event_releases",
+             FROM event_releases ORDER BY id",
         )
         .map_err(|e| e.to_string())?;
     let rows = stmt
@@ -801,7 +806,7 @@ fn load_event_releases(
 
 /// meta 表 (key → value)。value NULL の行は載せない (getValue の観測結果は行なしと同じ)。
 fn load_meta(conn: &Connection) -> Result<BTreeMap<String, String>, String> {
-    let mut stmt = conn.prepare("SELECT key, value FROM meta").map_err(|e| e.to_string())?;
+    let mut stmt = conn.prepare("SELECT key, value FROM meta ORDER BY key").map_err(|e| e.to_string())?;
     let rows = stmt
         .query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, Option<String>>(1)?)))
         .map_err(|e| e.to_string())?;
@@ -818,7 +823,7 @@ fn load_meta(conn: &Connection) -> Result<BTreeMap<String, String>, String> {
 /// song_artists の生行 (song_id, idol_id, role)。
 fn load_song_artists(conn: &Connection) -> Result<Vec<(String, String, Option<String>)>, String> {
     let mut stmt = conn
-        .prepare("SELECT song_id, idol_id, role FROM song_artists")
+        .prepare("SELECT song_id, idol_id, role FROM song_artists ORDER BY song_id, idol_id, role")
         .map_err(|e| e.to_string())?;
     let rows = stmt
         .query_map([], |r| {
@@ -831,7 +836,7 @@ fn load_song_artists(conn: &Connection) -> Result<Vec<(String, String, Option<St
 /// setlist_performers の生行 (setlist_item_id, idol_id)。
 fn load_setlist_performers(conn: &Connection) -> Result<Vec<(String, String)>, String> {
     let mut stmt = conn
-        .prepare("SELECT setlist_item_id, idol_id FROM setlist_performers")
+        .prepare("SELECT setlist_item_id, idol_id FROM setlist_performers ORDER BY setlist_item_id, idol_id")
         .map_err(|e| e.to_string())?;
     let rows = stmt
         .query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))
@@ -842,7 +847,7 @@ fn load_setlist_performers(conn: &Connection) -> Result<Vec<(String, String)>, S
 /// show_cast の生行 (show_id, idol_id, cast_role)。
 fn load_show_cast(conn: &Connection) -> Result<Vec<(String, String, Option<String>)>, String> {
     let mut stmt = conn
-        .prepare("SELECT show_id, idol_id, cast_role FROM show_cast")
+        .prepare("SELECT show_id, idol_id, cast_role FROM show_cast ORDER BY show_id, idol_id")
         .map_err(|e| e.to_string())?;
     let rows = stmt
         .query_map([], |r| {
@@ -855,7 +860,7 @@ fn load_show_cast(conn: &Connection) -> Result<Vec<(String, String, Option<Strin
 /// unit_members の生行 (unit_id, idol_id)。
 fn load_unit_members(conn: &Connection) -> Result<Vec<(String, String)>, String> {
     let mut stmt = conn
-        .prepare("SELECT unit_id, idol_id FROM unit_members")
+        .prepare("SELECT unit_id, idol_id FROM unit_members ORDER BY unit_id, idol_id")
         .map_err(|e| e.to_string())?;
     let rows = stmt
         .query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))
@@ -866,7 +871,7 @@ fn load_unit_members(conn: &Connection) -> Result<Vec<(String, String)>, String>
 /// idol_brands の生行 (idol_id, brand_id, is_primary)。
 fn load_idol_brands(conn: &Connection) -> Result<Vec<(String, String, Option<i64>)>, String> {
     let mut stmt = conn
-        .prepare("SELECT idol_id, brand_id, is_primary FROM idol_brands")
+        .prepare("SELECT idol_id, brand_id, is_primary FROM idol_brands ORDER BY idol_id, brand_id")
         .map_err(|e| e.to_string())?;
     let rows = stmt
         .query_map([], |r| {
@@ -1683,7 +1688,8 @@ mod tests {
         let _ = std::fs::remove_file(&path);
 
         let kept: Vec<&str> = s.costume_wears.iter().map(|w| w.id.as_str()).collect();
-        assert_eq!(kept, vec!["w_song_and_idol", "w_show_only"]);
+        // 行は主キー順に読む (Q-07)。
+        assert_eq!(kept, vec!["w_show_only", "w_song_and_idol"]);
 
         let by_show = &s.wears_by_show[s.show_index_by_id["sh1"] as usize];
         assert_eq!(by_show.len(), 2);

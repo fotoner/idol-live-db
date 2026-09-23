@@ -512,16 +512,13 @@ mod tests {
         assert!(ids.len() > 50, "検証に足る件数がある前提: {}", ids.len());
         assert!(ids.windows(2).all(|w| w[0] < w[1]), "id 昇順・重複なし");
 
-        // 添字順とは実際に違うこと (同じなら「並べ替えを忘れた実装」でも通ってしまう)
-        let in_snapshot_order: Vec<&str> = bundle_snapshot()
-            .songs
-            .iter()
-            .filter(|s| s.brand_id.as_deref() == Some(brand))
-            .filter(|s| !Snapshot::is_cover(s))
-            .filter(|s| s.parent_song_id.as_deref().is_none_or(str::is_empty))
-            .map(|s| s.id.as_str())
-            .collect();
-        assert_ne!(ids, in_snapshot_order, "添字順と id 昇順が同じ DB では検証にならない");
+        // 読み込みは主キー順 (添字順 = id 順) なので、並べ替えを忘れた実装でもここまでは
+        // 通る。添字順を逆にしたスナップショットでも同じ列を返すことを見る。
+        let reversed = Snapshot {
+            songs: bundle_snapshot().songs.iter().rev().cloned().collect(),
+            ..Snapshot::default()
+        };
+        assert_eq!(candidate_song_ids(&reversed, brand, false, true), ids);
     }
 
     /// 共有 CARGO_TARGET_DIR の成果物混入の回帰ガード (search_queries と同型)。

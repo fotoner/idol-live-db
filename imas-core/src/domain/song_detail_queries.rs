@@ -932,7 +932,7 @@ mod tests {
         let snap = bundle_snapshot();
         let db = bundle_conn();
         let mut stmt = db
-            .prepare("SELECT id, title, title_kana FROM songs ORDER BY title")
+            .prepare("SELECT id, title, title_kana FROM songs ORDER BY title, id")
             .unwrap();
         let expected: Vec<PickedSongRecord> = stmt
             .query_map([], |r| {
@@ -1203,10 +1203,10 @@ mod tests {
         };
 
         if let Some(sg) = series_group.as_deref().filter(|v| !v.is_empty()) {
-            add(fetch("SELECT * FROM songs WHERE series_group = ?", vec![sg.to_string()]), 3);
+            add(fetch("SELECT * FROM songs WHERE series_group = ? ORDER BY id", vec![sg.to_string()]), 3);
         }
         if let Some(unit) = unit_id.as_deref().filter(|v| !v.is_empty()) {
-            add(fetch("SELECT * FROM songs WHERE unit_id = ?", vec![unit.to_string()]), 2);
+            add(fetch("SELECT * FROM songs WHERE unit_id = ? ORDER BY id", vec![unit.to_string()]), 2);
         }
         if !artist_ids.is_empty() {
             let shared_ids: Vec<String> = {
@@ -1362,7 +1362,7 @@ mod tests {
         }
         let db = bundle_conn();
         let exact: Vec<SongDetailRecord> = db
-            .prepare("SELECT * FROM songs WHERE title = ?")
+            .prepare("SELECT * FROM songs WHERE title = ? ORDER BY id")
             .unwrap()
             .query_map([trimmed], |r| Ok(record_from_row(r)))
             .unwrap()
@@ -1376,7 +1376,7 @@ mod tests {
             .prepare(
                 "SELECT * FROM songs
                   WHERE (title LIKE ? ESCAPE '\\' OR title_kana LIKE ? ESCAPE '\\')
-                  LIMIT ?",
+                  ORDER BY id LIMIT ?",
             )
             .unwrap();
         let rows: Vec<SongDetailRecord> = stmt

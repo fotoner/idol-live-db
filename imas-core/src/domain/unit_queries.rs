@@ -52,8 +52,8 @@ pub struct UnitMemberLinkRecord {
 /// プラットフォーム側はこれから UnitIndex (memberIds / byIdol の Map) を組み立てる。
 #[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
 pub struct UnitIndexRecord {
-    /// 全ユニット。並びはスナップショット順 (= rowid 順 = `Unit.fetchAll` の走査順)。
-    /// UnitIndex.exactMatchingUnits は units の並び順で先勝ちするため、順序も忠実に保つ。
+    /// 全ユニット。並びはスナップショット順 (= id 順。ローダが主キー順に読む)。
+    /// UnitIndex.exactMatchingUnits は units の並び順で先勝ちするため、順序に意味がある。
     pub units: Vec<UnitRecord>,
     /// unit_members の全行。元 SQL は ORDER BY なし (Swift 側は Set に落とすので
     /// 順序は無観測)。ここでは (unit 添字, メンバー sort_order) 順で決定的にしてある。
@@ -421,11 +421,10 @@ mod tests {
         let db = bundle_conn();
         let data = unit_index_data(bundle_snapshot());
 
-        // units: fetchAll (`SELECT * FROM units`、ORDER BY なし) と並び・全カラム逐語一致。
-        // 注意: `SELECT id FROM units` は covering index (PK) 走査で id 順になり
-        // 全行スキャンの rowid 順と食い違うため、基準は必ず全カラムの走査で取る。
+        // units: fetchAll (`SELECT * FROM units`) と全カラム逐語一致。元 SQL は ORDER BY なし
+        // (行順) だったが、同順位は id 順に揃えた (Q-07) ので、並びの基準は ORDER BY id。
         let mut stmt = db
-            .prepare("SELECT id, brand_id, name, is_permanent, name_alt, name_kana FROM units")
+            .prepare("SELECT id, brand_id, name, is_permanent, name_alt, name_kana FROM units ORDER BY id")
             .unwrap();
         let expected_rows: Vec<UnitRecord> = stmt
             .query_map([], |r| {
@@ -442,7 +441,7 @@ mod tests {
             .collect::<Result<_, _>>()
             .unwrap();
         assert!(expected_rows.len() >= 100, "units は 3 桁以上ある前提");
-        assert_eq!(data.units, expected_rows, "units の並び (rowid 順) と全カラム");
+        assert_eq!(data.units, expected_rows, "units の並び (id 順) と全カラム");
 
         // member_links: 元 SQL の全行と集合一致 (Swift 側は Set 構築なので順序無観測)。
         let mut stmt = db.prepare("SELECT unit_id, idol_id FROM unit_members").unwrap();

@@ -541,7 +541,7 @@ mod tests {
         );
     }
     use super::*;
-    use crate::test_support::{bundle_conn, bundle_snapshot};
+    use crate::test_support::{bundle_conn, bundle_path, bundle_snapshot};
     use rusqlite::Connection;
 
     /// 一覧の行は参加ブランドと「合同か」を持つ (画面で joint_brand_ids を割らない)。
@@ -669,7 +669,7 @@ mod tests {
         );
     }
 
-    /// 結果は id 昇順 (DISTINCT を満たす PK 索引走査の順)。rowid 順ではない。
+    /// 結果は id 昇順 (DISTINCT を満たす PK 索引走査の順)。
     /// LIMIT がこの並びの先頭を取るので、順序を間違えると返る集合ごと変わる。
     #[test]
     fn search_events_are_ordered_by_id_not_by_snapshot_order() {
@@ -677,13 +677,19 @@ mod tests {
         assert!(hits.len() > 20, "検証に足る件数がある前提: {}", hits.len());
         assert!(hits.windows(2).all(|w| w[0] < w[1]), "id 昇順");
 
-        // 添字順 (rowid 順) とは実際に違うこと。
-        let in_snapshot_order: Vec<String> = {
-            let mut v: Vec<String> = hits.clone();
-            v.sort_by_key(|id| bundle_snapshot().event_index_by_id[id]);
-            v
-        };
-        assert_ne!(hits, in_snapshot_order, "id 順と添字順が同じ DB では検証にならない");
+        // 読み込みは主キー順 (添字順 = id 順) なので、並べ替えを忘れた実装でもここまでは
+        // 通る。イベントの添字順を逆にしたスナップショットでも同じ列を返すことを見る。
+        let mut raw = crate::outbound::sqlite_loader::load_raw_tables(bundle_path()).unwrap();
+        let last = raw.events.len() as u32 - 1;
+        raw.events.reverse();
+        raw.shows.iter_mut().for_each(|s| s.event = last - s.event);
+        raw.event_releases.iter_mut().for_each(|r| r.event = last - r.event);
+        let reversed = crate::domain::snapshot_build::build(raw);
+        let again: Vec<String> = search_events_by_name_or_venue(&reversed, "ライブ", 200)
+            .into_iter()
+            .map(|e| e.id)
+            .collect();
+        assert_eq!(again, hits);
     }
 
     /// (id, first_date, last_date) — with-date 系の照合対象射影。
@@ -992,12 +998,12 @@ mod tests {
     #[test]
     fn event_records_by_brand_matches_sql() {
         let db = bundle_conn();
-        // GRDB `Event.all()` は SELECT * (ORDER BY なし) = rowid 順の全表走査。
-        // covering index に化けないよう e.* を読む。
+        // GRDB `Event.all()` は SELECT * (ORDER BY なし) で行順だった。同順位は id 順に
+        // 揃えた (Q-07) ので、基準も ORDER BY e.id にする。
         let run = |brand: Option<&str>| -> Vec<String> {
             let (sql, args) = match brand {
-                Some(b) => ("SELECT e.* FROM events e WHERE e.brand_id = ?".to_string(), vec![b.to_string()]),
-                None => ("SELECT e.* FROM events e".to_string(), vec![]),
+                Some(b) => ("SELECT e.* FROM events e WHERE e.brand_id = ? ORDER BY e.id".to_string(), vec![b.to_string()]),
+                None => ("SELECT e.* FROM events e ORDER BY e.id".to_string(), vec![]),
             };
             let mut stmt = db.prepare(&sql).unwrap();
             let rows = stmt
