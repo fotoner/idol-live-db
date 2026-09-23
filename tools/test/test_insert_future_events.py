@@ -49,7 +49,7 @@ class CliTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         root = Path(self.tmp.name)
-        self.tools = support.copy_tools(root, "insert_future_events.py", "seed_cloudkit.py")
+        self.tools = support.copy_tools(root, "insert_future_events.py")
         support.write_json(self.tools / "future_events.json", EVENTS)
         self.db = root / "ImasLiveDB" / "Resources" / "master.sqlite"
         self.db.parent.mkdir(parents=True)
