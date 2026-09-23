@@ -28,6 +28,7 @@
       "artistsLabel": "春日未来",
       "songTypeLabel": "ユニット曲",
       "collabLabel": "合同曲",
+      "kamisabiLabel": "KAMISABI 収録",
       "composerCredit": "作曲 高田暁",
       "cdCredit": "収録 THE IDOLM@STER LIVE THE@TER PERFORMANCE 01",
       "performanceCount": 12,
@@ -48,6 +49,7 @@
       "artistsLabel": null,
       "songTypeLabel": null,
       "collabLabel": null,
+      "kamisabiLabel": null,
       "composerCredit": null,
       "cdCredit": null,
       "performanceCount": null,
@@ -68,6 +70,7 @@
     "includeRemixes": false,
     "includeOtherBrand": false,
     "excludeLiveOnly": false,
+    "kamisabiOnly": false,
     "sort": "kana",
     "ascending": null
   },
