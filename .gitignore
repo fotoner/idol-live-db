@@ -96,8 +96,10 @@ tools/lyrics/node_modules
 # 照合レポート。歌詞本文の抜粋が載るので公開リポジトリに入れない
 tools/lyrics/out/
 
-# imas-core (Rust) のビルド生成物。imas-core/build.sh が再生成する
-imas-core/target/
+# imas-core (Rust) のビルド生成物。imas-core/build.sh が再生成する。
+# 共有 target へのシンボリックリンクにしていることがあるので、末尾スラッシュを付けない
+# (付けるとディレクトリにしか一致せず、リンクが ?? で出る)
+imas-core/target
 # imas-text-fold (畳み込み規則の crate) のビルド生成物
 imas-text-fold/target/
 # tools/ の Python スクリプトを import/実行したときに出るバイトコード
