@@ -1,20 +1,19 @@
 package com.fugaif.imaslivedb.data.community
 
-import android.content.Context
 import android.util.Log
 import com.fugaif.imaslivedb.data.auth.AuthService
+import com.fugaif.imaslivedb.data.net.WorkerHttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
+import java.io.IOException
 import java.net.URLEncoder
 
 /** 集計系コミュニティ (タグ / ペンライト投票 / お題) の Worker D1 クライアント。iOS CommunityAPI の移植。
- *  authService がサインイン済みなら Authorization: Bearer を全リクエストに付与する
+ *  サインイン済みなら Authorization: Bearer を全リクエストに付与する ([WorkerHttpClient])
  *  (投票系エンドポイントはサーバ側で認証必須。タグ/ペンライト等は未指定でも動く匿名 read/write)。 */
-class CommunityApi(private val appContext: Context, private val authService: AuthService) {
+class CommunityApi(private val http: WorkerHttpClient, private val authService: AuthService) {
 
     data class SongTag(val id: String, val name: String, val color: String?, val voteCount: Int, val mine: Boolean)
     data class IdolTag(val id: String, val name: String, val color: String?, val voteCount: Int, val mine: Boolean)
@@ -844,25 +843,10 @@ class CommunityApi(private val appContext: Context, private val authService: Aut
     private fun JSONObject.strOrNull(key: String): String? =
         if (isNull(key)) null else optString(key).ifEmpty { null }
 
-    private fun open(method: String, path: String): HttpURLConnection {
-        val conn = (URL(BASE + path).openConnection() as HttpURLConnection).apply {
-            requestMethod = method
-            connectTimeout = 15_000
-            readTimeout = 15_000
-            setRequestProperty("Content-Type", "application/json")
-            setRequestProperty("X-Device-Id", DeviceIdentity.get(appContext))
-            authService.sessionToken?.let { setRequestProperty("Authorization", "Bearer $it") }
-        }
-        return conn
-    }
-
     private fun get(path: String): JSONObject? {
         return try {
-            val conn = open("GET", path)
-            val code = conn.responseCode
-            val text = (if (code in 200..299) conn.inputStream else conn.errorStream)?.bufferedReader()?.use { it.readText() }
-            conn.disconnect()
-            if (code in 200..299 && !text.isNullOrEmpty()) JSONObject(text) else null
+            val response = http.request("GET", path)
+            if (response.isSuccess && !response.body.isNullOrEmpty()) JSONObject(response.body) else null
         } catch (e: Exception) {
             Log.w(TAG, "GET $path failed: ${e.message}"); null
         }
@@ -870,11 +854,8 @@ class CommunityApi(private val appContext: Context, private val authService: Aut
 
     private fun getArray(path: String): JSONArray? {
         return try {
-            val conn = open("GET", path)
-            val code = conn.responseCode
-            val text = (if (code in 200..299) conn.inputStream else conn.errorStream)?.bufferedReader()?.use { it.readText() }
-            conn.disconnect()
-            if (code in 200..299 && !text.isNullOrEmpty()) JSONArray(text) else null
+            val response = http.request("GET", path)
+            if (response.isSuccess && !response.body.isNullOrEmpty()) JSONArray(response.body) else null
         } catch (e: Exception) {
             Log.w(TAG, "GET[] $path failed: ${e.message}"); null
         }
@@ -882,14 +863,7 @@ class CommunityApi(private val appContext: Context, private val authService: Aut
 
     private fun send(method: String, path: String, body: JSONObject?): Boolean {
         return try {
-            val conn = open(method, path)
-            if (body != null) {
-                conn.doOutput = true
-                conn.outputStream.use { it.write(body.toString().toByteArray(Charsets.UTF_8)) }
-            }
-            val code = conn.responseCode
-            conn.disconnect()
-            code in 200..299
+            http.request(method, path, body).isSuccess
         } catch (e: Exception) {
             Log.w(TAG, "$method $path failed: ${e.message}"); false
         }
@@ -898,16 +872,9 @@ class CommunityApi(private val appContext: Context, private val authService: Aut
     /** send と同じだがレスポンス body を JSON として返す (投票結果の票数反映に使う)。 */
     private fun sendJson(method: String, path: String, body: JSONObject?): JSONObject? {
         return try {
-            val conn = open(method, path)
-            if (body != null) {
-                conn.doOutput = true
-                conn.outputStream.use { it.write(body.toString().toByteArray(Charsets.UTF_8)) }
-            }
-            val code = conn.responseCode
-            val text = (if (code in 200..299) conn.inputStream else conn.errorStream)?.bufferedReader()?.use { it.readText() }
-            conn.disconnect()
-            if (code !in 200..299) Log.w(TAG, "$method $path -> HTTP $code body=$text")
-            if (code in 200..299 && !text.isNullOrEmpty()) JSONObject(text) else null
+            val response = http.request(method, path, body)
+            if (!response.isSuccess) Log.w(TAG, "$method $path -> HTTP ${response.code} body=${response.body}")
+            if (response.isSuccess && !response.body.isNullOrEmpty()) JSONObject(response.body) else null
         } catch (e: Exception) {
             Log.w(TAG, "$method $path failed: ${e.message}"); null
         }
@@ -919,17 +886,13 @@ class CommunityApi(private val appContext: Context, private val authService: Aut
         method: String, path: String, body: JSONObject?, allowedExtra: Set<Int> = emptySet()
     ): Pair<Int, JSONObject?> {
         return try {
-            val conn = open(method, path)
-            if (body != null) {
-                conn.doOutput = true
-                conn.outputStream.use { it.write(body.toString().toByteArray(Charsets.UTF_8)) }
-            }
-            val code = conn.responseCode
-            val ok = code in 200..299 || code in allowedExtra
-            val text = (if (ok) conn.inputStream else conn.errorStream)?.bufferedReader()?.use { it.readText() }
-            conn.disconnect()
-            if (!ok) Log.w(TAG, "$method $path -> HTTP $code body=$text")
-            code to (if (ok && !text.isNullOrEmpty()) JSONObject(text) else null)
+            val response = http.request(method, path, body)
+            // 今の挙動: allowedExtra (400 以上) の本文は inputStream から読もうとして例外になり、
+            // 通信失敗 (-1) と同じ扱いになっている (Android は 400 以上で inputStream が投げる)。
+            if (response.code in allowedExtra) throw IOException("HTTP ${response.code}")
+            val ok = response.isSuccess
+            if (!ok) Log.w(TAG, "$method $path -> HTTP ${response.code} body=${response.body}")
+            response.code to (if (ok && !response.body.isNullOrEmpty()) JSONObject(response.body) else null)
         } catch (e: Exception) {
             Log.w(TAG, "$method $path failed: ${e.message}")
             -1 to null
@@ -937,7 +900,6 @@ class CommunityApi(private val appContext: Context, private val authService: Aut
     }
 
     companion object {
-        private const val BASE = "https://imas-live-api.tokata3011.workers.dev"
         private const val TAG = "CommunityApi"
     }
 }

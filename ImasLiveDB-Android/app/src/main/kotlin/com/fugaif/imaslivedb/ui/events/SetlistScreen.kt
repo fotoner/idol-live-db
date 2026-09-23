@@ -74,6 +74,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fugaif.imaslivedb.data.community.SetlistLikeService
 import com.fugaif.imaslivedb.data.auth.canEdit
 import com.fugaif.imaslivedb.data.auth.showEditAffordance
 import com.fugaif.imaslivedb.data.auth.startCommunityEdit
@@ -147,7 +148,7 @@ fun SetlistScreen(
     val uiState by viewModel.uiState.collectAsState()
     val module = remember(context) { AppModule.from(context) }
     val marks = module.userMarkRepository
-    val likeService = remember(context) { SetlistLikeService.get(context) }
+    val likeService = remember(context) { AppModule.from(context).setlistLikeService }
     val authState by module.authService.state.collectAsState()
     // 権限フラグは認証状態が変わった時だけコアへ問い合わせる (data/auth/EditPermission.kt のヘッダ参照)。
     val canShowEditActions = remember(authState) { authState.showEditAffordance }

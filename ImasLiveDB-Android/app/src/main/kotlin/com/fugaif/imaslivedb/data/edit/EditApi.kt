@@ -1,15 +1,12 @@
 package com.fugaif.imaslivedb.data.edit
 
-import android.content.Context
 import android.util.Log
 import com.fugaif.imaslivedb.data.auth.AuthService
-import com.fugaif.imaslivedb.data.community.DeviceIdentity
+import com.fugaif.imaslivedb.data.net.WorkerHttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
 import java.net.URLEncoder
 
 /**
@@ -24,7 +21,7 @@ import java.net.URLEncoder
  * - [submitMaster] が `AuthService.isAdmin` で自動的にどちらを呼ぶか振り分ける
  *   (iOS `EditService.submitMaster` と同じ分岐)。
  */
-class EditApi(private val appContext: Context, private val authService: AuthService) {
+class EditApi(private val http: WorkerHttpClient, private val authService: AuthService) {
 
     enum class EditOp(val raw: String) { CREATE("create"), UPDATE("update"), DELETE("delete") }
 
@@ -285,27 +282,11 @@ class EditApi(private val appContext: Context, private val authService: AuthServ
     /** 成功時は JSON を返し、失敗時は契約に沿った [ApiException] を投げる (CommunityApi と違い、
      *  呼び出し側が 401/403/429 を UI 分岐 [ログイン誘導 / BAN / レート制限] できるようにする)。 */
     private suspend fun request(method: String, path: String, body: JSONObject?): JSONObject = withContext(Dispatchers.IO) {
-        val conn = try {
-            (URL(BASE + path).openConnection() as HttpURLConnection).apply {
-                requestMethod = method
-                connectTimeout = 15_000
-                readTimeout = 15_000
-                setRequestProperty("Content-Type", "application/json")
-                setRequestProperty("X-Device-Id", DeviceIdentity.get(appContext))
-                authService.sessionToken?.let { setRequestProperty("Authorization", "Bearer $it") }
-            }
-        } catch (e: Exception) {
-            throw ApiException.Transport(e.message ?: "connection failed")
-        }
         try {
-            if (body != null) {
-                conn.doOutput = true
-                conn.outputStream.use { it.write(body.toString().toByteArray(Charsets.UTF_8)) }
-            }
-            val code = conn.responseCode
-            val text = (if (code in 200..299) conn.inputStream else conn.errorStream)
-                ?.bufferedReader()?.use { it.readText() }
-            if (code !in 200..299) {
+            val response = http.request(method, path, body)
+            val code = response.code
+            val text = response.body
+            if (!response.isSuccess) {
                 Log.w(TAG, "$method $path -> HTTP $code body=$text")
                 throw when (code) {
                     401 -> ApiException.NotAuthorized
@@ -324,14 +305,11 @@ class EditApi(private val appContext: Context, private val authService: AuthServ
             throw e
         } catch (e: Exception) {
             throw ApiException.Transport(e.message ?: "request failed")
-        } finally {
-            conn.disconnect()
         }
     }
 
     companion object {
         private const val TAG = "EditApi"
-        private const val BASE = "https://imas-live-api.tokata3011.workers.dev"
     }
 }
 

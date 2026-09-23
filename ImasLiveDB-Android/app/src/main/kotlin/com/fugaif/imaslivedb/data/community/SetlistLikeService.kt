@@ -1,15 +1,11 @@
-package com.fugaif.imaslivedb.ui.events
+package com.fugaif.imaslivedb.data.community
 
-import android.content.Context
 import android.util.Log
-import com.fugaif.imaslivedb.data.community.DeviceIdentity
-import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.data.net.WorkerHttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
 import java.net.URLEncoder
 
 /**
@@ -22,8 +18,9 @@ import java.net.URLEncoder
  * 共有キャッシュには絶対載せない。ここが持つのは端末内メモリの短命 TTL キャッシュだけで、
  * 同じ公演のセトリを開き直すたびにサーバを叩くのを抑えるためのもの。like 数は他人の操作でも
  * 増減するので TTL は短く (60 秒)、自分の like/unlike は該当曲だけその場で patch する。
+ * キャッシュを画面をまたいで共有するため、インスタンスはアプリで 1 つ (AppModule)。
  */
-class SetlistLikeService private constructor(private val appContext: Context) {
+class SetlistLikeService(private val http: WorkerHttpClient) {
 
     /** 1 曲ぶんの集計 + 自分の like 状態。 */
     data class LikeEntry(val songId: String, val likeCount: Int, val hasUserLiked: Boolean)
@@ -98,37 +95,15 @@ class SetlistLikeService private constructor(private val appContext: Context) {
 
     /** ステータスとレスポンス本文を返す最小の HTTP。通信自体が失敗したら code = -1。 */
     private fun request(method: String, path: String): Pair<Int, String?> = try {
-        val conn = (URL(BASE + path).openConnection() as HttpURLConnection).apply {
-            requestMethod = method
-            connectTimeout = 15_000
-            readTimeout = 15_000
-            setRequestProperty("Content-Type", "application/json")
-            setRequestProperty("X-Device-Id", DeviceIdentity.get(appContext))
-            AppModule.from(appContext).authService.sessionToken
-                ?.let { setRequestProperty("Authorization", "Bearer $it") }
-        }
-        val code = conn.responseCode
-        val text = (if (code in 200..299) conn.inputStream else conn.errorStream)
-            ?.bufferedReader()?.use { it.readText() }
-        conn.disconnect()
-        code to text
+        val response = http.request(method, path)
+        response.code to response.body
     } catch (e: Exception) {
         Log.w(TAG, "$method $path failed: ${e.message}")
         -1 to null
     }
 
     companion object {
-        private const val BASE = "https://imas-live-api.tokata3011.workers.dev"
         private const val TAG = "SetlistLike"
         private const val CACHE_TTL_MS = 60_000L
-
-        @Volatile
-        private var instance: SetlistLikeService? = null
-
-        /** 集計キャッシュを画面をまたいで共有するため単一インスタンスにする。 */
-        fun get(context: Context): SetlistLikeService =
-            instance ?: synchronized(this) {
-                instance ?: SetlistLikeService(context.applicationContext).also { instance = it }
-            }
     }
 }

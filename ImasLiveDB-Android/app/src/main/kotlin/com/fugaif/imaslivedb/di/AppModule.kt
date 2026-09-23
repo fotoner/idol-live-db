@@ -23,6 +23,8 @@ import com.fugaif.imaslivedb.data.repository.UserMarkRepository
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.data.community.LocalContributionLog
 import com.fugaif.imaslivedb.data.community.LocalPollVoteLog
+import com.fugaif.imaslivedb.data.community.SetlistLikeService
+import com.fugaif.imaslivedb.data.net.WorkerHttpClient
 import com.fugaif.imaslivedb.data.games.GameProgressStore
 import com.fugaif.imaslivedb.data.sync.CloudKitSyncEngine
 
@@ -62,14 +64,17 @@ class AppModule private constructor(context: Context) {
     val expenseRepository: ExpenseRepository by lazy { ExpenseRepository(database) }
     val showTicketRepository: ShowTicketRepository by lazy { ShowTicketRepository(database) }
     val authService: AuthService by lazy { AuthService(appContext) }
-    val communityApi: CommunityApi by lazy { CommunityApi(appContext, authService) }
-    val editApi: EditApi by lazy { EditApi(appContext, authService) }
+    /** Worker (imas-live-api) への HTTP。セッションはリクエストの時点の値を付ける。 */
+    val workerHttpClient: WorkerHttpClient by lazy { WorkerHttpClient(appContext, { authService.sessionToken }) }
+    val communityApi: CommunityApi by lazy { CommunityApi(workerHttpClient, authService) }
+    val editApi: EditApi by lazy { EditApi(workerHttpClient, authService) }
+    val setlistLikeService: SetlistLikeService by lazy { SetlistLikeService(workerHttpClient) }
     val editFeedRepository: EditFeedRepository by lazy { EditFeedRepository(database, snapshotStoreProvider) }
     val syncEngine: CloudKitSyncEngine by lazy { CloudKitSyncEngine(appContext, database) }
     val localContributionLog: LocalContributionLog by lazy { LocalContributionLog(appContext) }
     val localPollVoteLog: LocalPollVoteLog by lazy { LocalPollVoteLog(appContext) }
     val gameProgressStore: GameProgressStore by lazy { GameProgressStore(appContext) }
-    val backupTransferApi: BackupTransferApi by lazy { BackupTransferApi(appContext, authService) }
+    val backupTransferApi: BackupTransferApi by lazy { BackupTransferApi(workerHttpClient) }
 
     companion object {
         @Volatile

@@ -8,7 +8,9 @@ import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.fugaif.imaslivedb.data.community.DeviceIdentity
+import com.fugaif.imaslivedb.data.net.UrlConnectionTransport
+import com.fugaif.imaslivedb.data.net.WorkerHttpClient
+import com.fugaif.imaslivedb.data.net.WorkerTransport
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.Dispatchers
@@ -17,8 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
 
 data class AuthState(
     val isSignedIn: Boolean = false,
@@ -39,7 +39,9 @@ data class AuthState(
  * iOS の AuthService (Sign in with Apple) の Android 版。
  * サーバ側の投票等の認証必須エンドポイントは、iOS/Android どちらでも同じセッションJWT形式を検証する。
  */
-class AuthService(private val appContext: Context) {
+class AuthService(private val appContext: Context, transport: WorkerTransport = UrlConnectionTransport) {
+
+    private val http = WorkerHttpClient(appContext, { sessionToken }, transport)
 
     // Android の Credential Manager (GetGoogleIdOption) は serverClientId に渡した
     // Web アプリケーション用クライアント ID を id トークンの aud に埋め込む仕様。
@@ -122,19 +124,12 @@ class AuthService(private val appContext: Context) {
      * 呼ぶのは起動時 ([com.fugaif.imaslivedb.ImasLiveDBApplication])。iOS も同じタイミング。
      */
     suspend fun refreshMe(): Unit = withContext(Dispatchers.IO) {
-        val token = sessionToken ?: return@withContext
-        val conn = (URL("$BASE/auth/me").openConnection() as HttpURLConnection).apply {
-            requestMethod = "GET"
-            connectTimeout = 15_000
-            readTimeout = 15_000
-            setRequestProperty("X-Device-Id", DeviceIdentity.get(appContext))
-            setRequestProperty("Authorization", "Bearer $token")
-        }
+        if (sessionToken == null) return@withContext
         try {
-            val code = conn.responseCode
-            val text = (if (code in 200..299) conn.inputStream else conn.errorStream)
-                ?.bufferedReader()?.use { it.readText() }
-            if (code !in 200..299 || text.isNullOrEmpty()) {
+            val response = http.request("GET", "/auth/me")
+            val code = response.code
+            val text = response.body
+            if (!response.isSuccess || text.isNullOrEmpty()) {
                 // 401 でもサインアウトはしない。Android にはセッション再発行 (`/auth/refresh`) の
                 // 経路が無く、通信不調と失効を区別できないため、ここで導線を壊すと復帰できなくなる。
                 // 失効は編集 API 側の 401 がログイン誘導として拾う。
@@ -159,8 +154,6 @@ class AuthService(private val appContext: Context) {
             )
         } catch (e: Exception) {
             Log.w(TAG, "refreshMe failed: ${e.message}")
-        } finally {
-            conn.disconnect()
         }
     }
 
@@ -203,27 +196,10 @@ class AuthService(private val appContext: Context) {
     }
 
     private fun requestVoid(method: String, path: String, body: JSONObject?) {
-        val conn = (URL(BASE + path).openConnection() as HttpURLConnection).apply {
-            requestMethod = method
-            connectTimeout = 15_000
-            readTimeout = 15_000
-            setRequestProperty("Content-Type", "application/json")
-            setRequestProperty("X-Device-Id", DeviceIdentity.get(appContext))
-            sessionToken?.let { setRequestProperty("Authorization", "Bearer $it") }
-        }
-        try {
-            if (body != null) {
-                conn.doOutput = true
-                conn.outputStream.use { it.write(body.toString().toByteArray(Charsets.UTF_8)) }
-            }
-            val code = conn.responseCode
-            if (code !in 200..299) {
-                val text = conn.errorStream?.bufferedReader()?.use { it.readText() }
-                Log.w(TAG, "$method $path -> HTTP $code body=$text")
-                throw IllegalStateException("HTTP $code")
-            }
-        } finally {
-            conn.disconnect()
+        val response = http.request(method, path, body)
+        if (!response.isSuccess) {
+            Log.w(TAG, "$method $path -> HTTP ${response.code} body=${response.body}")
+            throw IllegalStateException("HTTP ${response.code}")
         }
     }
 
@@ -234,22 +210,13 @@ class AuthService(private val appContext: Context) {
                 IllegalStateException("この端末ではサインイン情報を保存できません")
             )
             try {
-                val url = URL("$BASE/auth/login")
-                val conn = (url.openConnection() as HttpURLConnection).apply {
-                    requestMethod = "POST"
-                    connectTimeout = 15_000
-                    readTimeout = 15_000
-                    doOutput = true
-                    setRequestProperty("Content-Type", "application/json")
-                    setRequestProperty("X-Device-Id", DeviceIdentity.get(appContext))
-                }
-                val body = JSONObject().put("google_id_token", googleIdToken)
-                conn.outputStream.use { it.write(body.toString().toByteArray(Charsets.UTF_8)) }
-                val code = conn.responseCode
-                val text = (if (code in 200..299) conn.inputStream else conn.errorStream)
-                    ?.bufferedReader()?.use { it.readText() }
-                conn.disconnect()
-                if (code !in 200..299 || text.isNullOrEmpty()) {
+                // サインインそのものなので、手元のセッションは付けない。
+                val response = http.request(
+                    "POST", "/auth/login", JSONObject().put("google_id_token", googleIdToken), authorized = false
+                )
+                val code = response.code
+                val text = response.body
+                if (!response.isSuccess || text.isNullOrEmpty()) {
                     Log.w(TAG, "auth/login -> HTTP $code body=$text")
                     return@withContext Result.failure(IllegalStateException("login failed: HTTP $code"))
                 }
@@ -280,7 +247,6 @@ class AuthService(private val appContext: Context) {
     companion object {
         private const val TAG = "AuthService"
         private const val PREFS_NAME = "imas_auth_secure"
-        private const val BASE = "https://imas-live-api.tokata3011.workers.dev"
         private const val KEY_SESSION_TOKEN = "session_token"
         private const val KEY_DISPLAY_NAME = "display_name"
         private const val KEY_IS_ADMIN = "is_admin"

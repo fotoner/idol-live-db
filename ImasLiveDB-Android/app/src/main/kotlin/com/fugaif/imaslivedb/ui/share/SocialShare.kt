@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fugaif.imaslivedb.data.net.WorkerHttpClient
 import com.fugaif.imaslivedb.ui.theme.DS
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -42,7 +43,7 @@ import java.util.Locale
 
 /** シェア用 Universal Links URL の生成 (iOS DeeplinkBuilder の移植)。 */
 object ShareLinkBuilder {
-    private const val BASE = "https://imas-live-api.tokata3011.workers.dev"
+    private const val BASE = WorkerHttpClient.BASE_URL
 
     fun pollUrl(id: String): String = "$BASE/app/polls/${Uri.encode(id)}"
 
