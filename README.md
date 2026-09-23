@@ -21,10 +21,10 @@ iOS / Android ネイティブアプリと、それを支える Cloudflare Worker
 | コンポーネント | ディレクトリ | スタック |
 |---|---|---|
 | iOS アプリ | `ImasLiveDB/` | SwiftUI (iOS 17+), GRDB, Nuke, MusicKit, xcodegen |
-| Android アプリ | `ImasLiveDB-Android/` | Jetpack Compose, Retrofit, Coil, Firebase |
+| Android アプリ | `ImasLiveDB-Android/` | Jetpack Compose, Room, Coil (Retrofit・Firebase は未使用。HTTP は素の `HttpURLConnection`) |
 | バックエンド API | `imas-live-api/` | Cloudflare Workers, D1 (SQLite), CloudKit S2S |
 | Web 出面 | `web/` | Astro (静的サイト), Cloudflare Workers Static Assets |
-| データ整備ツール | `tools/` | Python / Ruby (CloudKit seed・Apple Music 補完・整合性チェック) |
+| データ整備ツール | `tools/` | Python (CloudKit seed・Apple Music 補完・整合性チェック) |
 | LLM から引く口 | `imas-core/src/agent/` | Rust (MCP サーバ / CLI・`imas-mcp`) |
 
 iOS と Android はファイル/コンポーネント構成を意図的に揃えており、片方の変更はもう片方に 1:1 で横展開する運用です。
@@ -70,27 +70,30 @@ MCP クライアント (Claude Code 等) からそのまま使えます。歌詞
 ### iOS (`ImasLiveDB/`)
 
 ```bash
-xcodegen generate          # project.yml → .xcodeproj 生成
+bash imas-core/build.sh --ios-only   # imas-core (Rust) の Swift バインディングを先に生成する。
+                                      # これを飛ばすと xcodegen が失敗する
+xcodegen generate                    # project.yml → .xcodeproj 生成
 xcodebuild build -scheme ImasLiveDB \
-  -destination 'platform=iOS Simulator,name=iPhone 16'
+  -destination "platform=iOS Simulator,name=$(python3 tools/pick_simulator.py)"
 ```
 
 - iOS 17.0+ / Swift 6 Concurrency 前提。
 - CloudKit コンテナ `iCloud.com.fugaif.ImasLiveDB` への参加権限が必要 (オーナーから iCloud で招待)。
 - バックエンド URL・コンテナ名は `ImasLiveDB/Services/APIEndpoints.swift` に定義。
+- シミュレータ名は実機構成で変わる (CI と手元でも違う) ため固定名で叩かず `tools/pick_simulator.py` で選ぶ。固定すると存在しない機種名で落ちることがある。
 
 > **Android は iOS のコア機能サブセット (部分移植)** です。ライブ/楽曲/アイドル/セトリ閲覧・
-> CloudKit 同期・基本的なコミュニティ表示は動きますが、編集/投稿・モデレーション・予想・通知・
-> 共有・ゲーム・App Attest 等の一部機能は未移植です。
+> CloudKit 同期・編集・通知・共有・ゲームは動きます。未移植なのは予想・モデレーション・
+> App Attest (Play Integrity)・歌詞・コールガイドです。
 
 1. CloudKit 集計 API トークンを `local.properties` か環境変数で渡す:
 
    ```properties
    # local.properties
-   CLOUDKIT_API_TOKEN=<オーナーから受け取ったトークン>
+   cloudkit.api.token=<オーナーから受け取ったトークン>
    ```
 
-   (`app/build.gradle.kts` が `BuildConfig.CLOUDKIT_API_TOKEN` に注入する)
+   (`app/build.gradle.kts` がこのキーを読んで `BuildConfig.CLOUDKIT_API_TOKEN` に注入する。環境変数なら `CLOUDKIT_API_TOKEN`)
 2. Android Studio でビルド、または `./gradlew assembleDebug`。
 
 > Firebase は現状未配線です (`google-services.json` は同梱しません)。導入する場合は正しい
@@ -120,7 +123,7 @@ npm run preview     # wrangler dev (Cloudflare Workers Static Assets と同じ�
 
 - マスタ DB (ライブ/公演/セトリ/楽曲/アイドル/ユニット/会場/ブランド) を閲覧・検索・共有できる静的サイト。**閲覧専用**で、担当/投票/歌詞/コール等の状態を持つ機能は持たない (すべてアプリへ誘導)。
 - 表示ルールの正は `imas-core` (Rust)。`web/src` には業務ルールを書かない。詳細は [docs/ARCHITECTURE-web.md](docs/ARCHITECTURE-web.md)。
-- 公開 URL: https://imas-live-web.tokata3011.workers.dev/ (Cloudflare secret 未登録時は CI がビルド検証のみ行い、デプロイはスキップされる)。
+- 公開 URL: https://idollivedb.fugaapp.site/ (独自ドメイン。`wrangler.jsonc` は `workers_dev: false` のため `*.workers.dev` では到達できない。Cloudflare secret 未登録時は CI がビルド検証のみ行い、デプロイはスキップされる)。
 
 ---
 
@@ -138,7 +141,7 @@ npm run preview     # wrangler dev (Cloudflare Workers Static Assets と同じ�
 - 検証・反映ツールは [`tools/apply_data.py`](tools/apply_data.py) 一本 (`--check` / `--apply` / `--push`)。
 - パイプライン全体・鮮度の仕組みは [`docs/DATA_PIPELINE.md`](docs/DATA_PIPELINE.md)。
 
-詳細な規約は各プラットフォームの `CLAUDE.md` を参照。
+詳細な設計規約は各プラットフォームの `docs/ARCHITECTURE*.md` を参照 (`CLAUDE.md` はオーナー/メンテナ向けの内部メモで `.gitignore` により追跡外。コントリビューターには配布されない)。
 
 ## 開発フロー / ブランチ戦略
 
