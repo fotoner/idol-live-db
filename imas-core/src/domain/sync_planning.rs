@@ -1750,11 +1750,7 @@ mod tests {
     /// 同梱 DB の実物で同じ答えになる。違うのは、スキーマの適用結果が要らないことだけ。
     #[test]
     fn reseed_master_targets_match_the_ios_formula_on_the_bundle() {
-        let conn = rusqlite::Connection::open_with_flags(
-            format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR")),
-            rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
-        )
-        .expect("bundle DB を開ける");
+        let conn = crate::test_support::bundle_conn();
         let bundle: Vec<String> = conn
             .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
             .unwrap()

@@ -105,6 +105,7 @@ pub fn track_number(snap: &crate::domain::snapshot::Snapshot, item: u32) -> usiz
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::bundle_snapshot;
 
     #[test]
     fn encore_spellings_collapse_to_one_label() {
@@ -164,21 +165,9 @@ mod tests {
 
     // ---- 曲順 (実データで固定する) ----
 
-    fn snap() -> &'static crate::domain::snapshot::Snapshot {
-        use std::sync::OnceLock;
-        static SNAP: OnceLock<crate::domain::snapshot::Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| {
-            crate::outbound::sqlite_loader::load_snapshot(&format!(
-                "{}/../ImasLiveDB/Resources/master.sqlite",
-                env!("CARGO_MANIFEST_DIR")
-            ))
-            .expect("bundle DB はロードできる")
-        })
-    }
-
     #[test]
     fn 曲順は公演内で_1_始まりの連番になる() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let mut checked = 0;
         for show in 0..snap.shows.len() as u32 {
             let numbers: Vec<usize> = numbered_setlist(snap, show).map(|(n, _)| n).collect();
@@ -194,7 +183,7 @@ mod tests {
 
     #[test]
     fn 曲順は生の_position_とは別物() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         // 生の position は公演をまたぐ通し番号なので、公演内で 1 から始まらない。
         // ここが崩れたら (position が公演内連番に変わったら) この層は要らなくなる。
         let raw_starts_at_one = (0..snap.shows.len() as u32)
@@ -221,7 +210,7 @@ mod tests {
 
     #[test]
     fn track_number_は_numbered_setlist_と同じ数を返す() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let show = (0..snap.shows.len() as u32)
             .find(|&s| snap.setlist_items_by_show[s as usize].len() > 5)
             .expect("6 曲以上の公演がある");

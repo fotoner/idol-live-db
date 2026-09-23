@@ -861,23 +861,8 @@ fn merge_max(acc: &mut Option<String>, v: &Option<String>) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rusqlite::{Connection, OpenFlags};
-
-    fn db_path() -> String {
-        format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"))
-    }
-
-    fn snapshot() -> Snapshot {
-        crate::outbound::sqlite_loader::load_snapshot(&db_path()).expect("bundle DB はロードできる")
-    }
-
-    fn conn() -> Connection {
-        Connection::open_with_flags(
-            db_path(),
-            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
-        )
-        .expect("bundle DB は開ける")
-    }
+    use crate::test_support::{bundle_conn, bundle_snapshot};
+    use rusqlite::Connection;
 
     /// `SELECT * FROM songs` 系の行を Record に写す (カラム名で引くので列順に依存しない)。
     fn record_from_row(row: &rusqlite::Row<'_>) -> SongDetailRecord {
@@ -930,8 +915,8 @@ mod tests {
     /// 照合: allSongsForPicker。元 SQL と**順序込み**で一致する。
     #[test]
     fn all_songs_for_picker_matches_sql() {
-        let snap = snapshot();
-        let db = conn();
+        let snap = bundle_snapshot();
+        let db = bundle_conn();
         let mut stmt = db
             .prepare("SELECT id, title, title_kana FROM songs ORDER BY title")
             .unwrap();
@@ -947,7 +932,7 @@ mod tests {
             .map(Result::unwrap)
             .collect();
 
-        let actual = all_songs_for_picker(&snap);
+        let actual = all_songs_for_picker(snap);
         assert_eq!(actual.len(), snap.songs.len(), "絞り込みは一切ない (全曲)");
         assert!(actual.len() > 3000, "全曲が載っている前提: {}", actual.len());
         assert_eq!(actual, expected);
@@ -957,8 +942,8 @@ mod tests {
     /// 50 音順に「直す」と編集 UI のピッカーの並びが黙って変わる。
     #[test]
     fn all_songs_for_picker_is_ordered_by_title_not_kana() {
-        let snap = snapshot();
-        let picker = all_songs_for_picker(&snap);
+        let snap = bundle_snapshot();
+        let picker = all_songs_for_picker(snap);
         assert!(
             picker.windows(2).all(|w| w[0].title <= w[1].title),
             "title のバイト列昇順"
@@ -983,7 +968,7 @@ mod tests {
         if trimmed.is_empty() {
             return Vec::new();
         }
-        let db = conn();
+        let db = bundle_conn();
         let pattern = format!("%{}%", like_escaped(trimmed));
         let mut stmt = db
             .prepare(
@@ -1054,8 +1039,8 @@ mod tests {
     /// **順序込み・全カラム・役割ラベル込み**で一致する。
     #[test]
     fn songs_by_creator_matches_sql() {
-        let snap = snapshot();
-        let mut names = sample_creator_names(&snap, 60);
+        let snap = bundle_snapshot();
+        let mut names = sample_creator_names(snap, 60);
         // 空・空白・部分一致だけの語・ワイルドカード・空振りも混ぜる。
         names.extend(
             ["", "  ", "\u{3000}", "%", "_", "存在しない作家", "BNSI"].map(str::to_string),
@@ -1065,7 +1050,7 @@ mod tests {
         let mut multi_role = 0usize;
         for name in &names {
             let want = run_original_creator_sql(name);
-            let got = songs_by_creator(&snap, name);
+            let got = songs_by_creator(snap, name);
             assert_eq!(got.len(), want.len(), "name={name:?}");
             for (g, (song, roles)) in got.iter().zip(want.iter()) {
                 assert_eq!(&g.song, song, "name={name:?}");
@@ -1082,10 +1067,10 @@ mod tests {
     /// ①②のどちらか一方に寄せると結果が変わることを、実データで固定する。
     #[test]
     fn songs_by_creator_drops_substring_only_candidates() {
-        let snap = snapshot();
-        let db = conn();
+        let snap = bundle_snapshot();
+        let db = bundle_conn();
         // 区切りで割っても丸ごと一致しない、部分文字列としてだけ現れる名前を探す。
-        let name = sample_creator_names(&snap, 400)
+        let name = sample_creator_names(snap, 400)
             .into_iter()
             .find_map(|n| {
                 if n.len() < 3 {
@@ -1093,16 +1078,16 @@ mod tests {
                 }
                 let head: String = n.chars().take(n.chars().count() - 1).collect();
                 (!head.is_empty()
-                    && !songs_by_creator(&snap, &head).is_empty()
-                    && count_like_candidates(&db, &head) > songs_by_creator(&snap, &head).len())
+                    && !songs_by_creator(snap, &head).is_empty()
+                    && count_like_candidates(&db, &head) > songs_by_creator(snap, &head).len())
                 .then_some(head)
             })
             .expect("部分一致だけの候補が落ちる名前が実データにある前提");
         let candidates = count_like_candidates(&db, &name);
-        let kept = songs_by_creator(&snap, &name).len();
+        let kept = songs_by_creator(snap, &name).len();
         assert!(kept < candidates, "name={name:?} candidates={candidates} kept={kept}");
         assert_eq!(
-            songs_by_creator(&snap, &name).len(),
+            songs_by_creator(snap, &name).len(),
             run_original_creator_sql(&name).len()
         );
     }
@@ -1123,11 +1108,11 @@ mod tests {
     /// 役割ラベルの並びは 作曲 → 作詞 → 編曲 で固定 (フィールドの走査順)。
     #[test]
     fn songs_by_creator_role_labels_keep_their_order() {
-        let snap = snapshot();
+        let snap = bundle_snapshot();
         let order = ["作曲", "作詞", "編曲"];
         let mut checked = 0usize;
-        for name in sample_creator_names(&snap, 120) {
-            for row in songs_by_creator(&snap, &name) {
+        for name in sample_creator_names(snap, 120) {
+            for row in songs_by_creator(snap, &name) {
                 let positions: Vec<usize> =
                     row.roles.iter().map(|r| order.iter().position(|o| o == r).unwrap()).collect();
                 assert!(positions.windows(2).all(|w| w[0] < w[1]), "roles={:?}", row.roles);
@@ -1153,7 +1138,7 @@ mod tests {
     /// (原本は SQL と Swift の合わせ技なので、両方を写して初めて等価性の基準になる)。
     fn run_original_related_sql(song_id: &str, limit: u32) -> Vec<SongDetailRecord> {
         use rusqlite::OptionalExtension;
-        let db = conn();
+        let db = bundle_conn();
 
         let series_group: Option<String> = db
             .query_row("SELECT series_group FROM songs WHERE id = ?", [song_id], |r| r.get(0))
@@ -1254,7 +1239,7 @@ mod tests {
     /// **順序込み・全カラム**で一致する。
     #[test]
     fn related_songs_match_sql() {
-        let snap = snapshot();
+        let snap = bundle_snapshot();
         // 3 枝それぞれが動く曲を確実に含めるため、条件つきの実在曲を明示的に足す。
         let mut targets: Vec<String> = snap.songs.iter().step_by(53).map(|s| s.id.clone()).collect();
         for pick in [
@@ -1280,22 +1265,22 @@ mod tests {
         for id in &targets {
             for limit in [8u32, 3, 200] {
                 let want = run_original_related_sql(id, limit);
-                assert_eq!(related_songs(&snap, id, limit), want, "song={id} limit={limit}");
+                assert_eq!(related_songs(snap, id, limit), want, "song={id} limit={limit}");
             }
-            let r = related_songs(&snap, id, 8);
+            let r = related_songs(snap, id, 8);
             non_empty_results += usize::from(!r.is_empty());
             hit_limit += usize::from(r.len() == 8);
         }
         assert!(non_empty_results > 20, "関連曲が出る曲のサンプル数 ({non_empty_results})");
         assert!(hit_limit > 10, "打ち切りが効くサンプル数 ({hit_limit})");
-        assert!(related_songs(&snap, "存在しない曲", 8).is_empty());
+        assert!(related_songs(snap, "存在しない曲", 8).is_empty());
     }
 
     /// 点は**加算**される (同シリーズかつ同ユニットは 3+2=5 点で、同シリーズだけの曲より前)。
     /// 「どれか 1 つの枝で決める」実装にすると並びが変わる。
     #[test]
     fn related_songs_scores_are_additive() {
-        let snap = snapshot();
+        let snap = bundle_snapshot();
         // 同シリーズかつ同ユニットの相手がいる曲を実データから探す。
         let found = snap.songs.iter().find(|s| {
             let (Some(sg), Some(unit)) = (non_empty(&s.series_group), non_empty(&s.unit_id)) else {
@@ -1317,7 +1302,7 @@ mod tests {
         let sg = non_empty(&song.series_group).unwrap();
         let unit = non_empty(&song.unit_id).unwrap();
 
-        let result = related_songs(&snap, &song.id, 200);
+        let result = related_songs(snap, &song.id, 200);
         let rank = |id: &str| result.iter().position(|r| r.id == id);
         let both = result
             .iter()
@@ -1338,10 +1323,10 @@ mod tests {
     /// 自分自身はどの枝からも除かれる。
     #[test]
     fn related_songs_never_include_the_song_itself() {
-        let snap = snapshot();
+        let snap = bundle_snapshot();
         for s in snap.songs.iter().step_by(29) {
             assert!(
-                related_songs(&snap, &s.id, 200).iter().all(|r| r.id != s.id),
+                related_songs(snap, &s.id, 200).iter().all(|r| r.id != s.id),
                 "song={}",
                 s.id
             );
@@ -1361,7 +1346,7 @@ mod tests {
         if trimmed.is_empty() {
             return Vec::new();
         }
-        let db = conn();
+        let db = bundle_conn();
         let exact: Vec<SongDetailRecord> = db
             .prepare("SELECT * FROM songs WHERE title = ?")
             .unwrap()
@@ -1391,7 +1376,7 @@ mod tests {
     /// 照合: searchSongs。当たり方の違う検索語で、元 SQL と**順序込み・全カラム**で一致する。
     #[test]
     fn search_songs_matches_sql() {
-        let snap = snapshot();
+        let snap = bundle_snapshot();
         // 完全一致する実在題・部分一致だけの語・かなでしか当たらない語・ASCII 大小混在・空振り
         let exact_title = snap.songs[0].title.clone();
         let queries = [
@@ -1408,9 +1393,9 @@ mod tests {
         for q in queries {
             for limit in [3u32, 200] {
                 let want = run_original_search_sql(q, limit);
-                assert_eq!(search_songs(&snap, q, limit), want, "query={q:?} limit={limit}");
+                assert_eq!(search_songs(snap, q, limit), want, "query={q:?} limit={limit}");
             }
-            let hits = search_songs(&snap, q, 200);
+            let hits = search_songs(snap, q, 200);
             saw_exact |= hits.iter().any(|r| r.title == q);
             saw_partial |= !hits.is_empty() && hits.iter().all(|r| r.title != q);
         }
@@ -1422,8 +1407,8 @@ mod tests {
     /// ここを「両枝に limit」に直すと、同題が並ぶ曲で結果が黙って減る。
     #[test]
     fn search_songs_does_not_limit_the_exact_branch() {
-        let snap = snapshot();
-        let db = conn();
+        let snap = bundle_snapshot();
+        let db = bundle_conn();
         // 同じ title が 2 件以上ある題を実データから探す (無ければ検証を諦めずに落とす)。
         let title: String = db
             .query_row(
@@ -1432,7 +1417,7 @@ mod tests {
                 |r| r.get(0),
             )
             .expect("同題の曲が 2 件以上ある前提");
-        let hits = search_songs(&snap, &title, 1);
+        let hits = search_songs(snap, &title, 1);
         assert!(hits.len() >= 2, "limit=1 でも完全一致は全部返る: {}", hits.len());
         assert!(hits.iter().all(|r| r.title == title));
         assert_eq!(hits, run_original_search_sql(&title, 1));
@@ -1441,7 +1426,7 @@ mod tests {
     /// 完全一致が 1 件でもあれば部分一致は評価されない (スコアではなく枝の切り替え)。
     #[test]
     fn search_songs_stops_at_the_exact_branch() {
-        let snap = snapshot();
+        let snap = bundle_snapshot();
         // 「他の曲名の部分文字列でもある完全一致題」を探す。この語なら
         // 「両枝を足す実装」との差が出る。
         let Some(title) = snap
@@ -1455,7 +1440,7 @@ mod tests {
         else {
             panic!("部分一致が広がる完全一致題がある前提");
         };
-        let hits = search_songs(&snap, &title, 200);
+        let hits = search_songs(snap, &title, 200);
         assert!(hits.iter().all(|r| r.title == title), "部分一致まで混ざっている: {title:?}");
         assert_eq!(hits, run_original_search_sql(&title, 200));
     }
@@ -1464,34 +1449,34 @@ mod tests {
     /// `.whitespacesAndNewlines` = Unicode White_Space = Rust の `str::trim()`。
     #[test]
     fn search_songs_trims_like_foundation() {
-        let snap = snapshot();
+        let snap = bundle_snapshot();
         for q in ["", " ", "\t\n", "\u{3000}", "\u{00A0}\u{2003}"] {
-            assert!(search_songs(&snap, q, 200).is_empty(), "query={q:?}");
+            assert!(search_songs(snap, q, 200).is_empty(), "query={q:?}");
         }
         // 前後の空白は落として同じ結果になる (全角スペース・NBSP も Foundation の集合に入る)。
         let title = snap.songs[0].title.clone();
         let padded = format!("\u{3000} {title}\u{00A0}\n");
-        assert_eq!(search_songs(&snap, &padded, 200), search_songs(&snap, &title, 200));
-        assert_eq!(search_songs(&snap, &padded, 200), run_original_search_sql(&padded, 200));
+        assert_eq!(search_songs(snap, &padded, 200), search_songs(snap, &title, 200));
+        assert_eq!(search_songs(snap, &padded, 200), run_original_search_sql(&padded, 200));
     }
 
     /// likeEscaped の再現: `%` `_` はワイルドカードではなくリテラルとして当たる。
     #[test]
     fn search_songs_escapes_wildcards() {
-        let snap = snapshot();
+        let snap = bundle_snapshot();
         for q in ["%", "_", "\\"] {
-            assert_eq!(search_songs(&snap, q, 200), run_original_search_sql(q, 200), "query={q:?}");
+            assert_eq!(search_songs(snap, q, 200), run_original_search_sql(q, 200), "query={q:?}");
         }
         // 素通しなら "%" は全曲 200 件になる。実データにリテラル % の題が無いので空。
-        assert!(search_songs(&snap, "%", 200).is_empty());
+        assert!(search_songs(snap, "%", 200).is_empty());
     }
 
     /// 照合 1: fetchSongs(ids:)。IN の結果順は SQL 未規定なので id 順に正規化して
     /// 全カラムを比較する。未知 id ・重複 id の挙動 (読み飛ばし / 1 回) も含めて確認。
     #[test]
     fn songs_by_ids_matches_sql() {
-        let snap = snapshot();
-        let db = conn();
+        let snap = bundle_snapshot();
+        let db = bundle_conn();
         // 実在 id (走査順の先頭 50 + 末尾 50) + 未知 id + 重複 id を混ぜる
         let mut ids: Vec<String> = snap.songs.iter().take(50).map(|s| s.id.clone()).collect();
         ids.extend(snap.songs.iter().rev().take(50).map(|s| s.id.clone()));
@@ -1506,7 +1491,7 @@ mod tests {
             .map(Result::unwrap)
             .collect();
 
-        let mut actual = song_records_by_ids(&snap, &ids);
+        let mut actual = song_records_by_ids(snap, &ids);
         assert_eq!(actual.len(), 100, "実在 100 件・未知は読み飛ばし・重複は 1 回");
 
         expected.sort_by(|a, b| a.id.cmp(&b.id));
@@ -1518,8 +1503,8 @@ mod tests {
     /// brand_id NULL は通る (`IS NOT 'other'`) ことを SQL と突き合わせる。
     #[test]
     fn listable_songs_matches_sql() {
-        let snap = snapshot();
-        let db = conn();
+        let snap = bundle_snapshot();
+        let db = bundle_conn();
         // 派生曲・other ブランド・通常曲を SQL 側から動的に混ぜる (データ変化に追従)
         let mut ids: Vec<String> = Vec::new();
         for q in [
@@ -1549,7 +1534,7 @@ mod tests {
             .map(Result::unwrap)
             .collect();
 
-        let mut actual = listable_song_records_by_ids(&snap, &ids);
+        let mut actual = listable_song_records_by_ids(snap, &ids);
         expected.sort_by(|a, b| a.id.cmp(&b.id));
         actual.sort_by(|a, b| a.id.cmp(&b.id));
         assert_eq!(actual, expected);
@@ -1560,8 +1545,8 @@ mod tests {
     /// original 歌唱者 id 列 (sort_order 順・重複除去・0 人はキーなし) を突き合わせる。
     #[test]
     fn performer_idol_ids_map_matches_sql() {
-        let snap = snapshot();
-        let db = conn();
+        let snap = bundle_snapshot();
+        let db = bundle_conn();
         let all_ids: Vec<String> = snap.songs.iter().map(|s| s.id.clone()).collect();
 
         // 元 SQL: ORDER BY sa.song_id, i.sort_order + Swift 側の初出 dedup。
@@ -1591,7 +1576,7 @@ mod tests {
             }
         }
 
-        let actual = performer_idol_ids_map(&snap, &all_ids);
+        let actual = performer_idol_ids_map(snap, &all_ids);
         assert_eq!(actual.len(), expected.len(), "original 歌唱者を持つ曲数が一致");
         for (sid, ids) in &expected {
             assert_eq!(actual.get(sid), Some(ids), "song={sid} の歌唱者列が一致");
@@ -1602,8 +1587,8 @@ mod tests {
     /// 両者を同一の決定キーに正規化して全カラム比較 + 自前出力の date 降順を検証。
     #[test]
     fn performance_history_matches_sql() {
-        let snap = snapshot();
-        let db = conn();
+        let snap = bundle_snapshot();
+        let db = bundle_conn();
         // 披露回数の多い曲 + 同日複数披露の曲 + 披露ゼロの曲を対象にする
         let mut targets: Vec<String> = {
             let mut stmt = db
@@ -1649,7 +1634,7 @@ mod tests {
                 .map(Result::unwrap)
                 .collect();
 
-            let actual = performance_history(&snap, song_id);
+            let actual = performance_history(snap, song_id);
 
             // 可視の契約 (date 降順) をスナップショット出力側で検証
             assert!(
@@ -1692,8 +1677,8 @@ mod tests {
     /// LIKE) の 3 パターンで、集計値と並びの契約 (MIN(release_date) 降順) を突き合わせる。
     #[test]
     fn album_summaries_matches_sql() {
-        let snap = snapshot();
-        let db = conn();
+        let snap = bundle_snapshot();
+        let db = bundle_conn();
         let cases: [(&[&str], Option<&str>); 4] = [
             (&[], None),
             (&["ml", "cg"], None),
@@ -1748,7 +1733,7 @@ mod tests {
                 .map(Result::unwrap)
                 .collect();
 
-            let mut actual = album_summaries(&snap, &brand_vec, query);
+            let mut actual = album_summaries(snap, &brand_vec, query);
             assert_eq!(actual.len(), expected.len(), "brands={brands:?} q={query:?} の件数");
 
             // 可視の契約: MIN(release_date) 降順 (NULL 末尾) をスナップショット出力側で検証
@@ -1776,8 +1761,8 @@ mod tests {
     /// 受けない) を含めて突き合わせる。
     #[test]
     fn series_summaries_matches_sql() {
-        let snap = snapshot();
-        let db = conn();
+        let snap = bundle_snapshot();
+        let db = bundle_conn();
         let cases: [(&[&str], Option<&str>); 3] =
             [(&[], None), (&["ml"], None), (&[], Some("the@ter"))];
         for (brands, query) in cases {
@@ -1832,7 +1817,7 @@ mod tests {
                 .map(Result::unwrap)
                 .collect();
 
-            let mut actual = series_summaries(&snap, &brand_vec, query);
+            let mut actual = series_summaries(snap, &brand_vec, query);
             assert_eq!(actual.len(), expected.len(), "brands={brands:?} q={query:?} の件数");
             assert!(
                 actual.windows(2).all(|w| {
@@ -1891,8 +1876,8 @@ mod tests {
     /// 正規化して照合) を全件 / ブランド絞りで突き合わせる。
     #[test]
     fn series_group_names_matches_sql() {
-        let snap = snapshot();
-        let db = conn();
+        let snap = bundle_snapshot();
+        let db = bundle_conn();
         for brands in [vec![], vec!["ml".to_string(), "sc".to_string()]] {
             let mut sql = String::from(
                 "SELECT series_group, COUNT(*) AS cnt FROM songs
@@ -1910,7 +1895,7 @@ mod tests {
                 .map(Result::unwrap)
                 .collect();
 
-            let actual = series_group_names(&snap, &brands);
+            let actual = series_group_names(snap, &brands);
             assert_eq!(actual, expected, "brands={brands:?} のシリーズ名一覧が一致");
         }
     }
@@ -1919,8 +1904,8 @@ mod tests {
     /// ORDER BY (親なし先頭, title_kana, title) が一致することを確認する。
     #[test]
     fn variant_songs_matches_sql() {
-        let snap = snapshot();
-        let db = conn();
+        let snap = bundle_snapshot();
+        let db = bundle_conn();
         // 派生の多い親と、その子の 1 つ + 派生を持たない曲を対象にする
         let parent: String = db
             .query_row(
@@ -1970,7 +1955,7 @@ mod tests {
                 .map(Result::unwrap)
                 .collect();
 
-            let mut actual = variant_song_records(&snap, song_id);
+            let mut actual = variant_song_records(snap, song_id);
 
             // (kana, title) 完全同値のタイは SQL 未規定なので id で正規化して照合。
             // 可視の契約 (バケツ → kana → title の非減少) は actual 側で別途検証する。
@@ -2008,8 +1993,8 @@ mod tests {
             assert_eq!(actual, expected, "song={song_id} の別バージョン一族が一致");
         }
         // 親起点は自分抜きの子全員、子起点は根+兄弟、独身曲は空になることの粗い確認
-        assert!(!variant_song_records(&snap, &parent).is_empty());
-        assert!(variant_song_records(&snap, &child).len() >= variant_song_records(&snap, &parent).len());
-        assert!(variant_song_records(&snap, &loner).is_empty());
+        assert!(!variant_song_records(snap, &parent).is_empty());
+        assert!(variant_song_records(snap, &child).len() >= variant_song_records(snap, &parent).len());
+        assert!(variant_song_records(snap, &loner).is_empty());
     }
 }

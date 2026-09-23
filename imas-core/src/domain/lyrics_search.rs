@@ -162,18 +162,7 @@ pub fn decorate(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::OnceLock;
-
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| {
-            crate::outbound::sqlite_loader::load_snapshot(&format!(
-                "{}/../ImasLiveDB/Resources/master.sqlite",
-                env!("CARGO_MANIFEST_DIR")
-            ))
-            .expect("bundle DB はロードできる")
-        })
-    }
+    use crate::test_support::bundle_snapshot;
 
     fn hit(id: &str, n: usize) -> ApiHit {
         ApiHit {
@@ -184,7 +173,7 @@ mod tests {
 
     #[test]
     fn 曲名と披露回数が添う() {
-        let out = decorate(snap(), &[hit("ml_ロケットスター", 1)], &LyricsFilter::default(), 10);
+        let out = decorate(bundle_snapshot(), &[hit("ml_ロケットスター", 1)], &LyricsFilter::default(), 10);
         assert_eq!(out.len(), 1, "{out:?}");
         assert_eq!(out[0].title, "ロケットスター☆");
         assert_eq!(out[0].brand_id.as_deref(), Some("ml"));
@@ -194,13 +183,13 @@ mod tests {
     #[test]
     fn 断片は_1_曲_2_本までに切る() {
         // サーバが 5 本返しても 2 本しか通さない。語を変えて集めても曲は復元できない。
-        let out = decorate(snap(), &[hit("ml_ロケットスター", 5)], &LyricsFilter::default(), 10);
+        let out = decorate(bundle_snapshot(), &[hit("ml_ロケットスター", 5)], &LyricsFilter::default(), 10);
         assert_eq!(out[0].snippets.len(), MAX_SNIPPETS_PER_SONG);
     }
 
     #[test]
     fn この_db_に無い曲は落とす() {
-        let out = decorate(snap(), &[hit("ml_ロケットスター", 1), hit("無い曲", 1)], &LyricsFilter::default(), 10);
+        let out = decorate(bundle_snapshot(), &[hit("ml_ロケットスター", 1), hit("無い曲", 1)], &LyricsFilter::default(), 10);
         assert_eq!(out.len(), 1);
     }
 
@@ -209,7 +198,7 @@ mod tests {
         // サーバは song_id 順で返すので、並べ替えていないとここが落ちる。
         let hits: Vec<ApiHit> =
             ["765as_continue", "ml_アイル", "765as_masterpiece"].iter().map(|id| hit(id, 1)).collect();
-        let out = decorate(snap(), &hits, &LyricsFilter::default(), 10);
+        let out = decorate(bundle_snapshot(), &hits, &LyricsFilter::default(), 10);
         let counts: Vec<u32> = out.iter().map(|h| h.show_count).collect();
         let mut sorted = counts.clone();
         sorted.sort_by(|a, b| b.cmp(a));
@@ -221,14 +210,14 @@ mod tests {
         let hits: Vec<ApiHit> =
             ["765as_continue", "ml_アイル"].iter().map(|id| hit(id, 1)).collect();
         let f = LyricsFilter { brand: Some("ml".into()), ..Default::default() };
-        let out = decorate(snap(), &hits, &f, 10);
+        let out = decorate(bundle_snapshot(), &hits, &f, 10);
         assert_eq!(out.len(), 1);
         assert_eq!(out[0].brand_id.as_deref(), Some("ml"));
     }
 
     #[test]
     fn 公演の中だけで探すと母集団が分かる() {
-        let s = snap();
+        let s = bundle_snapshot();
         let show = s.show_index_by_id["sh_the_idolm@ster_million_live_13thlive_2"];
         let in_show: Vec<&str> = Scope::Show(show)
             .song_indexes(s)
@@ -252,7 +241,7 @@ mod tests {
 
     #[test]
     fn 持ち歌の中だけで探せる() {
-        let s = snap();
+        let s = bundle_snapshot();
         let idol = s.idol_index_by_id["ml_伊吹翼"];
         let f = LyricsFilter { scope: Some(Scope::Idol(idol)), ..Default::default() };
         // ロケットスター☆ は翼の持ち歌、Dreaming! も。ハミングバードは桜守歌織。
@@ -264,7 +253,7 @@ mod tests {
 
     #[test]
     fn 披露回数で絞れて_0_なら未披露だけ() {
-        let s = snap();
+        let s = bundle_snapshot();
         let hits: Vec<ApiHit> =
             ["ml_ロケットスター", "ml_アイル", "765as_continue"].iter().map(|id| hit(id, 1)).collect();
         let hot = LyricsFilter { min_performances: Some(5), ..Default::default() };
@@ -279,7 +268,7 @@ mod tests {
 
     #[test]
     fn 絞った件数は_limit_で切る前に数える() {
-        let s = snap();
+        let s = bundle_snapshot();
         let hits: Vec<ApiHit> =
             ["ml_ロケットスター", "ml_アイル", "ml_泣き空のち"].iter().map(|id| hit(id, 1)).collect();
         // サーバは 10 件返したが、この DB に曲名があるのは 3 件、という状況。
@@ -292,7 +281,7 @@ mod tests {
 
     #[test]
     fn 派生曲は親と歌詞が同じなので返さない() {
-        let s = snap();
+        let s = bundle_snapshot();
         // アイル(Harmonized ver.) は ml_アイル の派生。
         let hits = vec![hit("ml_アイル", 1), hit("ml_アイルharmonized_ver", 1)];
         let out = decorate(s, &hits, &LyricsFilter::default(), 10);
@@ -302,7 +291,7 @@ mod tests {
 
     #[test]
     fn 母集団も派生を数えない() {
-        let s = snap();
+        let s = bundle_snapshot();
         let idol = s.idol_index_by_id["ml_伊吹翼"];
         let all = Scope::Idol(idol).song_indexes(s);
         assert!(
@@ -314,7 +303,7 @@ mod tests {
     #[test]
     fn limit_で曲数を切る() {
         let hits: Vec<ApiHit> = ["ml_ロケットスター", "ml_アイル"].iter().map(|id| hit(id, 1)).collect();
-        assert_eq!(decorate(snap(), &hits, &LyricsFilter::default(), 1).len(), 1);
+        assert_eq!(decorate(bundle_snapshot(), &hits, &LyricsFilter::default(), 1).len(), 1);
     }
 }
 

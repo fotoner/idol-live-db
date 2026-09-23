@@ -136,18 +136,7 @@ fn chronological_key(snap: &Snapshot, item: u32) -> (&str, i64, i64, u32) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::OnceLock;
-
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| {
-            crate::outbound::sqlite_loader::load_snapshot(&format!(
-                "{}/../ImasLiveDB/Resources/master.sqlite",
-                env!("CARGO_MANIFEST_DIR")
-            ))
-            .expect("bundle DB はロードできる")
-        })
-    }
+    use crate::test_support::bundle_snapshot;
 
     // ---- 満か月 ----
 
@@ -207,7 +196,7 @@ mod tests {
     /// 2016 年の公演に「2022 年以来」と出る。
     #[test]
     fn a_past_setlist_looks_only_at_its_own_past() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let song = "765as_初恋_一章_片想いの桜";
         // 4 回の披露: 2014-10-05 / 2016-04-30 / 2022-11-13 / 2026-09-19。
         let first = performance_gap(snap, item_of(snap, song, "2014-10-05"));
@@ -238,7 +227,7 @@ mod tests {
     /// (曲ページの「N 回目」とセトリの札が違う数を出さない)。
     #[test]
     fn ordinals_agree_with_the_snapshot() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let mut checked = 0usize;
         for item in (0..snap.setlist_items.len() as u32).step_by(37) {
             assert_eq!(
@@ -255,7 +244,7 @@ mod tests {
     /// 前回は必ず自分より前 (同日なら同日まで)。全披露で確かめる。
     #[test]
     fn the_previous_performance_is_never_in_the_future() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         for item in 0..snap.setlist_items.len() as u32 {
             let gap = performance_gap(snap, item);
             let Some(prev) = gap.previous_date else {
@@ -270,7 +259,7 @@ mod tests {
     /// 絞ると、回数も間隔も**絞った世界のもの**になる (「オケマスを除けば」の軸の足場)。
     #[test]
     fn a_filter_moves_the_count_and_the_interval_together() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let song = "765as_初恋_一章_片想いの桜";
         let latest = item_of(snap, song, "2026-09-19");
         // 2022 年の 1 回を数に入れないと、前回は 2016 年・通算 3 回目になる。
@@ -291,7 +280,7 @@ mod tests {
     /// 同じ日の昼夜公演は「0 か月」= 札を出さない (「同日ぶり」とは言わない)。
     #[test]
     fn same_day_shows_get_no_badge() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let same_day = (0..snap.setlist_items.len() as u32)
             .map(|i| (i, performance_gap(snap, i)))
             .find(|(i, g)| {

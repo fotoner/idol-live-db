@@ -175,16 +175,11 @@ pub fn singers_for_song(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::outbound::sqlite_loader::load_snapshot;
-
-    fn snap() -> Snapshot {
-        load_snapshot(&format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR")))
-            .expect("bundle DB")
-    }
+    use crate::test_support::bundle_snapshot;
 
     #[test]
     fn co_occurrence_is_ordered_and_bounded() {
-        let s = snap();
+        let s = bundle_snapshot();
         // 披露回数の多い曲を 1 つ選ぶ
         let mut counts: HashMap<u32, u32> = HashMap::new();
         for it in &s.setlist_items { *counts.entry(it.song).or_insert(0) += 1; }
@@ -192,7 +187,7 @@ mod tests {
         let song_id = s.songs[top as usize].id.clone();
 
         let t = std::time::Instant::now();
-        let got = co_occurring_songs(&s, &song_id, 10);
+        let got = co_occurring_songs(s, &song_id, 10);
         println!("STATS 共起 {:?} → {}件", t.elapsed(), got.len());
 
         assert!(!got.is_empty(), "よく演奏される曲に共起が無いのはおかしい");
@@ -207,14 +202,14 @@ mod tests {
 
     #[test]
     fn singers_are_ordered_and_have_a_denominator() {
-        let s = snap();
+        let s = bundle_snapshot();
         // 出演者が紐づいている披露を 1 つ選ぶ
         let idx = (0..s.setlist_items.len())
             .find(|&i| s.performers_by_item[i].len() >= 2)
             .expect("出演者つきの披露があるはず");
         let song_id = s.songs[s.setlist_items[idx].song as usize].id.clone();
 
-        let got = singers_for_song(&s, &song_id, &[], 10);
+        let got = singers_for_song(s, &song_id, &[], 10);
         assert!(!got.is_empty());
         for w in got.windows(2) { assert!(w[0].times >= w[1].times); }
         assert!(got.iter().all(|t| t.total >= t.times), "分母が回数を下回っている");
@@ -222,32 +217,32 @@ mod tests {
 
     #[test]
     fn candidates_narrow_the_result() {
-        let s = snap();
+        let s = bundle_snapshot();
         let idx = (0..s.setlist_items.len())
             .find(|&i| s.performers_by_item[i].len() >= 2)
             .unwrap();
         let song_id = s.songs[s.setlist_items[idx].song as usize].id.clone();
-        let all = singers_for_song(&s, &song_id, &[], 50);
+        let all = singers_for_song(s, &song_id, &[], 50);
         let one = vec![all[0].idol_id.clone()];
-        let narrowed = singers_for_song(&s, &song_id, &one, 50);
+        let narrowed = singers_for_song(s, &song_id, &one, 50);
         assert_eq!(narrowed.len(), 1);
         assert_eq!(narrowed[0].idol_id, all[0].idol_id);
     }
 
     #[test]
     fn unknown_ids_return_nothing_instead_of_panicking() {
-        let s = snap();
-        assert!(co_occurring_songs(&s, "存在しない曲", 5).is_empty());
-        assert!(singers_for_song(&s, "存在しない曲", &[], 5).is_empty());
+        let s = bundle_snapshot();
+        assert!(co_occurring_songs(s, "存在しない曲", 5).is_empty());
+        assert!(singers_for_song(s, "存在しない曲", &[], 5).is_empty());
     }
 
     #[test]
     fn results_are_deterministic() {
-        let s = snap();
+        let s = bundle_snapshot();
         let mut counts: HashMap<u32, u32> = HashMap::new();
         for it in &s.setlist_items { *counts.entry(it.song).or_insert(0) += 1; }
         let (&top, _) = counts.iter().max_by_key(|(_, &n)| n).unwrap();
         let id = s.songs[top as usize].id.clone();
-        assert_eq!(co_occurring_songs(&s, &id, 10), co_occurring_songs(&s, &id, 10));
+        assert_eq!(co_occurring_songs(s, &id, 10), co_occurring_songs(s, &id, 10));
     }
 }

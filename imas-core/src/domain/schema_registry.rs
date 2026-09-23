@@ -184,6 +184,7 @@ pub fn find_drift(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::bundle_path;
     use std::collections::HashMap;
 
     /// 実際の DB から「表名 → 列名」を読む。
@@ -206,17 +207,13 @@ mod tests {
         out
     }
 
-    fn bundle_db() -> String {
-        format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"))
-    }
-
     /// 同梱 master.sqlite が台帳どおりか。
     ///
     /// **ここが落ちたら「スキーマを変えたのに台帳を直していない」**。
     /// 台帳 (`expected_tables`) を実態に合わせて更新すること。
     #[test]
     fn bundle_database_matches_the_registry() {
-        let actual = actual_schema(&bundle_db());
+        let actual = actual_schema(bundle_path());
         // 想定内のずれ (端末ローカル専用表が同梱 DB に無い等) は無視する
         let drift: Vec<SchemaDrift> = find_drift(&expected_tables(), &actual)
             .into_iter()
@@ -234,7 +231,7 @@ mod tests {
     /// 混ざると、配布物に個人データの器が入る (中身が空でも設計として誤り)。
     #[test]
     fn local_only_tables_are_absent_from_the_bundle() {
-        let actual = actual_schema(&bundle_db());
+        let actual = actual_schema(bundle_path());
         for t in expected_tables().iter().filter(|t| t.origin == TableOrigin::LocalOnly) {
             assert!(
                 !actual.contains_key(&t.name),
@@ -247,7 +244,7 @@ mod tests {
     /// マスタ表は同梱 DB に必ず在ること。
     #[test]
     fn master_tables_are_all_present() {
-        let actual = actual_schema(&bundle_db());
+        let actual = actual_schema(bundle_path());
         let expected = expected_tables();
         let missing: Vec<&str> = expected
             .iter()

@@ -225,18 +225,7 @@ pub fn setlist_row_meta(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::OnceLock;
-
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| {
-            crate::outbound::sqlite_loader::load_snapshot(&format!(
-                "{}/../ImasLiveDB/Resources/master.sqlite",
-                env!("CARGO_MANIFEST_DIR")
-            ))
-            .expect("bundle DB はロードできる")
-        })
-    }
+    use crate::test_support::bundle_snapshot;
 
     use crate::domain::screen_composition::{RowNoteTone, SetlistRowNoteRecord};
 
@@ -265,7 +254,7 @@ mod tests {
     }
 
     fn meta_of(song_id: &str, date: &str) -> SetlistRowMetaRecord {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let si = snap.song_index_by_id[song_id];
         let item = snap.setlist_items_by_song[si as usize]
             .iter()
@@ -301,7 +290,7 @@ mod tests {
     /// 同じ 2 人でも、`unit_id` を持つ本物のユニット曲はユニット名で出る。
     #[test]
     fn 同じ_2_人の本物のユニット曲はユニット名で出る() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let si = snap.song_index_by_id["ml_だってあなたはプリンセス"];
         assert_eq!(
             snap.songs[si as usize].unit_name.as_deref(),
@@ -313,7 +302,7 @@ mod tests {
     /// 回帰: 顔ぶれ推論が曲の名義を上書きしていた行が、曲の綴りで出る。
     #[test]
     fn 曲の名義の綴りが顔ぶれ側の綴りに負けない() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let mut checked = 0usize;
         for show in 0..snap.shows.len() as u32 {
             if snap.setlist_items_by_show[show as usize].is_empty() {
@@ -341,7 +330,7 @@ mod tests {
     /// 実データで推論が残るのは一握り (原唱者すら記録の無い曲)。
     #[test]
     fn 推論で名義が出る行はごく少数に絞られる() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let mut inferred = 0usize;
         for show in 0..snap.shows.len() as u32 {
             let show_id = &snap.shows[show as usize].id;
@@ -375,7 +364,7 @@ mod tests {
     /// 札が出るのは詳細表示だけ。普通表示・シンプル表示では 1 行も札を持たない。
     #[test]
     fn 札は詳細表示でだけ出る() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let show = &snap.shows[snap.setlist_items[snap.song_index_by_id
             .get("765as_初恋_一章_片想いの桜")
             .map(|&si| snap.setlist_items_by_song[si as usize][0])
@@ -411,7 +400,7 @@ mod tests {
     /// 行の並びはセトリと同じ (呼び出し側が zip できる)。
     #[test]
     fn 行の並びはセトリと同じ() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let show = snap
             .shows
             .iter()
@@ -432,7 +421,7 @@ mod tests {
     /// 見出しにならず、本編 → アンコールの切れ目で 1 回だけ塊が変わる。
     #[test]
     fn 区切りの見出しは畳んだ綴りで行に載る() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let show = (0..snap.shows.len())
             .find(|&s| {
                 snap.setlist_items_by_show[s].iter().any(|&i| {
@@ -458,7 +447,7 @@ mod tests {
     #[test]
     fn 全員とオリメンの札は全行で_web_の組み方と一致する() {
         use crate::domain::setlist_lineup::{is_full_cast, summarize, Lineup};
-        let snap = snap();
+        let snap = bundle_snapshot();
         let (mut rows, mut noted, mut named, mut full) = (0usize, 0usize, 0usize, 0usize);
         for (show, items) in snap.setlist_items_by_show.iter().enumerate() {
             if items.is_empty() {
@@ -515,7 +504,7 @@ mod tests {
     /// 参加した公演では、行に自分の回収が乗り、頭の要約もその公演のものになる。
     #[test]
     fn 参加した公演では行に回収が乗り要約が出る() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         // 曲数が多く、リアルライブの公演を 1 つ選ぶ。
         let show = snap
             .shows
@@ -552,7 +541,7 @@ mod tests {
     /// 参加記録があっても、その公演に行っていなければ未回収の札と要約になる。
     #[test]
     fn 参加していない公演では未回収だけが出る() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         // 開く公演と、参加した扱いにする公演を選ぶ。**曲が 1 曲以上重なる 2 公演**にする
         // (重なりが無いと「別公演で回収済みなら札が付かない」を確かめられない)。
         let real_live = |i: usize| is_real_live(snap, i as u32);
@@ -599,7 +588,7 @@ mod tests {
     /// 参加記録が 1 件も無い人には、回収の札も要約も出ない。
     #[test]
     fn 参加記録が無ければ回収の表示は何も出ない() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let show = snap
             .shows
             .iter()
@@ -625,7 +614,7 @@ mod tests {
     /// 「未参加 かつ 回収 0 回」に化け、自分で付けた参加記録を全行が否定していた。
     #[test]
     fn 回収の対象でない催しでは参加していても札を出さない() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let target = snap.shows.iter().enumerate().find(|(i, _)| {
             !snap.setlist_items_by_show[*i].is_empty()
                 && !is_real_live(snap, *i as u32)
@@ -650,7 +639,7 @@ mod tests {
     /// 要約はシンプル表示では出さない (スクショに自分の記録を焼き込まない)。
     #[test]
     fn シンプル表示では要約を出さない() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let show = snap
             .shows
             .iter()

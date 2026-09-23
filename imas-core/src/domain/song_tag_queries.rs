@@ -45,17 +45,8 @@ pub fn song_tag_ranking<'a>(community: &'a CommunitySnapshot, snap: &Snapshot) -
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::bundle_snapshot;
     use crate::domain::community::{CommunityRows, TaggedRow};
-    use crate::outbound::sqlite_loader::load_snapshot;
-    use std::sync::OnceLock;
-
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| {
-            load_snapshot(&format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR")))
-                .expect("bundle DB はロードできる")
-        })
-    }
 
     fn tag(id: &str, name: &str) -> TagRow {
         TagRow {
@@ -73,7 +64,7 @@ mod tests {
 
     #[test]
     fn 曲の多い順に並び_各タグは付けた人の多い順_消えた曲は数えない() {
-        let s = snap();
+        let s = bundle_snapshot();
         let (a, b) = (s.songs[0].id.clone(), s.songs[1].id.clone());
         let community = CommunitySnapshot::build(CommunityRows {
             song_tag_vocab: vec![tag("t1", "い"), tag("t2", "あ"), tag("t3", "う")],
@@ -103,7 +94,7 @@ mod tests {
 
     #[test]
     fn 同数のタグは名前順() {
-        let s = snap();
+        let s = bundle_snapshot();
         let a = s.songs[0].id.clone();
         let community = CommunitySnapshot::build(CommunityRows {
             song_tag_vocab: vec![tag("t1", "い"), tag("t2", "あ")],

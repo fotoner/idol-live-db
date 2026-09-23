@@ -92,18 +92,7 @@ pub fn songs_for_cast(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::OnceLock;
-
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| {
-            crate::outbound::sqlite_loader::load_snapshot(&format!(
-                "{}/../ImasLiveDB/Resources/master.sqlite",
-                env!("CARGO_MANIFEST_DIR")
-            ))
-            .expect("bundle DB はロードできる")
-        })
-    }
+    use crate::test_support::bundle_snapshot;
 
     fn idx(snap: &Snapshot, ids: &[&str]) -> Vec<u32> {
         ids.iter().map(|id| snap.idol_index_by_id[*id]).collect()
@@ -111,7 +100,7 @@ mod tests {
 
     #[test]
     fn 顔ぶれで完全にそろう曲が出る() {
-        let s = snap();
+        let s = bundle_snapshot();
         let cast = idx(s, &["ml_伊吹翼", "ml_春日未来", "ml_最上静香"]);
         let hits = songs_for_cast(s, &cast, 0, Some(2), Some(5), 50);
         assert!(!hits.is_empty());
@@ -130,7 +119,7 @@ mod tests {
 
     #[test]
     fn 欠員を許すと候補が増え誰が足りないかが分かる() {
-        let s = snap();
+        let s = bundle_snapshot();
         let cast = idx(s, &["ml_伊吹翼", "ml_春日未来", "ml_最上静香"]);
         let strict = songs_for_cast(s, &cast, 0, Some(2), Some(5), 200);
         let loose = songs_for_cast(s, &cast, 1, Some(2), Some(5), 200);
@@ -146,7 +135,7 @@ mod tests {
 
     #[test]
     fn 人数で全体曲を外せる() {
-        let s = snap();
+        let s = bundle_snapshot();
         let cast: Vec<u32> = (0..s.idols.len() as u32).collect(); // 全員
         let small = songs_for_cast(s, &cast, 0, None, Some(5), 500);
         for h in &small {
@@ -156,7 +145,7 @@ mod tests {
 
     #[test]
     fn 並びは欠員の少ない順で次に披露回数() {
-        let s = snap();
+        let s = bundle_snapshot();
         let cast = idx(s, &["ml_伊吹翼", "ml_春日未来", "ml_最上静香"]);
         let hits = songs_for_cast(s, &cast, 1, Some(2), Some(5), 50);
         let keys: Vec<(usize, i64)> =
@@ -168,6 +157,6 @@ mod tests {
 
     #[test]
     fn 顔ぶれが空なら欠員だらけで何も出ない() {
-        assert!(songs_for_cast(snap(), &[], 0, None, None, 50).is_empty());
+        assert!(songs_for_cast(bundle_snapshot(), &[], 0, None, None, 50).is_empty());
     }
 }

@@ -30,13 +30,7 @@ impl SnapshotStore {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn loaded_store() -> std::sync::Arc<SnapshotStore> {
-        let store = SnapshotStore::new();
-        let db = format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"));
-        store.load(db).expect("bundle DB はロードできる");
-        store
-    }
+    use crate::test_support::bundle_store;
 
     #[test]
     fn not_loaded_is_a_typed_error() {
@@ -46,7 +40,7 @@ mod tests {
 
     #[test]
     fn artist_ids_come_back_for_known_songs() {
-        let store = loaded_store();
+        let store = bundle_store();
         // original ロールは全曲登録の運用ルール (feedback) — 適当な実在曲で空でないこと
         let snap = store.current().unwrap();
         let with_artists = (0..snap.songs.len())
@@ -63,7 +57,7 @@ mod tests {
 
     #[test]
     fn performance_counts_align_with_ids() {
-        let store = loaded_store();
+        let store = bundle_store();
         let counts = store
             .song_performance_counts(vec!["存在しないid".into()])
             .unwrap();

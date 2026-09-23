@@ -42,7 +42,8 @@ pub fn table_names() -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rusqlite::{Connection, OpenFlags};
+    use crate::test_support::bundle_conn;
+    use rusqlite::Connection;
     use std::collections::BTreeMap;
 
     /// 「表名 → (列名, 型, NOT NULL, 既定値) の並び」を読む。
@@ -77,11 +78,6 @@ mod tests {
         out
     }
 
-    fn bundle() -> Connection {
-        let p = format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"));
-        Connection::open_with_flags(p, OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap()
-    }
-
     /// **この DDL から作った DB が、同梱 master.sqlite と同じ形になること。**
     ///
     /// ここが落ちたら、`db/master.sql` を変えたのにコアの DDL を取り込み直していない。
@@ -92,7 +88,7 @@ mod tests {
         fresh.execute_batch(MASTER_SCHEMA_SQL).expect("DDL が流せる");
 
         let a = schema_of(&fresh);
-        let b = schema_of(&bundle());
+        let b = schema_of(&bundle_conn());
 
         let only_ddl: Vec<&String> = a.keys().filter(|k| !b.contains_key(*k)).collect();
         let only_bundle: Vec<&String> = b.keys().filter(|k| !a.contains_key(*k)).collect();
@@ -116,7 +112,7 @@ mod tests {
             let rows = stmt.query_map([], |r| r.get::<_, String>(0)).unwrap();
             rows.filter_map(Result::ok).collect()
         };
-        assert_eq!(read(&fresh), read(&bundle()), "索引がずれている");
+        assert_eq!(read(&fresh), read(&bundle_conn()), "索引がずれている");
     }
 
     /// 端末ローカル専用の表が DDL に混ざっていないこと。

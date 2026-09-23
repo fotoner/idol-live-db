@@ -202,12 +202,11 @@ mod tests {
     /// 実際の同梱 DB に流しても、データが減らない。
     #[test]
     fn applying_to_the_real_database_changes_nothing() {
-        let src = format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"));
         let dir = std::env::temp_dir().join(format!("imas_schema_apply_{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let dst = dir.join("copy.sqlite");
         let _ = std::fs::remove_file(&dst);
-        std::fs::copy(&src, &dst).unwrap();
+        std::fs::copy(crate::test_support::bundle_path(), &dst).unwrap();
 
         let conn = Connection::open(&dst).unwrap();
         let before: i64 = conn.query_row("SELECT COUNT(*) FROM songs", [], |r| r.get(0)).unwrap();

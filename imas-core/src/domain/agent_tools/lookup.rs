@@ -863,28 +863,18 @@ fn id_or_name_schema(name_key: &str, name_doc: &str) -> Value {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::bundle_snapshot;
     use crate::domain::agent_tools::call_tool;
-    use crate::outbound::sqlite_loader::load_snapshot;
     use serde_json::json;
-    use std::sync::OnceLock;
 
     const TODAY: &str = "2026-09-19";
 
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| {
-            let path =
-                format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"));
-            load_snapshot(&path).expect("bundle DB はロードできる")
-        })
-    }
-
     fn run(name: &str, args: Value) -> Value {
-        call_tool(snap(), name, &args, TODAY).unwrap_or_else(|e| panic!("{name}: {e}"))
+        call_tool(bundle_snapshot(), name, &args, TODAY).unwrap_or_else(|e| panic!("{name}: {e}"))
     }
 
     fn err(name: &str, args: Value) -> ToolError {
-        call_tool(snap(), name, &args, TODAY).unwrap_err()
+        call_tool(bundle_snapshot(), name, &args, TODAY).unwrap_err()
     }
 
     fn text(v: &Value, key: &str) -> String {

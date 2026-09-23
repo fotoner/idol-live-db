@@ -496,29 +496,10 @@ fn one_off_release_bars(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::{bundle_conn, bundle_snapshot};
     use crate::domain::snapshot::{Anniversary, Brand, Event, Show, Song};
-    use crate::outbound::sqlite_loader::load_snapshot;
-    use rusqlite::{Connection, OpenFlags};
+    use rusqlite::Connection;
     use std::collections::HashSet;
-    use std::sync::OnceLock;
-
-    fn db_path() -> String {
-        format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"))
-    }
-
-    /// スナップショットは全テストで共有 (不変なので安全・ロードを 1 回にする)。
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| load_snapshot(&db_path()).expect("bundle DB はロードできる"))
-    }
-
-    fn conn() -> Connection {
-        Connection::open_with_flags(
-            db_path(),
-            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
-        )
-        .expect("bundle DB を開ける")
-    }
 
     /// ORDER BY キーが同値の区間を集合として比較する等価判定 (song_list_queries と
     /// 同じ理由: SQLite のソータは安定でなく同値行の並びは未規定。共有コアは
@@ -606,7 +587,7 @@ mod tests {
     // ---- SQL 照合: 節目 ----
 
     fn expected_milestone_bars(brand_id: Option<&str>) -> Vec<TimelineBarRecord> {
-        let c = conn();
+        let c = bundle_conn();
         let colors = sql_brand_colors(&c);
         let (filter_sql, args) = brand_filter("brand_id", brand_id);
         let sql = format!(
@@ -648,8 +629,8 @@ mod tests {
     #[test]
     fn milestone_bars_match_sql() {
         for brand in [None, Some("cg"), Some("ml")] {
-            let colors = brand_colors(snap());
-            let actual = milestone_bars(snap(), brand, &colors);
+            let colors = brand_colors(bundle_snapshot());
+            let actual = milestone_bars(bundle_snapshot(), brand, &colors);
             let expected = expected_milestone_bars(brand);
             assert!(brand.is_some() || !expected.is_empty(), "全件が空だと照合にならない");
             assert_matches_up_to_ties(
@@ -664,7 +645,7 @@ mod tests {
     // ---- SQL 照合: イベント ----
 
     fn expected_event_bars(brand_id: Option<&str>) -> Vec<TimelineBarRecord> {
-        let c = conn();
+        let c = bundle_conn();
         let colors = sql_brand_colors(&c);
         let (filter_sql, args) = brand_filter("e.brand_id", brand_id);
         let sql = format!(
@@ -717,8 +698,8 @@ mod tests {
     #[test]
     fn event_bars_match_sql() {
         for brand in [None, Some("cg"), Some("765as")] {
-            let colors = brand_colors(snap());
-            let actual = event_bars(snap(), brand, &colors);
+            let colors = brand_colors(bundle_snapshot());
+            let actual = event_bars(bundle_snapshot(), brand, &colors);
             let expected = expected_event_bars(brand);
             assert!(!expected.is_empty(), "brand={brand:?} で空だと照合にならない");
             assert_matches_up_to_ties(
@@ -770,7 +751,7 @@ mod tests {
     /// テストで検出する分担。省略対象の実データで「未加工のまま」を発火させる。
     #[test]
     fn event_bar_titles_stay_official_names() {
-        let c = conn();
+        let c = bundle_conn();
         let mut stmt = c.prepare("SELECT id, name FROM events").unwrap();
         let names: HashMap<String, String> = stmt
             .query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))
@@ -778,8 +759,8 @@ mod tests {
             .map(Result::unwrap)
             .collect();
 
-        let colors = brand_colors(snap());
-        let bars = event_bars(snap(), None, &colors);
+        let colors = brand_colors(bundle_snapshot());
+        let bars = event_bars(bundle_snapshot(), None, &colors);
         let mut abbreviation_would_change = 0usize;
         for bar in &bars {
             let TimelineBarTarget::Event { id } = &bar.target else {
@@ -831,7 +812,7 @@ mod tests {
     }
 
     fn expected_series_bars(brand_id: Option<&str>) -> Vec<TimelineBarRecord> {
-        let c = conn();
+        let c = bundle_conn();
         let colors = sql_brand_colors(&c);
         let (filter_sql, args) = brand_filter("brand_id", brand_id);
         let sql = format!(
@@ -867,8 +848,8 @@ mod tests {
     #[test]
     fn series_bars_match_sql() {
         for brand in [None, Some("ml")] {
-            let colors = brand_colors(snap());
-            let actual = series_bars(snap(), brand, &colors);
+            let colors = brand_colors(bundle_snapshot());
+            let actual = series_bars(bundle_snapshot(), brand, &colors);
             let expected = expected_series_bars(brand);
             assert!(!expected.is_empty(), "brand={brand:?} で空だと照合にならない");
             assert_matches_up_to_ties(
@@ -881,7 +862,7 @@ mod tests {
     }
 
     fn expected_cd_series_bars(brand_id: Option<&str>) -> Vec<TimelineBarRecord> {
-        let c = conn();
+        let c = bundle_conn();
         let colors = sql_brand_colors(&c);
         let (filter_sql, args) = brand_filter("brand_id", brand_id);
         let sql = format!(
@@ -919,8 +900,8 @@ mod tests {
     #[test]
     fn cd_series_bars_match_sql() {
         for brand in [None, Some("cg")] {
-            let colors = brand_colors(snap());
-            let actual = cd_series_bars(snap(), brand, &colors);
+            let colors = brand_colors(bundle_snapshot());
+            let actual = cd_series_bars(bundle_snapshot(), brand, &colors);
             let expected = expected_cd_series_bars(brand);
             assert!(!expected.is_empty(), "brand={brand:?} で空だと照合にならない");
             assert_matches_up_to_ties(
@@ -933,7 +914,7 @@ mod tests {
     }
 
     fn expected_one_off_bars(brand_id: Option<&str>) -> Vec<TimelineBarRecord> {
-        let c = conn();
+        let c = bundle_conn();
         let colors = sql_brand_colors(&c);
         let (filter_sql, args) = brand_filter("brand_id", brand_id);
         let sql = format!(
@@ -991,8 +972,8 @@ mod tests {
     #[test]
     fn one_off_bars_match_sql() {
         for brand in [None, Some("sidem")] {
-            let colors = brand_colors(snap());
-            let actual = one_off_release_bars(snap(), brand, &colors);
+            let colors = brand_colors(bundle_snapshot());
+            let actual = one_off_release_bars(bundle_snapshot(), brand, &colors);
             let expected = expected_one_off_bars(brand);
             assert!(!expected.is_empty(), "brand={brand:?} で空だと照合にならない");
             assert_matches_up_to_ties(
@@ -1011,14 +992,14 @@ mod tests {
 
     #[test]
     fn timeline_bars_concatenates_in_swift_order() {
-        let bars = timeline_bars(snap(), None);
-        let colors = brand_colors(snap());
+        let bars = timeline_bars(bundle_snapshot(), None);
+        let colors = brand_colors(bundle_snapshot());
         let concatenated: Vec<TimelineBarRecord> = [
-            milestone_bars(snap(), None, &colors),
-            event_bars(snap(), None, &colors),
-            series_bars(snap(), None, &colors),
-            cd_series_bars(snap(), None, &colors),
-            one_off_release_bars(snap(), None, &colors),
+            milestone_bars(bundle_snapshot(), None, &colors),
+            event_bars(bundle_snapshot(), None, &colors),
+            series_bars(bundle_snapshot(), None, &colors),
+            cd_series_bars(bundle_snapshot(), None, &colors),
+            one_off_release_bars(bundle_snapshot(), None, &colors),
         ]
         .into_iter()
         .flatten()
@@ -1026,11 +1007,11 @@ mod tests {
         assert_eq!(bars, concatenated, "Swift 原本の + 連結順のまま");
 
         // 未知ブランドは全レーン空 (WHERE brand_id = ? が全行不一致)。
-        assert!(timeline_bars(snap(), Some("存在しないブランド")).is_empty());
+        assert!(timeline_bars(bundle_snapshot(), Some("存在しないブランド")).is_empty());
 
         // ブランド絞りは全件の部分集合 (id 基準)。
         let all_ids: HashSet<String> = bars.iter().map(|b| b.id.clone()).collect();
-        let cg = timeline_bars(snap(), Some("cg"));
+        let cg = timeline_bars(bundle_snapshot(), Some("cg"));
         assert!(!cg.is_empty());
         assert!(cg.iter().all(|b| all_ids.contains(&b.id)));
 

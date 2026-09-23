@@ -875,26 +875,11 @@ fn load_idol_brands(conn: &Connection) -> Result<Vec<(String, String, Option<i64
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn bundle_db() -> String {
-        format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"))
-    }
-
-    fn snapshot() -> Snapshot {
-        load_snapshot(&bundle_db()).expect("bundle DB はロードできる")
-    }
-
-    fn conn() -> Connection {
-        Connection::open_with_flags(
-            bundle_db(),
-            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
-        )
-        .unwrap()
-    }
+    use crate::test_support::{bundle_conn, bundle_path, bundle_snapshot};
 
     #[test]
     fn loads_bundle_db_with_consistent_indexes() {
-        let s = snapshot();
+        let s = bundle_snapshot();
         assert!(s.songs.len() >= 3000, "songs={}", s.songs.len());
         assert!(s.idols.len() >= 300, "idols={}", s.idols.len());
         assert!(s.events.len() >= 500, "events={}", s.events.len());
@@ -957,8 +942,8 @@ mod tests {
     fn row_counts_match_sql_after_orphan_policy() {
         // Bundle DB は FK 整合済みのはずなので、孤児読み飛ばし後も SQL の COUNT と一致する。
         // ずれたら「Bundle に孤児が混入した」ことを意味する (審査 reject 事故の再来を検知)。
-        let s = snapshot();
-        let c = conn();
+        let s = bundle_snapshot();
+        let c = bundle_conn();
         let count = |sql: &str| -> usize {
             c.query_row(sql, [], |r| r.get::<_, i64>(0)).unwrap() as usize
         };
@@ -991,7 +976,7 @@ mod tests {
 
     #[test]
     fn artists_are_sorted_by_sort_order() {
-        let s = snapshot();
+        let s = bundle_snapshot();
         for links in s.artists_by_song.iter().step_by(53) {
             let orders: Vec<i64> =
                 links.iter().map(|l| s.idols[l.idol as usize].sort_order.unwrap_or(i64::MAX)).collect();
@@ -1002,8 +987,8 @@ mod tests {
     #[test]
     fn performance_counts_match_sql_group_by() {
         // 披露回数は SQL 時代 (COUNT(*) GROUP BY song_id) と同じ値になること。
-        let s = snapshot();
-        let c = conn();
+        let s = bundle_snapshot();
+        let c = bundle_conn();
         let mut stmt =
             c.prepare("SELECT song_id, COUNT(*) FROM setlist_items GROUP BY song_id").unwrap();
         let rows: Vec<(String, i64)> = stmt
@@ -1021,7 +1006,7 @@ mod tests {
 
     #[test]
     fn shows_by_event_are_sorted_by_date_then_sort_order() {
-        let s = snapshot();
+        let s = bundle_snapshot();
         for list in &s.shows_by_event {
             let keys: Vec<(&String, i64)> = list
                 .iter()
@@ -1038,7 +1023,7 @@ mod tests {
 
     #[test]
     fn setlist_items_by_show_are_sorted_by_position() {
-        let s = snapshot();
+        let s = bundle_snapshot();
         for list in s.setlist_items_by_show.iter().step_by(7) {
             let positions: Vec<i64> =
                 list.iter().map(|&i| s.setlist_items[i as usize].position).collect();
@@ -1050,7 +1035,7 @@ mod tests {
     fn performance_history_matches_sql_order_and_fields() {
         // 披露履歴 (fetchSongPerformanceHistory 相当) を最多披露曲で SQL と突き合わせる。
         // SQL は date DESC のみで同日内が未規定なので、集合一致 + 日付の降順単調性で見る。
-        let s = snapshot();
+        let s = bundle_snapshot();
         let (top_song, _) = s
             .performance_counts
             .iter()
@@ -1064,7 +1049,7 @@ mod tests {
             items.iter().map(|&i| &s.shows[s.setlist_items[i as usize].show as usize].date).collect();
         assert!(dates.windows(2).all(|w| w[0] >= w[1]), "date DESC が崩れている");
 
-        let c = conn();
+        let c = bundle_conn();
         let mut stmt = c
             .prepare(
                 "SELECT si.id FROM setlist_items si
@@ -1088,14 +1073,14 @@ mod tests {
     #[test]
     fn performers_resolve_singers_like_sql() {
         // setlist_performers の歌い手解決を、適当な披露 1 件で SQL と突き合わせる。
-        let s = snapshot();
+        let s = bundle_snapshot();
         let ti = s
             .performers_by_item
             .iter()
             .position(|l| l.len() >= 2)
             .expect("複数人歌唱の披露がある");
         let item = &s.setlist_items[ti];
-        let c = conn();
+        let c = bundle_conn();
         let mut stmt = c
             .prepare(
                 "SELECT sp.idol_id FROM setlist_performers sp
@@ -1122,9 +1107,9 @@ mod tests {
 
     #[test]
     fn songs_by_idol_are_release_date_desc_with_roles() {
-        let s = snapshot();
+        let s = bundle_snapshot();
         let total_links: usize = s.songs_by_idol.iter().map(Vec::len).sum();
-        let sql_links: usize = conn()
+        let sql_links: usize = bundle_conn()
             .query_row("SELECT COUNT(*) FROM song_artists", [], |r| r.get::<_, i64>(0))
             .unwrap() as usize;
         assert_eq!(total_links, sql_links);
@@ -1143,7 +1128,7 @@ mod tests {
 
     #[test]
     fn variants_form_families_with_sorted_children() {
-        let s = snapshot();
+        let s = bundle_snapshot();
         let parent = s
             .variants_by_song
             .iter()
@@ -1167,7 +1152,7 @@ mod tests {
 
     #[test]
     fn unit_links_resolve_members_and_songs() {
-        let s = snapshot();
+        let s = bundle_snapshot();
         // メンバーのいるユニットと曲のあるユニットがそれぞれ十分いる
         let with_members = s.members_by_unit.iter().filter(|m| !m.is_empty()).count();
         assert!(with_members > 500, "メンバー付きユニット={with_members}");
@@ -1186,7 +1171,7 @@ mod tests {
 
     #[test]
     fn show_cast_roles_are_loaded() {
-        let s = snapshot();
+        let s = bundle_snapshot();
         let cast_links: usize = s.cast_by_show.iter().map(Vec::len).sum();
         assert!(cast_links > 5000, "show_cast リンク={cast_links}");
         // cast_role は常に非空 (NULL は 'member' に既定化)
@@ -1206,8 +1191,8 @@ mod tests {
         // 回収回数 (fetchSongCollectedCounts 相当) が索引だけで再現できることの確認。
         // user_marks は載せない規約なので、参加 show 集合を「全 show」と仮置きして
         // SQL の同等式 (kind IN ('live','festival') の distinct show 数) と突き合わせる。
-        let s = snapshot();
-        let c = conn();
+        let s = bundle_snapshot();
+        let c = bundle_conn();
         let mut stmt = c
             .prepare(
                 "SELECT si.song_id, COUNT(DISTINCT si.show_id)
@@ -1240,8 +1225,8 @@ mod tests {
     #[test]
     fn brand_order_matches_sql() {
         // Bundle の brands は sort_order がユニークなので SQL と逐語比較できる。
-        let s = snapshot();
-        let c = conn();
+        let s = bundle_snapshot();
+        let c = bundle_conn();
         let mut stmt = c.prepare("SELECT id FROM brands ORDER BY sort_order").unwrap();
         let sql_ids: Vec<String> =
             stmt.query_map([], |r| r.get(0)).unwrap().collect::<Result<_, _>>().unwrap();
@@ -1260,8 +1245,8 @@ mod tests {
         //   SELECT DISTINCT i.* FROM idols i JOIN idol_brands ib ON i.id = ib.idol_id
         //   WHERE ib.brand_id = ? AND i.is_external = 0 ORDER BY i.sort_order
         // を全ブランドで突き合わせる (Bundle は idols.sort_order がユニークなので逐語一致)。
-        let s = snapshot();
-        let c = conn();
+        let s = bundle_snapshot();
+        let c = bundle_conn();
         for (bi, brand) in s.brands.iter().enumerate() {
             let mut stmt = c
                 .prepare(
@@ -1297,8 +1282,8 @@ mod tests {
     fn voice_actor_resolution_matches_sql() {
         // fetchCurrentVoiceActor / fetchVoiceActorHistory / fetchIdolsByVoiceActor の3クエリを
         // 全アイドル・全 CV 名で SQL と突き合わせる。
-        let s = snapshot();
-        let c = conn();
+        let s = bundle_snapshot();
+        let c = bundle_conn();
         for (ii, idol) in s.idols.iter().enumerate() {
             // 現任: WHERE valid_to IS NULL ORDER BY IFNULL(valid_from,'') DESC LIMIT 1
             let sql_current: Option<String> = c
@@ -1364,8 +1349,8 @@ mod tests {
 
     #[test]
     fn venue_directory_matches_sql() {
-        let s = snapshot();
-        let c = conn();
+        let s = bundle_snapshot();
+        let c = bundle_conn();
         // venue_order: Bundle は sort_order ユニークなので逐語一致
         let mut stmt = c.prepare("SELECT id FROM venues ORDER BY sort_order").unwrap();
         let sql_ids: Vec<String> =
@@ -1394,8 +1379,8 @@ mod tests {
     fn shows_by_venue_match_sql() {
         // showsByVenue 相当 (venue_id = ? OR venue = ? / ORDER BY date DESC) を
         // 公演数の多い venue_id で突き合わせる。同日内は SQL 未規定 → 集合一致 + 単調性。
-        let s = snapshot();
-        let c = conn();
+        let s = bundle_snapshot();
+        let c = bundle_conn();
         let (vid, list) = s
             .shows_by_venue_id
             .iter()
@@ -1425,8 +1410,8 @@ mod tests {
     fn shows_in_date_order_supports_calendar_range() {
         // カレンダーの範囲抽出 (WHERE date BETWEEN ? AND ? ORDER BY date, sort_order) が
         // 二分探索 + 部分列で SQL と一致すること。同 (date, sort_order) は未規定 → 集合一致。
-        let s = snapshot();
-        let c = conn();
+        let s = bundle_snapshot();
+        let c = bundle_conn();
         let (start, end) = ("2023-01-01", "2023-12-31");
         let lo = s
             .shows_in_date_order
@@ -1463,8 +1448,8 @@ mod tests {
 
     #[test]
     fn anniversaries_and_staff_match_sql() {
-        let s = snapshot();
-        let c = conn();
+        let s = bundle_snapshot();
+        let c = bundle_conn();
         // Timeline milestoneBars の ORDER BY date (同日は未規定 → 単調性 + 集合一致)
         let mut stmt = c.prepare("SELECT id FROM anniversaries ORDER BY date").unwrap();
         let sql_ids: Vec<String> =
@@ -1491,8 +1476,8 @@ mod tests {
 
     #[test]
     fn meta_values_match_sql() {
-        let s = snapshot();
-        let c = conn();
+        let s = bundle_snapshot();
+        let c = bundle_conn();
         let mut stmt = c.prepare("SELECT key, value FROM meta").unwrap();
         let rows: Vec<(String, Option<String>)> = stmt
             .query_map([], |r| Ok((r.get(0)?, r.get(1)?)))
@@ -1509,7 +1494,7 @@ mod tests {
     #[test]
     fn documents_only_fields_default_to_none_on_bundle() {
         // Bundle DB には Documents 専用列が無い → 全行 None で読める (動的検出の既定値側)。
-        let s = snapshot();
+        let s = bundle_snapshot();
         assert!(s.events.iter().all(|e| e.has_streaming.is_none() && e.has_live_viewing.is_none()));
         assert!(s.shows.iter().all(|sh| sh.has_streaming.is_none() && sh.has_live_viewing.is_none()));
         assert!(s.brands.iter().all(|b| b.icon_url.is_none()));
@@ -1706,7 +1691,7 @@ mod tests {
         let path = dir.join("android_like.sqlite");
         let _ = std::fs::remove_file(&path);
         {
-            let src = Connection::open_with_flags(bundle_db(), OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap();
+            let src = Connection::open_with_flags(bundle_path(), OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap();
             let names: Vec<String> = {
                 let mut stmt = src
                     .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name <> 'idol_voice_actors'")
@@ -1715,7 +1700,7 @@ mod tests {
                 rows.filter_map(Result::ok).collect()
             };
             let dst = Connection::open(&path).unwrap();
-            dst.execute("ATTACH DATABASE ? AS src", [bundle_db()]).unwrap();
+            dst.execute("ATTACH DATABASE ? AS src", [bundle_path()]).unwrap();
             for t in &names {
                 let sql: Option<String> = src
                     .query_row("SELECT sql FROM sqlite_master WHERE type='table' AND name=?", [t], |r| r.get(0))

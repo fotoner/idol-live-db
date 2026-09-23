@@ -397,19 +397,8 @@ pub fn song_position_profile(snap: &Snapshot, song_id: &str) -> SongPositionProf
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::bundle_snapshot;
     use crate::domain::song_list_queries::is_solo_song;
-    use std::sync::OnceLock;
-
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| {
-            crate::outbound::sqlite_loader::load_snapshot(&format!(
-                "{}/../ImasLiveDB/Resources/master.sqlite",
-                env!("CARGO_MANIFEST_DIR")
-            ))
-            .expect("bundle DB はロードできる")
-        })
-    }
 
     /// 主演公演 (cast_role='lead' の行がある公演) の添字。
     fn lead_shows(snap: &Snapshot) -> Vec<u32> {
@@ -420,7 +409,7 @@ mod tests {
 
     #[test]
     fn 主演は他の出演者よりはっきり多く歌う() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let shape = setlist_shape(snap, &lead_shows(snap), 5);
         let lead = shape.lead_songs.clone().expect("主演公演を標本にしたので主演の標本がある");
         let member = shape.member_songs.clone().expect("同じ公演の他の出演者も標本になる");
@@ -439,7 +428,7 @@ mod tests {
 
     #[test]
     fn 割合は公演の規模に左右されない() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let shape = setlist_shape(snap, &lead_shows(snap), 5);
         let songs = shape.song_count.clone().unwrap();
         let share = shape.lead_share_percent.clone().unwrap();
@@ -460,7 +449,7 @@ mod tests {
 
     #[test]
     fn ソロ枠はその日_1_人で歌った曲だけを数える() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         // 14thLIVE DAY2。原唱者ベースなら 15 本になるが、実際のソロ枠は 7 本。
         let day2 = snap.show_index_by_id["sh_the_idolm@ster_million_live_14thlive_2"];
         let shape = setlist_shape(snap, &[day2], 5);
@@ -477,7 +466,7 @@ mod tests {
 
     #[test]
     fn 主演公演のソロ枠はすべて主演のもの() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let shape = setlist_shape(snap, &lead_shows(snap), 5);
         // 実データでは全公演一致する。崩れたら「主演以外もソロを歌う形式」に
         // 変わったということなので、予想の前提として気づけるようにしておく。
@@ -501,7 +490,7 @@ mod tests {
 
     #[test]
     fn 主演がいない公演を混ぜても主演の標本は増えない() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let lead_only = lead_shows(snap);
         let mut mixed = lead_only.clone();
         // 主演が立っていない公演を適当に足す。lead_songs は増えず、member_songs だけ増える。
@@ -555,7 +544,7 @@ mod tests {
 
     #[test]
     fn 主演公演の型が実データで取れる() {
-        let s = snap();
+        let s = bundle_snapshot();
         let shows = lead_shows(s);
         assert!(shows.len() >= 6, "主演公演が少なすぎる: {}", shows.len());
         let shape = setlist_shape(s, &shows, 5);
@@ -587,7 +576,7 @@ mod tests {
 
     #[test]
     fn アンコールの綴り違いは_1_つに畳まれる() {
-        let s = snap();
+        let s = bundle_snapshot();
         // 実データの主演公演には `encore` と `ENCORE` が混在している。
         let shape = setlist_shape(s, &lead_shows(s), 5);
         let labels: Vec<&str> =
@@ -601,9 +590,9 @@ mod tests {
 
     #[test]
     fn 曲の位置は披露回数に分かれて収まる() {
-        let s = snap();
+        let s = bundle_snapshot();
         // いちばん多く歌われている曲で見る。
-        let (top, _) = snap()
+        let (top, _) = bundle_snapshot()
             .performance_counts
             .iter()
             .enumerate()
@@ -629,14 +618,14 @@ mod tests {
 
     #[test]
     fn 未知の曲でも落ちずに全部_0() {
-        let p = song_position_profile(snap(), "存在しない曲");
+        let p = song_position_profile(bundle_snapshot(), "存在しない曲");
         assert_eq!(p.performances, 0);
         assert!(p.sections.is_empty());
     }
 
     #[test]
     fn 公演が無ければ型も空() {
-        let shape = setlist_shape(snap(), &[], 5);
+        let shape = setlist_shape(bundle_snapshot(), &[], 5);
         assert_eq!(shape.shows(), 0);
         assert_eq!(shape.shows_without_setlist, 0);
         assert!(shape.song_count.is_none());
@@ -645,7 +634,7 @@ mod tests {
 
     #[test]
     fn 同じ入力なら同じ答え() {
-        let s = snap();
+        let s = bundle_snapshot();
         let shows = lead_shows(s);
         assert_eq!(setlist_shape(s, &shows, 5), setlist_shape(s, &shows, 5));
     }

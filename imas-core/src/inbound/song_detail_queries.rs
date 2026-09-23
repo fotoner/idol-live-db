@@ -138,13 +138,7 @@ impl SnapshotStore {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn loaded_store() -> std::sync::Arc<SnapshotStore> {
-        let store = SnapshotStore::new();
-        let db = format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"));
-        store.load(db).expect("bundle DB はロードできる");
-        store
-    }
+    use crate::test_support::bundle_store;
 
     /// 未ロード時は全 API が型付きエラーを返す (アプリ側が SQL 経路へフォールバック
     /// できる契約)。
@@ -159,7 +153,7 @@ mod tests {
     /// inbound は委譲のみ (domain 直呼びと同一結果) であることを代表 API で確認する。
     #[test]
     fn ffi_layer_delegates_to_domain() {
-        let store = loaded_store();
+        let store = bundle_store();
         let snap = store.current().unwrap();
 
         let ids: Vec<String> = snap.songs.iter().take(20).map(|s| s.id.clone()).collect();

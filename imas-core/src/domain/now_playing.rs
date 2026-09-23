@@ -224,23 +224,15 @@ mod tests {
     /// 知らない曲 id を渡してもバーは出ない (曲を消した直後など)。
     #[test]
     fn unknown_song_yields_no_bar() {
-        let snap = crate::outbound::sqlite_loader::load_snapshot(&format!(
-            "{}/../ImasLiveDB/Resources/master.sqlite",
-            env!("CARGO_MANIFEST_DIR")
-        ))
-        .expect("bundle DB はロードできる");
-        assert!(now_playing_bar(&snap, "no_such_song", NowPlayingKind::Full, true).is_none());
+        let snap = crate::test_support::bundle_snapshot();
+        assert!(now_playing_bar(snap, "no_such_song", NowPlayingKind::Full, true).is_none());
     }
 
     /// 実データで、原唱者しか無い曲でも名義が出ること。
     #[test]
     fn real_song_resolves_naming() {
-        let snap = crate::outbound::sqlite_loader::load_snapshot(&format!(
-            "{}/../ImasLiveDB/Resources/master.sqlite",
-            env!("CARGO_MANIFEST_DIR")
-        ))
-        .expect("bundle DB はロードできる");
-        let b = now_playing_bar(&snap, "sc_take_ur_time", NowPlayingKind::Preview, true)
+        let snap = crate::test_support::bundle_snapshot();
+        let b = now_playing_bar(snap, "sc_take_ur_time", NowPlayingKind::Preview, true)
             .expect("実データに在る曲");
         assert_eq!(b.title, "Take Ur Time");
         assert_eq!(b.subtitle.as_deref(), Some("八宮めぐる"));

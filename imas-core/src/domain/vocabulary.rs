@@ -266,11 +266,7 @@ mod tests {
     /// マスタに入っている曲種別・催しの種別・性格は、どれも語彙で引ける。
     #[test]
     fn every_value_in_the_master_has_a_word() {
-        let snap = crate::outbound::sqlite_loader::load_snapshot(&format!(
-            "{}/../ImasLiveDB/Resources/master.sqlite",
-            env!("CARGO_MANIFEST_DIR")
-        ))
-        .expect("bundle DB はロードできる");
+        let snap = crate::test_support::bundle_snapshot();
         for song in &snap.songs {
             let Some(t) = song.song_type.as_deref() else { continue };
             assert!(song_type(t).is_some(), "{} の {t}", song.id);

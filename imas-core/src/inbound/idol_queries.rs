@@ -161,13 +161,7 @@ impl SnapshotStore {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn loaded_store() -> std::sync::Arc<SnapshotStore> {
-        let store = SnapshotStore::new();
-        let db = format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"));
-        store.load(db).expect("bundle DB はロードできる");
-        store
-    }
+    use crate::test_support::bundle_store;
 
     #[test]
     fn not_loaded_is_a_typed_error() {
@@ -184,7 +178,7 @@ mod tests {
     #[test]
     fn ffi_surface_smoke() {
         // ロジックの等価性は domain 側の照合テストが担う。ここは委譲の疎通だけ確認する。
-        let store = loaded_store();
+        let store = bundle_store();
         let all = store.idol_list(None).unwrap();
         assert!(all.len() > 100, "全アイドル数={}", all.len());
 

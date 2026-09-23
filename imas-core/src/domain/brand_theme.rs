@@ -51,25 +51,14 @@ pub fn derive_batch_for_brand_ids(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::bundle_snapshot;
     use crate::domain::color_engine::{derive, theme_hex};
-    use std::sync::OnceLock;
-
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| {
-            crate::outbound::sqlite_loader::load_snapshot(&format!(
-                "{}/../ImasLiveDB/Resources/master.sqlite",
-                env!("CARGO_MANIFEST_DIR")
-            ))
-            .expect("bundle DB はロードできる")
-        })
-    }
 
     /// 両 OS の BrandPalette に写経されていた値と、マスタの色が同じであること。
     /// ここが崩れたら、BrandPalette を消したときに色が変わる。
     #[test]
     fn brand_colors_come_from_the_master() {
-        let color = |id: &str| brand_color_hex(snap(), Some(id)).map(str::to_ascii_lowercase);
+        let color = |id: &str| brand_color_hex(bundle_snapshot(), Some(id)).map(str::to_ascii_lowercase);
         assert_eq!(color("876").as_deref(), Some("#656a75"));
         assert_eq!(color("961").as_deref(), Some("#520000"));
         assert_eq!(color("cg").as_deref(), Some("#2681c8"));
@@ -78,8 +67,8 @@ mod tests {
         assert_eq!(color("sidem").as_deref(), Some("#0fbe94"));
         assert_eq!(color("sc").as_deref(), Some("#6bb6b9"));
         assert_eq!(color("gakuen").as_deref(), Some("#f39800"));
-        assert_eq!(brand_color_hex(snap(), Some("存在しない")), None);
-        assert_eq!(brand_color_hex(snap(), None), None);
+        assert_eq!(brand_color_hex(bundle_snapshot(), Some("存在しない")), None);
+        assert_eq!(brand_color_hex(bundle_snapshot(), None), None);
     }
 
     /// ID を hex として渡していた経路 (`derive(None, Some("876"))`) と違う色になること。
@@ -87,20 +76,20 @@ mod tests {
     #[test]
     fn brand_id_is_not_read_as_a_hex() {
         for id in ["876", "961", "cg", "ml"] {
-            let by_id = derive_for_brand_id(snap(), None, Some(id), false);
-            let hex = brand_color_hex(snap(), Some(id)).unwrap();
+            let by_id = derive_for_brand_id(bundle_snapshot(), None, Some(id), false);
+            let hex = brand_color_hex(bundle_snapshot(), Some(id)).unwrap();
             assert_eq!(by_id, derive(None, Some(hex), false), "{id}");
             assert_ne!(by_id, derive(None, Some(id), false), "{id} を hex として読んでいる");
         }
         assert!(derive(None, Some("cg"), false).is_neutral, "旧経路の cg はグレー");
-        assert!(!derive_for_brand_id(snap(), None, Some("cg"), false).is_neutral);
+        assert!(!derive_for_brand_id(bundle_snapshot(), None, Some("cg"), false).is_neutral);
     }
 
     /// 導いた accent の値そのものを固定する (876 / 961 / cg / ml)。
     #[test]
     fn accents_for_the_brands_that_were_broken() {
         let accent = |id: &str, dark: bool| {
-            theme_hex(derive_for_brand_id(snap(), None, Some(id), dark).accent)
+            theme_hex(derive_for_brand_id(bundle_snapshot(), None, Some(id), dark).accent)
         };
         let light: Vec<String> = ["876", "961", "cg", "ml"].iter().map(|id| accent(id, false)).collect();
         let dark: Vec<String> = ["876", "961", "cg", "ml"].iter().map(|id| accent(id, true)).collect();
@@ -111,7 +100,7 @@ mod tests {
     /// アイドル色があればブランドより優先。未知のブランドはニュートラルへ落ちる。
     #[test]
     fn seed_wins_and_unknown_brand_falls_back_to_neutral() {
-        let s = snap();
+        let s = bundle_snapshot();
         assert_eq!(
             derive_for_brand_id(s, Some("#E22B30"), Some("cg"), true),
             derive(Some("#E22B30"), None, true)

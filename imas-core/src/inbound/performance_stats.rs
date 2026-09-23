@@ -85,9 +85,7 @@ mod tests {
     /// 束ねた口が、個別に呼んだ結果と同じものを返すこと。
     #[test]
     fn bundled_matches_the_individual_calls() {
-        let store = SnapshotStore::new();
-        let db = format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"));
-        store.load(db).unwrap();
+        let store = crate::test_support::bundle_store();
         let snap = store.current().unwrap();
         // 披露回数の多い曲を選ぶ
         let mut counts: std::collections::HashMap<u32, u32> = std::collections::HashMap::new();

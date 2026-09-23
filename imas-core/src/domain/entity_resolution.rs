@@ -492,16 +492,7 @@ pub fn event_date_range(snap: &Snapshot, event: u32) -> Option<(String, String)>
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::outbound::sqlite_loader::load_snapshot;
-    use std::sync::OnceLock;
-
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| {
-            let path = format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"));
-            load_snapshot(&path).expect("bundle DB はロードできる")
-        })
-    }
+    use crate::test_support::bundle_snapshot;
 
     fn find(hits: &[EntityHit], id: &str) -> Option<EntityHit> {
         hits.iter().find(|h| h.id == id).cloned()
@@ -509,7 +500,7 @@ mod tests {
 
     #[test]
     fn アイドル名は完全一致が先頭に立ちヒントで選べる() {
-        let hits = resolve(snap(), "春日未来", &[], 10);
+        let hits = resolve(bundle_snapshot(), "春日未来", &[], 10);
         let top = &hits[0];
         assert_eq!(top.kind, EntityKind::Idol);
         assert_eq!(top.id, "ml_春日未来");
@@ -521,20 +512,20 @@ mod tests {
 
     #[test]
     fn 声優名でも担当アイドルに辿り着ける() {
-        let hits = resolve(snap(), "山崎はるか", &[EntityKind::Idol], 10);
+        let hits = resolve(bundle_snapshot(), "山崎はるか", &[EntityKind::Idol], 10);
         assert!(find(&hits, "ml_春日未来").is_some(), "{hits:?}");
     }
 
     #[test]
     fn 種別を絞れる() {
-        let hits = resolve(snap(), "THE IDOLM@STER", &[EntityKind::Song], 20);
+        let hits = resolve(bundle_snapshot(), "THE IDOLM@STER", &[EntityKind::Song], 20);
         assert!(!hits.is_empty());
         assert!(hits.iter().all(|h| h.kind == EntityKind::Song));
     }
 
     #[test]
     fn 曲名の完全一致は候補が多くても1件に決まる() {
-        match resolve_unique(snap(), "THE IDOLM@STER", EntityKind::Song) {
+        match resolve_unique(bundle_snapshot(), "THE IDOLM@STER", EntityKind::Song) {
             Resolution::One(hit) => assert_eq!(hit.id, "765as_the_idolmster"),
             other => panic!("完全一致 1 件なら決まるはず: {other:?}"),
         }
@@ -543,7 +534,7 @@ mod tests {
     #[test]
     fn 決め手が無いときは候補を返して決めない() {
         // 「10th」はライブ名に何本も出てくる。勝手に 1 本へ丸めない。
-        match resolve_unique(snap(), "10th", EntityKind::Event) {
+        match resolve_unique(bundle_snapshot(), "10th", EntityKind::Event) {
             Resolution::Many(hits) => assert!(hits.len() > 1, "{hits:?}"),
             other => panic!("曖昧なままであるべき: {other:?}"),
         }
@@ -551,28 +542,28 @@ mod tests {
 
     #[test]
     fn 当たらない語は空() {
-        assert_eq!(resolve_unique(snap(), "存在しない名前ですよこれは", EntityKind::Idol), Resolution::Nothing);
-        assert!(resolve(snap(), "   ", &[], 10).is_empty(), "空白だけの語は候補を出さない");
+        assert_eq!(resolve_unique(bundle_snapshot(), "存在しない名前ですよこれは", EntityKind::Idol), Resolution::Nothing);
+        assert!(resolve(bundle_snapshot(), "   ", &[], 10).is_empty(), "空白だけの語は候補を出さない");
     }
 
     #[test]
     fn 種別をまたぐ語は種別が偏らない() {
         // 「ミリオン」は曲・ライブ・ユニットのどれにも当たる。曲だけで埋めない。
-        let hits = resolve(snap(), "ミリオン", &[], 12);
+        let hits = resolve(bundle_snapshot(), "ミリオン", &[], 12);
         let kinds: std::collections::BTreeSet<_> = hits.iter().map(|h| h.kind).collect();
         assert!(kinds.len() >= 2, "1 種別で埋まっている: {hits:?}");
     }
 
     #[test]
     fn 打ち切り前の件数が分かる() {
-        let all = resolve_with_total(snap(), "ライブ", &[EntityKind::Event], 3);
+        let all = resolve_with_total(bundle_snapshot(), "ライブ", &[EntityKind::Event], 3);
         assert_eq!(all.hits.len(), 3);
         assert!(all.total > 3, "total={}", all.total);
     }
 
     #[test]
     fn 公演は日付と会場で選び分けられる() {
-        let hits = resolve(snap(), "MILLION LIVE", &[EntityKind::Show], 5);
+        let hits = resolve(bundle_snapshot(), "MILLION LIVE", &[EntityKind::Show], 5);
         assert!(!hits.is_empty());
         let first = &hits[0];
         assert_eq!(first.kind, EntityKind::Show);
@@ -586,7 +577,7 @@ mod tests {
     #[test]
     fn ブランドは略称でも_id_でも引ける() {
         for (word, id) in [("デレマス", "cg"), ("ミリオン", "ml"), ("シャニマス", "sc"), ("ml", "ml")] {
-            let hits = resolve(snap(), word, &[EntityKind::Brand], 5);
+            let hits = resolve(bundle_snapshot(), word, &[EntityKind::Brand], 5);
             assert_eq!(hits.first().map(|h| h.id.as_str()), Some(id), "{word} が引けない: {hits:?}");
         }
     }
@@ -594,7 +585,7 @@ mod tests {
     /// ユニットは畳み済み索引 (`unit_search`) を通る。かな・別表記でも当たること。
     #[test]
     fn ユニットは名前と別表記で引ける() {
-        let hits = resolve(snap(), "トライスタービジョン", &[EntityKind::Unit], 5);
+        let hits = resolve(bundle_snapshot(), "トライスタービジョン", &[EntityKind::Unit], 5);
         assert_eq!(hits.first().map(|h| h.kind), Some(EntityKind::Unit), "{hits:?}");
         assert!(hits[0].exact, "表記そのものなので完全一致: {:?}", hits[0]);
         assert!(hits[0].hint.contains("ミリオン"), "hint={}", hits[0].hint);

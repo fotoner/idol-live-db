@@ -163,20 +163,9 @@ fn events_of_brand(snap: &Snapshot, brand_id: &str) -> HashSet<u32> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::OnceLock;
+    use crate::test_support::bundle_snapshot;
 
     const TODAY: &str = "2026-09-19";
-
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| {
-            crate::outbound::sqlite_loader::load_snapshot(&format!(
-                "{}/../ImasLiveDB/Resources/master.sqlite",
-                env!("CARGO_MANIFEST_DIR")
-            ))
-            .expect("bundle DB はロードできる")
-        })
-    }
 
     fn criteria() -> ShowFilterCriteria {
         ShowFilterCriteria { today_key: TODAY.to_string(), ..ShowFilterCriteria::default() }
@@ -184,7 +173,7 @@ mod tests {
 
     #[test]
     fn 条件なしなら全公演が新しい順で返る() {
-        let s = snap();
+        let s = bundle_snapshot();
         let got = filter_show_indexes(s, &criteria());
         assert_eq!(got.len(), s.shows.len());
         let dates: Vec<&str> = got.iter().map(|&i| s.shows[i as usize].date.as_str()).collect();
@@ -193,7 +182,7 @@ mod tests {
 
     #[test]
     fn 同日の並びは前計算列と同じ() {
-        let s = snap();
+        let s = bundle_snapshot();
         // 反転しない (= 近い順の) 枠なら shows_in_date_order そのまま。
         let c = ShowFilterCriteria { when: Timeframe::Upcoming, ..criteria() };
         let got = filter_show_indexes(s, &c);
@@ -209,7 +198,7 @@ mod tests {
 
     #[test]
     fn 主演は役割で引ける() {
-        let s = snap();
+        let s = bundle_snapshot();
         let c = ShowFilterCriteria { cast_role: Some("lead".into()), ..criteria() };
         let lead = filter_show_indexes(s, &c);
         assert!(lead.len() >= 6, "主演公演が少なすぎる: {}", lead.len());
@@ -233,7 +222,7 @@ mod tests {
 
     #[test]
     fn 出演の判定は歌唱だけの公演も拾う() {
-        let s = snap();
+        let s = bundle_snapshot();
         // 出演者表に行が無く、歌唱者としてだけ出ている公演が実データにある。
         let found = (0..s.shows.len() as u32).find_map(|show| {
             s.setlist_items_by_show[show as usize].iter().find_map(|&item| {
@@ -254,7 +243,7 @@ mod tests {
 
     #[test]
     fn 人数とセトリ有無で絞れる() {
-        let s = snap();
+        let s = bundle_snapshot();
         let c = ShowFilterCriteria {
             max_cast: Some(8),
             has_setlist: Some(true),
@@ -277,14 +266,14 @@ mod tests {
 
     #[test]
     fn 知らないイベント_id_は空() {
-        let s = snap();
+        let s = bundle_snapshot();
         let c = ShowFilterCriteria { event_id: Some("無いイベント".into()), ..criteria() };
         assert!(filter_show_indexes(s, &c).is_empty());
     }
 
     #[test]
     fn ブランドは合同ライブ込みでイベント一覧と同じ集合() {
-        let s = snap();
+        let s = bundle_snapshot();
         let c = ShowFilterCriteria { brand_id: Some("ml".into()), ..criteria() };
         let got = filter_show_indexes(s, &c);
         assert!(!got.is_empty());

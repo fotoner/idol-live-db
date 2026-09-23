@@ -12,6 +12,10 @@ use imas_core::web_export::url::{is_safe_segment, path_key, reserved_for, url_se
 use imas_core::web_export::{fixture, Args};
 use std::path::{Path, PathBuf};
 
+// 実データ DB は lib のテストと同じものを読む (db/master.sql から復元。IMAS_CORE_TEST_DB で差し替え)。
+#[path = "../src/test_support/test_db.rs"]
+mod test_db;
+
 /// テスト用の一時ディレクトリ。`Drop` で消す。
 struct TempDir(PathBuf);
 
@@ -505,7 +509,7 @@ fn run_rejects_ambiguous_or_incomplete_arguments() {
 }
 
 // ===========================================================================
-// 実データ (同梱 master.sqlite) を通した検査
+// 実データ (db/master.sql から復元した DB。test_db 参照) を通した検査
 //
 // ここだけ重い (フル出力に 1 分強)。既定の `cargo test --locked` には feature が
 // 付かないので走らず、`--features web-export` のときだけ走る。
@@ -527,17 +531,11 @@ mod real {
     /// 出力を固定するための「今日」。実時刻を使うと結果が日ごとに変わる。
     const TODAY: &str = "2026-09-04";
 
-    fn db_path() -> String {
-        format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"))
-    }
-
     /// スナップショットは全テストで共有する (不変なので安全・ロードを 1 回にする)。
     fn snap() -> &'static Snapshot {
         static SNAP: OnceLock<Snapshot> = OnceLock::new();
         SNAP.get_or_init(|| {
-            load_snapshot(&db_path()).expect(
-                "同梱 master.sqlite が読めない。`bash tools/build_db.sh` で生成すること",
-            )
+            load_snapshot(test_db::path()).expect("実データ DB からスナップショットを組める")
         })
     }
 
@@ -560,7 +558,7 @@ mod real {
         DIR.get_or_init(|| {
             let dir = TempDir::new("real");
             let args = Args {
-                db: Some(PathBuf::from(db_path())),
+                db: Some(PathBuf::from(test_db::path())),
                 out: Some(dir.path().to_path_buf()),
                 today: Some(TODAY.to_string()),
                 // コールガイドの写し (リポジトリに置いてある正本)。
@@ -1470,7 +1468,7 @@ mod real {
         let a = exported();
         let b = TempDir::new("real-again");
         let args = Args {
-            db: Some(PathBuf::from(db_path())),
+            db: Some(PathBuf::from(test_db::path())),
             out: Some(b.path().to_path_buf()),
             today: Some(TODAY.to_string()),
             // 共有の出力 (exported) と同じ入力にする (写しの有無で顔ぶれが変わる)。

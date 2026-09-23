@@ -513,15 +513,15 @@ mod tests {
     /// **ここは元 SQL と意図的に振る舞いが違う** (SQL は会場マスタを引かない)。
     #[test]
     fn event_search_matches_the_venue_reading() {
-        let by = |q: &str| search_events_by_name_or_venue(snap(), q, 500).len();
+        let by = |q: &str| search_events_by_name_or_venue(bundle_snapshot(), q, 500).len();
         // 会場マスタに読みが入っている会場を 1 つ選ぶ。
-        let venue = snap()
+        let venue = bundle_snapshot()
             .venues
             .iter()
             .find(|v| {
                 v.name_kana.as_deref().is_some_and(|k| !k.is_empty())
                     && v.name.chars().any(|c| ('\u{4E00}'..='\u{9FFF}').contains(&c))
-                    && snap().shows.iter().any(|s| s.venue_id.as_deref() == Some(&v.id))
+                    && bundle_snapshot().shows.iter().any(|s| s.venue_id.as_deref() == Some(&v.id))
             })
             .expect("読みつきで漢字の会場が 1 つはある");
         let kana = venue.name_kana.as_deref().unwrap();
@@ -541,32 +541,13 @@ mod tests {
         );
     }
     use super::*;
-    use crate::outbound::sqlite_loader::load_snapshot;
-    use rusqlite::{Connection, OpenFlags};
-    use std::sync::OnceLock;
-
-    fn db_path() -> String {
-        format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"))
-    }
-
-    /// スナップショットは全テストで共有 (不変なので安全・ロードを 1 回にする)。
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| load_snapshot(&db_path()).expect("bundle DB はロードできる"))
-    }
-
-    fn conn() -> Connection {
-        Connection::open_with_flags(
-            db_path(),
-            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
-        )
-        .expect("bundle DB を開ける")
-    }
+    use crate::test_support::{bundle_conn, bundle_snapshot};
+    use rusqlite::Connection;
 
     /// 一覧の行は参加ブランドと「合同か」を持つ (画面で joint_brand_ids を割らない)。
     #[test]
     fn records_carry_brand_ids_and_the_joint_flag() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let joint = snap.events.iter().find(|e| e.is_joint()).expect("合同ライブがある");
         let record = EventListRecord::from(joint);
         assert!(record.is_joint);
@@ -590,7 +571,7 @@ mod tests {
         // Swift 側は lowercased() してから likeEscaped する。
         let lowered: String = query.chars().flat_map(char::to_lowercase).collect();
         let pattern = format!("%{}%", like_escaped(&lowered));
-        let db = conn();
+        let db = bundle_conn();
         let mut stmt = db
             .prepare(
                 "SELECT DISTINCT e.* FROM events e
@@ -609,7 +590,7 @@ mod tests {
     }
 
     fn searched_event_ids(query: &str, limit: u32) -> Vec<String> {
-        search_events_by_name_or_venue(snap(), query, limit)
+        search_events_by_name_or_venue(bundle_snapshot(), query, limit)
             .into_iter()
             .map(|e| e.id)
             .collect()
@@ -667,16 +648,16 @@ mod tests {
     #[test]
     fn search_events_reaches_the_venue_column() {
         // 名前に含まれないが会場に含まれる語を実データから探す。
-        let venue_word = snap()
+        let venue_word = bundle_snapshot()
             .shows
             .iter()
             .filter_map(|s| s.venue.as_deref())
             .find(|v| {
-                v.chars().count() >= 3 && !snap().events.iter().any(|e| e.name.contains(*v))
+                v.chars().count() >= 3 && !bundle_snapshot().events.iter().any(|e| e.name.contains(*v))
             })
             .expect("名前に出てこない会場名がある前提")
             .to_string();
-        let hits = search_events_by_name_or_venue(snap(), &venue_word, 200);
+        let hits = search_events_by_name_or_venue(bundle_snapshot(), &venue_word, 200);
         assert!(!hits.is_empty(), "venue={venue_word:?}");
         assert!(
             hits.iter().all(|e| !e.name.contains(&venue_word)),
@@ -699,7 +680,7 @@ mod tests {
         // 添字順 (rowid 順) とは実際に違うこと。
         let in_snapshot_order: Vec<String> = {
             let mut v: Vec<String> = hits.clone();
-            v.sort_by_key(|id| snap().event_index_by_id[id]);
+            v.sort_by_key(|id| bundle_snapshot().event_index_by_id[id]);
             v
         };
         assert_ne!(hits, in_snapshot_order, "id 順と添字順が同じ DB では検証にならない");
@@ -769,7 +750,7 @@ mod tests {
              GROUP BY e.id ORDER BY COALESCE(MIN(s.date), '') DESC",
             conditions.join("\nAND ")
         );
-        query_with_date_rows(&conn(), &sql, &args)
+        query_with_date_rows(&bundle_conn(), &sql, &args)
     }
 
     fn query_with_date_rows(db: &Connection, sql: &str, args: &[String]) -> Vec<WithDateRow> {
@@ -809,7 +790,7 @@ mod tests {
             assert!(!expected.is_empty(), "{label}: 基準が空ではテストにならない");
             let owned_kinds: Option<Vec<String>> =
                 kinds.map(|ks| ks.iter().map(|k| k.to_string()).collect());
-            let actual = events_with_first_date(snap(), brand, include_empty, live_only, owned_kinds.as_deref());
+            let actual = events_with_first_date(bundle_snapshot(), brand, include_empty, live_only, owned_kinds.as_deref());
             assert_matches_up_to_ties(&label, &with_date_rows(&actual), &expected);
         }
     }
@@ -835,8 +816,8 @@ mod tests {
                      ORDER BY COALESCE(MIN(s.date), '') DESC",
                     having.join(" AND ")
                 );
-                let expected = query_with_date_rows(&conn(), &sql, &[year.to_string()]);
-                let actual = events_with_date_by_year(snap(), year, include_empty);
+                let expected = query_with_date_rows(&bundle_conn(), &sql, &[year.to_string()]);
+                let actual = events_with_date_by_year(bundle_snapshot(), year, include_empty);
                 // last_date は SELECT されないので必ず None (現行挙動の固定)。
                 assert!(actual.iter().all(|r| r.last_date.is_none()));
                 assert_matches_up_to_ties(
@@ -854,7 +835,7 @@ mod tests {
     #[test]
     fn events_with_date_by_ids_matches_sql() {
         // 実在 id (先頭/中間/末尾から) + 未知 id + 重複 id。
-        let events = &snap().events;
+        let events = &bundle_snapshot().events;
         let mut ids: Vec<String> = [0, events.len() / 2, events.len() - 1, 7, 42]
             .iter()
             .map(|&i| events[i].id.clone())
@@ -871,12 +852,12 @@ mod tests {
              GROUP BY e.id
              ORDER BY COALESCE(MIN(s.date), '') DESC"
         );
-        let expected = query_with_date_rows(&conn(), &sql, &ids);
+        let expected = query_with_date_rows(&bundle_conn(), &sql, &ids);
         assert_eq!(expected.len(), 5, "実在 5 件・未知と重複は増えない");
-        let actual = events_with_date_by_ids(snap(), &ids);
+        let actual = events_with_date_by_ids(bundle_snapshot(), &ids);
         assert_matches_up_to_ties("by_ids", &with_date_rows(&actual), &expected);
 
-        assert!(events_with_date_by_ids(snap(), &[]).is_empty());
+        assert!(events_with_date_by_ids(bundle_snapshot(), &[]).is_empty());
     }
 
     /// 実在の event/show id を使った合成 user_marks を TEMP テーブルに立てる。
@@ -889,8 +870,8 @@ mod tests {
         )
         .expect("TEMP user_marks を作れる");
 
-        let events = &snap().events;
-        let shows = &snap().shows;
+        let events = &bundle_snapshot().events;
+        let shows = &bundle_snapshot().shows;
         // event 単位: 種別なし (旧データ) / stream / bool_value=0 (無効) / マスタに無い id。
         let event_rows: Vec<(String, Option<&str>, i64)> = vec![
             (events[3].id.clone(), None, 1),
@@ -939,7 +920,7 @@ mod tests {
 
     #[test]
     fn attended_events_with_date_matches_sql() {
-        let db = conn();
+        let db = bundle_conn();
         let (event_marks, show_marks) = setup_marks(&db);
         // iOS fetchAttendedEventsWithDateQuery の写経 (一字一句)。
         let sql = "SELECT e.id, MIN(s.date) AS first_date, MAX(s.date) AS last_date
@@ -961,13 +942,13 @@ mod tests {
 
         let event_ids: Vec<String> = event_marks.iter().map(|m| m.entity_id.clone()).collect();
         let show_ids: Vec<String> = show_marks.iter().map(|m| m.entity_id.clone()).collect();
-        let actual = attended_events_with_date(snap(), &event_ids, &show_ids);
+        let actual = attended_events_with_date(bundle_snapshot(), &event_ids, &show_ids);
         assert_matches_up_to_ties("attended", &with_date_rows(&actual), &expected);
     }
 
     #[test]
     fn attended_event_type_sets_matches_sql() {
-        let db = conn();
+        let db = bundle_conn();
         let (event_marks, show_marks) = setup_marks(&db);
         // iOS fetchAttendedEventTypeSetsQuery の写経 (一字一句) + Swift 側分岐の再現。
         let sql = "SELECT event_id, text_value AS atype FROM (
@@ -995,7 +976,7 @@ mod tests {
             };
         }
 
-        let actual = attended_event_type_sets(snap(), &event_marks, &show_marks);
+        let actual = attended_event_type_sets(bundle_snapshot(), &event_marks, &show_marks);
         let as_set = |v: &[String]| v.iter().cloned().collect::<HashSet<String>>();
         assert_eq!(as_set(&actual.live), live, "現地集合");
         assert_eq!(as_set(&actual.stream), stream, "配信集合");
@@ -1010,7 +991,7 @@ mod tests {
 
     #[test]
     fn event_records_by_brand_matches_sql() {
-        let db = conn();
+        let db = bundle_conn();
         // GRDB `Event.all()` は SELECT * (ORDER BY なし) = rowid 順の全表走査。
         // covering index に化けないよう e.* を読む。
         let run = |brand: Option<&str>| -> Vec<String> {
@@ -1026,7 +1007,7 @@ mod tests {
         };
         for brand in [None, Some("ml"), Some("sc"), Some("存在しないブランド")] {
             let expected = run(brand);
-            let actual: Vec<String> = event_records_by_brand(snap(), brand)
+            let actual: Vec<String> = event_records_by_brand(bundle_snapshot(), brand)
                 .into_iter()
                 .map(|r| r.id)
                 .collect();
@@ -1036,7 +1017,7 @@ mod tests {
 
     #[test]
     fn event_names_matches_sql() {
-        let db = conn();
+        let db = bundle_conn();
         let mut stmt = db.prepare("SELECT name FROM events ORDER BY name").unwrap();
         let expected: Vec<String> = stmt
             .query_map([], |r| r.get(0))
@@ -1044,7 +1025,7 @@ mod tests {
             .collect::<Result<_, _>>()
             .unwrap();
         // 同名イベントがあっても値が同じなので列そのものが一致する。
-        assert_eq!(event_names(snap()), expected);
+        assert_eq!(event_names(bundle_snapshot()), expected);
         assert!(!expected.is_empty());
     }
 
@@ -1066,7 +1047,7 @@ mod tests {
     fn explicit_empty_kinds_matches_nothing() {
         // Swift からは来ない入力 (SQL では IN () が構文エラー)。空集合として安全側に。
         let empty: Vec<String> = vec![];
-        assert!(events_with_first_date(snap(), None, true, false, Some(&empty)).is_empty());
+        assert!(events_with_first_date(bundle_snapshot(), None, true, false, Some(&empty)).is_empty());
     }
 
     // ---- event_ids_for_shows ----
@@ -1074,7 +1055,7 @@ mod tests {
     /// 同じイベントの公演を複数渡しても、event id は 1 つに畳まれる。
     #[test]
     fn event_ids_for_shows_dedupes_shows_of_the_same_event() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let (event, shows) = snap
             .shows_by_event
             .iter()
@@ -1089,13 +1070,13 @@ mod tests {
     /// マークだけ残ってマスタから消えた公演は、エラーにせず捨てる。
     #[test]
     fn event_ids_for_shows_drops_unknown_show_ids() {
-        assert!(event_ids_for_shows(snap(), &["存在しない".to_string()]).is_empty());
+        assert!(event_ids_for_shows(bundle_snapshot(), &["存在しない".to_string()]).is_empty());
     }
 
     /// 公演を 1 件ずつ引いて所属イベントを集めた結果 (初出順・重複なし) と同じになる。
     #[test]
     fn event_ids_for_shows_matches_per_show_lookup() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let show_ids: Vec<String> = snap.shows.iter().take(200).map(|s| s.id.clone()).collect();
         let mut one_by_one: Vec<String> = Vec::new();
         for id in &show_ids {

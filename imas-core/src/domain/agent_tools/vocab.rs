@@ -94,22 +94,11 @@ pub fn checked_date_bound(arg: &str, value: String) -> Result<String, ToolError>
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::OnceLock;
-
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| {
-            crate::outbound::sqlite_loader::load_snapshot(&format!(
-                "{}/../ImasLiveDB/Resources/master.sqlite",
-                env!("CARGO_MANIFEST_DIR")
-            ))
-            .expect("bundle DB はロードできる")
-        })
-    }
+    use crate::test_support::bundle_snapshot;
 
     #[test]
     fn 語彙は実データから出る() {
-        let s = snap();
+        let s = bundle_snapshot();
         assert!(brand_vocab(s).contains(&"ml".to_string()));
         assert!(event_kind_vocab(s).contains(&"live".to_string()));
         // 種別は定数表でなく実データから。未分類 (空文字) は語彙に出ない。

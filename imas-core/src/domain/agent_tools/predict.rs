@@ -353,24 +353,13 @@ fn co_performed_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolE
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::bundle_snapshot;
     use crate::domain::agent_tools::call_tool;
-    use std::sync::OnceLock;
 
     const TODAY: &str = "2026-09-19";
 
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| {
-            crate::outbound::sqlite_loader::load_snapshot(&format!(
-                "{}/../ImasLiveDB/Resources/master.sqlite",
-                env!("CARGO_MANIFEST_DIR")
-            ))
-            .expect("bundle DB はロードできる")
-        })
-    }
-
     fn call(name: &str, args: Value) -> Value {
-        call_tool(snap(), name, &args, TODAY).unwrap_or_else(|e| panic!("{name}: {e}"))
+        call_tool(bundle_snapshot(), name, &args, TODAY).unwrap_or_else(|e| panic!("{name}: {e}"))
     }
 
     #[test]
@@ -430,7 +419,7 @@ mod tests {
 
     #[test]
     fn 語彙外の役割は候補つきで突き返す() {
-        let err = call_tool(snap(), "list_shows", &json!({ "cast_role": "主演" }), TODAY).unwrap_err();
+        let err = call_tool(bundle_snapshot(), "list_shows", &json!({ "cast_role": "主演" }), TODAY).unwrap_err();
         match err {
             ToolError::BadArgs(m) => assert!(m.contains("lead"), "{m}"),
             other => panic!("{other}"),
@@ -552,11 +541,11 @@ mod tests {
         for (tool, key) in
             [("song_position_profile", "song_id"), ("co_performed_songs", "song_id")]
         {
-            let err = call_tool(snap(), tool, &json!({ key: "無い曲" }), TODAY).unwrap_err();
+            let err = call_tool(bundle_snapshot(), tool, &json!({ key: "無い曲" }), TODAY).unwrap_err();
             assert!(matches!(err, ToolError::NotFound(_)), "{tool}: {err}");
         }
         let err =
-            call_tool(snap(), "list_shows", &json!({ "idol_id": "無い人" }), TODAY).unwrap_err();
+            call_tool(bundle_snapshot(), "list_shows", &json!({ "idol_id": "無い人" }), TODAY).unwrap_err();
         assert!(matches!(err, ToolError::NotFound(_)), "{err}");
     }
 }

@@ -281,21 +281,11 @@ pub fn song_ids_with_any_artist(snap: &Snapshot, idol_ids: &[String]) -> Vec<Str
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::{bundle_conn, bundle_snapshot};
     use rusqlite::Connection;
 
-    fn db_path() -> String {
-        format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"))
-    }
-
-    fn load() -> (Snapshot, Connection) {
-        let path = db_path();
-        let snap = crate::outbound::sqlite_loader::load_snapshot(&path).expect("bundle DB はロードできる");
-        let conn = Connection::open_with_flags(
-            &path,
-            rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX,
-        )
-        .expect("bundle DB を開ける");
-        (snap, conn)
+    fn load() -> (&'static Snapshot, Connection) {
+        (bundle_snapshot(), bundle_conn())
     }
 
     /// 照合 1: idol_songs (role なし / original) が元 SQL と全アイドルで一致する。
@@ -336,7 +326,7 @@ mod tests {
                         .map(Result::unwrap)
                         .collect(),
                 };
-                let got = idol_songs(&snap, &idol.id, role);
+                let got = idol_songs(snap, &idol.id, role);
                 // (a) release_date の並び (DESC・NULL 末尾) が SQL と同一
                 let sql_dates: Vec<&Option<String>> = sql_rows.iter().map(|r| &r.2).collect();
                 let got_dates: Vec<&Option<String>> = got.iter().map(|r| &r.release_date).collect();
@@ -380,7 +370,7 @@ mod tests {
                 .unwrap()
                 .map(Result::unwrap)
                 .collect();
-            let got = idol_performed_songs(&snap, &idol.id);
+            let got = idol_performed_songs(snap, &idol.id);
             let sql_keys: Vec<(u32, &Option<String>)> =
                 sql_rows.iter().map(|r| (r.1, &r.2)).collect();
             let got_keys: Vec<(u32, &Option<String>)> =
@@ -448,7 +438,7 @@ mod tests {
                     .unwrap()
                     .map(Result::unwrap)
                     .collect();
-                let got = idol_song_history(&snap, &idol.id, song_id);
+                let got = idol_song_history(snap, &idol.id, song_id);
                 assert!(!got.is_empty(), "サンプルは披露実績から取ったので空にならない");
                 let sql_dates: Vec<&String> = sql_rows.iter().map(|r| &r.4).collect();
                 let got_dates: Vec<&String> = got.iter().map(|r| &r.date).collect();
@@ -494,7 +484,7 @@ mod tests {
             .unwrap()
             .map(Result::unwrap)
             .collect();
-        let mut got = unit_ids_with_songs(&snap, &all_ids);
+        let mut got = unit_ids_with_songs(snap, &all_ids);
         assert!(!got.is_empty());
         // 入力順保持の確認: 出力は入力 (units の並び) の部分列になっている。
         let mut cursor = all_ids.iter();
@@ -530,7 +520,7 @@ mod tests {
             .into_iter()
             .chain(std::iter::once("units に無いid".to_string()))
             .collect();
-        assert_eq!(unit_ids_with_songs(&snap, &absent), Vec::<String>::new());
+        assert_eq!(unit_ids_with_songs(snap, &absent), Vec::<String>::new());
 
         let with_songs = snap
             .units
@@ -540,7 +530,7 @@ mod tests {
             .map(|(_, u)| u.id.clone())
             .expect("曲持ちユニットは存在する");
         let doubled = vec![with_songs.clone(), with_songs.clone(), "存在しないid".into()];
-        assert_eq!(unit_ids_with_songs(&snap, &doubled), vec![with_songs]);
+        assert_eq!(unit_ids_with_songs(snap, &doubled), vec![with_songs]);
     }
 
     /// 照合 5: idol_unit_song_ids が対応 SQL と全アイドルで一致する。
@@ -564,7 +554,7 @@ mod tests {
                 .unwrap()
                 .map(Result::unwrap)
                 .collect();
-            let got = idol_unit_song_ids(&snap, &idol.id);
+            let got = idol_unit_song_ids(snap, &idol.id);
             // 並びキー列: got 側のキーはスナップショットから引き直す。
             let mut got_keys: Vec<(&String, &Option<String>)> = Vec::new();
             for &ui in &snap.units_by_idol[ii] {
@@ -623,7 +613,7 @@ mod tests {
         for id in &all {
             let input = [id.clone()];
             let got: std::collections::HashSet<String> =
-                song_ids_with_any_artist(&snap, &input).into_iter().collect();
+                song_ids_with_any_artist(snap, &input).into_iter().collect();
             assert_eq!(got, sql_song_ids_with_any_artist(&conn, &input), "idol={id}");
             if !got.is_empty() {
                 nonempty += 1;
@@ -637,14 +627,14 @@ mod tests {
         let sampled: Vec<String> = all.iter().step_by(37).cloned().collect();
         for input in [all[..5.min(all.len())].to_vec(), sampled, all.clone()] {
             let got: std::collections::HashSet<String> =
-                song_ids_with_any_artist(&snap, &input).into_iter().collect();
+                song_ids_with_any_artist(snap, &input).into_iter().collect();
             assert_eq!(got, sql_song_ids_with_any_artist(&conn, &input), "n={}", input.len());
         }
 
         // (3) 未知 id は SQL でも 0 行 / 空入力は空 (Swift の guard と同じ観測)
         let ghost = ["idol_does_not_exist".to_string()];
-        assert!(song_ids_with_any_artist(&snap, &ghost).is_empty());
-        assert!(song_ids_with_any_artist(&snap, &[]).is_empty());
+        assert!(song_ids_with_any_artist(snap, &ghost).is_empty());
+        assert!(song_ids_with_any_artist(snap, &[]).is_empty());
     }
 
     /// 出力は「入力順・重複に依らず songs 添字昇順」。プラットフォーム間で
@@ -653,14 +643,14 @@ mod tests {
     fn song_ids_with_any_artist_is_input_order_independent() {
         let (snap, _conn) = load();
         let ids: Vec<String> = snap.idols.iter().map(|i| i.id.clone()).step_by(23).collect();
-        let forward = song_ids_with_any_artist(&snap, &ids);
+        let forward = song_ids_with_any_artist(snap, &ids);
         let mut reversed = ids.clone();
         reversed.reverse();
-        assert_eq!(forward, song_ids_with_any_artist(&snap, &reversed), "入力順で変わらない");
+        assert_eq!(forward, song_ids_with_any_artist(snap, &reversed), "入力順で変わらない");
         // 重複入力も結果を変えない (DISTINCT 相当)
         let mut doubled = ids.clone();
         doubled.extend(ids.iter().cloned());
-        assert_eq!(forward, song_ids_with_any_artist(&snap, &doubled), "重複入力で変わらない");
+        assert_eq!(forward, song_ids_with_any_artist(snap, &doubled), "重複入力で変わらない");
         // songs 添字昇順であること
         let idx: Vec<u32> = forward.iter().map(|id| snap.song_index_by_id[id]).collect();
         assert!(idx.windows(2).all(|w| w[0] < w[1]), "songs 添字の昇順で返る");
@@ -670,13 +660,13 @@ mod tests {
     #[test]
     fn unknown_ids_yield_empty_results() {
         let (snap, _conn) = load();
-        assert!(idol_songs(&snap, "居ないアイドル", None).is_empty());
-        assert!(idol_songs(&snap, "居ないアイドル", Some("original")).is_empty());
-        assert!(idol_performed_songs(&snap, "居ないアイドル").is_empty());
-        assert!(idol_song_history(&snap, "居ないアイドル", "居ない曲").is_empty());
+        assert!(idol_songs(snap, "居ないアイドル", None).is_empty());
+        assert!(idol_songs(snap, "居ないアイドル", Some("original")).is_empty());
+        assert!(idol_performed_songs(snap, "居ないアイドル").is_empty());
+        assert!(idol_song_history(snap, "居ないアイドル", "居ない曲").is_empty());
         let real_idol = &snap.idols[0].id;
-        assert!(idol_song_history(&snap, real_idol, "居ない曲").is_empty());
-        assert!(idol_unit_song_ids(&snap, "居ないアイドル").is_empty());
-        assert!(unit_ids_with_songs(&snap, &[]).is_empty());
+        assert!(idol_song_history(snap, real_idol, "居ない曲").is_empty());
+        assert!(idol_unit_song_ids(snap, "居ないアイドル").is_empty());
+        assert!(unit_ids_with_songs(snap, &[]).is_empty());
     }
 }

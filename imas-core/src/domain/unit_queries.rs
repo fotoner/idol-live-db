@@ -267,7 +267,7 @@ mod tests {
     #[test]
     fn unit_names_fold_kana_under_the_shared_match_rule() {
         use crate::domain::text_search_index::match_range;
-        let snap = snap();
+        let snap = bundle_snapshot();
         let katakana = snap
             .units
             .iter()
@@ -308,7 +308,7 @@ mod tests {
     #[test]
     fn kanji_unit_names_are_reachable_through_their_reading() {
         use crate::domain::text_search_index::match_range;
-        let snap = snap();
+        let snap = bundle_snapshot();
         let with_kana: Vec<&crate::domain::snapshot::Unit> = snap
             .units
             .iter()
@@ -343,28 +343,10 @@ mod tests {
     }
 
     use super::*;
-    use crate::outbound::sqlite_loader::load_snapshot;
-    use rusqlite::{Connection, OpenFlags};
+
+    use crate::test_support::{bundle_conn, bundle_snapshot};
+    use rusqlite::Connection;
     use std::collections::{HashMap, HashSet};
-    use std::sync::OnceLock;
-
-    fn db_path() -> String {
-        format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"))
-    }
-
-    /// スナップショットは全テストで共有 (不変なので安全・ロードを 1 回にする)。
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| load_snapshot(&db_path()).expect("bundle DB はロードできる"))
-    }
-
-    fn conn() -> Connection {
-        Connection::open_with_flags(
-            db_path(),
-            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
-        )
-        .expect("bundle DB を開ける")
-    }
 
     fn query_strings(db: &Connection, sql: &str, params: &[&str]) -> Vec<String> {
         let mut stmt = db.prepare(sql).expect("元 SQL は妥当");
@@ -404,8 +386,8 @@ mod tests {
 
     #[test]
     fn unit_index_matches_sql() {
-        let db = conn();
-        let data = unit_index_data(snap());
+        let db = bundle_conn();
+        let data = unit_index_data(bundle_snapshot());
 
         // units: fetchAll (`SELECT * FROM units`、ORDER BY なし) と並び・全カラム逐語一致。
         // 注意: `SELECT id FROM units` は covering index (PK) 走査で id 順になり
@@ -477,12 +459,12 @@ mod tests {
 
     #[test]
     fn all_units_matches_sql() {
-        let db = conn();
+        let db = bundle_conn();
         let expected = query_strings(&db, "SELECT id FROM units ORDER BY brand_id, name", &[]);
         assert!(!expected.is_empty());
-        let actual: Vec<String> = all_units(snap()).iter().map(|u| u.id.clone()).collect();
+        let actual: Vec<String> = all_units(bundle_snapshot()).iter().map(|u| u.id.clone()).collect();
         // ORDER BY キー (brand_id, name) ごとの同順位グループで比較。
-        let key_of: HashMap<String, (String, String)> = snap()
+        let key_of: HashMap<String, (String, String)> = bundle_snapshot()
             .units
             .iter()
             .map(|u| (u.id.clone(), (u.brand_id.clone(), u.name.clone())))
@@ -492,7 +474,7 @@ mod tests {
 
     #[test]
     fn unit_and_members_match_sql() {
-        let db = conn();
+        let db = bundle_conn();
         // メンバー 2 人以上のユニットを実データから拾う (データ更新に強くする)。
         let sample = query_strings(
             &db,
@@ -519,7 +501,7 @@ mod tests {
                     },
                 )
                 .unwrap();
-            assert_eq!(unit_by_id(snap(), unit_id), Some(expected), "unit {unit_id}");
+            assert_eq!(unit_by_id(bundle_snapshot(), unit_id), Some(expected), "unit {unit_id}");
 
             // fetchUnitMembersQuery: ORDER BY i.sort_order (同値は未規定 → up to ties)。
             let expected_members = query_strings(
@@ -529,9 +511,9 @@ mod tests {
                 &[unit_id],
             );
             assert!(expected_members.len() >= 2);
-            let actual_members = unit_member_idol_ids(snap(), unit_id);
+            let actual_members = unit_member_idol_ids(bundle_snapshot(), unit_id);
             let sort_key = |id: &String| {
-                snap().idols[snap().idol_index_by_id[id] as usize].sort_order
+                bundle_snapshot().idols[bundle_snapshot().idol_index_by_id[id] as usize].sort_order
             };
             assert_matches_up_to_ties(
                 &format!("members of {unit_id}"),
@@ -540,12 +522,12 @@ mod tests {
                 sort_key,
             );
         }
-        assert_eq!(unit_by_id(snap(), "存在しないunit"), None);
+        assert_eq!(unit_by_id(bundle_snapshot(), "存在しないunit"), None);
     }
 
     #[test]
     fn unit_songs_match_sql() {
-        let db = conn();
+        let db = bundle_conn();
         // 曲 3 曲以上のユニット (units 実在) を実データから拾う。
         let sample = query_strings(
             &db,
@@ -563,9 +545,9 @@ mod tests {
                 &[unit_id],
             );
             assert!(expected.len() >= 3);
-            let actual = unit_song_ids(snap(), unit_id);
+            let actual = unit_song_ids(bundle_snapshot(), unit_id);
             let release_key = |id: &String| {
-                snap().songs[snap().song_index_by_id[id] as usize].release_date.clone()
+                bundle_snapshot().songs[bundle_snapshot().song_index_by_id[id] as usize].release_date.clone()
             };
             assert_matches_up_to_ties(
                 &format!("songs of {unit_id}"),
@@ -631,7 +613,7 @@ mod tests {
 
     #[test]
     fn performed_unit_ids_match_sql() {
-        let db = conn();
+        let db = bundle_conn();
         // ユニット持ち曲が 2 人以上で披露されたイベント = 完全一致が出やすい母集団。
         let events = query_strings(
             &db,
@@ -649,7 +631,7 @@ mod tests {
         for event_id in &events {
             let expected = run_original_performed_unit_ids(&db, event_id);
             let actual: HashSet<String> =
-                performed_unit_ids(snap(), event_id).into_iter().collect();
+                performed_unit_ids(bundle_snapshot(), event_id).into_iter().collect();
             assert_eq!(actual, expected, "event {event_id}");
             if !expected.is_empty() {
                 nonempty += 1;
@@ -660,9 +642,9 @@ mod tests {
 
         // 戻り順の決定性: unit のスナップショット添字順。
         for event_id in &events {
-            let ids = performed_unit_ids(snap(), event_id);
+            let ids = performed_unit_ids(bundle_snapshot(), event_id);
             let indexes: Vec<u32> =
-                ids.iter().map(|id| snap().unit_index_by_id[id]).collect();
+                ids.iter().map(|id| bundle_snapshot().unit_index_by_id[id]).collect();
             let mut sorted = indexes.clone();
             sorted.sort_unstable();
             assert_eq!(indexes, sorted, "event {event_id} の戻り順");
@@ -673,32 +655,32 @@ mod tests {
 
     #[test]
     fn unknown_ids_are_harmless() {
-        assert!(unit_member_idol_ids(snap(), "存在しないunit").is_empty());
-        assert!(unit_song_ids(snap(), "存在しないunit").is_empty());
-        assert!(performed_unit_ids(snap(), "存在しないevent").is_empty());
-        assert_eq!(unit_by_id(snap(), ""), None);
+        assert!(unit_member_idol_ids(bundle_snapshot(), "存在しないunit").is_empty());
+        assert!(unit_song_ids(bundle_snapshot(), "存在しないunit").is_empty());
+        assert!(performed_unit_ids(bundle_snapshot(), "存在しないevent").is_empty());
+        assert_eq!(unit_by_id(bundle_snapshot(), ""), None);
     }
 
     #[test]
     fn unit_index_projections_are_consistent() {
-        let data = unit_index_data(snap());
+        let data = unit_index_data(bundle_snapshot());
         // member_links の unit_id / idol_id は必ず units / idols に実在する
         // (ローダが FK 孤児を読み飛ばす契約の再確認)。
         let unit_ids: HashSet<&str> = data.units.iter().map(|u| u.id.as_str()).collect();
         for link in &data.member_links {
             assert!(unit_ids.contains(link.unit_id.as_str()));
-            assert!(snap().idol_index_by_id.contains_key(&link.idol_id));
+            assert!(bundle_snapshot().idol_index_by_id.contains_key(&link.idol_id));
         }
         // song_unit_ids ⊆ units、かつ各ユニットの unit_song_ids は非空。
         for uid in &data.song_unit_ids {
             assert!(unit_ids.contains(uid.as_str()));
-            assert!(!unit_song_ids(snap(), uid).is_empty());
+            assert!(!unit_song_ids(bundle_snapshot(), uid).is_empty());
         }
         // unitsWithSongs 由来の分割 (曲あり/なし) が Phase 2 の
         // unit_ids_with_songs と同じ答えになる (二重実装の等価性)。
         let all_ids: Vec<String> = data.units.iter().map(|u| u.id.clone()).collect();
         let via_phase2 =
-            crate::domain::idol_song_queries::unit_ids_with_songs(snap(), &all_ids);
+            crate::domain::idol_song_queries::unit_ids_with_songs(bundle_snapshot(), &all_ids);
         let expected: HashSet<String> = data.song_unit_ids.iter().cloned().collect();
         let actual: HashSet<String> = via_phase2.into_iter().collect();
         assert_eq!(actual, expected);

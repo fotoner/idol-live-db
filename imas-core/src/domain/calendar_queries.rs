@@ -454,28 +454,8 @@ fn collect_tickets(snap: &Snapshot, start_day: &str, end_day: &str, out: &mut Ve
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::outbound::sqlite_loader::load_snapshot;
-    use rusqlite::{Connection, OpenFlags};
+    use crate::test_support::{bundle_conn, bundle_snapshot};
     use std::collections::HashSet;
-    use std::sync::OnceLock;
-
-    fn db_path() -> String {
-        format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"))
-    }
-
-    /// スナップショットは全テストで共有 (不変なので安全・ロードを 1 回にする)。
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| load_snapshot(&db_path()).expect("bundle DB はロードできる"))
-    }
-
-    fn conn() -> Connection {
-        Connection::open_with_flags(
-            db_path(),
-            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
-        )
-        .expect("bundle DB を開ける")
-    }
 
     /// ORDER BY キーが同値の区間を集合として比較する等価判定 (song_list_queries の前例と同じ)。
     /// SQLite のソータは安定でなく同値行の並びは未規定のため、キー列の一致 + 同値区間の
@@ -508,7 +488,7 @@ mod tests {
 
     /// iOS calendarShowsQuery の SQL をそのまま実行し、射影列を行文字列にして返す。
     fn run_original_shows_sql(start: &str, end: &str) -> Vec<((String, i64), String)> {
-        let c = conn();
+        let c = bundle_conn();
         let mut stmt = c
             .prepare(
                 "SELECT s.id, s.event_id, s.name, s.date, s.venue, s.venue_city,
@@ -586,7 +566,7 @@ mod tests {
     }
 
     fn assert_shows_match(start: &str, end: &str, expect_nonempty: bool) {
-        let entries = calendar_entries(snap(), start, end);
+        let entries = calendar_entries(bundle_snapshot(), start, end);
         let actual = show_rows(&entries);
         let expected = run_original_shows_sql(start, end);
         if expect_nonempty {
@@ -611,7 +591,7 @@ mod tests {
         // 最古公演 (2004-12-27) を境界に含む / データ以前は空
         assert_shows_match("2004-12-01", "2004-12-27", true);
         assert_shows_match("1990-01-01", "2003-12-31", false);
-        let entries = calendar_entries(snap(), "1990-01-01", "2003-12-31");
+        let entries = calendar_entries(bundle_snapshot(), "1990-01-01", "2003-12-31");
         assert!(show_rows(&entries).is_empty());
     }
 
@@ -623,7 +603,7 @@ mod tests {
     /// 元 SQL: release_date 範囲 + 原曲のみ + ORDER BY release_date, title_kana。
     /// 日付グループ (エントリ単位) に畳んで返す。
     fn run_original_releases_sql(start: &str, end: &str) -> Vec<ReleaseGroup> {
-        let c = conn();
+        let c = bundle_conn();
         let mut stmt = c
             .prepare(
                 "SELECT release_date, title_kana, id FROM songs
@@ -647,7 +627,7 @@ mod tests {
     }
 
     fn assert_releases_match(start: &str, end: &str, expect_nonempty: bool) {
-        let entries = calendar_entries(snap(), start, end);
+        let entries = calendar_entries(bundle_snapshot(), start, end);
         let actual: Vec<(String, Vec<String>)> = entries
             .iter()
             .filter_map(|e| match e {
@@ -668,7 +648,7 @@ mod tests {
             let a_rows: Vec<(Option<String>, String)> = a_ids
                 .iter()
                 .map(|id| {
-                    let song = &snap().songs[snap().song_index_by_id[id] as usize];
+                    let song = &bundle_snapshot().songs[bundle_snapshot().song_index_by_id[id] as usize];
                     (song.title_kana.clone(), id.clone())
                 })
                 .collect();
@@ -699,7 +679,7 @@ mod tests {
 
     /// iOS calendarTicketsQuery の SQL + Swift 分岐をテスト側で写経した期待値。
     fn run_original_tickets_logic(start: &str, end: &str) -> Vec<CalendarEntryRecord> {
-        let c = conn();
+        let c = bundle_conn();
         let mut stmt = c
             .prepare(
                 "SELECT e.id, e.name, e.ticket_open_date, e.ticket_deadline,
@@ -778,7 +758,7 @@ mod tests {
     }
 
     fn assert_tickets_match(start: &str, end: &str, expect_nonempty: bool) {
-        let entries = calendar_entries(snap(), start, end);
+        let entries = calendar_entries(bundle_snapshot(), start, end);
         let actual: HashSet<CalendarEntryRecord> = entries
             .iter()
             .filter(|e| {
@@ -818,7 +798,7 @@ mod tests {
     fn ticket_columns_are_all_strict_days_in_bundle() {
         // 「自由記述を弾く」分岐が Bundle では発火しないこと (= 検証が全通し) の確認。
         // 自由記述が入った時の挙動は is_strict_day 側の単体テストで固定する。
-        let c = conn();
+        let c = bundle_conn();
         for col in ["ticket_open_date", "ticket_deadline", "ticket_lottery_date"] {
             let mut stmt = c
                 .prepare(&format!("SELECT {col} FROM events WHERE {col} IS NOT NULL"))
@@ -835,7 +815,7 @@ mod tests {
     /// 「MM-DD が [a, b] に入る行」が出現し、出現日は Y-MM-DD になる。
     /// (2/29 の繰り越しが絡まないレンジでのみ成立 — 各呼び出し側で保証する。)
     fn birthday_oracle_same_year(table: &str, year: &str, md_lo: &str, md_hi: &str) -> HashSet<(String, String)> {
-        let c = conn();
+        let c = bundle_conn();
         let mut stmt = c
             .prepare(&format!(
                 "SELECT id, substr(birthday, 3) FROM {table}
@@ -879,7 +859,7 @@ mod tests {
 
     #[test]
     fn birthdays_match_sql_within_single_year_range() {
-        let entries = calendar_entries(snap(), "2025-04-06", "2025-05-17");
+        let entries = calendar_entries(bundle_snapshot(), "2025-04-06", "2025-05-17");
         let expected = birthday_oracle_same_year("idols", "2025", "04-06", "05-17");
         assert!(!expected.is_empty());
         assert_eq!(birthday_entries(&entries), expected);
@@ -892,7 +872,7 @@ mod tests {
     #[test]
     fn birthdays_match_sql_across_year_boundary() {
         // 1 月の月グリッド相当: 前年 12 月末〜当年 2 月頭。前年分は年 2025、当年分は 2026 に展開される。
-        let entries = calendar_entries(snap(), "2025-12-28", "2026-02-07");
+        let entries = calendar_entries(bundle_snapshot(), "2025-12-28", "2026-02-07");
         let mut expected = birthday_oracle_same_year("idols", "2025", "12-28", "12-31");
         expected.extend(birthday_oracle_same_year("idols", "2026", "01-01", "02-07"));
         assert!(!expected.is_empty());
@@ -907,7 +887,7 @@ mod tests {
         // 通年レンジでは誕生日持ち全員が 1 回ずつ出現する (2/29 も 3/1 繰り越しで年内に収まる)。
         // '--' 前置きの無い不正形式 (実データに 1 件: '07-26') は Swift の hasPrefix ガードと
         // 同じく出現しないので、オラクル側も GLOB で除外する。
-        let c = conn();
+        let c = bundle_conn();
         let idol_count: usize = c
             .query_row("SELECT COUNT(*) FROM idols WHERE birthday GLOB '--*'", [], |r| {
                 r.get::<_, i64>(0)
@@ -918,7 +898,7 @@ mod tests {
                 r.get::<_, i64>(0)
             })
             .unwrap() as usize;
-        let entries = calendar_entries(snap(), "2026-01-01", "2026-12-31");
+        let entries = calendar_entries(bundle_snapshot(), "2026-01-01", "2026-12-31");
         let birthdays = birthday_entries(&entries);
         assert_eq!(birthdays.len(), idol_count);
         assert_eq!(staff_birthday_entries(&entries).len(), staff_count);
@@ -963,7 +943,7 @@ mod tests {
     /// substr ベースの独立オラクル: 同一年内レンジなら「MM-DD がレンジ内 かつ 起点年 <= Y」。
     /// (起点年以降ガード `recurring >= ann.date` は、月日が同じなので年比較に等しい。)
     fn anniversary_oracle_same_year(year: &str, md_lo: &str, md_hi: &str) -> HashSet<(String, String)> {
-        let c = conn();
+        let c = bundle_conn();
         let mut stmt = c
             .prepare(
                 "SELECT id, substr(date, 6) FROM anniversaries
@@ -996,13 +976,13 @@ mod tests {
     #[test]
     fn anniversaries_match_sql_over_full_year() {
         // オラクルの前提: 2/29 起点の記念日が無い (あると繰り越しが絡み substr では表せない)
-        let c = conn();
+        let c = bundle_conn();
         let leap: i64 = c
             .query_row("SELECT COUNT(*) FROM anniversaries WHERE substr(date, 6) = '02-29'", [], |r| r.get(0))
             .unwrap();
         assert_eq!(leap, 0, "2/29 起点が現れたらこのオラクルを見直すこと");
 
-        let entries = calendar_entries(snap(), "2026-01-01", "2026-12-31");
+        let entries = calendar_entries(bundle_snapshot(), "2026-01-01", "2026-12-31");
         let actual = anniversary_entries(&entries);
         let expected = anniversary_oracle_same_year("2026", "01-01", "12-31");
         assert!(!expected.is_empty());
@@ -1011,7 +991,7 @@ mod tests {
         let origins: Vec<String> = actual
             .iter()
             .map(|(id, _)| {
-                snap()
+                bundle_snapshot()
                     .anniversaries
                     .iter()
                     .find(|a| &a.id == id)
@@ -1025,7 +1005,7 @@ mod tests {
 
     #[test]
     fn anniversaries_match_sql_over_one_month() {
-        let entries = calendar_entries(snap(), "2026-07-01", "2026-07-31");
+        let entries = calendar_entries(bundle_snapshot(), "2026-07-01", "2026-07-31");
         let expected = anniversary_oracle_same_year("2026", "07-01", "07-31");
         assert!(!expected.is_empty());
         assert_eq!(
@@ -1037,11 +1017,11 @@ mod tests {
     #[test]
     fn anniversaries_before_origin_year_are_hidden() {
         // 2006 年のレンジには起点 2006 年以前の記念日しか出ない (0 周年未満は非表示)
-        let entries = calendar_entries(snap(), "2006-01-01", "2006-12-31");
+        let entries = calendar_entries(bundle_snapshot(), "2006-01-01", "2006-12-31");
         let expected = anniversary_oracle_same_year("2006", "01-01", "12-31");
         let actual = anniversary_entries(&entries);
         assert_eq!(actual.iter().cloned().collect::<HashSet<_>>(), expected);
-        let full: i64 = conn()
+        let full: i64 = bundle_conn()
             .query_row("SELECT COUNT(*) FROM anniversaries", [], |r| r.get(0))
             .unwrap();
         assert!(
@@ -1052,7 +1032,7 @@ mod tests {
 
     #[test]
     fn anniversaries_match_sql_across_year_boundary() {
-        let entries = calendar_entries(snap(), "2026-12-27", "2027-02-06");
+        let entries = calendar_entries(bundle_snapshot(), "2026-12-27", "2027-02-06");
         let mut expected = anniversary_oracle_same_year("2026", "12-27", "12-31");
         expected.extend(anniversary_oracle_same_year("2027", "01-01", "02-06"));
         assert_eq!(
@@ -1073,7 +1053,7 @@ mod tests {
                 (occurs_on.clone(), RANK_STAFF_BIRTHDAY)
             }
             CalendarEntryRecord::Anniversary { anniversary_id, .. } => {
-                let origin = snap()
+                let origin = bundle_snapshot()
                     .anniversaries
                     .iter()
                     .find(|a| &a.id == anniversary_id)
@@ -1089,7 +1069,7 @@ mod tests {
 
     #[test]
     fn entries_are_sorted_like_swift_assemble() {
-        let entries = calendar_entries(snap(), "2026-04-01", "2026-05-31");
+        let entries = calendar_entries(bundle_snapshot(), "2026-04-01", "2026-05-31");
         // 全カテゴリが混ざる busy レンジであること (テストの実効性の担保)
         assert!(entries.iter().any(|e| matches!(e, CalendarEntryRecord::Show { .. })));
         assert!(entries.iter().any(|e| matches!(e, CalendarEntryRecord::Birthday { .. })));
@@ -1116,7 +1096,7 @@ mod tests {
     #[test]
     fn inverted_range_yields_nothing() {
         // start > end は SQL なら空。二分探索の lo > hi で落ちないことの固定。
-        let entries = calendar_entries(snap(), "2026-05-10", "2026-05-01");
+        let entries = calendar_entries(bundle_snapshot(), "2026-05-10", "2026-05-01");
         assert!(entries
             .iter()
             .all(|e| matches!(e, CalendarEntryRecord::TicketPeriod { .. })),

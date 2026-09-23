@@ -1134,29 +1134,18 @@ fn stats(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::bundle_snapshot;
     use crate::domain::agent_tools::call_tool;
-    use crate::outbound::sqlite_loader::load_snapshot;
-    use std::sync::OnceLock;
-
-    fn db_path() -> String {
-        format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"))
-    }
-
-    /// スナップショットは全テストで共有 (不変なので安全・ロードを 1 回にする)。
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| load_snapshot(&db_path()).expect("bundle DB はロードできる"))
-    }
 
     const TODAY: &str = "2026-09-19";
 
     fn run(name: &str, arguments: Value) -> Value {
-        call_tool(snap(), name, &arguments, TODAY)
+        call_tool(bundle_snapshot(), name, &arguments, TODAY)
             .unwrap_or_else(|e| panic!("{name} が失敗した: {e}"))
     }
 
     fn err(name: &str, arguments: Value) -> ToolError {
-        call_tool(snap(), name, &arguments, TODAY).expect_err("エラーになるはず")
+        call_tool(bundle_snapshot(), name, &arguments, TODAY).expect_err("エラーになるはず")
     }
 
     fn rows<'a>(value: &'a Value, key: &str) -> &'a Vec<Value> {
@@ -1189,7 +1178,7 @@ mod tests {
     fn 全ツールが_call_で拾われる() {
         for tool in catalog() {
             assert!(
-                call(snap(), &tool.name, &json!({}), TODAY).is_some(),
+                call(bundle_snapshot(), &tool.name, &json!({}), TODAY).is_some(),
                 "{} が dispatch から漏れている",
                 tool.name
             );
@@ -1236,7 +1225,7 @@ mod tests {
         let out = run("list_idols", json!({ "constellation": "獅子座", "limit": 200 }));
         // 一覧は外部ゲストを含まないので「正本の結果に含まれる」ことを見る。
         let canonical: HashSet<String> =
-            idols_by_constellation(snap(), "獅子座").into_iter().map(|r| r.id).collect();
+            idols_by_constellation(bundle_snapshot(), "獅子座").into_iter().map(|r| r.id).collect();
         for idol in rows(&out, "idols") {
             assert!(canonical.contains(&text(idol, "id")), "正本に無い: {idol}");
         }
@@ -1426,7 +1415,7 @@ mod tests {
     fn 催しの種別で絞れる() {
         // 「AS の周年では」のような絞り込みの軸。語彙は実データの DISTINCT なので、
         // 分類がまだ入っていない DB でも「その値で絞ったらその値だけ返る」は成り立つ。
-        let snapshot = snap();
+        let snapshot = bundle_snapshot();
         let vocabulary = super::event_type_vocab(snapshot);
         for value in &vocabulary {
             let listed = run("list_events", json!({ "event_type": value, "limit": 200 }));
@@ -1537,7 +1526,7 @@ mod tests {
 
     #[test]
     fn 同じ公演どうしの比較は完全一致になる() {
-        let show_id = snap().shows_in_date_order.last().map(|&i| snap().shows[i as usize].id.clone()).unwrap();
+        let show_id = bundle_snapshot().shows_in_date_order.last().map(|&i| bundle_snapshot().shows[i as usize].id.clone()).unwrap();
         let out = run("setlist_diff", json!({ "show_id_a": show_id, "show_id_b": show_id }));
         assert!(rows(&out, "only_a").is_empty());
         assert!(rows(&out, "only_b").is_empty());
@@ -1570,9 +1559,9 @@ mod tests {
 
     /// イベント id からその配下の最初の公演 id を取る (テストの下ごしらえ)。
     fn tour_show(event_id: &str) -> String {
-        let index = snap().event_index_by_id[event_id];
-        let show = snap().shows_by_event[index as usize][0];
-        snap().shows[show as usize].id.clone()
+        let index = bundle_snapshot().event_index_by_id[event_id];
+        let show = bundle_snapshot().shows_by_event[index as usize][0];
+        bundle_snapshot().shows[show as usize].id.clone()
     }
 
     #[test]

@@ -1022,27 +1022,9 @@ mod performer_name_tests {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::{bundle_conn, bundle_path, bundle_snapshot};
     use crate::outbound::sqlite_loader::load_snapshot;
-    use rusqlite::{Connection, OpenFlags};
-    use std::sync::OnceLock;
-
-    fn db_path() -> String {
-        format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"))
-    }
-
-    /// スナップショットは全テストで共有 (不変なので安全・ロードを 1 回にする)。
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| load_snapshot(&db_path()).expect("bundle DB はロードできる"))
-    }
-
-    fn conn() -> Connection {
-        Connection::open_with_flags(
-            db_path(),
-            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
-        )
-        .expect("bundle DB を開ける")
-    }
+    use rusqlite::Connection;
 
     /// Swift `String.likeEscaped` の写経 (テスト側で元 SQL を組むのに使う)。
     fn like_escaped(s: &str) -> String {
@@ -1087,7 +1069,7 @@ mod tests {
 
     /// show id → (date, sort_order)。shows 系クエリの ORDER BY キー。
     fn show_key(id: &String) -> (String, i64) {
-        let s = &snap().shows[snap().show_index_by_id[id] as usize];
+        let s = &bundle_snapshot().shows[bundle_snapshot().show_index_by_id[id] as usize];
         (s.date.clone(), s.sort_order)
     }
 
@@ -1095,7 +1077,7 @@ mod tests {
 
     #[test]
     fn shows_by_event_matches_sql_for_all_events() {
-        let db = conn();
+        let db = bundle_conn();
         let mut checked_multi = 0;
         for event_id in all_event_ids(&db) {
             let expected = string_column(
@@ -1104,19 +1086,19 @@ mod tests {
                 &[&event_id],
             );
             let actual: Vec<String> =
-                shows_by_event(snap(), &event_id).into_iter().map(|s| s.id).collect();
+                shows_by_event(bundle_snapshot(), &event_id).into_iter().map(|s| s.id).collect();
             assert_matches_up_to_ties(&format!("event {event_id}"), &actual, &expected, show_key);
             if expected.len() >= 2 {
                 checked_multi += 1;
             }
         }
         assert!(checked_multi > 50, "複数公演イベントが十分ある前提 ({checked_multi})");
-        assert!(shows_by_event(snap(), "存在しないイベント").is_empty());
+        assert!(shows_by_event(bundle_snapshot(), "存在しないイベント").is_empty());
     }
 
     #[test]
     fn show_record_fields_match_sql() {
-        let db = conn();
+        let db = bundle_conn();
         let mut stmt = db
             .prepare(
                 "SELECT id, event_id, name, date, venue, venue_city, start_time, sort_order,
@@ -1125,7 +1107,7 @@ mod tests {
             )
             .unwrap();
         let mut checked = 0;
-        for s in snap().shows.iter().step_by(17) {
+        for s in bundle_snapshot().shows.iter().step_by(17) {
             let expected = stmt
                 .query_row([&s.id], |r| {
                     Ok(ShowRecord {
@@ -1148,21 +1130,21 @@ mod tests {
                     })
                 })
                 .unwrap();
-            let actual = show_record(snap(), &s.id).expect("スナップショットに居る show");
+            let actual = show_record(bundle_snapshot(), &s.id).expect("スナップショットに居る show");
             assert_eq!(actual, expected, "show {}", s.id);
             checked += 1;
         }
         assert!(checked > 50, "サンプル数 ({checked})");
-        assert!(show_record(snap(), "存在しない公演").is_none());
+        assert!(show_record(bundle_snapshot(), "存在しない公演").is_none());
     }
 
     #[test]
     fn latest_show_matches_sql() {
-        let db = conn();
+        let db = bundle_conn();
         let max_date: String =
             db.query_row("SELECT MAX(date) FROM shows", [], |r| r.get(0)).unwrap();
         let candidates = string_column(&db, "SELECT id FROM shows WHERE date = ?", &[&max_date]);
-        let actual = latest_show(snap()).expect("公演は 1 件以上ある");
+        let actual = latest_show(bundle_snapshot()).expect("公演は 1 件以上ある");
         assert_eq!(actual.date, max_date);
         // ORDER BY date DESC LIMIT 1 の同日タイは SQL 未規定 → 最大日の中の 1 件であること。
         assert!(candidates.contains(&actual.id), "{} は {max_date} の公演", actual.id);
@@ -1170,7 +1152,7 @@ mod tests {
 
     #[test]
     fn shows_at_venue_matches_sql() {
-        let db = conn();
+        let db = bundle_conn();
         // 公演数の多い venue_id 3 件 + 生ラベルのみ (venue_id 未付与) の会場 + 未知値。
         let mut targets = string_column(
             &db,
@@ -1192,19 +1174,19 @@ mod tests {
                 &[venue],
             );
             let actual: Vec<String> =
-                shows_at_venue(snap(), venue).into_iter().map(|s| s.id).collect();
+                shows_at_venue(bundle_snapshot(), venue).into_iter().map(|s| s.id).collect();
             assert!(!expected.is_empty(), "{venue} は公演を持つ前提");
             // SQL の ORDER BY は date のみ → 同日の並びは date キーで区間比較。
             assert_matches_up_to_ties(&format!("venue {venue}"), &actual, &expected, |id| {
                 show_key(id).0
             });
         }
-        assert!(shows_at_venue(snap(), "存在しない会場xyz").is_empty());
+        assert!(shows_at_venue(bundle_snapshot(), "存在しない会場xyz").is_empty());
     }
 
     #[test]
     fn shows_on_date_matches_sql() {
-        let db = conn();
+        let db = bundle_conn();
         // 同日複数公演の日 3 件 (sort_order の並びが効くケース) + 未知日。
         let dates = string_column(
             &db,
@@ -1220,18 +1202,18 @@ mod tests {
                 &[date],
             );
             let actual: Vec<String> =
-                shows_on_date(snap(), date).into_iter().map(|s| s.id).collect();
+                shows_on_date(bundle_snapshot(), date).into_iter().map(|s| s.id).collect();
             assert!(expected.len() >= 2);
             assert_matches_up_to_ties(&format!("date {date}"), &actual, &expected, |id| {
                 show_key(id).1
             });
         }
-        assert!(shows_on_date(snap(), "1900-01-01").is_empty());
+        assert!(shows_on_date(bundle_snapshot(), "1900-01-01").is_empty());
     }
 
     #[test]
     fn all_shows_with_event_name_matches_sql() {
-        let db = conn();
+        let db = bundle_conn();
         let mut stmt = db
             .prepare(
                 "SELECT s.id, s.event_id, s.name, s.date, s.venue, e.name AS event_name
@@ -1256,19 +1238,19 @@ mod tests {
         };
         // 全件 (LIMIT が届かない大きさ) はレコード内容ごと区間照合。
         let expected = fetch(1_000_000);
-        let actual = all_shows_with_event_name(snap(), 1_000_000);
+        let actual = all_shows_with_event_name(bundle_snapshot(), 1_000_000);
         assert!(expected.len() > 100);
         assert_matches_up_to_ties("all_shows 全件", &actual, &expected, |r| r.date.clone());
         // 小さい LIMIT は同日途中で切れても日付列は必ず一致する。
         let expected_dates: Vec<String> = fetch(50).into_iter().map(|r| r.date).collect();
         let actual_dates: Vec<String> =
-            all_shows_with_event_name(snap(), 50).into_iter().map(|r| r.date).collect();
+            all_shows_with_event_name(bundle_snapshot(), 50).into_iter().map(|r| r.date).collect();
         assert_eq!(actual_dates, expected_dates);
     }
 
     #[test]
     fn search_shows_with_event_name_matches_sql() {
-        let db = conn();
+        let db = bundle_conn();
         // 大小混在 (LIKE の ASCII 大小無視)・日本語・likeEscaped が効く '%' 入り・ゼロ件。
         let queries = ["DAY", "day", "ミリオン", "10th", "100%", "存在しないクエリzz"];
         for query in queries {
@@ -1280,7 +1262,7 @@ mod tests {
                  ORDER BY s.date DESC LIMIT 1000000",
                 &[&pattern],
             );
-            let actual: Vec<String> = search_shows_with_event_name(snap(), query, 1_000_000)
+            let actual: Vec<String> = search_shows_with_event_name(bundle_snapshot(), query, 1_000_000)
                 .into_iter()
                 .map(|r| r.id)
                 .collect();
@@ -1289,8 +1271,8 @@ mod tests {
             });
         }
         // 大小無視が実データで退化していないこと (DAY と day は同一ヒット)。
-        let upper = search_shows_with_event_name(snap(), "DAY", 1_000_000);
-        let lower = search_shows_with_event_name(snap(), "day", 1_000_000);
+        let upper = search_shows_with_event_name(bundle_snapshot(), "DAY", 1_000_000);
+        let lower = search_shows_with_event_name(bundle_snapshot(), "day", 1_000_000);
         assert!(!upper.is_empty());
         assert_eq!(upper, lower);
     }
@@ -1299,7 +1281,7 @@ mod tests {
 
     #[test]
     fn setlist_matches_sql() {
-        let db = conn();
+        let db = bundle_conn();
         let mut stmt = db
             .prepare(
                 "SELECT si.id, si.position, si.section, si.notes, si.unit_name,
@@ -1309,7 +1291,7 @@ mod tests {
             )
             .unwrap();
         let mut checked = 0;
-        for show in snap().shows.iter().step_by(11) {
+        for show in bundle_snapshot().shows.iter().step_by(11) {
             let expected: Vec<SetlistEntryRecord> = stmt
                 .query_map([&show.id], |r| {
                     Ok(SetlistEntryRecord {
@@ -1329,7 +1311,7 @@ mod tests {
                 .unwrap()
                 .collect::<Result<_, _>>()
                 .unwrap();
-            let actual = setlist(snap(), &show.id);
+            let actual = setlist(bundle_snapshot(), &show.id);
             assert_matches_up_to_ties(&format!("setlist {}", show.id), &actual, &expected, |r| {
                 r.position
             });
@@ -1338,12 +1320,12 @@ mod tests {
             }
         }
         assert!(checked > 30, "セトリつき公演のサンプル数 ({checked})");
-        assert!(setlist(snap(), "存在しない公演").is_empty());
+        assert!(setlist(bundle_snapshot(), "存在しない公演").is_empty());
     }
 
     #[test]
     fn setlist_performers_match_sql() {
-        let db = conn();
+        let db = bundle_conn();
         // 行の並びは SQL 未規定なので item ごとの集合で照合する。
         type PerformerSet = HashSet<(String, String, Option<String>, String)>;
         let mut stmt = db
@@ -1361,7 +1343,7 @@ mod tests {
             )
             .unwrap();
         let mut checked = 0;
-        for show in snap().shows.iter().step_by(13) {
+        for show in bundle_snapshot().shows.iter().step_by(13) {
             let mut expected: HashMap<String, PerformerSet> = HashMap::new();
             let rows = stmt
                 .query_map([&show.id], |r| {
@@ -1379,7 +1361,7 @@ mod tests {
                 expected.entry(item_id).or_default().insert((idol_id, cast_name, color, idol_name));
             }
             let actual: HashMap<String, PerformerSet> =
-                setlist_performers_by_item(snap(), &show.id)
+                setlist_performers_by_item(bundle_snapshot(), &show.id)
                     .into_iter()
                     .map(|(item_id, rows)| {
                         let set = rows
@@ -1399,10 +1381,10 @@ mod tests {
 
     #[test]
     fn show_cast_and_original_songs_match_sql() {
-        let db = conn();
+        let db = bundle_conn();
         let mut checked_cast = 0;
         let mut checked_songs = 0;
-        for show in snap().shows.iter().step_by(19) {
+        for show in bundle_snapshot().shows.iter().step_by(19) {
             // fetchShowIdolIds: Set 照合 (SQL は並び未規定)。
             let expected: HashSet<String> = string_column(
                 &db,
@@ -1411,7 +1393,7 @@ mod tests {
             )
             .into_iter()
             .collect();
-            let actual_ordered = show_cast_idol_ids(snap(), &show.id);
+            let actual_ordered = show_cast_idol_ids(bundle_snapshot(), &show.id);
             let actual: HashSet<String> = actual_ordered.iter().cloned().collect();
             assert_eq!(actual.len(), actual_ordered.len(), "cast は重複しない ({})", show.id);
             assert_eq!(actual, expected, "cast {}", show.id);
@@ -1430,7 +1412,7 @@ mod tests {
             .into_iter()
             .collect();
             let actual_songs: HashSet<String> =
-                original_song_ids_for_show_cast(snap(), &show.id).into_iter().collect();
+                original_song_ids_for_show_cast(bundle_snapshot(), &show.id).into_iter().collect();
             assert_eq!(actual_songs, expected_songs, "original songs {}", show.id);
             if !expected_songs.is_empty() {
                 checked_songs += 1;
@@ -1438,15 +1420,15 @@ mod tests {
         }
         assert!(checked_cast > 20, "キャストつき公演のサンプル数 ({checked_cast})");
         assert!(checked_songs > 20, "オリメン曲ありのサンプル数 ({checked_songs})");
-        assert!(show_cast_idol_ids(snap(), "存在しない公演").is_empty());
+        assert!(show_cast_idol_ids(bundle_snapshot(), "存在しない公演").is_empty());
     }
 
     #[test]
     fn original_artist_ids_map_matches_sql() {
-        let db = conn();
+        let db = bundle_conn();
         // original あり/なし混在の実在曲 + 未知 id。
         let mut song_ids: Vec<String> =
-            snap().songs.iter().step_by(7).map(|s| s.id.clone()).collect();
+            bundle_snapshot().songs.iter().step_by(7).map(|s| s.id.clone()).collect();
         song_ids.push("存在しない曲".to_string());
         let placeholders = vec!["?"; song_ids.len()].join(",");
         let sql = format!(
@@ -1466,7 +1448,7 @@ mod tests {
         }
         assert!(expected.len() > 100, "original つき曲が十分ある前提");
         let actual: HashMap<String, HashSet<String>> =
-            original_artist_ids_map(snap(), &song_ids)
+            original_artist_ids_map(bundle_snapshot(), &song_ids)
                 .into_iter()
                 .map(|(song_id, ids)| (song_id, ids.into_iter().collect()))
                 .collect();
@@ -1477,8 +1459,8 @@ mod tests {
 
     #[test]
     fn venue_directory_matches_sql() {
-        let db = conn();
-        let directory = venue_directory(snap());
+        let db = bundle_conn();
+        let directory = venue_directory(bundle_snapshot());
 
         let expected_venues = string_column(&db, "SELECT id FROM venues ORDER BY sort_order", &[]);
         let actual_venues: Vec<String> = directory.venues.iter().map(|v| v.id.clone()).collect();
@@ -1534,7 +1516,7 @@ mod tests {
 
     #[test]
     fn event_ids_at_venue_matches_sql() {
-        let db = conn();
+        let db = bundle_conn();
         let venue_ids = string_column(
             &db,
             "SELECT venue_id FROM shows WHERE venue_id IS NOT NULL
@@ -1550,18 +1532,18 @@ mod tests {
             )
             .into_iter()
             .collect();
-            let ordered = event_ids_at_venue(snap(), venue_id);
+            let ordered = event_ids_at_venue(bundle_snapshot(), venue_id);
             let actual: HashSet<String> = ordered.iter().cloned().collect();
             assert_eq!(actual.len(), ordered.len(), "重複なし ({venue_id})");
             assert!(!expected.is_empty());
             assert_eq!(actual, expected, "venue {venue_id}");
         }
-        assert!(event_ids_at_venue(snap(), "存在しない会場id").is_empty());
+        assert!(event_ids_at_venue(bundle_snapshot(), "存在しない会場id").is_empty());
     }
 
     #[test]
     fn venues_matching_matches_sql() {
-        let db = conn();
+        let db = bundle_conn();
         let event_ids = all_event_ids(&db);
         for query in ["ホール", "ドーム", "Zepp", "zepp", "アリーナ"] {
             let placeholders = vec!["?"; event_ids.len()].join(",");
@@ -1584,20 +1566,20 @@ mod tests {
                 .unwrap()
                 .collect::<Result<_, _>>()
                 .unwrap();
-            let actual = venues_matching(snap(), query, &event_ids);
+            let actual = venues_matching(bundle_snapshot(), query, &event_ids);
             assert!(!expected.is_empty(), "{query} は 1 件以上ヒットする前提");
             assert_eq!(actual, expected, "query {query}");
         }
         // ガード節: 空クエリ・空 id 集合は空辞書。
-        assert!(venues_matching(snap(), "", &event_ids).is_empty());
-        assert!(venues_matching(snap(), "ホール", &[]).is_empty());
+        assert!(venues_matching(bundle_snapshot(), "", &event_ids).is_empty());
+        assert!(venues_matching(bundle_snapshot(), "ホール", &[]).is_empty());
     }
 
     // ---- イベント詳細 ----
 
     #[test]
     fn event_record_matches_sql() {
-        let db = conn();
+        let db = bundle_conn();
         let mut stmt = db
             .prepare(
                 "SELECT id, brand_id, name, event_type, is_streaming, is_solo, kind,
@@ -1607,7 +1589,7 @@ mod tests {
             )
             .unwrap();
         let mut checked = 0;
-        for event in snap().events.iter().step_by(5) {
+        for event in bundle_snapshot().events.iter().step_by(5) {
             let expected = stmt
                 .query_row([&event.id], |r| {
                     Ok(EventDetailRecord {
@@ -1640,17 +1622,17 @@ mod tests {
                     })
                 })
                 .unwrap();
-            let actual = event_record(snap(), &event.id).expect("スナップショットに居る event");
+            let actual = event_record(bundle_snapshot(), &event.id).expect("スナップショットに居る event");
             assert_eq!(actual, expected, "event {}", event.id);
             checked += 1;
         }
         assert!(checked > 50, "サンプル数 ({checked})");
-        assert!(event_record(snap(), "存在しないイベント").is_none());
+        assert!(event_record(bundle_snapshot(), "存在しないイベント").is_none());
     }
 
     #[test]
     fn event_stats_match_sql_for_all_events() {
-        let db = conn();
+        let db = bundle_conn();
         let mut stmt = db
             .prepare(
                 "WITH event_shows AS (SELECT id FROM shows WHERE event_id = ?)
@@ -1678,7 +1660,7 @@ mod tests {
                     })
                 })
                 .unwrap();
-            let actual = event_stats(snap(), &event_id);
+            let actual = event_stats(bundle_snapshot(), &event_id);
             assert_eq!(actual, expected, "event {event_id}");
             if expected.total_songs > 0 {
                 nonzero += 1;
@@ -1686,18 +1668,18 @@ mod tests {
         }
         assert!(nonzero > 100, "セトリつきイベントが十分ある前提 ({nonzero})");
         // 未知 id は SQL でも全ゼロになる (CTE が空) — 同じ値を返すこと。
-        assert_eq!(event_stats(snap(), "存在しないイベント"), EventStatsRecord::default());
+        assert_eq!(event_stats(bundle_snapshot(), "存在しないイベント"), EventStatsRecord::default());
     }
 
     /// fetchEventAttendanceQuery の写経を丸ごと実行し、全イベントで照合する。
     #[test]
     fn event_attendance_matches_sql_for_all_events() {
-        let db = conn();
+        let db = bundle_conn();
         let mut covered_cross = 0; // >= 3 ブランド (実出演者母集団) の分岐
         let mut covered_debut = 0; // debut_date 除外の分岐
         let mut covered_some = 0;
         for event_id in all_event_ids(&db) {
-            let actual = event_attendance(snap(), &event_id);
+            let actual = event_attendance(bundle_snapshot(), &event_id);
 
             // 1) primary brand と joint_brand_ids
             let row: Option<(Option<String>, Option<String>)> = db
@@ -1869,7 +1851,7 @@ mod tests {
         assert!(covered_some > 100, "出席表ありイベント数 ({covered_some})");
         assert!(covered_cross >= 1, ">=3 ブランドの越境フェス分岐を踏む前提");
         assert!(covered_debut >= 1, "debut_date 除外が効くイベントを踏む前提");
-        assert!(event_attendance(snap(), "存在しないイベント").is_none());
+        assert!(event_attendance(bundle_snapshot(), "存在しないイベント").is_none());
     }
 
     // ---- リリース (event_releases) ----
@@ -1877,8 +1859,8 @@ mod tests {
     #[test]
     fn event_releases_empty_on_bundle() {
         // Bundle には event_releases 表が無い → 全イベントで空 (動的検出の既定値側)。
-        for event in &snap().events {
-            assert!(event_releases(snap(), &event.id).is_empty());
+        for event in &bundle_snapshot().events {
+            assert!(event_releases(bundle_snapshot(), &event.id).is_empty());
         }
     }
 
@@ -1892,11 +1874,11 @@ mod tests {
         ));
         let path_str = path.to_str().unwrap().to_string();
         let _ = std::fs::remove_file(&path);
-        std::fs::copy(db_path(), &path).expect("bundle DB をコピーできる");
+        std::fs::copy(bundle_path(), &path).expect("bundle DB をコピーできる");
 
         // 実在の event / show に円盤をぶら下げる (NULL release_date・孤児 show/event 込み)。
         let (event_a, event_b, show_a) = {
-            let db = conn();
+            let db = bundle_conn();
             let event_a: String = db
                 .query_row(
                     "SELECT event_id FROM shows GROUP BY event_id
@@ -2015,7 +1997,7 @@ mod tests {
         use crate::domain::event_grouping::group_events_by_year;
         use crate::domain::jst_day::jst_is_today_or_later;
 
-        let snap = snap();
+        let snap = bundle_snapshot();
         // 実データから公演のある日を 1 つ選び、その日を「今日」とみなす。
         let today = snap.shows[snap.shows_in_date_order[snap.shows_in_date_order.len() / 2] as usize]
             .date
@@ -2050,7 +2032,7 @@ mod tests {
 
     #[test]
     fn recent_shows_honours_the_limit_and_an_empty_past() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         assert_eq!(recent_shows(snap, "2026-09-04", 3).len(), 3);
         // すべての公演より前の日付なら「最近の公演」は無い。
         assert!(recent_shows(snap, "1900-01-01", 10).is_empty());

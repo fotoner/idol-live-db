@@ -714,27 +714,8 @@ pub fn collected_count_map(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::outbound::sqlite_loader::load_snapshot;
-    use rusqlite::{Connection, OpenFlags};
-    use std::sync::OnceLock;
-
-    fn db_path() -> String {
-        format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"))
-    }
-
-    /// スナップショットは全テストで共有 (不変なので安全・ロードを 1 回にする)。
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| load_snapshot(&db_path()).expect("bundle DB はロードできる"))
-    }
-
-    fn conn() -> Connection {
-        Connection::open_with_flags(
-            db_path(),
-            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
-        )
-        .expect("bundle DB を開ける")
-    }
+    use crate::test_support::{bundle_conn, bundle_path, bundle_snapshot};
+    use rusqlite::Connection;
 
     /// Swift `String.likeEscaped` の写経 (テスト側で元 SQL を組むのに使う)。
     fn like_escaped(s: &str) -> String {
@@ -742,7 +723,7 @@ mod tests {
     }
 
     fn ids_of(indexes: &[u32]) -> Vec<String> {
-        indexes.iter().map(|&i| snap().songs[i as usize].id.clone()).collect()
+        indexes.iter().map(|&i| bundle_snapshot().songs[i as usize].id.clone()).collect()
     }
 
     /// ORDER BY キーが同値の区間を集合として比較する等価判定。
@@ -772,13 +753,13 @@ mod tests {
 
     /// (title_kana, title) — titleKana ソートと ids_ordered の ORDER BY キー。
     fn kana_key(id: &String) -> (Option<String>, String) {
-        let song = &snap().songs[snap().song_index_by_id[id] as usize];
+        let song = &bundle_snapshot().songs[bundle_snapshot().song_index_by_id[id] as usize];
         (song.title_kana.clone(), song.title.clone())
     }
 
     /// (release_date, title_kana) — releaseDate ソートと criterion 系の ORDER BY キー。
     fn release_key(id: &String) -> (Option<String>, Option<String>) {
-        let song = &snap().songs[snap().song_index_by_id[id] as usize];
+        let song = &bundle_snapshot().songs[bundle_snapshot().song_index_by_id[id] as usize];
         (song.release_date.clone(), song.title_kana.clone())
     }
 
@@ -890,7 +871,7 @@ mod tests {
             _ => {}
         }
 
-        let db = conn();
+        let db = bundle_conn();
         let mut stmt = db.prepare(&sql).expect("元 SQL は妥当");
         let rows = stmt
             .query_map(rusqlite::params_from_iter(args.iter()), |r| r.get::<_, String>("id"))
@@ -975,7 +956,7 @@ mod tests {
     fn songwriter_filter_matches_the_creator_reading() {
         let by_name = |q: &str| {
             let filter = SongListFilter { songwriter: Some(q.into()), ..browse_filter() };
-            song_list_indexes(snap(), &filter, SongListSort::TitleKana, None, &[], &[]).len()
+            song_list_indexes(bundle_snapshot(), &filter, SongListSort::TitleKana, None, &[], &[]).len()
         };
         let kanji = by_name("烏屋茶房");
         assert!(kanji > 0, "表記で引けない時点でこのテストは無意味");
@@ -993,7 +974,7 @@ mod tests {
     fn songwriter_filter_matches_through_aliases() {
         let by_name = |q: &str| {
             let filter = SongListFilter { songwriter: Some(q.into()), ..browse_filter() };
-            song_list_indexes(snap(), &filter, SongListSort::TitleKana, None, &[], &[]).len()
+            song_list_indexes(bundle_snapshot(), &filter, SongListSort::TitleKana, None, &[], &[]).len()
         };
         assert!(by_name("たきざわしゅんすけ") > 0);
     }
@@ -1005,7 +986,7 @@ mod tests {
         let filter = browse_filter();
         for asc in [None, Some(true), Some(false)] {
             let expected = run_original_filter_sql(&filter, SongListSort::TitleKana, asc);
-            let actual = ids_of(&song_list_indexes(snap(), &filter, SongListSort::TitleKana, asc, &[], &[]));
+            let actual = ids_of(&song_list_indexes(bundle_snapshot(), &filter, SongListSort::TitleKana, asc, &[], &[]));
             assert!(!expected.is_empty());
             assert_matches_up_to_ties(&format!("titleKana asc={asc:?}"), &actual, &expected, kana_key);
         }
@@ -1023,7 +1004,7 @@ mod tests {
         };
         for asc in [Some(false), Some(true)] {
             let expected = run_original_filter_sql(&filter, SongListSort::ReleaseDate, asc);
-            let actual = ids_of(&song_list_indexes(snap(), &filter, SongListSort::ReleaseDate, asc, &[], &[]));
+            let actual = ids_of(&song_list_indexes(bundle_snapshot(), &filter, SongListSort::ReleaseDate, asc, &[], &[]));
             assert!(!expected.is_empty());
             assert_matches_up_to_ties(&format!("releaseDate asc={asc:?}"), &actual, &expected, release_key);
         }
@@ -1042,7 +1023,7 @@ mod tests {
         ];
         for (n, filter) in cases.iter().enumerate() {
             let expected = run_original_filter_sql(filter, SongListSort::TitleKana, None);
-            let actual = ids_of(&song_list_indexes(snap(), filter, SongListSort::TitleKana, None, &[], &[]));
+            let actual = ids_of(&song_list_indexes(bundle_snapshot(), filter, SongListSort::TitleKana, None, &[], &[]));
             assert!(!expected.is_empty(), "case {n} は 1 件以上ヒットする前提");
             assert_matches_up_to_ties(&format!("case {n}"), &actual, &expected, kana_key);
         }
@@ -1067,7 +1048,7 @@ mod tests {
         };
         for (n, filter) in [&by_ids, &by_name, &both].into_iter().enumerate() {
             let expected = run_original_filter_sql(filter, SongListSort::TitleKana, None);
-            let actual = ids_of(&song_list_indexes(snap(), filter, SongListSort::TitleKana, None, &[], &[]));
+            let actual = ids_of(&song_list_indexes(bundle_snapshot(), filter, SongListSort::TitleKana, None, &[], &[]));
             assert!(!expected.is_empty(), "case {n} は 1 件以上ヒットする前提");
             assert_matches_up_to_ties(&format!("case {n}"), &actual, &expected, kana_key);
         }
@@ -1075,7 +1056,7 @@ mod tests {
 
     #[test]
     fn criterion_lists_match_sql() {
-        let db = conn();
+        let db = bundle_conn();
         let run = |sql: &str, params: &[&str]| -> Vec<String> {
             let mut stmt = db.prepare(sql).unwrap();
             stmt.query_map(rusqlite::params_from_iter(params.iter()), |r| r.get::<_, String>(0))
@@ -1095,7 +1076,7 @@ mod tests {
 
         let expected = run("SELECT id FROM songs WHERE cd_series = ? ORDER BY release_date, title_kana", &[&cd]);
         assert!(!expected.is_empty());
-        assert_matches_up_to_ties("cd_series", &ids_of(&songs_by_cd_series(snap(), &cd)), &expected, release_key);
+        assert_matches_up_to_ties("cd_series", &ids_of(&songs_by_cd_series(bundle_snapshot(), &cd)), &expected, release_key);
 
         let expected = run(
             "SELECT id FROM songs WHERE series_group = ? ORDER BY release_date, title_kana",
@@ -1104,7 +1085,7 @@ mod tests {
         assert!(!expected.is_empty());
         assert_matches_up_to_ties(
             "series_group",
-            &ids_of(&songs_by_series_group(snap(), "LIVE THE@TER HARMONY")),
+            &ids_of(&songs_by_series_group(bundle_snapshot(), "LIVE THE@TER HARMONY")),
             &expected,
             release_key,
         );
@@ -1113,7 +1094,7 @@ mod tests {
         assert!(!expected.is_empty());
         assert_matches_up_to_ties(
             "release_year",
-            &ids_of(&songs_by_release_year(snap(), "2015")),
+            &ids_of(&songs_by_release_year(bundle_snapshot(), "2015")),
             &expected,
             release_key,
         );
@@ -1128,12 +1109,12 @@ mod tests {
             &ids.iter().map(String::as_str).collect::<Vec<_>>(),
         );
         assert_eq!(expected.len(), 8);
-        assert_matches_up_to_ties("ids_ordered", &ids_of(&songs_by_ids_ordered(snap(), &ids)), &expected, kana_key);
+        assert_matches_up_to_ties("ids_ordered", &ids_of(&songs_by_ids_ordered(bundle_snapshot(), &ids)), &expected, kana_key);
     }
 
     #[test]
     fn performance_count_map_matches_sql() {
-        let db = conn();
+        let db = bundle_conn();
         let mut stmt = db
             .prepare("SELECT song_id, COUNT(*) FROM setlist_items GROUP BY song_id")
             .unwrap();
@@ -1143,14 +1124,14 @@ mod tests {
             .collect::<Result<_, _>>()
             .unwrap();
         assert!(expected.len() > 500);
-        assert_eq!(performance_count_map(snap()), expected);
+        assert_eq!(performance_count_map(bundle_snapshot()), expected);
     }
 
     /// user_marks は bundle DB に無いので、メモリ DB に作って master を ATTACH し、
     /// 元 SQL (未修飾テーブル名が main → attached の順で解決される) をそのまま流す。
     fn marks_db() -> Connection {
         let db = Connection::open_in_memory().unwrap();
-        db.execute("ATTACH DATABASE ?1 AS m", [db_path()]).unwrap();
+        db.execute("ATTACH DATABASE ?1 AS m", [bundle_path()]).unwrap();
         db.execute_batch(
             "CREATE TABLE user_marks (
                 id INTEGER PRIMARY KEY, entity_type TEXT, entity_id TEXT,
@@ -1261,7 +1242,7 @@ mod tests {
              WHERE entity_type='event' AND kind='attended' AND bool_value=1",
         );
         assert!(!expected.is_empty());
-        assert_eq!(collected_count_map(snap(), &show_ids, &event_ids, true), expected);
+        assert_eq!(collected_count_map(bundle_snapshot(), &show_ids, &event_ids, true), expected);
     }
 
     #[test]
@@ -1295,10 +1276,10 @@ mod tests {
              WHERE entity_type='event' AND kind='attended' AND bool_value=1",
         );
         assert!(!expected.is_empty());
-        let actual = collected_count_map(snap(), &show_ids, &event_ids, false);
+        let actual = collected_count_map(bundle_snapshot(), &show_ids, &event_ids, false);
         assert_eq!(actual, expected);
         // 配信参加や非リアルライブ公演も数える (バッジ側との差分が実際に出ていること)。
-        let badge = collected_count_map(snap(), &show_ids, &event_ids, true);
+        let badge = collected_count_map(bundle_snapshot(), &show_ids, &event_ids, true);
         assert!(actual.values().sum::<u32>() > badge.values().sum::<u32>());
     }
 
@@ -1322,19 +1303,19 @@ mod tests {
             "SELECT entity_id FROM user_marks
              WHERE entity_type='event' AND kind='attended' AND bool_value=1",
         );
-        let attended = collected_counts_by_song(snap(), &show_ids, &event_ids, false);
+        let attended = collected_counts_by_song(bundle_snapshot(), &show_ids, &event_ids, false);
 
         for sort in [SongListSort::PerformanceCount, SongListSort::CollectedCount, SongListSort::CollectedRate] {
-            let indexes = song_list_indexes(snap(), &filter, sort, None, &show_ids, &event_ids);
+            let indexes = song_list_indexes(bundle_snapshot(), &filter, sort, None, &show_ids, &event_ids);
             let actual_set: HashSet<String> = ids_of(&indexes).into_iter().collect();
             assert_eq!(actual_set, expected_set, "{sort:?}: 絞り込み結果の集合は SQL と一致");
 
             let key = |i: u32| -> f64 {
                 match sort {
-                    SongListSort::PerformanceCount => f64::from(snap().performance_counts[i as usize]),
+                    SongListSort::PerformanceCount => f64::from(bundle_snapshot().performance_counts[i as usize]),
                     SongListSort::CollectedCount => f64::from(attended[i as usize]),
                     SongListSort::CollectedRate => {
-                        let total = snap().performance_counts[i as usize];
+                        let total = bundle_snapshot().performance_counts[i as usize];
                         if total > 0 { f64::from(attended[i as usize]) / f64::from(total) } else { 0.0 }
                     }
                     _ => unreachable!(),
@@ -1347,15 +1328,15 @@ mod tests {
         }
 
         // 同数グループ内は 50 音 (決定性規約)。披露回数順の先頭グループで確認。
-        let indexes = song_list_indexes(snap(), &filter, SongListSort::PerformanceCount, None, &[], &[]);
-        let top = snap().performance_counts[indexes[0] as usize];
+        let indexes = song_list_indexes(bundle_snapshot(), &filter, SongListSort::PerformanceCount, None, &[], &[]);
+        let top = bundle_snapshot().performance_counts[indexes[0] as usize];
         let group: Vec<u32> = indexes
             .iter()
             .copied()
-            .take_while(|&i| snap().performance_counts[i as usize] == top)
+            .take_while(|&i| bundle_snapshot().performance_counts[i as usize] == top)
             .collect();
         for pair in group.windows(2) {
-            assert_ne!(kana_tiebreak(snap(), pair[0], pair[1]), Ordering::Greater);
+            assert_ne!(kana_tiebreak(bundle_snapshot(), pair[0], pair[1]), Ordering::Greater);
         }
     }
 
@@ -1385,15 +1366,15 @@ mod tests {
     #[test]
     fn empty_and_unknown_inputs_are_harmless() {
         // 参加マークが空なら回収数は全曲 0 (= マップは空)。
-        assert!(collected_count_map(snap(), &[], &[], true).is_empty());
+        assert!(collected_count_map(bundle_snapshot(), &[], &[], true).is_empty());
         // 未知 id だけなら同上。
         let unknown = ["謎のshow".to_string()];
         let unknown_ev = ["謎のevent".to_string()];
-        assert!(collected_count_map(snap(), &unknown, &unknown_ev, false).is_empty());
+        assert!(collected_count_map(bundle_snapshot(), &unknown, &unknown_ev, false).is_empty());
         // 未知 id しか無い ids_ordered は空。
-        assert!(songs_by_ids_ordered(snap(), &unknown).is_empty());
+        assert!(songs_by_ids_ordered(bundle_snapshot(), &unknown).is_empty());
         // 空フィルタ + include フラグ全開 = 全曲。
         let all = SongListFilter { include_remixes: true, include_other_brand: true, ..SongListFilter::default() };
-        assert_eq!(filter_song_indexes(snap(), &all).len(), snap().songs.len());
+        assert_eq!(filter_song_indexes(bundle_snapshot(), &all).len(), bundle_snapshot().songs.len());
     }
 }

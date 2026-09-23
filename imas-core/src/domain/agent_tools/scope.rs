@@ -184,26 +184,15 @@ pub const NARROWED_TO_ZERO_MESSAGE: &str = "この条件に当たる公演は無
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::OnceLock;
+    use crate::test_support::bundle_snapshot;
 
     const TODAY: &str = "2026-09-19";
     const ALL: [&str; 10] = SHOW_SCOPE_ARGS;
 
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| {
-            crate::outbound::sqlite_loader::load_snapshot(&format!(
-                "{}/../ImasLiveDB/Resources/master.sqlite",
-                env!("CARGO_MANIFEST_DIR")
-            ))
-            .expect("bundle DB はロードできる")
-        })
-    }
-
     #[test]
     fn 引数が条件型に詰まる() {
         let c = show_criteria(
-            snap(),
+            bundle_snapshot(),
             &json!({ "brand": "ml", "year": 2026, "cast_role": "lead", "max_cast": 16, "when": "past" }),
             TODAY,
             &ALL,
@@ -220,15 +209,15 @@ mod tests {
     #[test]
     fn 使えない軸は黙って無視せず突き返す() {
         let err =
-            show_criteria(snap(), &json!({ "cast_role": "lead" }), TODAY, &["brand"]).unwrap_err();
+            show_criteria(bundle_snapshot(), &json!({ "cast_role": "lead" }), TODAY, &["brand"]).unwrap_err();
         assert!(matches!(&err, ToolError::BadArgs(m) if m.contains("cast_role")), "{err}");
         // null は「渡していない」と同じ扱い (LLM が省略のつもりで null を書く)。
-        assert!(show_criteria(snap(), &json!({ "cast_role": null }), TODAY, &["brand"]).is_ok());
+        assert!(show_criteria(bundle_snapshot(), &json!({ "cast_role": null }), TODAY, &["brand"]).is_ok());
     }
 
     #[test]
     fn 語彙外と未知の_id_はそれぞれの形で返る() {
-        let s = snap();
+        let s = bundle_snapshot();
         assert!(matches!(
             show_criteria(s, &json!({ "brand": "cinderella" }), TODAY, &ALL),
             Err(ToolError::BadArgs(_))

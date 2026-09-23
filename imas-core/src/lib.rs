@@ -18,6 +18,10 @@ pub mod inbound;
 #[cfg(not(target_family = "wasm"))]
 pub mod outbound;
 
+// 実データを読むテストの入口 (DB の置き場所と、共有のスナップショット)。
+#[cfg(test)]
+pub(crate) mod test_support;
+
 // LLM 向けツール面 (MCP / CLI) の driving adapter。既定 off の feature で、
 // iOS/Android のビルドには一切入らない (uniffi も通らない)。
 // 判断の実体は domain::agent_tools / domain::proposal 側にあり、そちらは常時コンパイルされる。

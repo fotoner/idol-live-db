@@ -556,19 +556,8 @@ pub mod args {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::bundle_snapshot;
     use serde_json::json;
-    use std::sync::OnceLock;
-
-    fn loaded() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| {
-            crate::outbound::sqlite_loader::load_snapshot(&format!(
-                "{}/../ImasLiveDB/Resources/master.sqlite",
-                env!("CARGO_MANIFEST_DIR")
-            ))
-            .expect("bundle DB はロードできる")
-        })
-    }
 
     #[test]
     fn 数値を文字列で寄こしても受ける() {
@@ -650,17 +639,12 @@ mod tests {
         ]
     }
 
-    fn 実データ() -> Snapshot {
-        let db = format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"));
-        crate::outbound::sqlite_loader::load_snapshot(&db).expect("同梱 DB は読める")
-    }
-
     /// ツールを足したら代表引数にも足させる。これが無いと、下の禁止フィールド検査が
     /// 新しいツールを素通りして「緑だが守っていない」状態になる。
     #[test]
     fn 全ツールに代表引数がある() {
-        let snap = 実データ();
-        let 表: Vec<&str> = 代表引数(&snap).iter().map(|(n, _)| *n).collect();
+        let snap = crate::test_support::bundle_snapshot();
+        let 表: Vec<&str> = 代表引数(snap).iter().map(|(n, _)| *n).collect();
         for spec in tool_catalog() {
             assert!(表.contains(&spec.name.as_str()), "{} の代表引数が無い", spec.name);
         }
@@ -678,7 +662,7 @@ mod tests {
     /// 公開リポジトリに取り込み元サイト名を書くことになって本末転倒になる。
     #[test]
     fn どのツールも歌詞サイトと試聴の_url_を返さない() {
-        let snap = 実データ();
+        let snap = crate::test_support::bundle_snapshot();
         // or ではなく chain。両方を持つ曲から片方しか検査値に入らないと、
         // 欄名を変えられたときに二重の網が片方しか効かない。
         // 空文字は URL ではない (DB には NULL と '' が混ざる)。入れるとどの出力も
@@ -692,8 +676,8 @@ mod tests {
             .collect();
         assert!(!禁止値.is_empty(), "実データに検査対象が無い (テストが空振りしている)");
 
-        for (name, args) in 代表引数(&snap) {
-            let out = match call_tool(&snap, name, &args, "2026-09-19") {
+        for (name, args) in 代表引数(snap) {
+            let out = match call_tool(snap, name, &args, "2026-09-19") {
                 Ok(v) => v.to_string(),
                 // 引数が実データに合わず引けなかった場合も、その事実を隠さない。
                 Err(e) => panic!("{name} が代表引数で失敗した: {e}"),
@@ -733,7 +717,7 @@ mod tests {
 
     #[test]
     fn ブランドはどこでも同じ形で返る() {
-        let snap = loaded();
+        let snap = bundle_snapshot();
         let brand = json::brand_ref(snap, Some("cg")).expect("cg はある");
         assert_eq!(brand["id"], "cg");
         assert_eq!(brand["short_name"], "デレマス");
@@ -749,7 +733,7 @@ mod tests {
 
     #[test]
     fn 当たらない語は分解して手がかりを返す() {
-        let snap = loaded();
+        let snap = bundle_snapshot();
         // QA 実測: ユーザーのいちばん自然な聞き方が 0 件になる。
         // 実イベント名が "THE IDOLM@STER MILLION LIVE! 10thLIVE TOUR ..." で
         // 日本語の「ミリオン」を含まないため。

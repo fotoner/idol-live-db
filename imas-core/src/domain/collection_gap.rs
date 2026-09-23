@@ -295,22 +295,11 @@ pub fn show_collection_summary(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::OnceLock;
-
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| {
-            crate::outbound::sqlite_loader::load_snapshot(&format!(
-                "{}/../ImasLiveDB/Resources/master.sqlite",
-                env!("CARGO_MANIFEST_DIR")
-            ))
-            .expect("バンドル DB はロードできる")
-        })
-    }
+    use crate::test_support::bundle_snapshot;
 
     /// 曲 × 公演日 から披露 (`setlist_items` 添字) を引く。
     fn item_of(song_id: &str, date: &str) -> u32 {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let si = snap.song_index_by_id[song_id];
         snap.setlist_items_by_song[si as usize]
             .iter()
@@ -320,13 +309,13 @@ mod tests {
     }
 
     fn show_id_of(item: u32) -> String {
-        let snap = snap();
+        let snap = bundle_snapshot();
         snap.shows[snap.setlist_items[item as usize].show as usize].id.clone()
     }
 
     /// 参加した公演の集合を show id から組む。
     fn attending(show_ids: &[String]) -> HashSet<u32> {
-        attended_real_live_shows(snap(), show_ids, &[], true)
+        attended_real_live_shows(bundle_snapshot(), show_ids, &[], true)
     }
 
     // ---- 参加マークの選び方 ----
@@ -351,7 +340,7 @@ mod tests {
     /// SQL 経路 (`AppDatabase+UserMarks`) が IN 句に使う値は、Rust の判定と同じ集合を指す。
     #[test]
     fn sql_経路に配る値は判定と同じものを指す() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         // 催しの種別: collection_real_live_kinds の並びだけが is_real_live を通る。
         let kinds = collection_real_live_kinds();
         for show in (0..snap.shows.len() as u32).step_by(53) {
@@ -368,7 +357,7 @@ mod tests {
     /// 参加した公演の行は、その公演時点で数える。
     #[test]
     fn 参加した公演では何回目の回収かをその日時点で数える() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let song = "765as_初恋_一章_片想いの桜";
         // 4 回の披露: 2014-10-05 / 2016-04-30 / 2022-11-13 / 2026-09-19。
         let (a, b, c) = (
@@ -404,7 +393,7 @@ mod tests {
     /// 1 度も回収していない曲は `collected_count == 0` (= 未回収の根拠)。
     #[test]
     fn 参加記録が無ければ全部未回収になる() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let item = item_of("765as_初恋_一章_片想いの桜", "2016-04-30");
         let gap = collection_gap(snap, item, &HashSet::new());
         assert!(!gap.attended);
@@ -415,7 +404,7 @@ mod tests {
     /// 回収はリアルライブだけ。参加マークが付いていても歌枠等は数えない。
     #[test]
     fn リアルライブ以外の参加は回収に数えない() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let non_live = snap
             .shows
             .iter()
@@ -435,7 +424,7 @@ mod tests {
     /// イベント単位の参加マークは配下の公演に展開される。
     #[test]
     fn イベントの参加マークは配下の公演に広がる() {
-        let snap = snap();
+        let snap = bundle_snapshot();
         let (event, shows) = snap
             .events
             .iter()

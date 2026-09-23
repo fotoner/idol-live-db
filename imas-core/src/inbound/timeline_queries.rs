@@ -37,14 +37,8 @@ impl SnapshotStore {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::bundle_store;
     use crate::domain::timeline_queries::{TimelineBarLane, TimelineBarTarget};
-
-    fn loaded_store() -> std::sync::Arc<SnapshotStore> {
-        let store = SnapshotStore::new();
-        let db = format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"));
-        store.load(db).expect("bundle DB はロードできる");
-        store
-    }
 
     #[test]
     fn not_loaded_is_a_typed_error() {
@@ -55,7 +49,7 @@ mod tests {
     #[test]
     fn ffi_surface_smoke() {
         // ロジックの等価性は domain 側の照合テストが担う。ここは委譲の疎通だけ確認する。
-        let store = loaded_store();
+        let store = bundle_store();
         let all = store.timeline_bars(None).unwrap();
         assert!(all.len() > 500, "全ブランドの帯は数百本規模 (len={})", all.len());
         assert!(all.iter().any(|b| b.lane == TimelineBarLane::Milestone));
@@ -71,7 +65,7 @@ mod tests {
     /// domain 側 event_bar_titles_stay_official_names 参照)。
     #[test]
     fn event_titles_arrive_unabbreviated() {
-        let store = loaded_store();
+        let store = bundle_store();
         let bars = store.timeline_bars(None).unwrap();
         assert!(
             bars.iter().any(|b| matches!(b.target, TimelineBarTarget::Event { .. })

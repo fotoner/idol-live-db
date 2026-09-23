@@ -213,27 +213,7 @@ pub fn candidate_song_ids(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::outbound::sqlite_loader::load_snapshot;
-    use rusqlite::{Connection, OpenFlags};
-    use std::sync::OnceLock;
-
-    fn db_path() -> String {
-        format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"))
-    }
-
-    /// スナップショットは全テストで共有 (不変なので安全・ロードを 1 回にする)。
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| load_snapshot(&db_path()).expect("bundle DB はロードできる"))
-    }
-
-    fn conn() -> Connection {
-        Connection::open_with_flags(
-            db_path(),
-            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
-        )
-        .expect("bundle DB を開ける")
-    }
+    use crate::test_support::{bundle_conn, bundle_snapshot};
 
     // MARK: idol_index / sheet_kind
 
@@ -447,7 +427,7 @@ mod tests {
             sql.push_str(" AND (parent_song_id IS NULL OR parent_song_id='')");
         }
         sql.push_str(" ORDER BY id");
-        let db = conn();
+        let db = bundle_conn();
         let mut stmt = db.prepare(&sql).expect("元 SQL は妥当");
         stmt.query_map([brand_id], |r| r.get::<_, String>(0))
             .expect("元 SQL を実行できる")
@@ -458,14 +438,14 @@ mod tests {
     /// 実在ブランド全部 × フラグ 4 通りで元 SQL と順序込みで一致する。
     #[test]
     fn candidate_song_ids_match_sql_for_every_brand() {
-        let brand_ids: Vec<String> = snap().brands.iter().map(|b| b.id.clone()).collect();
+        let brand_ids: Vec<String> = bundle_snapshot().brands.iter().map(|b| b.id.clone()).collect();
         assert!(brand_ids.len() > 5, "ブランドが載っている前提: {}", brand_ids.len());
         let mut non_empty = 0usize;
         for brand in &brand_ids {
             for include_covers in [false, true] {
                 for exclude_remixes in [false, true] {
                     let want = run_original_sql(brand, include_covers, exclude_remixes);
-                    let got = candidate_song_ids(snap(), brand, include_covers, exclude_remixes);
+                    let got = candidate_song_ids(bundle_snapshot(), brand, include_covers, exclude_remixes);
                     assert_eq!(
                         got, want,
                         "brand={brand} include_covers={include_covers} exclude_remixes={exclude_remixes}"
@@ -484,12 +464,12 @@ mod tests {
     fn candidate_song_ids_actually_drop_covers_and_variants() {
         // カバーを一番多く持つブランド / 派生を一番多く持つブランドは別々なので分けて選ぶ。
         let dropped_by = |include_covers: bool, exclude_remixes: bool| {
-            snap()
+            bundle_snapshot()
                 .brands
                 .iter()
                 .map(|b| {
-                    let all = candidate_song_ids(snap(), &b.id, true, false).len();
-                    let kept = candidate_song_ids(snap(), &b.id, include_covers, exclude_remixes).len();
+                    let all = candidate_song_ids(bundle_snapshot(), &b.id, true, false).len();
+                    let kept = candidate_song_ids(bundle_snapshot(), &b.id, include_covers, exclude_remixes).len();
                     (b.id.clone(), all - kept)
                 })
                 .max_by_key(|(_, dropped)| *dropped)
@@ -504,9 +484,9 @@ mod tests {
 
         // 実際に使う組み合わせは両方の除外が同時に効く (どちらの単独より多くは残らない)。
         for brand in [&cover_brand, &variant_brand] {
-            let used = candidate_song_ids(snap(), brand, false, true).len();
-            let no_cover = candidate_song_ids(snap(), brand, false, false).len();
-            let no_variant = candidate_song_ids(snap(), brand, true, true).len();
+            let used = candidate_song_ids(bundle_snapshot(), brand, false, true).len();
+            let no_cover = candidate_song_ids(bundle_snapshot(), brand, false, false).len();
+            let no_variant = candidate_song_ids(bundle_snapshot(), brand, true, true).len();
             assert!(used <= no_cover.min(no_variant), "brand={brand}");
         }
     }
@@ -514,7 +494,7 @@ mod tests {
     /// 未知ブランドは空 (呼び出し側が空判定してスキップする前提)。
     #[test]
     fn candidate_song_ids_for_unknown_brand_is_empty() {
-        assert!(candidate_song_ids(snap(), "存在しないブランド", false, true).is_empty());
+        assert!(candidate_song_ids(bundle_snapshot(), "存在しないブランド", false, true).is_empty());
         assert_eq!(run_original_sql("存在しないブランド", false, true), Vec::<String>::new());
     }
 
@@ -522,18 +502,18 @@ mod tests {
     /// ここが崩れると Android (rowid = 同期到着順) と iOS で候補列がずれる。
     #[test]
     fn candidate_song_ids_are_sorted_by_id_not_by_snapshot_order() {
-        let brand = snap()
+        let brand = bundle_snapshot()
             .brands
             .iter()
             .map(|b| b.id.as_str())
-            .max_by_key(|b| candidate_song_ids(snap(), b, false, true).len())
+            .max_by_key(|b| candidate_song_ids(bundle_snapshot(), b, false, true).len())
             .expect("ブランドが 1 つはある");
-        let ids = candidate_song_ids(snap(), brand, false, true);
+        let ids = candidate_song_ids(bundle_snapshot(), brand, false, true);
         assert!(ids.len() > 50, "検証に足る件数がある前提: {}", ids.len());
         assert!(ids.windows(2).all(|w| w[0] < w[1]), "id 昇順・重複なし");
 
         // 添字順とは実際に違うこと (同じなら「並べ替えを忘れた実装」でも通ってしまう)
-        let in_snapshot_order: Vec<&str> = snap()
+        let in_snapshot_order: Vec<&str> = bundle_snapshot()
             .songs
             .iter()
             .filter(|s| s.brand_id.as_deref() == Some(brand))

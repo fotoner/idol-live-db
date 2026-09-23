@@ -151,20 +151,19 @@ mod tests {
     /// **新しいセットが出たらここを更新すること** (それが唯一の更新理由)。
     #[test]
     fn bundle_has_every_kamisabi_card() {
-        let path = format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"));
-        let snap = crate::outbound::sqlite_loader::load_snapshot(&path).expect("bundle DB はロードできる");
+        let snap = crate::test_support::bundle_snapshot();
 
         // 商品は 3 つ。アルバムセットはそれぞれ 50 曲。
-        let products = brand_ids(&snap);
+        let products = brand_ids(snap);
         assert_eq!(products, vec!["ml".to_string(), "sidem".to_string(), "sc".to_string()]);
         for p in &products {
             assert_eq!(
-                completion(&snap, Some(p), &[]).total,
+                completion(snap, Some(p), &[]).total,
                 50,
                 "{p} の KAMISABI 収録曲が 50 曲でない"
             );
         }
-        assert_eq!(completion(&snap, None, &[]).total, 150);
+        assert_eq!(completion(snap, None, &[]).total, 150);
     }
 
     #[test]

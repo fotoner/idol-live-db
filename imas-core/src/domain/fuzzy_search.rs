@@ -373,9 +373,7 @@ mod tests {
     /// 実データ (全曲) に対して、打鍵ごとに引ける速さかを確かめる。
     #[test]
     fn is_fast_enough_on_the_real_catalogue() {
-        use rusqlite::{Connection, OpenFlags};
-        let db = format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"));
-        let conn = Connection::open_with_flags(&db, OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap();
+        let conn = crate::test_support::bundle_conn();
         let mut stmt = conn.prepare("SELECT title FROM songs").unwrap();
         let titles: Vec<String> = stmt
             .query_map([], |r| r.get::<_, String>(0))
@@ -425,9 +423,7 @@ mod tests {
     }
     #[test]
     fn kana_search_now_reaches_kanji_titles() {
-        use rusqlite::{Connection, OpenFlags};
-        let db = format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"));
-        let conn = Connection::open_with_flags(&db, OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap();
+        let conn = crate::test_support::bundle_conn();
         let mut stmt = conn.prepare("SELECT title, title_kana FROM songs").unwrap();
         let rows: Vec<(String, Option<String>)> = stmt
             .query_map([], |r| Ok((r.get(0)?, r.get(1)?)))

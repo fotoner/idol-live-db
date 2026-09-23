@@ -619,6 +619,7 @@ pub fn brand_records(snap: &Snapshot) -> Vec<BrandRecord> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::{bundle_conn, bundle_snapshot};
     use rusqlite::Connection;
 
     // -----------------------------------------------------------------------
@@ -785,7 +786,7 @@ mod tests {
     fn raw_source_and_record_paths_agree_on_real_idols() {
         let (snap, _conn) = load();
         let mut compared = 0usize;
-        for record in idol_list(&snap, None) {
+        for record in idol_list(snap, None) {
             let via_record =
                 crate::domain::screen_composition::idol_profile_rows(&idol_profile_input(&record));
             let via_source = idol_profile_rows_from_source(&IdolProfileSource::from(&record));
@@ -799,7 +800,7 @@ mod tests {
     fn profile_input_of_a_real_idol_produces_rows() {
         // 実データを 1 件通して、行が組み上がるところまで見る。
         let (snap, _conn) = load();
-        let record = idol_list(&snap, None).into_iter().find(|i| i.birthday.is_some()).unwrap();
+        let record = idol_list(snap, None).into_iter().find(|i| i.birthday.is_some()).unwrap();
         let input = idol_profile_input(&record);
         let rows = crate::domain::screen_composition::idol_profile_rows(&input);
         assert!(!rows.is_empty(), "{} のプロフィール行が空", record.id);
@@ -811,20 +812,8 @@ mod tests {
         assert!(with_action <= 1, "誕生月へ飛べる行が複数ある");
     }
 
-    fn db_path() -> String {
-        format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"))
-    }
-
-    fn load() -> (Snapshot, Connection) {
-        let path = db_path();
-        let snap =
-            crate::outbound::sqlite_loader::load_snapshot(&path).expect("bundle DB はロードできる");
-        let conn = Connection::open_with_flags(
-            &path,
-            rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX,
-        )
-        .expect("bundle DB を開ける");
-        (snap, conn)
+    fn load() -> (&'static Snapshot, Connection) {
+        (bundle_snapshot(), bundle_conn())
     }
 
     /// iOS String.likeEscaped と同じエスケープ (\ → \\、% → \%、_ → \_)。
@@ -851,7 +840,7 @@ mod tests {
                 .map(Result::unwrap)
                 .collect();
             let got_ids: Vec<String> =
-                idol_list(&snap, Some(&brand.id)).into_iter().map(|r| r.id).collect();
+                idol_list(snap, Some(&brand.id)).into_iter().map(|r| r.id).collect();
             assert_eq!(sql_ids, got_ids, "brand={}", brand.id);
             if !got_ids.is_empty() {
                 nonempty += 1;
@@ -866,11 +855,11 @@ mod tests {
             .unwrap()
             .map(Result::unwrap)
             .collect();
-        let got_all: Vec<String> = idol_list(&snap, None).into_iter().map(|r| r.id).collect();
+        let got_all: Vec<String> = idol_list(snap, None).into_iter().map(|r| r.id).collect();
         assert_eq!(sql_all, got_all, "brand なし全件");
         assert!(got_all.len() > 100, "全アイドル数={}", got_all.len());
         // 未知ブランドは 0 行
-        assert!(idol_list(&snap, Some("存在しないbrand")).is_empty());
+        assert!(idol_list(snap, Some("存在しないbrand")).is_empty());
     }
 
     /// 照合 2: 誕生月・星座・出身地・血液型フィルタが、DB に実在する全値域で元 SQL と一致する。
@@ -890,15 +879,15 @@ mod tests {
                 .map(Result::unwrap)
                 .collect();
             let got_ids: Vec<String> =
-                idols_by_birth_month(&snap, month).into_iter().map(|r| r.id).collect();
+                idols_by_birth_month(snap, month).into_iter().map(|r| r.id).collect();
             assert_eq!(sql_ids, got_ids, "month={month}");
             if !got_ids.is_empty() {
                 matched_months += 1;
             }
         }
         assert_eq!(matched_months, 12, "全ての月に誕生日アイドルが居るはず");
-        assert!(idols_by_birth_month(&snap, 0).is_empty());
-        assert!(idols_by_birth_month(&snap, 13).is_empty());
+        assert!(idols_by_birth_month(snap, 0).is_empty());
+        assert!(idols_by_birth_month(snap, 13).is_empty());
 
         // 星座・出身地・血液型: DB に出現する distinct 値すべてで照合
         for (column, query_fn) in [
@@ -923,12 +912,12 @@ mod tests {
                 let sql_ids: Vec<String> =
                     stmt.query_map([value], |r| r.get(0)).unwrap().map(Result::unwrap).collect();
                 let got_ids: Vec<String> =
-                    query_fn(&snap, value).into_iter().map(|r| r.id).collect();
+                    query_fn(snap, value).into_iter().map(|r| r.id).collect();
                 assert_eq!(sql_ids, got_ids, "{column}={value}");
                 assert!(!got_ids.is_empty(), "{column}={value} は distinct 由来なので 1 件以上");
             }
             // 存在しない値は 0 行
-            assert!(query_fn(&snap, "そんな値はない").is_empty());
+            assert!(query_fn(snap, "そんな値はない").is_empty());
         }
     }
 
@@ -951,7 +940,7 @@ mod tests {
         .for_each(|(idol_id, name)| {
             sql_names.insert(idol_id, name);
         });
-        let got_names = idol_cast_names(&snap);
+        let got_names = idol_cast_names(snap);
         assert_eq!(sql_names, got_names, "現任 CV マップ");
         assert!(got_names.len() > 100, "現任 CV の居るアイドル数={}", got_names.len());
 
@@ -975,7 +964,7 @@ mod tests {
                 current_stmt.query_map([&idol.id], |r| r.get(0)).unwrap().next().map(Result::unwrap);
             assert_eq!(
                 sql_current,
-                current_voice_actor_name(&snap, &idol.id),
+                current_voice_actor_name(snap, &idol.id),
                 "idol={} の現任",
                 idol.id
             );
@@ -988,7 +977,7 @@ mod tests {
                 .unwrap()
                 .map(Result::unwrap)
                 .collect();
-            let got = voice_actor_history(&snap, &idol.id);
+            let got = voice_actor_history(snap, &idol.id);
             // 並びキー (IFNULL(valid_from,'') DESC) の列一致 + 全行の集合一致で固定
             // (同値 valid_from の並びは SQL では未規定のため)。
             let sql_keys: Vec<String> =
@@ -1036,11 +1025,11 @@ mod tests {
             let sql_ids: Vec<String> =
                 stmt.query_map([name], |r| r.get(0)).unwrap().map(Result::unwrap).collect();
             let got_ids: Vec<String> =
-                idols_by_voice_actor(&snap, name).into_iter().map(|r| r.id).collect();
+                idols_by_voice_actor(snap, name).into_iter().map(|r| r.id).collect();
             assert_eq!(sql_ids, got_ids, "va={name}");
             assert!(!got_ids.is_empty(), "va={name} は distinct 由来なので 1 件以上");
         }
-        assert!(idols_by_voice_actor(&snap, "存在しない声優").is_empty());
+        assert!(idols_by_voice_actor(snap, "存在しない声優").is_empty());
     }
 
     /// 照合 5: search_idols が元 SQL (LIKE + EXISTS + LIMIT) と一致する。
@@ -1105,7 +1094,7 @@ mod tests {
                     .map(Result::unwrap)
                     .collect();
                 let got_ids: Vec<String> =
-                    search_idols(&snap, q, limit).into_iter().map(|r| r.id).collect();
+                    search_idols(snap, q, limit).into_iter().map(|r| r.id).collect();
                 // **等価ではなく上位集合**。判定を `FoldedNeedle` (かなも畳む) に寄せた
                 // ので、SQL の LIKE より広く当たる。`limit` で切るぶん、SQL のヒットが
                 // 押し出されることはあるが、打ち切りに達していなければ全部残る。
@@ -1130,7 +1119,7 @@ mod tests {
             }
         }
         assert!(nonempty >= 10, "ヒットする検索語が少なすぎる: {nonempty}");
-        assert!(search_idols(&snap, "", 0).is_empty(), "LIMIT 0 は 0 行");
+        assert!(search_idols(snap, "", 0).is_empty(), "LIMIT 0 は 0 行");
     }
 
     /// 照合 6: all_idols_for_picker / idol_records_by_ids / brand_records が元 SQL と一致する。
@@ -1147,12 +1136,12 @@ mod tests {
             .map(Result::unwrap)
             .collect();
         let got_all: Vec<String> =
-            all_idols_for_picker(&snap).into_iter().map(|r| r.id).collect();
+            all_idols_for_picker(snap).into_iter().map(|r| r.id).collect();
         assert_eq!(sql_all, got_all);
         // ピッカーは外部ゲスト (is_external=1) も含む。現行 Bundle には外部ゲストが
         // 居ないので「一覧以上」で固定する (真の包含関係は id 列の逐語照合が担保済み)。
         assert!(
-            got_all.len() >= idol_list(&snap, None).len(),
+            got_all.len() >= idol_list(snap, None).len(),
             "ピッカーは一覧の上位集合のはず"
         );
 
@@ -1161,7 +1150,7 @@ mod tests {
         let mut input = sample.clone();
         input.push(sample[0].clone()); // 重複
         input.push("存在しないid".into()); // 未知
-        let got = idol_records_by_ids(&snap, &input);
+        let got = idol_records_by_ids(snap, &input);
         let got_ids: Vec<String> = got.iter().map(|r| r.id.clone()).collect();
         assert_eq!(got_ids, sample, "入力 id 順・初出のみ・未知 id 読み飛ばし");
         let placeholders = vec!["?"; input.len()].join(",");
@@ -1211,7 +1200,7 @@ mod tests {
             .unwrap()
             .map(Result::unwrap)
             .collect();
-        let got_brands: Vec<BrandRow> = brand_records(&snap)
+        let got_brands: Vec<BrandRow> = brand_records(snap)
             .into_iter()
             .map(|b| (b.id, b.name, b.short_name, b.color, b.sort_order))
             .collect();
@@ -1237,7 +1226,7 @@ mod tests {
                 .unwrap()
                 .map(Result::unwrap)
                 .collect();
-            let got = idol_units(&snap, &idol.id);
+            let got = idol_units(snap, &idol.id);
             let sql_names: Vec<&String> = sql_rows.iter().map(|r| &r.1).collect();
             let got_names: Vec<&String> = got.iter().map(|r| &r.name).collect();
             assert_eq!(sql_names, got_names, "idol={} の並びキー", idol.id);
@@ -1285,7 +1274,7 @@ mod tests {
                 .unwrap()
                 .map(Result::unwrap)
                 .collect();
-            let got = idol_shows(&snap, &idol.id);
+            let got = idol_shows(snap, &idol.id);
             let sql_dates: Vec<&String> = sql_rows.iter().map(|r| &r.4).collect();
             let got_dates: Vec<&String> = got.iter().map(|r| &r.date).collect();
             assert_eq!(sql_dates, got_dates, "idol={} の date 列", idol.id);
@@ -1305,6 +1294,6 @@ mod tests {
             }
         }
         assert!(with_shows > 100, "出演記録のあるアイドル数={with_shows}");
-        assert!(idol_shows(&snap, "存在しないid").is_empty());
+        assert!(idol_shows(snap, "存在しないid").is_empty());
     }
 }

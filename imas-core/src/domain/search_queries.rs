@@ -182,27 +182,7 @@ pub fn global_search(snap: &Snapshot, query: &str) -> GlobalSearchHits {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::outbound::sqlite_loader::load_snapshot;
-    use rusqlite::{Connection, OpenFlags};
-    use std::sync::OnceLock;
-
-    fn db_path() -> String {
-        format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR"))
-    }
-
-    /// スナップショットは全テストで共有 (不変なので安全・ロードを 1 回にする)。
-    fn snap() -> &'static Snapshot {
-        static SNAP: OnceLock<Snapshot> = OnceLock::new();
-        SNAP.get_or_init(|| load_snapshot(&db_path()).expect("bundle DB はロードできる"))
-    }
-
-    fn conn() -> Connection {
-        Connection::open_with_flags(
-            db_path(),
-            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
-        )
-        .expect("bundle DB を開ける")
-    }
+    use crate::test_support::{bundle_conn, bundle_snapshot};
 
     /// Swift `String.likeEscaped` の写経 (テスト側で元 SQL のバインド値を組むのに使う)。
     fn like_escaped(s: &str) -> String {
@@ -227,7 +207,7 @@ mod tests {
         } else {
             vec![&pattern]
         };
-        let db = conn();
+        let db = bundle_conn();
         let mut stmt = db.prepare(&sql).expect("元 SQL は妥当");
         stmt.query_map(rusqlite::params_from_iter(params), |r| r.get::<_, String>("id"))
             .expect("元 SQL を実行できる")
@@ -246,21 +226,21 @@ mod tests {
     }
 
     fn song_ids(q: &str) -> Vec<String> {
-        searched_song_indexes(snap(), q)
+        searched_song_indexes(bundle_snapshot(), q)
             .into_iter()
-            .map(|i| snap().songs[i as usize].id.clone())
+            .map(|i| bundle_snapshot().songs[i as usize].id.clone())
             .collect()
     }
     fn idol_ids(q: &str) -> Vec<String> {
-        searched_idol_indexes(snap(), q)
+        searched_idol_indexes(bundle_snapshot(), q)
             .into_iter()
-            .map(|i| snap().idols[i as usize].id.clone())
+            .map(|i| bundle_snapshot().idols[i as usize].id.clone())
             .collect()
     }
     fn event_ids(q: &str) -> Vec<String> {
-        searched_event_indexes(snap(), q)
+        searched_event_indexes(bundle_snapshot(), q)
             .into_iter()
-            .map(|i| snap().events[i as usize].id.clone())
+            .map(|i| bundle_snapshot().events[i as usize].id.clone())
             .collect()
     }
 
@@ -307,7 +287,7 @@ mod tests {
         // 依存しない形にしてある。
         let titles: Vec<&str> = lower
             .iter()
-            .map(|id| snap().songs[snap().song_index_by_id[id] as usize].title.as_str())
+            .map(|id| bundle_snapshot().songs[bundle_snapshot().song_index_by_id[id] as usize].title.as_str())
             .collect();
         assert!(!titles.is_empty(), "ready が 1 件も当たらない");
         assert!(titles.iter().all(|t| !t.contains("ready")), "{titles:?}");
@@ -317,7 +297,7 @@ mod tests {
     /// 空文字クエリ (LIKE '%%') は全行一致 = 各テーブル先頭 20 件になるのも元 SQL と同じ。
     #[test]
     fn limit_caps_at_20_like_sql() {
-        let db = conn();
+        let db = bundle_conn();
         let total: i64 = db
             .query_row(
                 "SELECT COUNT(*) FROM songs WHERE title LIKE '%夢%' OR title_kana LIKE '%夢%'",
@@ -357,7 +337,7 @@ mod tests {
         let ids = idol_ids("はるか");
         let harukas: Vec<&str> = ids
             .iter()
-            .map(|id| snap().idols[snap().idol_index_by_id[id] as usize].name.as_str())
+            .map(|id| bundle_snapshot().idols[bundle_snapshot().idol_index_by_id[id] as usize].name.as_str())
             .filter(|name| !name.contains("はるか"))
             .collect();
         assert!(harukas.contains(&"天海春香"), "kana 側だけで当たるヒットが要る: {ids:?}");
@@ -370,11 +350,11 @@ mod tests {
     #[test]
     fn counts_agree_with_what_each_list_actually_shows() {
         for q in ["夢", "はるか", "ready", "武道館", "アルストロメリア", "zzz存在しない"] {
-            let c = search_counts(snap(), q);
+            let c = search_counts(bundle_snapshot(), q);
             let needle = FoldedNeedle::new(q);
-            let songs = snap().song_search.iter().filter(|i| i.matches(needle.as_bytes())).count();
-            let idols = snap().idol_search.iter().filter(|i| i.matches(needle.as_bytes())).count();
-            let events = snap().event_search.iter().filter(|i| i.matches(needle.as_bytes())).count();
+            let songs = bundle_snapshot().song_search.iter().filter(|i| i.matches(needle.as_bytes())).count();
+            let idols = bundle_snapshot().idol_search.iter().filter(|i| i.matches(needle.as_bytes())).count();
+            let events = bundle_snapshot().event_search.iter().filter(|i| i.matches(needle.as_bytes())).count();
             assert_eq!((c.songs as usize, c.idols as usize, c.events as usize),
                        (songs, idols, events), "query={q:?}");
         }
@@ -384,18 +364,18 @@ mod tests {
     #[test]
     fn counts_are_not_capped_unlike_global_search() {
         // 実データで 20 件を超える語を選ぶ (超えないなら検証として退化する)。
-        let c = search_counts(snap(), "の");
+        let c = search_counts(bundle_snapshot(), "の");
         assert!(c.songs > 20, "曲 {} 件", c.songs);
-        assert_eq!(global_search(snap(), "の").song_ids.len(), 20, "横断検索は 20 件で切る");
+        assert_eq!(global_search(bundle_snapshot(), "の").song_ids.len(), 20, "横断検索は 20 件で切る");
     }
 
     /// 空の語は「絞り込んでいない」= 全件。一覧の挙動と同じ。
     #[test]
     fn empty_query_counts_everything() {
-        let c = search_counts(snap(), "");
-        assert_eq!(c.songs as usize, snap().songs.len());
-        assert_eq!(c.idols as usize, snap().idols.len());
-        assert_eq!(c.events as usize, snap().events.len());
+        let c = search_counts(bundle_snapshot(), "");
+        assert_eq!(c.songs as usize, bundle_snapshot().songs.len());
+        assert_eq!(c.idols as usize, bundle_snapshot().idols.len());
+        assert_eq!(c.events as usize, bundle_snapshot().events.len());
     }
 
     /// 「今後」と「開催済み」を足すと、ライブの当たり総数に一致する。
@@ -405,8 +385,8 @@ mod tests {
     #[test]
     fn event_sides_add_up_to_the_total_hits() {
         for q in ["ready", "武道館", "ライブ", "M@STER"] {
-            let sides = event_search_sides(snap(), q, "2026-09-01");
-            let total = search_counts(snap(), q).events;
+            let sides = event_search_sides(bundle_snapshot(), q, "2026-09-01");
+            let total = search_counts(bundle_snapshot(), q).events;
             assert_eq!(sides.upcoming + sides.past, total, "query={q:?}");
         }
     }
@@ -416,20 +396,20 @@ mod tests {
     #[test]
     fn the_boundary_day_counts_as_upcoming() {
         // 実データから公演日を 1 つ取り、その日を「今日」として数える。
-        let date = snap()
+        let date = bundle_snapshot()
             .shows
             .iter()
             .map(|s| s.date.clone())
             .find(|d| d.len() == 10)
             .expect("フル日付の公演がある前提");
-        let event = snap()
+        let event = bundle_snapshot()
             .events
             .iter()
             .enumerate()
-            .find(|(i, _)| first_show_date(snap(), *i as u32).as_deref() == Some(date.as_str()))
+            .find(|(i, _)| first_show_date(bundle_snapshot(), *i as u32).as_deref() == Some(date.as_str()))
             .map(|(_, e)| e.name.clone())
             .expect("その日を初日とするライブがある前提");
-        let sides = event_search_sides(snap(), &event, &date);
+        let sides = event_search_sides(bundle_snapshot(), &event, &date);
         assert!(sides.upcoming > 0, "境界日は今後側に入る: {event} / {date}");
     }
 
@@ -442,7 +422,7 @@ mod tests {
     fn kana_folding_finds_more_than_sql_like() {
         // 実データから「カタカナ表記の題を持ち、読みがひらがな」の曲を 1 つ拾い、
         // 題のカタカナ部分をひらがなに開いた語で引く (SQL の LIKE では当たらない語)。
-        let snap = snap();
+        let snap = bundle_snapshot();
         let (kana_query, sql_hits, ours) = snap
             .songs
             .iter()
@@ -507,7 +487,7 @@ mod tests {
     #[test]
     fn global_search_assembles_the_three_scans() {
         for q in ["夢", "M@STER", ""] {
-            let hits = global_search(snap(), q);
+            let hits = global_search(bundle_snapshot(), q);
             assert_eq!(hits.song_ids, song_ids(q), "query={q:?}");
             assert_eq!(hits.idol_ids, idol_ids(q), "query={q:?}");
             assert_eq!(hits.event_ids, event_ids(q), "query={q:?}");
