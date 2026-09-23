@@ -1045,8 +1045,9 @@ mod tests {
         names
     }
 
-    /// 照合: songsByCreator。実在の作家名を広く舐めて、元 SQL + Swift の役割判定と
-    /// **順序込み・全カラム・役割ラベル込み**で一致する。
+    /// 照合: songsByCreator。実在の作家名を広く舐めて、元 SQL + Swift の役割判定で当たった
+    /// 曲が**全カラム・前後の順・役割ラベル込み**で残り、件数は「以前の当たり ∪ 鍵の当たり」
+    /// ちょうど、並びは title_kana → title (Q-08i で広げた後の契約。L-4)。
     #[test]
     fn songs_by_creator_matches_sql() {
         let snap = bundle_snapshot();
@@ -1063,10 +1064,41 @@ mod tests {
             // 役割はすべて残る (増えるのは括弧の中の人名・空白の揺れで当たる曲)。
             let want = run_original_creator_sql(name);
             let got = songs_by_creator(snap, name);
+            let position = |id: &str| got.iter().position(|g| g.song.id == id);
+            let mut last = None;
             for (song, roles) in &want {
-                let row = got.iter().find(|g| g.song.id == song.id);
-                let row = row.unwrap_or_else(|| panic!("name={name:?} で {} が落ちた", song.id));
+                let at = position(&song.id).unwrap_or_else(|| panic!("name={name:?} で {} が落ちた", song.id));
+                let row = &got[at];
+                assert_eq!(&row.song, song, "name={name:?}");
                 assert!(roles.iter().all(|r| row.roles.contains(r)), "name={name:?} {}", song.id);
+                // 以前の結果どうしの前後は変わらない。
+                assert!(last < Some(at), "name={name:?}: {} の順が入れ替わった", song.id);
+                last = Some(at);
+            }
+            // 件数: 以前の規則で当たった曲 ∪ クレジット行の鍵で当たる曲、ちょうど。
+            let key = canonical_credit_key(name.trim());
+            let by_key = |s: &Song| {
+                !name.trim().is_empty()
+                    && [&s.composer, &s.lyricist, &s.arranger].into_iter().flatten().any(|f| {
+                        split_credits(f).iter().any(|p| canonical_credit_key(p) == key)
+                    })
+            };
+            let expected: HashSet<&str> = want
+                .iter()
+                .map(|(s, _)| s.id.as_str())
+                .chain(snap.songs.iter().filter(|s| by_key(s)).map(|s| s.id.as_str()))
+                .collect();
+            assert_eq!(got.len(), expected.len(), "name={name:?}");
+            assert!(got.iter().all(|g| expected.contains(g.song.id.as_str())), "name={name:?}");
+            // 並び: title_kana (NULL 先頭) → title。役割は 作曲 → 作詞 → 編曲。
+            assert!(
+                got.windows(2).all(|w| (&w[0].song.title_kana, &w[0].song.title) <= (&w[1].song.title_kana, &w[1].song.title)),
+                "name={name:?}: 並びが崩れた"
+            );
+            for row in &got {
+                let fixed: Vec<&str> =
+                    ["作曲", "作詞", "編曲"].into_iter().filter(|r| row.roles.iter().any(|x| x == r)).collect();
+                assert_eq!(row.roles, fixed, "name={name:?} {}", row.song.id);
             }
             with_hits += usize::from(!got.is_empty());
             multi_role += got.iter().filter(|r| r.roles.len() >= 2).count();
