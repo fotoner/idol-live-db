@@ -194,7 +194,7 @@ struct IdolListView: View {
                     idols: vm.filteredIdols,
                     brands: vm.visibleBrands,
                     pickIds: vm.pickIds,
-                    sortOrder: sortOrder,
+                    metricLabels: vm.metricLabels,
                     flatHeader: sortOrder.keepsBrandGrouping
                         ? nil
                         : "\(sortOrder.rawValue)順 ・ \(vm.filteredIdols.count)人"
@@ -316,7 +316,7 @@ struct IdolListView: View {
                             displayName: displayName(for: idol),
                             secondary: secondaryText(for: idol),
                             cvLine: cvText(for: idol),
-                            metric: sortOrder.metricLabel(for: idol)
+                            metric: vm.metricLabels[idol.id]
                         )
                     }
                     .buttonStyle(.plain)
@@ -368,7 +368,7 @@ struct IdolListView: View {
                                             displayName: displayName(for: idol),
                                             secondary: secondaryText(for: idol),
                                             cvLine: cvText(for: idol),
-                                            metric: sortOrder.metricLabel(for: idol)
+                                            metric: vm.metricLabels[idol.id]
                                         )
                                     }
                                     .buttonStyle(.plain)

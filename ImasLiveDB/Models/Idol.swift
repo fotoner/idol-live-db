@@ -81,27 +81,6 @@ struct Idol: Codable, FetchableRecord, PersistableRecord, Identifiable, Hashable
         return "\(m)月\(d)日"
     }
 
-    /// 身長表示
-    var heightDisplay: String? {
-        guard let height else { return nil }
-        return height.truncatingRemainder(dividingBy: 1) == 0
-            ? "\(Int(height))cm" : "\(height)cm"
-    }
-
-    /// スリーサイズ表示
-    var threeSizeDisplay: String? {
-        guard let bust, let waist, let hip else { return nil }
-        return "B\(Int(bust)) W\(Int(waist)) H\(Int(hip))"
-    }
-
-    /// 誕生月（"--MM-DD" 形式から取得）
-    var birthMonth: Int? {
-        guard let birthday, birthday.hasPrefix("--") else { return nil }
-        let parts = birthday.dropFirst(2).split(separator: "-")
-        guard let first = parts.first, let month = Int(first) else { return nil }
-        return month
-    }
-
     // MARK: - Associations
 
     static let brand = belongsTo(Brand.self)

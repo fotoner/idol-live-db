@@ -31,6 +31,8 @@ final class IdolListViewModel {
 
     // フィルタ済み派生結果
     private(set) var filteredIdols: [Idol] = []
+    /// idol id → 行に添える指標 (並び順が公式順・五十音のときは空)。文言はコア。
+    private(set) var metricLabels: [String: String] = [:]
     private(set) var groupedByBrand: [String: [Idol]] = [:]
     private(set) var visibleBrands: [Brand] = []
 
@@ -87,8 +89,9 @@ final class IdolListViewModel {
         var ctx = filter
         ctx.castNames = castNames
 
-        let result = sortIdols(filterIdols(idols, ctx), by: sortOrder, ascending: ascending)
+        let (result, labels) = sortIdolsWithMetrics(filterIdols(idols, ctx), by: sortOrder, ascending: ascending)
         filteredIdols = result
+        metricLabels = labels
 
         guard sortOrder.keepsBrandGrouping else {
             groupedByBrand = [:]

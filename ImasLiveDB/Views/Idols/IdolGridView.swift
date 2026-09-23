@@ -5,8 +5,8 @@ struct IdolGridView: View {
     let brands: [Brand]
     /// 担当アイドル ID。アバターの二重輪 (isPick) 表示に使う。
     var pickIds: Set<String> = []
-    /// 並び順。公式順以外は `brands` を空で渡して通しグリッドにし、セルに指標を併記する。
-    var sortOrder: IdolSortOrder = .official
+    /// idol id → セルに併記する指標 (公式順以外。`brands` は空で渡して通しグリッドにする)。
+    var metricLabels: [String: String] = [:]
     /// 通し表示時の見出し (「年齢順 / 342人」等)。
     var flatHeader: String? = nil
     let onSelect: (Idol) -> Void
@@ -93,7 +93,7 @@ struct IdolGridView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
             // 何順に並んでいるかセルから読めるようにする。
-            if let metric = sortOrder.metricLabel(for: idol) {
+            if let metric = metricLabels[idol.id] {
                 Text(metric)
                     .font(.imasDisplay(11, weight: .semibold))
                     .foregroundStyle(DS.ink3)

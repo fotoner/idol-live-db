@@ -61,20 +61,14 @@ final class IdolListSortingTests: XCTestCase {
         }
     }
 
-    // MARK: - 行に出す指標
+    // MARK: - 行に出す指標 (文言はコアの sort_idol_list_rows)
 
-    func testMetricLabelIsShownOnlyForSortableFields() {
-        let idol = makeIdol("x", age: 17, height: 158, weight: 45)
-        XCTAssertEqual(IdolSortOrder.age.metricLabel(for: idol), "17歳")
-        XCTAssertEqual(IdolSortOrder.height.metricLabel(for: idol), "158cm")
-        XCTAssertEqual(IdolSortOrder.weight.metricLabel(for: idol), "45kg")
-        XCTAssertNil(IdolSortOrder.official.metricLabel(for: idol))
-        XCTAssertNil(IdolSortOrder.nameKana.metricLabel(for: idol))
-    }
-
-    func testMetricLabelIsNilWhenValueMissing() {
-        let idol = makeIdol("x")
-        XCTAssertNil(IdolSortOrder.age.metricLabel(for: idol))
-        XCTAssertNil(IdolSortOrder.height.metricLabel(for: idol))
+    /// 並べ替えと一緒に受け取った指標が、並べた本人の id に配られていること。
+    func testMetricLabelsAreKeyedByIdolAndOnlyForMetricSorts() {
+        let idols = [makeIdol("a", age: 17, height: 158), makeIdol("b")]
+        let byAge = sortIdolsWithMetrics(idols, by: .age)
+        XCTAssertEqual(byAge.metricLabels, ["a": "17歳"])
+        XCTAssertEqual(sortIdolsWithMetrics(idols, by: .height).metricLabels["a"], "158cm")
+        XCTAssertTrue(sortIdolsWithMetrics(idols, by: .official).metricLabels.isEmpty)
     }
 }

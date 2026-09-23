@@ -832,23 +832,27 @@ struct IdolDetailView: View {
             }
     }
 
-    /// プロフィール行の組み立ては共有コアが唯一の正 (`idolProfileRows`)。
-    /// 「どの行が・どの順で・押せるか」を Android と二重に書くと必ずいつかズレるので、
-    /// ここは**整形済みの値を渡すだけ**にする。整形 (「4月3日」「160cm」) は iOS の担当のまま。
+    /// プロフィール行は整形 (「4月3日」「160cm」) も並べる判断も共有コアが持つ
+    /// (`idolProfileRowsFromSource`)。ここは生の値を渡すだけ。
     ///
     /// 1 画面 = 1 呼び出し。行ごとに FFI を跨がない。
     private var profileRowModels: [ScreenRow] {
-        idolProfileRows(input: IdolProfileInput(
+        idolProfileRowsFromSource(source: IdolProfileSource(
             nameKana: idol.nameKana,
             nameRomaji: idol.nameRomaji,
-            birthdayDisplay: idol.birthdayDisplay,
-            // 壊れた誕生日 (負値など) で落とさないよう exactly で弾く。コア側でも 1...12 に絞られる。
-            birthMonth: idol.birthMonth.flatMap { UInt32(exactly: $0) },
-            ageHeightWeight: ageHeightWeight,
-            threeSize: idol.threeSizeDisplay,
-            bloodConstellation: bloodConstellation,
-            birthplaceHandedness: birthplaceHand,
-            hobbyTalent: hobbyTalent,
+            birthday: idol.birthday,
+            age: idol.age.map(Int64.init),
+            height: idol.height,
+            weight: idol.weight,
+            bust: idol.bust,
+            waist: idol.waist,
+            hip: idol.hip,
+            bloodType: idol.bloodType,
+            constellation: idol.constellation,
+            birthPlace: idol.birthPlace,
+            handedness: idol.handedness,
+            hobbies: idol.hobbies,
+            talents: idol.talents,
             color: idol.color
         ))
     }
@@ -896,33 +900,6 @@ struct IdolDetailView: View {
                 content
             }
         }
-    }
-
-    // 集約プロフィール値
-    private var ageHeightWeight: String? {
-        var parts: [String] = []
-        if let age = idol.age { parts.append("\(age)歳") }
-        if let h = idol.heightDisplay { parts.append(h) }
-        if let w = idol.weight { parts.append("\(Int(w))kg") }
-        return parts.isEmpty ? nil : parts.joined(separator: " ・ ")
-    }
-    private var bloodConstellation: String? {
-        var parts: [String] = []
-        if let bt = idol.bloodType { parts.append("\(bt)型") }
-        if let c = idol.constellation { parts.append(c) }
-        return parts.isEmpty ? nil : parts.joined(separator: " ・ ")
-    }
-    private var birthplaceHand: String? {
-        var parts: [String] = []
-        if let bp = idol.birthPlace { parts.append(bp) }
-        if let h = idol.handedness { parts.append(h == "right" ? "右" : h == "left" ? "左" : h) }
-        return parts.isEmpty ? nil : parts.joined(separator: " ・ ")
-    }
-    private var hobbyTalent: String? {
-        var parts: [String] = []
-        if let h = idol.hobbies { parts.append(h) }
-        if let t = idol.talents { parts.append(t) }
-        return parts.isEmpty ? nil : parts.joined(separator: " ・ ")
     }
 
     // MARK: - Shared rows

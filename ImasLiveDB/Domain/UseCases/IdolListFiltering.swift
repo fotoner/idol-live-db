@@ -50,22 +50,6 @@ enum IdolSortOrder: String, CaseIterable, Sendable {
 
     /// 降順の言い回し (「年上から」等)。
     var descendingLabel: String { Self.meta[self]!.descendingLabel }
-
-    /// 行に併記する指標のラベル (nil ならバッジを出さない)。
-    ///
-    /// ここだけ Swift 実装のまま残す: 一覧の行ごと (ForEach 内) に呼ばれるため、
-    /// FFI へ委譲すると「要素ごとの FFI 呼び出し」になり境界規約に反する。
-    /// 中身は表示文字列の組み立てだけで、`birthdayDisplay` は `Idol` モデル側の表示補助。
-    func metricLabel(for idol: Idol) -> String? {
-        switch self {
-        case .official, .nameKana: return nil
-        case .age:      return idol.age.map { "\($0)歳" }
-        case .height:   return idol.height.map { "\(Int($0))cm" }
-        case .weight:   return idol.weight.map { "\(Int($0))kg" }
-        case .birthday: return idol.birthdayDisplay
-        case .debut:    return idol.debutDate
-        }
-    }
 }
 
 /// アイドル一覧を指定の並び順で整列する。
@@ -76,8 +60,23 @@ enum IdolSortOrder: String, CaseIterable, Sendable {
 /// フィールドの射影 (`IdolListEntry`) へ落とし、返ってきた index 列で自国の配列を
 /// 引き直すだけ。`ascending` 未指定 (nil) の既定方向解決も Rust 側が担う。
 func sortIdols(_ idols: [Idol], by order: IdolSortOrder, ascending: Bool? = nil) -> [Idol] {
-    sortIdolList(entries: idols.map(idolListEntry), kind: order.kind, ascending: ascending)
-        .map { idols[Int($0)] }
+    sortIdolsWithMetrics(idols, by: order, ascending: ascending).idols
+}
+
+/// 並べ替えと、行に添える指標 (`17歳` / `158cm` / `4月3日` / デビュー日) を 1 回で受け取る。
+/// 指標の文言もコア (`sort_idol_list_rows`) が作る。行ごとに FFI を呼ばないよう、
+/// 添え物は idol id → 文言の表で返す (公式順・五十音は空)。
+func sortIdolsWithMetrics(
+    _ idols: [Idol], by order: IdolSortOrder, ascending: Bool? = nil
+) -> (idols: [Idol], metricLabels: [String: String]) {
+    let rows = sortIdolListRows(entries: idols.map(idolListEntry), kind: order.kind, ascending: ascending)
+    var labels: [String: String] = [:]
+    let sorted = rows.map { row -> Idol in
+        let idol = idols[Int(row.index)]
+        if let label = row.metricLabel { labels[idol.id] = label }
+        return idol
+    }
+    return (sorted, labels)
 }
 
 /// アイドル一覧の絞り込みに必要な、解決済みの条件・集合。
