@@ -361,9 +361,12 @@ fn declared_checksums_match_inbound_exports() {
 
 /// UniFFI が checksum を生やすエクスポートを、inbound のソースから全部拾う。
 ///
-/// - `#[uniffi::export]` + `pub fn f` → `func_f`
-/// - `#[uniffi::export]` + `impl T {` → 中の `pub fn m` ごとに `method_t_m`。
+/// - `#[uniffi::export]` + `fn f` → `func_f`
+/// - `#[uniffi::export]` + `impl T {` → 中の `fn m` ごとに `method_t_m`。
 ///   `#[uniffi::constructor]` が付いたものは `constructor_t_m`
+///
+/// UniFFI 0.32 は、export したブロックの中の fn を `pub` かどうかに関係なく全部 export する。
+/// なので `pub` の有無・`pub(crate)`・`async` などを問わず、fn はすべて数える。
 ///
 /// impl ブロックは「0 桁目の `}` で閉じ、メソッドは 4 桁下げ」というこのリポジトリの
 /// 書き方を前提に読む。前提が崩れて拾い損ねたら、一覧との食い違いとして落ちる。
@@ -399,7 +402,7 @@ fn inbound_export_symbols() -> BTreeSet<String> {
                     .map(str::trim_start)
                     .find(|l| !l.is_empty() && !l.starts_with("//") && !l.starts_with("#["))
                     .expect("#[uniffi::export] の後に宣言がある");
-                if let Some(name) = pub_fn_name(item) {
+                if let Some(name) = fn_name(item) {
                     symbols.insert(format!("uniffi_imas_core_checksum_func_{name}"));
                     continue;
                 }
@@ -413,7 +416,7 @@ fn inbound_export_symbols() -> BTreeSet<String> {
                     if member.trim() == "#[uniffi::constructor]" {
                         constructor = true;
                     }
-                    if let Some(name) = member.strip_prefix("    ").and_then(pub_fn_name) {
+                    if let Some(name) = member.strip_prefix("    ").and_then(fn_name) {
                         let kind = if constructor { "constructor" } else { "method" };
                         symbols.insert(format!("uniffi_imas_core_checksum_{kind}_{object}_{name}"));
                         constructor = false;
@@ -425,7 +428,18 @@ fn inbound_export_symbols() -> BTreeSet<String> {
     symbols
 }
 
-/// `pub fn name(…` / `pub fn name<…` の name。
-fn pub_fn_name(line: &str) -> Option<&str> {
-    line.strip_prefix("pub fn ")?.split(['(', '<']).next()
+/// fn の宣言行 (`fn name(…` / `fn name<…`) の name。先頭の可視性 (`pub` / `pub(crate)` など) と
+/// `const` / `async` / `unsafe` は読み飛ばす。fn の宣言でなければ None。
+fn fn_name(line: &str) -> Option<&str> {
+    let mut rest = line;
+    if let Some(after_pub) = rest.strip_prefix("pub") {
+        rest = match after_pub.strip_prefix('(') {
+            Some(scoped) => scoped.split_once(')')?.1.trim_start(),
+            None => after_pub.strip_prefix(' ')?,
+        };
+    }
+    for qualifier in ["const ", "async ", "unsafe "] {
+        rest = rest.strip_prefix(qualifier).unwrap_or(rest);
+    }
+    rest.strip_prefix("fn ")?.split(['(', '<']).next()
 }
