@@ -185,7 +185,7 @@ private fun TabNavHost(
 
 // --- Per-tab nav graphs ---
 
-private fun NavGraphBuilder.eventsNavGraph(navController: NavHostController) {
+internal fun NavGraphBuilder.eventsNavGraph(navController: NavHostController) {
     composable(NavRoutes.EventList.route) {
         EventListScreen(
             onEventClick = { eventId ->
@@ -193,124 +193,10 @@ private fun NavGraphBuilder.eventsNavGraph(navController: NavHostController) {
             },
         )
     }
-    composable(NavRoutes.EventDetail.ROUTE) { backStackEntry ->
-        val eventId = backStackEntry.arguments?.getString("eventId") ?: return@composable
-        EventDetailScreen(
-            eventId = eventId,
-            onBack = { navController.popBackStack() },
-            onShowClick = { showId ->
-                navController.navigate(NavRoutes.Setlist.createRoute(showId))
-            },
-            onIdolClick = { idolId ->
-                navController.navigate(NavRoutes.IdolDetail.createRoute(idolId))
-            },
-            onFilteredEventsClick = { kind, value ->
-                navController.navigate(NavRoutes.FilteredEvents.createRoute(kind, value))
-            }
-        )
-    }
-    composable(NavRoutes.Setlist.ROUTE) { backStackEntry ->
-        val showId = backStackEntry.arguments?.getString("showId") ?: return@composable
-        SetlistScreen(
-            showId = showId,
-            onBack = { navController.popBackStack() },
-            onSongClick = { songId ->
-                navController.navigate(NavRoutes.SongDetail.createRoute(songId))
-            },
-            onIdolClick = { idolId ->
-                navController.navigate(NavRoutes.IdolDetail.createRoute(idolId))
-            },
-            onFilteredShowsClick = { kind, value ->
-                navController.navigate(NavRoutes.FilteredShows.createRoute(kind, value))
-            },
-            onEventClick = { eventId ->
-                navController.navigate(NavRoutes.EventDetail.createRoute(eventId))
-            },
-            onFilteredEventsClick = { kind, value ->
-                navController.navigate(NavRoutes.FilteredEvents.createRoute(kind, value))
-            }
-        )
-    }
-    composable(NavRoutes.IdolDetail.ROUTE) { backStackEntry ->
-        val idolId = backStackEntry.arguments?.getString("idolId") ?: return@composable
-        IdolDetailScreen(
-            idolId = idolId,
-            onNavigateBack = { navController.popBackStack() },
-            onNavigateToUnitDetail = { unitId ->
-                navController.navigate(NavRoutes.UnitDetail.createRoute(unitId))
-            },
-            onNavigateToSongDetail = { songId ->
-                navController.navigate(NavRoutes.SongDetail.createRoute(songId))
-            },
-            onNavigateToShowDetail = { showId ->
-                navController.navigate(NavRoutes.Setlist.createRoute(showId))
-            },
-            onNavigateToIdolDetail = { otherIdolId ->
-                navController.navigate(NavRoutes.IdolDetail.createRoute(otherIdolId))
-            },
-            onPollClick = { pollId ->
-                navController.navigate(NavRoutes.PollDetail.createRoute(pollId))
-            },
-            onIdolTagClick = { tagId ->
-                navController.navigate(NavRoutes.IdolTagDetail.createRoute(tagId))
-            },
-            onNavigateToBirthMonth = { month ->
-                navController.navigate(NavRoutes.IdolsByBirthMonth.createRoute(month))
-            },
-            onNavigateToSongHistory = { id, songId ->
-                navController.navigate(NavRoutes.IdolSongHistory.createRoute(id, songId))
-            },
-            onFilteredIdolsClick = { kind, value ->
-                navController.navigate(NavRoutes.FilteredIdols.createRoute(kind, value))
-            }
-        )
-    }
-    composable(NavRoutes.SongDetail.ROUTE) { backStackEntry ->
-        val songId = backStackEntry.arguments?.getString("songId") ?: return@composable
-        SongDetailScreen(
-            songId = songId,
-            onBack = { navController.popBackStack() },
-            onUnitClick = { unitId ->
-                navController.navigate(NavRoutes.UnitDetail.createRoute(unitId))
-            },
-            onIdolClick = { idolId ->
-                navController.navigate(NavRoutes.IdolDetail.createRoute(idolId))
-            },
-            onShowClick = { showId ->
-                navController.navigate(NavRoutes.Setlist.createRoute(showId))
-            },
-            onPollClick = { pollId ->
-                navController.navigate(NavRoutes.PollDetail.createRoute(pollId))
-            },
-            onFilteredSongsClick = { kind, value ->
-                navController.navigate(NavRoutes.FilteredSongs.createRoute(kind, value))
-            }
-        )
-    }
-    composable(NavRoutes.UnitDetail.ROUTE) { backStackEntry ->
-        val unitId = backStackEntry.arguments?.getString("unitId") ?: return@composable
-        UnitDetailScreen(
-            unitId = unitId,
-            onNavigateBack = { navController.popBackStack() },
-            onNavigateToIdolDetail = { idolId ->
-                navController.navigate(NavRoutes.IdolDetail.createRoute(idolId))
-            },
-            onNavigateToSongDetail = { songId ->
-                navController.navigate(NavRoutes.SongDetail.createRoute(songId))
-            },
-            onNavigateToUnitDetail = { otherUnitId ->
-                navController.navigate(NavRoutes.UnitDetail.createRoute(otherUnitId))
-            },
-            onPollClick = { pollId ->
-                navController.navigate(NavRoutes.PollDetail.createRoute(pollId))
-            }
-        )
-    }
-    idolsByBirthMonthRoute(navController)
-    filteredListRoutes(navController)
+    detailRoutes(navController)
 }
 
-private fun NavGraphBuilder.songsNavGraph(navController: NavHostController) {
+internal fun NavGraphBuilder.songsNavGraph(navController: NavHostController) {
     composable(NavRoutes.SongList.route) {
         SongListScreen(
             onSongClick = { songId ->
@@ -318,108 +204,10 @@ private fun NavGraphBuilder.songsNavGraph(navController: NavHostController) {
             },
         )
     }
-    composable(NavRoutes.SongDetail.ROUTE) { backStackEntry ->
-        val songId = backStackEntry.arguments?.getString("songId") ?: return@composable
-        SongDetailScreen(
-            songId = songId,
-            onBack = { navController.popBackStack() },
-            onUnitClick = { unitId ->
-                navController.navigate(NavRoutes.UnitDetail.createRoute(unitId))
-            },
-            onIdolClick = { idolId ->
-                navController.navigate(NavRoutes.IdolDetail.createRoute(idolId))
-            },
-            onShowClick = { showId ->
-                navController.navigate(NavRoutes.Setlist.createRoute(showId))
-            },
-            onPollClick = { pollId ->
-                navController.navigate(NavRoutes.PollDetail.createRoute(pollId))
-            },
-            onFilteredSongsClick = { kind, value ->
-                navController.navigate(NavRoutes.FilteredSongs.createRoute(kind, value))
-            }
-        )
-    }
-    composable(NavRoutes.IdolDetail.ROUTE) { backStackEntry ->
-        val idolId = backStackEntry.arguments?.getString("idolId") ?: return@composable
-        IdolDetailScreen(
-            idolId = idolId,
-            onNavigateBack = { navController.popBackStack() },
-            onNavigateToUnitDetail = { unitId ->
-                navController.navigate(NavRoutes.UnitDetail.createRoute(unitId))
-            },
-            onNavigateToSongDetail = { songId ->
-                navController.navigate(NavRoutes.SongDetail.createRoute(songId))
-            },
-            onNavigateToShowDetail = { showId ->
-                navController.navigate(NavRoutes.Setlist.createRoute(showId))
-            },
-            onNavigateToIdolDetail = { otherIdolId ->
-                navController.navigate(NavRoutes.IdolDetail.createRoute(otherIdolId))
-            },
-            onPollClick = { pollId ->
-                navController.navigate(NavRoutes.PollDetail.createRoute(pollId))
-            },
-            onIdolTagClick = { tagId ->
-                navController.navigate(NavRoutes.IdolTagDetail.createRoute(tagId))
-            },
-            onNavigateToBirthMonth = { month ->
-                navController.navigate(NavRoutes.IdolsByBirthMonth.createRoute(month))
-            },
-            onNavigateToSongHistory = { id, songId ->
-                navController.navigate(NavRoutes.IdolSongHistory.createRoute(id, songId))
-            },
-            onFilteredIdolsClick = { kind, value ->
-                navController.navigate(NavRoutes.FilteredIdols.createRoute(kind, value))
-            }
-        )
-    }
-    composable(NavRoutes.UnitDetail.ROUTE) { backStackEntry ->
-        val unitId = backStackEntry.arguments?.getString("unitId") ?: return@composable
-        UnitDetailScreen(
-            unitId = unitId,
-            onNavigateBack = { navController.popBackStack() },
-            onNavigateToIdolDetail = { idolId ->
-                navController.navigate(NavRoutes.IdolDetail.createRoute(idolId))
-            },
-            onNavigateToSongDetail = { songId ->
-                navController.navigate(NavRoutes.SongDetail.createRoute(songId))
-            },
-            onNavigateToUnitDetail = { otherUnitId ->
-                navController.navigate(NavRoutes.UnitDetail.createRoute(otherUnitId))
-            },
-            onPollClick = { pollId ->
-                navController.navigate(NavRoutes.PollDetail.createRoute(pollId))
-            }
-        )
-    }
-    composable(NavRoutes.Setlist.ROUTE) { backStackEntry ->
-        val showId = backStackEntry.arguments?.getString("showId") ?: return@composable
-        SetlistScreen(
-            showId = showId,
-            onBack = { navController.popBackStack() },
-            onSongClick = { songId ->
-                navController.navigate(NavRoutes.SongDetail.createRoute(songId))
-            },
-            onIdolClick = { idolId ->
-                navController.navigate(NavRoutes.IdolDetail.createRoute(idolId))
-            },
-            onFilteredShowsClick = { kind, value ->
-                navController.navigate(NavRoutes.FilteredShows.createRoute(kind, value))
-            },
-            onEventClick = { eventId ->
-                navController.navigate(NavRoutes.EventDetail.createRoute(eventId))
-            },
-            onFilteredEventsClick = { kind, value ->
-                navController.navigate(NavRoutes.FilteredEvents.createRoute(kind, value))
-            }
-        )
-    }
-    idolsByBirthMonthRoute(navController)
-    filteredListRoutes(navController)
+    detailRoutes(navController)
 }
 
-private fun NavGraphBuilder.idolsNavGraph(navController: NavHostController) {
+internal fun NavGraphBuilder.idolsNavGraph(navController: NavHostController) {
     composable(NavRoutes.IdolList.route) {
         IdolListScreen(
             onNavigateToIdolDetail = { idolId ->
@@ -430,108 +218,10 @@ private fun NavGraphBuilder.idolsNavGraph(navController: NavHostController) {
             },
         )
     }
-    composable(NavRoutes.IdolDetail.ROUTE) { backStackEntry ->
-        val idolId = backStackEntry.arguments?.getString("idolId") ?: return@composable
-        IdolDetailScreen(
-            idolId = idolId,
-            onNavigateBack = { navController.popBackStack() },
-            onNavigateToUnitDetail = { unitId ->
-                navController.navigate(NavRoutes.UnitDetail.createRoute(unitId))
-            },
-            onNavigateToSongDetail = { songId ->
-                navController.navigate(NavRoutes.SongDetail.createRoute(songId))
-            },
-            onNavigateToShowDetail = { showId ->
-                navController.navigate(NavRoutes.Setlist.createRoute(showId))
-            },
-            onNavigateToIdolDetail = { otherIdolId ->
-                navController.navigate(NavRoutes.IdolDetail.createRoute(otherIdolId))
-            },
-            onPollClick = { pollId ->
-                navController.navigate(NavRoutes.PollDetail.createRoute(pollId))
-            },
-            onIdolTagClick = { tagId ->
-                navController.navigate(NavRoutes.IdolTagDetail.createRoute(tagId))
-            },
-            onNavigateToBirthMonth = { month ->
-                navController.navigate(NavRoutes.IdolsByBirthMonth.createRoute(month))
-            },
-            onNavigateToSongHistory = { id, songId ->
-                navController.navigate(NavRoutes.IdolSongHistory.createRoute(id, songId))
-            },
-            onFilteredIdolsClick = { kind, value ->
-                navController.navigate(NavRoutes.FilteredIdols.createRoute(kind, value))
-            }
-        )
-    }
-    composable(NavRoutes.UnitDetail.ROUTE) { backStackEntry ->
-        val unitId = backStackEntry.arguments?.getString("unitId") ?: return@composable
-        UnitDetailScreen(
-            unitId = unitId,
-            onNavigateBack = { navController.popBackStack() },
-            onNavigateToIdolDetail = { idolId ->
-                navController.navigate(NavRoutes.IdolDetail.createRoute(idolId))
-            },
-            onNavigateToSongDetail = { songId ->
-                navController.navigate(NavRoutes.SongDetail.createRoute(songId))
-            },
-            onNavigateToUnitDetail = { otherUnitId ->
-                navController.navigate(NavRoutes.UnitDetail.createRoute(otherUnitId))
-            },
-            onPollClick = { pollId ->
-                navController.navigate(NavRoutes.PollDetail.createRoute(pollId))
-            }
-        )
-    }
-    composable(NavRoutes.SongDetail.ROUTE) { backStackEntry ->
-        val songId = backStackEntry.arguments?.getString("songId") ?: return@composable
-        SongDetailScreen(
-            songId = songId,
-            onBack = { navController.popBackStack() },
-            onUnitClick = { unitId ->
-                navController.navigate(NavRoutes.UnitDetail.createRoute(unitId))
-            },
-            onIdolClick = { idolId ->
-                navController.navigate(NavRoutes.IdolDetail.createRoute(idolId))
-            },
-            onShowClick = { showId ->
-                navController.navigate(NavRoutes.Setlist.createRoute(showId))
-            },
-            onPollClick = { pollId ->
-                navController.navigate(NavRoutes.PollDetail.createRoute(pollId))
-            },
-            onFilteredSongsClick = { kind, value ->
-                navController.navigate(NavRoutes.FilteredSongs.createRoute(kind, value))
-            }
-        )
-    }
-    composable(NavRoutes.Setlist.ROUTE) { backStackEntry ->
-        val showId = backStackEntry.arguments?.getString("showId") ?: return@composable
-        SetlistScreen(
-            showId = showId,
-            onBack = { navController.popBackStack() },
-            onSongClick = { songId ->
-                navController.navigate(NavRoutes.SongDetail.createRoute(songId))
-            },
-            onIdolClick = { idolId ->
-                navController.navigate(NavRoutes.IdolDetail.createRoute(idolId))
-            },
-            onFilteredShowsClick = { kind, value ->
-                navController.navigate(NavRoutes.FilteredShows.createRoute(kind, value))
-            },
-            onEventClick = { eventId ->
-                navController.navigate(NavRoutes.EventDetail.createRoute(eventId))
-            },
-            onFilteredEventsClick = { kind, value ->
-                navController.navigate(NavRoutes.FilteredEvents.createRoute(kind, value))
-            }
-        )
-    }
-    idolsByBirthMonthRoute(navController)
-    filteredListRoutes(navController)
+    detailRoutes(navController)
 }
 
-private fun NavGraphBuilder.scheduleNavGraph(navController: NavHostController) {
+internal fun NavGraphBuilder.scheduleNavGraph(navController: NavHostController) {
     composable(NavRoutes.Schedule.route) {
         CalendarScreen(
             onNavigateToShow = { navController.navigate(NavRoutes.Setlist.createRoute(it)) },
@@ -545,7 +235,7 @@ private fun NavGraphBuilder.scheduleNavGraph(navController: NavHostController) {
     detailRoutes(navController)
 }
 
-private fun NavGraphBuilder.produceNavGraph(navController: NavHostController) {
+internal fun NavGraphBuilder.produceNavGraph(navController: NavHostController) {
     composable(NavRoutes.Produce.route) {
         ProduceScreen(
             onNavigateToStats = { navController.navigate(NavRoutes.Stats.route) },
@@ -602,10 +292,6 @@ private fun NavGraphBuilder.produceNavGraph(navController: NavHostController) {
             onHallOfFameClick = { navController.navigate(NavRoutes.PollHallOfFame.route) }
         )
     }
-    composable(NavRoutes.PollDetail.ROUTE) { backStackEntry ->
-        val pollId = backStackEntry.arguments?.getString("pollId") ?: return@composable
-        PollDetailScreen(pollId = pollId, onBack = { navController.popBackStack() })
-    }
     composable(NavRoutes.PollHallOfFame.route) {
         PollHallOfFameScreen(
             onBack = { navController.popBackStack() },
@@ -649,22 +335,6 @@ private fun NavGraphBuilder.produceNavGraph(navController: NavHostController) {
             tagId = tagId,
             onBack = { navController.popBackStack() },
             onSongClick = { navController.navigate(NavRoutes.SongDetail.createRoute(it)) }
-        )
-    }
-    composable(NavRoutes.IdolTagDetail.ROUTE) { backStackEntry ->
-        val tagId = backStackEntry.arguments?.getString("tagId") ?: return@composable
-        IdolTagDetailScreen(
-            tagId = tagId,
-            onBack = { navController.popBackStack() },
-            onIdolClick = { navController.navigate(NavRoutes.IdolDetail.createRoute(it)) }
-        )
-    }
-    composable(NavRoutes.UnitTagDetail.ROUTE) { backStackEntry ->
-        val tagId = backStackEntry.arguments?.getString("tagId") ?: return@composable
-        UnitTagDetailScreen(
-            tagId = tagId,
-            onBack = { navController.popBackStack() },
-            onUnitClick = { navController.navigate(NavRoutes.UnitDetail.createRoute(it)) }
         )
     }
     composable(NavRoutes.TagActivity.route) {
@@ -844,7 +514,15 @@ private fun NavGraphBuilder.filteredListRoutes(navController: NavHostController)
     }
 }
 
-/** 複数タブで共有する詳細・検索ルート群 (公演/曲/アイドル/ユニット/イベント/検索)。 */
+/**
+ * どのタブにも積める詳細画面と、そこから押せる行き先 (公演/曲/アイドル/ユニット/イベント/
+ * お題/タグ/絞り込み一覧)。
+ *
+ * タブごとに NavHost が独立しているので、詳細画面から押せる行き先は全タブのグラフに
+ * 要る。登録の無い行き先へ navigate すると IllegalArgumentException で落ちる。
+ * タブ側で詳細を個別に書き写すと、コールバックの渡し漏れ (ユニットのタグが押せない) や
+ * 行き先の登録漏れが起きるので、全タブがこれ 1 つを呼ぶ。
+ */
 private fun NavGraphBuilder.detailRoutes(navController: NavHostController) {
     composable(NavRoutes.EventDetail.ROUTE) { backStackEntry ->
         val eventId = backStackEntry.arguments?.getString("eventId") ?: return@composable
@@ -920,6 +598,26 @@ private fun NavGraphBuilder.detailRoutes(navController: NavHostController) {
             onNavigateToUnitDetail = { navController.navigate(NavRoutes.UnitDetail.createRoute(it)) },
             onPollClick = { navController.navigate(NavRoutes.PollDetail.createRoute(it)) },
             onUnitTagClick = { navController.navigate(NavRoutes.UnitTagDetail.createRoute(it)) }
+        )
+    }
+    composable(NavRoutes.PollDetail.ROUTE) { backStackEntry ->
+        val pollId = backStackEntry.arguments?.getString("pollId") ?: return@composable
+        PollDetailScreen(pollId = pollId, onBack = { navController.popBackStack() })
+    }
+    composable(NavRoutes.IdolTagDetail.ROUTE) { backStackEntry ->
+        val tagId = backStackEntry.arguments?.getString("tagId") ?: return@composable
+        IdolTagDetailScreen(
+            tagId = tagId,
+            onBack = { navController.popBackStack() },
+            onIdolClick = { navController.navigate(NavRoutes.IdolDetail.createRoute(it)) }
+        )
+    }
+    composable(NavRoutes.UnitTagDetail.ROUTE) { backStackEntry ->
+        val tagId = backStackEntry.arguments?.getString("tagId") ?: return@composable
+        UnitTagDetailScreen(
+            tagId = tagId,
+            onBack = { navController.popBackStack() },
+            onUnitClick = { navController.navigate(NavRoutes.UnitDetail.createRoute(it)) }
         )
     }
     idolsByBirthMonthRoute(navController)
