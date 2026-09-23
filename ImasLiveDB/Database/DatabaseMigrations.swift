@@ -47,7 +47,10 @@ enum DatabaseMigrations {
             // idols
             try db.create(table: "idols") { t in
                 t.primaryKey("id", .text)
-                t.belongsTo("brand", inTable: "brands").notNull()
+                // 列名は snake_case で明示する。GRDB の belongsTo は列を `brandId` で作るので、
+                // 下の索引 (brand_id) が「no such column」で落ち、空の DB からの生成が
+                // 必ず失敗していた (同梱 DB がある通常の起動は v1 を飛ばすので踏まなかった)。
+                t.column("brand_id", .text).notNull().references("brands")
                 t.column("name", .text).notNull()
                 t.column("name_kana", .text)
                 t.column("name_romaji", .text)
@@ -104,7 +107,7 @@ enum DatabaseMigrations {
             // units
             try db.create(table: "units") { t in
                 t.primaryKey("id", .text)
-                t.belongsTo("brand", inTable: "brands").notNull()
+                t.column("brand_id", .text).notNull().references("brands")
                 t.column("name", .text).notNull()
                 t.column("is_permanent", .boolean).notNull().defaults(to: true)
             }
@@ -127,7 +130,7 @@ enum DatabaseMigrations {
             // shows
             try db.create(table: "shows") { t in
                 t.primaryKey("id", .text)
-                t.belongsTo("event", inTable: "events").notNull()
+                t.column("event_id", .text).notNull().references("events")
                 t.column("name", .text).notNull()
                 t.column("date", .text).notNull()
                 t.column("venue", .text)
