@@ -18,9 +18,7 @@ function tomorrowMidnightUtc(): string {
   return d.toISOString();
 }
 
-const LIMITS: Record<string, number> = {
-  submit: 10,
-  vote: 100,
+const LIMITS = {
   prediction: 30,
   // edit: 1 日あたりの編集 batch 数 (1 セトリ保存 = 1 batch なので op 数ではなく操作回数)。
   // 大量改竄の速度を抑える一次防御。根本対策は BAN + ユーザー単位 revert。
@@ -62,7 +60,10 @@ const LIMITS: Record<string, number> = {
   // lyrics_calls: PUT /songs/:id/calls。コール編集は 1 曲を何度も保存し直す作業なので
   // 歌詞投入より試行回数が多い。admin しか叩けないため広く取る。
   lyrics_calls: 5000,
-};
+} as const satisfies Record<string, number>;
+
+/** 日次枠の種類。LIMITS に無い名前は型で弾く (知らない名前に黙って既定値を当てない)。 */
+export type RateLimitAction = keyof typeof LIMITS;
 
 /**
  * 原子的 UPSERT でカウントを増加し、増加後の値でレート制限を判定する。
@@ -72,9 +73,9 @@ const LIMITS: Record<string, number> = {
 export async function checkRateLimit(
   db: D1Database,
   userId: string,
-  action: string
+  action: RateLimitAction
 ): Promise<RateLimitResult> {
-  const limit = LIMITS[action] ?? 100;
+  const limit = LIMITS[action];
   const date = todayUtc();
 
   const row = await db

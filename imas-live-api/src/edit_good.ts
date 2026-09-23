@@ -20,6 +20,8 @@
 //   (5) INSERT OR IGNORE (POST) または DELETE (DELETE)
 //   (6) COUNT(*) で goodCount 再算出して返す (レスポンスは { batchId, goodCount, gooded })
 
+import type { RateLimitAction, RateLimitResult } from "./rate_limit";
+
 export interface EditGoodEnv {
   DB: D1Database;
 }
@@ -28,11 +30,7 @@ export interface EditGoodDeps<E extends EditGoodEnv> {
   getAuthUser: (request: Request, env: E) => Promise<{ uid: string; email?: string } | null>;
   /** users 行を保証する (edit_good.user_id の FK 違反防止)。 */
   upsertUser: (env: E, uid: string, name?: string, picture?: string) => Promise<void>;
-  checkRateLimit: (
-    db: D1Database,
-    uid: string,
-    action: string
-  ) => Promise<{ allowed: boolean; used: number; limit: number; reset_at: string }>;
+  checkRateLimit: (db: D1Database, uid: string, action: RateLimitAction) => Promise<RateLimitResult>;
   json: (data: unknown, status?: number) => Response;
   error: (message: string, status?: number) => Response;
   rateLimitResponse: (used: number, limit: number, resetAt: string) => Response;

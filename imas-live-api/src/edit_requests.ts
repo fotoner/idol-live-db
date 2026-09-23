@@ -6,6 +6,7 @@
 //
 // コミュニティ投稿 (参考動画) は従来どおり /edits で全員オープン。ここはマスタ専用。
 
+import type { RateLimitAction, RateLimitResult } from "./rate_limit";
 import { validateMasterEdit, type EditOp } from "./master_validators";
 
 export interface EditRequestEnv {
@@ -23,11 +24,7 @@ interface OpInput {
 
 export interface EditRequestDeps<E extends EditRequestEnv> {
   getAuthUser: (request: Request, env: E) => Promise<{ uid: string; email?: string } | null>;
-  checkRateLimit: (
-    db: D1Database,
-    uid: string,
-    action: string
-  ) => Promise<{ allowed: boolean; used: number; limit: number; reset_at: string }>;
+  checkRateLimit: (db: D1Database, uid: string, action: RateLimitAction) => Promise<RateLimitResult>;
   json: (data: unknown, status?: number) => Response;
   error: (message: string, status?: number) => Response;
   rateLimitResponse: (used: number, limit: number, resetAt: string) => Response;

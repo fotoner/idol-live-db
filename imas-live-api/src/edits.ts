@@ -24,6 +24,7 @@
 //        delete は fields=null (ソフト削除。deletedAt/modifiedAt のみ注入)。
 //   失敗時: CloudKit 失敗 → 502 (edit_batch は cloudkit_ok=0 のまま、edit_history は書かない)
 
+import type { RateLimitAction, RateLimitResult } from "./rate_limit";
 import {
   buildForceUpdate,
   buildSoftDelete,
@@ -71,11 +72,7 @@ export interface EditsDeps<E extends EditsEnv> {
   /** admin 判定 (構造マスタ編集・フィールド allowlist 免除)。 */
   checkIsAdmin: (env: E, uid: string) => Promise<boolean>;
   /** レート制限判定 (action='edit')。 */
-  checkRateLimit: (
-    db: D1Database,
-    uid: string,
-    action: string
-  ) => Promise<{ allowed: boolean; used: number; limit: number; reset_at: string }>;
+  checkRateLimit: (db: D1Database, uid: string, action: RateLimitAction) => Promise<RateLimitResult>;
   json: (data: unknown, status?: number) => Response;
   error: (message: string, status?: number) => Response;
   rateLimitResponse: (used: number, limit: number, resetAt: string) => Response;

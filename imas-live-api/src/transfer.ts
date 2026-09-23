@@ -6,6 +6,8 @@
 //
 // payload の中身 (JSON 妥当性含む) はクライアント側の責務。Worker はただの文字列ストレージ。
 
+import type { RateLimitAction, RateLimitResult } from "./rate_limit";
+
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 紛らわしい 0/O/1/I/L を除いた32文字
 const CODE_LENGTH = 10;
 const MAX_PAYLOAD_BYTES = 200_000;
@@ -18,11 +20,7 @@ export interface TransferEnv {
 
 export interface TransferDeps<E extends TransferEnv> {
   getAuthUser: (request: Request, env: E) => Promise<{ uid: string; email?: string } | null>;
-  checkRateLimit: (
-    db: D1Database,
-    uid: string,
-    action: string
-  ) => Promise<{ allowed: boolean; used: number; limit: number; reset_at: string }>;
+  checkRateLimit: (db: D1Database, uid: string, action: RateLimitAction) => Promise<RateLimitResult>;
   json: (data: unknown, status?: number) => Response;
   error: (message: string, status?: number) => Response;
   rateLimitResponse: (used: number, limit: number, resetAt: string) => Response;
