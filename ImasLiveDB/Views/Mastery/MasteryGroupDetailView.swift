@@ -17,9 +17,15 @@ struct MasteryGroupDetailView: View {
     /// 群に入る曲の id。**Song の実体は押されてから引く**。
     /// 一覧側で `compactMap` して渡すと、行の数だけ全曲走査が走る。
     let songIds: [String]
+    /// 群の軸と鍵。段ごとの数・進捗・「聴いたのに未設定」は、この群をコアで組み直して受け取る
+    /// (`buildMasteryGroups`)。画面で数え直さない。
+    let axis: MasteryAxis
+    let groupKey: String
 
     @State private var songs: [Song] = []
     @State private var loaded = false
+    /// この群の集計値 (段を付け替えるたびに組み直す)。
+    @State private var group: MasteryGroup?
 
     @State private var undo: UndoState?
     @State private var sheetDestination: DetailDestination?
@@ -35,10 +41,9 @@ struct MasteryGroupDetailView: View {
 
     var body: some View {
         let levels = songs.map { marks.mastery(songId: $0.id) }
+        let heardUnsetIds = heardButUnsetIds
         let shown = songs.enumerated().filter { pair in
-            if heardOnly {
-                return levels[pair.offset] == 0 && marks.isAutoCollected(songId: pair.element.id)
-            }
+            if heardOnly { return heardUnsetIds.contains(pair.element.id) }
             return levelFilter == nil || levels[pair.offset] == levelFilter
         }
 
@@ -48,8 +53,8 @@ struct MasteryGroupDetailView: View {
         // 見た目より先にこの条件を満たす。
         return List {
             if loaded {
-                summarySection(levels).plainRow(background: DS.bg)
-                songHeader(shown, levels: levels).plainRow(background: DS.bg)
+                summarySection.plainRow(background: DS.bg)
+                songHeader(shown).plainRow(background: DS.bg)
                 if shown.isEmpty {
                     ImasEmptyState(systemImage: "line.3.horizontal.decrease",
                                    title: "該当する曲がありません",
@@ -84,6 +89,7 @@ struct MasteryGroupDetailView: View {
             DetailSheetView(destination: dest).environment(database)
         }
         .task { if !loaded { await load() } }
+        .task(id: levels) { rebuildGroup(levels) }
         .trackScreen("mastery_group")
     }
 
@@ -95,25 +101,55 @@ struct MasteryGroupDetailView: View {
         loaded = true
     }
 
+    // MARK: - 群の集計 (コア)
+
+    /// 段を付け替えたら群を組み直す (1 回の FFI)。
+    private func rebuildGroup(_ levels: [UInt8]) {
+        guard loaded else { return }
+        let collected = marks.autoCollectedSongIds()
+        let entries = zip(songs, levels).map { s, level in
+            MasterySong(songId: s.id, title: s.title,
+                        seriesGroup: s.seriesGroup, cdSeries: s.cdSeries,
+                        unitName: s.unitName, singerLabel: s.singerLabel,
+                        releaseDate: s.releaseDate, level: level,
+                        collected: collected.contains(s.id))
+        }
+        group = buildMasteryGroups(songs: entries, axis: axis, steps: marks.scale.steps,
+                                   sort: .songCount, progress: .all, nameFilter: "")
+            .first { $0.key == groupKey }
+    }
+
+    /// 「現地で聴いたのに未設定」の曲。
+    private var heardButUnsetIds: Set<String> {
+        guard let group else { return [] }
+        return Set(zip(group.songIds, group.heardButUnset).compactMap { $1 ? $0 : nil })
+    }
+
+    /// その段の曲数 (0 = 未設定)。
+    private func count(atLevel level: Int) -> Int {
+        guard let counts = group?.levelCounts, counts.indices.contains(level) else { return 0 }
+        return Int(counts[level])
+    }
+
     // MARK: - 全体の進捗 (回収率サマリーと同じ組み方)
 
-    private func summarySection(_ levels: [UInt8]) -> some View {
-        let total = max(levels.count, 1)
+    private var summarySection: some View {
+        let total = max(Int(group?.total ?? 0), 1)
         let steps = marks.scale.steps
         return VStack(alignment: .leading, spacing: DS.sp4) {
             ImasSectionHeader(title: "このグループの習熟度", tight: true)
             HStack(spacing: DS.sp5) {
-                MasteryRing(fraction: Double(percent(levels)) / 100)
+                MasteryRing(fraction: Double(group?.percent ?? 0) / 100)
                     .frame(width: 92, height: 92)
                 VStack(alignment: .leading, spacing: DS.sp3) {
                     HStack(alignment: .firstTextBaseline, spacing: DS.sp2) {
-                        Text("\(levels.filter { $0 > 0 }.count)")
+                        Text("\(group?.setCount ?? 0)")
                             .font(.imasDisplay(30, weight: .bold)).foregroundStyle(DS.ink)
-                        Text("/ \(levels.count)曲")
+                        Text("/ \(group?.total ?? 0)曲")
                             .font(.imasDisplay(15)).foregroundStyle(DS.ink2)
                     }
                     Text("段階を付けた曲").font(.imasFootnote).foregroundStyle(DS.ink2)
-                    Text("\(marks.scale.label(steps)) \(levels.filter { $0 == steps }.count) 曲")
+                    Text("\(marks.scale.label(steps)) \(group?.doneCount ?? 0) 曲")
                         .font(.imasCaption.weight(.semibold)).foregroundStyle(DS.ink3)
                 }
                 Spacer(minLength: 0)
@@ -123,7 +159,7 @@ struct MasteryGroupDetailView: View {
 
             VStack(spacing: 0) {
                 ForEach(Array((1...Int(steps)).reversed()), id: \.self) { level in
-                    let c = levels.filter { $0 == UInt8(level) }.count
+                    let c = count(atLevel: level)
                     ImasStatBar(label: marks.scale.label(UInt8(level)), value: "\(c)",
                                 percent: Double(c) / Double(total) * 100)
                 }
@@ -136,8 +172,7 @@ struct MasteryGroupDetailView: View {
     // MARK: - 曲一覧
 
     /// 曲一覧の見出し (件数 + 段階の絞り込み)。List の 1 行として差す。
-    /// `levels` は body で既に出している段階配列をそのまま受け取る (ここで引き直さない)。
-    private func songHeader(_ shown: [(offset: Int, element: Song)], levels: [UInt8]) -> some View {
+    private func songHeader(_ shown: [(offset: Int, element: Song)]) -> some View {
         VStack(alignment: .leading, spacing: DS.sp4) {
             HStack(alignment: .firstTextBaseline) {
                 ImasSectionHeader(title: "収録曲", tight: true)
@@ -146,7 +181,7 @@ struct MasteryGroupDetailView: View {
                      ? "\(songs.count)曲" : "\(shown.count) / \(songs.count)曲")
                     .font(.imasCaption.weight(.semibold)).foregroundStyle(DS.ink3)
             }
-            filterChips(levels)
+            filterChips
         }
         .padding(.top, DS.sp5)
     }
@@ -154,10 +189,8 @@ struct MasteryGroupDetailView: View {
     // MARK: - ヘッダ
 
     /// 段階の絞り込み。既存の絞り込みと同じ `ImasFilterChip` を使う。
-    private func filterChips(_ levels: [UInt8]) -> some View {
-        let heardUnset = songs.enumerated().filter {
-            levels[$0.offset] == 0 && marks.isAutoCollected(songId: $0.element.id)
-        }.count
+    private var filterChips: some View {
+        let heardUnset = Int(group?.heardButUnsetCount ?? 0)
         return ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: DS.sp3) {
                 if heardUnset > 0 {
@@ -170,7 +203,7 @@ struct MasteryGroupDetailView: View {
                 }
                 ForEach(0...Int(marks.scale.steps), id: \.self) { i in
                     let level = UInt8(i)
-                    let count = levels.filter { $0 == level }.count
+                    let count = count(atLevel: i)
                     ImasFilterChip(
                         text: "\(marks.scale.shortLabel(level)) \(count)",
                         isSelected: levelFilter == level,
@@ -182,16 +215,6 @@ struct MasteryGroupDetailView: View {
                 }
             }
         }
-    }
-
-    /// 加重%。**body から FFI を呼ばない**: ここは段数と段の本数だけで出せるので、
-    /// 曲ごとに `MasterySong` を組んで境界を越えるのは丸損だった
-    /// (重みの刻みは core の `masteryWeight` と同じ 1/steps)。
-    private func percent(_ levels: [UInt8]) -> UInt32 {
-        guard !levels.isEmpty else { return 0 }
-        let steps = Double(marks.scale.steps)
-        let sum = levels.reduce(0.0) { $0 + Double(min($1, marks.scale.steps)) / steps }
-        return UInt32((sum / Double(levels.count) * 100).rounded())
     }
 
     // MARK: - 行

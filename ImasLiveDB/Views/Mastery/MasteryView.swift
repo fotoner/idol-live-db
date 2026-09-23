@@ -234,7 +234,8 @@ struct MasteryView: View {
                 NavigationLink {
                     // destination は**押されたときに**組む。ここで
                     // `songIds.compactMap` すると行ごとに群の曲数ぶん走る。
-                    MasteryGroupDetailView(title: group.label, songIds: group.songIds)
+                    MasteryGroupDetailView(title: group.label, songIds: group.songIds,
+                                           axis: axis, groupKey: group.key)
                         .environment(database)
                 } label: {
                     groupRow(group)
