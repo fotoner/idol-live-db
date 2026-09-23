@@ -495,20 +495,17 @@ export async function handlePostEdits<E extends EditsEnv>(
   // CloudKit 書き込み前に users 行を保証する (RedTeam High)。
   await deps.upsertUser(env, user.uid);
 
-  // (6) edit_batch を cloudkit_ok=0 で先行 INSERT
+  // (6) edit_batch を cloudkit_ok=0 で先行 INSERT。
+  //     失敗 (D1 の障害) はここで拾わず、index.ts の共通の 500 に任せる。D1 のエラー文は
+  //     スキーマの情報を含むので応答に出さず、request id と一緒にログへ残す。
   const batchOp = deriveBatchOp(normalized);
   const summary = buildSummary(entries, body?.summary);
-  let batchId: number;
-  try {
-    batchId = await createEditBatch(env.DB, {
-      editorId: user.uid,
-      op: batchOp,
-      source: "app",
-      summary,
-    });
-  } catch (e: any) {
-    return error(`failed to create edit batch: ${String(e?.message ?? e)}`, 500);
-  }
+  const batchId = await createEditBatch(env.DB, {
+    editorId: user.uid,
+    op: batchOp,
+    source: "app",
+    summary,
+  });
 
   // (7) CloudKit へ反映 (200 件ずつ chunk)。1 chunk でも失敗したら 502。
   //     edit_batch は cloudkit_ok=0 のまま残り、edit_history は書かない (= 反映成功時のみ履歴記録)。

@@ -1249,7 +1249,8 @@ export default {
       // POST /edits — マスタ create/update/delete (オープン編集, 1 リクエスト = 1 edit_batch)
       // ----------------------------------------------------------------
       if (path === "/edits" && request.method === "POST") {
-        return handlePostEdits(request, env, {
+        // await する: 返した Promise の失敗も下の catch (request id 付きの 500) で受けるため。
+        return await handlePostEdits(request, env, {
           getAuthUser,
           upsertUser,
           checkIsAdmin,
