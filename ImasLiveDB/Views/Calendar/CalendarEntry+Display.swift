@@ -80,8 +80,8 @@ extension CalendarPeriodBand {
         for date in weekDays {
             for entry in entriesByDate[calendar.startOfDay(for: date)] ?? [] {
                 guard case .ticketPeriod(let row) = entry, seen.insert(row.eventId).inserted else { continue }
-                guard let start = AppDatabase.parseDate(row.start),
-                      let end = AppDatabase.parseDate(row.end) else { continue }
+                guard let start = JSTDay.date(row.start),
+                      let end = JSTDay.date(row.end) else { continue }
                 let startDay = calendar.startOfDay(for: start)
                 let endDay = calendar.startOfDay(for: end)
                 let startRaw = calendar.dateComponents([.day], from: weekStart, to: startDay).day ?? 0

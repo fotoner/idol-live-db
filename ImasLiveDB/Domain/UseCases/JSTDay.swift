@@ -18,6 +18,21 @@ enum JSTDay {
         jstToday(nowEpochSeconds: Int64(now.timeIntervalSince1970.rounded(.down)))
     }
 
+    /// `"yyyy-MM-dd"` を JST のその日の 0 時として読む。読めなければ nil。
+    /// 公演日・誕生日・記念日などを、カレンダーの日付として並べるときに使う。
+    static func date(_ day: String) -> Date? {
+        dayFormatter.date(from: day)
+    }
+
+    private static let dayFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = format
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        // JST 固定: 海外渡航中でも日付がズレないようにする
+        formatter.timeZone = timeZone
+        return formatter
+    }()
+
     /// 公演日が「今日以降」か。当日は未来として扱う (開催日当日はまだ終わっていない)。
     ///
     /// - Parameter date: `"yyyy-MM-dd"` の公演日。空文字は未来ではない。

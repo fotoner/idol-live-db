@@ -379,7 +379,7 @@ struct CalendarView: View {
             // 単曲 → 曲詳細 / 複数曲 → その日の日詳細シートで一覧から選ばせる
             if songs.count == 1, let song = songs.first {
                 sheetDestination = .song(song)
-            } else if let date = AppDatabase.parseDate(dateStr) {
+            } else if let date = JSTDay.date(dateStr) {
                 daySheet = DaySheet(date: calendar.startOfDay(for: date))
             } else if let first = songs.first {
                 sheetDestination = .song(first)
@@ -541,8 +541,8 @@ struct CalendarView: View {
 
     /// [start, end] (両端含む) を interval 内にクリップした日付一覧。
     private func coveredDays(start: String, end: String, in interval: DateInterval) -> [Date] {
-        guard let startDate = AppDatabase.parseDate(start),
-              let endDate = AppDatabase.parseDate(end),
+        guard let startDate = JSTDay.date(start),
+              let endDate = JSTDay.date(end),
               endDate >= startDate else { return [] }
         // interval.end は排他境界なので前日までを対象にする。
         let lastInclusive = calendar.date(byAdding: .day, value: -1, to: interval.end) ?? interval.end
@@ -582,16 +582,16 @@ struct CalendarView: View {
     private func entryDate(_ entry: CalendarEntry, in interval: DateInterval) -> Date? {
         switch entry {
         case .show(let row):
-            return AppDatabase.parseDate(row.show.date)
+            return JSTDay.date(row.show.date)
         case .release(let dateStr, _):
-            return AppDatabase.parseDate(dateStr)
+            return JSTDay.date(dateStr)
         case .birthday(let idol):
             return monthDayDate(idol.birthday, in: interval)
         case .staffBirthday(let staff):
             return monthDayDate(staff.birthday, in: interval)
         case .anniversary(let ann):
             // 起点日 YYYY-MM-DD を interval の年に展開。起点より前の年は出さない。
-            guard let start = AppDatabase.parseDate(ann.date) else { return nil }
+            guard let start = JSTDay.date(ann.date) else { return nil }
             let parts = ann.date.split(separator: "-")
             guard parts.count == 3,
                   let month = Int(parts[1]),
@@ -614,10 +614,10 @@ struct CalendarView: View {
             // マイ予定は groupPersonalByDate で別管理 (ここには通常来ない)
             return event.start
         case .ticket(let row):
-            return AppDatabase.parseDate(row.date)
+            return JSTDay.date(row.date)
         case .ticketPeriod(let row):
             // 帯は groupByDate で被覆日へ展開済み。アンカーは開始日。
-            return AppDatabase.parseDate(row.start)
+            return JSTDay.date(row.start)
         }
     }
 }
