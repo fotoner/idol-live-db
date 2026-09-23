@@ -111,6 +111,31 @@ impl LineupSummary<'_> {
     pub fn label(&self) -> String {
         self.lineup.label(self.present, self.total)
     }
+
+    /// アプリへ渡す形 (Web は Ref に解決した `LineupNote` を別に組む)。
+    pub fn note(&self) -> SetlistLineupNote {
+        SetlistLineupNote {
+            kind: self.lineup,
+            label: self.label(),
+            absent_in_cast_ids: self.absent_in_cast.iter().map(|id| id.to_string()).collect(),
+            missing_label: MISSING_LABEL.to_string(),
+        }
+    }
+}
+
+/// セトリ 1 行の歌唱者と原唱者 (オリメン) の関係。Web の公演ページと同じ規則・同じ文言。
+///
+/// 札の見出し (`オリメン 4/5`) と、歌っていない原唱者のうち**その公演には出ている人**
+/// (「いたのに歌わなかった」は出演者一覧からは読めない。公演にいない人は数に任せる)。
+#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
+pub struct SetlistLineupNote {
+    pub kind: Lineup,
+    /// `オリメン` / `オリメン+α` / `オリメン 4/5` / `オリメン不在`。
+    pub label: String,
+    /// 原唱者の並び順の idol_id。空なら名前の行は出さない。
+    pub absent_in_cast_ids: Vec<String>,
+    /// `absent_in_cast_ids` の前に置く言葉 ([`MISSING_LABEL`])。
+    pub missing_label: String,
 }
 
 /// 札を付ける行なら、その 1 行ぶんの答え。`full_cast` は [`is_full_cast`] の結果

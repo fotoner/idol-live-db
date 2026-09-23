@@ -19,7 +19,7 @@ use crate::domain::event_detail_queries::{
     SetlistEntryRecord, SetlistPerformerRecord, ShowRecord, ShowWithEventNameRecord,
     VenueDirectoryRecord,
 };
-use crate::domain::setlist_lineup::{self, Lineup};
+use crate::domain::setlist_lineup::{self, SetlistLineupNote};
 use crate::domain::screen_composition::SetlistDisplayMode;
 use crate::domain::collection_gap::{self as collection, AttendanceMarkRecord};
 use crate::domain::setlist_row_meta::{setlist_row_meta, SetlistRowMetaBundle};
@@ -98,21 +98,6 @@ pub fn is_character_live(performer_type: Option<String>) -> bool {
     queries::is_character_live(performer_type.as_deref())
 }
 
-/// セトリ 1 行の歌唱者と原唱者 (オリメン) の関係。Web の公演ページと同じ規則・同じ文言。
-///
-/// 札の見出し (`オリメン 4/5`) と、歌っていない原唱者のうち**その公演には出ている人**
-/// (「いたのに歌わなかった」は出演者一覧からは読めない。公演にいない人は数に任せる)。
-#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
-pub struct SetlistLineupNote {
-    pub kind: Lineup,
-    /// `オリメン` / `オリメン+α` / `オリメン 4/5` / `オリメン不在`。
-    pub label: String,
-    /// 原唱者の並び順の idol_id。空なら名前の行は出さない。
-    pub absent_in_cast_ids: Vec<String>,
-    /// `absent_in_cast_ids` の前に置く言葉 (`不参加`)。
-    pub missing_label: String,
-}
-
 fn id_set(ids: &[String]) -> BTreeSet<&str> {
     ids.iter().map(String::as_str).collect()
 }
@@ -133,13 +118,7 @@ pub fn setlist_lineup(
     let performers = id_set(&performer_ids);
     let cast = id_set(&cast_ids);
     let full_cast = setlist_lineup::is_full_cast(&cast, &performers);
-    let summary = setlist_lineup::summarize(&original, &performers, &cast, full_cast)?;
-    Some(SetlistLineupNote {
-        kind: summary.lineup,
-        label: summary.label(),
-        absent_in_cast_ids: summary.absent_in_cast.iter().map(|id| id.to_string()).collect(),
-        missing_label: setlist_lineup::MISSING_LABEL.to_string(),
-    })
+    setlist_lineup::summarize(&original, &performers, &cast, full_cast).map(|s| s.note())
 }
 
 /// 公演の出演者全員で歌う行なら `全員` の札 (出演者 2 人以上・歌唱者と完全一致)。

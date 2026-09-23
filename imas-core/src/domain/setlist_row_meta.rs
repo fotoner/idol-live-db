@@ -27,7 +27,7 @@ use crate::domain::performer_label::{setlist_performer_label, SetlistNaming};
 use crate::domain::screen_composition::{
     setlist_row_note_groups, SetlistDisplayMode, SetlistRowNoteGroupRecord,
 };
-use crate::domain::setlist_lineup::is_full_cast;
+use crate::domain::setlist_lineup::{is_full_cast, summarize, SetlistLineupNote};
 use crate::domain::setlist_sections::row_sections;
 use crate::domain::snapshot::Snapshot;
 use crate::domain::unit_queries::exact_matching_unit_names;
@@ -69,6 +69,11 @@ pub struct SetlistRowMetaRecord {
     /// この行から新しい区切りが始まるか (先頭行は必ず true)。**画面は true の行の前に
     /// `section_heading` の見出しを置くだけにする** — 隣と比べて塊を切る処理を持たない。
     pub starts_section: bool,
+    /// 原唱者 (オリメン) との関係の札 (`オリメン` / `オリメン+α` / `オリメン 4/5` /
+    /// `オリメン不在`) と、公演には出ているのにこの行で歌っていない原唱者。
+    /// 付けない行 (判定できない・ソロ曲を本人が歌う・全員曲の部分一致) は `None`。
+    /// 規則も文言も [`crate::domain::setlist_lineup`] (Web と同じ)。
+    pub lineup: Option<SetlistLineupNote>,
 }
 
 /// 公演 1 つぶんの添え物ひとまとめ。
@@ -132,6 +137,10 @@ pub fn setlist_row_meta(
         detail::is_character_live(snap.shows[show as usize].performer_type.as_deref());
     let cast_ids = detail::show_cast_idol_ids(snap, show_id);
     let cast: BTreeSet<&str> = cast_ids.iter().map(String::as_str).collect();
+    // オリメンの札で「公演には出ている」と言う範囲は、登録した出演者に歌唱メンバーを
+    // 足した和集合 (Web と同じ `show_presence`)。
+    let presence_ids = detail::show_cast_with_performers(snap, show_id);
+    let presence: BTreeSet<&str> = presence_ids.iter().map(String::as_str).collect();
     let active = active_units(snap, show);
     let performers_by_item = detail::setlist_performers_by_item(snap, show_id);
     let attended =
@@ -161,13 +170,22 @@ pub fn setlist_row_meta(
             let performer_indices: HashSet<u32> =
                 snap.performers_by_item[item as usize].iter().copied().collect();
             let full_cast = is_full_cast(&cast, &performer_ids);
+            let original_ids: Vec<&str> = snap
+                .song_artists(&song.id, Some("original"))
+                .into_iter()
+                .map(|idol| idol.id.as_str())
+                .collect();
+            // 全員曲の部分一致を札にしない判定は、行の「全員」チップと同じ答えを使う
+            // (チップが出ている行に「オリメン 4/5」が並ばないように)。
+            let lineup = summarize(&original_ids, &performer_ids, &presence, full_cast)
+                .map(|summary| summary.note());
 
             let label = setlist_performer_label(&SetlistNaming {
                 item_unit_name: row.unit_name.clone(),
                 song_unit_name: song.unit_name.clone(),
                 singer_label: song.singer_label.clone(),
                 lineup_unit_names: exact_matching_unit_names(snap, &performer_indices, &active),
-                has_original_artists: !snap.song_artists(&song.id, Some("original")).is_empty(),
+                has_original_artists: !original_ids.is_empty(),
                 is_full_cast: full_cast,
                 performer_names: performers
                     .iter()
@@ -195,6 +213,7 @@ pub fn setlist_row_meta(
                 note_groups,
                 section_heading: section.heading,
                 starts_section: section.starts,
+                lineup,
             }
         })
         .collect();
@@ -434,6 +453,46 @@ mod tests {
             .collect();
         assert_eq!(headings.last(), Some(&"アンコール"), "{headings:?}");
         assert!(headings.contains(&"本編"), "{headings:?}");
+    }
+
+    /// オリメンの札は Web と同じ規則・文言で行に載る (Android にも出せるように)。
+    /// 名前で示すのは「公演にいたのにこの行で歌っていない原唱者」だけ。
+    #[test]
+    fn オリメンの札が行に載る() {
+        use crate::domain::setlist_lineup::Lineup;
+        let snap = snap();
+        let mut noted = 0usize;
+        let mut named = 0usize;
+        for (show, items) in snap.setlist_items_by_show.iter().enumerate() {
+            if items.is_empty() {
+                continue;
+            }
+            let show_id = &snap.shows[show].id;
+            let presence: BTreeSet<String> =
+                detail::show_cast_with_performers(snap, show_id).into_iter().collect();
+            let metas = rows_of(snap, show_id, PerformerNameMode::IdolOnly, SetlistDisplayMode::Simple);
+            for (&item, meta) in items.iter().zip(&metas) {
+                let Some(note) = &meta.lineup else { continue };
+                noted += 1;
+                assert!(note.label.starts_with("オリメン"), "{}", note.label);
+                assert!(
+                    !(meta.is_full_cast && note.kind == Lineup::Partial),
+                    "全員チップの行に一部の札: {}",
+                    meta.item_id
+                );
+                let performers: HashSet<&str> = snap.performers_by_item[item as usize]
+                    .iter()
+                    .map(|&i| snap.idols[i as usize].id.as_str())
+                    .collect();
+                for id in &note.absent_in_cast_ids {
+                    assert!(presence.contains(id), "公演にいない人を名指し: {id}");
+                    assert!(!performers.contains(id.as_str()), "歌った人を名指し: {id}");
+                    named += 1;
+                }
+            }
+        }
+        assert!(noted > 1000, "札の付く行が少なすぎる: {noted}");
+        assert!(named > 100, "名指しが少なすぎる: {named}");
     }
 
     // ---- 自分の回収 ----
