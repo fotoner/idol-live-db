@@ -11,9 +11,10 @@ const OWNER = "001094.poll-owner";
 const VOTER = "001094.poll-voter";
 const ADMIN = "001094.poll-admin";
 
+// is_own_poll (呼び出した人のお題か) は Q-10 で足した。created_by はアプリの移行後に消す。
 const POLL_KEYS = [
   "candidate_scope", "created_at", "created_by", "description", "ends_at", "entry_count", "id",
-  "scope_brand_ids", "scope_entity_ids", "status", "target_type", "title", "total_votes",
+  "is_own_poll", "scope_brand_ids", "scope_entity_ids", "status", "target_type", "title", "total_votes",
 ];
 
 /** お題を直接入れる。ends_at は SQLite の datetime 修飾子 ("+1 day" 等)。 */
@@ -85,7 +86,7 @@ describe("POST /polls (お題の作成)", () => {
     expect(res.status).toBe(201);
     expect(Object.keys(res.body).sort()).toEqual(POLL_KEYS);
     expect(res.body).toMatchObject({
-      title: "好きな曲", description: "説明", target_type: "idol", created_by: OWNER, status: "active",
+      title: "好きな曲", description: "説明", target_type: "idol", created_by: OWNER, is_own_poll: true, status: "active",
       candidate_scope: "manual", scope_brand_ids: null, scope_entity_ids: ["b", "a"],
       total_votes: 0, entry_count: 0,
     });
@@ -144,6 +145,19 @@ describe("GET /polls と GET /polls/:id", () => {
 
     const past = await callJson("GET", "/polls?status=past");
     expect(past.body.map((p: any) => p.id)).toEqual(["ended"]);
+  });
+
+  it("is_own_poll: 呼び出した人が作ったお題だけ true。未ログインはすべて false", async () => {
+    await insertPoll("mine", { createdBy: VOTER });
+    await insertPoll("theirs");
+    const mine = await callJson("GET", "/polls", { headers: await bearer(VOTER) });
+    expect(Object.fromEntries(mine.body.map((p: any) => [p.id, p.is_own_poll]))).toEqual({ mine: true, theirs: false });
+    const anon = await callJson("GET", "/polls?anon=1");
+    expect(anon.body.map((p: any) => p.is_own_poll)).toEqual([false, false]);
+
+    expect((await callJson("GET", "/polls/mine", { headers: await bearer(VOTER) })).body.poll.is_own_poll).toBe(true);
+    expect((await callJson("GET", "/polls/mine", { headers: await bearer(OWNER) })).body.poll.is_own_poll).toBe(false);
+    expect((await callJson("GET", "/polls/mine")).body.poll.is_own_poll).toBe(false);
   });
 
   it("詳細: 候補を票数順で返し、自分が入れた候補に印を付ける。manual は 0 票の候補も並べる", async () => {

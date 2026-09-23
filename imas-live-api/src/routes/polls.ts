@@ -74,6 +74,9 @@ export async function handlePolls(ctx: RouteContext): Promise<Response | null> {
           description: r.description,
           target_type: r.target_type,
           created_by: r.created_by,
+          // 呼び出した人のお題か (削除の導線を出す判定)。アプリはこれに移り、created_by は後で消す。
+          // この応答は Cache-Control を付けない (エッジの共有キャッシュに載らない) ので、人ごとの値を入れてよい。
+          is_own_poll: uid !== "" && r.created_by === uid,
           created_at: r.created_at,
           ends_at: r.ends_at,
           status: r.status,
@@ -235,6 +238,7 @@ export async function handlePolls(ctx: RouteContext): Promise<Response | null> {
           description: poll.description,
           target_type: poll.target_type,
           created_by: poll.created_by,
+          is_own_poll: uid !== "" && poll.created_by === uid,
           created_at: poll.created_at,
           ends_at: poll.ends_at,
           status: poll.status,
@@ -357,6 +361,7 @@ export async function handlePolls(ctx: RouteContext): Promise<Response | null> {
           description: created.description,
           target_type: created.target_type,
           created_by: created.created_by,
+          is_own_poll: true,
           created_at: created.created_at,
           ends_at: created.ends_at,
           status: created.status,
