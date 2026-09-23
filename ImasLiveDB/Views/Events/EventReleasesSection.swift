@@ -134,7 +134,11 @@ struct EventReleasesSection: View {
     private func toggleOwned(_ release: EventRelease) {
         let now = !ownedIds.contains(release.id)
         AppAnalytics.tap("event_release.toggle_owned")
-        try? markService.setBool(.owned, entity: .release, id: release.id, value: now)
+        do {
+            try markService.setBool(.owned, entity: .release, id: release.id, value: now)
+        } catch {
+            LocalWriteFailure.report(error, action: "所有の記録")
+        }
         if now { ownedIds.insert(release.id) } else { ownedIds.remove(release.id) }
     }
 }

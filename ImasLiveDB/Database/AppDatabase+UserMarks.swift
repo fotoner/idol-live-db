@@ -34,6 +34,21 @@ extension AppDatabase {
         }
     }
 
+    /// 参加の記録 (有無と種別) を 1 トランザクションで書く。`type` が nil なら取り消し。
+    ///
+    /// 有無 (bool_value) と種別 (text_value) を別々に書くと、間で失敗したときに
+    /// 「参加しているのに種別が無い / 取り消したのに種別が残る」行ができる。
+    func setAttendanceMark(entity: UserMarkEntity, id: String, type: AttendanceType?) throws {
+        try upsertUserMarkRow(entity: entity, id: id, kind: .attended) { existing in
+            existing.boolValue = type != nil
+            existing.textValue = type?.rawValue
+        } makeNew: {
+            UserMark(entityType: entity.rawValue, entityId: id, kind: UserMarkKind.attended.rawValue,
+                     boolValue: type != nil, textValue: type?.rawValue,
+                     updatedAt: ISO8601DateFormatter.shared.string(from: Date()))
+        }
+    }
+
     private func upsertUserMarkRow(
         entity: UserMarkEntity,
         id: String,

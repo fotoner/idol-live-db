@@ -282,15 +282,8 @@ final class UserMarkService {
 
     /// 参加種別を設定する。nil で不参加 (マーク解除)。
     func setAttendance(entity: UserMarkEntity, id: String, type: AttendanceType?) throws {
-        if let type {
-            try db.upsertUserMark(entity: entity, id: id, kind: .attended, boolValue: true)
-            try db.upsertUserMarkText(entity: entity, id: id, kind: .attended, text: type.rawValue)
-            updateBoolCache(entity, .attended, id, true)
-        } else {
-            try db.upsertUserMark(entity: entity, id: id, kind: .attended, boolValue: false)
-            try db.upsertUserMarkText(entity: entity, id: id, kind: .attended, text: nil)
-            updateBoolCache(entity, .attended, id, false)
-        }
+        try db.setAttendanceMark(entity: entity, id: id, type: type)
+        updateBoolCache(entity, .attended, id, type != nil)
         // 参加ライブの登録は「一区切りついた瞬間」なのでレビュー依頼の好機に数える。
         // 取り消しは数えない (良い体験ではないので)。
         if type != nil { ReviewPrompt.noteMilestone() }

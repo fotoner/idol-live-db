@@ -108,7 +108,11 @@ struct EventAttendanceSheet: View {
     }
 
     private func set(show: Show, type: AttendanceType?) {
-        try? markService.setAttendance(entity: .show, id: show.id, type: type)
+        do {
+            try markService.setAttendance(entity: .show, id: show.id, type: type)
+        } catch {
+            LocalWriteFailure.report(error, action: "参加の記録")
+        }
         if let type { attendance[show.id] = type } else { attendance.removeValue(forKey: show.id) }
         onChange()
     }
@@ -116,7 +120,11 @@ struct EventAttendanceSheet: View {
     private func toggleAllLive() {
         let target: AttendanceType? = allLive ? nil : .live
         for show in shows {
-            try? markService.setAttendance(entity: .show, id: show.id, type: target)
+            do {
+                try markService.setAttendance(entity: .show, id: show.id, type: target)
+            } catch {
+                LocalWriteFailure.report(error, action: "参加の記録")
+            }
         }
         reload()
         onChange()

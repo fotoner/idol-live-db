@@ -290,8 +290,15 @@ struct LedgerView: View {
         }
     }
 
+    /// 保存に成功してから一覧を直す (失敗しても一覧だけ直すと、保存済みに見えて
+    /// 次に開くと消えている)。
     private func save(_ expense: Expense) {
-        try? database.saveExpense(expense)
+        do {
+            try database.saveExpense(expense)
+        } catch {
+            LocalWriteFailure.report(error, action: "家計簿の保存")
+            return
+        }
         if let index = expenses.firstIndex(where: { $0.id == expense.id }) {
             expenses[index] = expense
         } else {
@@ -302,7 +309,12 @@ struct LedgerView: View {
     }
 
     private func delete(_ expense: Expense) {
-        try? database.deleteExpense(id: expense.id)
+        do {
+            try database.deleteExpense(id: expense.id)
+        } catch {
+            LocalWriteFailure.report(error, action: "家計簿の削除")
+            return
+        }
         expenses.removeAll { $0.id == expense.id }
         changeToken += 1
     }

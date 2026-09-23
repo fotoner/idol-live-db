@@ -205,7 +205,11 @@ struct IdolDetailView: View {
                     onColor: t.accent,
                     onText: t.onAccent
                 ) {
-                    try? markService.toggle(.myPick, entity: .idol, id: idol.id)
+                    do {
+                        try markService.toggle(.myPick, entity: .idol, id: idol.id)
+                    } catch {
+                        LocalWriteFailure.report(error, action: "担当の切り替え")
+                    }
                 }
                 heroActionButton(
                     title: "お気に入り",
@@ -216,7 +220,11 @@ struct IdolDetailView: View {
                     onText: t.chipText,
                     ghost: true
                 ) {
-                    try? markService.toggle(.favorite, entity: .idol, id: idol.id)
+                    do {
+                        try markService.toggle(.favorite, entity: .idol, id: idol.id)
+                    } catch {
+                        LocalWriteFailure.report(error, action: "お気に入りの切り替え")
+                    }
                 }
                 Spacer(minLength: 0)
                 // メモ。担当/お気に入りと同じピル型ボタンに揃える (UserMarkBar のタイル型は

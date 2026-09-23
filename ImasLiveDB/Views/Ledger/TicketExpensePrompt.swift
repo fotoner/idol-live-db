@@ -1,3 +1,4 @@
+import os
 import SwiftUI
 
 /// 参加が付いたことを知らせる通知。
@@ -54,7 +55,14 @@ struct TicketExpensePromptModifier: ViewModifier {
         guard !candidates.isEmpty else { return }
 
         // 既にこの公演のチケット代を付けていれば聞かない (二重計上を防ぐ)。
-        let existing = (try? database.expenses(showId: showId)) ?? []
+        // 読めなかったときも聞かない (付けてあるか分からないまま聞くと二重計上になりうる)。
+        let existing: [Expense]
+        do {
+            existing = try database.expenses(showId: showId)
+        } catch {
+            Logger.database.error("ticket_prompt_read_failed: \(error.localizedDescription, privacy: .public)")
+            return
+        }
         let ticketKey = expenseCategoryKey(category: .ticket)
         guard !existing.contains(where: { $0.category == ticketKey }) else { return }
 
@@ -80,7 +88,11 @@ struct TicketExpensePromptModifier: ViewModifier {
             eventId: request.eventId,
             note: note
         )
-        try? database.saveExpense(expense)
+        do {
+            try database.saveExpense(expense)
+        } catch {
+            LocalWriteFailure.report(error, action: "チケット代の記録")
+        }
     }
 }
 

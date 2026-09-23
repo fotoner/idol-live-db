@@ -25,11 +25,15 @@ struct NoteEditorSheet: View {
                         Button("保存") {
                             AppAnalytics.tap("note_editor.save")
                             let trimmed = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-                            try? markService.setNote(
-                                entity: entity,
-                                id: entityId,
-                                text: trimmed.isEmpty ? nil : trimmed
-                            )
+                            do {
+                                try markService.setNote(
+                                    entity: entity,
+                                    id: entityId,
+                                    text: trimmed.isEmpty ? nil : trimmed
+                                )
+                            } catch {
+                                LocalWriteFailure.report(error, action: "メモの保存")
+                            }
                             dismiss()
                         }
                         .fontWeight(.semibold)

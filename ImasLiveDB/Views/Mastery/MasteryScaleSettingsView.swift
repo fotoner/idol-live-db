@@ -169,7 +169,11 @@ struct MasteryScaleSettingsView: View {
 
     private func apply() {
         guard isValid else { return }
-        try? marks.setScale(MasteryScale(labels: trimmed))
+        do {
+            try marks.setScale(MasteryScale(labels: trimmed))
+        } catch {
+            LocalWriteFailure.report(error, action: "習熟度の段階の保存")
+        }
         labels = marks.scale.labels
     }
 }

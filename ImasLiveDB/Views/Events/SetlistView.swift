@@ -641,7 +641,11 @@ struct SetlistView: View {
 
     /// この公演の参加種別を設定 (nil=取消)。UserMarkBar 表示を更新。
     private func setAttendance(_ type: AttendanceType?) {
-        try? UserMarkService.shared.setAttendance(entity: .show, id: show.id, type: type)
+        do {
+            try UserMarkService.shared.setAttendance(entity: .show, id: show.id, type: type)
+        } catch {
+            LocalWriteFailure.report(error, action: "参加の記録")
+        }
         attendanceVersion &+= 1
     }
 

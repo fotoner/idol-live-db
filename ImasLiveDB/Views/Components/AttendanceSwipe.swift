@@ -45,7 +45,11 @@ struct AttendanceSwipeActions: ViewModifier {
     }
 
     private func set(_ type: AttendanceType?) {
-        try? marks.setAttendance(entity: .show, id: show.id, type: type)
+        do {
+            try marks.setAttendance(entity: .show, id: show.id, type: type)
+        } catch {
+            LocalWriteFailure.report(error, action: "参加の記録")
+        }
         onChange()
     }
 }

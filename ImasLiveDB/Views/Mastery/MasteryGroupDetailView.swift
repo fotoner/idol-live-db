@@ -309,7 +309,11 @@ struct MasteryGroupDetailView: View {
 
     private func revert(_ u: UndoState) {
         for (id, level) in u.previous {
-            try? marks.setMastery(songId: id, level: level)
+            do {
+                try marks.setMastery(songId: id, level: level)
+            } catch {
+                LocalWriteFailure.report(error, action: "習熟度の取り消し")
+            }
         }
         withAnimation { undo = nil }
     }
