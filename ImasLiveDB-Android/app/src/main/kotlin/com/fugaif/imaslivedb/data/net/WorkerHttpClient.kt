@@ -105,6 +105,12 @@ class WorkerHttpClient(
         return send(method, path, body, sessionToken())
     }
 
+    /**
+     * いまのセッション (無ければ null)。利用者ごとの値を覚えておく側が「誰の値か」を
+     * 見分けるのに使う (サインアウト・別アカウントへの切り替えで前の人の値を出さない)。
+     */
+    fun currentSession(): String? = sessionToken()
+
     private fun send(method: String, path: String, body: JSONObject?, token: String?): WorkerResponse {
         val headers = buildMap {
             put("Content-Type", "application/json")

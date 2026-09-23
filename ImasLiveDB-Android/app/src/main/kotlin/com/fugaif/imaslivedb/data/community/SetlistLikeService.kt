@@ -19,6 +19,10 @@ import java.net.URLEncoder
  * 同じ公演のセトリを開き直すたびにサーバを叩くのを抑えるためのもの。like 数は他人の操作でも
  * 増減するので TTL は短く (60 秒)、自分の like/unlike は該当曲だけその場で patch する。
  * キャッシュを画面をまたいで共有するため、インスタンスはアプリで 1 つ (AppModule)。
+ *
+ * 覚え書きは「誰のセッションで取ったか」ごとに持つ。サインアウト・別アカウントへの切り替え・
+ * セッションの失効の後は鍵が変わるので、前の人の has_user_liked を出さない
+ * (通知で消して回ると、消す口を 1 つ書き忘れただけで漏れる)。
  */
 class SetlistLikeService(private val http: WorkerHttpClient) {
 
@@ -30,12 +34,18 @@ class SetlistLikeService(private val http: WorkerHttpClient) {
 
     private class CacheHit(val entries: List<LikeEntry>, val atMillis: Long)
 
-    private val cache = HashMap<String, CacheHit>()
+    /** (セッション, 公演) の鍵。セッションが違えば別の覚え書き。 */
+    private data class CacheKey(val session: String?, val showId: String)
+
+    private val cache = HashMap<CacheKey, CacheHit>()
 
     /** 公演の全曲ぶんの集計。TTL 内なら再取得しない。 */
     suspend fun fetch(showId: String): List<LikeEntry> = withContext(Dispatchers.IO) {
+        val key = CacheKey(http.currentSession(), showId)
         synchronized(cache) {
-            cache[showId]?.takeIf { System.currentTimeMillis() - it.atMillis < CACHE_TTL_MS }
+            // 前のセッションの覚え書きはもう出さないので捨てる。
+            cache.keys.removeAll { it.session != key.session }
+            cache[key]?.takeIf { System.currentTimeMillis() - it.atMillis < CACHE_TTL_MS }
         }?.let { return@withContext it.entries }
 
         val (code, body) = request("GET", "/shows/${enc(showId)}/likes")
@@ -47,7 +57,7 @@ class SetlistLikeService(private val http: WorkerHttpClient) {
                 LikeEntry(o.optString("song_id"), o.optInt("like_count"), o.optBoolean("has_user_liked"))
             }
         }.getOrDefault(emptyList())
-        synchronized(cache) { cache[showId] = CacheHit(entries, System.currentTimeMillis()) }
+        synchronized(cache) { cache[key] = CacheHit(entries, System.currentTimeMillis()) }
         entries
     }
 
@@ -70,7 +80,7 @@ class SetlistLikeService(private val http: WorkerHttpClient) {
                 likeCount = json.optInt("like_count"),
                 hasUserLiked = json.optBoolean("liked")
             )
-            patchCache(showId, entry)
+            patchCache(CacheKey(http.currentSession(), showId), entry)
             entry
         }
 
@@ -78,17 +88,12 @@ class SetlistLikeService(private val http: WorkerHttpClient) {
      * 自分の操作の結果だけキャッシュに反映する。取得時刻 (atMillis) は据え置きで、
      * 集計そのものの鮮度 (他人の票) は延ばさない。
      */
-    private fun patchCache(showId: String, entry: LikeEntry) {
+    private fun patchCache(key: CacheKey, entry: LikeEntry) {
         synchronized(cache) {
-            val hit = cache[showId] ?: return
+            val hit = cache[key] ?: return
             val entries = hit.entries.filter { it.songId != entry.songId } + entry
-            cache[showId] = CacheHit(entries, hit.atMillis)
+            cache[key] = CacheHit(entries, hit.atMillis)
         }
-    }
-
-    /** サインアウト / アカウント切替時に呼ぶ。has_user_liked は利用者ごとの値なので全部捨てる。 */
-    fun clearCache() {
-        synchronized(cache) { cache.clear() }
     }
 
     private fun enc(s: String): String = URLEncoder.encode(s, "UTF-8").replace("+", "%20")
