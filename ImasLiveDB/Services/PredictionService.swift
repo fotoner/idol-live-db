@@ -211,3 +211,14 @@ enum PredictionError: LocalizedError {
         }
     }
 }
+
+// MARK: - SetlistPredictionVoting
+
+/// `SetlistPredictionVoting` を `PredictionService` に繋ぐ口。
+/// `PredictionService` は main actor にいるので、合成ルート (nonisolated) から
+/// `.shared` を掴まずに済むよう、呼ばれたときに引く。
+struct PredictionServiceVoting: SetlistPredictionVoting {
+    func vote(showId: String, songId: String) async throws -> PredictionVoteResult {
+        try await PredictionService.shared.vote(showId: showId, songId: songId)
+    }
+}

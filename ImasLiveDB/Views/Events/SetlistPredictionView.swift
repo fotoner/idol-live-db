@@ -31,6 +31,22 @@ struct SetlistPredictionView: View {
     /// 複数選択に対応 (1回の起動でまとめて予想追加できる)。
     let presentSongPicker: (@escaping ([Song]) -> Void) -> Void
 
+    /// 機械予測の節 (コアの `setlistForecast`)。
+    @State private var forecast: SetlistForecastViewModel
+
+    init(
+        showId: String,
+        showName: String,
+        seed: String? = nil,
+        presentSongPicker: @escaping (@escaping ([Song]) -> Void) -> Void
+    ) {
+        self.showId = showId
+        self.showName = showName
+        self.seed = seed
+        self.presentSongPicker = presentSongPicker
+        _forecast = State(initialValue: SetlistForecastViewModel(showId: showId))
+    }
+
     @State private var predictions: [SetlistPrediction] = []
     /// 「歌唱メンバー予想」を展開中の曲 (songId)。行ローカル @State だと List 再描画/
     /// id 重複時に展開状態が他行へ漏れる (開いたら別の曲も開く) ため、親で songId をキーに保持する。
@@ -81,6 +97,11 @@ struct SetlistPredictionView: View {
                 .listRowInsets(EdgeInsets(top: DS.sp4, leading: DS.sp5, bottom: DS.sp3, trailing: DS.sp5))
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
+
+            forecastBody
+                .listRowInsets(EdgeInsets(top: DS.sp4, leading: DS.sp5, bottom: DS.sp3, trailing: DS.sp5))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
         }
         .overlay {
             if isCreatingPlaylist {
@@ -108,6 +129,7 @@ struct SetlistPredictionView: View {
             Text(alertMessage)
         }
         .task { await loadPredictions() }
+        .task { await forecast.load() }
     }
 
     /// 予想リスト本体。共通の ImasListContainer カードに詰めて、旧 List 行の強いマージンを解消。
@@ -158,6 +180,55 @@ struct SetlistPredictionView: View {
                 }
             }
         }
+    }
+
+    /// 機械予測の節。読み込みに失敗したとき・出す曲が無いときは節ごと出さない。
+    @ViewBuilder
+    private var forecastBody: some View {
+        switch forecast.phase {
+        case .loading:
+            VStack(alignment: .leading, spacing: DS.sp2) {
+                forecastHeading(note: nil)
+                ImasInlineLoading()
+            }
+        case .unavailable:
+            EmptyView()
+        case .loaded:
+            let songs = forecast.visibleSongs(predictedSongIds: Set(predictions.map(\.songId)))
+            if !songs.isEmpty {
+                let canAdd = !authService.isSignedIn || remaining > 0
+                VStack(alignment: .leading, spacing: DS.sp2) {
+                    forecastHeading(note: forecast.castUnannouncedNote)
+                    ImasListContainer {
+                        ForEach(Array(songs.enumerated()), id: \.element.songId) { index, song in
+                            if index > 0 {
+                                ImasRowDivider()
+                            }
+                            ForecastRowView(
+                                song: song,
+                                seed: seed,
+                                canPromote: canAdd && forecast.promotingSongId == nil,
+                                isPromoting: forecast.promotingSongId == song.songId,
+                                onPromote: { await promoteForecast(songId: song.songId) }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// 「機械予測」の見出しと注記。出演者未発表の注記はコアの label をそのまま出す。
+    private func forecastHeading(note: String?) -> some View {
+        VStack(alignment: .leading, spacing: DS.sp1) {
+            Text("機械予測").font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
+            Text("過去のセトリから推定").font(.imasCaption).foregroundStyle(DS.ink3)
+            if let note {
+                Label(note, systemImage: "exclamationmark.circle")
+                    .font(.imasCaption).foregroundStyle(DS.ink2)
+            }
+        }
+        .padding(.leading, DS.sp1)
     }
 
     /// 自分の予想をまとめてシェアする導線。1票も入れていない間は出さない。
@@ -344,6 +415,21 @@ struct SetlistPredictionView: View {
             } else {
                 _ = try await predictionService.vote(showId: showId, songId: prediction.songId)
             }
+            await loadPredictions()
+        } catch {
+            errorMessage = error.localizedDescription
+            AppAnalytics.event("prediction_vote_failed")
+        }
+    }
+
+    /// 機械予測の曲を予想に入れる (格上げ)。認証・エラーの扱いは `handleVote` と同じ。
+    private func promoteForecast(songId: String) async {
+        guard authService.isSignedIn else {
+            requireLogin { Task { await promoteForecast(songId: songId) } }
+            return
+        }
+        do {
+            try await forecast.promote(songId: songId)
             await loadPredictions()
         } catch {
             errorMessage = error.localizedDescription
@@ -548,3 +634,83 @@ private struct PredictionRowView: View {
     }
 }
 
+
+// MARK: - ForecastRowView
+
+/// 機械予測の 1 行。順位・曲名・点数・理由の札 (コアの label) と「予想に入れる」。
+private struct ForecastRowView: View {
+    @Environment(\.colorScheme) private var scheme
+    let song: ForecastSongRecord
+    var seed: String? = nil
+    let canPromote: Bool
+    let isPromoting: Bool
+    let onPromote: () async -> Void
+
+    /// 札は表示の都合で先頭 2 個まで (並びはコアの優先順)。
+    private var reasonLabels: [String] { song.reasons.prefix(2).map(\.label) }
+
+    var body: some View {
+        let t = ImasTheme.derive(seed: seed, scheme: scheme)
+        HStack(alignment: .top, spacing: DS.sp3) {
+            Text("\(song.rank)")
+                .font(.imasCaption.monospacedDigit())
+                .foregroundStyle(DS.ink3)
+                .frame(width: 22, alignment: .trailing)
+                .padding(.top, 2)
+
+            VStack(alignment: .leading, spacing: DS.sp2) {
+                HStack(alignment: .firstTextBaseline, spacing: DS.sp2) {
+                    Text(song.title)
+                        .font(.imasSubhead.weight(.semibold))
+                        .foregroundStyle(DS.ink)
+                        .lineLimit(2)
+                    Text(song.score.formatted(.percent.precision(.fractionLength(0))))
+                        .font(.imasCaption.monospacedDigit().weight(.semibold))
+                        .foregroundStyle(DS.ink2)
+                }
+                if !reasonLabels.isEmpty {
+                    // 札は省略せずに全文を出す。横に収まらなければ縦に積む。
+                    ViewThatFits(in: .horizontal) {
+                        HStack(spacing: DS.sp1) { reasonChips }
+                        VStack(alignment: .leading, spacing: DS.sp1) { reasonChips }
+                    }
+                }
+            }
+
+            Spacer(minLength: 4)
+
+            Button {
+                Task { await onPromote() }
+            } label: {
+                Group {
+                    if isPromoting {
+                        ProgressView().controlSize(.small)
+                    } else {
+                        Text("予想に入れる").font(.imasCaption.weight(.semibold))
+                    }
+                }
+                .foregroundStyle(canPromote ? t.accent : DS.ink3)
+                .padding(.horizontal, 11).padding(.vertical, 7)
+                .background(t.chipBg, in: Capsule())
+                .contentShape(Capsule())
+            }
+            .buttonStyle(.borderless)
+            .disabled(!canPromote)
+            .accessibilityLabel("\(song.title)を予想に入れる")
+        }
+        .padding(.horizontal, DS.sp4)
+        .padding(.vertical, DS.sp3)
+        .accessibilityElement(children: .contain)
+    }
+
+    private var reasonChips: some View {
+        ForEach(reasonLabels, id: \.self) { label in
+            Text(label)
+                .font(.imasScaled(11, weight: .semibold))
+                .foregroundStyle(DS.ink2)
+                .fixedSize()
+                .padding(.horizontal, 8).padding(.vertical, 3)
+                .background(DS.fill, in: Capsule())
+        }
+    }
+}

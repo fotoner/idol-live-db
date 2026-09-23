@@ -53,6 +53,9 @@ final class AppContainer: Sendable {
     /// 披露実績の集計 (共起曲 / 歌唱者) 読み取りの実装。
     let performanceEvidenceReading: any PerformanceEvidenceReading
 
+    /// セトリの機械予測の読み取りの実装。
+    let setlistForecastReading: any SetlistForecastReading
+
     private init() {
         let snapshot = CoreSnapshotManager()
         coreSnapshot = snapshot
@@ -68,6 +71,7 @@ final class AppContainer: Sendable {
         timelineReading = CoreTimelineRepository(snapshot: snapshot)
         globalSearchReading = CoreGlobalSearchRepository(snapshot: snapshot)
         performanceEvidenceReading = CorePerformanceEvidenceRepository(snapshot: snapshot)
+        setlistForecastReading = CoreSetlistForecastRepository(snapshot: snapshot)
         editFeedReading = GRDBEditFeedRepository(database: .shared, snapshot: snapshot)
 
         // ローカル編集 (モデレーターの .applied 経路やセトリ取込) は CloudKit sync を通らず
@@ -89,6 +93,9 @@ final class AppContainer: Sendable {
             snapshot.requestLoad()
         }
     }
+
+    /// セトリ予想への投票の実装 (Worker D1 集計 API)。
+    let setlistPredictionVoting: any SetlistPredictionVoting = PredictionServiceVoting()
 
     /// 「みんなの投票」のユースケース実装 (Worker D1 集計 API)。
     let communityVoting: any CommunityVoting = CommunityAPI.shared
