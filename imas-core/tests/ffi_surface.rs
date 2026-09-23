@@ -196,6 +196,7 @@ declare_and_call_checksums! {
     uniffi_imas_core_checksum_func_show_display_title,
     uniffi_imas_core_checksum_func_show_time_block,
     uniffi_imas_core_checksum_func_similar_idols_fetch_limit,
+    uniffi_imas_core_checksum_func_simple_lyrics_query,
     uniffi_imas_core_checksum_func_song_singer_quiz_answer,
     uniffi_imas_core_checksum_func_song_singer_quiz_hint_state,
     uniffi_imas_core_checksum_func_song_singer_quiz_pool_estimate,

@@ -85,6 +85,7 @@ pub mod event_hero;
 pub mod search_match_text;
 pub mod week_layout;
 pub mod notification_plan;
+pub mod lyrics_query;
 pub mod relative_time;
 pub mod auth_rules;
 pub mod share_text;
