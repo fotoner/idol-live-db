@@ -389,7 +389,10 @@ enum TicketDateKind: String, Sendable {
     case deadline   // 申込締切
     case lottery    // 当落発表
 
-    var label: String { self == .deadline ? "申込締切" : "当落発表" }
+    /// 語はコアの vocabulary (値は events の列名)。
+    var label: String {
+        Vocab.ticketDate(self == .deadline ? "ticket_deadline" : "ticket_lottery_date")?.label ?? ""
+    }
     var icon: String { self == .deadline ? "ticket.fill" : "envelope.open.fill" }
 }
 

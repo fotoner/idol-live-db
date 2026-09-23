@@ -222,7 +222,7 @@ struct DayEntryRow: View {
         let range = [Self.md(row.start), Self.md(row.end)].compactMap { $0 }.joined(separator: " 〜 ")
         return rowShell(
             seed: nil,
-            title: "受付期間 ・ \(row.eventName)",
+            title: "\(Vocab.table.ticketPeriodLabel) ・ \(row.eventName)",
             subtitle: range.isEmpty ? "チケット受付期間" : "チケット受付  \(range)",
             leading: { TicketIconAvatar(systemImage: "calendar.badge.clock", color: ImasTheme.derive(seed: CalendarEntry.ThemeSeed.ticket, scheme: scheme).accent) },
             trailing: { chevron }

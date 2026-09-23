@@ -17,15 +17,9 @@ enum EventKind: String, Codable, Sendable, CaseIterable {
     case radio
     case stream
 
-    /// UI 表示用の短いラベル
+    /// UI 表示用の短いラベル (語はコアの vocabulary)。
     var displayLabel: String {
-        switch self {
-        case .live:         return "ライブ"
-        case .festival:     return "フェス"
-        case .releaseEvent: return "リリイベ"
-        case .radio:        return "ラジオ"
-        case .stream:       return "配信"
-        }
+        Vocab.eventKind(rawValue)?.shortLabel ?? rawValue
     }
 
     /// SF Symbol
@@ -59,17 +53,9 @@ enum EventType: String, Codable, Sendable, CaseIterable {
     case broadcast
     case live
 
-    /// UI 表示用の短いラベル。
+    /// UI 表示用の短いラベル (語はコアの vocabulary)。
     var displayLabel: String {
-        switch self {
-        case .anniversary:   return "周年"
-        case .orchestra:     return "オーケストラ"
-        case .externalEvent: return "外部イベント"
-        case .birthday:      return "バースデー"
-        case .releaseEvent:  return "リリイベ"
-        case .broadcast:     return "番組・配信"
-        case .live:          return "ライブ"
-        }
+        Vocab.eventType(rawValue)?.shortLabel ?? rawValue
     }
 }
 
@@ -114,14 +100,6 @@ struct Event: Codable, FetchableRecord, PersistableRecord, Identifiable, Hashabl
         return raw.split(separator: ",")
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
-    }
-
-    /// primary brand_id または joint_brand_ids のいずれかが selected に含まれるか。
-    /// selected が空のときは常に true (= フィルタ無し)。
-    func matchesBrandFilter(_ selected: Set<String>) -> Bool {
-        guard !selected.isEmpty else { return true }
-        if let primary = brandId, selected.contains(primary) { return true }
-        return jointBrandIdList.contains(where: selected.contains)
     }
 
     /// `kind` 文字列を列挙型として返す。未知値は `.live` にフォールバック。

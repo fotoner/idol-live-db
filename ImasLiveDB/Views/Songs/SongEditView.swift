@@ -46,7 +46,8 @@ struct SongEditView: View {
     @State private var errorMessage: String?
     @State private var requestSent = false
 
-    private let songTypes = ["solo", "unit", "all", "original"]
+    /// 選べる曲種別 (値と語はコアの vocabulary。マスタにある 5 種)。
+    private let songTypes = Vocab.table.songTypes
 
     /// 既存編集用。
     init(song: Song) {
@@ -110,7 +111,7 @@ struct SongEditView: View {
                         ForEach(allBrands) { Text($0.name).tag($0.id) }
                     }
                     Picker("種別", selection: $songType) {
-                        ForEach(songTypes, id: \.self) { Text(songTypeLabel($0)).tag($0) }
+                        ForEach(songTypes, id: \.value) { Text($0.shortLabel).tag($0.value) }
                     }
                     TextField("ユニット名", text: $unitName)
                 }
@@ -248,16 +249,6 @@ struct SongEditView: View {
             .compactMap { idolById[$0]?.name }
             .sorted()
             .joined(separator: " / ")
-    }
-
-    private func songTypeLabel(_ type: String) -> String {
-        switch type {
-        case "solo": return "ソロ"
-        case "unit": return "ユニット"
-        case "all": return "全体曲"
-        case "original": return "オリジナル"
-        default: return type
-        }
     }
 
     private var savingOverlay: some View {

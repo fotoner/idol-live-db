@@ -302,9 +302,10 @@ struct SongFilterView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 6) {
                 songTypeChip(value: nil, label: "全て")
-                songTypeChip(value: "solo", label: "ソロ")
-                songTypeChip(value: "unit", label: "ユニット")
-                songTypeChip(value: "all", label: "全体曲")
+                // 絞り込みは今までどおり先頭の 3 種 (ソロ / ユニット / 全体曲)。語はコアの vocabulary。
+                ForEach(Vocab.table.songTypes.prefix(3), id: \.value) { term in
+                    songTypeChip(value: term.value, label: term.shortLabel)
+                }
             }
         }
     }

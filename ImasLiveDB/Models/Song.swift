@@ -73,23 +73,9 @@ struct Song: Codable, FetchableRecord, PersistableRecord, Identifiable, Hashable
 
     var isRemix: Bool { parentSongId != nil }
 
-    /// 参加ブランド (`brandId` が先頭、続いて `jointBrandIds`)。
-    var brandIds: [String] {
-        ([brandId].compactMap { $0 } + (jointBrandIds?.split(separator: ",").map(String.init) ?? []))
-            .filter { !$0.isEmpty }
-    }
-
-    /// 日本語表示用の楽曲タイプラベル
+    /// 日本語表示用の楽曲タイプラベル (語はコアの vocabulary)。知らない値は生値のまま出す。
     var songTypeLabel: String {
-        switch songType {
-        case "solo": return "ソロ"
-        // "group" は廃止したが、古い local DB が CloudKit pull されるまでの互換ラベル
-        case "unit", "group": return "ユニット"
-        case "all": return "全体曲"
-        case "original": return "オリジナル"
-        case "unknown": return "不明"
-        default: return songType
-        }
+        Vocab.songType(songType)?.shortLabel ?? songType
     }
 
     // MARK: - Associations

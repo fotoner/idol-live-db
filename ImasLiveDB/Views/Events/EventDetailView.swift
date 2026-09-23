@@ -433,10 +433,10 @@ struct EventDetailView: View {
     private var ticketRows: [TicketRow] {
         var rows: [TicketRow] = []
         if let deadline = event.ticketDeadline, !deadline.isEmpty {
-            rows.append(.labeled(key: "申込期限", value: deadline))
+            rows.append(.labeled(key: Vocab.ticketDate("ticket_deadline")?.label ?? "", value: deadline))
         }
         if let lottery = event.ticketLotteryDate, !lottery.isEmpty {
-            rows.append(.labeled(key: "当落発表", value: lottery))
+            rows.append(.labeled(key: Vocab.ticketDate("ticket_lottery_date")?.label ?? "", value: lottery))
         }
         if let url = URL.safeHTTP(string: event.ticketUrl) {
             rows.append(.link(url))

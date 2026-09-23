@@ -10,16 +10,15 @@ enum TagDomain {
 
 /// タグカテゴリの候補。ドメインごとに語彙が異なる (曲=ムード/シーン等、アイドル=性格/魅力等) ので
 /// tags/idol_tag_master/unit_tag_master 分離にあわせてここも分ける。
+/// 語と並びはコアの vocabulary。
 enum TagCategoryOptions {
-    static let song: [(value: String, label: String)] = [
-        ("mood", "ムード"), ("scene", "シーン"), ("special", "特別"), ("free", "フリー"),
-    ]
-    static let idol: [(value: String, label: String)] = [
-        ("personality", "性格"), ("charm", "魅力・外見"), ("talent", "特技"), ("free", "フリー"),
-    ]
-    static let unit: [(value: String, label: String)] = [
-        ("concept", "コンセプト"), ("mood", "雰囲気"), ("charm", "魅力"), ("free", "フリー"),
-    ]
+    static let song = pairs(Vocab.table.songTagCategories)
+    static let idol = pairs(Vocab.table.idolTagCategories)
+    static let unit = pairs(Vocab.table.unitTagCategories)
+
+    private static func pairs(_ terms: [VocabularyTerm]) -> [(value: String, label: String)] {
+        terms.map { ($0.value, $0.label) }
+    }
 
     static func options(for domain: TagDomain) -> [(value: String, label: String)] {
         switch domain {
@@ -77,7 +76,7 @@ struct TagCreateSheet: View {
                     VStack(alignment: .leading, spacing: DS.sp3) {
                         ImasSectionHeader(title: "カテゴリ（任意）", tight: true)
                         FlowLayout(spacing: DS.sp2) {
-                            categoryChip(value: "", label: "なし")
+                            categoryChip(value: "", label: Vocab.table.tagCategoryNoneLabel)
                             ForEach(TagCategoryOptions.options(for: domain), id: \.value) { cat in
                                 categoryChip(value: cat.value, label: cat.label)
                             }

@@ -41,7 +41,7 @@ struct TagEditSheet: View {
                     VStack(alignment: .leading, spacing: DS.sp3) {
                         ImasSectionHeader(title: "カテゴリ", tight: true)
                         FlowLayout(spacing: DS.sp2) {
-                            categoryChip(value: "", label: "なし")
+                            categoryChip(value: "", label: Vocab.table.tagCategoryNoneLabel)
                             ForEach(TagCategoryOptions.options(for: domain), id: \.value) { cat in
                                 categoryChip(value: cat.value, label: cat.label)
                             }

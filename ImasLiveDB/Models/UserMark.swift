@@ -21,12 +21,9 @@ enum AttendanceType: String, Codable, CaseIterable, Sendable {
     case stream      // 配信参加
     case liveViewing = "live_viewing" // ライブビューイング参加
 
+    /// 語はコアの vocabulary (券の形態も同じ語)。
     var label: String {
-        switch self {
-        case .live:        return "現地"
-        case .stream:      return "配信"
-        case .liveViewing: return "LV"
-        }
+        Vocab.attendanceType(rawValue)?.shortLabel ?? rawValue
     }
 
     var icon: String {
