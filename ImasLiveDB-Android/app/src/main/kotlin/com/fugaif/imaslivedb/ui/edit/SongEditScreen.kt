@@ -97,7 +97,7 @@ fun SongEditScreen(
         val module = AppModule.from(context)
         brands = runCatching { module.statsRepository.fetchBrands() }.getOrDefault(emptyList())
         if (isCreate) {
-            idolById = runCatching { module.idolRepository.fetchIdols(null) }
+            idolById = runCatching { module.idolRepository.fetchIdols() }
                 .getOrDefault(emptyList()).associateBy { it.id }
         }
     }

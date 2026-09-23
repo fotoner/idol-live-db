@@ -7,14 +7,6 @@ import com.fugaif.imaslivedb.data.model.Idol
 @Dao
 interface IdolDao {
 
-    @Query("""
-        SELECT DISTINCT i.* FROM idols i
-        JOIN idol_brands ib ON i.id = ib.idol_id
-        WHERE ib.brand_id = :brandId
-        ORDER BY i.sort_order
-    """)
-    suspend fun fetchIdolsByBrand(brandId: String): List<Idol>
-
     @Query("SELECT * FROM idols WHERE id = :id LIMIT 1")
     suspend fun fetchIdol(id: String): Idol?
 

@@ -84,7 +84,7 @@ class IdolPickerViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         viewModelScope.launch {
-            val idols = runCatching { idolRepo.fetchIdols(null) }.getOrDefault(emptyList())
+            val idols = runCatching { idolRepo.fetchIdols() }.getOrDefault(emptyList())
             val brands = runCatching { statsRepo.fetchBrands() }.getOrDefault(emptyList())
             _uiState.value = IdolPickerUiState(idols = idols, brands = brands, isLoading = false)
         }

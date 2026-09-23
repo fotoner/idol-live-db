@@ -27,15 +27,9 @@ class IdolRepository(
     private val snapshots: SnapshotStoreProvider
 ) {
 
-    suspend fun fetchIdols(brandId: String? = null): List<Idol> {
-        if (brandId == null) {
-            // 外部ゲストも含む全件 (ピッカー用) はコアに同条件の API がある。
-            return hydrateIdols(snapshots.query { store -> store.allIdolsForPicker().map { it.id } })
-        }
-        // 「ブランド絞り込み かつ 外部ゲストを含む」に相当するコア API が無い
-        // (idolList は is_external を必ず落とす)。母集団が変わるので SQL 経路のまま。
-        return db.idolDao().fetchIdolsByBrand(brandId)
-    }
+    /** 外部ゲストも含む全件 (ピッカー・ゲーム・画像の取り込み用)。母集団と並びはコア。 */
+    suspend fun fetchIdols(): List<Idol> =
+        hydrateIdols(snapshots.query { store -> store.allIdolsForPicker().map { it.id } })
 
     /** 一覧画面用。外部ゲスト演者 (is_external) を除外する (iOS `idols(brandId:)` と同一条件)。 */
     suspend fun fetchIdolsForList(brandId: String? = null): List<Idol> {

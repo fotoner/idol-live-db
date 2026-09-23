@@ -124,7 +124,7 @@ class SetlistEditViewModel(app: Application, private val show: Show) : AndroidVi
             val setlist: List<SetlistRow> = eventRepo.fetchSetlist(show.id)
             val allPerformers = eventRepo.fetchAllPerformers(show.id)
             val performersByItem = allPerformers.groupBy { it.setlistItemId }
-            val idols = idolRepo.fetchIdols(null)
+            val idols = idolRepo.fetchIdols()
             val idolById = idols.associateBy { it.id }
 
             val rows = setlist.map { item ->
