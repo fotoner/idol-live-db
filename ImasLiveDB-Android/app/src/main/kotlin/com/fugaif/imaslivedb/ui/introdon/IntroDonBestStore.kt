@@ -34,8 +34,6 @@ class IntroDonBestStore(context: Context) {
         }
     }
 
-    fun bestTimeMs(settings: IntroDonSettings): Long = prefs.getLong(timeKey(settings), 0L)
-
     /** elapsedMs が自己ベスト (より短い) なら更新して true を返す。 */
     fun submitTime(settings: IntroDonSettings, elapsedMs: Long): Boolean {
         val key = timeKey(settings)

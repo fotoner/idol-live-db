@@ -338,13 +338,6 @@ interface SongDao {
     """)
     suspend fun fetchIdolSongsByRole(idolId: String, role: String): List<Song>
 
-    @Query("""
-        SELECT * FROM songs
-        WHERE (title LIKE :pattern OR title_kana LIKE :pattern)
-        LIMIT 20
-    """)
-    suspend fun searchSongs(pattern: String): List<Song>
-
     /** ソロ曲クイズ用: ソロ曲 (リミックス除く) と原唱アイドルの対応。song_id 単位で複数行になり得る (原唱が複数人の曲)。 */
     @Query("""
         SELECT s.id AS song_id, sa.idol_id AS idol_id

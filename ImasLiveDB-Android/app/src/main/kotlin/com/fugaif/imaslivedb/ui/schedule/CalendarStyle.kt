@@ -42,16 +42,6 @@ val AnniversaryColor = DS.sys
 /** チケット系 (受付期間・当落発表)。公演(青)・リリース(橙)・誕生日(桃) と被らない藍 (iOS と同じ色域)。 */
 val TicketColor = Color(0xFF5856D6)
 
-/** ドット・チップの色。種別 1 つに 1 色 (申込締切だけ行側で緊急色に振る)。 */
-fun categoryColor(category: CalendarCategory): Color = when (category) {
-    CalendarCategory.SHOW -> ShowColor
-    CalendarCategory.RELEASE -> ReleaseColor
-    CalendarCategory.BIRTHDAY -> BirthdayColor
-    CalendarCategory.STAFF_BIRTHDAY -> StaffColor
-    CalendarCategory.ANNIVERSARY -> AnniversaryColor
-    CalendarCategory.TICKET -> TicketColor
-}
-
 /**
  * 帯・ブロックの地色。
  *

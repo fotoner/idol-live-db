@@ -193,12 +193,6 @@ class CustomImageStore(context: Context) {
         return manifest(entityId, kind).map { File(folder, it.name) }
     }
 
-    fun imageCount(entityId: String, kind: GalleryKind = GalleryKind.IDOL): Int =
-        manifest(entityId, kind).size
-
-    fun hasCustomImage(entityId: String, kind: GalleryKind = GalleryKind.IDOL): Boolean =
-        entityId in idsWithImages(kind).value
-
     // MARK: - スライドショー対象選択 (ウィジェット)
 
     /**

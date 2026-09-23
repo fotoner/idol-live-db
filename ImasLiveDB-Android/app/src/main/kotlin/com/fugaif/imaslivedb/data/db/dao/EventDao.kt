@@ -85,13 +85,6 @@ interface EventDao {
     """)
     suspend fun fetchEventShowCast(eventId: String): List<ShowCast>
 
-    @Query("""
-        SELECT * FROM events
-        WHERE name LIKE :pattern
-        LIMIT 20
-    """)
-    suspend fun searchEvents(pattern: String): List<Event>
-
     /** id 指定でイベント + 開催日レンジ(初日/最終日)を取得。お気に入りライブ一覧用。 */
     @Query("""
         SELECT e.id, e.brand_id, e.name, e.event_type, e.is_streaming, e.joint_brand_ids,

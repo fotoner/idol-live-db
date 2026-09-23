@@ -189,11 +189,6 @@ data class CastShowCount(
     @ColumnInfo(name = "show_count") val showCount: Int
 )
 
-data class IdolCastNameRow(
-    @ColumnInfo(name = "idol_id") val idolId: String,
-    @ColumnInfo(name = "name") val name: String
-)
-
 // MARK: - Stats Query Results
 
 data class BrandSongCount(

@@ -64,8 +64,4 @@ class ExpenseRepository(private val db: AppDatabase) {
                 date = row.date.orEmpty()
             )
         }
-
-    /** 明細に出す公演名の辞書 (公演 id → 表記)。 */
-    suspend fun attendedShowLabels(): Map<String, String> =
-        attendedShowOptions().associate { it.id to it.label }
 }

@@ -87,13 +87,6 @@ interface IdolDao {
     """)
     suspend fun fetchUnitMembers(unitId: String): List<Idol>
 
-    @Query("""
-        SELECT * FROM idols
-        WHERE (name LIKE :pattern OR name_kana LIKE :pattern)
-        LIMIT 20
-    """)
-    suspend fun searchIdols(pattern: String): List<Idol>
-
     @Query("SELECT COUNT(*) FROM idols")
     suspend fun fetchIdolCount(): Int
 

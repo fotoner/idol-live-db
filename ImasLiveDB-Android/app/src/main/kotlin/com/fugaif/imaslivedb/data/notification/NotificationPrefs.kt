@@ -42,12 +42,7 @@ enum class NotificationCategory(
         channelId = "imas_monday",
         channelName = "月曜が近いよ",
         channelDescription = "日曜 20:00 に月曜が近いことをお知らせします。"
-    );
-
-    companion object {
-        fun forChannelId(channelId: String): NotificationCategory? =
-            entries.firstOrNull { it.channelId == channelId }
-    }
+    )
 }
 
 /**

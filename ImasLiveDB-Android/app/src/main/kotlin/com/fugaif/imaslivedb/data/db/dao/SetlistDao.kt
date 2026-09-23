@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.fugaif.imaslivedb.data.model.AllPerformerRow
-import com.fugaif.imaslivedb.data.model.PerformerRow
 import com.fugaif.imaslivedb.data.model.SetlistItem
 import com.fugaif.imaslivedb.data.model.SetlistPerformer
 import com.fugaif.imaslivedb.data.model.SetlistRow
@@ -23,14 +22,6 @@ interface SetlistDao {
         ORDER BY si.position
     """)
     suspend fun fetchSetlist(showId: String): List<SetlistRow>
-
-    @Query("""
-        SELECT i.id AS id, i.name AS name, i.color AS idol_color, i.name AS idol_name, i.id AS idol_id
-        FROM setlist_performers sp
-        JOIN idols i ON sp.idol_id = i.id
-        WHERE sp.setlist_item_id = :setlistItemId
-    """)
-    suspend fun fetchPerformers(setlistItemId: String): List<PerformerRow>
 
     @Query("""
         SELECT sp.setlist_item_id AS setlist_item_id,
