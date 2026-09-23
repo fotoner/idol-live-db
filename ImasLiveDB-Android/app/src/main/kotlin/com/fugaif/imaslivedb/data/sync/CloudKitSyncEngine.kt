@@ -107,6 +107,9 @@ class CloudKitSyncEngine(
         val localIds: (suspend (SyncDao) -> List<String>)? = null
     )
 
+    /** 取り込む CloudKit のレコード型名 (テストで型名の打ち間違いを捕まえるため)。 */
+    internal val ingestedRecordTypes: Set<String> get() = stepIo.keys
+
     /**
      * 単一 PK の DELETE を、バインド変数の上限 (Android 11 以前の SQLite は 999) を
      * 跨がないよう分けて撃つ。孤児の掃除は数千件になりうる。
