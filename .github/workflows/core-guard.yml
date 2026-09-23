@@ -9,7 +9,11 @@ on:
     paths:
       - "imas-core/**"
       - "imas-text-fold/**"
+      - "web/wasm/imas-query-wasm/**"
       - "db/master.sql"
+      # 下の Build master.sqlite の段で実行している (壊れたら FK ゲートが黙って外れる)
+      - "tools/build_db.sh"
+      - "tools/check_fk_integrity.py"
       - "ImasLiveDB-Android/app/schemas/**"
       - ".github/workflows/core-guard.yml"
   push:
@@ -17,8 +21,12 @@ on:
     paths:
       - "imas-core/**"
       - "imas-text-fold/**"
+      - "web/wasm/imas-query-wasm/**"
       - "db/master.sql"
+      - "tools/build_db.sh"
+      - "tools/check_fk_integrity.py"
       - "ImasLiveDB-Android/app/schemas/**"
+      - ".github/workflows/core-guard.yml"
 
 jobs:
   test:
@@ -36,7 +44,9 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             imas-core/target
-          key: cargo-${{ runner.os }}-${{ hashFiles('imas-core/Cargo.lock') }}
+            imas-text-fold/target
+            web/wasm/imas-query-wasm/target
+          key: cargo-${{ runner.os }}-${{ hashFiles('imas-core/Cargo.lock', 'imas-text-fold/Cargo.lock', 'web/wasm/imas-query-wasm/Cargo.lock') }}
 
       # テストは同梱 master.sqlite を読む (スキーマ突き合わせ・実データ照合)。
       # gitignore 対象なので db/master.sql から作る。
@@ -52,3 +62,12 @@ jobs:
       - name: Test (agent feature)
         working-directory: imas-core
         run: cargo test --locked --features agent
+
+      # 畳み込み規則と一覧の絞り込み wasm は、imas-core とは別の Cargo プロジェクト。
+      # 上の cargo test には入らないので、ここで個別に走らせる。
+      - name: Test (imas-text-fold)
+        run: cargo test --locked --manifest-path imas-text-fold/Cargo.toml
+
+      # 同梱 master.sqlite を読む (上の Build master.sqlite の段で作ったもの)。
+      - name: Test (imas-query-wasm)
+        run: cargo test --locked --manifest-path web/wasm/imas-query-wasm/Cargo.toml
