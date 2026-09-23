@@ -76,7 +76,7 @@ fun FilteredEventRow(item: EventWithDateRange, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        ImasLeadBar(brandId = event.brandId, height = 38.dp, rainbow = event.jointBrandIdList.isNotEmpty())
+        ImasLeadBar(brandId = event.brandId, height = 38.dp, rainbow = item.isJoint)
         Column(Modifier.weight(1f)) {
             Text(
                 event.name,

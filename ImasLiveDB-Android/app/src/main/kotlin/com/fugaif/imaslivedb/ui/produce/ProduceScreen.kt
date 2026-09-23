@@ -384,7 +384,7 @@ private fun AttendedSection(
             ) {
                 ImasLeadBar(
                     brandId = ew.event.brandId, height = 38.dp,
-                    rainbow = ew.event.jointBrandIdList.isNotEmpty()
+                    rainbow = ew.isJoint
                 )
                 Column(Modifier.weight(1f)) {
                     Text(

@@ -7,6 +7,8 @@ import com.fugaif.imaslivedb.data.model.AllPerformerRow
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.Event
 import com.fugaif.imaslivedb.data.model.EventAttendance
+import com.fugaif.imaslivedb.data.model.EventInfo
+import com.fugaif.imaslivedb.data.model.ShowInfo
 import com.fugaif.imaslivedb.data.model.EventStats
 import com.fugaif.imaslivedb.data.model.EventWithDateRange
 import com.fugaif.imaslivedb.data.model.Idol
@@ -182,6 +184,19 @@ class EventRepository(
     suspend fun fetchShows(eventId: String): List<Show> =
         snapshots.query { store -> store.showsByEvent(eventId).map { it.toShow() } }
 
+    /** イベントと、コアが決めた属性 (合同か)。 */
+    suspend fun fetchEventInfo(id: String): EventInfo? =
+        snapshots.query { store -> store.eventRecord(id)?.let { EventInfo(it.toEvent(), it.isJoint) } }
+
+    /** 公演と、コアが決めた属性 (キャラライブか)。 */
+    suspend fun fetchShowInfo(id: String): ShowInfo? =
+        snapshots.query { store -> store.showRecord(id)?.let { ShowInfo(it.toShow(), it.isCharacterLive) } }
+
+    /** id で引くイベント (日付・合同か付き)。 */
+    suspend fun fetchEventsWithDateByIds(ids: List<String>): List<EventWithDateRange> =
+        if (ids.isEmpty()) emptyList()
+        else snapshots.query { store -> store.eventsWithDateByIds(ids).map { it.toEventWithDateRange() } }
+
     suspend fun fetchEvent(id: String): Event? =
         snapshots.query { store -> store.eventRecord(id)?.toEvent() }
 
@@ -344,7 +359,8 @@ private fun EventListRecord.toEvent(): Event = Event(
 private fun EventWithDateRecord.toEventWithDateRange(): EventWithDateRange = EventWithDateRange(
     event = event.toEvent(),
     firstDate = firstDate,
-    lastDate = lastDate
+    lastDate = lastDate,
+    isJoint = event.isJoint
 )
 
 private fun EventDetailRecord.toEvent(): Event = Event(

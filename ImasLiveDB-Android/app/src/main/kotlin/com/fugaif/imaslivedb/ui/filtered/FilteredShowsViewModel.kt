@@ -68,9 +68,8 @@ class FilteredShowsViewModel(
         }
 
         val directory = events.fetchVenueDirectory()
-        // 行ごとに fetchEvent を撃つと公演数に比例して境界を跨ぐ。イベントは全件でも小さいので
-        // 1 回で読んで id で引く。
-        val eventsById = events.fetchEvents().associateBy { it.id }
+        // 行ごとに fetchEvent を撃つと公演数に比例して境界を跨ぐ。出てくるイベントを 1 回で読んで id で引く。
+        val eventsById = events.fetchEventsWithDateByIds(shows.map { it.eventId }.distinct()).associateBy { it.event.id }
 
         // 同じ会場での一覧は全行が同じ会場なので、行に会場名を出すのは冗長。
         // 日付での一覧は行ごとに会場が違うので出す。
@@ -82,13 +81,14 @@ class FilteredShowsViewModel(
                 FilteredShowYearGroup(
                     year = year,
                     rows = yearShows.map { show ->
-                        val event = eventsById[show.eventId]
+                        val eventWithDate = eventsById[show.eventId]
+                        val event = eventWithDate?.event
                         FilteredShowRowUi(
                             showId = show.id,
                             title = event?.name?.let { AppPreferences.eventDisplayName(it) } ?: show.name,
                             subtitle = subtitle(show, directory, showsVenueInRow),
                             brandId = event?.brandId,
-                            rainbow = event?.jointBrandIdList?.isNotEmpty() == true
+                            rainbow = eventWithDate?.isJoint == true
                         )
                     }
                 )

@@ -29,7 +29,9 @@ data class EventWithDateRangeRow(
 data class EventWithDateRange(
     val event: Event,
     val firstDate: String?,
-    val lastDate: String?
+    val lastDate: String?,
+    /** 合同ライブか (参加ブランドの割り方はコア。虹色のリードバーに使う)。 */
+    val isJoint: Boolean = false
 ) {
     /** 表示用の開催日。複数日なら "first〜last"、単日なら first のみ。 */
     val dateRange: String?
@@ -101,6 +103,20 @@ data class ShowWithEventName(
         venueCity = venueCity, startTime = startTime, sortOrder = sortOrder, performerType = performerType
     )
 }
+
+/** 公演 + コアが決めた属性 (キャラライブか)。 */
+data class ShowInfo(
+    val show: Show,
+    /** キャラクターが出演する公演 (名義の出し方が変わる)。判定はコア。 */
+    val isCharacterLive: Boolean
+)
+
+/** イベント + コアが決めた属性 (合同か)。 */
+data class EventInfo(
+    val event: Event,
+    /** 合同ライブか。割り方はコア (`split_brand_ids`)。 */
+    val isJoint: Boolean
+)
 
 // MARK: - Song Query Results
 

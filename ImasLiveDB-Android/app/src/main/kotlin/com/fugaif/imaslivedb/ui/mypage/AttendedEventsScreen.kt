@@ -169,7 +169,7 @@ fun AttendedEventsScreen(
                                 .clickable { onEventClick(ew.event.id) }
                                 .padding(horizontal = 16.dp, vertical = 10.dp)
                         ) {
-                            ImasLeadBar(brandId = ew.event.brandId, height = 38.dp, rainbow = ew.event.jointBrandIdList.isNotEmpty())
+                            ImasLeadBar(brandId = ew.event.brandId, height = 38.dp, rainbow = ew.isJoint)
                             Column(Modifier.weight(1f)) {
                                 Text(
                                     text = ew.event.name,

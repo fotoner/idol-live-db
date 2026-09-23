@@ -237,7 +237,7 @@ fun SetlistScreen(
                 CircularProgressIndicator()
             }
         } else {
-            val isCharacterLive = uiState.show?.isCharacterLive ?: false
+            val isCharacterLive = uiState.isCharacterLive
             val seedHex = BrandColors.hex(uiState.brandId)
             LazyColumn(
                 modifier = Modifier

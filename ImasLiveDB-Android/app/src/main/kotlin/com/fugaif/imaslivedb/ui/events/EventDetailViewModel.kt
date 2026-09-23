@@ -58,7 +58,8 @@ class EventDetailViewModel : ViewModel() {
         viewModelScope.launch {
             val module = AppModule.from(context)
             val repo = module.eventRepository
-            val event = repo.fetchEvent(eventId)
+            val eventInfo = repo.fetchEventInfo(eventId)
+            val event = eventInfo?.event
             val shows = repo.fetchShows(eventId)
             val stats = repo.fetchEventStats(eventId)
             val attendance = repo.fetchEventAttendance(eventId)
@@ -69,7 +70,7 @@ class EventDetailViewModel : ViewModel() {
                 shows = shows,
                 stats = stats,
                 attendance = attendance,
-                isJoint = !event?.jointBrandIds.isNullOrBlank(),
+                isJoint = eventInfo?.isJoint == true,
                 brandColorHex = brand?.color,
                 brandId = brand?.id,
                 brandShortName = brand?.shortName,

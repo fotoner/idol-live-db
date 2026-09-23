@@ -337,7 +337,7 @@ private fun EventRow(
     onClick: () -> Unit
 ) {
     val event = eventWithDate.event
-    val isJoint = event.jointBrandIdList.isNotEmpty()
+    val isJoint = eventWithDate.isJoint
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier

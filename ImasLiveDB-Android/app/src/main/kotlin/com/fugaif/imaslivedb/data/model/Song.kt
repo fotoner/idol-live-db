@@ -119,9 +119,4 @@ data class Song(
     val hasKamisabiCard: Boolean = false
 ) {
     val isRemix: Boolean get() = parentSongId != null
-
-    /** 参加ブランド ([brandId] が先頭、続いて [jointBrandIds])。 */
-    val brandIds: List<String>
-        get() = (listOfNotNull(brandId) + (jointBrandIds?.split(",") ?: emptyList()))
-            .filter { it.isNotEmpty() }
 }

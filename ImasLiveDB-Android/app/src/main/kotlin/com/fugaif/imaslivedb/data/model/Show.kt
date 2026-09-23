@@ -54,6 +54,4 @@ data class Show(
 
     @ColumnInfo(name = "performer_type")
     val performerType: String?
-) {
-    val isCharacterLive: Boolean get() = performerType == "character"
-}
+)

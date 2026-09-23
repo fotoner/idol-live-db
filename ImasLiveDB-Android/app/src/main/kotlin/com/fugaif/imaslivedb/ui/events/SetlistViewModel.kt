@@ -39,6 +39,8 @@ data class SetlistSection(
 data class SetlistUiState(
     val isLoading: Boolean = true,
     val show: Show? = null,
+    /** キャラクターが出演する公演か (名義の出し方が変わる)。判定はコア。 */
+    val isCharacterLive: Boolean = false,
     val brandId: String? = null,
     val setlist: List<SetlistRow> = emptyList(),
     val performersByItemId: Map<String, List<PerformerRow>> = emptyMap(),
@@ -171,7 +173,8 @@ class SetlistViewModel(app: Application, private val showId: String) : AndroidVi
     }
 
     private suspend fun fetch(request: LoadRequest, displayMode: SetlistDisplayMode) {
-        val show = events.fetchShow(showId)
+        val showInfo = events.fetchShowInfo(showId)
+        val show = showInfo?.show
         val event = show?.eventId?.let { events.fetchEvent(it) }
         val brandId = event?.brandId
         // 画面の 2 つの半分 (曲と出演者) は同じ所有者から読む。DAO を直接叩くと
@@ -193,6 +196,7 @@ class SetlistViewModel(app: Application, private val showId: String) : AndroidVi
         _uiState.value = SetlistUiState(
             isLoading = false,
             show = show,
+            isCharacterLive = showInfo?.isCharacterLive == true,
             brandId = brandId,
             setlist = setlist,
             performersByItemId = performersByItemId,

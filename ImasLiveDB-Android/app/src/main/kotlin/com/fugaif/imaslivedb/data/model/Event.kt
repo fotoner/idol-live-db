@@ -46,8 +46,4 @@ data class Event(
 
     @ColumnInfo(name = "joint_brand_ids")
     val jointBrandIds: String? = null
-) {
-    /** `joint_brand_ids` をリストにして返す。null/空文字列は空リスト。 */
-    val jointBrandIdList: List<String>
-        get() = jointBrandIds?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList()
-}
+)
