@@ -15,7 +15,7 @@ interface Props {
   crumbs: readonly Crumb[];
 }
 const { crumbs } = Astro.props;
-const nav = meta().primaryNav;
+const { primaryNav: nav, siteName } = meta();
 const here = new Set(crumbs.map((c) => c.path));
 const isCurrent = (href: string) => here.has(href);
 ---
@@ -24,7 +24,7 @@ const isCurrent = (href: string) => here.has(href);
   <div class="site-nav__inner">
     <a class="site-nav__brand" href="/">
       <img class="site-nav__mark" src="/icon-192.png" alt="" width="28" height="28" />
-      アイドルライブDB
+      {siteName}
     </a>
     <nav class="site-nav__links" aria-label="サイト内の主要な一覧">
       <ul>

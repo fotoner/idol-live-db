@@ -22,7 +22,7 @@ const { app } = Astro.props;
     decoding="async"
   />
   <div class="open-in-app__body">
-    <p class="open-in-app__title">アプリ「アイドルライブDB」</p>
+    <p class="open-in-app__title">{app.title}</p>
     <p class="open-in-app__note">{app.note}</p>
   </div>
   <div class="open-in-app__actions">

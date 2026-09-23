@@ -4,7 +4,7 @@
 //! を焼き込んだもの。閲覧のたびに API は呼ばない。載るのは曲・件数・日時・マスク済みの
 //! 表示名だけで、歌詞もコール本文も含まない (Worker 側の応答がそもそも含まない)。
 
-use super::common::{Ref, SeoBlock, StatTile};
+use super::common::{EmptyText, Ref, SeoBlock, StatTile};
 
 web_dto! {
     pub struct CallGuidePage {
@@ -19,12 +19,20 @@ web_dto! {
         pub stat_tiles: Vec<StatTile>,
         /// コールガイドがある曲 (更新の新しい順)。
         pub with_calls: Vec<CallGuideSongRow>,
+        /// ガイドのある曲が 1 曲も無いときの案内。
+        pub with_calls_empty: Option<EmptyText>,
         /// 一覧が Worker の上限で打ち切られているときの断り。
         pub with_calls_note: Option<String>,
         /// 最近の編集 (新しい順)。
         pub recent_edits: Vec<CallGuideEditRow>,
+        /// 編集が 1 件も無いときの案内。
+        pub recent_edits_empty: Option<EmptyText>,
+        /// 書き手募集中の節の説明 (何の曲を・どの順で並べているか)。
+        pub wanted_lede: String,
         /// 「コール曲」タグが付いているのに未整備の曲 (票の多い順)。
         pub wanted: Vec<Ref>,
+        /// 未整備の曲が 1 曲も無いときの案内。
+        pub wanted_empty: Option<EmptyText>,
         /// 見出しに添える断り (歌詞が未登録で並べていない曲数)。
         pub wanted_note: Option<String>,
         pub seo: SeoBlock,

@@ -20,14 +20,11 @@ export const getStaticPaths = () => pathsFor("show", "showId");
 
 const show = page<ShowPage>(Astro.props.data);
 
-// 同じライブの公演の切替 (単日公演では Rust が空を返す)。数本ならヒーローの中の
-// セグメントで置き (DAY1 / DAY2 と行き来するのが一番多い操作)、ツアーのように多いときは
-// 横に並べきれないので前後の公演への送りにし、全部の並びは脇に置く。
-// 何本まで横に並ぶかは純粋に幅の話。
-const MAX_SEGMENTED_SHOWS = 8;
+// 同じライブの公演の切替。帯 (数本) か前後への送り (ツアーのように多いとき) か、
+// 単日公演で無しかは Rust が本数で決めている (`siblingNav`)。送りのときは全部の並びを脇に置く。
 const siblings = show.siblingShows;
-const siblingsAsSegments = siblings.length > 0 && siblings.length <= MAX_SEGMENTED_SHOWS;
-const siblingsAsPager = siblings.length > MAX_SEGMENTED_SHOWS;
+const siblingsAsSegments = show.siblingNav === "segments";
+const siblingsAsPager = show.siblingNav === "pager";
 // 自分は必ず並びの中にいる (Rust が自分も含めて返す)。
 const position = siblings.findIndex((s) => s.id === show.id);
 const prev = siblings[position - 1] ?? null;
@@ -100,11 +97,8 @@ const setlistCount = show.setlistSections.reduce((n, section) => n + section.row
   <Section id="show-setlist" title="セットリスト" count={setlistCount}>
     <PerformerNamePref slot="tools" />
     {
-      setlistCount === 0 ? (
-        <EmptyState
-          title="セットリストがまだ登録されていません"
-          body="GitHub のリポジトリからデータの追加にご協力いただけます。"
-        />
+      show.setlistEmpty ? (
+        <EmptyState {...show.setlistEmpty} />
       ) : (
         <div class="card setlist">
           {show.setlistSections.map((section) => (

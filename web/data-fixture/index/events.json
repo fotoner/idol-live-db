@@ -181,6 +181,7 @@
     }
   ],
   "total": 2,
+  "empty": null,
   "seo": {
     "title": "ライブ | アイドルライブDB",
     "description": "ライブの一覧。",

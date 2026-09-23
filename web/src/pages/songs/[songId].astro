@@ -54,9 +54,9 @@ const song = page<SongPage>(Astro.props.data);
         {song.appleMusicUrl && <a class="btn btn--ghost" href={song.appleMusicUrl}>Apple Music</a>}
       </div>
       {
-        song.parent && (
+        song.parentNote && (
           <p class="u-muted">
-            この曲は <a class="u-underline-hover" href={song.parent.path}>{song.parent.name}</a> の派生曲です。
+            {song.parentNote.before}<a class="u-underline-hover" href={song.parentNote.link.path}>{song.parentNote.link.name}</a>{song.parentNote.after}
           </p>
         )
       }
@@ -124,8 +124,8 @@ const song = page<SongPage>(Astro.props.data);
 
   <Section id="song-history" title="披露履歴" count={song.performanceCount}>
     {
-      song.performanceHistory.length === 0 ? (
-        <EmptyState title="ライブでの披露記録がありません" />
+      song.historyEmpty ? (
+        <EmptyState {...song.historyEmpty} />
       ) : (
         <ListContainer as="ol">
           {song.performanceHistory.map((h) => (
@@ -196,9 +196,7 @@ const song = page<SongPage>(Astro.props.data);
   }
 
   {
-    (song.community.tags.length > 0 ||
-      song.community.favorites > 0 ||
-      song.community.penlight.length > 0) && (
+    song.hasCommunity && (
       <Section id="song-community" title="みんなの記録">
         <div class="card card__pad u-stack">
           <CommunityTags tags={song.community.tags} />

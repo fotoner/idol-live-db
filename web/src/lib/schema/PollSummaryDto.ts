@@ -16,7 +16,11 @@ endsOn: string | null,
 /**
  * 締切前か。**判定は Rust** (TS に `new Date()` を書かせない)。
  */
-isOpen: boolean, totalVotes: number, 
+isOpen: boolean, 
+/**
+ * 締切の日付に添える語 (締切前は「締切」、過ぎたら「終了」)。無期限なら `None`。
+ */
+endsLabel: string | null, totalVotes: number, 
 /**
  * 上位の得票。同数は entity id 順で安定させる。
  */

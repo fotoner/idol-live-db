@@ -4,7 +4,7 @@
 //! クライアント状態を持たないというユーザー指示の直接の帰結で、切替 UI は
 //! [`NavLink`] のリンク集になる。
 
-use super::context::{join_parts, simple_json_ld, tag_badge, Ctx, PARTS_SEPARATOR, TAGS_PATH};
+use super::context::{join_parts, page_title, simple_json_ld, tag_badge, Ctx, PARTS_SEPARATOR, TAGS_PATH};
 use crate::domain::date_display::until_display;
 use crate::domain::display_join::join_capped;
 use crate::domain::kana_row::{kana_row_label, kana_sort_key};
@@ -237,6 +237,11 @@ pub fn event_lists(ctx: &Ctx) -> Vec<Emitted<EventListPage>> {
             .chain(std::iter::once(Ctx::crumb(spec.title, spec.path)))
             .collect();
         let (recent_past_title, recent_past) = spec.recent_past.map(|(t, g)| (Some(t), Some(g))).unwrap_or((None, None));
+        let empty = content::empty_text(
+            spec.groups.is_empty(),
+            if spec.kind == EventListKind::Upcoming { content::EMPTY_UPCOMING_EVENTS } else { content::EMPTY_EVENTS },
+            Some(content::EMPTY_EVENTS_BODY),
+        );
         Emitted {
             path: spec.path.to_string(),
             data: spec.data,
@@ -264,6 +269,7 @@ pub fn event_lists(ctx: &Ctx) -> Vec<Emitted<EventListPage>> {
                     ),
                 ]),
                 total: spec.total,
+                empty,
                 seo: ctx.seo(
                     spec.title,
                     spec.description,
@@ -536,6 +542,7 @@ pub fn song_lists(ctx: &Ctx) -> Vec<Emitted<SongListPage>> {
                 query_base,
                 kana_sections: kana_sections(ctx, &items),
                 total: items.len() as u32,
+                empty: content::empty_text(items.is_empty(), content::EMPTY_SONGS, Some(content::EMPTY_SONGS_BODY)),
                 all_songs_link: (path == "/songs/")
                     .then(|| NavLink::new("派生曲・ライブ限定曲を含む全件", "/songs/all/").with_count(total_all)),
                 // タグから探す入口。一覧を作るかどうかと同じ判断 (`Ctx::tags_link`)。
@@ -838,6 +845,7 @@ pub fn idol_lists(ctx: &Ctx) -> Vec<Emitted<IdolListPage>> {
                 brand,
                 birth_month,
                 total: items.len() as u32,
+                empty: content::empty_text(items.is_empty(), content::EMPTY_IDOLS, Some(content::EMPTY_IDOLS_BODY)),
                 // 絞り込みの出発点。ページの中身を決めた条件をそのまま渡す
                 // (JS 側で「/idols/brand/cg/ ならブランド cg」と書き直すと二重定義になる)。
                 query_base: IdolQuery {
@@ -976,6 +984,7 @@ pub fn unit_lists(ctx: &Ctx) -> Vec<Emitted<UnitListPage>> {
                 title: title.clone(),
                 brand,
                 total: items.len() as u32,
+                empty: content::empty_text(items.is_empty(), content::EMPTY_UNITS, None),
                 items,
                 kana_sections,
                 filters: filter_axes([FilterAxis::new(
@@ -1097,6 +1106,7 @@ pub fn venue_lists(ctx: &Ctx) -> Vec<Emitted<VenueListPage>> {
                 title: title.clone(),
                 prefecture,
                 total: items.len() as u32,
+                empty: content::empty_text(items.is_empty(), content::EMPTY_VENUES, None),
                 items,
                 filters: filter_axes([FilterAxis::new(content::FILTER_AXIS_PREFECTURE, {
                     let mut links = prefecture_links.clone();
@@ -1221,6 +1231,10 @@ pub fn poll_list(ctx: &Ctx) -> PollListPage {
                     rank: i as u32 + 1,
                 })
                 .collect();
+            let is_open = poll
+                .ends_at
+                .as_deref()
+                .is_none_or(|e| &e[..10.min(e.len())] >= ctx.today.as_str());
             PollSummaryDto {
                 id: poll.id.clone(),
                 title: poll.title.clone(),
@@ -1234,10 +1248,8 @@ pub fn poll_list(ctx: &Ctx) -> PollListPage {
                 // 時刻は落として日付だけ見せる (分単位の締切に意味は無い)。
                 ends_on: poll.ends_at.as_ref().map(|e| e[..10.min(e.len())].to_string()),
                 // 締切前か。`ends_at` が無いお題は開いたまま。
-                is_open: poll
-                    .ends_at
-                    .as_deref()
-                    .is_none_or(|e| &e[..10.min(e.len())] >= ctx.today.as_str()),
+                is_open,
+                ends_label: poll.ends_at.as_ref().map(|_| content::poll_ends_label(is_open).to_string()),
                 total_votes: all.iter().map(|e| e.vote_count.max(0) as u32).sum(),
                 entries,
             }
@@ -1248,6 +1260,7 @@ pub fn poll_list(ctx: &Ctx) -> PollListPage {
         schema_version: SCHEMA_VERSION,
         path: path.to_string(),
         title: "みんなのお題".to_string(),
+        lede: content::POLL_LIST_LEDE.to_string(),
         total: polls.len() as u32,
         polls,
         seo: ctx.seo(
@@ -1389,13 +1402,20 @@ pub fn utility_nav() -> Vec<NavLink> {
 /// トップページ。
 pub fn home(ctx: &Ctx, upcoming: &[EventListItem], counts: Counts) -> HomePage {
     let path = "/";
+    let recent_shows = super::events::recent_shows(ctx, 8);
     HomePage {
         schema_version: SCHEMA_VERSION,
         path: path.to_string(),
         tagline: content::SITE_TAGLINE.to_string(),
         // 先頭 8 件。種別の札は例外 (フェス・リリースイベント) にだけ付く (`content::kind_chip`)。
         upcoming: upcoming.iter().take(8).cloned().collect(),
-        recent_shows: super::events::recent_shows(ctx, 8),
+        upcoming_empty: content::empty_text(
+            upcoming.is_empty(),
+            content::EMPTY_UPCOMING_EVENTS,
+            Some(content::EMPTY_UPCOMING_EVENTS_HOME_BODY),
+        ),
+        recent_shows_empty: content::empty_text(recent_shows.is_empty(), content::EMPTY_SHOW_RECORDS, None),
+        recent_shows,
         recent_shows_more: NavLink::new("開催済みのライブへ", "/events/past/"),
         app_note: content::app_note(),
         stat_tiles: site_stat_tiles(counts, true, false),
@@ -1444,6 +1464,37 @@ pub fn primary_nav(with_polls: bool, with_calls: bool) -> Vec<NavLink> {
         nav.push(NavLink::new("コールガイド", super::calls::PATH));
     }
     nav
+}
+
+/// 見つからないページ (`404.html`)。入口はライブ・楽曲・アイドルの 3 つの一覧。
+///
+/// `<head>` は今までどおり JSON-LD もパンくずも持たない (どこにも位置しないページ)。
+pub fn not_found() -> NotFoundPage {
+    let entry = |list: SiteList, preview: &str| SiteEntry {
+        glyph: list.glyph().to_string(),
+        title: list.label().to_string(),
+        preview: preview.to_string(),
+        path: list.path().to_string(),
+    };
+    NotFoundPage {
+        eyebrow: content::NOT_FOUND_EYEBROW.to_string(),
+        title: content::NOT_FOUND_TITLE.to_string(),
+        lede: content::NOT_FOUND_LEDE.to_string(),
+        entries: vec![
+            entry(SiteList::Events, content::NOT_FOUND_PREVIEW_EVENTS),
+            entry(SiteList::Songs, content::NOT_FOUND_PREVIEW_SONGS),
+            entry(SiteList::Idols, content::NOT_FOUND_PREVIEW_IDOLS),
+        ],
+        seo: SeoBlock {
+            title: page_title(content::NOT_FOUND_TITLE),
+            description: content::NOT_FOUND_DESCRIPTION.to_string(),
+            canonical: content::absolute("/404.html"),
+            og_image: content::absolute(content::DEFAULT_OG_IMAGE),
+            robots: Robots::NoindexFollow,
+            json_ld: serde_json::json!({}),
+            breadcrumbs: vec![],
+        },
+    }
 }
 
 pub fn about(ctx: &Ctx, counts: Counts) -> AboutPage {

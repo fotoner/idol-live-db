@@ -1,6 +1,6 @@
 //! ライブ (event) 詳細ページの DTO。
 
-use super::common::{AppOpen, DateBadge, Ref, SeoBlock, StatTile};
+use super::common::{AppOpen, DateBadge, EmptyText, Ref, SeoBlock, StatTile};
 
 web_dto! {
     /// `/events/<id>/` の中身 (`events/<key>.json`)。
@@ -29,6 +29,8 @@ web_dto! {
         /// (開催前は曲数が全部 0 で、並べても「まだ無い」以上のことを言わない)。
         pub stat_tiles: Vec<StatTile>,
         pub shows: Vec<ShowSummary>,
+        /// 公演が 1 つも無いときの案内。
+        pub shows_empty: Option<EmptyText>,
         /// `event_attendance` が `None` を返しうるので `Option`。
         /// v1 の Web は公演ごとの出演者だけを出し、欠席マトリクスは描かない。
         pub cast: Option<EventCast>,
@@ -127,5 +129,7 @@ web_dto! {
         pub kind_label: String,
         pub release_date: Option<String>,
         pub url: Option<String>,
+        /// 1 行で出すときの表記 (`タイトル (発売日)`。発売日が無ければタイトルだけ)。
+        pub display: String,
     }
 }

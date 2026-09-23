@@ -31,8 +31,8 @@ const sectionStarts = new Set(list.kanaSections.map((s) => s.startIndex));
   {list.queryBase && <ListFilterBar kind="songs" queryBase={list.queryBase} total={list.total} />}
 
   {
-    list.items.length === 0 ? (
-      <EmptyState title="該当する楽曲がありません" body="別のブランドに切り替えるか、検索からお探しください。" />
+    list.empty ? (
+      <EmptyState {...list.empty} />
     ) : list.rowsAreLight ? (
       /* `/songs/all/` は行を ref だけに削った到達性のためのハブ。列が無いので表にせず、
          `.card > li` の content-visibility が効くリストのまま出す (3,153 行)。 */

@@ -59,8 +59,8 @@ const hasTicket = ticketRows.some((r) => r.value) || ev.ticket.url;
 
   <Section id="event-shows" title="公演" count={ev.shows.length}>
     {
-      ev.shows.length === 0 ? (
-        <EmptyState title="公演がまだ登録されていません" />
+      ev.showsEmpty ? (
+        <EmptyState {...ev.showsEmpty} />
       ) : (
         <ListContainer as="ul">
           {ev.shows.map((s) => (
@@ -102,11 +102,7 @@ const hasTicket = ticketRows.some((r) => r.value) || ev.ticket.url;
       <Section slot="aside" id="event-releases" title="映像・音源">
         <ListContainer>
           {ev.releases.map((r) => (
-            <LabeledRow
-              label={r.kindLabel}
-              value={r.releaseDate ? `${r.title} (${r.releaseDate})` : r.title}
-              href={r.url}
-            />
+            <LabeledRow label={r.kindLabel} value={r.display} href={r.url} />
           ))}
         </ListContainer>
       </Section>

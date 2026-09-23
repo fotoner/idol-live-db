@@ -19,8 +19,8 @@ const { list } = Astro.props;
   filters={list.filters}
 >
   {
-    list.items.length === 0 ? (
-      <EmptyState title="該当する会場がありません" />
+    list.empty ? (
+      <EmptyState {...list.empty} />
     ) : (
       <ListContainer as="ul">
         {list.items.map((item) => (

@@ -30,7 +30,7 @@
       "kind": "search",
       "key": null,
       "id": null,
-      "data": "search/manifest.json",
+      "data": "index/search.json",
       "inSitemap": true
     },
     {

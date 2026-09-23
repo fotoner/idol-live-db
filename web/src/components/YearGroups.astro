@@ -1,24 +1,23 @@
 ---
 import YearGroupSection from "./YearGroupSection.astro";
 import EmptyState from "./EmptyState.astro";
+import type { EmptyText } from "../lib/schema/EmptyText";
 import type { YearGroup } from "../lib/schema/YearGroup";
 /**
  * 年でまとめたライブ一覧。年の切り方・並び・見出しの文字 (「2026年」「日程未定」) は
  * Rust の event_grouping が決めている。年が見出しに出るので、行の日付ブロックからは落とす。
+ * 空のときの案内 (`empty`) も Rust が一覧の種類ごとに出す。
  */
 interface Props {
   groups: readonly YearGroup[];
-  emptyTitle?: string;
+  empty: EmptyText | null;
 }
-const { groups, emptyTitle = "該当するライブがありません" } = Astro.props;
+const { groups, empty } = Astro.props;
 ---
 
 {
-  groups.length === 0 ? (
-    <EmptyState
-      title={emptyTitle}
-      body="別の年やブランドに切り替えるか、検索からお探しください。"
-    />
+  empty ? (
+    <EmptyState {...empty} />
   ) : (
     <div class="u-stack">
       {groups.map((g) => (

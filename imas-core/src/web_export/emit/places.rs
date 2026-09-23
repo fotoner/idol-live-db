@@ -64,10 +64,15 @@ impl VenueDirectory {
             halls_by_venue
                 .entry(h.venue_id)
                 .or_default()
-                .push(HallRow { name: h.name, capacity: h.capacity.map(|c| c as i32) });
+                .push(hall_row(h.name, h.capacity.map(|c| c as i32)));
         }
         Self { names_by_venue, halls_by_venue }
     }
+}
+
+/// ホール 1 行。収容人数の書き方は `content::capacity_display`。
+pub fn hall_row(name: String, capacity: Option<i32>) -> HallRow {
+    HallRow { name, capacity_display: content::capacity_display(capacity), capacity }
 }
 
 pub fn venue_page(ctx: &Ctx, venue_id: &str, directory: &VenueDirectory) -> Option<VenuePage> {
@@ -82,6 +87,8 @@ pub fn venue_page(ctx: &Ctx, venue_id: &str, directory: &VenueDirectory) -> Opti
         Ctx::crumb("会場", "/venues/"),
         Ctx::crumb(&venue.name, &path),
     ];
+
+    let shows = shows_at_venue(ctx, venue_id);
 
     Some(VenuePage {
         schema_version: SCHEMA_VERSION,
@@ -106,7 +113,8 @@ pub fn venue_page(ctx: &Ctx, venue_id: &str, directory: &VenueDirectory) -> Opti
             .iter()
             .filter_map(|id| ctx.event_ref(id))
             .collect(),
-        shows: shows_at_venue(ctx, venue_id),
+        shows_empty: content::empty_text(shows.is_empty(), content::EMPTY_SHOW_RECORDS, None),
+        shows,
         app: content::app_open_plain(),
         seo: ctx.seo(
             &venue.name,
@@ -263,6 +271,12 @@ pub fn brand_page(ctx: &Ctx, brand_id: &str) -> Option<BrandPage> {
         Ctx::crumb(&brand.name, &path),
     ];
 
+    // 並ぶ全員がこのブランドなので、補助表記 (ブランド名) は落とす。
+    let idols: Vec<Ref> = idol_queries::idol_list(ctx.snap, Some(brand_id))
+        .iter()
+        .filter_map(|i| ctx.idol_ref(&i.id).map(Ref::without_sub))
+        .collect();
+
     Some(BrandPage {
         schema_version: SCHEMA_VERSION,
         id: brand.id.clone(),
@@ -271,11 +285,8 @@ pub fn brand_page(ctx: &Ctx, brand_id: &str) -> Option<BrandPage> {
         short_name: Some(brand.short_name.clone()),
         stat_tiles: brand_stat_tiles(ctx, brand_id, counts),
         theme_key,
-        // 並ぶ全員がこのブランドなので、補助表記 (ブランド名) は落とす。
-        idols: idol_queries::idol_list(ctx.snap, Some(brand_id))
-            .iter()
-            .filter_map(|i| ctx.idol_ref(&i.id).map(Ref::without_sub))
-            .collect(),
+        idols_empty: content::empty_text(idols.is_empty(), content::EMPTY_BRAND_IDOLS, None),
+        idols,
         units: unit_queries::all_units(ctx.snap)
             .iter()
             .filter(|u| u.brand_id == brand_id)

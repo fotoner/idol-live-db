@@ -3,7 +3,7 @@
 //! 何をどの日に出すかは `domain::calendar_queries` (アプリのカレンダーと同じ 1 本)。
 //! ここは月の枠 (週 × 7 日) に流し込んだ形で、Astro は並べるだけ。
 
-use super::common::{DateBadge, FilterAxis, NavLink, Ref, SeoBlock};
+use super::common::{DateBadge, EmptyText, FilterAxis, NavLink, Ref, SeoBlock};
 
 web_dto! {
     /// 月のカレンダー 1 枚。
@@ -27,6 +27,8 @@ web_dto! {
         pub weeks: Vec<CalendarWeek>,
         /// 予定のある日だけを日付順に (枠の下に並べる一覧)。
         pub days: Vec<CalendarDayGroup>,
+        /// 予定が 1 つも無い月の案内。
+        pub empty: Option<EmptyText>,
         pub seo: SeoBlock,
     }
 }

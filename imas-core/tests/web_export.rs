@@ -136,6 +136,7 @@ fn t7b_pages_survive_a_full_serde_round_trip() {
     round!("venues/venue_makuhari.json", VenuePage);
     round!("brands/ml.json", BrandPage);
     round!("search/manifest.json", SearchManifest);
+    round!("index/search.json", SearchPage);
     round!("search/songs.json", SearchShard);
     round!("parity/fold.json", FoldParity);
 }

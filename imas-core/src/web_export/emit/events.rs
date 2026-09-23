@@ -72,6 +72,7 @@ pub fn event_page(ctx: &Ctx, event_id: &str) -> Option<EventPage> {
             .into_iter()
             .map(|r| ReleaseInfo {
                 id: r.id,
+                display: content::release_display(&r.title, r.release_date.as_deref()),
                 title: r.title,
                 kind_label: release_kind_label(&r.product_type).to_string(),
                 kind: Some(r.product_type),
@@ -80,6 +81,7 @@ pub fn event_page(ctx: &Ctx, event_id: &str) -> Option<EventPage> {
             })
             .collect(),
         venues,
+        shows_empty: content::empty_text(shows.is_empty(), content::EMPTY_EVENT_SHOWS, None),
         shows,
         app: content::app_open_deeplink("event", &url_segment(&record.id)),
         seo: ctx.seo(
@@ -295,6 +297,8 @@ pub fn show_page(ctx: &Ctx, show_id: &str) -> Option<ShowPage> {
         Ctx::crumb(identity.short.text(), &path),
     ];
 
+    let siblings = sibling_shows(ctx, &show.event_id, &event.name);
+
     Some(ShowPage {
         schema_version: SCHEMA_VERSION,
         is_character_live: detail::is_character_live(show.performer_type.as_deref()),
@@ -309,9 +313,11 @@ pub fn show_page(ctx: &Ctx, show_id: &str) -> Option<ShowPage> {
         fact_rows: show_fact_rows(&show, venue.as_ref()),
         stat_tiles: show_stat_tiles(setlist_count, cast_ids.len() as u32),
         setlist_sections,
+        setlist_empty: content::empty_text(setlist_count == 0, content::EMPTY_SETLIST, Some(content::EMPTY_SETLIST_BODY)),
         costumes,
         cast: cast_ids.iter().filter_map(|id| ctx.idol_ref(id)).collect(),
-        sibling_shows: sibling_shows(ctx, &show.event_id, &event.name),
+        sibling_nav: sibling_nav(siblings.len()),
+        sibling_shows: siblings,
         app: content::app_open_deeplink("show", &url_segment(&show.id)),
         seo: ctx.seo(
             &title,
@@ -500,6 +506,15 @@ fn costume_where_label(song_numbers: &[u32], somewhere_in_show: bool) -> String 
 /// 名前は見分けだけの短い形 (`DAY1` / `昼公演` / 見分けが無ければ `9/13 (日)`)。
 /// このページの見出しが既にライブ名なので、チップにフルの公演名を並べると同じ文字列が
 /// 何度も出て、肝心の見分けが付かなくなる。切り方は [`show_identity`]。
+/// 同じライブの公演を行き来させる形。帯に並べきれる本数までは帯、超えたら前後への送り。
+pub fn sibling_nav(count: usize) -> SiblingNav {
+    match count {
+        0 => SiblingNav::Hidden,
+        n if n <= content::SIBLING_SHOWS_IN_SEGMENTS => SiblingNav::Segments,
+        _ => SiblingNav::Pager,
+    }
+}
+
 fn sibling_shows(ctx: &Ctx, event_id: &str, event_name: &str) -> Vec<Ref> {
     let shows = detail::shows_by_event(ctx.snap, event_id);
     if shows.len() <= 1 {
@@ -563,6 +578,14 @@ pub fn show_ids_by_event(ctx: &Ctx) -> BTreeMap<String, Vec<String>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn sibling_shows_go_to_segments_up_to_the_limit_then_to_a_pager() {
+        assert_eq!(sibling_nav(0), SiblingNav::Hidden);
+        assert_eq!(sibling_nav(2), SiblingNav::Segments);
+        assert_eq!(sibling_nav(content::SIBLING_SHOWS_IN_SEGMENTS), SiblingNav::Segments);
+        assert_eq!(sibling_nav(content::SIBLING_SHOWS_IN_SEGMENTS + 1), SiblingNav::Pager);
+    }
 
     /// 「どこで着たか」の 1 行。曲が分かる分と分からない分が混ざる。
     #[test]

@@ -1,6 +1,6 @@
 //! アイドル (idol) 詳細ページの DTO。
 
-use super::common::{AppOpen, DateBadge, Ref, SeoBlock, StatTile};
+use super::common::{AppOpen, DateBadge, EmptyText, Ref, SeoBlock, StatTile};
 use super::common::TagChipDto;
 
 web_dto! {
@@ -23,10 +23,14 @@ web_dto! {
         /// **並べる判断はコアが持つ**ので、web は行を上から出すだけ。
         pub profile_rows: Vec<ProfileRow>,
         pub current_voice_actor: Option<String>,
+        /// CV の履歴。**交代があったときだけ入る** (1 人だけなら現任の行と同じことしか
+        /// 言わないので空)。出す/出さないの線は Rust が引く。
         pub voice_actor_history: Vec<VoiceActorRow>,
         pub units: Vec<Ref>,
         /// 持ち曲 (release_date 降順)。
         pub songs: Vec<IdolSongRow>,
+        /// 持ち曲が 1 曲も無いときの案内。
+        pub songs_empty: Option<EmptyText>,
         /// 歌ったことのある曲。
         pub performed_songs: Vec<IdolPerformedRow>,
         pub shows: Vec<IdolShowRow>,
@@ -60,6 +64,8 @@ web_dto! {
         pub start_date: Option<String>,
         pub end_date: Option<String>,
         pub is_current: bool,
+        /// 行の見出し (「現任」/「歴代」)。
+        pub label: String,
         /// 1 行で出すときの表記 (名前と在任期間を `" ・ "` で繋いだもの)。
         pub display: String,
     }

@@ -8,4 +8,8 @@ import type { SeoBlock } from "./SeoBlock";
  * **読むだけ。** 投票はログインが要るのでアプリへ誘導する。
  * 中身は D1 の集計を焼き込んだもので、閲覧時に D1 は読まない。
  */
-export type PollListPage = { schemaVersion: number, path: string, title: string, polls: Array<PollSummaryDto>, total: number, seo: SeoBlock, };
+export type PollListPage = { schemaVersion: number, path: string, title: string, 
+/**
+ * 見出しの下の説明。
+ */
+lede: string, polls: Array<PollSummaryDto>, total: number, seo: SeoBlock, };

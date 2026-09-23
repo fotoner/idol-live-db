@@ -5,6 +5,10 @@
  */
 export type VoiceActorRow = { name: string, startDate: string | null, endDate: string | null, isCurrent: boolean, 
 /**
+ * 行の見出し (「現任」/「歴代」)。
+ */
+label: string, 
+/**
  * 1 行で出すときの表記 (名前と在任期間を `" ・ "` で繋いだもの)。
  */
 display: string, };

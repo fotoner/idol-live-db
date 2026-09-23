@@ -57,6 +57,11 @@ web_dto! {
         /// 歌詞の中の言葉で曲を探す API (検索ページの「歌詞」が押されたときだけ叩く)。
         /// 出面で歌詞を出すときだけ入る。TS は URL を組まず、ここに来たものを使う。
         pub lyrics_search_url: Option<String>,
+        /// サイト名。ヘッダ・フッタ・OGP の site_name・「アプリで開く」が同じ 1 本を描く。
+        pub site_name: String,
+        /// 見つからないページ (`404.html`)。routes.json に載らない唯一のページなので、
+        /// 全ページが読むメタに同居させる (文面と入口の並びは Rust が決める)。
+        pub not_found: super::index::NotFoundPage,
     }
 }
 
@@ -67,6 +72,31 @@ web_dto! {
         /// localStorage に残す値。iOS/Android の保存値と同じ文字列。
         pub raw: String,
         pub label: String,
+        /// 既定のモードか (`PerformerNameMode::default_mode`)。1 つだけが真。
+        /// サーバが描く HTML はこのモードで出ていて、閲覧者の選択が無ければこれに戻る。
+        pub is_default: bool,
+    }
+}
+
+web_dto! {
+    /// 一覧・節が空のときの案内。**中身が空のときだけ入る** (中身があれば `None`)。
+    ///
+    /// 空かどうかも文言も JSON を作る側が決める。受け手は「あれば案内を出す」だけ。
+    #[derive(Eq)]
+    pub struct EmptyText {
+        pub title: String,
+        pub body: Option<String>,
+    }
+}
+
+web_dto! {
+    /// 途中にリンクを 1 つ挟んだ 1 文 (`この曲は <派生元> の派生曲です。`)。
+    /// 文の前後は Rust が持ち、受け手はリンクを挟んで並べるだけ。
+    #[derive(Eq)]
+    pub struct LinkedNote {
+        pub before: String,
+        pub link: Ref,
+        pub after: String,
     }
 }
 
@@ -165,6 +195,8 @@ web_dto! {
     /// すべてここからアプリへ送る。
     #[derive(Eq)]
     pub struct AppOpen {
+        /// 導線の見出し (`アプリ「アイドルライブDB」`)。
+        pub title: String,
         pub app_store_url: String,
         /// `imaslivedb://events/<id>` 等。**event / show にしか無い**
         /// (`DeeplinkRouter` が受けるのは events / shows / polls の 3 種だけ)。
@@ -481,6 +513,13 @@ web_dto! {
         pub favorites: u32,
         /// ペンライトの色セット (得票の多い順)。
         pub penlight: Vec<PenlightSetDto>,
+    }
+}
+
+impl SongCommunity {
+    /// タグ・お気に入り・ペンライトのどれも無いか (「みんなの記録」を出さない)。
+    pub fn is_empty(&self) -> bool {
+        self.tags.is_empty() && self.favorites == 0 && self.penlight.is_empty()
     }
 }
 

@@ -26,19 +26,23 @@
   "performerNameOptions": [
     {
       "raw": "idol",
-      "label": "アイドル名"
+      "label": "アイドル名",
+      "isDefault": true
     },
     {
       "raw": "cast",
-      "label": "CV名"
+      "label": "CV名",
+      "isDefault": false
     },
     {
       "raw": "both",
-      "label": "アイドル名 + CV名"
+      "label": "アイドル名 + CV名",
+      "isDefault": false
     },
     {
       "raw": "show",
-      "label": "公演に合わせる"
+      "label": "公演に合わせる",
+      "isDefault": false
     }
   ],
   "primaryNav": [
@@ -120,5 +124,40 @@
     "キャラクター画像・公式ロゴ・歌詞は掲載していません。ジャケット画像は Apple Music の提供によるものです。"
   ],
   "lyricsLicenseNotice": null,
-  "lyricsSearchUrl": null
+  "lyricsSearchUrl": null,
+  "siteName": "アイドルライブDB",
+  "notFound": {
+    "eyebrow": "404",
+    "title": "ページが見つかりません",
+    "lede": "URL が変わったか、そのデータがまだ登録されていない可能性があります。 検索するか、下の入口からお探しください。",
+    "entries": [
+      {
+        "glyph": "♪",
+        "title": "ライブ",
+        "preview": "今後の予定と開催済みの記録",
+        "path": "/events/"
+      },
+      {
+        "glyph": "♬",
+        "title": "楽曲",
+        "preview": "クレジット・歌唱アイドル・披露履歴",
+        "path": "/songs/"
+      },
+      {
+        "glyph": "☺",
+        "title": "アイドル",
+        "preview": "プロフィール・持ち曲・出演履歴",
+        "path": "/idols/"
+      }
+    ],
+    "seo": {
+      "title": "ページが見つかりません | アイドルライブDB",
+      "description": "お探しのページは見つかりませんでした。検索か一覧からお探しください。",
+      "canonical": "https://idollivedb.fugaapp.site/404.html",
+      "ogImage": "https://idollivedb.fugaapp.site/og/default.png",
+      "robots": "noindex,follow",
+      "jsonLd": {},
+      "breadcrumbs": []
+    }
+  }
 }

@@ -88,6 +88,7 @@
       "setlistCount": 23
     }
   ],
+  "showsEmpty": null,
   "cast": {
     "shows": [
       {
@@ -138,7 +139,8 @@
       "kind": "bluray",
       "kindLabel": "Blu-ray",
       "releaseDate": "2026-10-01",
-      "url": null
+      "url": null,
+      "display": "Blu-ray BOX (2026-10-01)"
     }
   ],
   "venues": [
@@ -153,6 +155,7 @@
     }
   ],
   "app": {
+    "title": "アプリ「アイドルライブDB」",
     "appStoreUrl": "https://apps.apple.com/jp/app/id6763342297",
     "deeplink": "imaslivedb://events/ev_sample",
     "note": "参加記録・投票・歌詞・コール・タグ付けはアプリでご利用いただけます。"

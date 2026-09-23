@@ -3,6 +3,7 @@ import Head from "../components/Head.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import JsonLd from "../components/JsonLd.astro";
+import { meta } from "../lib/data";
 import type { SeoBlock } from "../lib/schema/SeoBlock";
 import "../styles/tokens.css";
 import "../styles/base.css";
@@ -22,12 +23,11 @@ interface Props {
   isCharacterLive?: boolean;
 }
 const { seo, themeKey = "neutral", wide = false, isCharacterLive } = Astro.props;
-const SITE_NAME = "アイドルライブDB";
 ---
 
 <html lang="ja" prefix="og: https://ogp.me/ns#">
   <head>
-    <Head seo={seo} siteName={SITE_NAME} />
+    <Head seo={seo} siteName={meta().siteName} />
     <link rel="stylesheet" href="/themes.css" />
     <JsonLd data={seo.jsonLd} />
   </head>

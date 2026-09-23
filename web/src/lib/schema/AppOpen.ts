@@ -6,7 +6,11 @@
  * Web は閲覧専用なので、状態を持つ操作 (参加記録・投票・タグ・歌詞・コール) は
  * すべてここからアプリへ送る。
  */
-export type AppOpen = { appStoreUrl: string, 
+export type AppOpen = { 
+/**
+ * 導線の見出し (`アプリ「アイドルライブDB」`)。
+ */
+title: string, appStoreUrl: string, 
 /**
  * `imaslivedb://events/<id>` 等。**event / show にしか無い**
  * (`DeeplinkRouter` が受けるのは events / shows / polls の 3 種だけ)。

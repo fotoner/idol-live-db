@@ -113,6 +113,7 @@
     "count": 1
   },
   "total": 2,
+  "empty": null,
   "seo": {
     "title": "楽曲 | アイドルライブDB",
     "description": "楽曲の一覧。",

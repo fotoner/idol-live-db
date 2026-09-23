@@ -13,7 +13,8 @@
   "halls": [
     {
       "name": "イベントホール",
-      "capacity": 9000
+      "capacity": 9000,
+      "capacityDisplay": "9000人"
     }
   ],
   "pastNames": [
@@ -82,7 +83,9 @@
       "setlistCount": 23
     }
   ],
+  "showsEmpty": null,
   "app": {
+    "title": "アプリ「アイドルライブDB」",
     "appStoreUrl": "https://apps.apple.com/jp/app/id6763342297",
     "deeplink": null,
     "note": "参加記録・投票・歌詞・コール・タグ付けはアプリでご利用いただけます。"

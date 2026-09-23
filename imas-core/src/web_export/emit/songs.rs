@@ -90,6 +90,36 @@ pub fn song_page(ctx: &Ctx, song_id: &str) -> Option<SongPage> {
             .collect()
     };
 
+    let community = SongCommunity {
+        tags: super::context::tag_chips(ctx, TagScope::Song, ctx.community.song_tags(&record.id)),
+        favorites: ctx.community.favorites(&record.id).max(0) as u32,
+        penlight: ctx
+            .community
+            .penlight(&record.id)
+            .iter()
+            .map(|p| PenlightSetDto { key: p.color_set_key.clone(), count: p.count.max(0) as u32 })
+            .collect(),
+    };
+    let performance_history: Vec<PerformanceRow> = detail::performance_history(ctx.snap, song_id)
+        .into_iter()
+        .zip(history_items)
+        .filter_map(|(h, &item)| {
+            let show_name = distinguishing_show_name(&h.event_name, &h.show_name);
+            let place_display = join_parts([show_name, h.venue.as_deref()]).unwrap_or_default();
+            Some(PerformanceRow {
+                show: ctx.show_ref(&h.show_id)?,
+                event: ctx.event_ref(&h.event_id)?,
+                date_badge: DateBadge::from_ymd(&h.date),
+                number: ctx.setlist_number(&h.show_id, h.position),
+                date: h.date,
+                venue: h.venue,
+                place_display,
+                performers_display: join_capped(&performer_names(item), "・", 3, "人"),
+                ordinal_label: performance_ordinal_label(h.ordinal),
+            })
+        })
+        .collect();
+
     Some(SongPage {
         schema_version: SCHEMA_VERSION,
         // 歌詞。**出すかどうかは content::LYRICS_ON_WEB 1 箇所で決まる。**
@@ -112,16 +142,9 @@ pub fn song_page(ctx: &Ctx, song_id: &str) -> Option<SongPage> {
         path: path.clone(),
         title: record.title.clone(),
         title_kana: record.title_kana.clone(),
-        community: SongCommunity {
-            tags: super::context::tag_chips(ctx, TagScope::Song, ctx.community.song_tags(&record.id)),
-            favorites: ctx.community.favorites(&record.id).max(0) as u32,
-            penlight: ctx
-                .community
-                .penlight(&record.id)
-                .iter()
-                .map(|p| PenlightSetDto { key: p.color_set_key.clone(), count: p.count.max(0) as u32 })
-                .collect(),
-        },
+        // 「みんなの記録」は、タグ・お気に入り・ペンライトのどれかがあるときだけ出す。
+        has_community: !community.is_empty(),
+        community,
         theme_key: ctx.brand_theme(brand_id.as_deref()),
         brand: brand_id.as_deref().and_then(|b| ctx.brand_ref(b)),
         joint_brands: ctx.joint_brand_refs(record.joint_brand_ids.as_deref()),
@@ -150,30 +173,16 @@ pub fn song_page(ctx: &Ctx, song_id: &str) -> Option<SongPage> {
         other_artists,
         unit: record.unit_id.as_deref().and_then(|u| ctx.unit_ref(u)),
         unit_label: record.unit_name.clone(),
-        parent: record.parent_song_id.as_deref().and_then(|p| ctx.song_ref(p)),
+        parent_note: record.parent_song_id.as_deref().and_then(|p| ctx.song_ref(p)).map(|link| LinkedNote {
+            before: content::PARENT_SONG_NOTE_BEFORE.to_string(),
+            link,
+            after: content::PARENT_SONG_NOTE_AFTER.to_string(),
+        }),
         variants,
         performance_count,
         stat_tiles,
-        performance_history: detail::performance_history(ctx.snap, song_id)
-            .into_iter()
-            .zip(history_items)
-            .filter_map(|(h, &item)| {
-                let show_name = distinguishing_show_name(&h.event_name, &h.show_name);
-                let place_display =
-                    join_parts([show_name, h.venue.as_deref()]).unwrap_or_default();
-                Some(PerformanceRow {
-                    show: ctx.show_ref(&h.show_id)?,
-                    event: ctx.event_ref(&h.event_id)?,
-                    date_badge: DateBadge::from_ymd(&h.date),
-                    number: ctx.setlist_number(&h.show_id, h.position),
-                    date: h.date,
-                    venue: h.venue,
-                    place_display,
-                    performers_display: join_capped(&performer_names(item), "・", 3, "人"),
-                    ordinal_label: performance_ordinal_label(h.ordinal),
-                })
-            })
-            .collect(),
+        history_empty: content::empty_text(performance_history.is_empty(), content::EMPTY_SONG_HISTORY, None),
+        performance_history,
         frequent_singers: performance_stats::singers_for_song(ctx.snap, song_id, &[], TOP_N)
             .into_iter()
             .filter_map(|t| {

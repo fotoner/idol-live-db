@@ -1,6 +1,6 @@
 //! 会場 (venue) 詳細ページの DTO。
 
-use super::common::{AppOpen, Ref, SeoBlock};
+use super::common::{AppOpen, EmptyText, Ref, SeoBlock};
 use super::idol::ProfileRow;
 use super::event::ShowSummary;
 
@@ -28,6 +28,8 @@ web_dto! {
         pub fact_rows: Vec<ProfileRow>,
         pub events: Vec<Ref>,
         pub shows: Vec<ShowSummary>,
+        /// 公演の記録が 1 つも無いときの案内。
+        pub shows_empty: Option<EmptyText>,
         pub app: AppOpen,
         pub seo: SeoBlock,
     }
@@ -39,6 +41,8 @@ web_dto! {
     pub struct HallRow {
         pub name: String,
         pub capacity: Option<i32>,
+        /// 収容人数の表記 (`9000人`)。人数が無ければ `None`。
+        pub capacity_display: Option<String>,
     }
 }
 

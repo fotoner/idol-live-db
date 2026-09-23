@@ -2,41 +2,27 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import EntryCard from "../components/EntryCard.astro";
 import SearchBox from "../components/SearchBox.astro";
-import type { SeoBlock } from "../lib/schema/SeoBlock";
+import { meta } from "../lib/data";
 
 /**
- * 404。レコードに対応しないページなので、文面はここに持つ (Rust の SeoBlock は無い)。
+ * 404。レコードに対応しないページなので、文面と入口は `meta.json` の `notFound` (Rust)。
  * Cloudflare 側の `not_found_handling: "404-page"` がこの HTML を 404 で返す。
  */
-const seo: SeoBlock = {
-  title: "ページが見つかりません | アイドルライブDB",
-  description: "お探しのページは見つかりませんでした。検索か一覧からお探しください。",
-  canonical: "/404.html",
-  ogImage: "/og/default.png",
-  robots: "noindex,follow",
-  jsonLd: {},
-  breadcrumbs: [],
-};
-const entries = [
-  { glyph: "♪", title: "ライブ", preview: "今後の予定と開催済みの記録", href: "/events/" },
-  { glyph: "♬", title: "楽曲", preview: "クレジット・歌唱アイドル・披露履歴", href: "/songs/" },
-  { glyph: "☺", title: "アイドル", preview: "プロフィール・持ち曲・出演履歴", href: "/idols/" },
-];
+const notFound = meta().notFound;
 ---
 
-<BaseLayout seo={seo}>
+<BaseLayout seo={notFound.seo}>
   <section class="hero" aria-labelledby="nf-title">
     <div class="hero__body">
-      <p class="hero__eyebrow">404</p>
-      <h1 class="hero__title" id="nf-title">ページが見つかりません</h1>
+      <p class="hero__eyebrow">{notFound.eyebrow}</p>
+      <h1 class="hero__title" id="nf-title">{notFound.title}</h1>
       <p class="lede">
-        URL が変わったか、そのデータがまだ登録されていない可能性があります。
-        検索するか、下の入口からお探しください。
+        {notFound.lede}
       </p>
       <SearchBox />
     </div>
   </section>
   <div class="entry-grid">
-    {entries.map((e) => <EntryCard {...e} />)}
+    {notFound.entries.map((e) => <EntryCard glyph={e.glyph} title={e.title} preview={e.preview} href={e.path} />)}
   </div>
 </BaseLayout>

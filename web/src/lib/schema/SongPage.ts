@@ -2,6 +2,8 @@
 import type { AppOpen } from "./AppOpen";
 import type { CoOccurRow } from "./CoOccurRow";
 import type { CreditGroup } from "./CreditGroup";
+import type { EmptyText } from "./EmptyText";
+import type { LinkedNote } from "./LinkedNote";
 import type { LyricsBlock } from "./LyricsBlock";
 import type { PerformanceRow } from "./PerformanceRow";
 import type { ProfileRow } from "./ProfileRow";
@@ -35,6 +37,10 @@ kamisabiLabel: string | null,
  */
 community: SongCommunity, 
 /**
+ * 「みんなの記録」の節を出すか (タグ・お気に入り・ペンライトのどれかがある)。
+ */
+hasCommunity: boolean, 
+/**
  * 歌詞・コールガイドの出し方。**出すかどうかを決めるのは Rust。**
  */
 lyrics: LyricsBlock, 
@@ -64,9 +70,9 @@ artworkUrl: string | null, appleMusicUrl: string | null, jasracCode: string | nu
  */
 unitLabel: string | null, 
 /**
- * 派生曲の親。
+ * 派生曲の親を言う 1 文 (`この曲は <親> の派生曲です。`)。派生曲でなければ `None`。
  */
-parent: Ref | null, 
+parentNote: LinkedNote | null, 
 /**
  * この曲の派生 (リミックス・ソロver 等)。
  */
@@ -78,7 +84,11 @@ statTiles: Array<StatTile>,
 /**
  * date 降順。
  */
-performanceHistory: Array<PerformanceRow>, frequentSingers: Array<SingerRow>, coOccurring: Array<CoOccurRow>, related: Array<Ref>, 
+performanceHistory: Array<PerformanceRow>, 
+/**
+ * 披露の記録が 1 件も無いときの案内。
+ */
+historyEmpty: EmptyText | null, frequentSingers: Array<SingerRow>, coOccurring: Array<CoOccurRow>, related: Array<Ref>, 
 /**
  * 「基本情報」の行 (リリース・収録・シリーズ・再生時間・JASRAC 作品コード)。
  *

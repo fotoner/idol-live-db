@@ -46,6 +46,7 @@
       }
     ]
   },
+  "hasCommunity": true,
   "lyrics": {
     "available": false,
     "statusLabel": "JASRAC 許諾待ち",
@@ -105,7 +106,7 @@
     "artworkUrl": null
   },
   "unitLabel": "765MILLION ALLSTARS",
-  "parent": null,
+  "parentNote": null,
   "variants": [
     {
       "kind": "song",
@@ -167,6 +168,7 @@
       "ordinalLabel": "12 回目"
     }
   ],
+  "historyEmpty": null,
   "frequentSingers": [
     {
       "idol": {
@@ -240,6 +242,7 @@
     }
   ],
   "app": {
+    "title": "アプリ「アイドルライブDB」",
     "appStoreUrl": "https://apps.apple.com/jp/app/id6763342297",
     "deeplink": null,
     "note": "参加記録・投票・歌詞・コール・タグ付けはアプリでご利用いただけます。"

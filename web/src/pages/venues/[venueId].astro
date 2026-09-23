@@ -36,7 +36,7 @@ const venue = page<VenuePage>(Astro.props.data);
         <ul class="u-row" aria-label="ホール">
           {venue.halls.map((h) => (
             <li>
-              <Chip text={h.name} sub={h.capacity ? `${h.capacity}人` : null} />
+              <Chip text={h.name} sub={h.capacityDisplay} />
             </li>
           ))}
         </ul>
@@ -66,8 +66,8 @@ const venue = page<VenuePage>(Astro.props.data);
 
   <Section id="venue-shows" title="公演" count={venue.shows.length}>
     {
-      venue.shows.length === 0 ? (
-        <EmptyState title="公演の記録がありません" />
+      venue.showsEmpty ? (
+        <EmptyState {...venue.showsEmpty} />
       ) : (
         <ListContainer as="ul">
           {venue.shows.map((s) => (

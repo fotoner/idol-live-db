@@ -101,8 +101,8 @@ const { page } = Astro.props;
 
   <section class="cal-days" aria-label="この月の予定">
     {
-      page.days.length === 0 ? (
-        <EmptyState title="この月の予定はまだありません" />
+      page.empty ? (
+        <EmptyState {...page.empty} />
       ) : (
         page.days.map((g) => (
           <article class="cal-day" id={dayAnchorId(g.dateBadge.iso)}>

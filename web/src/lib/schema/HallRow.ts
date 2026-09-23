@@ -3,4 +3,8 @@
 /**
  * ホール (同一会場内の区画)。
  */
-export type HallRow = { name: string, capacity: number | null, };
+export type HallRow = { name: string, capacity: number | null, 
+/**
+ * 収容人数の表記 (`9000人`)。人数が無ければ `None`。
+ */
+capacityDisplay: string | null, };

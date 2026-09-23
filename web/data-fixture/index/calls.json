@@ -40,6 +40,7 @@
       "updatedBy": "匿名"
     }
   ],
+  "withCallsEmpty": null,
   "withCallsNote": null,
   "recentEdits": [
     {
@@ -57,6 +58,8 @@
       "by": "匿名"
     }
   ],
+  "recentEditsEmpty": null,
+  "wantedLede": "「コール曲」タグが付いているのに、まだコールガイドが書かれていない曲 (票の多い順)。",
   "wanted": [
     {
       "kind": "song",
@@ -68,6 +71,7 @@
       "artworkUrl": null
     }
   ],
+  "wantedEmpty": null,
   "wantedNote": "ほかに「コール曲」タグの付いた 1 曲は歌詞が未登録のため、ここには並べていません (歌詞が入ってから書けるようになります)。",
   "seo": {
     "title": "コールガイドの進捗 | アイドルライブDB",

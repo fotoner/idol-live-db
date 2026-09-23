@@ -7,4 +7,8 @@ export type ReleaseInfo = { id: string, title: string, kind: string | null,
 /**
  * 種別の表示名。種別が無いものは「リリース」。
  */
-kindLabel: string, releaseDate: string | null, url: string | null, };
+kindLabel: string, releaseDate: string | null, url: string | null, 
+/**
+ * 1 行で出すときの表記 (`タイトル (発売日)`。発売日が無ければタイトルだけ)。
+ */
+display: string, };

@@ -66,11 +66,11 @@ const idol = page<IdolPage>(Astro.props.data);
   }
 
   {
-    idol.voiceActorHistory.length > 1 && (
+    idol.voiceActorHistory.length > 0 && (
       <Section slot="aside" id="idol-cv" title="CV">
         <ListContainer>
           {idol.voiceActorHistory.map((v) => (
-            <LabeledRow label={v.isCurrent ? "現任" : "歴代"} value={v.display} />
+            <LabeledRow label={v.label} value={v.display} />
           ))}
         </ListContainer>
       </Section>
@@ -87,8 +87,8 @@ const idol = page<IdolPage>(Astro.props.data);
 
   <Section id="idol-songs" title="持ち曲" count={idol.songs.length}>
     {
-      idol.songs.length === 0 ? (
-        <EmptyState title="持ち曲がまだ登録されていません" />
+      idol.songsEmpty ? (
+        <EmptyState {...idol.songsEmpty} />
       ) : (
         <ListContainer as="ul">
           {idol.songs.map((s) => (

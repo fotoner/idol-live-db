@@ -161,21 +161,23 @@ fn validate_ymd(text: &str) -> Result<()> {
     }
 }
 
+/// 歌唱者の表示モードの選択肢。**規則もラベルも既定も domain が持つ** ので、
+/// ここは DTO の形へ移すだけ。
+pub(crate) fn performer_name_options() -> Vec<PerformerNameOptionDto> {
+    use crate::domain::event_detail_queries::PerformerNameMode;
+    let default_mode = PerformerNameMode::default_mode();
+    crate::domain::event_detail_queries::performer_name_options()
+        .into_iter()
+        .map(|o| PerformerNameOptionDto { is_default: o.mode == default_mode, raw: o.raw, label: o.label })
+        .collect()
+}
+
 /// ブラウザに配ってよい形の生テーブル。
 ///
 /// **出面に出してはいけない列を落とすのはここ 1 箇所。** 生テーブルは
 /// 「DB の行そのまま」なので、DB に置いてよいが配ってはいけない列
 /// (試聴音源・歌詞の在り処) がそのまま混ざる。行型に列が増えたときは、
 /// ここを見て配ってよいかを決める。
-/// 歌唱者の表示モードの選択肢。**規則もラベルも domain が持つ** ので、
-/// ここは DTO の形へ移すだけ。
-fn performer_name_options() -> Vec<PerformerNameOptionDto> {
-    crate::domain::event_detail_queries::performer_name_options()
-        .into_iter()
-        .map(|o| PerformerNameOptionDto { raw: o.raw, label: o.label })
-        .collect()
-}
-
 fn shippable_tables(mut raw: RawTables) -> RawTables {
     raw.songs = raw.songs.into_iter().map(shippable_song).collect();
     raw
@@ -373,7 +375,8 @@ fn write_all(
         w.write_text(&format!("search/{}.json", shard.file), &shard.json)?;
     }
     w.write_json("search/manifest.json", &search::manifest(&shards))?;
-    book.listing(RouteKind::Search, "/search/", "search/manifest.json", true);
+    w.write_json("index/search.json", &search::search_page())?;
+    book.listing(RouteKind::Search, search::PATH, "index/search.json", true);
 
     w.write_json("parity/fold.json", &search::fold_parity(ctx))?;
 
@@ -394,6 +397,8 @@ fn write_all(
             footer_notes: crate::web_export::content::footer_notes(),
             lyrics_license_notice: crate::web_export::content::lyrics_license_notice(),
             lyrics_search_url: crate::web_export::content::lyrics_search_url(),
+            site_name: crate::web_export::content::SITE_NAME.to_string(),
+            not_found: lists::not_found(),
         },
     )?;
 

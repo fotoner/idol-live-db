@@ -5,6 +5,7 @@
 
 use super::dto::{
     AboutLink, AboutSection, AppLinks, AppOpen, CallGuideClap, CallGuideEmphasis, CallGuideVocabulary,
+    EmptyText,
 };
 
 /// サイトの起点。ホストを変えるときは以下も必ず揃える (docs/ARCHITECTURE-web.md O6 /
@@ -371,9 +372,15 @@ pub fn app_links() -> AppLinks {
     }
 }
 
+/// 「アプリで開く」の見出し。アプリの名前はサイト名と同じ。
+fn app_open_title() -> String {
+    format!("アプリ「{SITE_NAME}」")
+}
+
 /// deeplink を持たないページ (曲 / アイドル / ユニット / 会場) の導線。
 pub fn app_open_plain() -> AppOpen {
     AppOpen {
+        title: app_open_title(),
         app_store_url: APP_STORE_URL.to_string(),
         deeplink: None,
         note: APP_OPEN_NOTE.to_string(),
@@ -389,6 +396,7 @@ pub fn app_open_deeplink(kind: &str, segment: &str) -> AppOpen {
         other => other,
     };
     AppOpen {
+        title: app_open_title(),
         app_store_url: APP_STORE_URL.to_string(),
         deeplink: Some(format!("{DEEPLINK_SCHEME}://{collection}/{segment}")),
         note: APP_OPEN_NOTE.to_string(),
@@ -525,4 +533,145 @@ pub fn about_sections() -> Vec<AboutSection> {
             }],
         },
     ]
+}
+
+// ---- 空の一覧・節の案内 -----------------------------------------------------------
+// 見出しは「何が無いか」、本文は「次にどうすればよいか」(あるときだけ)。
+
+/// 空のときだけ案内を出す。中身があれば `None` (受け手は「あれば出す」だけにする)。
+pub fn empty_text(is_empty: bool, title: &str, body: Option<&str>) -> Option<EmptyText> {
+    is_empty.then(|| EmptyText { title: title.to_string(), body: body.map(str::to_string) })
+}
+
+pub const EMPTY_UPCOMING_EVENTS: &str = "今後の開催予定はまだ登録されていません";
+/// トップの「今後のライブ」が空のとき (一覧ページと違い、行き先を言い添える)。
+pub const EMPTY_UPCOMING_EVENTS_HOME_BODY: &str =
+    "発表され次第このページに載ります。過去の記録は「開催済み」からご覧ください。";
+pub const EMPTY_EVENTS: &str = "該当するライブがありません";
+pub const EMPTY_EVENTS_BODY: &str = "別の年やブランドに切り替えるか、検索からお探しください。";
+pub const EMPTY_SONGS: &str = "該当する楽曲がありません";
+pub const EMPTY_SONGS_BODY: &str = "別のブランドに切り替えるか、検索からお探しください。";
+pub const EMPTY_IDOLS: &str = "該当するアイドルがいません";
+pub const EMPTY_IDOLS_BODY: &str = "別のブランドや誕生月に切り替えてみてください。";
+pub const EMPTY_UNITS: &str = "該当するユニットがありません";
+pub const EMPTY_VENUES: &str = "該当する会場がありません";
+pub const EMPTY_CALENDAR_MONTH: &str = "この月の予定はまだありません";
+/// トップの「最近の公演」と会場の公演一覧。
+pub const EMPTY_SHOW_RECORDS: &str = "公演の記録がありません";
+pub const EMPTY_EVENT_SHOWS: &str = "公演がまだ登録されていません";
+pub const EMPTY_SONG_HISTORY: &str = "ライブでの披露記録がありません";
+pub const EMPTY_IDOL_SONGS: &str = "持ち曲がまだ登録されていません";
+pub const EMPTY_SETLIST: &str = "セットリストがまだ登録されていません";
+pub const EMPTY_SETLIST_BODY: &str = "GitHub のリポジトリからデータの追加にご協力いただけます。";
+pub const EMPTY_BRAND_IDOLS: &str = "アイドルが登録されていません";
+pub const EMPTY_UNIT_MEMBERS: &str = "メンバーがまだ登録されていません";
+pub const EMPTY_UNIT_SONGS: &str = "ユニット曲がまだ登録されていません";
+pub const EMPTY_CALL_GUIDES: &str = "まだコールガイドがありません";
+pub const EMPTY_CALL_GUIDES_BODY: &str =
+    "「コール曲」タグの付いた曲から書き始められます (アプリの歌詞タブから)。";
+pub const EMPTY_CALL_EDITS: &str = "まだ編集がありません";
+pub const EMPTY_CALL_EDITS_BODY: &str = "誰かがコールを書き込むと、ここに残ります。";
+pub const EMPTY_CALL_WANTED: &str =
+    "未整備の曲はありません。タグの付いた曲は、いまのところ全部書かれています。";
+
+// ---- ページごとの固定文 -------------------------------------------------------------
+
+/// コールガイドの「書き手募集中」の説明。並びは `emit::calls` の `wanted` と同じ (票の多い順)。
+pub const CALL_GUIDE_WANTED_LEDE: &str =
+    "「コール曲」タグが付いているのに、まだコールガイドが書かれていない曲 (票の多い順)。";
+
+/// お題の一覧の説明。
+pub const POLL_LIST_LEDE: &str = "アプリの利用者が出し合ったお題と、記録した時点の得票です。投票はアプリから。";
+/// お題の締切の日付に添える語。締切前か過ぎたかで言い分ける。
+pub fn poll_ends_label(is_open: bool) -> &'static str {
+    if is_open { "締切" } else { "終了" }
+}
+
+/// CV の履歴の行の見出し。
+pub fn voice_actor_label(is_current: bool) -> &'static str {
+    if is_current { "現任" } else { "歴代" }
+}
+
+/// 派生曲の親を言う 1 文の前後 (`この曲は <親> の派生曲です。`)。
+pub const PARENT_SONG_NOTE_BEFORE: &str = "この曲は ";
+pub const PARENT_SONG_NOTE_AFTER: &str = " の派生曲です。";
+
+/// 円盤 1 枚の 1 行の表記 (`タイトル (発売日)`)。発売日が無ければタイトルだけ。
+pub fn release_display(title: &str, release_date: Option<&str>) -> String {
+    match release_date {
+        Some(date) => format!("{title} ({date})"),
+        None => title.to_string(),
+    }
+}
+
+/// ホールの収容人数 (`9000人`)。人数が無い・0 のときは出さない。
+pub fn capacity_display(capacity: Option<i32>) -> Option<String> {
+    capacity.filter(|&c| c != 0).map(|c| format!("{c}人"))
+}
+
+/// 同じライブの公演を、ヒーローの帯に並べる上限の本数。これを超えると前後への送りにする。
+/// 純粋に幅の話 (`DAY1 / DAY2 …` の帯が 1 行に収まる本数)。
+pub const SIBLING_SHOWS_IN_SEGMENTS: usize = 8;
+
+// ---- 検索ページ -------------------------------------------------------------------
+pub const SEARCH_TITLE: &str = "検索";
+/// 検索ページの説明。歌詞検索を出しているときだけ、その使い方を言い添える。
+pub fn search_lede() -> String {
+    let base = "楽曲・アイドル・ライブ・会場を名前でまとめて探します。ひらがな / カタカナ / 英字の大小の違いはアプリと同じ規則で吸収します。";
+    if LYRICS_ON_WEB {
+        format!("{base} 「歌詞」に切り替えると、歌詞の中の言葉から曲を探せます (2 文字以上)。")
+    } else {
+        base.to_string()
+    }
+}
+/// 検索ページの `<meta name="description">`。
+pub fn search_description() -> &'static str {
+    "アイマスの楽曲・アイドル・ライブ・会場を名前で、または歌詞の中の言葉で検索します。ひらがな / カタカナ / 英字の違いは自動で吸収します。"
+}
+
+// ---- 見つからないページ (404) --------------------------------------------------------
+pub const NOT_FOUND_EYEBROW: &str = "404";
+pub const NOT_FOUND_TITLE: &str = "ページが見つかりません";
+pub const NOT_FOUND_LEDE: &str =
+    "URL が変わったか、そのデータがまだ登録されていない可能性があります。 検索するか、下の入口からお探しください。";
+pub const NOT_FOUND_DESCRIPTION: &str = "お探しのページは見つかりませんでした。検索か一覧からお探しください。";
+/// 404 の入口に添えるひとこと。どの一覧を出すか・記号・名前・行き先は `emit::lists::SiteList`。
+pub const NOT_FOUND_PREVIEW_EVENTS: &str = "今後の予定と開催済みの記録";
+pub const NOT_FOUND_PREVIEW_SONGS: &str = "クレジット・歌唱アイドル・披露履歴";
+pub const NOT_FOUND_PREVIEW_IDOLS: &str = "プロフィール・持ち曲・出演履歴";
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn empty_text_is_only_given_when_the_list_is_empty() {
+        assert_eq!(empty_text(false, EMPTY_SONGS, Some(EMPTY_SONGS_BODY)), None);
+        let empty = empty_text(true, EMPTY_UNITS, None).expect("空なら案内がある");
+        assert_eq!(empty.title, EMPTY_UNITS);
+        assert_eq!(empty.body, None);
+    }
+
+    #[test]
+    fn poll_end_and_voice_actor_rows_are_worded_by_state() {
+        assert_eq!(poll_ends_label(true), "締切");
+        assert_eq!(poll_ends_label(false), "終了");
+        assert_eq!(voice_actor_label(true), "現任");
+        assert_eq!(voice_actor_label(false), "歴代");
+    }
+
+    #[test]
+    fn release_and_capacity_are_written_the_way_the_pages_showed_them() {
+        assert_eq!(release_display("Blu-ray BOX", Some("2026-10-01")), "Blu-ray BOX (2026-10-01)");
+        assert_eq!(release_display("Blu-ray BOX", None), "Blu-ray BOX");
+        assert_eq!(capacity_display(Some(9000)), Some("9000人".to_string()));
+        // 人数の分からないホール (0 / 無し) には添えない。
+        assert_eq!(capacity_display(Some(0)), None);
+        assert_eq!(capacity_display(None), None);
+    }
+
+    #[test]
+    fn search_lede_mentions_lyrics_only_when_lyrics_search_is_open() {
+        assert_eq!(search_lede().contains("歌詞"), LYRICS_ON_WEB);
+    }
 }

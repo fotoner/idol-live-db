@@ -1,6 +1,22 @@
 //! 検索索引 (`search/*.json`) と、畳み込みパリティ (`parity/fold.json`) の DTO。
 
-use super::common::RefKind;
+use super::common::{RefKind, SeoBlock};
+
+web_dto! {
+    /// 検索ページ (`/search/`, `index/search.json`) の文面。
+    ///
+    /// 検索の中身 (索引) は `search/*.json` で、ここはページの見出し・説明・`<head>` だけ。
+    /// 歌詞検索を出すかどうかで言うことが変わるので、文面も Rust が持つ
+    /// (`content::LYRICS_ON_WEB` を見る)。
+    pub struct SearchPage {
+        pub schema_version: u32,
+        pub path: String,
+        pub title: String,
+        /// 見出しの下の説明。
+        pub lede: String,
+        pub seo: SeoBlock,
+    }
+}
 
 web_dto! {
     /// シャードの一覧 (`search/manifest.json`)。

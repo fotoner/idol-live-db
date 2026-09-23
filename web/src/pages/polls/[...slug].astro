@@ -11,7 +11,7 @@ import type { PollListPage } from "../../lib/schema/PollListPage";
  *
  * **読むだけ。** 投票にはログインが要るので、この出面には操作を置かない。
  * 中身は D1 の集計を焼き込んだもので、閲覧のたびに D1 は読まない。
- * 「締切前か」も Rust が `ends_at` と出面の「今日」から決めた `isOpen` を出すだけ。
+ * 「締切前か」も Rust が `ends_at` と出面の「今日」から決め、添える語 (`endsLabel`) まで出す。
  */
 export const getStaticPaths = () => optionalPage("pollList", "/polls/");
 
@@ -20,7 +20,7 @@ const list = page<PollListPage>(Astro.props.data);
 
 <ListLayout seo={list.seo} title={list.title} total={list.total}>
   <p slot="lede" class="u-muted">
-    アプリの利用者が出し合ったお題と、記録した時点の得票です。投票はアプリから。
+    {list.lede}
   </p>
 
   {
@@ -33,7 +33,7 @@ const list = page<PollListPage>(Astro.props.data);
             <span class="u-muted u-num">{poll.totalVotes} 票</span>
             {poll.endsOn && (
               <span class="u-muted">
-                {poll.isOpen ? "締切" : "終了"} <time class="u-num" datetime={poll.endsOn}>{poll.endsOn}</time>
+                {poll.endsLabel} <time class="u-num" datetime={poll.endsOn}>{poll.endsOn}</time>
               </span>
             )}
           </p>

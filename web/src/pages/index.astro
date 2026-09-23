@@ -9,7 +9,7 @@ import ListContainer from "../components/ListContainer.astro";
 import EmptyState from "../components/EmptyState.astro";
 import SearchBox from "../components/SearchBox.astro";
 import StatStrip from "../components/StatStrip.astro";
-import { page, routeData } from "../lib/data";
+import { meta, page, routeData } from "../lib/data";
 import type { HomePage } from "../lib/schema/HomePage";
 
 /**
@@ -24,7 +24,7 @@ const [featured, ...restUpcoming] = home.upcoming;
 <BaseLayout seo={home.seo}>
   <section class="hero hero--home" aria-labelledby="home-title">
     <div class="hero__body">
-      <h1 class="hero__title hero__title--display" id="home-title">アイドルライブDB</h1>
+      <h1 class="hero__title hero__title--display" id="home-title">{meta().siteName}</h1>
       <p class="lede">{home.tagline}</p>
       <SearchBox />
       <StatStrip items={home.statTiles} label="収録データ" />
@@ -34,11 +34,8 @@ const [featured, ...restUpcoming] = home.upcoming;
 
   <Section id="home-upcoming" title="今後のライブ" moreHref="/events/upcoming/">
     {
-      home.upcoming.length === 0 ? (
-        <EmptyState
-          title="今後の開催予定はまだ登録されていません"
-          body="発表され次第このページに載ります。過去の記録は「開催済み」からご覧ください。"
-        />
+      home.upcomingEmpty ? (
+        <EmptyState {...home.upcomingEmpty} />
       ) : (
         <div class="u-stack">
           {featured && <FeatureEvent item={featured} />}
@@ -61,8 +58,8 @@ const [featured, ...restUpcoming] = home.upcoming;
     moreLabel={home.recentShowsMore.label}
   >
     {
-      home.recentShows.length === 0 ? (
-        <EmptyState title="公演の記録がありません" />
+      home.recentShowsEmpty ? (
+        <EmptyState {...home.recentShowsEmpty} />
       ) : (
         <ListContainer as="ul">
           {home.recentShows.map((s) => (

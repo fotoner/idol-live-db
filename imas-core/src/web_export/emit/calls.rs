@@ -84,9 +84,21 @@ pub fn call_guide_page(ctx: &Ctx, dash: &Dashboard) -> CallGuidePage {
         intro: content::CALL_GUIDE_INTRO.to_string(),
         snapshot_note: format!("{} 時点の情報です (日次で更新)。", jst_datetime(dash.generated_at)),
         stat_tiles,
+        with_calls_empty: content::empty_text(
+            with_calls.is_empty(),
+            content::EMPTY_CALL_GUIDES,
+            Some(content::EMPTY_CALL_GUIDES_BODY),
+        ),
         with_calls,
         with_calls_note,
+        recent_edits_empty: content::empty_text(
+            recent_edits.is_empty(),
+            content::EMPTY_CALL_EDITS,
+            Some(content::EMPTY_CALL_EDITS_BODY),
+        ),
         recent_edits,
+        wanted_lede: content::CALL_GUIDE_WANTED_LEDE.to_string(),
+        wanted_empty: content::empty_text(wanted.is_empty(), content::EMPTY_CALL_WANTED, None),
         wanted,
         wanted_note,
         seo: ctx.seo(

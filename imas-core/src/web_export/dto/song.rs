@@ -1,6 +1,6 @@
 //! 楽曲 (song) 詳細ページの DTO。
 
-use super::common::{AppOpen, DateBadge, Ref, SeoBlock, StatTile};
+use super::common::{AppOpen, DateBadge, EmptyText, LinkedNote, Ref, SeoBlock, StatTile};
 use super::idol::ProfileRow;
 use super::common::{LyricsBlock, SongCommunity};
 
@@ -25,6 +25,8 @@ web_dto! {
         pub kamisabi_label: Option<String>,
         /// コミュニティ集計 (タグ・お気に入り・ペンライト)。焼き込み。
         pub community: SongCommunity,
+        /// 「みんなの記録」の節を出すか (タグ・お気に入り・ペンライトのどれかがある)。
+        pub has_community: bool,
         /// 歌詞・コールガイドの出し方。**出すかどうかを決めるのは Rust。**
         pub lyrics: LyricsBlock,
         /// 曲種別の表示名 (`全体曲` / `ソロ曲` …)。語彙に無い値なら `None`。
@@ -47,8 +49,8 @@ web_dto! {
         pub unit: Option<Ref>,
         /// `songs.unit_name` (マスタに無いユニット表記)。
         pub unit_label: Option<String>,
-        /// 派生曲の親。
-        pub parent: Option<Ref>,
+        /// 派生曲の親を言う 1 文 (`この曲は <親> の派生曲です。`)。派生曲でなければ `None`。
+        pub parent_note: Option<LinkedNote>,
         /// この曲の派生 (リミックス・ソロver 等)。
         pub variants: Vec<Ref>,
         pub performance_count: u32,
@@ -56,6 +58,8 @@ web_dto! {
         pub stat_tiles: Vec<StatTile>,
         /// date 降順。
         pub performance_history: Vec<PerformanceRow>,
+        /// 披露の記録が 1 件も無いときの案内。
+        pub history_empty: Option<EmptyText>,
         pub frequent_singers: Vec<SingerRow>,
         pub co_occurring: Vec<CoOccurRow>,
         pub related: Vec<Ref>,

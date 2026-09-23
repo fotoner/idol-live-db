@@ -216,6 +216,7 @@
       ]
     }
   ],
+  "setlistEmpty": null,
   "cast": [
     {
       "kind": "idol",
@@ -267,7 +268,9 @@
       "artworkUrl": null
     }
   ],
+  "siblingNav": "segments",
   "app": {
+    "title": "アプリ「アイドルライブDB」",
     "appStoreUrl": "https://apps.apple.com/jp/app/id6763342297",
     "deeplink": "imaslivedb://shows/sh_sample_1",
     "note": "参加記録・投票・歌詞・コール・タグ付けはアプリでご利用いただけます。"

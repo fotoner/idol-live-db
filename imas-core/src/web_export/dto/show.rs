@@ -1,6 +1,6 @@
 //! 公演 (show) 詳細ページの DTO。
 
-use super::common::{AppOpen, DateBadge, Ref, SeoBlock, StatTile};
+use super::common::{AppOpen, DateBadge, EmptyText, Ref, SeoBlock, StatTile};
 use super::idol::ProfileRow;
 use crate::domain::setlist_lineup::Lineup;
 
@@ -39,14 +39,32 @@ web_dto! {
         /// 塊の中は position 昇順。塊の切り方と見出しの畳み方は
         /// `domain::setlist_sections` が持つ。
         pub setlist_sections: Vec<SetlistSection>,
+        /// セトリが 1 曲も無いときの案内。
+        pub setlist_empty: Option<EmptyText>,
         /// `show_cast` (sort_order 順)。
         pub cast: Vec<Ref>,
         /// この公演で着られた衣装 (進行順)。記録が無ければ空。
         pub costumes: Vec<ShowCostume>,
         /// 同一ライブ内の他公演 (前後移動用。自分自身も含む)。
         pub sibling_shows: Vec<Ref>,
+        /// 同じライブの公演をどう行き来させるか (本数で決まる)。
+        pub sibling_nav: SiblingNav,
         pub app: AppOpen,
         pub seo: SeoBlock,
+    }
+}
+
+web_dto! {
+    /// 同じライブの公演の行き来の形。
+    ///
+    /// 数本ならヒーローの中の帯 (DAY1 / DAY2 と行き来するのが一番多い操作)。ツアーのように
+    /// 多いと横に並べきれないので前後への送りにし、全部の並びは脇に置く。単日公演は無し。
+    #[derive(Copy, Eq)]
+    pub enum SiblingNav {
+        /// 単日公演 (行き来する先が無い)。
+        Hidden,
+        Segments,
+        Pager,
     }
 }
 

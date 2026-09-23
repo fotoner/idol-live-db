@@ -91,26 +91,13 @@ pub fn idol_page(ctx: &Ctx, idol_id: &str) -> Option<IdolPage> {
         brands,
         color: record.color.clone(),
         profile_rows: profile_rows(&record),
-        voice_actor_history: idol_queries::voice_actor_history(ctx.snap, idol_id)
-            .into_iter()
-            .map(|v| {
-                let period = period_display(v.valid_from.as_deref(), v.valid_to.as_deref());
-                VoiceActorRow {
-                    is_current: voice_actor.as_deref() == Some(v.name.as_str())
-                        && v.valid_to.is_none(),
-                    display: join_parts([Some(v.name.clone()), period.clone()])
-                        .unwrap_or_else(|| v.name.clone()),
-                    name: v.name,
-                    start_date: v.valid_from,
-                    end_date: v.valid_to,
-                }
-            })
-            .collect(),
+        voice_actor_history: voice_actor_history(ctx, idol_id, voice_actor.as_deref()),
         current_voice_actor: voice_actor,
         units: idol_queries::idol_units(ctx.snap, idol_id)
             .iter()
             .filter_map(|u| ctx.unit_ref(&u.id))
             .collect(),
+        songs_empty: content::empty_text(songs.is_empty(), content::EMPTY_IDOL_SONGS, None),
         songs,
         performed_songs,
         shows,
@@ -206,6 +193,30 @@ fn idol_shows(ctx: &Ctx, idol_id: &str, idol_index: u32) -> Vec<IdolShowRow> {
         .collect()
 }
 
+/// CV の履歴。**交代があったときだけ出す** — 1 人だけなら現任の行
+/// (`current_voice_actor`) と同じことしか言わないので、節ごと出さない (空で返す)。
+fn voice_actor_history(ctx: &Ctx, idol_id: &str, current: Option<&str>) -> Vec<VoiceActorRow> {
+    let history = idol_queries::voice_actor_history(ctx.snap, idol_id);
+    if history.len() < 2 {
+        return vec![];
+    }
+    history
+        .into_iter()
+        .map(|v| {
+            let period = period_display(v.valid_from.as_deref(), v.valid_to.as_deref());
+            let is_current = current == Some(v.name.as_str()) && v.valid_to.is_none();
+            VoiceActorRow {
+                is_current,
+                label: content::voice_actor_label(is_current).to_string(),
+                display: join_parts([Some(v.name.clone()), period]).unwrap_or_else(|| v.name.clone()),
+                name: v.name,
+                start_date: v.valid_from,
+                end_date: v.valid_to,
+            }
+        })
+        .collect()
+}
+
 pub fn unit_page(ctx: &Ctx, unit_id: &str) -> Option<UnitPage> {
     let record = unit_queries::unit_by_id(ctx.snap, unit_id)?;
     let path = ctx.path(RefKind::Unit, unit_id);
@@ -220,6 +231,14 @@ pub fn unit_page(ctx: &Ctx, unit_id: &str) -> Option<UnitPage> {
         crumbs
     };
 
+    // 並ぶ全員が同じブランドなので、補助表記 (ブランド名) は落とす。
+    let members: Vec<Ref> = unit_queries::unit_member_idol_ids(ctx.snap, unit_id)
+        .iter()
+        .filter_map(|id| ctx.idol_ref(id).map(Ref::without_sub))
+        .collect();
+    let songs: Vec<Ref> =
+        unit_queries::unit_song_ids(ctx.snap, unit_id).iter().filter_map(|id| ctx.song_ref(id)).collect();
+
     Some(UnitPage {
         schema_version: SCHEMA_VERSION,
         tags: super::context::tag_chips(ctx, TagScope::Unit, ctx.community.unit_tags(&record.id)),
@@ -232,15 +251,10 @@ pub fn unit_page(ctx: &Ctx, unit_id: &str) -> Option<UnitPage> {
         is_permanent: record.is_permanent,
         kind_label: content::unit_kind_label(record.is_permanent).to_string(),
         brand: ctx.brand_ref(&record.brand_id),
-        // 並ぶ全員が同じブランドなので、補助表記 (ブランド名) は落とす。
-        members: unit_queries::unit_member_idol_ids(ctx.snap, unit_id)
-            .iter()
-            .filter_map(|id| ctx.idol_ref(id).map(Ref::without_sub))
-            .collect(),
-        songs: unit_queries::unit_song_ids(ctx.snap, unit_id)
-            .iter()
-            .filter_map(|id| ctx.song_ref(id))
-            .collect(),
+        members_empty: content::empty_text(members.is_empty(), content::EMPTY_UNIT_MEMBERS, None),
+        members,
+        songs_empty: content::empty_text(songs.is_empty(), content::EMPTY_UNIT_SONGS, None),
+        songs,
         app: content::app_open_plain(),
         seo: ctx.seo(
             &record.name,

@@ -1,6 +1,6 @@
 //! ユニット (unit) 詳細ページの DTO。
 
-use super::common::{AppOpen, Ref, SeoBlock};
+use super::common::{AppOpen, EmptyText, Ref, SeoBlock};
 use super::common::TagChipDto;
 
 web_dto! {
@@ -22,7 +22,11 @@ web_dto! {
         pub tags: Vec<TagChipDto>,
         pub brand: Option<Ref>,
         pub members: Vec<Ref>,
+        /// メンバーが 1 人も居ないときの案内。
+        pub members_empty: Option<EmptyText>,
         pub songs: Vec<Ref>,
+        /// ユニット曲が 1 曲も無いときの案内。
+        pub songs_empty: Option<EmptyText>,
         pub app: AppOpen,
         pub seo: SeoBlock,
     }

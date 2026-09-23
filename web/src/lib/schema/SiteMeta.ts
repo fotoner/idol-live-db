@@ -2,6 +2,7 @@
 import type { AppLinks } from "./AppLinks";
 import type { Counts } from "./Counts";
 import type { NavLink } from "./NavLink";
+import type { NotFoundPage } from "./NotFoundPage";
 import type { PerformerNameOptionDto } from "./PerformerNameOptionDto";
 
 /**
@@ -52,4 +53,13 @@ lyricsLicenseNotice: string | null,
  * 歌詞の中の言葉で曲を探す API (検索ページの「歌詞」が押されたときだけ叩く)。
  * 出面で歌詞を出すときだけ入る。TS は URL を組まず、ここに来たものを使う。
  */
-lyricsSearchUrl: string | null, };
+lyricsSearchUrl: string | null, 
+/**
+ * サイト名。ヘッダ・フッタ・OGP の site_name・「アプリで開く」が同じ 1 本を描く。
+ */
+siteName: string, 
+/**
+ * 見つからないページ (`404.html`)。routes.json に載らない唯一のページなので、
+ * 全ページが読むメタに同居させる (文面と入口の並びは Rust が決める)。
+ */
+notFound: NotFoundPage, };

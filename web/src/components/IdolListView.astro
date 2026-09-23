@@ -32,8 +32,8 @@ const { list } = Astro.props;
 >
   <ListFilterBar kind="idols" queryBase={list.queryBase} total={list.total} />
   {
-    list.items.length === 0 ? (
-      <EmptyState title="該当するアイドルがいません" body="別のブランドや誕生月に切り替えてみてください。" />
+    list.empty ? (
+      <EmptyState {...list.empty} />
     ) : (
       <div class="table-wrap">
         <table class="dtable">

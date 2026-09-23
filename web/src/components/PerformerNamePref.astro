@@ -1,6 +1,5 @@
 ---
 import { meta } from "../lib/data";
-import { DEFAULT_MODE } from "../lib/prefs/performerName";
 
 /**
  * セトリの歌唱者をどの名前で出すかの切り替え。
@@ -24,7 +23,7 @@ const options = meta().performerNameOptions;
   <select class="song-filter__select" id="performer-name" data-performer-select>
     {
       options.map((o) => (
-        <option value={o.raw} selected={o.raw === DEFAULT_MODE}>
+        <option value={o.raw} selected={o.isDefault}>
           {o.label}
         </option>
       ))
@@ -38,18 +37,19 @@ const options = meta().performerNameOptions;
   const root = document.querySelector<HTMLElement>("[data-performer-pref]");
   const select = root?.querySelector<HTMLSelectElement>("[data-performer-select]");
   if (root && select) {
-    // 選べる値は Rust が描いた <option> がそのまま名簿になる。
-    // JS 側にモードの一覧を持たない。
+    // 選べる値は Rust が描いた <option> がそのまま名簿になる。既定は `selected` の付いた 1 つ。
+    // JS 側にモードの一覧も既定も持たない。
     const known = [...select.options].map((o) => o.value);
+    const fallback = [...select.options].find((o) => o.defaultSelected)?.value ?? known[0] ?? "";
     // モードは body に置く。切り替えの実体は CSS 側 (components.css) で、
     // どちらの名前を見せるかだけが変わる。
     const apply = (mode: string) => {
       document.body.dataset.performerName = mode;
       select.value = mode;
     };
-    apply(readMode(known));
+    apply(readMode(known, fallback));
     select.addEventListener("change", () => {
-      writeMode(select.value);
+      writeMode(select.value, fallback);
       apply(select.value);
     });
     root.hidden = false;

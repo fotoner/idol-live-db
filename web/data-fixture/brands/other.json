@@ -7,6 +7,10 @@
   "themeKey": "neutral",
   "statTiles": [],
   "idols": [],
+  "idolsEmpty": {
+    "title": "アイドルが登録されていません",
+    "body": null
+  },
   "units": [],
   "recentEvents": [],
   "topSongs": [],

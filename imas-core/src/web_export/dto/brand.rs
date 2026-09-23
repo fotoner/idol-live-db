@@ -1,6 +1,6 @@
 //! ブランド (brand) 詳細ページの DTO。
 
-use super::common::{Ref, SeoBlock, StatTile};
+use super::common::{EmptyText, Ref, SeoBlock, StatTile};
 
 web_dto! {
     /// `/brands/<id>/` の中身。
@@ -17,6 +17,8 @@ web_dto! {
         /// そもそも並ばない** (`other` はアイドルだけ) ので、リンク切れにならない。
         pub stat_tiles: Vec<StatTile>,
         pub idols: Vec<Ref>,
+        /// アイドルが 1 人も居ないときの案内。
+        pub idols_empty: Option<EmptyText>,
         pub units: Vec<Ref>,
         pub recent_events: Vec<Ref>,
         pub top_songs: Vec<Ref>,

@@ -330,6 +330,7 @@ fn month_page(ctx: &Ctx, index: usize, range: &MonthRange) -> Option<Emitted<Cal
             ]),
             weekday_labels: content::CALENDAR_WEEKDAYS.iter().map(|w| w.to_string()).collect(),
             weeks,
+            empty: content::empty_text(days.is_empty(), content::EMPTY_CALENDAR_MONTH, None),
             days,
         },
     })

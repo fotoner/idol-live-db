@@ -27,10 +27,15 @@
   },
   "statTiles": [],
   "shows": [],
+  "showsEmpty": {
+    "title": "公演がまだ登録されていません",
+    "body": null
+  },
   "cast": null,
   "releases": [],
   "venues": [],
   "app": {
+    "title": "アプリ「アイドルライブDB」",
     "appStoreUrl": "https://apps.apple.com/jp/app/id6763342297",
     "deeplink": "imaslivedb://events/ev_empty",
     "note": "参加記録・投票・歌詞・コール・タグ付けはアプリでご利用いただけます。"

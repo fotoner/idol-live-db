@@ -60,7 +60,7 @@ pub use common::{filter_axes, nonzero_tiles};
 pub use calls::{CallGuideEditRow, CallGuidePage, CallGuideSongRow};
 pub use common::{
     mark_current, AppLinks, AppOpen, CallGuideClap, CallGuideEmphasis, CallGuideVocabulary, Counts, Crumb,
-    DateBadge, FilterAxis, LyricsBlock, NavLink, PenlightSetDto,
+    DateBadge, EmptyText, FilterAxis, LinkedNote, LyricsBlock, NavLink, PenlightSetDto,
     PerformerNameOptionDto, Ref, RefKind, Robots, SeoBlock, SiteMeta, SongCommunity, StatTile,
     TagBadge, TagChipDto, ThemePair, ThemeTable, ThemeTokens, SCHEMA_VERSION,
 };
@@ -71,15 +71,15 @@ pub use idol::{IdolPage, IdolPerformedRow, IdolShowRow, IdolSongRow, ProfileRow,
 pub use index::{
     AboutLink, AboutPage, AboutSection, BrandListItem, BrandListPage, EventListItem,
     EventListKind, EventListPage, HomePage, IdolColumn, IdolListItem, IdolListKind, IdolListPage,
-    KanaSection, RouteEntry, RouteKind, RoutesFile, SongListItem, SongListKind, SongListPage,
+    KanaSection, NotFoundPage, RouteEntry, RouteKind, RoutesFile, SiteEntry, SongListItem, SongListKind, SongListPage,
     TagListItem, TagListPage, TagPage, TagSongRow,
     UnitListItem, UnitListPage, VenueListItem, VenueListPage, YearGroup,
     PollEntryDto, PollListPage, PollSummaryDto,
 };
-pub use search::{FoldCase, FoldParity, SearchManifest, SearchRow, SearchShard, SearchShardMeta};
+pub use search::{FoldCase, FoldParity, SearchManifest, SearchPage, SearchRow, SearchShard, SearchShardMeta};
 pub use show::{
     LineupNote, MissingOriginals, PerformerRef, SetlistCostume, SetlistRow, SetlistSection,
-    ShowCostume, ShowPage,
+    ShowCostume, ShowPage, SiblingNav,
 };
 pub use song::{CoOccurRow, CreditGroup, PerformanceRow, SingerRow, SongPage};
 pub use unit::UnitPage;

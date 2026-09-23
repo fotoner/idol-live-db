@@ -31,11 +31,8 @@ const guide = page<CallGuidePage>(Astro.props.data);
 
   <Section id="calls-with" title="コールガイドがある曲" count={guide.withCalls.length}>
     {
-      guide.withCalls.length === 0 ? (
-        <EmptyState
-          title="まだコールガイドがありません"
-          body="「コール曲」タグの付いた曲から書き始められます (アプリの歌詞タブから)。"
-        />
+      guide.withCallsEmpty ? (
+        <EmptyState {...guide.withCallsEmpty} />
       ) : (
         <ListContainer as="ul">
           {guide.withCalls.map((row) => (
@@ -55,8 +52,8 @@ const guide = page<CallGuidePage>(Astro.props.data);
 
   <Section id="calls-recent" title="最近の編集" count={guide.recentEdits.length}>
     {
-      guide.recentEdits.length === 0 ? (
-        <EmptyState title="まだ編集がありません" body="誰かがコールを書き込むと、ここに残ります。" />
+      guide.recentEditsEmpty ? (
+        <EmptyState {...guide.recentEditsEmpty} />
       ) : (
         <ListContainer as="ul">
           {guide.recentEdits.map((row) => (
@@ -72,12 +69,8 @@ const guide = page<CallGuidePage>(Astro.props.data);
   </Section>
 
   <Section id="calls-wanted" title="書き手募集中" count={guide.wanted.length}>
-    <p class="u-muted">「コール曲」タグが付いているのに、まだコールガイドが書かれていない曲 (票の多い順)。</p>
-    <RefList
-      refs={guide.wanted}
-      label="未整備の曲"
-      emptyTitle="未整備の曲はありません。タグの付いた曲は、いまのところ全部書かれています。"
-    />
+    <p class="u-muted">{guide.wantedLede}</p>
+    {guide.wantedEmpty ? <EmptyState {...guide.wantedEmpty} /> : <RefList refs={guide.wanted} label="未整備の曲" />}
     {guide.wantedNote && <p class="u-dim">{guide.wantedNote}</p>}
   </Section>
 </ListLayout>

@@ -4,7 +4,7 @@
 //! 出す。クライアント状態を持たせないというユーザー指示の直接の帰結で、切替 UI は
 //! [`super::common::NavLink`] のリンク集になる。
 
-use super::common::{AppLinks, DateBadge, FilterAxis, NavLink, Ref, SeoBlock, StatTile, TagBadge};
+use super::common::{AppLinks, DateBadge, EmptyText, FilterAxis, NavLink, Ref, SeoBlock, StatTile, TagBadge};
 use super::event::ShowSummary;
 use crate::domain::idol_list_filtering::IdolQuery;
 use crate::domain::song_list_queries::SongQuery;
@@ -35,6 +35,8 @@ web_dto! {
         /// 畳んだメニューにする軸: ブランド、開催済みの側では年も。
         pub filters: Vec<FilterAxis>,
         pub total: u32,
+        /// 1 件も無いときの案内 (今後の一覧と、それ以外で言い方が違う)。
+        pub empty: Option<EmptyText>,
         pub seo: SeoBlock,
     }
 }
@@ -132,6 +134,8 @@ web_dto! {
         /// (タグ一覧はそのときだけ作る)。
         pub tags_link: Option<NavLink>,
         pub total: u32,
+        /// 1 曲も無いときの案内。
+        pub empty: Option<EmptyText>,
         pub seo: SeoBlock,
     }
 }
@@ -289,6 +293,8 @@ web_dto! {
         /// 条件を足して `filter_idol_list` / `sort_idol_list` を回す
         /// (曲一覧の `SongListPage.query_base` と同じ仕掛け)。
         pub query_base: IdolQuery,
+        /// 1 人も居ないときの案内。
+        pub empty: Option<EmptyText>,
         pub seo: SeoBlock,
     }
 }
@@ -302,6 +308,8 @@ web_dto! {
         pub schema_version: u32,
         pub path: String,
         pub title: String,
+        /// 見出しの下の説明。
+        pub lede: String,
         pub polls: Vec<PollSummaryDto>,
         pub total: u32,
         pub seo: SeoBlock,
@@ -320,6 +328,8 @@ web_dto! {
         pub ends_on: Option<String>,
         /// 締切前か。**判定は Rust** (TS に `new Date()` を書かせない)。
         pub is_open: bool,
+        /// 締切の日付に添える語 (締切前は「締切」、過ぎたら「終了」)。無期限なら `None`。
+        pub ends_label: Option<String>,
         pub total_votes: u32,
         /// 上位の得票。同数は entity id 順で安定させる。
         pub entries: Vec<PollEntryDto>,
@@ -387,6 +397,8 @@ web_dto! {
         /// 畳んだメニューにする軸 (ブランド)。
         pub filters: Vec<FilterAxis>,
         pub total: u32,
+        /// 1 件も無いときの案内。
+        pub empty: Option<EmptyText>,
         pub seo: SeoBlock,
     }
 }
@@ -417,6 +429,8 @@ web_dto! {
         /// 畳んだメニューにする軸 (都道府県)。
         pub filters: Vec<FilterAxis>,
         pub total: u32,
+        /// 1 件も無いときの案内。
+        pub empty: Option<EmptyText>,
         pub seo: SeoBlock,
     }
 }
@@ -481,8 +495,12 @@ web_dto! {
         pub tagline: String,
         /// 今後のライブ (直近 8 件)。
         pub upcoming: Vec<EventListItem>,
+        /// 今後のライブが 1 件も無いときの案内。
+        pub upcoming_empty: Option<EmptyText>,
         /// 最近の公演 (直近 8 件)。
         pub recent_shows: Vec<ShowSummary>,
+        /// 最近の公演が 1 件も無いときの案内。
+        pub recent_shows_empty: Option<EmptyText>,
         /// 件数タイル (ライブ / 公演 / 楽曲 / アイドル / ユニット / 会場)。各一覧への入口を持つ。
         pub stat_tiles: Vec<StatTile>,
         pub brands: Vec<BrandListItem>,
@@ -533,6 +551,33 @@ web_dto! {
         pub href: String,
         /// 外部サイトか (`rel="noopener"` と外部アイコンの材料)。
         pub external: bool,
+    }
+}
+
+web_dto! {
+    /// 見つからないページ (`404.html`)。`SiteMeta::not_found` に入る。
+    ///
+    /// ルート台帳に載らない (sitemap にもリンクにも出ない) ので、ページ単位の JSON を
+    /// 持たせずメタに同居させる。
+    pub struct NotFoundPage {
+        /// ヒーローの上の小さな札 (`404`)。
+        pub eyebrow: String,
+        pub title: String,
+        pub lede: String,
+        /// 「ここから探す」入口 (ライブ / 楽曲 / アイドル)。
+        pub entries: Vec<SiteEntry>,
+        pub seo: SeoBlock,
+    }
+}
+
+web_dto! {
+    /// サイトの一覧への入口 1 枚 (記号・名前・ひとこと・行き先)。
+    #[derive(Eq)]
+    pub struct SiteEntry {
+        pub glyph: String,
+        pub title: String,
+        pub preview: String,
+        pub path: String,
     }
 }
 

@@ -36,6 +36,7 @@
       }
     ]
   },
+  "hasCommunity": true,
   "lyrics": {
     "available": false,
     "statusLabel": "JASRAC 許諾待ち",
@@ -59,16 +60,21 @@
   "otherArtists": [],
   "unit": null,
   "unitLabel": null,
-  "parent": null,
+  "parentNote": null,
   "variants": [],
   "performanceCount": 0,
   "statTiles": [],
   "performanceHistory": [],
+  "historyEmpty": {
+    "title": "ライブでの披露記録がありません",
+    "body": null
+  },
   "frequentSingers": [],
   "coOccurring": [],
   "related": [],
   "factRows": [],
   "app": {
+    "title": "アプリ「アイドルライブDB」",
     "appStoreUrl": "https://apps.apple.com/jp/app/id6763342297",
     "deeplink": null,
     "note": "参加記録・投票・歌詞・コール・タグ付けはアプリでご利用いただけます。"

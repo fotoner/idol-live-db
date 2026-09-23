@@ -25,8 +25,8 @@ const sectionStarts = new Set(list.kanaSections.map((s) => s.startIndex));
 >
   <KanaIndex sections={list.kanaSections} />
   {
-    list.items.length === 0 ? (
-      <EmptyState title="該当するユニットがありません" />
+    list.empty ? (
+      <EmptyState {...list.empty} />
     ) : (
       <ListContainer as="ul">
         {list.items.map((item, i) => {

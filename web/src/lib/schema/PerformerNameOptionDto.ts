@@ -7,4 +7,9 @@ export type PerformerNameOptionDto = {
 /**
  * localStorage に残す値。iOS/Android の保存値と同じ文字列。
  */
-raw: string, label: string, };
+raw: string, label: string, 
+/**
+ * 既定のモードか (`PerformerNameMode::default_mode`)。1 つだけが真。
+ * サーバが描く HTML はこのモードで出ていて、閲覧者の選択が無ければこれに戻る。
+ */
+isDefault: boolean, };

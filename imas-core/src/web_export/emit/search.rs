@@ -12,13 +12,39 @@
 //!
 //! [`TextSearchIndex`]: crate::domain::text_search_index::TextSearchIndex
 
-use super::context::Ctx;
+use super::context::{page_title, Ctx};
 use crate::domain::display_join::year_of;
+use crate::web_export::content::{self, absolute};
 use crate::domain::text_search_index::{prepare_needle, TextSearchIndex};
 use crate::web_export::dto::*;
 
 /// フィールドの区切り。**JSON に明示して配る** (JS 側に定数をハードコードさせない)。
 pub const SEP: &str = "\u{0001}";
+
+/// 検索ページ。
+pub const PATH: &str = "/search/";
+
+/// 検索ページの見出し・説明・`<head>` (`index/search.json`)。
+///
+/// JSON-LD は持たない (検索ページは構造化データで言うことが無い)。
+pub fn search_page() -> SearchPage {
+    let breadcrumbs = vec![Ctx::crumb("ホーム", "/"), Ctx::crumb(content::SEARCH_TITLE, PATH)];
+    SearchPage {
+        schema_version: SCHEMA_VERSION,
+        path: PATH.to_string(),
+        title: content::SEARCH_TITLE.to_string(),
+        lede: content::search_lede(),
+        seo: SeoBlock {
+            title: page_title(content::SEARCH_TITLE),
+            description: content::search_description().to_string(),
+            canonical: absolute(PATH),
+            og_image: absolute(content::DEFAULT_OG_IMAGE),
+            robots: Robots::IndexFollow,
+            json_ld: serde_json::json!({}),
+            breadcrumbs,
+        },
+    }
+}
 
 /// 実データから取るパリティケースの件数。
 const PARITY_SAMPLE: usize = 2_000;

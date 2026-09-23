@@ -47,6 +47,7 @@
       "artworkUrl": null
     }
   ],
+  "membersEmpty": null,
   "songs": [
     {
       "kind": "song",
@@ -58,7 +59,9 @@
       "artworkUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music/sample/600x600bb.jpg"
     }
   ],
+  "songsEmpty": null,
   "app": {
+    "title": "アプリ「アイドルライブDB」",
     "appStoreUrl": "https://apps.apple.com/jp/app/id6763342297",
     "deeplink": null,
     "note": "参加記録・投票・歌詞・コール・タグ付けはアプリでご利用いただけます。"

@@ -25,8 +25,8 @@ const brand = page<BrandPage>(Astro.props.data);
 
   <Section id="brand-idols" title="アイドル" count={brand.idols.length}>
     {
-      brand.idols.length === 0 ? (
-        <EmptyState title="アイドルが登録されていません" />
+      brand.idolsEmpty ? (
+        <EmptyState {...brand.idolsEmpty} />
       ) : (
         <ul class="grid-tiles">
           {brand.idols.map((i) => (

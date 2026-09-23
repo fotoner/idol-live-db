@@ -245,6 +245,7 @@ fn call_guide_page() -> CallGuidePage {
             updated_display: with_weekday("2026-09-05"),
             updated_by: "匿名".to_string(),
         }],
+        with_calls_empty: None,
         with_calls_note: None,
         recent_edits: vec![CallGuideEditRow {
             song: song_sample(),
@@ -252,7 +253,10 @@ fn call_guide_page() -> CallGuidePage {
             at_display: with_weekday("2026-09-05"),
             by: "匿名".to_string(),
         }],
+        recent_edits_empty: None,
+        wanted_lede: content::CALL_GUIDE_WANTED_LEDE.to_string(),
         wanted: vec![song_no_artwork()],
+        wanted_empty: None,
         wanted_note: Some("ほかに「コール曲」タグの付いた 1 曲は歌詞が未登録のため、ここには並べていません (歌詞が入ってから書けるようになります)。".to_string()),
         seo: seo(
             "コールガイドの進捗",
@@ -274,16 +278,15 @@ fn site_meta() -> SiteMeta {
         counts: counts(),
         app: content::app_links(),
         // 代表値でも本番と同じ関数を通す (フィクスチャだけ違う文言が出ない)。
-        performer_name_options: crate::domain::event_detail_queries::performer_name_options()
-            .into_iter()
-            .map(|o| PerformerNameOptionDto { raw: o.raw, label: o.label })
-            .collect(),
+        performer_name_options: super::emit::performer_name_options(),
         // 代表値にはお題が無いので、ナビにも出ない (本番と同じ判断を通す)。
         primary_nav: super::emit::lists::primary_nav(false, true),
         utility_nav: super::emit::lists::utility_nav(),
         footer_notes: content::footer_notes(),
         lyrics_license_notice: content::lyrics_license_notice(),
         lyrics_search_url: content::lyrics_search_url(),
+        site_name: content::SITE_NAME.to_string(),
+        not_found: super::emit::lists::not_found(),
     }
 }
 
@@ -362,6 +365,7 @@ fn event_page(reference: &Ref, empty: bool) -> EventPage {
         },
         // 公演ゼロのライブ (空一覧の確認)。
         shows: if empty { vec![] } else { vec![show_summary(ShowContext::InEvent)] },
+        shows_empty: content::empty_text(empty, content::EMPTY_EVENT_SHOWS, None),
         cast: if empty {
             // event_attendance は None を返しうる。
             None
@@ -390,6 +394,7 @@ fn event_page(reference: &Ref, empty: bool) -> EventPage {
                 kind_label: "Blu-ray".to_string(),
                 release_date: Some("2026-10-01".to_string()),
                 url: None,
+                display: content::release_display("Blu-ray BOX", Some("2026-10-01")),
             }]
         },
         venues: if empty { vec![] } else { vec![venue_sample()] },
@@ -535,6 +540,7 @@ fn show_page() -> ShowPage {
                 }],
             },
         ],
+        setlist_empty: None,
         costumes: vec![
             ShowCostume {
                 id: "cos_sample_common".to_string(),
@@ -557,6 +563,7 @@ fn show_page() -> ShowPage {
             },
         ],
         cast: vec![idol_mirai(), idol_shizuka()],
+        sibling_nav: super::emit::events::sibling_nav(1),
         sibling_shows: vec![show_sample()],
         app: content::app_open_deeplink("show", "sh_sample_1"),
         seo: seo(
@@ -592,6 +599,7 @@ fn song_page(reference: &Ref, minimal: bool) -> SongPage {
             favorites: 34,
             penlight: vec![PenlightSetDto { key: "pink_white".to_string(), count: 5 }],
         },
+        has_community: true,
         id: reference.id.clone(),
         path: reference.path.clone(),
         title: reference.name.clone(),
@@ -634,7 +642,7 @@ fn song_page(reference: &Ref, minimal: bool) -> SongPage {
         other_artists: vec![],
         unit: if minimal { None } else { Some(unit_sample()) },
         unit_label: if minimal { None } else { Some("765MILLION ALLSTARS".to_string()) },
-        parent: None,
+        parent_note: None,
         variants: if minimal { vec![] } else { vec![song_variant()] },
         performance_count: if minimal { 0 } else { 12 },
         stat_tiles: if minimal {
@@ -645,6 +653,7 @@ fn song_page(reference: &Ref, minimal: bool) -> SongPage {
                 tile("☺", 2, "歌唱アイドル", None),
             ]
         },
+        history_empty: content::empty_text(minimal, content::EMPTY_SONG_HISTORY, None),
         performance_history: if minimal {
             vec![]
         } else {
@@ -698,7 +707,11 @@ fn song_page(reference: &Ref, minimal: bool) -> SongPage {
 fn song_variant_page() -> SongPage {
     let reference = song_variant();
     let mut page = song_page(&reference, false);
-    page.parent = Some(song_sample());
+    page.parent_note = Some(LinkedNote {
+        before: content::PARENT_SONG_NOTE_BEFORE.to_string(),
+        link: song_sample(),
+        after: content::PARENT_SONG_NOTE_AFTER.to_string(),
+    });
     page.variants = vec![];
     page.song_type_label = content::song_type_label("solo").map(str::to_string);
     page
@@ -741,14 +754,10 @@ fn idol_page(reference: &Ref) -> IdolPage {
             },
         ],
         current_voice_actor: Some("山崎はるか".to_string()),
-        voice_actor_history: vec![VoiceActorRow {
-            name: "山崎はるか".to_string(),
-            start_date: Some("2013-02-27".to_string()),
-            end_date: None,
-            is_current: true,
-            display: "山崎はるか ・ 2013-02-27 〜".to_string(),
-        }],
+        // CV の交代が無いアイドルでは履歴は空 (現任の行と同じことしか言わないので出さない)。
+        voice_actor_history: vec![],
         units: vec![unit_sample()],
+        songs_empty: None,
         songs: vec![IdolSongRow {
             song: song_sample(),
             role: Some("original".to_string()),
@@ -796,7 +805,9 @@ fn unit_page(reference: &Ref, empty: bool) -> UnitPage {
         kind_label: content::unit_kind_label(!empty).to_string(),
         brand: if empty { None } else { Some(brand_ml()) },
         members: if empty { vec![] } else { vec![idol_mirai(), idol_shizuka()] },
+        members_empty: content::empty_text(empty, content::EMPTY_UNIT_MEMBERS, None),
         songs: if empty { vec![] } else { vec![song_sample()] },
+        songs_empty: content::empty_text(empty, content::EMPTY_UNIT_SONGS, None),
         app: content::app_open_plain(),
         seo: seo(
             &reference.name,
@@ -825,7 +836,7 @@ fn venue_page(reference: &Ref, minimal: bool) -> VenuePage {
         halls: if minimal {
             vec![]
         } else {
-            vec![HallRow { name: "イベントホール".to_string(), capacity: Some(9000) }]
+            vec![super::emit::places::hall_row("イベントホール".to_string(), Some(9000))]
         },
         past_names: if minimal {
             vec![]
@@ -848,6 +859,7 @@ fn venue_page(reference: &Ref, minimal: bool) -> VenuePage {
         },
         events: if minimal { vec![] } else { vec![event_sample()] },
         shows: if minimal { vec![] } else { vec![show_summary(ShowContext::AtVenue)] },
+        shows_empty: content::empty_text(minimal, content::EMPTY_SHOW_RECORDS, None),
         app: content::app_open_plain(),
         seo: seo(
             &reference.name,
@@ -868,6 +880,7 @@ fn brand_page(reference: &Ref, noindex: bool) -> BrandPage {
         short_name: reference.sub.clone(),
         theme_key: reference.theme_key.clone(),
         idols: if noindex { vec![] } else { vec![idol_mirai(), idol_shizuka()] },
+        idols_empty: content::empty_text(noindex, content::EMPTY_BRAND_IDOLS, None),
         units: if noindex { vec![] } else { vec![unit_sample()] },
         recent_events: if noindex { vec![] } else { vec![event_sample()] },
         top_songs: if noindex { vec![] } else { vec![song_sample()] },
@@ -969,6 +982,11 @@ fn event_list_page(path: &str, title: &str, kind: EventListKind, empty: bool) ->
             ),
         ]),
         total: if empty { 0 } else { 2 },
+        empty: content::empty_text(
+            empty,
+            if kind == EventListKind::Upcoming { content::EMPTY_UPCOMING_EVENTS } else { content::EMPTY_EVENTS },
+            Some(content::EMPTY_EVENTS_BODY),
+        ),
         seo: seo(title, "ライブの一覧。", path, Robots::IndexFollow, &[("ホーム", "/")]),
     }
 }
@@ -1038,6 +1056,7 @@ fn song_list_page(path: &str, title: &str, kind: SongListKind) -> SongListPage {
             None
         },
         total: 2,
+        empty: None,
         seo: seo(
             title,
             "楽曲の一覧。",
@@ -1144,6 +1163,7 @@ fn idol_list_page(path: &str, title: &str, kind: IdolListKind, empty: bool) -> I
             .also_in_island("birthMonth"),
         ],
         total: if empty { 0 } else { 2 },
+        empty: content::empty_text(empty, content::EMPTY_IDOLS, Some(content::EMPTY_IDOLS_BODY)),
         seo: seo(title, "アイドルの一覧。", path, Robots::IndexFollow, &[("ホーム", "/")]),
     }
 }
@@ -1331,6 +1351,7 @@ fn calendar_page(path: &str, key: &str) -> CalendarPage {
         ],
         weekday_labels: content::CALENDAR_WEEKDAYS.iter().map(|w| w.to_string()).collect(),
         weeks,
+        empty: content::empty_text(days.is_empty(), content::EMPTY_CALENDAR_MONTH, None),
         days,
         seo,
     }
@@ -1367,6 +1388,7 @@ fn unit_list_page(path: &str, title: &str) -> UnitListPage {
             ],
         )],
         total: 2,
+        empty: None,
         seo: seo(title, "ユニットの一覧。", path, Robots::IndexFollow, &[("ホーム", "/")]),
     }
 }
@@ -1417,6 +1439,7 @@ fn venue_list_page(path: &str, title: &str, prefecture: Option<&str>) -> VenueLi
             ],
         )],
         total: 2,
+        empty: None,
         seo: seo(title, "会場の一覧。", path, Robots::IndexFollow, &[("ホーム", "/")]),
     }
 }
@@ -1446,7 +1469,9 @@ fn home_page() -> HomePage {
         path: "/".to_string(),
         tagline: content::SITE_TAGLINE.to_string(),
         upcoming: vec![event_list_item(&event_sample(), "live")],
+        upcoming_empty: None,
         recent_shows: vec![show_summary(ShowContext::Home)],
+        recent_shows_empty: None,
         recent_shows_more: nav("開催済みのライブへ", "/events/past/", false, None, None),
         app_note: content::app_note(),
         stat_tiles: site_tiles(true, false),
@@ -1654,6 +1679,8 @@ pub fn emit(dir: &Path, pretty: bool) -> Result<Stats> {
         w.write_json(&rel, &shard)?;
     }
     w.write_json("search/manifest.json", &SearchManifest { schema_version: SCHEMA_VERSION, shards: shard_metas })?;
+    // 検索ページの文面は本番と同じ関数 (定数だけで組むので代表値も同じものになる)。
+    w.write_json("index/search.json", &super::emit::search::search_page())?;
     w.write_json("parity/fold.json", &fold_parity())?;
 
     // --- ルート台帳 ---
@@ -1701,7 +1728,7 @@ fn routes(broken_key: &str) -> RoutesFile {
         listing(RouteKind::Home, "/", "index/home.json", true),
         listing(RouteKind::About, "/about/", "index/about.json", true),
         listing(RouteKind::CallGuide, "/calls/", "index/calls.json", true),
-        listing(RouteKind::Search, "/search/", "search/manifest.json", true),
+        listing(RouteKind::Search, "/search/", "index/search.json", true),
         listing(RouteKind::EventListIndex, "/events/", "index/events.json", true),
         listing(RouteKind::EventListUpcoming, "/events/upcoming/", "index/events-upcoming.json", true),
         listing(RouteKind::EventListPast, "/events/past/", "index/events-past.json", true),
@@ -1813,6 +1840,7 @@ fn verify(rel: &str, text: &str) -> std::result::Result<(), serde_json::Error> {
         _ if rel == "routes.json" => as_::<RoutesFile>(text),
         "index" if name == "home.json" => as_::<HomePage>(text),
         "index" if name == "about.json" => as_::<AboutPage>(text),
+        "index" if name == "search.json" => as_::<SearchPage>(text),
         "index" if name == "brands.json" => as_::<BrandListPage>(text),
         "index" if name.starts_with("events") => as_::<EventListPage>(text),
         "index" if name.starts_with("songs") => as_::<SongListPage>(text),

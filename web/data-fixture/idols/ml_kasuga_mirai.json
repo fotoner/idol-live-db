@@ -57,15 +57,7 @@
     }
   ],
   "currentVoiceActor": "山崎はるか",
-  "voiceActorHistory": [
-    {
-      "name": "山崎はるか",
-      "startDate": "2013-02-27",
-      "endDate": null,
-      "isCurrent": true,
-      "display": "山崎はるか ・ 2013-02-27 〜"
-    }
-  ],
+  "voiceActorHistory": [],
   "units": [
     {
       "kind": "unit",
@@ -94,6 +86,7 @@
       "subtitle": "765MILLION ALLSTARS ・ 2019-03-13 ・ 12 回披露"
     }
   ],
+  "songsEmpty": null,
   "performedSongs": [
     {
       "song": {
@@ -158,6 +151,7 @@
     }
   ],
   "app": {
+    "title": "アプリ「アイドルライブDB」",
     "appStoreUrl": "https://apps.apple.com/jp/app/id6763342297",
     "deeplink": null,
     "note": "参加記録・投票・歌詞・コール・タグ付けはアプリでご利用いただけます。"

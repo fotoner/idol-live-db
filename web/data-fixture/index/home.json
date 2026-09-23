@@ -36,6 +36,7 @@
       "kindLabel": null
     }
   ],
+  "upcomingEmpty": null,
   "recentShows": [
     {
       "ref": {
@@ -63,6 +64,7 @@
       "setlistCount": 23
     }
   ],
+  "recentShowsEmpty": null,
   "statTiles": [
     {
       "glyph": "♪",

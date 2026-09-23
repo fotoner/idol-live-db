@@ -46,6 +46,7 @@
       }
     ]
   },
+  "hasCommunity": true,
   "lyrics": {
     "available": false,
     "statusLabel": "JASRAC 許諾待ち",
@@ -105,14 +106,18 @@
     "artworkUrl": null
   },
   "unitLabel": "765MILLION ALLSTARS",
-  "parent": {
-    "kind": "song",
-    "id": "ml_sample",
-    "name": "Thank You!",
-    "sub": "765MILLION ALLSTARS",
-    "path": "/songs/ml_sample/",
-    "themeKey": "brand:ml",
-    "artworkUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music/sample/600x600bb.jpg"
+  "parentNote": {
+    "before": "この曲は ",
+    "link": {
+      "kind": "song",
+      "id": "ml_sample",
+      "name": "Thank You!",
+      "sub": "765MILLION ALLSTARS",
+      "path": "/songs/ml_sample/",
+      "themeKey": "brand:ml",
+      "artworkUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music/sample/600x600bb.jpg"
+    },
+    "after": " の派生曲です。"
   },
   "variants": [],
   "performanceCount": 12,
@@ -165,6 +170,7 @@
       "ordinalLabel": "12 回目"
     }
   ],
+  "historyEmpty": null,
   "frequentSingers": [
     {
       "idol": {
@@ -238,6 +244,7 @@
     }
   ],
   "app": {
+    "title": "アプリ「アイドルライブDB」",
     "appStoreUrl": "https://apps.apple.com/jp/app/id6763342297",
     "deeplink": null,
     "note": "参加記録・投票・歌詞・コール・タグ付けはアプリでご利用いただけます。"

@@ -15,7 +15,12 @@
   "factRows": [],
   "events": [],
   "shows": [],
+  "showsEmpty": {
+    "title": "公演の記録がありません",
+    "body": null
+  },
   "app": {
+    "title": "アプリ「アイドルライブDB」",
     "appStoreUrl": "https://apps.apple.com/jp/app/id6763342297",
     "deeplink": null,
     "note": "参加記録・投票・歌詞・コール・タグ付けはアプリでご利用いただけます。"
