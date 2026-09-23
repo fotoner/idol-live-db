@@ -165,7 +165,7 @@ mod room_parity {
     /// 直したらここから消すこと。
     const KNOWN_GAPS: &[(&str, &str, &str)] = &[
         ("idols", "voice_actors", "廃止列。iOS は書き戻すと落ちるので読まない。Android だけが今も持っている"),
-        ("songs", "jasrac_code", "JASRAC 許諾が認可待ちのため Android 未追加"),
+        ("songs", "jasrac_code", "アプリでは読まない列で、同期でも配らない (schema_registry::COLUMNS_NOT_SYNCED)"),
         ("idol_voice_actors", "*", "Android は entity を持たず、SeedImporter が『両方にある表』しか移さないため実機に無い。CV 名検索が Android で効かない原因"),
         ("song_units", "*", "非同期テーブル。Android は持たない"),
     ];

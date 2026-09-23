@@ -29,6 +29,9 @@ pub enum TableOrigin {
     Community,
     /// スナップショットが読まない補助表。片方にしか無くてもよい。
     Auxiliary,
+    /// iOS の Documents DB にだけある表 (GRDB の移行が作る)。同梱 DB・コアの DDL・
+    /// Android の Room には無い。列の単位のものは [`DOCUMENTS_ONLY_COLUMNS`]。
+    DocumentsOnly,
 }
 
 /// 台帳の 1 行。
@@ -116,8 +119,75 @@ pub fn expected_tables() -> Vec<TableSpec> {
               「両方にある表」しか移さないため実機に存在しない。そのため Android では CV 名検索が\
               効かず、コア側は table_exists で無ければ空として続行する"),
         spec("song_units", Auxiliary, &["song_id"], "曲とユニットの対応。非同期テーブル"),
+        spec("event_releases", DocumentsOnly, &["id", "event_id"],
+             "イベントの映像円盤 (BD/DVD)。iOS の移行 v24 が作る。所有の印は user_marks (kind=owned)。\
+              予定している機能の器で、今はどの経路 (同梱 DB・CloudKit の同期) からも行が入らない。\
+              コアのローダは表が無ければ空として読む"),
     ]
 }
+
+/// 列 1 本の覚え書き。表の単位の台帳 ([`expected_tables`]) とは別に、列の単位で持つもの。
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ColumnNote {
+    pub table: &'static str,
+    pub column: &'static str,
+    /// なぜこの扱いなのか。ずれた時に読む人向け。
+    pub note: &'static str,
+}
+
+/// iOS の Documents DB にしか無い列。GRDB の移行 (`DatabaseMigrations.swift`) が足し、
+/// コアの DDL・同梱 DB・Android の Room には無い。
+///
+/// - コアのローダは、列が無ければ NULL として読む (`outbound::sqlite_loader`)。
+/// - reseed は同梱 DB と共通の列しか入れ直さないので、reseed の後はどれも NULL に戻る。
+/// - **コアの DDL に移すときは、Android の Room にも entity と移行を足すこと。** iOS は
+///   ensureMasterSchema の ALTER で揃うが、Android はコアの DDL を流さない (Room が列まで
+///   照合する) ので、Room 側を足し忘れると Android だけ列が無いまま進む。
+pub const DOCUMENTS_ONLY_COLUMNS: &[ColumnNote] = &[
+    ColumnNote {
+        table: "brands",
+        column: "icon_url",
+        note: "ブランドのアイコン。CloudKit の Brand.iconUrl を同期で書く (CkBrandRow.icon_url)。\
+               書き先の列があるのは iOS だけ",
+    },
+    ColumnNote {
+        table: "idols",
+        column: "voice_actors",
+        note: "廃止した列。移行 v19 が、cast / idol_cast を持っていた古い端末にだけ足した。\
+               声優は idol_voice_actors が正で、iOS はこの列を読まない",
+    },
+    ColumnNote {
+        table: "events",
+        column: "has_streaming",
+        note: "開催形態 (配信の有無)。移行 v23 が足し、is_streaming から初期値を写す。同期では配らない",
+    },
+    ColumnNote {
+        table: "events",
+        column: "has_live_viewing",
+        note: "開催形態 (ライブビューイングの有無)。移行 v23 が足す。同期では配らない",
+    },
+    ColumnNote {
+        table: "shows",
+        column: "has_streaming",
+        note: "公演の単位の開催形態 (配信の有無)。移行 v23 が足す。同期では配らない",
+    },
+    ColumnNote {
+        table: "shows",
+        column: "has_live_viewing",
+        note: "公演の単位の開催形態 (ライブビューイングの有無)。移行 v23 が足す。同期では配らない",
+    },
+];
+
+/// コアの DDL にあるのに、CloudKit の同期では**意図して配らない**列。同期の行型
+/// (`ck_record_mapping` の Ck*Row) に載せていないので、端末には同梱 DB の reseed でだけ届く。
+pub const COLUMNS_NOT_SYNCED: &[ColumnNote] = &[ColumnNote {
+    table: "songs",
+    column: "jasrac_code",
+    note: "JASRAC の作品コード。読むのは同梱 DB を読む MCP (get_song) だけで、アプリの画面には\
+           出さない (JASRAC への利用報告は tools/jasrac/works.tsv を正にしている)。CloudKit の Song に\
+           ある jasracCode の欄は読まない (CkSongRow に無い)。Android の Room には列が無い\
+           (schema_ddl の KNOWN_GAPS)",
+}];
 
 /// 突き合わせの結果 1 件。
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -143,7 +213,10 @@ pub fn find_drift(
             // 出どころによって「無くて当たり前」かが変わる
             let expected_missing = matches!(
                 t.origin,
-                TableOrigin::LocalOnly | TableOrigin::Community | TableOrigin::Auxiliary
+                TableOrigin::LocalOnly
+                    | TableOrigin::Community
+                    | TableOrigin::Auxiliary
+                    | TableOrigin::DocumentsOnly
             );
             out.push(SchemaDrift {
                 table: t.name.clone(),
@@ -185,12 +258,22 @@ pub fn find_drift(
 mod tests {
     use super::*;
     use crate::test_support::bundle_path;
+    use rusqlite::{Connection, OpenFlags};
     use std::collections::HashMap;
 
     /// 実際の DB から「表名 → 列名」を読む。
     fn actual_schema(path: &str) -> HashMap<String, Vec<String>> {
-        use rusqlite::{Connection, OpenFlags};
-        let conn = Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap();
+        schema_of(&Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap())
+    }
+
+    /// コアの DDL から「表名 → 列名」を読む。
+    fn ddl_schema() -> HashMap<String, Vec<String>> {
+        let conn = Connection::open_in_memory().unwrap();
+        conn.execute_batch(crate::domain::schema_ddl::MASTER_SCHEMA_SQL).unwrap();
+        schema_of(&conn)
+    }
+
+    fn schema_of(conn: &Connection) -> HashMap<String, Vec<String>> {
         let names: Vec<String> = {
             let mut stmt = conn
                 .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
@@ -253,6 +336,83 @@ mod tests {
             .map(|t| t.name.as_str())
             .collect();
         assert!(missing.is_empty(), "マスタ表が同梱 DB に無い: {missing:?}");
+    }
+
+    /// Documents 専用の列は、コアの DDL (= 同梱 DB) に無い。DDL に移したら台帳から外すこと
+    /// (外すときに、Android の Room にも足したかを確かめる機会になる)。
+    #[test]
+    fn documents_only_columns_are_outside_the_master_ddl() {
+        let ddl = ddl_schema();
+        for c in DOCUMENTS_ONLY_COLUMNS {
+            let cols = ddl.get(c.table).unwrap_or_else(|| panic!("{} はマスタの表のはず", c.table));
+            assert!(
+                !cols.iter().any(|x| x == c.column),
+                "{}.{} は DDL にある。台帳の DOCUMENTS_ONLY_COLUMNS から外すこと",
+                c.table,
+                c.column
+            );
+        }
+    }
+
+    /// iOS の移行が足す列のうち DDL に無いものは、台帳の Documents 専用の列とちょうど一致する。
+    /// iOS にだけ列を足して台帳に書き忘れると、ここが落ちる。
+    #[test]
+    fn ios_only_columns_are_all_in_the_ledger() {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../ImasLiveDB/Database/DatabaseMigrations.swift");
+        let Ok(swift) = std::fs::read_to_string(&path) else {
+            eprintln!("iOS の移行が無いので検査を飛ばす ({})", path.display());
+            return;
+        };
+        let ddl = ddl_schema();
+        let mut ios_only: Vec<(String, String)> = swift
+            .split("ALTER TABLE ")
+            .skip(1)
+            .filter_map(|rest| {
+                let mut words = rest.split_whitespace();
+                let table = words.next()?;
+                (words.next()? == "ADD" && words.next()? == "COLUMN").then_some(())?;
+                Some((table.to_string(), words.next()?.to_string()))
+            })
+            .filter(|(table, column)| ddl.get(table).is_some_and(|cols| !cols.contains(column)))
+            .collect();
+        ios_only.sort();
+        ios_only.dedup();
+        let mut ledger: Vec<(String, String)> = DOCUMENTS_ONLY_COLUMNS
+            .iter()
+            .map(|c| (c.table.to_string(), c.column.to_string()))
+            .collect();
+        ledger.sort();
+        assert_eq!(ios_only, ledger, "iOS の移行が足す列 (左) と、台帳の DOCUMENTS_ONLY_COLUMNS (右) が違う");
+    }
+
+    /// CloudKit で配らない列は、DDL にあって、同期の行型には無い (台帳の記述が今も正しい)。
+    #[test]
+    fn columns_not_synced_are_absent_from_the_sync_rows() {
+        let ddl = ddl_schema();
+        let mapping = include_str!("ck_record_mapping.rs");
+        for c in COLUMNS_NOT_SYNCED {
+            assert!(
+                ddl.get(c.table).is_some_and(|cols| cols.iter().any(|x| x == c.column)),
+                "{}.{} が DDL に無い",
+                c.table,
+                c.column
+            );
+            let row = match c.table {
+                "songs" => "CkSongRow",
+                other => panic!("{other} の同期の行型をこのテストに足すこと"),
+            };
+            let body = mapping
+                .split(&format!("pub struct {row} {{"))
+                .nth(1)
+                .and_then(|rest| rest.split("\n}").next())
+                .unwrap_or_else(|| panic!("{row} が見つからない"));
+            assert!(
+                !body.contains(&format!("pub {}:", c.column)),
+                "{row} が {} を持っている。配るなら台帳の COLUMNS_NOT_SYNCED から外すこと",
+                c.column
+            );
+        }
     }
 
     #[test]

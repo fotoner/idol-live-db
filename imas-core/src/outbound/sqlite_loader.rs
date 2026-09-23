@@ -157,7 +157,7 @@ fn optional_col(cols: &HashSet<String>, name: &str) -> String {
 }
 
 fn load_songs(conn: &Connection) -> Result<Vec<Song>, String> {
-    // jasrac_code は iOS 側にしか無い列 (JASRAC 許諾は認可待ちで Android スキーマ未追加)。
+    // jasrac_code は Android の Room に無い列 (同期でも配らない: schema_registry::COLUMNS_NOT_SYNCED)。
     // 無ければ NULL を選ぶ: 列の有無でスナップショット全体を落とさないため。
     let jasrac = if table_columns(conn, "songs")?.contains("jasrac_code") {
         "jasrac_code"
