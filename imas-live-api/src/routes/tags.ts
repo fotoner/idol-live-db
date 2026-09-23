@@ -962,7 +962,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       const now = Math.floor(Date.now() / 1000);
       const appliedTagIds: string[] = [];
 
-      for (const tagId of tagIds) {
+      // 同じ id を何度送られても 1 回だけ数える。
+      for (const tagId of new Set(tagIds)) {
         const tag = await env.DB.prepare("SELECT id FROM tags WHERE id = ? AND status != 'removed'").bind(tagId).first();
         if (!tag) continue;
 
@@ -971,8 +972,10 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
           env.DB.prepare(
             `INSERT OR IGNORE INTO device_song_tag (device_id, song_id, tag_id, created_at) VALUES (?, ?, ?, ?)`
           ).bind(deviceId, songId, tagId, now),
+          // 票は端末の行が実際に増えたとき (直前の INSERT OR IGNORE の changes() > 0) だけ +1。
+          // 同じ端末の再送で増やさない。
           env.DB.prepare(
-            `INSERT INTO song_tags (song_id, tag_id, vote_count) VALUES (?, ?, 1)
+            `INSERT INTO song_tags (song_id, tag_id, vote_count) SELECT ?, ?, 1 WHERE changes() > 0
              ON CONFLICT(song_id, tag_id) DO UPDATE SET vote_count = vote_count + 1`
           ).bind(songId, tagId),
           // 類似曲スコアの分母を即時に追従させる (batch なので上の INSERT 後の状態を見る)。
@@ -1009,8 +1012,11 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         env.DB.prepare(
           "DELETE FROM device_song_tag WHERE device_id = ? AND song_id = ? AND tag_id = ?"
         ).bind(deviceId, songId, tagId),
+        // 票は端末の行が実際に消えたとき (直前の DELETE の changes() > 0) だけ -1。
+        // 付けていない端末の取り消しで減らさない。
         env.DB.prepare(
-          `UPDATE song_tags SET vote_count = MAX(0, vote_count - 1) WHERE song_id = ? AND tag_id = ?`
+          `UPDATE song_tags SET vote_count = MAX(0, vote_count - 1)
+            WHERE song_id = ? AND tag_id = ? AND changes() > 0`
         ).bind(songId, tagId),
         env.DB.prepare(
           `DELETE FROM song_tags WHERE song_id = ? AND tag_id = ? AND vote_count <= 0`
@@ -1056,7 +1062,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       const now = Math.floor(Date.now() / 1000);
       const appliedTagIds: string[] = [];
 
-      for (const tagId of tagIds) {
+      // 同じ id を何度送られても 1 回だけ数える。
+      for (const tagId of new Set(tagIds)) {
         const tag = await env.DB.prepare("SELECT id FROM idol_tag_master WHERE id = ? AND status != 'removed'").bind(tagId).first();
         if (!tag) continue;
 
@@ -1064,8 +1071,10 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
           env.DB.prepare(
             `INSERT OR IGNORE INTO device_idol_tag (device_id, idol_id, tag_id, created_at) VALUES (?, ?, ?, ?)`
           ).bind(deviceId, idolId, tagId, now),
+          // 票は端末の行が実際に増えたとき (直前の INSERT OR IGNORE の changes() > 0) だけ +1。
+          // 同じ端末の再送で増やさない。
           env.DB.prepare(
-            `INSERT INTO idol_tags (idol_id, tag_id, vote_count) VALUES (?, ?, 1)
+            `INSERT INTO idol_tags (idol_id, tag_id, vote_count) SELECT ?, ?, 1 WHERE changes() > 0
              ON CONFLICT(idol_id, tag_id) DO UPDATE SET vote_count = vote_count + 1`
           ).bind(idolId, tagId),
         ]);
@@ -1099,8 +1108,11 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         env.DB.prepare(
           "DELETE FROM device_idol_tag WHERE device_id = ? AND idol_id = ? AND tag_id = ?"
         ).bind(deviceId, idolId, tagId),
+        // 票は端末の行が実際に消えたとき (直前の DELETE の changes() > 0) だけ -1。
+        // 付けていない端末の取り消しで減らさない。
         env.DB.prepare(
-          `UPDATE idol_tags SET vote_count = MAX(0, vote_count - 1) WHERE idol_id = ? AND tag_id = ?`
+          `UPDATE idol_tags SET vote_count = MAX(0, vote_count - 1)
+            WHERE idol_id = ? AND tag_id = ? AND changes() > 0`
         ).bind(idolId, tagId),
         env.DB.prepare(
           `DELETE FROM idol_tags WHERE idol_id = ? AND tag_id = ? AND vote_count <= 0`
@@ -1455,7 +1467,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       const now = Math.floor(Date.now() / 1000);
       const appliedTagIds: string[] = [];
 
-      for (const tagId of tagIds) {
+      // 同じ id を何度送られても 1 回だけ数える。
+      for (const tagId of new Set(tagIds)) {
         const tag = await env.DB.prepare("SELECT id FROM unit_tag_master WHERE id = ? AND status != 'removed'").bind(tagId).first();
         if (!tag) continue;
 
@@ -1463,8 +1476,10 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
           env.DB.prepare(
             `INSERT OR IGNORE INTO device_unit_tag (device_id, unit_id, tag_id, created_at) VALUES (?, ?, ?, ?)`
           ).bind(deviceId, unitId, tagId, now),
+          // 票は端末の行が実際に増えたとき (直前の INSERT OR IGNORE の changes() > 0) だけ +1。
+          // 同じ端末の再送で増やさない。
           env.DB.prepare(
-            `INSERT INTO unit_tags (unit_id, tag_id, vote_count) VALUES (?, ?, 1)
+            `INSERT INTO unit_tags (unit_id, tag_id, vote_count) SELECT ?, ?, 1 WHERE changes() > 0
              ON CONFLICT(unit_id, tag_id) DO UPDATE SET vote_count = vote_count + 1`
           ).bind(unitId, tagId),
         ]);
@@ -1498,8 +1513,11 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         env.DB.prepare(
           "DELETE FROM device_unit_tag WHERE device_id = ? AND unit_id = ? AND tag_id = ?"
         ).bind(deviceId, unitId, tagId),
+        // 票は端末の行が実際に消えたとき (直前の DELETE の changes() > 0) だけ -1。
+        // 付けていない端末の取り消しで減らさない。
         env.DB.prepare(
-          `UPDATE unit_tags SET vote_count = MAX(0, vote_count - 1) WHERE unit_id = ? AND tag_id = ?`
+          `UPDATE unit_tags SET vote_count = MAX(0, vote_count - 1)
+            WHERE unit_id = ? AND tag_id = ? AND changes() > 0`
         ).bind(unitId, tagId),
         env.DB.prepare(
           `DELETE FROM unit_tags WHERE unit_id = ? AND tag_id = ? AND vote_count <= 0`

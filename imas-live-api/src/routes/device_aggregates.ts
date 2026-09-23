@@ -118,13 +118,15 @@ export async function handleDeviceAggregates(ctx: RouteContext): Promise<Respons
       if (favSongIdErr) return error(favSongIdErr);
       if (typeof value !== "boolean") return error("value must be boolean");
 
+      // 数は端末の行が実際に変わったとき (直前の文の changes() > 0) だけ動かす。
+      // 同じ端末の再送や、登録していない端末の解除では動かない。
       if (value) {
         // お気に入り追加: device upsert + count++ を batch
         const insertDevice = env.DB.prepare(
           `INSERT OR IGNORE INTO device_song_favorite (device_id, song_id, created_at) VALUES (?, ?, ?)`
         ).bind(deviceId, song_id, Math.floor(Date.now() / 1000));
         const upsertCount = env.DB.prepare(
-          `INSERT INTO song_favorites (song_id, count) VALUES (?, 1)
+          `INSERT INTO song_favorites (song_id, count) SELECT ?, 1 WHERE changes() > 0
            ON CONFLICT(song_id) DO UPDATE SET count = count + 1`
         ).bind(song_id);
         await env.DB.batch([insertDevice, upsertCount]);
@@ -134,7 +136,7 @@ export async function handleDeviceAggregates(ctx: RouteContext): Promise<Respons
           "DELETE FROM device_song_favorite WHERE device_id = ? AND song_id = ?"
         ).bind(deviceId, song_id);
         const decrementCount = env.DB.prepare(
-          `UPDATE song_favorites SET count = MAX(0, count - 1) WHERE song_id = ?`
+          `UPDATE song_favorites SET count = MAX(0, count - 1) WHERE song_id = ? AND changes() > 0`
         ).bind(song_id);
         await env.DB.batch([deleteDevice, decrementCount]);
       }

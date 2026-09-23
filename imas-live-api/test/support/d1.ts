@@ -37,6 +37,8 @@ export interface D1Usage {
   rowsRead: number;
   rowsWritten: number;
   statements: number;
+  /** 文ごとの内訳 (発行順)。どの文が読んでいるかを見るため。 */
+  log: Array<{ sql: string; rowsRead: number; rowsWritten: number }>;
 }
 
 /**
@@ -47,31 +49,35 @@ export interface D1Usage {
  * 読み取り行数は変わらない。
  */
 export function meterD1(db: D1Database = env.DB): { db: D1Database; usage: D1Usage; reset(): void } {
-  const usage: D1Usage = { rowsRead: 0, rowsWritten: 0, statements: 0 };
-  const record = (meta: { rows_read?: number; rows_written?: number } | undefined) => {
-    usage.rowsRead += meta?.rows_read ?? 0;
-    usage.rowsWritten += meta?.rows_written ?? 0;
+  const usage: D1Usage = { rowsRead: 0, rowsWritten: 0, statements: 0, log: [] };
+  const record = (sql: string, meta: { rows_read?: number; rows_written?: number } | undefined) => {
+    const rowsRead = meta?.rows_read ?? 0;
+    const rowsWritten = meta?.rows_written ?? 0;
+    usage.rowsRead += rowsRead;
+    usage.rowsWritten += rowsWritten;
     usage.statements += 1;
+    usage.log.push({ sql: sql.replace(/\s+/g, " ").trim(), rowsRead, rowsWritten });
   };
 
-  const wrap = (inner: D1PreparedStatement): D1PreparedStatement =>
+  const wrap = (inner: D1PreparedStatement, sql: string): D1PreparedStatement =>
     ({
       inner,
-      bind: (...values: unknown[]) => wrap(inner.bind(...values)),
+      sql,
+      bind: (...values: unknown[]) => wrap(inner.bind(...values), sql),
       first: async (column?: string) => {
         const result = await inner.all<Record<string, unknown>>();
-        record(result.meta);
+        record(sql, result.meta);
         const first = result.results[0] ?? null;
         return column === undefined ? first : (first?.[column] ?? null);
       },
       all: async () => {
         const result = await inner.all();
-        record(result.meta);
+        record(sql, result.meta);
         return result;
       },
       run: async () => {
         const result = await inner.run();
-        record(result.meta);
+        record(sql, result.meta);
         return result;
       },
       raw: async () => {
@@ -80,11 +86,11 @@ export function meterD1(db: D1Database = env.DB): { db: D1Database; usage: D1Usa
     }) as unknown as D1PreparedStatement;
 
   const metered = {
-    prepare: (sql: string) => wrap(db.prepare(sql)),
+    prepare: (sql: string) => wrap(db.prepare(sql), sql),
     batch: async (statements: D1PreparedStatement[]) => {
-      const inner = statements.map((s) => (s as unknown as { inner?: D1PreparedStatement }).inner ?? s);
-      const results = await db.batch(inner);
-      for (const r of results) record(r.meta);
+      const wrapped = statements as unknown as Array<{ inner: D1PreparedStatement; sql: string }>;
+      const results = await db.batch(wrapped.map((s) => s.inner));
+      results.forEach((r, i) => record(`[batch] ${wrapped[i].sql}`, r.meta));
       return results;
     },
     exec: (sql: string) => db.exec(sql),
@@ -98,6 +104,7 @@ export function meterD1(db: D1Database = env.DB): { db: D1Database; usage: D1Usa
       usage.rowsRead = 0;
       usage.rowsWritten = 0;
       usage.statements = 0;
+      usage.log = [];
     },
   };
 }
