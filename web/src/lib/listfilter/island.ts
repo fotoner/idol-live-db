@@ -15,6 +15,9 @@
  * 状態は URL のクエリに置く。戻る/進むで復元でき、絞った状態のまま共有できる
  * (「選択 = URL」という、この出面の基本を崩さない)。
  *
+ * **起動するのは最初の操作 (「絞り込み・並べ替え」か列見出しを押す) か、URL に条件が
+ * あるときだけ** (Q-14)。一覧を眺めるだけの人には、生テーブル (約 10MB) も wasm も配らない。
+ *
  * **軸は 1 本の表 ([`FieldSpec`]) で決まる。** 以前は「型・初期値・URL の鍵・
  * 描画・重ね方・絞り込み中かの判定」が別々に書かれていて、軸を 1 本足すと
  * 6 箇所を直す必要があった (1 つ忘れても型は通り、URL 復元だけが壊れる)。
@@ -116,6 +119,8 @@ export function mountListFilter<F extends ListFacets>(
     root,
     container,
     status: must(root, "[data-filter-status]"),
+    open: must<HTMLButtonElement>(root, "[data-filter-open]"),
+    controls: must(root, "[data-filter-controls]"),
     fields: must(root, "[data-filter-fields]"),
     sorts: must<HTMLElement>(root, "[data-filter-sorts]"),
     dir: must<HTMLButtonElement>(root, "[data-filter-dir]"),
@@ -144,12 +149,29 @@ export function mountListFilter<F extends ListFacets>(
   let defaultSort = "";
   let state = emptyState(fields, defaultSort);
   let engine: Engine | null = null;
+  let ready: Promise<boolean> | null = null;
   let timer = 0;
 
-  setEnabled(false);
-  void start();
+  el.open.addEventListener("click", () => {
+    void start().then((ok) => {
+      // 押したボタンは消えるので、フォーカスを最初の入力欄へ移す。
+      if (ok) el.fields.querySelector<HTMLElement>("input, select, button")?.focus();
+    });
+  });
+  bindSortHeaders();
+  // 共有された絞り込み・戻る/進む で来たときは、すぐ起動して URL の条件を復元する。
+  if (location.search) void start();
 
-  async function start(): Promise<void> {
+  /** 島を起動する (何度呼んでも 1 回だけ)。生テーブルと wasm はここで初めて取りに行く。 */
+  function start(): Promise<boolean> {
+    ready ??= boot();
+    return ready;
+  }
+
+  async function boot(): Promise<boolean> {
+    el.open.disabled = true;
+    el.root.dataset.state = "loading";
+    el.status.textContent = "絞り込みを準備しています…";
     try {
       engine = await loadEngine();
       const facets = spec.facets(engine);
@@ -161,15 +183,19 @@ export function mountListFilter<F extends ListFacets>(
       state = readUrl(fields, defaultSort);
       renderFields();
       hideDuplicateAxes();
-      bindSortHeaders();
       renderSorts();
-      setEnabled(true);
+      el.open.hidden = true;
+      el.controls.hidden = false;
+      for (const c of [el.dir, el.reset]) c.disabled = false;
+      el.root.dataset.state = "ready";
       apply();
+      return true;
     } catch (e) {
       // 絞り込めないだけで一覧は読める。壊れた見た目のまま黙らない。
       el.status.textContent = "絞り込みを読み込めませんでした。再読み込みしてください。";
       el.root.dataset.state = "failed";
       console.error(`${spec.name}: 読み込みに失敗`, e);
+      return false;
     }
   }
 
@@ -194,6 +220,10 @@ export function mountListFilter<F extends ListFacets>(
     apply();
   });
   window.addEventListener("popstate", () => {
+    if (!engine) {
+      if (location.search) void start();
+      return;
+    }
     state = readUrl(fields, defaultSort);
     renderFieldValues();
     renderSorts();
@@ -257,14 +287,6 @@ export function mountListFilter<F extends ListFacets>(
 
   // --- 描画 ---------------------------------------------------------------
 
-  function setEnabled(on: boolean): void {
-    // 入力欄は素材 (facets) が来てから描くので、ここで触るものは無い。
-    // 器の側 (sort/dir/reset と列見出し) だけを止めておく。
-    for (const c of [el.dir, el.reset]) c.disabled = !on;
-    for (const b of sortButtons()) b.disabled = !on;
-    el.root.dataset.state = on ? "ready" : "loading";
-  }
-
   /** その並びの既定の向き (決めるのはコア)。 */
   function defaultAscendingOf(key: string): boolean {
     return sorts.find((x) => x.key === key)?.defaultAscending ?? true;
@@ -298,15 +320,20 @@ export function mountListFilter<F extends ListFacets>(
   }
 
   /**
-   * 表の列見出しに動きを結ぶ。見出しそのものは Astro が出しているので、ここは
-   * 押されたときの反応だけ。**1 回しか呼ばない** (popstate で呼び直すと二重に結ばれる)。
+   * 表の列見出しに動きを結ぶ。見出しそのものは Astro が (JS 無しでは押せないよう
+   * `disabled` で) 出しているので、ここは押せるようにして反応を結ぶだけ。
+   * 見出しを押すのも「最初の操作」なので、起動を待ってからその並びにする。
+   * **1 回しか呼ばない** (呼び直すと二重に結ばれる)。
    */
   function bindSortHeaders(): void {
     if (!headerScope) return;
     // 向きは見出しの矢印が示すので、独立した向きボタンは出さない。
     el.dir.hidden = true;
     for (const b of sortButtons()) {
-      b.addEventListener("click", () => pickSort(b.dataset.sortKey!));
+      b.disabled = false;
+      b.addEventListener("click", () => {
+        void start().then((ok) => ok && pickSort(b.dataset.sortKey!));
+      });
     }
   }
 

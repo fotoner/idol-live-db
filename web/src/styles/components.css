@@ -2108,7 +2108,8 @@ a.labeled-row .labeled-row__value {
 }
 
 /* --- 楽曲一覧の絞り込み --------------------------------------------------
-   素材を取るまでは触らせない (押しても何も起きない時間を作らない)。 */
+   「絞り込み・並べ替え」を押すまでは入力欄の器を畳んでおく。素材を取っている間は
+   薄くして、押しても何も起きない時間を見せる。 */
 .song-filter {
   display: flex;
   flex-direction: column;
@@ -2120,6 +2121,14 @@ a.labeled-row .labeled-row__value {
 }
 .song-filter[data-state="loading"] {
   opacity: 0.6;
+}
+.song-filter__controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp4);
+}
+.song-filter__open {
+  align-self: flex-start;
 }
 .song-filter__row {
   display: flex;
@@ -2147,6 +2156,7 @@ a.labeled-row .labeled-row__value {
   outline: 2px solid var(--ds-sys);
   outline-offset: 1px;
 }
+.song-filter__open,
 .song-filter__dir,
 .song-filter__reset {
   font: inherit;
@@ -2163,6 +2173,7 @@ a.labeled-row .labeled-row__value {
 .song-filter__dir {
   min-width: 2.5rem;
 }
+.song-filter__open:hover,
 .song-filter__dir:hover,
 .song-filter__reset:hover {
   color: var(--ds-ink);
