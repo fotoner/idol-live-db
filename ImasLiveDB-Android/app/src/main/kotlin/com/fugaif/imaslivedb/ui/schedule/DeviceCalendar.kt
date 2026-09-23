@@ -9,6 +9,7 @@ import com.fugaif.imaslivedb.data.repository.CalendarShowDetail
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
+import uniffi.imas_core.parseTimeMinutes
 import uniffi.imas_core.showDisplayTitle
 
 /**
@@ -37,7 +38,7 @@ object DeviceCalendar {
      */
     fun addShow(context: Context, row: CalShowRow, detail: CalendarShowDetail?): Boolean {
         val date = runCatching { LocalDate.parse(row.date) }.getOrNull() ?: return false
-        val startMinutes = parseTimeMinutes(detail?.startTime)
+        val startMinutes = detail?.startTime?.let(::parseTimeMinutes)?.toInt()
         // 公演の正式な呼び名 (ライブ名と重なる部分は 2 度出さない) はコア。
         val title = showDisplayTitle(row.eventName, row.showName, row.date)
 

@@ -53,6 +53,9 @@ import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import uniffi.imas_core.TimedBlockInput
+import uniffi.imas_core.showTimeBlock
+import uniffi.imas_core.weekTimedLayout
 
 /**
  * Google カレンダー風の時間グリッド週ビュー (iOS `WeekTimeGridView` の移植)。
@@ -69,7 +72,6 @@ private object WeekMetric {
     /** 左端の時刻ラベル列の幅。 */
     val gutter = 44.dp
     /** 終了時刻データが無い公演に与える仮の長さ (分)。 */
-    const val DEFAULT_SHOW_MINUTES = 120
     /** ブロックの最小高さ (短すぎてタップ不能になるのを防ぐ)。 */
     val minBlockHeight = 20.dp
     val gridHeight = hourHeight * (END_HOUR - START_HOUR)
@@ -500,28 +502,30 @@ private fun nowMinutesJst(): Int =
 
 /** 終日レーン行き: 時刻を持たないエントリ。受付期間は連続帯で描くので除外する。 */
 private fun CalendarUiState.allDayEntries(date: LocalDate): List<CalendarEntry> =
-    entriesOn(date).filter { it !is CalendarEntry.TicketPeriod && startMinutesOf(it) == null }
+    entriesOn(date).filter { it !is CalendarEntry.TicketPeriod && timeBlockOf(it) == null }
 
-/** 時間グリッド行き: 開始時刻を持つエントリをブロック化する。 */
+/**
+ * 時間グリッド行き: 開始時刻を持つエントリをブロック化する。公演の (開始分, 終了分) は
+ * コア (showTimeBlock。終了時刻のデータが無いので 2 時間ぶん、24:00 で止める)。
+ */
 private fun CalendarUiState.timedBlocks(date: LocalDate): List<TimedBlock> =
     entriesOn(date).mapNotNull { entry ->
-        val start = startMinutesOf(entry) ?: return@mapNotNull null
+        val block = timeBlockOf(entry) ?: return@mapNotNull null
         TimedBlock(
             id = blockId(entry),
             entry = entry,
-            startMinutes = start,
-            // 終了時刻のデータが無いので、公演は仮に 2 時間ぶんの高さで描く。
-            endMinutes = (start + WeekMetric.DEFAULT_SHOW_MINUTES).coerceAtMost(24 * 60)
+            startMinutes = block.startMinutes.toInt(),
+            endMinutes = block.endMinutes.toInt()
         )
     }
 
 /**
- * 時間軸に置ける開始分。時刻を持つのは公演だけで、それも開始時刻が登録されている場合に限る
+ * 時間軸に置ける区間。時刻を持つのは公演だけで、それも開始時刻が登録されている場合に限る
  * (誕生日・リリース・記念日・チケットは日付しか持たない)。
  */
-private fun CalendarUiState.startMinutesOf(entry: CalendarEntry): Int? {
+private fun CalendarUiState.timeBlockOf(entry: CalendarEntry): TimedBlockInput? {
     if (entry !is CalendarEntry.Show) return null
-    return parseTimeMinutes(showDetails[entry.row.showId]?.startTime)
+    return showTimeBlock(showDetails[entry.row.showId]?.startTime)
 }
 
 private fun blockId(entry: CalendarEntry): String = when (entry) {
@@ -534,48 +538,17 @@ private fun blockId(entry: CalendarEntry): String = when (entry) {
     is CalendarEntry.TicketPeriod -> "tp-${entry.row.eventId}"
 }
 
-/** "HH:MM" → 0:00 からの経過分。壊れた値・範囲外は null。 */
-internal fun parseTimeMinutes(time: String?): Int? {
-    val parts = time?.split(":") ?: return null
-    if (parts.size != 2) return null
-    val h = parts[0].toIntOrNull() ?: return null
-    val m = parts[1].toIntOrNull() ?: return null
-    if (h !in 0..23 || m !in 0..59) return null
-    return h * 60 + m
-}
-
 /**
- * 同時刻の重なりを最大 2 列に振り分け、収まらない分を "+n" に集約する
- * (iOS `layoutTimedBlocks` の写し)。3 列以上に割ると 1 ブロックが細すぎて読めなくなる。
+ * 同時刻の重なりを最大 2 列に振り分け、収まらない分を "+n" に集約する。
+ * 置き方 (列・半分幅・溢れ) はコア (weekTimedLayout)。日ごとに 1 回。
  */
 private fun layoutTimedBlocks(blocks: List<TimedBlock>): Pair<List<TimedBlock>, List<OverflowBadge>> {
-    val sorted = blocks.sortedWith(compareBy({ it.startMinutes }, { it.endMinutes }))
-    val visible = mutableListOf<TimedBlock>()
-    val hidden = mutableListOf<TimedBlock>()
-    val laneEnds = intArrayOf(Int.MIN_VALUE, Int.MIN_VALUE)
-
-    for (block in sorted) {
-        val lane = laneEnds.indices.firstOrNull { laneEnds[it] <= block.startMinutes }
-        if (lane == null) {
-            hidden += block
-        } else {
-            laneEnds[lane] = block.endMinutes
-            visible += block.copy(lane = lane)
-        }
+    val layout = weekTimedLayout(blocks.map { TimedBlockInput(it.startMinutes.toUInt(), it.endMinutes.toUInt()) })
+    val visible = layout.placements.map { p ->
+        blocks[p.index.toInt()].copy(lane = p.lane.toInt(), isHalfWidth = p.halfWidth)
     }
-
-    // 他の可視ブロックと時間帯が重なるものだけ半分幅にする (単独なら全幅で読みやすく)。
-    val widened = visible.map { a ->
-        a.copy(
-            isHalfWidth = visible.any { b ->
-                b.id != a.id && a.startMinutes < b.endMinutes && b.startMinutes < a.endMinutes
-            }
-        )
-    }
-    val overflow = hidden.groupBy { it.startMinutes }
-        .map { (start, list) -> OverflowBadge(start, list.size) }
-        .sortedBy { it.startMinutes }
-    return widened to overflow
+    val overflow = layout.overflow.map { OverflowBadge(it.startMinutes.toInt(), it.count.toInt()) }
+    return visible to overflow
 }
 
 private fun yPosition(minutes: Int): Dp {
