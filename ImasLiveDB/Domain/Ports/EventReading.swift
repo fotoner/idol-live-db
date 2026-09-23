@@ -22,6 +22,9 @@ protocol EventReading: Sendable {
     func eventStats(eventId: String) async throws -> EventStats
     /// 参加状況 (現地/配信などの集計)。
     func eventAttendance(eventId: String) async throws -> EventAttendance?
+    /// イベント詳細のヒーロー (開催期間・会場・今後か・参加の札)。組み方はコア (`event_hero`)。
+    /// 参加マークは OS が持つので、公演単位の参加 id とイベント単位のマークの有無を渡す。
+    func eventHero(eventId: String, attendedShowIds: [String], eventMarked: Bool, today: String) async throws -> EventHeroRecord?
     /// フィルタ条件で絞った、日付つきイベント。
     func eventsWithDate(criterion: EventFilterCriterion, includeEmpty: Bool) async throws -> [EventWithDate]
     /// イベント名の一覧 (フィルタ補完用)。

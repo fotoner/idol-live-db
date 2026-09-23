@@ -24,6 +24,7 @@ final class EventListViewModelTests: XCTestCase {
         func searchEventsByNameOrVenue(query: String, limit: Int) async throws -> [Event] { [] }
         func eventStats(eventId: String) async throws -> EventStats { throw FakeError.notUsed }
         func eventAttendance(eventId: String) async throws -> EventAttendance? { nil }
+        func eventHero(eventId: String, attendedShowIds: [String], eventMarked: Bool, today: String) async throws -> EventHeroRecord? { nil }
         func eventsWithDate(criterion: EventFilterCriterion, includeEmpty: Bool) async throws -> [EventWithDate] { [] }
         func eventNames() async throws -> [String] { [] }
         func attendedEventsWithDate() async throws -> [EventWithDate] { [] }

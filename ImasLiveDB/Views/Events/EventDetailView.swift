@@ -66,31 +66,16 @@ struct EventDetailView: View {
         return Int(show.date.prefix(4))
     }
 
-    /// 未来イベントかどうか（最初の公演日が今日以降）。「今日」は JST 固定 (`JSTDay`)。
-    private var isFutureEvent: Bool {
-        guard let firstShow = vm.shows.first else { return false }
-        return JSTDay.isTodayOrLater(firstShow.date)
-    }
+    /// 未来イベントかどうか (最初の公演が今日以降)。判定はコアのヒーロー。
+    private var isFutureEvent: Bool { vm.hero?.isUpcoming ?? false }
 
-    /// 参加マーク済み公演の日付から導く「参加予定 (あとN日) / 参加済み」状態。
-    /// 公演単位の `.attended` を集約し、最も早い未来公演があれば予定扱いにする。
+    /// 「参加予定 (あとN日) / 参加済み」の札。決め方と文言はコアのヒーロー。
     private var attendanceStatus: AttendanceStatus {
-        let dates = vm.shows.filter { vm.attendedShowIds.contains($0.id) }.map(\.date)
-        return AttendanceStatus.derive(attendedShowDates: dates)
+        vm.hero.map { AttendanceStatus($0.attendance) } ?? .none
     }
 
-    /// ヒーローのサブ行 (日付レンジ ・ 会場)。
-    private var heroSub: String {
-        let dates = vm.shows.map(\.date).filter { !$0.isEmpty }
-        let datePart: String?
-        if let first = dates.first, let last = dates.last {
-            datePart = first == last ? first : "\(first)–\(last)"
-        } else {
-            datePart = nil
-        }
-        let venues = Array(Set(vm.shows.compactMap(\.venue))).sorted()
-        return [datePart, venues.first].compactMap { $0 }.joined(separator: " ・ ")
-    }
+    /// ヒーローのサブ行 (開催期間 ・ 会場)。組み方はコア。
+    private var heroSub: String { vm.hero?.subLine ?? "" }
 
     var body: some View {
         let t = ImasTheme.derive(seed: seed, brand: brandSeed, scheme: scheme)
@@ -215,6 +200,7 @@ struct EventDetailView: View {
         .sheet(isPresented: $showAttendanceSheet) {
             EventAttendanceSheet(shows: vm.shows, event: event, seed: seed, brand: brandSeed) {
                 vm.recomputeAttendedShows()
+                Task { await vm.reloadHero(eventId: event.id) }
             }
         }
         .task { await vm.loadData(event: event) }
@@ -306,6 +292,7 @@ struct EventDetailView: View {
                         .listRowSeparatorTint(DS.sep)
                         .attendanceSwipe(show: show, event: event) {
                             vm.recomputeAttendedShows()
+                            Task { await vm.reloadHero(eventId: event.id) }
                         }
                 }
             }

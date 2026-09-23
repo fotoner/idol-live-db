@@ -1,4 +1,5 @@
 import Foundation
+import os
 import GRDB
 
 // MARK: - Show Query Types
@@ -48,13 +49,21 @@ struct EventWithDate: Sendable, Identifiable, Hashable {
     var firstDate: String?
     var lastDate: String?
 
-    /// 表示用の開催日。複数日なら "first〜last"、単日なら first のみ。
-    var dateRange: String? {
-        guard let first = firstDate, !first.isEmpty else { return nil }
-        if let last = lastDate, !last.isEmpty, last != first {
-            return "\(first)〜\(last)"
-        }
-        return first
+    /// 表示用の開催期間 (曜日つき・複数日は ` 〜 ` で結ぶ。Web と同じ)。組み方はコアの
+    /// `date_range_display`。一覧の行ごとに FFI を呼ばないよう、日付の組ごとに覚える。
+    var dateRange: String? { EventDateRanges.display(first: firstDate, last: lastDate) }
+}
+
+private enum EventDateRanges {
+    private struct Key: Hashable { let first: String?; let last: String? }
+    private static let cache = OSAllocatedUnfairLock<[Key: String?]>(initialState: [:])
+
+    static func display(first: String?, last: String?) -> String? {
+        let key = Key(first: first, last: last)
+        if let cached = cache.withLock({ $0[key] }) { return cached }
+        let value = dateRangeDisplay(first: first, last: last)
+        cache.withLock { $0[key] = .some(value) }
+        return value
     }
 }
 
@@ -719,7 +728,7 @@ extension AlbumSummary: GridCardItem {
     var title: String { cdSeries }
     var subtitle: String? {
         var parts: [String] = ["\(songCount)曲"]
-        if let year = displayYear { parts.append(year) }
+        if let year = yearDisplay { parts.append(year) }
         return parts.joined(separator: " / ")
     }
     var placeholderSystemImage: String { "music.note" }
@@ -729,7 +738,7 @@ extension SeriesSummary: GridCardItem {
     var title: String { name }
     var subtitle: String? {
         var parts: [String] = ["\(cdCount)枚 / \(songCount)曲"]
-        if let years = yearRange { parts.append("· \(years)") }
+        if let years = yearDisplay { parts.append("· \(years)") }
         return parts.joined(separator: " ")
     }
     var placeholderSystemImage: String { "rectangle.stack.fill" }
@@ -745,8 +754,8 @@ struct AlbumSummary: Identifiable, Hashable, Sendable {
     let earliestDate: String?  // "YYYY-MM-DD"
     let latestDate: String?
     let brandIds: [String]  // このアルバムに含まれる曲のブランド（複数ブランド混在の可能性）
-
-    var displayYear: String? { earliestDate.flatMap { String($0.prefix(4)) } }
+    /// 札に出す年の幅 (`2019` / `2019 – 2021`)。組み方はコア。
+    let yearDisplay: String?
 }
 
 // MARK: - Series Summary (CDシリーズグループ単位)
@@ -760,16 +769,6 @@ struct SeriesSummary: Identifiable, Hashable, Sendable {
     let latestDate: String?
     let artworkUrl: String?   // 代表ジャケット（最古CDのもの）
     let brandIds: [String]
-
-    var yearRange: String? {
-        let from = earliestDate.flatMap { String($0.prefix(4)) }
-        let to = latestDate.flatMap { String($0.prefix(4)) }
-        switch (from, to) {
-        case let (f?, t?) where f == t: return f
-        case let (f?, t?): return "\(f) – \(t)"
-        case let (f?, nil): return f
-        case let (nil, t?): return t
-        default: return nil
-        }
-    }
+    /// 札に出す年の幅 (`2019` / `2019 – 2021`)。組み方はコア。
+    let yearDisplay: String?
 }

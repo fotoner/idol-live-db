@@ -107,6 +107,13 @@ struct CoreEventRepository: EventReading {
         }
     }
 
+    func eventHero(eventId: String, attendedShowIds: [String], eventMarked: Bool, today: String) async throws -> EventHeroRecord? {
+        try await snapshot.withStore { store in
+            try store.eventHero(eventId: eventId, attendedShowIds: attendedShowIds,
+                                eventMarked: eventMarked, today: today)
+        }
+    }
+
     func eventReleases(eventId: String) async throws -> [EventRelease] {
         try await snapshot.withStore { store in
             try store.eventReleases(eventId: eventId).map(CoreRecordMapping.eventRelease(from:))
