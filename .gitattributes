@@ -1,0 +1,8 @@
+# 生成物は PR の diff で畳む (見るのは i18n/catalog のカタログと呼び出し側)。
+# 作るのは python3 tools/i18n/i18n.py generate。手で直さない。
+ImasLiveDB/Shared/L10n/Generated/** linguist-generated=true
+ImasLiveDB/L10n/Generated/** linguist-generated=true
+ImasLiveDBWidget/L10n/Generated/** linguist-generated=true
+ImasLiveDBTests/L10n/Generated/** linguist-generated=true
+ImasLiveDB-Android/app/i18n/** linguist-generated=true
+ImasLiveDB-Android/app/src/*/kotlin/com/fugaif/imaslivedb/i18n/generated/** linguist-generated=true
