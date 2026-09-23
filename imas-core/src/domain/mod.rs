@@ -76,6 +76,7 @@ pub mod community_limits;
 pub mod color_names;
 pub mod event_naming;
 pub mod list_grouping;
+pub mod idol_detail;
 pub mod auth_rules;
 pub mod share_text;
 pub mod sync_decisions;
