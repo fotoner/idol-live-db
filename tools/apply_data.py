@@ -467,7 +467,8 @@ def apply_all(conn):
                     w,
                 )
             wear_count += len(rows)
-            affected |= {"costumes", "costume_wears"}
+            affected["costumes"]  # 絞る列が無いので全件
+            affected["costume_wears"]  # 同上
         print(f"  ✓ costumes/{path.name}: {len(data['costumes'])} 着 / 着用 {wear_count} 件")
 
     ecol, shcol = cols(conn, "events"), cols(conn, "shows")

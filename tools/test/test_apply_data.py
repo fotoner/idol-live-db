@@ -30,6 +30,55 @@ def fixture_db(path):
     conn.close()
 
 
+COSTUME_POST = {"costumes": [{
+    "id": "cos_t", "name": "テスト衣装", "brand_id": "ml",
+    "source_url": "https://example.com/costume",
+    "wears": [
+        {"show_id": "sh_t", "setlist_item_id": "sh_t_0007", "idol_id": "ml_t"},
+        {"show_id": "sh_t"},
+    ],
+}]}
+
+
+class ApplyCostumesTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        root = Path(self.tmp.name)
+        self.db = root / "m.sqlite"
+        fixture_db(self.db)
+        self.data = root / "data"
+        support.write_json(self.data / "costumes" / "t.json", COSTUME_POST)
+        self._saved = (apply_data.DATA_DIR, apply_data.ONLY_FILE)
+        apply_data.DATA_DIR, apply_data.ONLY_FILE = self.data, None
+
+    def tearDown(self):
+        apply_data.DATA_DIR, apply_data.ONLY_FILE = self._saved
+        self.tmp.cleanup()
+
+    def connect(self):
+        conn = sqlite3.connect(str(self.db))
+        conn.execute("PRAGMA foreign_keys = ON")
+        return conn
+
+    def test_the_post_is_valid(self):
+        conn = self.connect()
+        self.assertEqual(apply_data.validate(conn), [])
+        conn.close()
+
+    def test_costumes_are_applied(self):
+        conn = self.connect()
+        affected = apply_data.apply_all(conn)
+        wears = conn.execute(
+            "SELECT setlist_item_id, idol_id, sort_order FROM costume_wears"
+            " WHERE costume_id = 'cos_t' ORDER BY sort_order").fetchall()
+        conn.close()
+        # 曲の分かる記録はセトリの位置、分からない記録は末尾 (9999)。
+        self.assertEqual(wears, [("sh_t_0007", "ml_t", 7), (None, None, 9999)])
+        # 衣装の表は id で絞れないので、両方とも全件 push (空集合) になる。
+        self.assertEqual(affected["costumes"], set())
+        self.assertEqual(affected["costume_wears"], set())
+
+
 class CheckWithoutThirdPartyModulesTest(unittest.TestCase):
     """--check は鍵も外部のライブラリも要らない (貢献者が手元で回す口)。"""
 
