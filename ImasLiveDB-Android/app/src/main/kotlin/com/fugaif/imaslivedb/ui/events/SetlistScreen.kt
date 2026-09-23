@@ -100,6 +100,8 @@ import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import uniffi.imas_core.PerformerNameMode
 import uniffi.imas_core.RowNoteTone
+import uniffi.imas_core.Lineup
+import uniffi.imas_core.SetlistLineupNote
 import uniffi.imas_core.SetlistRowNoteGroupRecord
 import uniffi.imas_core.SetlistRowNoteRecord
 import uniffi.imas_core.setlistDisplayModeIsCompact
@@ -411,6 +413,8 @@ fun SetlistScreen(
                                     displayNumber = index + 1,
                                     performers = performers,
                                     unitNames = meta?.unitNames.orEmpty(),
+                                    isFullCast = meta?.isFullCast == true,
+                                    lineup = meta?.lineup,
                                     noteGroups = meta?.noteGroups.orEmpty(),
                                     performerName = performerName,
                                     isCharacterLive = isCharacterLive,
@@ -913,6 +917,13 @@ private fun SetlistItemRow(
      * (その披露の名義 → 曲の名義 → 顔ぶれ推論)。空なら札を出さない。
      */
     unitNames: List<String>,
+    /** 出演者全員で歌う行 (「全員」の札)。判定は共有コア。 */
+    isFullCast: Boolean,
+    /**
+     * 原唱者 (オリメン) との関係の札。**付けるか・文言は共有コアが決める**
+     * (`SetlistRowMetaRecord.lineup`)。null なら付けない。
+     */
+    lineup: SetlistLineupNote?,
     /**
      * この披露についての事実を、軸 (`披露` / `回収`) ごとにまとめたもの。
      * **軸の分け方も、ラベルも、順も、どれを強く見せるか (`tone`) も共有コアが決める**
@@ -986,21 +997,15 @@ private fun SetlistItemRow(
             //
             // 披露の履歴と自分の回収はここに入れない ([`NoteGroupsBlock`])。同じ形の札で
             // 混ぜると「ユニット名」と「4 回目」が同じ重みに見えて、行が札の羅列になる。
-            if (unitNames.isNotEmpty()) {
+            // オリメンの札・ユニット名 (無ければ「全員」) を 1 列に回り込ませる。
+            val tagNames = unitNames.ifEmpty { if (isFullCast) listOf("全員") else emptyList() }
+            if (lineup != null || tagNames.isNotEmpty()) {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    unitNames.forEach { name ->
-                        Surface(shape = RoundedCornerShape(50), color = DS.sys.copy(alpha = 0.1f)) {
-                            Text(
-                                text = name,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = DS.sys,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                            )
-                        }
-                    }
+                    lineup?.let { LineupChip(it) }
+                    tagNames.forEach { name -> RowTagChip(text = name, color = DS.sys) }
                 }
             }
 
@@ -1048,6 +1053,30 @@ private fun SetlistItemRow(
             onDismiss = { showCommentShare = false }
         )
     }
+}
+
+/** 行の札 (ユニット名・全員・オリメン)。色だけ変えて同じ形で並べる。 */
+@Composable
+private fun RowTagChip(text: String, color: Color) {
+    Surface(shape = RoundedCornerShape(50), color = color.copy(alpha = 0.1f)) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            color = color,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+        )
+    }
+}
+
+/** オリメンの札。色は種類だけで分ける (文言はコア。iOS の ImasTagChip の出し分けと同じ)。 */
+@Composable
+private fun LineupChip(note: SetlistLineupNote) {
+    val color = when (note.kind) {
+        Lineup.ORIGINAL, Lineup.ORIGINAL_PLUS -> DS.sys
+        Lineup.PARTIAL -> DS.warning
+        Lineup.COVER -> DS.pick
+    }
+    RowTagChip(text = note.label, color = color)
 }
 
 /**
