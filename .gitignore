@@ -93,6 +93,8 @@ tools/jasrac/out/
 # 歌詞本文は公開リポジトリに絶対に入れない。
 /lyrics_local/
 tools/lyrics/node_modules
+# lyrics-ocr のビルド生成物 (make で作る。Makefile の clean が消す)
+tools/lyrics/bin/
 # 照合レポート。歌詞本文の抜粋が載るので公開リポジトリに入れない
 tools/lyrics/out/
 
@@ -109,6 +111,7 @@ __pycache__/
 # 読み突き合わせの作業ファイル (再生成できる。state は途中再開用)
 tools/readings/crosscheck.tsv
 tools/readings/crosscheck_state.json
+tools/readings/state.json
 
 # Web 出面 (web/) のビルド生成物。web-export bin / astro build / wasm-pack が再生成する。
 # web/data-fixture/ と web/src/lib/schema/ は commit 対象 (生成物だが正として扱う) なので含めない。
