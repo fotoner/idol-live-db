@@ -230,22 +230,32 @@ function init({ form, input, status, results, fallback, lyricsSearchUrl, modes }
   }
 }
 
-/** 歌詞検索の結果 1 区画。行は名前の検索と同じ骨格に、一致箇所の窓を 1 本添える。 */
-function lyricsSection(hits: LyricsHit[], rows: Map<string, SearchRow>, songs: Shard): HTMLElement {
+/**
+ * 結果の 1 区画の器 (見出し + 行を入れる器)。見出しの形とクラスは `SectionHeader.astro` と同じ。
+ * 名前の検索と歌詞の検索で同じものを使う。
+ */
+function resultSection(title: string, count: number): { el: HTMLElement; list: HTMLUListElement } {
   const el = document.createElement("section");
   el.className = "section";
   const head = document.createElement("div");
   head.className = "section__head";
   const h = document.createElement("h2");
   h.className = "section__title";
-  h.textContent = "歌詞";
-  const count = document.createElement("span");
-  count.className = "section__count";
-  count.textContent = String(hits.length);
-  head.append(h, count);
+  h.textContent = title;
+  const n = document.createElement("span");
+  n.className = "section__count";
+  n.textContent = String(count);
+  head.append(h, n);
 
   const list = document.createElement("ul");
   list.className = "card";
+  el.append(head, list);
+  return { el, list };
+}
+
+/** 歌詞検索の結果 1 区画。行は名前の検索と同じ骨格に、一致箇所の窓を 1 本添える。 */
+function lyricsSection(hits: LyricsHit[], rows: Map<string, SearchRow>, songs: Shard): HTMLElement {
+  const { el, list } = resultSection("歌詞", hits.length);
   for (const hit of hits) {
     const row = rows.get(hit.songId)!;
     const li = item(row, songs);
@@ -253,7 +263,6 @@ function lyricsSection(hits: LyricsHit[], rows: Map<string, SearchRow>, songs: S
     if (first) li.querySelector(".row__body")?.append(snippet(first));
     list.append(li);
   }
-  el.append(head, list);
   return el;
 }
 
@@ -305,24 +314,8 @@ function render(results: HTMLElement, groups: readonly Group[], total: number): 
 }
 
 function section(g: Group): HTMLElement {
-  const el = document.createElement("section");
-  el.className = "section";
-
-  const head = document.createElement("div");
-  head.className = "section__head";
-  const h = document.createElement("h2");
-  h.className = "section__title";
-  h.textContent = g.shard.meta.label;
-  const count = document.createElement("span");
-  count.className = "section__count";
-  count.textContent = String(g.total);
-  head.append(h, count);
-
-  const list = document.createElement("ul");
-  list.className = "card";
+  const { el, list } = resultSection(g.shard.meta.label, g.total);
   for (const row of g.hits) list.append(item(row, g.shard));
-
-  el.append(head, list);
 
   if (g.total > g.hits.length) {
     const more = document.createElement("p");

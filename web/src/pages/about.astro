@@ -1,6 +1,5 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import Breadcrumbs from "../components/Breadcrumbs.astro";
+import ListLayout from "../layouts/ListLayout.astro";
 import Section from "../components/Section.astro";
 import StatTiles from "../components/StatTiles.astro";
 import ListContainer from "../components/ListContainer.astro";
@@ -16,13 +15,7 @@ import type { AboutPage } from "../lib/schema/AboutPage";
 const about = page<AboutPage>(routeData("about", "/about/"));
 ---
 
-<BaseLayout seo={about.seo}>
-  <div class="list-head">
-    <Breadcrumbs crumbs={about.seo.breadcrumbs} />
-    <div class="list-head__title">
-      <h1>このサイトについて</h1>
-    </div>
-  </div>
+<ListLayout seo={about.seo} title="このサイトについて">
 
   <Section id="about-scale" title="収録データ">
     <StatTiles tiles={about.statTiles} />
@@ -55,4 +48,4 @@ const about = page<AboutPage>(routeData("about", "/about/"));
       {about.contentHash && <LabeledRow label="内容ハッシュ" value={about.contentHash} mono />}
     </ListContainer>
   </Section>
-</BaseLayout>
+</ListLayout>
