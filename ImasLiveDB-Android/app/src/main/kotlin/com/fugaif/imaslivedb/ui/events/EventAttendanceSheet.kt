@@ -65,7 +65,7 @@ fun EventAttendanceSheet(
     val marks = remember { AppModule.from(context).userMarkRepository }
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val t = ImasTheme.derive(seed, brand, dark = true)
+    val t = ImasTheme.forBrand(seed, brand)
 
     var attendance by remember { mutableStateOf<Map<String, AttendanceType>>(emptyMap()) }
 

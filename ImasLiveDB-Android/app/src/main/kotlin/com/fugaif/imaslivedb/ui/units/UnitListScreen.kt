@@ -53,7 +53,6 @@ import com.fugaif.imaslivedb.ui.components.ImasLeadBar
 import com.fugaif.imaslivedb.ui.components.ImasListSkeleton
 import com.fugaif.imaslivedb.ui.components.SkeletonThumb
 import com.fugaif.imaslivedb.ui.components.NameFilterField
-import com.fugaif.imaslivedb.ui.theme.BrandPalette
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import uniffi.imas_core.TextSearchCatalog
@@ -110,7 +109,7 @@ fun UnitListBody(
     remember(state.units, q) {
         ImasTheme.prewarm(
             filteredUnits.flatMap {
-                listOf<Pair<String?, String?>>(null to BrandPalette.hex(it.brandId), it.id to it.brandId)
+                listOf<Pair<String?, String?>>(null to it.brandId, it.id to it.brandId)
             }
         )
     }

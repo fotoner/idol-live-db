@@ -69,7 +69,6 @@ import com.fugaif.imaslivedb.ui.components.ImasLeadBar
 import com.fugaif.imaslivedb.ui.components.ImasListSkeleton
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
 import com.fugaif.imaslivedb.ui.components.SkeletonThumb
-import com.fugaif.imaslivedb.ui.theme.BrandPalette
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import com.fugaif.imaslivedb.ui.units.UnitListBody
@@ -114,7 +113,7 @@ fun IdolListScreen(
     remember(filteredIdols) {
         ImasTheme.prewarm(
             filteredIdols.flatMap {
-                listOf(it.color to BrandPalette.hex(it.brandId), it.color to it.brandId)
+                listOf(it.color to it.brandId)
             }
         )
     }
@@ -364,7 +363,7 @@ private fun IdolRow(
                 metric,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
-                color = ImasTheme.derive(idol.color, BrandPalette.hex(idol.brandId)).accent,
+                color = ImasTheme.forBrand(idol.color, idol.brandId).accent,
                 modifier = Modifier.padding(end = 4.dp)
             )
         }

@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
-import com.fugaif.imaslivedb.ui.theme.BrandPalette
+import com.fugaif.imaslivedb.ui.theme.BrandColors
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.hexToColor
 
@@ -172,7 +172,7 @@ fun TagShareCompletionPane(
             artistNames = artists.take(4).joinToString("・") { it.name }.ifEmpty { null },
             tags = appliedTags,
             // 曲のブランドカラーを第一シードに。無ければ先頭タグの色へ落ちる。
-            seed = BrandPalette.hex(song?.brandId) ?: appliedTags.firstOrNull()?.color,
+            seed = BrandColors.hex(song?.brandId) ?: appliedTags.firstOrNull()?.color,
             artworkUrl = song?.artworkUrl
         )
     }

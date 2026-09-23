@@ -52,6 +52,9 @@ class SnapshotStoreProvider(
     /** 直近の読み込みの失敗 (読み取りが投げる例外の原因)。 */
     @Volatile private var lastLoadFailure: Throwable? = null
 
+    /** 読み込みが成功するたびに 1 つ進む。描画の同期経路の覚え書きを捨てる合図 ([currentGeneration])。 */
+    @Volatile private var generation = 0L
+
     /**
      * 同期の完了・seed の入れ直しで読み直す購読を始める。何度呼んでも始めるのは 1 回だけ。
      * 最初の読み込みはここではせず、最初の読み取り ([loadedStore]) が行う (ウィジェットや
@@ -105,6 +108,7 @@ class SnapshotStoreProvider(
         try {
             val stats = withContext(Dispatchers.IO) { store.load(dbFile.absolutePath) }
             lastLoadFailure = null
+            generation++
             Log.i(TAG, "snapshot loaded: songs=${stats.songs} idols=${stats.idols}")
         } catch (e: SnapshotException) {
             // 例: Room のマイグレーション中で新カラムがまだ無い等。
@@ -112,6 +116,13 @@ class SnapshotStoreProvider(
             Log.w(TAG, "snapshot load 失敗", e)
         }
     }
+
+    /**
+     * 描画から同期で読むための口。読み込み済みなら (世代, ストア)、まだなら null
+     * (待たない・読み込みも始めない)。世代は読み直すたびに変わるので、呼び元はこれで覚え書きを捨てる。
+     */
+    fun currentGeneration(): Pair<Long, SnapshotStore>? =
+        if (store.isLoaded()) generation to store else null
 
     /**
      * 読み込み済みスナップショットに対してクエリを 1 回実行する (まだなら読み込みを待つ)。

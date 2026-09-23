@@ -31,7 +31,7 @@ import com.fugaif.imaslivedb.ui.theme.DS
  * @param label     チップの表示文言
  * @param selected  選択中かどうか
  * @param seed      配色シード (アイドル色など)。指定するとその色から accent を導出する
- * @param brand     ブランド色シード
+ * @param brand     ブランド ID (マスタの色をシードにする)
  * @param icon      先頭アイコン (任意)
  */
 @Composable

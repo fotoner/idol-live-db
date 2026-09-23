@@ -22,6 +22,8 @@ data class EventDetailUiState(
     val isJoint: Boolean = false,
     /** ブランドのテーマシード色 (hex)。合同ライブは中立にするため画面側で isJoint と合わせて使う。 */
     val brandColorHex: String? = null,
+    /** 主ブランドの ID。画面の部品の `brand` に渡す (部品がマスタの色へ引く)。 */
+    val brandId: String? = null,
     val brandShortName: String? = null,
     val ticketDeadline: String? = null,
     val ticketLotteryDate: String? = null,
@@ -69,6 +71,7 @@ class EventDetailViewModel : ViewModel() {
                 attendance = attendance,
                 isJoint = !event?.jointBrandIds.isNullOrBlank(),
                 brandColorHex = brand?.color,
+                brandId = brand?.id,
                 brandShortName = brand?.shortName,
                 ticketDeadline = event?.ticketDeadline?.takeIf { it.isNotBlank() },
                 ticketLotteryDate = event?.ticketLotteryDate?.takeIf { it.isNotBlank() },

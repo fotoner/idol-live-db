@@ -65,7 +65,7 @@ fun UserMarkBar(
     brand: String? = null,
     modifier: Modifier = Modifier
 ) {
-    val t = ImasTheme.derive(seed, brand, dark = true)
+    val t = ImasTheme.forBrand(seed, brand)
     var editingNote by remember { mutableStateOf(false) }
     var editingSeat by remember { mutableStateOf(false) }
 

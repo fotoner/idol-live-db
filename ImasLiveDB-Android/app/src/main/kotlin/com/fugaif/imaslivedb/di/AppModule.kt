@@ -32,6 +32,7 @@ import com.fugaif.imaslivedb.data.community.SetlistLikeService
 import com.fugaif.imaslivedb.data.net.WorkerHttpClient
 import com.fugaif.imaslivedb.data.games.GameProgressStore
 import com.fugaif.imaslivedb.data.sync.CloudKitSyncEngine
+import com.fugaif.imaslivedb.ui.theme.BrandColors
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -66,7 +67,14 @@ class AppModule private constructor(context: Context) {
      * Application.onCreate の start() で起動時 load + sync 完了ごとの reload が始まる。
      */
     val snapshotStoreProvider: SnapshotStoreProvider by lazy {
-        SnapshotStoreProvider(appContext, syncEngine)
+        SnapshotStoreProvider(appContext, syncEngine).also { provider ->
+            // ブランドの色は描画から同期で引く (読めていなければ null = ニュートラル)。
+            BrandColors.install {
+                provider.currentGeneration()?.let { (generation, store) ->
+                    runCatching { store.brandRecords() }.getOrNull()?.let { generation to it }
+                }
+            }
+        }
     }
 
     val eventRepository: EventRepository by lazy { EventRepository(database, snapshotStoreProvider) }

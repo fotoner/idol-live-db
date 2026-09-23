@@ -243,7 +243,7 @@ private fun OshiRow(candidate: OshiCandidate, selected: Boolean, onPick: () -> U
         ImasAvatar(
             label = candidate.name,
             seed = candidate.colorHex,
-            brand = candidate.brandColorHex,
+            brand = candidate.brandId,
             size = 44.dp,
             entityId = candidate.idolId
         )

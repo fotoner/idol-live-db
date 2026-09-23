@@ -95,7 +95,7 @@ import com.fugaif.imaslivedb.ui.filtered.EventFilterKind
 import com.fugaif.imaslivedb.ui.filtered.ShowFilterKind
 import com.fugaif.imaslivedb.ui.share.SetlistCommentComposeSheet
 import com.fugaif.imaslivedb.ui.theme.AppPreferences
-import com.fugaif.imaslivedb.ui.theme.BrandPalette
+import com.fugaif.imaslivedb.ui.theme.BrandColors
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import uniffi.imas_core.PerformerNameMode
@@ -238,7 +238,7 @@ fun SetlistScreen(
             }
         } else {
             val isCharacterLive = uiState.show?.isCharacterLive ?: false
-            val seedHex = BrandPalette.hex(uiState.brandId)
+            val seedHex = BrandColors.hex(uiState.brandId)
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -404,7 +404,7 @@ fun SetlistScreen(
                                     item = item,
                                     displayNumber = index + 1,
                                     performerLabel = meta?.performerLabel.orEmpty(),
-                                    brandHex = BrandPalette.hex(item.songBrandId) ?: seedHex,
+                                    brandHex = BrandColors.hex(item.songBrandId) ?: seedHex,
                                     onClick = { onSongClick(item.songId) }
                                 )
                             } else {

@@ -94,7 +94,6 @@ import com.fugaif.imaslivedb.ui.components.ImasSegmented
 import com.fugaif.imaslivedb.ui.components.ImasStatTile
 import com.fugaif.imaslivedb.ui.tags.SongTagPickerSheet
 import com.fugaif.imaslivedb.ui.tags.TagDetailScreen
-import com.fugaif.imaslivedb.ui.theme.BrandPalette
 import com.fugaif.imaslivedb.ui.theme.AppPreferences
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
@@ -351,7 +350,7 @@ private fun SongSheetContent(
 ) {
     // 配色シード: ソロ (歌唱1人) はその個人カラー、それ以外はブランド色。
     val seed = if (state.originalArtists.size == 1) state.originalArtists.first().color else null
-    val t = ImasTheme.derive(seed, BrandPalette.hex(song.brandId), dark = true)
+    val t = ImasTheme.forBrand(seed, song.brandId)
     var segment by rememberSaveable(song.id) { mutableIntStateOf(0) }
 
     Column(modifier = modifier.verticalScroll(rememberScrollState())) {
@@ -720,7 +719,7 @@ private fun CreditRow(
     // 行き先のパスが組み立たず、押した瞬間に落ちる。
     val names = remember(value) { splitCreditNames(value).filter { it.isNotBlank() } }
     if (names.isEmpty()) return
-    val t = ImasTheme.derive(seed, BrandPalette.hex(brand), dark = true)
+    val t = ImasTheme.forBrand(seed, brand)
     Row(
         modifier = Modifier.fillMaxWidth().background(DS.surface).padding(horizontal = 16.dp, vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically,

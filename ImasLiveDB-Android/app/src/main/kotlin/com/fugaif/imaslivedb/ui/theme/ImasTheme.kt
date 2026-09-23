@@ -59,16 +59,18 @@ data class ImasTheme(
         /**
          * シード hex (アイドル色) → トークン。無ければ [brand] → ニュートラルへフォールバック。
          *
-         * [brand] の契約は**ブランドカラーの hex** ([BrandPalette.hex] で引いた値)。
-         * ただし現状の呼び出し元の多くはブランド ID をそのまま渡しており、ID は hex として
-         * 無効なのでニュートラルグレーに落ちている (例外は `"876"` / `"961"` で、3 桁 hex として
-         * 通ってしまい #887766 / #996611 という偶然の色になる)。
-         *
-         * この配線を hex 解決へ直すと 1500 以上のユニットと 1400 以上の曲の配色が一斉に
-         * 変わるため、色エンジンのコア移送とは切り離して単独で判断する。移送では 1bit も変えない。
+         * [brand] は**ブランドカラーの hex**。ブランド ID から引くときは [forBrand]
+         * (ID をここへ素通しすると hex として読まれ、グレーや偶然の色になる)。
          */
         fun derive(seed: String?, brand: String? = null, dark: Boolean = true): ImasTheme =
             memoized(Key(seed, brand, dark))
+
+        /**
+         * シード hex → [brandId] (ブランド ID) のマスタの色 → ニュートラルの順で導く。
+         * ID → 色はスナップショットのブランドから引く ([BrandColors])。
+         */
+        fun forBrand(seed: String?, brandId: String?, dark: Boolean = true): ImasTheme =
+            derive(seed, BrandColors.hex(brandId), dark)
 
         /**
          * 実体色 (`Color`) からトークンを導出する。
@@ -94,18 +96,16 @@ data class ImasTheme(
          * 初回スクロール中に**行数ぶん FFI を跨ぐ**。行が組まれる前にここでメモを埋めておけば、
          * 以後の [derive] はメモに当たるだけで済む。
          *
-         * 呼び出し側は「行が実際に引く組」をそのまま渡すこと。行が [BrandPalette.hex] で
-         * 解決してから渡すコンポーネント (ImasLeadBar) と、ID をそのまま渡すコンポーネント
-         * (ImasAvatar) が同居する画面では**両方**の組が要る。片方だけ温めても残りは行が跨ぐ。
+         * 呼び出し側は「行が実際に引く組」をそのまま渡すこと。
          *
-         * @param seeds 行ごとの (seed hex, ブランド hex) の組。[derive] に渡すのと同じ形。
+         * @param seeds 行ごとの (seed hex, ブランド ID) の組。[forBrand] に渡すのと同じ形。
          */
         @Synchronized
         fun prewarm(seeds: List<Pair<String?, String?>>, dark: Boolean = true) {
             // 重複と既出を落としてから 1 往復。順序を保つのは、結果を同じ並びで受けるため。
             val missing = LinkedHashSet<Key>()
-            for ((seed, brand) in seeds) {
-                val key = Key(seed, brand, dark)
+            for ((seed, brandId) in seeds) {
+                val key = Key(seed, BrandColors.hex(brandId), dark)
                 if (key !in cache) missing.add(key)
             }
             if (missing.isEmpty()) return

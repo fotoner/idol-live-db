@@ -51,4 +51,4 @@ fun hexToColor(hex: String): Color {
 
 /** Return the brand color for a given brandId string, or Gray if unknown. */
 fun brandColor(brandId: String?): Color =
-    BrandPalette.hex(brandId)?.let(::hexToColor) ?: Color.Gray
+    BrandColors.hex(brandId)?.let(::hexToColor) ?: Color.Gray
