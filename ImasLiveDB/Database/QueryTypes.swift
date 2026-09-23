@@ -235,28 +235,34 @@ struct UncollectedSong: Identifiable, Sendable {
     let song: Song
     /// この曲がリアルライブで披露された累計回数 (全ユーザ共通の客観値)。
     let playCount: Int
-
-    /// 披露頻度のラベル。閾値はざっくり: 10+ 定番 / 3+ ときどき / 1+ レア / 0 未披露。
-    var frequencyLabel: String {
-        switch playCount {
-        case 10...: return "定番"
-        case 3...:  return "ときどき"
-        case 1...:  return "レア"
-        default:    return "未披露"
-        }
-    }
+    /// 披露頻度の区分とその文言。閾値は imas-core (`PlayFrequency`) が持つ。
+    let frequency: PlayFrequency
+    let frequencyLabel: String
 }
 
-/// 未来公演ごとの「未回収が聴けるかも」スコア。
-/// score = この公演の親イベント (シリーズ) が過去に未回収曲を披露した延べ回数。
+/// 未来公演ごとの「未回収が聴けるかも」。
 struct UpcomingCatchChance: Identifiable, Sendable {
     var id: String { show.id }
     let show: Show
     let eventName: String
+    /// 「イベント名を省略」が ON のときに出す名前 (省略の規則は imas-core)。
+    let eventShortName: String
     let brandId: String?
     let brandColor: String?
     /// 過去の同系統セトリに登場した「自分の未回収曲」の異なり数。
     let likelyCount: Int
+}
+
+/// 回収ダッシュボード 1 画面ぶん (imas-core `collection_dashboard` の写し)。
+struct CollectionDashboard: Sendable {
+    let overallCollected: Int
+    let overallTotal: Int
+    let brandProgress: [BrandCollectionProgress]
+    let myPickCollected: Int
+    let myPickTotal: Int
+    let pickUncollected: [UncollectedSong]
+    let allUncollected: [UncollectedSong]
+    let catchChances: [UpcomingCatchChance]
 }
 
 struct YearlyShowCount: Codable, FetchableRecord, Identifiable, Sendable {

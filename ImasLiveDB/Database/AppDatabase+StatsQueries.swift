@@ -9,17 +9,6 @@ extension AppDatabase {
 
     // MARK: - Stats Queries
 
-    /// brand_id が設定されている曲 ID セット。
-    /// 回収率集計で分子と分母の母集合を揃えるために使う。
-    func fetchBrandedSongIds() throws -> Set<String> {
-        try dbQueue.read { db in try Self.fetchBrandedSongIdsQuery(db) }
-    }
-
-    private static func fetchBrandedSongIdsQuery(_ db: Database) throws -> Set<String> {
-        let ids = try String.fetchAll(db, sql: "SELECT id FROM songs WHERE brand_id IS NOT NULL")
-        return Set(ids)
-    }
-
     /// 全ブランド取得
     func fetchBrands() throws -> [Brand] {
         try dbQueue.read { db in try Self.fetchBrandsQuery(db) }

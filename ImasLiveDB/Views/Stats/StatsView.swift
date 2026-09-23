@@ -42,6 +42,8 @@ struct StatsView: View {
     @State private var allUncollectedCache: [UncollectedSong] = []
 
     private enum UncollectedScope: Int { case myPick, all }
+    /// 「イベント名を省略」の設定 (既定 ON)。省略した名前はコアが返す。
+    @AppStorage(eventNameAbbreviateKey) private var abbreviateEventNames = true
 
     var body: some View {
         NavigationStack {
@@ -168,7 +170,7 @@ struct StatsView: View {
             ImasLeadBar(seed: chance.brandColor)
                 .frame(maxHeight: .infinity)
             VStack(alignment: .leading, spacing: DS.sp2) {
-                Text("\(displayDate(chance.show.date)) ・ \(eventDisplayName(chance.eventName))")
+                Text("\(displayDate(chance.show.date)) ・ \(abbreviateEventNames ? chance.eventShortName : chance.eventName)")
                     .font(.imasDisplay(12, weight: .semibold))
                     .foregroundStyle(DS.ink3)
                     .lineLimit(1)
@@ -286,14 +288,14 @@ struct StatsView: View {
     private func frequencyBadge(_ item: UncollectedSong) -> some View {
         let fg: Color
         let bg: Color
-        switch item.playCount {
-        case 10...:
+        switch item.frequency {
+        case .staple:
             fg = DS.warning
             bg = DS.warning.opacity(0.14)
-        case 3...:
+        case .sometimes:
             fg = DS.ink2
             bg = DS.fill
-        default:
+        case .rare, .never:
             fg = DS.ink3
             bg = DS.fill
         }
@@ -573,77 +575,37 @@ struct StatsView: View {
         await loadFavoritesRanking()
     }
 
-    /// 回収ダッシュボードの重い集計をまとめてバックグラウンドで実行する。
-    /// autoCollectedSongIds / 担当 idol は MainActor の UserMarkService から取り、
-    /// branded 全曲スキャン等の重処理は detached task で回す。
+    /// 回収ダッシュボード。組み立てはコア (`collection_dashboard`) が 1 回で行う。
+    /// 回収済みの曲と担当は端末ローカルの印 (UserMarkService) から渡す。
     private func loadDashboard() async {
         isLoadingDashboard = true
         defer { isLoadingDashboard = false }
-
-        let collected = UserMarkService.shared.autoCollectedSongIds()
-        let pickIdolIds = Set(UserMarkService.shared.allMarked(kind: .myPick, entity: .idol))
-        let today = JSTDay.today()
-        let db = database
-
-        let result: DashboardResult? = await Task.detached(priority: .userInitiated) {
-            do {
-                let branded = try db.fetchBrandedSongIds()
-                let brandProg = try db.fetchBrandCollectionProgress(collectedIds: collected)
-                let pickSongIds = try db.fetchSongIdsWithAnyArtist(idolIds: pickIdolIds)
-
-                // 未回収リストのスコープ別母集合
-                let pickUncollected = try db.fetchUncollectedSongs(candidateIds: pickSongIds, collectedIds: collected)
-                let allUncollected = try db.fetchUncollectedSongs(candidateIds: branded, collectedIds: collected)
-
-                // 「聴けるかも」は全体の未回収 ID を母集合にする。
-                let allUncollectedIds = Set(allUncollected.map(\.id))
-                let chances = try db.fetchUpcomingCatchChances(uncollectedIds: allUncollectedIds, today: today)
-
-                let pickCollectedCount = pickSongIds.intersection(collected).count
-                return DashboardResult(
-                    overallCollected: branded.intersection(collected).count,
-                    overallTotal: branded.count,
-                    brandProgress: brandProg,
-                    pickUncollected: pickUncollected,
-                    allUncollected: allUncollected,
-                    myPickCollected: pickCollectedCount,
-                    myPickTotal: pickSongIds.count,
-                    catchChances: chances
-                )
-            } catch {
-                Logger.database.error("load_failed dashboard: \(error.localizedDescription)")
-                return nil
-            }
-        }.value
-
-        guard let result else { return }
-        overallCollected = result.overallCollected
-        overallTotal = result.overallTotal
-        brandProgress = result.brandProgress
-        pickUncollectedCache = result.pickUncollected
-        allUncollectedCache = result.allUncollected
-        myPickCollected = result.myPickCollected
-        myPickTotal = result.myPickTotal
-        catchChances = result.catchChances
-        applyUncollectedScope()
+        do {
+            let dashboard = try await AppContainer.shared.statsReading.collectionDashboard(
+                collectedSongIds: UserMarkService.shared.autoCollectedSongIds(),
+                pickIdolIds: Set(UserMarkService.shared.allMarked(kind: .myPick, entity: .idol)),
+                today: JSTDay.today(),
+                chanceLimit: Self.catchChanceLimit)
+            overallCollected = dashboard.overallCollected
+            overallTotal = dashboard.overallTotal
+            brandProgress = dashboard.brandProgress
+            pickUncollectedCache = dashboard.pickUncollected
+            allUncollectedCache = dashboard.allUncollected
+            myPickCollected = dashboard.myPickCollected
+            myPickTotal = dashboard.myPickTotal
+            catchChances = dashboard.catchChances
+            applyUncollectedScope()
+        } catch {
+            Logger.database.error("load_failed dashboard: \(error.localizedDescription)")
+        }
     }
+
+    /// 「この公演で聴けるかも」に並べる公演の数。
+    private static let catchChanceLimit = 8
 
     private func applyUncollectedScope() {
         uncollectedSongs = uncollectedScope == .myPick ? pickUncollectedCache : allUncollectedCache
     }
-
-    private struct DashboardResult: Sendable {
-        let overallCollected: Int
-        let overallTotal: Int
-        let brandProgress: [BrandCollectionProgress]
-        let pickUncollected: [UncollectedSong]
-        let allUncollected: [UncollectedSong]
-        let myPickCollected: Int
-        let myPickTotal: Int
-        let catchChances: [UpcomingCatchChance]
-    }
-
-
 
     private func loadFavoritesRanking() async {
         isLoadingFavorites = true
