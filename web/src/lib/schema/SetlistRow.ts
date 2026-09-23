@@ -27,7 +27,7 @@ unitLabel: string | null, song: Ref,
 performers: Array<PerformerRef>, 
 /**
  * 公演の出演者全員で歌う行なら `全員`。
- * 判定 (出演者 2 人以上・歌唱者と完全一致) は `domain::setlist_lineup::is_full_cast`。
+ * 判定 (出演者 2 人以上・歌唱者と完全一致) は `domain::setlist_lineup::row_lineup` が持つ。
  * 名前を全部並べる代わりにこの札を出し、名前は畳んでおく。
  */
 fullCastLabel: string | null, 
