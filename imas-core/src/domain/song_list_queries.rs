@@ -283,12 +283,8 @@ fn creator_names_matching<'a>(snap: &'a Snapshot, needle: &FoldedNeedle) -> Vec<
         .collect()
 }
 
+/// NULL でも空文字でもない値 (検索語と、excludeLiveOnly のメタ判定で使う)。
 fn non_empty(value: &Option<String>) -> Option<&str> {
-    value.as_deref().filter(|v| !v.is_empty())
-}
-
-/// NULL でも空文字でもない値 (excludeLiveOnly のメタ判定・シリーズ集計で使う)。
-fn non_blank(value: &Option<String>) -> Option<&str> {
     value.as_deref().filter(|v| !v.is_empty())
 }
 
@@ -380,7 +376,7 @@ pub fn filter_song_indexes(snap: &Snapshot, filter: &SongListFilter) -> Vec<u32>
                     &s.arranger,
                 ]
                 .iter()
-                .any(|v| non_blank(v).is_some());
+                .any(|v| non_empty(v).is_some());
                 // EXISTS (song_artists) は role を問わない (original 限定ではない)。
                 if !has_meta && snap.artists_by_song[i].is_empty() {
                     return false;
