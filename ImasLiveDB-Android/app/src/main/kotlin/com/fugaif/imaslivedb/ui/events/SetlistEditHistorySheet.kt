@@ -81,7 +81,7 @@ fun SetlistEditHistorySheet(showId: String, showName: String, onDismiss: () -> U
                 )
                 else -> {
                     // 相対時刻の言い回しはコア。一覧ぶんを 1 回で引く。
-                    val times = relativeTimes(entries.map { it.createdAt }, System.currentTimeMillis())
+                    val times = remember(entries) { relativeTimes(entries.map { it.createdAt }, System.currentTimeMillis()) }
                     entries.forEachIndexed { i, h ->
                         Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                             Row(

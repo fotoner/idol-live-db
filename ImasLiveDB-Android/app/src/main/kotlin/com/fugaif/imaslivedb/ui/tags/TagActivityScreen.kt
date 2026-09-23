@@ -109,6 +109,8 @@ fun TagActivityScreen(
                     val trends = activity.trendingTags.filter { it.domain == selectedDomain }
                     val rises = activity.risingEntities.filter { it.domain == selectedDomain }
                     val events = activity.recent.filter { it.domain == selectedDomain }
+                    // 相対時刻の言い回しはコア。一覧ぶんを 1 回で引き、一覧が変わるまで使い回す。
+                    val times = remember(events) { relativeTimes(events.map { it.createdAtMs }, System.currentTimeMillis()) }
 
                     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
                         item {
@@ -161,8 +163,6 @@ fun TagActivityScreen(
                             }
                             if (events.isNotEmpty()) {
                                 item { ImasSectionHeader(title = "最近つけられたタグ", tight = true) }
-                                // 相対時刻の言い回しはコア。一覧ぶんを 1 回で引く。
-                                val times = relativeTimes(events.map { it.createdAtMs }, System.currentTimeMillis())
                                 itemsIndexedWithDivider(events) { index, event ->
                                     RecentRow(
                                         event = event,

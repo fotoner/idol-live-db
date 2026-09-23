@@ -417,7 +417,8 @@ fun RecordHistorySheet(recordType: String, recordName: String, onDismiss: () -> 
                 }
                 history!!.isEmpty() -> Text("履歴がありません", fontSize = 13.sp, color = DS.ink2, modifier = Modifier.padding(16.dp))
                 else -> {
-                    val times = relativeTimes(history!!.map { it.createdAt }, System.currentTimeMillis())
+                    // 相対時刻の言い回しはコア。一覧ぶんを 1 回で引き、一覧が変わるまで使い回す。
+                    val times = remember(history) { relativeTimes(history!!.map { it.createdAt }, System.currentTimeMillis()) }
                     history!!.forEachIndexed { i, h ->
                         Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
