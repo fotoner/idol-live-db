@@ -947,11 +947,8 @@ pub fn event_attendance(snap: &Snapshot, event_id: &str) -> Option<EventAttendan
     let event = &snap.events[e as usize];
     let brand_id = event.brand_id.as_deref()?;
 
-    let joint: Vec<&str> = event
-        .joint_brand_ids
-        .as_deref()
-        .map(|s| s.split(',').map(str::trim).filter(|p| !p.is_empty()).collect())
-        .unwrap_or_default();
+    let joint: Vec<&str> =
+        crate::domain::snapshot::split_csv(event.joint_brand_ids.as_deref()).collect();
     // 件数判定 (>= 3) は iOS 同様に重複を数える。照合は Set で行う。
     let candidate_count = 1 + joint.len();
     let candidate_set: HashSet<&str> = std::iter::once(brand_id).chain(joint).collect();
@@ -1837,12 +1834,12 @@ mod tests {
                         is_joint: false,
                     })
                     .map(|mut e| {
-                        use crate::domain::snapshot::split_brand_ids;
+                        use crate::domain::snapshot::split_csv;
                         e.brand_ids = e.brand_id.iter().map(String::as_str)
-                            .chain(split_brand_ids(e.joint_brand_ids.as_deref()))
+                            .chain(split_csv(e.joint_brand_ids.as_deref()))
                             .map(str::to_string)
                             .collect();
-                        e.is_joint = split_brand_ids(e.joint_brand_ids.as_deref()).next().is_some();
+                        e.is_joint = split_csv(e.joint_brand_ids.as_deref()).next().is_some();
                         e
                     })
                 })

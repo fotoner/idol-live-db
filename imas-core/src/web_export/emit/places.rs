@@ -10,7 +10,7 @@ use crate::domain::snapshot::Snapshot;
 use crate::domain::unit_queries;
 use crate::web_export::content;
 use crate::web_export::dto::*;
-use crate::web_export::url::split_csv;
+use crate::domain::snapshot::split_csv;
 use std::collections::BTreeMap;
 
 /// ブランドページに出す「最近のライブ」「代表曲」の件数。

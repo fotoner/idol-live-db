@@ -307,14 +307,7 @@ pub mod json {
 
     /// 合同のときの参加ブランド。`joint_brand_ids` はカンマ区切りの生文字列 ("ml, cg")。
     pub fn joint_brand_refs(snap: &Snapshot, raw: Option<&str>) -> Vec<Value> {
-        raw.map(|s| {
-            s.split(',')
-                .map(str::trim)
-                .filter(|p| !p.is_empty())
-                .filter_map(|bid| brand_ref(snap, Some(bid)))
-                .collect()
-        })
-        .unwrap_or_default()
+        crate::domain::snapshot::split_csv(raw).filter_map(|bid| brand_ref(snap, Some(bid))).collect()
     }
 }
 

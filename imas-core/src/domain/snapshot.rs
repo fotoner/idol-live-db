@@ -144,7 +144,7 @@ impl Song {
         self.brand_id
             .as_deref()
             .into_iter()
-            .chain(self.joint_brand_ids.as_deref().unwrap_or_default().split(','))
+            .chain(split_csv(self.joint_brand_ids.as_deref()))
             .filter(|b| !b.is_empty())
     }
 
@@ -155,9 +155,13 @@ impl Song {
     }
 }
 
-/// `joint_brand_ids` (カンマ区切りの生値) を割る。前後の空白と空要素は捨てる
-/// (`"ml, cg,"` → `ml` / `cg`)。合同ライブの追加ブランドの読み方はここ 1 つ。
-pub fn split_brand_ids(raw: Option<&str>) -> impl Iterator<Item = &str> {
+/// マスタのカンマ区切りの複数値 (`joint_brand_ids` / `aliases`) を割る。前後の空白と
+/// 空要素は捨てる (`"ml, cg,"` → `ml` / `cg`)。
+///
+/// 割り方は**ここ 1 つ** (L-3)。曲・イベントの参加ブランド、Web の別名と合同ブランド、
+/// 出席表の母集団がここを通る。呼び出し側ごとに書くと空白の扱いが揃わず、
+/// 「別名が 1 つだけ空文字になる」「`ml, cg` の ` cg` がどのブランドにも当たらない」が起きる。
+pub fn split_csv(raw: Option<&str>) -> impl Iterator<Item = &str> {
     raw.unwrap_or_default().split(',').map(str::trim).filter(|b| !b.is_empty())
 }
 
@@ -167,12 +171,12 @@ impl Event {
         self.brand_id
             .as_deref()
             .into_iter()
-            .chain(split_brand_ids(self.joint_brand_ids.as_deref()))
+            .chain(split_csv(self.joint_brand_ids.as_deref()))
     }
 
     /// 合同ライブか (追加ブランドが 1 つでもある)。一覧のリードバーを虹色にする根拠。
     pub fn is_joint(&self) -> bool {
-        split_brand_ids(self.joint_brand_ids.as_deref()).next().is_some()
+        split_csv(self.joint_brand_ids.as_deref()).next().is_some()
     }
 }
 
@@ -207,9 +211,21 @@ mod brand_ids_tests {
 
     #[test]
     fn joint_brand_ids_are_trimmed_and_blank_entries_dropped() {
-        assert_eq!(split_brand_ids(Some(" ml , cg ,")).collect::<Vec<_>>(), ["ml", "cg"]);
-        assert_eq!(split_brand_ids(Some("")).count(), 0);
-        assert_eq!(split_brand_ids(None).count(), 0);
+        assert_eq!(split_csv(Some(" ml , cg ,")).collect::<Vec<_>>(), ["ml", "cg"]);
+        assert_eq!(split_csv(Some("")).count(), 0);
+        assert_eq!(split_csv(None).count(), 0);
+    }
+
+    /// 曲の参加ブランドも同じ割り方 (以前は空白を trim せず ` cg` がどのブランドにも当たらなかった)。
+    #[test]
+    fn song_joint_brands_are_trimmed_like_events() {
+        let song = Song {
+            brand_id: Some("765as".into()),
+            joint_brand_ids: Some("ml, cg ,".into()),
+            ..Default::default()
+        };
+        assert_eq!(song.brand_ids().collect::<Vec<_>>(), ["765as", "ml", "cg"]);
+        assert!(song.belongs_to_brand("cg"));
     }
 }
 

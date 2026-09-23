@@ -147,7 +147,7 @@ fn matches_brand_filter(item: &EventFilterItem, selected: &HashSet<&str>) -> boo
     }
     // joint_brand_ids はカンマ区切りの生文字列 (例 "ml, cg")。割り方は 1 つ
     // (trim して空要素を捨てる。末尾カンマ等の耐性)。
-    crate::domain::snapshot::split_brand_ids(item.joint_brand_ids.as_deref())
+    crate::domain::snapshot::split_csv(item.joint_brand_ids.as_deref())
         .any(|s| selected.contains(s))
 }
 
