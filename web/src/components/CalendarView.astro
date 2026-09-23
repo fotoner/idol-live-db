@@ -5,6 +5,7 @@ import TagChip from "./TagChip.astro";
 import RefList from "./RefList.astro";
 import EmptyState from "./EmptyState.astro";
 import Pager from "./Pager.astro";
+import { dayAnchorId } from "../lib/anchors";
 import type { CalendarPage } from "../lib/schema/CalendarPage";
 
 /**
@@ -19,8 +20,6 @@ interface Props {
   page: CalendarPage;
 }
 const { page } = Astro.props;
-/** 枠の日付と下の一覧を結ぶ id。予定のある日だけ (枠の予定は一覧と同じ日の先頭)。 */
-const anchor = (date: string) => `d-${date}`;
 ---
 
 <ListLayout
@@ -61,7 +60,7 @@ const anchor = (date: string) => `d-${date}`;
                   <Day
                     class="cal__day u-num"
                     data-weekday={page.weekdayLabels[column]}
-                    href={d.items.length > 0 ? `#${anchor(d.date)}` : undefined}
+                    href={d.items.length > 0 ? `#${dayAnchorId(d.date)}` : undefined}
                   >
                     <time datetime={d.date}>{d.day}</time>
                   </Day>
@@ -106,7 +105,7 @@ const anchor = (date: string) => `d-${date}`;
         <EmptyState title="この月の予定はまだありません" />
       ) : (
         page.days.map((g) => (
-          <article class="cal-day" id={anchor(g.dateBadge.iso)}>
+          <article class="cal-day" id={dayAnchorId(g.dateBadge.iso)}>
             <DateBadge badge={g.dateBadge} showYear={false} />
             <ul class="cal-day__items">
               {g.items.map((i) => {

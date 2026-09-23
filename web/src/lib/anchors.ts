@@ -8,3 +8,6 @@ export const setlistAnchorId = (number: number): string => `setlist-${number}`;
 
 /** よみ目次の区画の先頭 (`KanaIndex` が飛び、一覧の行が振る)。 */
 export const kanaAnchorId = (startIndex: number): string => `kana-${startIndex}`;
+
+/** カレンダーのその日の予定 (一覧の日の見出しが振り、枠の日付が飛ぶ)。`date` は `YYYY-MM-DD`。 */
+export const dayAnchorId = (date: string): string => `d-${date}`;
