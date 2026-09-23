@@ -6,7 +6,7 @@
   "THE IDOLM@STER LIVE THE@TER DREAMERS 02〜06 の CD クレジット",
   "https://ja.wikipedia.org/wiki/THE_IDOLM@STER_LIVE_THE@TER_DREAMERS"
  ],
- "_help": "solo なのに原唱者が 2 人以上、または singer_label が複数人/ユニット名のものを洗い出した。双海亜美／真美 (1 枠として歌う) と、リミックス盤のアルバムアーティスト表記 (765PRO ALLSTARS) だけのものは solo のまま",
+ "_help": "solo なのに原唱者が 2 人以上、または singer_label が複数人/ユニット名のものを洗い出した。双海亜美／真美 (1 枠として歌う) と、リミックス盤のアルバムアーティスト表記 (765PRO ALLSTARS) だけのものは solo のまま。原唱者が足りない曲は add_original_singers で足す (Funny Logic・わんだぁらんどの 亜美／真美 はスタ→トスタ→ と同じく 2 人とも入れる)",
  "fixes": [
   {
    "table": "songs",
@@ -201,7 +201,10 @@
     "cd_series": "THE IDOLM@STER LIVE THE@TER DREAMERS 05 - EP"
    },
    "note": "LTD 05 のデュエット (木下ひなた×双海亜美)。LIVE THE@TER BEST 扱い・木下ひなたのソロになっていた",
-   "source": "https://ja.wikipedia.org/wiki/THE_IDOLM@STER_LIVE_THE@TER_DREAMERS"
+   "source": "https://ja.wikipedia.org/wiki/THE_IDOLM@STER_LIVE_THE@TER_DREAMERS",
+   "add_original_singers": [
+    "765as_双海亜美"
+   ]
   },
   {
    "table": "songs",
@@ -282,7 +285,11 @@
    "fields": {
     "song_type": "unit"
    },
-   "note": "高槻やよい・双海亜美/真美 のデュエット (MASTER PRIMAL DANCIN' BLUE)"
+   "note": "高槻やよい・双海亜美/真美 のデュエット (MASTER PRIMAL DANCIN' BLUE)",
+   "add_original_singers": [
+    "765as_双海亜美",
+    "765as_双海真美"
+   ]
   },
   {
    "table": "songs",
@@ -298,7 +305,10 @@
    "fields": {
     "song_type": "unit"
    },
-   "note": "CINDERELLA GIRLS for あんきら (双葉杏・諸星きらり) 版"
+   "note": "CINDERELLA GIRLS for あんきら (双葉杏・諸星きらり) 版",
+   "add_original_singers": [
+    "cg_諸星きらり"
+   ]
   },
   {
    "table": "songs",
@@ -306,7 +316,21 @@
    "fields": {
     "song_type": "all"
    },
-   "note": "765PRO ALLSTARS 13 人とぷちどるの全員曲"
+   "note": "765PRO ALLSTARS 13 人とぷちどるの全員曲",
+   "add_original_singers": [
+    "765as_天海春香",
+    "765as_如月千早",
+    "765as_萩原雪歩",
+    "765as_高槻やよい",
+    "765as_秋月律子",
+    "765as_三浦あずさ",
+    "765as_水瀬伊織",
+    "765as_菊地真",
+    "765as_双海真美",
+    "765as_星井美希",
+    "765as_我那覇響",
+    "765as_四条貴音"
+   ]
   },
   {
    "table": "songs",
@@ -314,7 +338,21 @@
    "fields": {
     "song_type": "all"
    },
-   "note": "ら♪ら♪ら♪わんだぁらんど の Remix。原曲と同じく全員曲"
+   "note": "ら♪ら♪ら♪わんだぁらんど の Remix。原曲と同じく全員曲",
+   "add_original_singers": [
+    "765as_天海春香",
+    "765as_如月千早",
+    "765as_萩原雪歩",
+    "765as_高槻やよい",
+    "765as_秋月律子",
+    "765as_三浦あずさ",
+    "765as_水瀬伊織",
+    "765as_菊地真",
+    "765as_双海真美",
+    "765as_星井美希",
+    "765as_我那覇響",
+    "765as_四条貴音"
+   ]
   },
   {
    "table": "songs",
@@ -326,7 +364,11 @@
     "unit_id": "竜宮小町"
    },
    "note": "竜宮小町 (水瀬伊織・三浦あずさ・双海亜美) の曲",
-   "source": "https://www.uta-net.com/song/125289/"
+   "source": "https://www.uta-net.com/song/125289/",
+   "add_original_singers": [
+    "765as_水瀬伊織",
+    "765as_双海亜美"
+   ]
   },
   {
    "table": "songs",
@@ -341,6 +383,10 @@
    "source": [
     "https://imas-db.jp/song/detail/171.html",
     "https://recochoku.jp/song/S21189157/"
+   ],
+   "add_original_singers": [
+    "765as_水瀬伊織",
+    "765as_双海亜美"
    ]
   },
   {
@@ -356,6 +402,11 @@
    "source": [
     "https://cinderellagirls.idolmaster-official.jp/discography/cocc-17062/",
     "https://www.uta-net.com/movie/196017/"
+   ],
+   "add_original_singers": [
+    "cg_諸星きらり",
+    "cg_赤城みりあ",
+    "cg_城ヶ崎美嘉"
    ]
   },
   {
@@ -371,6 +422,11 @@
    "source": [
     "https://cinderellagirls.idolmaster-official.jp/discography/cocc-17062/",
     "https://dere-ken.com/?p=27616"
+   ],
+   "add_original_singers": [
+    "cg_三村かな子",
+    "cg_緒方智絵里",
+    "cg_輿水幸子"
    ]
   },
   {

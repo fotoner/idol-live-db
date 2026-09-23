@@ -238,6 +238,53 @@ class TitleKanaRequiredTest(PostFixture):
         self.assertEqual(self.kana_problems(title_kana="しんきょく"), [])
 
 
+class AddOriginalSingersTest(PostFixture):
+    """data/fixes/ の add_original_singers で既存曲に原唱者を足す。"""
+
+    def post(self, *fixes):
+        support.write_json(self.data / "fixes" / "post.json",
+                           {"source": "https://example.com/cd", "fixes": list(fixes)})
+
+    def validate(self):
+        conn = sqlite3.connect(str(self.db))
+        try:
+            return apply_data.validate(conn)
+        finally:
+            conn.close()
+
+    def test_singers_alone_are_a_valid_fix(self):
+        self.post({"table": "songs", "id": "song_t", "add_original_singers": ["ml_t"]})
+        self.assertEqual(self.validate(), [])
+
+    def test_singers_are_added_and_pushed_by_song(self):
+        self.post({"table": "songs", "id": "song_t", "fields": {"song_type": "solo"},
+                   "add_original_singers": ["ml_t"]})
+        conn = sqlite3.connect(str(self.db))
+        with contextlib.redirect_stdout(io.StringIO()):
+            affected = apply_data.apply_all(conn)
+            # 2 度流しても二重にならない。
+            apply_data.apply_all(conn)
+        rows = conn.execute("SELECT song_id, idol_id, role FROM song_artists").fetchall()
+        song_type = conn.execute("SELECT song_type FROM songs WHERE id='song_t'").fetchone()[0]
+        conn.close()
+        self.assertEqual(rows, [("song_t", "ml_t", "original")])
+        self.assertEqual(song_type, "solo")
+        self.assertEqual(affected["song_artists"], {"song_t"})
+
+    def test_an_unknown_idol_is_rejected(self):
+        self.post({"table": "songs", "id": "song_t", "add_original_singers": ["ml_nobody"]})
+        [problem] = self.validate()
+        self.assertIn("ml_nobody", problem)
+
+    def test_only_songs_take_singers(self):
+        self.post({"table": "idols", "id": "ml_t", "add_original_singers": ["ml_t"]})
+        self.assertTrue(any("songs の修正にだけ" in p for p in self.validate()))
+
+    def test_an_empty_list_is_rejected(self):
+        self.post({"table": "songs", "id": "song_t", "add_original_singers": []})
+        self.assertTrue(any("空は不可" in p for p in self.validate()))
+
+
 class AppliedPostsTest(unittest.TestCase):
     def test_posts_moved_to_applied_are_not_read(self):
         with tempfile.TemporaryDirectory() as tmp:
