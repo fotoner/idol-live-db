@@ -60,8 +60,9 @@ struct MasterySwipeActions: ViewModifier {
     }
 
     private func set(_ level: UInt8) {
+        // 失敗しても一覧は前の値のまま (壊れた値を見せない)。書けなかったことは知らせる。
         do { try marks.setMastery(songId: songId, level: level) }
-        catch { /* 失敗しても一覧は前の値のまま。無言で壊れた値を見せない */ }
+        catch { LocalWriteFailure.report(error, action: "習熟度の記録") }
     }
 }
 

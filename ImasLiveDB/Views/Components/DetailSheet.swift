@@ -1,4 +1,3 @@
-import os
 import NukeUI
 import SwiftUI
 
@@ -450,7 +449,7 @@ struct SongSheetContent: View {
             try markService.toggle(.favorite, entity: .song, id: song.id)
             markVersion += 1
         } catch {
-            Logger.database.error("toggle_favorite_failed: \(error.localizedDescription)")
+            LocalWriteFailure.report(error, action: "お気に入りの切り替え")
         }
     }
 
@@ -483,7 +482,7 @@ struct SongSheetContent: View {
             try markService.toggle(.owned, entity: .song, id: song.id)
             markVersion += 1
         } catch {
-            Logger.database.error("toggle_kamisabi_owned_failed: \(error.localizedDescription)")
+            LocalWriteFailure.report(error, action: "カード所持の記録")
         }
     }
 

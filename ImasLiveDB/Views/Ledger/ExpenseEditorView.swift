@@ -9,7 +9,8 @@ struct ExpenseEditorView: View {
 
     /// nil なら新規作成。
     let expense: Expense?
-    let onSave: (Expense) -> Void
+    /// 保存する。書けたら true。書けなかったときは画面を閉じない (入力を捨てない)。
+    let onSave: (Expense) async -> Bool
 
     @State private var date = Date()
     @State private var category: ExpenseCategory = .ticket
@@ -19,6 +20,7 @@ struct ExpenseEditorView: View {
     @State private var eventId: String?
     @State private var showOptions: [LedgerShowOption] = []
     @State private var showPicker = false
+    @State private var isSaving = false
 
     private var categories: [ExpenseCategoryInfo] { expenseCategories() }
     private var amount: Int64 { Int64(amountText.filter(\.isNumber)) ?? 0 }
@@ -102,7 +104,7 @@ struct ExpenseEditorView: View {
                     Button("キャンセル") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") { save() }.disabled(validation != nil)
+                    Button("保存") { Task { await save() } }.disabled(validation != nil || isSaving)
                 }
             }
             .sheet(isPresented: $showPicker) {
@@ -149,8 +151,8 @@ struct ExpenseEditorView: View {
         showOptions = (try? await AppContainer.shared.ledgerReading.attendedShowOptions()) ?? []
     }
 
-    private func save() {
-        guard validation == nil else { return }
+    private func save() async {
+        guard validation == nil, !isSaving else { return }
         var saved = expense ?? Expense.make(
             date: dateText, category: category, amount: amount,
             showId: showId, eventId: eventId, note: note
@@ -161,8 +163,10 @@ struct ExpenseEditorView: View {
         saved.showId = showId
         saved.eventId = eventId
         saved.note = note.isEmpty ? nil : note
-        onSave(saved)
-        dismiss()
+        isSaving = true
+        let succeeded = await onSave(saved)
+        isSaving = false
+        if succeeded { dismiss() }
     }
 }
 

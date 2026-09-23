@@ -29,14 +29,18 @@ final class PersonalTagService {
         }
     }
 
-    func addTag(entityType: String, entityId: String, name: String) {
+    /// 足せたら true。書けなかったときは入力欄を消さないよう、呼び出し側に返す。
+    @discardableResult
+    func addTag(entityType: String, entityId: String, name: String) -> Bool {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
+        guard !trimmed.isEmpty else { return false }
         do {
             try db.addPersonalTag(entityType: entityType, entityId: entityId, tagName: trimmed)
             version &+= 1
+            return true
         } catch {
-            logger.error("addPersonalTag failed: entityType=\(entityType) entityId=\(entityId) error=\(error.localizedDescription)")
+            LocalWriteFailure.report(error, action: "マイタグの追加")
+            return false
         }
     }
 
@@ -45,7 +49,7 @@ final class PersonalTagService {
             try db.removePersonalTag(entityType: entityType, entityId: entityId, tagName: name)
             version &+= 1
         } catch {
-            logger.error("removePersonalTag failed: entityType=\(entityType) entityId=\(entityId) error=\(error.localizedDescription)")
+            LocalWriteFailure.report(error, action: "マイタグの削除")
         }
     }
 }

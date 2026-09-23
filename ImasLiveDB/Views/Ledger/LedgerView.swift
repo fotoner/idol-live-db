@@ -79,7 +79,7 @@ struct LedgerView: View {
         }
         .sheet(item: $editing) { target in
             ExpenseEditorView(expense: target.expense) { saved in
-                Task { await save(saved) }
+                await save(saved)
             }
         }
         .task { if !loaded { await load() } }
@@ -290,13 +290,13 @@ struct LedgerView: View {
     }
 
     /// 保存に成功してから一覧を直す (失敗しても一覧だけ直すと、保存済みに見えて
-    /// 次に開くと消えている)。
-    private func save(_ expense: Expense) async {
+    /// 次に開くと消えている)。書けたら true。
+    private func save(_ expense: Expense) async -> Bool {
         do {
             try await AppContainer.shared.ledgerWriting.save(expense)
         } catch {
             LocalWriteFailure.report(error, action: "家計簿の保存")
-            return
+            return false
         }
         if let index = expenses.firstIndex(where: { $0.id == expense.id }) {
             expenses[index] = expense
@@ -305,6 +305,7 @@ struct LedgerView: View {
         }
         expenses.sort { ($0.date, $0.id) > ($1.date, $1.id) }
         changeToken += 1
+        return true
     }
 
     private func delete(_ expense: Expense) async {

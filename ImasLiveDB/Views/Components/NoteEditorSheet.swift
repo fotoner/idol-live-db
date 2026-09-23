@@ -31,10 +31,11 @@ struct NoteEditorSheet: View {
                                     id: entityId,
                                     text: trimmed.isEmpty ? nil : trimmed
                                 )
+                                dismiss()
                             } catch {
+                                // 書けなかったら閉じない (打ったメモを捨てずに、もう一度押せるように)。
                                 LocalWriteFailure.report(error, action: "メモの保存")
                             }
-                            dismiss()
                         }
                         .fontWeight(.semibold)
                     }

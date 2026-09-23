@@ -237,8 +237,9 @@ struct MasteryGroupDetailView: View {
     }
 
     private func setLevel(_ songId: String, to level: UInt8) {
+        // 失敗しても一覧は前の値のまま (壊れた値を見せない)。書けなかったことは知らせる。
         do { try marks.setMastery(songId: songId, level: level) }
-        catch { /* 失敗しても一覧は前の値のまま。無言で壊れた値を見せない */ }
+        catch { LocalWriteFailure.report(error, action: "習熟度の記録") }
     }
 
     // MARK: - 一括更新
@@ -280,8 +281,9 @@ struct MasteryGroupDetailView: View {
                                  previous: before)
             }
         } catch {
-            // 書けなかったときは何も出さない (半端に反映された表示を残さない)
+            // 取り消しの帯は出さない (半端に反映された表示を残さない)。書けなかったことは知らせる。
             undo = nil
+            LocalWriteFailure.report(error, action: "習熟度のまとめての記録")
         }
     }
 

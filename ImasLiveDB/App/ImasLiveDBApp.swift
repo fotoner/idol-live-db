@@ -32,6 +32,9 @@ struct ImasLiveDBApp: App {
         // アナリティクス起動 (GoogleService-Info.plist がある時だけ Firebase 有効化。無ければ no-op)。
         AppAnalytics.start()
 
+        // 端末にしか無いデータの書き込み失敗は、どの画面で起きてもアラートで知らせる。
+        LocalWriteFailure.presenter = LocalWriteFailureAlert.present
+
         // 曲アートワーク (mzstatic CDN のリモート URL) を永続ディスクキャッシュする。
         // 全 LazyImage は表示サイズへの Resize processor 付きなので、元 JPEG を保持しても
         // 肥大しすぎず、再起動後の再ダウンロードを回避できる。アイドル/ブランド画像は

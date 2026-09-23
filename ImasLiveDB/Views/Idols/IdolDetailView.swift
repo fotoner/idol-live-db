@@ -623,8 +623,9 @@ struct IdolDetailView: View {
 
     private func addPersonalTag() {
         guard canAddPersonalTag else { return }
-        personalTagService.addTag(entityType: "idol", entityId: idol.id, name: newPersonalTagName)
-        newPersonalTagName = ""
+        if personalTagService.addTag(entityType: "idol", entityId: idol.id, name: newPersonalTagName) {
+            newPersonalTagName = ""
+        }
     }
 
     /// 投稿/編集導線の共通ゲート (DetailSheet.startCommunityEdit と同じ方針)。

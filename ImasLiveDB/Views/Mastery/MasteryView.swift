@@ -276,8 +276,9 @@ struct MasteryView: View {
     private func applyToUnset(_ g: MasteryGroup, level: UInt8) {
         let targets = masteryBulkTargets(songIds: g.songIds, levels: g.levels, scope: .unsetOnly)
         guard !targets.isEmpty else { return }
+        // 失敗しても一覧は前の値のまま。書けなかったことは知らせる。
         do { try marks.setMastery(songIds: targets, level: level) }
-        catch { /* 失敗しても一覧は前の値のまま */ }
+        catch { LocalWriteFailure.report(error, action: "習熟度のまとめての記録") }
     }
 
     /// ブランド絞り込み。複数選択は OR、空集合は全ブランド (既存の絞り込みと同じ意味)。

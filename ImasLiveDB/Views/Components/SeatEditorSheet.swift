@@ -42,10 +42,11 @@ struct SeatEditorSheet: View {
                         AppAnalytics.tap("seat_editor.save")
                         do {
                             try markService.setSeat(entity: entity, id: entityId, text: draft)
+                            dismiss()
                         } catch {
+                            // 書けなかったら閉じない (入れた座席を捨てずに、もう一度押せるように)。
                             LocalWriteFailure.report(error, action: "座席の保存")
                         }
-                        dismiss()
                     }
                     .fontWeight(.semibold)
                 }
