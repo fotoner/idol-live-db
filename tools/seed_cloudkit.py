@@ -102,11 +102,6 @@ def init_session(key_id: str, key_file: Path) -> None:
     print(f"  [auth] CloudKit S2S auth initialized")
 
 
-def _sign_request(body: bytes, subpath: str) -> dict:
-    """Generate CloudKit S2S auth headers."""
-    return _signing_key.headers(body, subpath)
-
-
 def post_json(url: str, payload: dict, auth=None) -> dict:
     """init_session の鍵で署名して POST する (429 は待って再署名し、やり直す)。"""
     return _ck.post_json(url, payload, _signing_key)
