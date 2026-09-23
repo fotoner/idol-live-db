@@ -33,7 +33,7 @@ const EVERY_RUN: CronTask[] = [
     name: "api_rate_limits",
     // 1 日より古い分のバケット (正の鍵)。日のバケット (負の鍵) はここでは消さない —
     // 消すと IP の日の上限 (歌詞の 1,000/日) が 5 分ごとに 0 に戻って効かなくなる。
-    // idx_api_rate_limits_bucket の範囲で引くので、読むのは消す行だけ。
+    // idx_api_rate_limits_bucket の範囲で引くので、読むのは消す行と範囲の端の 1 行だけ。
     run: (env) =>
       env.DB.prepare("DELETE FROM api_rate_limits WHERE minute_bucket >= 0 AND minute_bucket < ?")
         .bind(Math.floor(Date.now() / 1000 / 60) - 1440)
