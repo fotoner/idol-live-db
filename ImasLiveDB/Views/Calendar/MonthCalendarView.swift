@@ -354,11 +354,11 @@ struct CalendarEntryBar: View {
         case .show(let row): return row.eventName
         case .release(_, let songs):
             return songs.first.map { $0.title } ?? "リリース"
-        case .birthday(let idol):
+        case .birthday(let idol, _):
             return idol.name
-        case .staffBirthday(let staff):
+        case .staffBirthday(let staff, _):
             return staff.name
-        case .anniversary(let ann):
+        case .anniversary(let ann, _):
             // 月セルは狭いので「ラベル」だけ。N周年は日詳細で見せる。
             return ann.label
         case .personal(let event):

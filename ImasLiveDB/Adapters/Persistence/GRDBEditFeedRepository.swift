@@ -1,14 +1,16 @@
 import Foundation
 
-/// `EditFeedReading` ポートの GRDB アダプタ。
+/// `EditFeedReading` ポートのアダプタ。
 ///
-/// 段階移行 (Strangler) のため、当面は `AppDatabase` の既存メソッドへ委譲する。
-/// `nonisolated` な async メソッドなので MainActor から `await` で呼ぶとオフメインで実行される。
+/// 編集の対象の呼び名と公演は、スナップショットにあるものはコア (`edit_record_target`:
+/// 公演・セトリは「ライブ名 見分け」の正式な呼び名) が答える。参考動画 (SongVideo) は
+/// スナップショットに無いので端末の DB に訊く。
 struct GRDBEditFeedRepository: EditFeedReading {
     let database: AppDatabase
+    let snapshot: CoreSnapshotManager
 
     func editRecordShowId(recordType: String, recordName: String) async throws -> String? {
-        try await database.fetchEditRecordShowIdAsync(recordType: recordType, recordName: recordName)
+        try await target(recordType: recordType, recordName: recordName)?.showId
     }
 
     func editRecordSongId(recordType: String, recordName: String) async throws -> String? {
@@ -16,6 +18,15 @@ struct GRDBEditFeedRepository: EditFeedReading {
     }
 
     func editRecordTitle(recordType: String, recordName: String) async throws -> String? {
-        try await database.fetchEditRecordTitleAsync(recordType: recordType, recordName: recordName)
+        if recordType == "SongVideo" {
+            return try await database.fetchSongVideoSongTitleAsync(videoId: recordName)
+        }
+        return try await target(recordType: recordType, recordName: recordName)?.title
+    }
+
+    private func target(recordType: String, recordName: String) async throws -> EditRecordTarget? {
+        try await snapshot.withStore { store in
+            try store.editRecordTarget(recordType: recordType, recordName: recordName)
+        }
     }
 }

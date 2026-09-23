@@ -428,11 +428,13 @@ struct TicketPeriodRow: Sendable {
 enum CalendarEntry: Identifiable, Hashable, Sendable {
     case show(CalendarShowRow)
     case release(date: String, songs: [Song])
-    case birthday(Idol)
+    /// 誕生日。`occursOn` は表示範囲の中の実際の日 (`YYYY-MM-DD`)。月日の展開
+    /// (非閏年の 2/29 は 2/28) はコアの `calendar_entries` が済ませている。
+    case birthday(Idol, occursOn: String)
     /// 「アイドル本人ではない関係者」(事務員・社長・幹部) の誕生日。
-    case staffBirthday(Staff)
+    case staffBirthday(Staff, occursOn: String)
     /// ブランド/アプリ記念日 (サービス開始・アプリ稼働・アニメ放映 等)。N周年表示用。
-    case anniversary(Anniversary)
+    case anniversary(Anniversary, occursOn: String)
     /// 端末カレンダーから取り込んだマイ予定 (アプリ内表示のみ。DB には保存しない)
     case personal(PersonalCalendarEvent)
     /// チケット日程 (申込締切 / 当落発表)。
@@ -446,9 +448,9 @@ enum CalendarEntry: Identifiable, Hashable, Sendable {
         switch self {
         case .show(let row): return "show_\(row.show.id)"
         case .release(let date, let songs): return "release_\(date)_\(songs.map(\.id).sorted().joined(separator: "_"))"
-        case .birthday(let idol): return "birthday_\(idol.id)"
-        case .staffBirthday(let staff): return "staffbirthday_\(staff.id)"
-        case .anniversary(let ann): return "anniversary_\(ann.id)"
+        case .birthday(let idol, _): return "birthday_\(idol.id)"
+        case .staffBirthday(let staff, _): return "staffbirthday_\(staff.id)"
+        case .anniversary(let ann, _): return "anniversary_\(ann.id)"
         case .personal(let event): return "personal_\(event.id)"
         case .ticket(let row): return "ticket_\(row.eventId)_\(row.kind.rawValue)"
         case .ticketPeriod(let row): return "ticketperiod_\(row.eventId)"
@@ -472,11 +474,11 @@ enum CalendarEntry: Identifiable, Hashable, Sendable {
         switch self {
         case .show(let row): return row.show.date
         case .release(let date, _): return date
-        case .birthday(let idol):
+        case .birthday(let idol, _):
             return idol.birthday ?? ""
-        case .staffBirthday(let staff):
+        case .staffBirthday(let staff, _):
             return staff.birthday ?? ""
-        case .anniversary(let ann):
+        case .anniversary(let ann, _):
             return ann.date
         case .personal(let event):
             return event.start.formatted(.iso8601.year().month().day().dateSeparator(.dash))

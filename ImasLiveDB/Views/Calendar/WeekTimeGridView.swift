@@ -409,9 +409,9 @@ struct WeekTimeGridView: View {
         switch entry {
         case .show(let row): return row.eventName
         case .release(_, let songs): return songs.first?.title ?? "リリース"
-        case .birthday(let idol): return idol.name
-        case .staffBirthday(let staff): return staff.name
-        case .anniversary(let ann): return ann.label
+        case .birthday(let idol, _): return idol.name
+        case .staffBirthday(let staff, _): return staff.name
+        case .anniversary(let ann, _): return ann.label
         case .personal(let event): return event.title
         case .ticket(let row): return "\(row.kind.label)・\(row.eventName)"
         case .ticketPeriod(let row): return "受付・\(row.eventName)"

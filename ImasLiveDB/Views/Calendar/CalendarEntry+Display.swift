@@ -21,7 +21,7 @@ extension CalendarEntry {
             return Color(hexString: row.brandColor, default: DS.sys)
         case .release:
             return DS.warning
-        case .birthday(let idol):
+        case .birthday(let idol, _):
             return Color(hexString: idol.color, default: ImasTheme.derive(seed: ThemeSeed.staffBirthday, scheme: scheme).accent)
         case .staffBirthday:
             // 事務員は固有色が無いので汎用桃 (アイドル誕生日と同じ色域、ロウ寄り)。

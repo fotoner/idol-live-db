@@ -74,16 +74,15 @@ struct CoreCalendarRepository: CalendarReading {
             // 曲が 1 曲も引けない日は行ごと出さない (空のリリース行は意味がない)。
             return resolved.isEmpty ? nil : .release(date: date, songs: resolved)
 
-        case let .birthday(idolId, _):
-            // occursOn (展開後の実出現日) は CalendarEntry.birthday が年を持たないため使わない。
-            // 並びは core が解決済みで、ここでは順序を保つだけで足りる。
-            return idols[idolId].map { .birthday($0) }
+        case let .birthday(idolId, occursOn):
+            // 表示範囲の中の実際の日 (非閏年の 2/29 は 2/28) はコアが決めている。並びも core のまま。
+            return idols[idolId].map { .birthday($0, occursOn: occursOn) }
 
-        case let .staffBirthday(staffId, _):
-            return staff[staffId].map { .staffBirthday($0) }
+        case let .staffBirthday(staffId, occursOn):
+            return staff[staffId].map { .staffBirthday($0, occursOn: occursOn) }
 
-        case let .anniversary(anniversaryId, _):
-            return anniversaries[anniversaryId].map { .anniversary($0) }
+        case let .anniversary(anniversaryId, occursOn):
+            return anniversaries[anniversaryId].map { .anniversary($0, occursOn: occursOn) }
 
         case let .ticket(eventId, eventName, brandColor, date, kind, url):
             return .ticket(TicketCalendarRow(

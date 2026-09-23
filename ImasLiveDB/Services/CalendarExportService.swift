@@ -126,8 +126,9 @@ final class CalendarExportService: Sendable {
 
     // MARK: - Private helpers
 
+    /// 予定のタイトルは公演の正式な呼び名 (ライブ名と重なる部分は 2 度出さない)。組み方はコア。
     private func buildTitle(show: Show, event: Event) -> String {
-        show.name.isEmpty ? event.name : "\(event.name) \(show.name)"
+        showDisplayTitle(eventName: event.name, showName: show.name, date: show.date)
     }
 
     private func buildNotes(show: Show, event: Event) -> String {

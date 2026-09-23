@@ -68,6 +68,7 @@ final class AppContainer: Sendable {
         timelineReading = CoreTimelineRepository(snapshot: snapshot)
         globalSearchReading = CoreGlobalSearchRepository(snapshot: snapshot)
         performanceEvidenceReading = CorePerformanceEvidenceRepository(snapshot: snapshot)
+        editFeedReading = GRDBEditFeedRepository(database: .shared, snapshot: snapshot)
 
         // ローカル編集 (モデレーターの .applied 経路やセトリ取込) は CloudKit sync を通らず
         // GRDB へ直接 upsert されるため、.masterDataDidSync だけではスナップショットが
@@ -98,8 +99,8 @@ final class AppContainer: Sendable {
     /// コミュニティタグ (曲/アイドル/ユニット) の書き込み実装 (Worker D1 集計 API)。
     let communityTagWriting: any CommunityTagWriting = CommunityAPI.shared
 
-    /// 編集フィードのレコード解決の実装 (GRDB / 共有 AppDatabase)。
-    let editFeedReading: any EditFeedReading = GRDBEditFeedRepository(database: .shared)
+    /// 編集フィードのレコード解決の実装 (共有コア + 参考動画だけ GRDB)。
+    let editFeedReading: any EditFeedReading
 
     /// DB メタ/診断読み取りの実装 (GRDB / 共有 AppDatabase)。
     let diagnosticsReading: any DiagnosticsReading = GRDBDiagnosticsRepository(database: .shared)

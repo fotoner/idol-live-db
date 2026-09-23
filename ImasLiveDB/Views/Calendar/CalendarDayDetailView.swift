@@ -51,17 +51,17 @@ struct DayEntryRow: View {
                 releaseRow(songs: songs)
             }
             .buttonStyle(.plain)
-        case .birthday(let idol):
+        case .birthday(let idol, _):
             Button {
                 onSelect(.idol(idol))
             } label: {
                 birthdayRow(idol: idol)
             }
             .buttonStyle(.plain)
-        case .staffBirthday(let staff):
+        case .staffBirthday(let staff, _):
             // 事務員は専用詳細画面が無いのでタップ無効 (View だけ)。
             staffBirthdayRow(staff: staff)
-        case .anniversary(let ann):
+        case .anniversary(let ann, _):
             // 記念日も詳細導線無し。タップ無効。
             anniversaryRow(ann)
         case .personal(let event):
