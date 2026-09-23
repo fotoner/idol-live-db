@@ -10,38 +10,19 @@ enum DeeplinkBuilder {
     /// 開発・テスト用 custom URL scheme (imaslivedb://)。
     static let customScheme = "imaslivedb"
 
-    /// ID を URL パスに埋める前のエスケープ。
-    ///
-    /// `@` は RFC 3986 上はパスに置けるので `appending(components:)` は素通しするが、
-    /// **SNS やメッセージアプリのリンク検出が `@` をメールアドレスの境界と誤認して
-    /// そこで URL を切る**。`sh_the_idolm@ster_...` が `sh_the_idolm` で切られ、
-    /// 共有されたリンクを踏むと 404 になっていた (TEXT PK に `@` を含む公演が該当)。
-    /// `%40` にしておけば切られず、受け側は `pathComponents` が percent-decode するので
-    /// そのまま元の ID に戻る。
-    private static func escaped(_ id: String) -> String {
-        id.replacingOccurrences(of: "@", with: "%40")
-    }
-
     /// イベント詳細への共有 URL (https://…/app/events/{eventId})。
-    static func eventURL(id: String) -> URL {
-        URL(string: universalLinkBase.absoluteString + "/app/events/" + escaped(id))
-            ?? universalLinkBase
-    }
+    ///
+    /// 組み立て (ID の `@` を `%40` にする等) はコアが持つ。`@` を生で残すと、SNS の
+    /// リンク検出がメールアドレスの境界と誤認して URL をそこで切る。
+    static func eventURL(id: String) -> URL { url(shareEventUrl(id: id)) }
 
     /// 公演セトリへの共有 URL (https://…/app/shows/{showId})。
-    static func showURL(id: String) -> URL {
-        URL(string: universalLinkBase.absoluteString + "/app/shows/" + escaped(id))
-            ?? universalLinkBase
-    }
+    static func showURL(id: String) -> URL { url(shareShowUrl(id: id)) }
 
     /// みんなの投票のお題への共有 URL (https://…/app/polls/{pollId})。
-    static func pollURL(id: String) -> URL {
-        URL(string: universalLinkBase.absoluteString + "/app/polls/" + escaped(id))
-            ?? universalLinkBase
-    }
+    static func pollURL(id: String) -> URL { url(sharePollUrl(id: id)) }
 
-    /// SNS シェア文。イベント名/公演名 + URL のシンプルな形式。
-    static func shareText(name: String, url: URL) -> String {
-        "\(name)\n\(url.absoluteString)"
+    private static func url(_ string: String) -> URL {
+        URL(string: string) ?? universalLinkBase
     }
 }

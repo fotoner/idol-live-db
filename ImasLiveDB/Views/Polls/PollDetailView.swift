@@ -180,12 +180,9 @@ struct PollDetailView: View {
     }
 
     /// 「〇〇に投票しました！」のシェア内容。名前が1つも解決できていなければ nil。
-    private func myVotePayload(poll: Poll) -> SocialSharePayload? {
+    private func myVotePayload(poll: Poll) -> SharePayload? {
         guard !myVoteNames.isEmpty else { return nil }
-        return SocialSharePayload(
-            message: ShareMessage.pollVotes(pollTitle: poll.title, entityNames: myVoteNames),
-            url: DeeplinkBuilder.pollURL(id: poll.id)
-        )
+        return sharePollVotesPayload(pollId: poll.id, pollTitle: poll.title, entityNames: myVoteNames)
     }
 
     @ViewBuilder

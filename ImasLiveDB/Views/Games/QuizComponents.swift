@@ -314,7 +314,11 @@ struct QuizResultView: View {
     }
 
     private var shareText: String {
-        "\(kind.displayName)で \(points)/\(maxPoints)pt・グレード\(grade.label)（正解 \(correct)/\(questions)）でした！ #アイドルライブDB"
+        shareQuizResultText(
+            gameDisplayName: kind.displayName,
+            points: UInt32(clamping: points), maxPoints: UInt32(clamping: maxPoints),
+            grade: grade,
+            correct: UInt32(clamping: correct), questions: UInt32(clamping: questions))
     }
 
     var body: some View {

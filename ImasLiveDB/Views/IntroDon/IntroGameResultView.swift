@@ -53,25 +53,25 @@ struct IntroGameResultView: View {
         IntroShareImageRenderer.share(image: image, text: shareText)
     }
 
-    /// シェア用テキスト (本家アプリの宣伝も兼ねる)。
+    /// シェア用テキスト (本家アプリの宣伝も兼ねる)。文面はコアが作る。
     private var shareText: String {
-        let pct = percentage
-        let base: String
-        if session.isAllSongsChallenge {
-            base = "🎵イントロドン 全曲チャレンジ \(timeString(session.elapsedTime))・正答率\(pct)% (\(session.score)/\(answered))"
-        } else {
-            switch session.settings.mode {
-            case .rush:
-                let secs = Int(session.settings.rushTimeLimit)
-                base = "🎵イントロドン・ラッシュ \(secs)秒で \(session.score)問正解！(正答率\(pct)%)"
-            case .party:
-                base = "🎵イントロドン パーティ対戦であそんだよ！"
-            case .allSongs, .normal:
-                base = "🎵イントロドンで \(session.score)/\(answered) 正解！(正答率\(pct)%)"
-            }
+        shareIntroDonText(input: IntroDonShareInput(
+            mode: shareMode,
+            score: Int32(clamping: session.score),
+            answered: Int32(clamping: answered),
+            bestCombo: Int32(clamping: session.bestCombo),
+            elapsedSeconds: session.elapsedTime,
+            rushTimeLimitSeconds: session.settings.rushTimeLimit))
+    }
+
+    /// シェア文の種類。全曲チャレンジかどうかは、設定の mode ではなくセッションの状態で決まる。
+    private var shareMode: IntroDonShareMode {
+        if session.isAllSongsChallenge { return .allSongs }
+        switch session.settings.mode {
+        case .rush: return .rush
+        case .party: return .party
+        case .allSongs, .normal: return .normal
         }
-        let combo = session.bestCombo >= 2 ? " 最大\(session.bestCombo)連続🔥" : ""
-        return base + combo + "\n#イントロドン #アイマス"
     }
 
     var body: some View {

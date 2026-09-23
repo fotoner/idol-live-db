@@ -168,12 +168,7 @@ struct EventDetailView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 // SNS シェア (Universal Links)。リンクを踏むとこのイベント詳細に直接着地する。
-                ShareLink(
-                    item: DeeplinkBuilder.shareText(
-                        name: event.name,
-                        url: DeeplinkBuilder.eventURL(id: event.id)
-                    )
-                ) {
+                ShareLink(item: shareEventText(eventId: event.id, eventName: event.name)) {
                     Image(systemName: "square.and.arrow.up")
                 }
                 .accessibilityLabel("このイベントをシェア")

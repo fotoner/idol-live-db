@@ -90,8 +90,10 @@ struct SetlistView: View {
         JSTDay.isTodayOrLater(show.date)
     }
 
-    /// シェア文に使う公演の表示名。イベント名が取れていれば「イベント名 公演名」、
-    /// 公演名が既にイベント名を含む場合は重複させない。
+    /// 感想カード (行の長押し) に載せる公演の表示名。イベント名が取れていれば
+    /// 「イベント名 公演名」、公演名が既にイベント名を含む場合は重複させない。
+    /// ⚠️ シェア文 (`shareSetlistText`) の 1 行目と同じ規則をコアも持っている
+    /// (`setlist_share_name`)。FFI になったら、これもそちらを呼ぶ。
     private var shareName: String {
         if let eventName, !show.name.contains(eventName) {
             return "\(eventName) \(show.name)"
@@ -99,33 +101,16 @@ struct SetlistView: View {
         return show.name
     }
 
-    /// シェア文。 セトリ画面なので **セトリ本文まで載せる**。
-    ///
-    /// 以前は「公演名 + URL」だけで、 セトリ画面から共有したのに中身が何も入らず、
-    /// 受け取った側はリンクを踏まないと何のライブか分からなかった。
-    ///
-    /// 曲数が多いと SNS の文字数制限に当たるので、 曲は 20 曲までにして残りは
-    /// 「ほか N 曲」と畳む (全部見たい人はリンクを踏む導線として URL を残す)。
+    /// シェア文。セトリ画面なので **セトリ本文まで載せる** (公演名・日付と会場・曲目・リンク)。
+    /// 曲目を何曲で畳むかも、公演名とイベント名の重ね方も、コアが決める。
     private var shareText: String {
-        var lines = [shareName]
-        let venue = venueDirectory.displayName(for: show) ?? show.venue
-        let sub = [show.date, venue].compactMap { $0 }.joined(separator: " ・ ")
-        if !sub.isEmpty { lines.append(sub) }
-
-        if !setlist.isEmpty {
-            lines.append("")
-            let limit = 20
-            for (index, item) in setlist.prefix(limit).enumerated() {
-                lines.append(String(format: "%02d. %@", index + 1, item.songTitle))
-            }
-            if setlist.count > limit {
-                lines.append("ほか \(setlist.count - limit) 曲")
-            }
-        }
-
-        lines.append("")
-        lines.append(DeeplinkBuilder.showURL(id: show.id).absoluteString)
-        return lines.joined(separator: "\n")
+        shareSetlistText(input: SetlistShareInput(
+            showId: show.id,
+            showName: show.name,
+            eventName: eventName,
+            date: show.date,
+            venue: venueDirectory.displayName(for: show) ?? show.venue,
+            songTitles: setlist.map(\.songTitle)))
     }
 
     /// 遷移の単一窓口。sheet 内 (navigate 非 nil) は共有 path に push、standalone は自前 sheet。

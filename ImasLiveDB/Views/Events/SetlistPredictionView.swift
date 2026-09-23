@@ -60,13 +60,10 @@ struct SetlistPredictionView: View {
     private var canAddVote: Bool { !authService.isSignedIn || remaining > 0 }
 
     /// 「〇〇に投票しました！」のシェア内容。1票も入れていなければ nil (導線ごと隠す)。
-    private var votePayload: SocialSharePayload? {
+    private var votePayload: SharePayload? {
         let titles = myVotedPredictions.map(\.songTitle)
         guard !titles.isEmpty else { return nil }
-        return SocialSharePayload(
-            message: ShareMessage.predictionVotes(showName: showName, songTitles: titles),
-            url: DeeplinkBuilder.showURL(id: showId)
-        )
+        return sharePredictionVotesPayload(showId: showId, showName: showName, songTitles: titles)
     }
 
     var body: some View {
