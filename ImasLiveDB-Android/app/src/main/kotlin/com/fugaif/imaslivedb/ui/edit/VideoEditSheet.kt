@@ -34,6 +34,7 @@ import com.fugaif.imaslivedb.ui.theme.DS
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.util.UUID
+import uniffi.imas_core.youtubeIsUploadUrl
 
 private const val MAX_VIDEO_TITLE = 300
 private const val MAX_VIDEO_NOTE = 1000
@@ -66,7 +67,8 @@ fun VideoEditSheet(
     val trimmedTitle = videoTitle.trim()
     val trimmedNote = note.trim()
     // iOS VideoEditView.isValid と同条件。
-    val urlOk = isYouTubeUrl(trimmedUrl)
+    // 受け付ける URL の形 (http(s) + YouTube のホスト) はコアが決める。
+    val urlOk = youtubeIsUploadUrl(trimmedUrl)
     val isValid = urlOk && trimmedTitle.length <= MAX_VIDEO_TITLE && trimmedNote.length <= MAX_VIDEO_NOTE
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
@@ -186,19 +188,4 @@ fun VideoEditSheet(
             }
         }
     }
-}
-
-/**
- * YouTube URL の簡易判定。iOS `VideoEditView.isYouTubeURL` と同条件で、
- * http(s) + ホストが YouTube 系かどうかだけを見る (パス形式はサーバ validator が見る)。
- */
-internal fun isYouTubeUrl(s: String): Boolean {
-    if (s.isEmpty()) return false
-    val uri = runCatching { android.net.Uri.parse(s) }.getOrNull() ?: return false
-    val scheme = uri.scheme?.lowercase()
-    if (scheme != "http" && scheme != "https") return false
-    val host = uri.host?.lowercase()?.takeIf { it.isNotEmpty() } ?: return false
-    return host == "youtu.be" ||
-        host == "youtube.com" || host == "www.youtube.com" ||
-        host == "m.youtube.com" || host == "music.youtube.com"
 }

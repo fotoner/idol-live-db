@@ -100,6 +100,7 @@ import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import com.fugaif.imaslivedb.ui.theme.hexToColor
 import com.fugaif.imaslivedb.ui.filtered.SongFilterKind
+import uniffi.imas_core.youtubeVideoRefs
 import uniffi.imas_core.kamisabiCardLabel
 import uniffi.imas_core.kamisabiCompletionLabel
 import uniffi.imas_core.shortYearMonth
@@ -904,8 +905,10 @@ private fun CommunityTab(
                 ImasEmptyState(Icons.Filled.OndemandVideo, "参考動画はまだありません",
                     "ライブ映像などの参考動画を共有しませんか？", seed = seed, brand = brand)
             } else {
-                state.songVideos.forEach { video ->
-                    val videoId = youTubeVideoId(video.youtubeUrl)
+                // id とサムネイルの URL はコアが読む (一覧で 1 回)。
+                val refs = remember(state.songVideos) { youtubeVideoRefs(state.songVideos.map { it.youtubeUrl }) }
+                state.songVideos.forEachIndexed { index, video ->
+                    val ref = refs.getOrNull(index)
                     Row(
                         modifier = Modifier.fillMaxWidth().clickable {
                             openUrl(context, video.youtubeUrl)
@@ -913,12 +916,23 @@ private fun CommunityTab(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(Modifier.size(56.dp).clip(RoundedCornerShape(9.dp)).background(DS.fill), contentAlignment = Alignment.Center) {
-                            if (videoId != null) {
+                            ref?.thumbnailUrl?.let { thumbnail ->
+                                // 高解像度 (maxresdefault) が無い動画は mqdefault に落とす (iOS と同じ)。
                                 SubcomposeAsyncImage(
-                                    model = "https://i.ytimg.com/vi/$videoId/mqdefault.jpg",
+                                    model = thumbnail,
                                     contentDescription = video.videoTitle,
                                     contentScale = ContentScale.Crop,
-                                    modifier = Modifier.size(56.dp).clip(RoundedCornerShape(9.dp))
+                                    modifier = Modifier.size(56.dp).clip(RoundedCornerShape(9.dp)),
+                                    error = {
+                                        ref.fallbackThumbnailUrl?.let { fallback ->
+                                            SubcomposeAsyncImage(
+                                                model = fallback,
+                                                contentDescription = video.videoTitle,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier.size(56.dp).clip(RoundedCornerShape(9.dp))
+                                            )
+                                        }
+                                    }
                                 )
                             }
                             Icon(Icons.Filled.PlayArrow, null, tint = Color.White, modifier = Modifier.size(22.dp))
@@ -944,23 +958,6 @@ private fun CommunityTab(
             }
         }
     }
-}
-
-/** YouTube URL から videoId (11文字) を抽出。iOS YouTube.videoID の簡易移植。 */
-private fun youTubeVideoId(urlString: String): String? {
-    val uri = runCatching { android.net.Uri.parse(urlString) }.getOrNull() ?: return null
-    val host = uri.host?.lowercase() ?: return null
-    val candidate = when {
-        host.contains("youtu.be") -> uri.pathSegments.firstOrNull()
-        host.contains("youtube.com") -> uri.getQueryParameter("v")
-            ?: uri.pathSegments.let { segs ->
-                val idx = segs.indexOfFirst { it in listOf("embed", "shorts", "live") }
-                if (idx >= 0 && idx + 1 < segs.size) segs[idx + 1] else null
-            }
-        else -> null
-    } ?: return null
-    val id = candidate.takeWhile { it.isLetterOrDigit() || it == '_' || it == '-' }
-    return id.takeIf { it.length == 11 }
 }
 
 /**
