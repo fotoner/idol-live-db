@@ -65,4 +65,19 @@ mod tests {
     fn empty_date_is_not_upcoming() {
         assert!(!jst_is_today_or_later("".into(), JULY26_10AM_JST));
     }
+
+    #[test]
+    fn month_and_year_roll_over_at_jst_midnight() {
+        // 月末: 2026-08-31 23:59:59 JST = 14:59:59 UTC → 次の 1 秒で 9/1。
+        assert_eq!(jst_today(1788188399), "2026-08-31");
+        assert_eq!(jst_today(1788188400), "2026-09-01");
+        // 年末: 2026-12-31 23:59:59 JST → 次の 1 秒で 2027-01-01 (UTC ではまだ 12/31)。
+        assert_eq!(jst_today(1798729199), "2026-12-31");
+        assert_eq!(jst_today(1798729200), "2027-01-01");
+        // 閏年の 2/28 の次は 2/29。
+        assert_eq!(jst_today(1835362800), "2028-02-29");
+        // 繰り上がった日付で「今日以降」も動く。
+        assert!(!jst_is_today_or_later("2026-12-31".into(), 1798729200));
+        assert!(jst_is_today_or_later("2027-01-01".into(), 1798729200));
+    }
 }

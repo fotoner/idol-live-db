@@ -345,4 +345,18 @@ mod tests {
         ctx.tag_vote_counts = HashMap::from([("a".to_string(), 1), ("c".to_string(), 99)]);
         assert_eq!(picked_ids(&s, &filter_song_list(&s, &ctx)), vec_of(&["a", "c"]));
     }
+
+    #[test]
+    fn call_guide_tag_and_vote_ranking_compose() {
+        // コールガイド × タグ × 票数ランキング: 両方の集合に入る曲だけを、票数の多い順
+        // (同票は 50 音) に並べる。ガイドの無い高得票曲 (d) は出ない。
+        let s = vec![entry("a", Some("あ")), entry("b", Some("い")), entry("c", Some("う")), entry("d", Some("え"))];
+        let mut ctx = criteria(SongCollectMode::All);
+        ctx.tag_song_ids = Some(vec_of(&["a", "b", "c", "d"]));
+        ctx.call_guide_song_ids = Some(vec_of(&["c", "b", "a"]));
+        ctx.rank_by_tag_votes = true;
+        ctx.tag_vote_counts =
+            HashMap::from([("a".into(), 2), ("b".into(), 7), ("c".into(), 2), ("d".into(), 99)]);
+        assert_eq!(picked_ids(&s, &filter_song_list(&s, &ctx)), vec_of(&["b", "a", "c"]));
+    }
 }
