@@ -138,7 +138,7 @@ final class AppDatabase: @unchecked Sendable {
         // 後ろに置けば seed は誰も触っていない実物を見るので印が嘘にならず、移行が作り切った
         // 形に対して正本の不足分だけを足す形になる。索引も同じで、列が揃った後なら
         // idx_setlist_performers_idol (v19 前は setlist_performers に idol_id が無い) が失敗しない。
-        applyCoreMasterSchema(at: dbURL.path)
+        let schema = applyCoreMasterSchema(at: dbURL.path)
         // event.kind の再適用は CloudKit pull 直後に効けばよい定常処理。毎起動で同期 UPDATE を
         // 走らせるとメインスレッドを数十〜数百ms 塞ぐため、バックグラウンドに退避する。
         Task.detached(priority: .utility) { [pool] in
@@ -151,7 +151,7 @@ final class AppDatabase: @unchecked Sendable {
         // reseedMasterTablesIfNeeded は破壊的 (DELETE + INSERT) なので失敗時はアプリ
         // 起動自体を止めないように吸収する。 失敗してもローカル DB の旧値で動作継続。
         do {
-            try reseedMasterTablesIfNeeded(pool)
+            try reseedMasterTablesIfNeeded(pool, nonLedgerTables: schema?.untouchedTables)
         } catch {
             let detail = "\(error.localizedDescription) | \(String(describing: error))"
             reseedState.withLock {
@@ -178,7 +178,11 @@ final class AppDatabase: @unchecked Sendable {
     /// 移行の後に呼ぶ以上、表と列は既に揃っている。ここで落ちて欠けるのは「正本にしか無い分」
     /// = `song_units` と、v20_ensure_indexes が持たない索引 (idx_song_units_song /
     /// idx_song_units_unit / idx_songs_series_group) だけで、遅くなっても壊れはしない。
-    private static func applyCoreMasterSchema(at path: String) {
+    ///
+    /// 結果の `untouchedTables` (台帳に無い表) は、reseed が入れ直さない表を決めるのに使う。
+    /// 失敗したときは nil (どの表がマスタか分からない)。
+    @discardableResult
+    private static func applyCoreMasterSchema(at path: String) -> SchemaApplyResult? {
         do {
             let result = try ensureMasterSchema(dbPath: path)
             Logger.database.info(
@@ -188,21 +192,26 @@ final class AppDatabase: @unchecked Sendable {
             for reason in result.deferred {
                 Logger.database.error("[core-schema] deferred: \(reason, privacy: .public)")
             }
+            return result
         } catch {
             // コア側の適用はトランザクションを張らず、最初の失敗でそれ以降の手を捨てる。
             // 「どこで止まったか」だけが手掛かりになるので、失敗した手の理由を含む本文をそのまま出す。
             Logger.database.error(
                 "[core-schema] failed (以降の手は流れていない): \(String(describing: error), privacy: .public)"
             )
+            return nil
         }
     }
 
     /// Bundle DB の data_version が Documents DB より新しいときに、 マスタテーブル一式を
     /// Bundle DB の内容で上書きする。 既存ユーザの Documents DB に古い show_cast 等が
     /// 残ったままでマスタ更新が反映されない問題への対処。
-    /// user_marks (担当/お気に入り/メモ/attended) や custom_image_paths など、 ユーザ
-    /// 固有のデータは触らない。
-    private static func reseedMasterTablesIfNeeded(_ dbQueue: any DatabaseWriter) throws {
+    ///
+    /// 入れ直すのは**コアの台帳にあるマスタ表だけ** (allow-list)。端末にしか無い表
+    /// (担当・マイタグ・家計簿) は台帳に無いので、同梱 DB に同名の表が入っても触らない。
+    /// `nonLedgerTables` は `ensureMasterSchema` が返す「台帳に無い表」。nil (スキーマの適用に
+    /// 失敗した) ならどの表がマスタか分からないので、入れ直さずに失敗として知らせる。
+    private static func reseedMasterTablesIfNeeded(_ dbQueue: any DatabaseWriter, nonLedgerTables: [String]?) throws {
         guard let bundleURL = Bundle.main.url(forResource: "master", withExtension: "sqlite") else {
             Logger.database.info("[reseed] bundle master.sqlite not found, skip")
             return
@@ -228,22 +237,13 @@ final class AppDatabase: @unchecked Sendable {
                            bundleHash: bundleMeta.contentHash,
                            localHash: localMeta.contentHash) else { return }
 
-        // 触らないテーブル (= ユーザデータ + grdb_migrations)
-        let preservedTables: Set<String> = [
-            "user_marks",
-            "custom_image_paths",
-            "grdb_migrations",
-            "meta",  // 自前で書き換える
-            "song_videos",  // コミュニティ投稿系 (CloudKit)
-            "song_tags",  // タグ投票 (CloudKit/サーバ)
-            "device_song_tag", "device_song_penlight",
-        ]
+        guard let nonLedgerTables else { throw ReseedError.masterSchemaUnavailable }
 
         // コピー本体は純処理として分離 (テスト可能性 + 責務分離)。
         let (ok, skipped) = try Self.copyMasterTables(
             into: dbQueue,
             fromBundleAt: tmpURL.path,
-            preserving: preservedTables,
+            preserving: reseedPreservedTables(nonLedgerTables: nonLedgerTables),
             newVersion: bundleMeta.version,
             newContentHash: bundleMeta.contentHash
         )
@@ -253,6 +253,21 @@ final class AppDatabase: @unchecked Sendable {
             $0.failureDetail = nil
         }
         Logger.database.info("[reseed] done \(summary, privacy: .public)")
+    }
+
+    /// reseed で触らない表。台帳に無い表 (端末ローカルの表・コミュニティ投稿) と、
+    /// コアの既定の保護表 (自分で書き換える meta 等) の和。これを除いた
+    /// 「台帳にあるマスタ表」だけが入れ直しの対象になる。
+    static func reseedPreservedTables(nonLedgerTables: [String]) -> [String] {
+        nonLedgerTables + reseedDefaultPreservedTables()
+    }
+
+    /// reseed を始められなかった理由。
+    enum ReseedError: LocalizedError {
+        /// コアのスキーマ適用に失敗し、どの表がマスタか (台帳) が分からない。
+        case masterSchemaUnavailable
+
+        var errorDescription: String? { "マスタ表の一覧を確定できませんでした" }
     }
 
     /// reseed の判定に使う meta 一式。
@@ -284,7 +299,7 @@ final class AppDatabase: @unchecked Sendable {
     static func copyMasterTables(
         into writer: any DatabaseWriter,
         fromBundleAt bundlePath: String,
-        preserving preservedTables: Set<String>,
+        preserving preservedTables: [String],
         newVersion: Int,
         newContentHash: String?
     ) throws -> (ok: Int, skipped: Int) {
@@ -295,9 +310,10 @@ final class AppDatabase: @unchecked Sendable {
             defer { try? db.execute(sql: "DETACH DATABASE bundle") }
 
             let bundleTables = try String.fetchAll(db, sql: "SELECT name FROM bundle.sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
-            let localTables = Set(try String.fetchAll(db, sql: "SELECT name FROM main.sqlite_master WHERE type='table'"))
-            // Bundle 側に存在し、ローカルにもあり、保護対象でないテーブルのみ再投入する。
-            let targets = bundleTables.filter { !preservedTables.contains($0) && localTables.contains($0) }
+            let localTables = try String.fetchAll(db, sql: "SELECT name FROM main.sqlite_master WHERE type='table'")
+            // Bundle 側に存在し、ローカルにもあり、保護対象でないテーブルのみ再投入する (判定はコア)。
+            let targets = reseedTargetTables(
+                bundleTables: bundleTables, localTables: localTables, preservedTables: preservedTables)
 
             try db.inTransaction {
                 // ⚠️ PRAGMA foreign_keys はトランザクション内では変更できない (no-op)。

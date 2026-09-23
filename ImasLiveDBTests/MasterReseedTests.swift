@@ -91,6 +91,76 @@ final class MasterReseedTests: XCTestCase {
         }
     }
 
+    // MARK: - 端末ローカルにしかない表は入れ直さない (D-IOS-03)
+
+    /// 本物のスキーマの DB に端末ローカルの 3 表の行を入れ、同名の表に別の行を持つ同梱 DB で
+    /// 入れ直しても、3 表の行がそのまま残ること。マスタ表は入れ直されること。
+    ///
+    /// 以前は触らない表を deny-list で持っていて、`personal_tags` と `expenses` が漏れていた。
+    /// 同梱 DB にこの 2 表が「無い」から偶然守られていただけで、同梱 DB に入った瞬間、
+    /// 次のアップデートの初回起動でマイタグと家計簿が全部消える (戻す手段が無い)。
+    func testReseedNeverTouchesLocalOnlyTablesEvenIfBundleHasThem() throws {
+        let localPath = try makeMigratedDatabaseFile()
+        let local = try DatabaseQueue(path: localPath)
+        try local.write { db in
+            try Self.insertBrand(db, id: "old")
+            try Self.insertLocalOnlyRows(db, marker: "local")
+        }
+        let bundle = try makeMigratedDatabaseFile()
+        try DatabaseQueue(path: bundle).write { db in
+            try Self.insertBrand(db, id: "new")
+            try Self.insertLocalOnlyRows(db, marker: "bundle")
+        }
+        let before = try local.read(Self.localOnlyRows)
+
+        // 起動時と同じく、スキーマを当てた結果 (台帳に無い表) から触らない表を決める。
+        let schema = try ensureMasterSchema(dbPath: localPath)
+        _ = try AppDatabase.copyMasterTables(
+            into: local, fromBundleAt: bundle,
+            preserving: AppDatabase.reseedPreservedTables(nonLedgerTables: schema.untouchedTables),
+            newVersion: 2, newContentHash: "hash-v2"
+        )
+
+        try local.read { db in
+            XCTAssertEqual(try Self.localOnlyRows(db), before, "端末ローカルの行が入れ直された")
+            XCTAssertEqual(try String.fetchAll(db, sql: "SELECT id FROM brands"), ["new"], "マスタ表は入れ直す")
+        }
+    }
+
+    private static func insertBrand(_ db: Database, id: String) throws {
+        try db.execute(
+            sql: "INSERT INTO brands (id, name, short_name, sort_order) VALUES (?, ?, ?, 1)",
+            arguments: [id, id, id])
+    }
+
+    private static func insertLocalOnlyRows(_ db: Database, marker: String) throws {
+        let now = "2026-09-23T00:00:00Z"
+        try db.execute(
+            sql: """
+                INSERT INTO user_marks (entity_type, entity_id, kind, bool_value, text_value, updated_at)
+                VALUES ('idol', ?, 'pick', 1, NULL, ?)
+                """,
+            arguments: [marker, now])
+        try db.execute(
+            sql: "INSERT INTO personal_tags (entity_type, entity_id, tag_name, created_at) VALUES ('song', ?, '聞いた', ?)",
+            arguments: [marker, now])
+        try db.execute(
+            sql: """
+                INSERT INTO expenses (id, date, category, amount, show_id, event_id, note, updated_at)
+                VALUES (?, '2026-09-01', 'ticket', 13200, NULL, NULL, NULL, ?)
+                """,
+            arguments: [marker, now])
+    }
+
+    private static func localOnlyRows(_ db: Database) throws -> [Row] {
+        try Row.fetchAll(db, sql: """
+            SELECT 'user_marks', entity_id FROM user_marks
+            UNION ALL SELECT 'personal_tags', entity_id FROM personal_tags
+            UNION ALL SELECT 'expenses', id FROM expenses
+            ORDER BY 1, 2
+            """)
+    }
+
     // MARK: - FK 違反は throw + ロールバック (旧: サイレント全停止)
 
     func testCopyThrowsAndRollsBackOnForeignKeyViolation() throws {
