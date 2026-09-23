@@ -39,6 +39,7 @@ pub mod edit_permission_rules;
 pub mod event_grouping;
 pub mod event_list_filtering;
 pub mod idol_list_filtering;
+pub mod list_facets;
 pub mod image_template_json;
 pub mod intro_quiz_choices;
 pub mod lyric_chunks;

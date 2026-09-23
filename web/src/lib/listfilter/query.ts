@@ -2,8 +2,9 @@
  * 一覧の絞り込みエンジン — **差し替え可能な import 面 (配管であって規則ではない)**。
  *
  * 実体は `imas-core` の domain を wasm にしたもの (`web/wasm/imas-query-wasm`)。
- * 絞り込みの条件も並び順も向こうが持っており、ここがやるのは
+ * 絞り込みの条件も並び順も選択肢も向こうが持っており、ここがやるのは
  * 「wasm をロードし、生テーブルを渡して `Query` を組む」ことだけ。
+ * 選択肢の型 (`SongFacets` / `IdolFacets`) は ts-rs の生成物 (`../schema/`)。
  * `src/lib/search/fold.ts` と同じ流儀。
  *
  * 生テーブル (10MB) と wasm (640KB) は**絞り込みを開くまで取りに行かない**。
@@ -35,33 +36,4 @@ export function loadQuery(): Promise<Query> {
     return new mod.Query(tables);
   })();
   return cached;
-}
-
-/** `Query.facets()` が返す選択肢。値は `SongQuery` にそのまま渡す文字列。 */
-export interface SongFacets {
-  brands: FacetOption[];
-  idols: FacetOption[];
-  cdSeries: FacetOption[];
-  seriesGroups: FacetOption[];
-  /** 並べ替え。既定方向もコアが決めた値をそのまま使う。 */
-  sorts: SortOption[];
-}
-
-/** `Query.idol_facets()` が返す選択肢。 */
-export interface IdolFacets {
-  brands: FacetOption[];
-  attributes: FacetOption[];
-  sorts: SortOption[];
-}
-
-/** 選択肢 1 件。値はそのまま条件に渡す文字列。 */
-export interface FacetOption {
-  value: string;
-  label: string;
-}
-
-export interface SortOption {
-  key: string;
-  label: string;
-  defaultAscending: boolean;
 }

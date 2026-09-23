@@ -19,7 +19,9 @@
  * 描画・重ね方・絞り込み中かの判定」が別々に書かれていて、軸を 1 本足すと
  * 6 箇所を直す必要があった (1 つ忘れても型は通り、URL 復元だけが壊れる)。
  */
-import type { FacetOption, SortOption } from "./query";
+import type { Query } from "../query/imas_query_wasm";
+import type { FacetOption } from "../schema/FacetOption";
+import type { SortOption } from "../schema/SortOption";
 
 /** 入力欄 1 つ。**この 1 行が軸のすべて**を決める。 */
 export interface FieldSpec {
@@ -50,8 +52,18 @@ export interface FieldSpec {
   boolean?: boolean;
 }
 
+/**
+ * 並べ替えの一覧と既定。曲・アイドルの選択肢 (`SongFacets` / `IdolFacets`) が共通に持つ。
+ * どちらも Rust (`domain::list_facets`) が決める。
+ */
+interface ListFacets {
+  sorts: SortOption[];
+  /** 未指定・未知の鍵が倒れる先 (= ページに描いた並び)。 */
+  defaultSort: string;
+}
+
 /** 一覧ごとの違いだけを持つ設定。 */
-export interface ListFilterSpec<F> {
+export interface ListFilterSpec<F extends ListFacets> {
   /** ログに出す名前。 */
   name: string;
   /** 行を抱えている要素 (tbody / ul)。 */
@@ -60,8 +72,6 @@ export interface ListFilterSpec<F> {
   item: string;
   /** 行の id を持つ dataset のキー。 */
   idAttr: string;
-  /** 未指定時の並び (コアの `from_key` の落とし先と同じ鍵)。 */
-  fallbackSort: string;
   /**
    * 並べ替えを表の列見出しで行う一覧の、その見出しを抱えている要素。
    *
@@ -74,26 +84,25 @@ export interface ListFilterSpec<F> {
   facets(engine: Engine): F;
   /** wasm に条件を渡して id 列を得る。 */
   ids(engine: Engine, queryJson: string): string[];
-  /** 選択肢から並べ替えの一覧を取り出す。 */
-  sorts(facets: F): SortOption[];
   /** 選択肢から入力欄の並びを組む。 */
   fields(facets: F): FieldSpec[];
   /**
    * 絞り込み/並べ替えの状態が変わったときの付随処理
-   * (かな目次のように、既定の並びを前提にした飛び先を隠す等)。
+   * (かな目次のように、ページに描いた並びを前提にした飛び先を隠す等)。
+   * `pageOrder` は「既定の並びを既定の向きで」= 行がページに描いた順のままか。
    */
-  onApply?(view: { narrowed: boolean; sort: string; ascending: boolean | null }): void;
+  onApply?(view: { narrowed: boolean; pageOrder: boolean }): void;
 }
 
-/** wasm ハンドル。ここは呼ぶだけなので、メソッド名は設定側が知っている。 */
-type Engine = unknown;
+/** wasm のハンドル (曲もアイドルも同じ `Query`。どのメソッドを呼ぶかは設定側が知っている)。 */
+type Engine = Query;
 
 type Value = string | string[] | number | boolean | null;
 type State = Record<string, Value> & { __sort: string; __ascending: boolean | null };
 
 const DEBOUNCE_MS = 120;
 
-export function mountListFilter<F>(
+export function mountListFilter<F extends ListFacets>(
   root: HTMLElement,
   spec: ListFilterSpec<F>,
   loadEngine: () => Promise<Engine>,
@@ -132,7 +141,8 @@ export function mountListFilter<F>(
   const baseQuery = JSON.parse(base) as Record<string, unknown>;
   let fields: FieldSpec[] = [];
   let sorts: SortOption[] = [];
-  let state = emptyState(fields, spec.fallbackSort);
+  let defaultSort = "";
+  let state = emptyState(fields, defaultSort);
   let engine: Engine | null = null;
   let timer = 0;
 
@@ -145,9 +155,10 @@ export function mountListFilter<F>(
       const facets = spec.facets(engine);
       // ページが決めている軸 (ブランド別ページのブランド・誕生月別ページの誕生月) は出さない。
       fields = spec.fields(facets).filter((f) => !fixedAxes.has(f.key));
-      sorts = spec.sorts(facets);
+      sorts = facets.sorts;
+      defaultSort = facets.defaultSort;
       // 軸が確定してから URL を読む (未知の鍵を拾わない)。
-      state = readUrl(fields, spec.fallbackSort);
+      state = readUrl(fields, defaultSort);
       renderFields();
       hideDuplicateAxes();
       bindSortHeaders();
@@ -176,14 +187,14 @@ export function mountListFilter<F>(
   el.reset.addEventListener("click", () => {
     // **並べ替えも既定に戻す。** 一覧の既定の並び (アイドルなら公式順) は列見出しに
     // 対応する列が無いので、ここが唯一の戻り道になる。「クリア」= 開いた直後の状態。
-    state = emptyState(fields, spec.fallbackSort);
+    state = emptyState(fields, defaultSort);
     renderFieldValues();
     syncDir();
     syncSorts();
     apply();
   });
   window.addEventListener("popstate", () => {
-    state = readUrl(fields, spec.fallbackSort);
+    state = readUrl(fields, defaultSort);
     renderFieldValues();
     renderSorts();
     apply();
@@ -233,8 +244,9 @@ export function mountListFilter<F>(
     const narrowed = isNarrowed(fields, state);
     el.status.textContent = narrowed ? `${visible} 件 / ${total} 件` : `${total} 件`;
     el.root.dataset.filtered = String(narrowed);
-    spec.onApply?.({ narrowed, sort: state.__sort, ascending: state.__ascending });
-    writeUrl(fields, state, spec.fallbackSort);
+    const pageOrder = state.__sort === defaultSort && currentAscending() === defaultAscendingOf(defaultSort);
+    spec.onApply?.({ narrowed, pageOrder });
+    writeUrl(fields, state, defaultSort);
   }
 
   /** 今見えている行が、この順のまま `order` と同じか。 */
@@ -253,9 +265,13 @@ export function mountListFilter<F>(
     el.root.dataset.state = on ? "ready" : "loading";
   }
 
+  /** その並びの既定の向き (決めるのはコア)。 */
+  function defaultAscendingOf(key: string): boolean {
+    return sorts.find((x) => x.key === key)?.defaultAscending ?? true;
+  }
+
   function currentAscending(): boolean {
-    if (state.__ascending !== null) return state.__ascending;
-    return sorts.find((x) => x.key === state.__sort)?.defaultAscending ?? true;
+    return state.__ascending ?? defaultAscendingOf(state.__sort);
   }
 
   function syncDir(): void {
@@ -311,7 +327,7 @@ export function mountListFilter<F>(
    * 表の列見出しで並べ替える一覧 (`spec.sortHeaders`) では札を出さない。
    */
   function renderSorts(): void {
-    if (!sorts.some((o) => o.key === state.__sort)) state.__sort = spec.fallbackSort;
+    if (!sorts.some((o) => o.key === state.__sort)) state.__sort = defaultSort;
     if (!headerScope) {
       el.sorts.replaceChildren(
         ...sorts.map((o) => {
@@ -500,9 +516,9 @@ function isNarrowed(fields: FieldSpec[], state: State): boolean {
 
 // --- URL との往復 -----------------------------------------------------------
 
-function readUrl(fields: FieldSpec[], fallbackSort: string): State {
+function readUrl(fields: FieldSpec[], defaultSort: string): State {
   const q = new URLSearchParams(location.search);
-  const s = emptyState(fields, q.get("sort") ?? fallbackSort);
+  const s = emptyState(fields, q.get("sort") ?? defaultSort);
   for (const f of fields) {
     const v = q.get(f.key);
     if (!v) continue;
@@ -519,14 +535,14 @@ function readUrl(fields: FieldSpec[], fallbackSort: string): State {
   return s;
 }
 
-function writeUrl(fields: FieldSpec[], state: State, fallbackSort: string): void {
+function writeUrl(fields: FieldSpec[], state: State, defaultSort: string): void {
   const q = new URLSearchParams();
   for (const f of fields) {
     const v = state[f.key];
     if (!hasValue(v)) continue;
     q.set(f.key, Array.isArray(v) ? v.join(",") : String(v).trim());
   }
-  if (state.__sort !== fallbackSort) q.set("sort", state.__sort);
+  if (state.__sort !== defaultSort) q.set("sort", state.__sort);
   if (state.__ascending !== null) q.set("dir", state.__ascending ? "asc" : "desc");
   const next = q.toString() ? `${location.pathname}?${q}` : location.pathname;
   if (next !== location.pathname + location.search) history.replaceState(null, "", next);

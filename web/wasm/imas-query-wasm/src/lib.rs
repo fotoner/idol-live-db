@@ -3,21 +3,19 @@
 //! **規則はここに無い。** やることは 3 つだけ:
 //!   1. Web 出面が配った生テーブル (JSON) を `RawTables` に戻す
 //!   2. `snapshot_build::build` で Snapshot を組む (索引はここで組み直す。派生は配らない)
-//!   3. `song_list_indexes` などコアの関数をそのまま呼び、添字列を返す
+//!   3. `song_list_indexes` / `list_facets` などコアの関数をそのまま呼び、結果を JSON で返す
 //!
-//! 条件の解釈も並び順も `imas-core` の domain が持っているので、アプリと web で
-//! 結果が食い違う余地が無い。事前計算していた頃は「軸ごとの集合を配って受け手が積を取る」
-//! 形だったため、軸を増やすたびに配る側の作り込みが要った。
+//! 条件の解釈も並び順も、選択肢の集合も `imas-core` の domain が持っているので、アプリと web で
+//! 結果が食い違う余地が無い。選択肢の型 (`SongFacets` / `IdolFacets`) も domain にあり、
+//! TS 側の型は ts-rs が出す。
 
 use imas_core::domain::snapshot::Snapshot;
 use imas_core::domain::snapshot_build::{self, RawTables};
-use imas_core::domain::song_list_queries::{
-    song_list_indexes, song_list_sort_options_without_user_marks, SongQuery,
-};
+use imas_core::domain::song_list_queries::{song_list_indexes, SongQuery};
 use imas_core::domain::idol_list_filtering::{
-    filter_idol_list, idol_list_entries, sort_idol_list, sort_order_table, IdolListEntry, IdolQuery,
+    filter_idol_list, idol_list_entries, sort_idol_list, IdolListEntry, IdolQuery,
 };
-use imas_core::domain::{idol_queries, song_detail_queries};
+use imas_core::domain::{idol_queries, list_facets};
 use wasm_bindgen::prelude::*;
 
 /// 組み立て済みの Snapshot を握るハンドル。
@@ -32,47 +30,6 @@ pub struct Query {
     idol_entries: Vec<IdolListEntry>,
     /// idol_id → 現任 CV 名。検索対象なので条件に毎回渡す。
     cast_names: std::collections::HashMap<String, String>,
-}
-
-/// 選択肢 1 件。value は `SongQuery` にそのまま渡す文字列。
-#[derive(serde::Serialize)]
-struct Opt {
-    value: String,
-    label: String,
-}
-
-#[derive(serde::Serialize)]
-#[serde(rename_all = "camelCase")]
-struct Facets {
-    brands: Vec<Opt>,
-    idols: Vec<Opt>,
-    cd_series: Vec<Opt>,
-    series_groups: Vec<Opt>,
-    /// 並べ替えの選択肢。既定方向もコアが持つ値をそのまま渡す。
-    sorts: Vec<SortOpt>,
-}
-
-/// アイドル一覧の選択肢。
-#[derive(serde::Serialize)]
-#[serde(rename_all = "camelCase")]
-struct IdolFacets {
-    brands: Vec<Opt>,
-    attributes: Vec<Opt>,
-    sorts: Vec<SortOpt>,
-}
-
-/// 並べ替え 1 件。
-#[derive(serde::Serialize)]
-#[serde(rename_all = "camelCase")]
-struct SortOpt {
-    key: String,
-    label: String,
-    default_ascending: bool,
-}
-
-/// 表示名がそのまま条件になる列 (CD シリーズ・シリーズ) の選択肢。
-fn same_value_options(names: Vec<String>) -> Vec<Opt> {
-    names.into_iter().map(|v| Opt { value: v.clone(), label: v }).collect()
 }
 
 #[wasm_bindgen]
@@ -100,46 +57,9 @@ impl Query {
         Ok(indexes.iter().map(|&i| self.snap.songs[i as usize].id.clone()).collect())
     }
 
-    /// 絞り込みの選択肢。**中身を決めるのは Snapshot** で、JS は並べるだけ。
-    ///
-    /// 値そのもの (ブランド id・アイドル id・CD シリーズ名) はコアが持つ文字列を
-    /// そのまま返す。JS 側で組み立て直すと `SongQuery` に渡す値がズレる。
+    /// 楽曲一覧の選択肢 (`list_facets::SongFacets` の JSON)。**中身を決めるのは domain** で、JS は並べるだけ。
     pub fn facets(&self) -> Result<String, JsValue> {
-        // **選択肢を組む関数はアプリと同じもの**を呼ぶ。ここで snap を自前で
-        // 走査すると、並びだけが他の画面と違う一覧になる (実際にアイドルは
-        // rowid 順・シリーズは辞書順になっていて、アプリのピッカーと食い違っていた)。
-        // ブランドは**この一覧に実際に居るものだけ** (属性と同じ規則)。
-        // 外部ゲストしか居ないブランド (`other`) を選べても 0 件になるだけ。
-        let present: std::collections::HashSet<&str> =
-            self.idol_entries.iter().map(|e| e.brand_id.as_str()).collect();
-        let brands = idol_queries::brand_records(&self.snap)
-            .into_iter()
-            .filter(|b| present.contains(b.id.as_str()))
-            .map(|b| Opt { value: b.id, label: b.name })
-            .collect();
-        let idols = idol_queries::all_idols_for_picker(&self.snap)
-            .into_iter()
-            .map(|i| Opt { value: i.id, label: i.name })
-            .collect();
-        let cd_series = same_value_options(
-            song_detail_queries::album_summaries(&self.snap, &[], None)
-                .into_iter()
-                .map(|a| a.cd_series)
-                .collect(),
-        );
-        let series_groups =
-            same_value_options(song_detail_queries::series_group_names(&self.snap, &[]));
-        let sorts = song_list_sort_options_without_user_marks()
-            .into_iter()
-            .map(|o| SortOpt {
-                key: o.key,
-                label: o.label,
-                default_ascending: o.default_ascending,
-            })
-            .collect();
-
-        serde_json::to_string(&Facets { brands, idols, cd_series, series_groups, sorts })
-            .map_err(|e| JsValue::from_str(&format!("選択肢を組めない: {e}")))
+        to_json(&list_facets::song_facets(&self.snap, &self.idol_entries))
     }
 
     /// 条件に合うアイドル id を、並び順どおりに返す。
@@ -157,45 +77,19 @@ impl Query {
         Ok(order.iter().map(|&i| kept_entries[i as usize].idol_id.clone()).collect())
     }
 
-    /// アイドル一覧の選択肢 (ブランド・属性・誕生月・並べ替え)。
+    /// アイドル一覧の選択肢 (`list_facets::IdolFacets` の JSON)。
     pub fn idol_facets(&self) -> Result<String, JsValue> {
-        // ブランドは**この一覧に実際に居るものだけ** (属性と同じ規則)。
-        // 外部ゲストしか居ないブランド (`other`) を選べても 0 件になるだけ。
-        let present: std::collections::HashSet<&str> =
-            self.idol_entries.iter().map(|e| e.brand_id.as_str()).collect();
-        let brands = idol_queries::brand_records(&self.snap)
-            .into_iter()
-            .filter(|b| present.contains(b.id.as_str()))
-            .map(|b| Opt { value: b.id, label: b.name })
-            .collect();
-        // 属性は実データに出てくるものだけ (ブランドごとに語彙が違う)。
-        let mut attrs: std::collections::BTreeSet<&str> = std::collections::BTreeSet::new();
-        for e in &self.idol_entries {
-            if let Some(a) = e.attribute.as_deref().filter(|a| !a.is_empty()) {
-                attrs.insert(a);
-            }
-        }
-        let attributes = attrs
-            .into_iter()
-            .map(|a| Opt { value: a.to_string(), label: a.to_string() })
-            .collect();
-        let sorts = sort_order_table()
-            .into_iter()
-            .map(|m| SortOpt {
-                key: m.kind.key().to_string(),
-                label: m.display_name,
-                default_ascending: m.default_ascending,
-            })
-            .collect();
-
-        serde_json::to_string(&IdolFacets { brands, attributes, sorts })
-            .map_err(|e| JsValue::from_str(&format!("選択肢を組めない: {e}")))
+        to_json(&list_facets::idol_facets(&self.snap, &self.idol_entries))
     }
 
     /// 曲の総数。
     pub fn song_count(&self) -> usize {
         self.snap.songs.len()
     }
+}
+
+fn to_json(value: &impl serde::Serialize) -> Result<String, JsValue> {
+    serde_json::to_string(value).map_err(|e| JsValue::from_str(&format!("選択肢を組めない: {e}")))
 }
 
 #[cfg(test)]
