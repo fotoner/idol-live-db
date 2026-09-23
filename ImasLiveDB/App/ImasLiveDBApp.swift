@@ -7,9 +7,12 @@ struct ImasLiveDBApp: App {
     /// 端末の DB を開く流れ。開けるまで ContentView は作らない (DB を読む画面が先に動かないように)。
     @State private var boot = DatabaseBoot()
     @State private var syncEngine = CloudKitSyncEngine()
-    /// DB を開き終える前に届いたリンク (ウィジェットからの起動など)。
-    /// その時点では ContentView が居ないので預かり、開けたら ContentView に渡す。
-    @State private var pendingLaunchURL: URL?
+    /// 届いたリンク (ウィジェット・共有されたリンク)。ContentView が開いたら nil に戻す。
+    ///
+    /// 受け口はここ 1 つにする。DB を開いている間は ContentView が居ないうえ、開き終えて
+    /// ContentView に差し替わる途中に届くと、ContentView 側の `onOpenURL` がまだ無く、
+    /// 取りこぼした (起動直後にリンクを開くと、何も起きないことがあった)。
+    @State private var incomingURL: URL?
 
     /// オンボーディング (HelpView) を初回起動で 1 度だけ自動表示するためのフラグ。
     /// オープン編集モデルへの刷新に伴い v2 へ更新 (既存ユーザーにも新しい説明を 1 度再表示する)。
@@ -93,18 +96,17 @@ struct ImasLiveDBApp: App {
             .task { await boot.prepare() }
             .onOpenURL { url in
                 // deeplink 着地時は起動シート (オンボーディング/日替わりピック) を閉じて
-                // 詳細ページの提示 (ContentView 側の onOpenURL) を優先する。
+                // 詳細ページの提示 (ContentView が incomingURL を開く) を優先する。
                 // オンボーディング既読フラグは onDismiss で通常どおり確定される。
                 launchSheet = nil
-                if case .ready = boot.state { return }
-                pendingLaunchURL = url
+                incomingURL = url
             }
         }
     }
 
     /// DB を開けた後の画面。
     private func root(_ appDatabase: AppDatabase) -> some View {
-        ContentView(launchURL: pendingLaunchURL)
+        ContentView(incomingURL: $incomingURL)
             .environment(appDatabase)
             .environment(syncEngine)
             .task {

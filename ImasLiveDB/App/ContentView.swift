@@ -48,16 +48,15 @@ struct ContentView: View {
         themeOshiColorHex.isEmpty ? nil : Color(hexString: themeOshiColorHex)
     }
 
-    /// DB を開き終える前に届いたリンク (ウィジェットからの起動など)。現れたときに 1 度だけ開く。
-    /// その時点ではこの View が居らず、`onOpenURL` では受け取れなかったもの。
-    private let launchURL: URL?
+    /// 届いたリンク。アプリのルートが受けて渡してくる (受け口は 1 つ)。開いたら nil に戻す。
+    @Binding private var incomingURL: URL?
 
     /// TabBar のアクティブ tint だけ .label にする。`.tint(.primary)` を View 階層にかけると
     /// 配下の tint 依存表示 (Toggle・Link 等の標準コントロール) まで巻き添えになるため、
     /// SwiftUI の `.tint()` ではなく UITabBar.appearance() を使う。
     /// (chip 系は既に Color.accentColor をやめ ImasTheme 由来に統一済みなので影響しない)
-    init(launchURL: URL? = nil) {
-        self.launchURL = launchURL
+    init(incomingURL: Binding<URL?> = .constant(nil)) {
+        _incomingURL = incomingURL
         UITabBar.appearance().tintColor = .label
     }
 
@@ -91,7 +90,6 @@ struct ContentView: View {
         // 状態が変わったとき 1 回だけここで回す。
         .task(id: MusicKitService.shared.playbackKey) { await NowPlayingModel.shared.refresh() }
         .task {
-            if let launchURL { handleDeeplink(launchURL) }
             AppAnalytics.screen(Self.tabName(selectedTab))
             // 一覧やピッカーは Idol の配列しか持たないので、CV 名は辞書から引く。
             // 行ごとに DB を叩くと N+1 になる (300件程度なのでまとめて持つ)。
@@ -126,7 +124,10 @@ struct ContentView: View {
         .sheet(isPresented: $showSettings, onDismiss: presentPendingDeeplink) {
             MyPageView().environment(database).environment(syncEngine)
         }
-        .onOpenURL { url in
+        // 起動直後に届いたものも、開いている間に届いたものも、ここで 1 度だけ開く。
+        .task(id: incomingURL) {
+            guard let url = incomingURL else { return }
+            incomingURL = nil
             handleDeeplink(url)
         }
         .sheet(item: $deeplinkDestination, onDismiss: presentPendingDeeplink) { dest in
