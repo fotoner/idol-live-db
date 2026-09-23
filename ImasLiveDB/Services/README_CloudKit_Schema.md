@@ -52,14 +52,6 @@ SongVideo
 
 ---
 
-## スキーマ自動生成（Development 環境のみ）
-
-`CloudKitSchemaBootstrap.createSchema()` を Development 環境で一度実行すると、
-各 Record Type のフィールド定義が CloudKit に登録されます（ダミーレコードを保存→削除）。
-ただし **インデックスは自動登録されません**。上記の手動設定が必ず必要です。
-
----
-
 ## トラブルシューティング
 
 | エラーメッセージ                              | 原因                          | 対処                                |
