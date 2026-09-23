@@ -434,7 +434,7 @@ pub fn songs_by_creator(snap: &Snapshot, name: &str) -> Vec<SongWithRolesRecord>
     let mut candidates: Vec<u32> = (0..snap.songs.len() as u32)
         .filter(|&i| {
             let s = &snap.songs[i as usize];
-            [&s.composer, &s.lyricist, &s.arranger].into_iter().any(|f| names_person(f))
+            [&s.composer, &s.lyricist, &s.arranger].into_iter().any(names_person)
         })
         .collect();
     candidates.sort_by(|&l, &r| {
