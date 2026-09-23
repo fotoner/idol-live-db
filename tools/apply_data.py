@@ -79,6 +79,14 @@ ALLOWED_FIX_TABLES = {
 }
 # 読みの表は fixes ではなく専用の投入口 (data/creators/) から入れる。
 
+# 出典。投稿はファイルの先頭か各項目に source (URL か一次ソースの名前。複数なら並び) を
+# 持つこと。衣装は各着の source_url も出典に数える。_sources は古い投稿の書き方。
+# source は DB に入らない (source_url は衣装の列として入る)。
+FILE_SOURCE_KEYS = ("source", "_sources")
+ITEM_SOURCE_KEYS = ("source", "source_url")
+# 各項目に付けてよい、表の列ではないキー (DB には入らない)。
+ANNOTATION_KEYS = ("source", "note")
+
 
 def cols(conn, table):
     return {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
@@ -98,6 +106,7 @@ ONLY_FILE = None
 
 
 def load(kind):
+    """data/<kind>/*.json を読む。反映済みを移した data/_applied/ は読まない。"""
     out = []
     d = DATA_DIR / kind
     if not d.exists():
@@ -132,8 +141,36 @@ def resolve_song(conn, brand_id, song_id, title, pending=()):
 
 # ---- 検証 -----------------------------------------------------------------
 
+def has_source(value) -> bool:
+    """出典として使える値か (空でない文字列か、空でない文字列だけの並び)。"""
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, list):
+        return bool(value) and all(isinstance(v, str) and v.strip() for v in value)
+    return False
+
+
+def source_problems(kind, path, data):
+    """出典の無い投稿を問題にする。ファイルの先頭か、全項目に出典があればよい。"""
+    if any(has_source(data.get(k)) for k in FILE_SOURCE_KEYS):
+        return []
+    # セットリストは 1 公演 1 ファイルなので、出典はファイルの先頭に書く。
+    items = [] if kind == "setlists" else data.get(kind, [])
+    missing = [i for i, item in enumerate(items)
+               if not any(has_source(item.get(k)) for k in ITEM_SOURCE_KEYS)]
+    if items and not missing:
+        return []
+    where = f" (項目 {missing[:5]}{' ほか' if len(missing) > 5 else ''})" if items else ""
+    return [f"{kind}/{path.name}: 出典が無い{where}。ファイルの先頭か各項目に source "
+            f"(URL か一次ソースの名前) を書く"]
+
+
 def validate(conn):
     problems = []
+
+    for kind in list(KIND_TABLES) + ["fixes"]:
+        for path, data in load(kind):
+            problems += source_problems(kind, path, data)
 
     for path, data in load("songs"):
         scol = cols(conn, "songs")
@@ -146,7 +183,7 @@ def validate(conn):
             elif exists(conn, "songs", s["id"]):
                 problems.append(f"{tag}: id '{s['id']}' は既に存在 (新規追加のみ)")
             for k in s:
-                if k not in scol and k not in ("original_singers", "source", "note"):
+                if k not in scol and k not in ("original_singers", *ANNOTATION_KEYS):
                     problems.append(f"{tag}: 未知の列 '{k}'")
             for idol in s.get("original_singers", []):
                 if not exists(conn, "idols", idol):
@@ -203,13 +240,13 @@ def validate(conn):
             if not ev.get("id") or exists(conn, "events", ev.get("id", "")):
                 problems.append(f"{tag}: event id が空 or 既存")
             for k in ev:
-                if k not in ecol and k not in ("shows",):
+                if k not in ecol and k not in ("shows", *ANNOTATION_KEYS):
                     problems.append(f"{tag}: events に未知の列 '{k}'")
             for sh in ev.get("shows", []):
                 if not sh.get("id") or exists(conn, "shows", sh.get("id", "")):
                     problems.append(f"{tag}: show id が空 or 既存 ({sh.get('id')})")
                 for k in sh:
-                    if k not in scol:
+                    if k not in scol and k not in ANNOTATION_KEYS:
                         problems.append(f"{tag}: shows に未知の列 '{k}'")
 
     for path, data in load("shows"):
@@ -223,7 +260,7 @@ def validate(conn):
             if not sh.get("date"):
                 problems.append(f"{tag}: date は必須")
             for k in sh:
-                if k not in scol and k != "note":
+                if k not in scol and k not in ANNOTATION_KEYS:
                     problems.append(f"{tag}: shows に未知の列 '{k}'")
 
     for path, data in load("idols"):
@@ -235,7 +272,7 @@ def validate(conn):
             if not idol.get("id") or exists(conn, "idols", idol.get("id", "")):
                 problems.append(f"{tag}: idol id が空 or 既存")
             for k in idol:
-                if k not in icol and k not in ("brands",):
+                if k not in icol and k not in ("brands", *ANNOTATION_KEYS):
                     problems.append(f"{tag}: idols に未知の列 '{k}'")
 
     for path, data in load("creators"):
@@ -247,7 +284,7 @@ def validate(conn):
             if not c.get("name") or not c.get("name_kana"):
                 problems.append(f"{tag}: name / name_kana は必須")
             for k in c:
-                if k not in ccol and k != "note":
+                if k not in ccol and k not in ANNOTATION_KEYS:
                     problems.append(f"{tag}: creators に未知の列 '{k}'")
 
     for path, data in load("unit_versions"):
@@ -261,7 +298,7 @@ def validate(conn):
             if not v.get("name"):
                 problems.append(f"{tag}: name が空")
             for k in v:
-                if k not in vcol and k != "note":
+                if k not in vcol and k not in ANNOTATION_KEYS:
                     problems.append(f"{tag}: unit_versions に未知の列 '{k}'")
 
     for path, data in load("costumes"):
@@ -278,7 +315,7 @@ def validate(conn):
                 if c.get(ref) and not exists(conn, table, c[ref]):
                     problems.append(f"{tag}: {ref} '{c[ref]}' が存在しない")
             for k in c:
-                if k not in kcol and k not in ("wears", "note"):
+                if k not in kcol and k not in ("wears", *ANNOTATION_KEYS):
                     problems.append(f"{tag}: costumes に未知の列 '{k}'")
             if not c.get("wears"):
                 problems.append(f"{tag}: wears が空 (着た公演が 1 つも無い衣装は入れない)")
@@ -313,7 +350,7 @@ def validate(conn):
             if not u.get("id") or exists(conn, "units", u.get("id", "")):
                 problems.append(f"{tag}: unit id が空 or 既存")
             for k in u:
-                if k not in ucol and k not in ("members",):
+                if k not in ucol and k not in ("members", *ANNOTATION_KEYS):
                     problems.append(f"{tag}: units に未知の列 '{k}'")
             for idol in u.get("members", []):
                 if not exists(conn, "idols", idol):
@@ -648,7 +685,7 @@ def main():
         print("✓ CloudKit push 完了")
     else:
         print("\n(master.sqlite のみ反映。CloudKit へ出すには --push --production)")
-    print("\n適用済みの data/**/*.json は確認後に削除してOK (PR履歴が監査ログ)。")
+    print("\n反映したファイルは data/_applied/<種類>/ へ移す (git mv。apply_data は読まない)。")
 
 
 if __name__ == "__main__":

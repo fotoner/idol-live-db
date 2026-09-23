@@ -112,5 +112,92 @@ class EnsureDbTest(unittest.TestCase):
         self.assertGreater(shows, 0)
 
 
+class SourceRequiredTest(unittest.TestCase):
+    """出典 (source) の無い投稿は --check で落とす。"""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        root = Path(self.tmp.name)
+        self.db = root / "m.sqlite"
+        fixture_db(self.db)
+        self.data = root / "data"
+        self._saved = (apply_data.DATA_DIR, apply_data.ONLY_FILE)
+        apply_data.DATA_DIR, apply_data.ONLY_FILE = self.data, None
+
+    def tearDown(self):
+        apply_data.DATA_DIR, apply_data.ONLY_FILE = self._saved
+        self.tmp.cleanup()
+
+    def problems(self, kind, post):
+        support.write_json(self.data / kind / "post.json", post)
+        conn = sqlite3.connect(str(self.db))
+        try:
+            return [p for p in apply_data.validate(conn) if "出典" in p]
+        finally:
+            conn.close()
+
+    def song(self, **extra):
+        return dict({"id": "ml_new_song", "title": "新曲", "brand_id": "ml", "song_type": "solo"}, **extra)
+
+    def test_a_post_without_any_source_is_rejected(self):
+        self.assertEqual(len(self.problems("songs", {"songs": [self.song()]})), 1)
+
+    def test_blank_sources_do_not_count(self):
+        self.assertEqual(len(self.problems("songs", {"source": " ", "songs": [self.song(source=[])]})), 1)
+
+    def test_a_file_level_source_covers_every_item(self):
+        self.assertEqual(self.problems("songs", {"source": "https://example.com/news", "songs": [self.song()]}), [])
+
+    def test_every_item_may_carry_its_own_source(self):
+        post = {"songs": [self.song(source="https://example.com/a"),
+                          self.song(id="ml_other", source=["CD のブックレット"])]}
+        self.assertEqual(self.problems("songs", post), [])
+        post["songs"][1].pop("source")
+        [problem] = self.problems("songs", post)
+        self.assertIn("[1]", problem)
+
+    def test_costume_source_url_counts_as_a_source(self):
+        self.assertEqual(self.problems("costumes", COSTUME_POST), [])
+
+    def test_setlists_and_fixes_need_one_too(self):
+        setlist = {"show_id": "sh_t", "songs": [{"position": 1, "song_id": "song_t", "performers": "all"}]}
+        self.assertEqual(len(self.problems("setlists", setlist)), 1)
+        self.assertEqual(self.problems("setlists", dict(setlist, source="公式のセットリスト画像")), [])
+        fix = {"table": "songs", "id": "song_t", "fields": {"title": "曲"}}
+        self.assertEqual(len(self.problems("fixes", {"fixes": [fix]})), 1)
+        self.assertEqual(self.problems("fixes", {"fixes": [dict(fix, source="https://example.com")]}), [])
+
+    def test_every_template_shows_a_source(self):
+        # テンプレートをそのまま写した投稿が、出典の検査に落ちないこと。
+        import json
+        for path in sorted((support.REPO / "data").glob("*/_template.json")):
+            data = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(apply_data.source_problems(path.parent.name, path, data), [], path)
+
+    def test_an_item_level_source_is_not_an_unknown_column(self):
+        conn = sqlite3.connect(str(self.db))
+        idol = {"id": "ml_new", "brand_id": "ml", "name": "新人", "sort_order": 3002,
+                "source": "https://example.com/idol"}
+        support.write_json(self.data / "idols" / "post.json", {"idols": [idol]})
+        try:
+            self.assertEqual(apply_data.validate(conn), [])
+        finally:
+            conn.close()
+
+
+class AppliedPostsTest(unittest.TestCase):
+    def test_posts_moved_to_applied_are_not_read(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            data = Path(tmp) / "data"
+            support.write_json(data / "_applied" / "songs" / "old.json", {"songs": []})
+            support.write_json(data / "songs" / "new.json", {"songs": []})
+            saved = apply_data.DATA_DIR
+            apply_data.DATA_DIR = data
+            try:
+                self.assertEqual([p.name for p, _ in apply_data.load("songs")], ["new.json"])
+            finally:
+                apply_data.DATA_DIR = saved
+
+
 if __name__ == "__main__":
     unittest.main()

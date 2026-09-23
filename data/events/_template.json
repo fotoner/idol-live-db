@@ -2,6 +2,7 @@
  "title": "ライブ / イベントの追加 (例)",
  "author": "あなたのハンドル名 (任意)",
  "_help": "event id 規則: ev_{slug}, show id 規則: sh_{slug}_{連番}。kind は ../README.md 参照。",
+ "source": "出典 (必須)。公式の告知ページの URL か、CD のクレジットなど一次ソースの名前。DB に既にある値から導いたものは derived:<何から導いたか> と書く (関係の無い URL を付けない)。複数なら並べる。項目ごとに違うなら各項目に source を書いてもよい",
  "events": [
   {
    "id": "ev_example_live_2026",
