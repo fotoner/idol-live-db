@@ -343,12 +343,8 @@ fun QuizResultView(
     val grade = result.grade
     val gradeColor = grade.color()
 
-    val comment = when {
-        rate >= 95 -> "お見事！担当への愛が伝わる"
-        rate >= 80 -> "高得点！プロデューサーの貫禄"
-        rate >= 50 -> "いい線いってる！次はもっと高みへ"
-        else -> "これから一緒に覚えていこう"
-    }
+    // 一言の閾値と文言はコア (QuizSessionResult.comment)。
+    val comment = result.comment
 
     var appeared by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
