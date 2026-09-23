@@ -92,6 +92,8 @@ declare_and_call_checksums! {
     uniffi_imas_core_checksum_func_edit_permission_should_prompt_login,
     uniffi_imas_core_checksum_func_edit_permission_show_edit_affordance,
     uniffi_imas_core_checksum_func_ensure_master_schema,
+    uniffi_imas_core_checksum_func_event_short_name,
+    uniffi_imas_core_checksum_func_event_short_names,
     uniffi_imas_core_checksum_func_expense_categories,
     uniffi_imas_core_checksum_func_expense_category_from_key,
     uniffi_imas_core_checksum_func_expense_category_key,

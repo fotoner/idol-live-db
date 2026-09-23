@@ -713,35 +713,6 @@ mod tests {
 
     // ---- 回帰: イベント帯 title は正式名称のまま (意図的な Swift 差分の固定) ----
 
-    /// iOS `Extensions/EventDisplayName.swift` の作品名プレフィックス一覧の写し。
-    /// core が省略を「していない」ことを実データで証明するためだけに使う。
-    const EVENT_DISPLAY_PREFIXES: [&str; 12] = [
-        "THE IDOLM@STER CINDERELLA GIRLS ",
-        "THE IDOLM@STER MILLION LIVE! ",
-        "THE IDOLM@STER MILLION LIVE!",
-        "THE IDOLM@STER SideM ",
-        "THE IDOLM@STER SHINY COLORS ",
-        "THE IDOLM@STER ",
-        "アイドルマスター シンデレラガールズ ",
-        "アイドルマスター ミリオンライブ! ",
-        "アイドルマスター シャイニーカラーズ ",
-        "アイドルマスター SideM ",
-        "学園アイドルマスター ",
-        "アイドルマスター ",
-    ];
-
-    /// Swift `eventDisplayName` (省略設定 ON 時) の写経 (テスト専用)。
-    /// 最初に一致した 1 プレフィックスだけ除去し、除去後 2 文字未満なら元の名前。
-    fn swift_event_display_name(name: &str) -> &str {
-        for prefix in EVENT_DISPLAY_PREFIXES {
-            if let Some(rest) = name.strip_prefix(prefix) {
-                let stripped = rest.trim();
-                return if stripped.chars().count() >= 2 { stripped } else { name };
-            }
-        }
-        name
-    }
-
     /// 移送時の意図的な差分の回帰固定: Swift 原本はフェッチ時に eventDisplayName
     /// (作品名プレフィックス省略) を掛けていたが、core は events.name の正式名称を
     /// そのまま返す。省略は UserDefaults 依存の表示状態なのでアダプタが
@@ -768,7 +739,7 @@ mod tests {
             };
             let official = &names[id];
             assert_eq!(&bar.title, official, "ev_{id}: title は events.name 未加工のまま");
-            if swift_event_display_name(official) != official.as_str() {
+            if crate::domain::event_naming::event_short_name(official) != official.as_str() {
                 abbreviation_would_change += 1;
             }
         }
