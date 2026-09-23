@@ -17,7 +17,7 @@
 //! 何度も引けば曲が復元できてしまう。ここで **1 曲 [`MAX_SNIPPETS_PER_SONG`] 本**に
 //! 切る。行番号も前後の行も持たないので、断片どうしのつながりは分からない。
 
-use crate::domain::agent_tools::{json::Obj, tool_schema, ToolSpec};
+use crate::agent::tools::{json::Obj, tool_schema, ToolSpec};
 use crate::domain::snapshot::Snapshot;
 use crate::domain::song_list_queries::is_hidden_variant;
 use serde_json::{json, Value};

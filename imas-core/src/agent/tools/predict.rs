@@ -354,7 +354,7 @@ fn co_performed_songs(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolE
 mod tests {
     use super::*;
     use crate::test_support::bundle_snapshot;
-    use crate::domain::agent_tools::call_tool;
+    use crate::agent::tools::call_tool;
 
     const TODAY: &str = "2026-09-19";
 

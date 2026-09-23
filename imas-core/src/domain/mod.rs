@@ -42,7 +42,6 @@ pub mod idol_list_filtering;
 pub mod image_template_json;
 pub mod intro_quiz_choices;
 pub mod lyric_chunks;
-pub mod lyrics_search;
 pub mod oshi_theme_resolution;
 pub mod setlist_diff;
 pub mod setlist_lineup;
@@ -83,9 +82,6 @@ pub mod share_text;
 pub mod sync_decisions;
 pub mod screen_composition;
 
-// LLM 向けツール面 (MCP / CLI)。規則はここに置き、アダプタ (crate::agent) は
-// JSON を渡して受け取るだけにする。feature ゲートしないのは、既定の cargo test で
-// 規則のテストを回したいため (アダプタと bin の方は feature = "agent" で切ってある)。
-pub mod agent_tools;
+// 人の言葉からエンティティを引き当てる規則。今の呼び手は LLM 向けのツール面
+// (crate::agent::tools) だけだが、JSON を持たない純粋な規則なのでここに置く。
 pub mod entity_resolution;
-pub mod proposal;

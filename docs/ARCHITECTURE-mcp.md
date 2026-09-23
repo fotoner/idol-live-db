@@ -36,10 +36,11 @@
 
 1. **ランニングコスト 0**。ローカル版はユーザーの手元で動くので当然 0。リモート公開版 (§8) も
    従量課金の経路を作らない。
-2. **判断の唯一の正は imas-core (Rust) の `domain`**。「どの語が当たるか」「何を返すか」
-   「何件で切るか」「どう並べるか」はすべて `domain::agent_tools` / `entity_resolution` /
-   `proposal` が持つ。アダプタ (`src/agent/`) は入力をほどいて domain を呼び、返った JSON を
-   書き出すだけ。**これを崩すと、アプリ・Web・LLM で「同じ質問に違う答え」が出る。**
+2. **判断の唯一の正は imas-core (Rust)**。「どの語が当たるか」「どう並べるか」のように他の面と
+   共有する規則は `domain` (`entity_resolution` / `text_search_index` / `setlist_shape` …) が持ち、
+   ツールのカタログと「何を返すか」「何件で切るか」はツール面 (`agent::tools` / `agent::proposal`) が
+   持つ。入出力 (`agent::mcp` / `stdio` / `cli` / `proposal_io`) は入力をほどいてツール面を呼び、
+   返った JSON を書き出すだけ。**これを崩すと、アプリ・Web・LLM で「同じ質問に違う答え」が出る。**
 3. **照合規則はコア一本**。検索の畳み込みは `imas-text-fold` / `domain::text_search_index` /
    `fuzzy_search` が唯一の実体。ツール面で `contains` や `to_lowercase` を書かない。
 4. **FFI 面は不変**。新しい `#[uniffi::export]` を足さない (`tests/ffi_surface.rs` が固定している)。
@@ -58,17 +59,19 @@
    │   stdio.rs … 行区切り JSON-RPC の入出力            │
    │   cli.rs   … argv → 同じツール                     │
    │   proposal_io.rs … ドラフトを書く / --check を起動 │
+   │       │ 呼ぶだけ (判断を書かない)                   │
+   │   ツール面 (カタログと応答の組み立て・テスト付)     │
+   │   tools/lookup.rs  … resolve / search / get_* / vocabulary
+   │   tools/browse.rs  … list_* / idol_songs / song_performances / setlist_diff / stats
+   │   tools/predict.rs … list_shows / setlist_shape / song_position_profile / co_performed_songs
+   │   tools/scope.rs   … 公演を絞る引数のほどき方 (公演を扱う全ツール共通)
+   │   tools/vocab.rs   … 取りうる値と、語彙外を候補つきで突き返す作法
+   │   proposal.rs      … 投入ドラフトの組み立て
    └───────────────┬──────────────────────────────────┘
-                   │ 呼ぶだけ (判断を書かない)
+                   │ 共有の規則を呼ぶ
    ┌───────────────▼──────────────────────────────────┐
    │ imas-core/src/domain/   (唯一の正・純粋・テスト付) │  feature に関係なく常時コンパイル
-   │   agent_tools/lookup.rs  … resolve / search / get_* / vocabulary
-   │   agent_tools/browse.rs  … list_* / idol_songs / song_performances / setlist_diff / stats
-   │   agent_tools/predict.rs … list_shows / setlist_shape / song_position_profile / co_performed_songs
-   │   agent_tools/scope.rs   … 公演を絞る引数のほどき方 (公演を扱う全ツール共通)
-   │   agent_tools/vocab.rs   … 取りうる値と、語彙外を候補つきで突き返す作法
    │   entity_resolution.rs   … 人の言葉 → エンティティ候補
-   │   proposal.rs            … 投入ドラフトの組み立て
    │   (以下は既存) search_queries / idol_queries / song_detail_queries / …
    └───────────────┬──────────────────────────────────┘
                    │ Snapshot
@@ -77,8 +80,9 @@
    └──────────────────────────────────────────────────┘
 ```
 
-`domain` 側を feature ゲートしていないのは、**既定の `cargo test` で規則のテストを回すため**。
-アダプタと bin だけを切れば iOS/Android のビルドには入らない。
+ツール面も入出力と同じ feature = "agent" に入れてある。JSON の組み立て (応答の形・JSON Schema) は
+LLM 向けの面の事情で、アプリ (iOS/Android) にも Web にも要らないため。テストは
+`cargo test --features agent` で走る (core-guard が既定の `cargo test` と並べて流す)。
 
 **読む DB はアプリと同じ `ImasLiveDB/Resources/master.sqlite`** で、Web 出面が読む
 `db/master.sql` 由来の写しとは**別物**。両者は双方向に乖離することが既知なので、
@@ -178,7 +182,7 @@ cargo build --release --features agent --bin imas-mcp
 ## 8. リモート公開 (Phase 2・未着手 / 着手前に決めることがある)
 
 手元に clone した人しか使えないのは惜しいので、誰でも繋げる MCP エンドポイントも出したい。
-**判断は同じ `domain::agent_tools` を通す** (wasm で呼ぶ) ので、判断そのものがズレることはない
+**判断は同じ `agent::tools` を通す** (feature = "agent" を付けて wasm で呼ぶ) ので、判断そのものがズレることはない
 (ただし読む DB が違えば答えは違いうる。§3 の注記)。
 
 **着手前に決めること (これが未決のうちは Phase 2 を始めない)**:

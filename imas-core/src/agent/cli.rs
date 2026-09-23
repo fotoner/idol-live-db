@@ -8,12 +8,12 @@
 //! ```
 //!
 //! `--key value` の組み立ては `super::dispatch` の手前で JSON オブジェクトに変換する
-//! だけ。値の型推定・欠損チェックは全部 `domain::agent_tools::args` 側の役目で、ここは
+//! だけ。値の型推定・欠損チェックは全部 `tools::args` 側の役目で、ここは
 //! 「文字列がどう見えるか」しか判断しない (数値に見えれば数値、`true`/`false` なら
 //! 真偽値、それ以外は文字列)。
 
 use super::Ctx;
-use crate::domain::agent_tools::ToolError;
+use crate::agent::tools::ToolError;
 use crate::domain::snapshot::Snapshot;
 use serde_json::{json, Map, Value};
 

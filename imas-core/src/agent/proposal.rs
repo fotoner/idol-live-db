@@ -24,8 +24,8 @@
 //! 「未知の列」判定 (songs は許すが idols/events は許さない、等) を一切気にしなくて済む
 //! 形にしてある。
 
-use crate::domain::agent_tools::{args, tool_schema};
-pub use crate::domain::agent_tools::{ToolError, ToolSpec};
+use crate::agent::tools::{args, tool_schema};
+pub use crate::agent::tools::{ToolError, ToolSpec};
 use serde_json::{json, Value};
 
 /// `data/` 配下、どの種別のドラフトか。ディレクトリとファイル名の両方をここから決める
@@ -145,7 +145,7 @@ pub const MAX_AUTO_CHECK_FILES: usize = 20;
 ///
 /// `table: "songs"` に任意の `fields` を書ける以上、歌詞/試聴 URL をここ経由で
 /// 混入させる経路が残ってしまう。歌詞本文そのものを返す訳ではないので「漏洩」では
-/// ないが、読み取り側 (`domain::agent_tools`) がこの 2 列を意図的に隠している以上、
+/// ないが、読み取り側 (`agent::tools`) がこの 2 列を意図的に隠している以上、
 /// 書き込み側でも同じ列は塞いでおく。
 const FORBIDDEN_FIX_FIELDS: &[&str] = &["lyrics_url", "preview_url"];
 
@@ -418,7 +418,7 @@ pub fn is_proposal_tool(name: &str) -> bool {
 /// `today_key` は JST の「今日」(`YYYY-MM-DD`)。ファイル名の日付部分に使う。
 /// ここで `SystemTime` 等を直接読まないのは、呼び手 (`agent::proposal_io`) が
 /// `Ctx::today_key` を渡せば決定的にテストできるようにするため
-/// (`domain::agent_tools::call_tool` が `today_key` を引数で受けるのと同じ理由)。
+/// (`tools::call_tool` が `today_key` を引数で受けるのと同じ理由)。
 ///
 /// `check_proposals` はここに来ない (ドラフトを組まないので) — `agent::proposal_io::run`
 /// が名前で先に分岐する。渡ってきた場合は `UnknownTool` として扱う。

@@ -2,7 +2,7 @@
 //!
 //! MCP サーバも CLI も、入口の形が違うだけで **答えの中身はここで決まる**。
 //! 「どの語がどのレコードに当たるか」「何を返すか」「何件で切るか」「どう並べるか」は
-//! 全部この層の判断で、アダプタ (`crate::agent`) は JSON-RPC の封を開けて
+//! 全部この層の判断で、アダプタ (`agent::mcp` / `stdio` / `cli`) は JSON-RPC の封を開けて
 //! ここへ渡し、返った `serde_json::Value` をそのまま書き出すだけにする。
 //!
 //! ## 返す形の方針
@@ -783,7 +783,7 @@ mod tests {
     #[test]
     fn 全25本のツールでスキーマの封が揃っている() {
         let mut all = tool_catalog();
-        all.extend(crate::domain::proposal::proposal_catalog());
+        all.extend(crate::agent::proposal::proposal_catalog());
         assert_eq!(all.len(), 25, "ツール数が変わった (この数を変えたら意図的か確認すること)");
 
         let mut names: Vec<&str> = all.iter().map(|s| s.name.as_str()).collect();

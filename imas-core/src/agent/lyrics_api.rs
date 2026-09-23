@@ -17,8 +17,8 @@
 //! 膨らむ。`proposal_io` が `tools/apply_data.py` を子プロセスで起こしているのと
 //! 同じ流儀にそろえた。`--data-urlencode` があるので語の組み立ても自分で書かずに済む。
 
-use crate::domain::agent_tools::{args, ToolError};
-use crate::domain::lyrics_search::{self, ApiHit, LyricsFilter, Scope, MAX_SONGS};
+use crate::agent::tools::{args, ToolError};
+use crate::agent::lyrics_search::{self, ApiHit, LyricsFilter, Scope, MAX_SONGS};
 use crate::domain::snapshot::Snapshot;
 use serde_json::Value;
 use std::process::{Command, Stdio};

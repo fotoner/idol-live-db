@@ -21,7 +21,7 @@
 //!   返す (MCP 仕様の MUST)。無ければこちらの最新版を返す。
 
 use super::Ctx;
-use crate::domain::agent_tools::{server_instructions, ToolError};
+use crate::agent::tools::{server_instructions, ToolError};
 use crate::domain::snapshot::Snapshot;
 use serde_json::{json, Value};
 
@@ -106,7 +106,7 @@ fn initialize_result(params: &Value) -> Value {
 
 /// `ToolSpec` を MCP の `tools/list` の形に写す。
 ///
-/// `input_schema` は `ToolSpec` (`domain::agent_tools::tool_schema` 経由) の時点で
+/// `input_schema` は `ToolSpec` (`tools::tool_schema` 経由) の時点で
 /// すでに `serde_json::Value`。以前はここが JSON 文字列を持っていて、パースに失敗した
 /// ツールを一覧から落として stderr に書く縮退が要った (`lookup` が文字列テンプレートで
 /// スキーマを組んでいて、説明文に `"` が 1 つ入るだけで不正な JSON を作れたため)。
@@ -235,7 +235,7 @@ mod tests {
         assert_eq!(resp["error"]["code"], -32600);
     }
 
-    /// カタログの中身 (何件あるか・どんなツールか) は `domain::agent_tools` 側の責務。
+    /// カタログの中身 (何件あるか・どんなツールか) は `agent::tools` 側の責務。
     /// ここで確かめるのは「`ToolSpec` → MCP の `tools/list` への写し方」だけなので、
     /// 件数を決め打ちしない (他の担当がツールを増減させても壊れないように)。
     #[test]

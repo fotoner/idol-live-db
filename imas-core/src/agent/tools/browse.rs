@@ -1135,7 +1135,7 @@ fn stats(snap: &Snapshot, arguments: &Value) -> Result<Value, ToolError> {
 mod tests {
     use super::*;
     use crate::test_support::bundle_snapshot;
-    use crate::domain::agent_tools::call_tool;
+    use crate::agent::tools::call_tool;
 
     const TODAY: &str = "2026-09-19";
 
@@ -1678,11 +1678,11 @@ mod tests {
         }
     }
 
-    /// 共有 CARGO_TARGET_DIR の成果物混入の回帰ガード (他の domain テストと同型)。
+    /// 共有 CARGO_TARGET_DIR の成果物混入の回帰ガード (domain のテストと同型)。
     #[test]
     fn test_binary_was_built_from_this_tree() {
         let baked = include_str!("browse.rs");
-        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/src/domain/agent_tools/browse.rs");
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/src/agent/tools/browse.rs");
         let on_disk = std::fs::read_to_string(path).unwrap_or_else(|e| {
             panic!("ビルド元ツリーの {path} を読めない = 陳腐化した成果物で検証している: {e}")
         });

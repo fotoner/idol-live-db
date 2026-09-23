@@ -22,9 +22,8 @@ pub mod outbound;
 #[cfg(test)]
 pub(crate) mod test_support;
 
-// LLM 向けツール面 (MCP / CLI) の driving adapter。既定 off の feature で、
-// iOS/Android のビルドには一切入らない (uniffi も通らない)。
-// 判断の実体は domain::agent_tools / domain::proposal 側にあり、そちらは常時コンパイルされる。
+// LLM 向けツール面 (MCP / CLI)。ツールのカタログと応答の組み立て、入出力のアダプタ。
+// 既定 off の feature で、iOS/Android のビルドには一切入らない (uniffi も通らない)。
 #[cfg(feature = "agent")]
 pub mod agent;
 

@@ -864,7 +864,7 @@ fn id_or_name_schema(name_key: &str, name_doc: &str) -> Value {
 mod tests {
     use super::*;
     use crate::test_support::bundle_snapshot;
-    use crate::domain::agent_tools::call_tool;
+    use crate::agent::tools::call_tool;
     use serde_json::json;
 
     const TODAY: &str = "2026-09-19";

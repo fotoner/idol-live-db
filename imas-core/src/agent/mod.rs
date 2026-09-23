@@ -1,15 +1,14 @@
-//! Driving adapter: LLM (MCP クライアント / 人の手) からの入口。
+//! LLM (MCP クライアント / 人の手) 向けの面。`web_export` と同じ立ち位置の driving adapter。
 //!
-//! ## この層の責務 (これ以外を書かない)
+//! ## 構成
 //!
-//! `web_export` と同じ立ち位置で、やってよいのは 3 つだけ:
-//!
-//! 1. 入力 (JSON-RPC の封 / argv) をほどく
-//! 2. `domain::agent_tools` / `domain::proposal` を呼ぶ
-//! 3. 返った値を書き出す (stdout / ファイル)
-//!
-//! 「どのレコードを返すか」「何件で切るか」「どの語が当たるか」をここで決めてはいけない。
-//! 判断が要るものは domain に `pub fn` を足してから呼ぶ。
+//! - **ツール面** ([`tools`] / [`proposal`] / [`lyrics_search`]): ツールのカタログ (名前・説明・
+//!   入力の JSON Schema) と、応答の JSON の組み立て。何を返すか・何件で切るか・どう並べるかは
+//!   ここで決まる (Web 出面の `web_export::emit` にあたる)。照合・曖昧解決・セトリの型のように
+//!   他の面と共有する規則は domain の関数を呼び、ここに書き直さない。
+//! - **入出力** ([`mcp`] / [`stdio`] / [`cli`] / [`proposal_io`] / [`lyrics_api`]): 入力
+//!   (JSON-RPC の封 / argv) をほどいてツール面を呼び、返った値を書き出す (stdout / ファイル /
+//!   HTTP) だけ。「どのレコードを返すか」「何件で切るか」をここで決めてはいけない。
 //!
 //! ## `#[uniffi::export]` は足さない
 //!
@@ -18,14 +17,15 @@
 
 pub mod cli;
 pub mod lyrics_api;
+pub mod lyrics_search;
 pub mod mcp;
+pub mod proposal;
 pub mod proposal_io;
 pub mod stdio;
+pub mod tools;
 
-use crate::domain::agent_tools::{self, ToolError, ToolSpec};
-use crate::domain::lyrics_search;
-use crate::domain::proposal;
 use crate::domain::snapshot::Snapshot;
+use tools::{ToolError, ToolSpec};
 use serde_json::Value;
 use std::path::PathBuf;
 
@@ -62,7 +62,7 @@ impl Ctx {
 
 /// 出せるツールの一覧 (読み取り + 書き込み)。
 pub fn catalog(ctx: &Ctx) -> Vec<ToolSpec> {
-    let mut all = agent_tools::tool_catalog();
+    let mut all = tools::tool_catalog();
     // 歌詞検索はサーバを叩くので domain の call_tool には通らない (proposal と同じ扱い)。
     all.extend(lyrics_search::lyrics_catalog());
     if ctx.allow_write {
@@ -83,5 +83,5 @@ pub fn dispatch(ctx: &Ctx, snap: &Snapshot, name: &str, args: &Value) -> Result<
     if lyrics_search::is_lyrics_tool(name) {
         return lyrics_api::run(snap, args);
     }
-    agent_tools::call_tool(snap, name, args, &ctx.today_key())
+    tools::call_tool(snap, name, args, &ctx.today_key())
 }

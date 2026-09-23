@@ -1,6 +1,6 @@
 //! 投入ドラフトの書き出しと検証の実行。
 //!
-//! 組み立て規則は `domain::proposal`。ここは「ファイルに書く」「`tools/apply_data.py
+//! 組み立て規則は `agent::proposal`。ここは「ファイルに書く」「`tools/apply_data.py
 //! --check` を動かして結果を読む」だけを持つ。検証規則を Rust に写経しない —
 //! 写経すると apply 側と二重管理になり、必ず片方だけ書き換わる。
 //!
@@ -18,8 +18,8 @@
 //! `--only` の値に何が入っていてもシェル展開/注入の余地が無い)。
 
 use super::Ctx;
-use crate::domain::agent_tools::{args, ToolError};
-use crate::domain::proposal::{self, ProposalDraft, ProposalKind};
+use crate::agent::tools::{args, ToolError};
+use crate::agent::proposal::{self, ProposalDraft, ProposalKind};
 use serde_json::{json, Value};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -27,7 +27,7 @@ use std::process::{Command, Stdio};
 /// 書き込みツールを実行する (ドラフト作成 → 書き出し → --check)。
 ///
 /// `check_proposals` だけはドラフトを組まない (既存の `data/` を検証し直すだけ) ので、
-/// `domain::proposal::build_proposal` を経由せずここで直接 `--check` を回す。
+/// `proposal::build_proposal` を経由せずここで直接 `--check` を回す。
 pub fn run(ctx: &Ctx, name: &str, args: &Value) -> Result<Value, ToolError> {
     if name == "check_proposals" {
         return run_check_proposals(ctx, args);
@@ -82,7 +82,7 @@ fn list_pending_files(repo_root: &Path) -> Vec<String> {
 ///
 /// RedTeam M5: 1 件ごとに python の起動と DB オープンをやり直すので実測 0.29 秒/件かかる。
 /// `data/` に実測 69 件ある状態で無制限に回すと 20 秒を超え、MCP クライアントのツール
-/// 呼び出しタイムアウト (一般に 30〜60 秒) に触れる。`domain::proposal::MAX_AUTO_CHECK_FILES`
+/// 呼び出しタイムアウト (一般に 30〜60 秒) に触れる。`proposal::MAX_AUTO_CHECK_FILES`
 /// で打ち切り、残りは `total_pending` と `message` で「未検証」だとはっきり返す
 /// (打ち切ったことを黙らない)。
 fn run_check_all(ctx: &Ctx) -> Value {
@@ -148,7 +148,7 @@ fn write_and_check(ctx: &Ctx, draft: &ProposalDraft) -> Result<Value, ToolError>
 
 /// `data/<kind>/` を用意し、実体が想定外の場所を指していないか確かめて返す。
 ///
-/// RedTeam M7: `domain::proposal` 側で `ProposalDraft::file_name` はパス区切りを
+/// RedTeam M7: `agent::proposal` 側で `ProposalDraft::file_name` はパス区切りを
 /// 含まない安全な値であることを検証済みだが (`is_valid_slug`)、経路の組み立てそのものは
 /// 最後の砦としてここでも検算する。`data/<kind>` がシンボリックリンク等で `data/` の外を
 /// 指すよう細工されていたら、`canonicalize` した実体の親ディレクトリが `data/` の実体と
@@ -192,7 +192,7 @@ fn prepare_kind_dir(repo_root: &Path, kind: ProposalKind) -> Result<PathBuf, Too
 /// 既存ファイルを上書きしない。同名があれば `_2` `_3`... と連番を足して空いている
 /// ファイル名を探す。
 ///
-/// **なぜ `BadArgs` で断らず連番にするか**: ファイル名は `domain::proposal` が
+/// **なぜ `BadArgs` で断らず連番にするか**: ファイル名は `agent::proposal` が
 /// (今日の日付 + kind タグ + id の slug から) 完全に決めていて、呼び手 (LLM) は
 /// ファイル名を指定できない。ここで機械的に拒否すると、LLM 側に「別の名前で
 /// 再試行する」余地が無いまま行き詰まる。同じ日に同じ id を 2 度提案するのは
@@ -357,7 +357,7 @@ mod tests {
     fn 連番になってもsummaryは古い_存在しない_ファイル名を案内しない() {
         // QA 実測バグ: draft.path は連番後の実ファイル (..._2.json) を正しく指すのに、
         // draft.summary が連番化される前の (存在しない) ファイル名の文言を含んでいた。
-        // 修正は「summary からファイル名/パスを完全に落とす」方向 (domain::proposal::
+        // 修正は「summary からファイル名/パスを完全に落とす」方向 (proposal::
         // ProposalDraft::summary の doc コメント参照) なので、ここでは summary に
         // ファイル名の痕跡が一切無いこと、かつ path が実在するファイルを指すことを固定する。
         let repo = TempRepo::new();
