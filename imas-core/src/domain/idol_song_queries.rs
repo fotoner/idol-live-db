@@ -280,7 +280,8 @@ pub fn song_ids_with_any_artist(snap: &Snapshot, idol_ids: &[String]) -> Vec<Str
 }
 
 /// アイドル詳細「楽曲 (原曲)」の節分け。songs.song_type によって並べる棚を固定する。
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+/// 並び (= この enum の宣言順) はソロ → ユニット → 全体曲 → カバー → その他。
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum IdolSongSectionKind {
     /// `song_type == "solo"`。
     Solo,
@@ -288,20 +289,26 @@ pub enum IdolSongSectionKind {
     Unit,
     /// `song_type == "all"`。
     All,
-    /// 上記 3 つ以外 (`cover` / `tie_in` / 未分類など)。
+    /// `song_type == "cover"`。独立した棚にする (オーナー方針: カバーはソロ/ユニット/全体曲と混ぜない)。
+    Cover,
+    /// 上記 4 つ以外 (`tie_in` / 未分類など)。
     Other,
 }
 
-/// 1 節ぶん: 見出し (vocabulary の正式な形) と、その節に属する持ち歌 (idol_songs と同じ並び)。
+/// 1 節ぶん: 見出し (vocabulary の正式な形と、小タブに出す短い形)、
+/// その節に属する持ち歌 (idol_songs と同じ並び)。
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
 pub struct IdolSongSectionRecord {
     pub kind: IdolSongSectionKind,
     pub heading: String,
+    /// 小タブ用の短い見出し (件数と組み合わせて「ソロ 12」のように出す)。
+    pub short_heading: String,
     pub songs: Vec<IdolSongRecord>,
 }
 
 /// 節に属さない (曲が 0 件の) 節を持たないための固定見出し。song_type の値 1 つに
-/// 対応しない棚 (cover と tie_in をまとめる) なので vocabulary::SONG_TYPES から引けない。
+/// 対応しない棚 (`tie_in` や未分類をまとめる) なので vocabulary::SONG_TYPES から引けない。
+/// 短い形も同じ語 (「その他」自体が既に短い)。
 const OTHER_SECTION_HEADING: &str = "その他";
 
 fn song_type_of<'a>(snap: &'a Snapshot, song_id: &str) -> Option<&'a str> {
@@ -309,11 +316,19 @@ fn song_type_of<'a>(snap: &'a Snapshot, song_id: &str) -> Option<&'a str> {
     snap.songs[si as usize].song_type.as_deref()
 }
 
+/// 親曲 (`parent_song_id`) を持つ派生曲 (ソロ ver 違いなど) かどうか。
+/// 空文字は「親を持たない」に含める (スキーマ上は NULL しか無いが、念のため)。
+fn has_parent_song(snap: &Snapshot, song_id: &str) -> bool {
+    let Some(&si) = snap.song_index_by_id.get(song_id) else { return false };
+    !snap.songs[si as usize].parent_song_id.as_deref().unwrap_or("").is_empty()
+}
+
 fn section_kind_of(song_type: Option<&str>) -> IdolSongSectionKind {
     match song_type {
         Some("solo") => IdolSongSectionKind::Solo,
         Some("unit") | Some("group") => IdolSongSectionKind::Unit,
         Some("all") => IdolSongSectionKind::All,
+        Some("cover") => IdolSongSectionKind::Cover,
         _ => IdolSongSectionKind::Other,
     }
 }
@@ -329,26 +344,55 @@ fn section_heading(kind: IdolSongSectionKind) -> String {
         IdolSongSectionKind::All => {
             vocabulary::song_type("all").map(|t| t.label.to_string()).unwrap_or_default()
         }
+        IdolSongSectionKind::Cover => {
+            vocabulary::song_type("cover").map(|t| t.label.to_string()).unwrap_or_default()
+        }
         IdolSongSectionKind::Other => OTHER_SECTION_HEADING.to_string(),
     }
 }
 
-/// アイドルの原曲を「ソロ曲 / ユニット曲 / 全体曲 / その他」の 4 節に分ける。
-/// アイドル詳細画面「楽曲 (原曲)」の顧客 (旧: 1 本のリストだった節を分割)。
+fn section_short_heading(kind: IdolSongSectionKind) -> String {
+    match kind {
+        IdolSongSectionKind::Solo => {
+            vocabulary::song_type("solo").map(|t| t.short_label.to_string()).unwrap_or_default()
+        }
+        IdolSongSectionKind::Unit => {
+            vocabulary::song_type("unit").map(|t| t.short_label.to_string()).unwrap_or_default()
+        }
+        IdolSongSectionKind::All => {
+            vocabulary::song_type("all").map(|t| t.short_label.to_string()).unwrap_or_default()
+        }
+        IdolSongSectionKind::Cover => {
+            vocabulary::song_type("cover").map(|t| t.short_label.to_string()).unwrap_or_default()
+        }
+        IdolSongSectionKind::Other => OTHER_SECTION_HEADING.to_string(),
+    }
+}
+
+/// アイドルの原曲を「ソロ曲 / ユニット曲 / 全体曲 / カバー / その他」の 5 節に分ける。
+/// アイドル詳細画面「楽曲 (原曲)」タブの顧客 (旧: 1 本のリストだった節を分割)。
+///
+/// - 親曲 (`parent_song_id`) を持つ派生曲 (ソロ ver 違い等) は一覧に出さない
+///   (ミリオン等でソロ ver 違いが大量に出るのを避けるオーナー方針)。
+/// - カバーは他の節と混ぜず、独立した節にする。
 ///
 /// 節の中の並びは `idol_songs(snap, idol_id, Some("original"))` の並び (release_date
 /// DESC) をそのまま保つ。曲が 0 件の節は出力に含めない。役割は `original` 固定
 /// (この画面が持ち歌として出すのは原曲歌唱者ぶんだけ、という既存の顧客の使い方に揃える)。
 pub fn idol_original_song_sections(snap: &Snapshot, idol_id: &str) -> Vec<IdolSongSectionRecord> {
     let songs = idol_songs(snap, idol_id, Some("original"));
-    let mut buckets: [Vec<IdolSongRecord>; 4] = Default::default();
+    let mut buckets: [Vec<IdolSongRecord>; 5] = Default::default();
     for song in songs {
+        if has_parent_song(snap, &song.song_id) {
+            continue;
+        }
         let kind = section_kind_of(song_type_of(snap, &song.song_id));
         let idx = match kind {
             IdolSongSectionKind::Solo => 0,
             IdolSongSectionKind::Unit => 1,
             IdolSongSectionKind::All => 2,
-            IdolSongSectionKind::Other => 3,
+            IdolSongSectionKind::Cover => 3,
+            IdolSongSectionKind::Other => 4,
         };
         buckets[idx].push(song);
     }
@@ -356,13 +400,19 @@ pub fn idol_original_song_sections(snap: &Snapshot, idol_id: &str) -> Vec<IdolSo
         IdolSongSectionKind::Solo,
         IdolSongSectionKind::Unit,
         IdolSongSectionKind::All,
+        IdolSongSectionKind::Cover,
         IdolSongSectionKind::Other,
     ];
     kinds
         .into_iter()
         .zip(buckets)
         .filter(|(_, songs)| !songs.is_empty())
-        .map(|(kind, songs)| IdolSongSectionRecord { kind, heading: section_heading(kind), songs })
+        .map(|(kind, songs)| IdolSongSectionRecord {
+            kind,
+            heading: section_heading(kind),
+            short_heading: section_short_heading(kind),
+            songs,
+        })
         .collect()
 }
 
@@ -760,37 +810,44 @@ mod tests {
     }
 
     /// idol_original_song_sections: 節の割り当て・順序・見出し・0 件の節の省略を、
-    /// idol_songs(role="original") から手で再計算した結果と突き合わせて固定する。
+    /// idol_songs(role="original") から (親曲持ちを除いて) 手で再計算した結果と
+    /// 突き合わせて固定する。
     #[test]
     fn idol_original_song_sections_groups_by_song_type_in_fixed_order() {
         let (snap, _conn) = load();
-        let mut checked_all_four = false;
+        let mut kinds_seen: std::collections::HashSet<IdolSongSectionKind> =
+            std::collections::HashSet::new();
         for idol in &snap.idols {
-            let originals = idol_songs(snap, &idol.id, Some("original"));
+            let originals: Vec<IdolSongRecord> = idol_songs(snap, &idol.id, Some("original"))
+                .into_iter()
+                .filter(|s| !has_parent_song(snap, &s.song_id))
+                .collect();
             if originals.is_empty() {
                 continue;
             }
-            let mut want: [Vec<IdolSongRecord>; 4] = Default::default();
+            let mut want: [Vec<IdolSongRecord>; 5] = Default::default();
             for song in &originals {
                 let idx = match song_type_of(snap, &song.song_id) {
                     Some("solo") => 0,
                     Some("unit") | Some("group") => 1,
                     Some("all") => 2,
-                    _ => 3,
+                    Some("cover") => 3,
+                    _ => 4,
                 };
                 want[idx].push(song.clone());
             }
-            let want_headings = ["ソロ曲", "ユニット曲", "全体曲", "その他"];
+            let want_headings = ["ソロ曲", "ユニット曲", "全体曲", "カバー", "その他"];
             let want_kinds = [
                 IdolSongSectionKind::Solo,
                 IdolSongSectionKind::Unit,
                 IdolSongSectionKind::All,
+                IdolSongSectionKind::Cover,
                 IdolSongSectionKind::Other,
             ];
 
             let got = idol_original_song_sections(snap, &idol.id);
 
-            // 節の並びが固定順 (ソロ→ユニット→全体曲→その他) の部分列になっていること、
+            // 節の並びが固定順 (ソロ→ユニット→全体曲→カバー→その他) の部分列になっていること、
             // 0 件の節が出ないこと、節内の並びが idol_songs と同じであることを確認する。
             let mut want_iter = want_kinds.iter().zip(want.iter()).zip(want_headings.iter());
             for section in &got {
@@ -809,10 +866,97 @@ mod tests {
             for ((_, s), _) in want_iter {
                 assert!(s.is_empty(), "idol={} の空でない節が got から漏れた", idol.id);
             }
-            if want.iter().all(|s| !s.is_empty()) {
-                checked_all_four = true;
+            for (kind, songs) in want_kinds.iter().zip(want.iter()) {
+                if !songs.is_empty() {
+                    kinds_seen.insert(*kind);
+                }
             }
         }
-        assert!(checked_all_four, "4 節すべて持つアイドルのサンプルが 1 件も無い");
+        // ソロ/ユニット/全体曲/カバーの 4 節は (アイドル全体を通して) 少なくとも 1 回は
+        // 出ていること (1 人のアイドルが全節を持つとは限らないので、全体で確認する)。
+        // Other (`tie_in` 等) はバンドルデータに原曲歌唱者が 1 件も無い (=常に出ない) ので、
+        // ここでは対象外 (専用の分岐テストを他に持たない: song_type が未分類/`tie_in` なら
+        // Other に入ることは match の網羅性で保証されている)。
+        for kind in [
+            IdolSongSectionKind::Solo,
+            IdolSongSectionKind::Unit,
+            IdolSongSectionKind::All,
+            IdolSongSectionKind::Cover,
+        ] {
+            assert!(kinds_seen.contains(&kind), "{kind:?} の節を持つアイドルのサンプルが 1 件も無い");
+        }
+    }
+
+    /// 親曲 (parent_song_id) を持つ派生曲 (ソロ ver 違い等) は節に出ない。
+    /// ミリオンのアイドルはこの手の ver 違いを大量に持つので、実データで確認する。
+    #[test]
+    fn idol_original_song_sections_excludes_songs_with_a_parent() {
+        let (snap, _conn) = load();
+        // 派生曲を実際に持つアイドルをサンプルにする (居なければテストとして意味を成さない)。
+        let idol = snap
+            .idols
+            .iter()
+            .find(|idol| {
+                idol_songs(snap, &idol.id, Some("original"))
+                    .iter()
+                    .any(|s| has_parent_song(snap, &s.song_id))
+            })
+            .expect("親曲持ちの原曲を持つアイドルのサンプルが必要");
+
+        let got = idol_original_song_sections(snap, &idol.id);
+        for section in &got {
+            for song in &section.songs {
+                assert!(
+                    !has_parent_song(snap, &song.song_id),
+                    "idol={} song={} は派生曲なので出てはいけない",
+                    idol.id,
+                    song.song_id
+                );
+            }
+        }
+        // 除外前 (idol_songs) には実際に派生曲が混ざっていたことのサンプル健全性チェック。
+        let originals = idol_songs(snap, &idol.id, Some("original"));
+        assert!(originals.iter().any(|s| has_parent_song(snap, &s.song_id)));
+    }
+
+    /// カバーはソロ/ユニット/全体曲と混ぜず、独立した節になる。
+    #[test]
+    fn idol_original_song_sections_puts_covers_in_their_own_section() {
+        let (snap, _conn) = load();
+        let idol = snap
+            .idols
+            .iter()
+            .find(|idol| {
+                idol_songs(snap, &idol.id, Some("original"))
+                    .iter()
+                    .any(|s| song_type_of(snap, &s.song_id) == Some("cover"))
+            })
+            .expect("カバーを持つアイドルのサンプルが必要");
+
+        let got = idol_original_song_sections(snap, &idol.id);
+        let cover_section = got
+            .iter()
+            .find(|s| s.kind == IdolSongSectionKind::Cover)
+            .expect("カバーの節が出るはず");
+        assert_eq!(cover_section.heading, "カバー");
+        assert_eq!(cover_section.short_heading, "カバー");
+        assert!(cover_section.songs.iter().all(|s| song_type_of(snap, &s.song_id) == Some("cover")));
+        // 他の節にカバーが紛れ込んでいないこと。
+        for section in &got {
+            if section.kind == IdolSongSectionKind::Cover {
+                continue;
+            }
+            assert!(section.songs.iter().all(|s| song_type_of(snap, &s.song_id) != Some("cover")));
+        }
+    }
+
+    /// 短い見出しは vocabulary の短い形と一致する (小タブに出す文言の根拠)。
+    #[test]
+    fn section_short_headings_come_from_vocabulary() {
+        assert_eq!(section_short_heading(IdolSongSectionKind::Solo), "ソロ");
+        assert_eq!(section_short_heading(IdolSongSectionKind::Unit), "ユニット");
+        assert_eq!(section_short_heading(IdolSongSectionKind::All), "全体曲");
+        assert_eq!(section_short_heading(IdolSongSectionKind::Cover), "カバー");
+        assert_eq!(section_short_heading(IdolSongSectionKind::Other), "その他");
     }
 }

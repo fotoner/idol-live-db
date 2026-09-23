@@ -129,9 +129,10 @@ mod tests {
         for r in &originals {
             assert_eq!(r.role, "original");
         }
-        // 節分け FFI: 全部の節の曲数の合計が originals の件数と一致する (中身は domain 側で検証済み)
+        // 節分け FFI: 全部の節の曲数の合計が originals の件数以下であること (親曲持ちの派生曲は
+        // 節に出ないので同数とは限らない。中身の検証は domain 側で済んでいる)。
         let sections = store.idol_original_song_sections(idol_id).unwrap();
         let total: usize = sections.iter().map(|s| s.songs.len()).sum();
-        assert_eq!(total, originals.len());
+        assert!(total <= originals.len());
     }
 }
