@@ -219,27 +219,12 @@ def parse_delete_file(path: Path) -> list[tuple[str, str]]:
 # ---------------------------------------------------------------------------
 
 def cloudkit_count(record_type: str) -> int:
-    """Query CloudKit for all records of a type and return count."""
-    url = BASE_URL + QUERY_PATH
-    payload = {
-        "query": {"recordType": record_type},
-        "resultsLimit": 1,
-        "desiredKeys": [],  # fetch no fields, just count
-    }
-    # CloudKit doesn't have a COUNT endpoint; use resultsLimit+cursor pagination
-    # For verification we do a real count by paginating.
-    count = 0
-    cursor = None
-    while True:
-        if cursor:
-            payload["continuationMarker"] = cursor
-        result = get_json(url, payload)
-        records = result.get("records", [])
-        count += len(records)
-        cursor = result.get("moreComing") and result.get("continuationMarker")
-        if not cursor:
-            break
-    return count
+    """CloudKit にある record type の件数 (soft delete 済みは数えない = export と同じ)。
+
+    CloudKit には件数を返す口が無いので、query_all と同じ条件 (modifiedAt > 0) で
+    全ページをめくって数える。フィルタも並びも無い query は CloudKit が受け付けない。
+    """
+    return _ck.count_live(BASE_URL + QUERY_PATH, record_type, post=get_json)
 
 
 def verify(conn: sqlite3.Connection) -> None:

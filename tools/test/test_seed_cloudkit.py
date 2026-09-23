@@ -163,6 +163,19 @@ class SendingTest(unittest.TestCase):
         self.assertEqual(self.run_main("--tables", "song_artists", "--ids", "other_song"), 0)
         self.assertEqual(self.ck.operations(), [])
 
+    def test_verify_counts_live_records_with_a_modified_at_query(self):
+        def respond(url, payload):
+            if url.endswith("/records/query"):
+                return {"records": [{"recordName": "a"},
+                                    {"recordName": "b", "fields": {"deletedAt": {"value": 1}}}]}
+            return support.accept_all(url, payload)
+
+        self.ck.handler = respond
+        self.assertEqual(sk.cloudkit_count("Brand"), 1)
+        query = self.ck.calls[-1][1]["query"]
+        self.assertEqual(query["filterBy"][0]["fieldName"], "modifiedAt")
+        self.assertEqual(query["sortBy"][0]["fieldName"], "modifiedAt")
+
 
 if __name__ == "__main__":
     unittest.main()
