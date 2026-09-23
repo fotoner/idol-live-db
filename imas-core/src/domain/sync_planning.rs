@@ -769,6 +769,27 @@ pub fn reseed_target_tables(
         .collect()
 }
 
+/// reseed で入れ直す表 (**allow-list**)。コアのマスタスキーマの正本
+/// ([`crate::domain::schema_ddl::table_names`]) に載っている表のうち、同梱 DB と端末の
+/// 両方にあるものだけを、同梱 DB の並びで返す。`meta` は reseed が自分で書くので除く
+/// ([`default_preserved_tables`])。
+///
+/// 台帳に載っていない表 — 端末ローカル専用の `user_marks` / `personal_tags` / `expenses`、
+/// コミュニティ由来の `song_videos` など — は、同梱 DB に同名の表が入ってきても対象に
+/// ならない。守るべき表を名前で並べる deny-list は、表が増えたときに書き足し忘れると
+/// そのまま消える (マイタグと家計簿が偶然にしか守られていなかった。D-IOS-03)。
+///
+/// **スキーマの適用 ([`crate::inbound::schema_apply::ensure_master_schema`]) の成否には
+/// 依存しない。** 台帳は DDL の定数から読むので、適用に失敗した端末でも同じ答えになる
+/// (端末に無い表・列は、両方にある表・共通列だけを移す既存の規則で落ちる)。
+pub fn reseed_master_target_tables(bundle_tables: &[String], local_tables: &[String]) -> Vec<String> {
+    let master: HashSet<String> = crate::domain::schema_ddl::table_names().into_iter().collect();
+    reseed_target_tables(bundle_tables, local_tables, &default_preserved_tables())
+        .into_iter()
+        .filter(|table| master.contains(table))
+        .collect()
+}
+
 /// reseed でコピーする列を **bundle 側の列順** で返す。
 ///
 /// 列順が seed 取り込み ([`seed_common_columns`], main 順) と逆なのは一次実装がそうだから。
@@ -1682,6 +1703,78 @@ mod tests {
             );
         }
         assert_eq!(preserved.len(), 8);
+    }
+
+    /// allow-list は台帳 (マスタの DDL) にある表だけを、同梱 DB の並びで返す。
+    /// 端末ローカル・コミュニティ・台帳に無い表は、同梱 DB に同名の表があっても入らない。
+    #[test]
+    fn reseed_master_targets_are_the_ledger_tables_only() {
+        let bundle = strings(&[
+            "sqlite_sequence", "songs", "personal_tags", "brands", "expenses", "meta",
+            "user_marks", "song_videos", "song_units", "idol_voice_actors", "mystery_table",
+        ]);
+        let local = strings(&[
+            "brands", "songs", "meta", "user_marks", "personal_tags", "expenses",
+            "song_videos", "song_units", "idol_voice_actors", "mystery_table", "grdb_migrations",
+        ]);
+        assert_eq!(
+            reseed_master_target_tables(&bundle, &local),
+            strings(&["songs", "brands", "song_units", "idol_voice_actors"])
+        );
+        // 端末に無い表は入れない (移す先が無い)。
+        assert!(reseed_master_target_tables(&bundle, &strings(&["songs"])) == strings(&["songs"]));
+    }
+
+    /// 台帳の「端末ローカル」「コミュニティ」の表が、マスタの DDL に紛れ込んでいないこと。
+    /// 紛れ込むと reseed がその表を消して入れ直す (戻す手段の無いデータが消える)。
+    #[test]
+    fn local_only_and_community_tables_are_never_reseeded() {
+        use crate::domain::schema_registry::{expected_tables, TableOrigin};
+        let ddl = crate::domain::schema_ddl::table_names();
+        let protected: Vec<String> = expected_tables()
+            .into_iter()
+            .filter(|t| matches!(t.origin, TableOrigin::LocalOnly | TableOrigin::Community))
+            .map(|t| t.name)
+            .collect();
+        for table in ["user_marks", "personal_tags", "expenses", "song_videos"] {
+            assert!(protected.iter().any(|t| t == table), "{table} が台帳で守られていない");
+        }
+        for table in &protected {
+            assert!(!ddl.contains(table), "{table} がマスタの DDL に入っている");
+            let both = strings(&[table.as_str()]);
+            assert!(reseed_master_target_tables(&both, &both).is_empty(), "{table}");
+        }
+    }
+
+    /// 6d195371 の iOS の組み方 (ensure_master_schema の untouched_tables を保護表に足す) と、
+    /// 同梱 DB の実物で同じ答えになる。違うのは、スキーマの適用結果が要らないことだけ。
+    #[test]
+    fn reseed_master_targets_match_the_ios_formula_on_the_bundle() {
+        let conn = rusqlite::Connection::open_with_flags(
+            format!("{}/../ImasLiveDB/Resources/master.sqlite", env!("CARGO_MANIFEST_DIR")),
+            rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
+        )
+        .expect("bundle DB を開ける");
+        let bundle: Vec<String> = conn
+            .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+            .unwrap()
+            .query_map([], |r| r.get(0))
+            .unwrap()
+            .map(Result::unwrap)
+            .collect();
+        // 端末 = 同梱の表 + 端末にしか無い表。
+        let mut local = bundle.clone();
+        local.extend(strings(&[
+            "user_marks", "personal_tags", "expenses", "song_videos", "grdb_migrations",
+        ]));
+        let ddl = crate::domain::schema_ddl::table_names();
+        let untouched: Vec<String> = local.iter().filter(|t| !ddl.contains(t)).cloned().collect();
+        let mut ios_preserved = untouched;
+        ios_preserved.extend(default_preserved_tables());
+        let targets = reseed_master_target_tables(&bundle, &local);
+        assert_eq!(targets, reseed_target_tables(&bundle, &local, &ios_preserved));
+        assert!(!targets.iter().any(|t| t == "meta"), "meta は reseed が自分で書く");
+        assert_eq!(targets.len(), ddl.len() - 1, "{targets:?}");
     }
 
     #[test]

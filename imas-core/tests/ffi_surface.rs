@@ -143,6 +143,7 @@ declare_and_call_checksums! {
     uniffi_imas_core_checksum_func_remap_mastery_level,
     uniffi_imas_core_checksum_func_reseed_common_columns,
     uniffi_imas_core_checksum_func_reseed_default_preserved_tables,
+    uniffi_imas_core_checksum_func_reseed_master_target_tables,
     uniffi_imas_core_checksum_func_reseed_needed,
     uniffi_imas_core_checksum_func_reseed_parse_data_version,
     uniffi_imas_core_checksum_func_reseed_summary_label,

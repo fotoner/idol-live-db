@@ -216,6 +216,14 @@ pub fn reseed_target_tables(
     sync_planning::reseed_target_tables(&bundle_tables, &local_tables, &preserved_tables)
 }
 
+/// reseed で入れ直す表 (allow-list)。コアのマスタスキーマの正本にある表のうち、同梱 DB と
+/// 端末の両方にあるものを同梱 DB の並びで返す (`meta` は除く)。端末ローカル・コミュニティの表は
+/// 入らない。スキーマの適用結果には依存しない。
+#[uniffi::export]
+pub fn reseed_master_target_tables(bundle_tables: Vec<String>, local_tables: Vec<String>) -> Vec<String> {
+    sync_planning::reseed_master_target_tables(&bundle_tables, &local_tables)
+}
+
 /// reseed でコピーする列を bundle 側の列順で返す。空ならそのテーブルは skip。
 #[uniffi::export]
 pub fn reseed_common_columns(
