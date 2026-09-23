@@ -25,7 +25,7 @@
 use std::collections::HashMap;
 
 /// 実行すべき 1 手。
-#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SchemaChange {
     /// 流す SQL。
     pub sql: String,
@@ -36,7 +36,7 @@ pub struct SchemaChange {
 }
 
 /// 計画の結果。
-#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SchemaPlan {
     /// 流すべき SQL の並び (この順で実行する)。
     pub changes: Vec<SchemaChange>,

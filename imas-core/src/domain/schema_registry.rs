@@ -18,7 +18,7 @@
 //! 実行の移管はその後に段階を踏む。
 
 /// 表の出どころ。突き合わせでどちらに在るべきかを決める。
-#[derive(uniffi::Enum, Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TableOrigin {
     /// CloudKit から配られるマスタ。同梱 DB にも実機にも在る。
     Master,
@@ -32,7 +32,7 @@ pub enum TableOrigin {
 }
 
 /// 台帳の 1 行。
-#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TableSpec {
     pub name: String,
     pub origin: TableOrigin,
@@ -120,7 +120,7 @@ pub fn expected_tables() -> Vec<TableSpec> {
 }
 
 /// 突き合わせの結果 1 件。
-#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SchemaDrift {
     pub table: String,
     /// 何がずれているか (人が読む文)。
