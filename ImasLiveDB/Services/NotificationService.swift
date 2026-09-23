@@ -63,11 +63,11 @@ final class NotificationService {
     /// 並行に走ると「全部消す → await → 登録」が互い違いになり、OFF にした直後の呼び出しが
     /// 消した通知を、前の呼び出しが登録し直すことがある。後に呼ばれた方が必ず最後に走るので、
     /// 最後の設定が残る。
-    func rescheduleAll(database: AppDatabase) async {
+    func rescheduleAll(database: AppDatabase, reason: RescheduleReason = .refresh) async {
         let previous = rescheduleInFlight
         let task = Task {
             await previous?.value
-            await performRescheduleAll(database: database)
+            await performRescheduleAll(database: database, reason: reason)
         }
         rescheduleInFlight = task
         await task.value
@@ -75,19 +75,29 @@ final class NotificationService {
 
     /// 予定表 (何を・いつ・どの文言で・上限 60 件・カテゴリ間の round-robin) はコアの
     /// `notification_plan`。ここは認可・全消し・設定と印の読み出し・トリガーへの詰め替え・画像の添付だけ。
-    private func performRescheduleAll(database: AppDatabase) async {
+    private func performRescheduleAll(database: AppDatabase, reason: RescheduleReason) async {
         let status = await authorizationStatus()
-        guard status == .authorized || status == .provisional else { return }
+        let authorized = status == .authorized || status == .provisional
 
-        let plan: [PlannedNotificationRecord]
-        do {
-            plan = try await buildPlan(database: database)
-        } catch {
-            Logger.notification.error("notif_plan_failed: \(error.localizedDescription, privacy: .public)")
-            return
+        var plan: [PlannedNotificationRecord]?
+        if authorized {
+            do {
+                plan = try await buildPlan(database: database)
+            } catch {
+                Logger.notification.error("notif_plan_failed: \(error.localizedDescription, privacy: .public)")
+            }
         }
 
-        center.removeAllPendingNotificationRequests()
+        switch Self.pendingUpdate(authorized: authorized, planBuilt: plan != nil, reason: reason) {
+        case .keep:
+            return
+        case .clear:
+            center.removeAllPendingNotificationRequests()
+            return
+        case .replace:
+            center.removeAllPendingNotificationRequests()
+        }
+        guard let plan else { return }
 
         for item in plan {
             let request = notificationRequest(for: item)
@@ -106,6 +116,35 @@ final class NotificationService {
         }
 
         Logger.notification.info("notif_rescheduled total=\(plan.count, privacy: .public)")
+    }
+
+    /// 再予約を頼む理由。予定表を作れなかったときの扱いが変わる。
+    enum RescheduleReason: Sendable {
+        /// 起動時・許可した直後・設定を ON にしたとき。
+        case refresh
+        /// 通知の設定を OFF にしたとき。
+        case settingTurnedOff
+    }
+
+    /// 今の予約をどうするか。
+    enum PendingUpdate: Equatable {
+        /// 触らない。
+        case keep
+        /// 全部消すだけ。
+        case clear
+        /// 全部消して、予定表を積み直す。
+        case replace
+    }
+
+    /// 権限が無ければ消す (鳴らしてはいけない)。予定表を作れたら積み直す。
+    /// 作れなかったときは、OFF にした直後なら消す (OFF にした通知が鳴り続けないように)。
+    /// それ以外は今の予約を残す (読み込みの一時的な失敗で、鳴るはずの通知を消さない)。
+    nonisolated static func pendingUpdate(
+        authorized: Bool, planBuilt: Bool, reason: RescheduleReason
+    ) -> PendingUpdate {
+        guard authorized else { return .clear }
+        if planBuilt { return .replace }
+        return reason == .settingTurnedOff ? .clear : .keep
     }
 
     /// 設定と印を詰めて、コアに予定表を訊く。日付と時刻は**端末のその地**の暦で渡す。

@@ -31,3 +31,14 @@ final class NotificationTriggerTests: XCTestCase {
         XCTAssertEqual(trigger.dateComponents.day, 28)
     }
 }
+
+/// 再予約で今の予約をどうするか (`NotificationService.pendingUpdate`)。
+final class NotificationPendingUpdateTests: XCTestCase {
+    func testPlanFailureClearsOnlyAfterTurningOffOrWithoutPermission() {
+        typealias S = NotificationService
+        XCTAssertEqual(S.pendingUpdate(authorized: true, planBuilt: true, reason: .refresh), .replace)
+        XCTAssertEqual(S.pendingUpdate(authorized: true, planBuilt: false, reason: .refresh), .keep)
+        XCTAssertEqual(S.pendingUpdate(authorized: true, planBuilt: false, reason: .settingTurnedOff), .clear)
+        XCTAssertEqual(S.pendingUpdate(authorized: false, planBuilt: false, reason: .refresh), .clear)
+    }
+}

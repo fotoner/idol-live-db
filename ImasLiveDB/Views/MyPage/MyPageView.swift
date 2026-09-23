@@ -638,6 +638,13 @@ struct MyPageView: View {
 
     // MARK: - Notification Section
 
+    private func rescheduleNotifications(turnedOn: Bool) {
+        Task {
+            await NotificationService.shared.rescheduleAll(
+                database: database, reason: turnedOn ? .refresh : .settingTurnedOff)
+        }
+    }
+
     @ViewBuilder
     private var notificationSection: some View {
         Section {
@@ -664,21 +671,13 @@ struct MyPageView: View {
                 }
             default:
                 Toggle("担当アイドルの誕生日", isOn: $notifOshiBirthday)
-                    .onChange(of: notifOshiBirthday) {
-                        Task { await NotificationService.shared.rescheduleAll(database: database) }
-                    }
+                    .onChange(of: notifOshiBirthday) { _, isOn in rescheduleNotifications(turnedOn: isOn) }
                 Toggle("ライブ1週間前", isOn: $notifLiveWeek)
-                    .onChange(of: notifLiveWeek) {
-                        Task { await NotificationService.shared.rescheduleAll(database: database) }
-                    }
+                    .onChange(of: notifLiveWeek) { _, isOn in rescheduleNotifications(turnedOn: isOn) }
                 Toggle("チケット締切・当落通知", isOn: $notifTicket)
-                    .onChange(of: notifTicket) {
-                        Task { await NotificationService.shared.rescheduleAll(database: database) }
-                    }
+                    .onChange(of: notifTicket) { _, isOn in rescheduleNotifications(turnedOn: isOn) }
                 Toggle("月曜が近いことを知らせる (日曜 20:00)", isOn: $notifMonday)
-                    .onChange(of: notifMonday) {
-                        Task { await NotificationService.shared.rescheduleAll(database: database) }
-                    }
+                    .onChange(of: notifMonday) { _, isOn in rescheduleNotifications(turnedOn: isOn) }
             }
         } header: {
             Text("通知")
