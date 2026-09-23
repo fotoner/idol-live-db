@@ -19,8 +19,6 @@ import com.fugaif.imaslivedb.data.model.TicketPeriodRow
 import uniffi.imas_core.CalendarEntryRecord
 import uniffi.imas_core.CalendarTicketKind
 import java.time.LocalDate
-import java.time.YearMonth
-import java.time.temporal.ChronoUnit
 
 /**
  * カレンダー (公演/リリース/誕生日/事務員誕生日/記念日/チケット日程) の読み取り口。
@@ -29,14 +27,11 @@ import java.time.temporal.ChronoUnit
  * 年展開・同日内の並び順はすべてコアが確定させる (SQL 時代の 5 クエリが 1 呼び出しになる)。
  * コアが返すのは公演とチケットの素の値、それ以外は **id だけ**なので、実体化はここで行う
  * (iOS `CoreCalendarRepository` と同じ分担)。
- *
- * スナップショットが使えないビルド/タイミングでは Room の月単位クエリへフォールバックする。
- * フォールバックは仕様の正本ではないので、挙動を足すときはコア側を直すこと。
+ * SQL の代わりの経路は持たない (非閏年の 2/29 や同日内の並びの規則を二重に持たないため)。
  */
 class CalendarRepository(
     private val db: AppDatabase,
-    // null = スナップショット経路なし (テスト等)。その場合は常に SQL 経路。
-    private val snapshots: SnapshotStoreProvider? = null
+    private val snapshots: SnapshotStoreProvider
 ) {
 
     /**
@@ -51,16 +46,10 @@ class CalendarRepository(
      * には載っているが、表示用の `CalShowRow` には無い列。週の時間グリッドは開始時刻が
      * 無いと縦位置を決められないので、行の型を変えずに別マップで運ぶ
      * (`data/model` の行定義は共有物なので、カレンダーの都合で列を足さない)。
-     *
-     * Room フォールバックは月単位のクエリしか持たないので、範囲の中心にあたる月で代用する
-     * (端の数日が欠けるが、この経路はスナップショットが載るまでの一時的な受け皿)。
-     * 追加情報もあちらでは取れないので空になり、全公演が「時刻未定」レーンに出る。
      */
     suspend fun fetchRange(start: LocalDate, end: LocalDate): CalendarMonthData {
-        snapshots?.query { store -> store.calendarEntries(start.toString(), end.toString()) }
-            ?.let { return CalendarMonthData(hydrate(it), showDetails(it)) }
-        val middle = YearMonth.from(start.plusDays(ChronoUnit.DAYS.between(start, end) / 2))
-        return CalendarMonthData(fetchEntriesFromRoom(middle), emptyMap())
+        val records = snapshots.query { store -> store.calendarEntries(start.toString(), end.toString()) }
+        return CalendarMonthData(hydrate(records), showDetails(records))
     }
 
     /** コアの公演射影から、行に載らない列だけを show_id 引きのマップに落とす。 */
@@ -193,68 +182,6 @@ class CalendarRepository(
         if (ids.isEmpty()) return emptyMap()
         return hydrateInOrder(ids, Idol::id) { db.idolDao().fetchIdolsByIds(it) }.associateBy { it.id }
     }
-
-    // ---- フォールバック: 旧 SQL 経路 ----
-
-    /**
-     * スナップショット未ロード時の受け皿。月単位の 5 クエリを引き、コアと同じ並び
-     * (日付 → 種別順位: 公演 < リリース < 記念日 < 誕生日 < 事務員誕生日) に整える。
-     *
-     * チケット日程はここでは出ない。events のチケット列を読む SQL がもともと無く、
-     * この経路のためだけに書き起こすと消したはずの二重実装が戻るため
-     * (スナップショットが載れば出る)。
-     */
-    private suspend fun fetchEntriesFromRoom(month: YearMonth): List<CalendarEntry> {
-        val dao = db.calendarDao()
-        val ym = "%04d-%02d".format(month.year, month.monthValue)
-        val mm = "%02d".format(month.monthValue)
-        // (ソートキー, 種別順位, エントリ)。ソートキーは記念日だけ「起点日」で、それ以外は
-        // 出現日 — コアの並びと同じ規則にしないと同日内の順序がフォールバックだけずれる。
-        val keyed = mutableListOf<Triple<String, Int, CalendarEntry>>()
-
-        for (row in dao.showsInMonth(ym)) {
-            keyed += Triple(row.date, RANK_SHOW, CalendarEntry.Show(row.date, row))
-        }
-        for ((date, rows) in dao.releasesInMonth(ym).groupBy { it.releaseDate }) {
-            keyed += Triple(date, RANK_RELEASE, CalendarEntry.Release(date, rows))
-        }
-        for (row in dao.birthdaysInMonth(mm)) {
-            occurrenceOf(row.birthday, month)?.let {
-                keyed += Triple(it, RANK_BIRTHDAY, CalendarEntry.Birthday(it, row))
-            }
-        }
-        for (row in dao.staffBirthdaysInMonth(mm)) {
-            occurrenceOf(row.birthday, month)?.let {
-                keyed += Triple(it, RANK_STAFF_BIRTHDAY, CalendarEntry.StaffBirthday(it, row))
-            }
-        }
-        for (row in dao.anniversariesInMonth(mm)) {
-            val years = Anniversary(row.id, row.brandId, row.label, row.date, row.kind)
-                .anniversaryYears(month.year) ?: continue
-            occurrenceOf("--" + row.date.drop(5), month)?.let {
-                keyed += Triple(row.date, RANK_ANNIVERSARY, CalendarEntry.Anniversary(it, row, years))
-            }
-        }
-
-        keyed.sortWith(compareBy<Triple<String, Int, CalendarEntry>> { it.first }.thenBy { it.second })
-        return keyed.map { it.third }
-    }
-
-    /** "--MM-DD" を [month] の実在日へ。その月に無い日 (非閏年の 2/29 等) は落とす。 */
-    private fun occurrenceOf(monthDay: String, month: YearMonth): String? {
-        val day = monthDay.removePrefix("--").substringAfter('-').toIntOrNull() ?: return null
-        if (day !in 1..month.lengthOfMonth()) return null
-        return "%04d-%02d-%02d".format(month.year, month.monthValue, day)
-    }
-
-    private companion object {
-        // 同日内の表示順位。コア (domain/calendar_queries.rs) の定数と同じ数値。
-        const val RANK_SHOW = 2
-        const val RANK_RELEASE = 3
-        const val RANK_ANNIVERSARY = 4
-        const val RANK_BIRTHDAY = 5
-        const val RANK_STAFF_BIRTHDAY = 6
-    }
 }
 
 /**
@@ -263,7 +190,7 @@ class CalendarRepository(
  */
 data class CalendarMonthData(
     val entries: List<CalendarEntry>,
-    /** show_id → 追加情報。フォールバック経路では空。 */
+    /** show_id → 追加情報。 */
     val showDetails: Map<String, CalendarShowDetail>
 )
 

@@ -33,8 +33,8 @@ data class SongDetailUiState(
     /** 関連楽曲 (同シリーズ/ユニット/原唱共有, ローカル算出)。 */
     val relatedSongs: List<Song> = emptyList(),
     /**
-     * 披露実績から出した共起曲と歌唱者 (共有コアのスナップショット走査。使えないときは
-     * 同じ数え方の Room 経路)。EMPTY になるのは披露 0 回の曲だけで、そのとき画面は
+     * 披露実績から出した共起曲と歌唱者 (共有コアのスナップショット走査)。
+     * EMPTY になるのは披露 0 回の曲だけで、そのとき画面は
      * 節を出さない。単位が 2 つある点は [SongPerformanceEvidence] の注記を参照。
      */
     val performanceEvidence: SongPerformanceEvidence = SongPerformanceEvidence.EMPTY,

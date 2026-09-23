@@ -76,8 +76,7 @@ class AppModule private constructor(context: Context) {
     val unitRepository: UnitRepository by lazy { UnitRepository(database, snapshotStoreProvider) }
     val statsRepository: StatsRepository by lazy { StatsRepository(database, communityApi, snapshotStoreProvider) }
     val searchRepository: SearchRepository by lazy { SearchRepository(snapshotStoreProvider) }
-    // 曲詳細の披露実績 (共起曲 / 歌唱者)。スナップショットが無い間 (ネイティブ未同梱
-    // ビルド・初回同期前・load 失敗) は Room 経路が同じ数え方で同じ値を返す。
+    // 曲詳細の披露実績 (共起曲 / 歌唱者)。集計はコアのスナップショットが答える。
     val performanceEvidenceRepository: PerformanceEvidenceRepository by lazy {
         PerformanceEvidenceRepository(database, snapshotStoreProvider)
     }
@@ -89,7 +88,6 @@ class AppModule private constructor(context: Context) {
             store = customImageStore,
             idolRepository = idolRepository,
             statsRepository = statsRepository,
-            unitRepository = unitRepository,
             snapshots = snapshotStoreProvider,
         )
     }

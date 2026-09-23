@@ -132,7 +132,7 @@ class EventListViewModel : ViewModel() {
     private suspend fun loadMarkSets(context: Context) {
         val module = AppModule.from(context)
         val marks = module.userMarkRepository
-        val attended = marks.attendedEventTypeSets()
+        val attended = module.eventRepository.fetchAttendedEventTypeSets()
         attendedEventIds = attended.live + attended.stream + attended.liveViewing
         val dao = module.database.userMarkDao()
         favoriteEventIds = dao.idsFor(UserMark.EVENT, UserMark.FAVORITE).toSet()

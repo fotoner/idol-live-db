@@ -1,8 +1,10 @@
 package com.fugaif.imaslivedb.data.repository
 
 import androidx.room.Room
+import com.fugaif.imaslivedb.data.core.SnapshotStoreProvider
 import com.fugaif.imaslivedb.data.db.AppDatabase
 import com.fugaif.imaslivedb.data.model.Song
+import com.fugaif.imaslivedb.data.sync.CloudKitSyncEngine
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -27,10 +29,12 @@ class IntroDonPoolTest {
 
     @Before
     fun setUp() {
-        db = Room.inMemoryDatabaseBuilder(RuntimeEnvironment.getApplication(), AppDatabase::class.java)
+        val context = RuntimeEnvironment.getApplication()
+        db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        repository = SongRepository(db)
+        // 出題プールはスナップショットを読まない (候補の読み出しと規則だけ)。
+        repository = SongRepository(db, SnapshotStoreProvider(context, CloudKitSyncEngine(context, db)))
     }
 
     @After

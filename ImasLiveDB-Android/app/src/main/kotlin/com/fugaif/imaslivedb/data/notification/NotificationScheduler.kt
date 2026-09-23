@@ -184,9 +184,9 @@ object NotificationScheduler {
      * 取り直しているのと同じ理由でイベント本体を引き直す。
      */
     private suspend fun eventSources(module: AppModule): List<EventNotificationSource> {
-        val marks = module.userMarkRepository
+        val events = module.eventRepository
         val byId = LinkedHashMap<String, EventWithDateRange>()
-        (marks.favoriteEvents() + marks.attendedEvents()).forEach { byId.putIfAbsent(it.event.id, it) }
+        (events.fetchFavoriteEvents() + events.fetchAttendedEvents()).forEach { byId.putIfAbsent(it.event.id, it) }
         return byId.values.mapNotNull { withDate ->
             val full = module.eventRepository.fetchEvent(withDate.event.id) ?: return@mapNotNull null
             EventNotificationSource(event = full, firstDate = withDate.firstDate)

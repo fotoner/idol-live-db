@@ -51,8 +51,6 @@ fun groupEventsByYear(
  *
  * `kind` は一覧の母集合 SQL (EventDao.fetchEventsWithFirstDate) が SELECT していないので、
  * EventRepository.fetchEventsWithFirstDate がコアの eventRecords から補って渡している。
- * コアが使えない環境 (ネイティブ .so 無し) では補えず Event の既定値 "live" のままなので、
- * 種別の除外は効かず全件表示になる (絞り込みが空振りするだけで一覧は壊れない)。
  */
 private fun eventFilterItem(ew: EventWithDateRange): EventFilterItem = EventFilterItem(
     id = ew.event.id,

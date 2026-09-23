@@ -65,7 +65,8 @@ data class AttendedEventsUiState(
 )
 
 class AttendedEventsViewModel(app: Application) : AndroidViewModel(app) {
-    private val marks = AppModule.from(app).userMarkRepository
+    private val module = AppModule.from(app)
+    private val marks = module.userMarkRepository
 
     private val _uiState = MutableStateFlow(AttendedEventsUiState())
     val uiState: StateFlow<AttendedEventsUiState> = _uiState.asStateFlow()
@@ -75,8 +76,8 @@ class AttendedEventsViewModel(app: Application) : AndroidViewModel(app) {
     fun load() {
         viewModelScope.launch {
             _uiState.value = AttendedEventsUiState(
-                events = marks.attendedEvents(),
-                typeSets = marks.attendedEventTypeSets(),
+                events = module.eventRepository.fetchAttendedEvents(),
+                typeSets = module.eventRepository.fetchAttendedEventTypeSets(),
                 isLoading = false
             )
         }

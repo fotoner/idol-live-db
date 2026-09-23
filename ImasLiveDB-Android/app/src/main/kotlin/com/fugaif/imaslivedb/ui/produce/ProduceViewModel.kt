@@ -73,10 +73,10 @@ class ProduceViewModel(app: Application) : AndroidViewModel(app) {
             // ローカル (Room / SharedPreferences) 由来はまとめて 1 回で反映する。
             // 「参加ライブ」はイベント参加 ∪ 公演参加→所属イベント を重複なしで取った一覧で、
             // 件数もこの一覧の長さにする (タイルの数字と一覧の行数が食い違わない)。
-            val attended = marks.attendedEvents()
+            val attended = module.eventRepository.fetchAttendedEvents()
             val favoriteCount = marks.favoriteSongIds().size +
                 marks.favoriteIdolIds().size +
-                marks.favoriteEvents().size
+                module.eventRepository.fetchFavoriteEvents().size
             // 合計はコアに出させる (画面で足し算しない)。
             val expenses = module.expenseRepository.getAll().map {
                 ExpenseEntry(

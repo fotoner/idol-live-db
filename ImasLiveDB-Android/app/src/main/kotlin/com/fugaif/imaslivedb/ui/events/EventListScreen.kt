@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -20,7 +19,6 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -146,7 +144,7 @@ fun EventListScreen(
                 viewModel.setSearchText(handed)
                 val sides = AppModule.from(context).searchRepository
                     .eventSearchSides(handed, JstDay.today())
-                if (sides != null && sides.second > sides.first) viewModel.selectTimeFilter(1)
+                if (sides.second > sides.first) viewModel.selectTimeFilter(1)
             }
 
             ActiveFilterChipRow(

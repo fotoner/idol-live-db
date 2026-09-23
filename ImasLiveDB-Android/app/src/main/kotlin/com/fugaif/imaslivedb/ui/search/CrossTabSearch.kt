@@ -18,11 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fugaif.imaslivedb.data.core.SnapshotUnavailableException
 import com.fugaif.imaslivedb.di.AppModule
 import com.fugaif.imaslivedb.ui.components.ImasFilterChip
 import com.fugaif.imaslivedb.ui.navigation.TopLevelTab
 import com.fugaif.imaslivedb.ui.theme.DS
-import kotlinx.coroutines.delay
 import androidx.compose.runtime.mutableIntStateOf
 
 /**
@@ -89,18 +89,12 @@ fun CrossTabCountChips(query: String, from: TopLevelTab) {
             counts = null
             return@LaunchedEffect
         }
-        // スナップショットは起動直後にバックグラウンドで載る。それより先に訊くと
-        // 数えようがないので、載るまで数回だけ待ち直す。0 件と「まだ分からない」は
-        // 別物なので、repo は後者を null で返す。
-        repeat(6) { attempt ->
-            if (attempt > 0) delay(400)
-            val got = repo.crossTabCounts(needle)
-            if (got != null) {
-                counts = got
-                return@LaunchedEffect
-            }
+        // 数えるのはスナップショットの読み込みを待ってから。読み込めなければ出さない。
+        counts = try {
+            repo.crossTabCounts(needle)
+        } catch (e: SnapshotUnavailableException) {
+            null
         }
-        counts = null
     }
 
     val suggestions = remember(counts, from) {

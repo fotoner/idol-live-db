@@ -52,9 +52,9 @@ private fun String.likeEscaped(): String =
 /**
  * 楽曲の読み取り口。
  *
- * 読み取りは共有コア (imas-core) のインメモリスナップショットを第一経路とし、
- * 未ロード・利用不可のときだけ従来の Room/SQL 経路へフォールバックする
- * (iOS と同一ロジック・同一結果を返すのがスナップショット経路の目的)。
+ * 読み取りは共有コア (imas-core) のインメモリスナップショットが答える (SQL の代わりの経路は
+ * 持たない。iOS と同一ロジック・同一結果を返すため)。コアに対応する API が無いもの
+ * (作家名での絞り込み・イントロドンの候補) だけ Room で引く。
  *
  * コアの FFI 規約により一覧クエリは「表示順の song_id 列」で返るので、
  * Song 実体への引き直し (hydration) はこのリポジトリが Room で行う。
@@ -79,8 +79,7 @@ private fun String.likeEscaped(): String =
  */
 class SongRepository(
     private val db: AppDatabase,
-    // null = スナップショット経路なし (テスト等)。その場合は常に SQL 経路。
-    private val snapshots: SnapshotStoreProvider? = null
+    private val snapshots: SnapshotStoreProvider
 ) {
 
     suspend fun fetchSongs(
@@ -95,187 +94,16 @@ class SongRepository(
     ): List<SongWithArtists> {
         if (tagFilterSongIds != null && tagFilterSongIds.isEmpty()) return emptyList()
 
-        fetchSongsViaSnapshot(filter, sortOrder, ascending, tagFilterSongIds)?.let { return it }
-
-        // ---- 以下フォールバック (従来の SQL 経路) ----
-
-        val conditions = mutableListOf<String>()
-        val args = mutableListOf<Any>()
-
-        if (tagFilterSongIds != null) {
-            val placeholders = tagFilterSongIds.joinToString(",") { "?" }
-            conditions.add("s.id IN ($placeholders)")
-            args.addAll(tagFilterSongIds)
-        }
-
-        // 既定ではリミックス・別バージョンを除外。ただし「それ自体が商品として立っている曲」
-        // (has_kamisabi_card = 1) は隠さない (コア `is_hidden_variant` と同じ規則を
-        // `song_list_queries.rs` の `run_original_filter_sql` と同じ 1 行で書く。
-        // kamisabiOnly を見て分岐する形は Code Simplifier の指摘で撤去済み — 2 軸を
-        // 絡ませると、写した先のどこか 1 箇所だけ書き忘れて食い違う)。
-        if (!filter.includeRemixes) {
-            conditions.add("(s.parent_song_id IS NULL OR s.has_kamisabi_card = 1)")
-        }
-
-        if (filter.brandIds.isNotEmpty()) {
-            conditions.add("s.brand_id IN (${filter.brandIds.joinToString(",") { "?" }})")
-            args.addAll(filter.brandIds)
-        } else if (!filter.includeOtherBrand) {
-            // ブランド未選択(全件)のときは既定で other (歌枠カバー等) を隠す。
-            conditions.add("s.brand_id IS NOT 'other'")
-        }
-        if (!filter.title.isNullOrEmpty()) {
-            conditions.add("(s.title LIKE ? OR s.title_kana LIKE ?)")
-            args.add("%${filter.title}%")
-            args.add("%${filter.title}%")
-        }
-        if (!filter.songwriter.isNullOrEmpty()) {
-            conditions.add("(s.composer LIKE ? OR s.lyricist LIKE ? OR s.arranger LIKE ?)")
-            args.add("%${filter.songwriter}%")
-            args.add("%${filter.songwriter}%")
-            args.add("%${filter.songwriter}%")
-        }
-        if (!filter.cdSeries.isNullOrEmpty()) {
-            conditions.add("s.cd_series LIKE ?")
-            args.add("%${filter.cdSeries}%")
-        }
-        if (!filter.seriesGroup.isNullOrEmpty()) {
-            // シリーズはピッカーで既存値から選ぶので完全一致 (部分一致にすると
-            // "BRILLI@NT WING" が "BRILLI@NT WING SP" まで拾ってしまう)。コア側も同じ規約。
-            conditions.add("s.series_group = ?")
-            args.add(filter.seriesGroup)
-        }
-        if (filter.songType != null) {
-            conditions.add("s.song_type = ?")
-            args.add(filter.songType)
-        }
-        if (filter.kamisabiOnly) {
-            conditions.add("s.has_kamisabi_card = 1")
-        }
-        if (filter.excludeLiveOnly) {
-            // ライブ履歴のみのファントム曲を除外。カタログメタ(配信ID/原唱者/リリース日/CD/作家)を
-            // 1つでも持てば正規曲として出す。何も無い曲(セトリ追加で生まれただけ)だけ隠す。
-            conditions.add(
-                """(
-                    (s.apple_music_id IS NOT NULL AND s.apple_music_id <> '')
-                    OR (s.release_date IS NOT NULL AND s.release_date <> '')
-                    OR (s.cd_title IS NOT NULL AND s.cd_title <> '')
-                    OR (s.cd_series IS NOT NULL AND s.cd_series <> '')
-                    OR (s.composer IS NOT NULL AND s.composer <> '')
-                    OR (s.lyricist IS NOT NULL AND s.lyricist <> '')
-                    OR (s.arranger IS NOT NULL AND s.arranger <> '')
-                    OR EXISTS (SELECT 1 FROM song_artists sa WHERE sa.song_id = s.id)
-                )""".trimIndent()
-            )
-        }
-
-        val hasIdolIds = !filter.idolIds.isNullOrEmpty()
-        val hasIdolName = !filter.idolName.isNullOrEmpty()
-        val needsArtistJoin = hasIdolIds || hasIdolName
-        val needsLiveJoin = !filter.liveName.isNullOrEmpty()
-
-        var sql = "SELECT DISTINCT s.* FROM songs s"
-        if (needsArtistJoin) {
-            // 持ち曲 (role='original') だけに絞る。role を見ないと 'performer'
-            // (そのアイドルがライブで一度歌っただけの曲) まで拾ってしまい、
-            // 「このアイドルの曲」を見たいのに他人の持ち曲がずらりと並ぶ。
-            sql += " JOIN song_artists sa ON s.id = sa.song_id AND sa.role = 'original'"
-            sql += " JOIN idols i ON sa.idol_id = i.id"
-            if (hasIdolIds) {
-                val placeholders = filter.idolIds!!.joinToString(",") { "?" }
-                conditions.add("sa.idol_id IN ($placeholders)")
-                args.addAll(filter.idolIds)
-            } else if (hasIdolName) {
-                conditions.add("(i.name LIKE ? OR i.name_kana LIKE ?)")
-                args.add("%${filter.idolName}%")
-                args.add("%${filter.idolName}%")
-            }
-        }
-        if (needsLiveJoin) {
-            sql += " JOIN setlist_items si ON s.id = si.song_id JOIN shows sh ON si.show_id = sh.id JOIN events ev ON sh.event_id = ev.id"
-            conditions.add("ev.name LIKE ?")
-            args.add("%${filter.liveName}%")
-        }
-
-        if (conditions.isNotEmpty()) {
-            sql += " WHERE " + conditions.joinToString(" AND ")
-        }
-
-        val asc = ascending ?: sortOrder.defaultAscending
-        val dir = if (asc) "ASC" else "DESC"
-        when (sortOrder) {
-            SongSortOrder.TITLE_KANA -> sql += " ORDER BY s.title_kana $dir, s.title $dir"
-            SongSortOrder.RELEASE_DATE -> sql += " ORDER BY s.release_date $dir, s.title_kana"
-            SongSortOrder.PERFORMANCE_COUNT, SongSortOrder.COLLECTED_COUNT, SongSortOrder.COLLECTED_RATE ->
-                { /* sorted in memory below */ }
-        }
-
-        val songs = db.songDao().fetchSongsRaw(SimpleSQLiteQuery(sql, args.toTypedArray()))
-
-        var results = songs.map { song ->
-            SongWithArtists(song = song, artistNames = song.singerLabel ?: "")
-        }
-
-        when (sortOrder) {
-            SongSortOrder.TITLE_KANA, SongSortOrder.RELEASE_DATE -> {}
-            SongSortOrder.PERFORMANCE_COUNT -> {
-                val countMap = db.songDao().fetchSongPerfCounts().associate { it.songId to it.cnt }
-                results = if (asc) results.sortedBy { countMap[it.song.id] ?: 0 }
-                else results.sortedByDescending { countMap[it.song.id] ?: 0 }
-            }
-            SongSortOrder.COLLECTED_COUNT -> {
-                // 並び替えの母集合はバッジ用 (現地参加 + リアルライブ限定) ではなく、
-                // iOS attendedSongCountMap と同じ「参加種別・イベント kind 無制限」。
-                // スナップショット経路 (songList へ全 attended id を渡す) と揃えないと、
-                // 配信参加マークを持つユーザーだけフォールバック時に順位が変わる。
-                val countMap = db.songDao().fetchAttendedSongCounts().associate { it.songId to it.cnt }
-                results = if (asc) results.sortedBy { countMap[it.song.id] ?: 0 }
-                else results.sortedByDescending { countMap[it.song.id] ?: 0 }
-            }
-            SongSortOrder.COLLECTED_RATE -> {
-                // COLLECTED_COUNT と同じ理由で無制限の attended 回数を使う (分母は全披露回数)。
-                val attendedMap = db.songDao().fetchAttendedSongCounts().associate { it.songId to it.cnt }
-                val totalMap = db.songDao().fetchSongPerfCounts().associate { it.songId to it.cnt }
-                fun rate(id: String): Double {
-                    val total = totalMap[id] ?: 0
-                    return if (total > 0) (attendedMap[id] ?: 0).toDouble() / total else 0.0
-                }
-                results = if (asc) {
-                    results.sortedWith(compareBy({ rate(it.song.id) }, { attendedMap[it.song.id] ?: 0 }))
-                } else {
-                    results.sortedWith(
-                        compareByDescending<SongWithArtists> { rate(it.song.id) }
-                            .thenByDescending { attendedMap[it.song.id] ?: 0 }
-                    )
-                }
-            }
-        }
-
-        return results
-    }
-
-    /**
-     * fetchSongs のスナップショット経路。絞り込み + 整列はコアが行い、表示順の song_id
-     * 列だけが返るので、Room で Song 実体へ引き直す。使えないときは null (SQL へ)。
-     */
-    private suspend fun fetchSongsViaSnapshot(
-        filter: SongSearchFilter,
-        sortOrder: SongSortOrder,
-        ascending: Boolean?,
-        tagFilterSongIds: Set<String>?
-    ): List<SongWithArtists>? {
-        val provider = snapshots ?: return null
         // 回収数系ソートの入力: 参加マーク (user_marks) はスナップショットに無いので
         // ここで解決して渡す。バッジ (fetchSongCollectedCounts) と違い参加種別・イベント
-        // kind を絞らずに全 attended を渡すのはコア側規約 (iOS attendedSongCountMap の
-        // 忠実な再現。SQL フォールバック側も fetchAttendedSongCounts で同じ母集合に揃えてある)。
+        // kind を絞らずに全 attended を渡すのはコア側規約 (iOS attendedSongCountMap の忠実な再現)。
         val needsAttended =
             sortOrder == SongSortOrder.COLLECTED_COUNT || sortOrder == SongSortOrder.COLLECTED_RATE
         val attendedShowIds =
             if (needsAttended) db.userMarkDao().idsFor("show", "attended") else emptyList()
         val attendedEventIds =
             if (needsAttended) db.userMarkDao().idsFor("event", "attended") else emptyList()
-        val ids = provider.query { store ->
+        val ids = snapshots.query { store ->
             store.songList(
                 filter.toSnapshotFilter(),
                 sortOrder.toSnapshotSort(),
@@ -283,44 +111,38 @@ class SongRepository(
                 attendedShowIds,
                 attendedEventIds
             )
-        } ?: return null
-        // タグ絞り込みは SQL 時代の `s.id IN (...)` と同じく通過フィルタ (並びはコアの表示順が正)。
-        val visibleIds = if (tagFilterSongIds != null) ids.filter { it in tagFilterSongIds } else ids
-        return fetchSongsPreservingOrder(visibleIds).map { song ->
-            SongWithArtists(song = song, artistNames = song.singerLabel ?: "")
         }
+        // タグ絞り込みは通過フィルタ (並びはコアの表示順が正)。
+        val visibleIds = if (tagFilterSongIds != null) ids.filter { it in tagFilterSongIds } else ids
+        return fetchSongsPreservingOrder(visibleIds).withArtists()
     }
 
     /** song_id → 現地回収回数 (行アイコン/回収済みフィルタ用の bulk 取得)。 */
     suspend fun fetchSongCollectedCounts(): Map<String, Int> {
-        if (snapshots != null) {
-            // バッジは「参加した show + 参加イベント配下の show」をリアルライブ
-            // (event.kind=live/festival) 限定で数える — 集計はコア側 (songCollectedCountMap
-            // 内の attended_real_live_shows)、参加マークの解決はプラットフォーム側という分担。
-            //
-            // show 側の「現地のみ / 配信も含める」の条件選びは CollectionAttendance (= コアの
-            // collectionAttendedShows) に一本化してある。以前はここが SongDao.fetchAttendedLiveShowIds
-            // という別 SQL (常に現地のみ固定で、設定「配信参加も回収に含める」を無視していた) を
-            // 使っていて、セトリ側の回収表示と条件が食い違う元だった。
-            // event 側は種別条件を掛けない (SQL 時代の fetchSongCollectedCountsQuery と同じ母集合)。
-            val attendedShowIds = CollectionAttendance.showIds(db, CollectionPreferences.includeStream)
-            val attendedEventIds = db.userMarkDao().idsFor(UserMark.EVENT, UserMark.ATTENDED)
-            snapshots.query { store ->
-                store.songCollectedCountMap(attendedShowIds, attendedEventIds, true)
-                    .mapValues { (_, count) -> count.toInt() }
-            }?.let { return it }
+        // バッジは「参加した show + 参加イベント配下の show」をリアルライブ
+        // (event.kind=live/festival) 限定で数える — 集計はコア側 (songCollectedCountMap
+        // 内の attended_real_live_shows)、参加マークの解決はプラットフォーム側という分担。
+        //
+        // show 側の「現地のみ / 配信も含める」の条件選びは CollectionAttendance (= コアの
+        // collectionAttendedShows) に一本化してある。以前はここが SongDao.fetchAttendedLiveShowIds
+        // という別 SQL (常に現地のみ固定で、設定「配信参加も回収に含める」を無視していた) を
+        // 使っていて、セトリ側の回収表示と条件が食い違う元だった。
+        // event 側は種別条件を掛けない (SQL 時代の fetchSongCollectedCountsQuery と同じ母集合)。
+        val attendedShowIds = CollectionAttendance.showIds(db, CollectionPreferences.includeStream)
+        val attendedEventIds = db.userMarkDao().idsFor(UserMark.EVENT, UserMark.ATTENDED)
+        return snapshots.query { store ->
+            store.songCollectedCountMap(attendedShowIds, attendedEventIds, true)
+                .mapValues { (_, count) -> count.toInt() }
         }
-        return db.songDao().fetchSongCollectedCounts().associate { it.songId to it.cnt }
     }
 
     /** 指定アイドルのいずれかが歌唱者にいる song_id 集合 (担当マーク由来の「担当」表示/絞り込み用)。 */
     suspend fun fetchSongIdsWithAnyArtist(idolIds: Collection<String>): Set<String> {
         if (idolIds.isEmpty()) return emptySet()
-        snapshots?.query { store ->
-            // 専用 API は無いが、songList の idol_ids 絞り込み (role='original' 限定) が
-            // SQL の `SELECT DISTINCT song_id FROM song_artists WHERE role='original' ...` と
-            // 同値になる。SQL 版は他の条件を一切持たないので、リミックス・other ブランド・
-            // ライブ履歴のみの曲も落とさないようフラグを全開にする。
+        return snapshots.query { store ->
+            // 専用 API は無いが、songList の idol_ids 絞り込み (role='original' 限定) で引ける。
+            // 他の条件は持たないので、リミックス・other ブランド・ライブ履歴のみの曲も
+            // 落とさないようフラグを全開にする。
             store.songList(
                 snapshotSongFilter(
                     idolIds = idolIds.toList(),
@@ -333,8 +155,7 @@ class SongRepository(
                 emptyList(),
                 emptyList()
             ).toSet()
-        }?.let { return it }
-        return db.songDao().fetchSongIdsWithAnyArtist(idolIds.toList()).toSet()
+        }
     }
 
     // Song 実体の単発/一括取得はスナップショットの hydration 先 (プラットフォーム側の
@@ -385,21 +206,11 @@ class SongRepository(
     suspend fun fetchSongArtists(songId: String, role: String? = null): List<Idol> {
         // コアは idol id 列 (sort_order 順) を返す。role=null の重複 (original と performer の
         // 両ロール保持) も SQL の JOIN と同じく行ごとに残る。
-        snapshots?.query { it.songArtistIds(songId, role) }
-            ?.let { return fetchIdolsPreservingOrder(it) }
-        return if (role != null) {
-            db.songDao().fetchSongArtistsByRole(songId, role)
-        } else {
-            db.songDao().fetchSongArtists(songId)
-        }
+        return fetchIdolsPreservingOrder(snapshots.query { it.songArtistIds(songId, role) })
     }
 
-    suspend fun fetchSongPerformanceHistory(songId: String): List<PerformanceHistoryRow> {
-        snapshots?.query { store ->
-            store.songPerformanceHistory(songId).map { it.toRow() }
-        }?.let { return it }
-        return db.songDao().fetchSongPerformanceHistory(songId)
-    }
+    suspend fun fetchSongPerformanceHistory(songId: String): List<PerformanceHistoryRow> =
+        snapshots.query { store -> store.songPerformanceHistory(songId).map { it.toRow() } }
 
     /**
      * 披露回数ランキング (iOS CoreStatsRepository.songPlayCountRanking と同一経路)。
@@ -409,15 +220,14 @@ class SongRepository(
      *
      * 同数タイの並びは iOS と一致しない — クラス KDoc の「スナップショット添字」の注意どおり、
      * 両プラットフォームとも添字を最終キーにするが、その添字の元になる rowid が別データだから。
-     * 移送前の Kotlin 実装 (songPerformanceCountMap を取って `thenBy { song_id }` で整列) と
-     * SQL フォールバック (GROUP BY が主キー索引を走るため実測ではタイが song_id 昇順) は
-     * どちらもタイが安定していたので、そこは失っている。
+     * 移送前の Kotlin 実装 (songPerformanceCountMap を取って `thenBy { song_id }` で整列) は
+     * タイが安定していたので、そこは失っている。
      * 順位の値そのものは変わらないので許容するが、同数が limit の境目にまたがると
      * 20 位に載る曲自体が入れ替わる (実データでは 36 回タイの いっぱいいっぱい /
      * M@STERPIECE / GOIN'!!! がちょうど limit=20 の境界にいる)。
      */
-    suspend fun fetchSongPlayCountRanking(limit: Int = 20): List<SongPlayCount> {
-        snapshots?.query { store ->
+    suspend fun fetchSongPlayCountRanking(limit: Int = 20): List<SongPlayCount> =
+        snapshots.query { store ->
             store.songPlayCountRanking(limit.coerceAtLeast(0).toUInt()).map {
                 SongPlayCount(
                     id = it.id,
@@ -427,9 +237,7 @@ class SongRepository(
                     artworkUrl = it.artworkUrl
                 )
             }
-        }?.let { return it }
-        return db.songDao().fetchSongPlayCountRanking(limit)
-    }
+        }
 
     // ---- 絞り込み一覧 (FilteredSongs) の母集団 ----
     //
@@ -437,30 +245,21 @@ class SongRepository(
     // (fetchSongs(filter:)) に合流するので、ここには専用クエリを持つ 3 種 + クリエイターだけ置く。
 
     /** CDシリーズ (完全一致) の楽曲。並びは release_date, title_kana。 */
-    suspend fun fetchSongsByCdSeries(series: String): List<SongWithArtists> {
-        snapshots?.query { it.songsByCdSeries(series) }
-            ?.let { return fetchSongsPreservingOrder(it).withArtists() }
-        return db.songDao().fetchSongsByCdSeries(series).withArtists()
-    }
+    suspend fun fetchSongsByCdSeries(series: String): List<SongWithArtists> =
+        fetchSongsPreservingOrder(snapshots.query { it.songsByCdSeries(series) }).withArtists()
 
     /** シリーズ (series_group 完全一致) の楽曲。 */
-    suspend fun fetchSongsBySeriesGroup(name: String): List<SongWithArtists> {
-        snapshots?.query { it.songsBySeriesGroup(name) }
-            ?.let { return fetchSongsPreservingOrder(it).withArtists() }
-        return db.songDao().fetchSongsBySeriesGroupOrdered(name).withArtists()
-    }
+    suspend fun fetchSongsBySeriesGroup(name: String): List<SongWithArtists> =
+        fetchSongsPreservingOrder(snapshots.query { it.songsBySeriesGroup(name) }).withArtists()
 
     /** リリース年 ("YYYY" 前方一致) の楽曲。 */
-    suspend fun fetchSongsByReleaseYear(year: String): List<SongWithArtists> {
-        snapshots?.query { it.songsByReleaseYear(year) }
-            ?.let { return fetchSongsPreservingOrder(it).withArtists() }
-        return db.songDao().fetchSongsByReleaseYear("${year.likeEscaped()}%").withArtists()
-    }
+    suspend fun fetchSongsByReleaseYear(year: String): List<SongWithArtists> =
+        fetchSongsPreservingOrder(snapshots.query { it.songsByReleaseYear(year) }).withArtists()
 
     /**
      * クリエイター名 (作詞・作曲・編曲 横断) で引いた楽曲と、その曲での役割。
      *
-     * **コアに対応 API が無い唯一の絞り込み**なので、スナップショットの有無にかかわらず Room 経路。
+     * **コアに対応 API が無い絞り込み**なので Room で引く。
      *
      * 2 段構えなのは 3 欄が「/」「、」等で複数名を詰めた自由文字列だから。SQL の部分一致だけだと
      * 「山田」で「山田太郎」の曲まで当たるので、候補を絞ったあとに欄を人ごとへ割って
@@ -482,18 +281,9 @@ class SongRepository(
         }
     }
 
-    suspend fun fetchCdSeriesList(): List<String> {
-        snapshots?.query { store ->
-            // albumSummaries は MIN(release_date) 降順で返るので、SQL 時代の
-            // `ORDER BY cd_series` (BINARY 照合 = UTF-8 バイト列昇順) に並べ直す。
-            // String.compareTo (UTF-16 コード単位) とはサロゲート域で順序が食い違うため、
-            // バイト列比較で SQL と厳密に一致させる。
-            store.albumSummaries(emptyList(), null)
-                .map { it.cdSeries }
-                .sortedWith(SQLITE_BINARY_ORDER)
-        }?.let { return it }
-        return db.songDao().fetchCdSeriesList()
-    }
+    /** CD シリーズの一覧 (フィルタシートのピッカー候補)。並びはコアの cdSeriesList が正。 */
+    suspend fun fetchCdSeriesList(): List<String> =
+        snapshots.query { store -> store.cdSeriesList() }
 
     /**
      * 上位シリーズ (series_group) の一覧。フィルタシートのピッカー候補。
@@ -501,29 +291,18 @@ class SongRepository(
      * コアの seriesSummaries は MIN(release_date) 降順で返るので、cd_series 一覧と同じく
      * SQL の `ORDER BY` (BINARY 照合 = UTF-8 バイト列昇順) に並べ直す。
      */
-    suspend fun fetchSeriesGroupList(): List<String> {
-        snapshots?.query { store ->
+    suspend fun fetchSeriesGroupList(): List<String> =
+        snapshots.query { store ->
             store.seriesSummaries(emptyList(), null)
                 .map { it.name }
                 .sortedWith(SQLITE_BINARY_ORDER)
-        }?.let { return it }
-        // SongDao に series_group の DISTINCT 口が無いので、フォールバックでは
-        // 生クエリで曲を引いてから Kotlin 側で畳む (コアが使えない時だけ通る道)。
-        return db.songDao()
-            .fetchSongsRaw(
-                SimpleSQLiteQuery("SELECT * FROM songs WHERE series_group IS NOT NULL AND series_group <> ''")
-            )
-            .mapNotNull { it.seriesGroup }
-            .distinct()
-            .sortedWith(SQLITE_BINARY_ORDER)
-    }
+        }
 
     /**
-     * CD シリーズ単位の集計 (曲一覧の「アルバム」表示)。
-     * 集計はコアの責務なので、スナップショットが無い時は空 (グリッド自体を出さない)。
+     * CD シリーズ単位の集計 (曲一覧の「アルバム」表示)。集計はコアの責務。
      */
     suspend fun fetchAlbumSummaries(brandIds: Set<String>, query: String?): List<AlbumSummary> =
-        snapshots?.query { store ->
+        snapshots.query { store ->
             store.albumSummaries(brandIds.toList(), query?.takeIf { it.isNotBlank() }).map {
                 AlbumSummary(
                     cdSeries = it.cdSeries,
@@ -534,11 +313,11 @@ class SongRepository(
                     brandIds = it.brandIds
                 )
             }
-        } ?: emptyList()
+        }
 
     /** 上位シリーズ (series_group) 単位の集計 (曲一覧の「シリーズ」表示)。 */
     suspend fun fetchSeriesSummaries(brandIds: Set<String>, query: String?): List<SeriesSummary> =
-        snapshots?.query { store ->
+        snapshots.query { store ->
             store.seriesSummaries(brandIds.toList(), query?.takeIf { it.isNotBlank() }).map {
                 SeriesSummary(
                     name = it.name,
@@ -550,7 +329,7 @@ class SongRepository(
                     brandIds = it.brandIds
                 )
             }
-        } ?: emptyList()
+        }
 
     /**
      * 同じ絞り込みで何件当たるかだけを返す (検索スコープ切替バーの件数)。
@@ -564,109 +343,63 @@ class SongRepository(
         tagFilterSongIds: Set<String>? = null
     ): Int {
         if (tagFilterSongIds != null && tagFilterSongIds.isEmpty()) return 0
-        val provider = snapshots
-        if (provider != null) {
-            val ids = provider.query { store ->
-                store.songList(filter.toSnapshotFilter(), SongListSort.TITLE_KANA, null, emptyList(), emptyList())
-            }
-            if (ids != null) {
-                return if (tagFilterSongIds != null) ids.count { it in tagFilterSongIds } else ids.size
-            }
+        val ids = snapshots.query { store ->
+            store.songList(filter.toSnapshotFilter(), SongListSort.TITLE_KANA, null, emptyList(), emptyList())
         }
-        // コアが使えない環境では素直に引いて数える (件数バーは出るが 1 回ぶん重い)。
-        return fetchSongs(filter, SongSortOrder.TITLE_KANA, null, tagFilterSongIds).size
+        return if (tagFilterSongIds != null) ids.count { it in tagFilterSongIds } else ids.size
     }
 
-    // イベント名一覧はイベントスライス (Phase 2 対象外)。スナップショット API が
-    // 生えるまで SQL 経路のまま。
-    suspend fun fetchEventNames(): List<String> {
-        return db.songDao().fetchEventNames()
-    }
+    /** ライブ名の一覧 (曲の絞り込みの候補)。並びはコアの eventNames が正。 */
+    suspend fun fetchEventNames(): List<String> =
+        snapshots.query { store -> store.eventNames() }
 
     /**
      * ユニットの持ち曲一覧 (iOS CoreUnitRepository.unitSongs と同一経路)。
      *
      * コアは release_date 昇順 (NULL 先頭 = SQLite ASC)、同日はスナップショット添字順の
      * song_id 列を返す。同日タイの前後はクラス KDoc の注意どおり端末ごと・同期ごとに動き得る
-     * (SQL の `ORDER BY release_date` も同日は未規定だったので、どちらの経路でも未規定のまま)。
+     * (同日は未規定)。
      */
-    suspend fun fetchUnitSongs(unitId: String): List<Song> {
-        snapshots?.query { it.unitSongIds(unitId) }
-            ?.let { return fetchSongsPreservingOrder(it) }
-        return db.songDao().fetchUnitSongs(unitId)
-    }
+    suspend fun fetchUnitSongs(unitId: String): List<Song> =
+        fetchSongsPreservingOrder(snapshots.query { it.unitSongIds(unitId) })
 
     suspend fun fetchCollectedShows(songId: String): List<PerformanceHistoryRow> {
-        if (snapshots != null) {
-            // 回収済み判定 (user_marks) はプラットフォームが正。全披露履歴をコアから取り、
-            // 参加 show / 参加イベント配下の公演だけ残す (SQL 版の WHERE と同値)。
-            // バッジと違い参加種別 (text_value) を絞らないのも SQL 版の忠実な再現。
-            val attendedShows = db.userMarkDao().idsFor("show", "attended").toSet()
-            val attendedEvents = db.userMarkDao().idsFor("event", "attended").toSet()
-            snapshots.query { store ->
-                store.songPerformanceHistory(songId)
-                    .filter { it.showId in attendedShows || it.eventId in attendedEvents }
-                    .map { it.toRow() }
-            }?.let { return it }
+        // 回収済み判定 (user_marks) はプラットフォームが正。全披露履歴をコアから取り、
+        // 参加 show / 参加イベント配下の公演だけ残す。参加種別 (text_value) は絞らない。
+        val attendedShows = db.userMarkDao().idsFor("show", "attended").toSet()
+        val attendedEvents = db.userMarkDao().idsFor("event", "attended").toSet()
+        return snapshots.query { store ->
+            store.songPerformanceHistory(songId)
+                .filter { it.showId in attendedShows || it.eventId in attendedEvents }
+                .map { it.toRow() }
         }
-        return db.songDao().fetchCollectedShows(songId)
     }
 
     /**
-     * 関連楽曲 (同じシリーズ/ユニット/原唱アイドルでつながる曲)。iOS fetchRelatedSongs と同じ重み付け
-     * (シリーズ=3, ユニット=2, 原唱共有=1) で足し合わせ、スコア降順→リリース日降順で並べる。
-     *
-     * 複合クエリで専用のスナップショット API がまだ無く、部分的に移すと FFI の
-     * 「1 ユーザー操作 = 1 呼び出し」規約に反する分割呼び出しになるため、
-     * 専用 API がコアに生えるまで SQL 経路のまま。
+     * 関連楽曲 (同じシリーズ/ユニット/原唱アイドルでつながる曲)。重み付け (シリーズ=3,
+     * ユニット=2, 原唱共有=1) と並び (スコア降順 → リリース日降順、同点はコアの規則) は
+     * コアの relatedSongs が持つ (iOS と同じ)。実体は Room で id から引く。
      */
-    suspend fun fetchRelatedSongs(song: Song, limit: Int = 8): List<Song> {
-        val dao = db.songDao()
-        val ordered = mutableListOf<String>()
-        val byId = mutableMapOf<String, Pair<Song, Int>>()
-        fun add(songs: List<Song>, weight: Int) {
-            for (s in songs) {
-                if (s.id == song.id) continue
-                if (byId[s.id] == null) ordered.add(s.id)
-                val (existing, score) = byId[s.id] ?: (s to 0)
-                byId[s.id] = existing to (score + weight)
-            }
-        }
-
-        val seriesGroup = dao.fetchSeriesGroup(song.id)
-        if (!seriesGroup.isNullOrEmpty()) {
-            add(dao.fetchSongsBySeriesGroup(seriesGroup), weight = 3)
-        }
-        if (!song.unitId.isNullOrEmpty()) {
-            add(dao.fetchUnitSongs(song.unitId), weight = 2)
-        }
-        add(dao.fetchSongsSharingOriginalArtist(song.id), weight = 1)
-
-        return ordered.mapNotNull { byId[it] }
-            .sortedWith(compareByDescending<Pair<Song, Int>> { it.second }.thenByDescending { it.first.releaseDate ?: "" })
-            .take(limit)
-            .map { it.first }
-    }
+    suspend fun fetchRelatedSongs(song: Song, limit: Int = 8): List<Song> =
+        fetchSongsPreservingOrder(
+            snapshots.query { store -> store.relatedSongs(song.id, limit.coerceAtLeast(0).toUInt()).map { it.id } }
+        )
 
     suspend fun fetchIdolSongs(idolId: String, role: String? = null): List<Song> {
         // idolSongRecords は一覧射影 (IdolSongRecord) を返すが、この口の戻り値は Song 実体
         // なので id 列だけ使って Room で引き直す。並び (release_date DESC) と重複
         // (role=null 時に両ロール保持曲が 2 行) はコアの返した id 列がそのまま正。
-        snapshots?.query { store -> store.idolSongRecords(idolId, role).map { it.songId } }
-            ?.let { return fetchSongsPreservingOrder(it) }
-        return if (role != null) {
-            db.songDao().fetchIdolSongsByRole(idolId, role)
-        } else {
-            db.songDao().fetchIdolSongs(idolId)
-        }
+        return fetchSongsPreservingOrder(
+            snapshots.query { store -> store.idolSongRecords(idolId, role).map { it.songId } }
+        )
     }
 
     /** ソロ曲クイズ用: ソロ曲と原唱アイドルの対応行 (song_id, idol_id)。 */
-    suspend fun fetchSoloOriginalSingers(): List<SoloOriginalSingerRow> {
-        snapshots?.query { store ->
+    suspend fun fetchSoloOriginalSingers(): List<SoloOriginalSingerRow> =
+        snapshots.query { store ->
             // ソロ曲集合 → 原唱者マップの 2 段引き。songList (song_type='solo', リミックス除外) と
-            // songPerformerIdolIdsMap (role='original' のみ) の組で SQL の JOIN と同値。
-            // SQL 版はブランド・ライブ履歴のみ曲を絞らないのでフラグを全開にする。
+            // songPerformerIdolIdsMap (role='original' のみ) の組。ブランド・ライブ履歴のみの曲は
+            // 絞らないのでフラグを全開にする。
             val soloIds = store.songList(
                 snapshotSongFilter(
                     songType = "solo",
@@ -683,38 +416,24 @@ class SongRepository(
             soloIds.flatMap { songId ->
                 (singersBySong[songId] ?: emptyList()).map { SoloOriginalSingerRow(songId, it) }
             }
-        }?.let { return it }
-        return db.songDao().fetchSoloOriginalSingers()
-    }
+        }
 
     /**
      * KAMISABI (音楽カードゲーム) の所持コンプ。**分母の規則はコア一本**
      * (`domain::kamisabi_cards::completion`) — KAMISABI はブランドごとの別商品
      * (ML 50 / SideM 50 / シャニ 50) なので、`brandId` を渡すとその商品の分母、
      * `null` なら全商品の合算になる。ここでは規則を持たず、コアの返り値をそのまま返す。
-     *
-     * スナップショット未ロード時だけ、同じ規則 (`has_kamisabi_card` かつ主ブランド一致) を
-     * SQL 側でも守った Room フォールバックへ落ちる (iOS `GRDBSongRepository.kamisabiCompletion`
-     * と対)。
      */
-    suspend fun fetchKamisabiCompletion(brandId: String?, ownedSongIds: List<String>): KamisabiCompletion {
-        snapshots?.query { store -> store.kamisabiCompletion(brandId, ownedSongIds) }?.let { return it }
-        val ids = db.songDao().fetchKamisabiSongIds(brandId)
-        val owned = ownedSongIds.toSet()
-        val have = ids.count { it in owned }
-        return KamisabiCompletion(owned = have.toUInt(), total = ids.size.toUInt())
-    }
+    suspend fun fetchKamisabiCompletion(brandId: String?, ownedSongIds: List<String>): KamisabiCompletion =
+        snapshots.query { store -> store.kamisabiCompletion(brandId, ownedSongIds) }
 
     /**
      * 編集で曲を 1 つ選ぶピッカーの母集団。絞り込みは一切しない (派生曲・その他ブランドも
      * 含む。編集ではどの曲でも選べる必要がある)。並びは title のバイト列順 (コアの
      * `allSongsForPicker`。iOS の SongPickerView と同じ)。
      */
-    suspend fun fetchSongsForPicker(): List<PickedSongRecord> {
-        snapshots?.query { store -> store.allSongsForPicker() }?.let { return it }
-        return db.songDao().fetchSongsRaw(SimpleSQLiteQuery("SELECT * FROM songs ORDER BY title"))
-            .map { PickedSongRecord(it.id, it.title, it.titleKana) }
-    }
+    suspend fun fetchSongsForPicker(): List<PickedSongRecord> =
+        snapshots.query { store -> store.allSongsForPicker() }
 
     /**
      * イントロドン出題プール (並びは無作為)。[brandIds] が空なら全ブランド。

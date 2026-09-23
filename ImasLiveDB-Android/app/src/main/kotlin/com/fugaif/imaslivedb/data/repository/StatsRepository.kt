@@ -21,30 +21,26 @@ import uniffi.imas_core.SongListSort
  * 統計・回収ダッシュボードの読み取り口。
  *
  * カタログ側の集計 (ブランド別曲数・年別公演数・回収母集合) は共有コア (imas-core) の
- * スナップショットを第一経路にし、未ロード・利用不可のときだけ Room へ委譲する。
+ * スナップショットが答える (SQL の代わりの経路は持たない)。コアに対応する API が無い集計
+ * (リアルライブ限定の披露回数・今後の公演) だけ Room で引く。
  * 参加マーク (user_marks) はスナップショットに含まれないので、解決済みの id 集合を
  * 呼び出し側 (UserMarkRepository) から受け取り、コアへは引数で渡す。
  */
 class StatsRepository(
     private val db: AppDatabase,
     private val communityApi: CommunityApi,
-    // null = スナップショット経路なし (テスト等)。その場合は常に SQL 経路。
-    private val snapshots: SnapshotStoreProvider? = null
+    private val snapshots: SnapshotStoreProvider
 ) {
 
-    suspend fun fetchBrands(): List<Brand> {
-        snapshots?.query { store -> store.brandRecords().map { it.toBrand() } }?.let { return it }
-        return db.brandDao().fetchBrands()
-    }
+    suspend fun fetchBrands(): List<Brand> =
+        snapshots.query { store -> store.brandRecords().map { it.toBrand() } }
 
-    suspend fun fetchBrandSongCounts(): List<BrandSongCount> {
-        snapshots?.query { store ->
+    suspend fun fetchBrandSongCounts(): List<BrandSongCount> =
+        snapshots.query { store ->
             store.brandSongCounts().map {
                 BrandSongCount(id = it.id, shortName = it.shortName, color = it.color, songCount = it.songCount.toInt())
             }
-        }?.let { return it }
-        return db.brandDao().fetchBrandSongCounts()
-    }
+        }
 
     /**
      * DB 統計 (行数)。コアは件数だけを返す API を持たず (SnapshotStats はロード時の戻り値で
@@ -59,12 +55,10 @@ class StatsRepository(
         )
     }
 
-    suspend fun fetchYearlyShowCounts(): List<YearlyShowCount> {
-        snapshots?.query { store ->
+    suspend fun fetchYearlyShowCounts(): List<YearlyShowCount> =
+        snapshots.query { store ->
             store.yearlyShowCounts().map { YearlyShowCount(year = it.year, showCount = it.showCount.toInt()) }
-        }?.let { return it }
-        return db.statsDao().fetchYearlyShowCounts()
-    }
+        }
 
     /**
      * meta の値 (schema_version / data_version)。設定画面が「いまローカル DB がどの版か」を
@@ -120,19 +114,16 @@ class StatsRepository(
     }
 
     /** 回収率の母集合 (brand_id が設定されている曲)。 */
-    private suspend fun fetchBrandedSongIds(): Set<String> {
-        snapshots?.query { store -> store.brandedSongIds().toSet() }?.let { return it }
-        return db.statsDao().fetchBrandedSongIds().toSet()
-    }
+    private suspend fun fetchBrandedSongIds(): Set<String> =
+        snapshots.query { store -> store.brandedSongIds().toSet() }
 
     /** 担当アイドルのいずれかが原唱者 (role='original') の曲 id 集合。 */
     private suspend fun fetchSongIdsWithAnyArtist(idolIds: Set<String>): Set<String> {
         if (idolIds.isEmpty()) return emptySet()
-        snapshots?.query { store ->
-            // 専用 API は無いが、songList の idol_ids 絞り込み (role='original' 限定) が
-            // SQL の `SELECT DISTINCT song_id FROM song_artists WHERE role='original' ...` と
-            // 同値になる。SQL 版は他の条件を持たないので、リミックス・other ブランド・
-            // ライブ履歴のみの曲を落とさないようフラグを全開にする
+        return snapshots.query { store ->
+            // 専用 API は無いが、songList の idol_ids 絞り込み (role='original' 限定) で引ける。
+            // 他の条件は持たないので、リミックス・other ブランド・ライブ履歴のみの曲を
+            // 落とさないようフラグを全開にする
             // (uniffi の Record にデフォルト引数は生成されないので全項目を明示する)。
             store.songList(
                 SongListFilter(
@@ -155,8 +146,7 @@ class StatsRepository(
                 emptyList(),
                 emptyList()
             ).toSet()
-        }?.let { return it }
-        return db.statsDao().fetchSongIdsWithAnyArtist(idolIds.toList()).toSet()
+        }
     }
 
     /** ブランドごとの現地回収進捗 (回収済み曲数 / そのブランド全曲数)。 */
@@ -178,21 +168,18 @@ class StatsRepository(
      * ブランド別の曲総数 (回収進捗の分母)。SQL では fetchBrandTotals と fetchBrandSongCounts が
      * 同一クエリなので、コア側は brandSongCounts が両方を担う (並びも sort_order で同じ)。
      */
-    private suspend fun fetchBrandTotals(): List<BrandTotalRow> {
-        snapshots?.query { store ->
+    private suspend fun fetchBrandTotals(): List<BrandTotalRow> =
+        snapshots.query { store ->
             store.brandSongCounts().map {
                 BrandTotalRow(id = it.id, shortName = it.shortName, color = it.color, total = it.songCount.toInt())
             }
-        }?.let { return it }
-        return db.statsDao().fetchBrandTotals()
-    }
+        }
 
-    /** 回収済み曲をブランド別に数える。曲 → brand_id の解決だけをコア/SQL に任せる。 */
+    /** 回収済み曲をブランド別に数える。曲 → brand_id の解決はコアが行う。 */
     private suspend fun collectedCountByBrand(collectedIds: Set<String>): Map<String, Int> {
         if (collectedIds.isEmpty()) return emptyMap()
         val ids = collectedIds.toList()
-        val brandIds = snapshots?.query { store -> store.songRecordsByIds(ids).mapNotNull { it.brandId } }
-            ?: db.statsDao().fetchBrandIdsForSongs(ids)
+        val brandIds = snapshots.query { store -> store.songRecordsByIds(ids).mapNotNull { it.brandId } }
         return brandIds.groupingBy { it }.eachCount()
     }
 

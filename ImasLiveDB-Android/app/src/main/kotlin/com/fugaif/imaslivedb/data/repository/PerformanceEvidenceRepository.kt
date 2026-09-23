@@ -16,24 +16,17 @@ import com.fugaif.imaslivedb.data.model.SongSingerTally
  * `CorePerformanceEvidenceRepository` と 1:1。
  *
  * ## 経路
- * スナップショットがあればコア、無ければ Room。他のリポジトリと同じフォールバック規約に
- * 従う。Android でスナップショットが無い局面は珍しくない —— ネイティブ .so 未同梱の
- * コントリビュータービルド、初回同期前 (Room がまだ DB ファイルを作っていない)、load 失敗
- * —— ので、フォールバックが無いと「そのビルドでは曲詳細に節が最初から存在しない」ことになる。
- *
- * 数え方は Room 経路も**コアと 1:1 に揃えてある** ([SongDao.fetchCoOccurringSongs] の注記)。
- * 経路で根拠の数字が変わるなら、根拠として出す意味が無い。
+ * 集計はコアのスナップショットだけが答える (SQL の代わりの経路は持たない)。
  *
  * ## FFI / クエリの回数
  * 曲詳細を 1 回開くのに叩くコア呼び出しは **1 回だけ** (`songPerformanceInsights` が
- * 共起と歌唱者を束ねて返す)。Room 経路も固定 4 クエリ。どちらも行ごとには引かない。
+ * 共起と歌唱者を束ねて返す)。行ごとには引かない。
  * コアは id しか返さないが、実体は Room から引き直す (`hydrateInOrder` の規約。
  * Room のエンティティにはコアが持たない派生列があるため)。
  */
 class PerformanceEvidenceRepository(
     private val db: AppDatabase,
-    // null = スナップショット経路なし (テスト・ネイティブ未同梱ビルド)。Room 経路のみで動く。
-    private val snapshots: SnapshotStoreProvider? = null
+    private val snapshots: SnapshotStoreProvider
 ) {
 
     suspend fun fetchSongPerformanceEvidence(
@@ -43,37 +36,14 @@ class PerformanceEvidenceRepository(
     ): SongPerformanceEvidence {
         val co = coLimit.coerceAtLeast(0)
         val singer = singerLimit.coerceAtLeast(0)
-        val raw = snapshots?.query { store ->
+        val raw = snapshots.query { store ->
             store.songPerformanceInsights(songId, co.toUInt(), singer.toUInt())
-        } ?: return fetchFromRoom(songId, co, singer)
-
-        // コアの行を SQL 経路と同じ形に均してから組み立てる。両経路で組み立てを共有すれば、
-        // 片方だけ並び順や分母の扱いが変わる余地が無くなる。
+        }
         return assemble(
             coRows = raw.coOccurring.map { CoOccurrenceRow(it.songId, it.together.toInt()) },
             performances = raw.coOccurring.associate { it.songId to it.performances.toInt() },
             singerRows = raw.singers.map { SingerTallyRow(it.idolId, it.times.toInt(), it.total.toInt()) }
         )
-    }
-
-    /** スナップショットが使えないときの Room 経路 (固定 4 クエリ)。 */
-    private suspend fun fetchFromRoom(
-        songId: String,
-        coLimit: Int,
-        singerLimit: Int
-    ): SongPerformanceEvidence {
-        val dao = db.songDao()
-        val coRows =
-            if (coLimit > 0) dao.fetchCoOccurringSongs(songId, coLimit) else emptyList<CoOccurrenceRow>()
-        // 分母は上位が決まってから 1 回だけ引く (行ごとには引かない)。
-        val performances = if (coRows.isEmpty()) {
-            emptyMap<String, Int>()
-        } else {
-            dao.fetchSongShowCounts(coRows.map { it.songId }).associate { it.songId to it.cnt }
-        }
-        val singerRows =
-            if (singerLimit > 0) dao.fetchSongSingerTallies(songId, singerLimit) else emptyList<SingerTallyRow>()
-        return assemble(coRows, performances, singerRows)
     }
 
     /**

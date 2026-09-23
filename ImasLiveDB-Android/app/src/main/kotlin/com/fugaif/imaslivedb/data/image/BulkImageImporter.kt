@@ -5,7 +5,6 @@ import com.fugaif.imaslivedb.data.core.SnapshotStoreProvider
 import com.fugaif.imaslivedb.data.model.ImasUnit
 import com.fugaif.imaslivedb.data.repository.IdolRepository
 import com.fugaif.imaslivedb.data.repository.StatsRepository
-import com.fugaif.imaslivedb.data.repository.UnitRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,8 +36,7 @@ class BulkImageImporter(
     private val store: CustomImageStore,
     private val idolRepository: IdolRepository,
     private val statsRepository: StatsRepository,
-    private val unitRepository: UnitRepository,
-    private val snapshots: SnapshotStoreProvider?,
+    private val snapshots: SnapshotStoreProvider,
 ) {
 
     /** 失敗内訳 1 件 (キー名, 理由)。最後のインポート分のみ保持する。 */
@@ -180,17 +178,17 @@ class BulkImageImporter(
     /**
      * 全ユニット (臨時含む)。名前解決表は臨時ユニットも引けたほうが良いので全件必要。
      * `UnitRepository` の公開口は「曲ありユニット」しか返さないため、全件を持っている
-     * 共有コアのスナップショットを先に見て、使えないときだけそちらへ落とす。
+     * 共有コアのスナップショットから引く。
      */
     private suspend fun fetchAllUnits(): List<ImasUnit> =
-        snapshots?.query { snapshot ->
+        snapshots.query { snapshot ->
             snapshot.unitIndexRecord().units.map {
                 ImasUnit(
                     id = it.id, brandId = it.brandId, name = it.name,
                     isPermanent = it.isPermanent, nameAlt = it.nameAlt,
                 )
             }
-        } ?: unitRepository.fetchUnitsForList()
+        }
 
     private suspend fun runImport(
         urlString: String,

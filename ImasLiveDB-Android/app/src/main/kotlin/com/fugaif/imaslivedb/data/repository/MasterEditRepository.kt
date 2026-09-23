@@ -24,8 +24,7 @@ import com.fugaif.imaslivedb.data.model.SongVideo
  */
 class MasterEditRepository(
     private val db: AppDatabase,
-    // null = スナップショット経路なし (テスト等)。
-    private val snapshots: SnapshotStoreProvider? = null
+    private val snapshots: SnapshotStoreProvider
 ) {
     suspend fun applyIdol(idol: Idol) = write { db.syncDao().upsertIdols(listOf(idol)) }
 
@@ -64,6 +63,6 @@ class MasterEditRepository(
     /** 1 トランザクションで書き、書き終えたらスナップショットを作り直す。 */
     private suspend fun write(block: suspend () -> Unit) {
         db.withTransaction { block() }
-        snapshots?.reload()
+        snapshots.reload()
     }
 }

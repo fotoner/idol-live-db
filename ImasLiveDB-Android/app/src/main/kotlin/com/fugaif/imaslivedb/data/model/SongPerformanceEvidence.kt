@@ -5,8 +5,7 @@ package com.fugaif.imaslivedb.data.model
  *
  * 共有コア (`imas-core/src/domain/performance_stats.rs`) がセトリ 13,777 件・
  * 出演者 60,383 件を走査して出す。事前計算も保存もしない (保存すると master 更新の
- * たびに作り直す手間と、古い値を配る事故が増える)。スナップショットが使えないときは
- * 同じ数え方の Room クエリ (`SongDao.fetchCoOccurringSongs` ほか) が同じ値を出す。
+ * たびに作り直す手間と、古い値を配る事故が増える)。
  *
  * ⚠️ 表示の約束 1: 画面に出すときは**必ず回数を添える**こと。回数を隠して
  * 「よく一緒に来る」とだけ書くと、次のライブで外れたときに嘘になる。分母
@@ -30,10 +29,7 @@ data class SongPerformanceEvidence(
     val isEmpty: Boolean get() = coOccurring.isEmpty() && singers.isEmpty()
 
     companion object {
-        /**
-         * 披露実績がまだ無い曲の答え。供給源の有無で空になることはない
-         * (スナップショットが無ければ Room 経路が同じ値を返す)。
-         */
+        /** 披露実績がまだ無い曲の答え。 */
         val EMPTY = SongPerformanceEvidence()
     }
 }

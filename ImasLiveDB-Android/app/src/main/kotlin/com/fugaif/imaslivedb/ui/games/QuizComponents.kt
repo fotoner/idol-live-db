@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,12 +29,10 @@ import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -94,14 +91,11 @@ val QUIZ_SESSION_LENGTH: Int by lazy { quizSessionLength().toInt() }
  * 選ぶ規則はコアの `idolCastNames` が持つ。画面につき 1 回だけ呼ぶ
  * (アイドル 1 人ずつ引くと N+1 の FFI になる)。
  *
- * スナップショットが未ロード/利用不可なら空マップを返し、呼び出し側は
- * `idols.voice_actors` へ落ちる。**現状 Android の実 DB には `idol_voice_actors` が
- * 無いので、ここは常に空になる** (Room のエンティティが無く、SeedImporter は
- * 「Room と seed の両方にあるテーブル」しか取り込まないため)。
- * データ経路が入れば、この関数を含め呼び出し側は一切変えずに値が流れ始める。
+ * 声優の履歴 (idol_voice_actors) は seed で入る。履歴が無いアイドルはマップに載らず、
+ * 呼び出し側は `idols.voice_actors` へ落ちる。
  */
 suspend fun fetchIdolCastNames(snapshots: SnapshotStoreProvider): Map<String, String> =
-    snapshots.query { store -> store.idolCastNames() } ?: emptyMap()
+    snapshots.query { store -> store.idolCastNames() }
 
 /**
  * `Idol` → アイドル当てクイズの射影 (iOS QuizComponents.swift の `idolQuizRefs` と同じ置き場所)。

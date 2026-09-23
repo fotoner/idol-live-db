@@ -3,10 +3,8 @@ package com.fugaif.imaslivedb.data.db.dao
 import androidx.room.Dao
 import androidx.room.Query
 import com.fugaif.imaslivedb.data.model.BrandSongHitRow
-import com.fugaif.imaslivedb.data.model.BrandTotalRow
 import com.fugaif.imaslivedb.data.model.SongPerfCount
 import com.fugaif.imaslivedb.data.model.UpcomingShowRow
-import com.fugaif.imaslivedb.data.model.YearlyShowCount
 
 @Dao
 interface StatsDao {
@@ -23,19 +21,7 @@ interface StatsDao {
     @Query("SELECT COUNT(*) FROM shows")
     suspend fun fetchShowCount(): Int
 
-    @Query("""
-        SELECT strftime('%Y', date) AS year, COUNT(*) AS show_count
-        FROM shows
-        GROUP BY year
-        ORDER BY year
-    """)
-    suspend fun fetchYearlyShowCounts(): List<YearlyShowCount>
-
     // MARK: - Collection Dashboard (iOS AppDatabase の回収ダッシュボード関連クエリの移植)
-
-    /** brand_id が設定されている曲 ID (回収率集計の分母母集合)。 */
-    @Query("SELECT id FROM songs WHERE brand_id IS NOT NULL")
-    suspend fun fetchBrandedSongIds(): List<String>
 
     /**
      * ユーザが参加した「リアルライブ」のセトリに含まれる全 song_id (回収済み)。
@@ -60,22 +46,6 @@ interface StatsDao {
         )
     """)
     suspend fun fetchAutoCollectedSongIds(): List<String>
-
-    /** 指定 idol_id 群のうち、いずれかが原唱者 (role='original') として紐付いてる song_id 集合。 */
-    @Query("SELECT DISTINCT song_id FROM song_artists WHERE role='original' AND idol_id IN (:idolIds)")
-    suspend fun fetchSongIdsWithAnyArtist(idolIds: List<String>): List<String>
-
-    /** ブランドごとの曲総数 (回収進捗の分母)。 */
-    @Query("""
-        SELECT b.id AS id, b.short_name AS short_name, b.color AS color, COUNT(s.id) AS total
-        FROM brands b LEFT JOIN songs s ON b.id = s.brand_id
-        GROUP BY b.id ORDER BY b.sort_order
-    """)
-    suspend fun fetchBrandTotals(): List<BrandTotalRow>
-
-    /** 指定 song_id 群の brand_id (回収済み曲をブランド別に集計するため)。 */
-    @Query("SELECT brand_id FROM songs WHERE id IN (:ids) AND brand_id IS NOT NULL")
-    suspend fun fetchBrandIdsForSongs(ids: List<String>): List<String>
 
     /** 指定 song_id 群の生涯リアルライブ披露回数。 */
     @Query("""

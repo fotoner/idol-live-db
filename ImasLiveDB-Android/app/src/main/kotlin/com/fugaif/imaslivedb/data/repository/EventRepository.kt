@@ -13,6 +13,7 @@ import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.PerformerRow
 import com.fugaif.imaslivedb.data.model.SetlistRow
 import com.fugaif.imaslivedb.data.model.Show
+import com.fugaif.imaslivedb.data.model.UserMark
 import com.fugaif.imaslivedb.data.model.VenueDirectory
 import com.fugaif.imaslivedb.data.model.Venue
 import com.fugaif.imaslivedb.data.model.VenueHall
@@ -28,6 +29,7 @@ import uniffi.imas_core.EventWithDateRecord
 import uniffi.imas_core.SetlistPerformerRecord
 import uniffi.imas_core.ShowCollectionRecord
 import uniffi.imas_core.ShowRecord
+import uniffi.imas_core.AttendanceMarkRecord
 import uniffi.imas_core.TimelineBarRecord
 
 /**
@@ -43,25 +45,19 @@ data class SetlistRowMetaResult(
 /**
  * ライブ (イベント/公演/セトリ/会場) の読み取り口。
  *
- * 読み取りは共有コア (imas-core) のインメモリスナップショットを第一経路とし、
- * 未ロード・利用不可のときだけ従来の Room/SQL 経路へ委譲する (呼び出し単位のフォールバック)。
+ * 読み取りは共有コア (imas-core) のインメモリスナップショットが答える (SQL の代わりの経路は
+ * 持たない)。Room で読むのは、セトリ編集の差分の基準 ([fetchSetlist]) と、コアに同じ母集合の
+ * API が無いライブ一覧の母集合 ([fetchEventsWithFirstDate]) だけ。
  * Event / Show / Venue はコアの射影と Room のエンティティが列 1:1 なので、
  * 曲やアイドルと違って実体をそのまま組み立てられる。
  */
 class EventRepository(
     private val db: AppDatabase,
-    // null = スナップショット経路なし (テスト等)。その場合は常に SQL 経路。
-    private val snapshots: SnapshotStoreProvider? = null
+    private val snapshots: SnapshotStoreProvider
 ) {
 
-    suspend fun fetchEvents(brandId: String? = null): List<Event> {
-        snapshots?.query { store -> store.eventRecords(brandId).map { it.toEvent() } }?.let { return it }
-        return if (brandId != null) {
-            db.eventDao().fetchEventsByBrand(brandId)
-        } else {
-            db.eventDao().fetchEvents()
-        }
-    }
+    suspend fun fetchEvents(brandId: String? = null): List<Event> =
+        snapshots.query { store -> store.eventRecords(brandId).map { it.toEvent() } }
 
     /**
      * ライブ一覧の母集合。kind を一切絞らない (live/festival だけでなく radio や
@@ -74,14 +70,13 @@ class EventRepository(
      * ただし母集合の SQL (EventDao.fetchEventsWithFirstDate) は events.kind を SELECT して
      * おらず、Event の既定値 "live" が入ってしまう。それだと一覧の「種別で除外」が
      * 全イベントを live と誤認して機能しないので、kind だけコアの eventRecords
-     * (絞り込み無しの全件射影) から補う。コアが使えない環境では補えないため、
-     * 種別フィルタは効かず全件表示のままになる (絞り込みが空振りするだけで一覧は壊れない)。
+     * (絞り込み無しの全件射影) から補う。
      */
     suspend fun fetchEventsWithFirstDate(): List<EventWithDateRange> {
         val rows = db.eventDao().fetchEventsWithFirstDate().map { it.toEventWithDateRange() }
-        val kinds = snapshots?.query { store ->
+        val kinds = snapshots.query { store ->
             store.eventRecords(null).associate { it.id to it.kind }
-        } ?: return rows
+        }
         return rows.map { ew ->
             val kind = kinds[ew.event.id] ?: return@map ew
             if (kind == ew.event.kind) ew else ew.copy(event = ew.event.copy(kind = kind))
@@ -98,41 +93,71 @@ class EventRepository(
      * `EventFilterCriterion.brand` を写したもので、iOS もラジオや発売記念イベントを混ぜない。
      * 公演が 1 本も無いイベントも出す (includeEmpty=true) のは iOS FilteredEventsView と同じ。
      */
-    suspend fun fetchEventsWithDateByBrand(brandId: String): List<EventWithDateRange> {
-        snapshots?.query { store ->
+    suspend fun fetchEventsWithDateByBrand(brandId: String): List<EventWithDateRange> =
+        snapshots.query { store ->
             store.eventsWithFirstDate(brandId, true, false, null).map { it.toEventWithDateRange() }
-        }?.let { return it }
-        return db.eventDao().fetchLiveEventsWithDateByBrand(brandId).map { it.toEventWithDateRange() }
-    }
+        }
 
     /**
      * 開催年で絞ったライブ一覧。
      *
      * last_date は返さない (SQL 時代の年フィルタが SELECT していなかった挙動をコアがそのまま
      * 写している)。行の日付が「最初の公演日」だけでレンジ ("first〜last") にならないのは
-     * iOS と揃った現行挙動なので、SQL 経路でも last_date を NULL 固定にして揃える。
+     * iOS と揃った現行挙動。
      */
-    suspend fun fetchEventsWithDateByYear(year: Int): List<EventWithDateRange> {
-        snapshots?.query { store ->
+    suspend fun fetchEventsWithDateByYear(year: Int): List<EventWithDateRange> =
+        snapshots.query { store ->
             store.eventsWithDateByYear(year, true).map { it.toEventWithDateRange() }
-        }?.let { return it }
-        return db.eventDao().fetchLiveEventsWithDateByYear(year.toString()).map { it.toEventWithDateRange() }
+        }
+
+    // ---- 自分のマークから引くイベント (マークは Room、イベントの形はコア) ----
+
+    /** お気に入りのライブ (イベント)。最初の公演日の降順。 */
+    suspend fun fetchFavoriteEvents(): List<EventWithDateRange> {
+        val ids = db.userMarkDao().idsFor(UserMark.EVENT, UserMark.FAVORITE)
+        if (ids.isEmpty()) return emptyList()
+        return snapshots.query { store -> store.eventsWithDateByIds(ids).map { it.toEventWithDateRange() } }
     }
+
+    /**
+     * 参加したライブ (イベント) を重複なしで、最初の公演日の降順。イベント単位の参加マークと、
+     * 公演単位の参加マーク (その公演のイベント) の両方を拾う (束ね方はコア)。
+     */
+    suspend fun fetchAttendedEvents(): List<EventWithDateRange> {
+        val eventIds = db.userMarkDao().idsFor(UserMark.EVENT, UserMark.ATTENDED)
+        val showIds = db.userMarkDao().idsFor(UserMark.SHOW, UserMark.ATTENDED)
+        return snapshots.query { store ->
+            store.attendedEventsWithDate(eventIds, showIds).map { it.toEventWithDateRange() }
+        }
+    }
+
+    /**
+     * 参加したイベントを「現地参加を含む」「配信参加を含む」「LV 参加を含む」に分ける。
+     * 1 イベント内で現地と配信が混在すれば両方に入る。種別なし (旧データ) は現地扱い (規則はコア)。
+     */
+    suspend fun fetchAttendedEventTypeSets(): AttendedEventTypeSets {
+        val eventMarks = attendanceMarks(UserMark.EVENT)
+        val showMarks = attendanceMarks(UserMark.SHOW)
+        val sets = snapshots.query { store -> store.attendedEventTypeSets(eventMarks, showMarks) }
+        return AttendedEventTypeSets(sets.live.toSet(), sets.stream.toSet(), sets.liveViewing.toSet())
+    }
+
+    /** [type] の参加マーク (ON のもの) と参加種別。 */
+    private suspend fun attendanceMarks(type: String): List<AttendanceMarkRecord> =
+        db.userMarkDao().marksOf(type, UserMark.ATTENDED)
+            .filter { it.boolValue }
+            .map { AttendanceMarkRecord(it.entityId, it.textValue) }
 
     /** 会場での公演一覧 (新しい順)。`venue` は会場マスタの ID (`venue_...`)。 */
-    suspend fun fetchShowsAtVenue(venue: String): List<Show> {
-        snapshots?.query { store -> store.showsAtVenue(venue).map { it.toShow() } }?.let { return it }
-        return db.showDao().fetchShowsAtVenue(venue)
-    }
+    suspend fun fetchShowsAtVenue(venue: String): List<Show> =
+        snapshots.query { store -> store.showsAtVenue(venue).map { it.toShow() } }
 
     /** 指定日 (YYYY-MM-DD) の公演一覧。 */
-    suspend fun fetchShowsOnDate(date: String): List<Show> {
-        snapshots?.query { store -> store.showsOnDate(date).map { it.toShow() } }?.let { return it }
-        return db.showDao().fetchShowsOnDate(date)
-    }
+    suspend fun fetchShowsOnDate(date: String): List<Show> =
+        snapshots.query { store -> store.showsOnDate(date).map { it.toShow() } }
 
-    suspend fun fetchEventStats(eventId: String): EventStats {
-        snapshots?.query { store ->
+    suspend fun fetchEventStats(eventId: String): EventStats =
+        snapshots.query { store ->
             val s = store.eventStats(eventId)
             EventStats(
                 showCount = s.showCount.toInt(),
@@ -140,9 +165,7 @@ class EventRepository(
                 uniqueSongs = s.uniqueSongs.toInt(),
                 castCount = s.castCount.toInt()
             )
-        }?.let { return it }
-        return db.eventDao().fetchEventStats(eventId)
-    }
+        }
 
     /**
      * DAY 別の出演状況 (出席・欠席・主演・ゲスト)。イベントにブランドが無いときや、
@@ -153,61 +176,39 @@ class EventRepository(
      * idol_id 列で返るので、並びを保ったまま実体化する。
      */
     suspend fun fetchEventAttendance(eventId: String): EventAttendance? {
-        snapshots?.query { store -> Found(store.eventAttendance(eventId)) }?.let { (record) ->
-            record ?: return null
-            return EventAttendance(
-                brandIdols = hydrateInOrder(record.brandIdolIds, Idol::id) { db.idolDao().fetchIdolsByIds(it) },
-                shows = record.shows.map { it.toShow() },
-                presenceByShow = record.presenceByShow.mapValues { it.value.toSet() },
-                leadByShow = record.leadByShow.mapValues { it.value.toSet() },
-                guestByShow = record.guestByShow.mapValues { it.value.toSet() }
-            )
-        }
-        // フォールバック (スナップショット未ロード時)。母集団と出席の規則がコアと違う。
-        val brandId = db.eventDao().fetchEvent(eventId)?.brandId ?: return null
-        return EventAttendance.build(
-            shows = db.showDao().fetchShows(eventId),
-            brandIdols = db.idolDao().fetchIdolsByBrand(brandId),
-            castRows = db.eventDao().fetchEventShowCast(eventId)
+        val record = snapshots.query { store -> store.eventAttendance(eventId) } ?: return null
+        return EventAttendance(
+            brandIdols = hydrateInOrder(record.brandIdolIds, Idol::id) { db.idolDao().fetchIdolsByIds(it) },
+            shows = record.shows.map { it.toShow() },
+            presenceByShow = record.presenceByShow.mapValues { it.value.toSet() },
+            leadByShow = record.leadByShow.mapValues { it.value.toSet() },
+            guestByShow = record.guestByShow.mapValues { it.value.toSet() }
         )
     }
 
     /** ヒーロー配色に使うブランド情報 (color hex)。 */
-    suspend fun fetchBrand(brandId: String): Brand? {
-        snapshots?.query { store -> store.brandRecords().firstOrNull { it.id == brandId }?.toBrand() }
-            ?.let { return it }
-        return db.brandDao().fetchBrand(brandId)
-    }
+    suspend fun fetchBrand(brandId: String): Brand? =
+        snapshots.query { store -> store.brandRecords().firstOrNull { it.id == brandId }?.toBrand() }
 
-    suspend fun fetchShows(eventId: String): List<Show> {
-        // コアは (date, sort_order) 順。Room の `ORDER BY sort_order` は同じイベント内で
-        // 日付が前後する編成のときだけ並びが変わり得るが、iOS と同じ並びに揃うのが正。
-        snapshots?.query { store -> store.showsByEvent(eventId).map { it.toShow() } }?.let { return it }
-        return db.showDao().fetchShows(eventId)
-    }
+    // コアは (date, sort_order) 順 (iOS と同じ並び)。
+    suspend fun fetchShows(eventId: String): List<Show> =
+        snapshots.query { store -> store.showsByEvent(eventId).map { it.toShow() } }
 
-    suspend fun fetchEvent(id: String): Event? {
-        snapshots?.query { store -> store.eventRecord(id)?.toEvent() }?.let { return it }
-        return db.eventDao().fetchEvent(id)
-    }
+    suspend fun fetchEvent(id: String): Event? =
+        snapshots.query { store -> store.eventRecord(id)?.toEvent() }
 
-    suspend fun fetchShow(id: String): Show? {
-        snapshots?.query { store -> store.showRecord(id)?.toShow() }?.let { return it }
-        return db.showDao().fetchShow(id)
-    }
+    suspend fun fetchShow(id: String): Show? =
+        snapshots.query { store -> store.showRecord(id)?.toShow() }
 
-    suspend fun fetchLatestShow(): Show? {
-        snapshots?.query { store -> store.latestShow()?.toShow() }?.let { return it }
-        return db.showDao().fetchLatestShow()
-    }
+    suspend fun fetchLatestShow(): Show? =
+        snapshots.query { store -> store.latestShow()?.toShow() }
 
     /**
      * 会場マスタ一式。244施設 + 名前245件 + ホール39件と小さいので一括で読み、
      * 当時名やキャパの解決はメモリ上 (VenueDirectory) で行う (公演ごとの N+1 を避ける)。
      */
-    suspend fun fetchVenueDirectory(): VenueDirectory {
-        // コアなら 3 テーブルぶんが 1 呼び出しで揃う (SQL 経路は 3 クエリ)。
-        snapshots?.query { store ->
+    suspend fun fetchVenueDirectory(): VenueDirectory =
+        snapshots.query { store ->
             val d = store.venueDirectory()
             VenueDirectory(
                 venues = d.venues.map {
@@ -227,13 +228,7 @@ class EventRepository(
                     VenueHall(id = it.id, venueId = it.venueId, name = it.name, capacity = it.capacity?.toInt())
                 }
             )
-        }?.let { return it }
-        return VenueDirectory(
-            venues = db.showDao().fetchVenues(),
-            names = db.showDao().fetchVenueNameRecords(),
-            halls = db.showDao().fetchVenueHalls()
-        )
-    }
+        }
 
     /**
      * 年表 (ブランド史) の帯。`brandId` が null なら全ブランド横断。
@@ -241,48 +236,37 @@ class EventRepository(
      * 節目・ライブ・楽曲シリーズの束ね方も、帯の色シード・バッジ・遷移先も**すべてコアが決める**。
      * ここは射影をそのまま渡すだけで、画面側は返ってきた帯を並べるだけにすること
      * (束ね方を UI で書き直すと iOS と黙ってズレる)。
-     *
-     * スナップショットが無い環境では空を返す — 年表はイベント・楽曲・節目を横断して束ねた
-     * 射影で、Room の SQL に同じ組み立ては無い。空なら画面は「描けるデータがありません」に落ちる。
      */
     suspend fun fetchTimelineBars(brandId: String?): List<TimelineBarRecord> =
-        snapshots?.query { store -> store.timelineBars(brandId) } ?: emptyList()
+        snapshots.query { store -> store.timelineBars(brandId) }
 
     /** 指定会場 (venue_id) で公演があったイベントの id 集合 (ライブ一覧の会場絞り込み用)。 */
-    suspend fun fetchEventIdsAtVenue(venueId: String): Set<String> {
-        snapshots?.query { store -> store.eventIdsAtVenue(venueId).toSet() }?.let { return it }
-        return db.showDao().fetchEventIdsAtVenue(venueId).toSet()
-    }
+    suspend fun fetchEventIdsAtVenue(venueId: String): Set<String> =
+        snapshots.query { store -> store.eventIdsAtVenue(venueId).toSet() }
 
     /** オープン編集「セトリ編集」の対象公演を選ぶピッカー用。 */
     suspend fun searchShows(query: String, limit: Int = 30): List<ShowWithEventName> {
         val trimmed = query.trim()
-        snapshots?.query { store ->
+        val records = snapshots.query { store ->
             if (trimmed.isEmpty()) {
                 store.allShowsWithEventName(limit.toUInt())
             } else {
                 store.searchShowsWithEventName(trimmed, limit.toUInt())
             }
-        }?.let { records ->
-            // コアの射影はピッカー表示に要る列 (venue_city / start_time / sort_order /
-            // performer_type) を持たない。選択後は toShow() で公演実体として使われるので、
-            // 欠けたまま組み立てず Room から引き直す。並びはコアが正。
-            val shows = hydrateInOrder(records.map { it.id }, Show::id) { db.showDao().fetchShowsByIds(it) }
-                .associateBy { it.id }
-            return records.mapNotNull { r -> shows[r.id]?.toShowWithEventName(r.eventName) }
         }
-        return if (trimmed.isEmpty()) {
-            db.showDao().fetchRecentShowsWithEventName(limit)
-        } else {
-            db.showDao().searchShowsWithEventName("%$trimmed%", limit)
-        }
+        // コアの射影はピッカー表示に要る列 (venue_city / start_time / sort_order /
+        // performer_type) を持たない。選択後は toShow() で公演実体として使われるので、
+        // 欠けたまま組み立てず Room から id で引き直す。並びはコアが正。
+        val shows = hydrateInOrder(records.map { it.id }, Show::id) { db.showDao().fetchShowsByIds(it) }
+            .associateBy { it.id }
+        return records.mapNotNull { r -> shows[r.id]?.toShowWithEventName(r.eventName) }
     }
 
     /**
      * セトリ編集画面が読む「いまローカルに保存されているセトリ」。**Room 経路のまま残す。**
      *
-     * [MasterEditRepository.replaceSetlist] はスナップショットを作り直すが、その reload は失敗を握り潰して
-     * 旧スナップショットを維持する (load 失敗時も機能を落とさないための設計)。ここが
+     * [MasterEditRepository.replaceSetlist] はスナップショットを作り直すが、その reload が失敗すると
+     * 旧スナップショットが残る。ここが
      * 旧スナップショットを読むと、その値が次回保存時の差分ベースライン
      * (SetlistEditScreen の initialItemIds / originalItems) になるため、削除済み項目への
      * DELETE や既存項目への CREATE を投げる壊れた差分を生む。書き込み結果を差分の基準に
@@ -307,19 +291,13 @@ class EventRepository(
      * 曲ごとのグループ化と並びはコアが担う。Room の SQL には ORDER BY が無く並びが未規定
      * だったので、iOS と同じ「アイドルの sort_order 順」に揃う。
      *
-     * 表示名 (`PerformerRow.name`) はコアでは現任 CV 名で、不在ならアイドル名に落ちる。
-     * Android の Room には idol_voice_actors が無く、コアのローダは欠損テーブルを空として
-     * 読むため当面かならずアイドル名になる (= 現行の SQL 経路と同じ文字列)。将来
-     * idol_voice_actors を持たせると、この画面のチップだけ先に CV 名へ切り替わる。
+     * 表示名 (`PerformerRow.name`) はコアでは現任 CV 名で、不在ならアイドル名に落ちる
+     * (声優の履歴 idol_voice_actors は seed で入る)。
      */
-    suspend fun fetchPerformersByItem(showId: String): Map<String, List<PerformerRow>> {
-        snapshots?.query { store ->
+    suspend fun fetchPerformersByItem(showId: String): Map<String, List<PerformerRow>> =
+        snapshots.query { store ->
             store.showSetlistPerformers(showId).mapValues { (_, rows) -> rows.map { it.toPerformerRow() } }
-        }?.let { return it }
-        return db.setlistDao().fetchAllPerformers(showId)
-            .groupBy { it.setlistItemId }
-            .mapValues { (_, rows) -> rows.map { it.toPerformerRow() } }
-    }
+        }
 
     /**
      * セトリ 1 行ぶんの添え物 (名義・ユニットの札・全員・何回目・いつぶり・自分の回収) と、
@@ -334,8 +312,6 @@ class EventRepository(
      * 参加マーク (user_marks) の解決は [CollectionAttendance] へ寄せてある
      * (どのマークを回収に数えるかの規則はコア一本)。`includeStreamInCollection` は
      * 設定「配信参加も回収に含める」の現在値で、変わったら呼び直すこと。
-     *
-     * スナップショットにしか無い判断なので、Room 経路のフォールバックは空。
      */
     suspend fun fetchSetlistRowMeta(
         showId: String,
@@ -343,12 +319,11 @@ class EventRepository(
         displayMode: SetlistDisplayMode,
         includeStreamInCollection: Boolean
     ): SetlistRowMetaResult {
-        val provider = snapshots ?: return SetlistRowMetaResult()
         val attendedShowIds = CollectionAttendance.showIds(db, includeStreamInCollection)
         val attendedEventIds = CollectionAttendance.eventIds(db, includeStreamInCollection)
-        val bundle = provider.query { store ->
+        val bundle = snapshots.query { store ->
             store.showSetlistRowMeta(showId, mode, displayMode, attendedShowIds, attendedEventIds)
-        } ?: return SetlistRowMetaResult()
+        }
         return SetlistRowMetaResult(
             rowsByItemId = bundle.rows.associateBy { it.itemId },
             collection = bundle.collection
@@ -361,16 +336,10 @@ class EventRepository(
      * 衣装の畳み方 (同じ衣装が複数曲に出たら 1 件にまとめる) と「どこで着たか」
      * 「誰が着たか」の文言は共有コア (`costume_queries`) が持つ。画面側で組み直すと
      * iOS / Web と表記が割れるので、受け取ったものをそのまま出すこと。
-     *
-     * スナップショット未ロード時は空。Room に同じ問い合わせを書くと畳み方が
-     * 2 実装になるため、あえてフォールバックを持たない (衣装は補助情報)。
      */
     suspend fun fetchShowCostumes(showId: String): List<ShowCostumeRecord> =
-        snapshots?.query { store -> store.showCostumeRecords(showId) } ?: emptyList()
+        snapshots.query { store -> store.showCostumeRecords(showId) }
 }
-
-/** 「コアが null を返した」と「スナップショットが無い」を分けるための入れ物。 */
-private data class Found<T>(val value: T)
 
 // ---- コアの射影 → Room エンティティ (列は 1:1) ----
 
@@ -405,10 +374,6 @@ private fun ShowRecord.toShow(): Show = Show(
 /** `PerformerRow.id` は SQL 時代も idol_id をそのまま返していた (iOS CoreRecordMapping と同じ)。 */
 private fun SetlistPerformerRecord.toPerformerRow(): PerformerRow = PerformerRow(
     id = idolId, name = displayName, idolColor = idolColor, idolName = idolName, idolId = idolId
-)
-
-private fun AllPerformerRow.toPerformerRow(): PerformerRow = PerformerRow(
-    id = castId, name = name, idolColor = idolColor, idolName = idolName, idolId = idolId
 )
 
 private fun Show.toShowWithEventName(eventName: String): ShowWithEventName = ShowWithEventName(

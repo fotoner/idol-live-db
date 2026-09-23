@@ -75,21 +75,4 @@ data class EventAttendance(
 
         return buckets.sortedBy { it.order }.map { Group(it.label, it.label, it.idols) }
     }
-
-    companion object {
-        /** show_cast 全行 + ブランド名簿から EventAttendance を組み立てる。 */
-        fun build(shows: List<Show>, brandIdols: List<Idol>, castRows: List<ShowCast>): EventAttendance {
-            val presence = mutableMapOf<String, MutableSet<String>>()
-            val lead = mutableMapOf<String, MutableSet<String>>()
-            val guest = mutableMapOf<String, MutableSet<String>>()
-            castRows.forEach { row ->
-                presence.getOrPut(row.showId) { mutableSetOf() }.add(row.idolId)
-                when (row.castRole) {
-                    "lead" -> lead.getOrPut(row.showId) { mutableSetOf() }.add(row.idolId)
-                    "guest" -> guest.getOrPut(row.showId) { mutableSetOf() }.add(row.idolId)
-                }
-            }
-            return EventAttendance(brandIdols, shows, presence, lead, guest)
-        }
-    }
 }

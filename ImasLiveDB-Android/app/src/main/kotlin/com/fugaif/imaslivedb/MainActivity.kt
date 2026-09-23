@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import com.fugaif.imaslivedb.data.core.SnapshotUnavailableException
 import com.fugaif.imaslivedb.data.db.DatabaseBoot
 import com.fugaif.imaslivedb.data.notification.NotificationScheduler
 import com.fugaif.imaslivedb.data.sync.CloudKitSyncEngine
@@ -70,9 +71,6 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             module.databaseBoot.prepare()
             if (module.databaseBoot.state.value != DatabaseBoot.State.Ready) return@launch
-            // スナップショットの読み込みは画面が出るときに始める (ウィジェットや通知だけの
-            // プロセスでは読まない)。移行を流し終えた DB を読むよう、開けてから。
-            module.snapshotStoreProvider.start()
             // ローカル通知を毎回まるごと組み直す (iOS ImasLiveDBApp と同じ起動時フック)。
             // AlarmManager の予約はアプリ更新や端末再起動で消えるうえ、担当/お気に入りの
             // 増減も起動のたびに拾い直したいので、差分更新ではなく全消去 → 全再スケジュール。
@@ -88,14 +86,28 @@ class MainActivity : ComponentActivity() {
         // null=判定中 / true=データあり / false=データ無し
         var hasData by remember { mutableStateOf<Boolean?>(null) }
         var retryKey by remember { mutableStateOf(0) }
+        /** マスタのスナップショットを読み込めなかったときの詳細。 */
+        var loadError by remember { mutableStateOf<String?>(null) }
         LaunchedEffect(retryKey) {
+            loadError = null
             // 初回 (データ無し) は seed DB を投入してから判定する。これで CloudKit token
             // 未設定でも実データで起動できる (token はリリース版の最新化のためだけ)。
-            hasData = sync.ensureLocalData()
+            val prepared = sync.ensureLocalData()
             // データありなら即UI表示してバックグラウンド差分同期 (アプリのスコープで走る)。
             sync.requestSync()
+            if (prepared) {
+                // マスタの読み取りはスナップショットだけが答えるので、画面を出す前に読み込んでおく
+                // (seed の投入・入れ直しを済ませた DB を読む)。読み込めなければ再試行の画面へ。
+                try {
+                    AppModule.from(this@MainActivity).snapshotStoreProvider.loadedStore()
+                } catch (e: SnapshotUnavailableException) {
+                    loadError = "${e.message}\n(詳細: ${e.cause?.message ?: "不明"})"
+                    return@LaunchedEffect
+                }
+            }
+            hasData = prepared
         }
-        val ready = hasData == true || state is CloudKitSyncEngine.SyncState.Completed
+        val ready = loadError == null && (hasData == true || state is CloudKitSyncEngine.SyncState.Completed)
         if (ready) {
             // 起動時の日替わりピック。データが揃ってから 1 回だけ枠を消費する
             // (「今日はもう出したか」の判定と印付けはコア + GameProgressStore)。
@@ -117,7 +129,8 @@ class MainActivity : ComponentActivity() {
         } else {
             // seed 投入失敗などでデータが無いまま Error になった場合、再起動せず
             // その場でやり直せるように再試行を用意する (無限「データを準備中…」の防止)。
-            SyncLoadingScreen(state, onRetry = { retryKey++ })
+            val shown = loadError?.let { CloudKitSyncEngine.SyncState.Error(it) } ?: state
+            SyncLoadingScreen(shown, onRetry = { retryKey++ })
         }
     }
 

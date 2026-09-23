@@ -99,7 +99,7 @@ object InfoWidgetData {
      *
      * **アプリ内の起動シート ([com.fugaif.imaslivedb.ui.games.DailyPickSheet]) と必ず同じ曲**に
      * なる必要がある。そのために揃えるものは 2 つだけ、どちらも共有コアが唯一の実装を持つ:
-     * - 候補列 … `SnapshotStore.dailyPickSongIds` (未ロード時のみ Room の同条件クエリへ落ちる)
+     * - 候補列 … `SnapshotStore.dailyPickSongIds`
      * - 何番目を引くか … [DailyPick.songIndices]
      *
      * ブランドごとの番号は互いに独立に解かれる (種は `"日付|ブランドID"`) ので、
@@ -116,9 +116,10 @@ object InfoWidgetData {
             val brands = database.brandDao().fetchBrands().filter { it.id != EXCLUDED_BRAND_ID }
             val snapshots = AppModule.from(context).snapshotStoreProvider
             for (brand in brands) {
+                // 候補列はアプリの「今日の1曲」と同じくコアが正本 (読み込めなければ runCatching で null)。
                 val songIds = snapshots.query {
                     it.dailyPickSongIds(brand.id, includeCovers = false, excludeRemixes = true)
-                } ?: database.songDao().fetchDailyPickSongIds(brand.id)
+                }
                 if (songIds.isEmpty()) continue
                 val index = DailyPick.songIndices(dayKey, listOf(brand.id to songIds.size)).firstOrNull()
                 val song = index?.let { songIds.getOrNull(it) }?.let { database.songDao().fetchSong(it) }

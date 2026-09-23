@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -1003,8 +1002,7 @@ private fun HistoryTab(
             ImasStatTile(Icons.Filled.CalendarMonth, shortYearMonth(date = sortedByDateAsc.first().date), "初披露", seed = seed, brand = brand, modifier = Modifier.weight(1f))
             ImasStatTile(Icons.Filled.CalendarMonth, shortYearMonth(date = sortedByDateAsc.last().date), "最終披露", seed = seed, brand = brand, modifier = Modifier.weight(1f))
         }
-        // 披露実績がまだ 1 度も無い曲でだけ中身が空になり、節ごと消える。共有コアの
-        // スナップショットが無い間も Room 経路が同じ値を返すので、節は消えない。
+        // 披露実績がまだ 1 度も無い曲でだけ中身が空になり、節ごと消える。
         SingersSection(evidence.singers, onIdolClick)
         CoOccurringSection(evidence.coOccurring, seed, brand, onSongClick)
         ImasSectionHeader("ライブ披露履歴", count = "${history.size}回", tight = true)

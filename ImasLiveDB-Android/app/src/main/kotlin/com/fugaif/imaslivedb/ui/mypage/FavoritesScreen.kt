@@ -65,7 +65,8 @@ data class FavoritesUiState(
 )
 
 class FavoritesViewModel(app: Application) : AndroidViewModel(app) {
-    private val marks = AppModule.from(app).userMarkRepository
+    private val module = AppModule.from(app)
+    private val marks = module.userMarkRepository
 
     private val _uiState = MutableStateFlow(FavoritesUiState())
     val uiState: StateFlow<FavoritesUiState> = _uiState.asStateFlow()
@@ -77,7 +78,7 @@ class FavoritesViewModel(app: Application) : AndroidViewModel(app) {
             _uiState.value = FavoritesUiState(
                 songs = marks.favoriteSongs(),
                 idols = marks.favoriteIdols(),
-                events = marks.favoriteEvents(),
+                events = module.eventRepository.fetchFavoriteEvents(),
                 isLoading = false
             )
         }

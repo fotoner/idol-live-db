@@ -43,12 +43,6 @@ data class EventWithDateRange(
     // ここに lastDate 基準の isUpcoming があると二重実装になるので置かない。
 }
 
-/** 参加マークの行 (event_id + 参加種別 text_value)。live/stream/live_viewing 分類用。 */
-data class AttendedEventTypeRow(
-    @ColumnInfo(name = "event_id") val eventId: String,
-    @ColumnInfo(name = "atype") val atype: String?
-)
-
 data class EventStats(
     @ColumnInfo(name = "show_count") val showCount: Int,
     @ColumnInfo(name = "total_songs") val totalSongs: Int,

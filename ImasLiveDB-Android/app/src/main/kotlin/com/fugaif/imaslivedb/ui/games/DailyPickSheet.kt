@@ -86,17 +86,17 @@ fun DailyPickSheet(
     LaunchedEffect(kind) {
         val dayKey = DailyPick.dayKey()
         // 「その他」は日替わりピックの母集団に入れない (ブランドの代表曲/代表アイドルではない)。
-        val brands = module.database.brandDao().fetchBrands()
+        val brands = module.statsRepository.fetchBrands()
             .filter { it.id != "other" }
             .sortedBy { it.sortOrder }
         when (kind) {
             DailyPickKind.SONG -> {
                 val candidates = brands.mapNotNull { brand ->
-                    // 候補列も番号と同じく共有コアが正本。未ロード時だけ Room の同条件クエリへ落ちる
-                    // (ウィジェット側 InfoWidgetData.todaySong も同じ 2 段で、両者は必ず同じ列を見る)。
+                    // 候補列も番号と同じく共有コアが正本 (ウィジェット側 InfoWidgetData.todaySong も
+                    // 同じ口を読み、両者は必ず同じ列を見る)。
                     val ids = module.snapshotStoreProvider.query {
                         it.dailyPickSongIds(brand.id, includeCovers = false, excludeRemixes = true)
-                    } ?: module.database.songDao().fetchDailyPickSongIds(brand.id)
+                    }
                     if (ids.isEmpty()) null else brand to ids
                 }
                 // 全ブランド分を 1 回の FFI 呼び出しで解決する。

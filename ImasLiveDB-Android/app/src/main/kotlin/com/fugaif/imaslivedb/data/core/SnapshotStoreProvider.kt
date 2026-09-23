@@ -15,19 +15,22 @@ import java.util.concurrent.atomic.AtomicBoolean
 import uniffi.imas_core.SnapshotException
 import uniffi.imas_core.SnapshotStore
 
+/** スナップショットを読み込めなかった (DB がまだ無い・読み込みに失敗した)。 */
+class SnapshotUnavailableException(message: String, cause: Throwable? = null) : Exception(message, cause)
+
 /**
  * 共有コア (imas-core) のインメモリスナップショットをアプリで単一保持するプロバイダ。
  *
- * - 起動時に Room の DB ファイル (master.sqlite) を READ_ONLY で読み切って load する
- * - CloudKit 差分同期の完了 (SyncState.Completed) を購読し、そのたびに reload して
- *   新スナップショットへ原子的に差し替える (core 側 SnapshotStore の規約)
+ * マスタの読み取りはすべてスナップショットが答える (OS 側の SQL の代わりの経路は持たない。
+ * 同じ問いに 2 つの実装が答えると、規則が必ず食い違う。iOS と同じ)。
+ * - まだ読み込めていない間の読み取り ([query]) は、読み込みを待つ。失敗したら
+ *   [SnapshotUnavailableException] を投げ、次の読み取りでもう一度読み込む。
+ * - CloudKit 差分同期の完了 (SyncState.Completed) と、seed の投入・入れ直しのたびに読み直し、
+ *   新スナップショットへ原子的に差し替える (core 側 SnapshotStore の規約。失敗したら前のものが残る)。
+ *   一度読み込めたら手放さない。
  * - **user_marks (担当/お気に入り/メモ/回収) はスナップショットに含まれない**。
  *   参加マーク等のユーザーデータは Room が正で、必要な id 集合は各リポジトリが
- *   解決してクエリ引数で渡す
- *
- * スナップショットが使えない局面 (ネイティブ .so 無しのコントリビュータービルド、
- * load 失敗、未ロード) では [query] が null を返し、呼び出し側 (リポジトリ) が
- * 既存の Room/SQL 経路へフォールバックする。アプリはどの状態でも機能を失わない。
+ *   解決してクエリ引数で渡す。
  */
 class SnapshotStoreProvider(
     context: Context,
@@ -42,26 +45,20 @@ class SnapshotStoreProvider(
     // 競合等) を直列化して「後勝ちで古い方が新しい方を上書く」逆転を防ぐ。
     private val reloadMutex = Mutex()
 
-    // ネイティブライブラリが同梱されていないビルド (Rust 未ビルドのコントリビューター環境) で
-    // クラスロード時に落とさないため、生成失敗は「スナップショット経路なし」に落とす。
-    private val store: SnapshotStore? = runCatching { SnapshotStore() }
-        .onFailure { Log.w(TAG, "SnapshotStore 生成失敗 → SQL 経路のみで継続", it) }
-        .getOrNull()
+    private val store = SnapshotStore()
 
     private val started = AtomicBoolean(false)
 
+    /** 直近の読み込みの失敗 (読み取りが投げる例外の原因)。 */
+    @Volatile private var lastLoadFailure: Throwable? = null
+
     /**
-     * 初回 load と、sync 完了ごとの reload 購読を開始する。何度呼んでも始めるのは 1 回だけ。
-     *
-     * 画面が出るとき ([com.fugaif.imaslivedb.MainActivity]) に呼ぶ。ウィジェットや通知だけの
-     * プロセスでは、初めて [query] されたときに始まる (そのプロセスで要らなければ読まない)。
-     *
-     * 初回インストール直後は DB ファイルがまだ無く初回 load はスキップされるが、
-     * seed 投入後の初回フル同期が Completed を流すのでそこで load される。
+     * 同期の完了・seed の入れ直しで読み直す購読を始める。何度呼んでも始めるのは 1 回だけ。
+     * 最初の読み込みはここではせず、最初の読み取り ([loadedStore]) が行う (ウィジェットや
+     * 通知だけのプロセスでは、読むときまで読み込まない)。
      */
     fun start() {
-        if (store == null || !started.compareAndSet(false, true)) return
-        scope.launch { reload() }
+        if (!started.compareAndSet(false, true)) return
         scope.launch {
             // CloudKitSyncEngine 側は書き込みの完了を state で公開しているだけなので、
             // エンジンに手を入れず購読で「sync 完了 → スナップショット再構築」を接続する。
@@ -74,50 +71,58 @@ class SnapshotStoreProvider(
     }
 
     /**
+     * 読み込み済みのストア。まだなら読み込んでから返す。読み込めなければ投げる
+     * (次の呼び出しでもう一度読み込む)。
+     */
+    suspend fun loadedStore(): SnapshotStore {
+        start()
+        if (!store.isLoaded()) {
+            // 待っている間に別の読み込みが済んでいれば読み直さない。
+            reloadMutex.withLock { if (!store.isLoaded()) loadLocked() }
+        }
+        if (!store.isLoaded()) {
+            throw SnapshotUnavailableException("マスタデータを読み込めませんでした", lastLoadFailure)
+        }
+        return store
+    }
+
+    /**
      * DB を読み直して新スナップショットへ差し替える。失敗しても現行スナップショット
-     * (あれば) が維持されるので、読み手は古い方 or SQL 経路で継続できる。
+     * (あれば) が維持される。
      */
     suspend fun reload() {
-        val s = store ?: return
-        reloadMutex.withLock {
-            // Room は初回アクセスまでファイルを作らない。存在しない段階で load しても
-            // 失敗ログが出るだけなので、初回同期の Completed を待つ。
-            val dbFile = appContext.getDatabasePath(DB_NAME)
-            if (!dbFile.exists()) {
-                Log.i(TAG, "DB 未作成のため load をスキップ (初回同期完了後に再試行)")
-                return
-            }
-            try {
-                val stats = withContext(Dispatchers.IO) { s.load(dbFile.absolutePath) }
-                Log.i(TAG, "snapshot loaded: songs=${stats.songs} idols=${stats.idols}")
-            } catch (e: SnapshotException) {
-                // 例: Room のマイグレーション中で新カラムがまだ無い等。次の sync 完了で
-                // 再試行されるまで SQL 経路で継続する。
-                Log.w(TAG, "snapshot load 失敗 → SQL 経路で継続", e)
-            }
+        reloadMutex.withLock { loadLocked() }
+    }
+
+    private suspend fun loadLocked() {
+        // Room は初回アクセスまでファイルを作らない。
+        val dbFile = appContext.getDatabasePath(DB_NAME)
+        if (!dbFile.exists()) {
+            lastLoadFailure = IllegalStateException("DB がまだ無い")
+            Log.i(TAG, "DB 未作成のため load をスキップ")
+            return
+        }
+        try {
+            val stats = withContext(Dispatchers.IO) { store.load(dbFile.absolutePath) }
+            lastLoadFailure = null
+            Log.i(TAG, "snapshot loaded: songs=${stats.songs} idols=${stats.idols}")
+        } catch (e: SnapshotException) {
+            // 例: Room のマイグレーション中で新カラムがまだ無い等。
+            lastLoadFailure = e
+            Log.w(TAG, "snapshot load 失敗", e)
         }
     }
 
     /**
-     * ロード済みスナップショットに対してクエリを 1 回実行する。
-     * 未ロード・利用不可・型付きエラー時は null (= 呼び出し側は SQL へフォールバック)。
+     * 読み込み済みスナップショットに対してクエリを 1 回実行する (まだなら読み込みを待つ)。
+     * 読み込めなければ [SnapshotUnavailableException]。
      *
      * FFI 呼び出しは呼び元スレッドをブロックするので、Main から呼ばれても UI を
      * 止めないよう Default ディスパッチャへ逃がす。
      */
-    suspend fun <T> query(block: (SnapshotStore) -> T): T? {
-        val s = store ?: return null
-        start()
-        if (!s.isLoaded()) return null
-        return withContext(Dispatchers.Default) {
-            try {
-                block(s)
-            } catch (e: SnapshotException) {
-                // isLoaded 直後の unload 競合 (NotLoaded) 等。フォールバックに任せる。
-                Log.w(TAG, "snapshot query 失敗 → SQL 経路へフォールバック", e)
-                null
-            }
-        }
+    suspend fun <T> query(block: (SnapshotStore) -> T): T {
+        val s = loadedStore()
+        return withContext(Dispatchers.Default) { block(s) }
     }
 
     companion object {

@@ -3,7 +3,7 @@ package com.fugaif.imaslivedb.data.model
 /**
  * 参加形態 (`user_marks.text_value`)。iOS `AttendanceType` の 1:1 移植。
  *
- * 種別なし (旧データ) は現地扱い — 集計側の `EventDao.fetchAttendedEventTypeRows` と同じ解釈。
+ * 種別なし (旧データ) は現地扱い — 集計側 (コアの attendedEventTypeSets) と同じ解釈。
  */
 enum class AttendanceType(val raw: String, val label: String) {
     LIVE("live", "現地"),
