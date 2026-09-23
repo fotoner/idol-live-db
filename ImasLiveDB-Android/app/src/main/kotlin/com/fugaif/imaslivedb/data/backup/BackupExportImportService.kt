@@ -2,8 +2,10 @@ package com.fugaif.imaslivedb.data.backup
 
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.room.withTransaction
 import com.fugaif.imaslivedb.data.community.DeviceIdentity
 import com.fugaif.imaslivedb.data.community.LocalPollVoteLog
+import com.fugaif.imaslivedb.data.db.AppDatabase
 import com.fugaif.imaslivedb.data.model.Expense
 import com.fugaif.imaslivedb.data.model.PersonalTag
 import com.fugaif.imaslivedb.data.model.UserMark
@@ -87,9 +89,14 @@ object BackupExportImportService {
         return buildBackupEnvelope(input, BackupKindDialect.ANDROID).envelopeJson
     }
 
+    /**
+     * @param database 端末の DB への書き込み (マーク・マイタグ・収支) を 1 トランザクションにするため。
+     *   途中で止まって一部の表だけ入る、を防ぐ。
+     */
     suspend fun importEnvelopeJson(
         context: Context,
         json: String,
+        database: AppDatabase,
         userMarkRepository: UserMarkRepository,
         pollVoteLog: LocalPollVoteLog,
         personalTagRepository: PersonalTagRepository,
@@ -120,22 +127,25 @@ object BackupExportImportService {
 
         // 追加すべき行はコアが絞り込み済み。repository 側の restoreIfAbsent は
         // 既存キーとの突き合わせをもう一度行うだけで結果は変わらない (非破壊・冪等)。
-        userMarkRepository.restoreIfAbsent(
-            plan.marksToInsert.map {
-                UserMark(it.entityType, it.entityId, it.kind, it.boolValue, it.textValue, it.updatedAt)
-            }
-        )
+        // DB に入れる 3 つは 1 トランザクションにし、DB の外 (投票履歴・端末 ID) は入れ終えてから。
+        val addedExpenses = database.withTransaction {
+            userMarkRepository.restoreIfAbsent(
+                plan.marksToInsert.map {
+                    UserMark(it.entityType, it.entityId, it.kind, it.boolValue, it.textValue, it.updatedAt)
+                }
+            )
+            personalTagRepository.restoreIfAbsent(
+                plan.personalTagsToInsert.map {
+                    PersonalTag(it.entityType, it.entityId, it.tagName, it.createdAt)
+                }
+            )
+            expenseRepository.restoreIfAbsent(
+                plan.expensesToInsert.map {
+                    Expense(it.id, it.date, it.category, it.amount, it.showId, it.eventId, it.note, it.updatedAt)
+                }
+            )
+        }
         pollVoteLog.mergeIfAbsent(plan.pollVotesToAdd.associate { it.pollId to it.entityIds.toSet() })
-        personalTagRepository.restoreIfAbsent(
-            plan.personalTagsToInsert.map {
-                PersonalTag(it.entityType, it.entityId, it.tagName, it.createdAt)
-            }
-        )
-        val addedExpenses = expenseRepository.restoreIfAbsent(
-            plan.expensesToInsert.map {
-                Expense(it.id, it.date, it.category, it.amount, it.showId, it.eventId, it.note, it.updatedAt)
-            }
-        )
         if (plan.restoreDeviceId) DeviceIdentity.restore(context, plan.info.deviceId)
 
         return BackupImportResult(

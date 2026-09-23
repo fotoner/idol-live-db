@@ -100,7 +100,7 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
     /** ファイル/引き継ぎコードから取得した envelope JSON を非破壊マージで取り込む。 */
     suspend fun importBackup(json: String, restoreDeviceId: Boolean): BackupImportResult =
         BackupExportImportService.importEnvelopeJson(
-            getApplication(), json, module.userMarkRepository, module.localPollVoteLog,
+            getApplication(), json, module.database, module.userMarkRepository, module.localPollVoteLog,
             module.personalTagRepository, module.expenseRepository, restoreDeviceId
         )
 
