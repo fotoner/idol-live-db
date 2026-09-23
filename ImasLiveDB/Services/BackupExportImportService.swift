@@ -77,16 +77,7 @@ enum BackupExportImportService {
 
     /// ローカルの担当/投票/マイタグを射影して共有コアに渡し、envelope 込みの JSON 文字列を得る。
     static func buildEnvelopeJSON(database: AppDatabase) throws -> String {
-        let marks = try database.allUserMarks().map {
-            BackupUserMarkRecord(
-                entityType: $0.entityType,
-                entityId: $0.entityId,
-                kind: $0.kind,
-                boolValue: $0.boolValue,
-                textValue: $0.textValue,
-                updatedAt: $0.updatedAt
-            )
-        }
+        let marks = try database.allUserMarks().map(\.backupRecord)
         let votes = LocalPollVoteLog.shared.allEntries().map {
             BackupPollVoteRecord(pollId: $0.pollId, entityIds: $0.entityIds)
         }
