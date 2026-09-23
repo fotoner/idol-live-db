@@ -459,6 +459,66 @@ pub fn idol_shows(snap: &Snapshot, idol_id: &str) -> Vec<IdolShowRecord> {
 /// 区切りは全角スペース込みの `" ・ "` (原本の `joined(separator: " ・ ")`)。
 /// 身長・体重・スリーサイズの整数化は Swift の `Int(_:)` と同じ**ゼロ方向への切り捨て**。
 pub fn idol_profile_input(r: &IdolRecord) -> IdolProfileInput {
+    profile_input(&IdolProfileSource::from(r))
+}
+
+/// プロフィール欄の材料 (生の値)。アプリは自分のエンティティからこれに詰め替えて
+/// [`idol_profile_rows_from_source`] を 1 回呼ぶ。「4月3日」「160cm」「A型 ・ 牡羊座」の
+/// 作り方をアプリに持たせないための入口 (Android は `04月03日` を出していた)。
+#[derive(uniffi::Record, Clone, Debug, Default, PartialEq)]
+pub struct IdolProfileSource {
+    pub name_kana: Option<String>,
+    pub name_romaji: Option<String>,
+    /// `"--MM-DD"` (年なし)。年入りの日付や読めない形はそのまま出す。
+    pub birthday: Option<String>,
+    pub age: Option<i64>,
+    pub height: Option<f64>,
+    pub weight: Option<f64>,
+    pub bust: Option<f64>,
+    pub waist: Option<f64>,
+    pub hip: Option<f64>,
+    pub blood_type: Option<String>,
+    pub constellation: Option<String>,
+    pub birth_place: Option<String>,
+    /// `right` / `left` は「右」「左」にする。知らない値はそのまま。
+    pub handedness: Option<String>,
+    pub hobbies: Option<String>,
+    pub talents: Option<String>,
+    /// カラーコード (#RRGGBB)。
+    pub color: Option<String>,
+}
+
+impl From<&IdolRecord> for IdolProfileSource {
+    fn from(r: &IdolRecord) -> Self {
+        Self {
+            name_kana: r.name_kana.clone(),
+            name_romaji: r.name_romaji.clone(),
+            birthday: r.birthday.clone(),
+            age: r.age,
+            height: r.height,
+            weight: r.weight,
+            bust: r.bust,
+            waist: r.waist,
+            hip: r.hip,
+            blood_type: r.blood_type.clone(),
+            constellation: r.constellation.clone(),
+            birth_place: r.birth_place.clone(),
+            handedness: r.handedness.clone(),
+            hobbies: r.hobbies.clone(),
+            talents: r.talents.clone(),
+            color: r.color.clone(),
+        }
+    }
+}
+
+/// アイドル詳細のプロフィール行を、生の値から (整形 + 並べる判断)。1 画面 = 1 呼び出し。
+pub fn idol_profile_rows_from_source(
+    source: &IdolProfileSource,
+) -> Vec<crate::domain::screen_composition::ScreenRow> {
+    crate::domain::screen_composition::idol_profile_rows(&profile_input(source))
+}
+
+fn profile_input(r: &IdolProfileSource) -> IdolProfileInput {
     IdolProfileInput {
         name_kana: r.name_kana.clone(),
         name_romaji: r.name_romaji.clone(),
@@ -689,6 +749,50 @@ mod tests {
         idol.hobbies = Some("料理".into());
         idol.talents = Some("そろばん".into());
         assert_eq!(idol_profile_input(&idol).hobby_talent.as_deref(), Some("料理 ・ そろばん"));
+    }
+
+    /// 生の値から組んだ行は、Android が自前で作っていた `04月03日` ではなく
+    /// iOS / Web と同じ `4月3日` になる (R-A-09)。
+    #[test]
+    fn rows_from_raw_values_format_in_core() {
+        use crate::domain::screen_composition::RowAction;
+        let rows = idol_profile_rows_from_source(&IdolProfileSource {
+            birthday: Some("--04-03".into()),
+            age: Some(17),
+            height: Some(158.5),
+            weight: Some(45.0),
+            bust: Some(80.0),
+            waist: Some(56.0),
+            hip: Some(81.0),
+            blood_type: Some("A".into()),
+            constellation: Some("牡羊座".into()),
+            handedness: Some("left".into()),
+            ..Default::default()
+        });
+        let value = |label: &str| rows.iter().find(|r| r.label == label).map(|r| r.value.as_str());
+        assert_eq!(value("誕生日"), Some("4月3日"));
+        assert_eq!(value("年齢 / 身長 / 体重"), Some("17歳 ・ 158.5cm ・ 45kg"));
+        assert_eq!(value("スリーサイズ"), Some("B80 W56 H81"));
+        assert_eq!(value("血液型 / 星座"), Some("A型 ・ 牡羊座"));
+        assert_eq!(value("出身 / 利き手"), Some("左"));
+        let birthday = rows.iter().find(|r| r.label == "誕生日").unwrap();
+        assert_eq!(birthday.action, RowAction::FilterByBirthMonth { month: 4 });
+        assert!(idol_profile_rows_from_source(&IdolProfileSource::default()).is_empty());
+    }
+
+    /// Web が使う IdolRecord の経路と、アプリが使う生の値の経路は同じ行を出す。
+    #[test]
+    fn raw_source_and_record_paths_agree_on_real_idols() {
+        let (snap, _conn) = load();
+        let mut compared = 0usize;
+        for record in idol_list(&snap, None) {
+            let via_record =
+                crate::domain::screen_composition::idol_profile_rows(&idol_profile_input(&record));
+            let via_source = idol_profile_rows_from_source(&IdolProfileSource::from(&record));
+            assert_eq!(via_record, via_source, "{}", record.id);
+            compared += 1;
+        }
+        assert!(compared > 200, "{compared}");
     }
 
     #[test]

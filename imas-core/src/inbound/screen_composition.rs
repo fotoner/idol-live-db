@@ -1,5 +1,6 @@
 //! 画面構成の FFI 口。
 
+use crate::domain::idol_queries::IdolProfileSource;
 use crate::domain::screen_composition::{
     idol_profile_rows as rows, setlist_display_mode_from_stored as mode_from_stored,
     setlist_display_modes as modes, IdolProfileInput, ScreenRow, SetlistDisplayMode,
@@ -10,6 +11,14 @@ use crate::domain::screen_composition::{
 #[uniffi::export]
 pub fn idol_profile_rows(input: IdolProfileInput) -> Vec<ScreenRow> {
     rows(&input)
+}
+
+/// プロフィール行を**生の値から**組み立てる (1 画面 = 1 呼び出し)。
+/// 「4月3日」「160cm」「A型 ・ 牡羊座」の整形もコアが持つ。アプリはエンティティを
+/// [`IdolProfileSource`] に詰め替えて渡すだけにする。
+#[uniffi::export]
+pub fn idol_profile_rows_from_source(source: IdolProfileSource) -> Vec<ScreenRow> {
+    crate::domain::idol_queries::idol_profile_rows_from_source(&source)
 }
 
 /// セトリの表示モードの選択肢一式 (順・保存値・文言)。

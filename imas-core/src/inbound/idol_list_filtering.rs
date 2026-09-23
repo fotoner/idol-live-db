@@ -5,7 +5,7 @@
 //! 並び順のメタ情報も、ケースごとの FFI 呼び出しループにならないよう表で一括して返す。
 
 use crate::domain::idol_list_filtering::{
-    IdolListEntry, IdolListFilterCriteria, IdolSortKind, IdolSortOrderMeta,
+    IdolListEntry, IdolListFilterCriteria, IdolListSortedRow, IdolSortKind, IdolSortOrderMeta,
 };
 
 /// ブランド/属性/マイマーク/テキスト検索の絞り込みを適用し、採用した index 列を返す
@@ -24,6 +24,17 @@ pub fn sort_idol_list(
     ascending: Option<bool>,
 ) -> Vec<u32> {
     crate::domain::idol_list_filtering::sort_idol_list(&entries, kind, ascending)
+}
+
+/// [`sort_idol_list`] と同じ並びに、行に添える値 (`17歳` / `158cm` / `4月3日`) を付けて返す。
+/// 一覧を出すときはこちらを 1 回呼ぶ (添え物を行ごとに組まない)。
+#[uniffi::export]
+pub fn sort_idol_list_rows(
+    entries: Vec<IdolListEntry>,
+    kind: IdolSortKind,
+    ascending: Option<bool>,
+) -> Vec<IdolListSortedRow> {
+    crate::domain::idol_list_filtering::sort_idol_list_rows(&entries, kind, ascending)
 }
 
 /// 並び順メタ情報 (既定方向・ブランド区切り・ラベル文言) を全種別ぶん返す。

@@ -337,6 +337,48 @@ pub fn sort_idol_list(
     indices
 }
 
+/// 並べ替えた一覧の 1 行: 元の添字と、並び順に合わせて行に添える値。
+#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
+pub struct IdolListSortedRow {
+    /// 渡された `entries` の添字。呼び出し側は自分の配列をこれで引き直す。
+    pub index: u32,
+    /// 行に併記する値 ([`metric_label`])。`None` なら何も添えない。
+    pub metric_label: Option<String>,
+}
+
+/// [`sort_idol_list`] に、行に添える値を付けたもの。並べ替えと添え物を 1 回で返す
+/// (添え物を行ごとに FFI で引くと、一覧の行数だけ境界を越える)。
+pub fn sort_idol_list_rows(
+    entries: &[IdolListEntry],
+    kind: IdolSortKind,
+    ascending: Option<bool>,
+) -> Vec<IdolListSortedRow> {
+    sort_idol_list(entries, kind, ascending)
+        .into_iter()
+        .map(|index| IdolListSortedRow {
+            index,
+            metric_label: metric_label(&entries[index as usize], kind),
+        })
+        .collect()
+}
+
+/// 並び順に合わせて一覧の行に添える値 (`17歳` / `158cm` / `4月3日`)。公式順と五十音は無し。
+///
+/// 身長・体重は整数に切り捨てる (行の添え物は桁を揃える。プロフィール欄は小数を残す —
+/// [`crate::domain::idol_queries::height_display`])。誕生日はプロフィール欄と同じ書式。
+pub fn metric_label(entry: &IdolListEntry, kind: IdolSortKind) -> Option<String> {
+    match kind {
+        IdolSortKind::Official | IdolSortKind::NameKana => None,
+        IdolSortKind::Age => entry.age.map(|age| format!("{age}歳")),
+        IdolSortKind::Height => entry.height.map(|h| format!("{}cm", h as i64)),
+        IdolSortKind::Weight => entry.weight.map(|w| format!("{}kg", w as i64)),
+        IdolSortKind::Birthday => {
+            crate::domain::idol_queries::birthday_display(entry.birthday.as_deref())
+        }
+        IdolSortKind::Debut => entry.debut_date.clone(),
+    }
+}
+
 /// 数値キー (年齢・身長・体重)。None = 値なし → 末尾送りの判定に使う。
 fn numeric_key(entry: &IdolListEntry, kind: IdolSortKind) -> Option<f64> {
     match kind {
@@ -426,6 +468,42 @@ mod tests {
 
     fn sorted_ids(entries: &[IdolListEntry], kind: IdolSortKind, asc: Option<bool>) -> Vec<String> {
         picked_ids(entries, &sort_idol_list(entries, kind, asc))
+    }
+
+    // ---- 行に添える値 (iOS `metricLabel(for:)` / Android `metricLabel` の移設) ----
+
+    #[test]
+    fn metric_labels_follow_the_sort_kind() {
+        let mut e = entry("a");
+        e.age = Some(17);
+        e.height = Some(158.9);
+        e.weight = Some(45.5);
+        e.birthday = Some("--04-03".into());
+        e.debut_date = Some("2013-09-13".into());
+        let label = |kind| metric_label(&e, kind);
+        assert_eq!(label(IdolSortKind::Official), None);
+        assert_eq!(label(IdolSortKind::NameKana), None);
+        assert_eq!(label(IdolSortKind::Age).as_deref(), Some("17歳"));
+        assert_eq!(label(IdolSortKind::Height).as_deref(), Some("158cm"), "切り捨て");
+        assert_eq!(label(IdolSortKind::Weight).as_deref(), Some("45kg"));
+        assert_eq!(label(IdolSortKind::Birthday).as_deref(), Some("4月3日"), "前置ゼロを落とす");
+        assert_eq!(label(IdolSortKind::Debut).as_deref(), Some("2013-09-13"));
+        assert_eq!(metric_label(&entry("b"), IdolSortKind::Age), None, "値なしは添えない");
+    }
+
+    #[test]
+    fn sorted_rows_carry_the_same_order_and_their_labels() {
+        let mut a = entry("a");
+        a.age = Some(20);
+        let mut b = entry("b");
+        b.age = Some(15);
+        let c = entry("c");
+        let entries = vec![a, b, c];
+        let rows = sort_idol_list_rows(&entries, IdolSortKind::Age, Some(true));
+        let indices: Vec<u32> = rows.iter().map(|r| r.index).collect();
+        assert_eq!(indices, sort_idol_list(&entries, IdolSortKind::Age, Some(true)));
+        let labels: Vec<Option<&str>> = rows.iter().map(|r| r.metric_label.as_deref()).collect();
+        assert_eq!(labels, [Some("15歳"), Some("20歳"), None]);
     }
 
     // ---- 絞り込み (iOS IdolListFilteringTests の移植) ----
