@@ -112,7 +112,7 @@ async function fetchSimilarSongsCached(
 async function loadLyrics(
   ctx: RouteContext,
   songId: string,
-  isAdmin: boolean
+  uid: string
 ): Promise<Awaited<ReturnType<typeof fetchPublishedLyrics>>> {
   const { request, env } = ctx;
   const ip = request.headers.get("CF-Connecting-IP") || "unknown";
@@ -122,7 +122,11 @@ async function loadLyrics(
     return null;
   }
   // 未公開 (draft) は admin にだけ返す。許諾が下りるまでの開発プレビュー用。
-  const lyrics = await fetchPublishedLyrics(env.DB, songId, isAdmin);
+  // ビルド種別では判定しない (クライアントの自己申告は信用できない)。
+  // admin の判定 (users の読み取り) は行が draft のときだけにする。公開済みの曲では要らない。
+  const row = await fetchPublishedLyrics(env.DB, songId, true);
+  const lyrics =
+    row && (row.status === "published" || (await checkIsAdmin(env, uid))) ? row : null;
   // 単体エンドポイントと同じく、歌詞を実際に返したときだけ枠を消費し、利用ログを出す
   // (歌詞未投入の曲を開いただけでは枠も回数も動かない)。曲詳細から読んだ歌詞も
   // JASRAC 報告のリクエスト回数に入る — 読者にとっては同じ「歌詞を読んだ」なので、
@@ -159,16 +163,12 @@ export async function handleSongDetail(ctx: RouteContext): Promise<Response | nu
 
   // 認証は任意。付いていれば歌詞も同梱する (未認証は歌詞を返さない)。
   const user = await getAuthUser(request, env);
-  // 未公開 (draft) の歌詞は admin にだけ見せる。JASRAC の許諾が下りるまで
-  // 一般ユーザーには配信できないが、開発中のプレビューは必要なため。
-  // ビルド種別では判定しない (クライアントの自己申告は信用できない)。
-  const isAdmin = user ? await checkIsAdmin(env, user.uid) : false;
 
   const [tags, similar, penlight, lyrics] = await Promise.all([
     optional("tags", fetchSongTagList(env.DB, songId, deviceId)),
     optional("similar", fetchSimilarSongsCached(ctx, songId, similarLimit)),
     optional("penlight", fetchPenlightVotes(env.DB, songId, deviceId)),
-    user ? optional("lyrics", loadLyrics(ctx, songId, isAdmin)) : Promise.resolve(null),
+    user ? optional("lyrics", loadLyrics(ctx, songId, user.uid)) : Promise.resolve(null),
   ]);
 
   // Cache-Control の分岐 (ファイル冒頭のコメントと対):
