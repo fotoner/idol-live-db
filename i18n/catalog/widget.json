@@ -1,0 +1,106 @@
+{
+  "ios_bundles": [
+    "app",
+    "widget"
+  ],
+  "kind": "ui",
+  "namespace": "widget",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/widget/"
+    ],
+    "ios": [
+      "ImasLiveDBWidget/"
+    ]
+  },
+  "strings": {
+    "next_live.description": {
+      "ja": "次のライブまでの日数を表示します。",
+      "ko": "다음 라이브까지 남은 날을 보여 줘요.",
+      "note": "ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)。iOS の説明 (InfoWidgets.swift) とは ja が違うので iOS を移すときは別のキーにする",
+      "platforms": [
+        "android"
+      ]
+    },
+    "next_live.name": {
+      "ja": "次のライブ",
+      "ko": "다음 라이브",
+      "note": "ホーム画面のウィジェット選択に出る名前 (Android の receiver の android:label)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "oshi_image.description": {
+      "ja": "担当アイドルの取り込んだ画像をホーム画面に出します。タップで次の画像に切り替わります。",
+      "ko": "가져온 담당 아이돌 이미지를 홈 화면에 보여 줘요. 탭하면 다음 이미지로 바뀌어요.",
+      "note": "ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "oshi_image.name": {
+      "ja": "担当の画像（タップで切替）",
+      "ko": "담당 이미지 (탭으로 전환)",
+      "note": "ホーム画面のウィジェット選択に出る名前 (Android の receiver の android:label)。タップで次の画像へ送る版",
+      "platforms": [
+        "android"
+      ]
+    },
+    "oshi_launcher.description": {
+      "ja": "担当アイドルの取り込んだ画像をホーム画面に出します。タップするとアプリが開きます。",
+      "ko": "가져온 담당 아이돌 이미지를 홈 화면에 보여 줘요. 탭하면 앱이 열려요.",
+      "note": "ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "oshi_launcher.name": {
+      "ja": "担当の画像（タップでアプリ）",
+      "ko": "담당 이미지 (탭으로 앱 열기)",
+      "note": "ホーム画面のウィジェット選択に出る名前 (Android の receiver の android:label)。タップでアプリを開く版 (絵は oshi_image と同じ)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "select_oshi.title": {
+      "ja": "担当を選ぶ",
+      "ko": "담당 고르기",
+      "note": "担当画像ウィジェットの設定画面の名前 (Android の設定 Activity の android:label)。iOS の AppIntent (SelectOshiIntent.title) を移すときに両方で使う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "ticket_deadline.description": {
+      "ja": "締切が近いチケットの先行受付を表示します。",
+      "ko": "마감이 가까운 티켓 선행 접수를 보여 줘요.",
+      "note": "ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "ticket_deadline.name": {
+      "ja": "チケット締切",
+      "ko": "티켓 마감",
+      "note": "ホーム画面のウィジェット選択に出る名前 (Android の receiver の android:label)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "today_song.description": {
+      "ja": "日替わりで1曲をジャケット付きで表示します。",
+      "ko": "날마다 한 곡을 재킷과 함께 보여 줘요.",
+      "note": "ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "today_song.name": {
+      "ja": "今日の1曲",
+      "ko": "오늘의 한 곡",
+      "note": "ホーム画面のウィジェット選択に出る名前 (Android の receiver の android:label)",
+      "platforms": [
+        "android"
+      ]
+    }
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "kind": "system",
+  "namespace": "system",
+  "strings": {
+    "app.apple_music_usage": {
+      "ios": {
+        "infoplist": {
+          "key": "NSAppleMusicUsageDescription",
+          "target": "app"
+        }
+      },
+      "ja": "楽曲のジャケット写真の表示とプレビュー再生に使用します",
+      "ko": "곡의 재킷 사진 표시와 미리 듣기에 사용해요",
+      "note": "権限ダイアログに出る利用目的 (Info.plist の NSAppleMusicUsageDescription)。ja は project.yml の INFOPLIST_KEY_NSAppleMusicUsageDescription と同じにする",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "app.calendars_full_usage": {
+      "ios": {
+        "infoplist": {
+          "key": "NSCalendarsFullAccessUsageDescription",
+          "target": "app"
+        }
+      },
+      "ja": "お手持ちのカレンダーの予定をアプリ内のスケジュールに重ねて表示するために使用します",
+      "ko": "가지고 있는 캘린더의 일정을 앱의 스케줄에 겹쳐 보여 주는 데 사용해요",
+      "note": "権限ダイアログに出る利用目的 (Info.plist の NSCalendarsFullAccessUsageDescription)。ja は project.yml の INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription と同じにする",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "app.calendars_write_only_usage": {
+      "ios": {
+        "infoplist": {
+          "key": "NSCalendarsWriteOnlyAccessUsageDescription",
+          "target": "app"
+        }
+      },
+      "ja": "ライブの予定をカレンダーに追加するために使用します",
+      "ko": "라이브 일정을 캘린더에 추가하는 데 사용해요",
+      "note": "権限ダイアログに出る利用目的 (Info.plist の NSCalendarsWriteOnlyAccessUsageDescription)。ja は project.yml の INFOPLIST_KEY_NSCalendarsWriteOnlyAccessUsageDescription と同じにする",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "app.camera_usage": {
+      "ios": {
+        "infoplist": {
+          "key": "NSCameraUsageDescription",
+          "target": "app"
+        }
+      },
+      "ja": "セットリストの写真を撮影してOCRで曲名を認識します",
+      "ko": "세트리스트 사진을 찍어 OCR로 곡명을 인식해요",
+      "note": "権限ダイアログに出る利用目的 (Info.plist の NSCameraUsageDescription)。ja は project.yml の INFOPLIST_KEY_NSCameraUsageDescription と同じにする",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "app.display_name": {
+      "ios": {
+        "infoplist": {
+          "key": "CFBundleDisplayName",
+          "target": "app"
+        }
+      },
+      "ja": "アイドルライブDB",
+      "note": "ホーム画面のアプリ名 (iOS CFBundleDisplayName / Android の application・activity の label)。ko 表記はオーナー確定待ち。ja は project.yml の INFOPLIST_KEY_CFBundleDisplayName と同じにする"
+    },
+    "app.microphone_usage": {
+      "ios": {
+        "infoplist": {
+          "key": "NSMicrophoneUsageDescription",
+          "target": "app"
+        }
+      },
+      "ja": "イントロドンで曲名を音声で答えるために使用します",
+      "ko": "인트로돈에서 곡명을 음성으로 답하는 데 사용해요",
+      "note": "権限ダイアログに出る利用目的 (Info.plist の NSMicrophoneUsageDescription)。ja は project.yml の INFOPLIST_KEY_NSMicrophoneUsageDescription と同じにする",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "app.photo_library_usage": {
+      "ios": {
+        "infoplist": {
+          "key": "NSPhotoLibraryUsageDescription",
+          "target": "app"
+        }
+      },
+      "ja": "セットリストの写真を選択してOCRで曲名を認識します",
+      "ko": "세트리스트 사진을 골라 OCR로 곡명을 인식해요",
+      "note": "権限ダイアログに出る利用目的 (Info.plist の NSPhotoLibraryUsageDescription)。ja は project.yml の INFOPLIST_KEY_NSPhotoLibraryUsageDescription と同じにする",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "app.speech_recognition_usage": {
+      "ios": {
+        "infoplist": {
+          "key": "NSSpeechRecognitionUsageDescription",
+          "target": "app"
+        }
+      },
+      "ja": "発声した曲名をテキスト化してクイズに回答するために使用します",
+      "ko": "말한 곡명을 텍스트로 바꿔 퀴즈에 답하는 데 사용해요",
+      "note": "権限ダイアログに出る利用目的 (Info.plist の NSSpeechRecognitionUsageDescription)。ja は project.yml の INFOPLIST_KEY_NSSpeechRecognitionUsageDescription と同じにする",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "widget_extension.display_name": {
+      "ios": {
+        "infoplist": {
+          "key": "CFBundleDisplayName",
+          "target": "widget"
+        }
+      },
+      "ja": "担当ウィジェット",
+      "note": "ウィジェット拡張の表示名 (Info.plist の CFBundleDisplayName)。ko 表記はオーナー確定待ち。ja は project.yml の ImasLiveDBWidget の INFOPLIST_KEY_CFBundleDisplayName と同じにする",
+      "platforms": [
+        "ios"
+      ]
+    }
+  }
+}

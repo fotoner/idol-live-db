@@ -1,0 +1,109 @@
+{
+  "ios_bundles": [
+    "app",
+    "widget"
+  ],
+  "kind": "ui",
+  "namespace": "common",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/components/"
+    ],
+    "ios": [
+      "ImasLiveDB/DesignSystem/",
+      "ImasLiveDB/Views/Components/"
+    ]
+  },
+  "strings": {
+    "action.back": {
+      "ja": "戻る",
+      "ko": "뒤로",
+      "note": "画面左上の戻るボタンの読み上げ (contentDescription)。iOS は OS が出すので Android だけ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "action.collapse": {
+      "ja": "折りたたむ",
+      "ko": "접기",
+      "note": "開いている節を閉じるボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "action.expand": {
+      "ja": "展開",
+      "ko": "펼치기",
+      "note": "閉じている節を開くボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "action.login": {
+      "ja": "ログイン",
+      "ko": "로그인",
+      "note": "未ログインの人に出すインライン導線 (InlineLoginPrompt) のボタン。Android は同じ部品を持たずダイアログで案内する",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "action.retry": {
+      "ja": "再試行",
+      "ko": "다시 시도",
+      "note": "読み込み失敗などの空状態に出す再試行ボタン"
+    },
+    "action.see_all": {
+      "ja": "すべて見る",
+      "ko": "모두 보기",
+      "note": "セクション見出し右の導線"
+    },
+    "personal_tags.add.a11y": {
+      "ja": "マイタグを追加",
+      "ko": "마이 태그 추가",
+      "note": "共通部品 PersonalTagsSection (アイドル・ユニット詳細のコミュニティ)。入力欄の右の ＋ ボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "personal_tags.empty": {
+      "ja": "マイタグはまだありません",
+      "ko": "아직 마이 태그가 없어요",
+      "note": "共通部品 PersonalTagsSection (アイドル・ユニット詳細のコミュニティ)。1 つも無いときの案内",
+      "platforms": [
+        "android"
+      ]
+    },
+    "personal_tags.header": {
+      "ja": "マイタグ(自分だけに表示)",
+      "ko": "마이 태그 (나에게만 보여요)",
+      "note": "共通部品 PersonalTagsSection (アイドル・ユニット詳細のコミュニティ)。節の見出し。自分だけのタグで、コミュニティには送らない",
+      "platforms": [
+        "android"
+      ]
+    },
+    "personal_tags.placeholder": {
+      "ja": "例: 聞いた",
+      "ko": "예: 들었음",
+      "note": "共通部品 PersonalTagsSection (アイドル・ユニット詳細のコミュニティ)。入力欄のプレースホルダ。例の語も訳す",
+      "platforms": [
+        "android"
+      ]
+    },
+    "personal_tags.remove.a11y": {
+      "ja": "削除",
+      "ko": "삭제",
+      "note": "共通部品 PersonalTagsSection (アイドル・ユニット詳細のコミュニティ)。チップの × の読み上げ (削除は長押し)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "personal_tags.remove.hint": {
+      "ja": "長押しで削除",
+      "ko": "길게 눌러 삭제",
+      "note": "共通部品 PersonalTagsSection (アイドル・ユニット詳細のコミュニティ)。チップの下の操作の案内",
+      "platforms": [
+        "android"
+      ]
+    }
+  }
+}

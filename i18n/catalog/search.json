@@ -1,0 +1,34 @@
+{
+  "kind": "ui",
+  "namespace": "search",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/search/"
+    ],
+    "ios": [
+      "ImasLiveDB/Views/Search/"
+    ]
+  },
+  "strings": {
+    "cross_tab.chip": {
+      "args": [
+        {
+          "name": "tab",
+          "type": "text"
+        },
+        {
+          "name": "count",
+          "type": "int"
+        }
+      ],
+      "ja": "{tab}に {count}",
+      "ko": "{tab}에 {count}",
+      "note": "他のタブの一致件数へ飛ぶチップ。tab はタブ名 (nav.tab.*)、count は件数。件数は今の表示どおり桁区切りしない (int)"
+    },
+    "cross_tab.header": {
+      "ja": "別のタブ",
+      "ko": "다른 탭",
+      "note": "一覧の検索欄の下、「他のタブに N 件」チップ列の見出し"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "ios_bundles": [
+    "app",
+    "widget"
+  ],
+  "kind": "system",
+  "namespace": "i18n",
+  "strings": {
+    "language_tag": {
+      "ja": "ja",
+      "ko": "ko",
+      "note": "実際に解決された表示言語のコード。訳文ではなく言語コードを入れる (DisplayLocale がこれを読む)"
+    }
+  }
+}

@@ -1,0 +1,344 @@
+{
+  "kind": "ui",
+  "namespace": "units",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/units/"
+    ],
+    "ios": [
+      "ImasLiveDB/Views/Units/"
+    ]
+  },
+  "strings": {
+    "detail.community.login_dialog": {
+      "ja": "タグ付け・投票にはログインが必要です。",
+      "ko": "태그를 달거나 투표하려면 로그인해야 해요.",
+      "note": "未ログインでタグを付けようとしたときのダイアログの本文 (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.community.login_prompt": {
+      "ja": "タグ付け・投票にはログインが必要です",
+      "ko": "태그를 달거나 투표하려면 로그인해야 해요",
+      "note": "コミュニティの節の先頭に出す、未ログインの人への案内"
+    },
+    "detail.copy.name": {
+      "ja": "ユニット名をコピー",
+      "ko": "유닛 이름 복사",
+      "note": "ユニット名の長押しメニュー",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.copy.name_alt": {
+      "ja": "別名をコピー",
+      "ko": "다른 이름 복사",
+      "note": "ユニット名の長押しメニュー (別名 = 英字表記など)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.load_error.message": {
+      "ja": "読み込みに失敗しました。通信状況を確認してもう一度お試しください。",
+      "ko": "불러오지 못했어요. 통신 상태를 확인하고 다시 시도해 주세요.",
+      "note": "詳細の読み込みに失敗したときの説明"
+    },
+    "detail.load_error.title": {
+      "ja": "読み込みに失敗しました",
+      "ko": "불러오지 못했어요",
+      "note": "詳細の読み込みに失敗したときの空状態の見出し"
+    },
+    "detail.members.empty.message": {
+      "ja": "メンバー情報はまだ登録されていません。",
+      "ko": "멤버 정보가 아직 등록되지 않았어요.",
+      "note": "メンバーが 1 人も無いときの空状態の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.members.empty.title": {
+      "ja": "メンバーがいません",
+      "ko": "멤버가 없어요",
+      "note": "メンバーが 1 人も無いときの空状態の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.members.empty.title_android": {
+      "ja": "メンバー情報がありません",
+      "ko": "멤버 정보가 없어요",
+      "note": "Android の文言。iOS の detail.members.empty.title と ja が違う (統一はオーナーが別 PR で)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.members.header": {
+      "ja": "メンバー",
+      "ko": "멤버",
+      "note": "メンバーの節の見出し (右に人数)"
+    },
+    "detail.not_found.message": {
+      "ja": "ユニットが見つかりませんでした。",
+      "ko": "유닛을 찾지 못했어요.",
+      "note": "開こうとしたユニットがデータに無いとき (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.personal_tags.action.remove": {
+      "ja": "マイタグを削除",
+      "ko": "마이 태그 삭제",
+      "note": "マイタグの長押しメニュー",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.personal_tags.add.a11y": {
+      "ja": "マイタグを追加",
+      "ko": "마이 태그 추가",
+      "note": "マイタグの入力欄の右の ＋ ボタンの読み上げ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.personal_tags.caption": {
+      "ja": "自分だけに表示されます (コミュニティには公開されません)",
+      "ko": "나에게만 보여요 (커뮤니티에는 공개되지 않아요)",
+      "note": "マイタグの節の見出しの下の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.personal_tags.header": {
+      "ja": "マイタグ",
+      "ko": "마이 태그",
+      "note": "マイタグ (自分だけのタグ) の節の見出し。Android は共通部品 PersonalTagsSection にある",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.personal_tags.placeholder": {
+      "ja": "マイタグを追加 (例: 聞いた)",
+      "ko": "마이 태그 추가 (예: 들었음)",
+      "note": "マイタグの入力欄のプレースホルダ。例の語も訳す",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.similar.caption": {
+      "ja": "つけられたタグが似ているユニット",
+      "ko": "달린 태그가 비슷한 유닛",
+      "note": "タグが似ているユニットの節の見出しの下の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.similar.header": {
+      "ja": "タグが似ているユニット",
+      "ko": "태그가 비슷한 유닛",
+      "note": "タグが似ているユニット (サーバ算出のおすすめ) の節の見出し"
+    },
+    "detail.similar.shared_tags": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "タグ{count}個一致",
+      "ko": "태그 {count}개 일치",
+      "note": "おすすめのユニットの下に出す、共通するタグの数"
+    },
+    "detail.songs.collected": {
+      "ja": "回収済",
+      "ko": "회수 완료",
+      "note": "楽曲の行のバッジ。ライブでその曲を聴いた (現地回収した)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.songs.empty.message": {
+      "ja": "このユニットの楽曲情報はまだ登録されていません。",
+      "ko": "이 유닛의 곡 정보가 아직 등록되지 않았어요.",
+      "note": "楽曲が 1 曲も無いときの空状態の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.songs.empty.title": {
+      "ja": "楽曲がありません",
+      "ko": "곡이 없어요",
+      "note": "楽曲が 1 曲も無いときの空状態の見出し"
+    },
+    "detail.songs.header": {
+      "ja": "楽曲",
+      "ko": "곡",
+      "note": "楽曲の節の見出し (右に件数)"
+    },
+    "detail.tab.community": {
+      "ja": "コミュニティ",
+      "ko": "커뮤니티",
+      "note": "詳細の中のセグメント (楽曲 / メンバー / コミュニティ)"
+    },
+    "detail.tab.members": {
+      "ja": "メンバー",
+      "ko": "멤버",
+      "note": "詳細の中のセグメント (楽曲 / メンバー / コミュニティ)"
+    },
+    "detail.tab.songs": {
+      "ja": "楽曲",
+      "ko": "곡",
+      "note": "詳細の中のセグメント (楽曲 / メンバー / コミュニティ)"
+    },
+    "detail.tags.action.add": {
+      "ja": "タグを追加",
+      "ko": "태그 추가",
+      "note": "タグを付ける操作。iOS はタグが無いときの空状態のボタン、Android は ＋ ボタンの読み上げ"
+    },
+    "detail.tags.action.remove": {
+      "ja": "タグを外す",
+      "ko": "태그 해제",
+      "note": "自分が付けたタグの長押しメニュー",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.tags.action.show_detail": {
+      "ja": "タグ詳細を見る",
+      "ko": "태그 상세 보기",
+      "note": "タグの長押しメニュー",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.tags.add_button": {
+      "ja": "タグ",
+      "ko": "태그",
+      "note": "タグの節の見出し右の ＋ 付きボタン (短い形)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.tags.empty.message": {
+      "ja": "このユニットを一言で表すタグを付けてみませんか？",
+      "ko": "이 유닛을 한마디로 표현하는 태그를 달아 볼까요?",
+      "note": "タグが 1 つも無いときの誘い文句",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.tags.empty.title": {
+      "ja": "タグはまだありません",
+      "ko": "아직 태그가 없어요",
+      "note": "タグが 1 つも無いとき"
+    },
+    "detail.tags.header": {
+      "ja": "タグ",
+      "ko": "태그",
+      "note": "コミュニティタグの節の見出し"
+    },
+    "list.empty.message": {
+      "ja": "登録されているユニットがまだありません。",
+      "ko": "등록된 유닛이 아직 없어요.",
+      "note": "ユニットが 1 件も無いときの空状態の説明"
+    },
+    "list.empty.title": {
+      "ja": "ユニットがありません",
+      "ko": "유닛이 없어요",
+      "note": "ユニットが 1 件も無いときの空状態の見出し"
+    },
+    "list.filter_empty.action.clear": {
+      "ja": "絞り込みを解除",
+      "ko": "필터 해제",
+      "note": "絞り込みの語を消すボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.filter_empty.message": {
+      "args": [
+        {
+          "name": "query",
+          "type": "string"
+        }
+      ],
+      "ja": "「{query}」に一致するユニットがありません",
+      "ko": "“{query}”에 해당하는 유닛이 없어요",
+      "note": "絞り込みで 1 件も残らなかったときの説明。query は利用者が打った語",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.filter_empty.message_android": {
+      "args": [
+        {
+          "name": "query",
+          "type": "string"
+        }
+      ],
+      "ja": "「{query}」に一致するユニットはいません。",
+      "ko": "“{query}”에 해당하는 유닛이 없어요.",
+      "note": "Android の文言。iOS の list.filter_empty.message と ja が違う (統一はオーナーが別 PR で)。query は利用者が打った語",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.filter_empty.title": {
+      "ja": "絞り込み結果がありません",
+      "ko": "필터 결과가 없어요",
+      "note": "絞り込みで 1 件も残らなかったときの空状態の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.filter_empty.title_android": {
+      "ja": "見つかりませんでした",
+      "ko": "찾지 못했어요",
+      "note": "Android の文言。iOS の list.filter_empty.title と ja が違う (統一はオーナーが別 PR で)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.name_filter.prompt": {
+      "ja": "ユニット名で絞り込み",
+      "ko": "유닛 이름으로 찾기",
+      "note": "一覧の先頭の絞り込み欄のプレースホルダ (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.search_field.prompt": {
+      "ja": "ユニット名",
+      "ko": "유닛 이름",
+      "note": "ナビバーの中の絞り込み欄のプレースホルダ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.title": {
+      "ja": "ユニット",
+      "ko": "유닛",
+      "note": "ユニット一覧のナビゲーションタイトル。Android の同じ見出しは IdolListScreen (idols スライス) の TopAppBar にある",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.view_mode.grid.a11y": {
+      "ja": "グリッド表示",
+      "ko": "그리드로 보기",
+      "note": "一覧/グリッド切替ボタンの読み上げ (今はリスト表示で、押すとグリッド表示になる)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.view_mode.list.a11y": {
+      "ja": "リスト表示",
+      "ko": "목록으로 보기",
+      "note": "一覧/グリッド切替ボタンの読み上げ (今はグリッド表示で、押すとリスト表示になる)。Android の同じボタンは IdolListScreen (idols スライス) にある",
+      "platforms": [
+        "ios"
+      ]
+    }
+  }
+}
