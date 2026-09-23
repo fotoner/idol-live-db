@@ -306,21 +306,6 @@ data class FavoriteRankingEntry(
     val artworkUrl: String?
 )
 
-// MARK: - Search Results
-
-data class SearchResults(
-    val songs: List<Song>,
-    val idols: List<Idol>,
-    val events: List<Event>,
-    // 打った語には部分一致しないが、あいまい一致で拾えた曲 (「もしかして」)。
-    // songs と混ぜない。混ぜると「打った通りの曲」がどれか分からなくなるので、
-    // 画面では確実な一致の下に、見出しを挟んで別枠で出す。
-    val fuzzySongs: List<Song> = emptyList()
-) {
-    val isEmpty: Boolean
-        get() = songs.isEmpty() && idols.isEmpty() && events.isEmpty() && fuzzySongs.isEmpty()
-}
-
 /**
  * あいまい検索へ渡す綴り (曲名 + 読み) の軽い射影。
  *
