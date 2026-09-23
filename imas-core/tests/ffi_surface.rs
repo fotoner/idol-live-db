@@ -204,6 +204,7 @@ declare_and_call_checksums! {
     uniffi_imas_core_checksum_func_song_singer_quiz_pool_estimate,
     uniffi_imas_core_checksum_func_song_singer_quiz_session,
     uniffi_imas_core_checksum_func_song_singer_quiz_session_result,
+    uniffi_imas_core_checksum_func_song_type_term,
     uniffi_imas_core_checksum_func_sort_idol_list,
     uniffi_imas_core_checksum_func_sort_idol_list_rows,
     uniffi_imas_core_checksum_func_split_credit_names,
