@@ -71,21 +71,21 @@ final class MyPageRulesTests: XCTestCase {
     /// 0 件の項目は文面に出さない (ノイズを増やさない)。
     func testSummaryOmitsZeroSections() {
         let s = backupImportSummary(
-            addedMarks: 3, addedVotes: 2, addedPersonalTags: 0,
+            addedMarks: 3, addedVotes: 2, addedPersonalTags: 0, addedExpenses: 0,
             skippedMarks: 0, deviceIdRestored: false)
         XCTAssertEqual(s, "担当/お気に入り等を 3 件、投票履歴を 2 件 追加しました。")
     }
 
     func testSummaryIncludesPersonalTagsWhenPresent() {
         let s = backupImportSummary(
-            addedMarks: 1, addedVotes: 0, addedPersonalTags: 5,
+            addedMarks: 1, addedVotes: 0, addedPersonalTags: 5, addedExpenses: 0,
             skippedMarks: 0, deviceIdRestored: false)
         XCTAssertTrue(s.contains("マイタグを 5 件 追加しました。"))
     }
 
     func testSummaryIncludesSkippedAndDeviceId() {
         let s = backupImportSummary(
-            addedMarks: 1, addedVotes: 1, addedPersonalTags: 2,
+            addedMarks: 1, addedVotes: 1, addedPersonalTags: 2, addedExpenses: 0,
             skippedMarks: 4, deviceIdRestored: true)
         XCTAssertEqual(s, """
             担当/お気に入り等を 1 件、投票履歴を 1 件 追加しました。
@@ -98,7 +98,7 @@ final class MyPageRulesTests: XCTestCase {
     /// 全部 0 でも「何も入らなかった」ことが分かる文面になる。
     func testSummaryWithNothingImported() {
         let s = backupImportSummary(
-            addedMarks: 0, addedVotes: 0, addedPersonalTags: 0,
+            addedMarks: 0, addedVotes: 0, addedPersonalTags: 0, addedExpenses: 0,
             skippedMarks: 0, deviceIdRestored: false)
         XCTAssertEqual(s, "担当/お気に入り等を 0 件、投票履歴を 0 件 追加しました。")
     }
