@@ -16,7 +16,6 @@ import com.fugaif.imaslivedb.di.AppModule
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
-import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -37,7 +36,7 @@ class BackupViewModelTest {
      */
     @Test
     fun importFinishesEvenAfterTheScreenGoesAway() = runBlocking {
-        val mark = UserMark(UserMark.IDOL, "idol_a", UserMark.PICK, true, null, "2026-09-01T00:00:00Z")
+        val mark = UserMark(UserMark.IDOL, "idol_backup_vm_test", UserMark.PICK, true, null, "2026-09-01T00:00:00Z")
         val file = File(app.cacheDir, "backup.json").apply { writeText(backupJsonOf(mark)) }
         val marks = AppModule.from(app).userMarkRepository
 
@@ -48,10 +47,11 @@ class BackupViewModelTest {
         viewModel.importFrom(Uri.fromFile(file), restoreDeviceId = false)
         store.clear()
 
+        // AppModule はプロセスで 1 つなので、他のテストが入れたマークも同じ DB に居る。
+        // 自分のマークが入ったかだけを見る。
         withTimeout(10_000) {
-            while (marks.getAll().isEmpty()) delay(20)
+            while (mark !in marks.getAll()) delay(20)
         }
-        assertEquals(listOf(mark), marks.getAll())
     }
 
     /** [mark] だけを持つ端末から書き出したバックアップ。 */
