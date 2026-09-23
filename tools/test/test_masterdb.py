@@ -83,6 +83,35 @@ class MasterDbTest(unittest.TestCase):
         self.assertEqual(other.execute("SELECT count(*) FROM show_tickets").fetchone()[0], 0)
         other.close()
 
+    def test_the_content_hash_row_is_carried_over_from_the_canonical_file(self):
+        # 手元の DB の content_hash は build_db.sh が毎回入れ直す値なので、正本に書くと
+        # 書き出すたびに差分になる。正本の行をそのまま引き継ぐ (export と同じ)。
+        conn = self.fixture()
+        path = self.root / "master.sql"
+        path.write_text(masterdb.dump_text(conn).replace(
+            "COMMIT;", "INSERT INTO \"meta\" VALUES('content_hash','canon');\nCOMMIT;"), encoding="utf-8")
+        for local in ("local-1", "local-2"):
+            conn.execute("INSERT OR REPLACE INTO meta (key, value) VALUES ('content_hash', ?)", (local,))
+            self.write(conn, path)
+            text = path.read_text(encoding="utf-8")
+            self.assertIn("VALUES('content_hash','canon')", text)
+            self.assertNotIn(local, text)
+
+    def test_the_row_is_kept_even_if_the_local_db_has_none(self):
+        conn = self.fixture()
+        path = self.root / "master.sql"
+        path.write_text(masterdb.dump_text(conn).replace(
+            "COMMIT;", "INSERT INTO \"meta\" VALUES('content_hash','canon');\nCOMMIT;"), encoding="utf-8")
+        self.write(conn, path)
+        self.assertEqual(path.read_text(encoding="utf-8").count("VALUES('content_hash','canon')"), 1)
+
+    def test_no_content_hash_row_when_the_canonical_file_has_none(self):
+        conn = self.fixture()
+        conn.execute("INSERT INTO meta (key, value) VALUES ('content_hash', 'local')")
+        path = self.root / "master.sql"
+        self.write(conn, path)
+        self.assertNotIn("content_hash", path.read_text(encoding="utf-8"))
+
     def test_stamp_content_hash_uses_the_file_digest(self):
         conn = self.fixture()
         path = self.root / "master.sql"

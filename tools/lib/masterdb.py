@@ -28,6 +28,25 @@ MASTER_SQL = ROOT / "db" / "master.sql"
 # 正本に入れないことをここで保証する。
 _UNISTR = re.compile(r"unistr\(")
 
+# 正本の meta.content_hash の行。手元の master.sqlite には build_db.sh が「その時の正本の
+# 指紋」を入れるので、手元の DB から書き出すと書くたびにこの行が変わる。正本への
+# 書き出しでは、今の正本の行をそのまま引き継ぐ (export も正本の meta を引き継ぐので同じ)。
+_CONTENT_HASH_ROW = re.compile(r"""^INSERT INTO ["']?meta["']? VALUES\('content_hash',.*\);\n""", re.M)
+
+
+def _keep_content_hash_row(text: str, sql_path) -> str:
+    """text の content_hash の行を、sql_path (今の正本) の行に置き換える (無ければ消す)。"""
+    current = Path(sql_path).read_text(encoding="utf-8") if Path(sql_path).exists() else ""
+    kept = _CONTENT_HASH_ROW.search(current)
+    replacement = kept.group(0) if kept else ""
+    text, n = _CONTENT_HASH_ROW.subn(lambda _: replacement, text, count=1)
+    if n == 0 and replacement:
+        # 手元の DB に行が無ければ、meta の最後の行の後ろに戻す。
+        rows = list(re.finditer(r"""^INSERT INTO ["']?meta["']? VALUES.*\n""", text, re.M))
+        at = rows[-1].end() if rows else text.rindex("COMMIT;")
+        text = text[:at] + replacement + text[at:]
+    return text
+
 
 def restore(sql_path, db_path) -> None:
     """sql_path (db/master.sql の形) を db_path に丸ごと入れる。db_path は空であること。"""
@@ -111,7 +130,7 @@ def write_master_sql(conn: sqlite3.Connection, sql_path=MASTER_SQL) -> None:
     検査に落ちたときに手元の DB だけ変わった状態を残さないため)。表ごとの行数の
     変化も出す (手元の DB を丸ごと書き出すと、正本にしか無い行が黙って消えるため)。
     """
-    text = dump_text(conn)
+    text = _keep_content_hash_row(dump_text(conn), sql_path)
     with tempfile.TemporaryDirectory(prefix="masterdb-") as tmp:
         check_path = Path(tmp) / "check.sqlite"
         check = sqlite3.connect(str(check_path))
