@@ -182,6 +182,128 @@ final class CKRecordMapperCoverageTests: XCTestCase {
         ]
     }
 
+    // MARK: - CKRecord → モデル (21 型を 1 件ずつ)
+
+    /// 21 型それぞれ、サンプルの行と同じ値を載せた CKRecord を型名つきで取り込み、
+    /// モデルまで届くこと。`mapped(_:as:)` に渡す型名を打ち間違えると、その型の同期が
+    /// 黙って全件落ちる (nil で warning ログが出るだけ) ので、ここで捕まえる。
+    func testEveryRecordTypeIsIngestedFromACKRecord() {
+        var issues: [String] = []
+        for row in samples(flag: true) {
+            let name = caseName(row)
+            let recordType = name.prefix(1).uppercased() + name.dropFirst()
+            let fields = recordFields(of: rowPayload(row))
+            // id を recordName から採る型があるので、recordName も id にそろえる。
+            let recordName = (fields.first { $0.label == "id" }?.value as? String) ?? "test-\(name)"
+            let rec = CKRecord(recordType: recordType, recordID: CKRecord.ID(recordName: recordName))
+            for (label, value) in fields {
+                guard let value = ckRecordValue(value) else { continue }
+                rec[label] = value
+            }
+            guard let model = ingest(rec, as: row) else {
+                issues.append("\(recordType): 取り込めなかった")
+                continue
+            }
+            let modelValues = Dictionary(
+                Mirror(reflecting: model).children.compactMap { c in c.label.map { ($0, c.value) } },
+                uniquingKeysWith: { first, _ in first })
+            for (label, value) in fields {
+                guard let got = modelValues[label] else { continue }
+                if normalized(value) != normalized(got) {
+                    issues.append("\(recordType).\(label): \(normalized(value)) → \(normalized(got))")
+                }
+            }
+        }
+        XCTAssertTrue(issues.isEmpty, issues.joined(separator: "\n"))
+    }
+
+    /// 実数 (NSNumber の double) と時刻 (Date) の列が、ckNumberValue / ckValue の変換を経て届くこと。
+    func testRealAndTimestampColumnsAreProjected() throws {
+        let idolRec = CKRecord(recordType: "Idol", recordID: CKRecord.ID(recordName: "i"))
+        idolRec["id"] = "i1" as NSString
+        idolRec["brandId"] = "ml" as NSString
+        idolRec["name"] = "名前" as NSString
+        idolRec["height"] = NSNumber(value: 158.5)
+        idolRec["age"] = NSNumber(value: 14)
+        idolRec["isExternal"] = NSNumber(value: true)
+        let idol = try XCTUnwrap(CKRecordMapper.idol(from: idolRec))
+        XCTAssertEqual(idol.height, 158.5)
+        XCTAssertEqual(idol.age, 14)
+        XCTAssertTrue(idol.isExternal)
+
+        let videoRec = CKRecord(recordType: "SongVideo", recordID: CKRecord.ID(recordName: "v"))
+        videoRec["id"] = "v1" as NSString
+        videoRec["songId"] = "s1" as NSString
+        videoRec["youtubeUrl"] = "https://www.youtube.com/watch?v=x" as NSString
+        // 2026-09-23T00:00:00.999Z。秒未満は切り捨てる。
+        videoRec["createdAt"] = Date(timeIntervalSince1970: 1_790_121_600.999) as NSDate
+        let video = try XCTUnwrap(CKRecordMapper.songVideo(from: videoRec))
+        XCTAssertEqual(video.createdAt, "2026-09-23T00:00:00Z")
+    }
+
+    /// 行のフィールドを CKRecord に載せる値にする。色はコアが 16 進として検査するので正しい形にし、
+    /// 時刻 (createdAt) は Date で来る列なので、ここでは載せず下の専用のテストで見る。
+    private func recordFields(of payload: Any) -> [(label: String, value: Any)] {
+        Mirror(reflecting: payload).children.compactMap { child in
+            guard let label = child.label, label != "createdAt" else { return nil }
+            return (label, label == "color" ? "E22B30" : child.value)
+        }
+    }
+
+    private func rowPayload(_ row: CkRow) -> Any {
+        var payload = Mirror(reflecting: row).children.first!.value
+        if Mirror(reflecting: payload).displayStyle == .tuple {
+            payload = Mirror(reflecting: payload).children.first!.value
+        }
+        return payload
+    }
+
+    /// 行の値を CloudKit が持つ形 (NSString / NSNumber) にする。nil は載せない。
+    private func ckRecordValue(_ value: Any) -> CKRecordValue? {
+        let mirror = Mirror(reflecting: value)
+        if mirror.displayStyle == .optional {
+            guard let wrapped = mirror.children.first?.value else { return nil }
+            return ckRecordValue(wrapped)
+        }
+        switch value {
+        case let text as String: return text as NSString
+        case let flag as Bool: return NSNumber(value: flag)
+        case let number as Int64: return NSNumber(value: number)
+        case let number as Int32: return NSNumber(value: number)
+        case let number as UInt32: return NSNumber(value: number)
+        case let number as Int: return NSNumber(value: number)
+        case let number as Double: return NSNumber(value: number)
+        default: return nil
+        }
+    }
+
+    /// 型ごとの取り込み口 (`CKRecordMapper.xxx(from:)`) を呼ぶ。
+    private func ingest(_ rec: CKRecord, as row: CkRow) -> Any? {
+        switch row {
+        case .brand: CKRecordMapper.brand(from: rec)
+        case .idol: CKRecordMapper.idol(from: rec)
+        case .event: CKRecordMapper.event(from: rec)
+        case .show: CKRecordMapper.show(from: rec)
+        case .venue: CKRecordMapper.venue(from: rec)
+        case .venueName: CKRecordMapper.venueName(from: rec)
+        case .venueHall: CKRecordMapper.venueHall(from: rec)
+        case .unitVersion: CKRecordMapper.unitVersion(from: rec)
+        case .costume: CKRecordMapper.costume(from: rec)
+        case .costumeWear: CKRecordMapper.costumeWear(from: rec)
+        case .creator: CKRecordMapper.creator(from: rec)
+        case .song: CKRecordMapper.song(from: rec)
+        case .unit: CKRecordMapper.unit(from: rec)
+        case .idolBrand: CKRecordMapper.idolBrand(from: rec)
+        case .songArtist: CKRecordMapper.songArtist(from: rec)
+        case .unitMember: CKRecordMapper.unitMember(from: rec)
+        case .showCast: CKRecordMapper.showCast(from: rec)
+        case .setlistItem: CKRecordMapper.setlistItem(from: rec)
+        case .setlistPerformer: CKRecordMapper.setlistPerformer(from: rec)
+        case .songVideo: CKRecordMapper.songVideo(from: rec)
+        case .showTicket: CKRecordMapper.showTicket(from: rec)
+        }
+    }
+
     // MARK: - CKRecord → モデル (射影を通した 1 本)
 
     /// CKRecord の値 (文字列・整数・小数・真偽値) をコアの入力に潰して、行を経てモデルまで届くこと。
