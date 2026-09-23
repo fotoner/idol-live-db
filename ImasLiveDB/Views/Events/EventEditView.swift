@@ -13,6 +13,9 @@ struct EventEditView: View {
     @State private var name: String
     @State private var brandId: String
     @State private var kind: EventKind
+    /// 語彙に無い種別 (または "other") を持つ既存イベントの元の値。
+    /// 利用者が種別を選び直さない限り、この値をそのまま送り返す。
+    private let unlistedKindRaw: String?
     @State private var ticketOpenDate: String
     @State private var ticketDeadline: String
     @State private var ticketLotteryDate: String
@@ -29,6 +32,7 @@ struct EventEditView: View {
         _name = State(initialValue: event.name)
         _brandId = State(initialValue: event.brandId ?? "")
         _kind = State(initialValue: event.eventKind)
+        self.unlistedKindRaw = event.eventKind == .other ? event.kind : nil
         _ticketOpenDate = State(initialValue: event.ticketOpenDate ?? "")
         _ticketDeadline = State(initialValue: event.ticketDeadline ?? "")
         _ticketLotteryDate = State(initialValue: event.ticketLotteryDate ?? "")
@@ -42,6 +46,7 @@ struct EventEditView: View {
         _name = State(initialValue: "")
         _brandId = State(initialValue: newEventBrandId ?? "")
         _kind = State(initialValue: .live)
+        self.unlistedKindRaw = nil
         _ticketOpenDate = State(initialValue: "")
         _ticketDeadline = State(initialValue: "")
         _ticketLotteryDate = State(initialValue: "")
@@ -67,6 +72,9 @@ struct EventEditView: View {
                         // 「その他」は知らない種別の受け皿なので、書き込む値としては出さない。
                         ForEach(EventKind.allCases.filter { $0 != .other }, id: \.self) {
                             Text($0.displayLabel).tag($0)
+                        }
+                        if let raw = unlistedKindRaw {
+                            Text("変更しない (\(raw))").tag(EventKind.other)
                         }
                     }
                     TextField("合同ブランド (カンマ区切り)", text: $jointBrandIds)
@@ -123,6 +131,16 @@ struct EventEditView: View {
         }
     }
 
+    private var kindToSend: String {
+        Self.kindToSend(selected: kind, unlistedRaw: unlistedKindRaw)
+    }
+
+    /// 「その他」は知らない種別の受け皿なので、選ばれていれば元の生の値を返す
+    /// (黙って "other" に潰すと、新しい種別のイベントを直した人がその種別を消してしまう)。
+    nonisolated static func kindToSend(selected: EventKind, unlistedRaw: String?) -> String {
+        selected == .other ? (unlistedRaw ?? selected.rawValue) : selected.rawValue
+    }
+
     private func save() async {
         isSaving = true
         defer { isSaving = false }
@@ -147,7 +165,7 @@ struct EventEditView: View {
             "eventType": AnyEncodable(eventType),
             "isStreaming": AnyEncodable(isStreaming ? 1 : 0),
             "isSolo": AnyEncodable(isSolo ? 1 : 0),
-            "kind": AnyEncodable(kind.rawValue),
+            "kind": AnyEncodable(kindToSend),
         ]
         // update はサーバ側マージ (未送信 = 現状維持)。空にした場合は null 明示送信でクリア。
         let resolvedBrandId = brandId.isEmpty ? nil : brandId
@@ -184,7 +202,7 @@ struct EventEditView: View {
                 eventType: eventType,
                 isStreaming: isStreaming,
                 isSolo: isSolo,
-                kind: kind.rawValue,
+                kind: kindToSend,
                 ticketOpenDate: ticketOpenDate.isEmpty ? nil : ticketOpenDate,
                 ticketDeadline: ticketDeadline.isEmpty ? nil : ticketDeadline,
                 ticketLotteryDate: ticketLotteryDate.isEmpty ? nil : ticketLotteryDate,
