@@ -35,9 +35,11 @@ DB_PATH = ROOT / "ImasLiveDB" / "Resources" / "master.sqlite"
 DATA_DIR = ROOT / "data"
 SEED_SCRIPT = Path(__file__).resolve().parent / "seed_cloudkit.py"
 
-# 絞り込みの知識は seed_cloudkit.py が持つ。**写さずに読む** (片方だけ古くならないように)。
+# 絞り込みの知識は lib/ck_tables.py が持つ (seed_cloudkit.py と共有)。**写さずに読む**
+# (片方だけ古くならないように)。標準ライブラリだけのモジュールなので、--check は
+# requests などが無くても動く。
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from seed_cloudkit import SCOPED_ID_SPACE, TABLE_ORDER as TABLE_PUSH_ORDER, scope_id  # noqa: E402
+from lib.ck_tables import SCOPED_ID_SPACE, TABLE_ORDER as TABLE_PUSH_ORDER, scope_id  # noqa: E402
 DUMP_PATH = ROOT / "db" / "master.sql"
 
 
