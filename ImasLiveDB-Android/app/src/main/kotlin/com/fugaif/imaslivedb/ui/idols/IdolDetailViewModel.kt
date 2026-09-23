@@ -18,6 +18,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import uniffi.imas_core.SimilarIdolCandidate
+import uniffi.imas_core.nextShowIndex
+import uniffi.imas_core.similarIdolsFetchLimit
 
 data class IdolDetailUiState(
     val idol: Idol? = null,
@@ -33,15 +36,10 @@ data class IdolDetailUiState(
     val similarSharedTags: Map<String, Int> = emptyMap(),
     /** 個人用タグ (端末ローカルのみ、サーバーには送信しない)。 */
     val personalTags: List<PersonalTag> = emptyList(),
+    /** 出演履歴のうち今日以降で最も近い公演 (= 次の出演)。選び方はコア (nextShowIndex)。 */
+    val nextShow: CastShowRow? = null,
     val isLoading: Boolean = true
-) {
-    /** 出演履歴のうち今日以降で最も近い公演 (= 次の出演)。無ければ null。 */
-    val nextShow: CastShowRow?
-        get() {
-            val today = JstDay.today()
-            return castShows.filter { it.date >= today }.minByOrNull { it.date }
-        }
-}
+)
 
 class IdolDetailViewModel(app: Application, private val idolId: String) : AndroidViewModel(app) {
 
@@ -76,6 +74,7 @@ class IdolDetailViewModel(app: Application, private val idolId: String) : Androi
                 unitsWithSongs = units.filter { it.id in unitIdsWithSongs },
                 unitsWithoutSongs = units.filter { it.id !in unitIdsWithSongs },
                 castShows = castShows,
+                nextShow = nextShowIndex(castShows.map { it.date }, JstDay.today())?.let { castShows[it.toInt()] },
                 isLoading = false
             )
             loadTags()
@@ -111,21 +110,18 @@ class IdolDetailViewModel(app: Application, private val idolId: String) : Androi
     }
 
     /**
-     * タグ類似のおすすめアイドルをサーバから取得し、ローカル DB で Idol に解決する (共有タグ数の降順を維持)。
-     * D1 に idols テーブルが無くサーバー側では is_external によるフィルタができないため、
-     * 外部ゲスト演者 (isExternal) はここでローカル解決後に除外する (一覧/検索/統計と同じ扱い)。
-     * サーバーには表示件数より多めの [SIMILAR_IDOLS_FETCH_LIMIT] 件を要求してから除外・trim することで、
-     * 上位に外部ゲストが混ざっても表示件数が [SIMILAR_IDOLS_DISPLAY_LIMIT] 未満に痩せにくくする。
+     * タグ類似のおすすめアイドル (サーバ算出)。サーバに頼む件数と、どれを出すか
+     * (手元に無い id と外部ゲストを除き、サーバの並びのまま 10 件) はコアが決める。
      */
     private suspend fun loadSimilarIdols() {
         val entries = runCatching {
-            api.similarIdolsByTags(idolId, limit = SIMILAR_IDOLS_FETCH_LIMIT)
+            api.similarIdolsByTags(idolId, limit = similarIdolsFetchLimit().toInt())
         }.getOrDefault(emptyList())
         if (entries.isEmpty()) return
-        val resolved = repo.fetchIdolsByIds(entries.map { it.idolId }).filterNot { it.isExternal }
-        val byId = resolved.associateBy { it.id }
-        val ordered = entries.mapNotNull { byId[it.idolId] }.take(SIMILAR_IDOLS_DISPLAY_LIMIT)
-        val sharedTags = ordered.associate { idol -> idol.id to entries.first { it.idolId == idol.id }.sharedTags }
+        val picked = repo.pickSimilarIdols(entries.map { SimilarIdolCandidate(it.idolId, it.sharedTags.toUInt()) })
+        val byId = repo.fetchIdolsByIds(picked.map { it.idolId }).associateBy { it.id }
+        val ordered = picked.mapNotNull { byId[it.idolId] }
+        val sharedTags = picked.associate { it.idolId to it.sharedTags.toInt() }
         _uiState.value = _uiState.value.copy(similarTagIdols = ordered, similarSharedTags = sharedTags)
     }
 
@@ -149,10 +145,5 @@ class IdolDetailViewModel(app: Application, private val idolId: String) : Androi
         @Suppress("UNCHECKED_CAST")
         override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T =
             IdolDetailViewModel(app, idolId) as T
-    }
-
-    companion object {
-        private const val SIMILAR_IDOLS_FETCH_LIMIT = 25
-        private const val SIMILAR_IDOLS_DISPLAY_LIMIT = 10
     }
 }

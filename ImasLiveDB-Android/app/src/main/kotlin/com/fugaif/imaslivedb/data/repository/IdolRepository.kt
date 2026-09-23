@@ -10,6 +10,7 @@ import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.IdolPerformedSong
 import com.fugaif.imaslivedb.data.model.Song
 import uniffi.imas_core.IdolShowRecord
+import uniffi.imas_core.SimilarIdolCandidate
 
 /**
  * アイドルの読み取り口。
@@ -78,6 +79,10 @@ class IdolRepository(
     }
 
     /** タグが似ているアイドルランキング表示用。N+1を避けてIN句で一括取得する。 */
+    /** タグ類似の候補 (サーバの並び) から出すものを選ぶ (手元に無い id・外部ゲストを除いて 10 件)。 */
+    suspend fun pickSimilarIdols(candidates: List<SimilarIdolCandidate>): List<SimilarIdolCandidate> =
+        snapshots.query { store -> store.pickSimilarIdols(candidates) }
+
     suspend fun fetchIdolsByIds(ids: List<String>): List<Idol> {
         if (ids.isEmpty()) return emptyList()
         return db.idolDao().fetchIdolsByIds(ids)
