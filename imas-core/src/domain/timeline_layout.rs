@@ -14,17 +14,11 @@
 //! FFI 境界はエンティティ全体を渡さず射影 (占有区間・期間・当たり矩形) を渡し、
 //! 結果は index / 座標の列で返す (1 ユーザー操作 = 1 呼び出し)。
 
-use chrono::{DateTime, Datelike, FixedOffset, TimeZone};
-
-/// JST は UTC+9 固定 (1951 年以降夏時間なし)。IANA tzdata に依存しない。
-const JST_OFFSET_SECONDS: i32 = 9 * 3600;
+use crate::domain::jst_day::jst;
+use chrono::{DateTime, Datelike, TimeZone};
 
 /// 1 日 = 86,400 秒。年表の x 座標は「経過日数 × 倍率」で決まる。
 const SECONDS_PER_DAY: f64 = 86_400.0;
-
-fn jst() -> FixedOffset {
-    FixedOffset::east_opt(JST_OFFSET_SECONDS).expect("JST offset は常に有効")
-}
 
 /// 行詰めに使う 1 本の占有区間 (キャンバス上の pt 座標)。
 #[derive(uniffi::Record, Clone, Copy, Debug, PartialEq)]

@@ -12,14 +12,19 @@
 use chrono::{DateTime, FixedOffset};
 
 /// JST は UTC+9 固定 (1951 年以降夏時間なし)。IANA tzdata に依存しない。
-const JST_OFFSET_SECONDS: i32 = 9 * 3600;
+/// コアで JST を扱うところ (年表・Web の日時表示を含む) は、すべてこの値を使う。
+pub const JST_OFFSET_SECONDS: i32 = 9 * 3600;
+
+/// JST のタイムゾーン (UTC+9 固定)。
+pub fn jst() -> FixedOffset {
+    FixedOffset::east_opt(JST_OFFSET_SECONDS).expect("JST offset は常に有効")
+}
 
 /// JST での「今日」を公演日と同じ `"yyyy-MM-dd"` 表記で返す。
 pub fn jst_today(now_epoch_seconds: i64) -> String {
-    let jst = FixedOffset::east_opt(JST_OFFSET_SECONDS).expect("JST offset は常に有効");
     // 表現不能な epoch (紀元前後数億年) のみ None。公演日データでは到達しない。
     let utc = DateTime::from_timestamp(now_epoch_seconds, 0).unwrap_or(DateTime::UNIX_EPOCH);
-    utc.with_timezone(&jst).format("%Y-%m-%d").to_string()
+    utc.with_timezone(&jst()).format("%Y-%m-%d").to_string()
 }
 
 /// 公演日が「今日以降」か。当日は未来として扱う (開催日当日はまだ終わっていない)。

@@ -30,8 +30,9 @@
 //! - バッジ ("3公演" / "12曲") は SQL 時代と同じくクエリ層 (= ここ) で組み立てる。
 //!   iOS/Android で同一表示を保証するため、書式をプラットフォームに重複させない。
 
+use crate::domain::jst_day::jst;
 use crate::domain::snapshot::Snapshot;
-use chrono::{FixedOffset, TimeZone};
+use chrono::TimeZone;
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 /// 年表のスイムレーン。iOS `TimelineLane` の 1:1 対応。
@@ -89,13 +90,6 @@ pub struct TimelineBarRecord {
     /// 右肩の小バッジ ("25曲" / "3公演")。
     pub badge: Option<String>,
     pub target: TimelineBarTarget,
-}
-
-/// JST は UTC+9 固定・夏時間なし (timeline_layout と同じ前提)。
-const JST_OFFSET_SECONDS: i32 = 9 * 3600;
-
-fn jst() -> FixedOffset {
-    FixedOffset::east_opt(JST_OFFSET_SECONDS).expect("JST offset は常に有効")
 }
 
 /// `YYYY-MM-DD` (先頭 10 バイト固定桁) を JST 0 時の epoch 秒へ。
