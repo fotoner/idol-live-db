@@ -43,11 +43,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
-import com.fugaif.imaslivedb.ui.share.ShareLinkBuilder
 import com.fugaif.imaslivedb.ui.share.ShareMessage
 import com.fugaif.imaslivedb.ui.share.SocialShareChip
 import com.fugaif.imaslivedb.ui.share.SocialShareIconButton
-import com.fugaif.imaslivedb.ui.share.SocialSharePayload
 import com.fugaif.imaslivedb.ui.theme.DS
 import kotlinx.coroutines.launch
 
@@ -164,10 +162,7 @@ fun PollDetailScreen(
                             Spacer(Modifier.weight(1f))
                             SocialShareChip(
                                 title = "投票をシェア",
-                                payload = SocialSharePayload(
-                                    message = ShareMessage.pollVotes(detail.title, myVoteNames),
-                                    url = ShareLinkBuilder.pollUrl(detail.id)
-                                )
+                                payload = ShareMessage.pollVotesPayload(detail.id, detail.title, myVoteNames)
                             )
                         }
                     }

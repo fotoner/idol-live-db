@@ -62,6 +62,7 @@ import uniffi.imas_core.IdolQuizIdolRef
 import uniffi.imas_core.QuizGrade
 import uniffi.imas_core.QuizSessionResult
 import uniffi.imas_core.quizSessionLength
+import uniffi.imas_core.shareQuizResultText
 
 // =============================================================================
 // 4 択クイズ系 (アイドル当て / ソロ曲) の共通 UI 部品。iOS QuizComponents.swift の移植。
@@ -397,7 +398,9 @@ fun QuizResultView(
 
         Column(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             QuizPrimaryButton(title = "もう一度", onClick = onReplay)
-            val shareText = "${kind.displayName}で $points/$maxPoints pt・グレード${grade.name}（正解 $correct/$questions）でした！ #アイドルライブDB"
+            val shareText = shareQuizResultText(
+                kind.displayName, result.points, result.maxPoints, grade, result.correct, result.questions
+            )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,

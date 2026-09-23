@@ -1,6 +1,5 @@
 package com.fugaif.imaslivedb.ui.events
 
-import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -98,6 +97,8 @@ import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import com.fugaif.imaslivedb.ui.share.SocialShare
+import uniffi.imas_core.shareEventText
 
 /**
  * イベント詳細。iOS EventDetailView の構成を 1:1 で写す。
@@ -193,18 +194,8 @@ fun EventDetailScreen(
                 },
                 actions = {
                     IconButton(onClick = {
-                        val text = buildString {
-                            append(uiState.eventName)
-                            if (uiState.heroSub.isNotEmpty()) {
-                                append("\n")
-                                append(uiState.heroSub)
-                            }
-                        }
-                        val intent = Intent(Intent.ACTION_SEND).apply {
-                            type = "text/plain"
-                            putExtra(Intent.EXTRA_TEXT, text)
-                        }
-                        context.startActivity(Intent.createChooser(intent, null))
+                        // 文面と URL はコアが作る (iOS と同じ: イベント名 + イベントへのリンク)。
+                        SocialShare.shareText(context, shareEventText(eventId, uiState.eventName))
                     }) {
                         Icon(Icons.Filled.Share, contentDescription = "このイベントをシェア")
                     }

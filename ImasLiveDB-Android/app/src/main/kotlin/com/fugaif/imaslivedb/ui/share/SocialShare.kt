@@ -31,87 +31,56 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.fugaif.imaslivedb.data.net.WorkerHttpClient
 import com.fugaif.imaslivedb.ui.theme.DS
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import uniffi.imas_core.SharePayload
+import uniffi.imas_core.sharePayloadPlainText
+import uniffi.imas_core.sharePayloadXPostUrl
+import uniffi.imas_core.sharePollInvitePayload
+import uniffi.imas_core.sharePollVotesPayload
+import java.util.TimeZone
 
 // =============================================================================
-// テキストシェア (X 投稿 / 標準シェアシート)。iOS SocialShare.swift の移植。
+// テキストシェア (X 投稿 / 標準シェアシート)。
+//
+// 文面と URL (本文・着地先・X の投稿画面の URL・シェアシートに渡す本文) はコア
+// (share_text) が作る (iOS と同じ文面)。ここは Android のシェアシートと X の起動だけ。
 // =============================================================================
-
-/** シェア用 Universal Links URL の生成 (iOS DeeplinkBuilder の移植)。 */
-object ShareLinkBuilder {
-    private const val BASE = WorkerHttpClient.BASE_URL
-
-    fun pollUrl(id: String): String = "$BASE/app/polls/${Uri.encode(id)}"
-
-    fun showUrl(id: String): String = "$BASE/app/shows/${Uri.encode(id)}"
-}
-
-/**
- * シェアする一言 + 着地先 URL。
- * X の intent は本文と URL を別パラメータで受けるとリンクカードが出るので、分けて保持する。
- */
-data class SocialSharePayload(val message: String, val url: String? = null) {
-    /** 標準シェアシート用のプレーンテキスト。 */
-    val plainText: String get() = if (url == null) message else "$message\n$url"
-}
 
 object SocialShare {
-    /** X (Twitter) の投稿画面 URL。X アプリ未インストールでもブラウザの投稿画面に着地する。 */
-    fun xPostUrl(payload: SocialSharePayload): String {
-        val builder = Uri.parse("https://x.com/intent/post").buildUpon()
-            .appendQueryParameter("text", payload.message)
-        payload.url?.let { builder.appendQueryParameter("url", it) }
-        return builder.build().toString()
+    /** X の投稿画面を開く。X アプリ未インストールでもブラウザの投稿画面に着地する。 */
+    fun postToX(context: Context, payload: SharePayload) {
+        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(sharePayloadXPostUrl(payload))))
     }
 
-    fun postToX(context: Context, payload: SocialSharePayload) {
-        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(xPostUrl(payload))))
-    }
+    /** 標準シェアシートで本文 + URL を渡す。 */
+    fun shareSheet(context: Context, payload: SharePayload) = shareText(context, sharePayloadPlainText(payload))
 
-    fun shareSheet(context: Context, payload: SocialSharePayload) {
+    /** 標準シェアシートで本文だけを渡す (文面をコアが作り終えているもの)。 */
+    fun shareText(context: Context, text: String) {
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, payload.plainText)
+            putExtra(Intent.EXTRA_TEXT, text)
         }
         context.startActivity(Intent.createChooser(intent, null))
     }
 }
 
-/** 投票系シェアの文面ビルダー。ハッシュタグはアプリ共通の #アイドルライブDB に揃える。 */
+/** 投票系のシェアの材料をコアに渡す口。一覧と詳細で同じ文面・同じリンクになる。 */
 object ShareMessage {
-    const val HASHTAG = "#アイドルライブDB"
-
-    /** 「A」「B」「C」形式。 */
-    fun quoted(names: List<String>): String = names.joinToString("") { "「$it」" }
-
-    /** みんなの投票 (お題) への投票シェア。 */
-    fun pollVotes(pollTitle: String, entityNames: List<String>): String =
-        "お題「$pollTitle」で${quoted(entityNames)}に投票しました！ $HASHTAG"
-
     /**
-     * お題への誘いシェアのペイロード。一覧と詳細で文面/リンクがズレないよう組み立てはここだけ
-     * (iOS の `SocialSharePayload.pollInvite(poll:)` と対)。締切は開催中のときだけ載せる。
+     * お題そのもののシェア (まだ投票していない人への誘い)。締切は開催中のときだけ載る。
+     * 締切を「何月何日」に直すための端末の TZ のずれは、締切の時点のものを渡す (iOS と同じ)。
      */
-    fun pollInvitePayload(id: String, title: String, endsAtMs: Long?, isActive: Boolean) =
-        SocialSharePayload(
-            message = pollInvite(title, endsAtMs.takeIf { isActive }),
-            url = ShareLinkBuilder.pollUrl(id)
-        )
-
-    /** お題そのもののシェア (まだ投票していない人への誘い)。endsAtMs が未知なら締切は省く。 */
-    fun pollInvite(title: String, endsAtMs: Long?): String {
-        val deadline = endsAtMs
-            ?.takeIf { it != Long.MAX_VALUE }
-            ?.let { " 締切は${deadlineFormat.format(Date(it))}！" }
-            .orEmpty()
-        return "お題「$title」に投票しよう！$deadline $HASHTAG"
+    fun pollInvitePayload(id: String, title: String, endsAtMs: Long?, isActive: Boolean): SharePayload {
+        // 締切が未知の値 (Long.MAX_VALUE) は「締切なし」として渡す。
+        val endsAt = endsAtMs?.takeIf { it != Long.MAX_VALUE }
+        val tzOffsetSeconds = TimeZone.getDefault().getOffset(endsAt ?: System.currentTimeMillis()) / 1000
+        return sharePollInvitePayload(id, title, endsAt, isActive, tzOffsetSeconds)
     }
 
-    private val deadlineFormat = SimpleDateFormat("M月d日", Locale.JAPAN)
+    /** みんなの投票で「〇〇に投票しました！」。 */
+    fun pollVotesPayload(pollId: String, pollTitle: String, entityNames: List<String>): SharePayload =
+        sharePollVotesPayload(pollId, pollTitle, entityNames)
 }
 
 /**
@@ -121,7 +90,7 @@ object ShareMessage {
  */
 @Composable
 fun SocialShareMenu(
-    payload: SocialSharePayload,
+    payload: SharePayload,
     trigger: @Composable (onClick: () -> Unit) -> Unit
 ) {
     val context = LocalContext.current
@@ -152,7 +121,7 @@ fun SocialShareMenu(
 /** アイコンボタン版のトリガー (ツールバー・カード右上用)。 */
 @Composable
 fun SocialShareIconButton(
-    payload: SocialSharePayload,
+    payload: SharePayload,
     contentDescription: String = "シェア",
     tint: Color = DS.ink2
 ) {
@@ -167,7 +136,7 @@ fun SocialShareIconButton(
 @Composable
 fun SocialShareChip(
     title: String,
-    payload: SocialSharePayload,
+    payload: SharePayload,
     accent: Color = DS.pick
 ) {
     SocialShareMenu(payload) { onClick ->

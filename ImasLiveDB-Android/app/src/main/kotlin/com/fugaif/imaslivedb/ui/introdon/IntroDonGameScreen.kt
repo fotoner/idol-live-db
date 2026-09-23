@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -74,6 +73,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import uniffi.imas_core.IntroDonShareInput
+import uniffi.imas_core.IntroDonShareMode
+import uniffi.imas_core.shareIntroDonText
 
 // =============================================================================
 // イントロドン本編 (ノーマル/ラッシュ/全曲チャレンジ)。iOS IntroGameView + IntroGameSession
@@ -719,7 +721,7 @@ private fun IntroDonResultBody(
             bestCombo = state.bestCombo,
             // 全曲チャレンジは曲数が多すぎて内訳が無意味なのでサマリのみ。
             lines = if (isAllSongs) emptyList() else state.records.map { IntroShareLine(it.title, it.correct) },
-            shareText = shareText(settings, state, percentage, answered),
+            shareText = shareText(settings, state, answered),
             onDismiss = { showShareCard = false }
         )
     }
@@ -781,14 +783,20 @@ private fun introDonModeLabel(settings: IntroDonSettings): String = when (settin
     else -> "ノーマル"
 }
 
-private fun shareText(settings: IntroDonSettings, state: IntroDonGameUiState, percentage: Int, answered: Int): String {
-    val modeLabel = introDonModeLabel(settings)
-    val base = if (settings.mode == IntroDonMode.ALL_SONGS) {
-        val secs = (state.elapsedMs / 1000).toInt()
-        "🎵イントロドン 全曲チャレンジ ${secs / 60}:${(secs % 60).toString().padStart(2, '0')}・正答率$percentage% (${state.score}/$answered)"
-    } else {
-        "🎵イントロドン($modeLabel)で ${state.score}/$answered 正解！(正答率$percentage%)"
-    }
-    val combo = if (state.bestCombo >= 2) " 最大${state.bestCombo}連続🔥" else ""
-    return base + combo + "\n#イントロドン #アイマス"
-}
+/** 結果のシェア文。文面 (タイムの丸め・正答率・連続正解) はコアが作る (iOS と同じ)。 */
+private fun shareText(settings: IntroDonSettings, state: IntroDonGameUiState, answered: Int): String =
+    shareIntroDonText(
+        IntroDonShareInput(
+            mode = when (settings.mode) {
+                IntroDonMode.NORMAL -> IntroDonShareMode.NORMAL
+                IntroDonMode.RUSH -> IntroDonShareMode.RUSH
+                IntroDonMode.ALL_SONGS -> IntroDonShareMode.ALL_SONGS
+                IntroDonMode.PARTY -> IntroDonShareMode.PARTY
+            },
+            score = state.score,
+            answered = answered,
+            bestCombo = state.bestCombo,
+            elapsedSeconds = state.elapsedMs / 1000.0,
+            rushTimeLimitSeconds = settings.rushTimeLimitSec.toDouble()
+        )
+    )
