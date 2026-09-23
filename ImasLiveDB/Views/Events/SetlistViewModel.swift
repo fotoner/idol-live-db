@@ -16,7 +16,6 @@ final class SetlistViewModel {
     // MARK: - セトリ本体
     private(set) var setlist: [SetlistRow] = []
     private(set) var performersByItemId: [String: [PerformerRow]] = [:]
-    private(set) var originalIdsBySongId: [String: Set<String>] = [:]
     private(set) var idolsById: [String: Idol] = [:]
 
     // MARK: - 添え物
@@ -109,8 +108,8 @@ final class SetlistViewModel {
 
     // MARK: - 単位ごとの読み込み
 
-    /// セトリの行と、行に要るもの (出演者・原唱者・アイドルの実体)。
-    /// 行が読めなければ、ほかの 3 つは意味が無いので読まない。
+    /// セトリの行と、行に要るもの (出演者・アイドルの実体)。
+    /// 行が読めなければ、ほかは意味が無いので読まない。
     private func loadSetlist(showId: String) async {
         do {
             setlist = try await showReading.setlist(showId: showId)
@@ -122,11 +121,6 @@ final class SetlistViewModel {
             performersByItemId = try await showReading.allPerformers(showId: showId)
         } catch {
             Logger.database.error("load_failed setlist_performers: \(error.localizedDescription)")
-        }
-        do {
-            originalIdsBySongId = try await showReading.originalArtistIds(songIds: setlist.map(\.songId))
-        } catch {
-            Logger.database.error("load_failed setlist_original_artists: \(error.localizedDescription)")
         }
         // 全 performer の idolId をまとめて 1 回で引く (N+1 にしない)。
         let idolIds = Array(Set(performersByItemId.values.flatMap { $0 }.compactMap(\.idolId)))

@@ -27,7 +27,6 @@ struct SetlistView: View {
     private var setlist: [SetlistRow] { model.setlist }
     private var venueDirectory: VenueDirectory { model.venueDirectory }
     private var performersByItemId: [String: [PerformerRow]] { model.performersByItemId }
-    private var originalIdsBySongId: [String: Set<String>] { model.originalIdsBySongId }
     private var idolsById: [String: Idol] { model.idolsById }
     private var rowMetaByItemId: [String: SetlistRowMetaRecord] { model.rowMetaByItemId }
     private var collectionSummary: ShowCollectionRecord? { model.collectionSummary }
@@ -129,7 +128,6 @@ struct SetlistView: View {
     @ViewBuilder
     private func setlistRow(item: SetlistRow, index: Int) -> some View {
         let performers = performersByItemId[item.id] ?? []
-        let performerIdolIds = Set(performers.compactMap(\.idolId))
         let meta = rowMetaByItemId[item.id]
         if simpleMode {
             SetlistSimpleRowView(
@@ -147,7 +145,6 @@ struct SetlistView: View {
                 }
             }
         } else {
-            let originalIds = originalIdsBySongId[item.songId] ?? []
             SetlistRowView(
                 item: item,
                 displayNumber: index + 1,
@@ -158,7 +155,7 @@ struct SetlistView: View {
                 noteGroups: meta?.noteGroups ?? [],
                 performerName: performerName,
                 isCharacterLive: show.isCharacterLive,
-                coverType: classifyCover(originalIds: originalIds, performerIds: performerIdolIds),
+                lineup: meta?.lineup,
                 myPickIdolIds: myPickIdolIds,
                 showId: show.id,
                 showName: shareName,
@@ -238,14 +235,18 @@ struct SetlistView: View {
         return showBrandHex
     }
 
+    /// 区切りの塊。どこで切るか・見出し (「アンコール」への畳み・区切り無しの「本編」) は
+    /// imas-core (`SetlistRowMetaRecord.startsSection` / `sectionHeading`) が決める。
+    /// 行の添え物がまだ無い間は、全体を 1 つの「本編」にしておく。
     private var sections: [SetlistSection] {
         var result: [SetlistSection] = []
         for item in setlist {
-            let sectionName = item.section ?? "本編"
-            if result.last?.sectionName == sectionName {
-                result[result.count - 1].items.append(item)
+            let meta = rowMetaByItemId[item.id]
+            if let last = result.indices.last, meta?.startsSection != true {
+                result[last].items.append(item)
             } else {
-                result.append(SetlistSection(id: item.position, sectionName: sectionName, items: [item]))
+                result.append(SetlistSection(
+                    id: item.position, sectionName: meta?.sectionHeading ?? "本編", items: [item]))
             }
         }
         return result
@@ -691,14 +692,6 @@ struct SetlistView: View {
         await model.loadRowMeta(showId: show.id, nameMode: performerName, displayMode: displayMode)
     }
 
-    private func classifyCover(originalIds: Set<String>, performerIds: Set<String>) -> CoverType {
-        if originalIds.isEmpty || performerIds.isEmpty { return .unknown }
-        if originalIds == performerIds { return .original }
-        if originalIds.isSubset(of: performerIds) { return .originalPlus }
-        if !originalIds.isDisjoint(with: performerIds) { return .partial }
-        return .cover
-    }
-
     /// Apple Music にプレイリストを作成してセトリの曲を追加
     private func addToAppleMusicPlaylist() async {
         // 認可は起動時に取らないので、使う直前に取る (契約の有無もここで読み直す)。
@@ -767,14 +760,6 @@ struct SetlistView: View {
             }
         }
     }
-}
-
-enum CoverType {
-    case original    // オリメン完全一致
-    case originalPlus // オリメン+α
-    case partial     // オリメン一部
-    case cover       // 完全カバー
-    case unknown     // 判定不可
 }
 
 private struct SetlistSection: Identifiable {

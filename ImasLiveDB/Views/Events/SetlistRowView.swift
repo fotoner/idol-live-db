@@ -28,7 +28,9 @@ struct SetlistRowView: View {
     ///
     /// 以前は既定値のまま誰も渡しておらず、キャラライブ分岐が死んでいた。
     var isCharacterLive: Bool = false
-    var coverType: CoverType = .unknown
+    /// オリメンの札 (`オリメン` / `オリメン+α` / `オリメン 4/5` / `オリメン不在`)。
+    /// 付けるか・文言はコア (`SetlistRowMetaRecord.lineup`) が決める。nil = 付けない。
+    var lineup: SetlistLineupNote? = nil
     /// 担当アイドル ID。 performer に含まれていれば担当認知 (アバターの二重輪) に委ねる。
     var myPickIdolIds: Set<String> = []
     /// 公演 ID (post-vote like で使う)。
@@ -131,17 +133,15 @@ struct SetlistRowView: View {
         .padding(.top, 6)
     }
 
-    /// カバー/一部カバーを ImasTagChip にマップ (オリメン一致は表示しない)。
+    /// オリメンの札を ImasTagChip に写す。色の出し分けは種類だけで決める (文言はコア)。
     private var coverTag: (text: String, kind: ImasTagChip.Kind)? {
-        // 公演の出演者全員で歌う全体曲は、原曲メンバーと完全一致しなくても
-        // (新メンバー追加・一部欠席で部分一致になるだけで) カバーではない。
-        // この場合「一部カバー」表記を抑制する (全員アンセムの通常パターン)。
-        if isFullCast, case .partial = coverType { return nil }
-        switch coverType {
-        case .original, .originalPlus, .unknown: return nil
-        case .partial: return ("一部カバー", .partial)
-        case .cover: return ("カバー", .cover)
+        guard let lineup else { return nil }
+        let kind: ImasTagChip.Kind = switch lineup.kind {
+        case .original, .originalPlus: .unit
+        case .partial: .partial
+        case .cover: .cover
         }
+        return (lineup.label, kind)
     }
 
     private var artworkURL: URL? {
