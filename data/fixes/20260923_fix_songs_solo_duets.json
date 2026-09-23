@@ -3,7 +3,8 @@
  "author": "Claude (オーナー依頼: Decided がソロ扱い)",
  "source": [
   "derived:songs.singer_label と song_artists(role=original) の人数",
-  "THE IDOLM@STER LIVE THE@TER DREAMERS 02〜06 の CD クレジット"
+  "THE IDOLM@STER LIVE THE@TER DREAMERS 02〜06 の CD クレジット",
+  "https://ja.wikipedia.org/wiki/THE_IDOLM@STER_LIVE_THE@TER_DREAMERS"
  ],
  "_help": "solo なのに原唱者が 2 人以上、または singer_label が複数人/ユニット名のものを洗い出した。双海亜美／真美 (1 枠として歌う) と、リミックス盤のアルバムアーティスト表記 (765PRO ALLSTARS) だけのものは solo のまま",
  "fixes": [
@@ -190,6 +191,26 @@
     "song_type": "unit"
    },
    "note": "LIVE THE@TER DREAMERS のデュエット曲。singer_label も原唱者も 2 人"
+  },
+  {
+   "table": "songs",
+   "id": "ml_your_home_town",
+   "fields": {
+    "song_type": "unit",
+    "singer_label": "木下ひなた×双海亜美",
+    "cd_series": "THE IDOLM@STER LIVE THE@TER DREAMERS 05 - EP"
+   },
+   "note": "LTD 05 のデュエット (木下ひなた×双海亜美)。LIVE THE@TER BEST 扱い・木下ひなたのソロになっていた",
+   "source": "https://ja.wikipedia.org/wiki/THE_IDOLM@STER_LIVE_THE@TER_DREAMERS"
+  },
+  {
+   "table": "songs",
+   "id": "ml_understand_understand",
+   "fields": {
+    "cd_series": "THE IDOLM@STER LIVE THE@TER DREAMERS 06 - EP"
+   },
+   "note": "LTD 06 のデュエット (高坂海美×田中琴葉)。song_type は unit で正しいが、収録 CD が LIVE THE@TER BEST になっていた",
+   "source": "https://ja.wikipedia.org/wiki/THE_IDOLM@STER_LIVE_THE@TER_DREAMERS"
   },
   {
    "table": "songs",
