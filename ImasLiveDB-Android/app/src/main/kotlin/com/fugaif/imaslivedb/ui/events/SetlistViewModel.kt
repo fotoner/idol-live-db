@@ -67,16 +67,22 @@ data class SetlistUiState(
     /** 会場名を「公演日時点の名前」で出すための会場マスタ (改名前の公演は当時名)。 */
     val venues: VenueDirectory = VenueDirectory.EMPTY
 ) {
+    /**
+     * 区切りの塊。**どこで塊を切るかも見出しの文言も共有コアが決める**
+     * (`rowMetaByItemId[id].startsSection` / `sectionHeading`)。ここは true の行で
+     * 新しい塊を始めるだけで、`section` の生の値を隣と比べない。
+     * 添え物が無い (まだ読めていない) ときは全体を 1 つの「本編」にする。
+     */
     val sections: List<SetlistSection>
         get() {
             val result = mutableListOf<SetlistSection>()
             for (item in setlist) {
-                val sectionName = item.section ?: "本編"
-                if (result.lastOrNull()?.sectionName == sectionName) {
+                val meta = rowMetaByItemId[item.id]
+                if (result.isEmpty() || meta?.startsSection == true) {
+                    result.add(SetlistSection(sectionName = meta?.sectionHeading ?: "本編", items = listOf(item)))
+                } else {
                     val last = result.last()
                     result[result.lastIndex] = last.copy(items = last.items + item)
-                } else {
-                    result.add(SetlistSection(sectionName = sectionName, items = listOf(item)))
                 }
             }
             return result

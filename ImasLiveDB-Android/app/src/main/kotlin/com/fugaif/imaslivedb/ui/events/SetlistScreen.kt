@@ -377,8 +377,9 @@ fun SetlistScreen(
                     }
                 }
 
-                uiState.sections.forEach { section ->
-                    stickyHeader(key = section.sectionName) {
+                uiState.sections.forEachIndexed { sectionIndex, section ->
+                    // 同じ見出しが 2 度来ても鍵がぶつからないよう、塊の順番を鍵にする。
+                    stickyHeader(key = "section_$sectionIndex") {
                         Surface(
                             color = DS.surface2,
                             modifier = Modifier.fillMaxWidth()
