@@ -4,6 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,9 +31,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import com.fugaif.imaslivedb.data.db.DatabaseBoot
 import com.fugaif.imaslivedb.data.notification.NotificationScheduler
 import com.fugaif.imaslivedb.data.sync.CloudKitSyncEngine
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.games.DailyPickSheet
 import com.fugaif.imaslivedb.ui.ledger.TicketExpensePrompt
 import com.fugaif.imaslivedb.ui.navigation.AppNavigation
@@ -40,53 +47,77 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val module = AppModule.from(this)
-        // スナップショットの読み込みは画面が出るときに始める (ウィジェットや通知だけの
-        // プロセスでは読まない)。
-        module.snapshotStoreProvider.start()
+        val boot = module.databaseBoot
         val sync = module.syncEngine
-        // ローカル通知を毎回まるごと組み直す (iOS ImasLiveDBApp と同じ起動時フック)。
-        // AlarmManager の予約はアプリ更新や端末再起動で消えるうえ、担当/お気に入りの
-        // 増減も起動のたびに拾い直したいので、差分更新ではなく全消去 → 全再スケジュール。
-        // 未許可なら中で何もしないので、ここで権限を要求することはない。
-        lifecycleScope.launch { NotificationScheduler.rescheduleAll(this@MainActivity) }
+        openDatabase()
         setContent {
             ImasLiveDBTheme {
-                val state by sync.state.collectAsState()
-                // null=判定中 / true=データあり / false=データ無し
-                var hasData by remember { mutableStateOf<Boolean?>(null) }
-                var retryKey by remember { mutableStateOf(0) }
-                LaunchedEffect(retryKey) {
-                    // 初回 (データ無し) は seed DB を投入してから判定する。これで CloudKit token
-                    // 未設定でも実データで起動できる (token はリリース版の最新化のためだけ)。
-                    hasData = sync.ensureLocalData()
-                    // データありなら即UI表示してバックグラウンド差分同期 (アプリのスコープで走る)。
-                    sync.requestSync()
-                }
-                val ready = hasData == true || state is CloudKitSyncEngine.SyncState.Completed
-                if (ready) {
-                    // 起動時の日替わりピック。データが揃ってから 1 回だけ枠を消費する
-                    // (「今日はもう出したか」の判定と印付けはコア + GameProgressStore)。
-                    var showDailyPick by remember {
-                        mutableStateOf(AppModule.from(this@MainActivity).gameProgressStore.consumeDailySheetSlot())
-                    }
-                    // オーバーレイにするのは、この上でタグピッカー (ModalBottomSheet) を開くため。
-                    // ボトムシートの中からボトムシートを開くと重なりとタッチ処理が壊れる。
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        AppNavigation()
-                        // 参加を付けた直後の「チケット代を記録しますか」。参加登録の入口は
-                        // 一覧のスワイプ・公演の参加シート・セトリ画面と複数あるので、
-                        // 出すのは**アプリのルート 1 箇所**にまとめる (iOS ContentView と同じ)。
-                        TicketExpensePrompt()
-                        if (showDailyPick) {
-                            DailyPickSheet(onDismiss = { showDailyPick = false })
-                        }
-                    }
-                } else {
-                    // seed 投入失敗などでデータが無いまま Error になった場合、再起動せず
-                    // その場でやり直せるように再試行を用意する (無限「データを準備中…」の防止)。
-                    SyncLoadingScreen(state, onRetry = { retryKey++ })
+                when (val bootState = boot.state.collectAsState().value) {
+                    DatabaseBoot.State.Preparing -> SyncLoadingScreen(CloudKitSyncEngine.SyncState.Idle, onRetry = {})
+                    is DatabaseBoot.State.Failed -> DatabaseRecoveryScreen(bootState.detail, onRetry = ::openDatabase)
+                    DatabaseBoot.State.Ready -> AppRoot(sync)
                 }
             }
+        }
+    }
+
+    /**
+     * 端末の DB を開き、開けたら DB を読む起動時の処理を始める。開けなければ復旧画面が出る
+     * (その「もう一度試す」もここを呼ぶ)。
+     */
+    private fun openDatabase() {
+        val module = AppModule.from(this)
+        lifecycleScope.launch {
+            module.databaseBoot.prepare()
+            if (module.databaseBoot.state.value != DatabaseBoot.State.Ready) return@launch
+            // スナップショットの読み込みは画面が出るときに始める (ウィジェットや通知だけの
+            // プロセスでは読まない)。移行を流し終えた DB を読むよう、開けてから。
+            module.snapshotStoreProvider.start()
+            // ローカル通知を毎回まるごと組み直す (iOS ImasLiveDBApp と同じ起動時フック)。
+            // AlarmManager の予約はアプリ更新や端末再起動で消えるうえ、担当/お気に入りの
+            // 増減も起動のたびに拾い直したいので、差分更新ではなく全消去 → 全再スケジュール。
+            // 未許可なら中で何もしないので、ここで権限を要求することはない。
+            NotificationScheduler.rescheduleAll(this@MainActivity)
+        }
+    }
+
+    /** DB を開けた後の画面。 */
+    @Composable
+    private fun AppRoot(sync: CloudKitSyncEngine) {
+        val state by sync.state.collectAsState()
+        // null=判定中 / true=データあり / false=データ無し
+        var hasData by remember { mutableStateOf<Boolean?>(null) }
+        var retryKey by remember { mutableStateOf(0) }
+        LaunchedEffect(retryKey) {
+            // 初回 (データ無し) は seed DB を投入してから判定する。これで CloudKit token
+            // 未設定でも実データで起動できる (token はリリース版の最新化のためだけ)。
+            hasData = sync.ensureLocalData()
+            // データありなら即UI表示してバックグラウンド差分同期 (アプリのスコープで走る)。
+            sync.requestSync()
+        }
+        val ready = hasData == true || state is CloudKitSyncEngine.SyncState.Completed
+        if (ready) {
+            // 起動時の日替わりピック。データが揃ってから 1 回だけ枠を消費する
+            // (「今日はもう出したか」の判定と印付けはコア + GameProgressStore)。
+            var showDailyPick by remember {
+                mutableStateOf(AppModule.from(this@MainActivity).gameProgressStore.consumeDailySheetSlot())
+            }
+            // オーバーレイにするのは、この上でタグピッカー (ModalBottomSheet) を開くため。
+            // ボトムシートの中からボトムシートを開くと重なりとタッチ処理が壊れる。
+            Box(modifier = Modifier.fillMaxSize()) {
+                AppNavigation()
+                // 参加を付けた直後の「チケット代を記録しますか」。参加登録の入口は
+                // 一覧のスワイプ・公演の参加シート・セトリ画面と複数あるので、
+                // 出すのは**アプリのルート 1 箇所**にまとめる (iOS ContentView と同じ)。
+                TicketExpensePrompt()
+                if (showDailyPick) {
+                    DailyPickSheet(onDismiss = { showDailyPick = false })
+                }
+            }
+        } else {
+            // seed 投入失敗などでデータが無いまま Error になった場合、再起動せず
+            // その場でやり直せるように再試行を用意する (無限「データを準備中…」の防止)。
+            SyncLoadingScreen(state, onRetry = { retryKey++ })
         }
     }
 
@@ -97,6 +128,40 @@ class MainActivity : ComponentActivity() {
         // 間隔を空けて問い合わせる (iOS は起動時)。
         val module = AppModule.from(this)
         module.appScope.launch { module.authService.refreshMeIfDue() }
+    }
+}
+
+/**
+ * DB を開けなかったときの画面 (iOS `DatabaseRecoveryView` と同じ)。端末のデータは消していないので、
+ * 「もう一度試す」だけを出す。再インストールは勧めない (端末にしかないデータが消える)。
+ */
+@Composable
+private fun DatabaseRecoveryScreen(detail: String, onRetry: () -> Unit) {
+    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        // 文字を大きくしている人でも読み切れるようにスクロールさせる。
+        Column(
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            ImasEmptyState(
+                icon = Icons.Filled.Warning,
+                title = "データを開けませんでした",
+                message = "端末に保存しているデータを開く途中で問題が起きました。データは消えていません。" +
+                    "もう一度試しても開けないときは、アプリを最新版に更新してください。",
+                actionTitle = "もう一度試す",
+                onAction = onRetry
+            )
+            SelectionContainer {
+                Text(
+                    "詳細: $detail",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
+            }
+        }
     }
 }
 

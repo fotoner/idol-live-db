@@ -6,6 +6,7 @@ import com.fugaif.imaslivedb.data.auth.AuthService
 import com.fugaif.imaslivedb.data.backup.BackupTransferApi
 import com.fugaif.imaslivedb.data.core.SnapshotStoreProvider
 import com.fugaif.imaslivedb.data.db.AppDatabase
+import com.fugaif.imaslivedb.data.db.DatabaseBoot
 import com.fugaif.imaslivedb.data.edit.EditApi
 import com.fugaif.imaslivedb.data.image.CustomImageStore
 import com.fugaif.imaslivedb.data.repository.CalendarRepository
@@ -32,6 +33,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.withContext
 
 /**
  * Manual DI container. Obtain via AppModule.from(context).
@@ -41,6 +43,11 @@ class AppModule private constructor(context: Context) {
 
     private val appContext: Context = context.applicationContext
     val database: AppDatabase = AppDatabase.getInstance(context)
+
+    /** 起動時に DB を開く流れ。開けるまで画面は DB を読まない (開けなければ復旧画面)。 */
+    val databaseBoot: DatabaseBoot = DatabaseBoot {
+        withContext(Dispatchers.IO) { database.openHelper.writableDatabase }
+    }
 
     /**
      * プロセス寿命の処理用 (画面を離れても止まらない)。個々の失敗が他を巻き込まないよう
