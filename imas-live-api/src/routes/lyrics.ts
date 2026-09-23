@@ -610,7 +610,7 @@ export async function handleLyrics(ctx: RouteContext): Promise<Response | null> 
     const terms = collectTerms(expr);
 
     const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-    const ipRl = await dryCheckIpRateLimit(env.DB, ip, LYRICS_IP_LIMITS);
+    const ipRl = await dryCheckIpRateLimit(env.DB, "lyrics", ip, LYRICS_IP_LIMITS);
     if (!ipRl.allowed) return rateLimitSimple();
 
     // draft は admin にしか見せない (GET /songs/:id/lyrics と同じ規則)。
@@ -622,7 +622,7 @@ export async function handleLyrics(ctx: RouteContext): Promise<Response | null> 
     // 従来どおり全走査する。候補が空配列なら「該当なし」が確定しているので走査すらしない。
     const candidates = await candidatesForNode(env, expr);
     if (candidates?.length === 0) {
-      await commitIpRateLimit(env.DB, ip, ipRl.bucket, ipRl.dayBucket);
+      await commitIpRateLimit(env.DB, ipRl);
       return json({ query, hits: [] }, 200, NO_STORE);
     }
 
@@ -706,7 +706,7 @@ export async function handleLyrics(ctx: RouteContext): Promise<Response | null> 
       return snippets.length > 0 ? [{ songId: row.song_id as string, snippets }] : [];
     });
 
-    await commitIpRateLimit(env.DB, ip, ipRl.bucket, ipRl.dayBucket);
+    await commitIpRateLimit(env.DB, ipRl);
     return json({ query, hits }, 200, NO_STORE);
   }
 
@@ -752,11 +752,11 @@ export async function handleLyrics(ctx: RouteContext): Promise<Response | null> 
     // 正常利用が 429 にならない値にし、まとめ取りは日の上限で押さえる。
     // 成功が確定してから commit する (404 等で枠を消費させない)。
     const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-    const ipRl = await dryCheckIpRateLimit(env.DB, ip, LYRICS_IP_LIMITS);
+    const ipRl = await dryCheckIpRateLimit(env.DB, "lyrics", ip, LYRICS_IP_LIMITS);
     if (!ipRl.allowed) return rateLimitSimple();
 
     const lines = parseLines(header.lines_json);
-    await commitIpRateLimit(env.DB, ip, ipRl.bucket, ipRl.dayBucket);
+    await commitIpRateLimit(env.DB, ipRl);
     // ここまで来たら歌詞を返すことが確定している (401/404/429 では数えない)。
     logLyricsRead(songId);
     return json({ ...buildLyricsPayload(songId, header, lines), status: header.status },

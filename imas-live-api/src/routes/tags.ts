@@ -251,7 +251,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       if (!deviceId) return error("X-Device-Id header is required");
 
       const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, ip);
+      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
       if (!ipDry.allowed) {
         return rateLimitSimple();
       }
@@ -301,7 +301,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       ]);
 
       const tag = await env.DB.prepare("SELECT * FROM tags WHERE id = ?").bind(candidateId).first();
-      await commitIpRateLimit(env.DB, ip, ipDry.bucket);
+      await commitIpRateLimit(env.DB, ipDry);
       return json({ tag, created: true }, 201);
     }
 
@@ -607,7 +607,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       // IP 単位の rate-limit: 複数デバイス回しで 1 タグを連続通報する spam を弾く。
       // device 単位の per-day 制限 (下記 already_reported) は二重防御として残す。
       const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, ip);
+      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
       if (!ipDry.allowed) {
         return rateLimitSimple();
       }
@@ -639,7 +639,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         ).bind(tagId).run();
       }
 
-      await commitIpRateLimit(env.DB, ip, ipDry.bucket);
+      await commitIpRateLimit(env.DB, ipDry);
       return json({ ok: true, total_reports: total });
     }
 
@@ -657,7 +657,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       if (!deviceId) return error("X-Device-Id header is required");
 
       const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, ip);
+      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
       if (!ipDry.allowed) {
         return rateLimitSimple();
       }
@@ -706,7 +706,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       ]);
 
       const tag = await env.DB.prepare("SELECT * FROM idol_tag_master WHERE id = ?").bind(candidateId).first();
-      await commitIpRateLimit(env.DB, ip, ipDry.bucket);
+      await commitIpRateLimit(env.DB, ipDry);
       return json({ tag, created: true }, 201);
     }
 
@@ -903,7 +903,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       if (!deviceId) return error("X-Device-Id header is required");
 
       const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, ip);
+      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
       if (!ipDry.allowed) {
         return rateLimitSimple();
       }
@@ -935,7 +935,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         ).bind(tagId).run();
       }
 
-      await commitIpRateLimit(env.DB, ip, ipDry.bucket);
+      await commitIpRateLimit(env.DB, ipDry);
       return json({ ok: true, total_reports: total });
     }
 
@@ -949,7 +949,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       if (!deviceId) return error("X-Device-Id header is required");
 
       const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, ip);
+      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
       if (!ipDry.allowed) {
         return rateLimitSimple();
       }
@@ -987,7 +987,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         }
       }
 
-      await commitIpRateLimit(env.DB, ip, ipDry.bucket);
+      await commitIpRateLimit(env.DB, ipDry);
       return json({ song_id: songId, applied_tag_ids: appliedTagIds });
     }
 
@@ -1002,7 +1002,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       if (!deviceId) return error("X-Device-Id header is required");
 
       const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, ip);
+      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
       if (!ipDry.allowed) {
         return rateLimitSimple();
       }
@@ -1025,7 +1025,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         recountSongTags(env.DB, songId),
       ]);
 
-      await commitIpRateLimit(env.DB, ip, ipDry.bucket);
+      await commitIpRateLimit(env.DB, ipDry);
       return json({ song_id: songId, tag_id: tagId, removed: deleted.meta.changes > 0 });
     }
 
@@ -1049,7 +1049,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       if (!deviceId) return error("X-Device-Id header is required");
 
       const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, ip);
+      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
       if (!ipDry.allowed) {
         return rateLimitSimple();
       }
@@ -1084,7 +1084,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         }
       }
 
-      await commitIpRateLimit(env.DB, ip, ipDry.bucket);
+      await commitIpRateLimit(env.DB, ipDry);
       return json({ idol_id: idolId, applied_tag_ids: appliedTagIds });
     }
 
@@ -1099,7 +1099,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       if (!deviceId) return error("X-Device-Id header is required");
 
       const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, ip);
+      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
       if (!ipDry.allowed) {
         return rateLimitSimple();
       }
@@ -1119,7 +1119,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         ).bind(idolId, tagId),
       ]);
 
-      await commitIpRateLimit(env.DB, ip, ipDry.bucket);
+      await commitIpRateLimit(env.DB, ipDry);
       return json({ idol_id: idolId, tag_id: tagId, removed: deleted.meta.changes > 0 });
     }
 
@@ -1162,7 +1162,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       if (!deviceId) return error("X-Device-Id header is required");
 
       const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, ip);
+      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
       if (!ipDry.allowed) {
         return rateLimitSimple();
       }
@@ -1211,7 +1211,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       ]);
 
       const tag = await env.DB.prepare("SELECT * FROM unit_tag_master WHERE id = ?").bind(candidateId).first();
-      await commitIpRateLimit(env.DB, ip, ipDry.bucket);
+      await commitIpRateLimit(env.DB, ipDry);
       return json({ tag, created: true }, 201);
     }
 
@@ -1408,7 +1408,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       if (!deviceId) return error("X-Device-Id header is required");
 
       const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, ip);
+      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
       if (!ipDry.allowed) {
         return rateLimitSimple();
       }
@@ -1440,7 +1440,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         ).bind(tagId).run();
       }
 
-      await commitIpRateLimit(env.DB, ip, ipDry.bucket);
+      await commitIpRateLimit(env.DB, ipDry);
       return json({ ok: true, total_reports: total });
     }
 
@@ -1454,7 +1454,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       if (!deviceId) return error("X-Device-Id header is required");
 
       const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, ip);
+      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
       if (!ipDry.allowed) {
         return rateLimitSimple();
       }
@@ -1489,7 +1489,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         }
       }
 
-      await commitIpRateLimit(env.DB, ip, ipDry.bucket);
+      await commitIpRateLimit(env.DB, ipDry);
       return json({ unit_id: unitId, applied_tag_ids: appliedTagIds });
     }
 
@@ -1504,7 +1504,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       if (!deviceId) return error("X-Device-Id header is required");
 
       const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, ip);
+      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
       if (!ipDry.allowed) {
         return rateLimitSimple();
       }
@@ -1524,7 +1524,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         ).bind(unitId, tagId),
       ]);
 
-      await commitIpRateLimit(env.DB, ip, ipDry.bucket);
+      await commitIpRateLimit(env.DB, ipDry);
       return json({ unit_id: unitId, tag_id: tagId, removed: deleted.meta.changes > 0 });
     }
 

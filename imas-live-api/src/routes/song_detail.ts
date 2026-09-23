@@ -30,7 +30,7 @@ import { getAuthUser } from "../auth";
 import { checkIsAdmin } from "../users";
 import { dryCheckIpRateLimit, commitIpRateLimit } from "../rate_limit";
 import { fetchPenlightVotes } from "./device_aggregates";
-import { fetchPublishedLyrics, logLyricsRead, NO_STORE } from "./lyrics";
+import { fetchPublishedLyrics, logLyricsRead, LYRICS_IP_LIMITS, NO_STORE } from "./lyrics";
 import {
   clampSimilarLimit,
   fetchSimilarSongs,
@@ -105,8 +105,9 @@ async function fetchSimilarSongsCached(
  *
  * レート制限は「束ねたことで実質的に厳しくなってはいけない」ため、既存 3 エンドポイントと
  * 同じく tags / similar / penlight には掛けない。歌詞を同梱するときだけ、単体の
- * GET /songs/:id/lyrics と同じ IP バースト制限 (30回/分) を掛ける。上限に当たっても
- * 429 で全体を落とさず lyrics だけ null にする (バンドルが単体 3 本より厳しくならないように)。
+ * GET /songs/:id/lyrics と同じ IP の歌詞の枠 (1 分の上限 LYRICS_IP_LIMITS.perMinute) で数える。
+ * 上限に当たっても 429 で全体を落とさず lyrics だけ null にする (バンドルが単体 3 本より
+ * 厳しくならないように)。
  */
 async function loadLyrics(
   ctx: RouteContext,
@@ -115,7 +116,7 @@ async function loadLyrics(
 ): Promise<Awaited<ReturnType<typeof fetchPublishedLyrics>>> {
   const { request, env } = ctx;
   const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-  const ipRl = await dryCheckIpRateLimit(env.DB, ip);
+  const ipRl = await dryCheckIpRateLimit(env.DB, "lyrics", ip, { perMinute: LYRICS_IP_LIMITS.perMinute });
   if (!ipRl.allowed) {
     console.log("song_detail_lyrics_rate_limited", { songId });
     return null;
@@ -127,7 +128,7 @@ async function loadLyrics(
   // JASRAC 報告のリクエスト回数に入る — 読者にとっては同じ「歌詞を読んだ」なので、
   // 経路で数え方を変えない。
   if (lyrics) {
-    await commitIpRateLimit(env.DB, ip, ipRl.bucket);
+    await commitIpRateLimit(env.DB, ipRl);
     logLyricsRead(songId);
   }
   return lyrics;

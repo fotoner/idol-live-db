@@ -989,10 +989,10 @@ export default {
       if (path === "/edits" && request.method === "GET") {
         // 読み取りのみ。/search と同様 IP rate-limit (dryCheck → commit)。
         const feedIp = request.headers.get("CF-Connecting-IP") ?? "unknown";
-        const feedRl = await dryCheckIpRateLimit(env.DB, feedIp);
+        const feedRl = await dryCheckIpRateLimit(env.DB, "feed", feedIp);
         if (!feedRl.allowed) return rateLimitSimple();
         const res = await handleGetFeed(request, url, env, { getAuthUser, json, error });
-        await commitIpRateLimit(env.DB, feedIp, feedRl.bucket);
+        await commitIpRateLimit(env.DB, feedRl);
         return res;
       }
 
