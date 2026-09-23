@@ -698,77 +698,19 @@ struct EventAttendance: Sendable {
         return brandIdols.filter { ids.contains($0.id) }
     }
 
-    /// 日付カテゴリでアイドルをグループ化。
-    /// 複数日公演なら「全日」「特定日のみ」「欠席」を、
-    /// 単一日公演なら「出席」「欠席」のみを返す。
+    /// 出演状況の塊 (「全日」「DAY1・DAY3 のみ」「欠席」、単日公演は「出演」「欠席」)。
+    /// 塊の切り方・見出し・並びはコア (`EventAttendanceRecord.groups`)。
     struct Group: Identifiable {
         let id: String
         let label: String
         let idols: [Idol]
     }
 
-    func grouped() -> [Group] {
-        guard !brandIdols.isEmpty else { return [] }
-        let allShowIds = shows.map(\.id)
-        let totalDays = allShowIds.count
+    var groups: [Group] = []
 
-        // 各 idol がどの show に出たか
-        var showsByIdol: [String: [String]] = [:]  // 出演した show_id の list (順序付き)
-        for show in shows {
-            let ids = presenceByShow[show.id] ?? []
-            for iid in ids {
-                showsByIdol[iid, default: []].append(show.id)
-            }
-        }
-
-        // グループ別
-        // - "全日" (全 show に出演)
-        // - "\(日付)のみ" or "\(ラベル)のみ"
-        // - "欠席"
-        var byKey: [(order: Int, label: String, idols: [Idol])] = []
-        var added: [String: Int] = [:]  // label → index
-
-        func bucket(label: String, order: Int, idol: Idol) {
-            if let idx = added[label] {
-                byKey[idx].idols.append(idol)
-            } else {
-                byKey.append((order, label, [idol]))
-                added[label] = byKey.count - 1
-            }
-        }
-
-        let showLabelById: [String: String] = Dictionary(uniqueKeysWithValues: shows.enumerated().map { idx, sh in
-            // 複数日公演なら DAY番号、単一ならただ日付
-            if totalDays > 1 {
-                return (sh.id, "DAY\(idx + 1)")
-            }
-            return (sh.id, sh.name)
-        })
-
-        let showIndexById: [String: Int] = Dictionary(
-            uniqueKeysWithValues: shows.enumerated().map { ($0.element.id, $0.offset) }
-        )
-
-        for idol in brandIdols {
-            let attended = showsByIdol[idol.id] ?? []
-            if attended.isEmpty {
-                bucket(label: "欠席", order: 999, idol: idol)
-            } else if attended.count == totalDays {
-                bucket(label: totalDays > 1 ? "全日" : "出演", order: 0, idol: idol)
-            } else {
-                let labels = attended.compactMap { showLabelById[$0] }
-                let combined = labels.joined(separator: "・")
-                // 「DAY1 のみ」→「DAY2 のみ」→ … の順を安定化させるため、
-                // 出演開始日 (= attended の最小 show index) を主キーに、出演日数を副キーに使う。
-                let firstIdx = attended.compactMap { showIndexById[$0] }.min() ?? 0
-                let order = 100 + firstIdx * 10 + attended.count
-                bucket(label: "\(combined) のみ", order: order, idol: idol)
-            }
-        }
-
-        byKey.sort { $0.order < $1.order }
-        return byKey.map { Group(id: $0.label, label: $0.label, idols: $0.idols) }
-    }
+    /// 出演者を覆う、このイベントで歌唱されたユニット (採った順)。選び方はコア
+    /// (`EventAttendanceRecord.coveringUnitIds`: 2 人以上・曲あり・大きい順の貪欲)。
+    var coveringUnitIds: [String] = []
 }
 
 // MARK: - GridCardItem Conformance

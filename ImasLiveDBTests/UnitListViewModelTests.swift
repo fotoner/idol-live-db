@@ -31,7 +31,6 @@ final class UnitListViewModelTests: XCTestCase {
         func unitMembers(unitId: String) async throws -> [Idol] { [] }
         func unitSongs(unitId: String) async throws -> [Song] { [] }
         func unitIdsWithSongs(unitIds: [String]) async throws -> Set<String> { [] }
-        func performedUnitIds(eventId: String) async throws -> Set<String> { [] }
         func allUnits() async throws -> [ImasLiveDB.Unit] { unitsToReturn }
     }
 

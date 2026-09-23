@@ -90,12 +90,19 @@ struct CoreEventRepository: EventReading {
             // 母集団は sort_order 順の idol_id 列で返る。EventAttendance の grouped() は
             // brandIdols の並びを表示順としてそのまま使うので、順序を保って実体化する。
             let brandIdols = try CoreRecordMapping.idols(store: store, orderedIds: record.brandIdolIds)
+            let idolById = Dictionary(brandIdols.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
             return EventAttendance(
                 brandIdols: brandIdols,
                 shows: record.shows.map(CoreRecordMapping.show(from:)),
                 presenceByShow: record.presenceByShow.mapValues { Set($0) },
                 leadByShow: record.leadByShow.mapValues { Set($0) },
-                guestByShow: record.guestByShow.mapValues { Set($0) }
+                guestByShow: record.guestByShow.mapValues { Set($0) },
+                groups: record.groups.map { group in
+                    EventAttendance.Group(
+                        id: group.label, label: group.label,
+                        idols: group.idolIds.compactMap { idolById[$0] })
+                },
+                coveringUnitIds: record.coveringUnitIds
             )
         }
     }

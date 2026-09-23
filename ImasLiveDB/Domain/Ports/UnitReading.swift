@@ -17,8 +17,6 @@ protocol UnitReading: Sendable {
     func unitSongs(unitId: String) async throws -> [Song]
     /// 指定ユニット集合のうち、曲を持つユニット id 集合。
     func unitIdsWithSongs(unitIds: [String]) async throws -> Set<String>
-    /// 指定イベントでユニット単独曲として披露されたユニット id 集合。
-    func performedUnitIds(eventId: String) async throws -> Set<String>
     /// 全ユニット (ピッカー用)。
     func allUnits() async throws -> [Unit]
 }

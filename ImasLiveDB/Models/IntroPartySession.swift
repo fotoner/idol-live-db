@@ -73,13 +73,16 @@ final class IntroPartySession {
         let pool = try IntroGameSession.questionPool(
             preset: presetPool, brandIds: settings.selectedBrandIds, database: database,
             hasAppleMusicSubscription: MusicKitService.shared.hasAppleMusicSubscription)
-        guard pool.count >= 4 else {
+        // 始めてよいか (候補が 4 曲以上) と問題数はコア。
+        guard let count = introQuestionCount(
+            kind: .standard, poolSize: UInt32(clamping: pool.count),
+            requested: UInt32(clamping: settings.questionCount)) else {
             questions = []
             // .loading のまま固着させない (再戦ボタン等が読み込み中表示のまま止まる不具合対策)。
             phase = .error
             return
         }
-        let picked = Array(pool.shuffled().prefix(settings.questionCount))
+        let picked = Array(pool.shuffled().prefix(Int(count)))
         // 選択肢は 1 ゲームぶんまとめて 1 回の FFI 呼び出しで生成する (出題ごとのループ呼び出しにしない)。
         questions = zip(picked, IntroQuizChoices.makeAll(for: picked, pool: pool)).map { song, choices in
             IntroGameQuestion(

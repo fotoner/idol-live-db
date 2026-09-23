@@ -25,6 +25,15 @@ enum IntroGameMode: String, Sendable, CaseIterable {
     case rush     // 制限時間内に連続出題、正解数を競う
     case allSongs // 全曲チャレンジ: 全曲出し切るまで終わらない、タイムと正答率を競う
     case party    // 1台2人・分割対戦 (早押し奪い合い)
+
+    /// コアの規則 (問題数・始めてよいか) に渡す種類。対戦は固定問数と同じ扱い。
+    var sessionKind: IntroSessionKind {
+        switch self {
+        case .normal, .party: .standard
+        case .rush: .rush
+        case .allSongs: .allSongs
+        }
+    }
 }
 
 /// 回答方式。ユーザーが切替可能。音声不可/未許可時は choices にフォールバック。
@@ -144,14 +153,14 @@ final class IntroGameSession {
             preset: presetPool, brandIds: settings.selectedBrandIds, database: database,
             hasAppleMusicSubscription: MusicKitService.shared.hasAppleMusicSubscription)
 
-        guard pool.count >= 4 else {
+        // 始めてよいか (候補が 4 曲以上) と問題数 (Rush / 全曲は候補を全部、Normal は指定数) はコア。
+        guard let count = introQuestionCount(
+            kind: settings.mode.sessionKind, poolSize: UInt32(clamping: pool.count),
+            requested: UInt32(clamping: settings.questionCount)) else {
             phase = .idle
             return
         }
-
-        // Rush / 全曲チャレンジ は選択ブランドの全曲をプール。Normal は questionCount 問。
-        let count = (settings.mode == .rush || settings.mode == .allSongs) ? pool.count : settings.questionCount
-        let picked = Array(pool.shuffled().prefix(count))
+        let picked = Array(pool.shuffled().prefix(Int(count)))
         // 選択肢は 1 ゲームぶんまとめて 1 回の FFI 呼び出しで生成する (出題ごとのループ呼び出しにしない)。
         questions = zip(picked, IntroQuizChoices.makeAll(for: picked, pool: pool)).map { song, choices in
             IntroGameQuestion(
@@ -276,13 +285,14 @@ final class IntroGameSession {
         selectedTitle = title
         let correct = title == q.title
         isCorrect = correct
-        if correct {
-            score += 1
-            combo += 1
-            bestCombo = max(bestCombo, combo)
-        } else {
-            combo = 0
-        }
+        // 点とコンボの進め方はコア。
+        let next = introScoreAfterAnswer(
+            current: IntroScore(score: UInt32(clamping: score), combo: UInt32(clamping: combo),
+                                bestCombo: UInt32(clamping: bestCombo)),
+            correct: correct)
+        score = Int(next.score)
+        combo = Int(next.combo)
+        bestCombo = Int(next.bestCombo)
         records.append(IntroAnswerRecord(id: q.id, title: q.title, selectedTitle: title, correct: correct))
         // 高速形式 (Rush/全曲) は正解画面を出さず ○/✕ エフェクトで即次へ。
         if settings.mode == .rush {
@@ -435,8 +445,9 @@ final class IntroGameSession {
     private func recordFinishedGame() {
         let key = bestScoreKey
         let previousBest = UserDefaults.standard.integer(forKey: key)
-        isNewBest = score > 0 && score > previousBest
-        if score > previousBest {
+        // 新記録か (前より多いときだけ) はコア。キーは端末に残る識別子なので変えない。
+        isNewBest = introIsNewBestScore(score: UInt32(clamping: score), previousBest: UInt32(clamping: previousBest))
+        if isNewBest {
             UserDefaults.standard.set(score, forKey: key)
         }
         // ゲーム一覧・連続クリア日数が見るのはこちら。**上のベストスコアとは別の器。**
@@ -462,7 +473,8 @@ final class IntroGameSession {
 
     private func saveBestTime() {
         let prev = UserDefaults.standard.double(forKey: bestTimeKey)
-        if elapsedTime > 0, prev == 0 || elapsedTime < prev {
+        // 記録が無い (0) か前より速いときだけ。判定はコア。
+        if elapsedTime > 0, introIsNewBestTime(elapsed: elapsedTime, previousBest: prev) {
             newBestTimeAchieved = true
             UserDefaults.standard.set(elapsedTime, forKey: bestTimeKey)
         }

@@ -348,7 +348,6 @@ struct EventDetailView: View {
             AttendancePanel(
                 attendance: attendance,
                 unitIndex: vm.unitIndex,
-                performedUnitIds: vm.performedUnitIds,
                 seed: seed,
                 brandSeed: brandSeed,
                 navigate: { go($0) }
@@ -586,8 +585,6 @@ private struct EventStatsTiles: View {
 private struct AttendancePanel: View {
     let attendance: EventAttendance
     let unitIndex: UnitIndex?
-    /// この event のセトリで歌唱された unit_id 集合。
-    let performedUnitIds: Set<String>
     var seed: String?
     var brandSeed: String?
     let navigate: (DetailDestination) -> Void
@@ -598,19 +595,14 @@ private struct AttendancePanel: View {
         Set(attendance.presentIdols.map(\.id))
     }
 
-    /// performer 集合を unit で被覆した結果 (実際に歌唱されたユニットのみ)。
+    /// 出演者を覆う、歌唱されたユニット (選び方はコア)。
     private var coveredUnits: [Unit] {
-        guard let unitIndex, !performedUnitIds.isEmpty else { return [] }
-        return unitIndex.coveringUnits(
-            for: presentIds,
-            requireSongs: true,
-            restrictTo: performedUnitIds
-        ).units
+        guard let units = unitIndex?.units else { return [] }
+        let byId = Dictionary(units.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        return attendance.coveringUnitIds.compactMap { byId[$0] }
     }
 
-    private var groups: [EventAttendance.Group] {
-        attendance.grouped()
-    }
+    private var groups: [EventAttendance.Group] { attendance.groups }
 
     /// 主演アイドル (出演者集合に含まれるもののみ)。
     private var leadIdols: [Idol] {

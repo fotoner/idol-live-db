@@ -39,12 +39,6 @@ struct CoreUnitRepository: UnitReading {
         }
     }
 
-    func performedUnitIds(eventId: String) async throws -> Set<String> {
-        try await snapshot.withStore { store in
-            Set(try store.performedUnitIds(eventId: eventId))
-        }
-    }
-
     func allUnits() async throws -> [Unit] {
         try await snapshot.withStore { store in
             try store.allUnitRecords().map(CoreRecordMapping.unit(from:))
