@@ -13,7 +13,8 @@
 master.sqlite で確かめて正本に書くと、手元にだけある公演を指す行が正本に入り、
 外部キーの壊れになる (実際に 23 行入った)。正本は tools/lib/masterdb.py の
 write_master_sql で書き出す (書く前に一時 DB で外部キーを検査する)。
-同梱 DB には、その公演がある行だけを入れる (無ければ触らずに知らせる)。
+同梱 DB (手元の master.sqlite) には全行を 1 つのトランザクションで入れる。同梱 DB に
+無い公演を指す行が 1 つでもあれば、同梱 DB には 1 行も入れずに知らせる (正本には入る)。
 """
 
 from __future__ import annotations
@@ -149,10 +150,13 @@ def main() -> int:
             db.executemany(INSERT_TICKETS, rows)
         print(f"同梱 DB に {len(rows)} 行")
     except sqlite3.IntegrityError as e:
-        # 手元の同梱 DB が正本より古く、公演が無い。正本には入ったので、
-        # 同梱 DB は bash tools/build_db.sh で正本から作り直せば揃う。
-        print(f"⚠️ 同梱 DB には入れなかった (無い公演を指す行がある: {e})。"
-              "正本から作り直すと揃う", file=sys.stderr)
+        # 同梱 DB に無い公演がある (正本より古いか、食い違っている)。with を抜けた時点で
+        # この書き込みは全部巻き戻っている。正本から作り直せば揃うが、作り直しは手元の
+        # 同梱 DB を正本で置き換えるので、まだ Production に届いていない行が消える。
+        print(f"⚠️ 同梱 DB には 1 行も入れなかった (同梱 DB に無い公演を指す行がある: {e})。"
+              "正本には入っている。同梱 DB を正本から作り直せば (bash tools/build_db.sh) 揃うが、"
+              "手元の同梱 DB にしか無い行 (まだ Production に push していない行) は作り直すと消える。"
+              "それが無いと確かめてから作り直すこと", file=sys.stderr)
     return 0
 
 

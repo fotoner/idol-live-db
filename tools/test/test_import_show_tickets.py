@@ -54,18 +54,21 @@ class ImportShowTicketsTest(unittest.TestCase):
         self.tmp.cleanup()
 
     def run_main(self, *lines, apply=True):
+        """終了コードを返す。出力 (stdout と stderr) は self.output に残す。"""
         self.tsv.write_text("\n".join(lines) + "\n", encoding="utf-8")
         argv = ["import_show_tickets.py", str(self.tsv), "--db", str(self.bundle),
                 "--master-sql", str(self.master_sql)] + (["--apply"] if apply else [])
         saved = sys.argv
         sys.argv = argv
+        out, err = io.StringIO(), io.StringIO()
         try:
-            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
                 return ist.main()
         except SystemExit as e:
             return e.code
         finally:
             sys.argv = saved
+            self.output = out.getvalue() + err.getvalue()
 
     def canonical(self, sql):
         with masterdb.restored(self.master_sql) as conn:
@@ -100,6 +103,15 @@ class ImportShowTicketsTest(unittest.TestCase):
         self.assertEqual(self.run_main(ticket_line("sh_c")), 0)
         self.assertEqual(self.canonical("SELECT show_id FROM show_tickets"), [("sh_c",)])
         self.assertEqual(self.bundle_rows(), [])
+
+    def test_the_bundle_gets_no_row_when_any_show_is_missing(self):
+        # 同梱 DB へは 1 つのトランザクションで入れる。1 公演でも無ければ全部巻き戻る。
+        self.assertEqual(self.run_main(ticket_line("sh_a"), ticket_line("sh_c")), 0)
+        self.assertEqual(self.canonical("SELECT show_id FROM show_tickets ORDER BY show_id"),
+                         [("sh_a",), ("sh_c",)])
+        self.assertEqual(self.bundle_rows(), [])
+        # 作り直しで揃えられることを言うなら、手元にしか無い行が消えることも言う。
+        self.assertIn("作り直すと消える", self.output)
 
     def test_check_only_writes_nothing(self):
         before = support.sha256(self.master_sql), support.sha256(self.bundle)
