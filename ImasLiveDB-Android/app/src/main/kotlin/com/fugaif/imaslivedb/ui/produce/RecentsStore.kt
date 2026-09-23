@@ -3,6 +3,7 @@ package com.fugaif.imaslivedb.ui.produce
 import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
+import uniffi.imas_core.recentsAfterVisit
 
 /** 最近見た項目の種別。 */
 enum class RecentKind(val raw: String) {
@@ -46,14 +47,24 @@ class RecentsStore private constructor(context: Context) {
         }.getOrDefault(emptyList())
     }
 
-    /** 記録する。既存の同一項目は取り除いて先頭へ積み直す。 */
+    /**
+     * 記録する。並べ方 (新しい順・同じ項目は先頭へ・上限・空は記録しない) はコアの
+     * recentsAfterVisit が決める。ここは鍵 (`kind:id`) に直して渡し、戻りを保存するだけ。
+     */
     fun record(kind: RecentKind, entityId: String) {
+        // id の無い鍵 (`event:`) は鍵として空ではないので、コアに渡す前に落とす。
         if (entityId.isEmpty()) return
-        val item = RecentItem(kind, entityId)
-        val updated = (listOf(item) + items().filter { it.key != item.key }).take(MAX_COUNT)
+        val updated = recentsAfterVisit(items().map { it.key }, RecentItem(kind, entityId).key)
+            .mapNotNull(::itemFromKey)
         val arr = JSONArray()
         updated.forEach { arr.put(JSONObject().put("kind", it.kind.raw).put("id", it.entityId)) }
         prefs.edit().putString(KEY, arr.toString()).apply()
+    }
+
+    private fun itemFromKey(key: String): RecentItem? {
+        val kind = RecentKind.from(key.substringBefore(':', "")) ?: return null
+        val id = key.substringAfter(':', "").ifEmpty { return null }
+        return RecentItem(kind, id)
     }
 
     fun clear() = prefs.edit().remove(KEY).apply()
@@ -61,7 +72,6 @@ class RecentsStore private constructor(context: Context) {
     companion object {
         private const val PREFS_NAME = "recent_items"
         private const val KEY = "items_v1"
-        private const val MAX_COUNT = 20
 
         @Volatile
         private var instance: RecentsStore? = null
