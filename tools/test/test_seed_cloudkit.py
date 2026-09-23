@@ -155,6 +155,10 @@ class SendingTest(unittest.TestCase):
         self.assertEqual(self.run_main("--tables", "brands", "song_artists"), 0)
         self.assertEqual(len(self.ck.operations()), 2)
 
+    def test_main_exits_one_on_record_errors(self):
+        self.failing = {"ml"}
+        self.assertEqual(self.run_main("--tables", "brands"), 1)
+
     def test_ids_limit_the_rows_sent(self):
         self.assertEqual(self.run_main("--tables", "song_artists", "--ids", "other_song"), 0)
         self.assertEqual(self.ck.operations(), [])

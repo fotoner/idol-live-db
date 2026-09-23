@@ -481,6 +481,10 @@ def main() -> None:
             print("(--verify skipped: no auth configured)", file=sys.stderr)
 
     conn.close()
+    # レコード単位のエラーが 1 件でもあれば失敗として終わる (一部だけ送れた push を
+    # 「成功」として先へ進めない)。
+    if total_errors:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
