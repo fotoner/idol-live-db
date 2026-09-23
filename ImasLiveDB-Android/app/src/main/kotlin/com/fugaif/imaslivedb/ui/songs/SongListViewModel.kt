@@ -355,10 +355,7 @@ class SongListViewModel : ViewModel() {
             } else {
                 null
             }
-            // メモ付き song_id。UserMarkRepository には notedIdolIds しか無い (Android に曲メモの
-            // 編集導線が無かったため) ので DAO を直に引く。EventListViewModel が brandDao を
-            // 直に引いているのと同じ扱い。
-            val notedIds = module.database.userMarkDao().idsWithNote(UserMark.SONG).toSet()
+            val notedIds = marks.notedIds(UserMark.SONG)
             val pickIdolIds = marks.pickedIdolIds()
             val myPickIds = module.songRepository.fetchSongIdsWithAnyArtist(pickIdolIds)
             val collectedCounts = module.songRepository.fetchSongCollectedCounts()

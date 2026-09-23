@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.fugaif.imaslivedb.data.model.AttendanceMarkProjection
-import com.fugaif.imaslivedb.data.model.TextMarkProjection
 import com.fugaif.imaslivedb.data.model.UserMark
 
 @Dao
@@ -34,16 +33,16 @@ interface UserMarkDao {
     """)
     suspend fun textValue(type: String, id: String, kind: String): String?
 
+    /** 1 件のマーク (bool_value を問わない)。読んでよいかの判定は呼び出し側 (コアの規則)。 */
+    @Query("SELECT * FROM user_marks WHERE entity_type = :type AND entity_id = :id AND kind = :kind LIMIT 1")
+    suspend fun mark(type: String, id: String, kind: String): UserMark?
+
     /**
-     * ある kind の (entity_id, text_value) を全部返す。習熟度のように
-     * **一覧の全行が読む値**は、行ごとに [textValue] を叩くと件数ぶんクエリが走るので、
-     * 起動時に 1 回だけ読んでメモリに持つ。
+     * ある kind のマークを全部返す (bool_value を問わない)。習熟度のように
+     * **一覧の全行が読む値**は、行ごとに引くと件数ぶんクエリが走るので 1 回で読む。
      */
-    @Query("""
-        SELECT entity_id AS entityId, text_value AS textValue FROM user_marks
-        WHERE entity_type = :type AND kind = :kind AND bool_value = 1
-    """)
-    suspend fun textValues(type: String, kind: String): List<TextMarkProjection>
+    @Query("SELECT * FROM user_marks WHERE entity_type = :type AND kind = :kind")
+    suspend fun marksOf(type: String, kind: String): List<UserMark>
 
     /** 指定 ID 群のうち ON になっているものだけを返す (公演単位の参加判定用)。 */
     @Query("""
@@ -62,10 +61,6 @@ interface UserMarkDao {
         WHERE entity_type = :type AND kind = :kind AND bool_value = 1
     """)
     suspend fun attendedMarks(type: String, kind: String): List<AttendanceMarkProjection>
-
-    /** メモ本文が入っているエンティティID一覧 (「メモがあるアイドルのみ」等の絞り込み用)。 */
-    @Query("SELECT entity_id FROM user_marks WHERE entity_type = :type AND kind = 'memo' AND text_value IS NOT NULL AND text_value != ''")
-    suspend fun idsWithNote(type: String): List<String>
 
     /** バックアップ全件エクスポート用。 */
     @Query("SELECT * FROM user_marks")

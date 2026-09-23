@@ -136,7 +136,7 @@ class EventListViewModel : ViewModel() {
         attendedEventIds = attended.live + attended.stream + attended.liveViewing
         val dao = module.database.userMarkDao()
         favoriteEventIds = dao.idsFor(UserMark.EVENT, UserMark.FAVORITE).toSet()
-        notedEventIds = dao.idsWithNote(UserMark.EVENT).toSet()
+        notedEventIds = marks.notedIds(UserMark.EVENT)
     }
 
     fun toggleBrand(brandId: String) {

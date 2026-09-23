@@ -48,9 +48,3 @@ data class AttendanceMarkProjection(
     @ColumnInfo(name = "entity_id") val entityId: String,
     @ColumnInfo(name = "text_value") val textValue: String?
 )
-
-/** [com.fugaif.imaslivedb.data.db.dao.UserMarkDao.textValues] の射影。 */
-data class TextMarkProjection(
-    val entityId: String,
-    val textValue: String?,
-)

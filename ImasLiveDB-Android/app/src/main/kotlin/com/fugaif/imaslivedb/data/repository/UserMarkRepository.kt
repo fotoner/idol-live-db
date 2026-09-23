@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.withContext
+import uniffi.imas_core.BackupUserMarkRecord
+import uniffi.imas_core.backupMeaningfulMarkIndices
 import java.time.Instant
 
 /** 参加が付いた (取り消しではない) 直後の通知。iOS `.attendanceMarked` 通知と対。 */
@@ -81,7 +83,7 @@ class UserMarkRepository(private val db: AppDatabase) {
 
     /** 座席メモ (未入力は null)。 */
     suspend fun seat(type: String, id: String): String? =
-        dao.textValue(type, id, SEAT)?.takeIf { it.isNotBlank() }
+        meaningful(listOfNotNull(dao.mark(type, id, SEAT))).firstOrNull()?.textValue?.takeIf { it.isNotBlank() }
 
     /** 座席メモを保存する。null / 空白のみ なら行ごと削除。 */
     suspend fun setSeat(type: String, id: String, text: String?) =
@@ -96,7 +98,7 @@ class UserMarkRepository(private val db: AppDatabase) {
 
     /** 全曲の習熟度。一覧の全行が読むので、行ごとに引かずまとめて 1 回。 */
     suspend fun masteryLevels(): Map<String, UByte> =
-        dao.textValues(UserMark.SONG, UserMark.MASTERY)
+        meaningful(dao.marksOf(UserMark.SONG, UserMark.MASTERY))
             .mapNotNull { row ->
                 val level = row.textValue?.toUByteOrNull() ?: return@mapNotNull null
                 if (level > 0u) row.entityId to level else null
@@ -116,10 +118,24 @@ class UserMarkRepository(private val db: AppDatabase) {
     }
 
     /**
+     * 読む価値のあるマークだけに絞る (bool が true か、文字に空白以外がある)。
+     *
+     * iOS は習熟度・座席・メモを `bool_value = false` のまま文字に値を入れて保存し、
+     * その行はバックアップでそのまま Android に入る。`bool_value = 1` で絞ると iOS から
+     * 持ってきた値が読めない。規則はコア (`backup_meaningful_mark_indices`) が持つ。
+     */
+    private fun meaningful(marks: List<UserMark>): List<UserMark> {
+        if (marks.isEmpty()) return marks
+        val records = marks.map {
+            BackupUserMarkRecord(it.entityType, it.entityId, it.kind, it.boolValue, it.textValue, it.updatedAt)
+        }
+        return backupMeaningfulMarkIndices(records).map { marks[it.toInt()] }
+    }
+
+    /**
      * text_value を持つマークの共通の書き込み口。
      *
-     * `bool_value` は必ず true で入れる。読み出しに使う [UserMarkDao.textValue] が
-     * `bool_value = 1` を条件にしているので、false で入れると書いた値が二度と読めない。
+     * `bool_value` は true で入れる (iOS は false で入れるが、読む側はどちらも読める)。
      */
     private suspend fun setText(type: String, id: String, kind: String, text: String?) {
         val trimmed = text?.trim()
@@ -146,7 +162,11 @@ class UserMarkRepository(private val db: AppDatabase) {
     suspend fun favoriteIdolIds(): Set<String> = dao.idsFor(UserMark.IDOL, UserMark.FAVORITE).toSet()
 
     /** メモがあるアイドルの ID セット。 */
-    suspend fun notedIdolIds(): Set<String> = dao.idsWithNote(UserMark.IDOL).toSet()
+    suspend fun notedIdolIds(): Set<String> = notedIds(UserMark.IDOL)
+
+    /** メモがあるエンティティの ID セット (「メモあり」の印と絞り込み)。 */
+    suspend fun notedIds(type: String): Set<String> =
+        meaningful(dao.marksOf(type, UserMark.MEMO)).mapTo(mutableSetOf()) { it.entityId }
 
     /**
      * 回収に配信参加も含めるか (既定 = 現地参加のみ)。地方勢など配信中心の人向けの設定。
