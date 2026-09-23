@@ -66,20 +66,27 @@ class AuthService(
      * セッション JWT などを置く暗号化 prefs (`imas_auth_secure`、バックアップ対象外)。
      *
      * キーストアの鍵と合わなくなった端末 (復元・鍵の破損) では開けずに例外になる。
+     * ただしキーストアの一時的な失敗もあるので、まず消さずに 1 回だけ開き直す
+     * (いきなり消すと、一時的な失敗でサインアウトしてしまう)。それでも開けなければ、
      * 壊れた保存先は読めないので消して開き直し、未サインインとして続ける
      * (null のまま動くと、サインインしても保存先が無く、起動のたびにサインインし直しになる)。
-     * 開き直しても開けなければ null にして、未サインインのまま動かす (起動では落とさない)。
+     * 消しても開けなければ null にして、未サインインのまま動かす (起動では落とさない)。
      */
     private val prefs: SharedPreferences? = try {
         openSecurePrefs(appContext)
     } catch (e: Exception) {
-        Log.e(TAG, "認証情報の保存先を開けない → 消して開き直す", e)
-        resetSecurePrefs(appContext)
+        Log.w(TAG, "認証情報の保存先を開けない → 消さずに開き直す", e)
         try {
             openSecurePrefs(appContext)
         } catch (e: Exception) {
-            Log.e(TAG, "開き直しても開けない → 未サインインとして続ける", e)
-            null
+            Log.e(TAG, "開き直しても開けない → 消して開き直す", e)
+            resetSecurePrefs(appContext)
+            try {
+                openSecurePrefs(appContext)
+            } catch (e: Exception) {
+                Log.e(TAG, "消しても開けない → 未サインインとして続ける", e)
+                null
+            }
         }
     }
 

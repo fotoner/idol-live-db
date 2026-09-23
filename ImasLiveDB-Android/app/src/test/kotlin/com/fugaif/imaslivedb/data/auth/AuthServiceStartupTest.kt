@@ -54,10 +54,31 @@ class AuthServiceStartupTest {
             prefs
         })
 
-        assertEquals(2, attempts)
+        // 1 回目 → 開き直し (消さない) → 消して開き直す、の 3 回。
+        assertEquals(3, attempts)
         assertEquals(AuthState(), auth.state.value)
         assertNull(auth.sessionToken)
         assertFalse(context.getSharedPreferences(SECURE_PREFS, Context.MODE_PRIVATE).contains("session_token"))
+    }
+
+    /**
+     * キーストアの一時的な失敗 (1 回目だけ開けない) では、保存先を消さずに開き直し、
+     * サインインしたままでいる (RedTeam A-L3)。
+     */
+    @Test
+    fun aTransientFailureDoesNotSignOut() {
+        val context: Context = RuntimeEnvironment.getApplication()
+        context.getSharedPreferences(SECURE_PREFS, Context.MODE_PRIVATE).edit()
+            .putString("session_token", "jwt").commit()
+        var attempts = 0
+        val auth = AuthService(context, openSecurePrefs = { ctx ->
+            attempts++
+            check(attempts > 1) { "キーストアが一時的に使えない" }
+            ctx.getSharedPreferences(SECURE_PREFS, Context.MODE_PRIVATE)
+        })
+
+        assertEquals("jwt", auth.sessionToken)
+        assertTrue(auth.state.value.isSignedIn)
     }
 
     private companion object {
