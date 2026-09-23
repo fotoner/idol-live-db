@@ -1,7 +1,9 @@
 package com.fugaif.imaslivedb.data.auth
 
+import android.content.Context
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -30,5 +32,35 @@ class AuthServiceStartupTest {
         auth.markBannedFromServer()
         auth.signOut()
         assertTrue(!auth.state.value.isSignedIn)
+    }
+
+    /**
+     * 保存先が壊れていて開けないときは、壊れた保存先を消して開き直す。開き直せたら
+     * 未サインインとして動き、次のサインインをそこに保存できる (null のまま動くと、
+     * サインインしても保存先が無く、起動のたびにサインインし直しになる)。
+     */
+    @Test
+    fun brokenSecurePrefsAreDeletedAndReopened() {
+        val context: Context = RuntimeEnvironment.getApplication()
+        // 前回までの (もう読めない) 保存先が残っている。
+        val leftover = context.getSharedPreferences(SECURE_PREFS, Context.MODE_PRIVATE)
+        leftover.edit().putString("session_token", "garbage").commit()
+        var attempts = 0
+        val auth = AuthService(context, openSecurePrefs = { ctx ->
+            attempts++
+            val prefs = ctx.getSharedPreferences(SECURE_PREFS, Context.MODE_PRIVATE)
+            // 読めないものが残っている間は開けない (キーストアの鍵と合わない、の代わり)。
+            check(!prefs.contains("session_token")) { "AEADBadTagException の代わり" }
+            prefs
+        })
+
+        assertEquals(2, attempts)
+        assertEquals(AuthState(), auth.state.value)
+        assertNull(auth.sessionToken)
+        assertFalse(context.getSharedPreferences(SECURE_PREFS, Context.MODE_PRIVATE).contains("session_token"))
+    }
+
+    private companion object {
+        const val SECURE_PREFS = "imas_auth_secure"
     }
 }

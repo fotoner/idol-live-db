@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import java.security.KeyStore
 
 data class AuthState(
     val isSignedIn: Boolean = false,
@@ -39,7 +40,12 @@ data class AuthState(
  * iOS の AuthService (Sign in with Apple) の Android 版。
  * サーバ側の投票等の認証必須エンドポイントは、iOS/Android どちらでも同じセッションJWT形式を検証する。
  */
-class AuthService(private val appContext: Context, transport: WorkerTransport = UrlConnectionTransport) {
+class AuthService(
+    private val appContext: Context,
+    transport: WorkerTransport = UrlConnectionTransport,
+    /** 暗号化 prefs を開く。テストは失敗や成功を差し替える。 */
+    openSecurePrefs: (Context) -> SharedPreferences = ::openEncryptedPrefs
+) {
 
     private val http = WorkerHttpClient(appContext, { sessionToken }, transport)
 
@@ -52,21 +58,22 @@ class AuthService(private val appContext: Context, transport: WorkerTransport = 
     /**
      * セッション JWT などを置く暗号化 prefs (`imas_auth_secure`、バックアップ対象外)。
      *
-     * キーストアが壊れた端末では開けずに例外になる。ここで投げると、起動時の refreshMe や
-     * 設定画面が AuthService に触れた瞬間にアプリが落ちる (起動のたびに落ち続ける) ので、
-     * 開けなければ null にして「未サインイン」として動かす。
+     * キーストアの鍵と合わなくなった端末 (復元・鍵の破損) では開けずに例外になる。
+     * 壊れた保存先は読めないので消して開き直し、未サインインとして続ける
+     * (null のまま動くと、サインインしても保存先が無く、起動のたびにサインインし直しになる)。
+     * 開き直しても開けなければ null にして、未サインインのまま動かす (起動では落とさない)。
      */
     private val prefs: SharedPreferences? = try {
-        EncryptedSharedPreferences.create(
-            appContext,
-            PREFS_NAME,
-            MasterKey.Builder(appContext).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build(),
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+        openSecurePrefs(appContext)
     } catch (e: Exception) {
-        Log.e(TAG, "認証情報の保存先を開けない → 未サインインとして続ける", e)
-        null
+        Log.e(TAG, "認証情報の保存先を開けない → 消して開き直す", e)
+        resetSecurePrefs(appContext)
+        try {
+            openSecurePrefs(appContext)
+        } catch (e: Exception) {
+            Log.e(TAG, "開き直しても開けない → 未サインインとして続ける", e)
+            null
+        }
     }
 
     val sessionToken: String? get() = prefs?.getString(KEY_SESSION_TOKEN, null)
@@ -260,6 +267,28 @@ class AuthService(private val appContext: Context, transport: WorkerTransport = 
     companion object {
         private const val TAG = "AuthService"
         private const val PREFS_NAME = "imas_auth_secure"
+
+        private fun openEncryptedPrefs(context: Context): SharedPreferences =
+            EncryptedSharedPreferences.create(
+                context,
+                PREFS_NAME,
+                MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build(),
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+
+        /**
+         * 読めなくなった保存先を消す。prefs のファイルと、それを暗号化していた鍵
+         * (AndroidKeyStore の MasterKey。この鍵を使うのは認証の保存先だけ) の両方。
+         * 鍵が無い・キーストアが使えない環境では、鍵の削除は黙って飛ばす。
+         */
+        private fun resetSecurePrefs(context: Context) {
+            context.deleteSharedPreferences(PREFS_NAME)
+            runCatching {
+                KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+                    .deleteEntry(MasterKey.DEFAULT_MASTER_KEY_ALIAS)
+            }
+        }
 
         /** 前面に出たときの /auth/me の問い合わせ間隔。BAN は編集 API の 403 でもその場で反映される。 */
         private const val ME_REFRESH_INTERVAL_MS = 6 * 60 * 60 * 1000L
