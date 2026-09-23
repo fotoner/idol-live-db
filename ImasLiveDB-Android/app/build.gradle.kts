@@ -92,6 +92,13 @@ android {
         getByName("main") {
             assets.srcDirs("src/main/assets")
         }
+        // Room の確定スキーマ (app/schemas) を JVM ユニットテストから読める assets に載せる。
+        // MigrationTestHelper は assets の `<DB クラス名>/<版>.json` から旧版の DB を組み立てる。
+        // test ソースセットの assets は AGP がユニットテストに渡さない (Robolectric が見るのは
+        // debug の merged assets だけ) ので、debug に足す。release の APK には入らない。
+        getByName("debug") {
+            assets.srcDirs("$projectDir/schemas")
+        }
     }
 
     packaging {
@@ -200,6 +207,8 @@ dependencies {
     testImplementation(libs.junit)
     // Room DAO (SongDao 等) を Android 実機/エミュ無しで JVM ユニットテストから叩くため。
     testImplementation(libs.robolectric)
+    // Room の移行を旧版のスキーマ JSON から組み立てて検証する (MigrationTestHelper)。
+    testImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

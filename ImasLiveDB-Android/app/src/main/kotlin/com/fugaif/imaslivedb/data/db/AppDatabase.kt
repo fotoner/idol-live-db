@@ -141,17 +141,25 @@ abstract class AppDatabase : RoomDatabase() {
             //   b) コアが「呼び手が持たない表だけ作る」適用モードを持つ
             // なお idol_voice_actors / song_units は Room が知らない表なので照合対象外であり、
             // コア適用の実利はいまのところこの 2 表だけ (どちらも Android では空のまま)。
-            return Room.databaseBuilder(
-                context.applicationContext,
-                AppDatabase::class.java,
-                "master.sqlite"
-            )
+            return configure(
+                Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "master.sqlite"
+                )
+            ).build()
+        }
+
+        /**
+         * 本番と同じ移行とコールバックを付ける。テストはこれを通してメモリ上の DB を
+         * 本番と同じ条件で作る (付け忘れた設定のせいでテストだけ通る、を防ぐ)。
+         */
+        internal fun configure(builder: RoomDatabase.Builder<AppDatabase>): RoomDatabase.Builder<AppDatabase> =
+            builder
                 // スキーマ変更時は破壊的再構築せず Room Migration を書く (iOS の DatabaseMigrations と対)。
                 // UserMark 等のローカル唯一データを保全するため (.fallbackToDestructiveMigration は使わない)。
-                .addMigrations(MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18)
+                .addMigrations(*ALL_MIGRATIONS)
                 .addCallback(seedCallback)
-                .build()
-        }
 
         // ---- seed helpers -------------------------------------------------------
 
@@ -479,5 +487,12 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("CREATE INDEX IF NOT EXISTS idx_show_tickets_show ON show_tickets(show_id)")
             }
         }
+
+        /** 登録する移行の全部 (古い順)。本番の builder と移行テストが同じ並びを使う。 */
+        val ALL_MIGRATIONS: Array<Migration> = arrayOf(
+            MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
+            MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14,
+            MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18
+        )
     }
 }
