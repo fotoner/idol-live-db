@@ -100,7 +100,7 @@ web_dto! {
         /// 歌唱メンバー。`display_name` は**コアが現任 CV で解決済み**。
         pub performers: Vec<PerformerRef>,
         /// 公演の出演者全員で歌う行なら `全員`。
-        /// 判定 (出演者 2 人以上・歌唱者と完全一致) は `domain::setlist_lineup::is_full_cast`。
+        /// 判定 (出演者 2 人以上・歌唱者と完全一致) は `domain::setlist_lineup::row_lineup` が持つ。
         /// 名前を全部並べる代わりにこの札を出し、名前は畳んでおく。
         pub full_cast_label: Option<String>,
         /// 原唱者 (オリメン) との関係。判定できない行・当たり前の行 (ソロ曲を本人が歌う) ・
