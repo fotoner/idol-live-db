@@ -7,6 +7,7 @@ data/ は読むだけで、書き換えない。外部への通信もしない�
 """
 
 import hashlib
+import json
 import os
 import shutil
 import socket
@@ -64,7 +65,6 @@ def schema_only(path):
 
 
 def write_json(path, obj):
-    import json
     os.makedirs(os.path.dirname(str(path)), exist_ok=True)
     with open(str(path), "w", encoding="utf-8") as f:
         json.dump(obj, f, ensure_ascii=False)

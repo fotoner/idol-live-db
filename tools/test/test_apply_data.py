@@ -3,6 +3,8 @@
     python3 -m unittest discover -s tools/test -p 'test_*.py'
 """
 
+import contextlib
+import io
 import sqlite3
 import subprocess
 import sys
@@ -67,7 +69,8 @@ class ApplyCostumesTest(unittest.TestCase):
 
     def test_costumes_are_applied(self):
         conn = self.connect()
-        affected = apply_data.apply_all(conn)
+        with contextlib.redirect_stdout(io.StringIO()):
+            affected = apply_data.apply_all(conn)
         wears = conn.execute(
             "SELECT setlist_item_id, idol_id, sort_order FROM costume_wears"
             " WHERE costume_id = 'cos_t' ORDER BY sort_order").fetchall()
