@@ -10,6 +10,7 @@
 //! メタ情報も、ケースごとの FFI 呼び出しループにならないよう [`sort_order_table`] で
 //! 一括して返す。
 
+use crate::domain::text_search_index::FoldedNeedle;
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 
@@ -255,8 +256,7 @@ pub fn filter_idol_list(entries: &[IdolListEntry], criteria: &IdolListFilterCrit
     let notes: HashSet<&str> = criteria.note_ids.iter().map(String::as_str).collect();
     // 検索語は 1 回だけ小文字化して全行で使い回す (行ごとに畳み込まない)。
     // iOS 原本は query を trim しない (空白込みで一致を見る) のでここでも trim しない。
-    let query_lower =
-        (!criteria.search_text.is_empty()).then(|| criteria.search_text.to_lowercase());
+    let needle = (!criteria.search_text.is_empty()).then(|| FoldedNeedle::new(&criteria.search_text));
 
     entries
         .iter()
@@ -272,9 +272,7 @@ pub fn filter_idol_list(entries: &[IdolListEntry], criteria: &IdolListFilterCrit
                 && (!criteria.require_favorite || favorites.contains(id))
                 && (!criteria.require_note || notes.contains(id))
                 && criteria.birth_month.is_none_or(|m| birthday_in_month(e, m))
-                && query_lower
-                    .as_deref()
-                    .is_none_or(|q| matches_search(e, &criteria.cast_names, q))
+                && needle.as_ref().is_none_or(|q| matches_search(e, &criteria.cast_names, q))
         })
         .map(|(i, _)| i as u32)
         .collect()
@@ -286,22 +284,16 @@ fn birthday_in_month(entry: &IdolListEntry, month: u32) -> bool {
     entry.birthday.as_deref().is_some_and(|b| b.starts_with(&format!("--{month:02}-")))
 }
 
-/// 検索語 (小文字化済み) が名前/かな/キャスト名/別名/愛称のどれかに部分一致するか。
+/// 検索語が名前/かな/キャスト名/別名/愛称のどれかに部分一致するか。
 ///
-/// iOS 原本の `localizedCaseInsensitiveContains` に相当する大文字小文字無視の部分一致。
-/// こちらは Unicode 標準の小文字化 + 部分一致で、ロケール固有の照合規則
-/// (合成済み/結合文字の正準等価など) は見ない。DB もキーボード入力も NFC の
-/// 日本語/ASCII なので実用上の差は出ない。
-fn matches_search(entry: &IdolListEntry, cast_names: &HashMap<String, String>, query_lower: &str) -> bool {
-    contains_ci(&entry.name, query_lower)
-        || entry.name_kana.as_deref().is_some_and(|s| contains_ci(s, query_lower))
-        || cast_names.get(&entry.idol_id).is_some_and(|s| contains_ci(s, query_lower))
-        || alias_list(entry.aliases.as_deref()).any(|alias| contains_ci(alias, query_lower))
-        || entry.nickname.as_deref().is_some_and(|s| contains_ci(s, query_lower))
-}
-
-fn contains_ci(haystack: &str, needle_lower: &str) -> bool {
-    haystack.to_lowercase().contains(needle_lower)
+/// 当たり方は横断検索・一覧の索引と同じ `FoldedNeedle` (大文字小文字と ひらがな↔カタカナを
+/// 畳む。Q-06)。以前の `str::to_lowercase` の部分一致の上位集合なので、当たる件数は増えうる。
+fn matches_search(entry: &IdolListEntry, cast_names: &HashMap<String, String>, needle: &FoldedNeedle) -> bool {
+    needle.matches(&entry.name)
+        || needle.matches_opt(entry.name_kana.as_deref())
+        || needle.matches_opt(cast_names.get(&entry.idol_id).map(String::as_str))
+        || alias_list(entry.aliases.as_deref()).any(|alias| needle.matches(alias))
+        || needle.matches_opt(entry.nickname.as_deref())
 }
 
 /// 別名カンマ区切りの分割規則 (iOS `Idol.aliasList` と同一): 前後空白 trim・空要素除外。
@@ -457,6 +449,25 @@ mod tests {
             birthday: None,
             debut_date: None,
         }
+    }
+
+    /// 検索は横断検索と同じ畳み込み (Q-06): 以前の小文字化の部分一致で当たるものは今も
+    /// 当たり (上位集合)、加えて ひらがな↔カタカナの表記違いでも当たる。
+    #[test]
+    fn search_folds_kana_like_the_global_search() {
+        let mut haruka = entry("天海春香");
+        haruka.name_kana = Some("あまみはるか".into());
+        let mut miki = entry("Miki");
+        miki.nickname = Some("ミキミキ".into());
+        let entries = [haruka, miki];
+        let hits = |q: &str| {
+            let criteria = IdolListFilterCriteria { search_text: q.into(), ..Default::default() };
+            filter_idol_list(&entries, &criteria)
+        };
+        assert_eq!(hits("はるか"), vec![0], "以前から当たる語");
+        assert_eq!(hits("MIKI"), vec![1], "以前から当たる語 (大文字小文字)");
+        assert_eq!(hits("ハルカ"), vec![0], "カタカナでも、ひらがなの読みに当たる");
+        assert_eq!(hits("みきみき"), vec![1], "ひらがなでも、カタカナの愛称に当たる");
     }
 
     fn vec_of(ids: &[&str]) -> Vec<String> {

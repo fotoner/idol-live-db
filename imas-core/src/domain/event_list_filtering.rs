@@ -14,7 +14,7 @@
 
 use std::collections::HashSet;
 
-use unicode_normalization::UnicodeNormalization;
+use crate::domain::text_search_index::FoldedNeedle;
 
 /// イベント 1 件ぶんの、絞り込み判定に必要なフィールドだけの射影。
 #[derive(uniffi::Record, Clone, Debug)]
@@ -93,7 +93,7 @@ pub fn filter_event_indices(items: &[EventFilterItem], c: &EventFilterCriteria) 
     let favorites: HashSet<&str> = c.favorite_ids.iter().map(String::as_str).collect();
     let notes: HashSet<&str> = c.note_ids.iter().map(String::as_str).collect();
     let venue_ids: HashSet<&str> = c.venue_event_ids.iter().map(String::as_str).collect();
-    let search_needle = search_key(&c.search_text);
+    let search_needle = FoldedNeedle::new(&c.search_text);
 
     items
         .iter()
@@ -106,7 +106,7 @@ pub fn filter_event_indices(items: &[EventFilterItem], c: &EventFilterCriteria) 
             if !excluded.is_empty() && excluded.contains(normalize_kind(&item.kind)) {
                 return false;
             }
-            if !search_needle.is_empty() && !search_key(&item.name).contains(&search_needle) {
+            if !search_needle.is_empty() && !search_needle.matches(&item.name) {
                 return false;
             }
             match c.attendance_filter.as_str() {
@@ -132,19 +132,6 @@ pub fn filter_event_indices(items: &[EventFilterItem], c: &EventFilterCriteria) 
         })
         .map(|(i, _)| i as u32)
         .collect()
-}
-
-/// Swift `String` の照合 (正準等価 + 大文字小文字無視) に合わせた検索キーを作る。
-///
-/// Rust の `str::contains` はバイト列一致なので、素の `to_lowercase().contains` では
-/// 正準等価な表現差 (例: NFC "パ" U+30D1 と NFD "ハ"+U+309A) を別物と見てしまい、
-/// macOS の Finder 等からコピペした NFD の検索語が NFC 格納の DB イベント名に
-/// ヒットしなくなる。原本 (Swift の `lowercased().contains`) は正準等価を同一視する。
-/// 両辺を NFC へ正規化してから Unicode 小文字化することで、正準等価な入力同士は
-/// 同一のバイト列に落ち、`str::contains` でも原本と同じ照合になる。
-/// (逆に "e" が "é" にヒットしない、という Swift 側の非マッチも NFC 合成で保たれる)
-fn search_key(s: &str) -> String {
-    s.nfc().collect::<String>().to_lowercase()
 }
 
 /// primary brand_id または joint_brand_ids のいずれかが selected に含まれるか。
