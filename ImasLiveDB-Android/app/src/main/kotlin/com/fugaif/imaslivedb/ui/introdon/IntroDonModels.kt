@@ -3,6 +3,7 @@ package com.fugaif.imaslivedb.ui.introdon
 import com.fugaif.imaslivedb.data.model.Song
 import kotlin.random.Random
 import uniffi.imas_core.IntroQuizSongRef
+import uniffi.imas_core.IntroSessionKind
 import uniffi.imas_core.introQuizChoicesBatch
 
 /**
@@ -18,6 +19,14 @@ enum class IntroDonMode(val label: String, val icon: String) {
 
 /** 高速形式 (押すまで流す・選択肢常時・即次へ)。Rush と 全曲チャレンジ。 */
 val IntroDonMode.isFast: Boolean get() = this == IntroDonMode.RUSH || this == IntroDonMode.ALL_SONGS
+
+/** 1 ゲームの規則 (問題数など) をコアに問うときの種類。 */
+val IntroDonMode.sessionKind: IntroSessionKind
+    get() = when (this) {
+        IntroDonMode.RUSH -> IntroSessionKind.RUSH
+        IntroDonMode.ALL_SONGS -> IntroSessionKind.ALL_SONGS
+        IntroDonMode.NORMAL, IntroDonMode.PARTY -> IntroSessionKind.STANDARD
+    }
 
 data class IntroDonSettings(
     val mode: IntroDonMode = IntroDonMode.NORMAL,

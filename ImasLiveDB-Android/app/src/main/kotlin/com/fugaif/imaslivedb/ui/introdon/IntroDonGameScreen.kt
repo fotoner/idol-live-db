@@ -76,6 +76,9 @@ import kotlinx.coroutines.withTimeoutOrNull
 import uniffi.imas_core.IntroDonShareInput
 import uniffi.imas_core.IntroDonShareMode
 import uniffi.imas_core.shareIntroDonText
+import uniffi.imas_core.IntroScore
+import uniffi.imas_core.introQuestionCount
+import uniffi.imas_core.introScoreAfterAnswer
 
 // =============================================================================
 // イントロドン本編 (ノーマル/ラッシュ/全曲チャレンジ)。iOS IntroGameView + IntroGameSession
@@ -107,6 +110,10 @@ data class IntroDonGameUiState(
     val totalCount: Int get() = questions.size
 }
 
+/** コアに渡す今の点とコンボ。 */
+private val IntroDonGameUiState.introScore: IntroScore
+    get() = IntroScore(score.toUInt(), combo.toUInt(), bestCombo.toUInt())
+
 class IntroDonGameViewModel(app: Application, private val settings: IntroDonSettings) : AndroidViewModel(app) {
     private val songRepository = AppModule.from(app).songRepository
     private val progressStore = AppModule.from(app).gameProgressStore
@@ -134,15 +141,16 @@ class IntroDonGameViewModel(app: Application, private val settings: IntroDonSett
         viewModelScope.launch {
             _uiState.value = IntroDonGameUiState(phase = IntroDonPhase.LOADING)
             val pool = songRepository.fetchIntroDonSongs(settings.selectedBrandIds)
-            if (pool.size < 4) {
+            // 始められるか (4 曲の門) と何問出すかはコア。
+            val count = introQuestionCount(settings.mode.sessionKind, pool.size.toUInt(), settings.questionCount.toUInt())
+            if (count == null) {
                 _uiState.value = _uiState.value.copy(
                     phase = IntroDonPhase.LOADING,
                     errorMessage = "対象の曲が見つかりませんでした。ブランドを増やしてお試しください。"
                 )
                 return@launch
             }
-            val count = if (isFast) pool.size else settings.questionCount
-            val questions = buildIntroDonQuestions(pool, count)
+            val questions = buildIntroDonQuestions(pool, count.toInt())
             _uiState.value = IntroDonGameUiState(
                 phase = IntroDonPhase.PLAYING,
                 questions = questions,
@@ -238,12 +246,12 @@ class IntroDonGameViewModel(app: Application, private val settings: IntroDonSett
         if (s.phase != IntroDonPhase.PLAYING && s.phase != IntroDonPhase.ANSWERING) return
         stopPlayback()
         val correct = title == q.title
-        val newCombo = if (correct) s.combo + 1 else 0
+        // 点とコンボの数え方はコア。
+        val next = introScoreAfterAnswer(s.introScore, correct)
         val records = s.records + IntroDonAnswerRecord(q.id, q.title, title, correct)
         val updated = s.copy(
             selectedTitle = title, isCorrect = correct,
-            score = s.score + if (correct) 1 else 0,
-            combo = newCombo, bestCombo = maxOf(s.bestCombo, newCombo),
+            score = next.score.toInt(), combo = next.combo.toInt(), bestCombo = next.bestCombo.toInt(),
             records = records, flashTick = s.flashTick + 1, flashCorrect = correct
         )
         _uiState.value = updated
@@ -255,7 +263,12 @@ class IntroDonGameViewModel(app: Application, private val settings: IntroDonSett
         val q = s.currentQuestion ?: return
         stopPlayback()
         val records = s.records + IntroDonAnswerRecord(q.id, q.title, null, false)
-        _uiState.value = s.copy(selectedTitle = null, isCorrect = false, combo = 0, records = records)
+        val next = introScoreAfterAnswer(s.introScore, false)
+        _uiState.value = s.copy(
+            selectedTitle = null, isCorrect = false,
+            score = next.score.toInt(), combo = next.combo.toInt(), bestCombo = next.bestCombo.toInt(),
+            records = records
+        )
         if (isFast) advanceFast() else _uiState.value = _uiState.value.copy(phase = IntroDonPhase.REVEALED)
     }
 

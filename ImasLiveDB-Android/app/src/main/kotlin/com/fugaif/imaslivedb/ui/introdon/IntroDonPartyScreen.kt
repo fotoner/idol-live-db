@@ -62,6 +62,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import uniffi.imas_core.IntroSessionKind
+import uniffi.imas_core.introQuestionCount
 
 // =============================================================================
 // パーティ対戦 (1台2人・分割画面・早押し)。iOS IntroPartySession + IntroPartyGameView の移植。
@@ -112,11 +114,13 @@ class IntroDonPartyViewModel(app: Application, private val settings: IntroDonSet
         viewModelScope.launch {
             _uiState.value = IntroDonPartyUiState(phase = PartyPhase.LOADING)
             val pool = songRepository.fetchIntroDonSongs(settings.selectedBrandIds)
-            if (pool.size < 4) {
+            // 始められるか (4 曲の門) と何問出すかはコア。
+            val count = introQuestionCount(IntroSessionKind.STANDARD, pool.size.toUInt(), settings.questionCount.toUInt())
+            if (count == null) {
                 _uiState.value = _uiState.value.copy(errorMessage = "対象の曲が見つかりませんでした。ブランドを増やしてお試しください。")
                 return@launch
             }
-            val questions = buildIntroDonQuestions(pool, settings.questionCount)
+            val questions = buildIntroDonQuestions(pool, count.toInt())
             _uiState.value = IntroDonPartyUiState(phase = PartyPhase.PLAYING, questions = questions)
             playCurrentQuestion()
         }
