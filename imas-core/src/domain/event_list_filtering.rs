@@ -151,19 +151,11 @@ fn matches_brand_filter(item: &EventFilterItem, selected: &HashSet<&str>) -> boo
         .any(|s| selected.contains(s))
 }
 
-/// kind の生文字列を既知 5 種へ正規化する。未知値は "live" 扱い。
-/// (iOS `Event.eventKind` の `EventKind(rawValue:) ?? .live` を引き継ぐ:
-///  将来 DB に新しい kind が入っても旧クライアントで「消える」のではなく
-///  ライブとして見え続ける、というフォールバック方針)
+/// kind の生文字列を語彙の値へ寄せる。**知らない値は `other` (その他)** (Q-08l)。
+/// 以前は `live` 扱いで、「ライブを除外」すると知らない種別も一緒に消えていた。
+/// 寄せ方は語彙 ([`crate::domain::vocabulary::event_kind`]) が正本。
 fn normalize_kind(raw: &str) -> &'static str {
-    match raw {
-        "live" => "live",
-        "festival" => "festival",
-        "release_event" => "release_event",
-        "radio" => "radio",
-        "stream" => "stream",
-        _ => "live",
-    }
+    crate::domain::vocabulary::event_kind(raw).value
 }
 
 #[cfg(test)]
@@ -319,10 +311,10 @@ mod tests {
         assert_eq!(filtered_ids(&items, &c), vs(&["a"]));
     }
 
-    /// 未知の kind は "live" として扱う (iOS `eventKind` の `?? .live` フォールバック):
-    /// "live" を除外すると未知 kind も一緒に落ちる。
+    /// 未知の kind は `other` (その他) として扱う (Q-08l): 「ライブを除外」しても消えず、
+    /// 「その他を除外」で落ちる。
     #[test]
-    fn unknown_kind_falls_back_to_live() {
+    fn unknown_kind_is_other() {
         let mut unknown = item("a");
         unknown.kind = "hologram_live".to_string();
         let mut festival = item("b");
@@ -330,6 +322,8 @@ mod tests {
         let items = [unknown, festival];
         let mut c = criteria();
         c.excluded_kinds = vs(&["live"]);
+        assert_eq!(filtered_ids(&items, &c), vs(&["a", "b"]));
+        c.excluded_kinds = vs(&["other"]);
         assert_eq!(filtered_ids(&items, &c), vs(&["b"]));
     }
 
