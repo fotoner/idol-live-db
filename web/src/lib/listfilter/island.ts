@@ -25,6 +25,7 @@
 import type { Query } from "../query/imas_query_wasm";
 import type { FacetOption } from "../schema/FacetOption";
 import type { SortOption } from "../schema/SortOption";
+import { hasIslandQuery } from "./start";
 
 /** 入力欄 1 つ。**この 1 行が軸のすべて**を決める。 */
 export interface FieldSpec {
@@ -160,7 +161,9 @@ export function mountListFilter<F extends ListFacets>(
   });
   bindSortHeaders();
   // 共有された絞り込み・戻る/進む で来たときは、すぐ起動して URL の条件を復元する。
-  if (location.search) void start();
+  // 島が読む軸・並べ替えが URL に無ければ (utm などだけなら) 起動しない。
+  const urlHasQuery = (): boolean => hasIslandQuery(location.search, baseQuery, fixedAxes);
+  if (urlHasQuery()) void start();
 
   /** 島を起動する (何度呼んでも 1 回だけ)。生テーブルと wasm はここで初めて取りに行く。 */
   function start(): Promise<boolean> {
@@ -221,7 +224,7 @@ export function mountListFilter<F extends ListFacets>(
   });
   window.addEventListener("popstate", () => {
     if (!engine) {
-      if (location.search) void start();
+      if (urlHasQuery()) void start();
       return;
     }
     state = readUrl(fields, defaultSort);
