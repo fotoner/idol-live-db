@@ -49,6 +49,14 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "CLOUDKIT_API_TOKEN", "\"$cloudKitApiToken\"")
+
+        // 共有コア (libimas_core.so) は arm64-v8a と x86_64 (エミュ) の 2 つだけビルドする
+        // (imas-core/build.sh)。32bit 端末にも配ると、初回起動でコアを読み込めずに落ちる
+        // (UnsatisfiedLinkError は Error なので catch (e: Exception) では捕まらない)。
+        // 配布対象を 64bit に絞る。JNA などが同梱する 32bit・mips の .so も入らなくなる。
+        ndk {
+            abiFilters += listOf("arm64-v8a", "x86_64")
+        }
     }
 
     signingConfigs {
