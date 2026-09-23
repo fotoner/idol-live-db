@@ -63,7 +63,7 @@ CLOUDKIT_KEY_ID=$KID python3 tools/seed_cloudkit.py --production --tables shows 
 `--replace` は `--ids/--ids-file` が必須で、`tools/cloudkit_schema.ckdb` と突き合わせて
 「CloudKit だけが持つ列」があるテーブルでは止まる (forceReplace は送らなかった列を消すため)。
 `--ids` の絞り込み列はテーブルごとに違う (`shows` は **event_id**、`setlist_items` は id、
-`song_artists` は song_id)。まとめて直した例: `tools/pending_push_20260906/README.md`。
+`song_artists` は song_id)。
 
 **複合主キーの列を書き換える修正も、push だけでは伝わらない。** `song_artists` は
 (song_id, idol_id, role) が主キーで、CloudKit の recordName にそのまま入る。role を
@@ -101,6 +101,15 @@ Production に列が無いうちに push すると弾かれる。
 
 スキーマを変えた時 (列追加等) は、ローカル master.sqlite から `sqlite3 ... .dump > db/master.sql` で
 dump を作り直してコミットする (cron はデータのみ更新し、スキーマは db/master.sql 由来のため)。
+
+⚠️ **この手順は、手元の `master.sqlite` と `db/master.sql` が乖離していない (=同じデータを指している)
+ときだけ安全。** 2 つは別々に更新されうる (`master.sqlite` は各自 `tools/build_db.sh` で生成、
+`db/master.sql` は日次 cron で CloudKit から取り直し) ため、**双方向に乖離することがある**。
+乖離した状態で `.dump` すると、`db/master.sql` 側にしか無い最新データが `master.sqlite` の
+古い内容で上書きされて消える。実行前に必ず `db/master.sql` から `master.sqlite` を作り直して
+(`bash tools/build_db.sh`) 揃えること。**`tools/build_db.sh` 自体は `db/master.sql` の FK 違反を
+検知すると生成した DB ごと消す**ので、`db/master.sql` に既知の FK 違反 (Q-02 の 9 公演等) が
+残っている間は、この手順を安易に実行しない。
 
 ## events の種別 (`event_type`)
 
@@ -266,22 +275,28 @@ SHINY COLORS MUSIC DAWN 等) が含まれる。**ここに 1 を入れてから�
 
 3 を飛ばして 4 をやると、`kind` を読む旧バージョンのアプリで一覧が空になる。
 
-### `meta.data_version` (これが落ちるとユーザーに届かない)
+### `meta.data_version` / `meta.content_hash` (これが落ちるとユーザーに届かない)
 
-アプリの reseed は **bundle 側 `data_version` > 端末側** のときだけ走る
-(`AppDatabase.reseedMasterTablesIfNeeded`)。つまり:
+**reseed が要るかの判定は `content_hash` が主。`data_version` は同梱側に指紋 (`content_hash`) が
+無い古いビルドのための退避路でしかない** (`domain::sync_planning::reseed_needed`: bundle 側に
+`content_hash` があれば `local_hash != bundle_hash` で判定、無ければ `data_version` の大小で判定)。
+両 OS の reseed (`AppDatabase.reseedMasterTablesIfNeeded` (iOS) / 同等の Android 実装) はこの
+1 つの関数を FFI 越しに呼ぶ (P5-05 で対象表の allow-list 化とあわせて共通化した。「reseed で
+入れ直す表をコアの台帳から決める」節も参照)。`content_hash` は `tools/build_db.sh` が
+`db/master.sql` から決定的に計算して `meta` に書く。
 
-- **`meta` が消えた dump を配ると reseed が二度と発火しない。** bundle 側が `0` と読まれ、
-  既存ユーザーは無言で旧データのまま固定される。FK ゲートでは検知できない種類の事故。
-  `meta` は CloudKit 側に実体が無いので、`export_cloudkit.py` の `PRESERVED_TABLES` で
-  refresh 対象から外して既存 dump の値を引き継ぐ。
-- **データを入れても `data_version` を上げなければ既存ユーザーには届かない。**
-  cron は「マスタに実差分があった回だけ」+1 する (差分判定は `data_version` 行を除いて比較。
-  バンプ自体が差分になる循環を避けるため)。手で `--apply --push` した分も、翌日の cron が
-  差分を拾って上げるので通常は追加操作は不要。
+- **`meta` が消えた dump を配ると reseed が二度と発火しない。** bundle 側の `content_hash` /
+  `data_version` が両方とも読めなくなり、既存ユーザーは無言で旧データのまま固定される。
+  FK ゲートでは検知できない種類の事故。`meta` は CloudKit 側に実体が無いので、
+  `export_cloudkit.py` の `PRESERVED_TABLES` で refresh 対象から外して既存 dump の値を引き継ぐ。
+- **`data_version` は今もユーザー向けの「何世代目か」の表示・診断用の値として維持する。**
+  reseed の発火そのものは `content_hash` の一致・不一致で決まるため、データを入れて
+  `content_hash` が変われば `data_version` を上げ忘れても reseed は走る。ただし cron は
+  「マスタに実差分があった回だけ」`data_version` を +1 する運用を続けている
+  (差分判定は `data_version` 行を除いて比較。バンプ自体が差分になる循環を避けるため)。
 
-`tools/build_db.sh` は FK 整合性に加えて `data_version` の存在も検証し、欠けていれば
-master.sqlite の生成を失敗させる。
+`tools/build_db.sh` は FK 整合性に加えて `data_version` と `content_hash` の存在も検証し、
+どちらか欠けていれば master.sqlite の生成を失敗させる。
 
 ## コミュニティデータ (D1) のバックアップ / スナップショット
 
@@ -329,21 +344,31 @@ npx wrangler d1 execute imas-live-db --remote --file db_backups_local/d1_<日時
 
 ## 日次自動エクスポート (GitHub Actions)
 
-`.github/workflows/refresh-data.yml` が毎日 CloudKit → `db/master.sql` を出力し、変化があれば自動コミット。
+`.github/workflows/refresh-data.yml` が毎日 CloudKit → `db/master.sql` を出力する。**ジョブを 2 つに分けてある**:
+
+- **export**: CloudKit から取り出して `bot/data-refresh` に保存する。**検査に落ちるデータでも保存する**
+  (以前は検査に落ちると保存もしなかったので、git 上の写しが何日も古いまま止まり、何が壊れているかも
+  手元で見られなかった)。
+- **check**: export が取り出した `db/master.sql` で FK ゲート (`tools/build_db.sh`) を回す。落ちたら
+  ワークフローを赤くし、違反の一覧を job summary に出す。secret は使わない (鍵を使うのは export だけ)。
+
 main / develop はどちらも保護ブランチ (PR + オーナー承認必須) なので、bot は**専用ブランチ `bot/data-refresh`**
 に push する。**オーナーが `bot/data-refresh` → develop の PR でレビュー&マージ**して取り込む
-(データ更新もレビューを通る)。develop → main は通常のリリースマージ。
-鍵 (CloudKit S2S) を CI に置くので、**以下のセキュリティ設定が前提**。
+(データ更新もレビューを通る。PR では core-guard が同じゲートを回すので、壊れたデータは develop に入らない)。
+develop → main は通常のリリースマージ。鍵 (CloudKit S2S) を CI に置くので、**以下のセキュリティ設定が前提**。
 
 ### 必要な GitHub 設定 (一度だけ)
 
-1. **Environment "cloudkit" を作成し、secret を登録 + main 限定にする**
+1. **Environment "cloudkit" を作成し、secret を登録 + main と develop に絞る**
    ```bash
    gh secret set CLOUDKIT_KEY_ID --env cloudkit --body "<CloudKit Key ID>"
    gh secret set CLOUDKIT_PRIVATE_KEY --env cloudkit < tools/eckey.pem
    ```
-   GitHub UI → Settings → Environments → cloudkit → **Deployment branches: Selected → `main` のみ**。
-   schedule は既定ブランチ(main)で走るため鍵を取得でき、feature ブランチ / PR で走る他ワークフローからは取得できない。
+   GitHub UI → Settings → Environments → cloudkit → **Deployment branches: Selected → `main` と `develop`**。
+   schedule はリポジトリの既定ブランチ (`develop`) にあるこのワークフロー定義で起動するため、
+   develop を許可しているのが正しい設定 (「main 限定」ではない)。feature ブランチ / PR で走る
+   他のワークフローからは鍵を取得できない。`workflow_dispatch` も、鍵を使えるのは main / develop
+   から起動したときだけ。
 
 2. **main / develop の branch protection**: 両方とも PR 必須 + 承認必須 + **Code Owners レビュー必須**
    (`.github/CODEOWNERS` の `* @owner` で全 PR をオーナー承認必須に)。
@@ -359,6 +384,30 @@ main / develop はどちらも保護ブランチ (PR + オーナー承認必須)
 
 | 攻撃 | 結果 |
 |---|---|
-| コントリビューターが別ワークフローで鍵を抜く | ❌ environment が main 限定なので feature ブランチでは鍵が出ない |
-| ワークフロー/ツールを改ざんして鍵を抜く | ❌ CODEOWNERS + PR レビュー必須で main に入らない |
-| 日次エクスポート | ✅ main の schedule なので鍵を使え、無人で回る |
+| コントリビューターが別ワークフローで鍵を抜く | ❌ environment が main / develop に絞られているので feature ブランチでは鍵が出ない |
+| ワークフロー/ツールを改ざんして鍵を抜く | ❌ CODEOWNERS + PR レビュー必須で main / develop に入らない |
+| 日次エクスポート | ✅ develop の schedule なので鍵を使え、無人で回る |
+
+## CloudKit 削除の台帳とチェッカ
+
+CloudKit のレコード削除は取り返しがつかないため、**実装担当は削除を実行しない**。代わりに:
+
+- **`tools/pending_cloudkit_deletions_*.tsv`**: 削除待ちレコードの一覧 (recordType と recordName)。
+  作業のたびに新しい TSV を足す (例: `tools/pending_cloudkit_deletions_765as_roles_20260906.tsv`)。
+- **`tools/cloudkit_deletion_ledger.tsv`**: どの TSV がいつ消化された (実際に `--delete-file` で
+  CloudKit から消した) かを記録する台帳。TSV を作った時点では「未消化」、オーナーが
+  `seed_cloudkit.py --delete-file` で消した後に台帳へ記録する。
+- **`tools/check_pending_deletions.py`**: 読み取り専用で台帳を検算する。各 TSV のレコードを
+  CloudKit の `records/lookup` で引き、生きている / soft delete 済み / 消えている (`NOT_FOUND`) の
+  件数を数え、台帳の状態と比べる。**レコードは消さない。** 消すのはオーナーが行う
+  `seed_cloudkit.py --delete-file` のみ。終了コードは 台帳と一致 = 0、食い違い = 1、鍵が無い = 2。
+
+## `insert_future_events.py` の鍵 ID の渡し方
+
+```bash
+python3 tools/insert_future_events.py --production --key-id KEY_ID
+```
+
+**`--key-id=KEY_ID` の形 (`=` 区切り) か、環境変数 `CLOUDKIT_KEY_ID` のどちらかを使うこと。**
+`--key-id KEY_ID` のようにスペース区切りで渡すと push を**黙って**飛ばし、翌日の CloudKit
+ダンプで変更が消えて見える (エラーにならないので気付きにくい)。
