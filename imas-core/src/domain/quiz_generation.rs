@@ -890,6 +890,19 @@ pub struct QuizSessionResult {
     pub questions: u32,
     pub rate_percent: u32,
     pub grade: QuizGrade,
+    /// リザルトに添える一言 ([`quiz_result_comment`])。
+    pub comment: String,
+}
+
+/// リザルトに添える一言。正答率の閾値 (95 / 80 / 50) で決まる — グレード (S〜D) とは
+/// 別の刻みなので、グレードから導かない。
+pub fn quiz_result_comment(rate_percent: u32) -> &'static str {
+    match rate_percent {
+        95.. => "お見事！担当への愛が伝わる",
+        80..=94 => "高得点！プロデューサーの貫禄",
+        50..=79 => "いい線いってる！次はもっと高みへ",
+        _ => "これから一緒に覚えていこう",
+    }
 }
 
 /// 百分率 (四捨五入)。Swift `Double.rounded()` と同じ「0 から遠い側へ丸める」。
@@ -924,6 +937,7 @@ pub fn quiz_session_result(
         questions: tally.asked,
         rate_percent: rate,
         grade: QuizGrade::from_rate(rate),
+        comment: quiz_result_comment(rate).to_string(),
     }
 }
 
@@ -1771,6 +1785,21 @@ mod tests {
         let best_rate =
             update.record.best_rate_percent().map_or(session.rate_percent, |p| p.max(0) as u32);
         (update, best_rate)
+    }
+
+    /// リザルトの一言の閾値 (両 OS の QuizComponents から移した 95 / 80 / 50)。
+    #[test]
+    fn result_comment_thresholds() {
+        assert_eq!(quiz_result_comment(100), "お見事！担当への愛が伝わる");
+        assert_eq!(quiz_result_comment(95), "お見事！担当への愛が伝わる");
+        assert_eq!(quiz_result_comment(94), "高得点！プロデューサーの貫禄");
+        assert_eq!(quiz_result_comment(80), "高得点！プロデューサーの貫禄");
+        assert_eq!(quiz_result_comment(79), "いい線いってる！次はもっと高みへ");
+        assert_eq!(quiz_result_comment(50), "いい線いってる！次はもっと高みへ");
+        assert_eq!(quiz_result_comment(49), "これから一緒に覚えていこう");
+        assert_eq!(quiz_result_comment(0), "これから一緒に覚えていこう");
+        let tally = QuizTally { points: 9, correct: 9, asked: 10 };
+        assert_eq!(quiz_session_result(&tally, 1, 10).comment, quiz_result_comment(90));
     }
 
     #[test]
