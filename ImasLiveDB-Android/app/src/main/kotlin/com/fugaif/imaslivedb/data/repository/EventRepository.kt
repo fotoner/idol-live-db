@@ -19,6 +19,7 @@ import com.fugaif.imaslivedb.data.model.Venue
 import com.fugaif.imaslivedb.data.model.VenueHall
 import com.fugaif.imaslivedb.data.model.VenueName
 import com.fugaif.imaslivedb.data.model.ShowWithEventName
+import com.fugaif.imaslivedb.data.model.Vocab
 import uniffi.imas_core.PerformerNameMode
 import uniffi.imas_core.SetlistDisplayMode
 import uniffi.imas_core.SetlistRowMetaRecord
@@ -46,8 +47,7 @@ data class SetlistRowMetaResult(
  * ライブ (イベント/公演/セトリ/会場) の読み取り口。
  *
  * 読み取りは共有コア (imas-core) のインメモリスナップショットが答える (SQL の代わりの経路は
- * 持たない)。Room で読むのは、セトリ編集の差分の基準 ([fetchSetlist]) と、コアに同じ母集合の
- * API が無いライブ一覧の母集合 ([fetchEventsWithFirstDate]) だけ。
+ * 持たない)。Room で読むのは、セトリ編集の差分の基準 ([fetchSetlist]) だけ。
  * Event / Show / Venue はコアの射影と Room のエンティティが列 1:1 なので、
  * 曲やアイドルと違って実体をそのまま組み立てられる。
  */
@@ -60,26 +60,14 @@ class EventRepository(
         snapshots.query { store -> store.eventRecords(brandId).map { it.toEvent() } }
 
     /**
-     * ライブ一覧の母集合。kind を一切絞らない (live/festival だけでなく radio や
-     * release_event も並べる) のが Android の一覧仕様。
-     *
-     * コアの eventsWithFirstDate は kind をホワイトリストでしか受けられず、
-     * 「絞らない」を表現できない。全 kind を列挙して渡すと、将来 kind が増えたときに
-     * その分だけ一覧から静かに消えるので、母集合は SQL 経路のまま残す。
-     *
-     * ただし母集合の SQL (EventDao.fetchEventsWithFirstDate) は events.kind を SELECT して
-     * おらず、Event の既定値 "live" が入ってしまう。それだと一覧の「種別で除外」が
-     * 全イベントを live と誤認して機能しないので、kind だけコアの eventRecords
-     * (絞り込み無しの全件射影) から補う。
+     * ライブ一覧の母集合 (公演の無いイベントも出す)。種別は語彙の 6 種 (最後が「その他」) を
+     * 全部渡して、実質絞らない。知らない種別はコアが「その他」に寄せて比べるので、
+     * 種別が増えても一覧から消えない (Q-08l)。
      */
     suspend fun fetchEventsWithFirstDate(): List<EventWithDateRange> {
-        val rows = db.eventDao().fetchEventsWithFirstDate().map { it.toEventWithDateRange() }
-        val kinds = snapshots.query { store ->
-            store.eventRecords(null).associate { it.id to it.kind }
-        }
-        return rows.map { ew ->
-            val kind = kinds[ew.event.id] ?: return@map ew
-            if (kind == ew.event.kind) ew else ew.copy(event = ew.event.copy(kind = kind))
+        val kinds = Vocab.table.eventKinds.map { it.value }
+        return snapshots.query { store ->
+            store.eventsWithFirstDate(null, true, false, kinds).map { it.toEventWithDateRange() }
         }
     }
 

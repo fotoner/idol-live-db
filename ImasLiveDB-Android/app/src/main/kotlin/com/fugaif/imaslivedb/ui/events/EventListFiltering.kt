@@ -48,9 +48,6 @@ fun groupEventsByYear(
 /**
  * FFI 射影: 絞り込み判定に要るフィールドだけを [EventFilterItem] へ落とす。
  * `jointBrandIds` は生のカンマ区切りのまま渡す (分割規則も Rust 側が一次実装)。
- *
- * `kind` は一覧の母集合 SQL (EventDao.fetchEventsWithFirstDate) が SELECT していないので、
- * EventRepository.fetchEventsWithFirstDate がコアの eventRecords から補って渡している。
  */
 private fun eventFilterItem(ew: EventWithDateRange): EventFilterItem = EventFilterItem(
     id = ew.event.id,
