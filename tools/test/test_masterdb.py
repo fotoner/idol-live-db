@@ -1,0 +1,93 @@
+"""lib/masterdb.py (正本の書き出しの形・書く前の検査・指紋) のテスト。
+
+    python3 -m unittest discover -s tools/test -p 'test_*.py'
+"""
+
+import contextlib
+import hashlib
+import io
+import sqlite3
+import tempfile
+import unittest
+from pathlib import Path
+
+import support
+from lib import masterdb
+
+
+class MasterDbTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def fixture(self):
+        path = self.root / "db.sqlite"
+        support.schema_only(path)
+        conn = sqlite3.connect(str(path))
+        conn.executescript("""
+            INSERT INTO meta (key, value) VALUES ('data_version', '3');
+            INSERT INTO events (id, brand_id, name, event_type) VALUES ('ev_t', 'ml', 'ライブ\n改行入り', 'live');
+            INSERT INTO shows (id, event_id, name, date, sort_order) VALUES ('sh_t', 'ev_t', 'DAY1', '2026-01-01', 0);
+        """)
+        conn.commit()
+        return conn
+
+    def write(self, conn, path):
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            masterdb.write_master_sql(conn, path)
+
+    def test_dump_of_the_canonical_file_is_stable(self):
+        # 同じ関数で 2 回書き出して、バイト単位で同じになること。
+        with masterdb.restored(support.MASTER_SQL) as conn:
+            first = masterdb.dump_text(conn)
+        again = self.root / "again.sql"
+        again.write_text(first, encoding="utf-8")
+        with masterdb.restored(again) as conn:
+            self.assertEqual(masterdb.dump_text(conn), first)
+
+    def test_newlines_are_written_as_plain_literals(self):
+        # unistr() は古い sqlite3 で読めないので、正本に出さない。
+        text = masterdb.dump_text(self.fixture())
+        self.assertNotIn("unistr(", text)
+        self.assertIn("ライブ\n改行入り", text)
+
+    def test_writes_when_the_references_are_intact(self):
+        conn = self.fixture()
+        path = self.root / "master.sql"
+        self.write(conn, path)
+        self.assertEqual(path.read_text(encoding="utf-8"), masterdb.dump_text(conn))
+
+    def test_refuses_to_write_a_broken_reference(self):
+        conn = self.fixture()
+        path = self.root / "master.sql"
+        self.write(conn, path)
+        before = support.sha256(path)
+        conn.execute("INSERT INTO show_tickets (id, show_id, name, price) VALUES ('t1', 'sh_missing', '券', 1000)")
+        with self.assertRaises(SystemExit):
+            self.write(conn, path)
+        self.assertEqual(support.sha256(path), before)
+
+    def test_stamp_content_hash_uses_the_file_digest(self):
+        conn = self.fixture()
+        path = self.root / "master.sql"
+        self.write(conn, path)
+        conn.close()
+        db = self.root / "db.sqlite"
+        masterdb.stamp_content_hash(db, path)
+        conn = sqlite3.connect(str(db))
+        [(value,)] = conn.execute("SELECT value FROM meta WHERE key = 'content_hash'").fetchall()
+        conn.close()
+        self.assertEqual(value, hashlib.sha256(path.read_bytes()).hexdigest())
+
+    def test_restored_db_is_removed_afterwards(self):
+        with masterdb.restored(support.MASTER_SQL) as conn:
+            path = conn.execute("PRAGMA database_list").fetchone()[2]
+            self.assertTrue(Path(path).exists())
+        self.assertFalse(Path(path).exists())
+
+
+if __name__ == "__main__":
+    unittest.main()

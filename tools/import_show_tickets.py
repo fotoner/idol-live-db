@@ -8,6 +8,12 @@
 使い方:
     python3 tools/import_show_tickets.py data/tickets/prices_*.tsv          # 検査だけ
     python3 tools/import_show_tickets.py --apply data/tickets/prices_*.tsv  # 反映
+
+公演の実在は、書き込む先の正本 (db/master.sql を戻した一時 DB) で確かめる。手元の
+master.sqlite で確かめて正本に書くと、手元にだけある公演を指す行が正本に入り、
+外部キーの壊れになる (実際に 23 行入った)。正本は tools/lib/masterdb.py の
+write_master_sql で書き出す (書く前に一時 DB で外部キーを検査する)。
+同梱 DB には、その公演がある行だけを入れる (無ければ触らずに知らせる)。
 """
 
 from __future__ import annotations
@@ -19,9 +25,15 @@ import sqlite3
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-BUNDLE_DB = ROOT / "ImasLiveDB/Resources/master.sqlite"
-MASTER_SQL = ROOT / "db/master.sql"
+from lib import masterdb
+
+BUNDLE_DB = masterdb.BUNDLE_DB
+MASTER_SQL = masterdb.MASTER_SQL
+
+INSERT_TICKETS = (
+    "INSERT OR REPLACE INTO show_tickets "
+    "(id, show_id, kind, name, price, is_estimate, note, sort_order) "
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
 
 KINDS = {"live", "stream", "live_viewing"}
 # 1 枚 100 万円を超える券は無い (コアの validate_ticket と同じ上限)。
@@ -107,49 +119,40 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("paths", nargs="+", type=Path)
     ap.add_argument("--apply", action="store_true", help="検査を通ったら実際に入れる")
+    ap.add_argument("--db", type=Path, default=BUNDLE_DB, help="同梱 DB (既定: ImasLiveDB/Resources/master.sqlite)")
+    ap.add_argument("--master-sql", type=Path, default=MASTER_SQL, help="正本 (既定: db/master.sql)")
     args = ap.parse_args()
 
-    with sqlite3.connect(BUNDLE_DB) as db:
-        known = {r[0] for r in db.execute("SELECT id FROM shows")}
+    with masterdb.restored(args.master_sql) as canonical:
+        known = {r[0] for r in canonical.execute("SELECT id FROM shows")}
+        rows, errors = load(args.paths, known)
+        for e in errors:
+            print(f"NG {e}", file=sys.stderr)
+        print(f"読めた行: {len(rows)} / はじいた行: {len(errors)}")
+        if errors:
+            # 1 行でも変なら入れない。直してから通すこと。
+            return 1
+        if not args.apply:
+            print("(--apply を付けると反映する)")
+            return 0
+        # 同じ id の行は置き換える (追記だけだと重複が増える)。
+        canonical.executemany(INSERT_TICKETS, rows)
+        masterdb.write_master_sql(canonical, args.master_sql)
+    print(f"{args.master_sql} に {len(rows)} 行")
 
-    rows, errors = load(args.paths, known)
-    for e in errors:
-        print(f"NG {e}", file=sys.stderr)
-    print(f"読めた行: {len(rows)} / はじいた行: {len(errors)}")
-    if errors:
-        # 1 行でも変なら入れない。直してから通すこと。
-        return 1
-    if not args.apply:
-        print("(--apply を付けると反映する)")
+    if not args.db.exists():
+        print(f"(同梱 DB {args.db} が無いので、正本にだけ入れた)")
         return 0
-
-    with sqlite3.connect(BUNDLE_DB) as db:
-        db.executemany(
-            "INSERT OR REPLACE INTO show_tickets "
-            "(id, show_id, kind, name, price, is_estimate, note, sort_order) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            rows,
-        )
-    print(f"同梱 DB に {len(rows)} 行")
-
-    def sql_literal(value) -> str:
-        if isinstance(value, int):
-            return str(value)
-        return "'" + str(value).replace("'", "''") + "'"
-
-    statements = "\n".join(
-        "INSERT INTO show_tickets (id, show_id, kind, name, price, is_estimate, note, sort_order) "
-        f"VALUES ({', '.join(sql_literal(v) for v in row)});"
-        for row in rows
-    )
-    text = MASTER_SQL.read_text(encoding="utf-8")
-    marker = "CREATE INDEX idx_show_tickets_show ON show_tickets(show_id);\n"
-    head, sep, tail = text.partition(marker)
-    # 既に入っている同じ id の行は書き換える (追記だけだと重複が増える)。
-    kept = [l for l in tail.splitlines(keepends=True)
-            if not any(l.startswith(f"INSERT INTO show_tickets (id, show_id, kind, name, price, is_estimate, note, sort_order) VALUES ('{r[0]}'") for r in rows)]
-    MASTER_SQL.write_text(head + sep + statements + "\n" + "".join(kept), encoding="utf-8")
-    print(f"db/master.sql に {len(rows)} 行")
+    try:
+        with sqlite3.connect(str(args.db)) as db:
+            db.execute("PRAGMA foreign_keys = ON")
+            db.executemany(INSERT_TICKETS, rows)
+        print(f"同梱 DB に {len(rows)} 行")
+    except sqlite3.IntegrityError as e:
+        # 手元の同梱 DB が正本より古く、公演が無い。正本には入ったので、
+        # 同梱 DB は bash tools/build_db.sh で正本から作り直せば揃う。
+        print(f"⚠️ 同梱 DB には入れなかった (無い公演を指す行がある: {e})。"
+              "正本から作り直すと揃う", file=sys.stderr)
     return 0
 
 
