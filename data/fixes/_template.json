@@ -13,6 +13,14 @@
    "note": "なぜこの値が正しいかの根拠"
   },
   {
+   "table": "songs",
+   "id": "ml_your_home_town",
+   "add_original_singers": [
+    "765as_双海亜美"
+   ],
+   "note": "原唱者が足りないときは add_original_singers に idol_id を並べる (足すだけ。fields と一緒でもよい)"
+  },
+  {
    "table": "idols",
    "id": "ml_kasuga_mirai",
    "fields": {

@@ -4,6 +4,7 @@
 data/ 配下を読み、検証 → master.sqlite に反映 → CloudKit へ一括 push する。
   - data/<種類>/*.json (songs/setlists/events/idols/units) … 新規追加 (INSERT)
   - data/fixes/*.json                                       … 既存レコードの修正 (UPDATE)
+                                                               曲の原唱者の追加 (add_original_singers) もここ
 
     # 貢献者 (鍵不要・自己検証):
     python3 tools/apply_data.py --check
@@ -373,7 +374,19 @@ def validate(conn):
             tcol = cols(conn, table)
             if not rid or not exists(conn, table, rid):
                 problems.append(f"{tag}: id '{rid}' が {table} に存在しない")
-            if not isinstance(fields, dict) or not fields:
+            singers = fx.get("add_original_singers")
+            if singers is not None:
+                if table != "songs":
+                    problems.append(f"{tag}: add_original_singers は songs の修正にだけ書ける")
+                elif not isinstance(singers, list) or not singers:
+                    problems.append(f"{tag}: add_original_singers は idol_id の配列 (空は不可)")
+                else:
+                    for idol in singers:
+                        if not exists(conn, "idols", idol):
+                            problems.append(f"{tag}: add_original_singers の idol '{idol}' が存在しない")
+            if fields is None and singers:
+                pass  # 原唱者を足すだけの修正
+            elif not isinstance(fields, dict) or not fields:
                 problems.append(f"{tag}: fields が無い/空")
             else:
                 for k in fields:
@@ -569,9 +582,17 @@ def apply_all(conn):
 
     for path, data in load("fixes"):
         for fx in data["fixes"]:
-            table, rid, fields = fx["table"], fx["id"], fx["fields"]
-            sets = ", ".join(f"{k} = ?" for k in fields)
-            conn.execute(f"UPDATE {table} SET {sets} WHERE id = ?", list(fields.values()) + [rid])
+            table, rid, fields = fx["table"], fx["id"], fx.get("fields") or {}
+            if fields:
+                sets = ", ".join(f"{k} = ?" for k in fields)
+                conn.execute(f"UPDATE {table} SET {sets} WHERE id = ?", list(fields.values()) + [rid])
+            # 原唱者は足すだけ。消すと CloudKit 側に残るので、削除は台帳 (pending_cloudkit_deletions_*) で扱う。
+            for idol in fx.get("add_original_singers", []):
+                conn.execute(
+                    "INSERT OR IGNORE INTO song_artists (song_id, idol_id, role) VALUES (?,?,'original')",
+                    (rid, idol),
+                )
+                affected["song_artists"].add(rid)
             # fixes は id 列で 1 行を直す。その表が絞れるなら、その 1 行だけを押す
             # (押すときに見る列は表ごとに違うので scope_id で読み替える)。
             if SCOPED_ID_SPACE.get(table):

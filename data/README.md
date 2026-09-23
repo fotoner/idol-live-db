@@ -44,6 +44,11 @@ master.sqlite → CloudKit に一括反映します（直接 CloudKit に書く�
 ```json
 { "fixes": [ { "table": "songs", "id": "対象id", "fields": { "release_date": "2024-09-04" } } ] }
 ```
+曲の原唱者が足りないときは `add_original_singers` に idol_id を並べる（`fields` と一緒でも、これだけでもよい）。
+足すだけで、既存の原唱者は消えない（消す必要があるときは PR でオーナーに相談）。
+```json
+{ "fixes": [ { "table": "songs", "id": "ml_your_home_town", "add_original_singers": ["765as_双海亜美"] } ] }
+```
 
 ## 値の決まり
 
