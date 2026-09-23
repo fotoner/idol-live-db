@@ -31,9 +31,11 @@ interface CronTask {
 const EVERY_RUN: CronTask[] = [
   {
     name: "api_rate_limits",
-    // 1 日より古い分のバケット。
+    // 1 日より古い分のバケット (正の鍵)。日のバケット (負の鍵) はここでは消さない —
+    // 消すと IP の日の上限 (歌詞の 1,000/日) が 5 分ごとに 0 に戻って効かなくなる。
+    // idx_api_rate_limits_bucket の範囲で引くので、読むのは消す行だけ。
     run: (env) =>
-      env.DB.prepare("DELETE FROM api_rate_limits WHERE minute_bucket < ?")
+      env.DB.prepare("DELETE FROM api_rate_limits WHERE minute_bucket >= 0 AND minute_bucket < ?")
         .bind(Math.floor(Date.now() / 1000 / 60) - 1440)
         .run(),
   },
@@ -57,6 +59,15 @@ const EVERY_RUN: CronTask[] = [
  * ここに入っているのはいずれも保持期間の掃除と集計で、5 分精度は要らない。
  */
 const DAILY: CronTask[] = [
+  {
+    name: "api_rate_limits_days",
+    // 前の日までの日のバケット (負の鍵 -floor(秒/86400))。今日の行 (-今日) は残す。
+    // 前の日の行は -今日 より大きい負の数なので、この範囲 (索引で引く) に入る。
+    run: (env) =>
+      env.DB.prepare("DELETE FROM api_rate_limits WHERE minute_bucket < 0 AND minute_bucket > ?")
+        .bind(-Math.floor(Date.now() / 1000 / 86400))
+        .run(),
+  },
   {
     name: "rate_limits",
     // 7 日以上前の日次枠 (テーブル肥大化防止)。

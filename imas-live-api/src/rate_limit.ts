@@ -48,12 +48,8 @@ const LIMITS = {
   auth_login: 500,
   // auth_refresh: 自前 JWT 検証のみで外部コストは無いが、同じ理由で下限の防御を掛ける。
   auth_refresh: 500,
-  // 歌詞の読み取りには日次上限を置かない。
-  // 一括取得を防いでいるのは構造 (1リクエスト1曲・一括エンドポイント無し・
-  // エクスポート機能無し・認証必須) であって回数制限ではない。日次上限は
-  // 正常な利用者に当たるリスクのわりに、決意した相手への効果が薄い。
-  // 代わりに routes/lyrics.ts で IP 単位のバースト制限 (30回/分) だけ掛けている。
-  // これはクライアントの暴走で Worker 無料枠 (10万req/日) を焼かないための保険。
+  // 歌詞の読み取り (単体・検索・曲詳細の束ね) の上限はユーザー単位ではなく IP 単位で、
+  // この表ではなく api_rate_limits に置く (routes/lyrics.ts の LYRICS_IP_LIMITS。分と日)。
   // lyrics_admin: PUT /admin/lyrics/:id。投入ツールが1曲1リクエストで流すため、
   // 一括投入が枠で止まらないよう十分広く取る (admin しか叩けない)。
   lyrics_admin: 5000,
@@ -105,6 +101,7 @@ export async function checkRateLimit(
  * から同じ 1 分に開くので、呼び出し側が別の上限を渡す (routes/lyrics.ts の
  * LYRICS_IP_LIMITS)。1 日の上限は、分の上限を上げたぶんの「まとめ取り」の歯止め。
  * 日のバケットは同じ表に**負の鍵**で置く (分のバケットは正の整数なので衝突しない)。
+ * 5 分ごとの掃除は分の行 (正の鍵) だけを消し、前の日の日の行は日次の cron が消す (scheduled.ts)。
  */
 export interface IpRateLimits {
   perMinute: number;

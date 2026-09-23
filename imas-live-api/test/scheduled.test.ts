@@ -1,7 +1,8 @@
 // cron (scheduled) の特性テスト。
 //   - 5 分 cron: api_rate_limits の 1 日より古い分のバケットと、期限切れの引き継ぎコードを消す。
-//   - 日次 cron (17 15 * * *): 上に加えて rate_limits の 7 日超・コール編集履歴の 180 日超を消し、
-//     song_tag_counts を数え直す。
+//     日のバケット (負の鍵) は消さない (Q-09: 消すと IP の日の上限が 5 分ごとに 0 に戻る)。
+//   - 日次 cron (17 15 * * *): 上に加えて前の日までの日のバケット・rate_limits の 7 日超・
+//     コール編集履歴の 180 日超を消し、song_tag_counts を数え直す。
 
 import { describe, expect, it } from "vitest";
 import { runScheduled } from "./support/worker";
@@ -17,8 +18,8 @@ async function seedRateBuckets() {
   const m = nowMinute();
   await exec(
     `INSERT INTO api_rate_limits (ip, minute_bucket, count) VALUES
-       ('old', ?, 1), ('edge', ?, 1), ('recent', ?, 1), ('day', ?, 1)`,
-    m - 1441, m - 1440, m, today()
+       ('old', ?, 1), ('edge', ?, 1), ('recent', ?, 1), ('day', ?, 1), ('yesterday', ?, 1)`,
+    m - 1441, m - 1440, m, today(), today() + 1
   );
 }
 
@@ -50,10 +51,11 @@ async function seedDailyTargets() {
 }
 
 describe("5 分 cron", () => {
-  it("1 日より古い分のバケットと、負の鍵の日のバケットを消す (現状)", async () => {
+  it("1 日より古い分のバケットだけを消す。日のバケット (負の鍵) は残す", async () => {
     await seedRateBuckets();
     await runScheduled(FIVE_MIN);
-    expect((await rows("SELECT ip FROM api_rate_limits ORDER BY ip")).map((r) => r.ip)).toEqual(["edge", "recent"]);
+    expect((await rows("SELECT ip FROM api_rate_limits ORDER BY ip")).map((r) => r.ip))
+      .toEqual(["day", "edge", "recent", "yesterday"]);
   });
 
   it("期限切れの引き継ぎコードだけを消す", async () => {
@@ -79,7 +81,8 @@ describe("日次 cron (17 15 * * *)", () => {
     await seedDailyTargets();
     await runScheduled(DAILY);
 
-    expect((await rows("SELECT ip FROM api_rate_limits ORDER BY ip")).map((r) => r.ip)).toEqual(["edge", "recent"]);
+    // 前の日の日のバケットは消え、今日の分は残る。
+    expect((await rows("SELECT ip FROM api_rate_limits ORDER BY ip")).map((r) => r.ip)).toEqual(["day", "edge", "recent"]);
     expect(await rows("SELECT code FROM transfer_codes")).toEqual([{ code: "ALIVE" }]);
     expect(await rows("SELECT date FROM rate_limits")).toHaveLength(1);
     expect(await rows("SELECT song_id FROM call_edit_history")).toEqual([{ song_id: "new" }]);

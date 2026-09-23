@@ -106,7 +106,8 @@ async function fetchSimilarSongsCached(
  *
  * レート制限は「束ねたことで実質的に厳しくなってはいけない」ため、既存 3 エンドポイントと
  * 同じく tags / similar / penlight には掛けない。歌詞を同梱するときだけ、単体の
- * GET /songs/:id/lyrics と同じ IP の歌詞の枠 (1 分の上限 LYRICS_IP_LIMITS.perMinute) で数える。
+ * GET /songs/:id/lyrics と同じ IP の歌詞の枠 (分と日。LYRICS_IP_LIMITS) で数える
+ * (束ねを外すと、アプリが歌詞を読む主な経路で日の上限を素通りできてしまう)。
  * 上限に当たっても 429 で全体を落とさず lyrics だけ null にする (バンドルが単体 3 本より
  * 厳しくならないように)。
  */
@@ -116,9 +117,7 @@ async function loadLyrics(
   uid: string
 ): Promise<Awaited<ReturnType<typeof fetchPublishedLyrics>>> {
   const { request, env } = ctx;
-  const ipRl = await dryCheckIpRateLimit(env.DB, "lyrics", clientIp(request), {
-    perMinute: LYRICS_IP_LIMITS.perMinute,
-  });
+  const ipRl = await dryCheckIpRateLimit(env.DB, "lyrics", clientIp(request), LYRICS_IP_LIMITS);
   if (!ipRl.allowed) {
     console.log("song_detail_lyrics_rate_limited", { songId });
     return null;

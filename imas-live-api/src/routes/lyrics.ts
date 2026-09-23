@@ -70,6 +70,8 @@ export const NO_STORE: Record<string, string> = { "Cache-Control": "no-store" };
 // 既定の 30/分 だと 31 人目から 429 (出面では「読み込めませんでした」) になる。
 // 分の上限を上げ、代わりに 1 日の上限で「まとめ取り」を押さえる (2,155 曲を 1 つの IP から
 // 取り切るには 3 日かかる。完全に防ぐものではなく、手間を上げるための歯止め)。
+// 単体の GET・歌詞検索・曲詳細の束ね (歌詞を同梱したとき) で同じ枠を使う。日の行は
+// その日のあいだ残る (前の日の行は日次の cron が消す。scheduled.ts)。
 // 数の根拠: ドーム規模で数十 IP に分かれ、1 IP あたり同じ 1 分に開くのは数十人、
 // 1 日に数百回、という見積り。本番の 429 の件数 (Workers Logs) を見て調整する。
 export const LYRICS_IP_LIMITS = { perMinute: 120, perDay: 1000 } as const;
