@@ -40,6 +40,11 @@ class AppDatabaseMigrationTest {
     /** 配布済みの Room 4 / 7 の端末は、この版を通って上がってくる (MIGRATION_9_10 が索引を作る)。 */
     @Test fun migrates9ToLatest() = assertMigrates(from = 9)
 
+    /** 配布済みの版 (11 / 12)。 */
+    @Test fun migrates11ToLatest() = assertMigrates(from = 11)
+
+    @Test fun migrates12ToLatest() = assertMigrates(from = 12)
+
     @Test fun migrates13ToLatest() = assertMigrates(from = 13)
 
     @Test fun migrates15ToLatest() = assertMigrates(from = 15)

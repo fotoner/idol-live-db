@@ -64,15 +64,18 @@ class SeedImporterTest {
         }
     }
 
-    /** 2 回目は何もしない (brands が入っていれば投入済みとみなす)。 */
+    /**
+     * brands が入っていれば投入済みとみなし、2 回目は seed を読まない。
+     * (行数が変わらないだけなら INSERT OR IGNORE でも同じになるので、消した行が戻らないことで見る)
+     */
     @Test
-    fun secondImportIsNoOp() = runBlocking {
+    fun skipsWhenBrandsAlreadyExist() = runBlocking {
         assertTrue(SeedImporter.importIfNeeded(context, db))
         val room = db.openHelper.writableDatabase
-        val before = count(room, "songs")
+        room.execSQL("DELETE FROM songs")
 
         assertTrue(SeedImporter.importIfNeeded(context, db))
-        assertEquals(before, count(room, "songs"))
+        assertEquals("投入済みの DB に seed を入れ直した", 0, count(room, "songs"))
     }
 
     /** 端末ローカルにしかない表には何も入れない (seed は利用者のデータを持たない)。 */
