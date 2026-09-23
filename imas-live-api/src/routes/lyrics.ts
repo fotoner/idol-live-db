@@ -642,9 +642,10 @@ export async function handleLyrics(ctx: RouteContext): Promise<Response | null> 
     // 上限は打った語数で決まるが、多すぎても読めないので SNIPPET_TERMS 本で頭打ち。
     const shown = terms.slice(0, SNIPPET_TERMS);
 
+    const exprParams: string[] = [];
+    const exprSql = nodeToSql(expr, exprParams);
+
     const runQuery = async (extraWhere: string, extraParams: string[]) => {
-      const exprParams: string[] = [];
-      const exprSql = nodeToSql(expr, exprParams);
       // ?1=before ?2=window、?3 以降が語 (位置用) → 式の LIKE → 追加条件。
       let n = 2;
       const posParams = shown.map(() => `?${++n}`);
@@ -674,8 +675,9 @@ export async function handleLyrics(ctx: RouteContext): Promise<Response | null> 
     };
 
     if (candidates) {
-      // D1 のバインド変数上限があるので IN 句を分割して引く。
-      const fixed = 2 + shown.length + terms.length;
+      // D1 のバインド変数上限があるので IN 句を分割して引く。式の LIKE は語の重複を除かず
+      // 出現ごとに 1 つ積むので、固定分は重複を除いた語数ではなく exprParams の実数で数える。
+      const fixed = 2 + shown.length + exprParams.length;
       const perChunk = Math.max(10, MAX_BOUND_PARAMS - fixed);
       for (let i = 0; i < candidates.length; i += perChunk) {
         const chunk = candidates.slice(i, i + perChunk);
