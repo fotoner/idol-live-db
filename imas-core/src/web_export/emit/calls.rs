@@ -6,7 +6,7 @@
 
 use super::context::{simple_json_ld, Ctx};
 use crate::domain::date_display::with_weekday;
-use crate::domain::jst_day::jst_today;
+use crate::domain::jst_day::{jst_today, JST_OFFSET_SECONDS};
 use crate::web_export::calls_dashboard::{Dashboard, Edit};
 use crate::web_export::content;
 use crate::web_export::dto::*;
@@ -116,7 +116,7 @@ fn date_display(epoch: Option<i64>) -> String {
 
 /// 秒 epoch (UTC) → `2026-09-06 12:34 (JST)`。
 fn jst_datetime(epoch: i64) -> String {
-    let jst = epoch + 9 * 3600;
+    let jst = epoch + i64::from(JST_OFFSET_SECONDS);
     let (h, m) = (jst.rem_euclid(86_400) / 3600, jst.rem_euclid(3600) / 60);
     format!("{} {h:02}:{m:02} (JST)", jst_today(epoch))
 }
