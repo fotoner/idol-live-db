@@ -115,10 +115,9 @@ pub fn setlist_lineup(
     cast_ids: Vec<String>,
 ) -> Option<SetlistLineupNote> {
     let original: Vec<&str> = original_ids.iter().map(String::as_str).collect();
-    let performers = id_set(&performer_ids);
-    let cast = id_set(&cast_ids);
-    let full_cast = setlist_lineup::is_full_cast(&cast, &performers);
-    setlist_lineup::summarize(&original, &performers, &cast, full_cast).map(|s| s.note())
+    setlist_lineup::row_lineup(&original, &id_set(&performer_ids), &id_set(&cast_ids))
+        .summary
+        .map(|s| s.note())
 }
 
 /// 公演の出演者全員で歌う行なら `全員` の札 (出演者 2 人以上・歌唱者と完全一致)。

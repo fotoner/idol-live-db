@@ -157,6 +157,32 @@ pub fn summarize<'a>(
     })
 }
 
+/// 1 行ぶんの「全員」と「オリメン」の答え。
+///
+/// **アプリ (セトリの行の添え物) と Web (公演ページ) はどちらもこの関数を通す。** 別々に組むと
+/// 「全員」を見る集合がずれて、片方にだけ「オリメン n/m」が出たり、「全員」のチップと
+/// 部分一致の札が同時に出たりする (2026-09 に同梱 DB でそれぞれ 61 行・3 行あった)。
+///
+/// `presence` は公演に「いた」人 = 登録した出演者 ∪ 歌唱メンバー
+/// ([`crate::domain::event_detail_queries::show_presence`])。「全員で歌ったか」も
+/// 「公演には出ているのに歌っていないか」も、同じこの集合で見る。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RowLineup<'a> {
+    /// 出演者全員で歌う行 (`全員` の札)。
+    pub is_full_cast: bool,
+    /// オリメンの札。付けない行は `None` ([`summarize`])。
+    pub summary: Option<LineupSummary<'a>>,
+}
+
+pub fn row_lineup<'a>(
+    original: &[&'a str],
+    performers: &BTreeSet<&str>,
+    presence: &BTreeSet<&str>,
+) -> RowLineup<'a> {
+    let is_full_cast = is_full_cast(presence, performers);
+    RowLineup { is_full_cast, summary: summarize(original, performers, presence, is_full_cast) }
+}
+
 /// 歌っていない原唱者のうち、**その公演には出ている人**。名前で示す価値があるのはこちら
 /// (「いたのに歌わなかった」は出演者一覧からは読めない)。公演にいない人は出演者一覧を
 /// 見れば分かるので、数 (`4/5`) だけに任せる — 全体曲でその公演にいない 30 人を並べても
@@ -241,6 +267,22 @@ mod tests {
         assert_eq!(summary.label(), "オリメン 1/3");
         // 札を付けない行は答えも無い。
         assert_eq!(summarize(&["a"], &set(&["a"]), &cast, false), None);
+    }
+
+    /// 「全員」の判定と札が同じ集合を見るので、全員の行に部分一致の札は付かない。
+    #[test]
+    fn row_lineup_sees_full_cast_and_absentees_through_the_same_presence() {
+        // 公演にいたのは a, b, c (b は登録漏れでも歌っていれば presence に入る)。
+        let presence = set(&["a", "b", "c"]);
+        let everyone = row_lineup(&["a", "z"], &set(&["a", "b", "c"]), &presence);
+        assert!(everyone.is_full_cast);
+        assert_eq!(everyone.summary, None, "全員曲の部分一致は札にしない");
+
+        let some = row_lineup(&["a", "c"], &set(&["a", "b"]), &presence);
+        assert!(!some.is_full_cast);
+        let summary = some.summary.expect("一部の札");
+        assert_eq!(summary.label(), "オリメン 1/2");
+        assert_eq!(summary.absent_in_cast, vec!["c"], "公演にいて歌わなかった人");
     }
 
     #[test]
