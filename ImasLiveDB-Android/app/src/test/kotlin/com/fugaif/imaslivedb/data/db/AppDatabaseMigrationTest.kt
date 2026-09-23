@@ -52,6 +52,27 @@ class AppDatabaseMigrationTest {
     /** v10〜v18 を新規に作った端末には索引が無い。MIGRATION_18_19 が作る。 */
     @Test fun migrates18ToLatest() = assertMigrates(from = 18)
 
+    @Test fun migrates19ToLatest() = assertMigrates(from = 19)
+
+    /**
+     * v20 で足した声優の表は、上がってきた端末では空。最後に取り込んだ seed の指紋を消して、
+     * 次の起動で同梱の seed から入れ直させる (版番号は残す)。
+     */
+    @Test
+    fun migrating19To20ForcesTheNextReseed() {
+        val name = "reseed_19.sqlite"
+        helper.createDatabase(name, 19).use {
+            it.execSQL("INSERT INTO meta (key, value) VALUES ('data_version', '88'), ('content_hash', 'abc')")
+        }
+        helper.runMigrationsAndValidate(name, 20, true, AppDatabase.MIGRATION_19_20).use { db ->
+            db.query("SELECT key, value FROM meta ORDER BY key").use { c ->
+                val rows = buildList { while (c.moveToNext()) add(c.getString(0) to c.getString(1)) }
+                assertEquals(listOf("data_version" to "88"), rows)
+            }
+            assertEquals(0, count(db, "idol_voice_actors"))
+        }
+    }
+
     private fun assertMigrates(from: Int) {
         val validated = "validated_$from.sqlite"
         helper.createDatabase(validated, from).use { insertLocalOnlyRows(it, from) }
@@ -100,7 +121,7 @@ class AppDatabaseMigrationTest {
 
     private companion object {
         /** `@Database(version = …)` と同じ値。版を上げたらここも上げる。 */
-        const val LATEST = 19
+        const val LATEST = 20
 
         /** 家計簿 (expenses) を作った版 (MIGRATION_16_17)。 */
         const val EXPENSES_SINCE = 17

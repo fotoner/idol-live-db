@@ -37,6 +37,7 @@ import com.fugaif.imaslivedb.data.model.Expense
 import com.fugaif.imaslivedb.data.model.ShowTicket
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.IdolBrand
+import com.fugaif.imaslivedb.data.model.IdolVoiceActor
 import com.fugaif.imaslivedb.data.model.ImasUnit
 import com.fugaif.imaslivedb.data.model.Meta
 import com.fugaif.imaslivedb.data.model.PersonalTag
@@ -79,9 +80,10 @@ import com.fugaif.imaslivedb.data.model.UserMark
         Costume::class,
         CostumeWear::class,
         Expense::class,
-        ShowTicket::class
+        ShowTicket::class,
+        IdolVoiceActor::class
     ],
-    version = 19,
+    version = 20,
     // 確定スキーマを app/schemas へ JSON で吐く。共有コア (imas-core) が持つ
     // マスタ DDL と突き合わせて、片方だけスキーマを変えた事故を CI で捕まえるため。
     exportSchema = true
@@ -500,11 +502,29 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v20: 声優の履歴 (idol_voice_actors) をコアのマスタ DDL と同じ形で持つ (Q-12 / R-A-18)。
+         * CloudKit では配らず、seed の初回投入とアプリ更新時の入れ直しで入る。上がってくる端末では
+         * 表が空なので、最後に取り込んだ seed の指紋 (meta.content_hash) を消して、次の起動で
+         * 同梱の seed から入れ直させる (コアの reseedNeeded は指紋が違えば入れ直す)。
+         */
+        val MIGRATION_19_20 = object : Migration(19, 20) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `idol_voice_actors` (`id` TEXT NOT NULL, `idol_id` TEXT NOT NULL, " +
+                        "`name` TEXT NOT NULL, `valid_from` TEXT, `valid_to` TEXT, PRIMARY KEY(`id`))"
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `idx_idol_voice_actors_idol` ON `idol_voice_actors` (`idol_id`)")
+                db.execSQL("DELETE FROM meta WHERE key = 'content_hash'")
+            }
+        }
+
         /** 登録する移行の全部 (古い順)。本番の builder と移行テストが同じ並びを使う。 */
         val ALL_MIGRATIONS: Array<Migration> = arrayOf(
             MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
             MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14,
-            MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19
+            MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19,
+            MIGRATION_19_20
         )
     }
 }
