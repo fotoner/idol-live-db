@@ -1,6 +1,6 @@
 // ck_schema.ts — CloudKit Public DB スキーマの型情報の単一ソース。
 //
-// Scripts/cloudkit_schema.ckdb から導出。buildForceUpdate の型付けと
+// tools/cloudkit_schema.ckdb から導出。buildForceUpdate の型付けと
 // master_validators の検証はこの 1 ファイルを正とする。
 // CloudKit には BOOL 型が無く、真偽値フィールド (isSolo 等) は INT64(0/1)。
 
