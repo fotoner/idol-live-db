@@ -345,6 +345,9 @@ function renderAppFallbackPage(opts: {
 </html>`;
 }
 
+/** アプリ証明 (App Attest / Play Integrity) の口。IP 単位の日次上限 (app_attest) を掛ける。 */
+const APP_ATTEST_PATHS = new Set(["/app/challenge", "/app/attest", "/app/assert", "/app/integrity"]);
+
 // ---------------------------------------------------------------------------
 // Main fetch handler
 // ---------------------------------------------------------------------------
@@ -422,8 +425,10 @@ export default {
       const attestMode = env.APP_ATTEST_MODE || "monitor";
       const secret = env.SESSION_JWT_SECRET;
 
-      // /app/* は IP 単位レート制限 (クォータ枯渇による自爆 DoS 防止)
-      if (path.startsWith("/app/")) {
+      // アプリ証明の口は IP 単位レート制限 (クォータ枯渇による自爆 DoS 防止)。
+      // 同じ /app/ の下にある共有リンクの着地ページ (/app/{events,shows,polls}/:id) には掛けない。
+      // 閲覧や OGP のクローラーで、同じ IP の端末のアプリ証明が 429 になるため。
+      if (APP_ATTEST_PATHS.has(path)) {
         const ip = request.headers.get("cf-connecting-ip") || "unknown";
         const rl = await checkRateLimit(env.DB, "ip:" + ip, "app_attest");
         if (!rl.allowed) return error("rate limited", 429);
