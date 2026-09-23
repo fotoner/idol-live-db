@@ -113,9 +113,33 @@ pub fn until_display(first: Option<&str>, last: Option<&str>) -> Option<String> 
     range_end(first, last).map(|l| format!("〜 {}", short_with_weekday(l)))
 }
 
+/// 年の幅 (`2019` / `2019 – 2021`)。アルバムと CD シリーズの札に出す (Q-08e)。
+/// 最初と最後の日付の先頭 4 桁が年として読めるものだけを使い、同じ年なら 1 つ、
+/// 片方しか無ければそれだけ。
+pub fn year_range(earliest: Option<&str>, latest: Option<&str>) -> Option<String> {
+    let year = |d: Option<&str>| {
+        d.and_then(|d| d.get(..4)).filter(|y| y.bytes().all(|b| b.is_ascii_digit())).map(str::to_string)
+    };
+    match (year(earliest), year(latest)) {
+        (Some(f), Some(t)) if f != t => Some(format!("{f} – {t}")),
+        (Some(y), _) | (None, Some(y)) => Some(y),
+        (None, None) => None,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn year_range_collapses_the_same_year() {
+        assert_eq!(year_range(Some("2019-03-01"), Some("2021-12-24")).as_deref(), Some("2019 – 2021"));
+        assert_eq!(year_range(Some("2019-03-01"), Some("2019-12-24")).as_deref(), Some("2019"));
+        assert_eq!(year_range(Some("2019"), None).as_deref(), Some("2019"));
+        assert_eq!(year_range(None, Some("2020-01")).as_deref(), Some("2020"));
+        assert_eq!(year_range(Some("未定"), Some("")), None);
+        assert_eq!(year_range(None, None), None);
+    }
 
     /// 2026-09-19 は土曜。ライブは週末に集中するので、曜日が 1 日ずれると全行が嘘になる。
     #[test]

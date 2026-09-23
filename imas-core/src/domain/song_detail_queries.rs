@@ -24,6 +24,7 @@
 //! - SQL が未規定だった同順位の並びは添字や名前で決定化する (プラットフォーム間で
 //!   同一結果を返すのが共有コアの目的なので、非決定性は残さない)。
 
+use crate::domain::date_display::year_range;
 use crate::domain::snapshot::{Snapshot, Song};
 use std::cmp::Reverse;
 use std::collections::{HashMap, HashSet};
@@ -131,6 +132,8 @@ pub struct AlbumSummaryRecord {
     pub song_count: u32,
     pub earliest_date: Option<String>,
     pub latest_date: Option<String>,
+    /// 札に出す年 (`2019` / `2019 – 2021`)。収録曲のリリース年の幅 (Q-08e)。
+    pub year_display: Option<String>,
     /// 含まれる曲のブランド id (重複なし・出現順)。SQL の GROUP_CONCAT(DISTINCT) を
     /// Swift 側で split → 空要素除去していた最終形に合わせ、NULL と '' は含めない。
     pub brand_ids: Vec<String>,
@@ -145,6 +148,8 @@ pub struct SeriesSummaryRecord {
     pub cd_count: u32,
     pub earliest_date: Option<String>,
     pub latest_date: Option<String>,
+    /// 札に出す年の幅 (`2019` / `2019 – 2021`。Q-08e)。
+    pub year_display: Option<String>,
     /// 代表ジャケット (最古リリース曲のもの)。元 SQL の相関サブクエリはブランド絞り込みの
     /// 影響を受けない仕様だったので、ここも全曲から選ぶ。
     pub artwork_url: Option<String>,
@@ -633,6 +638,7 @@ pub fn album_summaries(
                 song_count: 0,
                 earliest_date: None,
                 latest_date: None,
+                year_display: None,
                 brand_ids: Vec::new(),
             }
         });
@@ -648,8 +654,14 @@ pub fn album_summaries(
         }
     }
 
-    let mut result: Vec<AlbumSummaryRecord> =
-        order.into_iter().map(|k| groups.remove(&k).expect("group は必ず存在する")).collect();
+    let mut result: Vec<AlbumSummaryRecord> = order
+        .into_iter()
+        .map(|k| {
+            let mut rec = groups.remove(&k).expect("group は必ず存在する");
+            rec.year_display = year_range(rec.earliest_date.as_deref(), rec.latest_date.as_deref());
+            rec
+        })
+        .collect();
     result.sort_by(|a, b| {
         (Reverse(&a.earliest_date), &a.cd_series).cmp(&(Reverse(&b.earliest_date), &b.cd_series))
     });
@@ -714,6 +726,7 @@ pub fn series_summaries(
                 cd_count: 0,
                 earliest_date: None,
                 latest_date: None,
+                year_display: None,
                 artwork_url: artwork_rep.get(group).map(|(_, art)| (*art).to_owned()),
                 brand_ids: Vec::new(),
             }
@@ -736,6 +749,7 @@ pub fn series_summaries(
         .map(|k| {
             let mut rec = groups.remove(&k).expect("group は必ず存在する");
             rec.cd_count = cd_sets.get(&k).map_or(0, |s| s.len() as u32);
+            rec.year_display = year_range(rec.earliest_date.as_deref(), rec.latest_date.as_deref());
             rec
         })
         .collect();
@@ -1717,6 +1731,10 @@ mod tests {
                         song_count: r.get_unwrap::<_, i64>("song_count") as u32,
                         earliest_date: r.get_unwrap("earliest_date"),
                         latest_date: r.get_unwrap("latest_date"),
+                        year_display: year_range(
+                            r.get_unwrap::<_, Option<String>>("earliest_date").as_deref(),
+                            r.get_unwrap::<_, Option<String>>("latest_date").as_deref(),
+                        ),
                         // Swift の split(",") + 空要素除去と同じ写像
                         brand_ids: r
                             .get_unwrap::<_, Option<String>>("brand_ids")
@@ -1801,6 +1819,10 @@ mod tests {
                         cd_count: r.get_unwrap::<_, i64>("cd_count") as u32,
                         earliest_date: r.get_unwrap("earliest_date"),
                         latest_date: r.get_unwrap("latest_date"),
+                        year_display: year_range(
+                            r.get_unwrap::<_, Option<String>>("earliest_date").as_deref(),
+                            r.get_unwrap::<_, Option<String>>("latest_date").as_deref(),
+                        ),
                         artwork_url: r.get_unwrap("artwork_url"),
                         brand_ids: r
                             .get_unwrap::<_, Option<String>>("brand_ids")
