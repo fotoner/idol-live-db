@@ -445,10 +445,25 @@ mod tests {
     #[test]
     fn catch_chances_match_the_ios_sql_and_are_ordered_deterministically() {
         let snap = bundle_snapshot();
-        let conn = bundle_conn();
         let collected = attended_songs(snap);
-        let today = "2025-06-01";
-        let d = collection_dashboard(snap, &collected, &[], today, 1000);
+        check_catch_chances_against_ios_sql(&collected, "2025-06-01");
+        let d = collection_dashboard(snap, &collected, &[], "2025-06-01", 1000);
+        let limited = collection_dashboard(snap, &collected, &[], "2025-06-01", 3);
+        assert_eq!(limited.catch_chances, d.catch_chances[..3].to_vec(), "先頭から chance_limit 件");
+    }
+
+    #[test]
+    fn catch_chances_match_the_ios_sql_with_nothing_collected() {
+        // 回収が 0 曲のとき、ブランドの過去のリアルライブで披露された曲がそのまま数になる
+        // (同梱 DB では 1 公演 400〜600 曲台。大きく見えるが iOS の SQL と同じ数)。
+        check_catch_chances_against_ios_sql(&[], "2026-09-23");
+    }
+
+    /// iOS `fetchUpcomingCatchChances` の SQL (削除前の b6ea16f8^) と、今日以降の全公演で突き合わせる。
+    fn check_catch_chances_against_ios_sql(collected: &[String], today: &str) {
+        let snap = bundle_snapshot();
+        let conn = bundle_conn();
+        let d = collection_dashboard(snap, collected, &[], today, 1000);
         let uncollected: HashSet<&str> = d.all_uncollected.iter().map(|r| r.song.id.as_str()).collect();
 
         // fetchUpcomingCatchChances の 2 つの SQL。
@@ -479,7 +494,7 @@ mod tests {
             .filter_map(|(show, brand, date)| likely_by_brand.get(&brand).map(|&n| (show, n, date)))
             .collect();
         expected.sort_by_key(|e| std::cmp::Reverse(e.1));
-        assert!(expected.len() > 10, "今日以降の公演が十分ある: {}", expected.len());
+        assert!(expected.len() > 5, "今日以降の公演が十分ある: {}", expected.len());
 
         let got: Vec<(String, u32, String)> = d
             .catch_chances
@@ -500,8 +515,6 @@ mod tests {
             assert_eq!(c.brand_color, color);
         }
 
-        let limited = collection_dashboard(snap, &collected, &[], today, 3);
-        assert_eq!(limited.catch_chances, d.catch_chances[..3].to_vec(), "先頭から chance_limit 件");
     }
 
     #[test]
