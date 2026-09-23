@@ -1,13 +1,23 @@
 name: Refresh master data
 
 # CloudKit (source of truth) → db/master.sql を日次でエクスポートし、
-# 変化があれば自動コミット。コントリビューターが常に最新データに対して
+# 変化があれば bot/data-refresh に保存する。コントリビューターが常に最新データに対して
 # tools/apply_data.py --check を回せるようにする。
+#
+# 保存と検査は別のジョブにしてある:
+#   - export: 取り出して bot/data-refresh に保存する。検査に落ちるデータでも保存する
+#             (以前は検査に落ちると保存もしなかったので、git 上の写しが何日も古いまま
+#             止まり、何が壊れているかも手元で見られなかった)。
+#   - check : export が取り出した db/master.sql で FK ゲート (tools/build_db.sh) を回す。
+#             落ちたらワークフローを赤くし、違反の一覧を job summary に出す。
+#   bot/data-refresh が develop に自動で入ることは無い。オーナーが PR にして取り込み、
+#   PR では core-guard が同じゲートを回すので、壊れたデータは develop に入らない。
 #
 # ⚠️ セキュリティ前提 (設定は docs/DATA_PIPELINE.md 参照):
 #   - CloudKit 鍵は environment "cloudkit" の secret に置き、deployment branch を
 #     main と develop に絞る → feature ブランチ / PR で走る他ワークフローからは鍵を取得できない
 #     (schedule は既定ブランチ main で起動する。workflow_dispatch は develop からも起動できる)
+#   - 鍵を使うのは export ジョブだけ。check ジョブは secret を使わない
 #   - main の branch protection + .github/ の CODEOWNERS でワークフロー改ざんを防ぐ
 
 on:
@@ -21,11 +31,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  refresh:
+  export:
     runs-on: ubuntu-latest
-    environment: cloudkit          # ← main 限定の environment secret を使う
+    environment: cloudkit          # ← 鍵を置いた environment secret を使う
     permissions:
-      contents: write              # db/master.sql のコミットに必要
+      contents: write              # bot/data-refresh への push に必要
     steps:
       # main / develop はどちらも保護ブランチ (PR+オーナー承認必須) なので bot は直接 push できない。
       # bot 専用ブランチ bot/data-refresh に出し、オーナーが develop への PR でレビュー&マージする。
@@ -52,16 +62,20 @@ jobs:
         run: |
           python3 tools/export_cloudkit.py --production --key-file tools/eckey.pem
 
-      # 同梱される master.sqlite を生成し、外部キー整合性を検証する (必須ゲート)。
-      # FK 違反があると初回起動 reseed が全ロールバックしユーザーに無言で旧データが残るため、
-      # 壊れたスナップショットを bot/data-refresh に流さないようここで job を失敗させる。
-      - name: FK integrity gate
-        run: |
-          bash tools/build_db.sh
+      - name: Remove CloudKit key
+        if: always()
+        run: rm -f tools/eckey.pem
 
-      - name: Commit if changed
+      # check ジョブが「いま取り出したもの」をそのまま検査できるように渡す。
+      - name: Hand the export to the check job
+        uses: actions/upload-artifact@v4
+        with:
+          name: master-sql
+          path: db/master.sql
+          retention-days: 7
+
+      - name: Save to bot/data-refresh if changed
         run: |
-          rm -f tools/eckey.pem
           if git diff --quiet -- db/master.sql; then
             echo "変化なし"
             exit 0
@@ -73,3 +87,40 @@ jobs:
           # bot 専用ブランチへ (develop は保護ブランチで直接 push 不可)。
           # オーナーが bot/data-refresh → develop の PR でレビュー&マージする。
           git push --force origin HEAD:bot/data-refresh
+
+  check:
+    needs: export
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: master-sql
+          path: db
+
+      # 同梱される master.sqlite を生成し、外部キー整合性を検証する。
+      # FK 違反があると初回起動 reseed が全ロールバックし、ユーザーに無言で旧データが残る。
+      - name: FK integrity gate
+        run: bash tools/build_db.sh
+
+      # build_db.sh は落ちると DB を消すので、一覧は別の一時 DB で取り直す。
+      - name: List the violations in the job summary
+        if: failure()
+        run: |
+          sqlite3 "$RUNNER_TEMP/check.sqlite" < db/master.sql
+          {
+            echo '## db/master.sql の検査に落ちた'
+            echo 'bot/data-refresh には保存済み。CloudKit 側を直してから取り込む。'
+            echo '```'
+            python3 tools/check_fk_integrity.py "$RUNNER_TEMP/check.sqlite" || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
