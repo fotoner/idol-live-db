@@ -29,11 +29,9 @@
 //!
 //! 変わっていないのは**件数**の契約: `LIMIT 20` 相当の [`GLOBAL_SEARCH_LIMIT`]。
 
+use crate::domain::search_limits::GLOBAL_SEARCH_LIMIT;
 use crate::domain::snapshot::Snapshot;
 use crate::domain::text_search_index::{FoldedNeedle, MatchTier};
-
-/// iOS `searchQuery` の `.limit(20)` の写し。各エンティティ種別ごとの上限。
-pub const GLOBAL_SEARCH_LIMIT: usize = 20;
 
 /// 横断検索の結果 (表示順の id 列 3 本)。iOS `SearchResults` に対応する射影
 /// (実体化はプラットフォーム側が自国の store で行う。名前を iOS 側と揃えないのは
