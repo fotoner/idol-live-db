@@ -12,6 +12,9 @@ CloudKit へ送る。
 既に入っているイベントは送らない。CloudKit 側で直した分類 (event_type / kind /
 is_streaming / is_solo) を、発表時点の空の値で上書きしてしまうため。名前や日付を
 送り直したいときだけ --resend-existing を付ける (そのときも分類の列は送らない)。
+⚠️ --resend-existing が送るのは JSON の値なので、CloudKit 側で直したイベント名・公演名を
+JSON の値へ戻す操作になりうる (2026-09-19 に実際に 3 公演の名前が戻った)。
+使う前に、JSON の名前が今の正本と同じか確かめる。
 
 送信でエラーが 1 件でも出たら、手元の DB には入れずに exit 1 で終わる。入れてしまうと
 次の実行で「入った行」にならず、その行が二度と送られないため。同じコマンドを
@@ -196,7 +199,9 @@ def parse_args(argv=None):
     ap.add_argument("--skip-cloudkit", action="store_true",
                     help="手元の DB にだけ入れ、CloudKit へは送らない")
     ap.add_argument("--resend-existing", action="store_true",
-                    help="既に入っている行も送る (名前・日付を送り直す用。分類の列は送らない)")
+                    help="既に入っている行も送る (分類の列は送らない)。⚠️ 既存のイベント名・公演名を "
+                         "JSON の値へ戻す操作になりうる (2026-09-19 に実際に 3 公演の名前が戻った)。"
+                         "使う前に JSON の名前が今の正本と同じか確かめる")
     return ap.parse_args(argv)
 
 

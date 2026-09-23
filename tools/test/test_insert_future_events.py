@@ -70,6 +70,9 @@ class CliTest(unittest.TestCase):
         self.assertEqual(support.sha256(self.db), before, "--help で DB が書き換わった")
         self.assertEqual(proc.returncode, 0, proc.stderr)
         self.assertIn("--key-id", proc.stdout)
+        # --resend-existing は既存の名前を JSON の値へ戻しうる。ヘルプで警告する
+        # (argparse が行を折るので空白を除いて見る)。
+        self.assertIn("JSONの値へ戻す操作になりうる", "".join(proc.stdout.split()))
 
     def test_push_without_key_fails_before_writing(self):
         before = support.sha256(self.db)
