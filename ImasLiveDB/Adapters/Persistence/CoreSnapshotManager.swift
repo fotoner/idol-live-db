@@ -171,11 +171,6 @@ struct SnapshotInvalidatingShowWriting: ShowWriting {
         invalidate()
     }
 
-    func upsertSetlistItems(_ items: [SetlistItem]) async throws {
-        try await base.upsertSetlistItems(items)
-        invalidate()
-    }
-
     func replaceSetlist(showId: String, items: [SetlistItem], performers: [SetlistPerformer]) async throws {
         try await base.replaceSetlist(showId: showId, items: items, performers: performers)
         invalidate()

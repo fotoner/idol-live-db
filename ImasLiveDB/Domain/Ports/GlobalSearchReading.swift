@@ -5,9 +5,6 @@ import Foundation
 /// 実装は `Adapters/Persistence/CoreGlobalSearchRepository` (共有コアのスナップショット)。
 /// ⚠️ Domain 規約: このファイルは `SwiftUI` / `GRDB` / `CloudKit` を import しない。
 protocol GlobalSearchReading: Sendable {
-    /// クエリにマッチする各種エンティティをまとめて返す。
-    func search(query: String) async throws -> SearchResults
-
     /// 打った語が種別ごとに何件当たるか (打ち切りなし)。
     ///
     /// 各一覧の検索欄が「他のタブに N 件」を出すために使う。実体は要らないので

@@ -67,26 +67,6 @@ extension AppDatabase {
         )
     }
 
-    /// 同期診断用 — recordName に '@' が入ったレコード数を集計し、ML 13thLIVE が
-    /// 存在するかチェックする。@-roundtrip バグの切り分けに使う。
-    func fetchSyncDiagnosticsAsync() async throws -> SyncDiagnostics {
-        try await dbQueue.read { db in try Self.fetchSyncDiagnosticsQuery(db) }
-    }
-
-    private static func fetchSyncDiagnosticsQuery(_ db: Database) throws -> SyncDiagnostics {
-        SyncDiagnostics(
-            eventsAt: try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM events WHERE id LIKE '%@%'") ?? 0,
-            showsAt: try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM shows WHERE id LIKE '%@%'") ?? 0,
-            setlistItemsAt: try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM setlist_items WHERE id LIKE '%@%'") ?? 0,
-            ml13thLiveExists: try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM events WHERE id = ?", arguments: ["ev_the_idolm@ster_million_live_13thlive"]) ?? 0 > 0,
-            ml13thShowsCount: try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM shows WHERE event_id = ?", arguments: ["ev_the_idolm@ster_million_live_13thlive"]) ?? 0,
-            ml13thSetlistItemsCount: try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM setlist_items WHERE show_id LIKE 'sh_the_idolm@ster_million_live_13thlive%'") ?? 0,
-            sc8thName: try String.fetchOne(db, sql: "SELECT name FROM events WHERE id = ?", arguments: ["ev_the_idolm@ster_shiny_colors_8th_live_ito_yume"]),
-            sc8thKind: try String.fetchOne(db, sql: "SELECT kind FROM events WHERE id = ?", arguments: ["ev_the_idolm@ster_shiny_colors_8th_live_ito_yume"]),
-            sc8thShowsCount: try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM shows WHERE event_id = ?", arguments: ["ev_the_idolm@ster_shiny_colors_8th_live_ito_yume"]) ?? 0
-        )
-    }
-
     /// イベント名 OR 公演会場 (shows.venue) のいずれかが query に部分一致するイベントを返す。
     /// venue は同 event 内の複数 shows をまたぐので EXISTS で結合。
     func searchEventsByNameOrVenue(query: String, limit: Int = 100) throws -> [Event] {

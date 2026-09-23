@@ -51,7 +51,6 @@ final class StubSongReading: SongReading, @unchecked Sendable {
     func songCollectedCounts() async throws -> [String: Int] { [:] }
     func songPerformanceCounts() async throws -> [String: Int] { [:] }
     func searchSongs(query: String, limit: Int) async throws -> [Song] { [] }
-    func songSpellings() async throws -> [SongSpelling] { [] }
     func songPerformanceHistory(songId: String) async throws -> [PerformanceHistoryRow] { [] }
     func songArtists(songId: String, role: String?) async throws -> [Idol] { [] }
     func relatedSongs(to song: Song, limit: Int) async throws -> [Song] { [] }

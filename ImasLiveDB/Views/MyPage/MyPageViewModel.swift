@@ -7,18 +7,14 @@ import os
 /// - **VM (ここ)**: ポート越しの診断値 (`diagnosticsReading`)・ブランド・担当アイドル取得と、
 ///   画像一括インポート用の型紙ファイル生成。
 /// - **View 側**: `@AppStorage` の各設定、シート/アラート等の UI 状態、通知権限、
-///   バックアップ/引き継ぎコードの操作、CloudKit の debug probe。
+///   バックアップ/引き継ぎコードの操作。
 ///   担当テーマ色は `@AppStorage` を書くので View 側に残す (計算規則は `resolveOshiTheme`)。
-///
-/// CloudKit 同期エンジンは方針としてポート化しない (docs/ARCHITECTURE.md「現実的判断」) ため、
-/// probe は View に置き、その後の診断値の取り直しだけ `refreshSyncDiagnostics()` で受ける。
 @MainActor
 @Observable
 final class MyPageViewModel {
     private(set) var schemaVersion: String = "..."
     private(set) var dataVersion: String = "..."
     private(set) var dbStats: DatabaseStats?
-    private(set) var syncDiagnostics: SyncDiagnostics?
     private(set) var brands: [Brand] = []
     /// 「担当」としてマークされているアイドル。テーマ色の選択肢にもなる。
     private(set) var pickIdols: [Idol] = []
@@ -51,13 +47,12 @@ final class MyPageViewModel {
     /// (設定画面が DB エラーで真っ白になる方が困る)。
     ///
     /// 診断の値と、ブランド・担当は別々に読む。以前は 1 つの do にまとめていて、
-    /// 診断 (同期の状況) を読み損ねると、テーマ色の選択肢になるブランドと担当まで読めなくなった。
+    /// 診断を読み損ねると、テーマ色の選択肢になるブランドと担当まで読めなくなった。
     func load() async {
         do {
             schemaVersion = try await diagnosticsReading.metaValue(forKey: "schema_version") ?? "不明"
             dataVersion = try await diagnosticsReading.metaValue(forKey: "data_version") ?? "不明"
             dbStats = try await diagnosticsReading.databaseStats()
-            syncDiagnostics = try await diagnosticsReading.syncDiagnostics()
         } catch {
             Logger.database.error("load_failed settings_diagnostics: \(error.localizedDescription)")
         }
@@ -70,11 +65,6 @@ final class MyPageViewModel {
         }
 
         await regenerateImportTemplates()
-    }
-
-    /// CloudKit probe 後など、同期診断だけ取り直したいとき用。
-    func refreshSyncDiagnostics() async {
-        syncDiagnostics = try? await diagnosticsReading.syncDiagnostics()
     }
 
     /// 画像一括インポート用の型紙 JSON を一時ファイルに書き出す。

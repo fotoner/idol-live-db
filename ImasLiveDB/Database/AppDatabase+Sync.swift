@@ -75,25 +75,7 @@ extension AppDatabase {
     func upsertUnitMembers(_ unitMembers: [UnitMember]) throws { try upsertChunked(unitMembers) }
     func upsertShowCasts(_ showCasts: [ShowCast]) throws { try upsertChunked(showCasts) }
     func upsertSetlistItems(_ setlistItems: [SetlistItem]) throws { try upsertChunked(setlistItems) }
-    func upsertSetlistItemsAsync(_ setlistItems: [SetlistItem]) async throws { try await upsertChunkedAsync(setlistItems) }
     func upsertSetlistPerformers(_ setlistPerformers: [SetlistPerformer]) throws { try upsertChunked(setlistPerformers) }
-
-    /// あいまい検索の母集団 (曲名 + 読み)。
-    ///
-    /// 並びは問わない (コアが照合して並べ直す)。実体を読まないので安い。
-    ///
-    /// `brand_id = 'other'` (歌枠カバー等) は除く。曲一覧が既定でこれを隠しており
-    /// (`SongSearchFilter.includeOtherBrand`)、あいまい候補にだけ出てくると
-    /// 「一覧に無い曲が『もしかして』に並ぶ」ことになる。
-    /// `IS NOT` にしているのは、brand_id が NULL の曲を落とさないため (`<>` だと NULL は偽)。
-    func fetchSongSpellingsAsync() async throws -> [SongSpelling] {
-        try await dbQueue.read { db in
-            try Row.fetchAll(
-                db,
-                sql: "SELECT id, title, title_kana FROM songs WHERE brand_id IS NOT 'other'")
-                .map { SongSpelling(id: $0["id"], title: $0["title"], titleKana: $0["title_kana"]) }
-        }
-    }
 
     /// admin 編集: 指定 show の setlist を完全置換 (旧 items/performers 削除 → 新 items/performers 挿入)。
     /// CloudKit 側書き込み成功後にローカル DB を一致させるために呼ぶ。

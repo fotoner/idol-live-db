@@ -11,8 +11,4 @@ struct GRDBDiagnosticsRepository: DiagnosticsReading {
     func databaseStats() async throws -> DatabaseStats {
         try await database.fetchDatabaseStatsAsync()
     }
-
-    func syncDiagnostics() async throws -> SyncDiagnostics {
-        try await database.fetchSyncDiagnosticsAsync()
-    }
 }

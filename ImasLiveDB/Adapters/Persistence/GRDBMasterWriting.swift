@@ -11,7 +11,6 @@ struct GRDBEventWriting: EventWriting {
 struct GRDBShowWriting: ShowWriting {
     let database: AppDatabase
     func upsertShows(_ shows: [Show]) async throws { try await database.upsertShowsAsync(shows) }
-    func upsertSetlistItems(_ items: [SetlistItem]) async throws { try await database.upsertSetlistItemsAsync(items) }
     func replaceSetlist(showId: String, items: [SetlistItem], performers: [SetlistPerformer]) async throws {
         try await database.replaceSetlistAsync(showId: showId, items: items, performers: performers)
     }

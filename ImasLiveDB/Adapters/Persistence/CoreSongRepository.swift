@@ -9,12 +9,12 @@ import Foundation
 /// - user_marks (担当/お気に入り/参加/回収) はスナップショットに**含まれない**。回収系の
 ///   クエリには、ここで解決した参加 show/event id 集合を引数で渡す。
 ///
-/// 端末の DB (SQL) で答えると決めたクエリは 3 つだけ (`songSpellings` / `collectedShows` /
-/// `songVideos`)。どれも「スナップショットに載せない設計」の側に理由があり、
+/// 端末の DB (SQL) で答えると決めたクエリは 2 つだけ (`collectedShows` / `songVideos`)。
+/// どちらも「スナップショットに載せない設計」の側に理由があり、
 /// コアに API を生やせば済む話ではない。各メソッドのコメントに理由を書く。
 struct CoreSongRepository: SongReading {
     let snapshot: CoreSnapshotManager
-    /// 参加マーク (`user_marks`) と、上の 3 つのクエリの引き先。
+    /// 参加マーク (`user_marks`) と、上の 2 つのクエリの引き先。
     let database: AppDatabase
 
     // MARK: - 一覧
@@ -104,17 +104,6 @@ struct CoreSongRepository: SongReading {
         try await snapshot.withStore { store in
             try store.searchSongs(query: query, limit: UInt32(max(0, limit))).map(Self.song(from:))
         }
-    }
-
-    /// あいまい検索 (「もしかして」) の母集団になる綴り表。**移送しない**。
-    ///
-    /// 編集距離の照合そのものはコアが持っている (`domain/fuzzy_search.rs`)。
-    /// ここが渡すのは「どの曲を候補に入れるか」という母集団で、その線引き
-    /// (SQL 側の `WHERE brand_id IS NOT 'other'` = 曲一覧が既定で隠すものと揃える)
-    /// はプラットフォーム側の都合で決まる。照合はコア・母集団の供給はプラットフォーム、
-    /// という分担を保つために意図的に残している (技術的に移せないわけではない)。
-    func songSpellings() async throws -> [SongSpelling] {
-        try await database.fetchSongSpellingsAsync()
     }
 
     // MARK: - 楽曲詳細

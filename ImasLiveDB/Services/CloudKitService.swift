@@ -167,24 +167,6 @@ actor CloudKitService {
         return results
     }
 
-    /// デバッグ用 — `showId == X` で SetlistItem を query。
-    /// modifiedAt 経由の query が iOS SDK バグで取りこぼす場合の検証用。
-    func debugFetchSetlistItemsByShowId(_ showId: String) async throws -> [CKRecord] {
-        let predicate = NSPredicate(format: "showId == %@", showId)
-        let query = CKQuery(recordType: "SetlistItem", predicate: predicate)
-        var records: [CKRecord] = []
-        var cursor: CKQueryOperation.Cursor?
-        let (initial, initialCursor) = try await publicDB.records(matching: query, resultsLimit: 400)
-        records.append(contentsOf: try initial.map { try $0.1.get() })
-        cursor = initialCursor
-        while let c = cursor {
-            let (next, nextCursor) = try await publicDB.records(continuingMatchFrom: c, resultsLimit: 400)
-            records.append(contentsOf: try next.map { try $0.1.get() })
-            cursor = nextCursor
-        }
-        return records
-    }
-
     /// iCloudアカウントの状態を確認
     func accountStatus() async throws -> CKAccountStatus {
         try await container.accountStatus()

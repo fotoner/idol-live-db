@@ -259,18 +259,6 @@ struct UpcomingCatchChance: Identifiable, Sendable {
     let likelyCount: Int
 }
 
-struct SyncDiagnostics: Sendable, Equatable {
-    var eventsAt: Int
-    var showsAt: Int
-    var setlistItemsAt: Int
-    var ml13thLiveExists: Bool
-    var ml13thShowsCount: Int
-    var ml13thSetlistItemsCount: Int
-    var sc8thName: String?
-    var sc8thKind: String?
-    var sc8thShowsCount: Int
-}
-
 struct YearlyShowCount: Codable, FetchableRecord, Identifiable, Sendable {
     var year: String
     var showCount: Int
@@ -280,42 +268,6 @@ struct YearlyShowCount: Codable, FetchableRecord, Identifiable, Sendable {
     enum CodingKeys: String, CodingKey {
         case year
         case showCount = "show_count"
-    }
-}
-
-// MARK: - Search
-
-struct SearchResults: Sendable {
-    var songs: [Song]
-    var idols: [Idol]
-    var events: [Event]
-    /// 打った語には部分一致しないが、あいまい一致で拾えた曲 (「もしかして」)。
-    ///
-    /// `songs` と混ぜない。混ぜると「打った通りの曲」がどれか分からなくなるので、
-    /// 画面では確実な一致の**下**に、見出しを挟んで別枠で出す。
-    var fuzzySongs: [Song] = []
-
-    var isEmpty: Bool {
-        songs.isEmpty && idols.isEmpty && events.isEmpty && fuzzySongs.isEmpty
-    }
-}
-
-/// あいまい検索へ渡す綴り (曲名 + 読み) の軽い射影。
-///
-/// 候補を絞るのに要るのは綴りだけなので、Song 実体を全件読まない。
-/// 当たった曲だけを後から実体化する。
-struct SongSpelling: Sendable {
-    var id: String
-    var title: String
-    var titleKana: String?
-
-    /// コアへ渡す綴り列。読みが無い曲は曲名だけ。
-    var spellings: [String] {
-        let fields: [String?] = [title, titleKana]
-        return fields.compactMap { field in
-            let trimmed = field?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            return trimmed.isEmpty ? nil : trimmed
-        }
     }
 }
 

@@ -61,7 +61,6 @@ struct MyPageView: View {
     @State private var showBrandImageImport = false
     @State private var unitImageURL: String = ""
     @State private var showUnitImageImport = false
-    @State private var ckQueryProbeResult: String?
     @State private var showDeleteAccountConfirm = false
     @State private var isDeletingAccount = false
     @State private var deleteAccountErrorMessage: String?
@@ -754,41 +753,20 @@ struct MyPageView: View {
             #endif
 
             #if DEBUG
-            if let diag = vm.syncDiagnostics {
-                DisclosureGroup {
-                    LabeledContent("@ events", value: "\(diag.eventsAt)").font(.imasCaption2)
-                    LabeledContent("@ shows", value: "\(diag.showsAt)").font(.imasCaption2)
-                    LabeledContent("@ setlist_items", value: "\(diag.setlistItemsAt)").font(.imasCaption2)
-                    LabeledContent("ML 13thLIVE event", value: diag.ml13thLiveExists ? "✅" : "❌").font(.imasCaption2)
-                    LabeledContent("ML 13thLIVE shows", value: "\(diag.ml13thShowsCount)").font(.imasCaption2)
-                    LabeledContent("ML 13thLIVE items", value: "\(diag.ml13thSetlistItemsCount)").font(.imasCaption2)
-                    LabeledContent("SC 8th name", value: diag.sc8thName ?? "(nil)").font(.imasCaption2)
-                    LabeledContent("SC 8th kind", value: diag.sc8thKind ?? "(nil)").font(.imasCaption2)
-                    LabeledContent("SC 8th shows", value: "\(diag.sc8thShowsCount)").font(.imasCaption2)
-
-                    if let probe = ckQueryProbeResult {
-                        LabeledContent("CK Query probe (showId)", value: probe).font(.imasCaption2)
-                    }
-                    Button {
-                        Task { await probeCKQuery() }
-                    } label: {
-                        Label("CK Query probe", systemImage: "play.circle")
-                            .font(.imasCaption2)
-                    }
-                    LabeledContent("reseed 結果", value: AppDatabase.lastReseedStatus)
-                        .font(.imasCaption2)
-                        .textSelection(.enabled)
-                        .contextMenu {
-                            Button {
-                                UIPasteboard.general.string = AppDatabase.lastReseedStatus
-                            } label: {
-                                Label("コピー", systemImage: "doc.on.doc")
-                            }
+            DisclosureGroup {
+                LabeledContent("reseed 結果", value: AppDatabase.lastReseedStatus)
+                    .font(.imasCaption2)
+                    .textSelection(.enabled)
+                    .contextMenu {
+                        Button {
+                            UIPasteboard.general.string = AppDatabase.lastReseedStatus
+                        } label: {
+                            Label("コピー", systemImage: "doc.on.doc")
                         }
-                } label: {
-                    Label("@ 診断", systemImage: "stethoscope")
-                        .font(.imasCaption)
-                }
+                    }
+            } label: {
+                Label("診断", systemImage: "stethoscope")
+                    .font(.imasCaption)
             }
             #endif
         }
@@ -1079,26 +1057,6 @@ struct MyPageView: View {
         }
         themeOshiColorHex = resolved.colorHex
     }
-
-
-
-    private func probeCKQuery() async {
-        ckQueryProbeResult = "実行中..."
-        do {
-            let recs = try await CloudKitService.shared.debugFetchSetlistItemsByShowId("sh_the_idolm@ster_million_live_13thlive_1")
-            ckQueryProbeResult = "showId query: \(recs.count) 件"
-            // ついでにそれを upsert してみる
-            let mapped = recs.compactMap { CKRecordMapper.setlistItem(from: $0) }
-            if !mapped.isEmpty {
-                try await AppContainer.shared.showWriting.upsertSetlistItems(mapped)
-                await vm.refreshSyncDiagnostics()
-                ckQueryProbeResult = (ckQueryProbeResult ?? "") + " / upsert \(mapped.count) 件"
-            }
-        } catch {
-            ckQueryProbeResult = "エラー: \(error.localizedDescription)"
-        }
-    }
-
 }
 
 // MARK: - ModerationUserID

@@ -12,10 +12,6 @@ final class MyPageViewModelTests: XCTestCase {
     private struct FakeDiagnosticsReading: DiagnosticsReading {
         var meta: [String: String] = [:]
         var stats = DatabaseStats(songCount: 0, idolCount: 0, eventCount: 0, showCount: 0)
-        var diagnostics = SyncDiagnostics(
-            eventsAt: 0, showsAt: 0, setlistItemsAt: 0, ml13thLiveExists: false,
-            ml13thShowsCount: 0, ml13thSetlistItemsCount: 0,
-            sc8thName: nil, sc8thKind: nil, sc8thShowsCount: 0)
         var shouldThrow = false
 
         func metaValue(forKey key: String) async throws -> String? {
@@ -25,10 +21,6 @@ final class MyPageViewModelTests: XCTestCase {
         func databaseStats() async throws -> DatabaseStats {
             if shouldThrow { throw TestError.boom }
             return stats
-        }
-        func syncDiagnostics() async throws -> SyncDiagnostics {
-            if shouldThrow { throw TestError.boom }
-            return diagnostics
         }
     }
 
@@ -131,7 +123,6 @@ final class MyPageViewModelTests: XCTestCase {
         XCTAssertEqual(vm.schemaVersion, "27")
         XCTAssertEqual(vm.dataVersion, "61")
         XCTAssertEqual(vm.dbStats?.idolCount, 20)
-        XCTAssertNotNil(vm.syncDiagnostics)
     }
 
     /// meta が無いときは "不明" を出す (空文字や "nil" を画面に出さない)。
@@ -168,7 +159,7 @@ final class MyPageViewModelTests: XCTestCase {
         XCTAssertNil(vm.dbStats)
     }
 
-    /// 診断 (同期の状況) を読み損ねても、ブランドと担当は読む。
+    /// 診断 (版と件数) を読み損ねても、ブランドと担当は読む。
     /// 以前は同じ do の中にあり、診断の失敗でテーマ色の選択肢 (担当) まで消えていた。
     func testBrandsAndPicksLoadEvenWhenDiagnosticsThrow() async {
         var diag = FakeDiagnosticsReading()
@@ -183,7 +174,7 @@ final class MyPageViewModelTests: XCTestCase {
 
         await vm.load()
 
-        XCTAssertNil(vm.syncDiagnostics)
+        XCTAssertNil(vm.dbStats)
         XCTAssertEqual(vm.brands.map(\.id), ["cg"])
         XCTAssertEqual(vm.pickIdols.map(\.id), ["i1"])
     }
@@ -217,33 +208,5 @@ final class MyPageViewModelTests: XCTestCase {
         let unitJSON = try String(contentsOf: unitURL, encoding: .utf8)
         XCTAssertTrue(unitJSON.contains("\"常設ユニット\""))
         XCTAssertFalse(unitJSON.contains("\"臨時ユニット\""))
-    }
-
-    // MARK: - refreshSyncDiagnostics
-
-    func testRefreshSyncDiagnosticsUpdatesOnly() async {
-        let diag = FakeDiagnosticsReading(
-            diagnostics: SyncDiagnostics(
-                eventsAt: 7, showsAt: 0, setlistItemsAt: 0, ml13thLiveExists: false,
-                ml13thShowsCount: 0, ml13thSetlistItemsCount: 0,
-                sc8thName: nil, sc8thKind: nil, sc8thShowsCount: 0))
-        let vm = makeVM(diagnostics: diag)
-
-        await vm.refreshSyncDiagnostics()
-
-        XCTAssertEqual(vm.syncDiagnostics?.eventsAt, 7)
-        // load() を呼んでいないので他の値は初期値のまま
-        XCTAssertEqual(vm.schemaVersion, "...")
-    }
-
-    /// 取得に失敗しても既存の診断値を壊さない (probe 直後に呼ばれるため)。
-    func testRefreshSyncDiagnosticsSwallowsError() async {
-        var diag = FakeDiagnosticsReading()
-        diag.shouldThrow = true
-        let vm = makeVM(diagnostics: diag)
-
-        await vm.refreshSyncDiagnostics()
-
-        XCTAssertNil(vm.syncDiagnostics)
     }
 }

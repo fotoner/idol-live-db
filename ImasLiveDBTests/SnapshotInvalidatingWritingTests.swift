@@ -34,7 +34,6 @@ final class SnapshotInvalidatingWritingTests: XCTestCase {
 
     private struct StubShowWriting: ShowWriting {
         func upsertShows(_ shows: [Show]) async throws {}
-        func upsertSetlistItems(_ items: [SetlistItem]) async throws {}
         func replaceSetlist(showId: String, items: [SetlistItem], performers: [SetlistPerformer]) async throws {}
     }
 
@@ -91,12 +90,11 @@ final class SnapshotInvalidatingWritingTests: XCTestCase {
 
         let shows = SnapshotInvalidatingShowWriting(base: StubShowWriting(), invalidate: { counter.bump() })
         try await shows.upsertShows([])
-        try await shows.upsertSetlistItems([])
         try await shows.replaceSetlist(showId: "show1", items: [], performers: [])
-        XCTAssertEqual(counter.count, 4, "shows / setlist_items / setlist_performers は披露回数・回収数の元データ")
+        XCTAssertEqual(counter.count, 3, "shows / setlist_items / setlist_performers は披露回数・回収数の元データ")
 
         let idols = SnapshotInvalidatingIdolWriting(base: StubIdolWriting(), invalidate: { counter.bump() })
         try await idols.upsertIdols([])
-        XCTAssertEqual(counter.count, 5)
+        XCTAssertEqual(counter.count, 4)
     }
 }
