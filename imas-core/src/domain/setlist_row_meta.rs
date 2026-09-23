@@ -28,6 +28,7 @@ use crate::domain::screen_composition::{
     setlist_row_note_groups, SetlistDisplayMode, SetlistRowNoteGroupRecord,
 };
 use crate::domain::setlist_lineup::is_full_cast;
+use crate::domain::setlist_sections::row_sections;
 use crate::domain::snapshot::Snapshot;
 use crate::domain::unit_queries::exact_matching_unit_names;
 use std::collections::{BTreeSet, HashSet};
@@ -61,6 +62,13 @@ pub struct SetlistRowMetaRecord {
     /// どれを強く見せるかの判断を Swift / Kotlin に書くと、同じ条件が 2 か所に増える
     /// (`crate::domain::screen_composition::setlist_row_note_groups`)。
     pub note_groups: Vec<SetlistRowNoteGroupRecord>,
+    /// この行が属する区切りの見出し (`アンコール` / `LL` / 区切り無しは `本編`)。
+    /// `encore` / `ENCORE` の綴りの揺れはここで畳んである
+    /// ([`crate::domain::setlist_sections::section_label`]。Web と同じ)。
+    pub section_heading: String,
+    /// この行から新しい区切りが始まるか (先頭行は必ず true)。**画面は true の行の前に
+    /// `section_heading` の見出しを置くだけにする** — 隣と比べて塊を切る処理を持たない。
+    pub starts_section: bool,
 }
 
 /// 公演 1 つぶんの添え物ひとまとめ。
@@ -135,10 +143,15 @@ pub fn setlist_row_meta(
     let real_live = is_real_live(snap, show);
     // 要約を数えるための材料 (曲 id と回収) を行を組みながら集める。
     let mut collection_rows: Vec<(String, CollectionGap)> = Vec::new();
+    let items = &snap.setlist_items_by_show[show as usize];
+    let sections = row_sections(
+        items.iter().map(|&item| snap.setlist_items[item as usize].section.as_deref()),
+    );
 
-    let rows: Vec<SetlistRowMetaRecord> = snap.setlist_items_by_show[show as usize]
+    let rows: Vec<SetlistRowMetaRecord> = items
         .iter()
-        .map(|&item| {
+        .zip(sections)
+        .map(|(&item, section)| {
             let row = &snap.setlist_items[item as usize];
             let song = &snap.songs[row.song as usize];
             let empty: Vec<SetlistPerformerRecord> = Vec::new();
@@ -180,6 +193,8 @@ pub fn setlist_row_meta(
                 previous_date: gap.previous_date,
                 since_label: gap.since_label,
                 note_groups,
+                section_heading: section.heading,
+                starts_section: section.starts,
             }
         })
         .collect();
@@ -395,6 +410,30 @@ mod tests {
             assert_eq!(e.id, m.item_id);
         }
         assert!(rows_of(snap, "存在しない公演", PerformerNameMode::IdolOnly, SetlistDisplayMode::Normal).is_empty());
+    }
+
+    /// 区切りの見出しは Web と同じ畳み方で、行ごとに載る。`encore` の綴りのまま
+    /// 見出しにならず、本編 → アンコールの切れ目で 1 回だけ塊が変わる。
+    #[test]
+    fn 区切りの見出しは畳んだ綴りで行に載る() {
+        let snap = snap();
+        let show = (0..snap.shows.len())
+            .find(|&s| {
+                snap.setlist_items_by_show[s].iter().any(|&i| {
+                    snap.setlist_items[i as usize].section.as_deref() == Some("encore")
+                })
+            })
+            .expect("区切りを小文字の encore で入れた公演がある");
+        let metas = rows_of(snap, &snap.shows[show].id, PerformerNameMode::IdolOnly, SetlistDisplayMode::Normal);
+        assert!(metas[0].starts_section, "先頭行は必ず塊の頭");
+        assert!(metas.iter().all(|m| m.section_heading != "encore"));
+        let headings: Vec<&str> = metas
+            .iter()
+            .filter(|m| m.starts_section)
+            .map(|m| m.section_heading.as_str())
+            .collect();
+        assert_eq!(headings.last(), Some(&"アンコール"), "{headings:?}");
+        assert!(headings.contains(&"本編"), "{headings:?}");
     }
 
     // ---- 自分の回収 ----

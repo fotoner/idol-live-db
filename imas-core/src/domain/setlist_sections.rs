@@ -11,6 +11,9 @@
 /// アンコールの見出し。綴りが違っても全部これになる。
 pub const ENCORE_LABEL: &str = "アンコール";
 
+/// 区切り無しの塊にアプリが付ける見出し (Web は見出しを出さない)。
+pub const MAIN_SECTION_HEADING: &str = "本編";
+
 /// 区切りの見出し。`None` = 区切り無し (本編)。
 pub fn section_label(raw: Option<&str>) -> Option<String> {
     let label = raw?.trim();
@@ -21,6 +24,32 @@ pub fn section_label(raw: Option<&str>) -> Option<String> {
         return Some(ENCORE_LABEL.to_string());
     }
     Some(label.to_string())
+}
+
+/// セトリ 1 行の区切り。アプリは `starts` の行の前に `heading` の見出しを置くだけにする
+/// (綴りの畳み方も塊の切り方も画面に持たせない)。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RowSection {
+    /// 見出しの文言。区切り無しは [`MAIN_SECTION_HEADING`]。
+    pub heading: String,
+    /// この行から新しい塊が始まるか (先頭行は必ず true)。
+    pub starts: bool,
+}
+
+/// 並び順の `setlist_items.section` から、各行の区切り。塊の切り方は
+/// [`group_consecutive`] と同じで、畳んだ後の見出しが隣と同じなら 1 つの塊にする
+/// (`encore` と `ENCORE`、`NULL` と空文字は同じ塊)。
+pub fn row_sections<'a>(raws: impl IntoIterator<Item = Option<&'a str>>) -> Vec<RowSection> {
+    let mut previous: Option<Option<String>> = None;
+    raws.into_iter()
+        .map(|raw| {
+            let label = section_label(raw);
+            let starts = previous.as_ref() != Some(&label);
+            let heading = label.clone().unwrap_or_else(|| MAIN_SECTION_HEADING.to_string());
+            previous = Some(label);
+            RowSection { heading, starts }
+        })
+        .collect()
 }
 
 /// 隣り合う同じ区切りをひとまとめにする。並びは保つ。
@@ -112,6 +141,25 @@ mod tests {
             ]
         );
         assert!(group_consecutive(Vec::<(Option<&str>, i32)>::new()).is_empty());
+    }
+
+    #[test]
+    fn row_sections_fold_spellings_and_mark_where_a_block_starts() {
+        let raws = [None, Some(""), Some("encore"), Some("ENCORE"), Some("LL"), None, Some("LL")];
+        let sections = row_sections(raws);
+        let headings: Vec<&str> = sections.iter().map(|s| s.heading.as_str()).collect();
+        let starts: Vec<bool> = sections.iter().map(|s| s.starts).collect();
+        assert_eq!(headings, ["本編", "本編", "アンコール", "アンコール", "LL", "本編", "LL"]);
+        assert_eq!(starts, [true, false, true, false, true, true, true]);
+        assert!(row_sections(Vec::<Option<&str>>::new()).is_empty());
+    }
+
+    #[test]
+    fn row_sections_split_exactly_where_group_consecutive_does() {
+        let raws = [Some("encore"), None, Some(" "), Some("CROSS"), Some("CROSS"), Some("アンコール")];
+        let blocks = group_consecutive(raws.iter().map(|&raw| (section_label(raw), ())));
+        let starts = row_sections(raws).iter().filter(|s| s.starts).count();
+        assert_eq!(starts, blocks.len());
     }
 
     // ---- 曲順 (実データで固定する) ----
