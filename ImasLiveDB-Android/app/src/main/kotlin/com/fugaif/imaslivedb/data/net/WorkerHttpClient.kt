@@ -55,28 +55,61 @@ object UrlConnectionTransport : WorkerTransport {
 }
 
 /**
+ * セッションが 401 で断られたときの再発行口 (AuthService が持つ)。
+ *
+ * iOS `APIClient` と同じく、401 を受けたら 1 回だけ `/auth/refresh` で再発行を試し、
+ * 通れば同じリクエストを送り直す。通らなければセッションを失効させる (ログイン導線に戻す)。
+ */
+fun interface SessionRenewer {
+    /**
+     * @param rejectedToken 401 で断られたトークン。待っている間に別のリクエストが再発行を
+     *   済ませていれば、もう一度は再発行しない。
+     * @return 送り直してよい (新しいセッションがある) なら true。
+     */
+    fun renewAfterUnauthorized(rejectedToken: String): Boolean
+}
+
+/**
  * Worker (imas-live-api) への HTTP の共通部分。ベース URL・タイムアウト・端末 ID と
  * セッションの付け方をここ 1 か所に置く (以前は 5 つのクライアントがそれぞれ書いていた)。
  *
  * 失敗の扱い (null を返す / 例外にする / どの文言を出す) はクライアントごとに違うので、
  * ここは「送って、状態と本文を返す」だけ。通信そのものの失敗は例外のまま投げる。
+ * 例外は 401 だけで、セッションの再発行を 1 回試して送り直す ([SessionRenewer])。
  *
  * @param sessionToken セッション JWT。付けるのはリクエストの時点の値。
  */
 class WorkerHttpClient(
     private val appContext: Context,
     private val sessionToken: () -> String?,
-    private val transport: WorkerTransport = UrlConnectionTransport
+    private val transport: WorkerTransport = UrlConnectionTransport,
+    private val renewer: SessionRenewer? = null
 ) {
     /**
      * @param authorized false ならセッションを付けない (サインインそのもの)。
+     * @param bearer 手元のセッションの代わりに付けるトークン (再発行の要求そのもの)。
+     *   付けたときは 401 でも再発行しない。
      */
     @Throws(IOException::class)
-    fun request(method: String, path: String, body: JSONObject? = null, authorized: Boolean = true): WorkerResponse {
+    fun request(
+        method: String,
+        path: String,
+        body: JSONObject? = null,
+        authorized: Boolean = true,
+        bearer: String? = null
+    ): WorkerResponse {
+        val token = bearer ?: if (authorized) sessionToken() else null
+        val response = send(method, path, body, token)
+        if (response.code != 401 || bearer != null || token == null || renewer == null) return response
+        if (!renewer.renewAfterUnauthorized(token)) return response
+        return send(method, path, body, sessionToken())
+    }
+
+    private fun send(method: String, path: String, body: JSONObject?, token: String?): WorkerResponse {
         val headers = buildMap {
             put("Content-Type", "application/json")
             put("X-Device-Id", DeviceIdentity.get(appContext))
-            if (authorized) sessionToken()?.let { put("Authorization", "Bearer $it") }
+            token?.let { put("Authorization", "Bearer $it") }
         }
         return transport.execute(WorkerRequest(method, BASE_URL + path, headers, body?.toString()))
     }

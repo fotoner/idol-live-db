@@ -127,7 +127,11 @@ class MainActivity : ComponentActivity() {
         // 返らないため、これが無いと BAN 済みユーザーに編集導線が出続ける。前面に出たときに、
         // 間隔を空けて問い合わせる (iOS は起動時)。
         val module = AppModule.from(this)
-        module.appScope.launch { module.authService.refreshMeIfDue() }
+        // セッションの期限が近ければ先に再発行する (JWT は 1 年で切れる)。
+        module.appScope.launch {
+            module.authService.refreshSessionIfDue()
+            module.authService.refreshMeIfDue()
+        }
     }
 }
 

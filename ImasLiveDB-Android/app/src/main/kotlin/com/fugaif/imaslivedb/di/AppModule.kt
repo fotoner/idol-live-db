@@ -98,7 +98,7 @@ class AppModule private constructor(context: Context) {
     val showTicketRepository: ShowTicketRepository by lazy { ShowTicketRepository(database) }
     val authService: AuthService by lazy { AuthService(appContext) }
     /** Worker (imas-live-api) への HTTP。セッションはリクエストの時点の値を付ける。 */
-    val workerHttpClient: WorkerHttpClient by lazy { WorkerHttpClient(appContext, { authService.sessionToken }) }
+    val workerHttpClient: WorkerHttpClient by lazy { WorkerHttpClient(appContext, { authService.sessionToken }, renewer = authService) }
     val communityApi: CommunityApi by lazy { CommunityApi(workerHttpClient, authService) }
     val editApi: EditApi by lazy { EditApi(workerHttpClient, authService) }
     val setlistLikeService: SetlistLikeService by lazy { SetlistLikeService(workerHttpClient) }

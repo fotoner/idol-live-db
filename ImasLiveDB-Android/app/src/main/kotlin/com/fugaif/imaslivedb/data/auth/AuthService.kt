@@ -8,6 +8,7 @@ import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.fugaif.imaslivedb.data.net.SessionRenewer
 import com.fugaif.imaslivedb.data.net.UrlConnectionTransport
 import com.fugaif.imaslivedb.data.net.WorkerHttpClient
 import com.fugaif.imaslivedb.data.net.WorkerTransport
@@ -19,6 +20,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import uniffi.imas_core.SessionResponse
+import uniffi.imas_core.StoredAuthState
+import uniffi.imas_core.authAdoptSessionResponse
+import uniffi.imas_core.authRestoreStoredState
+import uniffi.imas_core.authSessionRefreshCandidate
+import uniffi.imas_core.authStoredFlagValue
 import java.security.KeyStore
 
 data class AuthState(
@@ -45,9 +52,9 @@ class AuthService(
     transport: WorkerTransport = UrlConnectionTransport,
     /** 暗号化 prefs を開く。テストは失敗や成功を差し替える。 */
     openSecurePrefs: (Context) -> SharedPreferences = ::openEncryptedPrefs
-) {
+) : SessionRenewer {
 
-    private val http = WorkerHttpClient(appContext, { sessionToken }, transport)
+    private val http = WorkerHttpClient(appContext, { sessionToken }, transport, renewer = this)
 
     // Android の Credential Manager (GetGoogleIdOption) は serverClientId に渡した
     // Web アプリケーション用クライアント ID を id トークンの aud に埋め込む仕様。
@@ -137,9 +144,8 @@ class AuthService(
             val code = response.code
             val text = response.body
             if (!response.isSuccess || text.isNullOrEmpty()) {
-                // 401 でもサインアウトはしない。Android にはセッション再発行 (`/auth/refresh`) の
-                // 経路が無く、通信不調と失効を区別できないため、ここで導線を壊すと復帰できなくなる。
-                // 失効は編集 API 側の 401 がログイン誘導として拾う。
+                // 401 は送信の口 (WorkerHttpClient) が再発行を 1 回試し、それでも通らなければ
+                // セッションを失効させている ([renewAfterUnauthorized])。ここは記録だけ。
                 Log.w(TAG, "auth/me -> HTTP $code body=$text")
                 return@withContext
             }
@@ -185,6 +191,101 @@ class AuthService(
     fun markBannedFromServer() {
         prefs?.edit()?.putBoolean(KEY_IS_BANNED, true)?.apply()
         _state.value = _state.value.copy(isBanned = true)
+    }
+
+    // MARK: - セッションの再発行 (iOS `AuthService.refreshSession` と同じ条件)
+
+    /** 再発行を 1 つずつにする (401 が同時に何本も返っても `/auth/refresh` は 1 回)。 */
+    private val refreshLock = Any()
+
+    /**
+     * 送信の口が 401 を受けたときに呼ぶ ([SessionRenewer])。`/auth/refresh` で再発行を試し、
+     * 通らなければセッションを失効させる (iOS の `handleSessionExpired` と同じく、
+     * サインイン済みの表示を落としてログイン導線に戻す)。
+     */
+    override fun renewAfterUnauthorized(rejectedToken: String): Boolean = synchronized(refreshLock) {
+        val current = sessionToken
+        // 待っている間に別のリクエストが再発行を済ませていれば、それで送り直す。
+        if (current != null && current != rejectedToken) return true
+        if (performSessionRefresh(nowEpochSeconds())) return true
+        expireSession()
+        false
+    }
+
+    /**
+     * アプリが前面に出たときに呼ぶ。保存しているセッションの期限を見て (判断はコアの
+     * `authRestoreStoredState`)、期限が近い・切れても猶予内なら再発行し、
+     * 再発行も望めない形なら捨てる。JWT の期限は 1 年で、再発行しないと 1 年後に
+     * 画面はサインイン済みのまま書き込みが 401 で失敗し続けていた。
+     */
+    suspend fun refreshSessionIfDue(nowEpochSeconds: Long = nowEpochSeconds()): Unit = withContext(Dispatchers.IO) {
+        val prefs = prefs ?: return@withContext
+        val stored = prefs.getString(KEY_SESSION_TOKEN, null) ?: return@withContext
+        val restored = authRestoreStoredState(
+            StoredAuthState(
+                // Android はユーザー ID を保存しておらず、セッションの有無がサインインの有無。
+                userId = SIGNED_IN_MARKER,
+                identityToken = null,
+                sessionToken = stored,
+                isAdminFlag = authStoredFlagValue(prefs.getBoolean(KEY_IS_ADMIN, false)),
+                isBannedFlag = authStoredFlagValue(prefs.getBoolean(KEY_IS_BANNED, false))
+            ),
+            nowEpochSeconds
+        )
+        synchronized(refreshLock) {
+            // 待っている間に再発行・サインアウトが済んでいれば何もしない。
+            if (sessionToken != stored) return@synchronized
+            when {
+                restored.shouldDeleteStoredSessionToken -> expireSession()
+                restored.shouldRefreshSession -> performSessionRefresh(nowEpochSeconds)
+            }
+        }
+    }
+
+    /** `/auth/refresh` で再発行し、採用できたら保存する。採否はコアが決める。 */
+    private fun performSessionRefresh(nowEpochSeconds: Long): Boolean {
+        val prefs = prefs ?: return false
+        val token = authSessionRefreshCandidate(sessionToken, prefs.getString(KEY_SESSION_TOKEN, null))
+            ?: return false
+        return try {
+            val response = http.request("POST", "/auth/refresh", bearer = token)
+            val text = response.body
+            if (!response.isSuccess || text.isNullOrEmpty()) {
+                Log.w(TAG, "auth/refresh -> HTTP ${response.code}")
+                return false
+            }
+            val json = JSONObject(text)
+            val adoption = authAdoptSessionResponse(
+                SessionResponse(json.getString("sessionToken"), json.optBoolean("isAdmin", false), null),
+                nowEpochSeconds
+            )
+            if (!adoption.accepted) {
+                Log.w(TAG, "session_refresh_rejected_invalid_claims")
+                return false
+            }
+            prefs.edit().apply {
+                adoption.sessionToken?.let { putString(KEY_SESSION_TOKEN, it) }
+                adoption.isAdmin?.let { putBoolean(KEY_IS_ADMIN, it) }
+                adoption.displayName?.let { putString(KEY_DISPLAY_NAME, it) }
+            }.apply()
+            _state.value = _state.value.let {
+                it.copy(
+                    isSignedIn = adoption.isSignedIn ?: it.isSignedIn,
+                    isAdmin = adoption.isAdmin ?: it.isAdmin,
+                    displayName = adoption.displayName ?: it.displayName
+                )
+            }
+            true
+        } catch (e: Exception) {
+            Log.w(TAG, "session refresh failed: ${e.message}")
+            false
+        }
+    }
+
+    /** 再発行もできずにセッションが失効した。表示名は次のサインインまで残す (iOS と同じ)。 */
+    private fun expireSession() {
+        prefs?.edit()?.remove(KEY_SESSION_TOKEN)?.apply()
+        _state.value = _state.value.copy(isSignedIn = false)
     }
 
     /** 表示名を変更する (`POST /users/me`)。iOS `AuthService.updateDisplayName` と同じ契約。 */
@@ -267,6 +368,11 @@ class AuthService(
     companion object {
         private const val TAG = "AuthService"
         private const val PREFS_NAME = "imas_auth_secure"
+
+        /** コアの復元規則に渡す「サインインしている」印 (Android はユーザー ID を保存していない)。 */
+        private const val SIGNED_IN_MARKER = "android-session"
+
+        private fun nowEpochSeconds(): Long = System.currentTimeMillis() / 1000
 
         private fun openEncryptedPrefs(context: Context): SharedPreferences =
             EncryptedSharedPreferences.create(
