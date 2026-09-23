@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/nav.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- nav.settings_button.a11y: 各タブ右上の歯車ボタン (設定・マイページを開く) の読み上げ -->
+    <string name="nav_settings_button_a11y">設定・マイ</string>
+</resources>

@@ -80,11 +80,6 @@ enum L10nCatalogKeys {
     private static func samplesNav() -> [L10nCatalogSample] {
         var s: [L10nCatalogSample] = []
         s.append(L10nCatalogSample(key: "nav.settings_button.a11y", table: "Nav", bundles: ["app"], languagesWithValue: ["ja", "ko"], args: "", make: { L10n.Nav.settingsButtonA11y }, expected: ["ja": "設定・マイ", "ko": "설정·마이페이지"]))
-        s.append(L10nCatalogSample(key: "nav.tab.events", table: "Nav", bundles: ["app"], languagesWithValue: ["ja", "ko"], args: "", make: { L10n.Nav.tabEvents }, expected: ["ja": "ライブ", "ko": "라이브"]))
-        s.append(L10nCatalogSample(key: "nav.tab.idols", table: "Nav", bundles: ["app"], languagesWithValue: ["ja", "ko"], args: "", make: { L10n.Nav.tabIdols }, expected: ["ja": "アイドル", "ko": "아이돌"]))
-        s.append(L10nCatalogSample(key: "nav.tab.produce", table: "Nav", bundles: ["app"], languagesWithValue: ["ja", "ko"], args: "", make: { L10n.Nav.tabProduce }, expected: ["ja": "プロデュース", "ko": "프로듀스"]))
-        s.append(L10nCatalogSample(key: "nav.tab.schedule", table: "Nav", bundles: ["app"], languagesWithValue: ["ja", "ko"], args: "", make: { L10n.Nav.tabSchedule }, expected: ["ja": "スケジュール", "ko": "스케줄"]))
-        s.append(L10nCatalogSample(key: "nav.tab.songs", table: "Nav", bundles: ["app"], languagesWithValue: ["ja", "ko"], args: "", make: { L10n.Nav.tabSongs }, expected: ["ja": "楽曲", "ko": "곡"]))
         return s
     }
 

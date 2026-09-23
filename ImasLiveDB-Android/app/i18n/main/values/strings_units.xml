@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/units.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- units.detail.community.login_dialog: 未ログインでタグを付けようとしたときのダイアログの本文 (Android) -->
+    <string name="units_detail_community_login_dialog">タグ付け・投票にはログインが必要です。</string>
+    <!-- units.detail.community.login_prompt: コミュニティの節の先頭に出す、未ログインの人への案内 -->
+    <string name="units_detail_community_login_prompt">タグ付け・投票にはログインが必要です</string>
+    <!-- units.detail.load_error.message: 詳細の読み込みに失敗したときの説明 -->
+    <string name="units_detail_load_error_message">読み込みに失敗しました。通信状況を確認してもう一度お試しください。</string>
+    <!-- units.detail.load_error.title: 詳細の読み込みに失敗したときの空状態の見出し -->
+    <string name="units_detail_load_error_title">読み込みに失敗しました</string>
+    <!-- units.detail.members.empty.title_android: Android の文言。iOS の detail.members.empty.title と ja が違う (統一はオーナーが別 PR で) -->
+    <string name="units_detail_members_empty_title_android">メンバー情報がありません</string>
+    <!-- units.detail.members.header: メンバーの節の見出し (右に人数) -->
+    <string name="units_detail_members_header">メンバー</string>
+    <!-- units.detail.not_found.message: 開こうとしたユニットがデータに無いとき (Android) -->
+    <string name="units_detail_not_found_message">ユニットが見つかりませんでした。</string>
+    <!-- units.detail.similar.header: タグが似ているユニット (サーバ算出のおすすめ) の節の見出し -->
+    <string name="units_detail_similar_header">タグが似ているユニット</string>
+    <!-- units.detail.similar.shared_tags: おすすめのユニットの下に出す、共通するタグの数 -->
+    <plurals name="units_detail_similar_shared_tags">
+        <item quantity="other">タグ%1$,d個一致</item>
+    </plurals>
+    <!-- units.detail.songs.empty.title: 楽曲が 1 曲も無いときの空状態の見出し -->
+    <string name="units_detail_songs_empty_title">楽曲がありません</string>
+    <!-- units.detail.songs.header: 楽曲の節の見出し (右に件数) -->
+    <string name="units_detail_songs_header">楽曲</string>
+    <!-- units.detail.tab.community: 詳細の中のセグメント (楽曲 / メンバー / コミュニティ) -->
+    <string name="units_detail_tab_community">コミュニティ</string>
+    <!-- units.detail.tab.members: 詳細の中のセグメント (楽曲 / メンバー / コミュニティ) -->
+    <string name="units_detail_tab_members">メンバー</string>
+    <!-- units.detail.tab.songs: 詳細の中のセグメント (楽曲 / メンバー / コミュニティ) -->
+    <string name="units_detail_tab_songs">楽曲</string>
+    <!-- units.detail.tags.action.add: タグを付ける操作。iOS はタグが無いときの空状態のボタン、Android は ＋ ボタンの読み上げ -->
+    <string name="units_detail_tags_action_add">タグを追加</string>
+    <!-- units.detail.tags.empty.title: タグが 1 つも無いとき -->
+    <string name="units_detail_tags_empty_title">タグはまだありません</string>
+    <!-- units.detail.tags.header: コミュニティタグの節の見出し -->
+    <string name="units_detail_tags_header">タグ</string>
+    <!-- units.list.empty.message: ユニットが 1 件も無いときの空状態の説明 -->
+    <string name="units_list_empty_message">登録されているユニットがまだありません。</string>
+    <!-- units.list.empty.title: ユニットが 1 件も無いときの空状態の見出し -->
+    <string name="units_list_empty_title">ユニットがありません</string>
+    <!-- units.list.filter_empty.message_android: Android の文言。iOS の list.filter_empty.message と ja が違う (統一はオーナーが別 PR で)。query は利用者が打った語 -->
+    <string name="units_list_filter_empty_message_android">「%1$s」に一致するユニットはいません。</string>
+    <!-- units.list.filter_empty.title_android: Android の文言。iOS の list.filter_empty.title と ja が違う (統一はオーナーが別 PR で) -->
+    <string name="units_list_filter_empty_title_android">見つかりませんでした</string>
+    <!-- units.list.name_filter.prompt: 一覧の先頭の絞り込み欄のプレースホルダ (Android) -->
+    <string name="units_list_name_filter_prompt">ユニット名で絞り込み</string>
+</resources>

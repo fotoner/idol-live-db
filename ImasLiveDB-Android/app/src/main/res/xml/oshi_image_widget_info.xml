@@ -10,7 +10,7 @@
   android:description が持つ (この属性は @string/… しか受け付けない)。
 -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:description="@string/widget_desc_oshi_image"
+    android:description="@string/widget_oshi_image_description"
     android:minWidth="110dp"
     android:minHeight="110dp"
     android:minResizeWidth="110dp"

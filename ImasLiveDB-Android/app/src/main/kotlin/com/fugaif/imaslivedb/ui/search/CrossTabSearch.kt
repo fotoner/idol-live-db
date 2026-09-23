@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.core.SnapshotUnavailableException
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasFilterChip
 import com.fugaif.imaslivedb.ui.navigation.TopLevelTab
 import com.fugaif.imaslivedb.ui.theme.DS
@@ -117,9 +119,9 @@ fun CrossTabCountChips(query: String, from: TopLevelTab) {
     ) {
         // 上のスコープ列と同じ形の見出し。見出しが無いと、同じ見た目のチップ列が
         // 2 段あるだけになり、「絞り込む対象を変える」のか「別の画面へ移る」のかが読めない。
-        Text("別のタブ", fontSize = 12.sp, color = DS.ink3)
+        Text(L10n.Search.crossTabHeader.resolve(), fontSize = 12.sp, color = DS.ink3)
         suggestions.forEach { (tab, n) ->
-            ImasFilterChip(label = "${tab.label}に $n", selected = false, onClick = {
+            ImasFilterChip(label = L10n.Search.crossTabChip(tab = tab.label, count = n).resolve(), selected = false, onClick = {
                 CrossTabSearch.hand(query, tab)
             })
         }

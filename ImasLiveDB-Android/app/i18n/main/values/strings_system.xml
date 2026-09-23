@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/system.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- system.app.display_name: ホーム画面のアプリ名 (iOS CFBundleDisplayName / Android の application・activity の label)。ko 表記はオーナー確定待ち。ja は project.yml の INFOPLIST_KEY_CFBundleDisplayName と同じにする -->
+    <string name="system_app_display_name">アイドルライブDB</string>
+</resources>

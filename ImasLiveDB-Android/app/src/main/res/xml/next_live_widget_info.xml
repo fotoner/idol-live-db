@@ -8,7 +8,7 @@
   android:description が持つ (この属性は @string/… しか受け付けない)。
 -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:description="@string/widget_desc_next_live"
+    android:description="@string/widget_next_live_description"
     android:minWidth="110dp"
     android:minHeight="110dp"
     android:minResizeWidth="110dp"

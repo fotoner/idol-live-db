@@ -56,6 +56,10 @@ import com.fugaif.imaslivedb.data.auth.startCommunityEdit
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.data.model.ImasUnit
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.coreText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.CommunityLoginPromptDialog
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
@@ -110,7 +114,7 @@ fun UnitDetailScreen(
                 title = { Text(unit?.displayName ?: "", maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 }
             )
@@ -120,9 +124,9 @@ fun UnitDetailScreen(
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 ImasEmptyState(
                     icon = Icons.Filled.ErrorOutline,
-                    title = "読み込みに失敗しました",
-                    message = state.loadError,
-                    actionTitle = "再試行",
+                    title = L10n.Units.detailLoadErrorTitle.resolve(),
+                    message = state.loadError?.resolve(),
+                    actionTitle = L10n.Common.actionRetry.resolve(),
                     onAction = { viewModel.retry() }
                 )
             }
@@ -134,7 +138,11 @@ fun UnitDetailScreen(
             Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState())) {
                 Hero(unit, t)
                 ImasSegmented(
-                    labels = listOf("楽曲", "メンバー", "コミュニティ"),
+                    labels = listOf(
+                        L10n.Units.detailTabSongs.resolve(),
+                        L10n.Units.detailTabMembers.resolve(),
+                        L10n.Units.detailTabCommunity.resolve()
+                    ),
                     selection = segment, onSelect = { segment = it },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)
                 )
@@ -182,7 +190,7 @@ fun UnitDetailScreen(
 
     if (showLoginPrompt) {
         CommunityLoginPromptDialog(
-            message = "タグ付け・投票にはログインが必要です。",
+            message = L10n.Units.detailCommunityLoginDialog.resolve(),
             onDismiss = { showLoginPrompt = false }
         )
     }
@@ -202,12 +210,12 @@ private fun Hero(unit: ImasUnit, t: ImasTheme) {
 private fun SongsBody(state: UnitDetailUiState, onSongClick: (String) -> Unit) {
     Column(modifier = Modifier.padding(top = 12.dp)) {
         if (state.songs.isEmpty()) {
-            ImasEmptyState(icon = Icons.Filled.MusicNote, title = "楽曲がありません")
+            ImasEmptyState(icon = Icons.Filled.MusicNote, title = L10n.Units.detailSongsEmptyTitle.resolve())
         } else {
-            ImasSectionHeader("楽曲", count = "${state.songs.size}")
+            ImasSectionHeader(L10n.Units.detailSongsHeader, count = DisplayText.Verbatim("${state.songs.size}"))
             state.songs.forEach { song ->
                 SongRow(
-                    title = song.title, songId = song.id, artistNames = song.singerLabel ?: "", unitName = song.unitName,
+                    title = song.title, songId = song.id, artistNames = coreText(song.singerLabel ?: ""), unitName = song.unitName,
                     artworkUrl = song.artworkUrl, previewUrl = song.previewUrl, brandId = song.brandId,
                     modifier = Modifier.clickable { onSongClick(song.id) }.padding(horizontal = 16.dp)
                 )
@@ -221,9 +229,9 @@ private fun SongsBody(state: UnitDetailUiState, onSongClick: (String) -> Unit) {
 private fun MembersBody(state: UnitDetailUiState, onIdolClick: (String) -> Unit) {
     Column(modifier = Modifier.padding(top = 12.dp)) {
         if (state.members.isEmpty()) {
-            ImasEmptyState(icon = Icons.Filled.Groups, title = "メンバー情報がありません")
+            ImasEmptyState(icon = Icons.Filled.Groups, title = L10n.Units.detailMembersEmptyTitleAndroid.resolve())
         } else {
-            ImasSectionHeader("メンバー", count = "${state.members.size}")
+            ImasSectionHeader(L10n.Units.detailMembersHeader, count = DisplayText.Verbatim("${state.members.size}"))
             FlowRow(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -278,20 +286,20 @@ private fun CommunityBody(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
                     .clip(RoundedCornerShape(12.dp)).background(DS.fill).padding(12.dp)
             ) {
-                Text("タグ付け・投票にはログインが必要です", fontSize = 12.5.sp, color = DS.ink2)
+                Text(L10n.Units.detailCommunityLoginPrompt.resolve(), fontSize = 12.5.sp, color = DS.ink2)
             }
         }
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                ImasSectionHeader("タグ", count = "${tags.size}", modifier = Modifier.weight(1f))
+                ImasSectionHeader(L10n.Units.detailTagsHeader, count = DisplayText.Verbatim("${tags.size}"), modifier = Modifier.weight(1f))
                 if (canEditHere) {
                     IconButton(onClick = onOpenTagPicker, modifier = Modifier.padding(end = 8.dp)) {
-                        Icon(Icons.Filled.Add, contentDescription = "タグを追加", tint = DS.ink2)
+                        Icon(Icons.Filled.Add, contentDescription = L10n.Units.detailTagsActionAdd.resolve(), tint = DS.ink2)
                     }
                 }
             }
             if (tags.isEmpty()) {
-                Text("タグはまだありません", fontSize = 13.sp, color = DS.ink3,
+                Text(L10n.Units.detailTagsEmptyTitle.resolve(), fontSize = 13.sp, color = DS.ink3,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp))
             } else {
                 FlowRow(
@@ -324,7 +332,7 @@ private fun CommunityBody(
         // タグが似ているユニット (このユニットが好きな人にはこのユニットも, サーバ算出)
         if (similarUnits.isNotEmpty()) {
             Column {
-                ImasSectionHeader("タグが似ているユニット", count = "${similarUnits.size}")
+                ImasSectionHeader(L10n.Units.detailSimilarHeader, count = DisplayText.Verbatim("${similarUnits.size}"))
                 FlowRow(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -341,7 +349,8 @@ private fun CommunityBody(
                                 modifier = Modifier.padding(top = 6.dp))
                             val shared = similarSharedTags[unit.id]
                             if (shared != null) {
-                                Text("タグ${shared}個一致", fontSize = 10.sp, color = DS.ink3, textAlign = TextAlign.Center,
+                                Text(L10n.Units.detailSimilarSharedTags(count = shared).resolve(), fontSize = 10.sp, color = DS.ink3,
+                                    textAlign = TextAlign.Center,
                                     maxLines = 1, overflow = TextOverflow.Ellipsis)
                             }
                         }

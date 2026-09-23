@@ -99,13 +99,25 @@ android {
     }
 
     sourceSets {
+        // 表示文言のリソース (生成物: i18n/catalog → python3 tools/i18n/i18n.py generate。手で直さない)。
+        // どの言語をどのディレクトリに置くかは i18n/config.json の channel が決める。
+        // main は channel=release の言語 (ja は常にここ = 既定の values/)。
+        getByName("main") {
+            res.srcDirs("$projectDir/i18n/main")
+        }
         // Room の確定スキーマ (app/schemas) を JVM ユニットテストから読める assets に載せる。
         // MigrationTestHelper は assets の `<DB クラス名>/<版>.json` から旧版の DB を組み立てる。
         // test ソースセットの assets は AGP がユニットテストに渡さない (Robolectric が見るのは
         // debug の merged assets だけ) ので、debug に足す。release の APK には入らない。
         getByName("debug") {
             assets.srcDirs("$projectDir/schemas")
+            // channel=dev/beta の言語 (今は ko)。Debug ビルドでだけ見える。buildType のリソースは
+            // main を上書きする (AGP の標準の優先順位) ので、xml/locale_config.xml などは debug 版が勝つ。
+            // JVM の単体テストは debug でだけ回る (下の androidComponents) ので、Robolectric からも見える。
+            res.srcDirs("$projectDir/i18n/debug")
         }
+        // beta の buildType を足すとき (ko を beta に上げる段階) は getByName("beta") { res.srcDirs("$projectDir/i18n/beta") }
+        // も足し、下の単体テストを止める selector を debug 以外の全 buildType に広げる。
     }
 
     packaging {

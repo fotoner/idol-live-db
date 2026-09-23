@@ -31,6 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 
 /**
@@ -51,7 +53,7 @@ fun PersonalTagsSection(
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 16.dp)) {
             Icon(Icons.Filled.Lock, contentDescription = null, tint = DS.ink3, modifier = Modifier.size(14.dp))
             Text(
-                "マイタグ(自分だけに表示)", fontSize = 13.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold, color = DS.ink2,
+                L10n.Common.personalTagsHeader.resolve(), fontSize = 13.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold, color = DS.ink2,
                 modifier = Modifier.padding(start = 6.dp)
             )
         }
@@ -64,7 +66,7 @@ fun PersonalTagsSection(
                 value = input,
                 onValueChange = { if (it.length <= 30) input = it },
                 modifier = Modifier.weight(1f),
-                placeholder = { Text("例: 聞いた", fontSize = 13.sp) },
+                placeholder = { Text(L10n.Common.personalTagsPlaceholder.resolve(), fontSize = 13.sp) },
                 singleLine = true
             )
             IconButton(onClick = {
@@ -73,12 +75,12 @@ fun PersonalTagsSection(
                     onAdd(name) { input = "" }
                 }
             }) {
-                Icon(Icons.Filled.Add, contentDescription = "マイタグを追加", tint = DS.ink2)
+                Icon(Icons.Filled.Add, contentDescription = L10n.Common.personalTagsAddA11y.resolve(), tint = DS.ink2)
             }
         }
         if (tags.isEmpty()) {
             Text(
-                "マイタグはまだありません", fontSize = 13.sp, color = DS.ink3,
+                L10n.Common.personalTagsEmpty.resolve(), fontSize = 13.sp, color = DS.ink3,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)
             )
         } else {
@@ -98,14 +100,14 @@ fun PersonalTagsSection(
                     ) {
                         Text(name, fontSize = 13.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold, color = DS.ink2)
                         Icon(
-                            Icons.Filled.Close, contentDescription = "削除",
+                            Icons.Filled.Close, contentDescription = L10n.Common.personalTagsRemoveA11y.resolve(),
                             tint = DS.ink3, modifier = Modifier.size(14.dp).padding(start = 4.dp)
                         )
                     }
                 }
             }
             Text(
-                "長押しで削除", fontSize = 11.sp, color = DS.ink3,
+                L10n.Common.personalTagsRemoveHint.resolve(), fontSize = 11.sp, color = DS.ink3,
                 modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 2.dp)
             )
         }
