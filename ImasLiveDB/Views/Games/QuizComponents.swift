@@ -304,14 +304,8 @@ struct QuizResultView: View {
     /// 自己ベストは記録**後**の保存値から引く (記録が無い初回は今回の率で代用)。
     private var bestRate: Int { GameProgressStore.shared.bestRatePercent(for: kind) ?? rate }
 
-    private var comment: String {
-        switch rate {
-        case 95...: return "お見事！担当への愛が伝わる"
-        case 80...: return "高得点！プロデューサーの貫禄"
-        case 50...: return "いい線いってる！次はもっと高みへ"
-        default: return "これから一緒に覚えていこう"
-        }
-    }
+    /// リザルトの一言 (閾値と文言はコアの QuizSessionResult.comment)。
+    private var comment: String { result.comment }
 
     private var shareText: String {
         shareQuizResultText(

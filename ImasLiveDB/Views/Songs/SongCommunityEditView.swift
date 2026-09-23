@@ -165,14 +165,9 @@ struct VideoEditView: View {
             && trimmedNote.count <= Self.maxNote
     }
 
-    /// YouTube URL 簡易判定 (サーバ validator の YouTube 正規表現に合わせたクライアント先行チェック)。
-    /// watch?v= / youtu.be/ / shorts/ / embed/ を許容する。
+    /// 投稿してよい YouTube の URL か (判定はコアの `youtube_is_upload_url`)。
     static func isYouTubeURL(_ s: String) -> Bool {
-        guard let url = URL.safeHTTP(string: s), let host = url.host?.lowercased() else { return false }
-        let isYouTubeHost = host == "youtu.be"
-            || host == "youtube.com" || host == "www.youtube.com"
-            || host == "m.youtube.com" || host == "music.youtube.com"
-        return isYouTubeHost
+        youtubeIsUploadUrl(url: s)
     }
 
     private func save() async {

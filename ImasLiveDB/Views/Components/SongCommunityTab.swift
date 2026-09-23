@@ -127,24 +127,26 @@ struct SongCommunityTab: View {
                                action: permission.showEditAffordance ? { onIntent(.createVideo) } : nil,
                                seed: seed)
             } else {
+                // 動画 id とサムネイルはコア (`youtubeVideoRefs`) が一覧ぶん 1 回で返す。
+                let refs = youtubeVideoRefs(urls: vm.songVideos.map(\.youtubeUrl))
                 ImasListContainer {
                     ForEach(Array(vm.songVideos.enumerated()), id: \.element.id) { idx, video in
                         if idx > 0 { ImasRowDivider(inset: DS.sp5) }
-                        videoRow(video)
+                        videoRow(video, ref: refs.indices.contains(idx) ? refs[idx] : nil)
                     }
                 }
             }
         }
     }
 
-    private func videoRow(_ video: SongVideo) -> some View {
-        let videoID = YouTube.videoID(from: video.youtubeUrl)
+    private func videoRow(_ video: SongVideo, ref: YouTubeVideoRef?) -> some View {
+        let videoID = ref?.videoId
         return VStack(alignment: .leading, spacing: DS.sp3) {
-            if let videoID, let url = URL.safeHTTP(string: video.youtubeUrl) {
+            if let ref, videoID != nil, let url = URL.safeHTTP(string: video.youtubeUrl) {
                 // 公式 MV は埋め込み無効が多くアプリ内再生不可 (YouTube仕様) のため、
                 // サムネタップで YouTube アプリ/Safari を開く。
                 Button { openURL(url) } label: {
-                    videoThumbnail(videoID: videoID)
+                    videoThumbnail(ref)
                 }
                 .buttonStyle(.plain)
             }
@@ -179,14 +181,14 @@ struct SongCommunityTab: View {
         .padding(.horizontal, DS.sp5).padding(.vertical, 11)
     }
 
-    private func videoThumbnail(videoID: String) -> some View {
+    private func videoThumbnail(_ ref: YouTubeVideoRef) -> some View {
         ZStack {
-            LazyImage(url: YouTube.thumbnailURL(for: videoID)) { state in
+            LazyImage(url: ref.thumbnailUrl.flatMap(URL.init(string:))) { state in
                 if let image = state.image {
                     image.resizable().aspectRatio(contentMode: .fill)
                 } else if state.error != nil {
                     // maxresdefault が無い動画は mqdefault にフォールバック。
-                    LazyImage(url: YouTube.fallbackThumbnailURL(for: videoID)) { fb in
+                    LazyImage(url: ref.fallbackThumbnailUrl.flatMap(URL.init(string:))) { fb in
                         if let image = fb.image {
                             image.resizable().aspectRatio(contentMode: .fill)
                         } else {
