@@ -87,11 +87,20 @@ object NotificationScheduler {
      * 予約を全消去してから、設定が ON の通知を組み直して積む。
      * 通知が許可されていない場合は積まない (iOS の `guard status == .authorized` と同じ)。
      */
-    suspend fun rescheduleAll(context: Context): Unit = withContext(Dispatchers.IO) {
-        rescheduleMutex.withLock { rescheduleAllLocked(context) }
+    suspend fun rescheduleAll(context: Context): Unit = rescheduleAll(context, ::buildPlan)
+
+    /** [plan] を差し替えられる入口 (テスト用)。本番は [buildPlan]。 */
+    internal suspend fun rescheduleAll(
+        context: Context,
+        plan: suspend (Context, NotificationPrefs, ZonedDateTime) -> List<PlannedNotificationRecord>
+    ): Unit = withContext(Dispatchers.IO) {
+        rescheduleMutex.withLock { rescheduleAllLocked(context, plan) }
     }
 
-    private suspend fun rescheduleAllLocked(context: Context) {
+    private suspend fun rescheduleAllLocked(
+        context: Context,
+        plan: suspend (Context, NotificationPrefs, ZonedDateTime) -> List<PlannedNotificationRecord>
+    ) {
         val app = context.applicationContext
         val prefs = NotificationPrefs(app)
 
@@ -104,27 +113,13 @@ object NotificationScheduler {
 
         ensureChannels(app)
 
-        val module = AppModule.from(app)
         val now = ZonedDateTime.now()
-
-        // 何を・いつ・どの文言で積むか (誕生日・月曜のミーム・ライブ 1 週間前・チケット、
-        // 60 件の上限とカテゴリ間の round-robin) は全部コアの予定表 (notificationPlan)。
-        // ここは設定とマークを詰めて 1 回呼び、返ってきた「その地の暦」の日時を端末のゾーンで
-        // 絶対時刻に直して積むだけ。
-        val plans = runCatching {
-            val input = NotificationPlanInput(
-                today = now.toLocalDate().toString(),
-                nowMinutes = (now.hour * 60 + now.minute).toUInt(),
-                birthdayEnabled = prefs.isEnabled(NotificationCategory.OSHI_BIRTHDAY),
-                mondayEnabled = prefs.isEnabled(NotificationCategory.MONDAY),
-                liveWeekEnabled = prefs.isEnabled(NotificationCategory.LIVE_WEEK),
-                ticketEnabled = prefs.isEnabled(NotificationCategory.TICKET),
-                pickIdolIds = module.userMarkRepository.pickedIdolIds().toList(),
-                eventIds = markedEventIds(module),
-                seed = Random.nextLong().toULong()
-            )
-            module.snapshotStoreProvider.query { store -> store.notificationPlan(input) }
-        }.onFailure { Log.e(TAG, "notif_plan_failed", it) }.getOrDefault(emptyList())
+        val plans = runCatching { plan(app, prefs, now) }
+            .onFailure { Log.e(TAG, "notif_plan_failed", it) }
+            .getOrNull()
+            // 予定表を作れなかったら、今の予約を消さずに残す (次に積み直せるときまで鳴らす)。
+            // 「全部消してから登録し直す」は、組み立てが成功したときだけ。
+            ?: return
 
         cancelAllScheduled(app, prefs)
 
@@ -166,6 +161,31 @@ object NotificationScheduler {
             ).apply { description = category.channelDescription }
             manager.createNotificationChannel(channel)
         }
+    }
+
+    /**
+     * 予定表を組む。何を・いつ・どの文言で積むか (誕生日・月曜のミーム・ライブ 1 週間前・
+     * チケット、60 件の上限とカテゴリ間の round-robin) は全部コアの予定表 (notificationPlan)。
+     * ここは設定とマークを詰めて 1 回呼ぶだけ。読めなければ投げる (呼び元が予約を残す)。
+     */
+    private suspend fun buildPlan(
+        context: Context,
+        prefs: NotificationPrefs,
+        now: ZonedDateTime
+    ): List<PlannedNotificationRecord> {
+        val module = AppModule.from(context)
+        val input = NotificationPlanInput(
+            today = now.toLocalDate().toString(),
+            nowMinutes = (now.hour * 60 + now.minute).toUInt(),
+            birthdayEnabled = prefs.isEnabled(NotificationCategory.OSHI_BIRTHDAY),
+            mondayEnabled = prefs.isEnabled(NotificationCategory.MONDAY),
+            liveWeekEnabled = prefs.isEnabled(NotificationCategory.LIVE_WEEK),
+            ticketEnabled = prefs.isEnabled(NotificationCategory.TICKET),
+            pickIdolIds = module.userMarkRepository.pickedIdolIds().toList(),
+            eventIds = markedEventIds(module),
+            seed = Random.nextLong().toULong()
+        )
+        return module.snapshotStoreProvider.query { store -> store.notificationPlan(input) }
     }
 
     /** お気に入り ∪ 参加マーク (公演単位のマークはそのイベント) のイベント id。 */
