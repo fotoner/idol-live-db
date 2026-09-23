@@ -209,4 +209,22 @@ final class PollDetailViewModelTests: XCTestCase {
         XCTAssertEqual(vm.remaining, 1) // myVoteCount 2 → 残り1
         XCTAssertEqual(fake.voteCalls, ["s2", "s3"])
     }
+
+    /// 一覧 (選択肢) がまだ読めていないときに決定しても、選択済みのまま返ってきた票は取り消さない。
+    /// 以前は選択肢に無い id を渡さず、投票済みの票が黙って取り消されていた (RedTeam H-1)。
+    func testPickerDecisionKeepsVotesNotInTheLoadedChoices() async {
+        let fake = FakeCommunityVoting()
+        fake.detailToReturn = PollDetail(
+            poll: makePoll(targetType: .idol),
+            entries: [PollEntry(entityId: "i1", voteCount: 3, hasUserVoted: true)],
+            myVoteCount: 1)
+        let vm = PollDetailViewModel(pollId: "p1", voting: fake)
+        await vm.load()
+
+        // ピッカーは i1 を選択済みで開き、そのまま i2 を足して決定。選択肢の一覧はまだ空。
+        await vm.applyPickerSelection(["i1", "i2"], ordered: [])
+
+        XCTAssertEqual(fake.unvoteCalls, [])
+        XCTAssertEqual(fake.voteCalls, ["i2"])
+    }
 }

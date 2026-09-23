@@ -340,7 +340,7 @@ struct PollDetailView: View {
                 selected: Set(detail.entries.filter(\.hasUserVoted).map(\.entityId))
             ) { selectedIds in
                 showVotePicker = false
-                applyPickerSelection(selectedIds, ordered: pickIdols.map(\.id), detail: detail)
+                Task { await vm.applyPickerSelection(selectedIds, ordered: pickIdols.map(\.id)) }
             }
             .environment(database)
         case .unit:
@@ -355,23 +355,11 @@ struct PollDetailView: View {
                 units: pickUnits
             ) { selectedIds in
                 showVotePicker = false
-                applyPickerSelection(selectedIds, ordered: pickUnits.map(\.id), detail: detail)
+                Task { await vm.applyPickerSelection(selectedIds, ordered: pickUnits.map(\.id)) }
             }
         }
     }
 
-    /// アイドル/ユニット共通のまとめ投票。選択差分から投票/取消をまとめて発火する。
-    /// 何を入れて何を取り消すかはコア (`planVoteSelection`)。選択は選択肢の表示順で渡す。
-    private func applyPickerSelection(_ selectedIds: Set<String>, ordered: [String], detail: PollDetail) {
-        let plan = planVoteSelection(
-            alreadyVoted: detail.entries.filter(\.hasUserVoted).map(\.entityId),
-            selectedInOrder: ordered.filter(selectedIds.contains),
-            myVoteCount: UInt32(clamping: detail.myVoteCount), unvoteDeselected: true)
-        Task {
-            if !plan.toUnvote.isEmpty { await vm.unvoteForEntities(plan.toUnvote) }
-            if !plan.toVote.isEmpty { await vm.voteForEntities(plan.toVote) }
-        }
-    }
 
     /// ランキング件数表示の単位。お題の対象種別で数え方の助数詞が変わる (曲/人/組)。
     private func entryCountUnit(for targetType: PollTargetType) -> String {

@@ -79,6 +79,22 @@ final class PollDetailViewModel {
         }
     }
 
+    /// アイドル/ユニットのピッカーの決定。選択差分から投票/取消をまとめて発火する。
+    /// 何を入れて何を取り消すかはコア (`planVoteSelection`)。選択は選択肢の表示順で渡し、
+    /// 選択肢に無い選択済みの id (一覧の読み込み前・絞り込みの外) も落とさず後ろに付ける。
+    /// 落とすと「外された」と読まれて、投票済みの票が黙って取り消される。
+    func applyPickerSelection(_ selectedIds: Set<String>, ordered: [String]) async {
+        guard let detail else { return }
+        let selectedInOrder = ordered.filter(selectedIds.contains)
+            + selectedIds.subtracting(ordered).sorted()
+        let plan = planVoteSelection(
+            alreadyVoted: detail.entries.filter(\.hasUserVoted).map(\.entityId),
+            selectedInOrder: selectedInOrder,
+            myVoteCount: UInt32(clamping: detail.myVoteCount), unvoteDeselected: true)
+        if !plan.toUnvote.isEmpty { await unvoteForEntities(plan.toUnvote) }
+        if !plan.toVote.isEmpty { await voteForEntities(plan.toVote) }
+    }
+
     /// お題を削除する。成否を返す (呼び出し元は成功時のみ pop する)。
     /// 連打防止のため isDeleting でガードし、失敗時は deleteErrorMessage にメッセージを立てる。
     @discardableResult
