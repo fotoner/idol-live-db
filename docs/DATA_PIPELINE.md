@@ -88,6 +88,9 @@ Production に列が無いうちに push すると弾かれる。
 > この import では、積み残していた `Costume` / `CostumeWear` も一緒に development へ入った。
 
 **ckdb を編集したら必ず `xcrun cktool validate-schema` を通すこと。**
+鍵の要らない事前検査 (二重定義・削除・型変更・インデックス外し) は
+`python3 tools/check_ckdb_schema.py --base origin/develop` で、PR では `schema-guard` が同じものを回す。
+`develop` に ckdb の変更が入ると「本番スキーマ反映待ち」Issue が自動で立つので、昇格したら close する。
 2026-09-13 まで、`Creator` と `UnitVersion` の定義が二重に書かれていて
 (「export の全文に追記」を繰り返した跡)、`type 'X' is specified multiple times` で
 **validate も import も通らない状態が放置されていた**。衣装の 2 型が CloudKit の
