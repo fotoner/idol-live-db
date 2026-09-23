@@ -8,9 +8,11 @@
 //   - 単一ファイル > 20 MiB      → exit 1 (上限 25 MiB の 80%)
 //   - 総サイズ                   → 警告のみ (Cloudflare 側の総サイズ上限に確立した数値が
 //                                   無いため exit 1 にはしない。リーダー決定 DECISIONS.md C4)
+// 1 ページの重さ (HTML 1 枚が圧縮後 1 MiB 未満) も見る。規則は page-weight.mjs。
 import fs from "node:fs";
 import path from "node:path";
 import { walk } from "./walk.mjs";
+import { MAX_PAGE_COMPRESSED_BYTES, measurePages } from "./page-weight.mjs";
 
 const DIST = path.resolve("./dist");
 const MAX_FILES = 18_000;
@@ -71,6 +73,20 @@ if (oversized.length > 0) {
   console.error(`[check-limits] 20MiB を超えるファイルが ${oversized.length} 件 (Cloudflare 上限 25MiB):`);
   for (const f of oversized.slice(0, 10)) {
     console.error(`  - ${path.relative(DIST, f.path)} (${fmtMB(f.size)}MB)`);
+  }
+  failed = true;
+}
+
+// 閲覧者が受け取る大きさ (圧縮後) で 1 ページの重さを見る。
+const pages = measurePages(files.filter((f) => f.path.endsWith(".html")).map((f) => f.path));
+console.log(
+  `[check-limits] heaviestPage=${path.relative(DIST, pages.largest.file)} ` +
+    `(gzip ${(pages.largest.bytes / 1024).toFixed(0)}KiB / 上限 ${MAX_PAGE_COMPRESSED_BYTES / 1024}KiB)`,
+);
+if (pages.over.length > 0) {
+  console.error(`[check-limits] 圧縮後 1MiB を超えるページが ${pages.over.length} 件:`);
+  for (const p of pages.over.slice(0, 10)) {
+    console.error(`  - ${path.relative(DIST, p.file)} (gzip ${fmtMB(p.bytes)}MB)`);
   }
   failed = true;
 }
