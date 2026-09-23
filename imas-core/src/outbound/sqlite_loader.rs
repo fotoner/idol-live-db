@@ -1648,6 +1648,13 @@ mod tests {
         let _ = std::fs::remove_file(&path);
         {
             let c = Connection::open(&path).unwrap();
+            // 実機の DB には孤児行がありうる (Android の Room は衣装の表に FK を宣言していない:
+            // AppDatabase.kt の MIGRATION_14_15)。このテストはローダがそれを落とす契約を見るので、
+            // FK を明示的に切る。既定値は SQLite のビルドで違い、bundled (Linux の CI) は ON、
+            // macOS の system SQLite は OFF なので、書かないと CI でだけ下の INSERT が落ちる。
+            c.execute_batch("PRAGMA foreign_keys = OFF;").unwrap();
+            let fk: i64 = c.query_row("PRAGMA foreign_keys", [], |r| r.get(0)).unwrap();
+            assert_eq!(fk, 0, "孤児行を入れるので FK は切れていること");
             // 表の形はコアが持つ正本から起こす (ここで DDL を手写しすると、
             // スキーマを変えたときテストだけ古い形のまま通ってしまう)。
             c.execute_batch(crate::domain::schema_ddl::MASTER_SCHEMA_SQL).unwrap();
