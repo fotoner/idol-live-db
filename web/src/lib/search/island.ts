@@ -17,12 +17,9 @@ import type { SearchShard } from "../schema/SearchShard";
 import type { SearchShardMeta } from "../schema/SearchShardMeta";
 import type { SearchRow } from "../schema/SearchRow";
 
-const LIMIT_PER_KIND = 30;
 const DEBOUNCE_MS = 80;
 /** 歌詞は Worker (D1) を叩くので、打鍵ごとには飛ばさない。 */
 const LYRICS_DEBOUNCE_MS = 500;
-/** 1 文字の歌詞検索は索引で絞れず全走査になる。2 文字から。 */
-const LYRICS_MIN_CHARS = 2;
 
 /** 歌詞検索 (Worker) の応答。曲 id と一致箇所の窓だけで、本文は無い。 */
 interface LyricsHit {
@@ -59,6 +56,9 @@ interface Elements {
   fallback: HTMLElement | null;
   /** 歌詞検索の取得先 (Rust が meta.json に出したもの)。無ければ名前だけ。 */
   lyricsSearchUrl: string | null;
+  /** 種別ごとに並べる件数の上限と、歌詞を探す最小文字数 (Rust の `SearchPage`)。 */
+  limitPerKind: number;
+  lyricsMinChars: number;
   modes: HTMLInputElement[];
 }
 
@@ -67,7 +67,8 @@ function elements(): Elements | null {
   const input = document.querySelector<HTMLInputElement>("[data-search-input]");
   const status = document.querySelector<HTMLElement>("[data-search-status]");
   const results = document.querySelector<HTMLElement>("[data-search-results]");
-  if (!form || !input || !status || !results) return null;
+  const panel = document.querySelector<HTMLElement>("[data-limit-per-kind]");
+  if (!form || !input || !status || !results || !panel) return null;
   return {
     form,
     input,
@@ -76,10 +77,12 @@ function elements(): Elements | null {
     fallback: document.querySelector<HTMLElement>("[data-search-fallback]"),
     lyricsSearchUrl: form.dataset.lyricsSearch ?? null,
     modes: [...form.querySelectorAll<HTMLInputElement>("[data-search-mode]")],
+    limitPerKind: Number(panel.dataset.limitPerKind),
+    lyricsMinChars: Number(panel.dataset.lyricsMinChars),
   };
 }
 
-function init({ form, input, status, results, fallback, lyricsSearchUrl, modes }: Elements): void {
+function init({ form, input, status, results, fallback, lyricsSearchUrl, modes, limitPerKind, lyricsMinChars }: Elements): void {
   form.addEventListener("submit", (e) => e.preventDefault());
   // 歌詞の一致箇所は本文の断片。コピー・切り取り・ドラッグを止める (選択は CSS)。
   // 曲ページの歌詞と同じ扱い: 右クリックまでは止めない (読み上げ・辞書のような支援の道具を
@@ -174,7 +177,7 @@ function init({ form, input, status, results, fallback, lyricsSearchUrl, modes }
     if (seq !== latest) return;
 
     const needle = loaded.fold(text);
-    const groups = loaded.shards.map((shard) => search(shard, needle));
+    const groups = loaded.shards.map((shard) => search(shard, needle, limitPerKind));
     const total = groups.reduce((n, g) => n + g.total, 0);
     render(results, groups, total);
     status.textContent =
@@ -186,9 +189,9 @@ function init({ form, input, status, results, fallback, lyricsSearchUrl, modes }
    * 曲名は楽曲の索引から引く (Worker はマスタを持たない)。
    */
   async function runLyrics(text: string, seq: number): Promise<void> {
-    if (Array.from(text).length < LYRICS_MIN_CHARS) {
+    if (Array.from(text).length < lyricsMinChars) {
       results.textContent = "";
-      status.textContent = `歌詞は ${LYRICS_MIN_CHARS} 文字以上で探せます`;
+      status.textContent = `歌詞は ${lyricsMinChars} 文字以上で探せます`;
       return;
     }
     status.textContent = "歌詞を検索中…";
@@ -282,10 +285,10 @@ function snippet(s: { snippet: string; matchStart: number; matchLength: number }
 
 /**
  * 1 シャードを走査する。
- * 表示は上位 `LIMIT_PER_KIND` 件だけなので、行の保持もそこで打ち切る
+ * 表示は上位 `limit` 件だけなので、行の保持もそこで打ち切る
  * (楽曲 3,153 行が全部当たるような 1 文字検索でも配列が伸びない)。
  */
-function search(shard: Shard, needle: string): Group {
+function search(shard: Shard, needle: string, limit: number): Group {
   // sep はフィールド境界。空だと includes が常に真になり全行が当たってしまう。
   if (!shard.body.sep) throw new Error(`${shard.meta.kind}: sep が空`);
   // 検索語が境界を含むなら、跨いだ偽陽性しか起きない。
@@ -296,7 +299,7 @@ function search(shard: Shard, needle: string): Group {
   for (const row of shard.body.rows) {
     if (!row.f.includes(needle)) continue;
     total += 1;
-    if (hits.length < LIMIT_PER_KIND) hits.push(row);
+    if (hits.length < limit) hits.push(row);
   }
   return { shard, hits, total };
 }

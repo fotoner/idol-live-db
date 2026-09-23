@@ -14,6 +14,10 @@ web_dto! {
         pub title: String,
         /// 見出しの下の説明。
         pub lede: String,
+        /// 種別ごとに並べる件数の上限 (`domain::search_limits::WEB_SEARCH_LIMIT_PER_KIND`)。
+        pub limit_per_kind: u32,
+        /// 歌詞を探す最小文字数 (`domain::search_limits::WEB_LYRICS_SEARCH_MIN_CHARS`)。
+        pub lyrics_min_chars: u32,
         pub seo: SeoBlock,
     }
 }

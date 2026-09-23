@@ -177,7 +177,9 @@ fn t12_no_lyrics_or_preview_audio_anywhere_in_the_output() {
     /// - `lyrics` … 出すか / 許諾番号 / 取得先だけを持つブロック (中身は下で固定する)
     /// - `lyricsLicenseNotice` … フッタの許諾表示 (`JASRAC 許諾番号 …`)
     /// - `lyricsSearchUrl` … 歌詞検索の取得先 (URL であって本文ではない)
-    const ALLOWED: [&str; 4] = ["lyricsNote", "lyrics", "lyricsLicenseNotice", "lyricsSearchUrl"];
+    /// - `lyricsMinChars` … 歌詞を探す最小文字数 (数であって本文ではない)
+    const ALLOWED: [&str; 5] =
+        ["lyricsNote", "lyrics", "lyricsLicenseNotice", "lyricsSearchUrl", "lyricsMinChars"];
 
     /// `lyrics` ブロックに入ってよいキー。**ここに `lines` や `text` が増えたら落ちる。**
     /// 歌詞本文は D1 にしか置けない (まとめて取れないことが JASRAC 許諾の条件)。

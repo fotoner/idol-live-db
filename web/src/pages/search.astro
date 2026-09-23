@@ -22,7 +22,8 @@ const site = meta();
   </p>
   <SearchBox slot="lede" island placeholder="例: 未来 / HARUKA / 武道館" />
 
-  <div class="search-panel">
+  {/* 件数と文字数の上限は面ごとの定数としてコアにある (domain::search_limits)。 */}
+  <div class="search-panel" data-limit-per-kind={search.limitPerKind} data-lyrics-min-chars={search.lyricsMinChars}>
     <p class="search-status" id="search-status" data-search-status aria-live="polite">
       検索の準備をしています…
     </p>

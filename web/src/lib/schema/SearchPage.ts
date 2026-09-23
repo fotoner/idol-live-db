@@ -12,4 +12,12 @@ export type SearchPage = { schemaVersion: number, path: string, title: string,
 /**
  * 見出しの下の説明。
  */
-lede: string, seo: SeoBlock, };
+lede: string, 
+/**
+ * 種別ごとに並べる件数の上限 (`domain::search_limits::WEB_SEARCH_LIMIT_PER_KIND`)。
+ */
+limitPerKind: number, 
+/**
+ * 歌詞を探す最小文字数 (`domain::search_limits::WEB_LYRICS_SEARCH_MIN_CHARS`)。
+ */
+lyricsMinChars: number, seo: SeoBlock, };

@@ -14,6 +14,7 @@
 
 use super::context::{page_title, Ctx};
 use crate::domain::display_join::year_of;
+use crate::domain::search_limits::{WEB_LYRICS_SEARCH_MIN_CHARS, WEB_SEARCH_LIMIT_PER_KIND};
 use crate::web_export::content::{self, absolute};
 use crate::domain::text_search_index::{prepare_needle, TextSearchIndex};
 use crate::web_export::dto::*;
@@ -34,6 +35,8 @@ pub fn search_page() -> SearchPage {
         path: PATH.to_string(),
         title: content::SEARCH_TITLE.to_string(),
         lede: content::search_lede(),
+        limit_per_kind: WEB_SEARCH_LIMIT_PER_KIND as u32,
+        lyrics_min_chars: WEB_LYRICS_SEARCH_MIN_CHARS as u32,
         seo: SeoBlock {
             title: page_title(content::SEARCH_TITLE),
             description: content::search_description().to_string(),
