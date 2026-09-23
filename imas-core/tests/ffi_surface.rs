@@ -274,6 +274,7 @@ declare_and_call_checksums! {
     uniffi_imas_core_checksum_method_snapshotstore_cast_show_count_ranking,
     uniffi_imas_core_checksum_method_snapshotstore_cd_series_list,
     uniffi_imas_core_checksum_method_snapshotstore_co_occurring_songs,
+    uniffi_imas_core_checksum_method_snapshotstore_collection_dashboard,
     uniffi_imas_core_checksum_method_snapshotstore_costume_record,
     uniffi_imas_core_checksum_method_snapshotstore_costume_records,
     uniffi_imas_core_checksum_method_snapshotstore_costume_show_records,

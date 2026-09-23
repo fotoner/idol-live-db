@@ -482,7 +482,7 @@ fn show_date_desc_key(snap: &Snapshot, show: u32) -> (Reverse<String>, i64, u32)
     (Reverse(s.date.clone()), s.sort_order, show)
 }
 
-fn show_record_at(snap: &Snapshot, show: u32) -> ShowRecord {
+pub(crate) fn show_record_at(snap: &Snapshot, show: u32) -> ShowRecord {
     let s = &snap.shows[show as usize];
     ShowRecord {
         id: s.id.clone(),
