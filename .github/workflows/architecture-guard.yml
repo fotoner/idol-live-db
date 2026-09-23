@@ -20,6 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Check Domain purity (no SwiftUI/GRDB/CloudKit import)
         run: |
           chmod +x tools/check_domain_purity.sh

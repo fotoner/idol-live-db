@@ -31,6 +31,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       # Gradle 8.11.1 は JDK 25 未対応。21 に固定する。
       - uses: actions/setup-java@v4

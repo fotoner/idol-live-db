@@ -26,6 +26,8 @@ jobs:
       PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       # refresh-data.yml と同じ版。手元 (macOS の 3.9) で動くかは構文検査の側で見る。
       - uses: actions/setup-python@v5

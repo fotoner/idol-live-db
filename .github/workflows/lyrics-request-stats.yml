@@ -40,6 +40,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: develop
+          persist-credentials: false
 
       - uses: actions/setup-python@v5
         with:
@@ -67,6 +68,9 @@ jobs:
 
       - name: Commit if changed
         if: steps.gate.outputs.ok == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
         run: |
           if git diff --quiet -- data/lyrics_requests; then
             echo "変化なし"
@@ -76,4 +80,5 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/lyrics_requests
           git commit -m "chore(jasrac): 歌詞リクエスト回数を集計 ($(date -u +%Y-%m-%d))"
-          git push --force origin HEAD:bot/lyrics-stats
+          # checkout で資格情報を残していないので、push のときだけ token を渡す。
+          git push --force "https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO}.git" HEAD:bot/lyrics-stats
