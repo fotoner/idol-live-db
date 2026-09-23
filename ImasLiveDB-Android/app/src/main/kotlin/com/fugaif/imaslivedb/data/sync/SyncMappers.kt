@@ -176,6 +176,8 @@ object SyncMappers {
                 id = row.id,
                 brandId = row.brandId.emptyToNull(),
                 name = row.name,
+                // 読み落とすと、同期のたびにライブ名の読みが消えてかなで引けなくなる。
+                nameKana = row.nameKana.emptyToNull(),
                 eventType = row.eventType,
                 isStreaming = row.isStreaming,
                 isSolo = row.isSolo,
