@@ -307,6 +307,34 @@ pub struct EventAttendanceRecord {
     /// 出演状況の塊 (`全日` / `DAY1・DAY3 のみ` / `欠席`、単日公演は `出演` / `欠席`)。
     /// 並びは表に出す順。画面はこれを並べるだけにする ([`attendance_groups`])。
     pub groups: Vec<AttendanceGroupRecord>,
+    /// 出演者を覆うユニット (そのイベントで歌唱されたユニットだけ・大きい順に貪欲に)。
+    /// 規則は [`crate::domain::unit_queries::covering_units`]。
+    pub covering_unit_ids: Vec<String>,
+}
+
+/// 出演者 (どれかの公演に出た人) を、そのイベントで歌唱されたユニットで覆う。
+fn event_covering_unit_ids(
+    snap: &Snapshot,
+    event_id: &str,
+    presence_by_show: &HashMap<String, Vec<String>>,
+) -> Vec<String> {
+    use crate::domain::unit_queries::{covering_units, performed_unit_ids};
+    let allowed: HashSet<u32> = performed_unit_ids(snap, event_id)
+        .iter()
+        .filter_map(|id| snap.unit_index_by_id.get(id).copied())
+        .collect();
+    if allowed.is_empty() {
+        return Vec::new();
+    }
+    let present: HashSet<u32> = presence_by_show
+        .values()
+        .flatten()
+        .filter_map(|id| snap.idol_index_by_id.get(id).copied())
+        .collect();
+    covering_units(snap, &present, &allowed)
+        .into_iter()
+        .map(|ui| snap.units[ui as usize].id.clone())
+        .collect()
 }
 
 /// 出演状況の塊 1 つ。
@@ -998,6 +1026,7 @@ pub fn event_attendance(snap: &Snapshot, event_id: &str) -> Option<EventAttendan
 
     let shows: Vec<ShowRecord> = shows.iter().map(|&s| show_record_at(snap, s)).collect();
     let groups = attendance_groups(&brand_idol_ids, &shows, &presence_by_show);
+    let covering_unit_ids = event_covering_unit_ids(snap, event_id, &presence_by_show);
     Some(EventAttendanceRecord {
         brand_idol_ids,
         shows,
@@ -1005,6 +1034,7 @@ pub fn event_attendance(snap: &Snapshot, event_id: &str) -> Option<EventAttendan
         lead_by_show,
         guest_by_show,
         groups,
+        covering_unit_ids,
     })
 }
 

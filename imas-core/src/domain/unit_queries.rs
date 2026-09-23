@@ -185,6 +185,38 @@ pub fn performed_unit_ids(snap: &Snapshot, event_id: &str) -> Vec<String> {
     matched
 }
 
+/// 出演者の集合を、互いに重ならないユニットで覆う (大きいユニットから貪欲に)。
+/// 例: 放クラ 5 人 + ストレイライト 3 人 → [放クラ, ストレイライト]。どのユニットにも
+/// 入らない人は残る (返さない)。iOS `UnitIndex.coveringUnits` から移したもの。
+///
+/// 候補にするのは `allowed` に入っていて、曲を持ち、メンバーが 2 人以上で、メンバーが
+/// **全員**まだ残っている人の中にいるユニット。いちばん大きいものを採って、そのメンバーを
+/// 残りから外し、採れるものが無くなるまで繰り返す。同じ大きさならユニットの並び
+/// (スナップショット順) で先のもの — iOS は Set を回していて、同じ大きさのユニットの
+/// どちらを採るかが起動ごとに変わりえた。返すのは採った順のユニットの添字。
+pub fn covering_units(snap: &Snapshot, present: &HashSet<u32>, allowed: &HashSet<u32>) -> Vec<u32> {
+    let mut remaining = present.clone();
+    let mut chosen = Vec::new();
+    loop {
+        let best = (0..snap.units.len() as u32)
+            .filter(|ui| allowed.contains(ui) && !snap.songs_by_unit[*ui as usize].is_empty())
+            .filter_map(|ui| {
+                let members: HashSet<u32> =
+                    snap.members_by_unit[ui as usize].iter().copied().collect();
+                (members.len() >= 2 && members.is_subset(&remaining)).then_some((ui, members))
+            })
+            // 大きい方、同じなら先の添字 (max_by_key は同値で後のものを返すので添字を反転して比べる)。
+            .max_by_key(|(ui, members)| (members.len(), std::cmp::Reverse(*ui)));
+        let Some((ui, members)) = best else { break };
+        chosen.push(ui);
+        remaining.retain(|idol| !members.contains(idol));
+        if remaining.is_empty() {
+            break;
+        }
+    }
+    chosen
+}
+
 /// 歌唱者の顔ぶれが「曲を持つユニット」1〜3 個の和集合と**ちょうど一致**するときの、
 /// そのユニット (スナップショット添字・units の並び順)。一致しなければ空。
 ///
@@ -684,5 +716,50 @@ mod tests {
         let expected: HashSet<String> = data.song_unit_ids.iter().cloned().collect();
         let actual: HashSet<String> = via_phase2.into_iter().collect();
         assert_eq!(actual, expected);
+    }
+}
+
+#[cfg(test)]
+mod covering_tests {
+    use super::*;
+    use crate::domain::event_detail_queries::event_attendance;
+    use crate::test_support::bundle_snapshot;
+
+    /// 実データの全イベントで、覆い方が規則どおりか: 重ならない・メンバー全員が出演者・
+    /// そのイベントで歌唱されたユニットだけ・大きい順・残りにはもう入るユニットが無い。
+    #[test]
+    fn covering_units_are_disjoint_maximal_and_performed() {
+        let snap = bundle_snapshot();
+        let mut covered_events = 0usize;
+        for event in &snap.events {
+            let Some(record) = event_attendance(snap, &event.id) else { continue };
+            if record.covering_unit_ids.is_empty() {
+                continue;
+            }
+            covered_events += 1;
+            let performed: HashSet<String> = performed_unit_ids(snap, &event.id).into_iter().collect();
+            let mut remaining: HashSet<u32> = record
+                .presence_by_show
+                .values()
+                .flatten()
+                .map(|id| snap.idol_index_by_id[id])
+                .collect();
+            let mut previous_size = usize::MAX;
+            for unit_id in &record.covering_unit_ids {
+                assert!(performed.contains(unit_id), "{}: 歌唱されていない {unit_id}", event.id);
+                let ui = snap.unit_index_by_id[unit_id];
+                let members: HashSet<u32> = snap.members_by_unit[ui as usize].iter().copied().collect();
+                assert!(members.is_subset(&remaining), "{}: {unit_id} が重なる", event.id);
+                assert!(members.len() <= previous_size, "{}: 大きい順でない", event.id);
+                previous_size = members.len();
+                remaining.retain(|i| !members.contains(i));
+            }
+            // もう入るユニットが無い (貪欲に採り切っている)。
+            let allowed: HashSet<u32> = performed.iter().map(|id| snap.unit_index_by_id[id]).collect();
+            assert!(covering_units(snap, &remaining, &allowed).is_empty(), "{}", event.id);
+            // 何度呼んでも同じ。
+            assert_eq!(event_attendance(snap, &event.id).unwrap().covering_unit_ids, record.covering_unit_ids);
+        }
+        assert!(covered_events > 10, "ユニットで覆えるイベントが少なすぎる: {covered_events}");
     }
 }
