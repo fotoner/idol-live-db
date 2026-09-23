@@ -71,6 +71,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.auth.showEditAffordance
 import com.fugaif.imaslivedb.data.auth.startCommunityEdit
+import com.fugaif.imaslivedb.data.model.EventAttendance
 import com.fugaif.imaslivedb.data.model.Event
 import com.fugaif.imaslivedb.data.model.EventStats
 import com.fugaif.imaslivedb.data.model.Idol

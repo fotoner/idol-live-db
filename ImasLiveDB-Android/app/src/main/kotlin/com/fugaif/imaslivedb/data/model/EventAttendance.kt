@@ -1,11 +1,9 @@
-package com.fugaif.imaslivedb.ui.events
-
-import com.fugaif.imaslivedb.data.model.Idol
-import com.fugaif.imaslivedb.data.model.Show
-import com.fugaif.imaslivedb.data.model.ShowCast
+package com.fugaif.imaslivedb.data.model
 
 /**
  * イベント内の出演状況。iOS `EventAttendance` (Database/QueryTypes.swift) の 1:1 移植。
+ * 母集団と出席の判定はコアの `eventAttendance` が持ち、ここは表示用の集計だけ
+ * ([com.fugaif.imaslivedb.data.repository.EventRepository.fetchEventAttendance])。
  * ユニット被覆判定 (披露ユニット表示) は Setlist 側の担当範囲と重複するため対象外。
  */
 data class EventAttendance(

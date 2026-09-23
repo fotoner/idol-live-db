@@ -3,6 +3,7 @@ package com.fugaif.imaslivedb.ui.events
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fugaif.imaslivedb.data.model.EventAttendance
 import com.fugaif.imaslivedb.data.model.EventStats
 import com.fugaif.imaslivedb.data.model.JstDay
 import com.fugaif.imaslivedb.data.model.Show
@@ -58,15 +59,14 @@ class EventDetailViewModel : ViewModel() {
             val event = repo.fetchEvent(eventId)
             val shows = repo.fetchShows(eventId)
             val stats = repo.fetchEventStats(eventId)
-            val castRows = repo.fetchEventShowCast(eventId)
-            val brandRoster = event?.brandId?.let { repo.fetchBrandRoster(it) } ?: emptyList()
+            val attendance = repo.fetchEventAttendance(eventId)
             val brand = event?.brandId?.let { repo.fetchBrand(it) }
             _uiState.value = EventDetailUiState(
                 isLoading = false,
                 eventName = event?.name ?: "",
                 shows = shows,
                 stats = stats,
-                attendance = EventAttendance.build(shows, brandRoster, castRows),
+                attendance = attendance,
                 isJoint = !event?.jointBrandIds.isNullOrBlank(),
                 brandColorHex = brand?.color,
                 brandShortName = brand?.shortName,

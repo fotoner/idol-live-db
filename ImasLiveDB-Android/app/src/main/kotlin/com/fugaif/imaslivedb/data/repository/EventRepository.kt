@@ -6,6 +6,7 @@ import com.fugaif.imaslivedb.data.db.AppDatabase
 import com.fugaif.imaslivedb.data.model.AllPerformerRow
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.Event
+import com.fugaif.imaslivedb.data.model.EventAttendance
 import com.fugaif.imaslivedb.data.model.EventStats
 import com.fugaif.imaslivedb.data.model.EventWithDateRange
 import com.fugaif.imaslivedb.data.model.Idol
@@ -18,7 +19,6 @@ import com.fugaif.imaslivedb.data.model.VenueDirectory
 import com.fugaif.imaslivedb.data.model.Venue
 import com.fugaif.imaslivedb.data.model.VenueHall
 import com.fugaif.imaslivedb.data.model.VenueName
-import com.fugaif.imaslivedb.data.model.ShowCast
 import com.fugaif.imaslivedb.data.model.ShowWithEventName
 import uniffi.imas_core.PerformerNameMode
 import uniffi.imas_core.SetlistDisplayMode
@@ -147,24 +147,31 @@ class EventRepository(
     }
 
     /**
-     * イベント配下の show_cast 全行 (主演/ゲスト/DAY別出演の判定用)。
+     * DAY 別の出演状況 (出席・欠席・主演・ゲスト)。イベントにブランドが無いときや、
+     * 母集団が空のときは null。
      *
-     * コアの eventAttendance は「DAY 別出席表」という別形の集計射影で、show_cast の生行は
-     * 返さない。この口の戻り値 (ShowCast のリスト) に無理に畳み込むと呼び出し側の判定が
-     * 変わるため、対応 API が生えるまで SQL 経路のまま。
+     * 母集団 (外部ゲスト・合同ブランド・デビュー日) と出席 (show_cast ∪ 歌唱) の規則は
+     * コアの `eventAttendance` が持つ (iOS と同じ)。母集団は表示順 (sort_order) の
+     * idol_id 列で返るので、並びを保ったまま実体化する。
      */
-    suspend fun fetchEventShowCast(eventId: String): List<ShowCast> {
-        return db.eventDao().fetchEventShowCast(eventId)
-    }
-
-    /**
-     * ブランド全体のアイドル名簿 (出演/欠席の対象集合)。
-     *
-     * コアの idolList は is_external を必ず落とすため、外部ゲストを含むこの名簿とは
-     * 母集団が変わる (欠席側に出ていた演者が消える)。SQL 経路のまま。
-     */
-    suspend fun fetchBrandRoster(brandId: String): List<Idol> {
-        return db.idolDao().fetchIdolsByBrand(brandId)
+    suspend fun fetchEventAttendance(eventId: String): EventAttendance? {
+        snapshots?.query { store -> Found(store.eventAttendance(eventId)) }?.let { (record) ->
+            record ?: return null
+            return EventAttendance(
+                brandIdols = hydrateInOrder(record.brandIdolIds, Idol::id) { db.idolDao().fetchIdolsByIds(it) },
+                shows = record.shows.map { it.toShow() },
+                presenceByShow = record.presenceByShow.mapValues { it.value.toSet() },
+                leadByShow = record.leadByShow.mapValues { it.value.toSet() },
+                guestByShow = record.guestByShow.mapValues { it.value.toSet() }
+            )
+        }
+        // フォールバック (スナップショット未ロード時)。母集団と出席の規則がコアと違う。
+        val brandId = db.eventDao().fetchEvent(eventId)?.brandId ?: return null
+        return EventAttendance.build(
+            shows = db.showDao().fetchShows(eventId),
+            brandIdols = db.idolDao().fetchIdolsByBrand(brandId),
+            castRows = db.eventDao().fetchEventShowCast(eventId)
+        )
     }
 
     /** ヒーロー配色に使うブランド情報 (color hex)。 */
@@ -390,6 +397,9 @@ class EventRepository(
         snapshots?.reload()
     }
 }
+
+/** 「コアが null を返した」と「スナップショットが無い」を分けるための入れ物。 */
+private data class Found<T>(val value: T)
 
 // ---- コアの射影 → Room エンティティ (列は 1:1) ----
 
