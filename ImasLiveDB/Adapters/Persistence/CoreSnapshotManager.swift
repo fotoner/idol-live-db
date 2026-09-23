@@ -64,6 +64,12 @@ final class CoreSnapshotManager: Sendable {
         }
     }
 
+    /// 描画のように待てない場面用。ロード済みならストア、まだなら nil (ロードは起こさない)。
+    /// 読み取りの口 (ポート) では使わないこと — そちらは `loadedStore()` で待つ。
+    func storeIfReady() -> SnapshotStore? {
+        store.isLoaded() ? store : nil
+    }
+
     /// バックグラウンドでのロード/再ロードを要求する (何度呼んでも安全)。
     /// `SnapshotStore.load` は成功時のみ差し替えるので、失敗しても現行スナップショット
     /// (あれば) は生き続ける。

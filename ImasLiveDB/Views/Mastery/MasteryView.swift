@@ -330,7 +330,7 @@ struct MasteryView: View {
     private func groupRow(_ g: MasteryGroup) -> some View {
         let brandId = g.songIds.first.flatMap { songsById[$0]?.brandId }
         // 矢印は List の NavigationLink が出すので、行の側では描かない (二重になる)。
-        return ImasLeadRow(title: g.label, subtitle: subtitle(g), brand: brandId, titleLineLimit: 2) {
+        return ImasLeadRow(title: g.label, subtitle: subtitle(g), brand: BrandColors.hex(for: brandId), titleLineLimit: 2) {
             ImasMetricBadge(value: "\(g.percent)", unit: "%",
                             emphasized: g.percent > 0, seed: nil)
         }

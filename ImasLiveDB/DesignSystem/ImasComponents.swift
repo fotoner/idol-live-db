@@ -179,7 +179,8 @@ struct ImasRowChevron: View {
 struct ImasLeadRow<Trailing: View>: View {
     let title: String
     var subtitle: String? = nil
-    /// リードバーの色。 seed = エンティティ由来 hex、 brand = ブランド ID。
+    /// リードバーの色。 seed = エンティティ由来 hex、 brand = ブランド色 hex
+    /// (ブランド ID ではない。ID から引くなら `BrandColors.hex(for:)`)。
     var seed: String? = nil
     var brand: String? = nil
     /// 合同ライブ等で虹色にする。

@@ -103,7 +103,7 @@ struct FilteredShowsView: View {
         ImasLeadRow(
             title: event.map { eventDisplayName($0.name) } ?? show.name,
             subtitle: subtitle(show),
-            seed: BrandPalette.hex(for: event?.brandId),
+            seed: BrandColors.hex(for: event?.brandId),
             rainbow: !(event?.jointBrandIdList.isEmpty ?? true)
         )
         .imasCopyable([

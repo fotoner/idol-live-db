@@ -231,8 +231,7 @@ struct EventListView: View {
                             // `EventAttendanceSheet` (EventDetailView と共有) にそのまま委ねる。
                             .eventAttendanceSwipe(
                                 event: ew.event,
-                                seed: brandColorMap[ew.event.brandId ?? ""],
-                                brand: ew.event.brandId
+                                seed: brandColorMap[ew.event.brandId ?? ""]
                             )
                         }
                     }

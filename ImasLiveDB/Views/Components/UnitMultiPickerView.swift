@@ -162,7 +162,7 @@ struct UnitMultiPickerView: View {
                 UnitAvatarView(unit: unit, size: 40)
                 Text(unit.displayName)
                 Spacer()
-                ImasSelectionMark(isSelected: isSelected, brand: unit.brandId)
+                ImasSelectionMark(isSelected: isSelected, brand: BrandColors.hex(for: unit.brandId))
             }
         }
         .buttonStyle(.plain)
@@ -210,7 +210,7 @@ struct UnitMultiPickerView: View {
         return VStack(spacing: DS.sp2) {
             UnitAvatarView(unit: unit, size: 60)
                 .overlay(alignment: .bottomTrailing) {
-                    ImasSelectionMark(isSelected: isSelected, brand: unit.brandId)
+                    ImasSelectionMark(isSelected: isSelected, brand: BrandColors.hex(for: unit.brandId))
                         .background(DS.bg, in: Circle())
                         .offset(x: 2, y: 2)
                 }

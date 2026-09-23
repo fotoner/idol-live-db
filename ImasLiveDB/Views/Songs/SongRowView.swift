@@ -341,8 +341,8 @@ struct SongRowView: View {
 
     // MARK: - Brand color
 
-    /// ブランド ID → イメージカラー hex。 リードバーとジャケフォールバックの seed に使う。
+    /// ブランド ID → マスタのブランド色 hex。 リードバーとジャケフォールバックの seed に使う。
     static func brandColorHex(for brandId: String?) -> String? {
-        BrandPalette.hex(for: brandId)
+        BrandColors.hex(for: brandId)
     }
 }

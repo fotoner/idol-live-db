@@ -229,7 +229,7 @@ struct TagActivityView: View {
             }
         case .idol:
             if let idol = idolCache[entityId] {
-                ImasAvatar(label: idol.name, seed: idol.color, brand: idol.brandId, size: 40)
+                ImasAvatar(label: idol.name, seed: idol.color, brand: BrandColors.hex(for: idol.brandId), size: 40)
             } else {
                 ImasAvatar(label: "?", size: 40)
             }

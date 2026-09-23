@@ -262,8 +262,7 @@ struct StatsView: View {
         HStack(spacing: DS.sp4) {
             ImasArtwork(
                 title: item.song.title,
-                seed: item.song.brandId,
-                brand: item.song.brandId,
+                seed: BrandColors.hex(for: item.song.brandId),
                 size: 44,
                 imageURL: artworkURL(item.song.artworkUrl)
             )
