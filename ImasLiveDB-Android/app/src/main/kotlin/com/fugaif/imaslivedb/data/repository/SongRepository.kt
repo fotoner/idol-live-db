@@ -22,6 +22,7 @@ import kotlinx.coroutines.withContext
 import uniffi.imas_core.IntroQuizPlayability
 import uniffi.imas_core.KamisabiCompletion
 import uniffi.imas_core.PerformanceHistoryEntry
+import uniffi.imas_core.PickedSongRecord
 import uniffi.imas_core.SongListFilter
 import uniffi.imas_core.SongListSort
 import uniffi.imas_core.introQuizPlayableIndices
@@ -702,6 +703,17 @@ class SongRepository(
         val owned = ownedSongIds.toSet()
         val have = ids.count { it in owned }
         return KamisabiCompletion(owned = have.toUInt(), total = ids.size.toUInt())
+    }
+
+    /**
+     * 編集で曲を 1 つ選ぶピッカーの母集団。絞り込みは一切しない (派生曲・その他ブランドも
+     * 含む。編集ではどの曲でも選べる必要がある)。並びは title のバイト列順 (コアの
+     * `allSongsForPicker`。iOS の SongPickerView と同じ)。
+     */
+    suspend fun fetchSongsForPicker(): List<PickedSongRecord> {
+        snapshots?.query { store -> store.allSongsForPicker() }?.let { return it }
+        return db.songDao().fetchSongsRaw(SimpleSQLiteQuery("SELECT * FROM songs ORDER BY title"))
+            .map { PickedSongRecord(it.id, it.title, it.titleKana) }
     }
 
     /**

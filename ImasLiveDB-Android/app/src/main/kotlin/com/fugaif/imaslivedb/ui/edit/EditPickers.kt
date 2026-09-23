@@ -57,7 +57,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.ShowWithEventName
-import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.di.AppModule
 import com.fugaif.imaslivedb.ui.components.BrandFilterChips
 import com.fugaif.imaslivedb.ui.components.BrandFilterItem
@@ -70,6 +69,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import com.fugaif.imaslivedb.ui.components.rememberSearchFiltered
+import uniffi.imas_core.PickedSongRecord
 
 // ---------------------------------------------------------------------------
 // Show picker (セトリ編集の対象公演を選ぶ)
@@ -166,40 +166,31 @@ fun ShowSearchPickerSheet(
 
 class SongPickerViewModel(app: Application) : AndroidViewModel(app) {
     private val songRepo = AppModule.from(app).songRepository
-    private val _results = MutableStateFlow<List<Song>>(emptyList())
-    val results: StateFlow<List<Song>> = _results.asStateFlow()
+    /** null = 読み込み中。 */
+    private val _songs = MutableStateFlow<List<PickedSongRecord>?>(null)
+    val songs: StateFlow<List<PickedSongRecord>?> = _songs.asStateFlow()
 
     init {
-        viewModelScope.launch { _results.value = songRepo.fetchSongs().map { it.song } }
-    }
-
-    fun search(query: String) {
-        viewModelScope.launch {
-            val filter = com.fugaif.imaslivedb.data.model.SongSearchFilter(
-                title = query.ifBlank { null },
-                excludeLiveOnly = false
-            )
-            _results.value = songRepo.fetchSongs(filter).map { it.song }.take(50)
-        }
+        viewModelScope.launch { _songs.value = songRepo.fetchSongsForPicker() }
     }
 }
 
-/** 曲を 1 件選ぶだけの軽量ピッカー (iOS `SongSearchPickerView` の単一選択版)。 */
+/**
+ * 曲を 1 件選ぶだけの軽量ピッカー (iOS `SongPickerView` と同じ)。
+ *
+ * 母集団は全曲 (派生曲も選べる)。絞り込みはコアの索引で、読みでも引ける。
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongPickerSheet(
     onDismiss: () -> Unit,
-    onSelect: (Song) -> Unit,
+    onSelect: (PickedSongRecord) -> Unit,
     viewModel: SongPickerViewModel = viewModel()
 ) {
-    val results by viewModel.results.collectAsState()
+    val songs by viewModel.songs.collectAsState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var query by remember { mutableStateOf("") }
-
-    LaunchedEffect(query) {
-        kotlinx.coroutines.delay(200)
-        viewModel.search(query)
-    }
+    val results = rememberSearchFiltered(songs.orEmpty(), query) { listOf(it.title, it.titleKana) }
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.9f)) {
@@ -220,7 +211,11 @@ fun SongPickerSheet(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)
             )
-            if (results.isEmpty()) {
+            if (songs == null) {
+                Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else if (results.isEmpty()) {
                 ImasEmptyState(Icons.Filled.MusicNote, "見つかりません", "「$query」に一致する楽曲がありません")
             } else {
                 LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)) {

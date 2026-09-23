@@ -59,13 +59,13 @@ import com.fugaif.imaslivedb.data.model.SetlistItem
 import com.fugaif.imaslivedb.data.model.SetlistPerformer
 import com.fugaif.imaslivedb.data.model.SetlistRow
 import com.fugaif.imaslivedb.data.model.Show
-import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.di.AppModule
 import com.fugaif.imaslivedb.ui.theme.DS
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import uniffi.imas_core.PickedSongRecord
 import uniffi.imas_core.SetlistItemDiffRow
 import uniffi.imas_core.setlistItemIndexesNeedingSync
 import uniffi.imas_core.setlistPerformerIndexesNeedingSync
@@ -150,12 +150,12 @@ class SetlistEditViewModel(app: Application, private val show: Show) : AndroidVi
         }
     }
 
-    fun addRow(song: Song) {
+    fun addRow(song: PickedSongRecord) {
         val state = _uiState.value
         _uiState.value = state.copy(rows = state.rows + EditableSetlistRow(songId = song.id, songTitle = song.title))
     }
 
-    fun setSong(rowId: String, song: Song) {
+    fun setSong(rowId: String, song: PickedSongRecord) {
         updateRow(rowId) { it.copy(songId = song.id, songTitle = song.title) }
     }
 
