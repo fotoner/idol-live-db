@@ -225,9 +225,6 @@ class AnnouncementStore(context: Context) {
 
     fun isRead(id: String): Boolean = id in readIds()
 
-    val unreadCount: Int
-        get() = readIds().let { read -> AnnouncementCatalog.all.count { it.id !in read } }
-
     fun markRead(id: String) {
         val next = readIds() + id
         // getStringSet が返す Set は SharedPreferences の内部インスタンスなので、

@@ -210,9 +210,6 @@ class EventRepository(
     suspend fun fetchEvent(id: String): Event? =
         snapshots.query { store -> store.eventRecord(id)?.toEvent() }
 
-    suspend fun fetchShow(id: String): Show? =
-        snapshots.query { store -> store.showRecord(id)?.toShow() }
-
     suspend fun fetchLatestShow(): Show? =
         snapshots.query { store -> store.latestShow()?.toShow() }
 
