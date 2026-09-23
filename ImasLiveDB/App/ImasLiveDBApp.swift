@@ -104,7 +104,7 @@ struct ImasLiveDBApp: App {
                     // 担当画像ウィジェット用に App Group へギャラリーをミラー。
                     Task.detached(priority: .utility) { await WidgetImageBridge.sync(database: appDatabase) }
                     // 情報ウィジェット(次のライブ/今日の1曲/チケット締切)用スナップショットを更新。
-                    Task.detached(priority: .utility) { await InfoWidgetBridge.sync(database: appDatabase) }
+                    Task.detached(priority: .utility) { await InfoWidgetBridge.sync() }
                     // App Store に新版が出ていたらお知らせ (iTunes Lookup で自動判定)。
                     Task.detached(priority: .utility) { await updateService.check() }
                 }
@@ -116,6 +116,13 @@ struct ImasLiveDBApp: App {
                     Task.detached(priority: .utility) {
                         await syncEngine.performStartupSync(database: appDatabase)
                     }
+                    // アプリを開かない日が続いた後でも、開いた時点で当日の内容に戻す。
+                    Task.detached(priority: .utility) { await InfoWidgetBridge.sync() }
+                }
+                .onReceive(NotificationCenter.default.publisher(for: .coreSnapshotDidLoad)) { _ in
+                    // 同期やローカル編集でマスタが変わったら、情報ウィジェットの中身も作り直す。
+                    guard !ProcessInfo.processInfo.isRunningTests else { return }
+                    Task.detached(priority: .utility) { await InfoWidgetBridge.sync() }
                 }
                 .onOpenURL { _ in
                     // deeplink 着地時は起動シート (オンボーディング/日替わりピック) を閉じて

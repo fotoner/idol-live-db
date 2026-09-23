@@ -3,6 +3,13 @@ import os
 
 private let logger = Logger(subsystem: "com.fugaif.ImasLiveDB", category: "CoreSnapshot")
 
+extension Notification.Name {
+    /// スナップショットを (読み直しを含めて) ロードし終えた。main で届く。
+    /// マスタから作る派生物 (情報ウィジェットのスナップショット等) を作り直す合図に使う。
+    /// `.masterDataDidSync` の直後はまだ古いスナップショットなので、そちらでは作り直さない。
+    static let coreSnapshotDidLoad = Notification.Name("coreSnapshotDidLoad")
+}
+
 /// 共有コア (imas-core) のインメモリスナップショットのライフサイクル管理。
 ///
 /// UniFFI 生成の `SnapshotStore` (Rust 側 RwLock で内部同期・差し替えは原子的) をアプリで
@@ -76,6 +83,9 @@ final class CoreSnapshotManager: Sendable {
         do {
             let stats = try store.load(dbPath: path)
             logger.info("snapshot_loaded songs=\(stats.songs) idols=\(stats.idols)")
+            Task { @MainActor in
+                NotificationCenter.default.post(name: .coreSnapshotDidLoad, object: nil)
+            }
         } catch {
             // 初回起動の DB コピー前・ファイル破損など。ここで落としても得るものが無いので
             // ログだけ残して GRDB 経路に委ねる (次の sync 完了時に自動で再挑戦する)。
