@@ -196,7 +196,6 @@ fun SongEditScreen(
                 summary = if (isCreate) "曲を追加" else "曲編集",
                 fallbackRecordName = songId
             ) { resolvedId ->
-                val syncDao = AppModule.from(context).database.syncDao()
                 // フォームに無い列 (parentSongId / unitId / seriesGroup / unitVersionId) は
                 // 元レコードから引き継ぐ。Room の upsert は行ごと REPLACE なので、
                 // ここで copy しないと編集のたびにそれらが消える。
@@ -222,10 +221,10 @@ fun SongEditScreen(
                     isrc = isrc.nonEmptyTrimmed(),
                     durationSec = parsedDuration
                 )
-                syncDao.upsertSongs(listOf(saved))
-                if (isCreate) {
-                    syncDao.upsertSongArtists(artistIdolIds.map { SongArtist(resolvedId, it, "original") })
-                }
+                AppModule.from(context).masterEditRepository.applySong(
+                    saved,
+                    newArtists = if (isCreate) artistIdolIds.map { SongArtist(resolvedId, it, "original") } else emptyList()
+                )
             }
             isSaving = false
             when (result) {

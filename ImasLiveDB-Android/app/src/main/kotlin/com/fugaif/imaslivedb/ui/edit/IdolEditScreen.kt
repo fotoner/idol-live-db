@@ -130,7 +130,7 @@ fun IdolEditScreen(
                 summary = "アイドル編集",
                 fallbackRecordName = original.id
             ) { resolvedId ->
-                AppModule.from(context).database.syncDao().upsertIdols(listOf(buildSaved(resolvedId, canonical)))
+                AppModule.from(context).masterEditRepository.applyIdol(buildSaved(resolvedId, canonical))
             }
             isSaving = false
             when (result) {

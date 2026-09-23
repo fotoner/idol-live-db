@@ -11,8 +11,6 @@ import com.fugaif.imaslivedb.data.model.EventStats
 import com.fugaif.imaslivedb.data.model.EventWithDateRange
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.PerformerRow
-import com.fugaif.imaslivedb.data.model.SetlistItem
-import com.fugaif.imaslivedb.data.model.SetlistPerformer
 import com.fugaif.imaslivedb.data.model.SetlistRow
 import com.fugaif.imaslivedb.data.model.Show
 import com.fugaif.imaslivedb.data.model.VenueDirectory
@@ -283,7 +281,7 @@ class EventRepository(
     /**
      * セトリ編集画面が読む「いまローカルに保存されているセトリ」。**Room 経路のまま残す。**
      *
-     * [replaceSetlist] はスナップショットを作り直すが、その reload は失敗を握り潰して
+     * [MasterEditRepository.replaceSetlist] はスナップショットを作り直すが、その reload は失敗を握り潰して
      * 旧スナップショットを維持する (load 失敗時も機能を落とさないための設計)。ここが
      * 旧スナップショットを読むと、その値が次回保存時の差分ベースライン
      * (SetlistEditScreen の initialItemIds / originalItems) になるため、削除済み項目への
@@ -304,7 +302,7 @@ class EventRepository(
     /**
      * セトリ**表示**の出演者 (setlist_item_id → 出演者)。編集画面が使う [fetchAllPerformers]
      * とは用途が違うので経路も分ける (あちらは差分の基準なので Room が正)。
-     * 編集直後にここが古い値を返さないのは [replaceSetlist] が reload を撃つため。
+     * 編集直後にここが古い値を返さないのは [MasterEditRepository.replaceSetlist] が reload を撃つため。
      *
      * 曲ごとのグループ化と並びはコアが担う。Room の SQL には ORDER BY が無く並びが未規定
      * だったので、iOS と同じ「アイドルの sort_order 順」に揃う。
@@ -369,33 +367,6 @@ class EventRepository(
      */
     suspend fun fetchShowCostumes(showId: String): List<ShowCostumeRecord> =
         snapshots?.query { store -> store.showCostumeRecords(showId) } ?: emptyList()
-
-    /**
-     * セトリ編集の保存後、サーバ確定値でローカル DB を全置換する (iOS `showWriting.replaceSetlist` と同じ)。
-     * ローカル反映は admin が直接反映 (POST /edits) できた場合のみ呼ばれる想定。
-     *
-     * 書き込み先は Room (スナップショットは読み取り専用)。書き込んだら**その場で**
-     * スナップショットを作り直す。これを省くと、スナップショット経由で読む口
-     * ([fetchPerformersByItem]) だけが次の同期完了まで編集前の値を返し、
-     * 「編集直後に自分の編集が見えない」回帰になる (iOS の
-     * `SnapshotInvalidatingShowWriting` と同じ役割)。
-     *
-     * reload は DB 全読みで数百 ms かかるが、await して完了させる。保存は「保存中…」を
-     * 出したままの操作で、戻った時点で全経路が新しい値を返すことのほうが重要。
-     * 失敗しても現行スナップショットが維持されるだけなので投げ直さない。
-     */
-    suspend fun replaceSetlist(
-        deletedItemIds: List<String>,
-        deletedPerformers: List<Pair<String, String>>,
-        items: List<SetlistItem>,
-        performers: List<SetlistPerformer>
-    ) {
-        if (deletedItemIds.isNotEmpty()) db.setlistDao().deleteItems(deletedItemIds)
-        for ((itemId, idolId) in deletedPerformers) db.setlistDao().deletePerformer(itemId, idolId)
-        if (items.isNotEmpty()) db.setlistDao().upsertItems(items)
-        if (performers.isNotEmpty()) db.setlistDao().upsertPerformers(performers)
-        snapshots?.reload()
-    }
 }
 
 /** 「コアが null を返した」と「スナップショットが無い」を分けるための入れ物。 */

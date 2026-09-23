@@ -14,6 +14,7 @@ import com.fugaif.imaslivedb.data.repository.EditFeedRepository
 import com.fugaif.imaslivedb.data.repository.EventRepository
 import com.fugaif.imaslivedb.data.repository.ExpenseRepository
 import com.fugaif.imaslivedb.data.repository.IdolRepository
+import com.fugaif.imaslivedb.data.repository.MasterEditRepository
 import com.fugaif.imaslivedb.data.repository.PerformanceEvidenceRepository
 import com.fugaif.imaslivedb.data.repository.PersonalTagRepository
 import com.fugaif.imaslivedb.data.repository.SearchRepository
@@ -91,6 +92,7 @@ class AppModule private constructor(context: Context) {
     val editApi: EditApi by lazy { EditApi(workerHttpClient, authService) }
     val setlistLikeService: SetlistLikeService by lazy { SetlistLikeService(workerHttpClient) }
     val editFeedRepository: EditFeedRepository by lazy { EditFeedRepository(database, snapshotStoreProvider) }
+    val masterEditRepository: MasterEditRepository by lazy { MasterEditRepository(database, snapshotStoreProvider) }
     val syncEngine: CloudKitSyncEngine by lazy { CloudKitSyncEngine(appContext, database, scope = appScope) }
     val localContributionLog: LocalContributionLog by lazy { LocalContributionLog(appContext) }
     val localPollVoteLog: LocalPollVoteLog by lazy { LocalPollVoteLog(appContext) }

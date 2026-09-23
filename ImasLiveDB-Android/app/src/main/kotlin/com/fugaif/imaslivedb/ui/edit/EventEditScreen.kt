@@ -121,7 +121,7 @@ fun EventEditScreen(
                     ticketUrl = ticketUrl.nonEmptyTrimmed(),
                     jointBrandIds = jointBrandIds.nonEmptyTrimmed()
                 )
-                AppModule.from(context).database.syncDao().upsertEvents(listOf(saved))
+                AppModule.from(context).masterEditRepository.applyEvent(saved)
             }
             isSaving = false
             when (result) {

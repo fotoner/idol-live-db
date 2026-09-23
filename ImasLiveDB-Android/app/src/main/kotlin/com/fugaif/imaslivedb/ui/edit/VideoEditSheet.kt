@@ -161,7 +161,7 @@ fun VideoEditSheet(
                                     authorDisplayName = existing?.authorDisplayName
                                         ?: module.authService.state.value.displayName
                                 )
-                                module.database.syncDao().upsertSongVideos(listOf(saved))
+                                module.masterEditRepository.applySongVideo(saved)
                                 isSaving = false
                                 onSaved(saved)
                                 onDismiss()

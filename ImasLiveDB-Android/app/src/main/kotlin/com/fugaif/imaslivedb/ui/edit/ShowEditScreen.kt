@@ -109,7 +109,7 @@ fun ShowEditScreen(
                     sortOrder = sortOrder,
                     performerType = performerType.nonEmptyTrimmed()
                 )
-                AppModule.from(context).database.syncDao().upsertShows(listOf(saved))
+                AppModule.from(context).masterEditRepository.applyShow(saved)
             }
             isSaving = false
             when (result) {

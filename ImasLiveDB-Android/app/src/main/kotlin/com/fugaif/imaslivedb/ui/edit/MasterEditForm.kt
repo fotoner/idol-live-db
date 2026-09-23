@@ -307,9 +307,9 @@ sealed class MasterEditSubmitResult {
  * 1 batch のマスタ編集を送り、admin なら [applyLocally] でローカル DB にも楽観反映する。
  *
  * - `recordName` は**サーバ確定値**を使う (create をサーバ採番に任せた時、送信値は空なので)。
- * - ローカルに書いたら**その場で**スナップショットを作り直す。省くとスナップショット経由で
- *   読む口だけが次の同期完了まで編集前の値を返し、「編集直後に自分の編集が見えない」に
- *   なる (EventRepository.replaceSetlist と同じ理由)。
+ * - [applyLocally] は [com.fugaif.imaslivedb.data.repository.MasterEditRepository] を通して書く。
+ *   あちらが 1 トランザクションで書き、その場でスナップショットを作り直す (省くとスナップショット
+ *   経由で読む口だけが次の同期完了まで編集前の値を返し、「編集直後に自分の編集が見えない」になる)。
  * - 例外はここで日本語の短文に畳む。呼び出し側が 401/403/429 を個別に扱う必要はない。
  *
  * @param fallbackRecordName create でクライアント採番した ID (Song など)。サーバが
@@ -328,8 +328,8 @@ suspend fun submitMasterEdit(
             is EditApi.MasterEditOutcome.Applied -> {
                 val resolved = outcome.response.primaryRecordName(fallbackRecordName)
                     ?: return MasterEditSubmitResult.Failed("保存に失敗しました (ID 未確定)")
+                // 端末の DB への反映 (と、スナップショットの作り直し) は MasterEditRepository が行う。
                 applyLocally(resolved)
-                module.snapshotStoreProvider.reload()
                 MasterEditSubmitResult.Applied(resolved)
             }
             is EditApi.MasterEditOutcome.Requested ->

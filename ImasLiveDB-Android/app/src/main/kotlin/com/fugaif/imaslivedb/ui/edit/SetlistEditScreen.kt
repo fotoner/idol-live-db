@@ -108,6 +108,7 @@ data class SetlistEditUiState(
 /** セトリ編集の状態管理。iOS `SetlistEditView` の移植 (契約: POST /edits を 1 リクエスト = 1 batch)。 */
 class SetlistEditViewModel(app: Application, private val show: Show) : AndroidViewModel(app) {
     private val eventRepo = AppModule.from(app).eventRepository
+    private val masterEditRepo = AppModule.from(app).masterEditRepository
     private val idolRepo = AppModule.from(app).idolRepository
     private val editApi = AppModule.from(app).editApi
 
@@ -314,7 +315,7 @@ class SetlistEditViewModel(app: Application, private val show: Show) : AndroidVi
                     is EditApi.MasterEditOutcome.Applied -> {
                         // ローカル置換は差分ではなく編集後の全量で行う (サーバ確定値との一致が目的)。
                         val performers = newPerformers.map { (itemId, idolId) -> SetlistPerformer(itemId, idolId) }
-                        eventRepo.replaceSetlist(
+                        masterEditRepo.replaceSetlist(
                             deletedItemIds = deletedItemIds,
                             deletedPerformers = deletedPerformerKeys.toList(),
                             items = built.map { it.item },
