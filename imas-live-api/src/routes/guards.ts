@@ -14,9 +14,9 @@ import {
 import { validateOpaqueKey } from "../validation";
 import type { RouteContext } from "./context";
 
-/** ここの関数が使う RouteContext の一部。index.ts の deps 方式のルートからも呼べるよう最小にしてある。 */
+/** ここの関数が使う RouteContext の一部 (使う項目だけを受け取る)。 */
 type ErrorResponder = Pick<RouteContext, "error">;
-type DbContext = ErrorResponder & { env: { DB: D1Database } };
+type DbContext = Pick<RouteContext, "env" | "error">;
 
 /** 呼び出し元の IP。Cloudflare が必ず付けるので、無いのはローカルで動かしたときだけ。 */
 export function clientIp(request: Request): string {

@@ -1,6 +1,6 @@
 // users.ts — users テーブルまわりの共通操作。
 //
-// index.ts と routes/ の双方から使うので独立させている。
+// 複数のルート (routes/*.ts と edits.ts 等) から使うので独立させている。
 
 import type { Env } from "./env";
 

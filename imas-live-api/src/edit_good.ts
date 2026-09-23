@@ -20,22 +20,11 @@
 //   (5) INSERT OR IGNORE (POST) または DELETE (DELETE)
 //   (6) COUNT(*) で goodCount 再算出して返す (レスポンスは { batchId, goodCount, gooded })
 
-import type { RateLimitAction, RateLimitResult } from "./rate_limit";
+import { getAuthUser } from "./auth";
+import { checkRateLimit } from "./rate_limit";
+import type { RouteContext } from "./routes/context";
 import { requireActiveUser } from "./routes/guards";
-
-export interface EditGoodEnv {
-  DB: D1Database;
-}
-
-export interface EditGoodDeps<E extends EditGoodEnv> {
-  getAuthUser: (request: Request, env: E) => Promise<{ uid: string; email?: string } | null>;
-  /** users 行を保証する (edit_good.user_id の FK 違反防止)。 */
-  upsertUser: (env: E, uid: string, name?: string, picture?: string) => Promise<void>;
-  checkRateLimit: (db: D1Database, uid: string, action: RateLimitAction) => Promise<RateLimitResult>;
-  json: (data: unknown, status?: number) => Response;
-  error: (message: string, status?: number) => Response;
-  rateLimitResponse: (used: number, limit: number, resetAt: string) => Response;
-}
+import { upsertUser } from "./users";
 
 interface BatchRow {
   editor_id: string;
@@ -46,17 +35,15 @@ interface BatchRow {
  * Good トグルの共通前段 (auth → ban → rate → batch 検証)。
  * 成功時は { user, batchId } を返し、失敗時は Response を返す (呼び出し側はそのまま return)。
  */
-async function authorizeGood<E extends EditGoodEnv>(
-  request: Request,
-  env: E,
-  deps: EditGoodDeps<E>,
+async function authorizeGood(
+  ctx: RouteContext,
   batchIdRaw: string,
   enforceRateLimit: boolean
 ): Promise<{ uid: string; batchId: number } | Response> {
-  const { error } = deps;
+  const { request, env, error, rateLimitResponse } = ctx;
 
   // (1) auth
-  const user = await deps.getAuthUser(request, env);
+  const user = await getAuthUser(request, env);
   if (!user) return error("Unauthorized", 401);
 
   const batchId = parseInt(batchIdRaw, 10);
@@ -64,13 +51,13 @@ async function authorizeGood<E extends EditGoodEnv>(
 
   // (2)(3) ban + rate (取消にはレート制限をかけない: トグルの往復で枯渇させないため)
   const [inactive, rl] = await Promise.all([
-    requireActiveUser({ env, error }, user),
+    requireActiveUser(ctx, user),
     enforceRateLimit
-      ? deps.checkRateLimit(env.DB, user.uid, "good")
+      ? checkRateLimit(env.DB, user.uid, "good")
       : Promise.resolve(null),
   ]);
   if (inactive) return inactive;
-  if (rl && !rl.allowed) return deps.rateLimitResponse(rl.used, rl.limit, rl.reset_at);
+  if (rl && !rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
   // (4) batch 検証
   const batch = await env.DB.prepare(
@@ -100,18 +87,13 @@ async function countGoods(db: D1Database, batchId: number): Promise<number> {
 // POST /edits/:batchId/good
 // ---------------------------------------------------------------------------
 
-export async function handlePostGood<E extends EditGoodEnv>(
-  request: Request,
-  env: E,
-  deps: EditGoodDeps<E>,
-  batchIdRaw: string
-): Promise<Response> {
-  const { json } = deps;
-  const auth = await authorizeGood(request, env, deps, batchIdRaw, true);
+export async function handlePostGood(ctx: RouteContext, batchIdRaw: string): Promise<Response> {
+  const { env, json } = ctx;
+  const auth = await authorizeGood(ctx, batchIdRaw, true);
   if (auth instanceof Response) return auth;
 
   // FK 孤児防止: edit_good.user_id が users(id) を参照するため行を保証する。
-  await deps.upsertUser(env, auth.uid);
+  await upsertUser(env, auth.uid);
 
   // (5) idempotent INSERT (複合 PK で多重 Good は no-op)
   await env.DB.prepare(
@@ -129,14 +111,9 @@ export async function handlePostGood<E extends EditGoodEnv>(
 // DELETE /edits/:batchId/good
 // ---------------------------------------------------------------------------
 
-export async function handleDeleteGood<E extends EditGoodEnv>(
-  request: Request,
-  env: E,
-  deps: EditGoodDeps<E>,
-  batchIdRaw: string
-): Promise<Response> {
-  const { json } = deps;
-  const auth = await authorizeGood(request, env, deps, batchIdRaw, false);
+export async function handleDeleteGood(ctx: RouteContext, batchIdRaw: string): Promise<Response> {
+  const { env, json } = ctx;
+  const auth = await authorizeGood(ctx, batchIdRaw, false);
   if (auth instanceof Response) return auth;
 
   // (5) DELETE (無ければ no-op)

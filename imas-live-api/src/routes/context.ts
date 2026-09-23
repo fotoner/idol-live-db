@@ -1,8 +1,9 @@
 // routes/context.ts — ルートハンドラが index.ts から受け取るもの。
 //
 // json / error / rateLimitResponse / rateLimitSimple はリクエストごとに作られる
-// クロージャ (CORS ヘッダと request id を閉じ込んでいる) なので、import ではなく
-// 引数で渡す。env / url / path / request も同様にルーター側の値をそのまま渡す。
+// クロージャ (CORS ヘッダを閉じ込んでいる) なので、import ではなく引数で渡す。
+// env / url / path / request / requestId も同様にルーター側の値をそのまま渡す。
+// どのルートもこの 1 つの型を受け取る (ルートごとに依存を注入する方式は使わない)。
 
 import type { Env } from "../env";
 
@@ -11,6 +12,8 @@ export interface RouteContext {
   env: Env;
   url: URL;
   path: string;
+  /** このリクエストの ID。応答の X-Request-Id と、失敗のログの突き合わせに使う。 */
+  requestId: string;
   json: (data: unknown, status?: number, headers?: Record<string, string>) => Response;
   error: (message: string, status?: number) => Response;
   rateLimitResponse: (used: number, limit: number, resetAt: string) => Response;

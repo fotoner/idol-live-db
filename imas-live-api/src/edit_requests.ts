@@ -6,29 +6,17 @@
 //
 // コミュニティ投稿 (参考動画) は従来どおり /edits で全員オープン。ここはマスタ専用。
 
-import type { RateLimitAction, RateLimitResult } from "./rate_limit";
+import { getAuthUser } from "./auth";
+import { checkRateLimit } from "./rate_limit";
+import type { RouteContext } from "./routes/context";
 import { requireActiveUser } from "./routes/guards";
 import { validateMasterEdit, type EditOp } from "./master_validators";
-
-export interface EditRequestEnv {
-  DB: D1Database;
-  GITHUB_TOKEN?: string;
-  GITHUB_REPO?: string; // "owner/repo"
-}
 
 interface OpInput {
   op?: string;
   recordType?: string;
   recordName?: string;
   fields?: Record<string, unknown>;
-}
-
-export interface EditRequestDeps<E extends EditRequestEnv> {
-  getAuthUser: (request: Request, env: E) => Promise<{ uid: string; email?: string } | null>;
-  checkRateLimit: (db: D1Database, uid: string, action: RateLimitAction) => Promise<RateLimitResult>;
-  json: (data: unknown, status?: number) => Response;
-  error: (message: string, status?: number) => Response;
-  rateLimitResponse: (used: number, limit: number, resetAt: string) => Response;
 }
 
 /**
@@ -171,14 +159,10 @@ function buildIssue(ops: OpInput[], summary: string | undefined, uid: string) {
   return { title, body, comments };
 }
 
-export async function handlePostEditRequests<E extends EditRequestEnv>(
-  request: Request,
-  env: E,
-  deps: EditRequestDeps<E>
-): Promise<Response> {
-  const { json, error, rateLimitResponse } = deps;
+export async function handlePostEditRequests(ctx: RouteContext): Promise<Response> {
+  const { request, env, json, error, rateLimitResponse } = ctx;
 
-  const user = await deps.getAuthUser(request, env);
+  const user = await getAuthUser(request, env);
   if (!user) return error("Unauthorized", 401);
 
   const raw = await request.text();
@@ -210,8 +194,8 @@ export async function handlePostEditRequests<E extends EditRequestEnv>(
   }
 
   const [inactive, rl] = await Promise.all([
-    requireActiveUser({ env, error }, user),
-    deps.checkRateLimit(env.DB, user.uid, "edit_request"),
+    requireActiveUser(ctx, user),
+    checkRateLimit(env.DB, user.uid, "edit_request"),
   ]);
   if (inactive) return inactive;
   if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);

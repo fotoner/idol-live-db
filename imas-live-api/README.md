@@ -84,7 +84,7 @@ Cron (scheduled) は掃除だけ:
 
 ## 主要エンドポイント
 
-ルーティングは `src/index.ts` の `path` / `request.method` マッチで定義されている (フレームワーク不使用)。
+ルーティングは `src/index.ts` の `ROUTES` (上から順に試す) と、各 `src/routes/*.ts` の `path` / `request.method` の一致で定義されている (フレームワーク不使用)。どのルートも `RouteContext` を 1 つ受け取る。
 以下が実在する全エンドポイント。`:xxx` はパスパラメータ。
 
 ### App Attestation / ランディング

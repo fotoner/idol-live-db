@@ -1,4 +1,4 @@
-// transfer.ts — 引き継ぎコード。
+// routes/transfer.ts — 引き継ぎコード。
 //
 //   POST /transfer        ユーザー生成ローカルデータ (お気に入り/担当/投票履歴等) を
 //                          サーバーに一時保管し、ワンタイムコードを発行する
@@ -6,8 +6,10 @@
 //
 // payload の中身 (JSON 妥当性含む) はクライアント側の責務。Worker はただの文字列ストレージ。
 
-import type { RateLimitAction, RateLimitResult } from "./rate_limit";
-import { readJsonBody, requireActiveUser } from "./routes/guards";
+import { getAuthUser } from "../auth";
+import { checkRateLimit } from "../rate_limit";
+import type { RouteContext } from "./context";
+import { decodePathParam, readJsonBody, requireActiveUser } from "./guards";
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 紛らわしい 0/O/1/I/L を除いた32文字
 const CODE_LENGTH = 10;
@@ -15,16 +17,17 @@ const MAX_PAYLOAD_BYTES = 200_000;
 const EXPIRES_IN_MS = 24 * 60 * 60 * 1000;
 const MAX_INSERT_RETRIES = 5;
 
-export interface TransferEnv {
-  DB: D1Database;
-}
-
-export interface TransferDeps<E extends TransferEnv> {
-  getAuthUser: (request: Request, env: E) => Promise<{ uid: string; email?: string } | null>;
-  checkRateLimit: (db: D1Database, uid: string, action: RateLimitAction) => Promise<RateLimitResult>;
-  json: (data: unknown, status?: number) => Response;
-  error: (message: string, status?: number) => Response;
-  rateLimitResponse: (used: number, limit: number, resetAt: string) => Response;
+/** POST /transfer と GET /transfer/:code。どちらでもなければ null。 */
+export async function handleTransfer(ctx: RouteContext): Promise<Response | null> {
+  const { request, path } = ctx;
+  if (path === "/transfer" && request.method === "POST") return createTransfer(ctx);
+  const fetchMatch = path.match(/^\/transfer\/([^/]+)$/);
+  if (fetchMatch && request.method === "GET") {
+    const code = decodePathParam(ctx, fetchMatch[1], "code");
+    if (code instanceof Response) return code;
+    return fetchTransfer(ctx, code);
+  }
+  return null;
 }
 
 function generateCode(): string {
@@ -41,24 +44,20 @@ function generateCode(): string {
 // POST /transfer
 // ---------------------------------------------------------------------------
 
-export async function handleCreateTransfer<E extends TransferEnv>(
-  request: Request,
-  env: E,
-  deps: TransferDeps<E>
-): Promise<Response> {
-  const { json, error, rateLimitResponse } = deps;
+async function createTransfer(ctx: RouteContext): Promise<Response> {
+  const { request, env, json, error, rateLimitResponse } = ctx;
 
-  const user = await deps.getAuthUser(request, env);
+  const user = await getAuthUser(request, env);
   if (!user) return error("Unauthorized", 401);
 
   const [inactive, rl] = await Promise.all([
-    requireActiveUser({ env, error }, user),
-    deps.checkRateLimit(env.DB, user.uid, "transfer_create"),
+    requireActiveUser(ctx, user),
+    checkRateLimit(env.DB, user.uid, "transfer_create"),
   ]);
   if (inactive) return inactive;
   if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
-  const body = await readJsonBody({ request, error }, "invalid_json");
+  const body = await readJsonBody(ctx, "invalid_json");
   if (body instanceof Response) return body;
 
   const payload = body.payload;
@@ -95,20 +94,15 @@ export async function handleCreateTransfer<E extends TransferEnv>(
 // GET /transfer/:code
 // ---------------------------------------------------------------------------
 
-export async function handleFetchTransfer<E extends TransferEnv>(
-  request: Request,
-  env: E,
-  code: string,
-  deps: TransferDeps<E>
-): Promise<Response> {
-  const { json, error, rateLimitResponse } = deps;
+async function fetchTransfer(ctx: RouteContext, code: string): Promise<Response> {
+  const { request, env, json, error, rateLimitResponse } = ctx;
 
-  const user = await deps.getAuthUser(request, env);
+  const user = await getAuthUser(request, env);
   if (!user) return error("Unauthorized", 401);
 
   const [inactive, rl] = await Promise.all([
-    requireActiveUser({ env, error }, user),
-    deps.checkRateLimit(env.DB, user.uid, "transfer_fetch"),
+    requireActiveUser(ctx, user),
+    checkRateLimit(env.DB, user.uid, "transfer_fetch"),
   ]);
   if (inactive) return inactive;
   if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);

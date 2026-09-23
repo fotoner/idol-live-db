@@ -24,8 +24,11 @@
 //        delete は fields=null (ソフト削除。deletedAt/modifiedAt のみ注入)。
 //   失敗時: CloudKit 失敗 → 502 (edit_batch は cloudkit_ok=0 のまま、edit_history は書かない)
 
-import type { RateLimitAction, RateLimitResult } from "./rate_limit";
+import { getAuthUser } from "./auth";
+import { checkRateLimit } from "./rate_limit";
+import type { RouteContext } from "./routes/context";
 import { requireActiveUser } from "./routes/guards";
+import { checkIsAdmin, upsertUser } from "./users";
 import {
   buildForceUpdate,
   buildSoftDelete,
@@ -50,34 +53,6 @@ import {
   fetchShowSetlistSnapshot,
 } from "./setlist_snapshot";
 import { maskDisplayName } from "./feed";
-
-// ---------------------------------------------------------------------------
-// 依存注入: index.ts の makeResponders / checkIsAdmin / getAuthUser / upsertUser に依存するため
-// ハンドラはこれらをまとめた deps を受け取る (index.ts のクロージャパターンに合わせる)。
-// ---------------------------------------------------------------------------
-
-// edits.ts は index.ts の具象 Env を直接知らないため、必要最小フィールドを EditsEnv とし、
-// 注入される各ヘルパは具象 Env を保持できるよう env 型を generic <E extends EditsEnv> で貫通させる
-// (具象 Env が APPLE_BUNDLE_ID 等の追加必須フィールドを持っていても型整合する)。
-export interface EditsEnv {
-  DB: D1Database;
-  CLOUDKIT_KEY_ID: string;
-  CLOUDKIT_PRIVATE_KEY: string;
-}
-
-export interface EditsDeps<E extends EditsEnv> {
-  /** Bearer から認証ユーザーを得る (未認証 null)。 */
-  getAuthUser: (request: Request, env: E) => Promise<{ uid: string; email?: string } | null>;
-  /** users 行を保証する (FK 違反による履歴孤児を防ぐ)。 */
-  upsertUser: (env: E, uid: string, name?: string, picture?: string) => Promise<void>;
-  /** admin 判定 (構造マスタ編集・フィールド allowlist 免除)。 */
-  checkIsAdmin: (env: E, uid: string) => Promise<boolean>;
-  /** レート制限判定 (action='edit')。 */
-  checkRateLimit: (db: D1Database, uid: string, action: RateLimitAction) => Promise<RateLimitResult>;
-  json: (data: unknown, status?: number) => Response;
-  error: (message: string, status?: number) => Response;
-  rateLimitResponse: (used: number, limit: number, resetAt: string) => Response;
-}
 
 // ---------------------------------------------------------------------------
 // 入力 DTO
@@ -219,15 +194,11 @@ function showIdOfSetlistOp(
 // POST /edits
 // ---------------------------------------------------------------------------
 
-export async function handlePostEdits<E extends EditsEnv>(
-  request: Request,
-  env: E,
-  deps: EditsDeps<E>
-): Promise<Response> {
-  const { json, error, rateLimitResponse } = deps;
+export async function handlePostEdits(ctx: RouteContext): Promise<Response> {
+  const { request, env, json, error, rateLimitResponse } = ctx;
 
   // (1) auth
-  const user = await deps.getAuthUser(request, env);
+  const user = await getAuthUser(request, env);
   if (!user) return error("Unauthorized", 401);
 
   // body パース + サイズ/件数ガード
@@ -245,13 +216,13 @@ export async function handlePostEdits<E extends EditsEnv>(
 
   // (2)(3) ban + rate を並列確認
   const [inactive, rl] = await Promise.all([
-    requireActiveUser({ env, error }, user),
-    deps.checkRateLimit(env.DB, user.uid, "edit"),
+    requireActiveUser(ctx, user),
+    checkRateLimit(env.DB, user.uid, "edit"),
   ]);
   if (inactive) return inactive;
   if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
-  const isAdmin = await deps.checkIsAdmin(env, user.uid);
+  const isAdmin = await checkIsAdmin(env, user.uid);
 
   // コーレス (SongCall) は 2026-09-06 に廃止。旧アプリからの投稿は「終了」と分かる形で返す
   // (下の一般ユーザー判定に落ちると「マスタは申請経由」という無関係な文言になる)。
@@ -489,7 +460,7 @@ export async function handlePostEdits<E extends EditsEnv>(
 
   // FK 孤児防止: edit_batch.editor_id が users(id) を NOT NULL 参照するため、
   // CloudKit 書き込み前に users 行を保証する (RedTeam High)。
-  await deps.upsertUser(env, user.uid);
+  await upsertUser(env, user.uid);
 
   // (6) edit_batch を cloudkit_ok=0 で先行 INSERT。
   //     失敗 (D1 の障害) はここで拾わず、index.ts の共通の 500 に任せる。D1 のエラー文は
@@ -567,14 +538,12 @@ export async function handlePostEdits<E extends EditsEnv>(
 // GET /master/:recordType/:recordName/history
 // ---------------------------------------------------------------------------
 
-export async function handleGetRecordHistory<E extends EditsEnv>(
+export async function handleGetRecordHistory(
+  ctx: RouteContext,
   recordType: string,
-  recordName: string,
-  url: URL,
-  env: E,
-  deps: Pick<EditsDeps<E>, "json" | "error">
+  recordName: string
 ): Promise<Response> {
-  const { json } = deps;
+  const { url, env, json } = ctx;
   const limit = parsePositiveInt(url.searchParams.get("limit"), 30);
   const rows = await getRecordHistory(env.DB, recordType, recordName, limit);
   // 一覧では変更フィールド名のみの要約 + フル diff を併せて返す (RedTeam Medium: 応答肥大対策の一次表現)。

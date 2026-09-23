@@ -69,8 +69,9 @@ export function stubD1(reply: Responder = () => undefined): StubD1 {
   return { db, calls, sql: () => calls.map((c) => c.sql).join("\n") };
 }
 
-/** index.ts の makeResponders と同じ形のレスポンダ (CORS ヘッダは省く)。 */
+/** index.ts の makeResponders と同じ形のレスポンダ (CORS ヘッダは省く) と、固定の request id。 */
 export const responders = {
+  requestId: "test-request-id",
   json: (data: unknown, status = 200, extraHeaders: Record<string, string> = {}) =>
     new Response(JSON.stringify(data), {
       status,
