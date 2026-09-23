@@ -8,6 +8,9 @@ import XCTest
 /// Swift ラッパ (射影とシード調達) を通しても核心が成り立つことを見る。核心は
 /// 「同名異曲が pool にあっても、正解と同じタイトルが不正解として並ばない」こと
 /// (並ぶと正しい答えを選んでも不正解になる)。
+///
+/// 規則そのものはコア (imas-core) の Rust テストが持つ。ここに残すのは、Swift の包みが
+/// コアに正しく渡し・受け取れていることを見る配線のスモークテストと、Swift にしか無い処理のテスト (Q-13)。
 final class IntroQuizChoicesTests: XCTestCase {
 
     /// 固定乱数 (SplitMix64)。シード調達を決定論にするため。
@@ -39,85 +42,7 @@ final class IntroQuizChoicesTests: XCTestCase {
 
     // MARK: - タイトルユニーク化の規則
 
-    /// 正解と同じタイトルの別バージョンは不正解候補にしない。
-    /// ここが壊れると「正解を選んだのに不正解」になる。
-    func testExcludesSameTitleDifferentSong() {
-        let answer = makeSong("s1", "READY!!")
-        let pool = [answer, makeSong("s2", "READY!! (M@STER VERSION)"), makeSong("s3", "READY!!")]
-        for seed in 0..<40 {
-            let choices = makeChoices(for: answer, pool: pool, seed: UInt64(seed))
-            XCTAssertEqual(Set(choices), ["READY!!", "READY!! (M@STER VERSION)"])
-            XCTAssertEqual(choices.count, 2, "正解と同じタイトルが重複して並んだ: \(choices)")
-        }
-    }
-
-    /// 正解そのもの (同じ id) は不正解候補から外れる。
-    func testExcludesAnswerItself() {
-        let answer = makeSong("s1", "GO MY WAY!!")
-        let choices = makeChoices(for: answer, pool: [answer, makeSong("s2", "蒼い鳥")])
-        XCTAssertEqual(Set(choices), ["GO MY WAY!!", "蒼い鳥"])
-        XCTAssertEqual(choices.count, 2)
-    }
-
-    /// 不正解どうしのタイトル重複も落とす (同じ選択肢が 2 つ並ばない)。
-    func testDeduplicatesAmongWrongCandidates() {
-        let answer = makeSong("s1", "自転車")
-        let pool = [makeSong("s2", "隣に…"), makeSong("s3", "隣に…"), makeSong("s4", "オーバーマスター")]
-        let choices = makeChoices(for: answer, pool: pool)
-        XCTAssertEqual(Set(choices), ["自転車", "隣に…", "オーバーマスター"])
-        XCTAssertEqual(choices.count, 3, "不正解どうしの重複が残った: \(choices)")
-    }
-
     // MARK: - 出題される 4 択
-
-    func testMakeReturnsFourUniqueChoicesIncludingAnswer() {
-        let answer = makeSong("s0", "答え")
-        let pool = (1...10).map { makeSong("s\($0)", "曲\($0)") }
-
-        let choices = makeChoices(for: answer, pool: pool)
-
-        XCTAssertEqual(choices.count, 4)
-        XCTAssertEqual(Set(choices).count, 4, "同じ選択肢が 2 つ並んではいけない")
-        XCTAssertTrue(choices.contains("答え"), "正解は必ず選択肢に入る")
-    }
-
-    /// 候補が足りなくても落ちず、正解は必ず残る (ブランド曲数が少ない設定への備え)。
-    func testMakeWithTooFewCandidates() {
-        let choices = makeChoices(for: makeSong("s0", "答え"), pool: [makeSong("s1", "曲1")], seed: 7)
-        XCTAssertEqual(choices.sorted(), ["曲1", "答え"].sorted())
-    }
-
-    /// pool が空でも正解 1 つは返る。
-    func testMakeWithEmptyPool() {
-        XCTAssertEqual(makeChoices(for: makeSong("s0", "答え"), pool: [], seed: 7), ["答え"])
-    }
-
-    /// 正解の位置が固定されない (常に末尾なら位置で当てられてしまう)。
-    func testAnswerPositionVaries() {
-        let answer = makeSong("s0", "答え")
-        let pool = (1...10).map { makeSong("s\($0)", "曲\($0)") }
-        var positions: Set<Int> = []
-        for seed in 0..<40 {
-            let choices = makeChoices(for: answer, pool: pool, seed: UInt64(seed))
-            positions.insert(choices.firstIndex(of: "答え")!)
-        }
-        XCTAssertTrue(positions.count > 1, "正解の位置が固定されている: \(positions)")
-    }
-
-    /// 同名異曲がある実データ相当の pool でも、選択肢にタイトル重複が出ない。
-    func testMakeNeverProducesDuplicateTitles() {
-        let answer = makeSong("s0", "READY!!")
-        let pool = [
-            makeSong("s1", "READY!!"), makeSong("s2", "READY!!"),
-            makeSong("s3", "CHANGE!!!!"), makeSong("s4", "CHANGE!!!!"),
-            makeSong("s5", "M@STERPIECE"),
-        ]
-        for seed in 0..<40 {
-            let choices = makeChoices(for: answer, pool: pool, seed: UInt64(seed))
-            XCTAssertEqual(Set(choices).count, choices.count, "重複した選択肢: \(choices)")
-            XCTAssertTrue(choices.contains("READY!!"))
-        }
-    }
 
     // MARK: - バッチ (1 ゲーム = 1 呼び出し)
 

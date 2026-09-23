@@ -2,6 +2,9 @@ import XCTest
 @testable import ImasLiveDB
 
 /// `filterIdols` (純粋ロジック) の単体テスト。DB に依存しない。
+///
+/// 規則そのものはコア (imas-core) の Rust テストが持つ。ここに残すのは、Swift の包みが
+/// コアに正しく渡し・受け取れていることを見る配線のスモークテストと、Swift にしか無い処理のテスト (Q-13)。
 final class IdolListFilteringTests: XCTestCase {
 
     private func makeIdol(_ id: String, name: String = "", brandId: String = "cg",
@@ -14,30 +17,6 @@ final class IdolListFilteringTests: XCTestCase {
             birthPlace: nil, age: nil, bust: nil, waist: nil, hip: nil, constellation: nil,
             hobbies: nil, talents: nil, description: nil, gender: nil, handedness: nil,
             debutDate: nil, attribute: attribute, aliases: aliases)
-    }
-
-    func testBrandFilter() {
-        let idols = [makeIdol("a", brandId: "cg"), makeIdol("b", brandId: "ml")]
-        var ctx = IdolFilterContext()
-        ctx.selectedBrandIds = ["ml"]
-        XCTAssertEqual(filterIdols(idols, ctx).map(\.id), ["b"])
-    }
-
-    func testAttributeFilter() {
-        let idols = [makeIdol("a", attribute: "cute"), makeIdol("b", attribute: "cool")]
-        var ctx = IdolFilterContext()
-        ctx.selectedAttribute = "cool"
-        XCTAssertEqual(filterIdols(idols, ctx).map(\.id), ["b"])
-    }
-
-    func testMarkFiltersAreAndConditions() {
-        let idols = [makeIdol("a"), makeIdol("b"), makeIdol("c")]
-        var ctx = IdolFilterContext()
-        ctx.requireFavorite = true
-        ctx.favoriteIds = ["a", "b"]
-        ctx.requireMyPick = true
-        ctx.myPickIds = ["b", "c"]
-        XCTAssertEqual(filterIdols(idols, ctx).map(\.id), ["b"])
     }
 
     func testSearchMatchesCastName() {
@@ -71,13 +50,5 @@ final class IdolListFilteringTests: XCTestCase {
 
         ctx.searchText = "レトラ"
         XCTAssertEqual(filterIdols(idols, ctx).map(\.id), ["retla"], "表示名でも従来どおり引けること")
-    }
-
-    /// 愛称でも引けること (nickname は表示名と別に持つアイドルがいる)。
-    func testSearchMatchesNickname() {
-        let idols = [makeIdol("meg", name: "ウィーン・マルガレーテ", nickname: "メグ")]
-        var ctx = IdolFilterContext()
-        ctx.searchText = "メグ"
-        XCTAssertEqual(filterIdols(idols, ctx).map(\.id), ["meg"])
     }
 }

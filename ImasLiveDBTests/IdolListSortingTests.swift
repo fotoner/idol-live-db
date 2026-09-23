@@ -8,6 +8,9 @@ import XCTest
 /// - **値が無いアイドルは並び方向に関わらず必ず末尾**。昇順で先頭に空欄が並ぶと
 ///   「若い順」を見に来た人の視界を潰すため。
 /// - 同値は公式順 (sortOrder) で安定させる (再描画で順序が入れ替わらない)。
+///
+/// 規則そのものはコア (imas-core) の Rust テストが持つ。ここに残すのは、Swift の包みが
+/// コアに正しく渡し・受け取れていることを見る配線のスモークテストと、Swift にしか無い処理のテスト (Q-13)。
 final class IdolListSortingTests: XCTestCase {
 
     private func makeIdol(
@@ -31,16 +34,6 @@ final class IdolListSortingTests: XCTestCase {
 
     // MARK: - 年齢
 
-    func testAgeDefaultsToOldestFirst() {
-        let idols = [makeIdol("a", age: 15), makeIdol("b", age: 32), makeIdol("c", age: 21)]
-        XCTAssertEqual(sortIdols(idols, by: .age).map(\.id), ["b", "c", "a"])
-    }
-
-    func testAgeAscendingIsYoungestFirst() {
-        let idols = [makeIdol("a", age: 15), makeIdol("b", age: 32), makeIdol("c", age: 21)]
-        XCTAssertEqual(sortIdols(idols, by: .age, ascending: true).map(\.id), ["a", "c", "b"])
-    }
-
     func testAgeMissingValuesGoLastRegardlessOfDirection() {
         let idols = [makeIdol("none1"), makeIdol("young", age: 12), makeIdol("none2"), makeIdol("old", age: 30)]
 
@@ -55,66 +48,9 @@ final class IdolListSortingTests: XCTestCase {
 
     // MARK: - 身長 / 体重
 
-    func testHeightDefaultsToTallestFirst() {
-        let idols = [makeIdol("s", height: 140), makeIdol("t", height: 191), makeIdol("m", height: 158)]
-        XCTAssertEqual(sortIdols(idols, by: .height).map(\.id), ["t", "m", "s"])
-    }
-
-    func testWeightAscendingIsLightestFirst() {
-        let idols = [makeIdol("h", weight: 52), makeIdol("l", weight: 30), makeIdol("m", weight: 41)]
-        XCTAssertEqual(sortIdols(idols, by: .weight, ascending: true).map(\.id), ["l", "m", "h"])
-    }
-
     // MARK: - 文字列キー
 
-    func testNameKanaAscending() {
-        let idols = [
-            makeIdol("c", nameKana: "うえの"),
-            makeIdol("a", nameKana: "あまみ"),
-            makeIdol("b", nameKana: "いおり"),
-        ]
-        XCTAssertEqual(sortIdols(idols, by: .nameKana).map(\.id), ["a", "b", "c"])
-    }
-
-    func testBirthdayAscendingStartsFromJanuary() {
-        let idols = [
-            makeIdol("dec", birthday: "--12-01"),
-            makeIdol("jan", birthday: "--01-03"),
-            makeIdol("jul", birthday: "--07-17"),
-        ]
-        XCTAssertEqual(sortIdols(idols, by: .birthday).map(\.id), ["jan", "jul", "dec"])
-    }
-
-    func testDebutDescendingIsNewestFirst() {
-        let idols = [
-            makeIdol("old", debutDate: "2011-11-28"),
-            makeIdol("new", debutDate: "2019-01-10"),
-            makeIdol("mid", debutDate: "2014-02-19"),
-        ]
-        XCTAssertEqual(sortIdols(idols, by: .debut, ascending: false).map(\.id), ["new", "mid", "old"])
-    }
-
-    func testBirthdayMissingValuesGoLast() {
-        let idols = [makeIdol("none"), makeIdol("jan", birthday: "--01-03")]
-        XCTAssertEqual(sortIdols(idols, by: .birthday).map(\.id), ["jan", "none"])
-    }
-
     // MARK: - 安定性 / 公式順
-
-    func testTiesFallBackToOfficialOrder() {
-        let idols = [
-            makeIdol("third", sortOrder: 30, age: 17),
-            makeIdol("first", sortOrder: 10, age: 17),
-            makeIdol("second", sortOrder: 20, age: 17),
-        ]
-        // 全員同い年 → 公式順で安定させる (再描画で入れ替わらない)
-        XCTAssertEqual(sortIdols(idols, by: .age).map(\.id), ["first", "second", "third"])
-    }
-
-    func testOfficialOrderUsesSortOrder() {
-        let idols = [makeIdol("b", sortOrder: 2), makeIdol("a", sortOrder: 1), makeIdol("c", sortOrder: 3)]
-        XCTAssertEqual(sortIdols(idols, by: .official).map(\.id), ["a", "b", "c"])
-    }
 
     // MARK: - グルーピング方針
 

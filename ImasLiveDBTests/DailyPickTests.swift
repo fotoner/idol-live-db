@@ -6,6 +6,9 @@ import XCTest
 /// 主目的は「アプリ内の日替わりピックとウィジェット用スナップショットが同じ曲を選ぶ」契約の固定。
 /// 以前は日付キー・FNV-1a・種文字列が 2 か所にコピーされていて、片方だけ直すと
 /// ウィジェットとアプリが黙って違う曲を出す状態だった。
+///
+/// 規則そのものはコア (imas-core) の Rust テストが持つ。ここに残すのは、Swift の包みが
+/// コアに正しく渡し・受け取れていることを見る配線のスモークテストと、Swift にしか無い処理のテスト (Q-13)。
 final class DailyPickTests: XCTestCase {
 
     /// 端末ローカル日なので、テストも端末ローカルの成分から Date を組む
@@ -17,10 +20,6 @@ final class DailyPickTests: XCTestCase {
     }
 
     // MARK: - dayKey
-
-    func testDayKeyIsZeroPadded() {
-        XCTAssertEqual(DailyPick.dayKey(local(2026, 1, 9)), "2026-01-09")
-    }
 
     /// 端末ローカルの日付をそのまま使う (JST 固定ではない)。
     /// `JSTDay` と用途が違うことをここで明示しておく。
@@ -54,67 +53,7 @@ final class DailyPickTests: XCTestCase {
 
     // MARK: - stableIndex
 
-    /// 同じ入力なら常に同じ値 (プロセスをまたいでも同じである必要がある)。
-    /// Swift の `hashValue` は起動ごとに seed が変わるので使えない、という前提の確認。
-    func testStableIndexIsDeterministic() {
-        XCTAssertEqual(
-            DailyPick.stableIndex("2026-07-26|cg", mod: 100),
-            DailyPick.stableIndex("2026-07-26|cg", mod: 100))
-    }
-
-    /// 出荷済みの実装が出す既知値を固定する。
-    ///
-    /// ここが変わると全ユーザーの「今日の1曲」が一斉に入れ替わる。特に offset basis は
-    /// 標準 FNV-1a (14695981039346656037) から 1 桁欠けた値のまま出荷されているので、
-    /// 「定数が間違っている」と気づいた人が直したくなる。直すとこのテストが落ちる。
-    /// 落ちたら実装ではなくこのテストの意図 (`DailyPick` のコメント) を先に読むこと。
-    func testStableIndexMatchesShippedValues() {
-        XCTAssertEqual(DailyPick.stableIndex("a", mod: 500), 366)
-        XCTAssertEqual(DailyPick.stableIndex("", mod: 7), 3)
-        XCTAssertEqual(DailyPick.stableIndex("2026-07-26|cg", mod: 500), 362)
-    }
-
-    func testStableIndexIsWithinRange() {
-        for i in 0..<200 {
-            let idx = DailyPick.stableIndex("2026-07-26|brand\(i)", mod: 13)
-            XCTAssertTrue((0..<13).contains(idx), "範囲外: \(idx)")
-        }
-    }
-
-    /// 候補 0 件でも落ちない (剰余のゼロ除算を踏まない)。
-    func testStableIndexWithZeroModIsSafe() {
-        XCTAssertEqual(DailyPick.stableIndex("x", mod: 0), 0)
-        XCTAssertEqual(DailyPick.stableIndex("x", mod: -3), 0)
-    }
-
     // MARK: - songIndex (アプリ ↔ ウィジェットの契約)
-
-    /// 種文字列は `"日付|ブランドID"`。
-    /// アプリ側とウィジェット側がこの組み立てを別々に持っていたのが元のバグ要因。
-    func testSongIndexUsesDayPipeBrandSeed() {
-        XCTAssertEqual(
-            DailyPick.songIndex(dayKey: "2026-07-26", brandId: "cg", count: 50),
-            DailyPick.stableIndex("2026-07-26|cg", mod: 50))
-    }
-
-    /// 日が変われば (基本的に) 選ぶ曲も変わる。日替わりとして機能していることの確認。
-    func testSongIndexVariesByDay() {
-        let a = DailyPick.songIndex(dayKey: "2026-07-26", brandId: "cg", count: 500)
-        let b = DailyPick.songIndex(dayKey: "2026-07-27", brandId: "cg", count: 500)
-        XCTAssertNotEqual(a, b)
-    }
-
-    /// 同じ日でもブランドが違えば別の曲を選ぶ (全ブランド同じ番号にならない)。
-    func testSongIndexVariesByBrand() {
-        let cg = DailyPick.songIndex(dayKey: "2026-07-26", brandId: "cg", count: 500)
-        let ml = DailyPick.songIndex(dayKey: "2026-07-26", brandId: "ml", count: 500)
-        XCTAssertNotEqual(cg, ml)
-    }
-
-    /// 候補が空でも 0 を返して落ちない。
-    func testSongIndexWithNoCandidates() {
-        XCTAssertEqual(DailyPick.songIndex(dayKey: "2026-07-26", brandId: "cg", count: 0), 0)
-    }
 
     /// 一括版 (アプリの日替わり投票が使う) はスカラー版 (ウィジェットが使う) と
     /// 必ず同じ答えを出す。順序も入力と同じ。ここが割れると再び別々の曲を出す。
