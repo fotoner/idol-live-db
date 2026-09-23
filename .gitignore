@@ -1,5 +1,5 @@
 # Xcode
-*.xcodeproj/
+*.xcodeproj/*
 *.xcworkspace/
 xcuserdata/
 DerivedData/
@@ -20,6 +20,14 @@ build/
 .swiftpm/
 Packages/
 Package.resolved
+# iOS の SPM 依存の版は追跡する (Q-13 / D-IOS-13)。CI・手元・リリースで同じ版を組むため。
+!ImasLiveDB.xcodeproj/project.xcworkspace/
+ImasLiveDB.xcodeproj/project.xcworkspace/*
+!ImasLiveDB.xcodeproj/project.xcworkspace/xcshareddata/
+ImasLiveDB.xcodeproj/project.xcworkspace/xcshareddata/*
+!ImasLiveDB.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+ImasLiveDB.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/*
+!ImasLiveDB.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 # macOS
 .DS_Store
