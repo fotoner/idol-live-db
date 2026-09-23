@@ -70,6 +70,60 @@ def write_json(path, obj):
         json.dump(obj, f, ensure_ascii=False)
 
 
+class FakeResponse:
+    def __init__(self, status_code, payload=None, text=""):
+        self.status_code = status_code
+        self._payload = payload
+        self.text = text
+
+    def json(self):
+        return self._payload
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise RuntimeError("HTTP %d" % self.status_code)
+
+
+def accept_all(url, payload):
+    """modify を全部成功として返す応答。"""
+    return {"records": [{"recordName": op["record"]["recordName"],
+                         "recordType": op["record"]["recordType"]}
+                        for op in payload.get("operations", [])]}
+
+
+class FakeCloudKit:
+    """lib/cloudkit.py の送信口を偽物に差し替える (テストの間だけ)。
+
+    handler(url, payload) が応答の JSON を返す。送られたものは calls に (url, payload)
+    で残る。鍵の読み込みと待ちも差し替えるので、鍵のファイルも時間も要らない。
+    """
+
+    def __init__(self, testcase, handler=accept_all):
+        from lib import cloudkit
+
+        self.handler = handler
+        self.calls = []
+        self.bodies = []  # 送られた生のバイト列
+        self.statuses = []  # 先頭から順に返す HTTP ステータス (空なら 200)
+        for name, fake in (("http_post", self._post),
+                           ("load_signer", lambda key_id, key_file: None),
+                           ("sleep", lambda seconds: None)):
+            testcase.addCleanup(setattr, cloudkit, name, getattr(cloudkit, name))
+            setattr(cloudkit, name, fake)
+
+    def _post(self, url, body, headers):
+        payload = json.loads(body.decode("utf-8"))
+        self.calls.append((url, payload))
+        self.bodies.append(body)
+        status = self.statuses.pop(0) if self.statuses else 200
+        if status != 200:
+            return FakeResponse(status, text="fake %d" % status)
+        return FakeResponse(200, self.handler(url, payload))
+
+    def operations(self):
+        return [op for _, payload in self.calls for op in payload.get("operations", [])]
+
+
 def sha256(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 

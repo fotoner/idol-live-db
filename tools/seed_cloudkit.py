@@ -13,19 +13,10 @@ Auth:
 """
 
 import argparse
-import json
 import os
-import re
 import sqlite3
 import sys
 import time
-import requests
-import hashlib
-import base64
-from ecdsa import SigningKey
-from ecdsa.util import sigencode_der
-import urllib.request
-import urllib.error
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -34,41 +25,27 @@ _TOOLS_DIR = str(Path(__file__).resolve().parent)
 if _TOOLS_DIR not in sys.path:
     sys.path.insert(0, _TOOLS_DIR)
 
-
-# ---------------------------------------------------------------------------
-# Config
-# ---------------------------------------------------------------------------
-
-BASE_URL = "https://api.apple-cloudkit.com"
-CONTAINER = "iCloud.com.fugaif.ImasLiveDB"
-ENVIRONMENT = "development"
-DB_PATH = Path(__file__).parent.parent / "ImasLiveDB" / "Resources" / "master.sqlite"
-
-# These are set after arg parsing (may be overridden by --environment / --production)
-MODIFY_PATH = ""
-QUERY_PATH = ""
-
-
-def _build_paths(env: str) -> None:
-    global MODIFY_PATH, QUERY_PATH
-    MODIFY_PATH = f"/database/1/{CONTAINER}/{env}/public/records/modify"
-    QUERY_PATH = f"/database/1/{CONTAINER}/{env}/public/records/query"
-
-
-_build_paths(ENVIRONMENT)
-
-BATCH_SIZE = 200
-MAX_RETRIES = 5
-INITIAL_BACKOFF = 1.0  # seconds
-DEFAULT_KEY_FILE = Path(__file__).parent / "eckey.pem"
-
-# ---------------------------------------------------------------------------
-# Record type mapping (SQL table → CloudKit record type)
-# ---------------------------------------------------------------------------
-
-# 実体は lib/ck_tables.py (標準ライブラリだけで書いてあり、apply_data.py --check が
-# requests 無しで読む)。手元のスクリプトがこの名前で import しているので、
-# ここからも同じ名前で読めるようにしておく。
+# 表の知識・レコードの組み立て・通信は lib/ に置いてある。手元のスクリプトがこの
+# ファイルの名前で import しているので、ここからも同じ名前で読めるようにしておく
+# (名前を消したり変えたりしない)。
+from lib import cloudkit as _ck  # noqa: E402
+from lib.ck_records import (  # noqa: E402,F401
+    SCHEMA_MANAGED_FIELDS,
+    SCHEMA_PATH,
+    assert_replace_safe,
+    build_fields,
+    get_column_info,
+    get_primary_keys,
+    has_table,
+    make_record_name,
+    next_modified_ms,
+    push_columns,
+    rows_to_operations,
+    schema_fields,
+    sent_columns,
+    snake_to_camel,
+    sql_type_to_cloudkit,
+)
 from lib.ck_tables import (  # noqa: E402,F401
     ID_FILTER_COLUMN,
     RECORD_TYPE_MAP,
@@ -79,269 +56,60 @@ from lib.ck_tables import (  # noqa: E402,F401
 
 
 # ---------------------------------------------------------------------------
-# Schema introspection helpers
+# Config
 # ---------------------------------------------------------------------------
 
-def has_table(conn: sqlite3.Connection, table: str) -> bool:
-    return conn.execute(
-        "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (table,)
-    ).fetchone() is not None
+BASE_URL = _ck.BASE_URL
+CONTAINER = _ck.CONTAINER
+ENVIRONMENT = "development"
+DB_PATH = Path(__file__).parent.parent / "ImasLiveDB" / "Resources" / "master.sqlite"
+
+# These are set after arg parsing (may be overridden by --environment / --production)
+MODIFY_PATH = ""
+QUERY_PATH = ""
 
 
-def get_column_info(conn: sqlite3.Connection, table: str) -> list[dict]:
-    """Return list of {name, type} for each column in table."""
-    cur = conn.execute(f"PRAGMA table_info({table})")
-    return [{"name": row[1], "type": row[2].upper()} for row in cur.fetchall()]
+def _build_paths(env: str) -> None:
+    global MODIFY_PATH, QUERY_PATH
+    MODIFY_PATH = _ck.records_path(env, "modify")
+    QUERY_PATH = _ck.records_path(env, "query")
 
 
-def snake_to_camel(name: str) -> str:
-    """Convert snake_case to camelCase."""
-    parts = name.split("_")
-    return parts[0] + "".join(p.capitalize() for p in parts[1:])
+_build_paths(ENVIRONMENT)
 
-
-def sql_type_to_cloudkit(sql_type: str) -> str:
-    """Map SQLite affinity to CloudKit field type."""
-    if "INT" in sql_type:
-        return "INT64"
-    if "REAL" in sql_type or "FLOAT" in sql_type or "DOUBLE" in sql_type:
-        return "DOUBLE"
-    # TEXT, BLOB, and anything else → STRING
-    return "STRING"
-
-
-# ---------------------------------------------------------------------------
-# Primary key helpers
-# ---------------------------------------------------------------------------
-
-def get_primary_keys(conn: sqlite3.Connection, table: str) -> list[str]:
-    """Return list of primary key column names for the table."""
-    cur = conn.execute(f"PRAGMA table_info({table})")
-    pks = [(row[5], row[1]) for row in cur.fetchall() if row[5] > 0]
-    pks.sort()
-    return [name for _, name in pks]
-
-
-def make_record_name(table: str, row: dict, pk_cols: list[str]) -> str:
-    """Build a stable CloudKit record name from primary key values."""
-    if len(pk_cols) == 1:
-        return str(row[pk_cols[0]])
-    # Composite PK: prefix with table abbreviation to avoid collisions
-    parts = [table] + [str(row[col]) for col in pk_cols]
-    return "-".join(parts)
-
-
-# ---------------------------------------------------------------------------
-# Record building
-# ---------------------------------------------------------------------------
-
-# モジュール読込時の基準時刻 (ms)。record ごとに +1ms ずつずらして使う。
-# modifiedAt は「呼び出し時の実時刻 ms」 をベースに単調増加でユニークに割り当てる。
-# プロセス開始時刻固定だと、 seed 実行中にユーザ端末側が incremental sync を完了して
-# lastSync を更新した場合、 seed 完了後の sync で「lastSync > 全レコードの modifiedAt」
-# となって新規 push がまるごと拾えなくなる ( "modifiedAt > lastSync" で 0 件)。
-# 実時刻ベースに切り替えることで「push されたレコードは push 時刻以降」 が保証され、
-# 任意のタイミングでアプリが incremental sync しても取りこぼされない。
-_last_returned_ms = 0
-
-
-def next_modified_ms() -> int:
-    global _last_returned_ms
-    now_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
-    if now_ms <= _last_returned_ms:
-        now_ms = _last_returned_ms + 1
-    _last_returned_ms = now_ms
-    return now_ms
-
+BATCH_SIZE = _ck.BATCH_SIZE
+MAX_RETRIES = _ck.MAX_RETRIES
+INITIAL_BACKOFF = _ck.INITIAL_BACKOFF  # seconds
+DEFAULT_KEY_FILE = Path(__file__).parent / "eckey.pem"
 
 # 互換のため NOW_MS は seed 全体で 1 つの代表値を持つが、 個別 push では next_modified_ms()
 # を使うので影響なし (event_merges 等で modifiedAt をその場で複数 push する箇所のみ参照)。
 NOW_MS = int(datetime.now(timezone.utc).timestamp() * 1000)
 
 
-def sent_columns(
-    col_info: list[dict],
-    pk_cols: list[str],
-    exclude_fields: Optional[set] = None,
-    include_fields: Optional[set] = None,
-) -> list[tuple[dict, str]]:
-    """CloudKit に送る列を (列情報, camelCase 名) で返す。
-
-    - 単一 PK は recordName に使うので送らない
-    - exclude_fields: camelCase フィールド名を除外 (Production に未デプロイな列を飛ばす用途)
-    - include_fields: camelCase フィールド名のホワイトリスト (指定時はそれ以外を飛ばす)
-    """
-    out = []
-    for col in col_info:
-        if len(pk_cols) == 1 and col["name"] == pk_cols[0]:
-            continue
-        ck_name = snake_to_camel(col["name"])
-        if include_fields is not None and ck_name not in include_fields:
-            continue
-        if exclude_fields and ck_name in exclude_fields:
-            continue
-        out.append((col, ck_name))
-    return out
-
-
-def build_fields(
-    row: dict,
-    col_info: list[dict],
-    pk_cols: list[str],
-    exclude_fields: Optional[set] = None,
-    include_fields: Optional[set] = None,
-) -> dict:
-    """Convert a SQLite row dict to CloudKit fields dict.
-
-    送る列は sent_columns で決める。値が NULL の列は送らない (forceUpdate では CloudKit 側の
-    値が残る。消したいときは forceReplace = rows_to_operations の replace)。
-    """
-    fields = {}
-    for col, ck_name in sent_columns(col_info, pk_cols, exclude_fields, include_fields):
-        value = row.get(col["name"])
-        if value is None:
-            continue  # omit NULL fields
-        ck_type = sql_type_to_cloudkit(col["type"])
-        fields[ck_name] = {"value": value, "type": ck_type}
-    # Add modifiedAt timestamp (milliseconds since epoch)
-    fields["modifiedAt"] = {"value": next_modified_ms(), "type": "TIMESTAMP"}
-    return fields
-
-
-def rows_to_operations(
-    table: str,
-    rows: list[dict],
-    col_info: list[dict],
-    pk_cols: list[str],
-    exclude_fields: Optional[set] = None,
-    include_fields: Optional[set] = None,
-    replace: bool = False,
-) -> list[dict]:
-    """Convert SQLite rows to CloudKit upsert operations.
-
-    既定は forceUpdate: 送った列だけを書き換え、送らなかった列は CloudKit 側の値が残る。
-    NULL 列は build_fields が省くので、**ローカルで NULL にした修正は forceUpdate では伝わらない**
-    (翌日の CloudKit → db/master.sql の export で巻き戻る)。
-    replace=True は forceReplace: レコードを送った列だけで置き換えるので NULL 化も伝わる。
-    代わりに送らなかった列は消えるため、CLI では assert_replace_safe を通した対象にしか使わない。
-    """
-    record_type = RECORD_TYPE_MAP[table]
-    ops = []
-    for row in rows:
-        record_name = make_record_name(table, row, pk_cols)
-        fields = build_fields(row, col_info, pk_cols, exclude_fields, include_fields)
-        ops.append(
-            {
-                "operationType": "forceReplace" if replace else "forceUpdate",
-                "record": {
-                    "recordType": record_type,
-                    "recordName": record_name,
-                    "fields": fields,
-                },
-            }
-        )
-    return ops
-
-
-SCHEMA_PATH = Path(__file__).resolve().parent / "cloudkit_schema.ckdb"
-# CloudKit 側だけが持つ運用列。forceReplace で送らなくても意味が変わらない
-# (deletedAt 無し = 生存、modifiedAt は build_fields が毎回付ける)。
-SCHEMA_MANAGED_FIELDS = {"deletedAt", "modifiedAt"}
-
-
-def schema_fields(record_type: str) -> set[str]:
-    """tools/cloudkit_schema.ckdb (CloudKit コンソールの export) から record type の列名を読む。
-
-    列は `name TYPE ...` の行。システム列は `"___createTime"` のように引用符つき、
-    GRANT 行は大文字始まりなので、小文字始まりの語だけ拾えば列名になる。
-    """
-    text = SCHEMA_PATH.read_text(encoding="utf-8")
-    m = re.search(r"RECORD TYPE %s \((.*?)\n\s*\);" % re.escape(record_type), text, re.S)
-    if not m:
-        raise SystemExit(f"Error: {SCHEMA_PATH.name} に RECORD TYPE {record_type} が無い")
-    return set(re.findall(r"^\s+([a-z]\w*)\s", m.group(1), re.M))
-
-
-def assert_replace_safe(
-    conn: sqlite3.Connection,
-    table: str,
-    exclude_fields: Optional[set],
-    include_fields: Optional[set],
-) -> None:
-    """forceReplace (--replace) がこのテーブルに安全かを、push を始める前に確かめる。
-
-    - id で絞れるテーブルに限る。全件 replace は、ダンプの後に CloudKit 側で入った投稿を
-      「ローカルでは NULL の列」として消してしまう。
-    - CloudKit の列 (システム列と運用列を除く) が、送る列に収まっていること。
-      収まらない列は forceReplace で黙って消えるので止める。
-
-    main が対象テーブル全部をこの順で通してから push を始める (途中のテーブルで止まると
-    その前のテーブルだけ送られた状態になるため)。
-    """
-    if table not in ID_FILTER_COLUMN:
-        raise SystemExit(f"Error: --replace は {table} では使えない (--ids で絞れないテーブル)")
-    col_info, _ = push_columns(conn, table)
-    sent = {ck for _, ck in sent_columns(col_info, get_primary_keys(conn, table), exclude_fields, include_fields)}
-    missing = schema_fields(RECORD_TYPE_MAP[table]) - SCHEMA_MANAGED_FIELDS - sent
-    if missing:
-        raise SystemExit(
-            f"Error: --replace は {table} に使えない。CloudKit 側の列 {sorted(missing)} を"
-            f" ローカルが持っていないので、forceReplace すると消える。"
-        )
-
-
 # ---------------------------------------------------------------------------
-# CloudKit S2S Auth (manual implementation)
+# CloudKit S2S Auth (実体は lib/cloudkit.py)
 # ---------------------------------------------------------------------------
 
-_signing_key = None
+_signing_key = None  # lib.cloudkit.Signer。init_session で作る
 _key_id = ""
 
 
 def init_session(key_id: str, key_file: Path) -> None:
     global _signing_key, _key_id
     _key_id = key_id
-    _signing_key = SigningKey.from_pem(key_file.read_text())
+    _signing_key = _ck.load_signer(key_id, key_file)
     print(f"  [auth] CloudKit S2S auth initialized")
 
 
 def _sign_request(body: bytes, subpath: str) -> dict:
     """Generate CloudKit S2S auth headers."""
-    from datetime import datetime, timezone
-    date_str = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    body_hash = base64.b64encode(hashlib.sha256(body).digest()).decode()
-    message = f"{date_str}:{body_hash}:{subpath}"
-    signature = base64.b64encode(_signing_key.sign(message.encode(), hashfunc=hashlib.sha256, sigencode=sigencode_der)).decode()
-    return {
-        "Content-Type": "application/json",
-        "X-Apple-CloudKit-Request-KeyID": _key_id,
-        "X-Apple-CloudKit-Request-ISO8601Date": date_str,
-        "X-Apple-CloudKit-Request-SignatureV1": signature,
-    }
+    return _signing_key.headers(body, subpath)
 
 
 def post_json(url: str, payload: dict, auth=None) -> dict:
-    """POST JSON to url with retry/backoff on 429.
-
-    CloudKit API は recordName に非 ASCII 文字 (全角仮名・異体字 等) を含む場合、
-    `\\uXXXX` 形式の escape よりも UTF-8 raw を期待するため ensure_ascii=False。
-    """
-    body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-    # Extract subpath from URL for signing
-    subpath = url.replace(BASE_URL, "")
-    headers = _sign_request(body, subpath) if _signing_key else {"Content-Type": "application/json"}
-    for attempt in range(MAX_RETRIES):
-        resp = requests.post(url, data=body, headers=headers)
-        if resp.status_code == 200:
-            return resp.json()
-        if resp.status_code == 429:
-            wait = INITIAL_BACKOFF * (2 ** attempt)
-            print(f"  [rate limit] sleeping {wait:.1f}s before retry {attempt + 1}/{MAX_RETRIES}")
-            time.sleep(wait)
-        else:
-            print(f"  [HTTP {resp.status_code}] {resp.text[:500]}", file=sys.stderr)
-            resp.raise_for_status()
-    raise RuntimeError("Max retries exceeded for CloudKit request")
+    """init_session の鍵で署名して POST する (429 は待って再署名し、やり直す)。"""
+    return _ck.post_json(url, payload, _signing_key)
 
 
 def get_json(url: str, payload: dict, auth=None) -> dict:
@@ -356,66 +124,11 @@ def get_json(url: str, payload: dict, auth=None) -> dict:
 def upload_operations(
     ops: list[dict], dry_run: bool, label: str
 ) -> tuple[int, int]:
-    """Upload operations in batches. Returns (succeeded_count, error_count)."""
-    total = len(ops)
-    processed = 0
-    error_count = 0
-    url = BASE_URL + MODIFY_PATH
+    """Upload operations in batches. Returns (succeeded_count, error_count).
 
-    for batch_start in range(0, total, BATCH_SIZE):
-        batch = ops[batch_start : batch_start + BATCH_SIZE]
-        if dry_run:
-            print(f"  [dry-run] would upload {len(batch)} records (batch starting at {batch_start})")
-            processed += len(batch)
-            continue
-
-        if batch_start > 0:
-            time.sleep(1.0)
-        payload = {"operations": batch}
-        try:
-            result = post_json(url, payload)
-        except Exception as e:
-            # CloudKit がまれに "could not find handler for endpoint" 404 を返す
-            # (連続リクエストでのスロットリングらしき挙動)。少し待って1回だけ再試行する。
-            print(f"  [warn] batch upload failed, retrying once: {e}", file=sys.stderr)
-            time.sleep(3.0)
-            try:
-                result = post_json(url, payload)
-            except Exception as e2:
-                print(f"  [error] batch upload failed after retry: {e2}", file=sys.stderr)
-                raise
-
-        errors = [r for r in result.get("records", []) if "serverErrorCode" in r]
-        if errors:
-            error_count += len(errors)
-            print(f"  [warn] {len(errors)} record errors in batch:", file=sys.stderr)
-            for err in errors[:3]:
-                print(f"    {err}", file=sys.stderr)
-
-        processed += len(batch)
-        print(f"  uploaded {processed}/{total} {label} records")
-
-    return (processed - error_count, error_count)
-
-
-def push_columns(conn: sqlite3.Connection, table: str) -> tuple[list[dict], str]:
-    """push する列 (get_column_info の形) と、それを引く SELECT 句。
-
-    idols.voice_actors は idol_voice_actors (期間つき履歴) へ移して列を消したが、
-    CloudKit にはしばらく送り続ける。旧アプリの CKRecordMapper は voiceActors を
-    読んでモデルを組み立てており、フィールドが消えると nil になって upsert のたびに
-    ローカル列が NULL 上書きされる = 更新していない人の CV 表示が全部消える。
-    全ユーザーが新版に移ったらこの導出ごと外す。
+    送り先は _build_paths で決めた環境 (呼んだ時点の MODIFY_PATH)。
     """
-    col_info = get_column_info(conn, table)
-    select = "*"
-    if table == "idols" and has_table(conn, "idol_voice_actors"):
-        select = ("*, (SELECT group_concat(name, ',') FROM idol_voice_actors v"
-                  " WHERE v.idol_id = idols.id AND v.valid_to IS NULL) AS voice_actors")
-        # get_column_info と同じ形 ({name, type}) にすること。type が無いと
-        # rows_to_operations が KeyError で落ちる。
-        col_info = col_info + [{"name": "voice_actors", "type": "TEXT"}]
-    return col_info, select
+    return _ck.upload_operations(ops, BASE_URL + MODIFY_PATH, dry_run, label, post=post_json)
 
 
 def seed_table(

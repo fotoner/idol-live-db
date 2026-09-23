@@ -27,7 +27,8 @@ import sqlite3
 import sys
 from pathlib import Path
 
-import seed_cloudkit as sk  # 同ディレクトリ。署名・query・テーブルマップを再利用
+import seed_cloudkit as sk  # 同ディレクトリ。鍵のセッション・テーブルマップを再利用
+from lib import cloudkit as _ck
 
 ROOT = Path(__file__).resolve().parent.parent
 DUMP_PATH = ROOT / "db" / "master.sql"
@@ -47,36 +48,8 @@ def camel_to_snake(name: str) -> str:
 
 
 def query_all(record_type: str) -> list[dict]:
-    """指定 RecordType の全レコードを continuationMarker でページング取得。
-
-    フィルタ無しクエリは recordName 順を要求するが recordName は queryable でない。
-    modifiedAt は iOS 差分同期 (modifiedAt > lastSync) が使うため必ず queryable なので、
-    modifiedAt > 0 でフィルタ＆ソートして全件を列挙する (全レコードに modifiedAt が入る)。
-    """
-    url = sk.BASE_URL + sk.QUERY_PATH
-    out, cursor = [], None
-    while True:
-        payload = {
-            "query": {
-                "recordType": record_type,
-                "filterBy": [{
-                    "fieldName": "modifiedAt",
-                    "comparator": "GREATER_THAN",
-                    "fieldValue": {"value": 0, "type": "TIMESTAMP"},
-                }],
-                "sortBy": [{"fieldName": "modifiedAt", "ascending": True}],
-            },
-            "resultsLimit": 200,
-        }
-        if cursor:
-            payload["continuationMarker"] = cursor
-        result = sk.get_json(url, payload)
-        out.extend(result.get("records", []))
-        # CloudKit は次ページがある時だけ continuationMarker を返す (無ければ最終ページ)
-        cursor = result.get("continuationMarker")
-        if not cursor:
-            break
-    return out
+    """指定 RecordType の全レコードを、init_session の鍵で読む (実体は lib/cloudkit.py)。"""
+    return _ck.query_all(sk.BASE_URL + sk.QUERY_PATH, record_type, post=sk.get_json)
 
 
 def record_to_row(conn, table, rec, pk_cols, table_cols):
@@ -114,7 +87,7 @@ def refresh_table(conn, table):
         # soft delete (deletedAt) 済みレコードは「削除」なので master に再取込しない。
         # master 側テーブルに deleted_at 列が無いため、取り込むと生存レコードとして
         # 復活してしまう (是正で消したはずの誤データが cron で蘇る事故の防止)。
-        if r.get("fields", {}).get("deletedAt", {}).get("value"):
+        if _ck.is_soft_deleted(r):
             soft_deleted += 1
             continue
         row = record_to_row(conn, table, r, pk_cols, table_cols)
