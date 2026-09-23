@@ -68,10 +68,11 @@ def record_to_row(conn, table, rec, pk_cols, table_cols):
     return {k: v for k, v in row.items() if k in table_cols}
 
 
-# 表の行数がこの割合以上減ったら警告する (0 行になったときは常に警告する)。
+# 表の行数がこの割合 (%) 以上減ったら警告する (0 行になったときも含む)。
 # 止めはしない (終了コードも書き込み先も変えない)。push し忘れた行が、CloudKit の分で
 # 表を置き換えたときに黙って消えるのを、ログで気づけるようにするため。
-SHRINK_WARN_RATIO = 0.10
+# 比較は整数で行う (浮動小数だと 70 → 63 のようなちょうど 10% 減が漏れる)。
+SHRINK_WARN_PERCENT = 10
 
 
 def refresh_table(conn, table):
@@ -110,7 +111,7 @@ def refresh_table(conn, table):
     print(f"  {table:<22} CloudKit {len(recs):>6} → 反映 {inserted:>6}{note}")
     for name, reason in dropped:
         print(f"    skip {table} {name}: {reason}", file=sys.stderr)
-    if before and (inserted == 0 or inserted < before * (1 - SHRINK_WARN_RATIO)):
+    if before and (before - inserted) * 100 >= before * SHRINK_WARN_PERCENT:
         print(f"  ⚠️ {table}: {before} 行 → {inserted} 行。CloudKit に push していない行が"
               f"消えていないか確かめること", file=sys.stderr)
     return inserted

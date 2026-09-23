@@ -74,6 +74,23 @@ class RefreshTableTest(unittest.TestCase):
         _, log = self.refresh()
         self.assertIn("brands: 20 行 → 17 行", log)
 
+    def test_exactly_ten_percent_is_warned(self):
+        # 「10% 以上減ったら」なので、ちょうど 10% 減も警告する (70 → 63 は浮動小数の
+        # 比較だと 70 * 0.9 = 63.000…01 になって漏れる)。
+        for before, after in ((20, 18), (100, 90), (70, 63)):
+            with self.subTest(before=before, after=after):
+                self.conn.execute("DELETE FROM brands")
+                self.given_local_brands(before)
+                self.cloudkit["Brand"] = [brand_record(i) for i in range(after)]
+                _, log = self.refresh()
+                self.assertIn(f"brands: {before} 行 → {after} 行", log)
+
+    def test_just_under_ten_percent_is_not_warned(self):
+        self.given_local_brands(100)
+        self.cloudkit["Brand"] = [brand_record(i) for i in range(91)]
+        _, log = self.refresh()
+        self.assertNotIn("行 → ", log)
+
     def test_small_shrink_is_not_warned(self):
         self.given_local_brands(20)
         self.cloudkit["Brand"] = [brand_record(i) for i in range(19)]
