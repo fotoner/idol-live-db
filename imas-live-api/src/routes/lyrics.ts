@@ -30,7 +30,7 @@ import {
 import { updateGramIndex } from "../lyrics_index";
 import type { ClapKind, LyricCall } from "../lyrics_calls";
 import type { RouteContext } from "./context";
-import { requireIpQuota } from "./guards";
+import { decodePathParam, requireIpQuota } from "./guards";
 import type { Env } from "../env";
 
 // tools/lyrics/lyrics_json.py の MAX_LINES / MAX_LINE_CHARS と同値にしてある。
@@ -722,12 +722,8 @@ export async function handleLyrics(ctx: RouteContext): Promise<Response | null> 
     // 未認証の取得は IP 単位のレート制限だけで守る。
     const user = await getAuthUser(request, env);
 
-    let songId: string;
-    try {
-      songId = decodeURIComponent(getMatch[1]);
-    } catch {
-      return error("invalid song_id", 400);
-    }
+    const songId = decodePathParam(ctx, getMatch[1], "song_id");
+    if (songId instanceof Response) return songId;
 
     // ⚠️ レート制限より先に 404 を返す。存在しない曲を叩かれても枠を減らさない
     //    ためで、POST /users/me と同じ作法。
@@ -857,12 +853,8 @@ export async function handleLyrics(ctx: RouteContext): Promise<Response | null> 
     const subject = await authorizeLyricsWrite(request, env);
     if (!subject) return error("Unauthorized", 401);
 
-    let songId: string;
-    try {
-      songId = decodeURIComponent(putMatch[1]);
-    } catch {
-      return error("invalid song_id", 400);
-    }
+    const songId = decodePathParam(ctx, putMatch[1], "song_id");
+    if (songId instanceof Response) return songId;
     if (!songId || songId.length > 200) return error("invalid song_id", 400);
 
     const body = await request.json().catch(() => null);

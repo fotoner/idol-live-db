@@ -13,7 +13,7 @@ import { handleLyrics } from "./routes/lyrics";
 import { handleLyricsCalls, handleCallsDashboard } from "./routes/calls";
 import { handleSongDetail } from "./routes/song_detail";
 import { handleSetlistPredictions } from "./routes/setlist_predictions";
-import { clientIp, readJsonBody, requireActiveUser, requireIpQuota } from "./routes/guards";
+import { clientIp, decodePathParam, readJsonBody, requireActiveUser, requireIpQuota } from "./routes/guards";
 import { fetchBadges, calcTier } from "./badges";
 import { handleScheduled } from "./apply";
 import { cloudKitModify, cloudKitLookup, buildForceUpdate, buildSoftDelete, CloudKitOperation } from "./cloudkit";
@@ -1012,7 +1012,8 @@ export default {
       // ----------------------------------------------------------------
       const badgesMatch = path.match(/^\/users\/([^/]+)\/badges$/);
       if (badgesMatch && request.method === "GET") {
-        const userId = decodeURIComponent(badgesMatch[1]);
+        const userId = decodePathParam({ error }, badgesMatch[1], "user_id");
+        if (userId instanceof Response) return userId;
         const badges = await fetchBadges(env.DB, userId);
         return json(badges);
       }
@@ -1098,7 +1099,8 @@ export default {
       // ----------------------------------------------------------------
       const adminUserEditsMatch = path.match(/^\/admin\/users\/([^/]+)\/edits$/);
       if (adminUserEditsMatch && request.method === "GET") {
-        const targetUserId = decodeURIComponent(adminUserEditsMatch[1]);
+        const targetUserId = decodePathParam({ error }, adminUserEditsMatch[1], "user_id");
+        if (targetUserId instanceof Response) return targetUserId;
         return handleGetAdminUserEdits(
           request,
           url,
@@ -1239,8 +1241,10 @@ export default {
       // ----------------------------------------------------------------
       const masterHistoryMatch = path.match(/^\/master\/([^/]+)\/([^/]+)\/history$/);
       if (masterHistoryMatch && request.method === "GET") {
-        const recordType = decodeURIComponent(masterHistoryMatch[1]);
-        const recordName = decodeURIComponent(masterHistoryMatch[2]);
+        const recordType = decodePathParam({ error }, masterHistoryMatch[1], "record_type");
+        if (recordType instanceof Response) return recordType;
+        const recordName = decodePathParam({ error }, masterHistoryMatch[2], "record_name");
+        if (recordName instanceof Response) return recordName;
         return handleGetRecordHistory(recordType, recordName, url, env, { json, error });
       }
 
@@ -1259,7 +1263,8 @@ export default {
       }
       const transferFetchMatch = path.match(/^\/transfer\/([^/]+)$/);
       if (transferFetchMatch && request.method === "GET") {
-        const code = decodeURIComponent(transferFetchMatch[1]);
+        const code = decodePathParam({ error }, transferFetchMatch[1], "code");
+        if (code instanceof Response) return code;
         return handleFetchTransfer(request, env, code, {
           getAuthUser,
           checkRateLimit,

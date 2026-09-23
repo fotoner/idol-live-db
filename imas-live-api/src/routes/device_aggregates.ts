@@ -12,7 +12,7 @@
 import { commitIpRateLimit } from "../rate_limit";
 import { parsePositiveInt } from "../validation";
 import type { RouteContext } from "./context";
-import { readJsonBody, requireDeviceWrite, requireOpaqueKey } from "./guards";
+import { decodePathParam, readJsonBody, requireDeviceWrite, requireOpaqueKey } from "./guards";
 
 
 /**
@@ -270,7 +270,8 @@ export async function handleDeviceAggregates(ctx: RouteContext): Promise<Respons
     // ----------------------------------------------------------------
     const penlightVotesMatch = path.match(/^\/penlight\/votes\/([^/]+)$/);
     if (penlightVotesMatch && request.method === "GET") {
-      const songId = decodeURIComponent(penlightVotesMatch[1]);
+      const songId = decodePathParam(ctx, penlightVotesMatch[1], "song_id");
+      if (songId instanceof Response) return songId;
       const deviceId = request.headers.get("X-Device-Id");
       return json(await fetchPenlightVotes(env.DB, songId, deviceId));
     }

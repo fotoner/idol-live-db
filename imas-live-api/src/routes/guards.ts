@@ -56,6 +56,18 @@ export async function requireDeviceWrite(
   return { deviceId, ipQuota };
 }
 
+/**
+ * パスの 1 区間を percent-decode する。壊れた符号化 (%G0 や、途中で切れた UTF-8) は
+ * 400 `invalid <name>` (decodeURIComponent の例外を 500 にしない)。
+ */
+export function decodePathParam(ctx: ErrorResponder, raw: string, name: string): string | Response {
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return ctx.error(`invalid ${name}`);
+  }
+}
+
 /** JSON の本文の項目。値は unknown なので、使う前に型を確かめること。 */
 export type JsonFields = Readonly<Record<string, unknown>>;
 

@@ -38,7 +38,7 @@ import {
   SIMILAR_CACHE_HEADERS,
 } from "./tags";
 import type { RouteContext } from "./context";
-import { clientIp } from "./guards";
+import { clientIp, decodePathParam } from "./guards";
 
 /** iOS の CommunityAPI.similarSongsByTags と同じ既定値 (候補を多めに取って端末側で抽選する)。 */
 const DEFAULT_SIMILAR_LIMIT = 50;
@@ -145,17 +145,13 @@ async function loadLyrics(
  * 一致しなければ null を返し、呼び出し元の if チェーンへ処理を戻す。
  */
 export async function handleSongDetail(ctx: RouteContext): Promise<Response | null> {
-  const { request, env, url, path, json, error } = ctx;
+  const { request, env, url, path, json } = ctx;
 
   const match = path.match(/^\/songs\/([^/]+)\/detail$/);
   if (!match || request.method !== "GET") return null;
 
-  let songId: string;
-  try {
-    songId = decodeURIComponent(match[1]);
-  } catch {
-    return error("invalid song_id", 400);
-  }
+  const songId = decodePathParam(ctx, match[1], "song_id");
+  if (songId instanceof Response) return songId;
 
   const deviceId = request.headers.get("X-Device-Id");
   const similarLimit = clampSimilarLimit(

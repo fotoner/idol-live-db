@@ -15,7 +15,7 @@ import { checkRateLimit, commitIpRateLimit } from "../rate_limit";
 import { checkIsAdmin } from "../users";
 import { parsePositiveInt, escapeLike } from "../validation";
 import type { RouteContext } from "./context";
-import { readJsonBody, requireActiveUser, requireDeviceWrite } from "./guards";
+import { decodePathParam, readJsonBody, requireActiveUser, requireDeviceWrite } from "./guards";
 
 // REPORT_THRESHOLD はタグ通報 (POST /tags/:id/report) で使用。
 // 投稿承認系の APPROVAL_THRESHOLD は submission 撤去 (0014) に伴い削除。
@@ -452,7 +452,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const tagDetailMatch = path.match(/^\/tags\/([^/]+)$/);
     if (tagDetailMatch && request.method === "GET") {
-      const tagId = decodeURIComponent(tagDetailMatch[1]);
+      const tagId = decodePathParam(ctx, tagDetailMatch[1], "tag_id");
+      if (tagId instanceof Response) return tagId;
       // 削除済み (status='removed') は詳細でも返さない。一覧・付与・曲/アイドル/
       // ユニット別・類似は全て status != 'removed' で除外しているのに、ここだけ
       // 素通しだと安定 URL から削除済みタグが読めてしまう。
@@ -480,7 +481,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // PUT /tags/:id — タグ情報更新
     // ----------------------------------------------------------------
     if (tagDetailMatch && request.method === "PUT") {
-      const tagId = decodeURIComponent(tagDetailMatch![1]);
+      const tagId = decodePathParam(ctx, tagDetailMatch[1], "tag_id");
+      if (tagId instanceof Response) return tagId;
       // 認証必須化: X-Device-Id だけでは誰でも他人タグを書換できた
       const authUser = await getAuthUser(request, env);
       if (!authUser) return error("Unauthorized", 401);
@@ -540,7 +542,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const tagHistoryMatch = path.match(/^\/tags\/([^/]+)\/history$/);
     if (tagHistoryMatch && request.method === "GET") {
-      const tagId = decodeURIComponent(tagHistoryMatch[1]);
+      const tagId = decodePathParam(ctx, tagHistoryMatch[1], "tag_id");
+      if (tagId instanceof Response) return tagId;
       const { results } = await env.DB.prepare(
         `SELECT id, tag_id,
                 description AS description_after,
@@ -567,7 +570,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // 誤操作なら status を戻すだけで復旧できる。
     const tagDeleteMatch = path.match(/^\/tags\/([^/]+)$/);
     if (tagDeleteMatch && request.method === "DELETE") {
-      const tagId = decodeURIComponent(tagDeleteMatch[1]);
+      const tagId = decodePathParam(ctx, tagDeleteMatch[1], "tag_id");
+      if (tagId instanceof Response) return tagId;
       const user = await getAuthUser(request, env);
       if (!user) return error("Unauthorized", 401);
       if (!(await checkIsAdmin(env, user.uid))) return error("Forbidden", 403);
@@ -594,7 +598,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const tagReportMatch = path.match(/^\/tags\/([^/]+)\/report$/);
     if (tagReportMatch && request.method === "POST") {
-      const tagId = decodeURIComponent(tagReportMatch[1]);
+      const tagId = decodePathParam(ctx, tagReportMatch[1], "tag_id");
+      if (tagId instanceof Response) return tagId;
       // IP 単位の rate-limit: 複数デバイス回しで 1 タグを連続通報する spam を弾く。
       // device 単位の per-day 制限 (下記 already_reported) は二重防御として残す。
       const guard = await requireDeviceWrite(ctx);
@@ -748,7 +753,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const idolTagDetailMatch = path.match(/^\/idol-tags\/([^/]+)$/);
     if (idolTagDetailMatch && request.method === "GET") {
-      const tagId = decodeURIComponent(idolTagDetailMatch[1]);
+      const tagId = decodePathParam(ctx, idolTagDetailMatch[1], "tag_id");
+      if (tagId instanceof Response) return tagId;
       // 削除済み (status='removed') は詳細でも返さない。一覧・付与・曲/アイドル/
       // ユニット別・類似は全て status != 'removed' で除外しているのに、ここだけ
       // 素通しだと安定 URL から削除済みタグが読めてしまう。
@@ -770,7 +776,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // PUT /idol-tags/:id — アイドルタグ情報更新
     // ----------------------------------------------------------------
     if (idolTagDetailMatch && request.method === "PUT") {
-      const tagId = decodeURIComponent(idolTagDetailMatch![1]);
+      const tagId = decodePathParam(ctx, idolTagDetailMatch[1], "tag_id");
+      if (tagId instanceof Response) return tagId;
       const authUser = await getAuthUser(request, env);
       if (!authUser) return error("Unauthorized", 401);
       const deviceId = request.headers.get("X-Device-Id") || authUser.uid;
@@ -826,7 +833,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const idolTagHistoryMatch = path.match(/^\/idol-tags\/([^/]+)\/history$/);
     if (idolTagHistoryMatch && request.method === "GET") {
-      const tagId = decodeURIComponent(idolTagHistoryMatch[1]);
+      const tagId = decodePathParam(ctx, idolTagHistoryMatch[1], "tag_id");
+      if (tagId instanceof Response) return tagId;
       const { results } = await env.DB.prepare(
         `SELECT id, tag_id,
                 description AS description_after,
@@ -853,7 +861,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // 誤操作なら status を戻すだけで復旧できる。
     const idolTagMasterDeleteMatch = path.match(/^\/idol-tags\/([^/]+)$/);
     if (idolTagMasterDeleteMatch && request.method === "DELETE") {
-      const tagId = decodeURIComponent(idolTagMasterDeleteMatch[1]);
+      const tagId = decodePathParam(ctx, idolTagMasterDeleteMatch[1], "tag_id");
+      if (tagId instanceof Response) return tagId;
       const user = await getAuthUser(request, env);
       if (!user) return error("Unauthorized", 401);
       if (!(await checkIsAdmin(env, user.uid))) return error("Forbidden", 403);
@@ -880,7 +889,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const idolTagReportMatch = path.match(/^\/idol-tags\/([^/]+)\/report$/);
     if (idolTagReportMatch && request.method === "POST") {
-      const tagId = decodeURIComponent(idolTagReportMatch[1]);
+      const tagId = decodePathParam(ctx, idolTagReportMatch[1], "tag_id");
+      if (tagId instanceof Response) return tagId;
       const guard = await requireDeviceWrite(ctx);
       if (guard instanceof Response) return guard;
       const { deviceId, ipQuota } = guard;
@@ -921,7 +931,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const songTagsPostMatch = path.match(/^\/songs\/([^/]+)\/tags$/);
     if (songTagsPostMatch && request.method === "POST") {
-      const songId = decodeURIComponent(songTagsPostMatch[1]);
+      const songId = decodePathParam(ctx, songTagsPostMatch[1], "song_id");
+      if (songId instanceof Response) return songId;
       const guard = await requireDeviceWrite(ctx);
       if (guard instanceof Response) return guard;
       const { deviceId, ipQuota } = guard;
@@ -968,8 +979,10 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const songTagDeleteMatch = path.match(/^\/songs\/([^/]+)\/tags\/([^/]+)$/);
     if (songTagDeleteMatch && request.method === "DELETE") {
-      const songId = decodeURIComponent(songTagDeleteMatch[1]);
-      const tagId = decodeURIComponent(songTagDeleteMatch[2]);
+      const songId = decodePathParam(ctx, songTagDeleteMatch[1], "song_id");
+      if (songId instanceof Response) return songId;
+      const tagId = decodePathParam(ctx, songTagDeleteMatch[2], "tag_id");
+      if (tagId instanceof Response) return tagId;
       const guard = await requireDeviceWrite(ctx);
       if (guard instanceof Response) return guard;
       const { deviceId, ipQuota } = guard;
@@ -1001,7 +1014,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const songTagsGetMatch = path.match(/^\/songs\/([^/]+)\/tags$/);
     if (songTagsGetMatch && request.method === "GET") {
-      const songId = decodeURIComponent(songTagsGetMatch[1]);
+      const songId = decodePathParam(ctx, songTagsGetMatch[1], "song_id");
+      if (songId instanceof Response) return songId;
       const deviceId = request.headers.get("X-Device-Id");
       return json(await fetchSongTagList(env.DB, songId, deviceId));
     }
@@ -1011,7 +1025,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const idolTagsPostMatch = path.match(/^\/idols\/([^/]+)\/tags$/);
     if (idolTagsPostMatch && request.method === "POST") {
-      const idolId = decodeURIComponent(idolTagsPostMatch[1]);
+      const idolId = decodePathParam(ctx, idolTagsPostMatch[1], "idol_id");
+      if (idolId instanceof Response) return idolId;
       const guard = await requireDeviceWrite(ctx);
       if (guard instanceof Response) return guard;
       const { deviceId, ipQuota } = guard;
@@ -1055,8 +1070,10 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const idolTagDeleteMatch = path.match(/^\/idols\/([^/]+)\/tags\/([^/]+)$/);
     if (idolTagDeleteMatch && request.method === "DELETE") {
-      const idolId = decodeURIComponent(idolTagDeleteMatch[1]);
-      const tagId = decodeURIComponent(idolTagDeleteMatch[2]);
+      const idolId = decodePathParam(ctx, idolTagDeleteMatch[1], "idol_id");
+      if (idolId instanceof Response) return idolId;
+      const tagId = decodePathParam(ctx, idolTagDeleteMatch[2], "tag_id");
+      if (tagId instanceof Response) return tagId;
       const guard = await requireDeviceWrite(ctx);
       if (guard instanceof Response) return guard;
       const { deviceId, ipQuota } = guard;
@@ -1085,7 +1102,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const idolTagsGetMatch = path.match(/^\/idols\/([^/]+)\/tags$/);
     if (idolTagsGetMatch && request.method === "GET") {
-      const idolId = decodeURIComponent(idolTagsGetMatch[1]);
+      const idolId = decodePathParam(ctx, idolTagsGetMatch[1], "idol_id");
+      if (idolId instanceof Response) return idolId;
       const deviceId = request.headers.get("X-Device-Id");
 
       const { results: tags } = await env.DB.prepare(
@@ -1221,7 +1239,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const unitTagDetailMatch = path.match(/^\/unit-tags\/([^/]+)$/);
     if (unitTagDetailMatch && request.method === "GET") {
-      const tagId = decodeURIComponent(unitTagDetailMatch[1]);
+      const tagId = decodePathParam(ctx, unitTagDetailMatch[1], "tag_id");
+      if (tagId instanceof Response) return tagId;
       // 削除済み (status='removed') は詳細でも返さない。一覧・付与・曲/アイドル/
       // ユニット別・類似は全て status != 'removed' で除外しているのに、ここだけ
       // 素通しだと安定 URL から削除済みタグが読めてしまう。
@@ -1243,7 +1262,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // PUT /unit-tags/:id — ユニットタグ情報更新
     // ----------------------------------------------------------------
     if (unitTagDetailMatch && request.method === "PUT") {
-      const tagId = decodeURIComponent(unitTagDetailMatch![1]);
+      const tagId = decodePathParam(ctx, unitTagDetailMatch[1], "tag_id");
+      if (tagId instanceof Response) return tagId;
       const authUser = await getAuthUser(request, env);
       if (!authUser) return error("Unauthorized", 401);
       const deviceId = request.headers.get("X-Device-Id") || authUser.uid;
@@ -1299,7 +1319,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const unitTagHistoryMatch = path.match(/^\/unit-tags\/([^/]+)\/history$/);
     if (unitTagHistoryMatch && request.method === "GET") {
-      const tagId = decodeURIComponent(unitTagHistoryMatch[1]);
+      const tagId = decodePathParam(ctx, unitTagHistoryMatch[1], "tag_id");
+      if (tagId instanceof Response) return tagId;
       const { results } = await env.DB.prepare(
         `SELECT id, tag_id,
                 description AS description_after,
@@ -1326,7 +1347,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // 誤操作なら status を戻すだけで復旧できる。
     const unitTagMasterDeleteMatch = path.match(/^\/unit-tags\/([^/]+)$/);
     if (unitTagMasterDeleteMatch && request.method === "DELETE") {
-      const tagId = decodeURIComponent(unitTagMasterDeleteMatch[1]);
+      const tagId = decodePathParam(ctx, unitTagMasterDeleteMatch[1], "tag_id");
+      if (tagId instanceof Response) return tagId;
       const user = await getAuthUser(request, env);
       if (!user) return error("Unauthorized", 401);
       if (!(await checkIsAdmin(env, user.uid))) return error("Forbidden", 403);
@@ -1353,7 +1375,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const unitTagReportMatch = path.match(/^\/unit-tags\/([^/]+)\/report$/);
     if (unitTagReportMatch && request.method === "POST") {
-      const tagId = decodeURIComponent(unitTagReportMatch[1]);
+      const tagId = decodePathParam(ctx, unitTagReportMatch[1], "tag_id");
+      if (tagId instanceof Response) return tagId;
       const guard = await requireDeviceWrite(ctx);
       if (guard instanceof Response) return guard;
       const { deviceId, ipQuota } = guard;
@@ -1394,7 +1417,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const unitTagsPostMatch = path.match(/^\/units\/([^/]+)\/tags$/);
     if (unitTagsPostMatch && request.method === "POST") {
-      const unitId = decodeURIComponent(unitTagsPostMatch[1]);
+      const unitId = decodePathParam(ctx, unitTagsPostMatch[1], "unit_id");
+      if (unitId instanceof Response) return unitId;
       const guard = await requireDeviceWrite(ctx);
       if (guard instanceof Response) return guard;
       const { deviceId, ipQuota } = guard;
@@ -1438,8 +1462,10 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const unitTagDeleteMatch = path.match(/^\/units\/([^/]+)\/tags\/([^/]+)$/);
     if (unitTagDeleteMatch && request.method === "DELETE") {
-      const unitId = decodeURIComponent(unitTagDeleteMatch[1]);
-      const tagId = decodeURIComponent(unitTagDeleteMatch[2]);
+      const unitId = decodePathParam(ctx, unitTagDeleteMatch[1], "unit_id");
+      if (unitId instanceof Response) return unitId;
+      const tagId = decodePathParam(ctx, unitTagDeleteMatch[2], "tag_id");
+      if (tagId instanceof Response) return tagId;
       const guard = await requireDeviceWrite(ctx);
       if (guard instanceof Response) return guard;
       const { deviceId, ipQuota } = guard;
@@ -1468,7 +1494,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const unitTagsGetMatch = path.match(/^\/units\/([^/]+)\/tags$/);
     if (unitTagsGetMatch && request.method === "GET") {
-      const unitId = decodeURIComponent(unitTagsGetMatch[1]);
+      const unitId = decodePathParam(ctx, unitTagsGetMatch[1], "unit_id");
+      if (unitId instanceof Response) return unitId;
       const deviceId = request.headers.get("X-Device-Id");
 
       const { results: tags } = await env.DB.prepare(
@@ -1499,7 +1526,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const unitSimilarMatch = path.match(/^\/units\/([^/]+)\/similar$/);
     if (unitSimilarMatch && request.method === "GET") {
-      const unitId = decodeURIComponent(unitSimilarMatch[1]);
+      const unitId = decodePathParam(ctx, unitSimilarMatch[1], "unit_id");
+      if (unitId instanceof Response) return unitId;
       const limitParam = parseInt(url.searchParams.get("limit") ?? "10", 10);
       const limit = Math.min(Math.max(Number.isFinite(limitParam) ? limitParam : 10, 1), 30);
 
@@ -1547,7 +1575,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const songSimilarMatch = path.match(/^\/songs\/([^/]+)\/similar$/);
     if (songSimilarMatch && request.method === "GET") {
-      const songId = decodeURIComponent(songSimilarMatch[1]);
+      const songId = decodePathParam(ctx, songSimilarMatch[1], "song_id");
+      if (songId instanceof Response) return songId;
       const limit = clampSimilarLimit(url.searchParams.get("limit"));
       const payload = await fetchSimilarSongs(env.DB, songId, limit);
 
@@ -1568,7 +1597,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const idolSimilarMatch = path.match(/^\/idols\/([^/]+)\/similar$/);
     if (idolSimilarMatch && request.method === "GET") {
-      const idolId = decodeURIComponent(idolSimilarMatch[1]);
+      const idolId = decodePathParam(ctx, idolSimilarMatch[1], "idol_id");
+      if (idolId instanceof Response) return idolId;
       const limitParam = parseInt(url.searchParams.get("limit") ?? "10", 10);
       const limit = Math.min(Math.max(Number.isFinite(limitParam) ? limitParam : 10, 1), 30);
 

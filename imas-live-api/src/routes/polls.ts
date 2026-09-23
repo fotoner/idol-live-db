@@ -13,7 +13,7 @@ import {
   parsePositiveInt, parseScopeIds, validateScopeIdsAgainstTable,
 } from "../validation";
 import type { RouteContext } from "./context";
-import { readJsonBody, requireActiveUser, requireOpaqueKey } from "./guards";
+import { decodePathParam, readJsonBody, requireActiveUser, requireOpaqueKey } from "./guards";
 
 /**
  * /polls/* を処理する。
@@ -127,7 +127,8 @@ export async function handlePolls(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const pollAchvMatch = path.match(/^\/polls\/achievements\/([^/]+)$/);
     if (pollAchvMatch && request.method === "GET") {
-      const entityId = decodeURIComponent(pollAchvMatch[1]);
+      const entityId = decodePathParam(ctx, pollAchvMatch[1], "entity_id");
+      if (entityId instanceof Response) return entityId;
       // 先に entity_id でエントリを絞り、その曲/アイドルが出たお題の中だけで順位を出す。
       // 旧実装は「終了お題の全エントリを RANK してから entity_id で絞る」形で、
       // 1 回あたり 3,954 行 (poll_entries ほぼ全件) を読んでいた。
@@ -162,7 +163,8 @@ export async function handlePolls(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const pollGetMatch = path.match(/^\/polls\/([^/]+)$/);
     if (pollGetMatch && request.method === "GET") {
-      const pollId = decodeURIComponent(pollGetMatch[1]);
+      const pollId = decodePathParam(ctx, pollGetMatch[1], "poll_id");
+      if (pollId instanceof Response) return pollId;
       const authUser = await getAuthUser(request, env);
       const uid = authUser?.uid ?? "";
 
@@ -373,7 +375,8 @@ export async function handlePolls(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const pollVotePostMatch = path.match(/^\/polls\/([^/]+)\/votes$/);
     if (pollVotePostMatch && request.method === "POST") {
-      const pollId = decodeURIComponent(pollVotePostMatch[1]);
+      const pollId = decodePathParam(ctx, pollVotePostMatch[1], "poll_id");
+      if (pollId instanceof Response) return pollId;
       const user = await getAuthUser(request, env);
       if (!user) return error("Unauthorized", 401);
 
@@ -497,8 +500,10 @@ export async function handlePolls(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const pollVoteDeleteMatch = path.match(/^\/polls\/([^/]+)\/votes\/([^/]+)$/);
     if (pollVoteDeleteMatch && request.method === "DELETE") {
-      const pollId = decodeURIComponent(pollVoteDeleteMatch[1]);
-      const entityId = decodeURIComponent(pollVoteDeleteMatch[2]);
+      const pollId = decodePathParam(ctx, pollVoteDeleteMatch[1], "poll_id");
+      if (pollId instanceof Response) return pollId;
+      const entityId = decodePathParam(ctx, pollVoteDeleteMatch[2], "entity_id");
+      if (entityId instanceof Response) return entityId;
       const user = await getAuthUser(request, env);
       if (!user) return error("Unauthorized", 401);
 
@@ -562,7 +567,8 @@ export async function handlePolls(ctx: RouteContext): Promise<Response | null> {
     // ----------------------------------------------------------------
     const pollDeleteMatch = path.match(/^\/polls\/([^/]+)$/);
     if (pollDeleteMatch && request.method === "DELETE") {
-      const pollId = decodeURIComponent(pollDeleteMatch[1]);
+      const pollId = decodePathParam(ctx, pollDeleteMatch[1], "poll_id");
+      if (pollId instanceof Response) return pollId;
       const user = await getAuthUser(request, env);
       if (!user) return error("Unauthorized", 401);
 

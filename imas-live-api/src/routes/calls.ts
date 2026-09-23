@@ -45,7 +45,7 @@ import {
 } from "./lyrics";
 import type { LyricLineRow } from "./lyrics";
 import type { RouteContext } from "./context";
-import { requireActiveUser } from "./guards";
+import { decodePathParam, requireActiveUser } from "./guards";
 
 /** 運用者トークン (X-Push-Token) の主体名。authorizeLyricsWrite が返す固定値。 */
 const OPERATOR_SUBJECT = "__lyrics_push__";
@@ -81,12 +81,8 @@ export async function handleLyricsCalls(ctx: RouteContext): Promise<Response | n
     subject = authUser.uid;
   }
 
-  let songId: string;
-  try {
-    songId = decodeURIComponent(match[1]);
-  } catch {
-    return error("invalid song_id", 400);
-  }
+  const songId = decodePathParam(ctx, match[1], "song_id");
+  if (songId instanceof Response) return songId;
   if (!songId || songId.length > 200) return error("invalid song_id", 400);
 
   // 歌詞が無い曲にはコールを付けられない (紐づける行 ID が存在しない)。

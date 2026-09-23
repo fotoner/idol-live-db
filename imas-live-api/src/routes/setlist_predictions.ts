@@ -15,7 +15,7 @@ import { checkRateLimit, VOTE_LIMIT } from "../rate_limit";
 import { upsertUser } from "../users";
 import { validateOpaqueKey } from "../validation";
 import type { RouteContext } from "./context";
-import { readJsonBody, requireActiveUser, requireOpaqueKey } from "./guards";
+import { decodePathParam, readJsonBody, requireActiveUser, requireOpaqueKey } from "./guards";
 
 /**
  * /me/predictions, /shows/:showId/predictions,
@@ -56,7 +56,8 @@ export async function handleSetlistPredictions(ctx: RouteContext): Promise<Respo
     // 公演単位の予想に統一 (旧 event-level 予想は 2026-05-28 クリーンスタートで全削除)
     const predictionsGetMatch = path.match(/^\/shows\/([^/]+)\/predictions$/);
     if (predictionsGetMatch && request.method === "GET") {
-      const showId = decodeURIComponent(predictionsGetMatch[1]);
+      const showId = decodePathParam(ctx, predictionsGetMatch[1], "show_id");
+      if (showId instanceof Response) return showId;
       const authUser = await getAuthUser(request, env);
       const uid = authUser?.uid ?? "";
 
@@ -95,7 +96,8 @@ export async function handleSetlistPredictions(ctx: RouteContext): Promise<Respo
     // ----------------------------------------------------------------
     const predictionsPostMatch = path.match(/^\/shows\/([^/]+)\/predictions$/);
     if (predictionsPostMatch && request.method === "POST") {
-      const showId = decodeURIComponent(predictionsPostMatch[1]);
+      const showId = decodePathParam(ctx, predictionsPostMatch[1], "show_id");
+      if (showId instanceof Response) return showId;
       const user = await getAuthUser(request, env);
       if (!user) return error("Unauthorized", 401);
 
@@ -188,8 +190,10 @@ export async function handleSetlistPredictions(ctx: RouteContext): Promise<Respo
     // ----------------------------------------------------------------
     const predictionDeleteMatch = path.match(/^\/shows\/([^/]+)\/predictions\/([^/]+)$/);
     if (predictionDeleteMatch && request.method === "DELETE") {
-      const showId = decodeURIComponent(predictionDeleteMatch[1]);
-      const songId = decodeURIComponent(predictionDeleteMatch[2]);
+      const showId = decodePathParam(ctx, predictionDeleteMatch[1], "show_id");
+      if (showId instanceof Response) return showId;
+      const songId = decodePathParam(ctx, predictionDeleteMatch[2], "song_id");
+      if (songId instanceof Response) return songId;
       const user = await getAuthUser(request, env);
       if (!user) return error("Unauthorized", 401);
 
@@ -241,8 +245,10 @@ export async function handleSetlistPredictions(ctx: RouteContext): Promise<Respo
     // has_user_voted を含む user 固有データなので Cache-Control は付けない。
     const performersGetMatch = path.match(/^\/shows\/([^/]+)\/songs\/([^/]+)\/performers$/);
     if (performersGetMatch && request.method === "GET") {
-      const showId = decodeURIComponent(performersGetMatch[1]);
-      const songId = decodeURIComponent(performersGetMatch[2]);
+      const showId = decodePathParam(ctx, performersGetMatch[1], "show_id");
+      if (showId instanceof Response) return showId;
+      const songId = decodePathParam(ctx, performersGetMatch[2], "song_id");
+      if (songId instanceof Response) return songId;
       const authUser = await getAuthUser(request, env);
       const uid = authUser?.uid ?? "";
 
@@ -281,8 +287,10 @@ export async function handleSetlistPredictions(ctx: RouteContext): Promise<Respo
     // 1曲あたり同一 user の投票上限は 8 人 (ユニット曲・全体曲対応のため複数選択許可)。
     const performersPostMatch = path.match(/^\/shows\/([^/]+)\/songs\/([^/]+)\/performers$/);
     if (performersPostMatch && request.method === "POST") {
-      const showId = decodeURIComponent(performersPostMatch[1]);
-      const songId = decodeURIComponent(performersPostMatch[2]);
+      const showId = decodePathParam(ctx, performersPostMatch[1], "show_id");
+      if (showId instanceof Response) return showId;
+      const songId = decodePathParam(ctx, performersPostMatch[2], "song_id");
+      if (songId instanceof Response) return songId;
       const user = await getAuthUser(request, env);
       if (!user) return error("Unauthorized", 401);
 
@@ -357,9 +365,12 @@ export async function handleSetlistPredictions(ctx: RouteContext): Promise<Respo
       /^\/shows\/([^/]+)\/songs\/([^/]+)\/performers\/([^/]+)$/
     );
     if (performersDeleteMatch && request.method === "DELETE") {
-      const showId = decodeURIComponent(performersDeleteMatch[1]);
-      const songId = decodeURIComponent(performersDeleteMatch[2]);
-      const idolId = decodeURIComponent(performersDeleteMatch[3]);
+      const showId = decodePathParam(ctx, performersDeleteMatch[1], "show_id");
+      if (showId instanceof Response) return showId;
+      const songId = decodePathParam(ctx, performersDeleteMatch[2], "song_id");
+      if (songId instanceof Response) return songId;
+      const idolId = decodePathParam(ctx, performersDeleteMatch[3], "idol_id");
+      if (idolId instanceof Response) return idolId;
       const user = await getAuthUser(request, env);
       if (!user) return error("Unauthorized", 401);
 
@@ -407,7 +418,8 @@ export async function handleSetlistPredictions(ctx: RouteContext): Promise<Respo
     // 集計は count(*) で都度算出 (低トラフィック前提)。
     const likesGetMatch = path.match(/^\/shows\/([^/]+)\/likes$/);
     if (likesGetMatch && request.method === "GET") {
-      const showId = decodeURIComponent(likesGetMatch[1]);
+      const showId = decodePathParam(ctx, likesGetMatch[1], "show_id");
+      if (showId instanceof Response) return showId;
       const authUser = await getAuthUser(request, env);
       const uid = authUser?.uid ?? "";
 
@@ -437,8 +449,10 @@ export async function handleSetlistPredictions(ctx: RouteContext): Promise<Respo
     // ----------------------------------------------------------------
     const likePostMatch = path.match(/^\/shows\/([^/]+)\/songs\/([^/]+)\/like$/);
     if (likePostMatch && request.method === "POST") {
-      const showId = decodeURIComponent(likePostMatch[1]);
-      const songId = decodeURIComponent(likePostMatch[2]);
+      const showId = decodePathParam(ctx, likePostMatch[1], "show_id");
+      if (showId instanceof Response) return showId;
+      const songId = decodePathParam(ctx, likePostMatch[2], "song_id");
+      if (songId instanceof Response) return songId;
       const user = await getAuthUser(request, env);
       if (!user) return error("Unauthorized", 401);
 
@@ -471,8 +485,10 @@ export async function handleSetlistPredictions(ctx: RouteContext): Promise<Respo
     // ----------------------------------------------------------------
     const likeDeleteMatch = path.match(/^\/shows\/([^/]+)\/songs\/([^/]+)\/like$/);
     if (likeDeleteMatch && request.method === "DELETE") {
-      const showId = decodeURIComponent(likeDeleteMatch[1]);
-      const songId = decodeURIComponent(likeDeleteMatch[2]);
+      const showId = decodePathParam(ctx, likeDeleteMatch[1], "show_id");
+      if (showId instanceof Response) return showId;
+      const songId = decodePathParam(ctx, likeDeleteMatch[2], "song_id");
+      if (songId instanceof Response) return songId;
       const user = await getAuthUser(request, env);
       if (!user) return error("Unauthorized", 401);
 
