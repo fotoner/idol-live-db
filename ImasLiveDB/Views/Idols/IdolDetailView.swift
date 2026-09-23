@@ -24,6 +24,8 @@ struct IdolDetailView: View {
     @State private var editIdol: Idol?
     @State private var showLoginPrompt = false
     @State private var segment = 0
+    /// 楽曲タブの小タブ (節) の選択。節の heading を選択値に使う (節ごとに一意)。
+    @State private var selectedSongSection: String?
     /// コミュニティタブ: このアイドルに付いたタグ (自分が付けたタグ含む)。
     @State private var idolTagData: IdolTagListResponse?
     @State private var showIdolTagPicker = false
@@ -398,23 +400,54 @@ struct IdolDetailView: View {
 
     // MARK: - 楽曲
 
+    /// 選択中の小タブに対応する節。選択が節の並びから外れていたら先頭に落ちる
+    /// (再読み込みで節の顔ぶれが変わった場合の保険)。
+    private var currentSongSection: IdolSongSection? {
+        vm.originalSongSections.first { $0.heading == selectedSongSection } ?? vm.originalSongSections.first
+    }
+
+    /// `ImasSegmented` の選択値 (String)。この Binding は節が 2 つ以上あるときだけ使われるので、
+    /// フォールバックの既定値 (先頭節の見出し) は常に存在する。
+    private var songSectionSelectionBinding: Binding<String> {
+        Binding<String>(
+            get: { selectedSongSection ?? vm.initialSongSectionHeading ?? "" },
+            set: { selectedSongSection = $0 }
+        )
+    }
+
+    /// 小タブに出す文言 (「ソロ 12」のように短い見出し + 件数)。
+    private func songSectionTabLabel(forHeading heading: String) -> String {
+        guard let section = vm.originalSongSections.first(where: { $0.heading == heading }) else {
+            return heading
+        }
+        return "\(section.shortHeading) \(section.songs.count)"
+    }
+
     @ViewBuilder
     private var songsBody: some View {
-        VStack(spacing: DS.sp6) {
+        VStack(spacing: DS.sp4) {
             if !vm.originalSongSections.isEmpty {
-                ForEach(vm.originalSongSections) { section in
-                    VStack(spacing: DS.sp3) {
-                        ImasSectionHeader(title: section.heading, count: "\(section.songs.count)", tight: true)
-                        ImasListContainer {
-                            ForEach(Array(section.songs.enumerated()), id: \.element.id) { idx, song in
-                                if idx > 0 { ImasRowDivider(inset: 66) }
-                                songRow(
-                                    song: song,
-                                    detailLabel: song.unitName ?? "",
-                                    performCount: nil
-                                ) {
-                                    go(.song(song))
-                                }
+                // 枠が 1 つしか無いときは小タブを出さず一覧だけを出す。
+                if vm.originalSongSections.count > 1 {
+                    ImasSegmented(
+                        options: vm.originalSongSections.map(\.heading),
+                        selection: songSectionSelectionBinding,
+                        seed: seed,
+                        brand: brandColor,
+                        label: songSectionTabLabel(forHeading:)
+                    )
+                    .padding(.horizontal, DS.sp5)
+                }
+                if let section = currentSongSection {
+                    ImasListContainer {
+                        ForEach(Array(section.songs.enumerated()), id: \.element.id) { idx, song in
+                            if idx > 0 { ImasRowDivider(inset: 66) }
+                            songRow(
+                                song: song,
+                                detailLabel: song.unitName ?? "",
+                                performCount: nil
+                            ) {
+                                go(.song(song))
                             }
                         }
                     }
@@ -431,6 +464,11 @@ struct IdolDetailView: View {
             }
         }
         .padding(.top, DS.sp4)
+        // 節の顔ぶれが変わったら (初回読み込み・再読み込み)、選択が無効なら先頭節に戻す。
+        .onChange(of: vm.originalSongSections.map(\.heading)) { _, headings in
+            if let selectedSongSection, headings.contains(selectedSongSection) { return }
+            selectedSongSection = vm.initialSongSectionHeading
+        }
     }
 
     // MARK: - プロフィール

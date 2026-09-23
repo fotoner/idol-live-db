@@ -23,6 +23,10 @@ final class IdolDetailViewModel {
     private let brandReading: any BrandReading
     private let unitReading: any UnitReading
 
+    /// 楽曲タブの小タブで初めに選ぶ節 (曲がある最初の枠の見出し)。節が 0 件なら nil。
+    /// 節の並び (ソロ→ユニット→全体曲→カバー→その他、0 件は含まない) はコアが決める。
+    var initialSongSectionHeading: String? { originalSongSections.first?.heading }
+
     nonisolated init(
         idolReading: any IdolReading = AppContainer.shared.idolReading,
         brandReading: any BrandReading = AppContainer.shared.brandReading,

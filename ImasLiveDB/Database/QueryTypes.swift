@@ -340,12 +340,15 @@ struct IdolPerformedSong: Identifiable, Sendable {
     var performCount: Int
 }
 
-/// アイドル詳細「楽曲（原曲）」の 1 節 (ソロ曲/ユニット曲/全体曲/その他)。
-/// 節分け・見出し・並びは共有コア (`idol_original_song_sections`) が決める。
-/// 見出しは節ごとに異なるので Identifiable の id にそのまま使える。
+/// アイドル詳細「楽曲（原曲）」の 1 節 (ソロ曲/ユニット曲/全体曲/カバー/その他)。
+/// 節分け・見出し・並びは共有コア (`idol_original_song_sections`) が決める
+/// (親曲を持つ派生曲の除外、カバーの独立節化も含む)。
+/// 見出しは節ごとに異なるので Identifiable の id・小タブの選択値にそのまま使える。
 struct IdolSongSection: Identifiable, Sendable {
     var id: String { heading }
     var heading: String
+    /// 小タブに出す短い見出し (「ソロ」等)。件数と組み合わせて「ソロ 12」のように使う。
+    var shortHeading: String
     var songs: [Song]
 }
 

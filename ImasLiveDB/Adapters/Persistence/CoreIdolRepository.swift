@@ -104,6 +104,7 @@ struct CoreIdolRepository: IdolReading {
             return sections.map { section in
                 IdolSongSection(
                     heading: section.heading,
+                    shortHeading: section.shortHeading,
                     songs: section.songs.compactMap { songsById[$0.songId] }
                 )
             }
