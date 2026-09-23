@@ -53,7 +53,7 @@ async function authorizeGood<E extends EditGoodEnv>(
   deps: EditGoodDeps<E>,
   batchIdRaw: string,
   enforceRateLimit: boolean
-): Promise<{ uid: string; email?: string; batchId: number } | Response> {
+): Promise<{ uid: string; batchId: number } | Response> {
   const { error } = deps;
 
   // (1) auth
@@ -87,7 +87,7 @@ async function authorizeGood<E extends EditGoodEnv>(
   // 自己賞賛防止 (votes の自己投票禁止と同思想)。
   if (batch.editor_id === user.uid) return error("cannot good your own edit", 400);
 
-  return { uid: user.uid, email: user.email, batchId };
+  return { uid: user.uid, batchId };
 }
 
 /** batch の現在の Good 数を返す。 */
@@ -114,7 +114,7 @@ export async function handlePostGood<E extends EditGoodEnv>(
   if (auth instanceof Response) return auth;
 
   // FK 孤児防止: edit_good.user_id が users(id) を参照するため行を保証する。
-  await deps.upsertUser(env, auth.uid, auth.email);
+  await deps.upsertUser(env, auth.uid);
 
   // (5) idempotent INSERT (複合 PK で多重 Good は no-op)
   await env.DB.prepare(

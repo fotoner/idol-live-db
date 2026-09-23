@@ -7,10 +7,11 @@ import type { Env } from "./env";
 /** Apple/Google uid の行を作る (表示名の上書き事故を防ぐ規則はコメント参照)。 */
 export async function upsertUser(env: Env, uid: string, name?: string, picture?: string) {
   // display_name は INSERT (初回ログインで行を作る) 時のみ設定し、CONFLICT では一切更新しない。
-  // 既存ユーザーの表示名は POST /users/me でのみ変更する設計にする。これにより:
-  //  - login: Apple は fullName を初回認可時しか返さず、2台目/再インストール後は name=undefined。
-  //  - community 書き込み: 各ハンドラが upsertUser(uid, user.email) と email を name に渡している。
-  // のどちらでも、ユーザーが POST /users/me で設定した display_name を毎回上書きする事故を防ぐ。
+  // 既存ユーザーの表示名は POST /users/me でのみ変更する設計にする。これにより、
+  // Apple が fullName を初回認可時しか返さない (2台目/再インストール後は name=undefined)
+  // 再ログインでも、ユーザーが POST /users/me で設定した display_name を上書きしない。
+  // 書き込みの経路 (投票・予想・Good・編集) は name を渡さない。メールアドレスを
+  // 表示名として保存しないため (行が無いときは "匿名" で作る)。
   // avatar_url は渡されたときだけ更新し、無ければ COALESCE で既存を温存する。
   await env.DB.prepare(
     `INSERT INTO users (id, display_name, avatar_url) VALUES (?, ?, ?)

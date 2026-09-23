@@ -493,7 +493,7 @@ export async function handlePostEdits<E extends EditsEnv>(
 
   // FK 孤児防止: edit_batch.editor_id が users(id) を NOT NULL 参照するため、
   // CloudKit 書き込み前に users 行を保証する (RedTeam High)。
-  await deps.upsertUser(env, user.uid, user.email);
+  await deps.upsertUser(env, user.uid);
 
   // (6) edit_batch を cloudkit_ok=0 で先行 INSERT
   const batchOp = deriveBatchOp(normalized);

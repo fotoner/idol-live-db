@@ -107,7 +107,7 @@ export async function handleSetlistPredictions(ctx: RouteContext): Promise<Respo
       if (dbUser?.is_banned) return error("Banned", 403);
       if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
-      await upsertUser(env, user.uid, user.email);
+      await upsertUser(env, user.uid);
 
       const body = (await request.json().catch(() => null)) as any;
       if (body === null) return error("invalid JSON body");
@@ -321,7 +321,7 @@ export async function handleSetlistPredictions(ctx: RouteContext): Promise<Respo
       const rl = await checkRateLimit(env.DB, user.uid, "performer_prediction");
       if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
-      await upsertUser(env, user.uid, user.email);
+      await upsertUser(env, user.uid);
 
       // 1曲あたりの投票数上限チェック (8人まで)
       const userVoteCount = await env.DB.prepare(
@@ -455,7 +455,7 @@ export async function handleSetlistPredictions(ctx: RouteContext): Promise<Respo
         .first<{ is_banned: number }>();
       if (dbUser?.is_banned) return error("Banned", 403);
 
-      await upsertUser(env, user.uid, user.email);
+      await upsertUser(env, user.uid);
 
       await env.DB.prepare(
         `INSERT OR IGNORE INTO setlist_song_likes (show_id, song_id, user_id, liked_at)

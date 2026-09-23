@@ -267,7 +267,7 @@ export async function handlePolls(ctx: RouteContext): Promise<Response | null> {
       if (dbUser?.is_banned) return error("Banned", 403);
       if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
-      await upsertUser(env, user.uid, user.email);
+      await upsertUser(env, user.uid);
 
       const body = (await request.json().catch(() => null)) as any;
       if (body === null) return error("invalid JSON body");
@@ -461,7 +461,7 @@ export async function handlePolls(ctx: RouteContext): Promise<Response | null> {
       const rl = await checkRateLimit(env.DB, user.uid, "poll_vote");
       if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
-      await upsertUser(env, user.uid, user.email);
+      await upsertUser(env, user.uid);
 
       // 応答の票数は、書く前に読んだ値 + 1 (従来どおり)。
       const entry = await env.DB.prepare(
