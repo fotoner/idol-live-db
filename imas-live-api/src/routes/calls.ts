@@ -41,9 +41,9 @@ import {
   buildLyricsPayload,
   logLyricsRead,
   parseLines,
-  sqliteTimestampToEpochSeconds,
   NO_STORE,
 } from "./lyrics";
+import { sqliteTimestampToEpochSeconds } from "../time";
 import type { LyricLineRow } from "./lyrics";
 import type { RouteContext } from "./context";
 import { decodePathParam, requireActiveUser } from "./guards";

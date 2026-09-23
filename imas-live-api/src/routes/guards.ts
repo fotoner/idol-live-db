@@ -4,7 +4,7 @@
 // 呼び出し側は `if (x instanceof Response) return x;` で抜ける。
 // 文言とステータスは、ここへ集める前の各ルートのものと同じ。
 
-import type { AuthUser } from "../auth";
+import { isRevokedSession, type AuthUser } from "../auth";
 import {
   dryCheckIpRateLimit,
   type IpRateCheck,
@@ -93,13 +93,16 @@ export function requireOpaqueKey(ctx: ErrorResponder, value: unknown, fieldName:
 }
 
 /**
- * 書き込んでよいアカウントか (BAN されていないか) を、users の行 1 行で確かめる。
- * 認証 (getAuthUser) の後に呼ぶ。だめなら返す応答、よければ null。
- * 日次の枠 (checkRateLimit) と Promise.all で並べて走らせてよい。
+ * 書き込んでよいアカウントかを、users の行 1 行で確かめる。認証 (getAuthUser) の後に呼ぶ。
+ *   - 退会で無効になったセッション (行が無い・作り直した行より前の発行) → 401
+ *   - BAN → 403
+ * だめなら返す応答、よければ null。日次の枠 (checkRateLimit) と Promise.all で並べて走らせてよい。
+ * 読むのは今までの BAN の確認と同じ 1 行 (列を足しただけ)。
  */
 export async function requireActiveUser(ctx: DbContext, user: AuthUser): Promise<Response | null> {
-  const row = await ctx.env.DB.prepare("SELECT is_banned FROM users WHERE id = ?")
+  const row = await ctx.env.DB.prepare("SELECT is_banned, created_at FROM users WHERE id = ?")
     .bind(user.uid)
-    .first<{ is_banned: number }>();
+    .first<{ is_banned: number; created_at: string }>();
+  if (isRevokedSession(user, row)) return ctx.error("Unauthorized", 401);
   return row?.is_banned ? ctx.error("Banned", 403) : null;
 }

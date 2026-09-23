@@ -6,6 +6,7 @@
 
 import type { Env } from "./env";
 import { decodeJwt, JwksCache, signHs256, verifyHs256, verifyRs256, type DecodedJwt } from "./jwt";
+import { sqliteTimestampToEpochSeconds } from "./time";
 
 export const SESSION_JWT_ISSUER = "imas-live-db";
 // 名前は "-ios" だが実体は自前セッションJWT共通の aud 固定値 (Android の Google Sign-In 経由でも同じ値を使う)。
@@ -16,6 +17,28 @@ export const SESSION_JWT_TTL_SECONDS = 60 * 60 * 24 * 365;
 export interface AuthUser {
   uid: string;
   email?: string;
+  /**
+   * 自前のセッション JWT で認証したとき、その発行時刻 (iat 秒。無いトークンは null)。
+   * Apple の ID トークンをそのまま使う互換の経路では undefined。
+   */
+  session?: { issuedAt: number | null };
+}
+
+/** セッションの発行がアカウントの作成より前でも許す幅 (時計のずれ)。 */
+const SESSION_REISSUE_SKEW_SECONDS = 10 * 60;
+
+/**
+ * 退会で無効になったセッションか。自前のセッション JWT だけが対象で、
+ *   - users の行が無い (退会した)
+ *   - 行が作られた時刻より 10 分以上前に発行されている (退会したあと同じ人がまた登録した)
+ * のどちらかなら true。行は呼び出し側が既に読んでいるものを渡す (このために読み足さない)。
+ */
+export function isRevokedSession(user: AuthUser, row: { created_at?: string | null } | null): boolean {
+  if (!user.session) return false;
+  if (!row) return true;
+  const { issuedAt } = user.session;
+  if (issuedAt === null) return false;
+  return issuedAt < sqliteTimestampToEpochSeconds(row.created_at) - SESSION_REISSUE_SKEW_SECONDS;
 }
 
 // ---------------------------------------------------------------------------
@@ -112,7 +135,7 @@ async function verifySession(
   token: string,
   secret: string,
   expGraceSeconds: number
-): Promise<{ uid: string } | null> {
+): Promise<{ uid: string; issuedAt: number | null } | null> {
   try {
     if (secret.length < MIN_SECRET_LENGTH) return null;
     const jwt = decodeJwt(token);
@@ -126,21 +149,23 @@ async function verifySession(
     if (typeof exp !== "number" || exp < now - expGraceSeconds) return null;
     if (typeof iat === "number" && iat > now + 60) return null;
     if (typeof sub !== "string") return null;
-    return { uid: sub };
+    return { uid: sub, issuedAt: typeof iat === "number" ? iat : null };
   } catch {
     return null;
   }
 }
 
-export function verifySessionToken(token: string, secret: string): Promise<{ uid: string } | null> {
-  return verifySession(token, secret, 0);
+export async function verifySessionToken(token: string, secret: string): Promise<AuthUser | null> {
+  const verified = await verifySession(token, secret, 0);
+  return verified && { uid: verified.uid, session: { issuedAt: verified.issuedAt } };
 }
 
 /** sliding refresh 用: 署名 + iss/aud が有効なら、exp 切れでも猶予内なら uid を返す。
  *  攻撃者が偽造できない (署名検証は通常どおり)。古すぎる (exp が猶予より前) トークンは拒否。 */
 const REFRESH_GRACE_SECONDS = 60 * 60 * 24 * 90; // 期限切れ後90日まで再発行可
-export function verifySessionTokenForRefresh(token: string, secret: string): Promise<{ uid: string } | null> {
-  return verifySession(token, secret, REFRESH_GRACE_SECONDS);
+export async function verifySessionTokenForRefresh(token: string, secret: string): Promise<AuthUser | null> {
+  const verified = await verifySession(token, secret, REFRESH_GRACE_SECONDS);
+  return verified && { uid: verified.uid, session: { issuedAt: verified.issuedAt } };
 }
 
 /** JWT の iss クレームだけ覗いて自前セッションか Apple か振り分ける (署名はまだ見ない)。 */

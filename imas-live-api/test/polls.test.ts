@@ -129,6 +129,7 @@ describe("GET /polls と GET /polls/:id", () => {
     await insertPoll("ended", { endsIn: "-1 day" });
     await insertPoll("removed", { status: "removed" });
     await insertUser(VOTER);
+    await insertUser("001094.other");
     await vote("sooner", "s1");
     await vote("sooner", "s2");
     await vote("sooner", "s2", "001094.other");
@@ -163,6 +164,7 @@ describe("GET /polls と GET /polls/:id", () => {
   it("詳細: 候補を票数順で返し、自分が入れた候補に印を付ける。manual は 0 票の候補も並べる", async () => {
     await insertPoll("m", { scope: "manual", entities: ["s1", "s2", "s3"] });
     await insertUser(VOTER);
+    await insertUser("001094.other");
     await vote("m", "s2");
     await vote("m", "s2", "001094.other");
     await vote("m", "s1", "001094.other");
@@ -215,6 +217,7 @@ describe("POST /polls/:id/votes と DELETE /polls/:id/votes/:entityId", () => {
 
   it("投票は 201 で票数と自分の票数。同じ候補への再投票は 200 で数を変えない。1 人 3 票まで", async () => {
     await insertUser(VOTER);
+    await insertUser("001094.other");
     await insertPoll("p");
     const first = await vote("p", "s1");
     expect(first.status).toBe(201);
@@ -237,6 +240,7 @@ describe("POST /polls/:id/votes と DELETE /polls/:id/votes/:entityId", () => {
 
   it("取り消しは票数と自分の票数を返し、0 票の候補は消える。入れていなければそのままの数を返す", async () => {
     await insertUser(VOTER);
+    await insertUser("001094.other");
     await insertPoll("p");
     await vote("p", "s1");
     await vote("p", "s1", "001094.other");

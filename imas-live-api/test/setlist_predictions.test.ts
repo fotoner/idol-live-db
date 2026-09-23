@@ -27,6 +27,7 @@ describe.skip("予想セトリ (/shows/:id/predictions と /me/predictions)", ()
 
   it("投票は 201。同じ曲は 200 で already_voted。1 公演 3 票まで", async () => {
     await insertUser(UID);
+    await insertUser(OTHER);
     expect((await predict("sh1", "s1")).body)
       .toEqual({ song_id: "s1", vote_count: 1, already_voted: false, my_vote_count: 1 });
     const again = await predict("sh1", "s1");
@@ -44,6 +45,7 @@ describe.skip("予想セトリ (/shows/:id/predictions と /me/predictions)", ()
 
   it("一覧は票数順で、自分が入れた曲に印を付ける。/me/predictions は自分の票の一覧", async () => {
     await insertUser(UID);
+    await insertUser(OTHER);
     await predict("sh1", "s1", OTHER);
     await predict("sh1", "s2", OTHER);
     await predict("sh1", "s2");
@@ -67,6 +69,7 @@ describe.skip("予想セトリ (/shows/:id/predictions と /me/predictions)", ()
 
   it("取り消しは票を 1 減らし、0 票の行は消える。入れていなければ not_voted", async () => {
     await insertUser(UID);
+    await insertUser(OTHER);
     await predict("sh1", "s1");
     const auth = await bearer(UID);
     expect((await callJson("DELETE", "/shows/sh1/predictions/s9", { headers: auth })).body)
@@ -96,6 +99,7 @@ describe("出演者予想 (/shows/:id/songs/:songId/performers)", () => {
 
   it("投票は 201。同じアイドルは 200 で already_voted (枠を使わない)。1 曲 8 人まで", async () => {
     await insertUser(UID);
+    await insertUser(OTHER);
     expect((await pick("i1")).body).toEqual({ idol_id: "i1", vote_count: 1, already_voted: false });
     const again = await pick("i1");
     expect(again.status).toBe(200);
@@ -113,6 +117,7 @@ describe("出演者予想 (/shows/:id/songs/:songId/performers)", () => {
 
   it("一覧は票数順で、自分が入れたアイドルに印を付ける", async () => {
     await insertUser(UID);
+    await insertUser(OTHER);
     await pick("i1", OTHER);
     await pick("i2", OTHER);
     await pick("i2");
@@ -128,6 +133,7 @@ describe("出演者予想 (/shows/:id/songs/:songId/performers)", () => {
 
   it("取り消しは票を 1 減らし、0 票の行は消える。入れていなければ not_voted", async () => {
     await insertUser(UID);
+    await insertUser(OTHER);
     await pick("i1");
     await pick("i1", OTHER);
     const auth = await bearer(UID);

@@ -8,7 +8,7 @@
 
 import {
   verifyAppleToken, verifyGoogleToken, signSessionToken,
-  verifySessionTokenForRefresh, getAuthUser, peekJwtIssuer,
+  verifySessionTokenForRefresh, getAuthUser, peekJwtIssuer, isRevokedSession,
   SESSION_JWT_ISSUER, SESSION_JWT_TTL_SECONDS,
 } from "../auth";
 import { checkRateLimit } from "../rate_limit";
@@ -104,8 +104,14 @@ export async function handleAuth(ctx: RouteContext): Promise<Response | null> {
     if (peekJwtIssuer(oldToken) !== SESSION_JWT_ISSUER) return error("Unauthorized", 401);
     const verified = await verifySessionTokenForRefresh(oldToken, env.SESSION_JWT_SECRET);
     if (!verified) return error("Unauthorized", 401);
+    // 退会したアカウントのトークンは再発行しない。admin の判定と同じ 1 行で見る
+    // (env の許可リストの admin だけは、今まで読まなかった行を読む。refresh は 1 年に 1 回程度)。
+    const row = await env.DB.prepare("SELECT is_admin, created_at FROM users WHERE id = ?")
+      .bind(verified.uid)
+      .first<{ is_admin: number; created_at: string }>();
+    if (isRevokedSession(verified, row)) return error("Unauthorized", 401);
     const sessionToken = await signSessionToken(verified.uid, env.SESSION_JWT_SECRET);
-    const isAdmin = await checkIsAdmin(env, verified.uid);
+    const isAdmin = isAllowlistedAdmin(env, verified.uid) || !!row?.is_admin;
     return json({
       sessionToken,
       uid: verified.uid,
@@ -124,7 +130,7 @@ export async function handleAuth(ctx: RouteContext): Promise<Response | null> {
     //   editCount     = users.contribution_count (編集 batch 件数。finalize で +1)
     //   goodsReceived = 自分の編集が累計で受け取った Good 数 (edit_good を editor で都度 COUNT)
     const row = await env.DB.prepare(
-      `SELECT u.id, u.display_name, u.avatar_url, u.is_admin, u.is_banned, u.contribution_count,
+      `SELECT u.id, u.display_name, u.avatar_url, u.is_admin, u.is_banned, u.contribution_count, u.created_at,
               COALESCE((SELECT COUNT(*) FROM edit_good g
                         JOIN edit_batch eb ON eb.id = g.batch_id
                         WHERE eb.editor_id = u.id AND eb.source = 'app'), 0) AS goods_received
@@ -138,8 +144,11 @@ export async function handleAuth(ctx: RouteContext): Promise<Response | null> {
         is_admin: number;
         is_banned: number;
         contribution_count: number;
+        created_at: string;
         goods_received: number;
       }>();
+    // 退会で無効になったセッションは 401 (読んだ行で判定する。読み足さない)。
+    if (isRevokedSession(user, row)) return error("Unauthorized", 401);
     // admin の判定は、読んだ行の is_admin と env の許可リストで済ませる (同じ行を読み直さない)。
     const isAdmin = isAllowlistedAdmin(env, user.uid) || !!row?.is_admin;
     // editCount = source='app' の編集 batch 件数。contribution_count は finalizeEditBatch で

@@ -142,6 +142,8 @@ describe("POST /auth/refresh", () => {
 
   it("期限切れでも 90 日以内なら再発行、それより古いと 401", async () => {
     await insertUser(UID);
+    // 1 年前に発行したトークンなので、アカウントはそれより前からある。
+    await exec("UPDATE users SET created_at = datetime('now', '-2 years') WHERE id = ?", UID);
     const within = await signHs256(sessionPayload(UID, { iat: nowSec() - YEAR, exp: nowSec() - 89 * 86400 }));
     expect((await callJson("POST", "/auth/refresh", { headers: { Authorization: `Bearer ${within}` } })).status)
       .toBe(200);
@@ -259,7 +261,7 @@ describe("POST /users/me (表示名の変更)", () => {
     expect(emoji.status).toBe(200);
   });
 
-  it("変更後の表示名を返す。BAN は 403、行の無いユーザーは 404、1 日 3 回まで", async () => {
+  it("変更後の表示名を返す。BAN は 403、行の無いユーザー (退会済みのセッション) は 401、1 日 3 回まで", async () => {
     await insertUser(UID);
     const res = await callJson("POST", "/users/me", { headers: await bearer(UID), body: { display_name: " 新しい名前 " } });
     expect(res.body).toEqual({ displayName: "新しい名前" });
@@ -276,9 +278,10 @@ describe("POST /users/me (表示名の変更)", () => {
       headers: await bearer("001094.banned"), body: { display_name: "x" },
     })).status).toBe(403);
 
+    // 行の無いセッションは退会済みとして 401 (Q-10。以前は UPDATE が 0 件で 404)。
     const ghost = await callJson("POST", "/users/me", { headers: await bearer("001094.ghost"), body: { display_name: "x" } });
-    expect(ghost.status).toBe(404);
-    expect(ghost.body).toEqual({ error: "user not found" });
+    expect(ghost.status).toBe(401);
+    expect(ghost.body).toEqual({ error: "Unauthorized" });
   });
 });
 

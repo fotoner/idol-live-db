@@ -29,6 +29,7 @@ import {
 } from "../call_stats";
 import { updateGramIndex } from "../lyrics_index";
 import { timingSafeEqual, utf8 } from "../bytes";
+import { sqliteTimestampToEpochSeconds } from "../time";
 import type { ClapKind, LyricCall } from "../lyrics_calls";
 import type { RouteContext } from "./context";
 import { decodePathParam, requireIpQuota } from "./guards";
@@ -406,17 +407,6 @@ export interface LyricLineRow {
   // D1 の行読み取り 1 回に収めるという lines_json の存在理由が壊れる。
   clap?: ClapKind | null;
   calls?: LyricCall[];
-}
-
-/**
- * "2026-08-05 12:00:00" (SQLite datetime('now') 形式・UTC) を epoch 秒に変換する。
- * iOS の APIClient が .secondsSince1970 でデコードするため、応答は必ず秒 epoch の数値。
- * ミリ秒や ISO 文字列にすると iOS 側のデコードが落ちる。
- */
-export function sqliteTimestampToEpochSeconds(ts: string | null | undefined): number {
-  if (!ts) return 0;
-  const ms = Date.parse(ts.replace(" ", "T") + "Z");
-  return Number.isNaN(ms) ? 0 : Math.floor(ms / 1000);
 }
 
 /**

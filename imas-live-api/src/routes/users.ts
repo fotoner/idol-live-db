@@ -10,6 +10,26 @@ import { checkRateLimit } from "../rate_limit";
 import type { RouteContext } from "./context";
 import { decodePathParam, readJsonBody, requireActiveUser } from "./guards";
 
+/** 退会した人の uid の代わりに入れる値。 */
+const DELETED_USER = "deleted";
+
+/**
+ * 退会したら uid を DELETED_USER に置き換える列 (表, 列)。値は定数だけ (SQL に埋め込む)。
+ * タグの updated_by / edited_by は、端末 ID が無いときに uid が入る。
+ */
+const USER_REFERENCE_COLUMNS: ReadonlyArray<readonly [string, string]> = [
+  ["polls", "created_by"],
+  ["poll_entries", "first_voted_by"],
+  ["setlist_predictions", "first_voted_by"],
+  ["setlist_performer_predictions", "first_voted_by"],
+  ["tags", "updated_by"],
+  ["idol_tag_master", "updated_by"],
+  ["unit_tag_master", "updated_by"],
+  ["tag_description_history", "edited_by"],
+  ["idol_tag_description_history", "edited_by"],
+  ["unit_tag_description_history", "edited_by"],
+];
+
 /** /users/me (POST・DELETE) と /users/:user_id/badges。どれでもなければ null。 */
 export async function handleUsers(ctx: RouteContext): Promise<Response | null> {
   const { request, env, path, json, error, rateLimitResponse } = ctx;
@@ -67,6 +87,9 @@ export async function handleUsers(ctx: RouteContext): Promise<Response | null> {
   //   端末・匿名の共有データなので触らない。
   //   foreign_keys が ON でも通るよう、子テーブルの参照を先に外してから親 → users の順に消す。
   //   一連の操作は env.DB.batch() で原子的に実行し、途中失敗で中途半端な状態を残さない。
+  //   共有データ (お題・予想・タグの語彙と履歴) に残る本人の uid は "deleted" に置き換える。
+  //   手元に残ったセッション JWT は、users の行が無いので書き込みの経路・/auth/me・
+  //   /auth/refresh で 401 になる (isRevokedSession。読み取りだけの GET は期限まで通る)。
   // ----------------------------------------------------------------
   if (path === "/users/me" && request.method === "DELETE") {
     const user = await getAuthUser(request, env);
@@ -120,6 +143,15 @@ export async function handleUsers(ctx: RouteContext): Promise<Response | null> {
       // 参照を外したので本人の編集 batch を削除し、最後に users 行を削除する。
       env.DB.prepare("DELETE FROM edit_batch WHERE editor_id = ?").bind(uid),
       env.DB.prepare("DELETE FROM users WHERE id = ?").bind(uid),
+
+      // ここから下は、みんなの共有データ (お題・予想・タグの語彙と履歴) に残った本人の uid を
+      // "deleted" に置き換える (データは残し、誰のものかだけを消す)。これらの列には索引が無く
+      // 表全体を読むが、退会はまれなので索引を張って毎回の書き込みを重くするより安い。
+      ...USER_REFERENCE_COLUMNS.map(([table, column]) =>
+        env.DB.prepare(`UPDATE ${table} SET ${column} = '${DELETED_USER}' WHERE ${column} = ?`).bind(uid)
+      ),
+      // 本人が発行した引き継ぎコード (中身は本人の端末のデータ)。
+      env.DB.prepare("DELETE FROM transfer_codes WHERE user_id = ?").bind(uid),
     ]);
 
     return json({ deleted: true });
