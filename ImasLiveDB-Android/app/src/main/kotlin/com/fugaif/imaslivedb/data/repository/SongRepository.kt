@@ -27,7 +27,6 @@ import uniffi.imas_core.SongListFilter
 import uniffi.imas_core.SongListSort
 import uniffi.imas_core.introQuizPlayableIndices
 import uniffi.imas_core.masterySongFilter
-import uniffi.imas_core.splitCreditNames
 import uniffi.imas_core.ShowWithEventNameRecord
 
 /**
@@ -43,13 +42,6 @@ data class SongWithRoles(
 ) {
     val rolesLabel: String get() = roles.joinToString("・")
 }
-
-/**
- * SQLite の LIKE パターン中の特殊文字を潰す。SQL 側で `ESCAPE '\'` を付けて使うこと。
- * (iOS `String.likeEscaped` と対。エスケープ文字自体を最初に置き換える順序が要。)
- */
-private fun String.likeEscaped(): String =
-    replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 /**
  * 楽曲の読み取り口。
@@ -270,28 +262,14 @@ class SongRepository(
         fetchSongsPreservingOrder(snapshots.query { it.songsByReleaseYear(year) }).withArtists()
 
     /**
-     * クリエイター名 (作詞・作曲・編曲 横断) で引いた楽曲と、その曲での役割。
-     *
-     * **コアに対応 API が無い絞り込み**なので Room で引く。
-     *
-     * 2 段構えなのは 3 欄が「/」「、」等で複数名を詰めた自由文字列だから。SQL の部分一致だけだと
-     * 「山田」で「山田太郎」の曲まで当たるので、候補を絞ったあとに欄を人ごとへ割って
-     * **完全一致した欄だけ**を役割として採り、1 つも一致しない曲は落とす
-     * (iOS songsWithCreatorRoles と同じ)。欄の割り方はコア (splitCreditNames) が唯一の正 —
-     * ここで区切り文字を書き直すと、曲詳細のクレジット表示と同じ人が二通りに分かれる。
+     * この名前の作家の曲と、その人の役割 (作曲 → 作詞 → 編曲)。当たり方 (連名の割り方・所属の括弧や
+     * 空白の揺れを畳んだ鍵での一致) はコアの songsByCreator が決める。実体は Room で id から引く。
      */
     suspend fun fetchSongsByCreator(name: String): List<SongWithRoles> {
-        val trimmed = name.trim()
-        if (trimmed.isEmpty()) return emptyList()
-        val candidates = db.songDao().fetchSongsByCreator("%${trimmed.likeEscaped()}%")
-        return candidates.mapNotNull { song ->
-            // 並びは iOS の rolesLabel と同じ 作曲 → 作詞 → 編曲。
-            val roles = listOf("作曲" to song.composer, "作詞" to song.lyricist, "編曲" to song.arranger)
-                .mapNotNull { (label, field) ->
-                    label.takeIf { field != null && trimmed in splitCreditNames(field) }
-                }
-            if (roles.isEmpty()) null else SongWithRoles(song = song, roles = roles)
-        }
+        val records = snapshots.query { store -> store.songsByCreator(name) }
+        val rolesById = records.associate { it.song.id to it.roles }
+        return fetchSongsPreservingOrder(records.map { it.song.id })
+            .map { song -> SongWithRoles(song = song, roles = rolesById[song.id].orEmpty()) }
     }
 
     /** CD シリーズの一覧 (フィルタシートのピッカー候補)。並びはコアの cdSeriesList が正。 */

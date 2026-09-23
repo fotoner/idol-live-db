@@ -649,7 +649,7 @@ private fun FilterRow(key: String, value: String?, seed: String?, brand: String?
  *
  * 欄の割り方はコア (`splitCreditNames`) が唯一の正 — 括弧の外は 5 種類の区切りで割り、
  * 括弧の中は `・` と `、` だけで割る (`,` `/` は社名の一部)。ここで書き直すと
- * 一覧側の突き合わせ (SongRepository.fetchSongsByCreator) とずれて、同じ人が
+ * 一覧側の突き合わせ (コアの songsByCreator) とずれて、同じ人が
  * 二通りに分かれるか一覧が 0 件になる。
  */
 @OptIn(ExperimentalLayoutApi::class)

@@ -25,23 +25,4 @@ interface SongDao {
 
     @RawQuery
     suspend fun fetchSongsRaw(query: SupportSQLiteQuery): List<Song>
-
-    /**
-     * クリエイター名 (作曲・作詞・編曲 横断) の候補曲。**コアに対応 API が無い絞り込み**なので
-     * Room で引く。
-     *
-     * 3 欄は「/」「、」等で複数名が入った自由文字列なので、SQL では部分一致まで広く拾い、
-     * 「その名前が本当に 1 人ぶんとして入っているか」の判定は呼び出し側 (SongRepository) が行う
-     * (iOS fetchSongsByCreatorQuery + songsWithCreatorRoles と同じ 2 段構え)。
-     * `%` `_` を含む名前でパターンが壊れないよう、パターンはエスケープ済みを受け取り
-     * `ESCAPE '\'` を明示する (iOS の likeEscaped と対)。
-     */
-    @Query("""
-        SELECT * FROM songs
-        WHERE composer LIKE :pattern ESCAPE '\'
-           OR lyricist LIKE :pattern ESCAPE '\'
-           OR arranger LIKE :pattern ESCAPE '\'
-        ORDER BY title_kana, title
-    """)
-    suspend fun fetchSongsByCreator(pattern: String): List<Song>
 }
