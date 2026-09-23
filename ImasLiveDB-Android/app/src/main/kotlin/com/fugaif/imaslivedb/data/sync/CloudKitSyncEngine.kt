@@ -301,7 +301,11 @@ class CloudKitSyncEngine(
      * 「seed = 基準データ / CloudKit = 増分」の連続したパイプラインの第1段で、ここで投入してから
      * sync() で最新差分を当てる。投入後にデータがあるか (= UI を即表示してよいか) を返す。
      */
-    suspend fun ensureLocalData(): Boolean = ensureLocalDataMutex.withLock { ensureLocalDataLocked() }
+    suspend fun ensureLocalData(): Boolean =
+        // 投入・入れ直しと、その後処理 (次の同期をフルにする印・入れ替わった知らせ) は
+        // アプリのスコープで 1 まとまりに走らせる。呼んだ画面が回転などで消えても、
+        // 入れ直しだけ済んで後処理が飛ぶことが無いように (待つ側だけが取り消される)。
+        scope.async { ensureLocalDataMutex.withLock { ensureLocalDataLocked() } }.await()
 
     /**
      * seed の投入・入れ直しは 1 本ずつ (回転などで 2 本目が重なると、ATTACH と

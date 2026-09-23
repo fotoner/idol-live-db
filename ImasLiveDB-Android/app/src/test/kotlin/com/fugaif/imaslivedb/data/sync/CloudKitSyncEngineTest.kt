@@ -5,14 +5,21 @@ import androidx.room.Room
 import com.fugaif.imaslivedb.data.db.AppDatabase
 import com.fugaif.imaslivedb.data.db.dao.SyncDao
 import com.fugaif.imaslivedb.data.model.Brand
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.yield
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
@@ -22,8 +29,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * [CloudKitSyncEngine] の実行の仕方 (単一実行・取り消し・大量削除)。CloudKit はフェイクに差し替える。
@@ -95,6 +100,24 @@ class CloudKitSyncEngineTest {
 
         assertTrue("取り消しが Error になった: ${engine.state.value}",
             engine.state.value !is CloudKitSyncEngine.SyncState.Error)
+    }
+
+    /**
+     * seed の投入を頼んだ画面が途中で消えても (回転など)、投入の後処理 (入れ替わった知らせ) まで
+     * 走り切る (RedTeam A-L1)。
+     */
+    @Test
+    fun seedImportFinishesEvenIfTheCallerGoesAway() = runBlocking {
+        val engine = engine { _, _ -> emptyList() }
+        val replaced = scope.async { engine.localDataReplaced.first() }
+        yield()
+
+        val caller = launch(Dispatchers.IO) { engine.ensureLocalData() }
+        delay(50)
+        caller.cancel()
+
+        withTimeout(30_000) { replaced.await() }
+        assertTrue(engine.hasData())
     }
 
     /**
