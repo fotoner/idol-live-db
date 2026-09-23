@@ -7,10 +7,7 @@ import { exec, insertUser, row, rows } from "./support/d1";
 const UID = "001094.predictor";
 const OTHER = "001094.other";
 
-// ⚠️ D-API-09: migrations が作る setlist_predictions / setlist_prediction_votes は event_id 列で、
-//    本番とコードは show_id 列。migrations だけから作った D1 ではこの 4 本が 500 になるので、
-//    表の形を本番に揃えるまで skip する。
-describe.skip("予想セトリ (/shows/:id/predictions と /me/predictions)", () => {
+describe("予想セトリ (/shows/:id/predictions と /me/predictions)", () => {
   async function predict(showId: string, songId: string, uid = UID) {
     return callJson("POST", `/shows/${showId}/predictions`, { headers: await bearer(uid), body: { song_id: songId } });
   }
@@ -181,9 +178,13 @@ describe("セトリのいいね (/shows/:id/likes と /shows/:id/songs/:songId/l
 });
 
 describe("表の前提", () => {
-  it("出演者予想といいねの表は show_id を持つ (本番と同じ)", async () => {
+  it("予想・出演者予想・いいねの表は show_id を持つ (本番と同じ。0038 で揃えた)", async () => {
+    await exec("INSERT INTO setlist_predictions (show_id, song_id) VALUES ('sh', 's')");
+    await exec("INSERT INTO setlist_prediction_votes (show_id, song_id, user_id) VALUES ('sh', 's', 'u')");
     await exec("INSERT INTO setlist_song_likes (show_id, song_id, user_id) VALUES ('sh', 's', 'u')");
     await exec("INSERT INTO setlist_performer_predictions (show_id, song_id, idol_id) VALUES ('sh', 's', 'i')");
     expect(await rows("SELECT show_id FROM setlist_song_likes")).toEqual([{ show_id: "sh" }]);
+    // 本番の first_voted_at は NOT NULL で既定値あり。
+    expect(await row("SELECT first_voted_at IS NOT NULL AS has_time FROM setlist_predictions")).toEqual({ has_time: 1 });
   });
 });

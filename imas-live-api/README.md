@@ -24,6 +24,17 @@ npx wrangler d1 migrations apply imas-live-db
 npx wrangler d1 migrations apply imas-live-db --remote
 ```
 
+本番の表は migrations の履歴どおりには作られていない箇所があり、それを新しい環境で再現するための
+migration (本番では流さないもの) がある。`--remote` で当てる前に `npx wrangler d1 migrations list
+imas-live-db --remote` で未適用の一覧を見て、次のものが並んでいたら、流さずに適用済みとして記録する。
+
+- `0038_setlist_predictions_show_id.sql` (予想セトリの 2 表を本番の形 = show_id にする)
+
+```bash
+npx wrangler d1 execute imas-live-db --remote --command \
+  "INSERT OR IGNORE INTO d1_migrations (name) VALUES ('0038_setlist_predictions_show_id.sql')"
+```
+
 ## デプロイ
 
 ```bash
