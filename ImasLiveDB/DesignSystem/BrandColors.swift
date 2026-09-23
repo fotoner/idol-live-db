@@ -10,6 +10,16 @@ import os
 enum BrandColors {
     private static let cache = OSAllocatedUnfairLock<[String: String]?>(initialState: nil)
 
+    /// スナップショットを読み直したら (同期でブランドの色が変わりうる) 表を捨てる。
+    /// 起動時に 1 回呼ぶ。
+    static func startObservingReloads() {
+        NotificationCenter.default.addObserver(
+            forName: .coreSnapshotDidLoad, object: nil, queue: nil
+        ) { _ in
+            cache.withLock { $0 = nil }
+        }
+    }
+
     /// そのブランドの色 hex。未知の ID・色の無いブランド・nil は nil。
     static func hex(for brandId: String?) -> String? {
         guard let brandId else { return nil }

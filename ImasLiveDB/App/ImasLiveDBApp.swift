@@ -34,6 +34,7 @@ struct ImasLiveDBApp: App {
 
         // 端末にしか無いデータの書き込み失敗は、どの画面で起きてもアラートで知らせる。
         LocalWriteFailure.presenter = LocalWriteFailureAlert.present
+        BrandColors.startObservingReloads()
 
         // 曲アートワーク (mzstatic CDN のリモート URL) を永続ディスクキャッシュする。
         // 全 LazyImage は表示サイズへの Resize processor 付きなので、元 JPEG を保持しても
