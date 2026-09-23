@@ -52,7 +52,7 @@ export async function handleAppAttest(ctx: RouteContext): Promise<Response | nul
       ).bind(keyId, bytesToBase64Url(spki), counter, now, now).run();
       return json({ appToken: await mintAppToken(keyId, secret) });
     } catch (e) {
-      return error("attestation failed: " + (e as Error).message, 401);
+      return proofFailed(ctx, "attestation", e);
     }
   }
   if (path === "/app/assert" && request.method === "POST") {
@@ -70,10 +70,25 @@ export async function handleAppAttest(ctx: RouteContext): Promise<Response | nul
       await env.DB.prepare("UPDATE app_attest_keys SET counter=?, updated_at=? WHERE key_id=?").bind(newCounter, Date.now(), keyId).run();
       return json({ appToken: await mintAppToken(keyId, secret) });
     } catch (e) {
-      return error("assertion failed: " + (e as Error).message, 401);
+      return proofFailed(ctx, "assertion", e);
     }
   }
   return null;
+}
+
+/**
+ * 証明の検証 (と、その後の鍵の保存) に失敗したときの 401 "<attestation|assertion> failed"。
+ * 理由 (内部の例外メッセージ) は本文に載せず、request id と一緒にログにだけ出す
+ * (どこで落ちたかの手がかりを外に渡さない)。
+ */
+function proofFailed(ctx: RouteContext, step: "attestation" | "assertion", e: unknown): Response {
+  console.error(JSON.stringify({
+    event: "app_attest_failed",
+    requestId: ctx.requestId,
+    step,
+    error: e instanceof Error ? e.message : String(e),
+  }));
+  return ctx.error(`${step} failed`, 401);
 }
 
 /**
