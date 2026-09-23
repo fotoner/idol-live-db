@@ -2,9 +2,6 @@ package com.fugaif.imaslivedb.data.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import com.fugaif.imaslivedb.data.model.BrandSongHitRow
-import com.fugaif.imaslivedb.data.model.SongPerfCount
-import com.fugaif.imaslivedb.data.model.UpcomingShowRow
 
 @Dao
 interface StatsDao {
@@ -46,40 +43,6 @@ interface StatsDao {
         )
     """)
     suspend fun fetchAutoCollectedSongIds(): List<String>
-
-    /** 指定 song_id 群の生涯リアルライブ披露回数。 */
-    @Query("""
-        SELECT si.song_id AS song_id, COUNT(*) AS cnt
-        FROM setlist_items si
-        JOIN shows sh ON si.show_id = sh.id
-        JOIN events e ON e.id = sh.event_id
-        WHERE e.kind IN ('live','festival') AND si.song_id IN (:songIds)
-        GROUP BY si.song_id
-    """)
-    suspend fun fetchLifetimePlayCounts(songIds: List<String>): List<SongPerfCount>
-
-    /** 未回収曲ごとに、過去リアルライブで披露された brand_id との対応 (この公演で聴けるかも判定用)。 */
-    @Query("""
-        SELECT DISTINCT e.brand_id AS brand_id, si.song_id AS song_id
-        FROM setlist_items si
-        JOIN shows sh ON si.show_id = sh.id
-        JOIN events e ON e.id = sh.event_id
-        WHERE e.kind IN ('live','festival') AND e.brand_id IS NOT NULL AND si.song_id IN (:songIds)
-    """)
-    suspend fun fetchBrandSongHits(songIds: List<String>): List<BrandSongHitRow>
-
-    /** 今日以降のリアルライブ公演 (親イベント名・ブランド色つき)。 */
-    @Query("""
-        SELECT s.id, s.event_id, s.name, s.date, s.venue, s.venue_city,
-               s.start_time, s.sort_order, s.performer_type,
-               e.name AS event_name, e.brand_id AS brand_id, b.color AS brand_color
-        FROM shows s
-        JOIN events e ON s.event_id = e.id
-        LEFT JOIN brands b ON e.brand_id = b.id
-        WHERE s.date >= :today AND e.kind IN ('live','festival')
-        ORDER BY s.date ASC, s.sort_order ASC
-    """)
-    suspend fun fetchUpcomingRealLiveShows(today: String): List<UpcomingShowRow>
 
     /** 最新公演のセトリ曲数。 */
     @Query("SELECT COUNT(*) FROM setlist_items WHERE show_id = :showId")

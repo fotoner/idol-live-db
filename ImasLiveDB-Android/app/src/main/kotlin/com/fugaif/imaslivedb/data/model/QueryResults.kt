@@ -141,11 +141,6 @@ data class SongPlayCount(
     @ColumnInfo(name = "artwork_url") val artworkUrl: String? = null
 )
 
-data class SongPerfCount(
-    @ColumnInfo(name = "song_id") val songId: String,
-    @ColumnInfo(name = "cnt") val cnt: Int
-)
-
 /**
  * 共起曲 1 件の集計行 (披露実績)。**単位は公演**で、1 公演で 2 回演奏されても 1。
  * 分母 (その曲自身の総披露公演数) は別クエリ ([SongPerfCount]) で引く。
@@ -220,86 +215,6 @@ data class YearlyShowCount(
 )
 
 // MARK: - Collection Dashboard Query Types (iOS Database/QueryTypes.swift の移植)
-
-/** ブランドごとの曲総数の生行 (回収進捗の分母)。 */
-data class BrandTotalRow(
-    @ColumnInfo(name = "id") val id: String,
-    @ColumnInfo(name = "short_name") val shortName: String,
-    @ColumnInfo(name = "color") val color: String?,
-    @ColumnInfo(name = "total") val total: Int
-)
-
-/** 未回収候補ごとに過去披露した brand_id との対応 (この公演で聴けるかも判定用)。 */
-data class BrandSongHitRow(
-    @ColumnInfo(name = "brand_id") val brandId: String?,
-    @ColumnInfo(name = "song_id") val songId: String
-)
-
-/** 今日以降のリアルライブ公演 (親イベント名・ブランド色つき)。 */
-data class UpcomingShowRow(
-    @ColumnInfo(name = "id") val id: String,
-    @ColumnInfo(name = "event_id") val eventId: String,
-    @ColumnInfo(name = "name") val name: String,
-    @ColumnInfo(name = "date") val date: String,
-    @ColumnInfo(name = "venue") val venue: String?,
-    @ColumnInfo(name = "venue_city") val venueCity: String?,
-    @ColumnInfo(name = "start_time") val startTime: String?,
-    @ColumnInfo(name = "sort_order") val sortOrder: Int,
-    @ColumnInfo(name = "performer_type") val performerType: String?,
-    @ColumnInfo(name = "event_name") val eventName: String,
-    @ColumnInfo(name = "brand_id") val brandId: String?,
-    @ColumnInfo(name = "brand_color") val brandColor: String?
-) {
-    fun toShow() = Show(
-        id = id, eventId = eventId, name = name, date = date, venue = venue,
-        venueCity = venueCity, startTime = startTime, sortOrder = sortOrder, performerType = performerType
-    )
-}
-
-/** ブランド別の現地回収進捗 (回収済み曲数 / そのブランドの全曲数)。 */
-data class BrandCollectionProgress(
-    val brandId: String,
-    val shortName: String,
-    val color: String?,
-    val collected: Int,
-    val total: Int
-) {
-    /** 0.0–1.0。total=0 のときは 0。 */
-    val fraction: Double get() = if (total > 0) collected.toDouble() / total else 0.0
-}
-
-/** 未回収曲 + その曲の生涯披露回数 (= よく演る/レアの目安)。 */
-data class UncollectedSong(val song: Song, val playCount: Int) {
-    /** 披露頻度のラベル。閾値はざっくり: 10+ 定番 / 3+ ときどき / 1+ レア / 0 未披露。 */
-    val frequencyLabel: String get() = when {
-        playCount >= 10 -> "定番"
-        playCount >= 3 -> "ときどき"
-        playCount >= 1 -> "レア"
-        else -> "未披露"
-    }
-}
-
-/** 未来公演ごとの「未回収が聴けるかも」スコア。 */
-data class UpcomingCatchChance(
-    val show: Show,
-    val eventName: String,
-    val brandId: String?,
-    val brandColor: String?,
-    /** 過去の同系統セトリに登場した「自分の未回収曲」の異なり数。 */
-    val likelyCount: Int
-)
-
-/** 回収ダッシュボードの重い集計をまとめたリポジトリ戻り値。 */
-data class CollectionDashboard(
-    val overallCollected: Int,
-    val overallTotal: Int,
-    val brandProgress: List<BrandCollectionProgress>,
-    val pickUncollected: List<UncollectedSong>,
-    val allUncollected: List<UncollectedSong>,
-    val myPickCollected: Int,
-    val myPickTotal: Int,
-    val catchChances: List<UpcomingCatchChance>
-)
 
 /** お気に入りランキング行。API のコミュニティ集計 (song_id, count) にローカルカタログの曲メタを結合。 */
 data class FavoriteRankingEntry(
