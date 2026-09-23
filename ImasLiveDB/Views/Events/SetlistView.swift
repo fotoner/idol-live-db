@@ -1,5 +1,4 @@
 import MusicKit
-import os
 import SwiftUI
 
 struct SetlistView: View {
@@ -21,11 +20,25 @@ struct SetlistView: View {
     /// 非 nil なら遷移は自前 sheet ではなく共有 path への push にする (sheet 多重化回避)。
     /// nil の時 (タブ内 standalone) は従来どおり自前 sheet。
     var navigate: ((DetailDestination) -> Void)? = nil
-    @State private var setlist: [SetlistRow] = []
-    /// 会場マスタ。当時名とキャパの解決に使う。
-    @State private var venueDirectory: VenueDirectory = .empty
     /// 予想/実セトリ両方ある時の内部タブ (0=セットリスト / 1=予想)。
     @State private var contentTab = 0
+    /// 読み込み (単位ごとに失敗を独立させてある)。表示は下の同じ名前の値から読む。
+    @State private var model = SetlistViewModel()
+    private var setlist: [SetlistRow] { model.setlist }
+    private var venueDirectory: VenueDirectory { model.venueDirectory }
+    private var performersByItemId: [String: [PerformerRow]] { model.performersByItemId }
+    private var originalIdsBySongId: [String: Set<String>] { model.originalIdsBySongId }
+    private var idolsById: [String: Idol] { model.idolsById }
+    private var rowMetaByItemId: [String: SetlistRowMetaRecord] { model.rowMetaByItemId }
+    private var collectionSummary: ShowCollectionRecord? { model.collectionSummary }
+    private var costumes: [ShowCostumeRecord] { model.costumes }
+    private var tickets: [ShowTicket] { model.tickets }
+    private var brandHexById: [String: String] { model.brandHexById }
+    private var brandNameById: [String: String] { model.brandNameById }
+    private var showBrandHex: String? { model.showBrandHex }
+    private var event: Event? { model.event }
+    private var eventName: String? { model.event?.name }
+    private var likesBySongId: [String: SetlistLikeService.LikeEntry] { model.likesBySongId }
     /// セトリの詳しさ (シンプル / 普通 / 詳細)。公演をまたいで保持したいので AppStorage。
     /// 保存値は文字列 (**序数で保存しない** — 並べ替えた瞬間に化ける)。
     @AppStorage("setlist_display_mode") private var displayModeRaw = ""
@@ -48,25 +61,11 @@ struct SetlistView: View {
     @AppStorage(PerformerNamePref.storageKey) private var performerNameRaw = PerformerNamePref.defaultRaw
     /// 保存値から解決したモード。行ごとに解決し直さないよう 1 箇所で持つ。
     private var performerName: PerformerNameMode { PerformerNamePref.mode(performerNameRaw) }
-    @State private var performersByItemId: [String: [PerformerRow]] = [:]
-    @State private var originalIdsBySongId: [String: Set<String>] = [:]
-    @State private var idolsById: [String: Idol] = [:]
     @State private var showPlaylistAlert = false
     @State private var playlistMessage = ""
     @State private var isCreatingPlaylist = false
     @State private var playlistProgress: (current: Int, total: Int) = (0, 0)
     @State private var sheetDestination: DetailDestination?
-    /// セトリ 1 行ぶんの添え物 (名義・ユニットのチップ・全員・何回目・いつぶり)。
-    /// **中身を決めるのは imas-core。** 画面はキーで引いて出すだけ。
-    @State private var rowMetaByItemId: [String: SetlistRowMetaRecord] = [:]
-    /// 公演の頭に出す「自分の回収」の要約 (この公演で N 曲回収 / 未回収 N 曲)。
-    /// **出すかどうかも文言も imas-core が決める。** nil なら何も出さない
-    /// (参加記録が無い人・回収の対象でない催し・シンプル表示)。
-    @State private var collectionSummary: ShowCollectionRecord? = nil
-    /// この公演で着られた衣装 (進行順)。畳み方も並びも imas-core が決めている。
-    @State private var costumes: [ShowCostumeRecord] = []
-    /// この公演の券種 (マスタ)。「どんな価格の券があったか」を出す。
-    @State private var tickets: [ShowTicket] = []
     @State private var showEditSheet = false
     /// 未ログイン時のログイン誘導 sheet。ログイン後にセトリ編集を再開する。
     @State private var showLoginPrompt = false
@@ -80,18 +79,6 @@ struct SetlistView: View {
     @AppStorage(AppDatabase.collectionIncludeStreamKey) private var collectionIncludeStream = false
     /// 担当アイドル ID 集合。 担当認知はアバターの二重輪 (isPick) に委ねる。
     @State private var myPickIdolIds: Set<String> = []
-    /// brand_id → イメージカラー hex。曲のフォールバックジャケ/チップ色のシードに使う。
-    @State private var brandHexById: [String: String] = [:]
-    /// brand_id → 短い表示名。パンくずの 1 段目に出す。
-    @State private var brandNameById: [String: String] = [:]
-    /// この公演自体のブランド色 hex (会場/日付の lcRow シード)。
-    @State private var showBrandHex: String? = nil
-    /// イベント名 (シェア文を「イベント名 + 公演名」にするため保持)。
-    @State private var eventName: String? = nil
-    /// 開催形態フォールバック用に親イベントを保持 (参加形態の出し分け)。
-    @State private var event: Event? = nil
-    /// 公演内の各曲への「良かった」 like 状態 (post-vote)。 song_id 索引。
-    @State private var likesBySongId: [String: SetlistLikeService.LikeEntry] = [:]
     /// 予想セトリの「曲を追加」picker。安定した List 上で presentation するため親が保持する
     /// (Section に sheet を付けると初回 presentation が行再評価で即閉じするため)。
     @State private var songPicker: SongPickerRequest?
@@ -193,11 +180,7 @@ struct SetlistView: View {
                 showDate: show.date,
                 likeEntry: likesBySongId[item.songId],
                 onToggleLike: { entry in
-                    likesBySongId[item.songId] = SetlistLikeService.LikeEntry(
-                        songId: item.songId,
-                        likeCount: entry.likeCount,
-                        hasUserLiked: entry.liked
-                    )
+                    model.setLike(songId: item.songId, likeCount: entry.likeCount, hasUserLiked: entry.liked)
                 },
                 brandHex: brandHex(for: item),
                 navigate: navigate,
@@ -624,9 +607,7 @@ struct SetlistView: View {
         ) {
             await loadRowMeta()
         }
-        .task {
-            venueDirectory = (try? await AppContainer.shared.showReading.venueDirectory()) ?? .empty
-        }
+        .task { await model.loadVenueDirectory() }
         .trackScreen("setlist")
     }
 
@@ -714,66 +695,15 @@ struct SetlistView: View {
     }
 
     private func loadSetlist() async {
-        do {
-            let showReading = AppContainer.shared.showReading
-            setlist = try await showReading.setlist(showId: show.id)
-            performersByItemId = try await showReading.allPerformers(showId: show.id)
-            let songIds = setlist.map(\.songId)
-            originalIdsBySongId = try await showReading.originalArtistIds(songIds: songIds)
-
-            // 全 performer の idolId を収集して一括 fetch（N+1 解消）
-            let allIdolIds = Array(Set(
-                performersByItemId.values
-                    .flatMap { $0 }
-                    .compactMap(\.idolId)
-            ))
-            let fetchedIdols = try await AppContainer.shared.idolReading.idols(ids: allIdolIds)
-            idolsById = Dictionary(uniqueKeysWithValues: fetchedIdols.map { ($0.id, $0) })
-
-            costumes = try await showReading.showCostumes(showId: show.id)
-            tickets = (try? await showReading.tickets(showId: show.id)) ?? []
-
-            myPickIdolIds = Set(UserMarkService.shared.allMarked(kind: .myPick, entity: .idol))
-
-            // ブランド色 (フォールバックジャケ/チップのシード)。
-            let brands = try await AppContainer.shared.brandReading.brands()
-            brandHexById = Dictionary(uniqueKeysWithValues: brands.compactMap { brand in
-                brand.color.map { (brand.id, $0) }
-            })
-            brandNameById = Dictionary(uniqueKeysWithValues: brands.map { ($0.id, $0.shortName) })
-            if let event = try await AppContainer.shared.eventReading.event(id: show.eventId) {
-                self.event = event
-                eventName = event.name
-                if let bid = event.brandId {
-                    showBrandHex = brandHexById[bid]
-                }
-            }
-
-            // セトリが埋まっている公演のみ like を取得 (空 setlist は意味なし)。
-            if !setlist.isEmpty {
-                do {
-                    let entries = try await SetlistLikeService.shared.fetch(showId: show.id)
-                    likesBySongId = Dictionary(uniqueKeysWithValues: entries.map { ($0.songId, $0) })
-                } catch {
-                    Logger.database.warning("setlist_likes_fetch_failed: \(error.localizedDescription)")
-                }
-            }
-        } catch {
-            Logger.database.error("load_failed setlist: \(error.localizedDescription)")
-        }
+        await model.load(show: show)
+        myPickIdolIds = Set(UserMarkService.shared.allMarked(kind: .myPick, entity: .idol))
     }
 
     /// 行の添え物と回収の要約を読み直す。**歌唱者の表示名の設定・表示モード・参加記録・
     /// 「配信も回収に含める」設定で答えが変わる**ので、それらを鍵にした `.task(id:)` から
     /// 呼ぶ (画面を開き直さなくても追従する)。
     private func loadRowMeta() async {
-        let bundle = try? await AppContainer.shared.showReading.setlistRowMeta(
-            showId: show.id, nameMode: performerName, displayMode: displayMode
-        )
-        rowMetaByItemId = Dictionary(
-            uniqueKeysWithValues: (bundle?.rows ?? []).map { ($0.itemId, $0) }
-        )
-        collectionSummary = bundle?.collection
+        await model.loadRowMeta(showId: show.id, nameMode: performerName, displayMode: displayMode)
     }
 
     private func classifyCover(originalIds: Set<String>, performerIds: Set<String>) -> CoverType {

@@ -168,6 +168,26 @@ final class MyPageViewModelTests: XCTestCase {
         XCTAssertNil(vm.dbStats)
     }
 
+    /// 診断 (同期の状況) を読み損ねても、ブランドと担当は読む。
+    /// 以前は同じ do の中にあり、診断の失敗でテーマ色の選択肢 (担当) まで消えていた。
+    func testBrandsAndPicksLoadEvenWhenDiagnosticsThrow() async {
+        var diag = FakeDiagnosticsReading()
+        diag.shouldThrow = true
+        let brand = Brand(id: "cg", name: "シンデレラガールズ", shortName: "CG",
+                          color: nil, sortOrder: 0, iconUrl: nil)
+        let vm = makeVM(
+            diagnostics: diag,
+            brands: FakeBrandReading(brandsToReturn: [brand]),
+            idols: FakeIdolReading(byIds: [makeIdol("i1")]),
+            marks: FakeMarkReading(markedIds: ["i1"]))
+
+        await vm.load()
+
+        XCTAssertNil(vm.syncDiagnostics)
+        XCTAssertEqual(vm.brands.map(\.id), ["cg"])
+        XCTAssertEqual(vm.pickIdols.map(\.id), ["i1"])
+    }
+
     // MARK: - 画像インポート用の型紙
 
     func testTemplatesAreGeneratedForIdolsBrandsAndUnits() async throws {

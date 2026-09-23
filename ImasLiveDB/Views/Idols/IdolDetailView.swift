@@ -549,7 +549,7 @@ struct IdolDetailView: View {
                             if isMine {
                                 Button(role: .destructive) {
                                     Task {
-                                        try? await CommunityAPI.shared.removeIdolTag(idolId: idol.id, tagId: tag.id)
+                                        try? await AppContainer.shared.communityTagWriting.removeIdolTag(idolId: idol.id, tagId: tag.id)
                                         await loadIdolTags()
                                     }
                                 } label: { Label("タグを外す", systemImage: "tag.slash") }
@@ -637,7 +637,7 @@ struct IdolDetailView: View {
     }
 
     private func loadIdolTags() async {
-        idolTagData = try? await CommunityAPI.shared.idolTags(idolId: idol.id)
+        idolTagData = try? await AppContainer.shared.communityTagReading.idolTags(idolId: idol.id)
     }
 
     /// このアイドルが好きな人にはこれもおすすめ — タグが似ているアイドル (サーバ算出)。
@@ -687,7 +687,7 @@ struct IdolDetailView: View {
     /// タグ類似のおすすめアイドルをサーバから取得し、ローカル DB で Idol に解決する。
     /// 返却順 (共有タグ数の降順) を維持する。
     private func loadSimilarIdols() async {
-        guard let response = try? await CommunityAPI.shared.similarIdolsByTags(
+        guard let response = try? await AppContainer.shared.communityTagReading.similarIdolsByTags(
             idolId: idol.id, limit: Self.similarIdolsFetchLimit
         ) else { return }
         let ids = response.idols.map(\.idolId)

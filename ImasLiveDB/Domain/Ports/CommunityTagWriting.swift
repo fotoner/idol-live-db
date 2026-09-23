@@ -28,6 +28,8 @@ protocol CommunityTagWriting: Sendable {
     func reportIdolTag(id: String, reason: String?) async throws
     /// アイドルへタグをまとめて付与。
     func applyIdolTags(idolId: String, tagIds: [String]) async throws
+    /// アイドルから自分の付けたタグを外す。
+    func removeIdolTag(idolId: String, tagId: String) async throws
 
     // MARK: - ユニットタグ (unit_tag_master — 曲/アイドルタグとは別プール)
 

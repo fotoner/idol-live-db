@@ -30,6 +30,8 @@ protocol CommunityTagReading: Sendable {
     func idolTagDetail(id: String) async throws -> IdolTagDetailResponse
     /// アイドルタグの編集履歴。
     func idolTagHistory(id: String) async throws -> [TagHistoryEntry]
+    /// タグが似ているアイドル (共有タグ数の降順。サーバ算出)。
+    func similarIdolsByTags(idolId: String, limit: Int) async throws -> SimilarIdolsResponse
 
     // MARK: - ユニットタグ (unit_tag_master — 曲/アイドルタグとは別プール)
 

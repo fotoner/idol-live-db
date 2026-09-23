@@ -47,14 +47,21 @@ final class MyPageViewModel {
         self.unitReading = unitReading
     }
 
-    /// 画面表示に必要な値を一括で読む。失敗しても画面は開けるようにログだけ残す
+    /// 画面表示に必要な値を読む。失敗しても画面は開けるようにログだけ残す
     /// (設定画面が DB エラーで真っ白になる方が困る)。
+    ///
+    /// 診断の値と、ブランド・担当は別々に読む。以前は 1 つの do にまとめていて、
+    /// 診断 (同期の状況) を読み損ねると、テーマ色の選択肢になるブランドと担当まで読めなくなった。
     func load() async {
         do {
             schemaVersion = try await diagnosticsReading.metaValue(forKey: "schema_version") ?? "不明"
             dataVersion = try await diagnosticsReading.metaValue(forKey: "data_version") ?? "不明"
             dbStats = try await diagnosticsReading.databaseStats()
             syncDiagnostics = try await diagnosticsReading.syncDiagnostics()
+        } catch {
+            Logger.database.error("load_failed settings_diagnostics: \(error.localizedDescription)")
+        }
+        do {
             brands = try await brandReading.brands()
             let pickIds = try await markReading.markedEntityIds(entity: .idol, kind: .myPick)
             pickIdols = try await idolReading.idols(ids: pickIds)
