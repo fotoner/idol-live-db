@@ -16,16 +16,9 @@ final class ShowsByVenueTests: XCTestCase {
     /// - `sh_other`          : 別会場
     /// - `sh_legacy`         : venue_id を持たない旧データ (生文字列でしか辿れない)
     private func makeDatabase() throws -> AppDatabase {
-        let queue = try DatabaseQueue()
+        let queue = try makeMigratedDatabase()
         try queue.write { db in
-            try db.execute(sql: """
-                CREATE TABLE shows(
-                    id TEXT PRIMARY KEY, event_id TEXT NOT NULL, name TEXT NOT NULL,
-                    date TEXT NOT NULL, venue TEXT, venue_city TEXT, start_time TEXT,
-                    sort_order INTEGER NOT NULL DEFAULT 0, performer_type TEXT,
-                    venue_id TEXT, hall TEXT, stream_platform TEXT
-                )
-                """)
+            try db.execute(sql: "INSERT INTO events(id, name, event_type) VALUES('ev1', 'ev1', 'live')")
             let rows = [
                 ("sh_new", "京王アリーナ TOKYO", "2026-07-25", "venue_keio"),
                 ("sh_old", "東京・京王アリーナTOKYO", "2026-02-28", "venue_keio"),
@@ -34,13 +27,13 @@ final class ShowsByVenueTests: XCTestCase {
             ]
             for (id, venue, date, venueId) in rows {
                 try db.execute(
-                    sql: "INSERT INTO shows(id, event_id, name, date, venue, venue_id) VALUES(?,?,?,?,?,?)",
+                    sql: "INSERT INTO shows(id, event_id, name, date, venue, venue_id, sort_order) VALUES(?,?,?,?,?,?,0)",
                     arguments: [id, "ev1", id, date, venue, venueId]
                 )
             }
             // venue_id 未設定の旧データ
             try db.execute(
-                sql: "INSERT INTO shows(id, event_id, name, date, venue) VALUES(?,?,?,?,?)",
+                sql: "INSERT INTO shows(id, event_id, name, date, venue, sort_order) VALUES(?,?,?,?,?,0)",
                 arguments: ["sh_legacy", "ev1", "sh_legacy", "2019-01-01", "どこかのホール"]
             )
         }

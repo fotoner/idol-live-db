@@ -13,33 +13,15 @@ import GRDB
 /// 元から original 限定だったので、同じ「このアイドルの曲」でも経路によって結果が違っていた。
 final class SongIdolFilterTests: XCTestCase {
 
-    /// 最小スキーマ + 固定データの in-memory DB。
+    /// 本物のスキーマ + 固定データの DB。
     ///
     /// - `s_own`    : haruka の持ち曲 (original)
     /// - `s_shared` : haruka と chihaya 両方が original (ユニット曲)
     /// - `s_cover`  : chihaya の持ち曲を haruka がライブで歌っただけ (haruka は performer のみ)
     private func makeDatabase() throws -> AppDatabase {
-        let queue = try DatabaseQueue()
+        let queue = try makeMigratedDatabase()
         try queue.write { db in
-            try db.execute(sql: """
-                CREATE TABLE songs(
-                    id TEXT PRIMARY KEY, brand_id TEXT, title TEXT, title_kana TEXT,
-                    parent_song_id TEXT, release_date TEXT, cd_series TEXT, series_group TEXT,
-                    song_type TEXT NOT NULL, unit_id TEXT, unit_name TEXT, singer_label TEXT,
-                    apple_music_id TEXT, artwork_url TEXT, lyrics_url TEXT,
-                    lyricist TEXT, composer TEXT, arranger TEXT,
-                    -- NOT NULL の列は Swift 側が Optional でないので、抜くと GRDB の
-                    -- デコードが "column not found" で落ちる (String? の列は抜いてよい)。
-                    is_collab INTEGER NOT NULL DEFAULT 0,
-                    has_kamisabi_card INTEGER NOT NULL DEFAULT 0
-                )
-                """)
-            try db.execute(sql: "CREATE TABLE idols(id TEXT PRIMARY KEY, brand_id TEXT, name TEXT, name_kana TEXT, sort_order INTEGER NOT NULL DEFAULT 0, is_external INTEGER NOT NULL DEFAULT 0)")
-            try db.execute(sql: "CREATE TABLE song_artists(song_id TEXT, idol_id TEXT, role TEXT, PRIMARY KEY(song_id, idol_id, role))")
-            try db.execute(sql: "CREATE TABLE setlist_items(song_id TEXT, show_id TEXT)")
-            try db.execute(sql: "CREATE TABLE shows(id TEXT PRIMARY KEY, event_id TEXT)")
-            try db.execute(sql: "CREATE TABLE events(id TEXT PRIMARY KEY, name TEXT)")
-
+            try Self.insertBrands(db)
             try db.execute(sql: "INSERT INTO idols(id, brand_id, name, name_kana, sort_order) VALUES('haruka','765as','天海春香','あまみはるか',1)")
             try db.execute(sql: "INSERT INTO idols(id, brand_id, name, name_kana, sort_order) VALUES('chihaya','765as','如月千早','きさらぎちはや',2)")
 
@@ -152,25 +134,9 @@ final class SongIdolFilterTests: XCTestCase {
 
     /// 無印曲 + カード付き派生曲 (`s_variant_with_card`) + カード無し派生曲 (`s_variant_plain`)。
     private func makeKamisabiVariantDatabase() throws -> AppDatabase {
-        let queue = try DatabaseQueue()
+        let queue = try makeMigratedDatabase()
         try queue.write { db in
-            try db.execute(sql: """
-                CREATE TABLE songs(
-                    id TEXT PRIMARY KEY, brand_id TEXT, title TEXT, title_kana TEXT,
-                    parent_song_id TEXT, release_date TEXT, cd_series TEXT, series_group TEXT,
-                    song_type TEXT NOT NULL, unit_id TEXT, unit_name TEXT, singer_label TEXT,
-                    apple_music_id TEXT, artwork_url TEXT, lyrics_url TEXT,
-                    lyricist TEXT, composer TEXT, arranger TEXT,
-                    is_collab INTEGER NOT NULL DEFAULT 0,
-                    has_kamisabi_card INTEGER NOT NULL DEFAULT 0
-                )
-                """)
-            try db.execute(sql: "CREATE TABLE idols(id TEXT PRIMARY KEY, brand_id TEXT, name TEXT, name_kana TEXT, sort_order INTEGER NOT NULL DEFAULT 0, is_external INTEGER NOT NULL DEFAULT 0)")
-            try db.execute(sql: "CREATE TABLE song_artists(song_id TEXT, idol_id TEXT, role TEXT, PRIMARY KEY(song_id, idol_id, role))")
-            try db.execute(sql: "CREATE TABLE setlist_items(song_id TEXT, show_id TEXT)")
-            try db.execute(sql: "CREATE TABLE shows(id TEXT PRIMARY KEY, event_id TEXT)")
-            try db.execute(sql: "CREATE TABLE events(id TEXT PRIMARY KEY, name TEXT)")
-
+            try Self.insertBrands(db)
             // 無印曲 (カード無し) + カード付き派生曲 (レジェンドデイズ Ver. 相当) +
             // カード無し派生曲 (ただの別バージョン、従来どおり隠れるべき)。
             try db.execute(sql: """
@@ -187,5 +153,11 @@ final class SongIdolFilterTests: XCTestCase {
                 """)
         }
         return try AppDatabase(dbQueue: queue)
+    }
+
+    /// 曲とアイドルが参照するブランド (本物のスキーマは外部キーで検査する)。
+    private static func insertBrands(_ db: Database) throws {
+        try db.execute(sql: "INSERT INTO brands(id, name, short_name, sort_order) VALUES('765as','765PRO ALLSTARS','765AS',1)")
+        try db.execute(sql: "INSERT INTO brands(id, name, short_name, sort_order) VALUES('ml','ミリオンライブ','ML',2)")
     }
 }
