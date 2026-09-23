@@ -82,6 +82,9 @@ struct ImasLiveDBApp: App {
                     if appDatabase.reseedFailureMessage != nil {
                         showReseedAlert = true
                     }
+                    // テストホストとして起動されたときは、外に出る副作用を起こさない。
+                    // DB の準備とスナップショットのロードは止めない (テストがそれを読む)。
+                    guard !ProcessInfo.processInfo.isRunningTests else { return }
                     #if !targetEnvironment(simulator)
                     await MusicKitService.shared.requestAuthorization()
                     #endif
@@ -109,7 +112,7 @@ struct ImasLiveDBApp: App {
                     // フォアグラウンド復帰で同期を再開/継続する。フルsyncが途中で中断されて
                     // いれば残りステップ/チャンクから再開、そうでなければ差分syncで最新化。
                     // (再入は SyncEngine 側でガード済みなので二重には走らない)
-                    guard phase == .active else { return }
+                    guard phase == .active, !ProcessInfo.processInfo.isRunningTests else { return }
                     Task.detached(priority: .utility) {
                         await syncEngine.performStartupSync(database: appDatabase)
                     }
