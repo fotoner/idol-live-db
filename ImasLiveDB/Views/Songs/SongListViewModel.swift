@@ -240,6 +240,12 @@ final class SongListViewModel {
     /// id だけを VM、スニペットを View に分けると、二か所を手で同期することになる。
     private(set) var lyricsHits: [String: [LyricsSnippet]]?
 
+    /// 行がなぜ当たったかの説明 (song id → 「田中琴葉 ほか51人」「作詞 ○○」)。組み立てはコアの
+    /// `search_match_texts` で、絞り込みの結果が変わったときにここで 1 回だけ作る。
+    private(set) var matchDescriptions: [String: String] = [:]
+    /// 説明を作った語とスコープ (「もしかして」が後から届いたときに作り直すため)。
+    private var matchContext: (needle: String, scope: SongSearchMode)?
+
     /// 一覧の絞り込みを掛け直す。**絞り込みの入口はここ 1 本**。
     ///
     /// 引数を省ける形にしない (以前 `scope` に既定値があったせいで、渡し忘れた経路が
@@ -256,6 +262,8 @@ final class SongListViewModel {
         fuzzyTask?.cancel()
         fuzzyGeneration = UUID()
         fuzzySongs = []
+        matchContext = nil
+        matchDescriptions = [:]
         if let newHits { lyricsHits = newHits }
         if let lyricsHits {
             displayedSongs = songs.filter { lyricsHits[$0.song.id] != nil }
@@ -267,6 +275,7 @@ final class SongListViewModel {
             otherScopeCounts = [:]
             return
         }
+        matchContext = (searchText, scope)
         // 絞り込みは「index 列を 1 回の FFI で受け取り、`songs` を添字で引く」形。
         // カタログは `songs` と同じ並びで `didSet` が必ず張り直しているが、
         // 万一ずれても落ちないよう範囲外の index は捨てる。
@@ -281,6 +290,7 @@ final class SongListViewModel {
             counts[other] = searchCatalogs[other]?.matchingIndices(needle: searchText).count ?? 0
         }
         otherScopeCounts = counts
+        rebuildMatchDescriptions()
         // 件数は「打った通りに当たった数」のまま (あいまい候補は数に混ぜない)。
         // スコープ切替を勧める根拠が「たぶん当たる」では、切り替えた先で裏切られる。
         scheduleFuzzySearch(needle: searchText, scope: scope,
@@ -308,7 +318,43 @@ final class SongListViewModel {
             self.fuzzySongs = indices.compactMap { i in
                 self.songs.indices.contains(i) ? self.songs[i] : nil
             }
+            self.rebuildMatchDescriptions()
         }
+    }
+
+    /// 表示中の行 (打った通り + もしかして) の説明を 1 回の FFI で作り直す。
+    private func rebuildMatchDescriptions() {
+        guard let (needle, mode) = matchContext else { matchDescriptions = [:]; return }
+        let scope: SearchMatchScope
+        switch mode {
+        case .performer: scope = .performer
+        case .creator: scope = .creator
+        case .title, .lyrics: matchDescriptions = [:]; return
+        }
+        let trimmed = needle.trimmingCharacters(in: .whitespacesAndNewlines)
+        let rows = displayedSongs + fuzzySongs
+        guard !trimmed.isEmpty, !rows.isEmpty else { matchDescriptions = [:]; return }
+        let texts = searchMatchTexts(
+            rows: rows.map {
+                SearchMatchRowInput(performerLabels: Self.performerLabels(of: $0),
+                                    lyricist: $0.song.lyricist, composer: $0.song.composer,
+                                    arranger: $0.song.arranger)
+            },
+            scope: scope, needle: trimmed)
+        var result: [String: String] = [:]
+        for (row, text) in zip(rows, texts) {
+            if let text { result[row.song.id] = text }
+        }
+        matchDescriptions = result
+    }
+
+    /// 説明の組み立てに渡す、行の歌唱者の表記 (優先順)。最後に歌唱アイドル名の連結を置く
+    /// (song_artists 未整備の曲でも当たった人が出るように)。
+    private static func performerLabels(of item: SongWithArtists) -> [String] {
+        [item.song.unitName, item.song.singerLabel, item.artistNames,
+         item.performerIdols.map(\.name).joined(separator: "、")]
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
     }
 
     /// 一覧行アイコン用のマイマーク集合・回収数を bulk 取得する。

@@ -8,7 +8,7 @@ struct SongRowMatch: Equatable {
     let text: String
     let scope: SongSearchMode
     /// 行がなぜ当たったかの説明 (「田中琴葉 ほか51人」「作詞 ○○ / 作曲 ○○」)。
-    /// 組み立てはコア (`search_match_texts`) で、一覧が画面の行ぶんを 1 回で作って渡す。
+    /// 組み立てはコア (`search_match_texts`) で、一覧の ViewModel が絞り込みのたびに 1 回で作る。
     var described: String? = nil
 }
 
@@ -191,14 +191,6 @@ struct SongRowView: View {
         return described
     }
 
-    /// 説明の組み立てに渡す、この行の歌唱者の表記 (優先順)。最後に歌唱アイドル名の連結を置く
-    /// (song_artists 未整備の曲でも当たった人が出るように)。
-    static func performerLabels(of item: SongWithArtists) -> [String] {
-        [item.song.unitName, item.song.singerLabel, item.artistNames,
-         item.performerIdols.map(\.name).joined(separator: "、")]
-            .compactMap { $0 }
-            .filter { !$0.isEmpty }
-    }
 
     /// 作詞・作曲・編曲で絞っているときだけ出す行。普段の一覧には要らない情報なので、
     /// 当たった理由を見せる必要がある時にだけ増やす。
