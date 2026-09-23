@@ -135,7 +135,6 @@ pub fn setlist_section_label(raw: Option<String>) -> Option<String> {
 
 #[uniffi::export]
 impl SnapshotStore {
-    /// イベント配下の公演一覧 (date, sort_order 順)。SQL 時代の fetchShows(eventId:) 相当。
     /// 曲詳細の「現地回収 N 公演」の公演 (新しい順)。参加マークは show 単位・event 単位とも
     /// `collection_attended_shows(marks, include_stream)` を通した id を渡す
     /// (一覧の回収バッジと同じ規則。リアルライブだけに絞るのはこちら)。
@@ -149,6 +148,7 @@ impl SnapshotStore {
         Ok(collection::song_collected_shows(&snap, &song_id, &attended_show_ids, &attended_event_ids))
     }
 
+    /// イベント配下の公演一覧 (date, sort_order 順)。SQL 時代の fetchShows(eventId:) 相当。
     pub fn shows_by_event(&self, event_id: String) -> Result<Vec<ShowRecord>, SnapshotError> {
         let snap = self.current()?;
         Ok(queries::shows_by_event(&snap, &event_id))
@@ -216,7 +216,7 @@ impl SnapshotStore {
     /// (規則が両 OS に写経される)。
     ///
     /// `attended_*` は参加マーク (`user_marks`) をプラットフォーム側で解決した id 列。
-    /// show 側は参加形態の条件を適用済みで渡す ([`collection_attended_show_ids`])。
+    /// show 側は参加形態の条件を適用済みで渡す ([`collection_attended_shows`])。
     /// 空で渡せば回収の表示は何も出ない。
     pub fn show_setlist_row_meta(
         &self,
