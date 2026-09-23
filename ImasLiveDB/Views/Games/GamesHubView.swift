@@ -3,7 +3,6 @@ import SwiftUI
 /// クイズ・ゲームのハブ。プロデュース → 「クイズ・ゲーム」から push。
 /// イントロドン／アイドル当て／ソロ曲／メンバーカラー合わせを束ねる。
 struct GamesHubView: View {
-    @Environment(AppDatabase.self) private var database
     @Environment(\.colorScheme) private var scheme
     @State private var progress = GameProgressStore.shared
 

@@ -155,7 +155,6 @@ struct CollectionShareCard: View {
 
 /// Stats タブから開く回収率シェア sheet。
 struct CollectionShareSheet: View {
-    @Environment(AppDatabase.self) private var database
     @State private var stats: CollectionShareStats?
 
     var body: some View {

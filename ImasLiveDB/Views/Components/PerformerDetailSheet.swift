@@ -2,7 +2,6 @@ import SwiftUI
 
 /// セトリ行の出演者詳細を表示するシート
 struct PerformerDetailSheet: View {
-    @Environment(AppDatabase.self) private var database
     let songTitle: String
     /// 並べる歌唱者。**アイドルと表示名を 1 組で受け取る。**
     /// 以前は `[Idol]` と `[PerformerRow]` を別々に受け取り、シート側が id で

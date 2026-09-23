@@ -2,7 +2,6 @@ import SwiftUI
 
 /// セトリ編集等で曲を 1 つ選ぶための picker。検索バー付き。
 struct SongPickerView: View {
-    @Environment(AppDatabase.self) private var database
     @Environment(\.dismiss) private var dismiss
 
     let onPick: (PickedSong) -> Void

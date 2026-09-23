@@ -9,7 +9,6 @@ import SwiftUI
 /// 難易度ごとの出題の作り方、答え合わせ、正答率は imas-core の `domain/color_match.rs` にあり、
 /// Android と同じ実装を共有する。この画面が担うのは描画・ドラッグ操作・シード調達だけ。
 struct ColorMatchGameView: View {
-    @Environment(AppDatabase.self) private var database
     @State private var imageService = CustomImageService.shared
 
     /// 画面ロード時に 1 回だけ組む母集団一式 (コア)。

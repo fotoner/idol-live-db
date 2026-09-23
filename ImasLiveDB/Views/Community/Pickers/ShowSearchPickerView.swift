@@ -1,10 +1,8 @@
 import SwiftUI
-import GRDB
 
 // MARK: - ShowSearchPickerView
 
 struct ShowSearchPickerView: View {
-    @Environment(AppDatabase.self) private var database
     @Environment(\.dismiss) private var dismiss
     let onSelect: (ShowWithEventName) -> Void
 

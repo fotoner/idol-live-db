@@ -2,7 +2,6 @@ import SwiftUI
 
 /// イベントカード左端のブランドカラーバー
 struct BrandColorBar: View {
-    @Environment(AppDatabase.self) private var database
     let brandId: String?
 
     var body: some View {

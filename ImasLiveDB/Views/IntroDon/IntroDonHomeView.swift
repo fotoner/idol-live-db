@@ -2,7 +2,6 @@ import SwiftUI
 import MusicKit
 
 struct IntroDonHomeView: View {
-    @Environment(AppDatabase.self) private var database
     @State private var showSetup = false
     @State private var authStatus: MusicAuthorization.Status = MusicKitService.shared.authorizationStatus
 

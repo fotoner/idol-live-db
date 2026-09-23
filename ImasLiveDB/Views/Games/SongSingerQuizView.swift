@@ -9,7 +9,6 @@ import SwiftUI
 /// imas-core の `domain/quiz_generation.rs` にあり、Android と同じ実装を共有する。
 /// この画面が担うのは描画・プレビュー再生・シード調達だけ。
 struct SongSingerQuizView: View {
-    @Environment(AppDatabase.self) private var database
 
     /// 出題ブランド絞り込み（空集合 = 全ブランド対象）。SongSingerQuizSetupView から渡す。
     let selectedBrandIds: Set<String>

@@ -11,7 +11,6 @@ import SwiftUI
 /// 出題数といった規則の定数もコア側にあり、ここからは指定しない。
 /// この画面が担うのは描画と、シード調達 (`SystemRandomNumberGenerator`) だけ。
 struct IdolQuizView: View {
-    @Environment(AppDatabase.self) private var database
 
     /// 出題ブランド絞り込み（空集合 = 全ブランド対象）。IdolQuizSetupView から渡す。
     let selectedBrandIds: Set<String>
