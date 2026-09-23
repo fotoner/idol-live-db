@@ -69,6 +69,19 @@ fn fingerprint(sql: &str) -> u64 {
     hasher.finish()
 }
 
+/// dump を `conn` に流し込む。
+///
+/// 外部キーは先に切る。dump は表を名前順に作って入れるので、最初の INSERT
+/// (anniversaries) が、まだ無い brands を参照する。SQLite の既定は OFF だが、
+/// Linux の bundled SQLite は ON でビルドされていて、そこで `no such table: main.brands`
+/// になる (macOS だけ緑に見える)。トランザクションの中では PRAGMA が効かないので、
+/// dump の BEGIN より前に流す。`web_export::restore` も同じ。
+pub(super) fn load_dump(conn: &rusqlite::Connection, sql: &str) -> rusqlite::Result<()> {
+    conn.pragma_update(None, "foreign_keys", false)?;
+    // dump は BEGIN TRANSACTION / COMMIT を含むので execute_batch がそのまま使える。
+    conn.execute_batch(sql)
+}
+
 /// dump を一時ファイルに流し込み、できあがってから `db` へ rename する。
 /// 古い dump から作った DB はそのとき消す (置き場所に溜めない)。
 fn restore(sql: &str, dir: &Path, db: &Path) -> Result<(), String> {
@@ -76,8 +89,7 @@ fn restore(sql: &str, dir: &Path, db: &Path) -> Result<(), String> {
     let tmp = db.with_extension(format!("sqlite.tmp-{}", std::process::id()));
     let _ = std::fs::remove_file(&tmp);
     let conn = rusqlite::Connection::open(&tmp).map_err(|e| format!("{} を作れない: {e}", tmp.display()))?;
-    // dump は BEGIN TRANSACTION / COMMIT を含むので execute_batch がそのまま使える。
-    conn.execute_batch(sql).map_err(|e| format!("db/master.sql を復元できない: {e}"))?;
+    load_dump(&conn, sql).map_err(|e| format!("db/master.sql を復元できない: {e}"))?;
     conn.close().map_err(|(_, e)| format!("{} を閉じられない: {e}", tmp.display()))?;
     std::fs::rename(&tmp, db).map_err(|e| format!("{} を置けない: {e}", db.display()))?;
     for entry in std::fs::read_dir(dir).into_iter().flatten().flatten() {
@@ -90,3 +102,4 @@ fn restore(sql: &str, dir: &Path, db: &Path) -> Result<(), String> {
     }
     Ok(())
 }
+

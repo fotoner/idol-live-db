@@ -37,3 +37,22 @@ pub(crate) fn bundle_store() -> Arc<SnapshotStore> {
     store.load(bundle_path().to_string()).expect("実データ DB を SnapshotStore に読み込める");
     store
 }
+
+#[cfg(test)]
+mod tests {
+    // test_db.rs は tests/web_export.rs にも #[path] で入るので、2 回走らないようこちらに置く。
+    use super::test_db::load_dump;
+    use std::path::Path;
+
+    /// 外部キーが既定で ON の SQLite (Linux の bundled) でも復元できる。
+    #[test]
+    fn restores_the_dump_even_when_foreign_keys_default_on() {
+        let dump = Path::new(env!("CARGO_MANIFEST_DIR")).join("../db/master.sql");
+        let sql = std::fs::read_to_string(dump).unwrap();
+        let conn = rusqlite::Connection::open_in_memory().unwrap();
+        conn.pragma_update(None, "foreign_keys", true).unwrap();
+        load_dump(&conn, &sql).unwrap();
+        let brands: i64 = conn.query_row("SELECT COUNT(*) FROM brands", [], |r| r.get(0)).unwrap();
+        assert!(brands > 0);
+    }
+}
