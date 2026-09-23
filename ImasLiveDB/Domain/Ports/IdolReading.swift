@@ -13,6 +13,9 @@ protocol IdolReading: Sendable {
     func idol(id: String) async throws -> Idol?
     /// id 集合に該当するアイドル。
     func idols(ids: [String]) async throws -> [Idol]
+    /// タグが似ているアイドルの候補 (サーバの並び) から、手元に居て外部ゲストでない人を
+    /// 表示する数だけ選ぶ。選び方はコア (`pick_similar_idols`)。並びはサーバの並びのまま。
+    func similarIdols(from candidates: [SimilarIdolCandidate]) async throws -> [Idol]
     /// フィルタ条件で絞ったアイドル。
     func idols(criterion: IdolFilterCriterion) async throws -> [Idol]
     /// idol_id → キャスト(声優)名。

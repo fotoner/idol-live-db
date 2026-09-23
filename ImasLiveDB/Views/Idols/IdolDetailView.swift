@@ -48,11 +48,10 @@ struct IdolDetailView: View {
     private var hasNote: Bool { !(markService.note(entity: .idol, id: idol.id) ?? "").isEmpty }
 
     /// 出演履歴のうち今日以降で最も近い公演 (= 次の出演)。無ければ nil。
+    /// 選び方 (日付の精度を揃えて今日以降か・同じ日なら先の方) はコアの `next_show_index`。
     private var nextShow: CastShowRow? {
-        let today = JSTDay.today()
-        return vm.castShows
-            .filter { $0.date >= today }
-            .min { $0.date < $1.date }
+        let shows = vm.castShows
+        return nextShowIndex(dates: shows.map(\.date), todayKey: JSTDay.today()).map { shows[Int($0)] }
     }
 
     /// 子遷移の単一窓口。sheet 内 (navigate 非 nil) は共有 path に push、standalone は自前 sheet。
@@ -679,26 +678,21 @@ struct IdolDetailView: View {
         }
     }
 
-    /// 表示件数 (サーバー算出の共有タグ数上位から採用する件数)。
-    private static let similarIdolsDisplayLimit = 10
-    /// サーバーへの取得件数。D1 に idols テーブルが無く is_external フィルタをサーバー側で
-    /// 適用できないため、クライアント側除外後に表示件数を確保できるよう多めに over-fetch する。
-    private static let similarIdolsFetchLimit = 25
-
     /// タグ類似のおすすめアイドルをサーバから取得し、ローカル DB で Idol に解決する。
     /// 返却順 (共有タグ数の降順) を維持する。
     private func loadSimilarIdols() async {
+        // サーバ (D1) には idols が無く外部ゲストを除けないので多めに頼み (件数はコア)、
+        // 手元で除いて表示する数だけ選ぶ (選び方もコア)。
         guard let response = try? await AppContainer.shared.communityTagReading.similarIdolsByTags(
-            idolId: idol.id, limit: Self.similarIdolsFetchLimit
+            idolId: idol.id, limit: Int(similarIdolsFetchLimit())
         ) else { return }
-        let ids = response.idols.map(\.idolId)
-        guard !ids.isEmpty,
-              let resolved = try? await AppContainer.shared.idolReading.idols(ids: ids) else { return }
-        // サーバー (D1) には idols テーブルが無く is_external でのフィルタができないため、
-        // ローカル DB 解決後にここで外部ゲスト演者を除外し、表示件数分だけ採用する。
-        let byId = Dictionary(resolved.filter { !$0.isExternal }.map { ($0.id, $0) }) { a, _ in a }
+        let candidates = response.idols.map {
+            SimilarIdolCandidate(idolId: $0.idolId, sharedTags: UInt32(clamping: $0.sharedTags))
+        }
+        guard !candidates.isEmpty,
+              let picked = try? await AppContainer.shared.idolReading.similarIdols(from: candidates) else { return }
         similarSharedTags = Dictionary(response.idols.map { ($0.idolId, $0.sharedTags) }) { a, _ in a }
-        similarTagIdols = Array(ids.compactMap { byId[$0] }.prefix(Self.similarIdolsDisplayLimit))
+        similarTagIdols = picked
     }
 
     // MARK: - 画像ギャラリー (ユーザーがローカルに持たせる複数画像)

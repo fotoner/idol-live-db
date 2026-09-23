@@ -30,10 +30,12 @@ struct FilteredShowsView: View {
         return criterion.navigationTitle
     }
 
-    /// 年 → その年の公演 (新しい年が先、 年内も新しい順)。
+    /// 年ごとの塊 (新しい年が先・年が読めない公演は末尾の「日程未定」)。
+    /// 見出し (`2026年`) と並びはコアの `group_indices_by_year_desc`。塊の中は渡した並び。
     private var groupedByYear: [(year: String, shows: [Show])] {
-        let groups = Dictionary(grouping: shows) { String($0.date.prefix(4)) }
-        return groups.keys.sorted(by: >).map { ($0, groups[$0] ?? []) }
+        groupIndicesByYearDesc(dates: shows.map(\.date)).map { group in
+            (year: group.label, shows: group.indices.map { shows[Int($0)] })
+        }
     }
 
     var body: some View {
@@ -59,7 +61,7 @@ struct FilteredShowsView: View {
     private var content: some View {
         List {
             ForEach(Array(groupedByYear.enumerated()), id: \.element.year) { index, group in
-                ImasSectionHeader(title: "\(group.year)年", tight: true)
+                ImasSectionHeader(title: group.year, tight: true)
                     .padding(.top, index == 0 ? 8 : 18)
                     .plainRow(background: DS.bg)
 

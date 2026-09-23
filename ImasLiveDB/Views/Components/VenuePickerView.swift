@@ -15,23 +15,15 @@ struct VenuePickerView: View {
     @State private var searchText = ""
 
     /// 都道府県ごとにまとめる。会場は 245 件あるので、地域で塊にしないと探せない。
-    /// 都道府県が未確定の会場 (海外・非公開) は末尾の「その他」に寄せる。
+    /// 塊の並び (公演数の多い地域が上・都道府県の無い会場は末尾の「その他」) はコアの
+    /// `group_venues_by_area` が決める。
     private var grouped: [(area: String, venues: [Venue])] {
         let filtered = filteredVenues
-        var byArea: [String: [Venue]] = [:]
-        for v in filtered {
-            byArea[v.prefecture ?? "その他", default: []].append(v)
+        return groupVenuesByArea(venues: filtered.map {
+            VenueAreaEntry(prefecture: $0.prefecture, sortOrder: Int64($0.sortOrder))
+        }).map { group in
+            (area: group.label, venues: group.indices.map { filtered[Int($0)] })
         }
-        return byArea
-            .map { (area: $0.key, venues: $0.value) }
-            .sorted { lhs, rhs in
-                if lhs.area == "その他" { return false }
-                if rhs.area == "その他" { return true }
-                // 公演数の多い地域を上に (sort_order は公演数順で振ってある)
-                let l = lhs.venues.map(\.sortOrder).min() ?? 0
-                let r = rhs.venues.map(\.sortOrder).min() ?? 0
-                return l < r
-            }
     }
 
     /// 絞り込み用の索引。会場一覧は開いている間変わらないので 1 回だけ組む。

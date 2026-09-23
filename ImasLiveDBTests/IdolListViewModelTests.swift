@@ -19,6 +19,7 @@ final class IdolListViewModelTests: XCTestCase {
         // 未使用メソッドは既定値で充足 (このテストでは呼ばれない)。
         func idol(id: String) async throws -> Idol? { nil }
         func idols(ids: [String]) async throws -> [Idol] { [] }
+        func similarIdols(from candidates: [SimilarIdolCandidate]) async throws -> [Idol] { [] }
         func idols(criterion: IdolFilterCriterion) async throws -> [Idol] { [] }
         func idolsByVoiceActor(name: String) async throws -> [Idol] { [] }
         func searchIdols(query: String, limit: Int) async throws -> [Idol] { [] }

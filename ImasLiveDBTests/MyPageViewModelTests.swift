@@ -51,6 +51,8 @@ final class MyPageViewModelTests: XCTestCase {
         var allIdols: [Idol] = []
 
         func idols(ids: [String]) async throws -> [Idol] { byIds }
+
+        func similarIdols(from candidates: [SimilarIdolCandidate]) async throws -> [Idol] { [] }
         func idols(brandId: String?) async throws -> [Idol] { allIdols }
 
         func idol(id: String) async throws -> Idol? { nil }
@@ -76,7 +78,6 @@ final class MyPageViewModelTests: XCTestCase {
         func unitMembers(unitId: String) async throws -> [Idol] { [] }
         func unitSongs(unitId: String) async throws -> [Song] { [] }
         func unitIdsWithSongs(unitIds: [String]) async throws -> Set<String> { [] }
-        func performedUnitIds(eventId: String) async throws -> Set<String> { [] }
         func allUnits() async throws -> [ImasLiveDB.Unit] { units }
     }
 

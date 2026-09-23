@@ -49,14 +49,10 @@ struct TicketExpensePromptModifier: ViewModifier {
 
     /// 出す条件を調べる。**出さない理由が 1 つでもあれば黙って終わる**
     /// (参加を付けただけなのに毎回シートが出ると、付ける作業が止まる)。
+    /// 聞くか・どの券を並べるかはコア (`ticket_expense_prompt`)。
     private func prepare(showId: String, type: AttendanceType) async {
-        let kind = ticketKindFromAttendance(textValue: type.rawValue)
         let tickets = (try? await showReading.tickets(showId: showId)) ?? []
-        let candidates = ticketsForKind(tickets: tickets, kind: kind)
-        guard !candidates.isEmpty else { return }
-
-        // 既にこの公演のチケット代を付けていれば聞かない (二重計上を防ぐ)。
-        // 読めなかったときも聞かない (付けてあるか分からないまま聞くと二重計上になりうる)。
+        // 記録済みかを読めなかったときは聞かない (付けてあるか分からないまま聞くと二重計上になりうる)。
         let existing: [Expense]
         do {
             existing = try await ledgerReading.expenses(showId: showId)
@@ -64,8 +60,9 @@ struct TicketExpensePromptModifier: ViewModifier {
             Logger.database.error("ticket_prompt_read_failed: \(error.localizedDescription, privacy: .public)")
             return
         }
-        let ticketKey = expenseCategoryKey(category: .ticket)
-        guard !existing.contains(where: { $0.category == ticketKey }) else { return }
+        guard let prompt = ticketExpensePrompt(
+            showTickets: tickets, attendanceType: type.rawValue,
+            existingExpenseCategories: existing.map(\.category)) else { return }
 
         let options = (try? await ledgerReading.attendedShowOptions()) ?? []
         let option = options.first { $0.id == showId }
@@ -74,13 +71,13 @@ struct TicketExpensePromptModifier: ViewModifier {
             showLabel: option?.label ?? "この公演",
             eventId: option?.eventId,
             date: option?.date ?? "",
-            kind: kind,
-            tickets: candidates
+            kind: prompt.kind,
+            tickets: prompt.tickets
         )
     }
 
     private func save(request: TicketExpensePromptRequest, ticket: ShowTicket, amount: Int64) async {
-        let note = ticket.isEstimate ? "\(ticket.name) (推定)" : ticket.name
+        let note = ticketExpenseNote(ticket: ticket)
         let expense = Expense.make(
             date: request.date.isEmpty ? Expense.today : request.date,
             category: .ticket,

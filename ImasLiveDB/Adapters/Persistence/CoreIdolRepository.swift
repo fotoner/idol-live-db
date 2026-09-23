@@ -31,6 +31,13 @@ struct CoreIdolRepository: IdolReading {
         }
     }
 
+    func similarIdols(from candidates: [SimilarIdolCandidate]) async throws -> [Idol] {
+        try await snapshot.withStore { store in
+            let picked = try store.pickSimilarIdols(candidates: candidates)
+            return try CoreRecordMapping.idols(store: store, orderedIds: picked.map(\.idolId))
+        }
+    }
+
     func idols(criterion: IdolFilterCriterion) async throws -> [Idol] {
         try await snapshot.withStore { store in
             let records: [IdolRecord]

@@ -55,6 +55,7 @@ final class SetlistViewModelTests: XCTestCase {
 
     private struct FakeIdolReading: IdolReading {
         func idols(ids: [String]) async throws -> [Idol] { [] }
+        func similarIdols(from candidates: [SimilarIdolCandidate]) async throws -> [Idol] { [] }
 
         func idols(brandId: String?) async throws -> [Idol] { [] }
         func idol(id: String) async throws -> Idol? { nil }

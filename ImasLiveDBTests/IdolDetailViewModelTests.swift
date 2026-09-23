@@ -24,6 +24,7 @@ final class IdolDetailViewModelTests: XCTestCase {
         func idols(brandId: String?) async throws -> [Idol] { [] }
         func idol(id: String) async throws -> Idol? { nil }
         func idols(ids: [String]) async throws -> [Idol] { [] }
+        func similarIdols(from candidates: [SimilarIdolCandidate]) async throws -> [Idol] { [] }
         func idols(criterion: IdolFilterCriterion) async throws -> [Idol] { [] }
         func idolCastNames() async throws -> [String: String] { [:] }
         func idolsByVoiceActor(name: String) async throws -> [Idol] { [] }
@@ -47,7 +48,6 @@ final class IdolDetailViewModelTests: XCTestCase {
         func unit(id: String) async throws -> ImasLiveDB.Unit? { nil }
         func unitMembers(unitId: String) async throws -> [Idol] { [] }
         func unitSongs(unitId: String) async throws -> [Song] { [] }
-        func performedUnitIds(eventId: String) async throws -> Set<String> { [] }
         func allUnits() async throws -> [ImasLiveDB.Unit] { [] }
     }
 
