@@ -23,14 +23,10 @@ actor CommunityAPI {
     private var tagDetailCache: [String: (detail: TagDetailResponse, at: Date)] = [:]
     private let tagDetailCacheTTL: TimeInterval = 300
 
-    /// タグ類似曲 (/songs/:id/similar) の TTL キャッシュ。song_id 単位。
-    /// 曲詳細を開くたびに毎回ネットワークを叩いていた。レスポンスは完全にユーザー非依存
-    /// (共有タグ数の集計のみ) で、タグ分布で決まり変化が非常に緩やかなので長めの TTL で安全。
-    /// 自分のタグ付け/取消で類似関係が変わりうるので、その曲のエントリは無効化する。
-    private var similarSongsCache: [String: (response: SimilarSongsResponse, at: Date)] = [:]
-    private let similarSongsCacheTTL: TimeInterval = 600
-
-    /// タグ類似アイドル (/idols/:id/similar) の TTL キャッシュ。idol_id 単位。similarSongsCache と同じ理由・同じ TTL。
+    /// タグ類似アイドル (/idols/:id/similar) の TTL キャッシュ。idol_id 単位。
+    /// レスポンスは完全にユーザー非依存 (共有タグ数の集計のみ) で、タグ分布で決まり
+    /// 変化が非常に緩やかなので長めの TTL で安全。自分のタグ付け/取消で類似関係が
+    /// 変わりうるので、そのアイドルのエントリは無効化する。
     private var similarIdolsCache: [String: (response: SimilarIdolsResponse, at: Date)] = [:]
     private let similarIdolsCacheTTL: TimeInterval = 600
 
@@ -85,8 +81,6 @@ actor CommunityAPI {
         tagDetailCache.removeAll()
         if let songId {
             songTagsCache[songId] = nil
-            // 自分のタグ付けは類似関係 (共有タグ) を変えうるので、その曲の類似キャッシュも捨てる。
-            similarSongsCache[songId] = nil
         }
         if let idolId {
             idolTagsCache[idolId] = nil
@@ -452,29 +446,6 @@ actor CommunityAPI {
             "POST", path: "/unit-tags/\(id)/report",
             body: body
         )
-    }
-
-    /// タグが似ている楽曲 (この曲が好きな人にはこれもおすすめ)。近い順の**候補**を返す。
-    ///
-    /// 実際に画面に出す数件はクライアント側で重み付き抽選する (`WeightedSampling`) ため、
-    /// ここでは表示数より多めに取っておく。サーバ応答は決定的なのでエッジキャッシュが効く。
-    ///
-    /// 上限いっぱい (50) を取るのは、タグが疎で**同点が大量に出る**ため。
-    /// 本番実測でタグ 6 個の曲に候補 581 曲、最高スコアだけで 6 曲以上が同点だった。
-    /// 母数を絞るとスコアで区別がつかない集団の中から毎回同じ顔ぶれを見ることになる。
-    func similarSongsByTags(songId: String, limit: Int = 50) async throws -> SimilarSongsResponse {
-        // limit は呼び出し側で固定 (DetailSheet=既定)。同一 song の再オープンを即時化するため
-        // song_id 単位でキャッシュ。完全にユーザー非依存なので長め TTL でよい。
-        if let hit = similarSongsCache[songId], Date().timeIntervalSince(hit.at) < similarSongsCacheTTL {
-            return hit.response
-        }
-        // limit はクエリ辞書で渡す。path に "?limit=" を埋めると URLComponents が
-        // "?" を %3F にエンコードしてパスの一部になり 404 になる (他メソッドと同じ query: 方式に揃える)。
-        let response: SimilarSongsResponse = try await APIClient.shared.request(
-            "GET", path: "/songs/\(songId)/similar", query: ["limit": "\(limit)"]
-        )
-        similarSongsCache[songId] = (response, Date())
-        return response
     }
 
     /// タグが似ているアイドル (このアイドルが好きな人にはこれもおすすめ)。共有タグ数の多い順。
