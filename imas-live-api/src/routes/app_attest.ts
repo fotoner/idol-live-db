@@ -11,8 +11,8 @@ import { getAuthUser } from "../auth";
 import {
   verifyAttestation, verifyAssertion,
   mintAppToken, verifyAppToken, makeChallenge, checkChallenge,
-  b64ToBytes, bytesToB64Url,
 } from "../appattest";
+import { base64ToBytes, bytesToBase64Url } from "../bytes";
 import { checkRateLimit } from "../rate_limit";
 import type { RouteContext } from "./context";
 import { clientIp } from "./guards";
@@ -34,21 +34,21 @@ export async function handleAppAttest(ctx: RouteContext): Promise<Response | nul
 
   if (path === "/app/challenge" && request.method === "GET") {
     if (!secret) return error("server not configured", 500);
-    return json({ challenge: bytesToB64Url(await makeChallenge(secret)) });
+    return json({ challenge: bytesToBase64Url(await makeChallenge(secret)) });
   }
   if (path === "/app/attest" && request.method === "POST") {
     if (!secret) return error("server not configured", 500);
     const body: any = await request.json().catch(() => null);
     if (!body?.keyId || !body?.attestation || !body?.challenge) return error("bad request", 400);
-    const challenge = b64ToBytes(body.challenge);
+    const challenge = base64ToBytes(body.challenge);
     if (!(await checkChallenge(challenge, secret))) return error("bad challenge", 400);
     try {
-      const { spki, counter } = await verifyAttestation(challenge, b64ToBytes(body.keyId), body.attestation, env.APP_ATTEST_ALLOW_DEV === "true");
+      const { spki, counter } = await verifyAttestation(challenge, base64ToBytes(body.keyId), body.attestation, env.APP_ATTEST_ALLOW_DEV === "true");
       const now = Date.now();
       // OR IGNORE: 既存 keyId への再 attest (リプレイ) で counter を 0 に戻させない
       await env.DB.prepare(
         "INSERT OR IGNORE INTO app_attest_keys (key_id, public_key, counter, created_at, updated_at) VALUES (?,?,?,?,?)"
-      ).bind(body.keyId, bytesToB64Url(spki), counter, now, now).run();
+      ).bind(body.keyId, bytesToBase64Url(spki), counter, now, now).run();
       return json({ appToken: await mintAppToken(body.keyId, secret) });
     } catch (e) {
       return error("attestation failed: " + (e as Error).message, 401);
@@ -58,12 +58,12 @@ export async function handleAppAttest(ctx: RouteContext): Promise<Response | nul
     if (!secret) return error("server not configured", 500);
     const body: any = await request.json().catch(() => null);
     if (!body?.keyId || !body?.assertion || !body?.challenge) return error("bad request", 400);
-    const challenge = b64ToBytes(body.challenge);
+    const challenge = base64ToBytes(body.challenge);
     if (!(await checkChallenge(challenge, secret))) return error("bad challenge", 400);
     const row: any = await env.DB.prepare("SELECT public_key, counter FROM app_attest_keys WHERE key_id=?").bind(body.keyId).first();
     if (!row) return error("unknown key", 401);
     try {
-      const newCounter = await verifyAssertion(challenge, body.assertion, b64ToBytes(row.public_key), row.counter as number);
+      const newCounter = await verifyAssertion(challenge, body.assertion, base64ToBytes(row.public_key), row.counter as number);
       await env.DB.prepare("UPDATE app_attest_keys SET counter=?, updated_at=? WHERE key_id=?").bind(newCounter, Date.now(), body.keyId).run();
       return json({ appToken: await mintAppToken(body.keyId, secret) });
     } catch (e) {

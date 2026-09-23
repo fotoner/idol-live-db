@@ -1,5 +1,6 @@
 // cloudkit.ts — CloudKit S2S auth (ECDSA P-256) + records/modify + records/lookup + records/query
 
+import { bytesToBase64, pemToDer, sha256, utf8 } from "./bytes";
 import { ckFieldType } from "./ck_schema";
 
 const BASE_URL = "https://api.apple-cloudkit.com";
@@ -18,14 +19,9 @@ async function importP256PrivateKey(pem: string): Promise<CryptoKey> {
   const cached = keyCache.get(pem);
   if (cached) return cached;
 
-  const b64 = pem
-    .replace(/-----BEGIN PRIVATE KEY-----/, "")
-    .replace(/-----END PRIVATE KEY-----/, "")
-    .replace(/\s+/g, "");
-  const der = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
   const key = await crypto.subtle.importKey(
     "pkcs8",
-    der,
+    pemToDer(pem),
     { name: "ECDSA", namedCurve: "P-256" },
     false,
     ["sign"]
@@ -97,8 +93,7 @@ async function signRequest(
 ): Promise<Record<string, string>> {
   const dateStr = new Date().toISOString().replace(/\.\d{3}/, "");
   // SHA-256 of body → base64
-  const bodyHashBuf = await crypto.subtle.digest("SHA-256", body);
-  const bodyHash = btoa(String.fromCharCode(...new Uint8Array(bodyHashBuf)));
+  const bodyHash = bytesToBase64(await sha256(body));
   const message = `${dateStr}:${bodyHash}:${subpath}`;
 
   // Sign with WebCrypto (P-256 / ECDSA-SHA256) via PKCS8 key
@@ -106,13 +101,13 @@ async function signRequest(
   const rawSig = await crypto.subtle.sign(
     { name: "ECDSA", hash: "SHA-256" },
     privKey,
-    new TextEncoder().encode(message)
+    utf8(message)
   );
 
   // WebCrypto returns raw r||s (64 bytes); CloudKit expects DER
   const rawArr = new Uint8Array(rawSig);
   const derSig = rawToDer(rawArr);
-  const sigBase64 = btoa(String.fromCharCode(...derSig));
+  const sigBase64 = bytesToBase64(derSig);
 
   return {
     "Content-Type": "application/json",
@@ -146,7 +141,7 @@ export async function cloudKitModify(
   privKeyPem: string
 ): Promise<CloudKitModifyResult> {
   const payload = { operations };
-  const body = new TextEncoder().encode(JSON.stringify(payload));
+  const body = utf8(JSON.stringify(payload));
 
   let headers: Record<string, string>;
   try {
@@ -227,7 +222,7 @@ export async function cloudKitLookup(
   if (recordNames.length === 0) return { ok: true, records: new Map() };
 
   const payload = { records: recordNames.map((recordName) => ({ recordName })) };
-  const body = new TextEncoder().encode(JSON.stringify(payload));
+  const body = utf8(JSON.stringify(payload));
 
   let headers: Record<string, string>;
   try {
@@ -302,7 +297,7 @@ export async function cloudKitQuery(
     };
     if (continuationMarker) payload.continuationMarker = continuationMarker;
 
-    const body = new TextEncoder().encode(JSON.stringify(payload));
+    const body = utf8(JSON.stringify(payload));
     let headers: Record<string, string>;
     try {
       headers = await signRequest(body, QUERY_PATH, keyId, privKeyPem);

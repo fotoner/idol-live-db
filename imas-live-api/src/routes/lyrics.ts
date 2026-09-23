@@ -28,6 +28,7 @@ import {
   syncCallStatsStatement,
 } from "../call_stats";
 import { updateGramIndex } from "../lyrics_index";
+import { timingSafeEqual, utf8 } from "../bytes";
 import type { ClapKind, LyricCall } from "../lyrics_calls";
 import type { RouteContext } from "./context";
 import { decodePathParam, requireIpQuota } from "./guards";
@@ -555,16 +556,6 @@ function validateLyricsBody(body: unknown): string | null {
   return null;
 }
 
-/** 長さに依存しない比較。トークンの推測を時間差から助けない。 */
-function timingSafeEqual(a: string, b: string): boolean {
-  const ea = new TextEncoder().encode(a);
-  const eb = new TextEncoder().encode(b);
-  if (ea.length !== eb.length) return false;
-  let diff = 0;
-  for (let i = 0; i < ea.length; i++) diff |= ea[i] ^ eb[i];
-  return diff === 0;
-}
-
 /** 歌詞**本文**の書き込み権限。運用者トークン、または admin のセッション JWT。
  *  レート制限の主体に使う文字列を返す (拒否なら null)。
  *
@@ -573,7 +564,7 @@ function timingSafeEqual(a: string, b: string): boolean {
  *     ここを緩めると本文まで書けるようになるので、混ぜないこと。 */
 export async function authorizeLyricsWrite(request: Request, env: Env): Promise<string | null> {
   const pushToken = request.headers.get("X-Push-Token");
-  if (pushToken && env.LYRICS_PUSH_TOKEN && timingSafeEqual(pushToken, env.LYRICS_PUSH_TOKEN)) {
+  if (pushToken && env.LYRICS_PUSH_TOKEN && timingSafeEqual(utf8(pushToken), utf8(env.LYRICS_PUSH_TOKEN))) {
     // 運用者は1人なので固定の主体でよい。uid 空間と衝突しない名前にする。
     return "__lyrics_push__";
   }
