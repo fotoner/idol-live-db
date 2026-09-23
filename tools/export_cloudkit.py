@@ -94,14 +94,22 @@ def record_to_row(conn, table, rec, pk_cols, table_cols):
     return {k: v for k, v in row.items() if k in table_cols}
 
 
+# 表の行数がこの割合以上減ったら警告する (0 行になったときは常に警告する)。
+# 止めはしない (終了コードも書き込み先も変えない)。push し忘れた行が、CloudKit の分で
+# 表を置き換えたときに黙って消えるのを、ログで気づけるようにするため。
+SHRINK_WARN_RATIO = 0.10
+
+
 def refresh_table(conn, table):
     record_type = sk.RECORD_TYPE_MAP[table]
     table_cols = {c["name"] for c in sk.get_column_info(conn, table)}
     pk_cols = sk.get_primary_keys(conn, table)
     recs = query_all(record_type)
 
+    before = conn.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
     conn.execute(f"DELETE FROM {table}")
-    inserted = skipped = soft_deleted = 0
+    inserted = soft_deleted = 0
+    dropped = []  # (recordName, 理由)。入れられなかった行は全部出す
     for r in recs:
         # soft delete (deletedAt) 済みレコードは「削除」なので master に再取込しない。
         # master 側テーブルに deleted_at 列が無いため、取り込むと生存レコードとして
@@ -111,7 +119,7 @@ def refresh_table(conn, table):
             continue
         row = record_to_row(conn, table, r, pk_cols, table_cols)
         if not row:
-            skipped += 1
+            dropped.append((r.get("recordName"), "表の列に当たるフィールドが無い"))
             continue
         keys = list(row.keys())
         try:
@@ -121,13 +129,16 @@ def refresh_table(conn, table):
             )
             inserted += 1
         except sqlite3.IntegrityError as e:
-            skipped += 1
-            if skipped <= 5:
-                print(f"    skip {table} {r.get('recordName')}: {e}", file=sys.stderr)
-    note = f" (skip {skipped})" if skipped else ""
+            dropped.append((r.get("recordName"), str(e)))
+    note = f" (skip {len(dropped)})" if dropped else ""
     if soft_deleted:
         note += f" (soft-deleted {soft_deleted})"
     print(f"  {table:<22} CloudKit {len(recs):>6} → 反映 {inserted:>6}{note}")
+    for name, reason in dropped:
+        print(f"    skip {table} {name}: {reason}", file=sys.stderr)
+    if before and (inserted == 0 or inserted < before * (1 - SHRINK_WARN_RATIO)):
+        print(f"  ⚠️ {table}: {before} 行 → {inserted} 行。CloudKit に push していない行が"
+              f"消えていないか確かめること", file=sys.stderr)
     return inserted
 
 
