@@ -15,7 +15,6 @@ import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.Event
 import com.fugaif.imaslivedb.data.model.Vocab
 import com.fugaif.imaslivedb.di.AppModule
-import com.fugaif.imaslivedb.ui.events.EVENT_KINDS
 import kotlinx.coroutines.launch
 
 /**
@@ -147,7 +146,7 @@ fun EventEditScreen(
             if (original != null) EditReadonlyRow("ID", original.id)
             EditTextField("イベント名", name, { name = it })
             EditDropdownField("ブランド", brandOptions, brandId) { brandId = it }
-            EditDropdownField("種別", EVENT_KINDS, kind) { kind = it }
+            EditDropdownField("種別", eventKindEditOptions(original?.kind), kind) { kind = it }
             EditTextField("合同ブランド (カンマ区切り)", jointBrandIds, { jointBrandIds = it })
         }
         EditSection("チケット") {
@@ -174,3 +173,19 @@ private fun emptyEvent(id: String) = Event(
     eventType = "",
     isStreaming = false
 )
+
+/**
+ * 種別の選択肢。語彙の種別から受け皿の「その他」を外し、元の値が語彙に無い (または `other`)
+ * ときだけ「変更しない (元の値)」を足す。選び直さない限り、状態は元の生の値のまま送り返す
+ * (黙って `other` などに書き換えると、新しい種別のイベントを直した人がその種別を消してしまう)。
+ * iOS `EventEditView` と同じ。
+ */
+internal fun eventKindEditOptions(originalKind: String?): List<Pair<String, String>> {
+    val listed = Vocab.table.eventKinds.filter { it.value != OTHER_EVENT_KIND }.map { it.value to it.shortLabel }
+    val unlisted = originalKind?.takeIf { raw -> listed.none { it.first == raw } }
+    return listed + listOfNotNull(unlisted?.let { it to "変更しない ($it)" })
+}
+
+/** 語彙の「その他」(知らない種別の受け皿)。選択肢には出さない。 */
+private const val OTHER_EVENT_KIND = "other"
+
