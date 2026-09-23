@@ -29,6 +29,7 @@ from pathlib import Path
 
 import seed_cloudkit as sk  # 同ディレクトリ。鍵のセッション・テーブルマップを再利用
 from lib import cloudkit as _ck
+from lib import masterdb
 
 ROOT = Path(__file__).resolve().parent.parent
 DUMP_PATH = ROOT / "db" / "master.sql"
@@ -123,13 +124,12 @@ def build_conn_from_dump() -> sqlite3.Connection:
     if DB_PATH.exists():
         DB_PATH.unlink()
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
-    conn.executescript(DUMP_PATH.read_text(encoding="utf-8"))
-    return conn
+    masterdb.restore(DUMP_PATH, DB_PATH)
+    return sqlite3.connect(DB_PATH)
 
 
-def dump_text(conn) -> str:
-    return "".join(line + "\n" for line in conn.iterdump())
+# 正本の書き出しの形は masterdb に 1 つだけ置く (他のツールと同じ形で書く)。
+dump_text = masterdb.dump_text
 
 
 _DATA_VERSION_RE = re.compile(
@@ -226,6 +226,9 @@ def main():
     DUMP_PATH.parent.mkdir(parents=True, exist_ok=True)
     DUMP_PATH.write_text(after, encoding="utf-8")
     conn.close()
+    # 作り直した master.sqlite の指紋を、書き出した正本に合わせる (build_db.sh と同じ値)。
+    # 書き出しの後に入れる (前に入れると dump に入り、毎回差分になる)。
+    masterdb.stamp_content_hash(DB_PATH, DUMP_PATH)
     print(f"✓ {total} 行を db/master.sql に書き出し")
 
 

@@ -39,18 +39,22 @@ SEED_SCRIPT = Path(__file__).resolve().parent / "seed_cloudkit.py"
 # (片方だけ古くならないように)。標準ライブラリだけのモジュールなので、--check は
 # requests などが無くても動く。
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from lib import masterdb  # noqa: E402
 from lib.ck_tables import SCOPED_ID_SPACE, TABLE_ORDER as TABLE_PUSH_ORDER, scope_id  # noqa: E402
 DUMP_PATH = ROOT / "db" / "master.sql"
 
 
 def ensure_db(db_path):
-    """binary master.sqlite が無ければ db/master.sql から生成 (クローン直後でも --check 可)。"""
+    """binary master.sqlite が無ければ db/master.sql から生成 (クローン直後でも --check 可)。
+
+    指紋 (meta.content_hash) は tools/build_db.sh と同じ値を入れ直す。正本に残っている
+    meta の行のままだと、中身と合わない古い指紋が付く。
+    """
     p = Path(db_path)
     if not p.exists() and DUMP_PATH.exists():
         p.parent.mkdir(parents=True, exist_ok=True)
-        c = sqlite3.connect(str(p))
-        c.executescript(DUMP_PATH.read_text(encoding="utf-8"))
-        c.close()
+        masterdb.restore(DUMP_PATH, p)
+        masterdb.stamp_content_hash(p, DUMP_PATH)
         print(f"(db/master.sql から {p.name} を生成しました)")
 
 VALID_BRANDS = {"765as", "cg", "ml", "sidem", "sc", "gakuen", "876", "961", "other"}

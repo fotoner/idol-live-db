@@ -1,17 +1,21 @@
-"""export_cloudkit.py の refresh_table のテスト (CloudKit の読み取りは偽物に差し替える)。
+"""export_cloudkit.py のテスト (CloudKit の読み取りは偽物に差し替える)。
 
     python3 -m unittest discover -s tools/test -p 'test_*.py'
 """
 
 import contextlib
+import hashlib
 import io
 import sqlite3
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 import support
 import export_cloudkit
+import seed_cloudkit
+from lib import masterdb
 
 
 def brand_record(i, name=True):
@@ -83,6 +87,83 @@ class RefreshTableTest(unittest.TestCase):
         inserted, _ = self.refresh()
         self.assertEqual(inserted, 3)
         self.assertEqual(self.brand_ids(), ["b01", "b02", "b03"])
+
+
+class ExportMainTest(unittest.TestCase):
+    """main を通しで回す。CloudKit の中身は、正本の行を seed と同じ規則でレコードにしたもの。"""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        root = Path(self.tmp.name)
+        support.schema_only(root / "fixture.sqlite")
+        conn = sqlite3.connect(str(root / "fixture.sqlite"))
+        conn.executescript("""
+            INSERT INTO meta (key, value) VALUES ('data_version', '5');
+            INSERT INTO meta (key, value) VALUES ('content_hash', 'stale');
+            INSERT INTO brands (id, name, short_name, sort_order) VALUES ('ml', 'ML', 'ML', 3);
+            INSERT INTO events (id, brand_id, name, event_type, kind) VALUES ('ev_t', 'ml', 'ライブ', 'live', 'live');
+            INSERT INTO shows (id, event_id, name, date, sort_order, performer_type)
+                VALUES ('sh_t', 'ev_t', 'DAY1', '2026-01-01', 0, 'cast');
+        """)
+        conn.commit()
+        self.cloudkit = {}
+        for table in seed_cloudkit.TABLE_ORDER:
+            cols, select = seed_cloudkit.push_columns(conn, table)
+            cur = conn.execute(f"SELECT {select} FROM {table}")
+            names = [d[0] for d in cur.description]
+            rows = [dict(zip(names, r)) for r in cur.fetchall()]
+            ops = seed_cloudkit.rows_to_operations(
+                table, rows, cols, seed_cloudkit.get_primary_keys(conn, table))
+            self.cloudkit[seed_cloudkit.RECORD_TYPE_MAP[table]] = [op["record"] for op in ops]
+        self.dump = root / "master.sql"
+        self.dump.write_text(masterdb.dump_text(conn), encoding="utf-8")
+        conn.close()
+        self.db = root / "master.sqlite"
+        for obj, name, value in ((export_cloudkit, "DUMP_PATH", self.dump),
+                                 (export_cloudkit, "DB_PATH", self.db),
+                                 (export_cloudkit, "query_all", lambda rt: self.cloudkit.get(rt, [])),
+                                 (seed_cloudkit, "init_session", lambda key_id, key_file: None)):
+            self.addCleanup(setattr, obj, name, getattr(obj, name))
+            setattr(obj, name, value)
+        self.addCleanup(seed_cloudkit._build_paths, "development")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def run_main(self):
+        saved = sys.argv
+        sys.argv = ["export_cloudkit.py", "--production", "--key-id", "dummy"]
+        try:
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                export_cloudkit.main()
+        finally:
+            sys.argv = saved
+
+    def meta(self, key):
+        conn = sqlite3.connect(str(self.db))
+        try:
+            row = conn.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
+            return row and row[0]
+        finally:
+            conn.close()
+
+    def test_no_change_keeps_the_dump_and_the_version(self):
+        before = self.dump.read_bytes()
+        self.run_main()
+        self.assertEqual(self.dump.read_bytes(), before)
+        self.assertEqual(self.meta("data_version"), "5")
+
+    def test_a_change_bumps_the_version(self):
+        self.cloudkit["Event"][0]["fields"]["name"]["value"] = "ライブ (改名)"
+        self.run_main()
+        self.assertIn("ライブ (改名)", self.dump.read_text(encoding="utf-8"))
+        self.assertEqual(self.meta("data_version"), "6")
+
+    def test_the_built_master_sqlite_carries_the_new_fingerprint(self):
+        # master.sqlite を作る経路では指紋を入れ直す (tools/build_db.sh と同じ値)。
+        self.run_main()
+        self.assertEqual(self.meta("content_hash"),
+                         hashlib.sha256(self.dump.read_bytes()).hexdigest())
 
 
 if __name__ == "__main__":

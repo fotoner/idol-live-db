@@ -98,5 +98,19 @@ class CheckWithoutThirdPartyModulesTest(unittest.TestCase):
         self.assertIn("投入対象なし", proc.stdout)
 
 
+class EnsureDbTest(unittest.TestCase):
+    def test_a_missing_db_is_built_from_the_dump_with_its_fingerprint(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            db = Path(tmp) / "sub" / "master.sqlite"
+            with contextlib.redirect_stdout(io.StringIO()):
+                apply_data.ensure_db(db)
+            conn = sqlite3.connect(str(db))
+            [(value,)] = conn.execute("SELECT value FROM meta WHERE key = 'content_hash'").fetchall()
+            shows = conn.execute("SELECT count(*) FROM shows").fetchone()[0]
+            conn.close()
+        self.assertEqual(value, support.sha256(support.MASTER_SQL))
+        self.assertGreater(shows, 0)
+
+
 if __name__ == "__main__":
     unittest.main()
