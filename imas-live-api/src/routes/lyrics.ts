@@ -934,10 +934,11 @@ export async function handleLyrics(ctx: RouteContext): Promise<Response | null> 
       .join("\n");
 
     // body_norm は表記ゆれを吸収した検索用のコピー (migrations 0031)。body と必ず同時に書く。
+    const searchBodyNorm = normalizeForSearch(searchBody);
     statements.push(
       env.DB.prepare(
         "UPDATE song_lyrics SET lines_json = ?, body = ?, body_norm = ? WHERE song_id = ?"
-      ).bind(JSON.stringify(nextLines), searchBody, normalizeForSearch(searchBody), songId)
+      ).bind(JSON.stringify(nextLines), searchBody, searchBodyNorm, songId)
     );
 
     // 歌詞の差し替えで行が消えるとコール数が変わる (carryOverAnnotation は消えた行の
@@ -951,6 +952,9 @@ export async function handleLyrics(ctx: RouteContext): Promise<Response | null> 
     // 検索の転置インデックスを差分で追従させる。本文が変わっていなければ
     // 1 クエリも投げない (同じ歌詞の入れ直しは索引の書き込みゼロ)。
     //
+    // 索引は body_norm から作る (全再構築 tools/lyrics/build_gram_index.py と同じ)。
+    // 検索語も正規化してから gram を引くので、素の本文で作ると正規化した語の候補から漏れる。
+    //
     // 失敗しても PUT は成功として返す。索引がズレても検索側は候補を body LIKE で
     // 検証するので誤ヒットは出ず、「出るはずの曲が出ない」側にしか倒れない。
     // 歌詞そのものは既に保存済みなので、索引の都合で投入を失敗扱いにする方が害が大きい。
@@ -959,7 +963,7 @@ export async function handleLyrics(ctx: RouteContext): Promise<Response | null> 
       .map((line) => line.text)
       .join("\n");
     try {
-      await updateGramIndex(env, songId, previousBody, searchBody);
+      await updateGramIndex(env, songId, normalizeForSearch(previousBody), searchBodyNorm);
     } catch (err) {
       console.error("lyrics_gram_index_update_failed", songId, err);
     }

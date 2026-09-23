@@ -35,7 +35,8 @@ const byteLength = (text: string) => encoder.encode(text).length;
  * ⚠️ tools/lyrics/build_gram_index.py の build_index と同じ規則にすること。
  *    片方だけ変えると、増分更新と全再構築で索引の中身が食い違う。
  *    - 行 (\n) をまたぐ gram は作らない。並びとして連続していないため。
- *    - 正規化しない (素の部分文字列)。検索側も素のまま引く。
+ *    - ここでは正規化しない。呼び出し側が normalizeForSearch を通した本文 (body_norm と同じもの)
+ *      を渡す。全再構築も body_norm から作り、検索側も正規化した語で引く。
  */
 export function extractGrams(body: string): Set<string> {
     const grams = new Set<string>();
