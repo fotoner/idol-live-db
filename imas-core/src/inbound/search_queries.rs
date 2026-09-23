@@ -14,7 +14,7 @@ use crate::domain::search_queries::{self as queries, EventSearchSides, GlobalSea
 
 #[uniffi::export]
 impl SnapshotStore {
-    /// 横断検索 (曲/アイドル/イベント各 20 件まで・rowid 順)。
+    /// 横断検索 (曲/アイドル/イベント各 20 件まで・当たり方の強い順、同じ強さは id 順)。
     /// SQL 時代の search(query:) 相当。空文字クエリは各テーブル先頭 20 件 (元 SQL と同じ)。
     pub fn global_search(&self, query: String) -> Result<GlobalSearchHits, SnapshotError> {
         let snap = self.current()?;

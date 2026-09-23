@@ -14,10 +14,9 @@
 //!   UTF-8 の多バイト文字は継続バイトが 0x80 以上で ASCII と衝突しないため、
 //!   バイト列上の大小無視探索で等価になる。
 //! - NULL 列 (title_kana / name_kana) への LIKE は NULL = 不一致。
-//! - `LIMIT 20` は ORDER BY なし: 結果はテーブル走査順 (= rowid 昇順) の先頭 20 件。
-//!   3 本とも EXPLAIN QUERY PLAN が `SCAN` (LIKE の先頭 `%` で索引を使えない) なので
-//!   走査順は rowid 昇順で決定的。Snapshot の各 Vec は同じ全表走査で読み込まれるため、
-//!   添字順の走査 + 先頭 20 件がそのまま元 SQL の結果順になる。
+//! - `LIMIT 20` は ORDER BY なしだった (結果は物理的な行順の先頭 20 件で、iOS と Android で
+//!   違った)。今は当たり方の強い順 (完全一致 → 前方一致 → 部分一致)・同じ強さは id 順に
+//!   並べてから 20 件で切る (Q-07。[`strongest_first`])。
 //!
 //! **畳み込みは `text_search_index::FoldedNeedle` に寄せてある** (この節はかつて
 //! 「`text_search_index` を使わないのは意図的」と書いていたが、実装が変わっている)。
@@ -28,11 +27,10 @@
 //! `FoldedNeedle` が畳む範囲は `LIKE` の真の上位集合なので、寄せても従来出ていた行が
 //! 消えることはなく、当たり方だけが 3 プラットフォームで揃う。
 //!
-//! 変わっていないのは**件数と順序**の契約: `LIMIT 20` 相当の [`GLOBAL_SEARCH_LIMIT`] と、
-//! rowid 昇順 (= Snapshot の添字順) の走査順は元 SQL のまま。
+//! 変わっていないのは**件数**の契約: `LIMIT 20` 相当の [`GLOBAL_SEARCH_LIMIT`]。
 
 use crate::domain::snapshot::Snapshot;
-use crate::domain::text_search_index::FoldedNeedle;
+use crate::domain::text_search_index::{FoldedNeedle, MatchTier};
 
 /// iOS `searchQuery` の `.limit(20)` の写し。各エンティティ種別ごとの上限。
 pub const GLOBAL_SEARCH_LIMIT: usize = 20;
@@ -48,43 +46,45 @@ pub struct GlobalSearchHits {
 }
 
 
-/// 曲の横断検索 (title / title_kana の部分一致、先頭 20 件)。添字はスナップショット順。
-pub fn searched_song_indexes(snap: &Snapshot, query: &str) -> Vec<u32> {
-    let needle = FoldedNeedle::new(query);
-    snap.songs
-        .iter()
+/// 当たった行を**当たり方の強い順** (完全一致 → 前方一致 → 部分一致) に並べ、同じ強さの
+/// 中は id 順にして、先頭 [`GLOBAL_SEARCH_LIMIT`] 件の添字を返す。
+///
+/// 並べ替えのキーが無いまま上限で切ると、何が切り捨てられるかが行の順で決まってしまう。
+/// 物理的な行順は iOS と Android で違い、id 順は id の若いブランドに偏る (「夢」で
+/// 765as と cg だけで 20 件が埋まる)。強さの判定は曖昧解決と同じ `FoldedNeedle::tier`。
+fn strongest_first<'a>(
+    needle: &FoldedNeedle,
+    index: &[crate::domain::text_search_index::TextSearchIndex],
+    rows: impl Iterator<Item = (&'a str, [Option<&'a str>; 2])>,
+) -> Vec<u32> {
+    let mut hits: Vec<(MatchTier, &str, u32)> = rows
         .enumerate()
-        .filter(|(i, _)| snap.song_search[*i].matches(needle.as_bytes()))
-        .map(|(i, _)| i as u32)
-        .take(GLOBAL_SEARCH_LIMIT)
-        .collect()
+        .filter(|(i, _)| index[*i].matches(needle.as_bytes()))
+        .map(|(i, (id, spellings))| (needle.tier(&spellings), id, i as u32))
+        .collect();
+    hits.sort_unstable();
+    hits.into_iter().take(GLOBAL_SEARCH_LIMIT).map(|(_, _, i)| i).collect()
+}
+
+/// 曲の横断検索 (title / title_kana の部分一致、先頭 20 件)。
+pub fn searched_song_indexes(snap: &Snapshot, query: &str) -> Vec<u32> {
+    let rows = snap.songs.iter().map(|s| (s.id.as_str(), [Some(s.title.as_str()), s.title_kana.as_deref()]));
+    strongest_first(&FoldedNeedle::new(query), &snap.song_search, rows)
 }
 
 /// アイドルの横断検索 (name / name_kana の部分一致、先頭 20 件)。
 /// 元 SQL 同様 is_external も対象に含める (絞らないのが現行仕様)。
 pub fn searched_idol_indexes(snap: &Snapshot, query: &str) -> Vec<u32> {
-    let needle = FoldedNeedle::new(query);
-    snap.idols
-        .iter()
-        .enumerate()
-        .filter(|(i, _)| snap.idol_search[*i].matches(needle.as_bytes()))
-        .map(|(i, _)| i as u32)
-        .take(GLOBAL_SEARCH_LIMIT)
-        .collect()
+    let rows = snap.idols.iter().map(|d| (d.id.as_str(), [Some(d.name.as_str()), d.name_kana.as_deref()]));
+    strongest_first(&FoldedNeedle::new(query), &snap.idol_search, rows)
 }
 
 /// イベントの横断検索 (name / name_kana の部分一致、先頭 20 件)。
 ///
 /// 漢字のライブ名は読みが無いとかなで引けない。曲・アイドルと同じ扱いに揃える。
 pub fn searched_event_indexes(snap: &Snapshot, query: &str) -> Vec<u32> {
-    let needle = FoldedNeedle::new(query);
-    snap.events
-        .iter()
-        .enumerate()
-        .filter(|(i, _)| snap.event_search[*i].matches(needle.as_bytes()))
-        .map(|(i, _)| i as u32)
-        .take(GLOBAL_SEARCH_LIMIT)
-        .collect()
+    let rows = snap.events.iter().map(|e| (e.id.as_str(), [Some(e.name.as_str()), e.name_kana.as_deref()]));
+    strongest_first(&FoldedNeedle::new(query), &snap.event_search, rows)
 }
 
 /// 種別ごとの一致件数 (打ち切りなし)。
@@ -189,24 +189,48 @@ mod tests {
         s.replace('\\', "\\\\").replace('%', "\\%").replace('_', "\\_")
     }
 
-    /// GRDB 生成 SQL の写経を rusqlite で直接実行した id 列 (これが等価性の基準)。
-    /// ORDER BY なしの LIMIT なので順序も含めて比較する (走査は 3 本とも SCAN =
-    /// rowid 昇順で決定的。実行計画が変わればこの照合が落ちて教えてくれる)。
+    /// カタカナをひらがなに寄せる (読みの列はひらがなで入っている)。並べ方の基準を
+    /// SQL で書くためだけのもので、畳み込みの実体 (`FoldedNeedle`) とは独立に書いてある。
+    fn hiragana(text: &str) -> String {
+        text.chars()
+            .map(|c| match c {
+                'ァ'..='ヶ' => char::from_u32(c as u32 - 0x60).unwrap_or(c),
+                _ => c,
+            })
+            .collect()
+    }
+
+    /// GRDB 生成 SQL の写経に、並べ方 (当たり方の強い順・同じ強さは id 順) を足して
+    /// rusqlite で直接実行した id 列 (これが等価性の基準)。順序も含めて比較する。
+    /// 強さは LIKE で書く: 完全一致 = `LIKE 'q'`、前方一致 = `LIKE 'q%'` を、検索語そのものと
+    /// ひらがなに寄せた語の両方で見る (読みの列はひらがなだが、検索語はカタカナで来うる)。
     fn run_original_sql(table: &str, kana_col: Option<&str>, query: &str) -> Vec<String> {
         let name_col = if table == "songs" { "title" } else { "name" };
-        let cond = match kana_col {
-            Some(kana) => {
-                format!("({name_col} LIKE ? ESCAPE '\\' OR {kana} LIKE ? ESCAPE '\\')")
-            }
-            None => format!("{name_col} LIKE ? ESCAPE '\\'"),
+        let like = |params: &[&str]| {
+            let cols: Vec<&str> = std::iter::once(name_col).chain(kana_col).collect();
+            let terms: Vec<String> = cols
+                .iter()
+                .flat_map(|col| params.iter().map(move |p| format!("{col} LIKE {p} ESCAPE '\\'")))
+                .collect();
+            format!("({})", terms.join(" OR "))
         };
-        let sql = format!("SELECT t.* FROM {table} t WHERE {cond} LIMIT 20");
-        let pattern = format!("%{}%", like_escaped(query));
-        let params: Vec<&str> = if kana_col.is_some() {
-            vec![&pattern, &pattern]
-        } else {
-            vec![&pattern]
-        };
+        let sql = format!(
+            "SELECT t.* FROM {table} t WHERE {} \
+             ORDER BY CASE WHEN {} THEN 0 WHEN {} THEN 1 ELSE 2 END, t.id LIMIT 20",
+            like(&["?1"]),
+            like(&["?2", "?3"]),
+            like(&["?4", "?5"])
+        );
+        let escaped = like_escaped(query);
+        let folded = like_escaped(&hiragana(query));
+        let owned = [
+            format!("%{escaped}%"),
+            escaped.clone(),
+            folded.clone(),
+            format!("{escaped}%"),
+            format!("{folded}%"),
+        ];
+        let params: Vec<&str> = owned.iter().map(String::as_str).collect();
         let db = bundle_conn();
         let mut stmt = db.prepare(&sql).expect("元 SQL は妥当");
         stmt.query_map(rusqlite::params_from_iter(params), |r| r.get::<_, String>("id"))
@@ -293,7 +317,7 @@ mod tests {
         assert!(titles.iter().all(|t| !t.contains("ready")), "{titles:?}");
     }
 
-    /// LIMIT 20 の頭切り: 全件が 20 を超える検索語で「先頭 20 件 (rowid 順)」が一致する。
+    /// LIMIT 20 の頭切り: 全件が 20 を超える検索語で「先頭 20 件 (強い順・id 順)」が一致する。
     /// 空文字クエリ (LIKE '%%') は全行一致 = 各テーブル先頭 20 件になるのも元 SQL と同じ。
     #[test]
     fn limit_caps_at_20_like_sql() {
