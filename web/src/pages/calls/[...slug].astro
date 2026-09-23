@@ -6,7 +6,7 @@ import ListContainer from "../../components/ListContainer.astro";
 import Artwork from "../../components/Artwork.astro";
 import RefList from "../../components/RefList.astro";
 import EmptyState from "../../components/EmptyState.astro";
-import { page, routeData } from "../../lib/data";
+import { optionalPage, page } from "../../lib/data";
 import type { CallGuidePage } from "../../lib/schema/CallGuidePage";
 
 /**
@@ -16,7 +16,9 @@ import type { CallGuidePage } from "../../lib/schema/CallGuidePage";
  * 写した JSON を Rust が焼き込んだもので、閲覧のたびに API は呼ばない。
  * 3 区画 (ガイドのある曲 / 最近の編集 / 書き手募集中) は iOS のダッシュボードと同じ。
  */
-const guide = page<CallGuidePage>(routeData("callGuide", "/calls/"));
+export const getStaticPaths = () => optionalPage("callGuide", "/calls/");
+
+const guide = page<CallGuidePage>(Astro.props.data);
 ---
 
 <ListLayout seo={guide.seo} title={guide.title}>

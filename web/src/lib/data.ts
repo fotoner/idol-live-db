@@ -98,3 +98,24 @@ export function routeData(kind: RouteKind, urlPath: string): string {
   }
   return hit.data;
 }
+
+/**
+ * 出すかどうかを Rust が決める単独ページ (お題 / コールガイド / タグの一覧) の
+ * `getStaticPaths`。行があれば 1 件、無ければ `[]` (= ページを作らない)。
+ *
+ * 集計が空・写しが無いとき、Rust はルートごと出さない。そこで `routeData` のように
+ * 投げると、1 枚のために 7,600 ページのビルドが丸ごと落ちる。
+ * `[...slug].astro` から呼び、`slug: undefined` でそのディレクトリの index にする。
+ * URL はファイルの置き場所が決めるので、Rust の path と食い違っていたら落とす。
+ */
+export function optionalPage(
+  kind: RouteKind,
+  urlPath: string,
+): { params: { slug: undefined }; props: { data: string } }[] {
+  const hits = routes().routes.filter((r) => r.kind === kind);
+  const moved = hits.find((r) => r.path !== urlPath);
+  if (moved) {
+    throw new Error(`routes.json の ${kind} が ${moved.path} を指しています (ページは ${urlPath})`);
+  }
+  return hits.map((r) => ({ params: { slug: undefined }, props: { data: r.data } }));
+}

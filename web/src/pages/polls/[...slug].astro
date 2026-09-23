@@ -3,7 +3,7 @@ import ListLayout from "../../layouts/ListLayout.astro";
 import ListContainer from "../../components/ListContainer.astro";
 import RankingRow from "../../components/RankingRow.astro";
 import TagChip from "../../components/TagChip.astro";
-import { page, routeData } from "../../lib/data";
+import { optionalPage, page } from "../../lib/data";
 import type { PollListPage } from "../../lib/schema/PollListPage";
 
 /**
@@ -13,7 +13,9 @@ import type { PollListPage } from "../../lib/schema/PollListPage";
  * 中身は D1 の集計を焼き込んだもので、閲覧のたびに D1 は読まない。
  * 「締切前か」も Rust が `ends_at` と出面の「今日」から決めた `isOpen` を出すだけ。
  */
-const list = page<PollListPage>(routeData("pollList", "/polls/"));
+export const getStaticPaths = () => optionalPage("pollList", "/polls/");
+
+const list = page<PollListPage>(Astro.props.data);
 ---
 
 <ListLayout seo={list.seo} title={list.title} total={list.total}>

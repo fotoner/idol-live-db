@@ -5,7 +5,7 @@ import DatedRow from "../../components/DatedRow.astro";
 import Count from "../../components/Count.astro";
 import TagChip from "../../components/TagChip.astro";
 import CommunityTagChip from "../../components/CommunityTagChip.astro";
-import { page, routeData } from "../../lib/data";
+import { optionalPage, page } from "../../lib/data";
 import type { TagListPage } from "../../lib/schema/TagListPage";
 
 /**
@@ -14,7 +14,9 @@ import type { TagListPage } from "../../lib/schema/TagListPage";
  * **読むだけ。** タグ付けはログインが要るので、この出面には操作を置かない。
  * 並び (曲の多い順)・文言・どのタグに一覧があるかは Rust が決めている。
  */
-const list = page<TagListPage>(routeData("tagListIndex", "/tags/"));
+export const getStaticPaths = () => optionalPage("tagListIndex", "/tags/");
+
+const list = page<TagListPage>(Astro.props.data);
 ---
 
 <ListLayout seo={list.seo} title={list.title} total={list.total}>
