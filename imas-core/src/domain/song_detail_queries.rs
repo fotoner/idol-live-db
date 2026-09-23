@@ -19,14 +19,18 @@
 //! - `ORDER BY ... DESC` の NULL は SQLite では末尾 / `ASC` は先頭 → Option の
 //!   Ord (None < Some) と Reverse で同じ位置に置く。
 //! - 集計 (MIN/MAX/COUNT DISTINCT) は NULL を無視するが空文字 '' は値として扱う。
-//! - `LIKE '%q%'` は ASCII のみ大文字小文字を無視 (SQLite の既定) → ASCII だけ
-//!   小文字化してから部分一致。
+//!   ただし NULL・空・空白だけの値を「値なし」に畳む判定は
+//!   [`display_join::non_empty`](crate::domain::display_join::non_empty) に揃えた (Q-07)。
+//! - `LIKE '%q%'` の部分一致は [`FoldedNeedle`] に寄せた (Q-06)。大小・全半角・かなの
+//!   違いを畳むので、LIKE が当てていた行は全部当たる (上位集合)。
 //! - SQL が未規定だった同順位の並びは添字や名前で決定化する (プラットフォーム間で
 //!   同一結果を返すのが共有コアの目的なので、非決定性は残さない)。
 
 use crate::domain::credit_names::{canonical_credit_key, split_credits};
 use crate::domain::date_display::year_range;
+use crate::domain::display_join::non_empty;
 use crate::domain::snapshot::{Snapshot, Song};
+use crate::domain::text_search_index::FoldedNeedle;
 use std::cmp::Reverse;
 use std::collections::{HashMap, HashSet};
 
@@ -228,10 +232,11 @@ pub fn song_records_by_ids(snap: &Snapshot, song_ids: &[String]) -> Vec<SongDeta
 /// - 「完全一致優先」はスコアではなく**枝の切り替え**。完全一致が 1 件でもあれば
 ///   部分一致は評価されない (完全一致 1 件 + 部分一致 50 件 → 返るのは 1 件だけ)。
 /// - 完全一致の `=` は BINARY 比較 (バイト列一致) なので ASCII の大小も区別する。
-///   一方 LIKE は ASCII だけ大小を無視するので、両枝で当たり方が違う。
+///   部分一致の枝は [`FoldedNeedle`] で畳んで照合する (Q-06。元は LIKE で ASCII だけ
+///   大小無視)。完全一致の枝は畳まない: 同題を並べる「完全一致優先」の契約は据え置き。
 /// - どちらの枝も ORDER BY 無し。`songs.title` に索引が無く実行計画は SCAN なので、
-///   結果順は rowid 昇順 = スナップショットの添字順になる。
-/// - `title_kana` が NULL の行への LIKE は NULL = 不一致。
+///   結果順はスナップショットの添字順 (読み込みは主キー順。Q-07) になる。
+/// - `title_kana` が NULL の行は読みでは当たらない。
 /// - トリムは Swift の `.whitespacesAndNewlines`。この集合 (Z* + U+000A–U+000D +
 ///   U+0085 + TAB) は Unicode の White_Space プロパティと同一で、Rust の
 ///   `char::is_whitespace` すなわち `str::trim()` がそのまま等価になる。
@@ -252,15 +257,13 @@ pub fn search_songs(snap: &Snapshot, query: &str, limit: u32) -> Vec<SongDetailR
     if !exact.is_empty() {
         return exact;
     }
-    let needle = trimmed.to_ascii_lowercase();
+    let needle = FoldedNeedle::new(trimmed);
     snap.songs
         .iter()
-        .filter(|s| {
-            ascii_ci_contains(&s.title, &needle)
-                || s.title_kana.as_deref().is_some_and(|k| ascii_ci_contains(k, &needle))
-        })
+        .zip(&snap.song_search)
+        .filter(|(_, index)| index.matches(needle.as_bytes()))
         .take(limit as usize)
-        .map(SongDetailRecord::from)
+        .map(|(s, _)| SongDetailRecord::from(s))
         .collect()
 }
 
@@ -613,7 +616,7 @@ pub fn performance_ordinal_label(ordinal: u32) -> String {
 ///
 /// - 対象: cd_series が NULL でも '' でもない曲。brand_ids 指定時はそのブランドのみ
 ///   (brand_id が NULL の曲は IN に一致しないので落ちる)。
-/// - query は cd_series への部分一致 (SQLite LIKE と同じく ASCII のみ大小無視)。
+/// - query は cd_series への部分一致 ([`FoldedNeedle`] で畳んで照合。Q-06)。
 /// - 並び: MIN(release_date) 降順・全曲 NULL のグループは末尾 (SQLite DESC の NULL 位置)。
 ///   同日は SQL 未規定だったので cd_series 昇順 (バイト列) で決定化。
 pub fn album_summaries(
@@ -622,7 +625,7 @@ pub fn album_summaries(
     query: Option<&str>,
 ) -> Vec<AlbumSummaryRecord> {
     let brand_set = to_brand_set(brand_ids);
-    let needle = normalized_needle(query);
+    let needle = folded_needle(query);
 
     // グループは出現順 (テーブルスキャン順) に積む。GROUP_CONCAT(DISTINCT) の並びを
     // 初出順で決定化するのと同じ理由で、グループ自体も走査順に一度だけ作る。
@@ -634,10 +637,8 @@ pub fn album_summaries(
         if !brand_matches(&brand_set, &song.brand_id) {
             continue;
         }
-        if let Some(n) = &needle {
-            if !ascii_ci_contains(series, n) {
-                continue;
-            }
+        if !needle.as_ref().is_none_or(|n| n.matches(series)) {
+            continue;
         }
         let entry = groups.entry(series.to_owned()).or_insert_with(|| {
             order.push(series.to_owned());
@@ -688,7 +689,7 @@ pub fn series_summaries(
     query: Option<&str>,
 ) -> Vec<SeriesSummaryRecord> {
     let brand_set = to_brand_set(brand_ids);
-    let needle = normalized_needle(query);
+    let needle = folded_needle(query);
 
     // パス1: series_group → 代表ジャケット (絞り込み前の全曲が母集団)。
     // キーは (release_date ASC・NULL 先頭, 走査順)。Option の Ord は None < Some なので
@@ -722,10 +723,8 @@ pub fn series_summaries(
         if !brand_matches(&brand_set, &song.brand_id) {
             continue;
         }
-        if let Some(n) = &needle {
-            if !ascii_ci_contains(group, n) {
-                continue;
-            }
+        if !needle.as_ref().is_none_or(|n| n.matches(group)) {
+            continue;
         }
         let entry = groups.entry(group.to_owned()).or_insert_with(|| {
             order.push(group.to_owned());
@@ -822,11 +821,6 @@ fn variant_order_key(snap: &Snapshot, i: u32) -> (u8, &Option<String>, &String, 
 // SQL の暗黙挙動を明示するヘルパ
 // =============================================================================
 
-/// `IS NOT NULL AND <> ''` の射影。NULL と空文字を「値なし」に畳む。
-fn non_empty(v: &Option<String>) -> Option<&str> {
-    v.as_deref().filter(|s| !s.is_empty())
-}
-
 /// brand フィルタの集合化。空 Vec は「絞り込みなし」(SQL で IN 句自体を組まない状態)。
 fn to_brand_set(brand_ids: &[String]) -> Option<HashSet<&str>> {
     if brand_ids.is_empty() {
@@ -844,16 +838,9 @@ fn brand_matches(set: &Option<HashSet<&str>>, brand_id: &Option<String>) -> bool
     }
 }
 
-/// 検索語の正規化。空文字は「絞り込みなし」(Swift 側の `!query.isEmpty` ガードと同じ)。
-/// LIKE の ASCII 大小無視に合わせて先に ASCII 小文字化しておく。
-fn normalized_needle(query: Option<&str>) -> Option<String> {
-    query.filter(|q| !q.is_empty()).map(|q| q.to_ascii_lowercase())
-}
-
-/// SQLite `LIKE '%q%'` の部分一致。ASCII のみ大小無視・非 ASCII は区別 (SQLite の既定)。
-/// needle は [`normalized_needle`] で小文字化済みであること。
-fn ascii_ci_contains(haystack: &str, needle_lower: &str) -> bool {
-    haystack.to_ascii_lowercase().contains(needle_lower)
+/// 検索語。空文字は「絞り込みなし」(Swift 側の `!query.isEmpty` ガードと同じ)。
+fn folded_needle(query: Option<&str>) -> Option<FoldedNeedle> {
+    query.filter(|q| !q.is_empty()).map(FoldedNeedle::new)
 }
 
 /// MIN 集計 (NULL 無視・バイト列比較 = SQLite BINARY 照合)。
@@ -1421,7 +1408,20 @@ mod tests {
         rows
     }
 
-    /// 照合: searchSongs。当たり方の違う検索語で、元 SQL と**順序込み・全カラム**で一致する。
+    /// 部分一致の枝はかなの違いを畳む (Q-06)。読み (ひらがな) にカタカナで打っても当たる。
+    /// LIKE では当たらなかった打ち方。
+    #[test]
+    fn search_songs_partial_branch_folds_kana() {
+        let snap = bundle_snapshot();
+        let hira = search_songs(snap, "れでぃ", u32::MAX);
+        assert!(hira.iter().any(|r| r.id == "765as_ready"));
+        assert!(run_original_search_sql("レディ", u32::MAX).iter().all(|r| r.id != "765as_ready"));
+        assert_eq!(search_songs(snap, "レディ", u32::MAX), hira);
+    }
+
+    /// 照合: searchSongs。完全一致の枝は元 SQL と**順序込み・全カラム**で一致する。
+    /// 部分一致の枝は FoldedNeedle に寄せたので (Q-06)、元 SQL の当たりを全部含み
+    /// (上位集合)、並びは添字順、`limit` は先頭からの切り出し、を確かめる。
     #[test]
     fn search_songs_matches_sql() {
         let snap = bundle_snapshot();
@@ -1439,9 +1439,25 @@ mod tests {
         let mut saw_exact = false;
         let mut saw_partial = false;
         for q in queries {
-            for limit in [3u32, 200] {
-                let want = run_original_search_sql(q, limit);
-                assert_eq!(search_songs(snap, q, limit), want, "query={q:?} limit={limit}");
+            let all = search_songs(snap, q, u32::MAX);
+            let old = run_original_search_sql(q, u32::MAX);
+            if all.iter().any(|r| r.title == q.trim()) {
+                for limit in [3u32, 200] {
+                    let want = run_original_search_sql(q, limit);
+                    assert_eq!(search_songs(snap, q, limit), want, "query={q:?} limit={limit}");
+                }
+            } else {
+                let ids: HashSet<&str> = all.iter().map(|r| r.id.as_str()).collect();
+                for r in &old {
+                    assert!(ids.contains(r.id.as_str()), "query={q:?}: 元 SQL の {} が落ちた", r.id);
+                }
+                let pos: HashMap<&str, usize> =
+                    snap.songs.iter().enumerate().map(|(i, s)| (s.id.as_str(), i)).collect();
+                assert!(all.windows(2).all(|w| pos[w[0].id.as_str()] < pos[w[1].id.as_str()]), "query={q:?}: 添字順");
+                for limit in [3u32, 200] {
+                    let got = search_songs(snap, q, limit);
+                    assert_eq!(got, all.iter().take(limit as usize).cloned().collect::<Vec<_>>(), "query={q:?} limit={limit}");
+                }
             }
             let hits = search_songs(snap, q, 200);
             saw_exact |= hits.iter().any(|r| r.title == q);
