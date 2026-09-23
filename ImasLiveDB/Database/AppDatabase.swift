@@ -140,15 +140,6 @@ final class AppDatabase: @unchecked Sendable {
         // 形に対して正本の不足分だけを足す形になる。索引も同じで、列が揃った後なら
         // idx_setlist_performers_idol (v19 前は setlist_performers に idol_id が無い) が失敗しない。
         applyCoreMasterSchema(at: dbURL.path)
-        // event.kind の再適用は CloudKit pull 直後に効けばよい定常処理。毎起動で同期 UPDATE を
-        // 走らせるとメインスレッドを数十〜数百ms 塞ぐため、バックグラウンドに退避する。
-        Task.detached(priority: .utility) { [pool] in
-            do {
-                try reseedEventKindIfNeeded(pool)
-            } catch {
-                Logger.database.error("reseedEventKindIfNeeded failed: \(error.localizedDescription, privacy: .public)")
-            }
-        }
         guard let bundleURL else { return pool }
         // reseedMasterTablesIfNeeded は破壊的 (DELETE + INSERT) なので失敗時はアプリ
         // 起動自体を止めないように吸収する。 失敗してもローカル DB の旧値で動作継続。
@@ -328,16 +319,6 @@ final class AppDatabase: @unchecked Sendable {
             }
         }
         return (ok, skipped)
-    }
-
-    /// CloudKit 同期で `kind` が default 'live' に上書きされる対策。
-    /// 起動毎に Bundle 同梱の v7_event_kind_data.sql を idempotent に再適用する。
-    private static func reseedEventKindIfNeeded(_ dbQueue: any DatabaseWriter) throws {
-        guard let url = Bundle.main.url(forResource: "v7_event_kind_data", withExtension: "sql"),
-              let sql = try? String(contentsOf: url, encoding: .utf8) else { return }
-        try dbQueue.write { db in
-            try db.execute(sql: sql)
-        }
     }
 
     /// Bundle 由来の master.sqlite には grdb_migrations が無いため、
