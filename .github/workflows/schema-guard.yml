@@ -72,6 +72,10 @@ jobs:
           SHA: ${{ github.sha }}
         run: |
           : > body.md
+          # force push などで前のコミットが無いときは比べようがないので、何もしない
+          if ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            echo "前のコミット ($BEFORE) が無いので比較しない"; exit 0
+          fi
           if ! git diff --quiet "$BEFORE" "$SHA" -- tools/cloudkit_schema.ckdb; then
             python3 tools/check_ckdb_schema.py --base "$BEFORE" --summary body.md
           fi
