@@ -161,11 +161,6 @@ class MasteryViewModel(app: Application) : AndroidViewModel(app) {
         _detail.value = current.copy(group = refreshed ?: current.group)
     }
 
-    fun reloadScale() {
-        _uiState.value = _uiState.value.copy(scale = AppPreferences.masteryScale)
-        recompute(immediate = true)
-    }
-
     private fun recompute(immediate: Boolean = false) {
         recomputeJob?.cancel()
         recomputeJob = viewModelScope.launch {

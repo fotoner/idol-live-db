@@ -8,10 +8,7 @@ enum class SearchScope(val label: String, val prompt: String, val emptyNoun: Str
     ALL("すべて", "ライブ・楽曲・アイドルを検索", "項目"),
     EVENTS("ライブ", "ライブ名 / 会場で検索", "ライブ"),
     SONGS("楽曲", "曲名で検索", "楽曲"),
-    IDOLS("アイドル", "アイドル名 / CV名で検索", "アイドル");
-
-    /** このスコープで結果セクションを表示するか。 */
-    fun includes(other: SearchScope): Boolean = this == ALL || this == other
+    IDOLS("アイドル", "アイドル名 / CV名で検索", "アイドル")
 }
 
 /**

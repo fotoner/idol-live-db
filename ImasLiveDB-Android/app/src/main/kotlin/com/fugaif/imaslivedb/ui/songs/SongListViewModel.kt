@@ -244,20 +244,6 @@ class SongListViewModel : ViewModel() {
         applyTagFilter(_uiState.value.selectedTags.filter { it.id != tag.id })
     }
 
-    fun resetAllFilters() {
-        _uiState.value = _uiState.value.copy(
-            filter = SongSearchFilter(),
-            sortOrder = SongSortOrder.TITLE_KANA,
-            sortAscending = null,
-            showOtherBrand = false,
-            collectFilter = SongCollectFilter.ALL,
-            myMarkFilter = SongMyMarkFilter(),
-            selectedTags = emptyList(),
-            listMode = SongListMode.SONGS
-        )
-        loadSongs()
-    }
-
     /**
      * 行の長押しメニューから習熟度を付け替える。
      *

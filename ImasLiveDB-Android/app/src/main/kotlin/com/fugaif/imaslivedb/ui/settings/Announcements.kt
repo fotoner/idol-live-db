@@ -239,22 +239,8 @@ class AnnouncementStore(context: Context) {
         prefs.edit().putStringSet(KEY_READ, AnnouncementCatalog.all.map { it.id }.toSet()).apply()
     }
 
-    /**
-     * アプリのバージョンが前回起動から変わっていて、かつ未読があるときだけ true。
-     * 一度判定したらそのバージョンを記録し、同バージョンでは二度と自動表示しない。
-     * 初インストール (記録なし) は自動表示しない — 初回はオンボーディングの領分。
-     */
-    fun shouldAutoShowOnUpdate(currentVersion: String): Boolean {
-        val lastSeen = prefs.getString(KEY_SEEN_VERSION, null)
-        if (lastSeen == currentVersion) return false
-        prefs.edit().putString(KEY_SEEN_VERSION, currentVersion).apply()
-        if (lastSeen == null) return false
-        return unreadCount > 0
-    }
-
     private companion object {
         const val PREFS_NAME = "announcements"
         const val KEY_READ = "announce_read_ids"
-        const val KEY_SEEN_VERSION = "announce_seen_version"
     }
 }
