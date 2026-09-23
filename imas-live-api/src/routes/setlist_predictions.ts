@@ -8,9 +8,11 @@
 // 新曲でも投票できるようにするため)。
 //
 // ⚠️ ルート本文は移動しただけで、SQL もレスポンス JSON のキーも
-//    ステータスコードも Cache-Control も変えていない。
+//    ステータスコードも Cache-Control も変えていない
+//    (そのあと Q-10 で、一覧の first_voted_by の値を先頭 8 文字にした。キーは残す)。
 
 import { getAuthUser } from "../auth";
+import { maskUserRef } from "../masking";
 import { checkRateLimit, VOTE_LIMIT } from "../rate_limit";
 import { upsertUser } from "../users";
 import { validateOpaqueKey } from "../validation";
@@ -86,6 +88,8 @@ export async function handleSetlistPredictions(ctx: RouteContext): Promise<Respo
       return json(
         results.map((r: any) => ({
           ...r,
+          // 最初に入れた人 (uid) は先頭 8 文字だけ返す (タグの履歴の edited_by と同じ)。
+          first_voted_by: maskUserRef(r.first_voted_by),
           has_user_voted: r.has_user_voted === 1,
         }))
       );
@@ -276,6 +280,8 @@ export async function handleSetlistPredictions(ctx: RouteContext): Promise<Respo
       return json(
         results.map((r: any) => ({
           ...r,
+          // 最初に入れた人 (uid) は先頭 8 文字だけ返す (タグの履歴の edited_by と同じ)。
+          first_voted_by: maskUserRef(r.first_voted_by),
           has_user_voted: r.has_user_voted === 1,
         }))
       );

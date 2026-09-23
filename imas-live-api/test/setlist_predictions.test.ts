@@ -64,6 +64,15 @@ describe("予想セトリ (/shows/:id/predictions と /me/predictions)", () => {
     expect((await callJson("GET", "/me/predictions")).status).toBe(401);
   });
 
+  it("一覧の first_voted_by は先頭 8 文字だけ返す (キーは残す。値の無い行は null のまま)", async () => {
+    await insertUser(UID);
+    await predict("sh1", "s1");
+    await exec("INSERT INTO setlist_predictions (show_id, song_id, vote_count, first_voted_by) VALUES ('sh1', 's2', 1, NULL)");
+    const list = await callJson("GET", "/shows/sh1/predictions");
+    expect(Object.fromEntries(list.body.map((r: any) => [r.song_id, r.first_voted_by])))
+      .toEqual({ s1: UID.slice(0, 8), s2: null });
+  });
+
   it("取り消しは票を 1 減らし、0 票の行は消える。入れていなければ not_voted", async () => {
     await insertUser(UID);
     await insertUser(OTHER);
@@ -126,6 +135,13 @@ describe("出演者予想 (/shows/:id/songs/:songId/performers)", () => {
     expect(Object.keys(res.body[0]).sort()).toEqual(
       ["first_voted_at", "first_voted_by", "has_user_voted", "idol_id", "show_id", "song_id", "vote_count"]
     );
+  });
+
+  it("一覧の first_voted_by は先頭 8 文字だけ返す (キーは残す)", async () => {
+    await insertUser(UID);
+    await pick("i1");
+    const res = await callJson("GET", "/shows/sh1/songs/s1/performers");
+    expect(res.body.map((r: any) => r.first_voted_by)).toEqual([UID.slice(0, 8)]);
   });
 
   it("取り消しは票を 1 減らし、0 票の行は消える。入れていなければ not_voted", async () => {

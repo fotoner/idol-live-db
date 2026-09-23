@@ -15,6 +15,7 @@
 //    表の名前は TagPool の定数だけを埋め込む (ユーザーの入力は常にバインドする)。
 
 import { getAuthUser } from "../auth";
+import { maskUserRef } from "../masking";
 import { checkRateLimit, commitIpRateLimit } from "../rate_limit";
 import { checkIsAdmin } from "../users";
 import { parsePositiveInt, escapeLike } from "../validation";
@@ -646,7 +647,7 @@ async function updateTag(ctx: RouteContext, pool: TagPool, rawId: string): Promi
 
 /**
  * GET <master>/:id/history — 説明の編集履歴 (新しい順に 30 件)。
- * 編集者 (端末 ID か uid) は先頭 8 文字だけ返す (アプリも先頭 8 文字 + "..." で表示している)。
+ * 編集者 (端末 ID か uid) は先頭 8 文字だけ返す (maskUserRef。予想の first_voted_by と同じ)。
  */
 async function tagHistory(ctx: RouteContext, pool: TagPool, rawId: string): Promise<Response> {
   const tagId = decodePathParam(ctx, rawId, "tag_id");
@@ -655,11 +656,11 @@ async function tagHistory(ctx: RouteContext, pool: TagPool, rawId: string): Prom
     `SELECT id, tag_id,
             description AS description_after,
             description_before,
-            SUBSTR(edited_by, 1, 8) AS edited_by, edited_at
+            edited_by, edited_at
      FROM ${pool.historyTable}
      WHERE tag_id = ? ORDER BY edited_at DESC LIMIT 30`
   ).bind(tagId).all();
-  return ctx.json(results);
+  return ctx.json(results.map((r) => ({ ...r, edited_by: maskUserRef(r.edited_by) })));
 }
 
 /**
