@@ -681,11 +681,14 @@ mod tests {
         let snap = 実データ();
         // or ではなく chain。両方を持つ曲から片方しか検査値に入らないと、
         // 欄名を変えられたときに二重の網が片方しか効かない。
+        // 空文字は URL ではない (DB には NULL と '' が混ざる)。入れるとどの出力も
+        // `contains("")` で引っかかり、検査にならない。
         let 禁止値: Vec<&str> = snap
             .songs
             .iter()
             .flat_map(|s| [s.lyrics_url.as_deref(), s.preview_url.as_deref()])
             .flatten()
+            .filter(|v| !v.is_empty())
             .collect();
         assert!(!禁止値.is_empty(), "実データに検査対象が無い (テストが空振りしている)");
 
