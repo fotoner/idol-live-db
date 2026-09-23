@@ -114,10 +114,10 @@ import com.fugaif.imaslivedb.ui.theme.BrandPalette
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import kotlinx.coroutines.launch
-import uniffi.imas_core.IdolProfileInput
+import uniffi.imas_core.IdolProfileSource
 import uniffi.imas_core.RowAction
 import uniffi.imas_core.RowStyle
-import uniffi.imas_core.idolProfileRows
+import uniffi.imas_core.idolProfileRowsFromSource
 import java.io.File
 
 /**
@@ -592,17 +592,23 @@ private fun ProfileBody(
     // iOS と同じ条件を二重に書くと必ずいつかズレるので、ここは整形済みの値を渡すだけにする。
     // 1 画面 = 1 呼び出し。idol が変わらない限り作り直さない。
     val rows = remember(idol) {
-        idolProfileRows(
-            IdolProfileInput(
+        idolProfileRowsFromSource(
+            IdolProfileSource(
                 nameKana = idol.nameKana,
                 nameRomaji = idol.nameRomaji,
-                birthdayDisplay = idol.birthday?.let { formatBirthday(it) },
-                birthMonth = birthMonth(idol.birthday),
-                ageHeightWeight = ageHeightWeight(idol),
-                threeSize = threeSize(idol),
-                bloodConstellation = bloodConstellation(idol),
-                birthplaceHandedness = birthplaceHand(idol),
-                hobbyTalent = hobbyTalent(idol),
+                birthday = idol.birthday,
+                age = idol.age?.toLong(),
+                height = idol.height,
+                weight = idol.weight,
+                bust = idol.bust,
+                waist = idol.waist,
+                hip = idol.hip,
+                bloodType = idol.bloodType,
+                constellation = idol.constellation,
+                birthPlace = idol.birthPlace,
+                handedness = idol.handedness,
+                hobbies = idol.hobbies,
+                talents = idol.talents,
                 color = idol.color
             )
         )
@@ -652,7 +658,7 @@ private fun ProfileBody(
  * 「同じ属性のアイドル」への入口 (ブランド / 星座 / 出身地 / 血液型)。
  *
  * プロフィールの行そのものを押させないのは、行の組み立て — どの行が・どの順で・押せるか —
- * を共有コア (`idolProfileRows`) が持っているため。血液型と星座は 1 行に同居していて
+ * を共有コア (`idolProfileRowsFromSource`) が持っているため。血液型と星座は 1 行に同居していて
  * 行き先が 2 つあり、コアの `RowAction` では表現できない。行の内訳ではなくチップで
  * 「この属性で辿れる」ことを示す方が、どこを押すと何が起きるかも明快になる。
  */
@@ -909,19 +915,6 @@ private fun voiceActorLabel(voiceActors: String?): String? {
     return names.takeIf { it.isNotEmpty() }?.joinToString(" / ")?.let { "CV $it" }
 }
 
-private fun formatBirthday(b: String): String =
-    b.removePrefix("--").split("-").let { if (it.size == 2) "${it[0]}月${it[1]}日" else b }
-
-/**
- * "--MM-DD" から誕生月を取り出す (iOS `Idol.birthMonth` と同じ判定)。
- *
- * "--" で始まらない値は年入りの日付なので月を名乗らせない。範囲外の月はコア側で弾かれる。
- */
-private fun birthMonth(birthday: String?): UInt? {
-    if (birthday == null || !birthday.startsWith("--")) return null
-    return birthday.removePrefix("--").split("-").firstOrNull()?.toUIntOrNull()
-}
-
 /** "2026-06-21" → "6/21" */
 private fun monthDay(date: String): String {
     val parts = date.split("-")
@@ -929,42 +922,4 @@ private fun monthDay(date: String): String {
     val m = parts[1].toIntOrNull() ?: return date
     val d = parts[2].toIntOrNull() ?: return date
     return "$m/$d"
-}
-
-private fun ageHeightWeight(i: Idol): String? {
-    val parts = buildList {
-        i.age?.let { add("${it}歳") }
-        i.height?.let { add("${it.toInt()}cm") }
-        i.weight?.let { add("${it.toInt()}kg") }
-    }
-    return parts.takeIf { it.isNotEmpty() }?.joinToString(" / ")
-}
-
-private fun threeSize(i: Idol): String? {
-    val b = i.bust; val w = i.waist; val h = i.hip
-    return if (b != null && w != null && h != null) "B${b.toInt()} / W${w.toInt()} / H${h.toInt()}" else null
-}
-
-private fun bloodConstellation(i: Idol): String? {
-    val parts = buildList {
-        i.bloodType?.let { add("${it}型") }
-        i.constellation?.let { add(it) }
-    }
-    return parts.takeIf { it.isNotEmpty() }?.joinToString(" ・ ")
-}
-
-private fun birthplaceHand(i: Idol): String? {
-    val parts = buildList {
-        i.birthPlace?.let { add(it) }
-        i.handedness?.let { add(if (it == "right") "右" else if (it == "left") "左" else it) }
-    }
-    return parts.takeIf { it.isNotEmpty() }?.joinToString(" ・ ")
-}
-
-private fun hobbyTalent(i: Idol): String? {
-    val parts = buildList {
-        i.hobbies?.let { add(it) }
-        i.talents?.let { add(it) }
-    }
-    return parts.takeIf { it.isNotEmpty() }?.joinToString(" ・ ")
 }
