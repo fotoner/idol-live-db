@@ -36,6 +36,8 @@ ImasLiveDB.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/*
 
 # SQLite generated
 ImasLiveDB/Resources/master.sqlite
+# Android: 古いクローンに残った seed の生成物を誤って追跡しないためのガード (いまの seed はビルド出力に作る)
+ImasLiveDB-Android/app/src/main/assets/master_seed.sqlite
 
 # Secrets
 .env
