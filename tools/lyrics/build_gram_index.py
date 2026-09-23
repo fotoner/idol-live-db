@@ -14,7 +14,9 @@ Usage:
 入力は既定で **D1 の song_lyrics.body_norm** (表記ゆれを吸収した検索用のコピー)。
 検索側も正規化した語で引くので、索引も正規化後の本文から作らないと候補が合わない。
 lyrics_local ではなく D1 を正とするのは、アプリからの編集などローカルに無い更新が
-入りうるため。
+入りうるため。--from-local のときも、Worker が body_norm を作るのと同じ手順
+(歌詞行だけを改行でつなぎ、tools/lib/text.py の normalize_for_search を通す) で
+本文を作る。Worker の増分更新 (lyrics_index.ts) も body_norm から索引を作る。
 
 ⚠️ 全消し全入れで作り直す。差分更新にしないのは、歌詞1曲で 2-gram が 900 種類
    ほどあり、投入のたびに 900 行の read-modify-write が走って D1 無料枠の
@@ -34,6 +36,10 @@ from collections import defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
+sys.path.insert(0, os.path.dirname(HERE))  # tools/ (lib を読むため)
+
+from lib.text import normalize_for_search  # noqa: E402
+
 API_DIR = os.path.join(REPO, "imas-live-api")
 LOCAL_DIR = os.path.join(REPO, "lyrics_local", "lyrics")
 D1_NAME = "imas-live-db"
@@ -71,13 +77,26 @@ def read_from_d1() -> list[tuple[str, str]]:
     return [(r["song_id"], r["body"] or "") for r in rows]
 
 
+def search_body(lines: list) -> str:
+    """Worker が body に書く検索用の本文 (routes/lyrics.ts の searchBody と同じ)。
+
+    歌詞行だけを改行でつなぐ。kind の無い行は歌詞として扱う (push_lyrics.py も Worker も
+    kind を省いた行を lyric にする)。
+    """
+    def kind(line):
+        return "lyric" if line.get("kind") is None else line["kind"]
+
+    return "\n".join(line.get("text") or "" for line in lines if kind(line) == "lyric")
+
+
 def read_from_local() -> list[tuple[str, str]]:
+    """lyrics_local/lyrics/*.json から (song_id, body_norm と同じ本文) を読む。"""
     import glob
     out = []
     for path in sorted(glob.glob(os.path.join(LOCAL_DIR, "*.json"))):
         with open(path, encoding="utf-8") as f:
             doc = json.load(f)
-        body = "\n".join(l["text"] for l in doc["lines"] if l.get("kind") == "lyric")
+        body = normalize_for_search(search_body(doc["lines"]))
         if body:
             out.append((doc["song_id"], body))
     return out

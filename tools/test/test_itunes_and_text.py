@@ -12,7 +12,7 @@ import json
 import unittest
 import urllib.request
 
-import support  # noqa: F401 (通信の番人)
+import support
 from lib import itunes, text
 
 import apply_official_idol_order
@@ -61,6 +61,34 @@ class TextRulesTest(unittest.TestCase):
         expected = ["所恵美", "765PROALLSTARS", "a\tb\nc", "Abcd", "xy", "アイドルマスター"]
         for fn in (text.nfkc_drop_spaces, apply_official_idol_order.key):
             self.check(fn, expected)
+
+
+class NormalizeForSearchTest(unittest.TestCase):
+    """歌詞検索の正規化。Worker (imas-live-api/src/routes/lyrics.ts の normalizeForSearch) と同じ規則。
+
+    ダミーの仮名と記号だけで確かめる (歌詞は使わない)。
+    """
+
+    CASES = [
+        ("あいうゔゕゖ", "アイウヴヵヶ"),          # U+3041〜U+3096 はカタカナへ
+        ("\u3040\u3097ゝゞーアイ", "\u3040\u3097ゝゞーアイ"),  # 範囲の外と、既にカタカナのものはそのまま
+        ("ＡＢＣａｂｃ０１２！～", "abcabc012!~"),  # U+FF01〜U+FF5E は半角へ (英字は小文字)
+        ("\uff00｟ｱｲ", "\uff00｟ｱｲ"),             # 範囲の外 (半角カナも広げない)
+        ("ABC xyz", "abc xyz"),
+    ]
+
+    def test_cases(self):
+        for given, expected in self.CASES:
+            with self.subTest(given=given):
+                self.assertEqual(text.normalize_for_search(given), expected)
+                # 1 文字 → 1 文字 (検索は body_norm 上の位置で body から窓を切る)。
+                self.assertEqual(len(text.normalize_for_search(given)), len(given))
+
+    def test_the_backfill_tool_uses_the_same_function(self):
+        import sys
+        sys.path.insert(0, str(support.TOOLS / "lyrics"))
+        import backfill_body_norm
+        self.assertIs(backfill_body_norm.normalize, text.normalize_for_search)
 
 
 class FakeUrlopen:

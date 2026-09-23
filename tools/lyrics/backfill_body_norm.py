@@ -8,10 +8,9 @@ Usage:
 body_norm は表記ゆれを吸収した検索用のコピー (migrations 0031)。
 以降は PUT /admin/lyrics/:song_id が body と同時に書くので、これは初回の埋め直し用。
 
-⚠️ 正規化は **1文字 → 1文字** の変換だけ。検索は body_norm 上で一致位置を求め、
-   その位置で body から窓を切るので、長さの変わる変換を入れるとスニペットが壊れる。
-   routes/lyrics.ts の normalizeForSearch と**同じ規則**にすること。
-   片方だけ変えると、検索で当たるのに窓が作れない曲が出る。
+⚠️ 正規化は tools/lib/text.py の normalize_for_search (routes/lyrics.ts の
+   normalizeForSearch と同じ規則。1文字 → 1文字 の変換だけ)。索引の全再構築
+   (build_gram_index.py) も同じ関数を使う。
 """
 
 import argparse
@@ -22,26 +21,16 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
+sys.path.insert(0, os.path.dirname(HERE))  # tools/ (lib を読むため)
+
+from lib.text import normalize_for_search as normalize  # noqa: E402
+
 API_DIR = os.path.join(REPO, "imas-live-api")
 OUT_PATH = os.path.join(REPO, "lyrics_local", "body_norm.sql")
 D1_NAME = "imas-live-db"
 
 # 1文あたりのバイト上限。D1 は 100KB 程度で SQLITE_TOOBIG になる。
 MAX_STATEMENT_BYTES = 60_000
-
-
-def normalize(text: str) -> str:
-    """routes/lyrics.ts の normalizeForSearch と同じ規則。"""
-    out = []
-    for ch in text:
-        code = ord(ch)
-        if 0x3041 <= code <= 0x3096:          # ひらがな → カタカナ
-            out.append(chr(code + 0x60))
-        elif 0xFF01 <= code <= 0xFF5E:        # 全角英数記号 → 半角
-            out.append(chr(code - 0xFEE0).lower())
-        else:
-            out.append(ch.lower())
-    return "".join(out)
 
 
 def sql_quote(value: str) -> str:
