@@ -312,10 +312,15 @@ pub struct EventAttendanceRecord {
     pub covering_unit_ids: Vec<String>,
 }
 
-/// 出演者 (どれかの公演に出た人) を、そのイベントで歌唱されたユニットで覆う。
+/// 出演者を、そのイベントで歌唱されたユニットで覆う。
+///
+/// 覆う対象は「どれかの公演に出た人 ∩ 母集団 (`brand_idol_ids`)」。変更前の iOS の
+/// `presentIdols` (brandIdols のうち出た人) と同じ (R-C-01)。母集団の外の人
+/// (外部ゲスト・未実装期の人など) を混ぜると、その人を含むユニットが覆いに入りうる。
 fn event_covering_unit_ids(
     snap: &Snapshot,
     event_id: &str,
+    brand_idol_ids: &[String],
     presence_by_show: &HashMap<String, Vec<String>>,
 ) -> Vec<String> {
     use crate::domain::unit_queries::{covering_units, performed_unit_ids};
@@ -326,9 +331,11 @@ fn event_covering_unit_ids(
     if allowed.is_empty() {
         return Vec::new();
     }
+    let population: HashSet<&str> = brand_idol_ids.iter().map(String::as_str).collect();
     let present: HashSet<u32> = presence_by_show
         .values()
         .flatten()
+        .filter(|id| population.contains(id.as_str()))
         .filter_map(|id| snap.idol_index_by_id.get(id).copied())
         .collect();
     covering_units(snap, &present, &allowed)
@@ -1026,7 +1033,7 @@ pub fn event_attendance(snap: &Snapshot, event_id: &str) -> Option<EventAttendan
 
     let shows: Vec<ShowRecord> = shows.iter().map(|&s| show_record_at(snap, s)).collect();
     let groups = attendance_groups(&brand_idol_ids, &shows, &presence_by_show);
-    let covering_unit_ids = event_covering_unit_ids(snap, event_id, &presence_by_show);
+    let covering_unit_ids = event_covering_unit_ids(snap, event_id, &brand_idol_ids, &presence_by_show);
     Some(EventAttendanceRecord {
         brand_idol_ids,
         shows,
@@ -1201,6 +1208,29 @@ mod attendance_group_tests {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// 覆う対象は母集団の中の人だけ (R-C-01)。覆いに入ったユニットの 1 人を母集団から
+    /// 外すと、出席表の出席に残っていても、そのユニットは覆いから消える。
+    #[test]
+    fn covering_units_ignore_people_outside_the_population() {
+        let snap = crate::test_support::bundle_snapshot();
+        let (event_id, record) = snap
+            .events
+            .iter()
+            .find_map(|e| {
+                let r = event_attendance(snap, &e.id)?;
+                (!r.covering_unit_ids.is_empty()).then(|| (e.id.clone(), r))
+            })
+            .expect("覆いのあるイベントが実データにある");
+        let unit_id = &record.covering_unit_ids[0];
+        let unit = snap.unit_index_by_id[unit_id];
+        let outsider = &snap.idols[snap.members_by_unit[unit as usize][0] as usize].id;
+        let population: Vec<String> =
+            record.brand_idol_ids.iter().filter(|id| *id != outsider).cloned().collect();
+        let covering =
+            event_covering_unit_ids(snap, &event_id, &population, &record.presence_by_show);
+        assert!(!covering.contains(unit_id), "{event_id}: 母集団の外の {outsider} で {unit_id} が覆いに入った");
+    }
 
     /// sort_order が NULL のアイドルは、出席表でも一覧と同じく末尾に並ぶ (Q-07)。
     #[test]
