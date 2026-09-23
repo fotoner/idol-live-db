@@ -91,7 +91,7 @@ Swift のコードは Android (Kotlin) と**共有できない**。再利用で�
 - **View**: ViewModel にのみ依存。**View 内で `AppDatabase` 直叩き・`XxxService.shared` 到達を禁止** (合成ルート `AppContainer.shared` 経由は可)。
 
 ### Composition Root (`AppContainer`)
-- 具象アダプタを1箇所で組み立て、ポートとして供給。`XxxService.shared` 直参照 (MusicKit 56 / APIClient 46 / Auth 42 / Community 35 / UserMark 26 …) はここへ寄せる。
+- 具象アダプタを1箇所で組み立て、ポートとして供給。`XxxService.shared` 直参照 (実測 2026-09-23: MusicKit 61 / APIClient 74 / Auth 50 / Community 23 / UserMark 42) はここへ寄せる。
 
 ---
 
@@ -187,7 +187,7 @@ ImasLiveDB/
 - **投票機能**を縦に1本貫通 (`CommunityVoting` + `CommunityAPI` + `Poll*ViewModel` 3本)。
 - **読みポート 12 + 書きポート 4 + CommunityVoting = 16 ポート**。各 `GRDB*Repository` が `AppDatabase` へ委譲 (Strangler, `nonisolated async` でオフメイン)。View 層の `AppDatabase` 直叩き (fetch/search/upsert/replace/raw dbQueue) は **0 件**。
 - **純粋 UseCase 4本** (`EventGrouping` + 3リストフィルタ)。絞り込み・グルーピングは DB 非依存で単体テスト済。
-- **List/Detail の正式 ViewModel 化 (済)**: 3リスト (`IdolListViewModel` / `SongListViewModel` / `EventListViewModel`) + 2詳細 (`EventDetailViewModel` / `IdolDetailViewModel`)。いずれも `@MainActor @Observable final class` + `nonisolated init` でポート注入。View は `@AppStorage`・選択状態・`@Observable` サービス観測 (UserMark/CustomImage) のみ保持し、Request/Context/Query 構造体で条件を VM へ渡す。`SongDetailView` は薄いラッパ (データ取得なし) のため VM 不要。
+- **List/Detail の正式 ViewModel 化 (済)**: 3リスト (`IdolListViewModel` / `SongListViewModel` / `EventListViewModel`) + 2詳細 (`EventDetailViewModel` / `IdolDetailViewModel`)。いずれも `@MainActor @Observable final class` + `nonisolated init` でポート注入。View は `@AppStorage`・選択状態・`@Observable` サービス観測 (UserMark/CustomImage) のみ保持し、Request/Context/Query 構造体で条件を VM へ渡す。`SongDetailView` は薄いラッパ (データ取得なし) のため VM 不要 (2026-09-23 実測: 呼び出し元 0 件で未参照。`Views/Songs/SongDetailView.swift` を触る前に呼び出し経路を再確認すること)。
 - **テスト 36本** 全パス (投票11 + フィルタ/グルーピング22 + IdolListViewModel 3)。
 
 ### 進捗 (2026-07)
@@ -266,8 +266,50 @@ ImasLiveDB/
 - Web も同じ規則を使う (`web_export/emit/glyph.rs::idol_monogram` が `Idol::short_name` を
   4 文字までに切る)。**3 プラットフォームで顔の文字が一致する。**
 
+### 進捗 (2026-09-23) — SQL フォールバック廃止・reseed の allow-list 化・コアへの規則移送
+
+大規模リファクタ (指示書 `refactor-instructions.md` の P2〜P6・Q-01〜Q-16) で、マスタの読みと
+reseed の判断がさらにコアへ寄った。
+
+- **マスタ読みの SQL フォールバックを廃止 (X-01 / Q-04)。** それまで両 OS とも「スナップショット
+  (Rust 側でロード済みの全件メモリ表) が無ければ GRDB / Room への生 SQL に落ちる」という二重経路
+  だったが、**フォールバックを消し、スナップショット未ロードの間は読み込み待ちにする**方針に統一した
+  (iOS はコミット `bf157c75`、Android は `f6ca2acf`)。ネイティブ (imas-core) 無しで動く Android 環境は
+  要件から外れた。メモリ警告時にスナップショットを unload することもしない。「Repository は
+  `AppDatabase` への薄い委譲」という本書冒頭の記述は、マスタ読みに関する限りこの変更で
+  「スナップショット 1 経路」に単純化されている (投票等の集計系コミュニティ API 呼び出しは対象外)。
+- **reseed で入れ直す対象表を、コアのマスタスキーマ台帳からの allow-list で決める (P5-05)。**
+  `reseed_master_target_tables(bundleTables:localTables:)` が `schema_ddl::table_names()`
+  (= `master_schema.sql` の表一覧) にあり、かつ同梱 DB と端末の両方に実在する表だけを
+  同梱 DB の並びで返す。`sqlite_` 前置と `meta` は除く。`user_marks` / `personal_tags` /
+  `expenses` / `song_videos` のようなローカル唯一データは台帳に無いので、同名の表が
+  同梱 DB に紛れ込んでも reseed の対象にならない。旧実装の `untouchedTables` (スキーマ適用の
+  結果に依存する保護表の組み方) には依存しないため、スキーマ適用に失敗した端末でも reseed が
+  止まらなくなった。共通列 (`reseed_common_columns`) と要約文言 (`reseed_summary_label`) も
+  同じコアの関数に統一。
+- **コアに移した表示・判断規則の一覧。** このリファクタで iOS / Android の手書きロジックの
+  多数をコア (`imas-core/src/domain/`) の純粋関数へ移送し、両 OS から FFI 経由で呼ぶ形に揃えた
+  (セトリの区切り見出し・オリメン札・プロフィール整形・ブランド色解決・語彙 (曲種別/催しの種別/
+  参加形態/タグカテゴリ)・通知の予定表・週表示のレイアウト・検索行の説明文・回収ダッシュボード・
+  出演状況の塊・イントロドンの得点規則・YouTube URL 解析・色の読み上げ名・チケット代を聞くかの
+  判断・会場と年のグルーピング・次の出演/似ているアイドルの選び方・入力欄の文字数上限と投票の
+  数え方・共有文面・バックアップの対象行・「最近見たもの」の並べ替え・ライブ名の短縮 等)。
+  移送の考え方はリポジトリの `CLAUDE.md`「着手時に最初に決めること」と同じ:
+  「OS SDK に触らないと書けないものだけが各 OS 側、それ以外の判断は全部コア」。
+  1 件ごとの FFI 差分・置き換え箇所・挙動が変わる点は `git log` のコミットメッセージ
+  (`R-A-*` / `R-B-*` / `R-C-*` / `Q-08*` の ID で検索可能) と、各コミットに対応する
+  core-rules チームの配線メモを参照。
+- **LLM 向けツール面 (MCP サーバ / CLI) を `feature = "agent"` に隔離 (D-CORE-14 / Q-16)。**
+  `imas-core/src/agent/` (ツールのカタログ・応答の組み立て・入出力) は既定 off の Cargo feature
+  で、iOS / Android のビルド (既定 feature set) には一切コンパイルされない。詳細は
+  [`ARCHITECTURE-mcp.md`](ARCHITECTURE-mcp.md)。
+- **テストの既定 DB を `db/master.sql` からの復元にした (P6-01)。** 実データを読む Rust の
+  テストは `test_support::test_db` に集約され、既定で `db/master.sql` を SQLite に復元した
+  ものを読む (`IMAS_CORE_TEST_DB` で差し替え可能)。CI とローカルが同じ入力でテストするため、
+  「CI は緑・手元は赤」のような環境差を減らす。
+
 ### レイヤ違反の検査
-- `Domain/` 配下で `import SwiftUI|GRDB|CloudKit` を grep して 0 を保つ。**`tools/check_domain_purity.sh`** が自動チェック (違反で exit 1)。pre-commit / CI 組み込み候補。
+- `Domain/` 配下で `import SwiftUI|GRDB|CloudKit` を grep して 0 を保つ。**`tools/check_domain_purity.sh`** が自動チェック (違反で exit 1)。**CI 組み込み済み** (`.github/workflows/architecture-guard.yml`。`ImasLiveDB/Domain/**` 変更時に push(main/develop)/PR で実行)。
 
 ---
 
