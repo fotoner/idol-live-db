@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.util.concurrent.atomic.AtomicBoolean
 import uniffi.imas_core.SnapshotException
 import uniffi.imas_core.SnapshotStore
 
@@ -47,14 +48,19 @@ class SnapshotStoreProvider(
         .onFailure { Log.w(TAG, "SnapshotStore 生成失敗 → SQL 経路のみで継続", it) }
         .getOrNull()
 
+    private val started = AtomicBoolean(false)
+
     /**
-     * 起動時に一度呼ぶ。初回 load と、sync 完了ごとの reload 購読を開始する。
+     * 初回 load と、sync 完了ごとの reload 購読を開始する。何度呼んでも始めるのは 1 回だけ。
+     *
+     * 画面が出るとき ([com.fugaif.imaslivedb.MainActivity]) に呼ぶ。ウィジェットや通知だけの
+     * プロセスでは、初めて [query] されたときに始まる (そのプロセスで要らなければ読まない)。
      *
      * 初回インストール直後は DB ファイルがまだ無く初回 load はスキップされるが、
      * seed 投入後の初回フル同期が Completed を流すのでそこで load される。
      */
     fun start() {
-        if (store == null) return
+        if (store == null || !started.compareAndSet(false, true)) return
         scope.launch { reload() }
         scope.launch {
             // CloudKitSyncEngine 側は書き込みの完了を state で公開しているだけなので、
@@ -99,6 +105,7 @@ class SnapshotStoreProvider(
      */
     suspend fun <T> query(block: (SnapshotStore) -> T): T? {
         val s = store ?: return null
+        start()
         if (!s.isLoaded()) return null
         return withContext(Dispatchers.Default) {
             try {

@@ -39,7 +39,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val sync = AppModule.from(this).syncEngine
+        val module = AppModule.from(this)
+        // スナップショットの読み込みは画面が出るときに始める (ウィジェットや通知だけの
+        // プロセスでは読まない)。
+        module.snapshotStoreProvider.start()
+        val sync = module.syncEngine
         // ローカル通知を毎回まるごと組み直す (iOS ImasLiveDBApp と同じ起動時フック)。
         // AlarmManager の予約はアプリ更新や端末再起動で消えるうえ、担当/お気に入りの
         // 増減も起動のたびに拾い直したいので、差分更新ではなく全消去 → 全再スケジュール。
@@ -84,6 +88,15 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // サインイン済みなら isAdmin / BAN 状態をサーバから最新化する。BAN は /auth/login では
+        // 返らないため、これが無いと BAN 済みユーザーに編集導線が出続ける。前面に出たときに、
+        // 間隔を空けて問い合わせる (iOS は起動時)。
+        val module = AppModule.from(this)
+        module.appScope.launch { module.authService.refreshMeIfDue() }
     }
 }
 

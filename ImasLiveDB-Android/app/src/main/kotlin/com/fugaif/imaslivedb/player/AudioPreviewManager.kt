@@ -39,7 +39,8 @@ data class PlaybackState(
  * Singleton audio preview manager backed by ExoPlayer (Media3).
  * Handles audio focus, and exposes [playbackState] as a [StateFlow].
  *
- * Must be initialised via [init] before use (call from Application.onCreate).
+ * [init] で Context を受け取っておき、ExoPlayer は初めて鳴らすときに作る
+ * (プロセスはウィジェットや通知からも起動するので、鳴らさないプロセスで作らない)。
  * Mirrors iOS MusicKitService.shared preview logic.
  */
 object AudioPreviewManager {
@@ -47,17 +48,21 @@ object AudioPreviewManager {
     private val _playbackState = MutableStateFlow(PlaybackState())
     val playbackState: StateFlow<PlaybackState> = _playbackState.asStateFlow()
 
+    private var appContext: Context? = null
     private var player: ExoPlayer? = null
     private var audioManager: AudioManager? = null
     private var focusRequest: AudioFocusRequest? = null
     private var focusChangeListener: AudioManager.OnAudioFocusChangeListener? = null
 
-    /**
-     * Initialise ExoPlayer and AudioManager.
-     * Call once from [android.app.Application.onCreate].
-     */
+    /** Context だけを受け取る (軽い)。Call once from [android.app.Application.onCreate]. */
     fun init(context: Context) {
-        if (player != null) return
+        appContext = context.applicationContext
+    }
+
+    /** ExoPlayer と AudioManager を初めて要るときに作る。鳴らす操作 (メインスレッド) から呼ぶ。 */
+    private fun ensurePlayer(): ExoPlayer? {
+        player?.let { return it }
+        val context = appContext ?: return null
 
         audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
@@ -84,6 +89,7 @@ object AudioPreviewManager {
                     }
                 })
             }
+        return player
     }
 
     /**
@@ -128,7 +134,7 @@ object AudioPreviewManager {
     // --- Private helpers ---
 
     private fun playUrl(url: String, songId: String) {
-        val exo = player ?: return
+        val exo = ensurePlayer() ?: return
         if (!requestAudioFocus()) return
 
         _playbackState.value = PlaybackState(

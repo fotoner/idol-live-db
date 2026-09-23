@@ -1,6 +1,7 @@
 package com.fugaif.imaslivedb.di
 
 import android.content.Context
+import android.util.Log
 import com.fugaif.imaslivedb.data.auth.AuthService
 import com.fugaif.imaslivedb.data.backup.BackupTransferApi
 import com.fugaif.imaslivedb.data.core.SnapshotStoreProvider
@@ -27,6 +28,10 @@ import com.fugaif.imaslivedb.data.community.SetlistLikeService
 import com.fugaif.imaslivedb.data.net.WorkerHttpClient
 import com.fugaif.imaslivedb.data.games.GameProgressStore
 import com.fugaif.imaslivedb.data.sync.CloudKitSyncEngine
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 /**
  * Manual DI container. Obtain via AppModule.from(context).
@@ -36,6 +41,15 @@ class AppModule private constructor(context: Context) {
 
     private val appContext: Context = context.applicationContext
     val database: AppDatabase = AppDatabase.getInstance(context)
+
+    /**
+     * プロセス寿命の処理用 (画面を離れても止まらない)。個々の失敗が他を巻き込まないよう
+     * SupervisorJob、捕まえ損ねた例外でプロセスごと落とさないようハンドラで受けて記録だけする。
+     */
+    val appScope: CoroutineScope = CoroutineScope(
+        SupervisorJob() + Dispatchers.IO +
+            CoroutineExceptionHandler { _, e -> Log.e(TAG, "バックグラウンドの処理が失敗", e) }
+    )
 
     /**
      * 共有コア (imas-core) のインメモリスナップショット。読み取り系リポジトリの第一経路。
@@ -70,13 +84,15 @@ class AppModule private constructor(context: Context) {
     val editApi: EditApi by lazy { EditApi(workerHttpClient, authService) }
     val setlistLikeService: SetlistLikeService by lazy { SetlistLikeService(workerHttpClient) }
     val editFeedRepository: EditFeedRepository by lazy { EditFeedRepository(database, snapshotStoreProvider) }
-    val syncEngine: CloudKitSyncEngine by lazy { CloudKitSyncEngine(appContext, database) }
+    val syncEngine: CloudKitSyncEngine by lazy { CloudKitSyncEngine(appContext, database, scope = appScope) }
     val localContributionLog: LocalContributionLog by lazy { LocalContributionLog(appContext) }
     val localPollVoteLog: LocalPollVoteLog by lazy { LocalPollVoteLog(appContext) }
     val gameProgressStore: GameProgressStore by lazy { GameProgressStore(appContext) }
     val backupTransferApi: BackupTransferApi by lazy { BackupTransferApi(workerHttpClient) }
 
     companion object {
+        private const val TAG = "AppModule"
+
         @Volatile
         private var instance: AppModule? = null
 

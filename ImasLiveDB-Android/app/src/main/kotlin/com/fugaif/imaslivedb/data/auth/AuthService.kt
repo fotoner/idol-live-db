@@ -121,7 +121,7 @@ class AuthService(private val appContext: Context, transport: WorkerTransport = 
      *
      * BAN はサーバ側でしか立たず `/auth/login` は isBanned を返さないので、
      * この再取得が無いと BAN 済みユーザーに編集導線が出続ける。
-     * 呼ぶのは起動時 ([com.fugaif.imaslivedb.ImasLiveDBApplication])。iOS も同じタイミング。
+     * 呼ぶのはアプリが前面に出たとき ([refreshMeIfDue])。iOS は起動時。
      */
     suspend fun refreshMe(): Unit = withContext(Dispatchers.IO) {
         if (sessionToken == null) return@withContext
@@ -155,6 +155,19 @@ class AuthService(private val appContext: Context, transport: WorkerTransport = 
         } catch (e: Exception) {
             Log.w(TAG, "refreshMe failed: ${e.message}")
         }
+    }
+
+    /** 直近に [refreshMe] を問い合わせた時刻 (このプロセスの中だけ)。0 = まだ。 */
+    @Volatile private var lastMeRefreshMs = 0L
+
+    /**
+     * アプリが前面に出たときに呼ぶ。このプロセスで [ME_REFRESH_INTERVAL_MS] 以内に
+     * 問い合わせていれば何もしない (前面に出るたびにサーバを読まないため)。
+     */
+    suspend fun refreshMeIfDue(nowMs: Long = System.currentTimeMillis()) {
+        if (lastMeRefreshMs != 0L && nowMs - lastMeRefreshMs < ME_REFRESH_INTERVAL_MS) return
+        lastMeRefreshMs = nowMs
+        refreshMe()
     }
 
     /**
@@ -247,6 +260,9 @@ class AuthService(private val appContext: Context, transport: WorkerTransport = 
     companion object {
         private const val TAG = "AuthService"
         private const val PREFS_NAME = "imas_auth_secure"
+
+        /** 前面に出たときの /auth/me の問い合わせ間隔。BAN は編集 API の 403 でもその場で反映される。 */
+        private const val ME_REFRESH_INTERVAL_MS = 6 * 60 * 60 * 1000L
         private const val KEY_SESSION_TOKEN = "session_token"
         private const val KEY_DISPLAY_NAME = "display_name"
         private const val KEY_IS_ADMIN = "is_admin"
