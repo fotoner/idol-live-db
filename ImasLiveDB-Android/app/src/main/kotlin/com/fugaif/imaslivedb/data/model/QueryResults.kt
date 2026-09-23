@@ -7,26 +7,6 @@ import uniffi.imas_core.dateRangeDisplay
 // MARK: - Event Query Results
 
 // Raw Room query result for events joined with first/last show date (一覧・お気に入り・参加ライブ共通)
-data class EventWithDateRangeRow(
-    @ColumnInfo(name = "id") val id: String,
-    @ColumnInfo(name = "brand_id") val brandId: String?,
-    @ColumnInfo(name = "name") val name: String,
-    @ColumnInfo(name = "event_type") val eventType: String,
-    @ColumnInfo(name = "is_streaming") val isStreaming: Boolean,
-    @ColumnInfo(name = "first_date") val firstDate: String?,
-    @ColumnInfo(name = "last_date") val lastDate: String?,
-    @ColumnInfo(name = "joint_brand_ids") val jointBrandIds: String?
-) {
-    fun toEventWithDateRange() = EventWithDateRange(
-        event = Event(
-            id = id, brandId = brandId, name = name, eventType = eventType,
-            isStreaming = isStreaming, jointBrandIds = jointBrandIds
-        ),
-        firstDate = firstDate,
-        lastDate = lastDate
-    )
-}
-
 data class EventWithDateRange(
     val event: Event,
     val firstDate: String?,

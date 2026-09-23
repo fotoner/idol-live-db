@@ -9,7 +9,6 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.fugaif.imaslivedb.data.db.dao.BrandDao
 import com.fugaif.imaslivedb.data.db.dao.CalendarDao
 import com.fugaif.imaslivedb.data.db.dao.CommunityDao
-import com.fugaif.imaslivedb.data.db.dao.EventDao
 import com.fugaif.imaslivedb.data.db.dao.ExpenseDao
 import com.fugaif.imaslivedb.data.db.dao.ShowTicketDao
 import com.fugaif.imaslivedb.data.db.dao.IdolDao
@@ -94,7 +93,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun calendarDao(): CalendarDao
     abstract fun communityDao(): CommunityDao
     abstract fun songDao(): SongDao
-    abstract fun eventDao(): EventDao
     abstract fun showDao(): ShowDao
     abstract fun setlistDao(): SetlistDao
     abstract fun idolDao(): IdolDao

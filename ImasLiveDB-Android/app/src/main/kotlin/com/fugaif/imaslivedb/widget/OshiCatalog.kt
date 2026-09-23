@@ -1,7 +1,6 @@
 package com.fugaif.imaslivedb.widget
 
 import android.content.Context
-import com.fugaif.imaslivedb.data.db.AppDatabase
 import com.fugaif.imaslivedb.data.image.CustomImageStore
 import com.fugaif.imaslivedb.data.image.GalleryKind
 import com.fugaif.imaslivedb.di.AppModule
@@ -45,9 +44,9 @@ object OshiCatalog {
         val ids = galleryIdolIds(context)
         if (ids.isEmpty()) return@withContext emptyList()
 
-        val database = AppDatabase.getInstance(context)
-        val idols = database.idolDao().fetchIdolsByIds(ids)
-        val brands = database.brandDao().fetchBrands().associateBy { it.id }
+        val module = AppModule.from(context)
+        val idols = module.idolRepository.fetchIdolsByIds(ids)
+        val brands = module.statsRepository.fetchBrands().associateBy { it.id }
 
         idols.sortedWith(
             compareBy(

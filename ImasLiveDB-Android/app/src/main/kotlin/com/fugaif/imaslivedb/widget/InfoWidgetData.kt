@@ -2,12 +2,12 @@ package com.fugaif.imaslivedb.widget
 
 import android.content.Context
 import android.util.Log
-import com.fugaif.imaslivedb.data.db.AppDatabase
 import com.fugaif.imaslivedb.data.model.DailyPick
 import com.fugaif.imaslivedb.data.model.JstDay
 import com.fugaif.imaslivedb.di.AppModule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import uniffi.imas_core.nextShowIndex
 
 /** 次のライブ 1 件。 */
 data class NextShowInfo(
@@ -36,14 +36,14 @@ data class TicketDeadlineInfo(
 )
 
 /**
- * 情報ウィジェット 3 種のデータを Room から計算する層。
+ * 情報ウィジェット 3 種のデータを共有コアのスナップショットから引く層。
  * iOS `ImasLiveDB/Services/InfoWidgetBridge.swift` に対応する。
  *
  * ## iOS との違い: スナップショット JSON を挟まない
  *
  * iOS のウィジェット拡張は別プロセス・別サンドボックスでアプリの GRDB を開けないため、
  * アプリ側が計算結果を App Group の JSON に書き出し、拡張はそれを読むだけだった。
- * Android のウィジェットはアプリと同じ UID・同じプロセスなので Room を直接読める。
+ * Android のウィジェットはアプリと同じ UID・同じプロセスなのでスナップショットを直接読める。
  * 中間ファイルを挟むと「アプリが書き出すまでウィジェットが古いまま」という状態を
  * 自前で管理することになるので挟まない。
  *
@@ -58,38 +58,27 @@ object InfoWidgetData {
 
     private const val TAG = "ImasWidget"
 
-    /** 「次のライブ」に数えるイベント種別。iOS `kinds: [.live, .festival]` と同じ。 */
-    private val NEXT_SHOW_KINDS = setOf("live", "festival")
-
     /** 日替わりピックの母集団から外すブランド (ブランドの代表曲ではないため。起動シートと同条件)。 */
     private const val EXCLUDED_BRAND_ID = "other"
 
     /**
-     * 今日以降で最も近いライブ 1 件。
-     * 公演が 1 本も無いイベント (first_date が null) は自然に外れる。
+     * 今日以降で最も近いライブ 1 件。母集合 (ライブ・フェスで公演のあるイベント) も
+     * 「今日以降でいちばん早い」の選び方もコア (eventsWithFirstDate の既定の種別 / nextShowIndex)。
      */
     suspend fun nextShow(context: Context): NextShowInfo? = withContext(Dispatchers.IO) {
         runCatching {
-            val database = AppDatabase.getInstance(context)
-            val today = JstDay.today()
-            // 一覧クエリの行は kind を持たない (ライブ一覧が kind で絞らないため)。
-            // ここは live/festival だけを見たいので、種別はイベント本体から引き直す。
-            val kindById = database.eventDao().fetchEvents().associate { it.id to it.kind }
-            val next = database.eventDao().fetchEventsWithFirstDate()
-                .asSequence()
-                .filter { kindById[it.id] in NEXT_SHOW_KINDS }
-                // 公演を 1 本も持たないイベントは first_date が null で、"" は
-                // どの "YYYY-MM-DD" より小さいのでこの比較で一緒に落ちる。
-                .filter { (it.firstDate ?: "") >= today }
-                .minByOrNull { it.firstDate.orEmpty() }
+            val module = AppModule.from(context)
+            val events = module.snapshotStoreProvider.query { store ->
+                store.eventsWithFirstDate(null, false, false, null)
+            }
+            val index = nextShowIndex(events.map { it.firstDate.orEmpty() }, JstDay.today())
                 ?: return@runCatching null
-
-            val brandColor = database.brandDao().fetchBrands().firstOrNull { it.id == next.brandId }?.color
+            val next = events[index.toInt()]
             NextShowInfo(
-                eventId = next.id,
-                eventName = next.name,
+                eventId = next.event.id,
+                eventName = next.event.name,
                 firstDate = next.firstDate.orEmpty(),
-                brandColorHex = brandColor
+                brandColorHex = next.event.brandId?.let { module.statsRepository.fetchBrands().firstOrNull { b -> b.id == it } }?.color
             )
         }.onFailure { Log.w(TAG, "次のライブの取得に失敗", it) }.getOrNull()
     }
@@ -110,11 +99,11 @@ object InfoWidgetData {
      */
     suspend fun todaySong(context: Context): TodaySongInfo? = withContext(Dispatchers.IO) {
         runCatching {
-            val database = AppDatabase.getInstance(context)
+            val module = AppModule.from(context)
             val dayKey = DailyPick.dayKey()
             // fetchBrands() は sort_order 順。
-            val brands = database.brandDao().fetchBrands().filter { it.id != EXCLUDED_BRAND_ID }
-            val snapshots = AppModule.from(context).snapshotStoreProvider
+            val brands = module.statsRepository.fetchBrands().filter { it.id != EXCLUDED_BRAND_ID }
+            val snapshots = module.snapshotStoreProvider
             for (brand in brands) {
                 // 候補列はアプリの「今日の1曲」と同じくコアが正本 (読み込めなければ runCatching で null)。
                 val songIds = snapshots.query {
@@ -122,7 +111,7 @@ object InfoWidgetData {
                 }
                 if (songIds.isEmpty()) continue
                 val index = DailyPick.songIndices(dayKey, listOf(brand.id to songIds.size)).firstOrNull()
-                val song = index?.let { songIds.getOrNull(it) }?.let { database.songDao().fetchSong(it) }
+                val song = index?.let { songIds.getOrNull(it) }?.let { module.songRepository.fetchSong(it) }
                     ?: continue
                 return@runCatching TodaySongInfo(
                     songId = song.id,
@@ -141,7 +130,7 @@ object InfoWidgetData {
         withContext(Dispatchers.IO) {
             runCatching {
                 val today = JstDay.today()
-                AppDatabase.getInstance(context).eventDao().fetchEvents()
+                AppModule.from(context).eventRepository.fetchEvents()
                     .mapNotNull { event ->
                         val deadline = event.ticketDeadline?.takeIf { it >= today } ?: return@mapNotNull null
                         TicketDeadlineInfo(event.id, event.name, deadline)
