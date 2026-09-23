@@ -181,6 +181,33 @@ describe("PUT /songs/:id/calls — 既存クライアント契約 (変えては�
     expect(res.status).toBe(404);
     expect(sqlOf(stub)).not.toMatch(/song_call_stats|call_edit_history/);
   });
+
+  it("未公開 (draft) の曲は、一般ユーザーには歌詞の無い曲と同じ 404 で、何も書かない", async () => {
+    const stub = stubD1(responder({ header: { ...HEADER, status: "draft" } }));
+    const res = (await save(put(stub)))!;
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: "lyrics not found" });
+    expect(sqlOf(stub)).not.toMatch(/UPDATE song_lyrics|song_call_stats|call_edit_history|rate_limits/);
+  });
+
+  it("未公開 (draft) の曲でも、admin と運用者トークンは保存できる", async () => {
+    const admin = stubD1(responder({ header: { ...HEADER, status: "draft" } }));
+    const adminCtx = put(admin);
+    const byAdmin = (await save({
+      ...adminCtx,
+      env: { ...adminCtx.env, ADMIN_USER_IDS: UID } as RouteContext["env"],
+    }))!;
+    expect(byAdmin.status).toBe(200);
+    expect(((await byAdmin.json()) as any).status).toBe("draft");
+
+    const operator = stubD1(responder({ header: { ...HEADER, status: "draft" } }));
+    const operatorCtx = put(operator, BODY, { "X-Push-Token": PUSH_TOKEN });
+    const byOperator = (await save({
+      ...operatorCtx,
+      env: { ...operatorCtx.env, LYRICS_PUSH_TOKEN: PUSH_TOKEN } as RouteContext["env"],
+    }))!;
+    expect(byOperator.status).toBe(200);
+  });
 });
 
 describe("PUT /songs/:id/calls — 統計と履歴", () => {

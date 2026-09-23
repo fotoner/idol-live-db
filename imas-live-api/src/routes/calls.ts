@@ -98,6 +98,9 @@ export async function handleLyricsCalls(ctx: RouteContext): Promise<Response | n
     .first<{ source: string | null; status: string; updated_at: string;
              lines_json: string | null }>();
   if (!header) return error("lyrics not found", 404);
+  // 未公開 (draft) の歌詞は admin と運用者にしか見せない (GET と同じ規則)。この応答は保存後の
+  // 歌詞全文を返すので、一般ユーザーには歌詞の無い曲と同じ 404 にする。
+  if (header.status !== "published" && !operator) return error("lyrics not found", 404);
 
   const existing = parseLines(header.lines_json);
   const body = await request.json().catch(() => null);
