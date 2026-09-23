@@ -51,16 +51,6 @@ extension AppDatabase {
         try Event.fetchOne(db, key: id)
     }
 
-    /// イベント一括取得（ID配列） — 全フィールド（ticketDeadline 等）を含む完全な Event を返す。N+1防止用。
-    func fetchFullEvents(ids: [String]) throws -> [Event] {
-        guard !ids.isEmpty else { return [] }
-        let placeholders = ids.map { _ in "?" }.joined(separator: ", ")
-        return try dbQueue.read { db in
-            try Event.fetchAll(db, sql: "SELECT * FROM events WHERE id IN (\(placeholders))",
-                               arguments: StatementArguments(ids))
-        }
-    }
-
     // MARK: - Song Search (for OCR matching)
 
     /// 楽曲をタイトルで検索（完全一致優先、部分一致も含む）

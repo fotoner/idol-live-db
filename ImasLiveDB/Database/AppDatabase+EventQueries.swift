@@ -27,29 +27,6 @@ extension AppDatabase {
         return try ShowWithEventName.fetchAll(db, sql: sql, arguments: [pattern, pattern, limit])
     }
 
-    /// 指定 event_id 集合に該当する EventWithDate を、最新公演日降順で返す。
-    /// MyPage の参加ライブ一覧などで使用。 空配列を渡したら空配列を返す。
-    func fetchEventsByIds(_ ids: [String]) throws -> [EventWithDate] {
-        guard !ids.isEmpty else { return [] }
-        return try dbQueue.read { db in try Self.fetchEventsByIdsQuery(db, ids) }
-    }
-
-    private static func fetchEventsByIdsQuery(_ db: Database, _ ids: [String]) throws -> [EventWithDate] {
-        let placeholders = ids.map { _ in "?" }.joined(separator: ", ")
-        let sql = """
-            SELECT e.id, e.brand_id, e.name, e.event_type, e.is_streaming, e.is_solo, e.kind,
-                   MIN(s.date) AS first_date,
-                   MAX(s.date) AS last_date
-            FROM events e
-            LEFT JOIN shows s ON s.event_id = e.id
-            WHERE e.id IN (\(placeholders))
-            GROUP BY e.id
-            ORDER BY COALESCE(MIN(s.date), '') DESC
-            """
-        return try Row.fetchAll(db, sql: sql, arguments: StatementArguments(ids))
-            .map(Self.eventWithDate)
-    }
-
     /// 参加したライブ(イベント)を重複なしで返す。
     /// 「イベント単位の参加マーク」と「公演(show)単位の参加マーク→所属イベント」を UNION で統合する。
     /// (参加を公演単位で付けるユーザーが多く、event マークだけ見るとリストが取りこぼすため)

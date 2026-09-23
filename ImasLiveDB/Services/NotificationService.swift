@@ -57,7 +57,7 @@ final class NotificationService {
     private var rescheduleInFlight: Task<Void, Never>?
 
     /// 既存の pending 通知を全消去し、設定がONの通知を再スケジュールする。
-    /// 未認可の場合は何もしない。最大60件cap（誕生日・月曜は repeat のため少数、イベント系は近い順）。
+    /// 未認可の場合は何もしない。上限と配分はコアの予定表が決める。
     ///
     /// 呼び出しは 1 本ずつ順に走らせる。起動時とマイページの 5 つのトグルから同時に呼ばれうるが、
     /// 並行に走ると「全部消す → await → 登録」が互い違いになり、OFF にした直後の呼び出しが
@@ -73,30 +73,24 @@ final class NotificationService {
         await task.value
     }
 
+    /// 予定表 (何を・いつ・どの文言で・上限 60 件・カテゴリ間の round-robin) はコアの
+    /// `notification_plan`。ここは認可・全消し・設定と印の読み出し・トリガーへの詰め替え・画像の添付だけ。
     private func performRescheduleAll(database: AppDatabase) async {
         let status = await authorizationStatus()
         guard status == .authorized || status == .provisional else { return }
 
+        let plan: [PlannedNotificationRecord]
+        do {
+            plan = try await buildPlan(database: database)
+        } catch {
+            Logger.notification.error("notif_plan_failed: \(error.localizedDescription, privacy: .public)")
+            return
+        }
+
         center.removeAllPendingNotificationRequests()
 
-        // カテゴリごとに独立したグループとして組み立てる。
-        // 1. 担当アイドル誕生日 (repeats annually)
-        let birthdayRequests = notifEnabled("notif_oshi_birthday")
-            ? await buildBirthdayRequests(database: database)
-            : []
-        // 2. 月曜ミーム (今後数週の日曜 20:00。回ごとにレア文言を抽選するため個別スケジュール)
-        let mondayRequests = notifEnabled("notif_monday")
-            ? buildMondayMemeRequests()
-            : []
-        // 3. ライブ1週間前 + 4. チケット締切/当落 (非repeat, 近い順ソート済み)
-        let eventRequests = await buildEventRequests(database: database)
-
-        // 合計60件cap。単純連結+prefix だと誕生日が並び順で枠を食い尽くし、
-        // イベント/月曜通知が 0 件になりうる。カテゴリを round-robin で混ぜて、
-        // どのカテゴリも枠を独占しないようにする (各グループ内の順序は保つ)。
-        let capped = Self.roundRobinMerge([birthdayRequests, mondayRequests, eventRequests], cap: 60)
-
-        for request in capped {
+        for item in plan {
+            let request = notificationRequest(for: item)
             do {
                 // 同上。center も request も非 Sendable なのでコールバック版を使う。
                 let center = self.center
@@ -111,251 +105,55 @@ final class NotificationService {
             }
         }
 
-        Logger.notification.info("notif_rescheduled total=\(capped.count, privacy: .public)")
+        Logger.notification.info("notif_rescheduled total=\(plan.count, privacy: .public)")
     }
 
-    /// 複数カテゴリのリクエスト列を round-robin で 1 列に混ぜ、cap 件で打ち切る。
-    /// 各グループ内の相対順序は保つ (誕生日は fetch 順、イベントは近い順ソート済み)。
-    /// 単純連結+prefix だと先頭カテゴリが枠を独占しうるため、カテゴリ間で均等に配分する。
-    private static func roundRobinMerge(_ groups: [[UNNotificationRequest]], cap: Int) -> [UNNotificationRequest] {
-        var result: [UNNotificationRequest] = []
-        result.reserveCapacity(min(cap, groups.reduce(0) { $0 + $1.count }))
-        var indices = [Int](repeating: 0, count: groups.count)
-        var remaining = groups.reduce(0) { $0 + $1.count }
-        while result.count < cap && remaining > 0 {
-            for g in groups.indices {
-                guard result.count < cap else { break }
-                let i = indices[g]
-                guard i < groups[g].count else { continue }
-                result.append(groups[g][i])
-                indices[g] += 1
-                remaining -= 1
-            }
-        }
-        return result
-    }
-
-    // MARK: - Birthday Notifications
-
-    private func buildBirthdayRequests(database: AppDatabase) async -> [UNNotificationRequest] {
-        do {
-            let idolIds = try database.fetchMarkedEntityIds(entity: .idol, kind: .myPick)
-            let idols = try database.fetchIdols(ids: idolIds)
-            return idols.compactMap { birthdayRequest(for: $0) }
-        } catch {
-            Logger.notification.error("notif_birthday_fetch_failed: \(error.localizedDescription, privacy: .public)")
-            return []
-        }
-    }
-
-    private func birthdayRequest(for idol: Idol) -> UNNotificationRequest? {
-        guard let birthday = idol.birthday else { return nil }
-
-        // "--MM-DD" または "MM-DD" 形式をパース
-        let raw = birthday.hasPrefix("--") ? String(birthday.dropFirst(2)) : birthday
-        let parts = raw.split(separator: "-")
-        guard parts.count == 2,
-              let month = Int(parts[0]),
-              let day = Int(parts[1]),
-              (1...12).contains(month),
-              (1...31).contains(day) else { return nil }
-
-        let content = UNMutableNotificationContent()
-        content.title = "🎂 今日は\(idol.name)の誕生日！"
-        content.body = "\(idol.name)、お誕生日おめでとう！"
-        content.sound = .default
-        if let att = customImageAttachment(idolId: idol.id, identifier: "bday_img_\(idol.id)") {
-            content.attachments = [att]
-        }
-
-        var components = DateComponents()
-        components.month = month
-        components.day = day
-        components.hour = 9
-        components.minute = 0
-
-        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
-        return UNNotificationRequest(
-            identifier: "bday_\(idol.id)",
-            content: content,
-            trigger: trigger
-        )
-    }
-
-    // MARK: - Monday Meme Notification
-
-    /// 園田智代子の「月曜が近いよ」ミーム。基本は「月曜が近いよ」、たまにレアで
-    /// 「どぅいどぅいどぅ〜」。回ごとに抽選するため、今後8週分の日曜20:00を個別に積む。
-    private func buildMondayMemeRequests() -> [UNNotificationRequest] {
-        let calendar = Calendar.current
+    /// 設定と印を詰めて、コアに予定表を訊く。日付と時刻は**端末のその地**の暦で渡す。
+    private func buildPlan(database: AppDatabase) async throws -> [PlannedNotificationRecord] {
+        let pickIdolIds = try database.fetchMarkedEntityIds(entity: .idol, kind: .myPick)
+        // お気に入り ∪ 参加マークのイベント。
+        let favoriteIds = Set(try database.fetchMarkedEntityIds(entity: .event, kind: .favorite))
+        let attendedIds = Set(try database.fetchAttendedEventsWithDate().map(\.id))
         let now = Date()
-        // 直近の「次の日曜 20:00」を求める。
-        var comps = DateComponents()
-        comps.weekday = 1  // Sunday
-        comps.hour = 20
-        comps.minute = 0
-        guard var next = calendar.nextDate(after: now, matching: comps,
-                                           matchingPolicy: .nextTime) else { return [] }
+        let calendar = Calendar.current
+        let parts = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: now)
+        let today = String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
+        let input = NotificationPlanInput(
+            today: today,
+            nowMinutes: UInt32((parts.hour ?? 0) * 60 + (parts.minute ?? 0)),
+            birthdayEnabled: notifEnabled("notif_oshi_birthday"),
+            mondayEnabled: notifEnabled("notif_monday"),
+            liveWeekEnabled: notifEnabled("notif_live_week"),
+            ticketEnabled: notifEnabled("notif_ticket"),
+            pickIdolIds: pickIdolIds,
+            eventIds: Array(favoriteIds.union(attendedIds)).sorted(),
+            // 月曜のミームのレア抽選 (1/500) の種。
+            seed: UInt64.random(in: .min ... .max))
+        let store = try await AppContainer.shared.coreSnapshot.loadedStore()
+        return try store.notificationPlan(input: input)
+    }
 
-        var requests: [UNNotificationRequest] = []
-        for i in 0..<8 {
-            // レア抽選: SSR級 約0.2% (1/500) で「どぅいどぅいどぅ〜」、通常は「月曜が近いよ」。
-            let rare = Int.random(in: 0..<500) == 0
-            let content = UNMutableNotificationContent()
-            content.title = rare ? "どぅいどぅいどぅ〜" : "月曜が近いよ"
-            content.sound = .default
-            if let att = customImageAttachment(idolId: "sc_園田智代子", identifier: "monday_img_\(i)") {
-                content.attachments = [att]
-            }
-            let triggerComps = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: next)
-            let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComps, repeats: false)
-            requests.append(UNNotificationRequest(
-                identifier: "monday_meme_\(i)",
-                content: content,
-                trigger: trigger
-            ))
-            guard let following = calendar.date(byAdding: .day, value: 7, to: next) else { break }
-            next = following
+    /// 予定 1 件を通知にする。日付 + 時・分で、くり返さない (積み直しのたびに次の 1 回を積む)。
+    private func notificationRequest(for item: PlannedNotificationRecord) -> UNNotificationRequest {
+        let content = UNMutableNotificationContent()
+        content.title = item.title
+        if let body = item.body { content.body = body }
+        content.sound = .default
+        if let idolId = item.imageIdolId,
+           let attachment = customImageAttachment(idolId: idolId, identifier: "\(item.id)_img") {
+            content.attachments = [attachment]
         }
-        return requests
-    }
-
-    // MARK: - Event Notifications (ライブ1週間前 / チケット締切 / 当落)
-
-    private func buildEventRequests(database: AppDatabase) async -> [UNNotificationRequest] {
-        let liveWeekEnabled = notifEnabled("notif_live_week")
-        let ticketEnabled = notifEnabled("notif_ticket")
-        guard liveWeekEnabled || ticketEnabled else { return [] }
-
-        do {
-            // お気に入り ∪ 参加マーク のイベントを対象にする
-            let favoriteIds = Set(try database.fetchMarkedEntityIds(entity: .event, kind: .favorite))
-            let attendedEvents = try database.fetchAttendedEventsWithDate()
-            let attendedIds = Set(attendedEvents.map(\.id))
-            let allIds = Array(favoriteIds.union(attendedIds))
-
-            guard !allIds.isEmpty else { return [] }
-
-            let eventsWithDate = try database.fetchEventsByIds(allIds)
-            // ticketDeadline / ticketLotteryDate を含む完全な Event を一括取得。
-            let fullEvents = try database.fetchFullEvents(ids: allIds)
-            let eventById = Dictionary(uniqueKeysWithValues: fullEvents.map { ($0.id, $0) })
-
-            let now = Date()
-            var requests: [UNNotificationRequest] = []
-
-            for ew in eventsWithDate {
-                guard let firstDateStr = ew.firstDate,
-                      let firstDate = parseDate(firstDateStr),
-                      firstDate > now else { continue }
-
-                // ticketDeadline/ticketLotteryDate を持つ完全な Event を優先参照。
-                let event = eventById[ew.id] ?? ew.event
-
-                // ライブ1週間前 (初日の7日前 10:00)
-                if liveWeekEnabled {
-                    if let req = liveWeekRequest(event: event, firstDate: firstDate, now: now) {
-                        requests.append(req)
-                    }
-                }
-
-                // チケット締切
-                if ticketEnabled {
-                    // ticketDeadline 前日 18:00
-                    if let deadlineStr = event.ticketDeadline,
-                       let deadline = parseDate(deadlineStr),
-                       deadline > now {
-                        if let req = ticketDeadlineRequest(event: event, deadline: deadline, now: now) {
-                            requests.append(req)
-                        }
-                    }
-
-                    // 当落発表日 当日 09:00
-                    if let lotteryStr = event.ticketLotteryDate,
-                       let lotteryDate = parseDate(lotteryStr),
-                       lotteryDate > now {
-                        if let req = lotteryRequest(event: event, lotteryDate: lotteryDate, now: now) {
-                            requests.append(req)
-                        }
-                    }
-                }
-            }
-
-            // 近い順にソートして返す（後でcapされる）
-            return requests.sorted { lhs, rhs in
-                let lt = (lhs.trigger as? UNCalendarNotificationTrigger)?.nextTriggerDate() ?? .distantFuture
-                let rt = (rhs.trigger as? UNCalendarNotificationTrigger)?.nextTriggerDate() ?? .distantFuture
-                return lt < rt
-            }
-        } catch {
-            Logger.notification.error("notif_event_fetch_failed: \(error.localizedDescription, privacy: .public)")
-            return []
+        var components = DateComponents()
+        let dateParts = item.date.split(separator: "-").compactMap { Int($0) }
+        if dateParts.count == 3 {
+            components.year = dateParts[0]
+            components.month = dateParts[1]
+            components.day = dateParts[2]
         }
-    }
-
-    private func liveWeekRequest(event: Event, firstDate: Date, now: Date) -> UNNotificationRequest? {
-        guard let triggerDate = Calendar.current.date(byAdding: .day, value: -7, to: firstDate),
-              triggerDate > now else { return nil }
-
-        let content = UNMutableNotificationContent()
-        content.title = "もうすぐライブ！"
-        content.body = "\(event.name) まであと1週間！準備はOK？"
-        content.sound = .default
-
-        let components = Calendar.current.dateComponents(
-            [.year, .month, .day, .hour, .minute],
-            from: Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: triggerDate) ?? triggerDate
-        )
-
+        components.hour = Int(item.hour)
+        components.minute = Int(item.minute)
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-        return UNNotificationRequest(
-            identifier: "live_\(event.id)",
-            content: content,
-            trigger: trigger
-        )
-    }
-
-    private func ticketDeadlineRequest(event: Event, deadline: Date, now: Date) -> UNNotificationRequest? {
-        guard let dayBefore = Calendar.current.date(byAdding: .day, value: -1, to: deadline),
-              dayBefore > now else { return nil }
-
-        let content = UNMutableNotificationContent()
-        content.title = "チケット申込は明日まで！"
-        content.body = "\(event.name) のチケット申込締切は明日です。お忘れなく！"
-        content.sound = .default
-
-        let components = Calendar.current.dateComponents(
-            [.year, .month, .day, .hour, .minute],
-            from: Calendar.current.date(bySettingHour: 18, minute: 0, second: 0, of: dayBefore) ?? dayBefore
-        )
-
-        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-        return UNNotificationRequest(
-            identifier: "ticketdl_\(event.id)",
-            content: content,
-            trigger: trigger
-        )
-    }
-
-    private func lotteryRequest(event: Event, lotteryDate: Date, now: Date) -> UNNotificationRequest? {
-        guard lotteryDate > now else { return nil }
-
-        let content = UNMutableNotificationContent()
-        content.title = "当落発表日です！"
-        content.body = "\(event.name) の当落発表日。ドキドキしながら確認してみよう！"
-        content.sound = .default
-
-        let components = Calendar.current.dateComponents(
-            [.year, .month, .day, .hour, .minute],
-            from: Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: lotteryDate) ?? lotteryDate
-        )
-
-        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-        return UNNotificationRequest(
-            identifier: "lottery_\(event.id)",
-            content: content,
-            trigger: trigger
-        )
+        return UNNotificationRequest(identifier: item.id, content: content, trigger: trigger)
     }
 
     // MARK: - Helpers
@@ -381,22 +179,5 @@ final class NotificationService {
     private func notifEnabled(_ key: String) -> Bool {
         guard UserDefaults.standard.object(forKey: key) != nil else { return true }
         return UserDefaults.standard.bool(forKey: key)
-    }
-
-    /// "YYYY-MM-DD" → Date (Calendar.current)
-    private func parseDate(_ str: String) -> Date? {
-        let parts = str.split(separator: "-")
-        guard parts.count == 3,
-              let year = Int(parts[0]),
-              let month = Int(parts[1]),
-              let day = Int(parts[2]) else { return nil }
-        var comps = DateComponents()
-        comps.year = year
-        comps.month = month
-        comps.day = day
-        comps.hour = 0
-        comps.minute = 0
-        comps.second = 0
-        return Calendar.current.date(from: comps)
     }
 }
