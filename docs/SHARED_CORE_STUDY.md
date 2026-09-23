@@ -1,5 +1,11 @@
 # iOS / Android ロジック共通化 方式検討 (調査レポート)
 
+> **凍結 (2026-09-23)。** この文書は Rust + UniFFI 採用を決めるまでの調査記録であり、以後は更新しない
+> (歴史資料)。採用後の設計方針・現在の到達点は [`ARCHITECTURE.md`](ARCHITECTURE.md) (iOS/コア核の考え方)、
+> 個々にコアへ移した規則の一覧はリポジトリの `git log` (コミットメッセージの `R-A-*` / `R-B-*` /
+> `R-C-*` / `Q-08*` ID で検索可) を正とする。「新機能でコアに書くかどうか」の判断基準は
+> リポジトリの `CLAUDE.md`「着手時に最初に決めること」が正 (この文書の記述より新しい)。
+
 > 状態: **方式を Rust + UniFFI に決定 (2026-08-24)。Phase 0 (疎通) 完了 (2026-08-25)。**
 > `imas-core/` crate + `imas-core/build.sh`。JSTDay/JstDay が Rust 委譲になり、
 > iOS 10 テスト + Android 11 テストが FFI 越しに全パス。次は Phase 1 (純粋 UseCase 16本)。

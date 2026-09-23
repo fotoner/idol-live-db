@@ -359,9 +359,10 @@ D1 (コミュニティ表) のすべてに反映済み (経緯は git 履歴 `22
    アプリは notes をそのまま出すので、データ側で揃えるのが本筋。加えてコアのセトリ取得
    (`event_detail_queries::setlist`) が `domain/setlist_notes.rs` の `display_notes` で同じ畳み込みを
    掛けるので、投稿で再発しても iOS / Android / Web のどれも見た目は割れない。
-   `data/fixes/setlist_notes_plain_20260906.json` が監査用の全件。
+   反映済みのため当時の投入 JSON はリポジトリに残っていない (反映後は `data/_applied/` へ
+   移すか削除する運用。監査したい場合は git 履歴のコミット `2281879` / `659fb41` / `259b9d6` を参照)。
 4. 会場欄と配信欄が同文だった 10 公演 (`sh_L0004` 含む) を、配信の実体は配信欄・物理会場は
-   都内某所か NULL に分けた (`data/fixes/shows_stream_platform_dup_20260906.json`)。
+   都内某所か NULL に分けた。
    **NULL にした列は既定の push (forceUpdate) では CloudKit に伝わらない**ので
    `seed_cloudkit.py --replace` (forceReplace) で送った。
 
