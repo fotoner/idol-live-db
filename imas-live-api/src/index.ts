@@ -14,13 +14,13 @@ import { handleLyricsCalls, handleCallsDashboard } from "./routes/calls";
 import { handleSongDetail } from "./routes/song_detail";
 import { handleSetlistPredictions } from "./routes/setlist_predictions";
 import { clientIp, decodePathParam, readJsonBody, requireActiveUser, requireIpQuota } from "./routes/guards";
-import { fetchBadges, calcTier } from "./badges";
+import { fetchBadges } from "./badges";
 import { handleScheduled } from "./apply";
-import { cloudKitModify, cloudKitLookup, buildForceUpdate, buildSoftDelete, CloudKitOperation } from "./cloudkit";
+import { cloudKitLookup } from "./cloudkit";
 import { handlePostEdits, handleGetRecordHistory } from "./edits";
 import { handleCreateTransfer, handleFetchTransfer } from "./transfer";
 import { handlePostEditRequests } from "./edit_requests";
-import { handleGetFeed, handleGetMyEdits, maskDisplayName } from "./feed";
+import { handleGetFeed, handleGetMyEdits } from "./feed";
 import { handlePostGood, handleDeleteGood } from "./edit_good";
 import {
   handlePostRevertBatch,
@@ -28,7 +28,7 @@ import {
   handleGetAdminUserEdits,
 } from "./revert";
 import {
-  verifyAttestation, verifyAssertion, verifyPlayIntegrity,
+  verifyAttestation, verifyAssertion,
   mintAppToken, verifyAppToken, makeChallenge, checkChallenge,
   b64ToBytes, bytesToB64Url,
 } from "./appattest";
@@ -104,7 +104,7 @@ async function cleanExpiredTransferCodes(db: D1Database): Promise<void> {
 function isCommunityRead(path: string, method: string): boolean {
   if (method !== "GET") return false;
   // D1 固定無料枠に乗る集計 read を網羅する (CLAUDE.md 名指しの予想/いいね/ランキング含む)
-  if (/^\/(polls|favorites|penlight|tags|master|leaderboard)(\/|$)/.test(path)) return true;
+  if (/^\/(polls|favorites|penlight|tags|master)(\/|$)/.test(path)) return true;
   if (/^\/songs\/[^/]+\/(tags|similar|detail)$/.test(path)) return true;
   if (/^\/idols\/[^/]+\/similar$/.test(path)) return true;
   if (/^\/units\/[^/]+\/similar$/.test(path)) return true;
@@ -310,8 +310,8 @@ function renderAppFallbackPage(opts: {
 </html>`;
 }
 
-/** アプリ証明 (App Attest / Play Integrity) の口。IP 単位の日次上限 (app_attest) を掛ける。 */
-const APP_ATTEST_PATHS = new Set(["/app/challenge", "/app/attest", "/app/assert", "/app/integrity"]);
+/** アプリ証明 (App Attest) の口。IP 単位の日次上限 (app_attest) を掛ける。 */
+const APP_ATTEST_PATHS = new Set(["/app/challenge", "/app/attest", "/app/assert"]);
 
 // ---------------------------------------------------------------------------
 // Main fetch handler
@@ -385,7 +385,7 @@ export default {
     const handle = async (): Promise<Response> => {
     try {
       // ----------------------------------------------------------------
-      // アプリ証明 (App Attest / Play Integrity) — クローンただ乗り対策
+      // アプリ証明 (App Attest) — クローンただ乗り対策
       // ----------------------------------------------------------------
       const attestMode = env.APP_ATTEST_MODE || "monitor";
       const secret = env.SESSION_JWT_SECRET;
@@ -436,20 +436,6 @@ export default {
           return error("assertion failed: " + (e as Error).message, 401);
         }
       }
-      if (path === "/app/integrity" && request.method === "POST") {
-        if (!secret || !env.GOOGLE_SERVICE_ACCOUNT) return error("server not configured", 500);
-        const body: any = await request.json().catch(() => null);
-        if (!body?.token || !body?.challenge) return error("bad request", 400);
-        if (!(await checkChallenge(b64ToBytes(body.challenge), secret))) return error("bad challenge", 400);
-        try {
-          const ok = await verifyPlayIntegrity(body.token, body.challenge, env.GOOGLE_SERVICE_ACCOUNT);
-          if (!ok) return error("integrity check failed", 401);
-          return json({ appToken: await mintAppToken("android", secret) });
-        } catch (e) {
-          return error("integrity failed: " + (e as Error).message, 401);
-        }
-      }
-
       // コミュニティ集計 read のゲート (正規アプリ or ログイン済みのみ)
       if (attestMode !== "off" && isCommunityRead(path, request.method)) {
         const appTok = request.headers.get("X-App-Token");
@@ -472,7 +458,6 @@ export default {
           endpoints: [
             "POST /auth/login",
             "GET /auth/me",
-            "POST /admin/cloudkit/save",
             "POST /edits",
             "GET /edits?brand_id=&record_type=&editor_id=&page=1&limit=20",
             "GET /me/edits?page=1&limit=20",
@@ -481,7 +466,6 @@ export default {
             "POST /edits/:batchId/revert",
             "GET /master/:recordType/:recordName/history",
             "GET /users/:user_id/badges",
-            "GET /leaderboard",
             "POST /admin/ban",
             "POST /admin/revert-user",
             "GET /admin/users/:id/edits",
@@ -868,69 +852,6 @@ export default {
       }
 
       // ----------------------------------------------------------------
-      // POST /admin/cloudkit/save — admin 限定の CK forceUpdate+delete
-      // iOS 直書きでは「他人 (S2S) のレコードを更新不可」なのでサーバ経由で S2S 借用。
-      // ----------------------------------------------------------------
-      if (path === "/admin/cloudkit/save" && request.method === "POST") {
-        const user = await getAuthUser(request, env);
-        if (!user) return error("Unauthorized", 401);
-        if (!(await checkIsAdmin(env, user.uid))) return error("Forbidden: admin only", 403);
-
-        const rawBody = await request.text();
-        if (rawBody.length > 2_000_000) return error("body too large (max 2MB)", 413);
-        type SavePayload = {
-          records?: Array<{ recordType: string; recordName: string; fields: Record<string, unknown> }>;
-          deletes?: Array<{ recordType: string; recordName: string }>;
-        };
-        let body: SavePayload | null;
-        try { body = JSON.parse(rawBody) as SavePayload; }
-        catch { return error("invalid json body"); }
-        if (!body) return error("invalid json body");
-
-        const records = body.records ?? [];
-        const deletes = body.deletes ?? [];
-        if (records.length === 0 && deletes.length === 0) return error("records or deletes required");
-        if (records.length + deletes.length > 1000) return error("too many operations (max 1000)", 413);
-        for (const r of records) {
-          for (const [k, v] of Object.entries(r.fields ?? {})) {
-            if (typeof v === "string" && v.length > 50_000) {
-              return error(`fields.${k} too long (max 50KB)`, 413);
-            }
-          }
-        }
-
-        const ALLOWED_TYPES = new Set([
-          "Brand", "Idol", "IdolBrand",
-          "Event", "Show", "ShowCast",
-          "Song", "SongArtist", "ImasUnit", "UnitMember",
-          "SetlistItem", "SetlistPerformer",
-        ]);
-
-        const ops: CloudKitOperation[] = [];
-        for (const r of records) {
-          if (!ALLOWED_TYPES.has(r.recordType)) return error(`recordType not allowed: ${r.recordType}`, 400);
-          if (!r.recordName) return error("recordName required");
-          ops.push(buildForceUpdate(r.recordType, r.recordName, r.fields ?? {}));
-        }
-        for (const d of deletes) {
-          if (!ALLOWED_TYPES.has(d.recordType)) return error(`recordType not allowed: ${d.recordType}`, 400);
-          if (!d.recordName) return error("recordName required for delete");
-          // ハード削除 (forceDelete) は iOS 差分同期が観測できないため soft delete (deletedAt) を使う (契約 v2 #1)。
-          ops.push(buildSoftDelete(d.recordType, d.recordName));
-        }
-
-        const chunkSize = 200;
-        let successCount = 0;
-        for (let i = 0; i < ops.length; i += chunkSize) {
-          const chunk = ops.slice(i, i + chunkSize);
-          const res = await cloudKitModify(chunk, env.CLOUDKIT_KEY_ID, env.CLOUDKIT_PRIVATE_KEY);
-          if (!res.ok) return error(`cloudkit_error after ${successCount}/${ops.length}: ${res.error}`, 502);
-          successCount += chunk.length;
-        }
-        return json({ ok: true, savedCount: records.length, deletedCount: deletes.length });
-      }
-
-      // ----------------------------------------------------------------
       // 旧 Web アプリ (imas-live-app) 専用の master JSON API はここにあったが撤去した。
       //   GET /brands /idols /idols/:id /songs /songs/:id /songs/:id/artists
       //       /events /events/:id /events/:id/shows /shows/:id/setlist
@@ -1016,45 +937,6 @@ export default {
         if (userId instanceof Response) return userId;
         const badges = await fetchBadges(env.DB, userId);
         return json(badges);
-      }
-
-      // ----------------------------------------------------------------
-      // GET /leaderboard — 貢献ランキング (バッジ tier 付き)
-      //
-      // 貢献度は 2 指標を個別集計し合成しない (確定契約)。レスポンスキーは camelCase:
-      //   - editCount     = 編集件数 (cloudkit_ok=1 の edit_batch を finalize で +1。= contribution_count)
-      //   - goodsReceived = 自分の編集が累計で受け取った Good 数 (edit_good を editor で集計)
-      // tier は editCount を主指標とする (Good は sybil 水増し耐性が低いため)。
-      // ----------------------------------------------------------------
-      if (path === "/leaderboard" && request.method === "GET") {
-        const { results } = await env.DB.prepare(
-          `SELECT u.id, u.display_name, u.avatar_url, u.contribution_count,
-                  COALESCE((SELECT COUNT(*) FROM edit_good g
-                            JOIN edit_batch eb ON eb.id = g.batch_id
-                            WHERE eb.editor_id = u.id AND eb.source = 'app'), 0) AS goods_received
-           FROM users u
-           WHERE u.is_banned = 0 AND u.contribution_count > 0
-           ORDER BY u.contribution_count DESC LIMIT 20`
-        ).all<{
-          id: string;
-          display_name: string;
-          avatar_url: string | null;
-          contribution_count: number;
-          goods_received: number;
-        }>();
-
-        // editCount = source='app' 編集件数 (= contribution_count。確定契約 §3)。旧キー contributionCount は廃止。
-        const leaderboard = results.map((u) => ({
-          id: u.id,
-          userId: u.id,
-          displayName: maskDisplayName(u.display_name),
-          avatarUrl: u.avatar_url,
-          editCount: u.contribution_count,
-          goodsReceived: u.goods_received,
-          tier: calcTier(u.contribution_count),
-        }));
-
-        return json(leaderboard);
       }
 
       // ----------------------------------------------------------------

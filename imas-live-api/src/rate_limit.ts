@@ -35,8 +35,8 @@ const LIMITS = {
   performer_prediction: 60,
   // profile: 表示名など自分のプロフィール更新。頻度は低いはず + 誤字修正の余地を見て 1日3回。
   profile: 3,
-  // app_attest: アプリ証明 (/app/*) の IP 単位上限。正規端末は 1 日数回程度。
-  // Google Play Integrity / ECDSA 検証コストのクォータ枯渇 (自爆 DoS) を防ぐ一次防御。
+  // app_attest: アプリ証明 (/app/challenge・attest・assert) の IP 単位上限。正規端末は 1 日数回程度。
+  // 証明の検証 (証明書チェーンと ECDSA) を空打ちで回させない一次防御。
   app_attest: 50,
   // transfer_create: 引き継ぎコード発行。機種変更等での利用を想定し控えめ。
   transfer_create: 5,

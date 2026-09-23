@@ -17,10 +17,9 @@ export interface Env {
   // ユーザーのセッション JWT を持ち出す必要がないようにする。
   // 未設定ならこの経路は完全に無効 (admin JWT のみ受け付ける)。
   LYRICS_PUSH_TOKEN?: string;
-  // クローンただ乗り対策 (App Attest / Play Integrity)
+  // クローンただ乗り対策 (App Attest)
   APP_ATTEST_MODE?: string;        // "off" | "monitor" | "enforce" (既定 monitor)
   APP_ATTEST_ALLOW_DEV?: string;   // "true" のときだけ dev attestation (appattestdevelop) を許可
-  GOOGLE_SERVICE_ACCOUNT?: string; // Play Integrity 検証用 (Android)
   GOOGLE_WEB_CLIENT_ID?: string;   // Android Sign in with Google の ID トークン検証用 (aud として使う Web クライアント ID)
   // マスタ修正リクエストの GitHub issue 化用 (secret: wrangler secret put GITHUB_TOKEN)。
   GITHUB_TOKEN?: string;

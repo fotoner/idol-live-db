@@ -2,8 +2,8 @@
 //
 // OSS 化に伴い「クローンアプリのただ乗り (read endpoint への無認証アクセス)」を防ぐ。
 // 埋め込み秘密は OSS では無意味なので、プラットフォーム証明で正規性を担保する:
-//   - iOS:     App Attest (DCAppAttestService) の attestation / assertion を検証
-//   - Android: Play Integrity トークンを Google API で検証
+//   - iOS: App Attest (DCAppAttestService) の attestation / assertion を検証
+//   (Android の証明は未実装。以前あった Play Integrity の口は呼び出し元が無いので削除した)
 // 検証が通った端末にだけ短命の「アプリ実体トークン (app token)」を発行し、
 // read endpoint はそれ (または Apple 認証済みユーザセッション) を要求する。
 //
@@ -11,7 +11,6 @@
 // monitor の間は失敗してもログのみで通す (実機で正規 attestation が通るのを確認してから enforce)。
 
 const APP_ID = "GQ3WP34LFW.com.fugaif.ImasLiveDB"; // TeamID.bundleId
-const ANDROID_PACKAGE = "com.fugaif.imaslivedb";
 const APPLE_ROOT_PEM_URL =
   "https://www.apple.com/certificateauthority/Apple_App_Attest_Root_CA.pem";
 
@@ -302,71 +301,6 @@ export async function verifyAssertion(
 }
 
 // ---------------------------------------------------------------------------
-// 3) Android: Play Integrity トークン検証 (Google API)
-// ---------------------------------------------------------------------------
-
-export async function verifyPlayIntegrity(
-  token: string,
-  expectedNonce: string,
-  serviceAccountJson: string
-): Promise<boolean> {
-  const sa = JSON.parse(serviceAccountJson);
-  const accessToken = await googleAccessToken(sa, "https://www.googleapis.com/auth/playintegrity");
-  const res = await fetch(
-    `https://playintegrity.googleapis.com/v1/${ANDROID_PACKAGE}:decodeIntegrityToken`,
-    {
-      method: "POST",
-      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ integrity_token: token }),
-    }
-  );
-  if (!res.ok) throw new Error("playintegrity decode failed: " + res.status);
-  const data = (await res.json()) as any;
-  const p = data?.tokenPayloadExternal ?? {};
-  const rd = p?.requestDetails ?? {};
-  const nonceOk = rd?.nonce === expectedNonce;
-  const reqPkgOk = rd?.requestPackageName === ANDROID_PACKAGE;
-  const pkgOk = p?.appIntegrity?.packageName === ANDROID_PACKAGE;
-  const appVerdict = p?.appIntegrity?.appRecognitionVerdict;
-  const deviceVerdict: string[] = p?.deviceIntegrity?.deviceRecognitionVerdict ?? [];
-  // トークン鮮度 (10 分以内)。challenge TTL と二重で担保。
-  const ts = Number(rd?.timestampMillis ?? 0);
-  const freshOk = ts > 0 && Math.abs(Date.now() - ts) < 10 * 60 * 1000;
-  return (
-    nonceOk &&
-    reqPkgOk &&
-    pkgOk &&
-    freshOk &&
-    appVerdict === "PLAY_RECOGNIZED" &&
-    deviceVerdict.includes("MEETS_DEVICE_INTEGRITY")
-  );
-}
-
-// service account → OAuth2 access token (JWT bearer grant)
-async function googleAccessToken(sa: any, scope: string): Promise<string> {
-  const now = Math.floor(Date.now() / 1000);
-  const header = bytesToB64Url(new TextEncoder().encode(JSON.stringify({ alg: "RS256", typ: "JWT" })));
-  const claim = bytesToB64Url(new TextEncoder().encode(JSON.stringify({
-    iss: sa.client_email, scope, aud: "https://oauth2.googleapis.com/token", iat: now, exp: now + 3600,
-  })));
-  const signingInput = `${header}.${claim}`;
-  const pemBody = sa.private_key.replace(/-----[^-]+-----/g, "").replace(/\s+/g, "");
-  const key = await crypto.subtle.importKey(
-    "pkcs8", b64ToBytes(pemBody), { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]
-  );
-  const sig = new Uint8Array(await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(signingInput)));
-  const jwt = `${signingInput}.${bytesToB64Url(sig)}`;
-  const res = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
-  });
-  const tok = (await res.json()) as any;
-  if (!tok.access_token) throw new Error("google token grant failed");
-  return tok.access_token;
-}
-
-// ---------------------------------------------------------------------------
 // 4) アプリ実体トークン (HS256 JWT)
 // ---------------------------------------------------------------------------
 
@@ -401,7 +335,7 @@ export async function verifyAppToken(token: string, secret: string): Promise<boo
 // ---------------------------------------------------------------------------
 // 5) ステートレスなチャレンジ (リプレイ防止・D1 不要)
 //    blob = random(16) || expMsBE(8) || HMAC(secret, random||exp)(32)
-//    クライアントはこの blob 全体を App Attest の challenge / Play Integrity の nonce に使う。
+//    クライアントはこの blob 全体を App Attest の challenge に使う。
 // ---------------------------------------------------------------------------
 
 const CHALLENGE_TTL_MS = 5 * 60 * 1000;
@@ -426,4 +360,4 @@ export async function checkChallenge(blob: Uint8Array, secret: string): Promise<
   return ok;
 }
 
-export { b64ToBytes, bytesToB64Url, APP_ID, ANDROID_PACKAGE };
+export { b64ToBytes, bytesToB64Url, APP_ID };

@@ -8,7 +8,7 @@
 //
 // 貢献度の 2 指標は個別集計し合成しない (契約):
 //   - 編集件数      = users.contribution_count (1 batch finalize で +1。Good では一切触らない)
-//   - 受け取った Good = edit_good を editor 単位で COUNT (badges/leaderboard で都度算出)
+//   - 受け取った Good = edit_good を editor 単位で COUNT (badges で都度算出)
 // したがって Good toggle は edit_good 行の INSERT/DELETE のみで、CloudKit も
 // contribution_count も触らない (D1 内で閉じる。RedTeam: Good は CloudKit 非依存なので batch で可)。
 //

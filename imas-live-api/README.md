@@ -97,7 +97,6 @@ Cron (scheduled) は掃除だけ:
 | GET | /app/challenge | - | App Attest チャレンジ発行 |
 | POST | /app/attest | - | App Attest 鍵の登録 |
 | POST | /app/assert | - | App Attest アサーション検証 |
-| POST | /app/integrity | App token | Play Integrity (Android) 検証 |
 
 ### 認証 (Apple Sign in with Apple)
 
@@ -119,7 +118,6 @@ Cron (scheduled) は掃除だけ:
 | POST | /edits/:id/revert | Bearer | 編集を差し戻し |
 | GET | /master/:type/:id/history | - | 特定マスタレコードの編集履歴 |
 | GET | /users/:id/badges | - | ユーザーのバッジ一覧 |
-| GET | /leaderboard | - | 貢献ランキング |
 
 ### 引き継ぎコード (ユーザー生成ローカルデータの端末間転送)
 
@@ -293,7 +291,6 @@ SELECT sl.song_id,
 
 | Method | Path | 認証 | 概要 |
 |--------|------|------|------|
-| POST | /admin/cloudkit/save | admin Bearer | CloudKit へ直接保存 |
 | POST | /admin/ban | admin Bearer | ユーザー BAN |
 | POST | /admin/revert-user | admin Bearer | ユーザーの全編集を差し戻し |
 | GET | /admin/users/:id/edits | admin Bearer | 特定ユーザーの編集一覧 |

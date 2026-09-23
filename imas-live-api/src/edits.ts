@@ -104,7 +104,7 @@ const RECORD_NAME_PREFIX: Record<string, string> = {
   SongVideo: "ytref",
 };
 
-const MAX_OPS = 1000;        // 1 batch あたりの op 上限 (既存 /admin/cloudkit/save 踏襲)
+const MAX_OPS = 1000;        // 1 batch あたりの op 上限
 const MAX_BODY_BYTES = 2_000_000;
 const MAX_FIELD_STR = 50_000;
 const CK_CHUNK = 200;        // cloudKitModify の 1 リクエストあたり op 数
