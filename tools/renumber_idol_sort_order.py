@@ -105,8 +105,8 @@ def main() -> None:
     conn.execute("UPDATE meta SET value = ? WHERE key = 'data_version'", (str(version + 1),))
     print(f"data_version {version} → {version + 1}")
 
-    conn.commit()
-    # 正本は書く前に一時 DB で外部キーを検査してから書き出す (壊れていれば書かない)。
+    # 正本は書く前に一時 DB で外部キーを検査してから書き出す。通れば手元の DB も
+    # commit し、壊れていればどちらも書き換えない。
     masterdb.write_master_sql(conn, DUMP_PATH)
     conn.close()
 

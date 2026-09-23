@@ -105,7 +105,6 @@ def main() -> None:
     db.executemany(
         "INSERT INTO anniversaries (id, brand_id, label, date, kind, sort_order)"
         " VALUES (?,?,?,?,?,?)", rows)
-    db.commit()
     print(f"\nanniversaries に {len(rows)} 件追加した"
           f" (合計 {db.execute('SELECT count(*) FROM anniversaries').fetchone()[0]} 件)")
 

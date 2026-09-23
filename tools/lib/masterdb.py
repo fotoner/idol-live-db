@@ -106,10 +106,11 @@ def _report_changes(before: dict, after: dict) -> None:
 def write_master_sql(conn: sqlite3.Connection, sql_path=MASTER_SQL) -> None:
     """conn の中身を正本の形で sql_path に書く。書く前に一時 DB で外部キーを検査する。
 
-    壊れが 1 件でもあれば書かずに SystemExit(1)。表ごとの行数の変化も出す
-    (手元の DB を丸ごと書き出すと、正本にしか無い行が黙って消えるため)。
+    壊れが 1 件でもあれば書かずに、conn の未 commit の変更を rollback して SystemExit(1)。
+    通れば正本を書いてから conn を commit する (呼び出し側は先に commit しないこと。
+    検査に落ちたときに手元の DB だけ変わった状態を残さないため)。表ごとの行数の
+    変化も出す (手元の DB を丸ごと書き出すと、正本にしか無い行が黙って消えるため)。
     """
-    conn.commit()
     text = dump_text(conn)
     with tempfile.TemporaryDirectory(prefix="masterdb-") as tmp:
         check_path = Path(tmp) / "check.sqlite"
@@ -121,8 +122,9 @@ def write_master_sql(conn: sqlite3.Connection, sql_path=MASTER_SQL) -> None:
             check.close()
         problems = integrity_problems(check_path)
     if problems:
-        print(f"✗ 書き出す中身に外部キーの壊れが {problems} 件。{sql_path} は書き換えない。",
-              file=sys.stderr)
+        conn.rollback()
+        print(f"✗ 書き出す中身に外部キーの壊れが {problems} 件。{sql_path} も手元の DB も"
+              "書き換えない。", file=sys.stderr)
         raise SystemExit(1)
 
     if Path(sql_path).exists():
@@ -132,4 +134,5 @@ def write_master_sql(conn: sqlite3.Connection, sql_path=MASTER_SQL) -> None:
     with open(tmp_out, "w", encoding="utf-8") as f:
         f.write(text)
     os.replace(tmp_out, str(sql_path))
+    conn.commit()
     print(f"✓ {sql_path} を書き出した")

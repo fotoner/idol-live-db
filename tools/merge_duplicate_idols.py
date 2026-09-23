@@ -143,7 +143,9 @@ def main() -> None:
         print("\n統合するものは無かった。")
         return
 
-    db.commit()
+    # 正本は書く前に一時 DB で外部キーを検査してから書き出す。通れば手元の DB も commit し、
+    # 壊れていればどちらも書き換えない。削除リストは正本を書けたときだけ作る。
+    masterdb.write_master_sql(db, os.path.join(REPO, "db", "master.sql"))
     db.close()
 
     with open(OUT_TSV, "w", encoding="utf-8") as w:
@@ -151,11 +153,6 @@ def main() -> None:
         for record_type, name in deletions:
             w.write(f"{record_type}\t{name}\n")
     print(f"\nCloudKit 削除リスト: {OUT_TSV} ({len(deletions)} 件)")
-
-    # 正本は書く前に一時 DB で外部キーを検査してから書き出す (壊れていれば書かない)。
-    db = sqlite3.connect(DB_PATH)
-    masterdb.write_master_sql(db, os.path.join(REPO, "db", "master.sql"))
-    db.close()
 
 
 

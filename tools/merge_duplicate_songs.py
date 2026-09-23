@@ -132,17 +132,16 @@ def main() -> None:
         print("\n(--apply で master.sqlite に反映する)")
         return
 
-    db.commit()
+    # db/master.sql を吐き直す (このリポジトリではこちらが正)。書く前に一時 DB で外部キーを
+    # 検査し、通れば手元の DB も commit する。壊れていればどちらも書き換えない。
+    # 削除リストは正本を書けたときだけ作る。
+    masterdb.write_master_sql(db, DUMP_PATH)
 
     with open(OUT_TSV, "w", encoding="utf-8") as f:
         f.write("# 二重登録の統合で不要になったレコード。子 (SongArtist) を先に消す。\n")
         for rtype, rname in deletions:
             f.write(f"{rtype}\t{rname}\n")
     print(f"\nCloudKit 削除リスト: {OUT_TSV} ({len(deletions)} 件)")
-
-    # db/master.sql を吐き直す (このリポジトリではこちらが正)。書く前に一時 DB で
-    # 外部キーを検査し、壊れていれば書かない。
-    masterdb.write_master_sql(db, DUMP_PATH)
 
 
 

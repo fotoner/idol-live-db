@@ -70,6 +70,19 @@ class MasterDbTest(unittest.TestCase):
             self.write(conn, path)
         self.assertEqual(support.sha256(path), before)
 
+    def test_a_refused_write_rolls_the_connection_back(self):
+        # 検査に落ちたら、正本も手元の DB も変えない (commit してから検査しない)。
+        conn = self.fixture()
+        path = self.root / "master.sql"
+        self.write(conn, path)
+        conn.execute("INSERT INTO show_tickets (id, show_id, name, price) VALUES ('t1', 'sh_missing', '券', 1000)")
+        with self.assertRaises(SystemExit):
+            self.write(conn, path)
+        self.assertEqual(conn.execute("SELECT count(*) FROM show_tickets").fetchone()[0], 0)
+        other = sqlite3.connect(str(self.root / "db.sqlite"))
+        self.assertEqual(other.execute("SELECT count(*) FROM show_tickets").fetchone()[0], 0)
+        other.close()
+
     def test_stamp_content_hash_uses_the_file_digest(self):
         conn = self.fixture()
         path = self.root / "master.sql"
