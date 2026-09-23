@@ -90,6 +90,11 @@ struct CoreShowRepository: ShowReading {
         }
     }
 
+    /// 券種はスナップショットに載らない (価格マスタは公演の表示に要らない) ので、DB から引く。
+    func tickets(showId: String) async throws -> [ShowTicket] {
+        try await database.showTicketsAsync(showId: showId).map(\.ticket)
+    }
+
     /// 参加マーク (user_marks) はスナップショットに無いので、ここで解決して渡す。
     /// 何を回収と数えるかの規則は core (`CollectionAttendance` 参照)。
     ///

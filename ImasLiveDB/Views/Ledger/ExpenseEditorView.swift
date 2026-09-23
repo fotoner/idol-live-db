@@ -5,7 +5,6 @@ import SwiftUI
 /// 入力の検査 (日付の形・金額の範囲) は**共有コア** (`validateExpense`) 一本。
 /// ここは弾かれた理由を日本語に直して出すだけで、条件を Swift に書かない。
 struct ExpenseEditorView: View {
-    @Environment(AppDatabase.self) private var database
     @Environment(\.dismiss) private var dismiss
 
     /// nil なら新規作成。
@@ -147,7 +146,7 @@ struct ExpenseEditorView: View {
     }
 
     private func loadOptions() async {
-        showOptions = (try? await database.attendedShowOptionsAsync()) ?? []
+        showOptions = (try? await AppContainer.shared.ledgerReading.attendedShowOptions()) ?? []
     }
 
     private func save() {

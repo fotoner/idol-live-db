@@ -522,7 +522,7 @@ struct ProduceTabView: View {
             favoriteCount = songFav + idolFav + eventFav
 
             // 合計はコアに出させる (画面で足し算しない)。
-            let expenses = try await database.allExpensesAsync().map {
+            let expenses = try await AppContainer.shared.ledgerReading.expenses().map {
                 ExpenseEntry(id: $0.id, date: $0.date, category: $0.categoryValue,
                              amount: $0.amount, showId: $0.showId, eventId: $0.eventId,
                              showLabel: nil, note: $0.note)

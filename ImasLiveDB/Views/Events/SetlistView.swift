@@ -731,7 +731,7 @@ struct SetlistView: View {
             idolsById = Dictionary(uniqueKeysWithValues: fetchedIdols.map { ($0.id, $0) })
 
             costumes = try await showReading.showCostumes(showId: show.id)
-            tickets = (try? await database.showTicketsAsync(showId: show.id))?.map(\.ticket) ?? []
+            tickets = (try? await showReading.tickets(showId: show.id)) ?? []
 
             myPickIdolIds = Set(UserMarkService.shared.allMarked(kind: .myPick, entity: .idol))
 

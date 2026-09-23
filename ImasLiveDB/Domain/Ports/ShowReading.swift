@@ -47,6 +47,9 @@ protocol ShowReading: Sendable {
     func searchShows(query: String, limit: Int) async throws -> [ShowWithEventName]
     /// 公演の出演キャストを Idol として取得 (出演者予想の対象一覧用)。
     func showCastIdols(showId: String) async throws -> [Idol]
+    /// 公演の券種と価格 (チケット代の記録・セトリ画面の価格表示)。
+    /// 券種はスナップショットに載らないので、実装は端末の DB を読む。
+    func tickets(showId: String) async throws -> [ShowTicket]
     /// その公演で着られた衣装 (進行順)。記録が無ければ空。
     ///
     /// 衣装の畳み方 (同じ衣装が複数曲に出たら 1 件にまとめる) と「どこで着たか」の

@@ -16,15 +16,4 @@ extension AppDatabase {
         }
     }
 
-    /// 複数公演ぶんをまとめて (公演 id → 券種)。一覧で公演ごとに引くと N 回走る。
-    func showTicketsAsync(showIds: [String]) async throws -> [String: [ShowTicketRecord]] {
-        guard !showIds.isEmpty else { return [:] }
-        let rows = try await dbQueue.read { db in
-            try ShowTicketRecord
-                .filter(showIds.contains(ShowTicketRecord.Columns.showId))
-                .fetchAll(db)
-        }
-        return Dictionary(grouping: rows, by: \.showId)
-    }
-
 }

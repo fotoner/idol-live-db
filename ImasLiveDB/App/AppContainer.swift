@@ -107,6 +107,10 @@ final class AppContainer: Sendable {
     /// マーク集合読み取りの実装 (GRDB / 共有 AppDatabase)。
     let markReading: any MarkReading = GRDBMarkRepository(database: .shared)
 
+    /// 家計簿 (端末にだけある支出) の読み書きの実装 (GRDB / 共有 AppDatabase)。
+    let ledgerReading: any LedgerReading = GRDBLedgerRepository(database: .shared)
+    let ledgerWriting: any LedgerWriting = GRDBLedgerRepository(database: .shared)
+
     /// 曲詳細のサーバ側データ (タグ / 類似曲 / ペンライト / 歌詞) 読み取りの実装。
     /// 束ねエンドポイント 1 本で取り、未配信 Worker では旧個別エンドポイントに落ちる。
     /// ⚠️ 歌詞を含むため JASRAC 許諾の条件によりディスクへは一切書けない。

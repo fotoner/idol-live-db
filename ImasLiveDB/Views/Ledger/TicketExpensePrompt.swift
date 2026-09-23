@@ -26,7 +26,9 @@ enum AttendanceMarkedKey {
 /// 出すのは「その形態の券種がマスタにあり、まだその公演のチケット代を
 /// 記録していない」ときだけ。券が 1 種なら金額そのまま、複数なら選ばせる。
 struct TicketExpensePromptModifier: ViewModifier {
-    let database: AppDatabase
+    let ledgerReading: any LedgerReading
+    let ledgerWriting: any LedgerWriting
+    let showReading: any ShowReading
 
     @State private var request: TicketExpensePromptRequest?
 
@@ -40,7 +42,7 @@ struct TicketExpensePromptModifier: ViewModifier {
             }
             .sheet(item: $request) { request in
                 TicketExpenseSheet(request: request) { ticket, amount in
-                    save(request: request, ticket: ticket, amount: amount)
+                    Task { await save(request: request, ticket: ticket, amount: amount) }
                 }
             }
     }
@@ -49,8 +51,7 @@ struct TicketExpensePromptModifier: ViewModifier {
     /// (参加を付けただけなのに毎回シートが出ると、付ける作業が止まる)。
     private func prepare(showId: String, type: AttendanceType) async {
         let kind = ticketKindFromAttendance(textValue: type.rawValue)
-        let tickets = ((try? await database.showTicketsAsync(showId: showId)) ?? [])
-            .map(\.ticket)
+        let tickets = (try? await showReading.tickets(showId: showId)) ?? []
         let candidates = ticketsForKind(tickets: tickets, kind: kind)
         guard !candidates.isEmpty else { return }
 
@@ -58,7 +59,7 @@ struct TicketExpensePromptModifier: ViewModifier {
         // 読めなかったときも聞かない (付けてあるか分からないまま聞くと二重計上になりうる)。
         let existing: [Expense]
         do {
-            existing = try database.expenses(showId: showId)
+            existing = try await ledgerReading.expenses(showId: showId)
         } catch {
             Logger.database.error("ticket_prompt_read_failed: \(error.localizedDescription, privacy: .public)")
             return
@@ -66,7 +67,7 @@ struct TicketExpensePromptModifier: ViewModifier {
         let ticketKey = expenseCategoryKey(category: .ticket)
         guard !existing.contains(where: { $0.category == ticketKey }) else { return }
 
-        let options = (try? await database.attendedShowOptionsAsync()) ?? []
+        let options = (try? await ledgerReading.attendedShowOptions()) ?? []
         let option = options.first { $0.id == showId }
         request = TicketExpensePromptRequest(
             showId: showId,
@@ -78,7 +79,7 @@ struct TicketExpensePromptModifier: ViewModifier {
         )
     }
 
-    private func save(request: TicketExpensePromptRequest, ticket: ShowTicket, amount: Int64) {
+    private func save(request: TicketExpensePromptRequest, ticket: ShowTicket, amount: Int64) async {
         let note = ticket.isEstimate ? "\(ticket.name) (推定)" : ticket.name
         let expense = Expense.make(
             date: request.date.isEmpty ? Expense.today : request.date,
@@ -89,7 +90,7 @@ struct TicketExpensePromptModifier: ViewModifier {
             note: note
         )
         do {
-            try database.saveExpense(expense)
+            try await ledgerWriting.save(expense)
         } catch {
             LocalWriteFailure.report(error, action: "チケット代の記録")
         }
@@ -98,8 +99,11 @@ struct TicketExpensePromptModifier: ViewModifier {
 
 extension View {
     /// アプリのどこで参加を付けても、確認シートがここから出る。
-    func ticketExpensePrompt(database: AppDatabase) -> some View {
-        modifier(TicketExpensePromptModifier(database: database))
+    func ticketExpensePrompt(container: AppContainer = .shared) -> some View {
+        modifier(TicketExpensePromptModifier(
+            ledgerReading: container.ledgerReading,
+            ledgerWriting: container.ledgerWriting,
+            showReading: container.showReading))
     }
 }
 

@@ -12,7 +12,6 @@ import SwiftUI
 /// ⚠️ 行のスワイプ (削除) を効かせるため **List** で組む。`ScrollView + LazyVStack` に
 /// `swipeActions` を付けても無言で消える。
 struct LedgerView: View {
-    @Environment(AppDatabase.self) private var database
 
     @State private var expenses: [Expense] = []
     @State private var showLabels: [String: String] = [:]
@@ -80,9 +79,8 @@ struct LedgerView: View {
         }
         .sheet(item: $editing) { target in
             ExpenseEditorView(expense: target.expense) { saved in
-                save(saved)
+                Task { await save(saved) }
             }
-            .environment(database)
         }
         .task { if !loaded { await load() } }
         .task(id: recomputeKey) { recompute() }
@@ -191,7 +189,7 @@ struct LedgerView: View {
                         .listRowBackground(DS.surface)
                         .listRowSeparatorTint(DS.sep)
                         .swipeActions(edge: .trailing) {
-                            Button(role: .destructive) { delete(expense) } label: {
+                            Button(role: .destructive) { Task { await delete(expense) } } label: {
                                 Label("削除", systemImage: "trash")
                             }
                         }
@@ -265,8 +263,9 @@ struct LedgerView: View {
     // MARK: - 読み書き
 
     private func load() async {
-        expenses = (try? await database.allExpensesAsync()) ?? []
-        showLabels = (try? await database.attendedShowLabelsAsync()) ?? [:]
+        let ledger = AppContainer.shared.ledgerReading
+        expenses = (try? await ledger.expenses()) ?? []
+        showLabels = (try? await ledger.attendedShowLabels()) ?? [:]
         loaded = true
     }
 
@@ -292,9 +291,9 @@ struct LedgerView: View {
 
     /// 保存に成功してから一覧を直す (失敗しても一覧だけ直すと、保存済みに見えて
     /// 次に開くと消えている)。
-    private func save(_ expense: Expense) {
+    private func save(_ expense: Expense) async {
         do {
-            try database.saveExpense(expense)
+            try await AppContainer.shared.ledgerWriting.save(expense)
         } catch {
             LocalWriteFailure.report(error, action: "家計簿の保存")
             return
@@ -308,9 +307,9 @@ struct LedgerView: View {
         changeToken += 1
     }
 
-    private func delete(_ expense: Expense) {
+    private func delete(_ expense: Expense) async {
         do {
-            try database.deleteExpense(id: expense.id)
+            try await AppContainer.shared.ledgerWriting.delete(id: expense.id)
         } catch {
             LocalWriteFailure.report(error, action: "家計簿の削除")
             return
