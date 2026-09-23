@@ -1,6 +1,5 @@
 package com.fugaif.imaslivedb.ui.events
 
-import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -51,7 +50,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,7 +57,6 @@ import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
@@ -84,9 +81,7 @@ import com.fugaif.imaslivedb.data.model.PerformerRow
 import com.fugaif.imaslivedb.data.model.SetlistRow
 import com.fugaif.imaslivedb.data.model.Show
 import com.fugaif.imaslivedb.data.model.ShowTicket
-import com.fugaif.imaslivedb.data.model.UserMark
 import com.fugaif.imaslivedb.data.model.VenueDirectory
-import com.fugaif.imaslivedb.di.AppModule
 import com.fugaif.imaslivedb.ui.components.ArtworkImage
 import com.fugaif.imaslivedb.ui.components.CommunityLoginPromptDialog
 import com.fugaif.imaslivedb.ui.components.GradientHeader
@@ -105,12 +100,9 @@ import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import uniffi.imas_core.PerformerNameMode
 import uniffi.imas_core.RowNoteTone
-import uniffi.imas_core.SetlistDisplayMode
-import uniffi.imas_core.SetlistRowMetaRecord
 import uniffi.imas_core.SetlistRowNoteGroupRecord
 import uniffi.imas_core.SetlistRowNoteRecord
 import uniffi.imas_core.setlistDisplayModeIsCompact
-import uniffi.imas_core.setlistDisplayModeFromStored
 import uniffi.imas_core.setlistDisplayModes
 import uniffi.imas_core.ShowCollectionRecord
 import uniffi.imas_core.ShowCostumeRecord
@@ -120,8 +112,6 @@ import uniffi.imas_core.ticketPriceRanges
 import uniffi.imas_core.ticketsForKind
 import com.fugaif.imaslivedb.ui.theme.brandColor
 import com.fugaif.imaslivedb.ui.theme.displayName
-import com.fugaif.imaslivedb.ui.theme.joined
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -142,95 +132,47 @@ fun SetlistScreen(
      * [com.fugaif.imaslivedb.ui.filtered.EventFilterKind] の定義に従う。ここでは常に `BRAND`)。
      */
     onFilteredEventsClick: (String, String) -> Unit = { _, _ -> },
-    viewModel: SetlistViewModel = viewModel(key = showId)
+    viewModel: SetlistViewModel = viewModel(key = showId, factory = SetlistViewModel.factory(showId))
 ) {
-    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
-    val module = remember(context) { AppModule.from(context) }
-    val marks = module.userMarkRepository
-    val likeService = remember(context) { AppModule.from(context).setlistLikeService }
-    val authState by module.authService.state.collectAsState()
+    val marks by viewModel.showMarks.collectAsState()
+    val likes by viewModel.likes.collectAsState()
+    val authState by viewModel.authState.collectAsState()
+    val showLoginPrompt by viewModel.loginPrompt.collectAsState()
     // 権限フラグは認証状態が変わった時だけコアへ問い合わせる (data/auth/EditPermission.kt のヘッダ参照)。
     val canShowEditActions = remember(authState) { authState.showEditAffordance }
     val isSignedIn = remember(authState) { authState.canEdit }
-    val scope = rememberCoroutineScope()
-
-    // 会場名は「公演日時点の名前」で出す (改名前の公演は当時名)。解決には会場マスタが要るが、
-    // この画面の担当範囲外である ViewModel は変えないのでここで 1 回だけ読む
-    // (244 施設ぶんの小さなマスタで、公演ごとの引き直しはしない)。
-    var venues by remember { mutableStateOf(VenueDirectory.EMPTY) }
-    LaunchedEffect(Unit) { venues = module.eventRepository.fetchVenueDirectory() }
 
     // 歌唱者をどの名前で出すか。設定画面と同じ 1 箇所から読む。
     // **行の添え物 (名義) の中身がこれで変わる**ので、読み込みの鍵に入れて
     // 設定変更に画面を開き直さずに追従させる。
     val performerName = AppPreferences.performerName
 
-    // 表示の詳しさは公演をまたいで保持する。「1 枚のスクショに収めたい」人は
-    // 次の公演でも同じ見方をするので、画面を離れるたびに戻ると毎回押し直しになる。
-    // **保存値からモードを決めるのも、旧 Bool からの移行も共有コアが担う。**
-    var displayMode by remember { mutableStateOf(SetlistViewPrefs.displayMode(context)) }
+    // 表示の詳しさ。公演をまたいで保持する (ViewModel が端末に残す)。
+    val displayMode by viewModel.displayMode.collectAsState()
     // 曲名と歌唱者だけに絞る形か。どのモードがそれに当たるかもコアが決める。
     val simpleMode = setlistDisplayModeIsCompact(displayMode)
 
-    // --- マーク (参加 / お気に入り / メモ / 座席)。実体は Room なのでここで読み書きする ---
-    var attendance by remember(showId) { mutableStateOf<AttendanceType?>(null) }
-    var favoriteOn by remember(showId) { mutableStateOf(false) }
-    var note by remember(showId) { mutableStateOf<String?>(null) }
-    var seat by remember(showId) { mutableStateOf<String?>(null) }
-    // 参加を付け外しすると回収の札と要約が変わるので、行の添え物を読み直す鍵に使う。
-    var attendanceVersion by remember(showId) { mutableStateOf(0) }
-
-    suspend fun reloadMarks() {
-        attendance = marks.attendance(UserMark.SHOW, showId)
-        favoriteOn = marks.isOn(UserMark.SHOW, showId, UserMark.FAVORITE)
-        note = marks.note(UserMark.SHOW, showId)
-        seat = marks.seat(UserMark.SHOW, showId)
-    }
-    LaunchedEffect(showId) { reloadMarks() }
-
-    // 参加の付け外し・「配信も回収に含める」設定でも回収の札と要約が変わるので、
-    // 表示モード・歌唱者の設定と同じ扱いで読み直しの鍵に入れる。
-    LaunchedEffect(
-        showId, performerName, displayMode, attendanceVersion, AppPreferences.includeStreamInCollection
-    ) {
-        viewModel.load(
-            context, showId, performerName, displayMode, AppPreferences.includeStreamInCollection
-        )
+    // 「配信も回収に含める」設定でも回収の札と要約が変わるので、歌唱者の設定と同じ扱いで
+    // 読み直しの鍵に入れる。表示の詳しさの切り替えと参加の付け外しは ViewModel が自分で読み直す。
+    LaunchedEffect(showId, performerName, AppPreferences.includeStreamInCollection) {
+        viewModel.load(performerName, AppPreferences.includeStreamInCollection)
     }
 
     // --- 「良かった」投票 (post-vote)。セトリが埋まっている公演だけ取りに行く ---
-    var likes by remember(showId) { mutableStateOf<Map<String, SetlistLikeService.LikeEntry>>(emptyMap()) }
     val hasSetlist = uiState.setlist.isNotEmpty()
     LaunchedEffect(showId, hasSetlist) {
-        if (hasSetlist) likes = likeService.fetch(showId).associateBy { it.songId }
-    }
-
-    // セトリ編集シートに渡すイベント名 (編集画面の見出し)。パンくずの 2 段目にも使う。
-    var eventName by remember(showId) { mutableStateOf("") }
-    LaunchedEffect(uiState.show?.eventId) {
-        val id = uiState.show?.eventId ?: return@LaunchedEffect
-        eventName = module.eventRepository.fetchEvent(id)?.name.orEmpty()
-    }
-
-    // パンくずの 1 段目 (ブランドの短縮名)。ナビの戻るは「どこから来たか」しか辿れない
-    // (深リンクや検索から直接開くと戻り先が無い) ので、この画面がライブの木の
-    // どこに居るのかを示して、上の階層へ直接行けるようにする。
-    var brandShortName by remember(showId) { mutableStateOf<String?>(null) }
-    LaunchedEffect(uiState.brandId) {
-        val id = uiState.brandId ?: return@LaunchedEffect
-        brandShortName = module.eventRepository.fetchBrand(id)?.shortName
+        if (hasSetlist) viewModel.refreshLikes()
     }
 
     var menuOpen by remember { mutableStateOf(false) }
     var showAttendanceDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
     var showHistorySheet by remember { mutableStateOf(false) }
-    var showLoginPrompt by remember { mutableStateOf(false) }
 
     /** 編集導線の共通ゲート。未ログインならログイン誘導、BAN は無反応 (導線自体を隠している)。 */
     fun startEdit() {
-        authState.startCommunityEdit(promptLogin = { showLoginPrompt = true }) { showEditDialog = true }
+        authState.startCommunityEdit(promptLogin = viewModel::requestLogin) { showEditDialog = true }
     }
 
     Scaffold(
@@ -262,8 +204,7 @@ fun SetlistScreen(
                                 },
                                 onClick = {
                                     menuOpen = false
-                                    displayMode = option.mode
-                                    SetlistViewPrefs.setDisplayMode(context, option.raw)
+                                    viewModel.setDisplayMode(option)
                                 }
                             )
                         }
@@ -308,10 +249,10 @@ fun SetlistScreen(
                     // 現在地 (公演) はすぐ下の大見出しが言うので、ここには出さない。
                     val breadcrumb: @Composable () -> Unit = {
                         uiState.show?.eventId?.let { eventId ->
-                            if (eventName.isNotEmpty()) {
+                            if (uiState.eventName.isNotEmpty()) {
                                 SetlistBreadcrumb(
-                                    brandName = brandShortName,
-                                    eventName = eventName,
+                                    brandName = uiState.brandShortName,
+                                    eventName = uiState.eventName,
                                     accent = ImasTheme.derive(seedHex, null, dark = true).accent,
                                     onBrandClick = {
                                         uiState.brandId?.let {
@@ -337,7 +278,7 @@ fun SetlistScreen(
                             )
                             uiState.show?.let { show ->
                                 val sub = listOfNotNull(
-                                    venues.displayName(show) ?: show.venue?.takeIf { it.isNotBlank() },
+                                    uiState.venues.displayName(show) ?: show.venue?.takeIf { it.isNotBlank() },
                                     show.date.takeIf { it.isNotBlank() }
                                 ).joinToString(" ・ ")
                                 if (sub.isNotEmpty()) {
@@ -368,7 +309,7 @@ fun SetlistScreen(
                         item(key = "venue_date") {
                             VenueDateCard(
                                 show = show,
-                                venues = venues,
+                                venues = uiState.venues,
                                 brandId = uiState.brandId,
                                 onFilteredShowsClick = onFilteredShowsClick
                             )
@@ -385,29 +326,15 @@ fun SetlistScreen(
                         }
                         item(key = "mark_bar") {
                             UserMarkBar(
-                                attendedLabel = attendance?.let { "参加 (${it.label})" } ?: "参加",
-                                attendedOn = attendance != null,
+                                attendedLabel = marks.attendance?.let { "参加 (${it.label})" } ?: "参加",
+                                attendedOn = marks.attendance != null,
                                 onAttendedClick = { showAttendanceDialog = true },
-                                favoriteOn = favoriteOn,
-                                onFavoriteClick = {
-                                    scope.launch {
-                                        favoriteOn = marks.toggle(UserMark.SHOW, showId, UserMark.FAVORITE)
-                                    }
-                                },
-                                note = note,
-                                onNoteChange = { text ->
-                                    scope.launch {
-                                        marks.setNote(UserMark.SHOW, showId, text)
-                                        note = marks.note(UserMark.SHOW, showId)
-                                    }
-                                },
-                                seat = seat,
-                                onSeatChange = { text ->
-                                    scope.launch {
-                                        marks.setSeat(UserMark.SHOW, showId, text)
-                                        seat = marks.seat(UserMark.SHOW, showId)
-                                    }
-                                },
+                                favoriteOn = marks.favoriteOn,
+                                onFavoriteClick = viewModel::toggleFavorite,
+                                note = marks.note,
+                                onNoteChange = viewModel::setNote,
+                                seat = marks.seat,
+                                onSeatChange = viewModel::setSeat,
                                 seed = seedHex,
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
                             )
@@ -438,7 +365,7 @@ fun SetlistScreen(
                 // スクショに誘導文が写り込むだけになる。
                 if (hasSetlist && !simpleMode) {
                     item(key = "vote_note") {
-                        VoteHintRow(isSignedIn = isSignedIn, onLoginClick = { showLoginPrompt = true })
+                        VoteHintRow(isSignedIn = isSignedIn, onLoginClick = viewModel::requestLogin)
                     }
                 }
 
@@ -492,17 +419,7 @@ fun SetlistScreen(
                                     // (ブランド ID のままだと色エンジンがニュートラルへ落ちる)。
                                     seed = seedHex,
                                     likeEntry = likes[item.songId],
-                                    onToggleLike = {
-                                        toggleLike(
-                                            scope = scope,
-                                            likeService = likeService,
-                                            showId = showId,
-                                            songId = item.songId,
-                                            current = likes[item.songId],
-                                            onResult = { likes = likes + (it.songId to it) },
-                                            onRequireLogin = { showLoginPrompt = true }
-                                        )
-                                    },
+                                    onToggleLike = { viewModel.toggleLike(item.songId) },
                                     onSongClick = { onSongClick(item.songId) },
                                     onIdolClick = { idolId -> onIdolClick(idolId) }
                                 )
@@ -517,15 +434,11 @@ fun SetlistScreen(
 
     if (showAttendanceDialog) {
         AttendanceDialog(
-            current = attendance,
+            current = marks.attendance,
             onDismiss = { showAttendanceDialog = false },
             onSelect = { type ->
                 showAttendanceDialog = false
-                scope.launch {
-                    marks.setAttendance(UserMark.SHOW, showId, type)
-                    reloadMarks()
-                    attendanceVersion++
-                }
+                viewModel.setAttendance(type)
             }
         )
     }
@@ -533,7 +446,7 @@ fun SetlistScreen(
     if (showLoginPrompt) {
         CommunityLoginPromptDialog(
             message = "セトリの編集や 👍 での投票にはログインが必要です。",
-            onDismiss = { showLoginPrompt = false }
+            onDismiss = viewModel::dismissLoginPrompt
         )
     }
 
@@ -545,14 +458,11 @@ fun SetlistScreen(
         ) {
             SetlistEditScreen(
                 show = editingShow,
-                eventName = eventName,
+                eventName = uiState.eventName,
                 onDismiss = { showEditDialog = false },
                 onSaved = {
                     showEditDialog = false
-                    viewModel.load(
-                        context, showId, performerName, displayMode,
-                        AppPreferences.includeStreamInCollection
-                    )
+                    viewModel.reload()
                 }
             )
         }
@@ -564,64 +474,6 @@ fun SetlistScreen(
             showName = uiState.show?.name.orEmpty(),
             onDismiss = { showHistorySheet = false }
         )
-    }
-}
-
-/**
- * 👍 のトグル。押した瞬間の状態から反転を決め、サーバが返した確定値で行を更新する。
- *
- * 送信前に「ログインしているか」を見て弾かないのは意図的 — セッション更新中の一瞬に
- * トークンが空になることがあり、そこで先回りして落とすと投票が無言で失敗する。
- * 認証が要るという判断はサーバの 401 に任せ、返ってきたときだけログイン誘導を出す。
- */
-private fun toggleLike(
-    scope: kotlinx.coroutines.CoroutineScope,
-    likeService: SetlistLikeService,
-    showId: String,
-    songId: String,
-    current: SetlistLikeService.LikeEntry?,
-    onResult: (SetlistLikeService.LikeEntry) -> Unit,
-    onRequireLogin: () -> Unit
-) {
-    scope.launch {
-        try {
-            val liked = current?.hasUserLiked == true
-            val result = if (liked) likeService.unlike(showId, songId)
-            else likeService.like(showId, songId)
-            onResult(result)
-        } catch (e: SetlistLikeService.Unauthorized) {
-            onRequireLogin()
-        } catch (e: Exception) {
-            // 通信断などは黙る。次回 fetch で正しい状態に戻る。
-        }
-    }
-}
-
-/** シンプル表示のオン/オフを端末に残す。画面をまたいで見方を保つためだけの 1 bit。 */
-/**
- * セトリの詳しさを端末に残す。画面をまたいで見方を保つためだけの設定。
- *
- * 3 値にする前は [KEY_SIMPLE] という Bool 1 つだった。新しい鍵がまだ無い端末は
- * その Bool から移行するが、**その判断はコア (setlistDisplayModeFromStored) が持つ**
- * — iOS と Android で別々に書くと片方だけ移行しそこねる。
- */
-private object SetlistViewPrefs {
-    private const val PREFS_NAME = "setlist_view_prefs"
-    private const val KEY_SIMPLE = "simple_mode"
-    private const val KEY_MODE = "display_mode"
-
-    fun displayMode(context: Context): SetlistDisplayMode {
-        val prefs = context.applicationContext
-            .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        return setlistDisplayModeFromStored(
-            prefs.getString(KEY_MODE, null),
-            prefs.getBoolean(KEY_SIMPLE, false)
-        )
-    }
-
-    fun setDisplayMode(context: Context, raw: String) {
-        context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit().putString(KEY_MODE, raw).apply()
     }
 }
 
