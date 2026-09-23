@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uniffi.imas_core.backupImportSummary
 
 data class BackupUiState(
     val isCreatingCode: Boolean = false,
@@ -25,7 +26,8 @@ data class BackupUiState(
     val isRestoringCode: Boolean = false,
     val isExporting: Boolean = false,
     val isImportingFile: Boolean = false,
-    val importResult: BackupImportResult? = null,
+    /** 復元の結果の文面 (何がどれだけ入ったか。組み立てはコア)。null = 出していない。 */
+    val importSummary: String? = null,
     val importError: String? = null
 )
 
@@ -71,7 +73,7 @@ class BackupViewModel(app: Application) : AndroidViewModel(app) {
             try {
                 val envelope = module.backupTransferApi.fetchTransferCode(code)
                 val result = importJson(envelope, restoreDeviceId)
-                _uiState.update { it.copy(importResult = result, codeInput = "") }
+                _uiState.update { it.copy(importSummary = summaryOf(result), codeInput = "") }
             } catch (e: Exception) {
                 reportImportFailure(e)
             } finally {
@@ -109,7 +111,7 @@ class BackupViewModel(app: Application) : AndroidViewModel(app) {
                         ?.bufferedReader()?.use { it.readText() }
                 } ?: throw BackupFormatException("ファイルを読み込めませんでした")
                 val result = importJson(json, restoreDeviceId)
-                _uiState.update { it.copy(importResult = result) }
+                _uiState.update { it.copy(importSummary = summaryOf(result)) }
             } catch (e: Exception) {
                 reportImportFailure(e)
             } finally {
@@ -120,7 +122,7 @@ class BackupViewModel(app: Application) : AndroidViewModel(app) {
 
     fun dismissTransferError() = _uiState.update { it.copy(transferError = null) }
 
-    fun dismissImportResult() = _uiState.update { it.copy(importResult = null) }
+    fun dismissImportResult() = _uiState.update { it.copy(importSummary = null) }
 
     fun dismissImportError() = _uiState.update { it.copy(importError = null) }
 
@@ -132,6 +134,16 @@ class BackupViewModel(app: Application) : AndroidViewModel(app) {
         } ?: "読み込みに失敗しました"
         _uiState.update { it.copy(importError = message) }
     }
+
+    /** 復元の結果の文面 (iOS と同じ。入ったものだけを並べる規則はコアの backupImportSummary)。 */
+    private fun summaryOf(result: BackupImportResult): String = backupImportSummary(
+        addedMarks = result.addedMarks.toLong(),
+        addedVotes = result.addedVotes.toLong(),
+        addedPersonalTags = result.addedPersonalTags.toLong(),
+        addedExpenses = result.addedExpenses.toLong(),
+        skippedMarks = result.skippedMarks.toLong(),
+        deviceIdRestored = result.deviceIdRestored
+    )
 
     private suspend fun exportJson(): String =
         BackupExportImportService.buildEnvelopeJson(

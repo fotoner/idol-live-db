@@ -16,10 +16,12 @@ import com.fugaif.imaslivedb.di.AppModule
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import uniffi.imas_core.backupImportSummary
 import java.io.File
 
 /**
@@ -52,6 +54,28 @@ class BackupViewModelTest {
         withTimeout(10_000) {
             while (mark !in marks.getAll()) delay(20)
         }
+    }
+
+    /** 復元の結果は、コアの文面 (入ったものだけを並べる。iOS と同じ) で出す。 */
+    @Test
+    fun restoreSummaryIsTheCoreText() = runBlocking {
+        val mark = UserMark(UserMark.IDOL, "idol_backup_summary_test", UserMark.FAVORITE, true, null, "2026-09-01T00:00:00Z")
+        val file = File(app.cacheDir, "summary.json").apply { writeText(backupJsonOf(mark)) }
+        val viewModel = ViewModelProvider(ViewModelStore(), ViewModelProvider.AndroidViewModelFactory.getInstance(app))[
+            BackupViewModel::class.java
+        ]
+
+        viewModel.importFrom(Uri.fromFile(file), restoreDeviceId = false)
+        val summary = withTimeout(10_000) {
+            var s: String? = null
+            while (s == null) {
+                s = viewModel.uiState.value.importSummary
+                if (s == null) delay(20)
+            }
+            s
+        }
+
+        assertEquals(backupImportSummary(1, 0, 0, 0, 0, false), summary)
     }
 
     /** [mark] だけを持つ端末から書き出したバックアップ。 */
