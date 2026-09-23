@@ -42,6 +42,11 @@ object SeedImporter {
     private const val PREFS_NAME = "imas_seed"
     /** reseed の判定を済ませたアプリ更新 (PackageInfo.lastUpdateTime)。 */
     private const val KEY_CHECKED_UPDATE = "reseed_checked_update_time"
+    /** 入れ直しに失敗した回数と、それがどの更新でのことか。 */
+    private const val KEY_FAILED_UPDATE = "reseed_failed_update_time"
+    private const val KEY_FAILED_COUNT = "reseed_failed_count"
+    /** 同じ更新で入れ直しに失敗し続けたら、この回数で諦める (毎起動で seed を複製し続けない)。 */
+    private const val MAX_RESEED_ATTEMPTS = 3
 
     /**
      * 直近の import 失敗のユーザー可視メッセージ (成功時/未実行時は null)。
@@ -91,21 +96,47 @@ object SeedImporter {
      *   (seed の複製と meta の読み出しを毎起動にしない)。
      * - 入れ直した後は、seed を作った時点より後の変更を取り直すため、呼び出し側で次の同期をフルにする。
      */
-    suspend fun reseedIfNeeded(context: Context, db: AppDatabase): Boolean = withContext(Dispatchers.IO) {
+    suspend fun reseedIfNeeded(context: Context, db: AppDatabase): Boolean =
+        reseedIfNeeded(context, db) { seedPath -> reseedFrom(db, seedPath) }
+
+    /** [reseed] を差し替えられる入口 (テスト用)。本番は [reseedFrom]。 */
+    internal suspend fun reseedIfNeeded(
+        context: Context,
+        db: AppDatabase,
+        reseed: (String) -> Boolean
+    ): Boolean = withContext(Dispatchers.IO) {
         val updatedAt = packageUpdateTime(context)
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        if (updatedAt != null && prefs.getLong(KEY_CHECKED_UPDATE, 0L) == updatedAt) return@withContext false
+        if (updatedAt != null && prefs.contains(KEY_CHECKED_UPDATE) && prefs.getLong(KEY_CHECKED_UPDATE, 0L) == updatedAt) {
+            return@withContext false
+        }
         if (!hasAsset(context) || db.syncDao().brandCount() == 0) return@withContext false
         val reseeded = try {
-            withSeedFile(context) { seedPath -> reseedFrom(db, seedPath) }
+            withSeedFile(context, reseed)
         } catch (e: Exception) {
-            // 失敗しても端末のマスタはトランザクションで元のまま。次の更新まで判定し直さないと
-            // 毎起動で失敗し続けるので、印は付ける (差分同期と 24h のフル同期が残りを埋める)。
+            // 失敗しても端末のマスタはトランザクションで元のまま。判定済みの印は付けず、次の起動で
+            // もう一度試す (同時に走る Room の読み取りと ATTACH が当たるなど、一時的な失敗がある)。
+            // 同じ更新で失敗し続けるときは上限の回数で諦める (差分同期と 24h のフル同期が残りを埋める)。
             Log.e(TAG, "reseed 失敗 (端末のマスタはそのまま)", e)
-            false
+            if (updatedAt != null) recordFailure(prefs, updatedAt)
+            return@withContext false
         }
-        if (updatedAt != null) prefs.edit().putLong(KEY_CHECKED_UPDATE, updatedAt).apply()
+        if (updatedAt != null) markChecked(prefs, updatedAt)
         reseeded
+    }
+
+    private fun markChecked(prefs: android.content.SharedPreferences, updatedAt: Long) {
+        prefs.edit().putLong(KEY_CHECKED_UPDATE, updatedAt).remove(KEY_FAILED_UPDATE).remove(KEY_FAILED_COUNT).apply()
+    }
+
+    private fun recordFailure(prefs: android.content.SharedPreferences, updatedAt: Long) {
+        val sameUpdate = prefs.contains(KEY_FAILED_UPDATE) && prefs.getLong(KEY_FAILED_UPDATE, 0L) == updatedAt
+        val failures = (if (sameUpdate) prefs.getInt(KEY_FAILED_COUNT, 0) else 0) + 1
+        if (failures >= MAX_RESEED_ATTEMPTS) {
+            markChecked(prefs, updatedAt)
+        } else {
+            prefs.edit().putLong(KEY_FAILED_UPDATE, updatedAt).putInt(KEY_FAILED_COUNT, failures).apply()
+        }
     }
 
     /** [seedPath] の seed が新しければ入れ直す。判定とコピーの本体 (テストはここを直接呼ぶ)。 */

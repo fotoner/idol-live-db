@@ -5,6 +5,8 @@ import android.util.Log
 import com.fugaif.imaslivedb.data.db.AppDatabase
 import com.fugaif.imaslivedb.data.db.dao.SyncDao
 import com.fugaif.imaslivedb.data.core.SQLITE_IN_CHUNK
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -299,7 +301,15 @@ class CloudKitSyncEngine(
      * 「seed = 基準データ / CloudKit = 増分」の連続したパイプラインの第1段で、ここで投入してから
      * sync() で最新差分を当てる。投入後にデータがあるか (= UI を即表示してよいか) を返す。
      */
-    suspend fun ensureLocalData(): Boolean {
+    suspend fun ensureLocalData(): Boolean = ensureLocalDataMutex.withLock { ensureLocalDataLocked() }
+
+    /**
+     * seed の投入・入れ直しは 1 本ずつ (回転などで 2 本目が重なると、ATTACH と
+     * もう 1 本の Room の読み取りが当たって失敗しうる)。
+     */
+    private val ensureLocalDataMutex = Mutex()
+
+    private suspend fun ensureLocalDataLocked(): Boolean {
         val wasEmpty = dao.brandCount() == 0
         val hasData = SeedImporter.importIfNeeded(appContext, db)
         // seed 投入に失敗しデータが依然として空の場合、無言で「データを準備中…」に留まらせず

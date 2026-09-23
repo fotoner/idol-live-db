@@ -129,6 +129,35 @@ class SeedImporterTest {
         assertEquals(rows(seed, meta), rows(room, meta))
     }
 
+    /**
+     * 入れ直しが失敗したら、判定済みの印を付けず次の起動でもう一度試す (RedTeam A-M4)。
+     * ただし何度も失敗し続けるときは、上限の回数で諦める。
+     */
+    @Test
+    fun failedReseedIsRetriedOnTheNextLaunchUpToALimit() = runBlocking {
+        assertTrue(SeedImporter.importIfNeeded(context, db))
+        forgetReseedCheck()
+
+        var attempts = 0
+        repeat(5) { SeedImporter.reseedIfNeeded(context, db) { attempts++; error("ATTACH と WAL が当たった") } }
+        assertEquals("失敗した入れ直しを上限まで試し直していない", 3, attempts)
+    }
+
+    /** 入れ直しが済んだら、同じ更新の間は判定し直さない。 */
+    @Test
+    fun reseedIsCheckedOncePerUpdate() = runBlocking {
+        assertTrue(SeedImporter.importIfNeeded(context, db))
+        forgetReseedCheck()
+
+        var attempts = 0
+        repeat(2) { SeedImporter.reseedIfNeeded(context, db) { attempts++; false } }
+        assertEquals(1, attempts)
+    }
+
+    private fun forgetReseedCheck() {
+        context.getSharedPreferences("imas_seed", Context.MODE_PRIVATE).edit().clear().commit()
+    }
+
     /** seed が端末と同じなら入れ直さない (端末の行はそのまま)。 */
     @Test
     fun reseedSkipsWhenSeedIsNotNewer() = runBlocking {
