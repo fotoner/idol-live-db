@@ -284,7 +284,7 @@ pub fn search_songs(snap: &Snapshot, query: &str, limit: u32) -> Vec<SongDetailR
 ///   - `WHERE unit_id = ?` … 索引が無く SCAN = rowid 昇順
 ///   - `WHERE id IN (...)` … PK 索引を使い **id 昇順** (rowid 順ではない)。
 ///     ここだけ順序が違うので、原唱者共有の枝は id 昇順に並べてから積む。
-///   rowid 昇順はスナップショットの添字順に一致する (ORDER BY 無しで読み込むため)。
+///   スナップショットは主キー (id) 順で読み込む (Q-07) ので、添字順はどの枝でも id 昇順になる。
 /// - リリース日は `releaseDate ?? ""` の降順。空文字は最小なので NULL は末尾に来る。
 ///   NULL と空文字は**同じ扱い** (原本の `?? ""` がそうなっている)。
 /// - シリーズ・ユニットは「NULL でも空文字でもない」ときだけ枝が動く
@@ -334,7 +334,7 @@ pub fn related_songs(snap: &Snapshot, song_id: &str, limit: u32) -> Vec<SongDeta
     ordered.into_iter().map(|i| SongDetailRecord::from(&snap.songs[i as usize])).collect()
 }
 
-/// 条件に合う曲の添字を**添字順** (= 元 SQL の rowid 昇順) で集める。
+/// 条件に合う曲の添字を**添字順** (= 読み込み順。主キー順) で集める。
 fn indexes_where(snap: &Snapshot, pred: impl Fn(&Song) -> bool) -> Vec<u32> {
     snap.songs
         .iter()
@@ -409,7 +409,7 @@ fn release_key(snap: &Snapshot, i: u32) -> &str {
 ///   バイト比較と一致するので、ここもバイト比較で写す。
 /// - 役割ラベルの並びは 作曲 → 作詞 → 編曲 で固定 (フィールドの走査順そのもの)。
 /// - `ORDER BY title_kana, title` は SQLite の ASC なので title_kana の NULL が先頭。
-///   同着は SQL 未規定なので添字 (= rowid 読み込み順) を最終キーにして決定化する。
+///   同着は SQL 未規定なので添字 (= 読み込み順。主キー順) を最終キーにして決定化する。
 /// - 空・空白だけの名前は即空 (原本の `normalizedCreatorName` が nil を返す枝)。
 ///
 /// **Q-08i で広げた**: 上の ② に加えて、クレジット欄を曲詳細のクレジット行と同じ規則
@@ -495,7 +495,7 @@ fn trim_foundation_spaces(s: &str) -> &str {
 ///   SQL 時代からこうで、直すとピッカーの並びが黙って変わる。
 /// - 絞り込みは一切なし。カバーも派生曲もその他ブランドも全部出る (編集時に
 ///   どの曲でも選べる必要があるため)。
-/// - 同題の曲が複数あるときの並びは SQL 未規定なので、添字 (= rowid 読み込み順) を
+/// - 同題の曲が複数あるときの並びは SQL 未規定なので、添字 (= 読み込み順。主キー順) を
 ///   最終キーにして決定化する。
 pub fn all_songs_for_picker(snap: &Snapshot) -> Vec<PickedSongRecord> {
     let mut indexes: Vec<u32> = (0..snap.songs.len() as u32).collect();

@@ -189,7 +189,7 @@ pub fn sheet_kind(local_day: i32) -> DailyPickKind {
 /// - `ORDER BY id` は BINARY 照合 (バイト列比較) で、Rust の `str` の `Ord` と一致する。
 ///   id は PRIMARY KEY なのでタイは無く、並びは完全に決まる。
 ///
-/// スナップショットの添字順 (rowid 順) に**依存しない**のがこの候補列の要点:
+/// スナップショットの添字順 (読み込み順) に**依存しない**のがこの候補列の要点:
 /// Android の rowid は同期で届いた順で iOS の同梱ファイルとは別物なので、
 /// id 昇順に並べ直して初めて両 OS が同じ列を見る。
 pub fn candidate_song_ids(

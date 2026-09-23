@@ -223,7 +223,7 @@ fn lane_for_event_kind(kind: &str) -> TimelineBarLane {
 ///
 /// shows_by_event は (date ASC, sort_order ASC) 前計算済みなので、空日付を除いた
 /// 先頭/末尾がそのまま MIN/MAX(date)。同 first_date の並びは events 添字
-/// (= rowid 読み込み順) で決定的にする (安定ソート)。
+/// (= 読み込み順。主キー順) で決定的にする (安定ソート)。
 fn event_bars(
     snap: &Snapshot,
     brand_id: Option<&str>,

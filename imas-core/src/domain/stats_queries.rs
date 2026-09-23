@@ -18,7 +18,7 @@
 //!
 //! SQL の暗黙挙動をコードで明示して固定する:
 //! - ランキングの `ORDER BY count DESC` の同数タイは SQL では未規定 → 添字
-//!   (= rowid 読み込み順) を最終キーにして決定的にする (共有コアの決定性規約)。
+//!   (= 読み込み順。主キー順) を最終キーにして決定的にする (共有コアの決定性規約)。
 //! - `COUNT(DISTINCT sc.show_id)` — show_cast に同一 (show, idol) が複数行あっても
 //!   1 公演と数える (ミニ DB 照合テストで固定。Bundle DB に重複行は無い)。
 //! - `strftime('%Y', date)` — ゼロ埋め 'YYYY-MM-DD' で月 01-12・日 01-31 のときだけ
@@ -221,7 +221,7 @@ pub fn yearly_show_counts(snap: &Snapshot) -> Vec<YearlyShowCountRecord> {
 /// ```
 ///
 /// IS NOT NULL なので空文字 '' や brands に無い id でも「設定あり」として含む。
-/// iOS 側は Set にしていた (= 順序不問) が、FFI 面は songs Vec 順 (= rowid 読み込み順)
+/// iOS 側は Set にしていた (= 順序不問) が、FFI 面は songs Vec 順 (= 読み込み順。主キー順)
 /// で決定的に返し、集合化はプラットフォーム側に任せる。
 pub fn branded_song_ids(snap: &Snapshot) -> Vec<String> {
     snap.songs.iter().filter(|s| s.brand_id.is_some()).map(|s| s.id.clone()).collect()
@@ -593,7 +593,7 @@ mod tests {
 
     #[test]
     fn branded_song_ids_order_is_deterministic_songs_order() {
-        // FFI 面の並びは songs Vec 順 (= rowid 読み込み順) で固定 (関数 doc の宣言どおり)。
+        // FFI 面の並びは songs Vec 順 (= 読み込み順。主キー順) で固定 (関数 doc の宣言どおり)。
         let s = bundle_snapshot();
         let expected: Vec<String> = s
             .songs

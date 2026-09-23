@@ -253,7 +253,7 @@ pub fn idol_unit_song_ids(snap: &Snapshot, idol_id: &str) -> Vec<String> {
 /// (曲一覧本体の担当絞り込み JOIN も同じ `sa.role = 'original'` に揃えてある)。
 ///
 /// 呼び出し側は結果を Set で持ち、入力も Set (順不同) なので、**出力順を入力順に
-/// 依存させない**。songs Vec の添字昇順 (= rowid 読み込み順) に固定して、どの順で
+/// 依存させない**。songs Vec の添字昇順 (= 読み込み順。主キー順) に固定して、どの順で
 /// idol_id を渡しても同じ列が返るようにする (集合化はプラットフォーム側)。
 ///
 /// 意図的な差分: song_artists の FK 孤児 (songs / idols に無い id を指す行) は

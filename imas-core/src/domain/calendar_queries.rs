@@ -23,7 +23,7 @@
 //! - 文字列比較は BINARY 照合 = バイト列比較。Rust の `str` の `Ord` と同じ。
 //! - 非閏年の 2/29 (誕生日・記念日) は 2/28 に出す ([`month_day_in_year`]、Q-08j)。
 //!   出現日は `occurs_on` に入れて返すので、View 側で月日を展開し直さない。
-//! - SQL が未規定だった同順位の並びは投入順 (= テーブル出現順 = rowid 読み込み順) を
+//! - SQL が未規定だった同順位の並びは投入順 (= テーブル出現順 = 読み込み順。主キー順) を
 //!   安定ソートで保って決定的にする (プラットフォーム間で同一結果を返すのが共有コアの目的)。
 //!
 //! ## 最終整列 (Swift `assembleCalendarEntries` の写し)
@@ -198,7 +198,7 @@ fn collect_releases(snap: &Snapshot, start_day: &str, end_day: &str, out: &mut V
                     .is_some_and(|d| in_range(d, start_day, end_day))
         })
         .collect();
-    // ORDER BY release_date, title_kana (ASC = NULL 先頭)。同値は添字 (= rowid 順) で決定的に。
+    // ORDER BY release_date, title_kana (ASC = NULL 先頭)。同値は添字 (= 読み込み順。主キー順) で決定的に。
     hits.sort_by(|&a, &b| {
         let (sa, sb) = (&snap.songs[a as usize], &snap.songs[b as usize]);
         (&sa.release_date, &sa.title_kana, a).cmp(&(&sb.release_date, &sb.title_kana, b))

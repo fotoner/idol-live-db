@@ -757,7 +757,7 @@ pub fn original_artist_ids_map(
 
 /// 指定公演の出演キャストがオリメンの曲 song_id 集合 (iOS fetchOriginalSongIds)。
 /// 「この公演の出演者が歌う曲」で予想ピッカーを絞るのに使う。
-/// SQL は `SELECT DISTINCT` で並び未規定 → 曲の添字昇順 (= rowid 順) で決定化。
+/// SQL は `SELECT DISTINCT` で並び未規定 → 曲の添字昇順 (= 読み込み順。主キー順) で決定化。
 pub fn original_song_ids_for_show_cast(snap: &Snapshot, show_id: &str) -> Vec<String> {
     let Some(&s) = snap.show_index_by_id.get(show_id) else { return vec![] };
     let mut songs: HashSet<u32> = HashSet::new();

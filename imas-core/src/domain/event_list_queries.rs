@@ -18,7 +18,7 @@
 //! - `strftime('%Y', d)` は妥当な日付形式でなければ NULL (= 年フィルタ不一致)。
 //!   [`strftime_year`] に判定を固定した。
 //! - `IN (...)` は重複 id 1 回・未知 id 無視。結果順は SQL では未規定 → ORDER BY キーの
-//!   同値区間は添字 (= rowid 読み込み順) で決定化 (プラットフォーム間で同一結果を返す)。
+//!   同値区間は添字 (= 読み込み順。主キー順) で決定化 (プラットフォーム間で同一結果を返す)。
 //!
 //! **user_marks はスナップショットに無い** (書き込みが頻繁でプラットフォームが正)。
 //! 参加系は「attended マーク済みの event/show id (bool_value=1 で解決済み)」を引数で
@@ -138,7 +138,7 @@ fn first_last_dates(snap: &Snapshot, event: u32) -> (Option<&str>, Option<&str>)
 
 /// `ORDER BY COALESCE(MIN(s.date), '') DESC` の明示実装。
 /// '' は全日付より小さいので、公演なしイベントは降順の末尾に落ちる。
-/// SQL が未規定だった同日 (同値キー) の並びは添字 (= rowid 順) で決定化。
+/// SQL が未規定だった同日 (同値キー) の並びは添字 (= 読み込み順。主キー順) で決定化。
 fn sort_by_first_date_desc(snap: &Snapshot, mut indexes: Vec<u32>) -> Vec<u32> {
     indexes.sort_by(|&l, &r| {
         let key = |e: u32| first_last_dates(snap, e).0.unwrap_or("");
@@ -198,7 +198,7 @@ fn has_shows(snap: &Snapshot, event: u32) -> bool {
 // =============================================================================
 
 /// ブランド絞り込み (None で全件) のイベント一覧 (iOS fetchEvents(brandId:))。
-/// 元 SQL は ORDER BY なし → スナップショット順 (= rowid 読み込み順) をそのまま返す。
+/// 元 SQL は ORDER BY なし → スナップショット順 (= 読み込み順。主キー順) をそのまま返す。
 /// `brand_id = ?` は NULL ブランドと一致しない (SQL の = と同じ)。
 pub fn event_records_by_brand(snap: &Snapshot, brand_id: Option<&str>) -> Vec<EventListRecord> {
     snap.events
