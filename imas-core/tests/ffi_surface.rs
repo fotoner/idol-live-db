@@ -233,6 +233,8 @@ declare_and_call_checksums! {
     uniffi_imas_core_checksum_func_validate_ticket,
     uniffi_imas_core_checksum_func_vocabulary,
     uniffi_imas_core_checksum_func_weighted_sample_indices,
+    uniffi_imas_core_checksum_func_youtube_is_upload_url,
+    uniffi_imas_core_checksum_func_youtube_video_refs,
     uniffi_imas_core_checksum_method_snapshotstore_album_summaries,
     uniffi_imas_core_checksum_method_snapshotstore_all_idols_for_picker,
     uniffi_imas_core_checksum_method_snapshotstore_all_shows_with_event_name,
