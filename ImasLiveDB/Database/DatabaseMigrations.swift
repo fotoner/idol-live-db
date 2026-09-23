@@ -28,11 +28,12 @@ import os
 /// - **スキーマを変えたら Android (Room `Migration`) にも対で書く。**
 ///   詳細は docs/ARCHITECTURE.md「データの所在・同期・マイグレーション」。
 enum DatabaseMigrations {
+    /// 各移行は、終わるたびに DB 全体の外部キーを検査する (GRDB の既定)。
+    ///
+    /// Debug でも切らない。以前は Debug だけ検査を外していて、外部キーを破る行があると
+    /// Release でだけ起動時に落ちた。CI のテストは Debug で走るので、捕まえられなかった。
     static var migrator: DatabaseMigrator {
         var migrator = DatabaseMigrator()
-        #if DEBUG
-        migrator = migrator.disablingDeferredForeignKeyChecks()
-        #endif
 
         migrator.registerMigration("v1_create_tables") { db in
             // brands

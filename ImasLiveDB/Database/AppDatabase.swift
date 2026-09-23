@@ -39,7 +39,11 @@ final class AppDatabase: @unchecked Sendable {
 
     private init() {
         do {
-            self.dbQueue = try Self.openDatabase()
+            let documents = try FileManager.default.url(
+                for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            self.dbQueue = try Self.openDatabase(
+                at: documents.appendingPathComponent("master.sqlite"),
+                bundleURL: Bundle.main.url(forResource: "master", withExtension: "sqlite"))
         } catch {
             fatalError("Database initialization failed: \(error)")
         }
@@ -75,15 +79,12 @@ final class AppDatabase: @unchecked Sendable {
         }
     }
 
-    private static func openDatabase() throws -> DatabasePool {
+    /// `dbURL` の DB を開いて最新の形にする。無ければ `bundleURL` (同梱 DB) を置いてから。
+    ///
+    /// 同梱 DB → seedMigrationHistoryIfNeeded → 移行 → コアのスキーマ → reseed の順。
+    /// テストは一時ファイルと同梱 DB を渡して、実機と同じ経路を通す。
+    static func openDatabase(at dbURL: URL, bundleURL: URL?) throws -> DatabasePool {
         let fileManager = FileManager.default
-        let documentsURL = try fileManager.url(
-            for: .documentDirectory,
-            in: .userDomainMask,
-            appropriateFor: nil,
-            create: true
-        )
-        let dbURL = documentsURL.appendingPathComponent("master.sqlite")
 
         // 接続ごとに適用する共通設定。DatabasePool は WAL を自動で有効化するため、
         // ここでは foreign_keys を明示 ON にする (DEBUG では SQL トレースも仕込む)。
@@ -104,7 +105,7 @@ final class AppDatabase: @unchecked Sendable {
         // 単一コネクションのみを使うため増やしても衝突リスクは増えない。
         config.maximumReaderCount = 10
 
-        if let bundleURL = Bundle.main.url(forResource: "master", withExtension: "sqlite") {
+        if let bundleURL {
             if !fileManager.fileExists(atPath: dbURL.path) {
                 try fileManager.copyItem(at: bundleURL, to: dbURL)
                 // 万一 Bundle DB が破損していたら検知して削除。コード署名で
@@ -148,10 +149,11 @@ final class AppDatabase: @unchecked Sendable {
                 Logger.database.error("reseedEventKindIfNeeded failed: \(error.localizedDescription, privacy: .public)")
             }
         }
+        guard let bundleURL else { return pool }
         // reseedMasterTablesIfNeeded は破壊的 (DELETE + INSERT) なので失敗時はアプリ
         // 起動自体を止めないように吸収する。 失敗してもローカル DB の旧値で動作継続。
         do {
-            try reseedMasterTablesIfNeeded(pool)
+            try reseedMasterTablesIfNeeded(pool, bundleURL: bundleURL)
         } catch {
             let detail = "\(error.localizedDescription) | \(String(describing: error))"
             reseedState.withLock {
@@ -205,11 +207,7 @@ final class AppDatabase: @unchecked Sendable {
     ///
     /// 入れ直すのは**コアの台帳にあるマスタ表だけ** (allow-list)。端末にしか無い表
     /// (担当・マイタグ・家計簿) は台帳に無いので、同梱 DB に同名の表が入っても触らない。
-    private static func reseedMasterTablesIfNeeded(_ dbQueue: any DatabaseWriter) throws {
-        guard let bundleURL = Bundle.main.url(forResource: "master", withExtension: "sqlite") else {
-            Logger.database.info("[reseed] bundle master.sqlite not found, skip")
-            return
-        }
+    private static func reseedMasterTablesIfNeeded(_ dbQueue: any DatabaseWriter, bundleURL: URL) throws {
         // Bundle 内は read-only 領域なので GRDB/SQLite の open 試行 (WAL sidecar 等) で
         // SQLITE_CANTOPEN になる。 一旦 tmp に複製してそちらを ATTACH する。
         let tmpURL = FileManager.default.temporaryDirectory

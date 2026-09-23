@@ -32,6 +32,45 @@ final class DatabaseMigrationTests: XCTestCase {
         }
     }
 
+    /// 実機の経路: 同梱 DB を置いたところから、seedMigrationHistoryIfNeeded → 移行 →
+    /// コアのスキーマ → reseed の判定まで通り、外部キーを破る行が残らないこと。
+    /// 2 回目の起動 (置いた DB を開き直す) も同じく通ること。
+    func testBundledDatabasePreparesToLatest() throws {
+        guard let bundle = Bundle.main.url(forResource: "master", withExtension: "sqlite") else {
+            throw XCTSkip("同梱 master.sqlite が無いビルド")
+        }
+        let url = URL(fileURLWithPath: temporaryDatabasePath())
+
+        for launch in 1...2 {
+            let pool = try AppDatabase.openDatabase(at: url, bundleURL: bundle)
+            try pool.read { db in
+                XCTAssertTrue(try DatabaseMigrations.migrator.hasCompletedMigrations(db), "起動 \(launch)")
+                let tables = Set(try String.fetchAll(db, sql: "SELECT name FROM sqlite_master WHERE type='table'"))
+                for table in Self.localOnlyTables {
+                    XCTAssertTrue(tables.contains(table), "起動 \(launch): \(table) が無い")
+                }
+                XCTAssertEqual(try Row.fetchAll(db, sql: "PRAGMA foreign_key_check").count, 0, "起動 \(launch)")
+            }
+        }
+    }
+
+    /// 移行は Debug でも、各移行の後に外部キーを検査する (Release と同じ)。
+    /// Debug だけ検査を外していたので、Release でだけ起動時に落ちる種類の失敗を
+    /// CI (Debug で走る) が捕まえられなかった。
+    func testMigrationChecksForeignKeysInDebugToo() throws {
+        let queue = try DatabaseQueue(path: temporaryDatabasePath())
+        try DatabaseMigrations.migrator.migrate(queue, upTo: "v32_expenses")
+        // 外部キーを破る行 (存在しない公演での衣装の着用)。
+        try queue.writeWithoutTransaction { db in
+            try db.execute(sql: "PRAGMA foreign_keys = OFF")
+            try db.execute(sql: "INSERT INTO costumes (id, name) VALUES ('c1', 'c1')")
+            try db.execute(sql: "INSERT INTO costume_wears (id, costume_id, show_id) VALUES ('w1', 'c1', 'missing')")
+            try db.execute(sql: "PRAGMA foreign_keys = ON")
+        }
+
+        XCTAssertThrowsError(try DatabaseMigrations.migrator.migrate(queue))
+    }
+
     func testLocalOnlyRowsSurviveMigrationFromV18() throws {
         try assertLocalOnlyRowsSurviveMigration(from: "v18_event_joint_brands")
     }
