@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -74,15 +73,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.fugaif.imaslivedb.data.backup.BackupFormatException
-import com.fugaif.imaslivedb.data.backup.BackupImportResult
-import com.fugaif.imaslivedb.data.backup.BackupTransferException
-import com.fugaif.imaslivedb.data.backup.TransferCodeResult
 import com.fugaif.imaslivedb.data.model.PerformerRow
 import com.fugaif.imaslivedb.data.notification.NotificationCategory
 import com.fugaif.imaslivedb.data.notification.NotificationPrefs
 import com.fugaif.imaslivedb.data.notification.NotificationScheduler
-import com.fugaif.imaslivedb.data.image.BulkImageImporter
 import com.fugaif.imaslivedb.data.sync.CloudKitSyncEngine
 import com.fugaif.imaslivedb.di.AppModule
 import coil3.compose.AsyncImage
@@ -93,9 +87,7 @@ import com.fugaif.imaslivedb.ui.theme.PerformerNamePref
 import com.fugaif.imaslivedb.ui.theme.displayName
 import com.fugaif.imaslivedb.ui.theme.hexToColor
 import com.fugaif.imaslivedb.ui.theme.joined
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import androidx.compose.foundation.layout.Spacer
 import com.fugaif.imaslivedb.ui.components.ImasFilterChip
 import com.fugaif.imaslivedb.ui.theme.MasteryPalette
@@ -205,7 +197,7 @@ fun SettingsScreen(
             // バックアップ
             item {
                 SettingsSectionTitle("バックアップ")
-                BackupSection(viewModel)
+                BackupSection()
                 HorizontalDivider()
             }
 
@@ -445,19 +437,15 @@ private fun SettingsSectionTitle(title: String) {
  * iOS `MyPageView.accountSection` (AuthService = Sign in with Apple) の Android 移植。
  */
 @Composable
-private fun AccountSection() {
+private fun AccountSection(viewModel: AccountViewModel = viewModel()) {
     val context = LocalContext.current
-    val authService = remember { AppModule.from(context).authService }
-    val authState by authService.state.collectAsState()
+    val authState by viewModel.authState.collectAsState()
+    val state by viewModel.uiState.collectAsState()
+    // サインインは Credential Manager がこの画面の上にアカウント選択を出すので、画面のスコープで行う。
     val scope = rememberCoroutineScope()
+    val authService = remember { AppModule.from(context).authService }
 
-    var showEditName by remember { mutableStateOf(false) }
-    var editingName by remember { mutableStateOf("") }
-    var isSavingName by remember { mutableStateOf(false) }
-    var nameError by remember { mutableStateOf<String?>(null) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
-    var isDeleting by remember { mutableStateOf(false) }
-    var deleteError by remember { mutableStateOf<String?>(null) }
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
         if (authState.isSignedIn) {
@@ -467,23 +455,20 @@ private fun AccountSection() {
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.weight(1f, fill = false)
                 )
-                IconButton(onClick = {
-                    editingName = authState.displayName ?: ""
-                    showEditName = true
-                }) {
+                IconButton(onClick = viewModel::startEditingName) {
                     Icon(Icons.Filled.Edit, contentDescription = "表示名を変更", modifier = Modifier.size(18.dp))
                 }
             }
             OutlinedButton(
-                onClick = { authService.signOut() },
+                onClick = viewModel::signOut,
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
             ) { Text("ログアウト") }
             Button(
                 onClick = { showDeleteConfirm = true },
-                enabled = !isDeleting,
+                enabled = !state.isDeleting,
                 colors = ButtonDefaults.buttonColors(containerColor = DS.danger),
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-            ) { Text(if (isDeleting) "削除中..." else "アカウントを削除") }
+            ) { Text(if (state.isDeleting) "削除中..." else "アカウントを削除") }
         } else {
             Text(
                 "投票 (お題) にはログインが必要です",
@@ -497,9 +482,9 @@ private fun AccountSection() {
         }
     }
 
-    if (showEditName) {
+    state.editingName?.let { editingName ->
         AlertDialog(
-            onDismissRequest = { if (!isSavingName) showEditName = false },
+            onDismissRequest = viewModel::cancelEditingName,
             title = { Text("表示名を変更") },
             text = {
                 Column {
@@ -510,7 +495,7 @@ private fun AccountSection() {
                     )
                     OutlinedTextField(
                         value = editingName,
-                        onValueChange = { if (it.length <= 40) editingName = it },
+                        onValueChange = viewModel::setEditingName,
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                     )
@@ -518,30 +503,22 @@ private fun AccountSection() {
             },
             confirmButton = {
                 TextButton(
-                    enabled = editingName.trim().isNotEmpty() && !isSavingName,
-                    onClick = {
-                        scope.launch {
-                            isSavingName = true
-                            val result = authService.updateDisplayName(editingName.trim())
-                            isSavingName = false
-                            result.onSuccess { showEditName = false }
-                                .onFailure { nameError = "表示名の保存に失敗しました" }
-                        }
-                    }
+                    enabled = editingName.trim().isNotEmpty() && !state.isSavingName,
+                    onClick = viewModel::saveName
                 ) { Text("保存") }
             },
             dismissButton = {
-                TextButton(onClick = { showEditName = false }, enabled = !isSavingName) { Text("キャンセル") }
+                TextButton(onClick = viewModel::cancelEditingName, enabled = !state.isSavingName) { Text("キャンセル") }
             }
         )
     }
 
-    if (nameError != null) {
+    state.nameError?.let { message ->
         AlertDialog(
-            onDismissRequest = { nameError = null },
+            onDismissRequest = viewModel::dismissNameError,
             title = { Text("表示名の保存に失敗") },
-            text = { Text(nameError ?: "") },
-            confirmButton = { TextButton(onClick = { nameError = null }) { Text("OK") } }
+            text = { Text(message) },
+            confirmButton = { TextButton(onClick = viewModel::dismissNameError) { Text("OK") } }
         )
     }
 
@@ -553,24 +530,19 @@ private fun AccountSection() {
             confirmButton = {
                 TextButton(onClick = {
                     showDeleteConfirm = false
-                    scope.launch {
-                        isDeleting = true
-                        val result = authService.deleteAccount()
-                        isDeleting = false
-                        result.onFailure { deleteError = "削除に失敗しました" }
-                    }
+                    viewModel.deleteAccount()
                 }) { Text("削除する", color = DS.danger) }
             },
             dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text("キャンセル") } }
         )
     }
 
-    if (deleteError != null) {
+    state.deleteError?.let { message ->
         AlertDialog(
-            onDismissRequest = { deleteError = null },
+            onDismissRequest = viewModel::dismissDeleteError,
             title = { Text("削除に失敗しました") },
-            text = { Text(deleteError ?: "") },
-            confirmButton = { TextButton(onClick = { deleteError = null }) { Text("OK") } }
+            text = { Text(message) },
+            confirmButton = { TextButton(onClick = viewModel::dismissDeleteError) { Text("OK") } }
         )
     }
 }
@@ -602,32 +574,9 @@ private fun SettingsInfoRow(label: String, value: String) {
 // 取り込んだ画像は端末内 (filesDir) にだけ置く。サーバにも CloudKit にも送らない。
 // =============================================================================
 
-/** 一括インポート/型紙の対象。UI 文言・ファイル名・呼ぶ API がこれで決まる。 */
-private enum class ImageImportTarget(
-    val label: String,
-    val templateFileName: String,
-) {
-    IDOL("アイドル", "idol_images_template.json"),
-    BRAND("ブランド", "brand_images_template.json"),
-    UNIT("ユニット", "unit_images_template.json"),
-}
-
 @Composable
-private fun ImageImportSection() {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val module = remember { AppModule.from(context) }
-    // 画面を離れると進捗が消えるが、iOS も View 側の @State に持たせている (同じ寿命)。
-    val importer = remember {
-        BulkImageImporter(
-            store = module.customImageStore,
-            idolRepository = module.idolRepository,
-            statsRepository = module.statsRepository,
-            unitRepository = module.unitRepository,
-            snapshots = module.snapshotStoreProvider,
-        )
-    }
-    val state by importer.state.collectAsState()
+private fun ImageImportSection(viewModel: ImageImportViewModel = viewModel()) {
+    val state by viewModel.state.collectAsState()
 
     var urlTarget by remember { mutableStateOf<ImageImportTarget?>(null) }
     var urlText by remember { mutableStateOf("") }
@@ -638,21 +587,7 @@ private fun ImageImportSection() {
     val saveTemplateLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
-        if (uri == null) return@rememberLauncherForActivityResult
-        val target = templateTarget
-        scope.launch {
-            // 型紙 JSON の組み立ては共有コア (imas-core) が唯一の正。ここは書き出すだけ。
-            val json = when (target) {
-                ImageImportTarget.IDOL -> importer.idolTemplateJson()
-                ImageImportTarget.BRAND -> importer.brandTemplateJson()
-                ImageImportTarget.UNIT -> importer.unitTemplateJson()
-            }
-            withContext(Dispatchers.IO) {
-                context.contentResolver.openOutputStream(uri)?.use {
-                    it.write(json.toByteArray(Charsets.UTF_8))
-                }
-            }
-        }
+        if (uri != null) viewModel.saveTemplate(templateTarget, uri)
     }
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
@@ -739,15 +674,8 @@ private fun ImageImportSection() {
             confirmButton = {
                 TextButton(
                     onClick = {
-                        val url = urlText
+                        viewModel.import(target, urlText)
                         urlTarget = null
-                        scope.launch {
-                            when (target) {
-                                ImageImportTarget.IDOL -> importer.importIdolImages(url)
-                                ImageImportTarget.BRAND -> importer.importBrandImages(url)
-                                ImageImportTarget.UNIT -> importer.importUnitImages(url)
-                            }
-                        }
                     },
                     enabled = urlText.isNotBlank()
                 ) { Text("インポート") }
@@ -764,7 +692,7 @@ private fun ImageImportSection() {
             confirmButton = {
                 TextButton(onClick = {
                     showClearConfirm = false
-                    scope.launch { importer.clearAllImages() }
+                    viewModel.clearAll()
                 }) { Text("削除", color = DS.danger) }
             },
             dismissButton = { TextButton(onClick = { showClearConfirm = false }) { Text("キャンセル") } }
@@ -792,71 +720,22 @@ private fun CreditText(text: String) {
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun BackupSection(viewModel: SettingsViewModel) {
+private fun BackupSection(viewModel: BackupViewModel = viewModel()) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val state by viewModel.uiState.collectAsState()
 
     var restoreDeviceId by remember { mutableStateOf(false) }
-
-    var isCreatingCode by remember { mutableStateOf(false) }
-    var transferCodeResult by remember { mutableStateOf<TransferCodeResult?>(null) }
-    var transferError by remember { mutableStateOf<String?>(null) }
-
-    var codeInput by remember { mutableStateOf("") }
-    var isRestoringCode by remember { mutableStateOf(false) }
-
-    var isExporting by remember { mutableStateOf(false) }
-    var isImportingFile by remember { mutableStateOf(false) }
-
-    var importResult by remember { mutableStateOf<BackupImportResult?>(null) }
-    var importError by remember { mutableStateOf<String?>(null) }
-
-    fun handleImportFailure(e: Exception) {
-        importError = when (e) {
-            is BackupFormatException -> e.message
-            is BackupTransferException -> e.message
-            else -> "読み込みに失敗しました"
-        } ?: "読み込みに失敗しました"
-    }
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
-        if (uri == null) return@rememberLauncherForActivityResult
-        scope.launch {
-            isExporting = true
-            try {
-                val json = viewModel.exportBackupJson()
-                withContext(Dispatchers.IO) {
-                    context.contentResolver.openOutputStream(uri)?.use {
-                        it.write(json.toByteArray(Charsets.UTF_8))
-                    }
-                }
-            } catch (e: Exception) {
-                importError = "書き出しに失敗しました"
-            } finally {
-                isExporting = false
-            }
-        }
+        if (uri != null) viewModel.exportTo(uri)
     }
 
     val importLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri ->
-        if (uri == null) return@rememberLauncherForActivityResult
-        scope.launch {
-            isImportingFile = true
-            try {
-                val json = withContext(Dispatchers.IO) {
-                    context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
-                } ?: throw BackupFormatException("ファイルを読み込めませんでした")
-                importResult = viewModel.importBackup(json, restoreDeviceId)
-            } catch (e: Exception) {
-                handleImportFailure(e)
-            } finally {
-                isImportingFile = false
-            }
-        }
+        if (uri != null) viewModel.importFrom(uri, restoreDeviceId)
     }
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
@@ -868,26 +747,12 @@ private fun BackupSection(viewModel: SettingsViewModel) {
 
         // 引き継ぎコード発行
         Button(
-            onClick = {
-                scope.launch {
-                    isCreatingCode = true
-                    transferError = null
-                    try {
-                        transferCodeResult = viewModel.createTransferCode()
-                    } catch (e: BackupTransferException) {
-                        transferError = e.message
-                    } catch (e: Exception) {
-                        transferError = "発行に失敗しました"
-                    } finally {
-                        isCreatingCode = false
-                    }
-                }
-            },
-            enabled = !isCreatingCode,
+            onClick = { viewModel.createTransferCode() },
+            enabled = !state.isCreatingCode,
             modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
-        ) { Text(if (isCreatingCode) "発行中..." else "引き継ぎコードを発行する") }
+        ) { Text(if (state.isCreatingCode) "発行中..." else "引き継ぎコードを発行する") }
 
-        transferCodeResult?.let { result ->
+        state.transferCode?.let { result ->
             val clipboardManager = remember(context) {
                 context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             }
@@ -920,43 +785,31 @@ private fun BackupSection(viewModel: SettingsViewModel) {
 
         // 引き継ぎコードで復元
         OutlinedTextField(
-            value = codeInput,
-            onValueChange = { codeInput = it.uppercase() },
+            value = state.codeInput,
+            onValueChange = viewModel::setCodeInput,
             singleLine = true,
             label = { Text("引き継ぎコード") },
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
         )
         Button(
-            onClick = {
-                scope.launch {
-                    isRestoringCode = true
-                    try {
-                        importResult = viewModel.restoreFromTransferCode(codeInput.trim(), restoreDeviceId)
-                        codeInput = ""
-                    } catch (e: Exception) {
-                        handleImportFailure(e)
-                    } finally {
-                        isRestoringCode = false
-                    }
-                }
-            },
-            enabled = !isRestoringCode && codeInput.isNotBlank(),
+            onClick = { viewModel.restoreFromTransferCode(restoreDeviceId) },
+            enabled = !state.isRestoringCode && state.codeInput.isNotBlank(),
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-        ) { Text(if (isRestoringCode) "復元中..." else "引き継ぎコードで復元する") }
+        ) { Text(if (state.isRestoringCode) "復元中..." else "引き継ぎコードで復元する") }
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
 
         // ファイルエクスポート/インポート
         OutlinedButton(
             onClick = { exportLauncher.launch("imas-live-backup.json") },
-            enabled = !isExporting,
+            enabled = !state.isExporting,
             modifier = Modifier.fillMaxWidth()
-        ) { Text(if (isExporting) "書き出し中..." else "ファイルに保存する") }
+        ) { Text(if (state.isExporting) "書き出し中..." else "ファイルに保存する") }
         OutlinedButton(
             onClick = { importLauncher.launch(arrayOf("application/json", "text/plain", "*/*")) },
-            enabled = !isImportingFile,
+            enabled = !state.isImportingFile,
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-        ) { Text(if (isImportingFile) "読み込み中..." else "ファイルから復元する") }
+        ) { Text(if (state.isImportingFile) "読み込み中..." else "ファイルから復元する") }
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -971,21 +824,20 @@ private fun BackupSection(viewModel: SettingsViewModel) {
         }
     }
 
-    if (transferError != null) {
+    state.transferError?.let { message ->
         AlertDialog(
-            onDismissRequest = { transferError = null },
+            onDismissRequest = viewModel::dismissTransferError,
             title = { Text("発行に失敗しました") },
-            text = { Text(transferError ?: "") },
-            confirmButton = { TextButton(onClick = { transferError = null }) { Text("OK") } }
+            text = { Text(message) },
+            confirmButton = { TextButton(onClick = viewModel::dismissTransferError) { Text("OK") } }
         )
     }
 
-    if (importResult != null) {
+    state.importResult?.let { r ->
         AlertDialog(
-            onDismissRequest = { importResult = null },
+            onDismissRequest = viewModel::dismissImportResult,
             title = { Text("復元が完了しました") },
             text = {
-                val r = importResult!!
                 Column {
                     Text("追加されたマーク: ${r.addedMarks}件")
                     Text("追加された投票履歴: ${r.addedVotes}件")
@@ -995,16 +847,16 @@ private fun BackupSection(viewModel: SettingsViewModel) {
                     if (r.deviceIdRestored) Text("端末IDを引き継ぎました")
                 }
             },
-            confirmButton = { TextButton(onClick = { importResult = null }) { Text("OK") } }
+            confirmButton = { TextButton(onClick = viewModel::dismissImportResult) { Text("OK") } }
         )
     }
 
-    if (importError != null) {
+    state.importError?.let { message ->
         AlertDialog(
-            onDismissRequest = { importError = null },
+            onDismissRequest = viewModel::dismissImportError,
             title = { Text("復元に失敗しました") },
-            text = { Text(importError ?: "") },
-            confirmButton = { TextButton(onClick = { importError = null }) { Text("OK") } }
+            text = { Text(message) },
+            confirmButton = { TextButton(onClick = viewModel::dismissImportError) { Text("OK") } }
         )
     }
 }
@@ -1018,7 +870,8 @@ private fun BackupSection(viewModel: SettingsViewModel) {
 @Composable
 private fun NotificationSection() {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+    // 組み直しはアプリのスコープで行う (画面を離れても途中で止まらない)。
+    val scope = remember { AppModule.from(context).appScope }
     val prefs = remember { NotificationPrefs(context) }
 
     var enabled by remember { mutableStateOf(NotificationScheduler.areNotificationsEnabled(context)) }
@@ -1043,7 +896,7 @@ private fun NotificationSection() {
     ) { granted ->
         enabled = granted && NotificationScheduler.areNotificationsEnabled(context)
         permissionDenied = !enabled
-        if (enabled) scope.launch { NotificationScheduler.rescheduleAll(context) }
+        if (enabled) scope.launch { NotificationScheduler.rescheduleAll(context.applicationContext) }
     }
 
     if (!enabled) {
@@ -1105,7 +958,7 @@ private fun NotificationToggleRow(
                 checked = value
                 prefs.setEnabled(category, value)
                 // 設定を変えたら即座に予定表を作り直す (iOS の onChange と同じ)。
-                scope.launch { NotificationScheduler.rescheduleAll(context) }
+                scope.launch { NotificationScheduler.rescheduleAll(context.applicationContext) }
             },
             // システムクロムは無彩 (DS の方針)。色はエンティティ側からしか出さない。
             colors = SwitchDefaults.colors(checkedTrackColor = DS.sys, checkedThumbColor = DS.onSys)

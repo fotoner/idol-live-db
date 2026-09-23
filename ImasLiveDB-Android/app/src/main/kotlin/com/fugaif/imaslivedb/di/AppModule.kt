@@ -8,6 +8,7 @@ import com.fugaif.imaslivedb.data.core.SnapshotStoreProvider
 import com.fugaif.imaslivedb.data.db.AppDatabase
 import com.fugaif.imaslivedb.data.db.DatabaseBoot
 import com.fugaif.imaslivedb.data.edit.EditApi
+import com.fugaif.imaslivedb.data.image.BulkImageImporter
 import com.fugaif.imaslivedb.data.image.CustomImageStore
 import com.fugaif.imaslivedb.data.repository.CalendarRepository
 import com.fugaif.imaslivedb.data.repository.EditFeedRepository
@@ -81,6 +82,16 @@ class AppModule private constructor(context: Context) {
     }
     /** ユーザーが端末に取り込んだアイドル/ユニット/ブランド画像。filesDir 配下でウィジェットと共有する。 */
     val customImageStore: CustomImageStore by lazy { CustomImageStore(appContext) }
+    /** 画像の一括インポート。進捗を画面をまたいで持つため、アプリで 1 つ。 */
+    val bulkImageImporter: BulkImageImporter by lazy {
+        BulkImageImporter(
+            store = customImageStore,
+            idolRepository = idolRepository,
+            statsRepository = statsRepository,
+            unitRepository = unitRepository,
+            snapshots = snapshotStoreProvider,
+        )
+    }
     val userMarkRepository: UserMarkRepository by lazy { UserMarkRepository(database) }
     val personalTagRepository: PersonalTagRepository by lazy { PersonalTagRepository(database) }
     val expenseRepository: ExpenseRepository by lazy { ExpenseRepository(database) }

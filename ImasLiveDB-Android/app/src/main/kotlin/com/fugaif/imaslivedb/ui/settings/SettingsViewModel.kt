@@ -4,9 +4,6 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.fugaif.imaslivedb.data.backup.BackupExportImportService
-import com.fugaif.imaslivedb.data.backup.BackupImportResult
-import com.fugaif.imaslivedb.data.backup.TransferCodeResult
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.DatabaseStats
 import com.fugaif.imaslivedb.data.model.Idol
@@ -88,32 +85,6 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
         val value = brandId ?: ""
         prefs.edit().putString(KEY_DEFAULT_BRAND, value).apply()
         _uiState.value = _uiState.value.copy(defaultBrandId = value)
-    }
-
-    /** バックアップをファイルエクスポート/引き継ぎコード発行用の envelope JSON 文字列にまとめる。 */
-    suspend fun exportBackupJson(): String =
-        BackupExportImportService.buildEnvelopeJson(
-            getApplication(), module.userMarkRepository, module.localPollVoteLog,
-            module.personalTagRepository, module.expenseRepository
-        )
-
-    /** ファイル/引き継ぎコードから取得した envelope JSON を非破壊マージで取り込む。 */
-    suspend fun importBackup(json: String, restoreDeviceId: Boolean): BackupImportResult =
-        BackupExportImportService.importEnvelopeJson(
-            getApplication(), json, module.database, module.userMarkRepository, module.localPollVoteLog,
-            module.personalTagRepository, module.expenseRepository, restoreDeviceId
-        )
-
-    /** 現在のバックアップを envelope 化してサーバーに送り、引き継ぎコードを発行する。 */
-    suspend fun createTransferCode(): TransferCodeResult {
-        val envelope = exportBackupJson()
-        return module.backupTransferApi.createTransferCode(envelope)
-    }
-
-    /** 引き継ぎコードでサーバーから envelope を取得し、非破壊マージで取り込む。 */
-    suspend fun restoreFromTransferCode(code: String, restoreDeviceId: Boolean): BackupImportResult {
-        val envelope = module.backupTransferApi.fetchTransferCode(code)
-        return importBackup(envelope, restoreDeviceId)
     }
 
     companion object {
