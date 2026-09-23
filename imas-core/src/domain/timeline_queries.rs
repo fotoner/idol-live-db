@@ -30,6 +30,7 @@
 //! - バッジ ("3公演" / "12曲") は SQL 時代と同じくクエリ層 (= ここ) で組み立てる。
 //!   iOS/Android で同一表示を保証するため、書式をプラットフォームに重複させない。
 
+use crate::domain::display_join::non_empty;
 use crate::domain::jst_day::jst;
 use crate::domain::snapshot::Snapshot;
 use chrono::TimeZone;
@@ -145,11 +146,6 @@ fn strftime_year(text: &str) -> Option<&str> {
         return None;
     }
     Some(&text[..4])
-}
-
-/// `IFNULL(x,'') != ''` (NULL と空文字を同一視した「値あり」判定)。
-fn non_blank(value: &Option<String>) -> Option<&str> {
-    value.as_deref().filter(|v| !v.is_empty())
 }
 
 /// brand_id → カラー hex (`IFNULL(color,'') != ''` の行のみ)。帯の色シード。
@@ -357,8 +353,8 @@ fn series_bars(
 ) -> Vec<TimelineBarRecord> {
     let mut groups: BTreeMap<(Option<&str>, &str), ReleaseGroup<'_>> = BTreeMap::new();
     for song in &snap.songs {
-        let Some(series) = non_blank(&song.series_group) else { continue };
-        let Some(date) = non_blank(&song.release_date) else { continue };
+        let Some(series) = non_empty(&song.series_group) else { continue };
+        let Some(date) = non_empty(&song.release_date) else { continue };
         if brand_id.is_some_and(|b| song.brand_id.as_deref() != Some(b)) {
             continue;
         }
@@ -389,11 +385,11 @@ fn cd_series_bars(
 ) -> Vec<TimelineBarRecord> {
     let mut groups: BTreeMap<(Option<&str>, &str), ReleaseGroup<'_>> = BTreeMap::new();
     for song in &snap.songs {
-        if non_blank(&song.series_group).is_some() {
+        if non_empty(&song.series_group).is_some() {
             continue;
         }
-        let Some(cd) = non_blank(&song.cd_series) else { continue };
-        let Some(date) = non_blank(&song.release_date) else { continue };
+        let Some(cd) = non_empty(&song.cd_series) else { continue };
+        let Some(date) = non_empty(&song.release_date) else { continue };
         if brand_id.is_some_and(|b| song.brand_id.as_deref() != Some(b)) {
             continue;
         }
@@ -432,7 +428,7 @@ fn one_off_release_bars(
     // `t.cd_series = s.cd_series` は = 比較なので NULL の cd_series は数えない。
     let mut bundle_counts: HashMap<(Option<&str>, &str), u32> = HashMap::new();
     for song in &snap.songs {
-        if non_blank(&song.series_group).is_some() || non_blank(&song.release_date).is_none() {
+        if non_empty(&song.series_group).is_some() || non_empty(&song.release_date).is_none() {
             continue;
         }
         if let Some(cd) = song.cd_series.as_deref() {
@@ -444,15 +440,15 @@ fn one_off_release_bars(
     // 一度に固定する (year 同値のブランド並びは SQL 未規定 → NULL 最小 + id 昇順)。
     let mut groups: BTreeMap<(&str, Option<&str>), ReleaseGroup<'_>> = BTreeMap::new();
     for song in &snap.songs {
-        if non_blank(&song.series_group).is_some() {
+        if non_empty(&song.series_group).is_some() {
             continue;
         }
-        let Some(date) = non_blank(&song.release_date) else { continue };
+        let Some(date) = non_empty(&song.release_date) else { continue };
         if brand_id.is_some_and(|b| song.brand_id.as_deref() != Some(b)) {
             continue;
         }
         let brand = song.brand_id.as_deref();
-        let is_one_off = match non_blank(&song.cd_series) {
+        let is_one_off = match non_empty(&song.cd_series) {
             std::option::Option::None => true, // CD 名なし = 束ねる相手がいない
             Some(cd) => bundle_counts.get(&(brand, cd)).copied() == Some(1),
         };

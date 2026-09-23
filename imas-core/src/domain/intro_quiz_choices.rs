@@ -34,6 +34,7 @@ use std::collections::HashSet;
 
 use unicode_normalization::{is_nfc_quick, IsNormalized, UnicodeNormalization};
 
+use crate::domain::display_join::non_empty;
 use crate::domain::prng::SplitMix64;
 
 /// 選択肢生成に必要な曲の射影。エンティティ全体を FFI に通さないための最小形。
@@ -66,13 +67,12 @@ pub struct IntroQuizPlayability {
 ///
 /// 派生曲を外すのは選択肢の重複を避けるため (同名の別バージョンが並ぶ)。
 pub fn is_quiz_playable(song: &IntroQuizPlayability, has_apple_music_subscription: bool) -> bool {
-    let non_empty = |v: &Option<String>| v.as_deref().is_some_and(|s| !s.is_empty());
-    if non_empty(&song.parent_song_id) {
+    let present = |v: &Option<String>| non_empty(v).is_some();
+    if present(&song.parent_song_id) {
         return false;
     }
     // 契約があればカタログのフル再生に落とせる。無ければ preview が唯一の音源。
-    non_empty(&song.preview_url)
-        || (has_apple_music_subscription && non_empty(&song.apple_music_id))
+    present(&song.preview_url) || (has_apple_music_subscription && present(&song.apple_music_id))
 }
 
 /// Swift の String == (正準等価) に合わせた比較キー。NFC 済みならそのまま借用し、

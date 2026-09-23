@@ -22,6 +22,7 @@
 //! 回収系は「参加済みの show/event id 集合」を解決済みで受け取る (SongListFiltering と同じ流儀)。
 
 use crate::domain::collection_gap::attended_real_live_shows;
+use crate::domain::display_join::non_empty;
 use crate::domain::snapshot::Snapshot;
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
@@ -281,11 +282,6 @@ fn creator_names_matching<'a>(snap: &'a Snapshot, needle: &FoldedNeedle) -> Vec<
         .filter(|(_, spellings)| spellings.iter().any(|sp| needle.matches(sp)))
         .map(|(i, _)| snap.creators[i].name.as_str())
         .collect()
-}
-
-/// NULL でも空文字でもない値 (検索語と、excludeLiveOnly のメタ判定で使う)。
-fn non_empty(value: &Option<String>) -> Option<&str> {
-    value.as_deref().filter(|v| !v.is_empty())
 }
 
 // ---- 絞り込み ----
@@ -716,6 +712,20 @@ mod tests {
     use super::*;
     use crate::test_support::{bundle_conn, bundle_path, bundle_snapshot};
     use rusqlite::Connection;
+
+    /// 空白だけの検索語は、絞り込みなしと同じ (non_empty は前後の空白を落とす。Q-07)。
+    #[test]
+    fn blank_text_filters_are_ignored() {
+        let snap = crate::test_support::bundle_snapshot();
+        let all = filter_song_indexes(snap, &SongListFilter::default());
+        let blank = SongListFilter {
+            title: Some("  ".into()),
+            songwriter: Some("\u{3000}".into()),
+            live_name: Some(" ".into()),
+            ..SongListFilter::default()
+        };
+        assert_eq!(filter_song_indexes(snap, &blank), all);
+    }
 
     /// Swift `String.likeEscaped` の写経 (テスト側で元 SQL を組むのに使う)。
     fn like_escaped(s: &str) -> String {
