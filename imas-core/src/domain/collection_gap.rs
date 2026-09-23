@@ -292,6 +292,35 @@ pub fn show_collection_summary(
     })
 }
 
+/// 曲詳細の「現地回収 N 公演」: その曲を回収した公演 (Q-08c)。
+///
+/// 一覧の回収バッジ・セトリの「未回収」と**同じ規則で絞る**: 催しはリアルライブ
+/// ([`REAL_LIVE_KINDS`]) だけ、参加マークは [`collection_attended_show_ids`] を通したもの
+/// (show 単位・event 単位のどちらも) を渡す。新しい公演から (同じ日は sort_order → 公演 id)。
+pub fn song_collected_shows(
+    snap: &Snapshot,
+    song_id: &str,
+    attended_show_ids: &[String],
+    attended_event_ids: &[String],
+) -> Vec<crate::domain::event_detail_queries::ShowWithEventNameRecord> {
+    let Some(&song) = snap.song_index_by_id.get(song_id) else { return Vec::new() };
+    let attended = attended_real_live_shows(snap, attended_show_ids, attended_event_ids, true);
+    let mut shows: Vec<u32> = snap.setlist_items_by_song[song as usize]
+        .iter()
+        .map(|&item| snap.setlist_items[item as usize].show)
+        .filter(|show| attended.contains(show))
+        .collect();
+    shows.sort_by(|&a, &b| {
+        let (sa, sb) = (&snap.shows[a as usize], &snap.shows[b as usize]);
+        sb.date.cmp(&sa.date).then(sa.sort_order.cmp(&sb.sort_order)).then_with(|| sa.id.cmp(&sb.id))
+    });
+    shows.dedup();
+    shows
+        .into_iter()
+        .map(|show| crate::domain::event_detail_queries::show_with_event_name_at(snap, show))
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -527,5 +556,37 @@ mod tests {
         assert_eq!(show_collection_summary(&rows, false, true), None, "参加記録が無い人");
         assert_eq!(show_collection_summary(&rows, true, false), None, "回収の対象でない催し");
         assert_eq!(show_collection_summary(&[], true, true), None, "セトリが空");
+    }
+
+    #[test]
+    fn song_collected_shows_keeps_only_attended_real_lives_newest_first() {
+        let snap = crate::test_support::bundle_snapshot();
+        // セトリの行がいちばん多い曲。
+        let song = (0..snap.songs.len()).max_by_key(|&s| snap.setlist_items_by_song[s].len()).unwrap();
+        let song_id = snap.songs[song].id.clone();
+        let performed: Vec<u32> =
+            snap.setlist_items_by_song[song].iter().map(|&i| snap.setlist_items[i as usize].show).collect();
+        let real = performed.iter().copied().find(|&s| is_real_live(snap, s)).expect("リアルライブで披露");
+        let other = snap.shows.iter().position(|s| !REAL_LIVE_KINDS.contains(&snap.events[s.event as usize].kind.as_str()));
+        let mut ids: Vec<String> = performed.iter().take(20).map(|&s| snap.shows[s as usize].id.clone()).collect();
+        if let Some(o) = other {
+            ids.push(snap.shows[o].id.clone());
+        }
+        ids.push(snap.shows[real as usize].id.clone());
+        let got = song_collected_shows(snap, &song_id, &ids, &[]);
+        assert!(!got.is_empty());
+        let got_ids: HashSet<&str> = got.iter().map(|r| r.id.as_str()).collect();
+        assert_eq!(got_ids.len(), got.len(), "同じ公演は 1 行");
+        for r in &got {
+            let show = snap.show_index_by_id[&r.id];
+            assert!(is_real_live(snap, show), "リアルライブだけ");
+            assert!(performed.contains(&show));
+        }
+        assert!(got.windows(2).all(|w| w[0].date >= w[1].date), "新しい順");
+        // event 単位の参加は配下の公演に広がる。
+        let event_id = snap.events[snap.shows[real as usize].event as usize].id.clone();
+        let by_event = song_collected_shows(snap, &song_id, &[], &[event_id]);
+        assert!(by_event.iter().any(|r| r.id == snap.shows[real as usize].id));
+        assert!(song_collected_shows(snap, "存在しない", &ids, &[]).is_empty());
     }
 }

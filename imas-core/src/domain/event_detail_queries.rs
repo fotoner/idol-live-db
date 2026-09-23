@@ -503,7 +503,7 @@ pub(crate) fn show_record_at(snap: &Snapshot, show: u32) -> ShowRecord {
     }
 }
 
-fn show_with_event_name_at(snap: &Snapshot, show: u32) -> ShowWithEventNameRecord {
+pub(crate) fn show_with_event_name_at(snap: &Snapshot, show: u32) -> ShowWithEventNameRecord {
     let s = &snap.shows[show as usize];
     let e = &snap.events[s.event as usize];
     ShowWithEventNameRecord {

@@ -136,6 +136,19 @@ pub fn setlist_section_label(raw: Option<String>) -> Option<String> {
 #[uniffi::export]
 impl SnapshotStore {
     /// イベント配下の公演一覧 (date, sort_order 順)。SQL 時代の fetchShows(eventId:) 相当。
+    /// 曲詳細の「現地回収 N 公演」の公演 (新しい順)。参加マークは show 単位・event 単位とも
+    /// `collection_attended_shows(marks, include_stream)` を通した id を渡す
+    /// (一覧の回収バッジと同じ規則。リアルライブだけに絞るのはこちら)。
+    pub fn song_collected_shows(
+        &self,
+        song_id: String,
+        attended_show_ids: Vec<String>,
+        attended_event_ids: Vec<String>,
+    ) -> Result<Vec<ShowWithEventNameRecord>, SnapshotError> {
+        let snap = self.current()?;
+        Ok(collection::song_collected_shows(&snap, &song_id, &attended_show_ids, &attended_event_ids))
+    }
+
     pub fn shows_by_event(&self, event_id: String) -> Result<Vec<ShowRecord>, SnapshotError> {
         let snap = self.current()?;
         Ok(queries::shows_by_event(&snap, &event_id))
