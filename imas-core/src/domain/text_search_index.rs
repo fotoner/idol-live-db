@@ -82,10 +82,27 @@ impl TextSearchIndex {
     }
 }
 
-/// 検索語の前処理 (小文字化 + UTF-8 バイト列化)。
+/// 検索語の前処理 (NFC → 畳み込み → UTF-8 バイト列化)。
 /// 索引側と同じ畳み込みを通すことが、当たり方を対称に保つ条件。
 pub fn prepare_needle(text: &str) -> Vec<u8> {
-    fold_lowercase(text).into_bytes()
+    fold_needle(text).into_bytes()
+}
+
+/// 検索語の畳み方の**唯一の入口**。`prepare_needle` (→ `matching_indices` /
+/// `match_range`) と `FoldedNeedle::new` がここを通る。
+///
+/// 先に NFC へ寄せる。打った語 (macOS の Finder からの貼り付け等) が NFD でも、
+/// NFC で入っている DB の名前に当たるようにするため (`e` + 結合アキュートでも `é` に
+/// 当たる)。かなの濁点の合成は畳み込み自体も持っているが、ラテン文字は持たない。
+/// 索引側 (DB の値) は NFC で入っている前提なので、そちらには掛けない。
+///
+/// ブラウザ (Web の検索欄) は `imas-text-fold` の `fold` を wasm で直接呼んでおり、
+/// この NFC は通らない (`imas-text-fold` は依存を持たない方針なので NFC を入れられない)。
+/// 差が出るのは NFD のラテン文字を打ったときだけ。揃えるなら TS 側で
+/// `String.prototype.normalize("NFC")` を通してから fold に渡す。
+fn fold_needle(text: &str) -> String {
+    use unicode_normalization::UnicodeNormalization;
+    fold_lowercase(&text.nfc().collect::<String>())
 }
 
 /// 一覧クエリ側 (索引を組まずに 1 行ずつ判定する経路) 用の、畳み済み検索語。
@@ -124,12 +141,9 @@ pub struct FoldedNeedle {
 }
 
 impl FoldedNeedle {
-    /// 検索語は先に NFC へ寄せてから畳む。打った語 (macOS の Finder からの貼り付け等) が
-    /// NFD でも、NFC で入っている DB の名前に当たるようにするため (`e` + 結合アキュートでも
-    /// `é` に当たる)。かなの濁点の合成は畳み込み自体も持っているが、ラテン文字は持たない。
+    /// 検索語は [`prepare_needle`] と同じ規則 (NFC → 畳み込み) で畳む。
     pub fn new(needle: &str) -> Self {
-        use unicode_normalization::UnicodeNormalization;
-        Self { folded: fold_lowercase(&needle.nfc().collect::<String>()) }
+        Self { folded: fold_needle(needle) }
     }
 
     /// 畳み済みのバイト列。読み込み時に畳んである索引
@@ -270,6 +284,17 @@ mod tests {
 
     fn hit(index: &TextSearchIndex, query: &str) -> bool {
         index.matches(&prepare_needle(query))
+    }
+
+    /// 検索語の NFC は、索引を引く経路 (`matching_indices` / `match_range`) にも効く (L-1)。
+    #[test]
+    fn nfd_needle_matches_through_every_entry_point() {
+        let nfd = "Cafe\u{301}";
+        let items = [index(&["Café Parade"])];
+        assert_eq!(matching_indices(&items, nfd), vec![0]);
+        assert_eq!(match_range("Café Parade", nfd), Some((0, "Café".len() as u32)));
+        assert!(FoldedNeedle::new(nfd).matches("Café Parade"));
+        assert_eq!(prepare_needle(nfd), FoldedNeedle::new(nfd).as_bytes());
     }
 
     // --- 基本 ---
