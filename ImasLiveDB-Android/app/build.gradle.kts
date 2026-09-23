@@ -1,3 +1,5 @@
+import com.android.build.api.variant.HasHostTestsBuilder
+import com.android.build.api.variant.HostTestBuilder
 import java.util.Properties
 
 plugins {
@@ -140,6 +142,15 @@ val generateSeedDb by tasks.registering(Exec::class) {
 }
 
 tasks.named("preBuild") { dependsOn(generateSeedDb) }
+
+// JVM の単体テストは debug でだけ回す。単体テストが見るコードは debug も release も同じで
+// (R8 は単体テストに掛からない)、移行テストが読むスキーマ JSON は debug の assets にしか
+// 置かない (release の APK に入れないため)。release でも回すと移行テストが JSON を見つけられない。
+androidComponents {
+    beforeVariants(selector().withBuildType("release")) { variant ->
+        (variant as HasHostTestsBuilder).hostTests[HostTestBuilder.UNIT_TEST_TYPE]?.enable = false
+    }
+}
 
 // app/schemas は KSP (Room) が書き出し、debug の assets がそれを読む (移行テスト用)。
 // Gradle はこの受け渡しを知らないので、版を上げた回のビルドでも新しい JSON が assets に
