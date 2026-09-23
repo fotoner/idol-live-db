@@ -63,9 +63,10 @@ const POOLS: Pool[] = [
   },
 ];
 
+// 作成者・編集者 (created_by / updated_by。端末 ID か uid) は応答に載せない (Q-10)。
 const TAG_KEYS = [
-  "category", "color", "created_at", "created_by", "description", "id",
-  "is_official", "name", "status", "updated_at", "updated_by",
+  "category", "color", "created_at", "description", "id",
+  "is_official", "name", "status", "updated_at",
 ];
 
 const LIST_CACHE = "public, max-age=60, stale-while-revalidate=300";
@@ -136,13 +137,14 @@ describe.each(POOLS)("$label タグ: 語彙の作成 (POST $master)", (pool) => 
       description: "説明",
       category: "mood",
       color: "#12abEF",
-      created_by: "dev-a",
-      updated_by: null,
       is_official: 0,
       status: "active",
     });
     expect(typeof tag.created_at).toBe("number");
     expect(tag.updated_at).toBe(tag.created_at);
+    // 作成者の端末 ID は表には残す (応答には出さない)。
+    expect(await row(`SELECT created_by, updated_by FROM ${pool.table} WHERE id = 'fresh-tag'`))
+      .toEqual({ created_by: "dev-a", updated_by: null });
   });
 
   it("日本語の名前は tag_ + base64url の先頭 16 文字、衝突したら -2", async () => {
@@ -161,7 +163,8 @@ describe.each(POOLS)("$label タグ: 語彙の作成 (POST $master)", (pool) => 
     const res = await createTag(pool, "dup", "dev-b");
     expect(res.status).toBe(409);
     expect(res.body.created).toBe(false);
-    expect(res.body.tag).toMatchObject({ id: "dup", name: "dup", created_by: "dev-a" });
+    expect(res.body.tag).toMatchObject({ id: "dup", name: "dup" });
+    expect(Object.keys(res.body.tag).sort()).toEqual(TAG_KEYS);
   });
 });
 
@@ -274,7 +277,7 @@ describe.each(POOLS)("$label タグ: 説明の編集 (PUT $master/:id) と履歴
     expect(invalid.body).toEqual({ error: "invalid JSON body" });
   });
 
-  it("更新したタグを返し、説明が変わったら前後を履歴に積む。編集者は端末 ID (無ければ uid)", async () => {
+  it("更新したタグを返し、説明が変わったら前後を履歴に積む。編集者は端末 ID (無ければ uid) で、応答では先頭 8 文字", async () => {
     await insertUser(UID);
     await createTag(pool, "tt", "dev-a", { description: "before" });
     const res = await callJson("PUT", `${pool.master}/tt`, {
@@ -283,9 +286,10 @@ describe.each(POOLS)("$label タグ: 説明の編集 (PUT $master/:id) と履歴
     });
     expect(res.status).toBe(200);
     expect(Object.keys(res.body)).toEqual(["tag"]);
-    expect(res.body.tag).toMatchObject({
-      id: "tt", description: "after", color: "#000000", created_by: "dev-a", updated_by: "dev-edit",
-    });
+    expect(res.body.tag).toMatchObject({ id: "tt", description: "after", color: "#000000" });
+    expect(Object.keys(res.body.tag).sort()).toEqual(TAG_KEYS);
+    expect(await row(`SELECT created_by, updated_by FROM ${pool.table} WHERE id = 'tt'`))
+      .toEqual({ created_by: "dev-a", updated_by: "dev-edit" });
 
     // 色だけの変更は履歴を積まない。端末 ID が無いときは uid が編集者になる。
     await callJson("PUT", `${pool.master}/tt`, { headers: await bearer(UID), body: { color: "#111111" } });
@@ -300,7 +304,10 @@ describe.each(POOLS)("$label タグ: 説明の編集 (PUT $master/:id) と履歴
     );
     const byAfter = Object.fromEntries(history.body.map((h: any) => [h.description_after, h]));
     expect(byAfter.after).toMatchObject({ tag_id: "tt", description_before: "before", edited_by: "dev-edit" });
-    expect(byAfter.third).toMatchObject({ description_before: "after", edited_by: UID });
+    expect(byAfter.third).toMatchObject({ description_before: "after", edited_by: UID.slice(0, 8) });
+    // 表には全体が残る。
+    expect(await row(`SELECT edited_by FROM ${pool.historyTable} WHERE description = 'third'`))
+      .toEqual({ edited_by: UID });
 
     // 編集は "edit" の日次枠を使う (マスタ編集と共有)。
     const quota = await row<{ count: number }>(

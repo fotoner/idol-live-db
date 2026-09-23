@@ -10,7 +10,8 @@
 //   - similar: 類似の並べ方と候補の上限。曲は減衰つき Jaccard (上限 50)、
 //              アイドル・ユニットは共有タグ数 → 票数合計 (上限 30)
 //
-// ⚠️ 応答のキー・ステータス・Cache-Control と SQL は、1 本にする前の 3 つの複製と同じ。
+// ⚠️ 応答のキー・ステータス・Cache-Control と SQL は、1 本にする前の 3 つの複製と同じ
+//    (そのあと Q-10 で、応答から作成者・編集者の ID を外し、履歴の編集者を先頭 8 文字にした)。
 //    表の名前は TagPool の定数だけを埋め込む (ユーザーの入力は常にバインドする)。
 
 import { getAuthUser } from "../auth";
@@ -148,6 +149,12 @@ const TAG_POOLS: readonly TagPool[] = [SONG_TAGS, IDOL_TAGS, UNIT_TAGS];
 // ---------------------------------------------------------------------------
 // 語彙の項目の検証
 // ---------------------------------------------------------------------------
+
+/**
+ * 応答に載せるタグの列。作成者・編集者 (created_by / updated_by) は端末 ID か uid なので載せない
+ * (公開の応答で、誰がどの語彙を作ったかを追えないように。表には残す)。
+ */
+const TAG_COLUMNS = "id, name, description, category, color, created_at, updated_at, is_official, status";
 
 /** 通報がこの件数に達したら under_review の印を付ける。 */
 const REPORT_THRESHOLD = 3;
@@ -468,7 +475,7 @@ async function createTag(ctx: RouteContext, pool: TagPool): Promise<Response> {
   if (typeof fields === "string") return error(fields);
 
   // 同名チェック
-  const existingByName = await env.DB.prepare(`SELECT * FROM ${pool.masterTable} WHERE name = ?`)
+  const existingByName = await env.DB.prepare(`SELECT ${TAG_COLUMNS} FROM ${pool.masterTable} WHERE name = ?`)
     .bind(name)
     .first();
   if (existingByName) return json({ tag: existingByName, created: false }, 409);
@@ -503,7 +510,7 @@ async function createTag(ctx: RouteContext, pool: TagPool): Promise<Response> {
     ).bind(deviceId, dateYmd),
   ]);
 
-  const tag = await env.DB.prepare(`SELECT * FROM ${pool.masterTable} WHERE id = ?`)
+  const tag = await env.DB.prepare(`SELECT ${TAG_COLUMNS} FROM ${pool.masterTable} WHERE id = ?`)
     .bind(candidateId)
     .first();
   await commitIpRateLimit(env.DB, ipQuota);
@@ -566,7 +573,7 @@ async function getTag(ctx: RouteContext, pool: TagPool, rawId: string): Promise<
   // 削除済み (status='removed') は詳細でも返さない。一覧・付与・対象別・類似は全て
   // status != 'removed' で除外しているので、安定 URL から読めてしまわないようにそろえる。
   const tag = await env.DB.prepare(
-    `SELECT * FROM ${pool.masterTable} WHERE id = ? AND status != 'removed'`
+    `SELECT ${TAG_COLUMNS} FROM ${pool.masterTable} WHERE id = ? AND status != 'removed'`
   ).bind(tagId).first();
   if (!tag) return error("Tag not found", 404);
 
@@ -602,7 +609,7 @@ async function updateTag(ctx: RouteContext, pool: TagPool, rawId: string): Promi
   if (inactive) return inactive;
   if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
-  const tag = await env.DB.prepare(`SELECT * FROM ${pool.masterTable} WHERE id = ?`).bind(tagId).first<{
+  const tag = await env.DB.prepare(`SELECT ${TAG_COLUMNS} FROM ${pool.masterTable} WHERE id = ?`).bind(tagId).first<{
     id: string; description: string | null; status: string;
   }>();
   if (!tag) return error("Tag not found", 404);
@@ -633,11 +640,14 @@ async function updateTag(ctx: RouteContext, pool: TagPool, rawId: string): Promi
     .bind(...vals)
     .run();
 
-  const updated = await env.DB.prepare(`SELECT * FROM ${pool.masterTable} WHERE id = ?`).bind(tagId).first();
+  const updated = await env.DB.prepare(`SELECT ${TAG_COLUMNS} FROM ${pool.masterTable} WHERE id = ?`).bind(tagId).first();
   return json({ tag: updated });
 }
 
-/** GET <master>/:id/history — 説明の編集履歴 (新しい順に 30 件)。 */
+/**
+ * GET <master>/:id/history — 説明の編集履歴 (新しい順に 30 件)。
+ * 編集者 (端末 ID か uid) は先頭 8 文字だけ返す (アプリも先頭 8 文字 + "..." で表示している)。
+ */
 async function tagHistory(ctx: RouteContext, pool: TagPool, rawId: string): Promise<Response> {
   const tagId = decodePathParam(ctx, rawId, "tag_id");
   if (tagId instanceof Response) return tagId;
@@ -645,7 +655,7 @@ async function tagHistory(ctx: RouteContext, pool: TagPool, rawId: string): Prom
     `SELECT id, tag_id,
             description AS description_after,
             description_before,
-            edited_by, edited_at
+            SUBSTR(edited_by, 1, 8) AS edited_by, edited_at
      FROM ${pool.historyTable}
      WHERE tag_id = ? ORDER BY edited_at DESC LIMIT 30`
   ).bind(tagId).all();
