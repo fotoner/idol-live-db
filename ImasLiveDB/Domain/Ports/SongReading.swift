@@ -9,6 +9,9 @@ import Foundation
 protocol SongReading: Sendable {
     /// フィルタ + ソート済みの一覧 (アーティスト名つき)。
     func songs(filter: SongSearchFilter, sortOrder: SongSortOrder, ascending: Bool?) async throws -> [SongWithArtists]
+    /// 習熟度の分母にする曲 (曲名かな順)。どの曲を数えるか (リミックス・別バージョン・
+    /// other ブランド・ライブ履歴しか無い曲を除く) はコア (`mastery_song_filter`)。
+    func masterySongs() async throws -> [Song]
     /// 単一楽曲。
     func song(id: String) async throws -> Song?
     /// id 集合に該当する楽曲。

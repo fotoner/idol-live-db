@@ -263,38 +263,4 @@ extension AppDatabase {
         return Set(rows.compactMap { row -> String? in row["song_id"] })
     }
 
-    /// その曲を回収した (参加したリアルライブで聴いた) show 一覧 (親 event 名込み)。
-    ///
-    /// 曲詳細の「現地回収 N 公演」はこの件数。**一覧の回収バッジ・セトリの「未回収」と
-    /// 同じ規則で絞る** — ここだけ催しの種別も参加形態も見ていなかったため、
-    /// 「現地回収 3 公演」なのに一覧では未回収、という食い違いが作れていた。
-    func fetchCollectedShowsAsync(for songId: String) async throws -> [ShowWithEventName] {
-        let condition = attendedTypeCondition
-        return try await dbQueue.read { db in
-            try Self.fetchCollectedShowsQuery(db, for: songId, attendedTypeCondition: condition)
-        }
-    }
-
-    private static func fetchCollectedShowsQuery(
-        _ db: Database,
-        for songId: String,
-        attendedTypeCondition: String
-    ) throws -> [ShowWithEventName] {
-        let sql = """
-            SELECT DISTINCT sh.id, sh.event_id, sh.name, sh.date, sh.venue,
-                            e.name AS event_name
-            FROM shows sh
-            JOIN setlist_items si ON si.show_id = sh.id
-            JOIN events e ON e.id = sh.event_id
-            WHERE si.song_id = ?
-            AND e.kind IN (\(Self.realLiveKinds))
-            AND (
-                sh.id IN (\(Self.attendedIdsSubquery(.show, attendedTypeCondition)))
-                OR sh.event_id IN (\(Self.attendedIdsSubquery(.event, attendedTypeCondition)))
-            )
-            ORDER BY sh.date DESC
-            """
-        return try ShowWithEventName.fetchAll(db, sql: sql, arguments: [songId])
-    }
-
 }

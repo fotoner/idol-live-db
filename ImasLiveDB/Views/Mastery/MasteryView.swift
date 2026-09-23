@@ -354,11 +354,9 @@ struct MasteryView: View {
     // MARK: - 読み込み
 
     private func load() async {
-        // 一覧に出る曲だけを分母にする (「ライブ履歴しか無い曲」を隠す既存の絞り込みに乗る)。
+        // 分母にする曲の選び方はコア (Q-08b: リミックス・別バージョン・other・ライブ履歴だけの曲を数えない)。
         let container = AppContainer.shared
-        let rows = (try? await container.songReading.songs(
-            filter: SongSearchFilter(), sortOrder: .titleKana, ascending: nil)) ?? []
-        songs = rows.map(\.song)
+        songs = (try? await container.songReading.masterySongs()) ?? []
         brands = (try? await container.brandReading.brands()) ?? []
         loaded = true
     }

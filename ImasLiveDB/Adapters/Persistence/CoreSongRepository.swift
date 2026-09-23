@@ -9,12 +9,12 @@ import Foundation
 /// - user_marks (担当/お気に入り/参加/回収) はスナップショットに**含まれない**。回収系の
 ///   クエリには、ここで解決した参加 show/event id 集合を引数で渡す。
 ///
-/// 端末の DB (SQL) で答えると決めたクエリは 2 つだけ (`collectedShows` / `songVideos`)。
-/// どちらも「スナップショットに載せない設計」の側に理由があり、
+/// 端末の DB (SQL) で答えると決めたクエリは `songVideos` だけ。
+/// 「スナップショットに載せない設計」の側に理由があり、
 /// コアに API を生やせば済む話ではない。各メソッドのコメントに理由を書く。
 struct CoreSongRepository: SongReading {
     let snapshot: CoreSnapshotManager
-    /// 参加マーク (`user_marks`) と、上の 2 つのクエリの引き先。
+    /// 参加マーク (`user_marks`) と、上のクエリの引き先。
     let database: AppDatabase
 
     // MARK: - 一覧
@@ -37,6 +37,15 @@ struct CoreSongRepository: SongReading {
                 attendedEventIds: attendedEventIds
             )
             return try Self.songsWithArtists(store: store, orderedIds: ids)
+        }
+    }
+
+    func masterySongs() async throws -> [Song] {
+        try await snapshot.withStore { store in
+            let ids = try store.songList(
+                filter: masterySongFilter(), sort: .titleKana, ascending: nil,
+                attendedShowIds: [], attendedEventIds: [])
+            return try CoreRecordMapping.songs(store: store, orderedIds: ids)
         }
     }
 
@@ -155,15 +164,19 @@ struct CoreSongRepository: SongReading {
         }
     }
 
-    /// この曲を回収した公演。**移送しない**。
+    /// この曲を回収した公演 (曲詳細の「現地回収 N 公演」)。
     ///
-    /// `user_marks` (参加マーク) を主語にした結合で、ユーザーデータはプラットフォーム側が
-    /// 正という分担の側に置いてある。技術的には他の回収系 (`songCollectedCounts`) と同じく
-    /// 「解決済みの参加 id 集合を引数で渡す」形で移せるが、曲詳細を 1 回開くたびに参加マーク
-    /// 全件を FFI 越しに運ぶことになり、既にある SQL に対して得るものが無い
-    /// (一覧のように全曲ぶんを 1 回でさばく必要も無い)。
+    /// 参加マークは回収の規則 (`collectionAttendedShows`) を通した id を渡し、リアルライブに
+    /// 絞るのも並べるのもコア (`song_collected_shows`)。一覧の回収バッジ・セトリの「未回収」と
+    /// 同じ規則になる。
     func collectedShows(for songId: String) async throws -> [ShowWithEventName] {
-        try await database.fetchCollectedShowsAsync(for: songId)
+        let showIds = try await CollectionAttendance.showIds(database: database)
+        let eventIds = try await CollectionAttendance.eventIds(database: database)
+        return try await snapshot.withStore { store in
+            try store.songCollectedShows(
+                songId: songId, attendedShowIds: showIds, attendedEventIds: eventIds
+            ).map(CoreRecordMapping.showWithEventName(from:))
+        }
     }
 
     func songs(criterion: SongFilterCriterion) async throws -> [SongWithArtists] {
@@ -235,7 +248,8 @@ struct CoreSongRepository: SongReading {
                     songCount: Int($0.songCount),
                     earliestDate: $0.earliestDate,
                     latestDate: $0.latestDate,
-                    brandIds: $0.brandIds
+                    brandIds: $0.brandIds,
+                    yearDisplay: $0.yearDisplay
                 )
             }
         }
@@ -251,7 +265,8 @@ struct CoreSongRepository: SongReading {
                     earliestDate: $0.earliestDate,
                     latestDate: $0.latestDate,
                     artworkUrl: $0.artworkUrl,
-                    brandIds: $0.brandIds
+                    brandIds: $0.brandIds,
+                    yearDisplay: $0.yearDisplay
                 )
             }
         }

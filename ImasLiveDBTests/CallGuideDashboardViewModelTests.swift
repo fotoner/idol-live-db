@@ -46,6 +46,7 @@ final class StubSongReading: SongReading, @unchecked Sendable {
     func songs(filter: SongSearchFilter, sortOrder: SongSortOrder, ascending: Bool?) async throws -> [SongWithArtists] { [] }
     func song(id: String) async throws -> Song? { known[id] }
     func songs(ids: [String]) async throws -> [Song] { ids.compactMap { known[$0] } }
+    func masterySongs() async throws -> [Song] { [] }
     func songIdsWithAnyArtist(idolIds: Set<String>) async throws -> Set<String> { [] }
     func songPerformerIdolsMap(songIds: [String]) async throws -> [String: [Idol]] { [:] }
     func songCollectedCounts() async throws -> [String: Int] { [:] }
