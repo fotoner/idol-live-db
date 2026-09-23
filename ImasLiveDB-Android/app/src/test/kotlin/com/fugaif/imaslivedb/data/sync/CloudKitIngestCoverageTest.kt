@@ -82,13 +82,12 @@ class CloudKitIngestCoverageTest {
         }
         assertEquals(rowClassByRecordType.keys, types)
         val notIngested = types.filterNot { ckIsIngestedRecordType(it) }.toSet()
-        assertEquals("コアが取り込まない型名 (KNOWN_CORE_GAPS を見直す)", KNOWN_CORE_GAPS, notIngested)
+        assertTrue("コアが取り込まない型名: $notIngested", notIngested.isEmpty())
     }
 
     @Test
     fun eachRecordTypeReachesItsRowFromARawRecord() {
         val problems = rowClassByRecordType
-            .filterKeys { it !in KNOWN_CORE_GAPS }
             .flatMap { (recordType, rowClass) -> problems(recordType, rowClass) }
         assertTrue(problems.joinToString("\n"), problems.isEmpty())
     }
@@ -172,12 +171,5 @@ class CloudKitIngestCoverageTest {
 
         /** 値の決まった列の正しい値 (色は `#` 無しの 16 進、出演の役割は語彙の値)。 */
         val ENUM_LIKE_VALUES = mapOf("color" to "E22B30", "castRole" to "lead")
-
-        /**
-         * コアの取り込みが落としている型 (このテストで見つかった)。
-         * `ck_record_mapping::is_ingested_record_type` に ShowTicket が無く、Android の
-         * チケット価格の同期が全件落ちている。コアを直したらここから消す (直るとこのテストが知らせる)。
-         */
-        val KNOWN_CORE_GAPS = setOf("ShowTicket")
     }
 }
