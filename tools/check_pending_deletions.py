@@ -11,7 +11,10 @@ seed_cloudkit.py --delete-file で、オーナーが行う。
 
 鍵の ID は環境変数 CLOUDKIT_KEY_ID から読む (鍵のファイルは --key-file)。
 
-終了コード: 台帳と合っていれば 0、食い違い (台帳に無い TSV・状態の違い) があれば 1、
+消えたと数えるのは NOT_FOUND だけ。それ以外のエラー (THROTTLED など) は「不明」に
+数え、1 件でもあればその TSV は done を案内しない。
+
+終了コード: 台帳と合っていれば 0、食い違い (台帳に無い TSV・状態の違い・不明) があれば 1、
 鍵が無ければ 2。
 """
 from __future__ import annotations
@@ -38,18 +41,23 @@ def read_ledger(path: Path) -> dict:
 
 
 def count(pairs: list, found: dict) -> dict:
-    """TSV の 1 本ぶんを、生きている / soft delete 済み / 消えている に分けて数える。"""
-    alive = soft = 0
+    """TSV の 1 本ぶんを、生きている / soft delete 済み / 消えている / 不明 に分けて数える。
+
+    消えたと言えるのは NOT_FOUND だけ。THROTTLED などのエラーや応答の無いレコードは
+    「分からない」(unknown) で、消えたことにしない。
+    """
+    counts = {"total": len(pairs), "alive": 0, "soft_deleted": 0, "gone": 0, "unknown": 0}
     for _, name in pairs:
         record = found.get(name)
-        if record is None or "serverErrorCode" in record:
-            continue
-        if cloudkit.is_soft_deleted(record):
-            soft += 1
+        if record is None:
+            counts["unknown"] += 1
+        elif "serverErrorCode" in record:
+            counts["gone" if record["serverErrorCode"] == "NOT_FOUND" else "unknown"] += 1
+        elif cloudkit.is_soft_deleted(record):
+            counts["soft_deleted"] += 1
         else:
-            alive += 1
-    return {"total": len(pairs), "alive": alive, "soft_deleted": soft,
-            "gone": len(pairs) - alive - soft}
+            counts["alive"] += 1
+    return counts
 
 
 def compare(name: str, counts: dict, ledger: dict) -> str | None:
@@ -57,6 +65,8 @@ def compare(name: str, counts: dict, ledger: dict) -> str | None:
     row = ledger.get(name)
     if row is None:
         return "台帳に無い (tools/cloudkit_deletion_ledger.tsv に 1 行足す)"
+    if counts["unknown"]:
+        return f"{counts['unknown']} 件が確かめられなかった (NOT_FOUND 以外のエラー)。時間を置いて流し直す"
     if row["status"] == "done" and counts["alive"]:
         return f"台帳は done だが {counts['alive']} 件が生きている"
     if row["status"] == "pending" and not counts["alive"]:
@@ -95,10 +105,11 @@ def main(argv=None) -> int:
     ledger = read_ledger(args.ledger)
 
     results = check(tsv_paths, ledger, lambda u, p: cloudkit.post_json(u, p, signer), args.environment)
-    print(f"{'TSV':<66} {'件数':>6} {'生存':>6} {'soft':>5} {'消滅':>6}  台帳")
+    print(f"{'TSV':<66} {'件数':>6} {'生存':>6} {'soft':>5} {'消滅':>6} {'不明':>5}  台帳")
     for name, c, problem in results:
         status = ledger.get(name, {}).get("status", "-")
-        print(f"{name:<66} {c['total']:>6} {c['alive']:>6} {c['soft_deleted']:>5} {c['gone']:>6}  {status}")
+        print(f"{name:<66} {c['total']:>6} {c['alive']:>6} {c['soft_deleted']:>5} {c['gone']:>6}"
+              f" {c['unknown']:>5}  {status}")
     names = {name for name, _, _ in results}
     missing = [] if args.tsv else sorted(set(ledger) - names)
     problems = [(name, p) for name, _, p in results if p] + [(n, "台帳にあるのに TSV が無い") for n in missing]

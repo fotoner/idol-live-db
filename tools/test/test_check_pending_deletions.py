@@ -21,7 +21,7 @@ class CheckerTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
-        self.alive, self.soft = {"n1"}, {"n2"}
+        self.alive, self.soft, self.throttled = {"n1"}, {"n2"}, set()
         self.ck = support.FakeCloudKit(self, self.respond)
         self.key_file = self.root / "dummy.pem"
         self.key_file.write_text("not a key")
@@ -39,6 +39,8 @@ class CheckerTest(unittest.TestCase):
             name = ask["recordName"]
             if name in self.alive:
                 out.append({"recordName": name, "recordType": "Song", "fields": {}})
+            elif name in self.throttled:
+                out.append({"recordName": name, "serverErrorCode": "THROTTLED"})
             elif name in self.soft:
                 out.append({"recordName": name, "recordType": "Song",
                             "fields": {"deletedAt": {"value": 1, "type": "TIMESTAMP"}}})
@@ -70,7 +72,7 @@ class CheckerTest(unittest.TestCase):
         self.assertEqual(rc, 0, out)
         [(name, counts, problem)] = cpd.check([a], cpd.read_ledger(ledger),
                                              lambda u, p: self.respond(u, p), "production")
-        self.assertEqual(counts, {"total": 3, "alive": 1, "soft_deleted": 1, "gone": 1})
+        self.assertEqual(counts, {"total": 3, "alive": 1, "soft_deleted": 1, "gone": 1, "unknown": 0})
         self.assertIsNone(problem)
 
     def test_disagreements_are_reported(self):
@@ -86,6 +88,20 @@ class CheckerTest(unittest.TestCase):
         self.assertIn("台帳は done だが 1 件が生きている", out)
         self.assertIn("生きているものは無い。台帳を done にする", out)
         self.assertIn("pending_cloudkit_deletions_d.tsv: 台帳に無い", out)
+
+    def test_errors_other_than_not_found_are_unknown(self):
+        # 消えたと言えるのは NOT_FOUND だけ。THROTTLED などは「分からない」で、done を案内しない。
+        self.throttled = {"n3"}
+        a = self.tsv("pending_cloudkit_deletions_a.tsv", "n3", "n4")
+        ledger = self.ledger(("pending_cloudkit_deletions_a.tsv", "2026-09-01", "pending", "", "", ""))
+        [(_, counts, problem)] = cpd.check([a], cpd.read_ledger(ledger),
+                                           lambda u, p: self.respond(u, p), "production")
+        self.assertEqual(counts, {"total": 2, "alive": 0, "soft_deleted": 0, "gone": 1, "unknown": 1})
+        self.assertNotIn("done", problem)
+        rc, out = self.run_main(str(a), "--ledger", str(ledger), "--key-file", str(self.key_file))
+        self.assertEqual(rc, 1)
+        self.assertIn("確かめられなかった", out)
+        self.assertNotIn("台帳を done にする", out)
 
     def test_it_only_reads(self):
         a = self.tsv("pending_cloudkit_deletions_a.tsv", *["x%d" % i for i in range(250)])
