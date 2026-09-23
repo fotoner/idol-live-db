@@ -13,10 +13,10 @@ seed_cloudkit.py の逆向き。CloudKit の全マスタレコードを query �
 スキーマと非同期テーブル(meta / song_units 等)は既存の db/master.sql から引き継ぎ、
 CloudKit に存在するテーブルだけ中身を入れ替える (PRESERVED_TABLES 参照)。
 
-マスタに実差分があった回だけ meta.data_version を +1 する。ここが上がらないと
-アプリ側の reseed (bundle > 端末) が発火せず、CloudKit に入ったデータが既存
-ユーザーに届かない。差分判定は data_version 行を除いて比較する (バンプ自体が
-差分になる循環を避けるため)。
+マスタに実差分があった回だけ meta.data_version を +1 する。アプリの reseed の判定は
+同梱 DB の content_hash (tools/build_db.sh が書く) が主で、data_version は同梱側に
+指紋が無いときの代わりと、設定画面の「データバージョン」の表示に使う。差分判定は
+data_version 行を除いて比較する (バンプ自体が差分になる循環を避けるため)。
 """
 from __future__ import annotations
 
@@ -36,8 +36,8 @@ DB_PATH = ROOT / "ImasLiveDB" / "Resources" / "master.sqlite"
 # CloudKit に RecordType はあるが、master としては既存 dump 側が正のテーブル。
 # meta は RECORD_TYPE_MAP に載っているので、外さないと refresh_table の
 # DELETE FROM meta で消える。CloudKit 側に MetaData レコードは無いため
-# 空のまま dump され、bundle 側 data_version が 0 になって
-# AppDatabase.reseedMasterTablesIfNeeded が二度と走らなくなる。
+# 空のまま dump され、bundle 側 data_version が 0 になる (build_db.sh の
+# data_version ゲートで同梱が止まる)。
 PRESERVED_TABLES = {"meta"}
 
 
@@ -193,9 +193,9 @@ def read_data_version(conn) -> int:
 def bump_data_version(conn) -> int:
     """data_version を +1 する。
 
-    アプリの reseed は bundle 側 data_version > 端末側 のときだけ走る
-    (AppDatabase.reseedMasterTablesIfNeeded)。ここを上げないと、CloudKit に入って
-    db/master.sql まで来たデータが既存ユーザーに永久に届かない。
+    reseed の判定は content_hash が主で、data_version は同梱側に指紋が無いときの
+    代わりに比べる (imas-core domain/sync_planning.rs の reseed_needed)。その経路では、
+    ここを上げないと db/master.sql まで来たデータが既存ユーザーに届かない。
     """
     new = read_data_version(conn) + 1
     conn.execute(
@@ -243,8 +243,8 @@ def main():
     else:
         print(f"\nマスタに差分なし → data_version {read_data_version(conn)} 据え置き")
 
-    # data_version が落ちた dump を出すと、既存ユーザーの reseed が bundle=0 で
-    # 止まり無言で旧データのまま固定される。書き出す前にここで落とす。
+    # data_version が落ちた dump を出すと、build_db.sh の data_version ゲートで同梱が
+    # 止まる (指紋の無い経路では reseed も bundle=0 で止まる)。書き出す前にここで落とす。
     if read_data_version(conn) <= 0:
         print("✗ meta.data_version が無い/不正。db/master.sql を書き換えず中止。", file=sys.stderr)
         conn.close()

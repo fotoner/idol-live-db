@@ -2,9 +2,10 @@ name: iOS Guard
 
 # iOS のビルドとユニットテスト。
 #
-# テストは 90 本以上あるのに CI で守られておらず、ローカル実行の記憶に頼っていた。
-# 公開リポジトリなので macOS runner も無料枠。secret は使わず、署名も行わない
-# (CODE_SIGNING_ALLOWED=NO でシミュレータ向けにビルドする)。
+# テストがローカル実行の記憶に頼っていたので CI に置いた。
+# 公開リポジトリなので macOS runner も無料枠。secret は使わず、証明書での署名もしない
+# (アドホック署名でシミュレータ向けにビルドする。CODE_SIGNING_ALLOWED=NO が使えない
+# 理由は Test の段)。
 on:
   push:
     branches: [main, develop]

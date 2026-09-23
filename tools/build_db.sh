@@ -19,9 +19,10 @@ python3 "$ROOT/tools/check_fk_integrity.py" "$DB" || {
   exit 1
 }
 
-# data_version ゲート (必須): reseed は bundle 側 data_version > 端末側 のときだけ走る。
-# meta が欠けた master.sqlite を同梱すると bundle=0 と読まれ、既存ユーザーでは reseed が
-# 二度と発火せず、無言で旧データのまま固定される (FK ゲートでは検知できない)。
+# data_version ゲート (必須): reseed の判定は下で書く content_hash が主で、data_version は
+# 同梱側に指紋が無いときの代わりに比べる (imas-core domain/sync_planning.rs reseed_needed)。
+# 設定画面の「データバージョン」もこの値。meta が欠けた master.sqlite は bundle=0 と読まれ、
+# 指紋の無い経路では reseed が二度と発火しない (FK ゲートでは検知できない)。
 python3 - "$DB" <<'PY' || { rm -f "$DB"; exit 1; }
 import sqlite3, sys
 conn = sqlite3.connect(sys.argv[1])

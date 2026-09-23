@@ -2,13 +2,13 @@ name: Refresh master data
 
 # CloudKit (source of truth) → db/master.sql を日次でエクスポートし、
 # 変化があれば自動コミット。コントリビューターが常に最新データに対して
-# tools/apply_data.py --check / apply_corrections.py --check を回せるようにする。
+# tools/apply_data.py --check を回せるようにする。
 #
 # ⚠️ セキュリティ前提 (設定は docs/DATA_PIPELINE.md 参照):
-#   - CloudKit 鍵は environment "cloudkit" の secret に置き、deployment branch を main 限定にする
-#     → feature ブランチ / PR で走る他ワークフローからは鍵を取得できない
+#   - CloudKit 鍵は environment "cloudkit" の secret に置き、deployment branch を
+#     main と develop に絞る → feature ブランチ / PR で走る他ワークフローからは鍵を取得できない
+#     (schedule は既定ブランチ main で起動する。workflow_dispatch は develop からも起動できる)
 #   - main の branch protection + .github/ の CODEOWNERS でワークフロー改ざんを防ぐ
-#   - schedule は常に main で走るので、鍵に触れるのはこの自動エクスポートだけになる
 
 on:
   schedule:

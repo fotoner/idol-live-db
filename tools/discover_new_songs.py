@@ -3,10 +3,10 @@
 master.sqlite に未登録の新曲を検出 → songs テーブルに追加するスキル支援スクリプト。
 
 Usage:
-    python3 Scripts/discover_new_songs.py --dry-run
-    python3 Scripts/discover_new_songs.py --apply
-    python3 Scripts/discover_new_songs.py --apply --brand sc
-    python3 Scripts/discover_new_songs.py --apply --since 2025-01-01
+    python3 tools/discover_new_songs.py --dry-run
+    python3 tools/discover_new_songs.py --apply
+    python3 tools/discover_new_songs.py --apply --brand sc
+    python3 tools/discover_new_songs.py --apply --since 2025-01-01
 
 挙動:
   - ブランド別に seed term (ユニット名等) で iTunes API を叩き、 配信曲を収集
