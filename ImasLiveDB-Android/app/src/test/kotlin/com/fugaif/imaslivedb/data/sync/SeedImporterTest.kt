@@ -78,6 +78,20 @@ class SeedImporterTest {
         assertEquals("投入済みの DB に seed を入れ直した", 0, count(room, "songs"))
     }
 
+    /**
+     * 新しく作った DB に入れると、スタッフと記念日は seed の値そのものになる。
+     * (DB の作成時に直書きの古い値を先に入れると、seed の INSERT OR IGNORE に勝ってしまう)
+     */
+    @Test
+    fun staffAndAnniversariesComeFromTheSeed() = runBlocking {
+        assertTrue(SeedImporter.importIfNeeded(context, db))
+        val room = db.openHelper.writableDatabase
+        for ((table, columns) in SEEDED_ROWS) {
+            val sql = "SELECT $columns FROM $table ORDER BY id"
+            assertEquals(table, rows(seed, sql), rows(room, sql))
+        }
+    }
+
     /** 端末ローカルにしかない表には何も入れない (seed は利用者のデータを持たない)。 */
     @Test
     fun leavesLocalOnlyTablesEmpty() = runBlocking {
@@ -98,6 +112,16 @@ class SeedImporterTest {
             buildList { while (c.moveToNext()) add(c.getString(0)) }
         }
 
+    private fun rows(db: SQLiteDatabase, sql: String): List<List<String?>> =
+        db.rawQuery(sql, null).use { c ->
+            buildList { while (c.moveToNext()) add((0 until c.columnCount).map { c.getString(it) }) }
+        }
+
+    private fun rows(db: SupportSQLiteDatabase, sql: String): List<List<String?>> =
+        db.query(sql).use { c ->
+            buildList { while (c.moveToNext()) add((0 until c.columnCount).map { c.getString(it) }) }
+        }
+
     private fun count(db: SQLiteDatabase, table: String): Int =
         db.rawQuery("SELECT COUNT(*) FROM \"$table\"", null).use { it.moveToFirst(); it.getInt(0) }
 
@@ -106,6 +130,12 @@ class SeedImporterTest {
 
     private companion object {
         const val SEED_ASSET = "master_seed.sqlite"
+
+        /** 作成時の直書きと seed の両方が入れていた表と、比べる列。 */
+        val SEEDED_ROWS = listOf(
+            "staff" to "id, brand_id, name, name_kana, name_romaji, role, birthday, sort_order",
+            "anniversaries" to "id, brand_id, label, date, kind, sort_order",
+        )
 
         /** 行を移さない SQLite / Room の内部表。 */
         val INTERNAL_TABLES = setOf("room_master_table", "android_metadata", "sqlite_sequence")

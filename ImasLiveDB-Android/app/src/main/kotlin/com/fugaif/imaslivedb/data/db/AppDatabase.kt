@@ -151,19 +151,24 @@ abstract class AppDatabase : RoomDatabase() {
         }
 
         /**
-         * 本番と同じ移行とコールバックを付ける。テストはこれを通してメモリ上の DB を
+         * 本番と同じ設定 (移行) を付ける。テストはこれを通してメモリ上の DB を
          * 本番と同じ条件で作る (付け忘れた設定のせいでテストだけ通る、を防ぐ)。
+         *
+         * 新規作成時の初期データは SeedImporter が seed から入れる。作成時のコールバックで
+         * 直書きの値を先に入れると、seed の INSERT OR IGNORE に勝ってしまい、古い肩書きが
+         * 残ったり記念日が欠けたりする (以前はそうなっていた)。
          */
         internal fun configure(builder: RoomDatabase.Builder<AppDatabase>): RoomDatabase.Builder<AppDatabase> =
-            builder
-                // スキーマ変更時は破壊的再構築せず Room Migration を書く (iOS の DatabaseMigrations と対)。
-                // UserMark 等のローカル唯一データを保全するため (.fallbackToDestructiveMigration は使わない)。
-                .addMigrations(*ALL_MIGRATIONS)
-                .addCallback(seedCallback)
+            // スキーマ変更時は破壊的再構築せず Room Migration を書く (iOS の DatabaseMigrations と対)。
+            // UserMark 等のローカル唯一データを保全するため (.fallbackToDestructiveMigration は使わない)。
+            builder.addMigrations(*ALL_MIGRATIONS)
 
         // ---- seed helpers -------------------------------------------------------
 
-        /** staff と anniversaries の初期データ投入。Migration / onCreate 双方から呼ぶ。 */
+        /**
+         * staff と anniversaries の初期データ投入。MIGRATION_4_5 からだけ呼ぶ
+         * (seed の無かった旧版から上がってくる端末に、表を作るのと同時に入れるため)。
+         */
         private fun insertStaffAndAnniversarySeeds(db: SupportSQLiteDatabase) {
             // staff (8件)
             db.execSQL("INSERT OR IGNORE INTO staff (id, brand_id, name, name_kana, name_romaji, role, birthday, sort_order) VALUES ('staff_kotori_otonashi', '765as', '音無小鳥', 'おとなしことり', 'Kotori Otonashi', '765プロダクション事務員 / プロデューサー補佐', '--09-09', 0)")
@@ -197,15 +202,6 @@ abstract class AppDatabase : RoomDatabase() {
             db.execSQL("INSERT OR IGNORE INTO anniversaries (id, brand_id, label, date, kind, sort_order) VALUES ('ann_sc_20241004_anime_start', 'sc', 'シャニアニ2nd season放映開始', '2024-10-04', 'anime_start', 18)")
             db.execSQL("INSERT OR IGNORE INTO anniversaries (id, brand_id, label, date, kind, sort_order) VALUES ('ann_sc_20231114_app_start', 'sc', 'シャニソン配信開始', '2023-11-14', 'app_start', 19)")
             db.execSQL("INSERT OR IGNORE INTO anniversaries (id, brand_id, label, date, kind, sort_order) VALUES ('ann_gakuen_20240516_app_start', 'gakuen', '学マス配信開始', '2024-05-16', 'app_start', 20)")
-        }
-
-        // ---- Callback (新規インストール時の seed) --------------------------------
-
-        private val seedCallback = object : RoomDatabase.Callback() {
-            override fun onCreate(db: SupportSQLiteDatabase) {
-                super.onCreate(db)
-                insertStaffAndAnniversarySeeds(db)
-            }
         }
 
         // ---- Migrations ---------------------------------------------------------
