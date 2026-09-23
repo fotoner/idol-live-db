@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import uniffi.imas_core.planVoteSelection
 
 data class PollDetailUiState(
     val isLoading: Boolean = true,
@@ -104,11 +105,26 @@ class PollDetailViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /** ピッカーから新規候補へまとめて投票 (残り票数分だけ呼び出し側が絞って渡す想定)。 */
-    fun voteForNewEntities(entityIds: List<String>) {
+    /**
+     * ピッカーの選択 (選択肢の表示順) からまとめて投票/取消する。何を入れて何を取り消すか・
+     * 残りの票数での打ち切りはコア ([planVoteSelection])。取り消しを先に流す。
+     */
+    fun applyPickerSelection(selectedInOrder: List<String>, unvoteDeselected: Boolean) {
         val id = pollId ?: return
+        val detail = _uiState.value.detail ?: return
+        val plan = planVoteSelection(
+            detail.entries.filter { it.mine }.map { it.entityId },
+            selectedInOrder,
+            detail.myVoteCount.coerceAtLeast(0).toUInt(),
+            unvoteDeselected
+        )
         viewModelScope.launch {
-            for (entityId in entityIds) {
+            for (entityId in plan.toUnvote) {
+                val result = runCatching { api.unvotePoll(id, entityId) }.getOrNull() ?: continue
+                voteLog.removeVote(id, entityId)
+                applyVoteResult(entityId, result, mine = false)
+            }
+            for (entityId in plan.toVote) {
                 val result = runCatching { api.votePoll(id, entityId) }.getOrNull() ?: continue
                 voteLog.recordVote(id, entityId)
                 applyVoteResult(entityId, result, mine = true)

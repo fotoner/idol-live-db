@@ -40,6 +40,11 @@ import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
 import com.fugaif.imaslivedb.ui.theme.DS
 import kotlinx.coroutines.launch
+import uniffi.imas_core.InputField
+import uniffi.imas_core.inputClamp
+import uniffi.imas_core.inputIsAcceptable
+import uniffi.imas_core.inputLength
+import uniffi.imas_core.inputLimitMax
 
 /**
  * 新規タグ作成シート。iOS TagCreateSheet の移植。
@@ -66,7 +71,9 @@ fun TagCreateSheet(
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val trimmedName = name.trim()
-    val isValid = trimmedName.isNotEmpty() && trimmedName.length <= 30
+    // 上限・数え方 (サーバと同じ UTF-16 の単位)・空の可否はコアが決める。
+    val isValid = inputIsAcceptable(InputField.TAG_NAME, name)
+    val nameLimit = inputLimitMax(InputField.TAG_NAME)
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(
@@ -82,18 +89,18 @@ fun TagCreateSheet(
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
-                    label = { Text("タグ名(1〜30文字)") },
+                    onValueChange = { name = inputClamp(InputField.TAG_NAME, it) },
+                    label = { Text("タグ名(1〜${nameLimit}文字)") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     isError = name.isNotEmpty() && !isValid
                 )
-                Text("${trimmedName.length} / 30文字", fontSize = 12.sp, color = if (isValid) DS.ink2 else DS.danger)
+                Text("${inputLength(InputField.TAG_NAME, name)} / ${nameLimit}文字", fontSize = 12.sp, color = if (isValid) DS.ink2 else DS.danger)
             }
 
             OutlinedTextField(
                 value = description,
-                onValueChange = { description = it },
+                onValueChange = { description = inputClamp(InputField.TAG_DESCRIPTION, it) },
                 label = { Text("説明文(任意)") },
                 minLines = 3,
                 modifier = Modifier.fillMaxWidth()

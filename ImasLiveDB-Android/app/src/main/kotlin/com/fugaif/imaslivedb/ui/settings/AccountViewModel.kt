@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uniffi.imas_core.InputField
+import uniffi.imas_core.inputClamp
 
 data class AccountUiState(
     /** 表示名の変更ダイアログ。null = 閉じている。 */
@@ -40,7 +42,8 @@ class AccountViewModel(app: Application) : AndroidViewModel(app) {
 
     /** 40 文字までだけ受け付ける。 */
     fun setEditingName(value: String) {
-        if (value.length <= MAX_DISPLAY_NAME) _uiState.update { it.copy(editingName = value) }
+        // 上限と数え方 (コードポイント。サーバと同じ) はコアが決める。超えた分は切る。
+        _uiState.update { it.copy(editingName = inputClamp(InputField.DISPLAY_NAME, value)) }
     }
 
     fun cancelEditingName() = _uiState.update { if (it.isSavingName) it else it.copy(editingName = null) }
@@ -74,6 +77,5 @@ class AccountViewModel(app: Application) : AndroidViewModel(app) {
     fun dismissDeleteError() = _uiState.update { it.copy(deleteError = null) }
 
     private companion object {
-        const val MAX_DISPLAY_NAME = 40
     }
 }

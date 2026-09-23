@@ -33,6 +33,8 @@ import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
 import com.fugaif.imaslivedb.ui.theme.DS
 import kotlinx.coroutines.launch
+import uniffi.imas_core.InputField
+import uniffi.imas_core.inputClamp
 
 /** 既存タグの説明文/カテゴリ/色を編集するシート。iOS TagEditSheet の移植。 */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -66,7 +68,7 @@ fun TagEditSheet(
 
             OutlinedTextField(
                 value = description,
-                onValueChange = { description = it },
+                onValueChange = { description = inputClamp(InputField.TAG_DESCRIPTION, it) },
                 label = { Text("説明文") },
                 minLines = 4,
                 modifier = Modifier.fillMaxWidth()

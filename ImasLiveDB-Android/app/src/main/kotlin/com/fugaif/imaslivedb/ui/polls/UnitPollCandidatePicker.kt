@@ -232,10 +232,15 @@ fun UnitPollCandidatePicker(
                 Button(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("キャンセル") }
                 Button(
                     onClick = {
-                        val newIds = (selection - alreadySelected).toList().take(remaining)
-                        onConfirm(newIds)
+                        // 選択は選択肢の表示順 (ブランド順 → 一覧の並び) で返す。
+                        // 何を入れて何を取り消すか・残りの票数での打ち切りはコア (planVoteSelection)。
+                        val ordered = state.brands
+                            .flatMap { brand -> state.units.filter { it.brandId == brand.id } }
+                            .map { it.id }
+                            .filter { it in selection }
+                        onConfirm(ordered + (selection - ordered.toSet()))
                     },
-                    enabled = (selection - alreadySelected).isNotEmpty(),
+                    enabled = selection != alreadySelected,
                     modifier = Modifier.weight(1f)
                 ) { Text("決定") }
             }

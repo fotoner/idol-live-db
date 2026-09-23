@@ -18,6 +18,7 @@ import uniffi.imas_core.LedgerLinkage
 import uniffi.imas_core.LedgerPeriod
 import uniffi.imas_core.buildLedgerSummary
 import uniffi.imas_core.formatYen
+import uniffi.imas_core.votesRemaining
 
 /** 「最近見た」チップ 1 件 (id を名前まで解決したもの)。 */
 data class RecentChip(val kind: RecentKind, val entityId: String, val name: String)
@@ -133,8 +134,8 @@ class ProduceViewModel(app: Application) : AndroidViewModel(app) {
         for (summary in polls.shuffled().take(MAX_POLL_PROBES)) {
             val detail = runCatching { module.communityApi.pollDetail(summary.id) }.getOrNull() ?: continue
             if (!detail.isActive) continue
-            // 3 票を使い切ったお題はバナーに出さない (押しても投票できない)。
-            if (detail.myVoteCount >= MAX_VOTES_PER_POLL) continue
+            // 票を使い切ったお題はバナーに出さない (押しても投票できない)。票の上限はコア。
+            if (votesRemaining(detail.myVoteCount.coerceAtLeast(0).toUInt()) == 0u) continue
             val card = detail.toFeaturedPoll(summary)
             if (detail.myVoteCount == 0) {
                 _uiState.value = _uiState.value.copy(featuredPoll = card)
@@ -156,6 +157,5 @@ class ProduceViewModel(app: Application) : AndroidViewModel(app) {
     companion object {
         /** 1 タブ表示あたりに詳細を引くお題の上限。 */
         private const val MAX_POLL_PROBES = 3
-        private const val MAX_VOTES_PER_POLL = 3
     }
 }

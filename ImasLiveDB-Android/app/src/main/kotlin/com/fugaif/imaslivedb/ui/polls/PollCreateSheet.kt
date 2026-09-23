@@ -39,6 +39,12 @@ import com.fugaif.imaslivedb.ui.components.ImasRemovableChip
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.brandColor
+import uniffi.imas_core.InputField
+import uniffi.imas_core.inputClamp
+import uniffi.imas_core.inputIsAcceptable
+import uniffi.imas_core.inputLength
+import uniffi.imas_core.inputLimitMax
+import uniffi.imas_core.voteLimitPerTarget
 
 /** 投票対象。index はセグメントの並びと 1:1 (曲 / アイドル / ユニット)。 */
 private val TARGET_TYPES = listOf("song", "idol", "unit")
@@ -82,7 +88,7 @@ fun PollCreateSheet(
     val trimmedTitle = title.trim()
 
     // iOS canSubmit と同じ条件。ブランド限定は 1 つ以上、候補指定は 2 件以上ないとサーバが弾く。
-    val canSubmit = trimmedTitle.isNotEmpty() && !state.isSubmitting && when (scope) {
+    val canSubmit = inputIsAcceptable(InputField.POLL_TITLE, title) && !state.isSubmitting && when (scope) {
         CommunityApi.PollCandidateScope.ALL -> true
         CommunityApi.PollCandidateScope.BRAND -> selectedBrandIds.isNotEmpty()
         CommunityApi.PollCandidateScope.MANUAL -> state.candidates.size >= 2
@@ -99,35 +105,35 @@ fun PollCreateSheet(
         ) {
             Text("お題を投稿", fontSize = 20.sp, color = DS.ink)
             Text(
-                "お題を作って、みんなに推しを投票してもらおう。期間中は誰でも3票まで投票できます。",
+                "お題を作って、みんなに推しを投票してもらおう。期間中は誰でも${voteLimitPerTarget()}票まで投票できます。",
                 fontSize = 13.sp, color = DS.ink2
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 OutlinedTextField(
                     value = title,
-                    // 80 文字はサーバの上限。超えた入力はここで切って、送信してから弾かれるのを防ぐ。
-                    onValueChange = { title = it.take(80) },
+                    // 上限と数え方 (サーバと同じ UTF-16 の単位) はコア。超えた入力は切って、送信してから弾かれるのを防ぐ。
+                    onValueChange = { title = inputClamp(InputField.POLL_TITLE, it) },
                     label = { Text("タイトル") },
                     placeholder = { Text("例: 夏に聴きたい曲は？") },
                     minLines = 1,
                     maxLines = 3,
                     modifier = Modifier.fillMaxWidth()
                 )
-                Text("${title.length} / 80文字", fontSize = 12.sp, color = DS.ink2)
+                Text("${inputLength(InputField.POLL_TITLE, title)} / ${inputLimitMax(InputField.POLL_TITLE)}文字", fontSize = 12.sp, color = DS.ink2)
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 OutlinedTextField(
                     value = description,
-                    onValueChange = { description = it.take(280) },
+                    onValueChange = { description = inputClamp(InputField.POLL_DESCRIPTION, it) },
                     label = { Text("説明(任意)") },
                     placeholder = { Text("補足やルールがあれば") },
                     minLines = 2,
                     maxLines = 5,
                     modifier = Modifier.fillMaxWidth()
                 )
-                Text("${description.length} / 280文字", fontSize = 12.sp, color = DS.ink2)
+                Text("${inputLength(InputField.POLL_DESCRIPTION, description)} / ${inputLimitMax(InputField.POLL_DESCRIPTION)}文字", fontSize = 12.sp, color = DS.ink2)
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {

@@ -48,6 +48,8 @@ import com.fugaif.imaslivedb.ui.share.SocialShareChip
 import com.fugaif.imaslivedb.ui.share.SocialShareIconButton
 import com.fugaif.imaslivedb.ui.theme.DS
 import kotlinx.coroutines.launch
+import uniffi.imas_core.voteLimitPerTarget
+import uniffi.imas_core.votesRemaining
 
 /** お題(投票)の単体詳細。iOS PollDetailView の移植。実績バッジのタップ先や、お題一覧カードからの深掘りに使う。 */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -110,7 +112,9 @@ fun PollDetailScreen(
                 CircularProgressIndicator()
             }
         } else {
-            val remaining = (3 - detail.myVoteCount).coerceAtLeast(0)
+            // 1 対象あたりの票数と残りはコアが決める。
+            val limit = voteLimitPerTarget().toInt()
+            val remaining = votesRemaining(detail.myVoteCount.coerceAtLeast(0).toUInt()).toInt()
             Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState())) {
                 Column(Modifier.fillMaxWidth().padding(16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -131,7 +135,7 @@ fun PollDetailScreen(
                     PollEntriesList(detail.entries, state.entityNames, detail.totalVotes, authState.isSignedIn, viewModel::toggleVote)
 
                     if (authState.isSignedIn && detail.isActive) {
-                        Text("タップで投票/取消 (残り${remaining}/3)", fontSize = 11.sp, color = DS.ink3, modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 6.dp))
+                        Text("タップで投票/取消 (残り${remaining}/${limit})", fontSize = 11.sp, color = DS.ink3, modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 6.dp))
                     }
 
                     if (authState.isSignedIn && detail.isActive && detail.candidateScope != CommunityApi.PollCandidateScope.MANUAL) {
@@ -142,7 +146,7 @@ fun PollDetailScreen(
                         ) {
                             Icon(Icons.Filled.AddCircle, contentDescription = null, modifier = Modifier.size(18.dp))
                             Text(
-                                if (remaining > 0) "候補を追加して投票 (残り${remaining}/3)" else "投票済み (3/3)",
+                                if (remaining > 0) "候補を追加して投票 (残り${remaining}/${limit})" else "投票済み (${limit}/${limit})",
                                 fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
                                 modifier = Modifier.padding(start = 6.dp)
                             )
@@ -158,7 +162,7 @@ fun PollDetailScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
                         ) {
-                            Text("あなたの投票 ${myVoteNames.size}/3", fontSize = 12.sp, color = DS.ink3)
+                            Text("あなたの投票 ${myVoteNames.size}/${voteLimitPerTarget()}", fontSize = 12.sp, color = DS.ink3)
                             Spacer(Modifier.weight(1f))
                             SocialShareChip(
                                 title = "投票をシェア",
@@ -174,26 +178,27 @@ fun PollDetailScreen(
 
     if (showPicker && detail != null) {
         val alreadySelected = detail.entries.filter { it.mine }.map { it.entityId }.toSet()
-        val remaining = (3 - detail.myVoteCount).coerceAtLeast(0)
+        val remaining = votesRemaining(detail.myVoteCount.coerceAtLeast(0).toUInt()).toInt()
+        // 選択状態を見せる選択肢 (アイドル・ユニット) は外したものを取り消す。曲は足すだけ (iOS と同じ)。
         when (detail.targetType) {
             "idol" -> IdolPollCandidatePicker(
                 alreadySelected = alreadySelected,
                 remaining = remaining,
                 onDismiss = { showPicker = false },
-                onConfirm = { newIds -> viewModel.voteForNewEntities(newIds); showPicker = false }
+                onConfirm = { ordered -> viewModel.applyPickerSelection(ordered, unvoteDeselected = true); showPicker = false }
             )
             "unit" -> UnitPollCandidatePicker(
                 alreadySelected = alreadySelected,
                 remaining = remaining,
                 onDismiss = { showPicker = false },
-                onConfirm = { newIds -> viewModel.voteForNewEntities(newIds); showPicker = false }
+                onConfirm = { ordered -> viewModel.applyPickerSelection(ordered, unvoteDeselected = true); showPicker = false }
             )
             else -> SongPollCandidatePicker(
                 alreadySelected = alreadySelected,
                 remaining = remaining,
                 restrictedBrandIds = if (detail.candidateScope == CommunityApi.PollCandidateScope.BRAND) detail.scopeBrandIds.toSet() else null,
                 onDismiss = { showPicker = false },
-                onConfirm = { newIds -> viewModel.voteForNewEntities(newIds); showPicker = false }
+                onConfirm = { ordered -> viewModel.applyPickerSelection(ordered, unvoteDeselected = false); showPicker = false }
             )
         }
     }

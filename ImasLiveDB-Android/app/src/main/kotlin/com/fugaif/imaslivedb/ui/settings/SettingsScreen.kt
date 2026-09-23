@@ -92,6 +92,9 @@ import androidx.compose.foundation.layout.Spacer
 import com.fugaif.imaslivedb.ui.components.ImasFilterChip
 import com.fugaif.imaslivedb.ui.theme.MasteryPalette
 import com.fugaif.imaslivedb.ui.theme.MasteryScale
+import uniffi.imas_core.InputField
+import uniffi.imas_core.inputIsAcceptable
+import uniffi.imas_core.inputLimitMax
 
 private enum class SettingsInfoScreen { HELP, INBOX, PRIVACY, TERMS, SUPPORT, LICENSES }
 
@@ -489,7 +492,7 @@ private fun AccountSection(viewModel: AccountViewModel = viewModel()) {
             text = {
                 Column {
                     Text(
-                        "コミュニティ投稿で表示される名前です (40文字以内)",
+                        "コミュニティ投稿で表示される名前です (${inputLimitMax(InputField.DISPLAY_NAME)}文字以内)",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -503,7 +506,7 @@ private fun AccountSection(viewModel: AccountViewModel = viewModel()) {
             },
             confirmButton = {
                 TextButton(
-                    enabled = editingName.trim().isNotEmpty() && !state.isSavingName,
+                    enabled = inputIsAcceptable(InputField.DISPLAY_NAME, editingName) && !state.isSavingName,
                     onClick = viewModel::saveName
                 ) { Text("保存") }
             },
