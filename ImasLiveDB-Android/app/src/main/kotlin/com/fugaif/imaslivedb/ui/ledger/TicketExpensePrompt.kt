@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fugaif.imaslivedb.data.local.localWrite
 import com.fugaif.imaslivedb.data.model.Expense
 import com.fugaif.imaslivedb.data.repository.AttendanceMarkedEvent
 import com.fugaif.imaslivedb.di.AppModule
@@ -92,7 +93,9 @@ fun TicketExpensePrompt() {
                         eventId = req.eventId,
                         note = note
                     )
-                    module.expenseRepository.save(expense)
+                    // 保存できたときだけ閉じる (書けなかったら知らせて、シートは残す)。
+                    localWrite("チケット代の記録") { module.expenseRepository.save(expense) } ?: return@launch
+                    request = null
                 }
             },
             onDismiss = { request = null }
@@ -218,7 +221,6 @@ private fun TicketExpenseSheet(
                 Button(
                     onClick = {
                         ticket?.let { onSave(it, amount) }
-                        onDismiss()
                     },
                     enabled = ticket != null && amount > 0
                 ) { Text("記録する") }

@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fugaif.imaslivedb.data.local.localWrite
 import com.fugaif.imaslivedb.data.model.AttendanceType
 import com.fugaif.imaslivedb.data.model.Show
 import com.fugaif.imaslivedb.data.model.UserMark
@@ -81,7 +82,7 @@ fun EventAttendanceSheet(
 
     fun set(showId: String, type: AttendanceType?) {
         scope.launch {
-            marks.setAttendance(UserMark.SHOW, showId, type)
+            localWrite("参加の記録") { marks.setAttendance(UserMark.SHOW, showId, type) }
             reload()
             onChange()
         }
@@ -90,7 +91,7 @@ fun EventAttendanceSheet(
     fun toggleAllLive() {
         val target = if (allLive) null else AttendanceType.LIVE
         scope.launch {
-            shows.forEach { marks.setAttendance(UserMark.SHOW, it.id, target) }
+            localWrite("参加の記録") { shows.forEach { marks.setAttendance(UserMark.SHOW, it.id, target) } }
             reload()
             onChange()
         }

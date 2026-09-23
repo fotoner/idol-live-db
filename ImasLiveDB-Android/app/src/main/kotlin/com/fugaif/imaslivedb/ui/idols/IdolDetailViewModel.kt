@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 import uniffi.imas_core.SimilarIdolCandidate
 import uniffi.imas_core.nextShowIndex
 import uniffi.imas_core.similarIdolsFetchLimit
+import com.fugaif.imaslivedb.data.local.localWrite
 
 data class IdolDetailUiState(
     val idol: Idol? = null,
@@ -88,10 +89,12 @@ class IdolDetailViewModel(app: Application, private val idolId: String) : Androi
         _uiState.value = _uiState.value.copy(personalTags = tags)
     }
 
-    /** 個人用タグを追加。サーバーには送信しない。 */
-    fun addPersonalTag(name: String) {
+    /** 個人用タグを追加。サーバーには送信しない。足せたときだけ [onAdded] (入力欄を空にする)。 */
+    fun addPersonalTag(name: String, onAdded: () -> Unit) {
         viewModelScope.launch {
-            personalTagRepo.addTag(PersonalTag.IDOL, idolId, name)
+            localWrite("マイタグの追加") { personalTagRepo.addTag(PersonalTag.IDOL, idolId, name) }
+                ?: return@launch
+            onAdded()
             loadPersonalTags()
         }
     }
@@ -99,7 +102,7 @@ class IdolDetailViewModel(app: Application, private val idolId: String) : Androi
     /** 個人用タグを削除。 */
     fun removePersonalTag(name: String) {
         viewModelScope.launch {
-            personalTagRepo.removeTag(PersonalTag.IDOL, idolId, name)
+            localWrite("マイタグの削除") { personalTagRepo.removeTag(PersonalTag.IDOL, idolId, name) }
             loadPersonalTags()
         }
     }

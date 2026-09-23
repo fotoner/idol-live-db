@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.fugaif.imaslivedb.data.local.localWrite
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.UserMark
@@ -214,7 +215,8 @@ class IdolListViewModel(app: Application) : AndroidViewModel(app) {
     // 集合の更新と同時に再計算する。
     fun toggleMyPick(idolId: String) {
         viewModelScope.launch {
-            val now = marksRepo.toggle(UserMark.IDOL, idolId, UserMark.PICK)
+            val now = localWrite("担当の切り替え") { marksRepo.toggle(UserMark.IDOL, idolId, UserMark.PICK) }
+                ?: return@launch
             val current = _uiState.value.pickIds.toMutableSet()
             if (now) current.add(idolId) else current.remove(idolId)
             _uiState.value = _uiState.value.copy(pickIds = current).rebuilt()

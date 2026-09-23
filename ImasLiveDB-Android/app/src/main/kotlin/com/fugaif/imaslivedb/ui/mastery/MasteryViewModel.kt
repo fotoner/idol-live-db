@@ -3,6 +3,7 @@ package com.fugaif.imaslivedb.ui.mastery
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.fugaif.imaslivedb.data.local.localWrite
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.di.AppModule
@@ -117,14 +118,14 @@ class MasteryViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             val targets = masteryBulkTargets(group.songIds, group.levels, scope)
             if (targets.isEmpty()) return@launch
-            marks.setMastery(targets, level)
+            localWrite("習熟度の記録") { marks.setMastery(targets, level) } ?: return@launch
             onMarksChanged()
         }
     }
 
     fun setMastery(songId: String, level: UByte) {
         viewModelScope.launch {
-            marks.setMastery(songId, level)
+            localWrite("習熟度の記録") { marks.setMastery(songId, level) } ?: return@launch
             onMarksChanged()
         }
     }

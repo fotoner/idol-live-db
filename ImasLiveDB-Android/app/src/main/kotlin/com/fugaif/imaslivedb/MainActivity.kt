@@ -42,6 +42,9 @@ import com.fugaif.imaslivedb.ui.ledger.TicketExpensePrompt
 import com.fugaif.imaslivedb.ui.navigation.AppNavigation
 import com.fugaif.imaslivedb.ui.theme.ImasLiveDBTheme
 import kotlinx.coroutines.launch
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import com.fugaif.imaslivedb.data.local.LocalWriteFailure
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -122,6 +125,8 @@ class MainActivity : ComponentActivity() {
                 // 一覧のスワイプ・公演の参加シート・セトリ画面と複数あるので、
                 // 出すのは**アプリのルート 1 箇所**にまとめる (iOS ContentView と同じ)。
                 TicketExpensePrompt()
+                // 端末にしか無いデータの書き込み失敗は、どの画面で起きてもここで知らせる。
+                LocalWriteFailureAlert()
                 if (showDailyPick) {
                     DailyPickSheet(onDismiss = { showDailyPick = false })
                 }
@@ -147,6 +152,26 @@ class MainActivity : ComponentActivity() {
         }
         // 送れなかったお気に入りの集計を送り直す。
         module.appScope.launch { module.favoriteAggregation.flushPending() }
+    }
+}
+
+/**
+ * 端末ローカルの書き込み失敗の知らせ ([LocalWriteFailure])。出ている間は次を重ねない
+ * (iOS `LocalWriteFailureAlert` と同じ)。ダイアログは別ウィンドウなので、シートの上にも出る。
+ */
+@Composable
+private fun LocalWriteFailureAlert() {
+    var notice by remember { mutableStateOf<LocalWriteFailure.Notice?>(null) }
+    LaunchedEffect(Unit) {
+        LocalWriteFailure.notices.collect { if (notice == null) notice = it }
+    }
+    notice?.let { shown ->
+        AlertDialog(
+            onDismissRequest = { notice = null },
+            title = { Text(shown.title) },
+            text = { Text(shown.message) },
+            confirmButton = { TextButton(onClick = { notice = null }) { Text("OK") } }
+        )
     }
 }
 

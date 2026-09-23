@@ -42,7 +42,8 @@ import com.fugaif.imaslivedb.ui.theme.DS
 @Composable
 fun PersonalTagsSection(
     tags: List<String>,
-    onAdd: (String) -> Unit,
+    /** (名前, 足せたときに呼ぶ) — 書けなかったときは入力を消さない。 */
+    onAdd: (String, () -> Unit) -> Unit,
     onRemove: (String) -> Unit
 ) {
     var input by rememberSaveable { mutableStateOf("") }
@@ -69,8 +70,7 @@ fun PersonalTagsSection(
             IconButton(onClick = {
                 val name = input.trim()
                 if (name.isNotEmpty()) {
-                    onAdd(name)
-                    input = ""
+                    onAdd(name) { input = "" }
                 }
             }) {
                 Icon(Icons.Filled.Add, contentDescription = "マイタグを追加", tint = DS.ink2)

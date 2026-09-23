@@ -3,6 +3,7 @@ package com.fugaif.imaslivedb.ui.ledger
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.fugaif.imaslivedb.data.local.localWrite
 import com.fugaif.imaslivedb.data.model.Expense
 import com.fugaif.imaslivedb.data.repository.LedgerShowOption
 import com.fugaif.imaslivedb.di.AppModule
@@ -108,9 +109,11 @@ class LedgerViewModel(app: Application) : AndroidViewModel(app) {
         recompute()
     }
 
-    fun save(expense: Expense) {
+    /** 保存できたときだけ [onSaved] (編集を閉じる)。書けなかったら入力を捨てない。 */
+    fun save(expense: Expense, onSaved: () -> Unit) {
         viewModelScope.launch {
-            repository.save(expense)
+            localWrite("支出の保存") { repository.save(expense) } ?: return@launch
+            onSaved()
             val state = _uiState.value
             val updated = if (state.expenses.any { it.id == expense.id }) {
                 state.expenses.map { if (it.id == expense.id) expense else it }
@@ -124,7 +127,7 @@ class LedgerViewModel(app: Application) : AndroidViewModel(app) {
 
     fun delete(expense: Expense) {
         viewModelScope.launch {
-            repository.delete(expense.id)
+            localWrite("支出の削除") { repository.delete(expense.id) } ?: return@launch
             val state = _uiState.value
             _uiState.value = state.copy(expenses = state.expenses.filterNot { it.id == expense.id })
             recompute()

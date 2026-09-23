@@ -58,9 +58,11 @@ fun UserMarkBar(
     favoriteOn: Boolean,
     onFavoriteClick: () -> Unit,
     note: String?,
-    onNoteChange: (String?) -> Unit,
+    /** (新しい値, 保存できたときに呼ぶ)。書けなかったときは編集を閉じない。 */
+    onNoteChange: (String?, () -> Unit) -> Unit,
     seat: String?,
-    onSeatChange: (String?) -> Unit,
+    /** (新しい値, 保存できたときに呼ぶ)。書けなかったときは編集を閉じない。 */
+    onSeatChange: (String?, () -> Unit) -> Unit,
     seed: String? = null,
     brand: String? = null,
     modifier: Modifier = Modifier
@@ -117,7 +119,7 @@ fun UserMarkBar(
             initial = note.orEmpty(),
             singleLine = false,
             onDismiss = { editingNote = false },
-            onSave = { editingNote = false; onNoteChange(it) }
+            onSave = { onNoteChange(it) { editingNote = false } }
         )
     }
     if (editingSeat) {
@@ -127,7 +129,7 @@ fun UserMarkBar(
             initial = seat.orEmpty(),
             singleLine = true,
             onDismiss = { editingSeat = false },
-            onSave = { editingSeat = false; onSeatChange(it) }
+            onSave = { onSeatChange(it) { editingSeat = false } }
         )
     }
 }

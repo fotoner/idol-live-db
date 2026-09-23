@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.fugaif.imaslivedb.data.community.CommunityApi
+import com.fugaif.imaslivedb.data.local.localWrite
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.ImasUnit
 import com.fugaif.imaslivedb.data.model.PersonalTag
@@ -97,10 +98,12 @@ class UnitDetailViewModel(app: Application, private val unitId: String) : Androi
         _uiState.value = _uiState.value.copy(personalTags = tags)
     }
 
-    /** 個人用タグを追加。サーバーには送信しない。 */
-    fun addPersonalTag(name: String) {
+    /** 個人用タグを追加。サーバーには送信しない。足せたときだけ [onAdded] (入力欄を空にする)。 */
+    fun addPersonalTag(name: String, onAdded: () -> Unit) {
         viewModelScope.launch {
-            personalTagRepo.addTag(PersonalTag.UNIT, unitId, name)
+            localWrite("マイタグの追加") { personalTagRepo.addTag(PersonalTag.UNIT, unitId, name) }
+                ?: return@launch
+            onAdded()
             loadPersonalTags()
         }
     }
@@ -108,7 +111,7 @@ class UnitDetailViewModel(app: Application, private val unitId: String) : Androi
     /** 個人用タグを削除。 */
     fun removePersonalTag(name: String) {
         viewModelScope.launch {
-            personalTagRepo.removeTag(PersonalTag.UNIT, unitId, name)
+            localWrite("マイタグの削除") { personalTagRepo.removeTag(PersonalTag.UNIT, unitId, name) }
             loadPersonalTags()
         }
     }

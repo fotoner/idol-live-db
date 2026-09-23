@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import uniffi.imas_core.KamisabiCompletion
 import uniffi.imas_core.ShowWithEventNameRecord
+import com.fugaif.imaslivedb.data.local.localWrite
 
 data class SongDetailUiState(
     val isLoading: Boolean = true,
@@ -183,7 +184,9 @@ class SongDetailViewModel : ViewModel() {
         val songId = currentSongId ?: return
         val module = appModule ?: return
         viewModelScope.launch {
-            val now = module.userMarkRepository.toggle(UserMark.SONG, songId, UserMark.FAVORITE)
+            val now = localWrite("お気に入りの切り替え") {
+                module.userMarkRepository.toggle(UserMark.SONG, songId, UserMark.FAVORITE)
+            } ?: return@launch
             _uiState.value = _uiState.value.copy(isFavorite = now)
         }
     }
@@ -200,7 +203,9 @@ class SongDetailViewModel : ViewModel() {
         val module = appModule ?: return
         val brandId = _uiState.value.song?.brandId
         viewModelScope.launch {
-            val now = module.userMarkRepository.toggle(UserMark.SONG, songId, UserMark.OWNED)
+            val now = localWrite("カード所持の記録") {
+                module.userMarkRepository.toggle(UserMark.SONG, songId, UserMark.OWNED)
+            } ?: return@launch
             val ownedIds = module.userMarkRepository.ownedSongIds()
             val completion = module.songRepository.fetchKamisabiCompletion(brandId, ownedIds.toList())
             _uiState.value = _uiState.value.copy(isCardOwned = now, kamisabiCompletion = completion)

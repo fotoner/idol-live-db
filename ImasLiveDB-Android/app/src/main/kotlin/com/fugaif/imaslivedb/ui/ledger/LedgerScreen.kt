@@ -133,7 +133,7 @@ fun LedgerScreen(viewModel: LedgerViewModel = viewModel()) {
         ExpenseEditorSheet(
             expense = target.expense,
             showOptions = state.showOptions,
-            onSave = { saved -> viewModel.save(saved); editorTarget = null },
+            onSave = { saved -> viewModel.save(saved) { editorTarget = null } },
             onDismiss = { editorTarget = null }
         )
     }

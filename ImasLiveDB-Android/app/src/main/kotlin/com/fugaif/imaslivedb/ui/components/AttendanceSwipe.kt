@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fugaif.imaslivedb.data.local.localWrite
 import com.fugaif.imaslivedb.data.model.AttendanceType
 import com.fugaif.imaslivedb.data.model.Show
 import com.fugaif.imaslivedb.data.model.UserMark
@@ -87,7 +88,7 @@ fun AttendanceSwipeRow(
             onSelect = { type ->
                 showSheet = false
                 scope.launch {
-                    marks.setAttendance(UserMark.SHOW, showId, type)
+                    localWrite("参加の記録") { marks.setAttendance(UserMark.SHOW, showId, type) } ?: return@launch
                     current = type
                     onChange()
                 }

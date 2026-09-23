@@ -99,6 +99,7 @@ import java.time.LocalDate
 import com.fugaif.imaslivedb.ui.share.SocialShare
 import uniffi.imas_core.shareEventText
 import uniffi.imas_core.AttendanceState
+import com.fugaif.imaslivedb.data.local.localWrite
 
 /**
  * イベント詳細。iOS EventDetailView の構成を 1:1 で写す。
@@ -240,7 +241,12 @@ fun EventDetailScreen(
             Column(Modifier.fillMaxSize().padding(innerPadding)) {
                 Hero(
                     state = uiState, t = t, favOn = favOn, attendOn = attendOn,
-                    onFavToggle = { scope.launch { favOn = marks.toggle(UserMark.EVENT, eventId, UserMark.FAVORITE) } },
+                    onFavToggle = {
+                        scope.launch {
+                            localWrite("お気に入りの切り替え") { marks.toggle(UserMark.EVENT, eventId, UserMark.FAVORITE) }
+                                ?.let { favOn = it }
+                        }
+                    },
                     onAttendToggle = { showAttendanceSheet = true }
                 )
                 ImasSegmented(

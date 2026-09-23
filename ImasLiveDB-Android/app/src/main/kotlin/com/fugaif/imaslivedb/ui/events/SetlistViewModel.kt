@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.fugaif.imaslivedb.data.auth.AuthState
 import com.fugaif.imaslivedb.data.community.SetlistLikeService
+import com.fugaif.imaslivedb.data.local.localWrite
 import com.fugaif.imaslivedb.data.model.AttendanceType
 import com.fugaif.imaslivedb.data.model.PerformerRow
 import com.fugaif.imaslivedb.data.model.SetlistRow
@@ -17,12 +18,14 @@ import com.fugaif.imaslivedb.data.model.ShowTicket
 import com.fugaif.imaslivedb.data.model.UserMark
 import com.fugaif.imaslivedb.data.model.VenueDirectory
 import com.fugaif.imaslivedb.di.AppModule
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uniffi.imas_core.PerformerNameMode
 import uniffi.imas_core.SetlistDisplayMode
 import uniffi.imas_core.SetlistDisplayModeOption
@@ -220,25 +223,30 @@ class SetlistViewModel(app: Application, private val showId: String) : AndroidVi
     }
 
     fun toggleFavorite() = write {
-        val on = marks.toggle(UserMark.SHOW, showId, UserMark.FAVORITE)
+        val on = localWrite("お気に入りの切り替え") { marks.toggle(UserMark.SHOW, showId, UserMark.FAVORITE) }
+            ?: return@write
         _marks.update { it.copy(favoriteOn = on) }
     }
 
-    fun setNote(text: String?) = write {
-        marks.setNote(UserMark.SHOW, showId, text)
+    /** 保存できたときだけ [onSaved] (編集を閉じる)。書けなかったら入力を捨てない。 */
+    fun setNote(text: String?, onSaved: () -> Unit) = write {
+        localWrite("メモの保存") { marks.setNote(UserMark.SHOW, showId, text) } ?: return@write
         val saved = marks.note(UserMark.SHOW, showId)
         _marks.update { it.copy(note = saved) }
+        withContext(Dispatchers.Main) { onSaved() }
     }
 
-    fun setSeat(text: String?) = write {
-        marks.setSeat(UserMark.SHOW, showId, text)
+    /** 保存できたときだけ [onSaved] (編集を閉じる)。書けなかったら入力を捨てない。 */
+    fun setSeat(text: String?, onSaved: () -> Unit) = write {
+        localWrite("座席の保存") { marks.setSeat(UserMark.SHOW, showId, text) } ?: return@write
         val saved = marks.seat(UserMark.SHOW, showId)
         _marks.update { it.copy(seat = saved) }
+        withContext(Dispatchers.Main) { onSaved() }
     }
 
     /** 参加を付け外しすると回収の札と要約が変わるので、行の添え物も読み直す。 */
     fun setAttendance(type: AttendanceType?) = write {
-        marks.setAttendance(UserMark.SHOW, showId, type)
+        localWrite("参加の記録") { marks.setAttendance(UserMark.SHOW, showId, type) } ?: return@write
         loadMarks()
         // 読み直しは画面のスコープ (メインスレッド) で。画面を離れていれば読み直すものも無い。
         viewModelScope.launch { reload() }

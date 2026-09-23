@@ -118,6 +118,7 @@ import uniffi.imas_core.RowAction
 import uniffi.imas_core.RowStyle
 import uniffi.imas_core.idolProfileRowsFromSource
 import java.io.File
+import com.fugaif.imaslivedb.data.local.localWrite
 
 /**
  * アイドル詳細。iOS IdolDetailView の構成を 1:1 で写す。
@@ -427,10 +428,10 @@ private fun Hero(idol: Idol, brandShortName: String?, t: ImasTheme) {
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             HeroToggle("担当", pick, DS.pick, t) {
-                scope.launch { pick = marks.toggle(UserMark.IDOL, idol.id, UserMark.PICK) }
+                scope.launch { localWrite("担当の切り替え") { marks.toggle(UserMark.IDOL, idol.id, UserMark.PICK) }?.let { pick = it } }
             }
             HeroToggle("お気に入り", fav, DS.favorite, t) {
-                scope.launch { fav = marks.toggle(UserMark.IDOL, idol.id, UserMark.FAVORITE) }
+                scope.launch { localWrite("お気に入りの切り替え") { marks.toggle(UserMark.IDOL, idol.id, UserMark.FAVORITE) }?.let { fav = it } }
             }
         }
     }

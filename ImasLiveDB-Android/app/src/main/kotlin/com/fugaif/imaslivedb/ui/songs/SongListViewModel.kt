@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.data.core.FuzzySearch
+import com.fugaif.imaslivedb.data.local.localWrite
 import com.fugaif.imaslivedb.data.model.AlbumSummary
 import com.fugaif.imaslivedb.data.model.SeriesSummary
 import com.fugaif.imaslivedb.data.model.SongCollectFilter
@@ -252,7 +253,8 @@ class SongListViewModel : ViewModel() {
     fun setMastery(songId: String, level: UByte) {
         val ctx = appContext ?: return
         viewModelScope.launch {
-            AppModule.from(ctx).userMarkRepository.setMastery(songId, level)
+            localWrite("習熟度の記録") { AppModule.from(ctx).userMarkRepository.setMastery(songId, level) }
+                ?: return@launch
             _uiState.value = _uiState.value.copy(
                 masteryLevels = _uiState.value.masteryLevels + (songId to level)
             )
