@@ -83,7 +83,10 @@ extension CalendarPeriodBand {
             }
         }
         guard !spans.isEmpty else { return [] }
-        let weekStart = JSTDay.key(calendar.startOfDay(for: firstDay))
+        // 週の頭の日付は、グリッドを組んだ calendar の年月日から作る。JST に直すと、
+        // JST より東の端末で前日に落ちて帯が 1 列ずれる。
+        let parts = calendar.dateComponents([.year, .month, .day], from: firstDay)
+        let weekStart = String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
         return weekPeriodBands(weekStart: weekStart, periods: spans).compactMap { band in
             guard let found = entryById[band.id] else { return nil }
             return CalendarPeriodBand(

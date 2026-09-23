@@ -24,11 +24,6 @@ enum JSTDay {
         dayFormatter.date(from: day)
     }
 
-    /// JST のその日を `"yyyy-MM-dd"` にする (`date(_:)` の逆)。
-    static func key(_ date: Date) -> String {
-        dayFormatter.string(from: date)
-    }
-
     private static let dayFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = format
