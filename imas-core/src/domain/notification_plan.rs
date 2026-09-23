@@ -13,8 +13,10 @@
 //! 時刻は**端末のその地の暦** (日付 + 時・分) で返す。タイムゾーンへの換算は OS。
 //!
 //! 変えたところ:
-//! - 誕生日は「毎年くり返す」ではなく**次の 1 回の日付**で返す。非閏年の 2/29 生まれは
-//!   2/28 に出す (Q-08m。iOS の毎年くり返しは閏年にしか鳴らなかった)。積み直しのたびに次の年へ進む。
+//! - 誕生日は次の 1 回の日付に加えて `repeats_yearly` を返す。2/29 以外は真で、OS は今までどおり
+//!   毎年くり返しで登録する (アプリを開かなくても翌年も鳴る。§3-26)。2/29 生まれだけ偽で、
+//!   非閏年は 2/28 の 1 回を登録し、積み直しのたびに次の年へ進む (Q-08m。iOS の毎年くり返しは
+//!   閏年にしか鳴らなかった)。
 //! - 誕生日の並びは近い順 (上限で切られるなら遠い方から落ちる)。以前は取得順。
 //! - 月曜のミームのレア抽選はシードで決める (同じシードなら両 OS で同じ出方)。
 
@@ -81,6 +83,10 @@ pub struct PlannedNotificationRecord {
     pub minute: u32,
     /// 添える画像の元になるアイドル (ユーザーが取り込んだ画像があれば)。
     pub image_idol_id: Option<String>,
+    /// 毎年同じ月日・時刻にくり返してよいか。真なら OS は毎年くり返しのトリガで登録する
+    /// (アプリを開かなくても翌年も鳴る)。2/29 生まれの誕生日は非閏年に 2/28 へ動くので偽 —
+    /// `date` の 1 回だけを登録し、積み直しのたびに次の年へ進める。誕生日以外も偽。
+    pub repeats_yearly: bool,
 }
 
 /// 予定表 1 回ぶん (上限 60 件、カテゴリ間は round-robin)。
@@ -125,7 +131,22 @@ fn day_key(date: NaiveDate) -> String {
 }
 
 fn plan(id: String, kind: NotificationKind, title: String, body: Option<String>, at: Moment, image: Option<String>) -> PlannedNotificationRecord {
-    PlannedNotificationRecord { id, kind, title, body, date: day_key(at.0), hour: at.1 / 60, minute: at.1 % 60, image_idol_id: image }
+    PlannedNotificationRecord {
+        id,
+        kind,
+        title,
+        body,
+        date: day_key(at.0),
+        hour: at.1 / 60,
+        minute: at.1 % 60,
+        image_idol_id: image,
+        repeats_yearly: false,
+    }
+}
+
+/// その月日の誕生日を毎年くり返しで登録してよいか。2/29 だけは年によって日付が動く (非閏年は 2/28)。
+fn repeats_yearly_for(month: u32, day: u32) -> bool {
+    (month, day) != (2, 29)
 }
 
 /// `--MM-DD` (素の `MM-DD` も受ける) → (月, 日)。
@@ -150,7 +171,7 @@ fn birthday_plans(snap: &Snapshot, idol_ids: &[String], now: Moment) -> Vec<Plan
             let (month, day) = birthday_month_day(idol.birthday.as_deref()?)?;
             let date = next_birthday(month, day, now)?;
             let name = &idol.name;
-            let record = plan(
+            let mut record = plan(
                 format!("bday_{}", idol.id),
                 NotificationKind::OshiBirthday,
                 format!("🎂 今日は{name}の誕生日！"),
@@ -158,6 +179,7 @@ fn birthday_plans(snap: &Snapshot, idol_ids: &[String], now: Moment) -> Vec<Plan
                 (date, at),
                 Some(idol.id.clone()),
             );
+            record.repeats_yearly = repeats_yearly_for(month, day);
             Some((date, idol_rank(snap, i), record))
         })
         .collect();
@@ -330,6 +352,24 @@ mod tests {
         assert_eq!(next_birthday(2, 29, at("2028-01-10", 0)).map(day_key).as_deref(), Some("2028-02-29"));
         assert_eq!(next_birthday(2, 29, at("2027-03-01", 0)).map(day_key).as_deref(), Some("2028-02-29"));
         assert_eq!(next_birthday(2, 30, at("2026-01-10", 0)), None, "実在しない月日は出さない");
+    }
+
+    #[test]
+    fn birthdays_repeat_yearly_except_feb_29_and_nothing_else_repeats() {
+        let snap = bundle_snapshot();
+        let mut inp = input("2026-01-10", 0);
+        inp.pick_idol_ids = snap.idols.iter().filter(|i| i.birthday.is_some()).take(30).map(|i| i.id.clone()).collect();
+        inp.event_ids = snap.events.iter().map(|e| e.id.clone()).collect();
+        let plan = notification_plan(snap, &inp);
+        assert!(plan.iter().any(|p| p.kind == NotificationKind::OshiBirthday));
+        for p in &plan {
+            let expected = p.kind == NotificationKind::OshiBirthday && !p.id.is_empty() && {
+                let idol = &snap.idols[snap.idol_index_by_id[p.id.trim_start_matches("bday_")] as usize];
+                birthday_month_day(idol.birthday.as_deref().unwrap()) != Some((2, 29))
+            };
+            assert_eq!(p.repeats_yearly, expected, "{}", p.id);
+        }
+        assert!(repeats_yearly_for(3, 1) && !repeats_yearly_for(2, 29), "2/29 だけ毎年くり返さない");
     }
 
     #[test]
