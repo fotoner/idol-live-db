@@ -95,7 +95,7 @@ struct InlineLoginPrompt: View {
                     Text(message).font(.imasFootnote.weight(.semibold))
                         .fixedSize(horizontal: false, vertical: true)
                     Spacer(minLength: 8)
-                    Text("ログイン")
+                    Text(L10n.Common.actionLogin)
                         .font(.imasFootnote.weight(.bold))
                         .padding(.horizontal, DS.sp4).padding(.vertical, 6)
                         .foregroundStyle(t.onAccent)

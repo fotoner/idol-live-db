@@ -215,7 +215,7 @@ struct SettingsToolbarButton: View {
         } label: {
             Image(systemName: "gearshape")
         }
-        .accessibilityLabel("設定・マイ")
+        .accessibilityLabel(L10n.Nav.settingsButtonA11y)
     }
 }
 

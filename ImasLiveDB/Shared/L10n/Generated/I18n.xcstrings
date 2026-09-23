@@ -1,0 +1,24 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "i18n.language_tag" : {
+      "comment" : "実際に解決された表示言語のコード。訳文ではなく言語コードを入れる (DisplayLocale がこれを読む) (i18n/catalog/i18n.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ja"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ko"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

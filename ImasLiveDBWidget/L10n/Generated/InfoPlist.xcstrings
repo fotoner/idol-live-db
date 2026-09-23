@@ -1,0 +1,18 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "ウィジェット拡張の表示名 (Info.plist の CFBundleDisplayName)。ko 表記はオーナー確定待ち。ja は project.yml の ImasLiveDBWidget の INFOPLIST_KEY_CFBundleDisplayName と同じにする (system.widget_extension.display_name, i18n/catalog/system.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当ウィジェット"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

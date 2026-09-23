@@ -1,0 +1,114 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "nav.settings_button.a11y" : {
+      "comment" : "各タブ右上の歯車ボタン (設定・マイページを開く) の読み上げ (i18n/catalog/nav.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定・マイ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "설정·마이페이지"
+          }
+        }
+      }
+    },
+    "nav.tab.events" : {
+      "comment" : "下のタブバーのラベル (ライブ・公演の一覧) (i18n/catalog/nav.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브"
+          }
+        }
+      }
+    },
+    "nav.tab.idols" : {
+      "comment" : "下のタブバーのラベル (アイドルの一覧) (i18n/catalog/nav.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌"
+          }
+        }
+      }
+    },
+    "nav.tab.produce" : {
+      "comment" : "下のタブバーのラベル (プロデュース = マイページ的なハブ) (i18n/catalog/nav.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロデュース"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "프로듀스"
+          }
+        }
+      }
+    },
+    "nav.tab.schedule" : {
+      "comment" : "下のタブバーのラベル (スケジュール = カレンダー) (i18n/catalog/nav.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スケジュール"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "스케줄"
+          }
+        }
+      }
+    },
+    "nav.tab.songs" : {
+      "comment" : "下のタブバーのラベル (楽曲の一覧) (i18n/catalog/nav.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

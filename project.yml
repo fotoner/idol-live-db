@@ -26,6 +26,17 @@ settings:
   base:
     MARKETING_VERSION: "2.3.0"
     CURRENT_PROJECT_VERSION: "56"
+    # 文言の正は i18n/catalog。カタログ (.xcstrings) を書くのは tools/i18n だけ
+    # (Xcode の文字列抽出・シンボル生成は使わない。既定値に頼らず明示する)
+    SWIFT_EMIT_LOC_STRINGS: NO
+    LOCALIZED_STRING_SWIFTUI_SUPPORT: NO
+    STRING_CATALOG_GENERATE_SYMBOLS: NO
+  configs:
+    # 出荷ゲート: i18n/config.json の channel=release の言語だけを Release に入れる。
+    # i18n.py check (i18n-guard) が照合する。ターゲット側の configs には書かない
+    # (ターゲット設定がこれを上書きするため)。Debug は未指定 = 全言語 (dev チャネルの ko も入る)
+    Release:
+      XCSTRINGS_LANGUAGES_TO_COMPILE: ja
 
 targets:
   ImasLiveDB:

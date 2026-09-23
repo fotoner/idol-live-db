@@ -96,8 +96,8 @@ struct UnitDetailView: View {
                     .lineLimit(2)
                     .minimumScaleFactor(0.7)
                     // 表示は 2 行に省略されうるので、コピーは原文 (displayName) を渡す。
-                    .imasCopyable([CopyItem("ユニット名をコピー", unit.displayName, key: "unit_name"),
-                                   CopyItem("別名をコピー", unit.nameAlt, key: "unit_name_alt")])
+                    .imasCopyable([CopyItem(String(localized: L10n.Units.detailCopyName), unit.displayName, key: "unit_name"),
+                                   CopyItem(String(localized: L10n.Units.detailCopyNameAlt), unit.nameAlt, key: "unit_name_alt")])
                 if let brand = vm.brand {
                     Button {
                         go(.filteredIdols(.brand(id: brand.id, label: brand.shortName)))
@@ -120,7 +120,8 @@ struct UnitDetailView: View {
 
     private var segmentedBar: some View {
         ImasSegmented(
-            labels: ["楽曲", "メンバー", "コミュニティ"],
+            labels: [String(localized: L10n.Units.detailTabSongs), String(localized: L10n.Units.detailTabMembers),
+                     String(localized: L10n.Units.detailTabCommunity)],
             selection: $segment,
             seed: nil,
             brand: brandColor
@@ -151,15 +152,15 @@ struct UnitDetailView: View {
             } else if let loadError = vm.loadError {
                 ImasEmptyState(
                     systemImage: "exclamationmark.triangle",
-                    title: "読み込みに失敗しました",
-                    message: loadError,
-                    actionTitle: "再試行",
+                    title: String(localized: L10n.Units.detailLoadErrorTitle),
+                    message: loadError.resolved,
+                    actionTitle: String(localized: L10n.Common.actionRetry),
                     action: { Task { await vm.loadDetails(unit: unit) } },
                     brand: brandColor
                 )
             } else if !vm.songs.isEmpty {
                 VStack(spacing: DS.sp3) {
-                    ImasSectionHeader(title: "楽曲", count: "\(vm.songs.count)", tight: true)
+                    ImasSectionHeader(title: .key(L10n.Units.detailSongsHeader), count: .verbatim("\(vm.songs.count)"), tight: true)
                     ImasListContainer {
                         ForEach(Array(vm.songs.enumerated()), id: \.element.id) { idx, song in
                             if idx > 0 { ImasRowDivider(inset: 66) }
@@ -173,8 +174,8 @@ struct UnitDetailView: View {
             } else {
                 ImasEmptyState(
                     systemImage: "music.note.list",
-                    title: "楽曲がありません",
-                    message: "このユニットの楽曲情報はまだ登録されていません。",
+                    title: String(localized: L10n.Units.detailSongsEmptyTitle),
+                    message: String(localized: L10n.Units.detailSongsEmptyMessage),
                     brand: brandColor
                 )
             }
@@ -197,7 +198,7 @@ struct UnitDetailView: View {
                         .foregroundStyle(DS.ink)
                         .lineLimit(1)
                     if collected {
-                        Label("回収済", systemImage: "checkmark")
+                        Label(L10n.Units.detailSongsCollected, systemImage: "checkmark")
                             .labelStyle(.titleAndIcon)
                             .font(.imasCaption.weight(.semibold))
                             .foregroundStyle(DS.success)
@@ -226,15 +227,15 @@ struct UnitDetailView: View {
             } else if let loadError = vm.loadError {
                 ImasEmptyState(
                     systemImage: "exclamationmark.triangle",
-                    title: "読み込みに失敗しました",
-                    message: loadError,
-                    actionTitle: "再試行",
+                    title: String(localized: L10n.Units.detailLoadErrorTitle),
+                    message: loadError.resolved,
+                    actionTitle: String(localized: L10n.Common.actionRetry),
                     action: { Task { await vm.loadDetails(unit: unit) } },
                     brand: brandColor
                 )
             } else if !vm.members.isEmpty {
                 VStack(spacing: DS.sp3) {
-                    ImasSectionHeader(title: "メンバー", count: "\(vm.members.count)", tight: true)
+                    ImasSectionHeader(title: .key(L10n.Units.detailMembersHeader), count: .verbatim("\(vm.members.count)"), tight: true)
                     ImasListContainer {
                         ForEach(Array(vm.members.enumerated()), id: \.element.id) { idx, member in
                             if idx > 0 { ImasRowDivider(inset: 66) }
@@ -246,8 +247,8 @@ struct UnitDetailView: View {
             } else {
                 ImasEmptyState(
                     systemImage: "person.3",
-                    title: "メンバーがいません",
-                    message: "メンバー情報はまだ登録されていません。",
+                    title: String(localized: L10n.Units.detailMembersEmptyTitle),
+                    message: String(localized: L10n.Units.detailMembersEmptyMessage),
                     brand: brandColor
                 )
             }
@@ -287,7 +288,7 @@ struct UnitDetailView: View {
     private var communityBody: some View {
         VStack(spacing: DS.sp5) {
             PollAchievementBadges(entityId: unit.id)
-            InlineLoginPrompt(message: "タグ付け・投票にはログインが必要です", seed: nil)
+            InlineLoginPrompt(message: String(localized: L10n.Units.detailCommunityLoginPrompt), seed: nil)
             communityUnitTags
             personalUnitTags
             if !similarTagUnits.isEmpty { communitySimilarUnits }
@@ -310,7 +311,7 @@ struct UnitDetailView: View {
     private var communityUnitTags: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
             HStack(alignment: .firstTextBaseline) {
-                Text("タグ").font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
+                Text(L10n.Units.detailTagsHeader).font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
                 Spacer(minLength: 12)
                 if EditPermission.showEditAffordance {
                     Button {
@@ -319,7 +320,7 @@ struct UnitDetailView: View {
                     } label: {
                         HStack(spacing: DS.sp2) {
                             Image(systemName: "plus").font(.imasScaled( 13, weight: .semibold))
-                            Text("タグ").font(.imasScaled( 14, weight: .semibold))
+                            Text(L10n.Units.detailTagsAddButton).font(.imasScaled( 14, weight: .semibold))
                         }
                         .foregroundStyle(ImasTheme.derive(seed: nil, brand: brandColor, scheme: scheme).accent)
                     }
@@ -342,16 +343,16 @@ struct UnitDetailView: View {
                                         try? await CommunityAPI.shared.removeUnitTag(unitId: unit.id, tagId: tag.id)
                                         await loadUnitTags()
                                     }
-                                } label: { Label("タグを外す", systemImage: "tag.slash") }
+                                } label: { Label(L10n.Units.detailTagsActionRemove, systemImage: "tag.slash") }
                             }
-                            Button { sheetDestination = .unitTagDetail(tag) } label: { Label("タグ詳細を見る", systemImage: "tag") }
+                            Button { sheetDestination = .unitTagDetail(tag) } label: { Label(L10n.Units.detailTagsActionShowDetail, systemImage: "tag") }
                         }
                     }
                 }
             } else {
-                ImasEmptyState(systemImage: "tag", title: "タグはまだありません",
-                               message: "このユニットを一言で表すタグを付けてみませんか？",
-                               actionTitle: EditPermission.showEditAffordance ? "タグを追加" : nil,
+                ImasEmptyState(systemImage: "tag", title: String(localized: L10n.Units.detailTagsEmptyTitle),
+                               message: String(localized: L10n.Units.detailTagsEmptyMessage),
+                               actionTitle: EditPermission.showEditAffordance ? String(localized: L10n.Units.detailTagsActionAdd) : nil,
                                action: EditPermission.showEditAffordance ? { startCommunityEdit { showUnitTagPicker = true } } : nil,
                                brand: brandColor)
             }
@@ -366,9 +367,9 @@ struct UnitDetailView: View {
             VStack(alignment: .leading, spacing: DS.sp1) {
                 HStack(spacing: 6) {
                     Image(systemName: "lock.fill").font(.imasScaled(13, weight: .semibold)).foregroundStyle(DS.ink3)
-                    Text("マイタグ").font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
+                    Text(L10n.Units.detailPersonalTagsHeader).font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
                 }
-                Text("自分だけに表示されます (コミュニティには公開されません)")
+                Text(L10n.Units.detailPersonalTagsCaption)
                     .font(.imasCaption).foregroundStyle(DS.ink3)
             }
             if !tags.isEmpty {
@@ -378,13 +379,14 @@ struct UnitDetailView: View {
                             .contextMenu {
                                 Button(role: .destructive) {
                                     personalTagService.removeTag(entityType: "unit", entityId: unit.id, name: tag.tagName)
-                                } label: { Label("マイタグを削除", systemImage: "trash") }
+                                } label: { Label(L10n.Units.detailPersonalTagsActionRemove, systemImage: "trash") }
                             }
                     }
                 }
             }
             HStack(spacing: DS.sp3) {
-                TextField("マイタグを追加 (例: 聞いた)", text: $newPersonalTagName)
+                // LocalizedStringResource を受ける TextField(_:text:) は iOS 26 からなので、prompt: 付きの版 (iOS 16) を使う
+                TextField(L10n.Units.detailPersonalTagsPlaceholder, text: $newPersonalTagName, prompt: nil)
                     .font(.imasSubhead)
                     .foregroundStyle(DS.ink)
                     .autocorrectionDisabled()
@@ -401,7 +403,7 @@ struct UnitDetailView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(!canAddPersonalTag)
-                .accessibilityLabel("マイタグを追加")
+                .accessibilityLabel(L10n.Units.detailPersonalTagsAddA11y)
             }
         }
     }
@@ -435,9 +437,9 @@ struct UnitDetailView: View {
     private var communitySimilarUnits: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
             VStack(alignment: .leading, spacing: DS.sp1) {
-                Text("タグが似ているユニット")
+                Text(L10n.Units.detailSimilarHeader)
                     .font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
-                Text("つけられたタグが似ているユニット")
+                Text(L10n.Units.detailSimilarCaption)
                     .font(.imasCaption).foregroundStyle(DS.ink2)
             }
             ScrollView(.horizontal, showsIndicators: false) {
@@ -453,7 +455,7 @@ struct UnitDetailView: View {
                                     .lineLimit(1)
                                     .foregroundStyle(DS.ink)
                                 if let shared = similarSharedTags[other.id] {
-                                    Text("タグ\(shared)個一致")
+                                    Text(L10n.Units.detailSimilarSharedTags(count: shared))
                                         .font(.imasScaled(10))
                                         .foregroundStyle(DS.ink3)
                                 }
