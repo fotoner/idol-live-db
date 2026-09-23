@@ -6,7 +6,7 @@ use crate::domain::date_display::{range_with_weekday, short_with_weekday};
 use crate::domain::event_detail_queries as detail;
 use crate::domain::snapshot::Snapshot;
 use crate::domain::event_grouping::group_events_by_year;
-use crate::domain::setlist_lineup::{is_full_cast, summarize, FULL_CAST_LABEL, MISSING_LABEL};
+use crate::domain::setlist_lineup::{row_lineup, LineupSummary, FULL_CAST_LABEL, MISSING_LABEL};
 use crate::domain::setlist_sections::{group_consecutive, section_label};
 use crate::domain::show_naming::show_identity;
 use crate::domain::song_detail_queries::FIRST_PERFORMANCE_LABEL;
@@ -369,7 +369,8 @@ fn setlist_rows(
                 .get(&e.song_id)
                 .map(|ids| ids.iter().map(String::as_str).collect())
                 .unwrap_or_default();
-            let full_cast = is_full_cast(cast, &performer_ids);
+            // 「全員」の札とオリメンの札は 1 回で決まる (出演者 ∪ 歌唱メンバーで見る。アプリと同じ規則)。
+            let lineup = row_lineup(&original_ids, &performer_ids, cast);
             let row = SetlistRow {
                 id: e.id.clone(),
                 // entries は position 昇順なので、添字がそのまま「何曲目か」になる。
@@ -387,8 +388,8 @@ fn setlist_rows(
                         })
                     })
                     .collect(),
-                full_cast_label: full_cast.then(|| FULL_CAST_LABEL.to_string()),
-                lineup: lineup_note_of(ctx, &original_ids, &performer_ids, cast, full_cast),
+                full_cast_label: lineup.is_full_cast.then(|| FULL_CAST_LABEL.to_string()),
+                lineup: lineup.summary.map(|summary| lineup_note(ctx, summary)),
                 is_cover: ctx.snap.song(&e.song_id).is_some_and(Snapshot::is_cover),
                 first_performance_label: (ctx.snap.ordinal_by_item[item as usize] == 1)
                     .then(|| FIRST_PERFORMANCE_LABEL.to_string()),
@@ -405,27 +406,20 @@ fn setlist_rows(
 
 /// オリメンとの関係の札。規則も文言も `domain::setlist_lineup` (アプリと同じ)。
 /// ここは「いたのに歌わなかった人」の id を Ref に解決するだけ。
-fn lineup_note_of(
-    ctx: &Ctx,
-    original: &[&str],
-    performers: &BTreeSet<&str>,
-    cast: &BTreeSet<&str>,
-    full_cast: bool,
-) -> Option<LineupNote> {
-    let summary = summarize(original, performers, cast, full_cast)?;
+fn lineup_note(ctx: &Ctx, summary: LineupSummary) -> LineupNote {
     let idols: Vec<Ref> = summary
         .absent_in_cast
         .iter()
         .filter_map(|id| ctx.idol_ref(id))
         .collect();
-    Some(LineupNote {
+    LineupNote {
         kind: summary.lineup,
         label: summary.label(),
         missing: (!idols.is_empty()).then(|| MissingOriginals {
             label: MISSING_LABEL.to_string(),
             idols,
         }),
-    })
+    }
 }
 
 /// 公演の JSON-LD。
