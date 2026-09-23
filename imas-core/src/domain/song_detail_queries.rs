@@ -24,6 +24,7 @@
 //! - SQL が未規定だった同順位の並びは添字や名前で決定化する (プラットフォーム間で
 //!   同一結果を返すのが共有コアの目的なので、非決定性は残さない)。
 
+use crate::domain::credit_names::{canonical_credit_key, split_credits};
 use crate::domain::date_display::year_range;
 use crate::domain::snapshot::{Snapshot, Song};
 use std::cmp::Reverse;
@@ -407,23 +408,31 @@ fn release_key(snap: &Snapshot, i: u32) -> &str {
 /// - `ORDER BY title_kana, title` は SQLite の ASC なので title_kana の NULL が先頭。
 ///   同着は SQL 未規定なので添字 (= rowid 読み込み順) を最終キーにして決定化する。
 /// - 空・空白だけの名前は即空 (原本の `normalizedCreatorName` が nil を返す枝)。
+///
+/// **Q-08i で広げた**: 上の ② に加えて、クレジット欄を曲詳細のクレジット行と同じ規則
+/// ([`split_credits`]) で人ごとに割り、表記の揺れを落とした鍵 ([`canonical_credit_key`]) が
+/// 一致する欄も役割に数える。`BNSI(佐藤貴文)` の欄に「佐藤貴文」で当たり、
+/// `グシミヤギ ヒデユキ` と `グシミヤギヒデユキ` が同じ人になる (クレジット行で押した
+/// 名前と絞り込みで当たる名前が揃う)。以前の ② で当たった曲はすべて残る (和集合)。
+/// ① の部分一致の候補絞りは、鍵で当たる曲 (空白の揺れ) を落とすのでやめ、全曲を見る。
 pub fn songs_by_creator(snap: &Snapshot, name: &str) -> Vec<SongWithRolesRecord> {
     let trimmed = name.trim();
     if trimmed.is_empty() {
         return Vec::new();
     }
-    let needle = trimmed.to_ascii_lowercase();
+    let key = canonical_credit_key(trimmed);
+    let names_person = |field: &Option<String>| {
+        credit_field_names_exactly(field, trimmed)
+            || field
+                .as_deref()
+                .is_some_and(|v| split_credits(v).iter().any(|p| canonical_credit_key(p) == key))
+    };
 
-    let mut candidates: Vec<u32> = snap
-        .songs
-        .iter()
-        .enumerate()
-        .filter(|(_, s)| {
-            [&s.composer, &s.lyricist, &s.arranger]
-                .into_iter()
-                .any(|v| v.as_deref().is_some_and(|v| ascii_ci_contains(v, &needle)))
+    let mut candidates: Vec<u32> = (0..snap.songs.len() as u32)
+        .filter(|&i| {
+            let s = &snap.songs[i as usize];
+            [&s.composer, &s.lyricist, &s.arranger].into_iter().any(|f| names_person(f))
         })
-        .map(|(i, _)| i as u32)
         .collect();
     candidates.sort_by(|&l, &r| {
         let (a, b) = (&snap.songs[l as usize], &snap.songs[r as usize]);
@@ -436,7 +445,7 @@ pub fn songs_by_creator(snap: &Snapshot, name: &str) -> Vec<SongWithRolesRecord>
             let s = &snap.songs[i as usize];
             let roles: Vec<String> = [("作曲", &s.composer), ("作詞", &s.lyricist), ("編曲", &s.arranger)]
                 .into_iter()
-                .filter(|(_, field)| credit_field_names_exactly(field, trimmed))
+                .filter(|(_, field)| names_person(field))
                 .map(|(label, _)| label.to_string())
                 .collect();
             (!roles.is_empty()).then(|| SongWithRolesRecord { song: SongDetailRecord::from(s), roles })
@@ -1063,12 +1072,14 @@ mod tests {
         let mut with_hits = 0usize;
         let mut multi_role = 0usize;
         for name in &names {
+            // Q-08i で広げたので、以前の規則 (SQL + 区切り 5 文字の完全一致) で当たった曲と
+            // 役割はすべて残る (増えるのは括弧の中の人名・空白の揺れで当たる曲)。
             let want = run_original_creator_sql(name);
             let got = songs_by_creator(snap, name);
-            assert_eq!(got.len(), want.len(), "name={name:?}");
-            for (g, (song, roles)) in got.iter().zip(want.iter()) {
-                assert_eq!(&g.song, song, "name={name:?}");
-                assert_eq!(&g.roles, roles, "name={name:?}");
+            for (song, roles) in &want {
+                let row = got.iter().find(|g| g.song.id == song.id);
+                let row = row.unwrap_or_else(|| panic!("name={name:?} で {} が落ちた", song.id));
+                assert!(roles.iter().all(|r| row.roles.contains(r)), "name={name:?} {}", song.id);
             }
             with_hits += usize::from(!got.is_empty());
             multi_role += got.iter().filter(|r| r.roles.len() >= 2).count();
@@ -1100,9 +1111,32 @@ mod tests {
         let candidates = count_like_candidates(&db, &name);
         let kept = songs_by_creator(snap, &name).len();
         assert!(kept < candidates, "name={name:?} candidates={candidates} kept={kept}");
-        assert_eq!(
-            songs_by_creator(snap, &name).len(),
-            run_original_creator_sql(&name).len()
+    }
+
+    /// Q-08i: 括弧の中の人名 (`BNSI(佐藤貴文)` の「佐藤貴文」) でも当たる。
+    #[test]
+    fn songs_by_creator_matches_the_person_inside_company_brackets() {
+        let snap = bundle_snapshot();
+        let (song, person) = snap
+            .songs
+            .iter()
+            .find_map(|s| {
+                [&s.composer, &s.lyricist, &s.arranger].into_iter().flatten().find_map(|field| {
+                    split_credits(field).into_iter().find_map(|piece| {
+                        let key = canonical_credit_key(&piece);
+                        (piece.contains('(') || piece.contains('（'))
+                            .then_some(())
+                            .filter(|_| !key.is_empty() && key != piece && !field.contains(&format!("/{key}")))
+                            .map(|_| (s, key))
+                    })
+                })
+            })
+            .expect("括弧で所属の付いた作家がいる");
+        let hit = songs_by_creator(snap, &person);
+        assert!(hit.iter().any(|r| r.song.id == song.id), "{person} で {} に当たる", song.id);
+        assert!(
+            run_original_creator_sql(&person).iter().all(|(s, _)| hit.iter().any(|r| r.song.id == s.id)),
+            "以前当たった曲も残る"
         );
     }
 
