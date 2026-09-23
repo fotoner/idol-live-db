@@ -7,7 +7,7 @@ import GRDB
 /// 検証する不変条件:
 /// - 一括コピーで Bundle 側データに置き換わる (旧データは消える)。
 /// - 列差分に強い (Bundle にしか無い列は無視、ローカルにしか無い列は NULL)。
-/// - 保護テーブル (user_marks 等) は触らない。
+/// - 入れ直すのはコアの台帳にあるマスタ表だけ。台帳に無い表 (user_marks 等) は触らない。
 /// - FK 違反があれば COMMIT で throw し、トランザクション全体がロールバックする
 ///   (= 旧「サイレント全停止で旧データ継続」ではなく、失敗が呼び出し元に伝わる)。
 final class MasterReseedTests: XCTestCase {
@@ -38,7 +38,7 @@ final class MasterReseedTests: XCTestCase {
         return queue
     }
 
-    // MARK: - happy path + 列差分 + 保護テーブル
+    // MARK: - happy path + 列差分 + 台帳に無い表
 
     func testCopyReplacesDataHandlesColumnDiffAndPreservesUserTables() throws {
         let local = try makeLocal { db in
@@ -62,11 +62,10 @@ final class MasterReseedTests: XCTestCase {
         }
 
         let result = try AppDatabase.copyMasterTables(
-            into: local, fromBundleAt: bundle,
-            preserving: ["meta", "user_marks"], newVersion: 2, newContentHash: "hash-v2"
+            into: local, fromBundleAt: bundle, newVersion: 2, newContentHash: "hash-v2"
         )
 
-        XCTAssertEqual(result.ok, 1)       // idols のみコピー対象
+        XCTAssertEqual(result.ok, 1)       // idols のみコピー対象 (meta と user_marks は台帳に無い)
         XCTAssertEqual(result.skipped, 0)
 
         try local.read { db in
@@ -78,14 +77,14 @@ final class MasterReseedTests: XCTestCase {
             XCTAssertNil(extra)
             let name = try String.fetchOne(db, sql: "SELECT name FROM idols WHERE id='a'")
             XCTAssertEqual(name, "Alice")
-            // 保護テーブルは無傷 (Bundle の mX は入らない)。
+            // 台帳に無い表は無傷 (Bundle の mX は入らない)。
             let marks = try String.fetchAll(db, sql: "SELECT note FROM user_marks")
             XCTAssertEqual(marks, ["keep"])
             // data_version は newVersion に更新。
             let version = try String.fetchOne(db, sql: "SELECT value FROM meta WHERE key='data_version'")
             XCTAssertEqual(version, "2")
             // 「最後に取り込んだ同梱データ」の指紋を記録する。次回の判定はこれと突き合わせる。
-            // meta は保護テーブルで一括コピーの対象外なので、書き漏らすと毎起動 reseed になる。
+            // meta は一括コピーの対象外なので、書き漏らすと毎起動 reseed になる。
             let hash = try String.fetchOne(db, sql: "SELECT value FROM meta WHERE key='content_hash'")
             XCTAssertEqual(hash, "hash-v2")
         }
@@ -99,6 +98,7 @@ final class MasterReseedTests: XCTestCase {
     /// 以前は触らない表を deny-list で持っていて、`personal_tags` と `expenses` が漏れていた。
     /// 同梱 DB にこの 2 表が「無い」から偶然守られていただけで、同梱 DB に入った瞬間、
     /// 次のアップデートの初回起動でマイタグと家計簿が全部消える (戻す手段が無い)。
+    /// 入れ直す表はコアの台帳から決まり、スキーマの適用結果には頼らない。
     func testReseedNeverTouchesLocalOnlyTablesEvenIfBundleHasThem() throws {
         let localPath = try makeMigratedDatabaseFile()
         let local = try DatabaseQueue(path: localPath)
@@ -113,12 +113,8 @@ final class MasterReseedTests: XCTestCase {
         }
         let before = try local.read(Self.localOnlyRows)
 
-        // 起動時と同じく、スキーマを当てた結果 (台帳に無い表) から触らない表を決める。
-        let schema = try ensureMasterSchema(dbPath: localPath)
         _ = try AppDatabase.copyMasterTables(
-            into: local, fromBundleAt: bundle,
-            preserving: AppDatabase.reseedPreservedTables(nonLedgerTables: schema.untouchedTables),
-            newVersion: 2, newContentHash: "hash-v2"
+            into: local, fromBundleAt: bundle, newVersion: 2, newContentHash: "hash-v2"
         )
 
         try local.read { db in
@@ -163,38 +159,40 @@ final class MasterReseedTests: XCTestCase {
 
     // MARK: - FK 違反は throw + ロールバック (旧: サイレント全停止)
 
+    /// 親子はどちらも台帳にあるマスタ表 (brands ← idols) で組む。台帳に無い表は入れ直さないので、
+    /// 架空の表では違反まで届かない。
     func testCopyThrowsAndRollsBackOnForeignKeyViolation() throws {
+        let schema = """
+            CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT);
+            CREATE TABLE brands(id TEXT PRIMARY KEY);
+            CREATE TABLE idols(id TEXT PRIMARY KEY, brand_id TEXT REFERENCES brands(id) ON DELETE CASCADE);
+            """
         let local = try makeLocal { db in
-            try db.execute(sql: "CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT)")
+            try db.execute(sql: schema)
             try db.execute(sql: "INSERT INTO meta VALUES('data_version','1')")
-            try db.execute(sql: "CREATE TABLE parent(id TEXT PRIMARY KEY)")
-            try db.execute(sql: "CREATE TABLE child(id TEXT PRIMARY KEY, parent_id TEXT REFERENCES parent(id) ON DELETE CASCADE)")
-            try db.execute(sql: "INSERT INTO parent VALUES('p_old')")
-            try db.execute(sql: "INSERT INTO child VALUES('c_old','p_old')")
+            try db.execute(sql: "INSERT INTO brands VALUES('b_old')")
+            try db.execute(sql: "INSERT INTO idols VALUES('i_old','b_old')")
         }
         let bundle = try makeBundle { db in
-            try db.execute(sql: "CREATE TABLE meta(key TEXT PRIMARY KEY, value TEXT)")
+            try db.execute(sql: schema)
             try db.execute(sql: "INSERT INTO meta VALUES('data_version','2')")
-            try db.execute(sql: "CREATE TABLE parent(id TEXT PRIMARY KEY)")
-            try db.execute(sql: "CREATE TABLE child(id TEXT PRIMARY KEY, parent_id TEXT REFERENCES parent(id) ON DELETE CASCADE)")
-            try db.execute(sql: "INSERT INTO parent VALUES('p1')")
-            // FK 違反: 存在しない親 pMISSING を参照 (Bundle は FK 無効なので投入できる)。
-            try db.execute(sql: "INSERT INTO child VALUES('c1','pMISSING')")
+            try db.execute(sql: "INSERT INTO brands VALUES('b1')")
+            // FK 違反: 存在しないブランド bMISSING を参照 (Bundle は FK 無効なので投入できる)。
+            try db.execute(sql: "INSERT INTO idols VALUES('i1','bMISSING')")
         }
 
         XCTAssertThrowsError(
             try AppDatabase.copyMasterTables(
-                into: local, fromBundleAt: bundle,
-                preserving: ["meta"], newVersion: 2, newContentHash: "hash-v2"
+                into: local, fromBundleAt: bundle, newVersion: 2, newContentHash: "hash-v2"
             )
         )
 
         // ロールバックされ、ローカルは元のまま (data_version も 1 のまま)。
         try local.read { db in
-            let parents = try String.fetchAll(db, sql: "SELECT id FROM parent")
-            XCTAssertEqual(parents, ["p_old"])
-            let children = try String.fetchAll(db, sql: "SELECT id FROM child")
-            XCTAssertEqual(children, ["c_old"])
+            let brands = try String.fetchAll(db, sql: "SELECT id FROM brands")
+            XCTAssertEqual(brands, ["b_old"])
+            let idols = try String.fetchAll(db, sql: "SELECT id FROM idols")
+            XCTAssertEqual(idols, ["i_old"])
             let version = try String.fetchOne(db, sql: "SELECT value FROM meta WHERE key='data_version'")
             XCTAssertEqual(version, "1")
         }
