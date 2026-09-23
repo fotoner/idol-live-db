@@ -1,5 +1,6 @@
 import CloudKit
 import Foundation
+import GRDB
 
 /// CloudKit のレコードをローカル DB のモデルに変換する。
 ///
@@ -17,10 +18,39 @@ import Foundation
 /// 2. 返ってきた行 (`CkRow`) → GRDB のモデル。
 enum CKRecordMapper {
 
+    /// コアの行 1 つを GRDB のモデルにする。
+    ///
+    /// `CkRow` の場合分けを網羅しているので、コアが取り込むレコード型を足すと
+    /// ここがコンパイルエラーになる (写し方の書き忘れを防ぐ)。
+    static func record(from row: CkRow) -> any PersistableRecord {
+        switch row {
+        case .brand(let row): brand(row)
+        case .idol(let row): idol(row)
+        case .event(let row): event(row)
+        case .show(let row): show(row)
+        case .venue(let row): venue(row)
+        case .creator(let row): creator(row)
+        case .unitVersion(let row): unitVersion(row)
+        case .costume(let row): costume(row)
+        case .costumeWear(let row): costumeWear(row)
+        case .showTicket(let row): showTicket(row)
+        case .venueName(let row): venueName(row)
+        case .venueHall(let row): venueHall(row)
+        case .song(let row): song(row)
+        case .unit(let row): unit(row)
+        case .idolBrand(let row): idolBrand(row)
+        case .songArtist(let row): songArtist(row)
+        case .unitMember(let row): unitMember(row)
+        case .showCast(let row): showCast(row)
+        case .setlistItem(let row): setlistItem(row)
+        case .setlistPerformer(let row): setlistPerformer(row)
+        case .songVideo(let row): songVideo(row)
+        }
+    }
+
     // MARK: - Core Entities
 
-    static func brand(from record: CKRecord) -> Brand? {
-        guard case .brand(let row)? = mapped(record, as: "Brand") else { return nil }
+    static func brand(_ row: CkBrandRow) -> Brand {
         return Brand(
             id: row.id,
             name: row.name,
@@ -31,8 +61,12 @@ enum CKRecordMapper {
         )
     }
 
-    static func idol(from record: CKRecord) -> Idol? {
-        guard case .idol(let row)? = mapped(record, as: "Idol") else { return nil }
+    static func brand(from record: CKRecord) -> Brand? {
+        guard case .brand(let row)? = mapped(record, as: "Brand") else { return nil }
+        return brand(row)
+    }
+
+    static func idol(_ row: CkIdolRow) -> Idol {
         return Idol(
             id: row.id,
             brandId: row.brandId,
@@ -69,11 +103,15 @@ enum CKRecordMapper {
         )
     }
 
+    static func idol(from record: CKRecord) -> Idol? {
+        guard case .idol(let row)? = mapped(record, as: "Idol") else { return nil }
+        return idol(row)
+    }
+
     // Cast テーブル廃止: CastMember レコードは取り込まない。 旧 CK スキーマに存在する
     // CastMember レコードは CloudKitSyncEngine 側で無視する。
 
-    static func event(from record: CKRecord) -> Event? {
-        guard case .event(let row)? = mapped(record, as: "Event") else { return nil }
+    static func event(_ row: CkEventRow) -> Event {
         return Event(
             id: row.id,
             brandId: row.brandId,
@@ -91,8 +129,12 @@ enum CKRecordMapper {
         )
     }
 
-    static func show(from record: CKRecord) -> Show? {
-        guard case .show(let row)? = mapped(record, as: "Show") else { return nil }
+    static func event(from record: CKRecord) -> Event? {
+        guard case .event(let row)? = mapped(record, as: "Event") else { return nil }
+        return event(row)
+    }
+
+    static func show(_ row: CkShowRow) -> Show {
         return Show(
             id: row.id,
             eventId: row.eventId,
@@ -109,9 +151,13 @@ enum CKRecordMapper {
         )
     }
 
+    static func show(from record: CKRecord) -> Show? {
+        guard case .show(let row)? = mapped(record, as: "Show") else { return nil }
+        return show(row)
+    }
+
     /// 会場 (施設)。会場は ID で管理するので、名前が変わっても履歴が分断されない。
-    static func venue(from record: CKRecord) -> Venue? {
-        guard case .venue(let row)? = mapped(record, as: "Venue") else { return nil }
+    static func venue(_ row: CkVenueRow) -> Venue {
         return Venue(
             id: row.id,
             name: row.name,
@@ -124,17 +170,25 @@ enum CKRecordMapper {
         )
     }
 
+    static func venue(from record: CKRecord) -> Venue? {
+        guard case .venue(let row)? = mapped(record, as: "Venue") else { return nil }
+        return venue(row)
+    }
+
     /// 作詞・作曲・編曲の表記とその読み。
+    static func creator(_ row: CkCreatorRow) -> Creator {
+        return Creator(id: row.id, name: row.name, nameKana: row.nameKana, aliases: row.aliases)
+    }
+
     static func creator(from record: CKRecord) -> Creator? {
         guard case .creator(let row)? = mapped(record, as: "Creator") else { return nil }
-        return Creator(id: row.id, name: row.name, nameKana: row.nameKana, aliases: row.aliases)
+        return creator(row)
     }
 
     /// ユニットの版 (Project“ReLight”AXE8 等)。
     ///
     /// ユニット自体は 1 行のまま。版で分かれるのは曲側 (`Song.unitVersionId`)。
-    static func unitVersion(from record: CKRecord) -> UnitVersion? {
-        guard case .unitVersion(let row)? = mapped(record, as: "UnitVersion") else { return nil }
+    static func unitVersion(_ row: CkUnitVersionRow) -> UnitVersion {
         return UnitVersion(
             id: row.id, unitId: row.unitId, code: row.code, name: row.name,
             catchphrase: row.catchphrase, logoUrl: row.logoUrl,
@@ -143,9 +197,13 @@ enum CKRecordMapper {
         )
     }
 
+    static func unitVersion(from record: CKRecord) -> UnitVersion? {
+        guard case .unitVersion(let row)? = mapped(record, as: "UnitVersion") else { return nil }
+        return unitVersion(row)
+    }
+
     /// ライブ衣装の目録。
-    static func costume(from record: CKRecord) -> Costume? {
-        guard case .costume(let row)? = mapped(record, as: "Costume") else { return nil }
+    static func costume(_ row: CkCostumeRow) -> Costume {
         return Costume(
             id: row.id, brandId: row.brandId, name: row.name, nameKana: row.nameKana,
             unitId: row.unitId, idolId: row.idolId, description: row.description,
@@ -153,12 +211,16 @@ enum CKRecordMapper {
         )
     }
 
+    static func costume(from record: CKRecord) -> Costume? {
+        guard case .costume(let row)? = mapped(record, as: "Costume") else { return nil }
+        return costume(row)
+    }
+
     /// 衣装の着用記録。
     ///
     /// `setlistItemId` / `idolId` の nil は欠損ではない (曲までは特定していない /
     /// その場の全員)。埋めたり捨てたりしないこと。
-    static func costumeWear(from record: CKRecord) -> CostumeWear? {
-        guard case .costumeWear(let row)? = mapped(record, as: "CostumeWear") else { return nil }
+    static func costumeWear(_ row: CkCostumeWearRow) -> CostumeWear {
         return CostumeWear(
             id: row.id, costumeId: row.costumeId, showId: row.showId,
             setlistItemId: row.setlistItemId, idolId: row.idolId,
@@ -166,9 +228,13 @@ enum CKRecordMapper {
         )
     }
 
+    static func costumeWear(from record: CKRecord) -> CostumeWear? {
+        guard case .costumeWear(let row)? = mapped(record, as: "CostumeWear") else { return nil }
+        return costumeWear(row)
+    }
+
     /// 公演のチケット価格。席種は自由文字列、kind は live / stream / live_viewing。
-    static func showTicket(from record: CKRecord) -> ShowTicketRecord? {
-        guard case .showTicket(let row)? = mapped(record, as: "ShowTicket") else { return nil }
+    static func showTicket(_ row: CkShowTicketRow) -> ShowTicketRecord {
         return ShowTicketRecord(
             id: row.id, showId: row.showId, kind: row.kind, name: row.name,
             price: row.price, isEstimate: row.isEstimate, note: row.note,
@@ -176,9 +242,13 @@ enum CKRecordMapper {
         )
     }
 
+    static func showTicket(from record: CKRecord) -> ShowTicketRecord? {
+        guard case .showTicket(let row)? = mapped(record, as: "ShowTicket") else { return nil }
+        return showTicket(row)
+    }
+
     /// 会場名と有効期間。表示を「公演日時点の名前」にするために使う。
-    static func venueName(from record: CKRecord) -> VenueName? {
-        guard case .venueName(let row)? = mapped(record, as: "VenueName") else { return nil }
+    static func venueName(_ row: CkVenueNameRow) -> VenueName {
         return VenueName(
             id: row.id, venueId: row.venueId, name: row.name,
             validFrom: row.validFrom,
@@ -186,14 +256,22 @@ enum CKRecordMapper {
         )
     }
 
+    static func venueName(from record: CKRecord) -> VenueName? {
+        guard case .venueName(let row)? = mapped(record, as: "VenueName") else { return nil }
+        return venueName(row)
+    }
+
     /// 会場のホール/構成。キャパは構成で変わるので施設と分けて持つ。
-    static func venueHall(from record: CKRecord) -> VenueHall? {
-        guard case .venueHall(let row)? = mapped(record, as: "VenueHall") else { return nil }
+    static func venueHall(_ row: CkVenueHallRow) -> VenueHall {
         return VenueHall(id: row.id, venueId: row.venueId, name: row.name, capacity: row.capacity.map(Int.init))
     }
 
-    static func song(from record: CKRecord) -> Song? {
-        guard case .song(let row)? = mapped(record, as: "Song") else { return nil }
+    static func venueHall(from record: CKRecord) -> VenueHall? {
+        guard case .venueHall(let row)? = mapped(record, as: "VenueHall") else { return nil }
+        return venueHall(row)
+    }
+
+    static func song(_ row: CkSongRow) -> Song {
         return Song(
             id: row.id,
             title: row.title,
@@ -233,8 +311,12 @@ enum CKRecordMapper {
         )
     }
 
-    static func unit(from record: CKRecord) -> Unit? {
-        guard case .unit(let row)? = mapped(record, as: "ImasUnit") else { return nil }
+    static func song(from record: CKRecord) -> Song? {
+        guard case .song(let row)? = mapped(record, as: "Song") else { return nil }
+        return song(row)
+    }
+
+    static func unit(_ row: CkUnitRow) -> Unit {
         return Unit(
             id: row.id,
             brandId: row.brandId,
@@ -245,12 +327,16 @@ enum CKRecordMapper {
         )
     }
 
+    static func unit(from record: CKRecord) -> Unit? {
+        guard case .unit(let row)? = mapped(record, as: "ImasUnit") else { return nil }
+        return unit(row)
+    }
+
     // MARK: - Junction Tables
 
     // IdolCast 廃止: idol.voiceActors に統合済み、 旧 CK レコードは無視する。
 
-    static func idolBrand(from record: CKRecord) -> IdolBrand? {
-        guard case .idolBrand(let row)? = mapped(record, as: "IdolBrand") else { return nil }
+    static func idolBrand(_ row: CkIdolBrandRow) -> IdolBrand {
         return IdolBrand(
             idolId: row.idolId,
             brandId: row.brandId,
@@ -258,8 +344,12 @@ enum CKRecordMapper {
         )
     }
 
-    static func songArtist(from record: CKRecord) -> SongArtist? {
-        guard case .songArtist(let row)? = mapped(record, as: "SongArtist") else { return nil }
+    static func idolBrand(from record: CKRecord) -> IdolBrand? {
+        guard case .idolBrand(let row)? = mapped(record, as: "IdolBrand") else { return nil }
+        return idolBrand(row)
+    }
+
+    static func songArtist(_ row: CkSongArtistRow) -> SongArtist {
         return SongArtist(
             songId: row.songId,
             idolId: row.idolId,
@@ -267,16 +357,24 @@ enum CKRecordMapper {
         )
     }
 
-    static func unitMember(from record: CKRecord) -> UnitMember? {
-        guard case .unitMember(let row)? = mapped(record, as: "UnitMember") else { return nil }
+    static func songArtist(from record: CKRecord) -> SongArtist? {
+        guard case .songArtist(let row)? = mapped(record, as: "SongArtist") else { return nil }
+        return songArtist(row)
+    }
+
+    static func unitMember(_ row: CkUnitMemberRow) -> UnitMember {
         return UnitMember(
             unitId: row.unitId,
             idolId: row.idolId
         )
     }
 
-    static func showCast(from record: CKRecord) -> ShowCast? {
-        guard case .showCast(let row)? = mapped(record, as: "ShowCast") else { return nil }
+    static func unitMember(from record: CKRecord) -> UnitMember? {
+        guard case .unitMember(let row)? = mapped(record, as: "UnitMember") else { return nil }
+        return unitMember(row)
+    }
+
+    static func showCast(_ row: CkShowCastRow) -> ShowCast {
         // 共有コアが member/lead/guest に正規化済み。未知の役割は member に倒っている。
         return ShowCast(
             showId: row.showId,
@@ -285,8 +383,12 @@ enum CKRecordMapper {
         )
     }
 
-    static func setlistItem(from record: CKRecord) -> SetlistItem? {
-        guard case .setlistItem(let row)? = mapped(record, as: "SetlistItem") else { return nil }
+    static func showCast(from record: CKRecord) -> ShowCast? {
+        guard case .showCast(let row)? = mapped(record, as: "ShowCast") else { return nil }
+        return showCast(row)
+    }
+
+    static func setlistItem(_ row: CkSetlistItemRow) -> SetlistItem {
         return SetlistItem(
             id: row.id,
             showId: row.showId,
@@ -298,15 +400,23 @@ enum CKRecordMapper {
         )
     }
 
+    static func setlistItem(from record: CKRecord) -> SetlistItem? {
+        guard case .setlistItem(let row)? = mapped(record, as: "SetlistItem") else { return nil }
+        return setlistItem(row)
+    }
+
+    static func setlistPerformer(_ row: CkSetlistPerformerRow) -> SetlistPerformer {
+        return SetlistPerformer(setlistItemId: row.setlistItemId, idolId: row.idolId)
+    }
+
     static func setlistPerformer(from record: CKRecord) -> SetlistPerformer? {
         guard case .setlistPerformer(let row)? = mapped(record, as: "SetlistPerformer") else { return nil }
-        return SetlistPerformer(setlistItemId: row.setlistItemId, idolId: row.idolId)
+        return setlistPerformer(row)
     }
 
     // MARK: - Community Content
 
-    static func songVideo(from record: CKRecord) -> SongVideo? {
-        guard case .songVideo(let row)? = mapped(record, as: "SongVideo") else { return nil }
+    static func songVideo(_ row: CkSongVideoRow) -> SongVideo {
         return SongVideo(
             id: row.id,
             songId: row.songId,
@@ -316,6 +426,11 @@ enum CKRecordMapper {
             createdAt: row.createdAt,
             authorDisplayName: row.authorDisplayName
         )
+    }
+
+    static func songVideo(from record: CKRecord) -> SongVideo? {
+        guard case .songVideo(let row)? = mapped(record, as: "SongVideo") else { return nil }
+        return songVideo(row)
     }
 
     // MARK: - Soft Delete
