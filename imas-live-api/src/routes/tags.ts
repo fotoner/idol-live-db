@@ -83,7 +83,7 @@ function poolRoutes(masterPath: string, entityPath: string): TagPool["routes"] {
  * 類似曲スコアの分母 (相手の曲のタグ総数) をここに持たせている。
  * タグ付け / 取り外しの batch に混ぜて、その曲だけを数え直す (数行の読み取りで済む)。
  * タグ自体が removed になった場合は全曲に効くので、日次 cron
- * (apply.ts の refreshTagCounts) が全体を数え直して辻褄を合わせる。
+ * (scheduled.ts の refreshTagCounts) が全体を数え直して辻褄を合わせる。
  */
 function recountSongTags(db: D1Database, songId: string): D1PreparedStatement {
   return db
