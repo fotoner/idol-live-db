@@ -20,7 +20,8 @@ Usage:
 import argparse
 import os
 import sqlite3
-import subprocess
+
+from lib import masterdb
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -108,9 +109,8 @@ def main() -> None:
     print(f"\nanniversaries に {len(rows)} 件追加した"
           f" (合計 {db.execute('SELECT count(*) FROM anniversaries').fetchone()[0]} 件)")
 
-    with open(DUMP_PATH, "w", encoding="utf-8") as f:
-        subprocess.run(["sqlite3", DB_PATH, ".dump"], stdout=f, check=True)
-    print(f"{DUMP_PATH} を更新した")
+    # 正本は書く前に一時 DB で外部キーを検査してから書き出す (壊れていれば書かない)。
+    masterdb.write_master_sql(db, DUMP_PATH)
 
 
 if __name__ == "__main__":

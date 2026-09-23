@@ -64,9 +64,10 @@ from __future__ import annotations
 import argparse
 import os
 import sqlite3
-import subprocess
 import sys
 import unicodedata
+
+from lib import masterdb
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -159,18 +160,9 @@ def main() -> None:
     print(f"data_version {version} → {version + 1}")
 
     conn.commit()
+    # 正本は書く前に一時 DB で外部キーを検査してから書き出す (壊れていれば書かない)。
+    masterdb.write_master_sql(conn, DUMP_PATH)
     conn.close()
-    with open(DUMP_PATH, "w", encoding="utf-8") as f:
-        subprocess.run(["sqlite3", DB_PATH, ".dump"], stdout=f, check=True)
-    sys.path.insert(0, HERE)
-    import normalize_master_sql  # noqa: E402
-
-    text = open(DUMP_PATH, encoding="utf-8").read()
-    fixed, n = normalize_master_sql.normalize(text)
-    if n:
-        open(DUMP_PATH, "w", encoding="utf-8").write(fixed)
-        print(f"  unistr() を {n} 箇所ほどいた")
-    print(f"\n{DUMP_PATH} を更新した")
 
 
 if __name__ == "__main__":
