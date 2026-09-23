@@ -53,9 +53,27 @@ final class NotificationService {
 
     // MARK: - Reschedule All
 
+    /// いま走っている再予約。次の呼び出しは、これが終わってから走る。
+    private var rescheduleInFlight: Task<Void, Never>?
+
     /// 既存の pending 通知を全消去し、設定がONの通知を再スケジュールする。
     /// 未認可の場合は何もしない。最大60件cap（誕生日・月曜は repeat のため少数、イベント系は近い順）。
+    ///
+    /// 呼び出しは 1 本ずつ順に走らせる。起動時とマイページの 5 つのトグルから同時に呼ばれうるが、
+    /// 並行に走ると「全部消す → await → 登録」が互い違いになり、OFF にした直後の呼び出しが
+    /// 消した通知を、前の呼び出しが登録し直すことがある。後に呼ばれた方が必ず最後に走るので、
+    /// 最後の設定が残る。
     func rescheduleAll(database: AppDatabase) async {
+        let previous = rescheduleInFlight
+        let task = Task {
+            await previous?.value
+            await performRescheduleAll(database: database)
+        }
+        rescheduleInFlight = task
+        await task.value
+    }
+
+    private func performRescheduleAll(database: AppDatabase) async {
         let status = await authorizationStatus()
         guard status == .authorized || status == .provisional else { return }
 
