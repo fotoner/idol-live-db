@@ -15,33 +15,58 @@ extension Notification.Name {
 /// UniFFI 生成の `SnapshotStore` (Rust 側 RwLock で内部同期・差し替えは原子的) をアプリで
 /// 1 個だけ持ち、以下を束ねる:
 /// - 起動時: バックグラウンドで Documents の master.sqlite を読み切ってロード
-/// - CloudKit sync 完了時: 再ロード (読み手はロック待ちなしで新スナップショットへ切り替わる)
-/// - メモリ警告時: 破棄 (以後の読み取りは GRDB 経路へフォールバック)
+/// - CloudKit sync 完了時・ローカル編集の後: 再ロード (読み手はロック待ちなしで新スナップショットへ切り替わる)
 ///
-/// 読み取りアダプタ (`CoreSongRepository` 等) は `storeIfLoaded` 越しに掴む。
+/// マスタの読み取りはすべてスナップショットが答える (OS 側の SQL の代わりの経路は持たない。
+/// 同じ問いに 2 つの実装が答えると、規則が必ず食い違う)。まだロードできていない間
+/// (起動直後・ロードの失敗の後) の読み取りは、`loadedStore()` でロードを待つ。
+/// メモリ警告でも手放さない (手放すと、次の読み取りが全部ロード待ちになる)。
+///
 /// ロードは DB 全読みで重いため必ずバックグラウンドで行い、実行中の再要求は
 /// 「終わったらもう 1 回だけ」に潰す (sync 完了が連続しても読み直しが積み上がらない)。
 final class CoreSnapshotManager: Sendable {
     private let store = SnapshotStore()
 
-    /// ロードの直列化 + 追走要求の記録。
-    /// running 中に来た要求は pending に畳み、走っているロードの完了後に 1 回だけ再実行する
-    /// (ロード中に sync が完了した場合、その sync の書き込みを読み直さないと古いまま固定される)。
+    /// ロードの直列化 + 追走要求 + ロード待ちの記録。
+    /// running 中に来た再ロードの要求は pending に畳み、走っているロードの完了後に 1 回だけ
+    /// 再実行する (ロード中に sync が完了した場合、その sync の書き込みを読み直さないと古いまま固定される)。
     private struct LoadState {
         var running = false
         var pending = false
+        /// ロードを待っている読み取り。ロードが 1 回終わるたびに、成否を渡してまとめて起こす。
+        var waiters: [CheckedContinuation<SnapshotStore, any Error>] = []
     }
     private let loadState = OSAllocatedUnfairLock(initialState: LoadState())
 
-    /// ロード済みならストアを返す。未ロード (起動直後 / ロード失敗 / メモリ警告後) は nil。
-    /// 呼び出し側はこの nil を「GRDB へフォールバック」の合図として使う (スライス並走の原則)。
-    var storeIfLoaded: SnapshotStore? {
-        store.isLoaded() ? store : nil
+    /// ロード待ちに入った読み取りが次にすること。
+    private enum WaitStep { case ready, wait, start }
+
+    /// ロード済みのストア。まだなら (起動直後・前のロードの失敗の後) ロードを待つ。
+    ///
+    /// ロードに失敗したら投げる。画面は既存の読み込み失敗の表示になり、次の読み取りで
+    /// もう一度ロードを試す。
+    func loadedStore() async throws -> SnapshotStore {
+        if store.isLoaded() { return store }
+        return try await withCheckedThrowingContinuation { continuation in
+            let step = loadState.withLock { state -> WaitStep in
+                // ロックの外で確かめた後に、ちょうどロードが終わっていることがある。
+                if store.isLoaded() { return .ready }
+                state.waiters.append(continuation)
+                if state.running { return .wait }
+                state.running = true
+                return .start
+            }
+            switch step {
+            case .ready: continuation.resume(returning: store)
+            case .wait: break
+            case .start: startLoading()
+            }
+        }
     }
 
     /// バックグラウンドでのロード/再ロードを要求する (何度呼んでも安全)。
     /// `SnapshotStore.load` は成功時のみ差し替えるので、失敗しても現行スナップショット
-    /// (あれば) は生き続け、未ロードなら GRDB 経路が答え続ける。
+    /// (あれば) は生き続ける。
     func requestLoad() {
         let shouldStart = loadState.withLock { state -> Bool in
             if state.running {
@@ -51,34 +76,41 @@ final class CoreSnapshotManager: Sendable {
             state.running = true
             return true
         }
-        guard shouldStart else { return }
-
-        // .utility: 完了までは GRDB が同じ答えを返せるため、UI 描画やユーザー操作より優先度を下げる。
-        Task.detached(priority: .utility) { [self] in
-            repeat {
-                loadOnce()
-            } while loadState.withLock { state -> Bool in
-                if state.pending {
-                    state.pending = false
-                    return true
-                }
-                state.running = false
-                return false
-            }
-        }
-    }
-
-    /// メモリ警告時の明示破棄。次の requestLoad (sync 完了 or 再起動) まで未ロードに戻る。
-    /// ロード実行中に呼ばれた場合は直後に新スナップショットが入り直すことがあるが、
-    /// 警告時の解放はベストエフォートで良い (整合性は store 側の原子差し替えが守る)。
-    func unload() {
-        store.unload()
-        logger.notice("snapshot_unloaded (memory warning)")
+        if shouldStart { startLoading() }
     }
 
     // MARK: - Private
 
-    private func loadOnce() {
+    /// ロードを回す (呼ぶ前に running を立てておくこと)。
+    ///
+    /// 1 回終わるたびに、待っている読み取りを起こす。起こす相手の取り出しと running を
+    /// 下ろすのは同じロックの中で行う。間に来た読み取りは、取り出しに間に合えばこの結果で
+    /// 起き、間に合わなければ running が下りているので自分で次のロードを始める (取り残されない)。
+    ///
+    /// 優先度は .userInitiated。読み取りがロードを待つので、画面の表示を待たせている。
+    private func startLoading() {
+        Task.detached(priority: .userInitiated) { [self] in
+            while true {
+                let outcome = loadOnce()
+                let (waiters, again) = loadState.withLock { state in
+                    let waiters = state.waiters
+                    state.waiters = []
+                    if state.pending {
+                        state.pending = false
+                        return (waiters, true)
+                    }
+                    state.running = false
+                    return (waiters, false)
+                }
+                for waiter in waiters { waiter.resume(with: outcome) }
+                if !again { return }
+            }
+        }
+    }
+
+    /// 1 回ロードする。読み直しに失敗しても、前のスナップショットがあればそれを返す
+    /// (`SnapshotStore.load` は成功したときだけ差し替える)。
+    private func loadOnce() -> Result<SnapshotStore, any Error> {
         let path = Self.masterDatabasePath()
         do {
             let stats = try store.load(dbPath: path)
@@ -86,15 +118,17 @@ final class CoreSnapshotManager: Sendable {
             Task { @MainActor in
                 NotificationCenter.default.post(name: .coreSnapshotDidLoad, object: nil)
             }
+            return .success(store)
         } catch {
-            // 初回起動の DB コピー前・ファイル破損など。ここで落としても得るものが無いので
-            // ログだけ残して GRDB 経路に委ねる (次の sync 完了時に自動で再挑戦する)。
+            // ファイル破損など。待っている読み取りには失敗を返し、次の読み取りか
+            // 次の sync 完了のときにもう一度試す。
             logger.error("snapshot_load_failed: \(error.localizedDescription, privacy: .public)")
+            return store.isLoaded() ? .success(store) : .failure(error)
         }
     }
 
-    /// `AppDatabase.openDatabase()` と同じ Documents/master.sqlite。
-    /// (パス構築ロジックはあちらが private のため同じ規則をここに書いている。変更時は両方を揃えること)
+    /// `AppDatabase.prepare()` が開くのと同じ Documents/master.sqlite。
+    /// (パスの組み立てはあちらにもある。変更時は両方を揃えること)
     private static func masterDatabasePath() -> String {
         let documentsURL = URL.documentsDirectory
         return documentsURL.appendingPathComponent("master.sqlite").path

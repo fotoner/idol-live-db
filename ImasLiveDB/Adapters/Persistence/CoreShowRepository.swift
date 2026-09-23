@@ -2,43 +2,35 @@ import Foundation
 import os
 
 /// `ShowReading` ポートの共有コア (imas-core インメモリスナップショット) アダプタ。
-///
-/// 呼び出し単位でスナップショットの有無を見て切り替える (スライス並走の原則):
-/// - ロード済み → UniFFI 越しに `SnapshotStore` のクエリを呼ぶ
-/// - 未ロード / ロード失敗 / メモリ警告で破棄後 → 従来の `GRDBShowRepository` に委ねる
-///
-/// ポートの全メソッドに対応する core API があるため、未ロード時以外は全て core 経路。
+/// スナップショットがまだなら、ロードを待ってから答える (`CoreSnapshotManager.withStore`)。
 struct CoreShowRepository: ShowReading {
     let snapshot: CoreSnapshotManager
-    /// 未ロード時の受け皿 (Strangler の旧経路)。
-    let fallback: GRDBShowRepository
-
     /// 参加マーク (`user_marks`) の引き先。ユーザーデータはスナップショットに載らない
-    /// (書き込みが頻繁でプラットフォームが正) ので、core 経路でも DB から解決して渡す。
-    private var database: AppDatabase { fallback.database }
+    /// (書き込みが頻繁でプラットフォームが正) ので、DB から解決して渡す。
+    let database: AppDatabase
 
     // MARK: - 公演
 
     func shows(eventId: String) async throws -> [Show] {
-        try await snapshot.withStore(fallbackTo: { try await fallback.shows(eventId: eventId) }) { store in
+        try await snapshot.withStore { store in
             try store.showsByEvent(eventId: eventId).map(CoreRecordMapping.show(from:))
         }
     }
 
     func show(id: String) async throws -> Show? {
-        try await snapshot.withStore(fallbackTo: { try await fallback.show(id: id) }) { store in
+        try await snapshot.withStore { store in
             try store.showRecord(id: id).map(CoreRecordMapping.show(from:))
         }
     }
 
     func latestShow() async throws -> Show? {
-        try await snapshot.withStore(fallbackTo: { try await fallback.latestShow() }) { store in
+        try await snapshot.withStore { store in
             try store.latestShow().map(CoreRecordMapping.show(from:))
         }
     }
 
     func shows(criterion: ShowFilterCriterion) async throws -> [Show] {
-        try await snapshot.withStore(fallbackTo: { try await fallback.shows(criterion: criterion) }) { store in
+        try await snapshot.withStore { store in
             let records: [ShowRecord]
             switch criterion {
             case .venue(let venue):
@@ -53,14 +45,14 @@ struct CoreShowRepository: ShowReading {
     }
 
     func allShows(limit: Int) async throws -> [ShowWithEventName] {
-        try await snapshot.withStore(fallbackTo: { try await fallback.allShows(limit: limit) }) { store in
+        try await snapshot.withStore { store in
             try store.allShowsWithEventName(limit: UInt32(max(0, limit)))
                 .map(CoreRecordMapping.showWithEventName(from:))
         }
     }
 
     func searchShows(query: String, limit: Int) async throws -> [ShowWithEventName] {
-        try await snapshot.withStore(fallbackTo: { try await fallback.searchShows(query: query, limit: limit) }) { store in
+        try await snapshot.withStore { store in
             try store.searchShowsWithEventName(query: query, limit: UInt32(max(0, limit)))
                 .map(CoreRecordMapping.showWithEventName(from:))
         }
@@ -69,13 +61,13 @@ struct CoreShowRepository: ShowReading {
     // MARK: - セットリスト
 
     func setlist(showId: String) async throws -> [SetlistRow] {
-        try await snapshot.withStore(fallbackTo: { try await fallback.setlist(showId: showId) }) { store in
+        try await snapshot.withStore { store in
             try store.showSetlist(showId: showId).map(CoreRecordMapping.setlistRow(from:))
         }
     }
 
     func allPerformers(showId: String) async throws -> [String: [PerformerRow]] {
-        try await snapshot.withStore(fallbackTo: { try await fallback.allPerformers(showId: showId) }) { store in
+        try await snapshot.withStore { store in
             try store.showSetlistPerformers(showId: showId)
                 .mapValues { $0.map(CoreRecordMapping.performerRow(from:)) }
         }
@@ -87,13 +79,7 @@ struct CoreShowRepository: ShowReading {
         displayMode: SetlistDisplayMode
     ) async throws -> SetlistRowMetaBundle {
         let attended = await attendedIds()
-        return try await snapshot.withStore(
-            fallbackTo: {
-                try await fallback.setlistRowMeta(
-                    showId: showId, nameMode: nameMode, displayMode: displayMode
-                )
-            }
-        ) { store in
+        return try await snapshot.withStore { store in
             try store.showSetlistRowMeta(
                 showId: showId,
                 mode: nameMode,
@@ -124,13 +110,13 @@ struct CoreShowRepository: ShowReading {
     }
 
     func showIdolIds(showId: String) async throws -> Set<String> {
-        try await snapshot.withStore(fallbackTo: { try await fallback.showIdolIds(showId: showId) }) { store in
+        try await snapshot.withStore { store in
             Set(try store.showCastIdolIds(showId: showId))
         }
     }
 
     func showCastIdols(showId: String) async throws -> [Idol] {
-        try await snapshot.withStore(fallbackTo: { try await fallback.showCastIdols(showId: showId) }) { store in
+        try await snapshot.withStore { store in
             // core は sort_order 順の idol_id 列を返す (`showIdolIds` と同じ 1 本の API)。
             // 実体化はプラットフォーム側の規約なので、その並びを保って引き直す。
             try CoreRecordMapping.idols(store: store, orderedIds: store.showCastIdolIds(showId: showId))
@@ -138,14 +124,14 @@ struct CoreShowRepository: ShowReading {
     }
 
     func showCostumes(showId: String) async throws -> [ShowCostumeRecord] {
-        try await snapshot.withStore(fallbackTo: { try await fallback.showCostumes(showId: showId) }) { store in
+        try await snapshot.withStore { store in
             try store.showCostumeRecords(showId: showId)
         }
     }
 
     func originalArtistIds(songIds: [String]) async throws -> [String: Set<String>] {
         guard !songIds.isEmpty else { return [:] }
-        return try await snapshot.withStore(fallbackTo: { try await fallback.originalArtistIds(songIds: songIds) }) { store in
+        return try await snapshot.withStore { store in
             try store.originalArtistIdsMap(songIds: songIds).mapValues { Set($0) }
         }
     }
@@ -153,27 +139,27 @@ struct CoreShowRepository: ShowReading {
     // MARK: - 会場
 
     func venueDirectory() async throws -> VenueDirectory {
-        try await snapshot.withStore(fallbackTo: { try await fallback.venueDirectory() }) { store in
+        try await snapshot.withStore { store in
             let record = try store.venueDirectory()
             return CoreRecordMapping.venueDirectory(from: record)
         }
     }
 
     func eventIdsAtVenue(_ venueId: String) async throws -> Set<String> {
-        try await snapshot.withStore(fallbackTo: { try await fallback.eventIdsAtVenue(venueId) }) { store in
+        try await snapshot.withStore { store in
             Set(try store.eventIdsAtVenue(venueId: venueId))
         }
     }
 
     func eventIds(forShows showIds: [String]) async throws -> Set<String> {
         guard !showIds.isEmpty else { return [] }
-        return try await snapshot.withStore(fallbackTo: { try await fallback.eventIds(forShows: showIds) }) { store in
+        return try await snapshot.withStore { store in
             Set(try store.eventIdsForShows(showIds: showIds))
         }
     }
 
     func venuesMatching(query: String, eventIds: [String]) async throws -> [String: String] {
-        try await snapshot.withStore(fallbackTo: { try await fallback.venuesMatching(query: query, eventIds: eventIds) }) { store in
+        try await snapshot.withStore { store in
             try store.venuesMatching(query: query, eventIds: eventIds)
         }
     }

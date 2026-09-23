@@ -82,7 +82,7 @@ struct TimelineBar: Identifiable, Sendable, Hashable {
 
 /// 年表 (ブランド史) の読み取りポート (driven port)。
 ///
-/// 実装は `Adapters/Persistence/GRDBTimelineRepository`。
+/// 実装は `Adapters/Persistence/CoreTimelineRepository` (共有コアのスナップショット)。
 protocol TimelineReading: Sendable {
     /// 指定ブランド (nil = 全ブランド) の年表帯を全レーン分まとめて返す。
     func timelineBars(brandId: String?) async throws -> [TimelineBar]

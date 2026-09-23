@@ -78,16 +78,6 @@ extension AppDatabase {
     func upsertSetlistItemsAsync(_ setlistItems: [SetlistItem]) async throws { try await upsertChunkedAsync(setlistItems) }
     func upsertSetlistPerformers(_ setlistPerformers: [SetlistPerformer]) throws { try upsertChunked(setlistPerformers) }
 
-    /// 編集 UI 用: 全曲を id+title だけのコンパクト型で返す。
-    func fetchAllSongsForPickerAsync() async throws -> [PickedSong] {
-        try await dbQueue.read { db in try Self.fetchAllSongsForPickerQuery(db) }
-    }
-
-    private static func fetchAllSongsForPickerQuery(_ db: Database) throws -> [PickedSong] {
-        let rows = try Row.fetchAll(db, sql: "SELECT id, title, title_kana FROM songs ORDER BY title")
-        return rows.map { PickedSong(id: $0["id"], title: $0["title"], titleKana: $0["title_kana"]) }
-    }
-
     /// あいまい検索の母集団 (曲名 + 読み)。
     ///
     /// 並びは問わない (コアが照合して並べ直す)。実体を読まないので安い。
@@ -103,16 +93,6 @@ extension AppDatabase {
                 sql: "SELECT id, title, title_kana FROM songs WHERE brand_id IS NOT 'other'")
                 .map { SongSpelling(id: $0["id"], title: $0["title"], titleKana: $0["title_kana"]) }
         }
-    }
-
-    /// 編集 UI 用: 出演者 picker に出す全アイドル (sort_order 順)。
-    /// Cast 廃止により idol を直接返すようになった。
-    func fetchAllIdolsForPickerAsync() async throws -> [Idol] {
-        try await dbQueue.read { db in try Self.fetchAllIdolsForPickerQuery(db) }
-    }
-
-    private static func fetchAllIdolsForPickerQuery(_ db: Database) throws -> [Idol] {
-        try Idol.order(Column("sort_order")).fetchAll(db)
     }
 
     /// admin 編集: 指定 show の setlist を完全置換 (旧 items/performers 削除 → 新 items/performers 挿入)。
@@ -171,10 +151,6 @@ extension AppDatabase {
         for record in records {
             try record.upsert(db)
         }
-    }
-
-    private func fetchBySongId<T: FetchableRecord & TableRecord>(_ songId: String) throws -> [T] {
-        try dbQueue.read { db in try Self.fetchBySongIdQuery(db, songId) }
     }
 
     private func fetchBySongIdAsync<T: FetchableRecord & TableRecord & Sendable>(_ songId: String) async throws -> [T] {

@@ -3,7 +3,7 @@ import Foundation
 /// イベント (ライブ/公演) のマスタ読み取りポート (driven port)。
 ///
 /// Presentation はこのポートに依存し、永続化の具象 (`AppDatabase` / GRDB) を知らない。
-/// マスタ読みなので read 専用。実装は `Adapters/Persistence/GRDBEventRepository`。
+/// マスタ読みなので read 専用。実装は `Adapters/Persistence/CoreEventRepository` (共有コアのスナップショット)。
 ///
 /// ⚠️ Domain 規約: このファイルは `SwiftUI` / `GRDB` / `CloudKit` を import しない。
 protocol EventReading: Sendable {

@@ -5,19 +5,15 @@ import XCTest
 /// ライブ一覧は年グループ × 行の入れ子 ForEach なので、両方の id 一意性を実データで守る。
 final class EventGroupIdentityTests: XCTestCase {
 
-    private func loadedCore() throws -> any EventReading {
-        let manager = AppContainer.shared.coreSnapshot
-        manager.requestLoad()
-        let deadline = CFAbsoluteTimeGetCurrent() + 30
-        while manager.storeIfLoaded == nil && CFAbsoluteTimeGetCurrent() < deadline {
-            Thread.sleep(forTimeInterval: 0.05)
-        }
-        XCTAssertNotNil(manager.storeIfLoaded, "スナップショットがロードできない")
+    /// 実データのスナップショット越しの読み取り。ロードできなければここで失敗させる
+    /// (読み取りはロードを待つので、待つ処理は要らない)。
+    private func loadedCore() async throws -> any EventReading {
+        _ = try await AppContainer.shared.coreSnapshot.loadedStore()
         return AppContainer.shared.eventReading
     }
 
     func testNoDuplicateIdsInEventListForEach() async throws {
-        let reading = try loadedCore()
+        let reading = try await loadedCore()
         let events = try await reading.eventsWithFirstDate(
             brandId: nil, includeEmpty: true, liveOnly: false, kinds: EventKind.allCases)
 

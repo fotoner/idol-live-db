@@ -1,5 +1,4 @@
 import Foundation
-import UIKit
 
 /// 合成ルート (Composition Root)。
 ///
@@ -12,13 +11,12 @@ final class AppContainer: Sendable {
     static let shared = AppContainer()
 
     /// 共有コア (imas-core) のインメモリスナップショット供給。
-    /// 起動時ロード / sync 完了後の再ロード / メモリ警告での破棄の配線は合成ルートの責務
-    /// としてここ (init) で束ねる。
+    /// 起動時ロード / sync 完了後の再ロードの配線は合成ルートの責務としてここ (init) で束ねる。
     let coreSnapshot: CoreSnapshotManager
 
     // マスタ読み取りの実装群。
-    // いずれもスナップショットがロード済みなら共有コア (imas-core)、未ロード/ロード失敗/
-    // メモリ警告での破棄後は従来の GRDB 経路へ呼び出し単位でフォールバックする (スライス並走の原則)。
+    // どれも共有コア (imas-core) のスナップショットが答える。まだロードできていなければ
+    // ロードを待つ (OS 側の SQL へ落とす経路は持たない)。
     // CoreSnapshotManager を注入する必要があるので、これらだけ init で組み立てる。
 
     /// 楽曲マスタ読み取りの実装。
@@ -58,21 +56,18 @@ final class AppContainer: Sendable {
     private init() {
         let snapshot = CoreSnapshotManager()
         coreSnapshot = snapshot
-        songReading = CoreSongRepository(snapshot: snapshot, fallback: GRDBSongRepository(database: .shared))
+        songReading = CoreSongRepository(snapshot: snapshot, database: .shared)
         nowPlayingReading = CoreNowPlayingRepository(snapshot: snapshot)
-        idolReading = CoreIdolRepository(snapshot: snapshot, fallback: GRDBIdolRepository(database: .shared))
-        brandReading = CoreBrandRepository(snapshot: snapshot, fallback: GRDBBrandRepository(database: .shared))
-        unitReading = CoreUnitRepository(snapshot: snapshot, fallback: GRDBUnitRepository(database: .shared))
-        eventReading = CoreEventRepository(snapshot: snapshot, fallback: GRDBEventRepository(database: .shared))
-        showReading = CoreShowRepository(snapshot: snapshot, fallback: GRDBShowRepository(database: .shared))
-        calendarReading = CoreCalendarRepository(snapshot: snapshot, fallback: GRDBCalendarRepository(database: .shared))
-        statsReading = CoreStatsRepository(snapshot: snapshot, fallback: GRDBStatsRepository(database: .shared))
-        timelineReading = CoreTimelineRepository(snapshot: snapshot, fallback: GRDBTimelineRepository(database: .shared))
-        globalSearchReading = CoreGlobalSearchRepository(snapshot: snapshot, fallback: GRDBGlobalSearchRepository(database: .shared))
-        performanceEvidenceReading = CorePerformanceEvidenceRepository(
-            snapshot: snapshot,
-            fallback: GRDBPerformanceEvidenceRepository(database: .shared)
-        )
+        idolReading = CoreIdolRepository(snapshot: snapshot)
+        brandReading = CoreBrandRepository(snapshot: snapshot)
+        unitReading = CoreUnitRepository(snapshot: snapshot)
+        eventReading = CoreEventRepository(snapshot: snapshot, database: .shared)
+        showReading = CoreShowRepository(snapshot: snapshot, database: .shared)
+        calendarReading = CoreCalendarRepository(snapshot: snapshot, database: .shared)
+        statsReading = CoreStatsRepository(snapshot: snapshot)
+        timelineReading = CoreTimelineRepository(snapshot: snapshot)
+        globalSearchReading = CoreGlobalSearchRepository(snapshot: snapshot)
+        performanceEvidenceReading = CorePerformanceEvidenceRepository(snapshot: snapshot)
 
         // ローカル編集 (モデレーターの .applied 経路やセトリ取込) は CloudKit sync を通らず
         // GRDB へ直接 upsert されるため、.masterDataDidSync だけではスナップショットが
@@ -84,21 +79,13 @@ final class AppContainer: Sendable {
         idolWriting = SnapshotInvalidatingIdolWriting(base: GRDBIdolWriting(database: .shared), invalidate: invalidate)
         songWriting = SnapshotInvalidatingSongWriting(base: GRDBSongWriting(database: .shared), invalidate: invalidate)
 
-        // 起動時ロード。上の GRDB フォールバック生成 (`.shared` 参照) が AppDatabase.shared を
-        // 先に初期化しており (Bundle DB → Documents コピー含む)、この時点で master.sqlite は存在する。
-        // 失敗しても未ロードのまま GRDB が答え続けるので起動は塞がない。
+        // 起動時ロード。上の `.shared` 参照が DB を開き終えている (Bundle DB → Documents コピー含む)
+        // ので、この時点で master.sqlite は存在する。ロードが終わるまでの読み取りは、ロードを待つ。
         snapshot.requestLoad()
 
         // CloudKit sync がローカルのマスタを書き換えたら読み直す (新スナップショットへ原子的に差し替え)。
         NotificationCenter.default.addObserver(forName: .masterDataDidSync, object: nil, queue: nil) { _ in
             snapshot.requestLoad()
-        }
-        // メモリ警告でスナップショットを手放す (以後は GRDB へフォールバック。
-        // 次の sync 完了 or アプリ再起動の requestLoad で復帰する)。
-        NotificationCenter.default.addObserver(
-            forName: UIApplication.didReceiveMemoryWarningNotification, object: nil, queue: nil
-        ) { _ in
-            snapshot.unload()
         }
     }
 

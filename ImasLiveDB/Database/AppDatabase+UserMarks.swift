@@ -208,11 +208,6 @@ extension AppDatabase {
         return try dbQueue.read { db in try Self.fetchSongIdsWithAnyArtistQuery(db, idolIds: idolIds) }
     }
 
-    func fetchSongIdsWithAnyArtistAsync(idolIds: Set<String>) async throws -> Set<String> {
-        guard !idolIds.isEmpty else { return [] }
-        return try await dbQueue.read { db in try Self.fetchSongIdsWithAnyArtistQuery(db, idolIds: idolIds) }
-    }
-
     private static func fetchSongIdsWithAnyArtistQuery(_ db: Database, idolIds: Set<String>) throws -> Set<String> {
         let placeholders = idolIds.map { _ in "?" }.joined(separator: ",")
         let sql = "SELECT DISTINCT song_id FROM song_artists WHERE role='original' AND idol_id IN (\(placeholders))"
@@ -231,38 +226,6 @@ extension AppDatabase {
             x.performerIdols = perfMap[song.id] ?? []
             return x
         }
-    }
-
-    /// (async) 現地回収回数マップ取得。cooperative thread pool をブロックしない。
-    func fetchSongCollectedCountsAsync() async throws -> [String: Int] {
-        let condition = attendedTypeCondition
-        return try await dbQueue.read { db in try Self.fetchSongCollectedCountsQuery(db, attendedTypeCondition: condition) }
-    }
-
-    private static func fetchSongCollectedCountsQuery(_ db: Database, attendedTypeCondition: String) throws -> [String: Int] {
-        let sql = """
-            SELECT si.song_id AS song_id, COUNT(DISTINCT si.show_id) AS cnt
-            FROM setlist_items si
-            JOIN shows sh ON sh.id = si.show_id
-            JOIN events e ON e.id = sh.event_id
-            WHERE e.kind IN (\(Self.realLiveKinds))
-            AND (
-                si.show_id IN (\(Self.attendedIdsSubquery(.show, attendedTypeCondition)))
-                OR si.show_id IN (
-                    SELECT id FROM shows
-                    WHERE event_id IN (\(Self.attendedIdsSubquery(.event, attendedTypeCondition)))
-                )
-            )
-            GROUP BY si.song_id
-            """
-        let rows = try Row.fetchAll(db, sql: sql)
-        var m: [String: Int] = [:]
-        for row in rows {
-            let sid: String = row["song_id"]
-            let cnt: Int = row["cnt"] ?? 0
-            m[sid] = cnt
-        }
-        return m
     }
 
     /// 回収に配信参加も含めるユーザー設定 (既定=現地のみ)。地方勢など配信中心の人向け。

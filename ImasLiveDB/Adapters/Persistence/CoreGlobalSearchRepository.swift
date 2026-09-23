@@ -1,15 +1,12 @@
 import Foundation
 
 /// `GlobalSearchReading` ポートの共有コア (imas-core インメモリスナップショット) アダプタ。
-///
-/// 呼び出し単位でスナップショットの有無を見て切り替える (スライス並走の原則)。
+/// スナップショットがまだなら、ロードを待ってから答える (`CoreSnapshotManager.withStore`)。
 struct CoreGlobalSearchRepository: GlobalSearchReading {
     let snapshot: CoreSnapshotManager
-    /// 未ロード時の受け皿 (Strangler の旧経路)。
-    let fallback: GRDBGlobalSearchRepository
 
     func search(query: String) async throws -> SearchResults {
-        try await snapshot.withStore(fallbackTo: { try await fallback.search(query: query) }) { store in
+        try await snapshot.withStore { store in
             // core が返すのはヒットした id 列 (各 20 件まで・rowid 順)。実体化はここで行う。
             let hits = try store.globalSearch(query: query)
             return SearchResults(
@@ -21,7 +18,7 @@ struct CoreGlobalSearchRepository: GlobalSearchReading {
     }
 
     func counts(query: String) async throws -> CrossTabSearchCounts? {
-        try await snapshot.withStore(fallbackTo: { try await fallback.counts(query: query) }) { store in
+        try await snapshot.withStore { store in
             let c = try store.searchCounts(query: query)
             return CrossTabSearchCounts(
                 songs: Int(c.songs), idols: Int(c.idols), events: Int(c.events))
@@ -29,9 +26,7 @@ struct CoreGlobalSearchRepository: GlobalSearchReading {
     }
 
     func eventSides(query: String, todayKey: String) async throws -> EventSearchSideCounts? {
-        try await snapshot.withStore(
-            fallbackTo: { try await fallback.eventSides(query: query, todayKey: todayKey) }
-        ) { store in
+        try await snapshot.withStore { store in
             let s = try store.eventSearchSides(query: query, todayKey: todayKey)
             return EventSearchSideCounts(upcoming: Int(s.upcoming), past: Int(s.past))
         }

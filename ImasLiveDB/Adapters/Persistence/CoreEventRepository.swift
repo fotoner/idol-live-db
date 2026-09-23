@@ -1,40 +1,32 @@
 import Foundation
-import GRDB
 
 /// `EventReading` ポートの共有コア (imas-core インメモリスナップショット) アダプタ。
-///
-/// 呼び出し単位でスナップショットの有無を見て切り替える (スライス並走の原則):
-/// - ロード済み → UniFFI 越しに `SnapshotStore` のクエリを呼ぶ
-/// - 未ロード / ロード失敗 / メモリ警告で破棄後 → 従来の `GRDBEventRepository` に委ねる
+/// スナップショットがまだなら、ロードを待ってから答える (`CoreSnapshotManager.withStore`)。
 ///
 /// FFI 形状の規約:
 /// - user_marks (参加マーク) はスナップショットに**含まれない**。参加系のクエリには、
-///   ここで GRDB から解決した参加 event/show id (と種別) を引数で渡す。
+///   ここで端末の DB から解決した参加 event/show id (と種別) を引数で渡す。
 struct CoreEventRepository: EventReading {
     let snapshot: CoreSnapshotManager
-    /// 未ロード時と未移送クエリの受け皿 (Strangler の旧経路)。
-    let fallback: GRDBEventRepository
-
-    private var database: AppDatabase { fallback.database }
+    /// 参加マーク (`user_marks`) の引き先。ユーザーデータはスナップショットに載らない。
+    let database: AppDatabase
 
     // MARK: - 一覧
 
     func events(brandId: String?) async throws -> [Event] {
-        try await snapshot.withStore(fallbackTo: { try await fallback.events(brandId: brandId) }) { store in
+        try await snapshot.withStore { store in
             try store.eventRecords(brandId: brandId).map(CoreRecordMapping.event(from:))
         }
     }
 
     func event(id: String) async throws -> Event? {
-        try await snapshot.withStore(fallbackTo: { try await fallback.event(id: id) }) { store in
+        try await snapshot.withStore { store in
             try store.eventRecord(id: id).map(CoreRecordMapping.event(from:))
         }
     }
 
     func eventsWithFirstDate(brandId: String?, includeEmpty: Bool, liveOnly: Bool, kinds: [EventKind]?) async throws -> [EventWithDate] {
-        try await snapshot.withStore(fallbackTo: {
-            try await fallback.eventsWithFirstDate(brandId: brandId, includeEmpty: includeEmpty, liveOnly: liveOnly, kinds: kinds)
-        }) { store in
+        try await snapshot.withStore { store in
             try store.eventsWithFirstDate(
                 brandId: brandId,
                 includeEmpty: includeEmpty,
@@ -51,9 +43,7 @@ struct CoreEventRepository: EventReading {
             // SQL 時代と同じく通常の一覧クエリに合流させる (kind 既定 = live + festival)。
             return try await eventsWithFirstDate(brandId: id, includeEmpty: includeEmpty, liveOnly: false, kinds: nil)
         case .year(let year):
-            return try await snapshot.withStore(fallbackTo: {
-                try await fallback.eventsWithDate(criterion: criterion, includeEmpty: includeEmpty)
-            }) { store in
+            return try await snapshot.withStore { store in
                 try store.eventsWithDateByYear(year: Int32(year), includeEmpty: includeEmpty)
                     .map(CoreRecordMapping.eventWithDate(from:))
             }
@@ -61,14 +51,14 @@ struct CoreEventRepository: EventReading {
     }
 
     func eventNames() async throws -> [String] {
-        try await snapshot.withStore(fallbackTo: { try await fallback.eventNames() }) { store in
+        try await snapshot.withStore { store in
             try store.eventNames()
         }
     }
 
     func eventsByIds(_ ids: [String]) async throws -> [EventWithDate] {
         guard !ids.isEmpty else { return [] }
-        return try await snapshot.withStore(fallbackTo: { try await fallback.eventsByIds(ids) }) { store in
+        return try await snapshot.withStore { store in
             try store.eventsWithDateByIds(ids: ids).map(CoreRecordMapping.eventWithDate(from:))
         }
     }
@@ -79,7 +69,7 @@ struct CoreEventRepository: EventReading {
     /// クエリとして持たせている。結果が id 昇順なのは元 SQL が DISTINCT のために
     /// PK 索引で走査していたからで、`limit` はその並びの先頭を取る。
     func searchEventsByNameOrVenue(query: String, limit: Int) async throws -> [Event] {
-        try await snapshot.withStore(fallbackTo: { try await fallback.searchEventsByNameOrVenue(query: query, limit: limit) }) { store in
+        try await snapshot.withStore { store in
             try store.searchEventsByNameOrVenue(query: query, limit: UInt32(max(0, limit)))
                 .map(CoreRecordMapping.event(from:))
         }
@@ -88,14 +78,14 @@ struct CoreEventRepository: EventReading {
     // MARK: - イベント詳細
 
     func eventStats(eventId: String) async throws -> EventStats {
-        try await snapshot.withStore(fallbackTo: { try await fallback.eventStats(eventId: eventId) }) { store in
+        try await snapshot.withStore { store in
             let record = try store.eventStats(eventId: eventId)
             return CoreRecordMapping.eventStats(from: record)
         }
     }
 
     func eventAttendance(eventId: String) async throws -> EventAttendance? {
-        try await snapshot.withStore(fallbackTo: { try await fallback.eventAttendance(eventId: eventId) }) { store in
+        try await snapshot.withStore { store in
             guard let record = try store.eventAttendance(eventId: eventId) else { return nil }
             // 母集団は sort_order 順の idol_id 列で返る。EventAttendance の grouped() は
             // brandIdols の並びを表示順としてそのまま使うので、順序を保って実体化する。
@@ -111,7 +101,7 @@ struct CoreEventRepository: EventReading {
     }
 
     func eventReleases(eventId: String) async throws -> [EventRelease] {
-        try await snapshot.withStore(fallbackTo: { try await fallback.eventReleases(eventId: eventId) }) { store in
+        try await snapshot.withStore { store in
             try store.eventReleases(eventId: eventId).map(CoreRecordMapping.eventRelease(from:))
         }
     }
@@ -119,7 +109,7 @@ struct CoreEventRepository: EventReading {
     // MARK: - 参加マーク由来 (user_marks はスナップショットに無い)
 
     func attendedEventsWithDate() async throws -> [EventWithDate] {
-        try await snapshot.withStore(fallbackTo: { try await fallback.attendedEventsWithDate() }) { store in
+        try await snapshot.withStore { store in
             let eventIds = try await database.fetchMarkedEntityIdsAsync(entity: .event, kind: .attended)
             let showIds = try await database.fetchMarkedEntityIdsAsync(entity: .show, kind: .attended)
             return try store.attendedEventsWithDate(attendedEventIds: eventIds, attendedShowIds: showIds)
@@ -128,7 +118,7 @@ struct CoreEventRepository: EventReading {
     }
 
     func attendedEventTypeSets() async throws -> (live: Set<String>, stream: Set<String>, liveViewing: Set<String>) {
-        try await snapshot.withStore(fallbackTo: { try await fallback.attendedEventTypeSets() }) { store in
+        try await snapshot.withStore { store in
             // 種別 (text_value) つきで渡す必要があるので id だけの取得 API では足りない。
             // 「種別なし = 現地扱い」の解釈は core 側が持つ (SQL 時代の default 分岐と同じ)。
             let eventMarks = try await attendanceMarks(entity: .event)

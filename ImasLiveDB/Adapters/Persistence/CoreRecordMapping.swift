@@ -417,24 +417,14 @@ enum CoreRecordMapping {
     }
 }
 
-// MARK: - core / GRDB の呼び出し単位フォールバック
+// MARK: - スナップショットで答える
 
 extension CoreSnapshotManager {
-    /// スナップショットがあれば core 経路、無ければ GRDB 経路。
-    /// core 実行中の `SnapshotError` (メモリ警告 unload との競合等) も GRDB に落とす。
-    /// それ以外のエラー (GRDB 側の失敗など) は従来どおり呼び出し元へ伝える。
+    /// ロード済みのスナップショットで `body` を実行する。まだロードできていなければ待つ。
     ///
-    /// 各 `Core*Repository` が同じ分岐を書くとフォールバック漏れが起きるので、
-    /// 切り替えの規則はここ 1 箇所に置く。
-    func withStore<T: Sendable>(
-        fallbackTo grdb: () async throws -> T,
-        _ body: (SnapshotStore) async throws -> T
-    ) async throws -> T {
-        guard let store = storeIfLoaded else { return try await grdb() }
-        do {
-            return try await body(store)
-        } catch is SnapshotError {
-            return try await grdb()
-        }
+    /// OS 側の SQL へ落とす経路は持たない。同じ問いに Rust と SQL の 2 つが答えていて、
+    /// 規則が食い違っていた (合同曲がブランド絞りに出ない・かなや幅を畳まない検索など)。
+    func withStore<T: Sendable>(_ body: (SnapshotStore) async throws -> T) async throws -> T {
+        try await body(try await loadedStore())
     }
 }

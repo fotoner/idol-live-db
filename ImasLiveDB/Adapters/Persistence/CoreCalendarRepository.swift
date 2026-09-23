@@ -3,7 +3,7 @@ import GRDB
 
 /// `CalendarReading` ポートの共有コア (imas-core インメモリスナップショット) アダプタ。
 ///
-/// 呼び出し単位でスナップショットの有無を見て切り替える (スライス並走の原則)。
+/// スナップショットがまだなら、ロードを待ってから答える (`CoreSnapshotManager.withStore`)。
 ///
 /// core が担うのは「表示範囲の絞り込み + 誕生日/記念日の年展開 + 並び替え」まで。
 /// 返るのは公演やチケットの素の値と、曲/アイドル/スタッフ/記念日の **id** だけなので、
@@ -13,13 +13,11 @@ import GRDB
 ///   GRDB から引く。どちらも数十件の小さなマスタなので全件読みで足りる。
 struct CoreCalendarRepository: CalendarReading {
     let snapshot: CoreSnapshotManager
-    /// 未ロード時の受け皿 (Strangler の旧経路)。
-    let fallback: GRDBCalendarRepository
-
-    private var database: AppDatabase { fallback.database }
+    /// スタッフと記念日の引き先 (スナップショットに載らない小さなマスタ)。
+    let database: AppDatabase
 
     func calendarEntries(in interval: DateInterval) async throws -> [CalendarEntry] {
-        try await snapshot.withStore(fallbackTo: { try await fallback.calendarEntries(in: interval) }) { store in
+        try await snapshot.withStore { store in
             let records = try store.calendarEntries(
                 startDay: Self.dayFormatter.string(from: interval.start),
                 endDay: Self.dayFormatter.string(from: interval.end)

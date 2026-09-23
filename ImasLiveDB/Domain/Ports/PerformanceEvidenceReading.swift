@@ -7,9 +7,7 @@ import Foundation
 /// 全セトリ・全出演者を横断した集計を返す。同じポートに混ぜると、楽曲 1 件を
 /// 引きたいだけの呼び出し側にも集計の都合 (件数上限・分母の単位) が漏れる。
 ///
-/// 実装は 2 つあり、どちらも同じ数え方をする:
-/// - `Adapters/Persistence/CorePerformanceEvidenceRepository` (共有コアのスナップショット)
-/// - `Adapters/Persistence/GRDBPerformanceEvidenceRepository` (SQL)
+/// 実装は `Adapters/Persistence/CorePerformanceEvidenceRepository` (共有コアのスナップショット)。
 ///
 /// ⚠️ Domain 規約: このファイルは `SwiftUI` / `GRDB` / `CloudKit` を import しない。
 protocol PerformanceEvidenceReading: Sendable {

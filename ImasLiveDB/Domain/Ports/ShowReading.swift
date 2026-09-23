@@ -3,7 +3,7 @@ import Foundation
 /// 公演 (Show) / セットリストの読み取りポート (driven port)。
 ///
 /// Presentation はこのポートに依存し、永続化の具象 (`AppDatabase` / GRDB) を知らない。
-/// 実装は `Adapters/Persistence/GRDBShowRepository`。
+/// 実装は `Adapters/Persistence/CoreShowRepository` (共有コアのスナップショット)。
 ///
 /// ⚠️ Domain 規約: このファイルは `SwiftUI` / `GRDB` / `CloudKit` を import しない。
 protocol ShowReading: Sendable {
