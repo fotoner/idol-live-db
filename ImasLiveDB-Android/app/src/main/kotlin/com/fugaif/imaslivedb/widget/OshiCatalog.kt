@@ -1,6 +1,7 @@
 package com.fugaif.imaslivedb.widget
 
 import android.content.Context
+import android.util.Log
 import com.fugaif.imaslivedb.data.image.CustomImageStore
 import com.fugaif.imaslivedb.data.image.GalleryKind
 import com.fugaif.imaslivedb.di.AppModule
@@ -36,6 +37,8 @@ data class OshiCandidate(
  */
 object OshiCatalog {
 
+    private const val TAG = "OshiCatalog"
+
     /**
      * 画像を持つアイドルを、ブランド順 → アイドルの sort_order 順で返す
      * (iOS `WidgetImageBridge` の並びと同じ。ピッカーで探しやすい順)。
@@ -45,8 +48,11 @@ object OshiCatalog {
         if (ids.isEmpty()) return@withContext emptyList()
 
         val module = AppModule.from(context)
-        val idols = module.idolRepository.fetchIdolsByIds(ids)
-        val brands = module.statsRepository.fetchBrands().associateBy { it.id }
+        // 設定画面は DatabaseBoot を通らずに開かれるので、マスタを読めない (スナップショットの
+        // 読み込み失敗・DB の移行中など) ことがある。落とさず候補を空にする (ほかのウィジェットと同じ)。
+        val (idols, brands) = runCatching {
+            module.idolRepository.fetchIdolsByIds(ids) to module.statsRepository.fetchBrands().associateBy { it.id }
+        }.onFailure { Log.w(TAG, "担当画像の候補を読めない", it) }.getOrNull() ?: return@withContext emptyList()
 
         idols.sortedWith(
             compareBy(
