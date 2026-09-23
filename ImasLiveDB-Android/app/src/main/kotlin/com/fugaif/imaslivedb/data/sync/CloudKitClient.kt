@@ -2,11 +2,18 @@ package com.fugaif.imaslivedb.data.sync
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+
+/** CloudKit のレコードを取る口。同期エンジンのテストではフェイクに差し替える。 */
+fun interface CloudKitRecordSource {
+    /** [recordType] の modifiedSinceMs より後の変更を全ページ取る (レコードの生 JSON)。 */
+    suspend fun query(recordType: String, modifiedSinceMs: Long): List<String>
+}
 
 /**
  * CloudKit Web Services の public DB を read-only で叩く最小クライアント。
@@ -18,18 +25,22 @@ import java.net.URL
  * 投稿の createdAt も同期のたび現在時刻に化ける。
  * transport (HTTP・ページング・serverErrorCode の除去) だけがこのクラスの責務。
  */
-class CloudKitClient {
+class CloudKitClient : CloudKitRecordSource {
 
     private val queryUrl: String
         get() = "${CloudKitConfig.BASE}/database/1/${CloudKitConfig.CONTAINER}/" +
             "${CloudKitConfig.ENV}/public/records/query?ckAPIToken=${CloudKitConfig.API_TOKEN}"
 
-    /** 指定 recordType を modifiedSinceMs より後の変更だけ全ページ取得する (生 JSON のまま)。 */
-    suspend fun query(recordType: String, modifiedSinceMs: Long): List<String> =
+    /**
+     * 指定 recordType を modifiedSinceMs より後の変更だけ全ページ取得する (生 JSON のまま)。
+     * 1 ページの通信 (HttpURLConnection) は途中で止められないので、取り消しはページの間で拾う。
+     */
+    override suspend fun query(recordType: String, modifiedSinceMs: Long): List<String> =
         withContext(Dispatchers.IO) {
             val out = ArrayList<String>()
             var cursor: String? = null
             do {
+                ensureActive()
                 val page = queryPage(recordType, modifiedSinceMs, cursor)
                 out.addAll(page.recordJsons)
                 cursor = page.continuationMarker

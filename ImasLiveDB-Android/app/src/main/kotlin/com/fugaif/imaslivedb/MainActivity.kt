@@ -55,8 +55,8 @@ class MainActivity : ComponentActivity() {
                     // 初回 (データ無し) は seed DB を投入してから判定する。これで CloudKit token
                     // 未設定でも実データで起動できる (token はリリース版の最新化のためだけ)。
                     hasData = sync.ensureLocalData()
-                    // データありなら即UI表示してバックグラウンド差分同期。
-                    sync.sync()
+                    // データありなら即UI表示してバックグラウンド差分同期 (アプリのスコープで走る)。
+                    sync.requestSync()
                 }
                 val ready = hasData == true || state is CloudKitSyncEngine.SyncState.Completed
                 if (ready) {

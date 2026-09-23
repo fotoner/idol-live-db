@@ -402,7 +402,6 @@ private fun SettingsNavRow(label: String, onClick: () -> Unit) {
 @Composable
 private fun DataSyncSection() {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val engine = remember { AppModule.from(context).syncEngine }
     val state by engine.state.collectAsState()
     val syncing = state is CloudKitSyncEngine.SyncState.Syncing
@@ -427,10 +426,10 @@ private fun DataSyncSection() {
         modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        TextButton(onClick = { scope.launch { engine.sync() } }, enabled = !syncing) {
+        TextButton(onClick = { engine.requestSync() }, enabled = !syncing) {
             Text("差分更新")
         }
-        TextButton(onClick = { scope.launch { engine.syncFull() } }, enabled = !syncing) {
+        TextButton(onClick = { engine.requestFullSync() }, enabled = !syncing) {
             Text("全データ同期")
         }
     }

@@ -199,7 +199,7 @@ class IdolListViewModel(app: Application) : AndroidViewModel(app) {
     fun refresh() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isRefreshing = true)
-            runCatching { syncEngine.sync() }
+            runCatching { syncEngine.requestSync().await() }
             load()
             refreshMarks()
             _uiState.value = _uiState.value.copy(isRefreshing = false)

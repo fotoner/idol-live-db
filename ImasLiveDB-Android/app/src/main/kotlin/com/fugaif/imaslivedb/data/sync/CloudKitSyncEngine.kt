@@ -4,6 +4,14 @@ import android.content.Context
 import android.util.Log
 import com.fugaif.imaslivedb.data.db.AppDatabase
 import com.fugaif.imaslivedb.data.db.dao.SyncDao
+import com.fugaif.imaslivedb.data.core.SQLITE_IN_CHUNK
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +29,7 @@ import uniffi.imas_core.syncStepStartPlan
 import uniffi.imas_core.syncStepsInOrder
 import uniffi.imas_core.syncSupportsOrphanCleanup
 import uniffi.imas_core.syncTableInfo
+import kotlin.coroutines.coroutineContext
 import kotlin.math.roundToLong
 
 /**
@@ -36,11 +45,25 @@ import kotlin.math.roundToLong
  *  - 定期フル再取得 (iOS 24h) が無い → fullSyncIntervalSeconds=null
  *  - cursor の概念が無い ([CloudKitClient] が continuationMarker を内部で使い切る)
  */
-class CloudKitSyncEngine(context: Context, private val db: AppDatabase) {
+class CloudKitSyncEngine(
+    context: Context,
+    private val db: AppDatabase,
+    private val source: CloudKitRecordSource = CloudKitClient(),
+    /**
+     * 同期を走らせるアプリ寿命のスコープ。画面のスコープで走らせると、画面を離れたり
+     * 回したりしただけで途中で止まる。
+     */
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+    private val dao: SyncDao = db.syncDao(),
+    private val isConfigured: () -> Boolean = { CloudKitConfig.isConfigured },
+) {
 
     private val appContext = context.applicationContext
-    private val client = CloudKitClient()
     private val prefs = appContext.getSharedPreferences("imas_sync", Context.MODE_PRIVATE)
+
+    /** 実行中の同期。同時に 2 本走らせない (取得の重複と、結果の上書き合いを防ぐ)。 */
+    private var running: Deferred<Unit>? = null
+    private val runningLock = Any()
 
     private val _state = MutableStateFlow<SyncState>(SyncState.Idle)
     val state: StateFlow<SyncState> = _state.asStateFlow()
@@ -70,66 +93,72 @@ class CloudKitSyncEngine(context: Context, private val db: AppDatabase) {
         val localIds: (suspend (SyncDao) -> List<String>)? = null
     )
 
-    private fun singlePk(keys: List<List<String>>): List<String> = keys.map { it[0] }
+    /**
+     * 単一 PK の DELETE を、バインド変数の上限 (Android 11 以前の SQLite は 999) を
+     * 跨がないよう分けて撃つ。孤児の掃除は数千件になりうる。
+     */
+    private suspend fun deleteInChunks(keys: List<List<String>>, delete: suspend (List<String>) -> Unit) {
+        for (chunk in keys.map { it[0] }.chunked(SQLITE_IN_CHUNK)) delete(chunk)
+    }
 
     private val stepIo: Map<String, StepIo> = mapOf(
         "Brand" to StepIo(
             { d, rows, _ -> d.upsertBrands(SyncMappers.brands(rows)) },
-            { d, keys -> d.deleteBrands(singlePk(keys)) },
+            { d, keys -> deleteInChunks(keys, d::deleteBrands) },
             { d -> d.brandIds() }),
         "Idol" to StepIo(
             // voiceActors はコアの行に載らない (声優は履歴テーブルが正) が、Room の upsert は
             // 行を丸ごと置換するので、生レコードから拾い直して渡さないと CV が消える。
             { d, rows, jsons -> d.upsertIdols(SyncMappers.idols(rows, SyncMappers.voiceActorsById(jsons))) },
-            { d, keys -> d.deleteIdols(singlePk(keys)) },
+            { d, keys -> deleteInChunks(keys, d::deleteIdols) },
             { d -> d.idolIds() }),
         "Event" to StepIo(
             { d, rows, _ -> d.upsertEvents(SyncMappers.events(rows)) },
-            { d, keys -> d.deleteEvents(singlePk(keys)) },
+            { d, keys -> deleteInChunks(keys, d::deleteEvents) },
             { d -> d.eventIds() }),
         "ImasUnit" to StepIo(
             { d, rows, _ -> d.upsertUnits(SyncMappers.units(rows)) },
-            { d, keys -> d.deleteUnits(singlePk(keys)) },
+            { d, keys -> deleteInChunks(keys, d::deleteUnits) },
             { d -> d.unitIds() }),
         // 会場は Show より前に取り込む (shows.venue_id が参照する)。順序はコアの FK 依存順が正。
         "Venue" to StepIo(
             { d, rows, _ -> d.upsertVenues(SyncMappers.venues(rows)) },
-            { d, keys -> d.deleteVenues(singlePk(keys)) },
+            { d, keys -> deleteInChunks(keys, d::deleteVenues) },
             { d -> d.venueIds() }),
         "Creator" to StepIo(
             { d, rows, _ -> d.upsertCreators(SyncMappers.creators(rows)) },
-            { d, keys -> d.deleteCreators(singlePk(keys)) },
+            { d, keys -> deleteInChunks(keys, d::deleteCreators) },
             { d -> d.creatorIds() }),
         "UnitVersion" to StepIo(
             { d, rows, _ -> d.upsertUnitVersions(SyncMappers.unitVersions(rows)) },
-            { d, keys -> d.deleteUnitVersions(singlePk(keys)) },
+            { d, keys -> deleteInChunks(keys, d::deleteUnitVersions) },
             { d -> d.unitVersionIds() }),
         "Costume" to StepIo(
             { d, rows, _ -> d.upsertCostumes(SyncMappers.costumes(rows)) },
-            { d, keys -> d.deleteCostumes(singlePk(keys)) },
+            { d, keys -> deleteInChunks(keys, d::deleteCostumes) },
             { d -> d.costumeIds() }),
         "CostumeWear" to StepIo(
             { d, rows, _ -> d.upsertCostumeWears(SyncMappers.costumeWears(rows)) },
-            { d, keys -> d.deleteCostumeWears(singlePk(keys)) },
+            { d, keys -> deleteInChunks(keys, d::deleteCostumeWears) },
             { d -> d.costumeWearIds() }),
         "VenueName" to StepIo(
             { d, rows, _ -> d.upsertVenueNames(SyncMappers.venueNames(rows)) },
-            { d, keys -> d.deleteVenueNames(singlePk(keys)) },
+            { d, keys -> deleteInChunks(keys, d::deleteVenueNames) },
             { d -> d.venueNameIds() }),
         "VenueHall" to StepIo(
             { d, rows, _ -> d.upsertVenueHalls(SyncMappers.venueHalls(rows)) },
-            { d, keys -> d.deleteVenueHalls(singlePk(keys)) },
+            { d, keys -> deleteInChunks(keys, d::deleteVenueHalls) },
             { d -> d.venueHallIds() }),
         "IdolBrand" to StepIo(
             { d, rows, _ -> d.upsertIdolBrands(SyncMappers.idolBrands(rows)) },
             { d, keys -> keys.forEach { d.deleteIdolBrand(it[0], it[1]) } }),
         "Show" to StepIo(
             { d, rows, _ -> d.upsertShows(SyncMappers.shows(rows)) },
-            { d, keys -> d.deleteShows(singlePk(keys)) },
+            { d, keys -> deleteInChunks(keys, d::deleteShows) },
             { d -> d.showIds() }),
         "Song" to StepIo(
             { d, rows, _ -> d.upsertSongs(SyncMappers.songs(rows)) },
-            { d, keys -> d.deleteSongs(singlePk(keys)) },
+            { d, keys -> deleteInChunks(keys, d::deleteSongs) },
             { d -> d.songIds() }),
         "UnitMember" to StepIo(
             { d, rows, _ -> d.upsertUnitMembers(SyncMappers.unitMembers(rows)) },
@@ -143,7 +172,7 @@ class CloudKitSyncEngine(context: Context, private val db: AppDatabase) {
             { d, keys -> keys.forEach { d.deleteShowCast(it[0], it[1]) } }),
         "SetlistItem" to StepIo(
             { d, rows, _ -> d.upsertSetlistItems(SyncMappers.setlistItems(rows)) },
-            { d, keys -> d.deleteSetlistItems(singlePk(keys)) },
+            { d, keys -> deleteInChunks(keys, d::deleteSetlistItems) },
             { d -> d.setlistItemIds() }),
         "SetlistPerformer" to StepIo(
             { d, rows, _ -> d.upsertSetlistPerformers(SyncMappers.setlistPerformers(rows)) },
@@ -151,13 +180,13 @@ class CloudKitSyncEngine(context: Context, private val db: AppDatabase) {
         // Phase 6: コミュニティコンテンツ (songs に依存)
         "SongVideo" to StepIo(
             { d, rows, _ -> d.upsertSongVideos(SyncMappers.songVideos(rows)) },
-            { d, keys -> d.deleteSongVideos(singlePk(keys)) },
+            { d, keys -> deleteInChunks(keys, d::deleteSongVideos) },
             { d -> d.songVideoIds() }),
         // 公演のチケット価格。shows にだけ依存するので、公演が入った後ならいつでもよい
         // (コアの STEPS_IN_FK_ORDER と同じ理由づけ)。
         "ShowTicket" to StepIo(
             { d, rows, _ -> d.upsertShowTickets(SyncMappers.showTickets(rows)) },
-            { d, keys -> d.deleteShowTickets(singlePk(keys)) },
+            { d, keys -> deleteInChunks(keys, d::deleteShowTickets) },
             { d -> d.showTicketIds() }),
     )
 
@@ -251,7 +280,7 @@ class CloudKitSyncEngine(context: Context, private val db: AppDatabase) {
     private val steps: List<SyncStep> by lazy { syncStepsInOrder(stepIo.keys.toList()) }
 
     /** ローカルに既にデータがあるか (初回判定用)。 */
-    suspend fun hasData(): Boolean = db.syncDao().brandCount() > 0
+    suspend fun hasData(): Boolean = dao.brandCount() > 0
 
     /**
      * 起動時のローカルデータ準備: DB が空なら seed (assets/master_seed.sqlite) を投入する。
@@ -269,29 +298,43 @@ class CloudKitSyncEngine(context: Context, private val db: AppDatabase) {
     }
 
     /**
-     * 全データ同期。差分の起点を捨ててから [sync] に入る (コアの startup_plan は
-     * `lastSyncEpoch = None` を「フルで取り直す」と読む)。
+     * 差分同期 (初回 lastSync 無し → 全件) を頼む。
+     *
+     * 実行中ならその実行をそのまま返す (取得を 2 回走らせない)。実行はアプリのスコープで
+     * 行うので、呼んだ画面が消えても止まらない。終わりを待ちたい呼び出し側は await する。
+     */
+    fun requestSync(): Deferred<Unit> = start(full = false)
+
+    /**
+     * 全データ同期を頼む。差分の起点を捨ててから走る (コアの startup_plan は
+     * `lastSyncEpoch = None` を「フルで取り直す」と読む)。実行中の同期があれば、それが
+     * 終わってから走る。
      *
      * 設定画面から手で走らせるためのもの。増分は「サーバ側で消えたレコード」を
      * 落とせない (孤児掃除はフルでしか走らない) ので、表示がおかしくなったときの
      * 最後の手段としてユーザーが自分で叩ける口が要る。
      * backfill 済みの印も一緒に捨てる。全件取り直すなら判定し直すのが正しい。
      */
-    suspend fun syncFull() {
-        prefs.edit().remove(KEY_LAST_SYNC).remove(KEY_BACKFILLED).apply()
-        sync()
+    fun requestFullSync(): Deferred<Unit> = start(full = true)
+
+    private fun start(full: Boolean): Deferred<Unit> = synchronized(runningLock) {
+        val current = running?.takeIf { it.isActive }
+        if (current != null && !full) return current
+        scope.async {
+            current?.join()
+            if (full) prefs.edit().remove(KEY_LAST_SYNC).remove(KEY_BACKFILLED).apply()
+            runSync()
+        }.also { running = it }
     }
 
-    /** 差分同期 (初回 lastSync 無し → 全件)。 */
-    suspend fun sync() {
-        if (!CloudKitConfig.isConfigured) {
+    private suspend fun runSync() {
+        if (!isConfigured()) {
             // token 未設定でもエラーにしない: seed DB の実データで継続する (最新化だけ行わない)。
             // 主にコントリビューターのローカルビルド向け。リリース版は token を注入する。
             Log.i(TAG, "CloudKit API token 未設定 → 同期スキップ (seed/既存DBで継続)")
             _state.value = SyncState.Idle
             return
         }
-        val dao = db.syncDao()
         val startMs = System.currentTimeMillis()
         var total = 0
         try {
@@ -319,6 +362,7 @@ class CloudKitSyncEngine(context: Context, private val db: AppDatabase) {
             val backfilled = (prefs.getStringSet(KEY_BACKFILLED, emptySet()) ?: emptySet()).toMutableSet()
 
             steps.forEachIndexed { i, step ->
+                coroutineContext.ensureActive()
                 _state.value = SyncState.Syncing(i + 1, steps.size, step.displayName)
                 val io = stepIo.getValue(step.recordType)
                 val isBackfill = needsBackfill(step.recordType, dao, backfilled)
@@ -335,7 +379,7 @@ class CloudKitSyncEngine(context: Context, private val db: AppDatabase) {
                 // 公演・楽曲・セトリまで丸ごと取り込まれず、Completed も流れない
                 // (= スナップショットも作り直されない)。本物の失敗は従来どおり実行を止める。
                 val recordJsons = try {
-                    client.query(step.recordType, stepStart.startEpoch.toEpochMillis())
+                    source.query(step.recordType, stepStart.startEpoch.toEpochMillis())
                 } catch (e: CloudKitQueryException) {
                     if (!e.isUnknownRecordType) throw e
                     Log.w(TAG, "${step.recordType}: レコードタイプ未作成 → スキップ (${e.serverErrorCode}: ${e.reason})")
@@ -408,6 +452,10 @@ class CloudKitSyncEngine(context: Context, private val db: AppDatabase) {
             // スナップショットを再ロードしており、0 件同期でも state は必ず進める必要がある。
             _state.value = SyncState.Completed(total)
             Log.i(TAG, "sync complete: total=$total, lastSync→${completion.lastSyncEpochToSave}")
+        } catch (e: CancellationException) {
+            // 取り消しは失敗ではない。Error にすると、別の実行が出した結果を上書きしてしまう。
+            if (_state.value is SyncState.Syncing) _state.value = SyncState.Idle
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "sync failed", e)
             _state.value = SyncState.Error(e.message ?: "同期に失敗しました")
