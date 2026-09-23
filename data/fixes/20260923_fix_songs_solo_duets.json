@@ -3,7 +3,7 @@
  "author": "Claude (オーナー依頼: Decided がソロ扱い)",
  "source": [
   "derived:songs.singer_label と song_artists(role=original) の人数",
-  "THE IDOLM@STER LIVE THE@TER DREAMERS 01〜03 の CD クレジット"
+  "THE IDOLM@STER LIVE THE@TER DREAMERS 02〜06 の CD クレジット"
  ],
  "_help": "solo なのに原唱者が 2 人以上、または singer_label が複数人/ユニット名のものを洗い出した。双海亜美／真美 (1 枠として歌う) と、リミックス盤のアルバムアーティスト表記 (765PRO ALLSTARS) だけのものは solo のまま",
  "fixes": [
