@@ -117,6 +117,18 @@ describe("POST /auth/login", () => {
     expect(res.body.isAdmin).toBe(true);
   });
 
+  it("users の行は upsert のあと 1 回だけ読む (表示名と admin の判定を同じ行で済ませる)", async () => {
+    await insertUser("apple-1", { displayName: "りん", isAdmin: true });
+    const m = meterD1();
+    const res = await callJson("POST", "/auth/login", {
+      body: { identity_token: await appleToken("apple-1") },
+      env: makeEnv({ DB: m.db }),
+    });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ uid: "apple-1", displayName: "りん", isAdmin: true });
+    expect(m.usage.log.filter((l) => /^SELECT .*FROM users/.test(l.sql))).toHaveLength(1);
+  });
+
   it("IP ごとに 1 日 500 回まで。超えると 429 と使用量", async () => {
     await exec(
       "INSERT INTO rate_limits (user_id, date, action, count) VALUES (?, ?, 'auth_login', 500)",

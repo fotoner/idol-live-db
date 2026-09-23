@@ -12,7 +12,7 @@ import {
   SESSION_JWT_ISSUER, SESSION_JWT_TTL_SECONDS,
 } from "../auth";
 import { checkRateLimit } from "../rate_limit";
-import { upsertUser, checkIsAdmin, isAllowlistedAdmin } from "../users";
+import { upsertUser, isAllowlistedAdmin } from "../users";
 import type { RouteContext } from "./context";
 import { clientIp } from "./guards";
 
@@ -67,13 +67,14 @@ export async function handleAuth(ctx: RouteContext): Promise<Response | null> {
     // (Apple はクライアント供給の displayName に頼る既存挙動を維持)。
     await upsertUser(env, verified.uid, verified.name ?? displayName, verified.picture);
     const sessionToken = await signSessionToken(verified.uid, env.SESSION_JWT_SECRET);
-    const isAdmin = await checkIsAdmin(env, verified.uid);
     // 再ログイン時 Apple は fullName を初回認可時しか返さないため、クライアントは
     // 自前で表示名を復元できない。upsert 後の正準 display_name を返し、クライアントが
     // userName を即復元できるようにする (これが無いと再ログイン直後に表示名が空になる)。
-    const dbRow = await env.DB.prepare("SELECT display_name FROM users WHERE id = ?")
+    // admin の判定も、この行の is_admin と env の許可リストで済ませる (同じ行を読み直さない)。
+    const dbRow = await env.DB.prepare("SELECT display_name, is_admin FROM users WHERE id = ?")
       .bind(verified.uid)
-      .first<{ display_name: string }>();
+      .first<{ display_name: string; is_admin: number }>();
+    const isAdmin = isAllowlistedAdmin(env, verified.uid) || !!dbRow?.is_admin;
     return json({
       sessionToken,
       uid: verified.uid,
