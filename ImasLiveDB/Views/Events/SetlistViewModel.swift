@@ -34,6 +34,8 @@ final class SetlistViewModel {
     /// セトリ 1 行ぶんの添え物 (名義・ユニットのチップ・全員・何回目・いつぶり)。
     /// **中身を決めるのは imas-core。**
     private(set) var rowMetaByItemId: [String: SetlistRowMetaRecord] = [:]
+    /// `rowMetaByItemId` がどの公演の答えか。
+    private var rowMetaShowId: String?
     /// 公演の頭に出す「自分の回収」の要約。**出すかどうかも文言も imas-core が決める。**
     private(set) var collectionSummary: ShowCollectionRecord?
     /// 会場マスタ。当時名とキャパの解決に使う。
@@ -85,10 +87,15 @@ final class SetlistViewModel {
                 showId: showId, nameMode: nameMode, displayMode: displayMode)
             rowMetaByItemId = Dictionary(uniqueKeysWithValues: bundle.rows.map { ($0.itemId, $0) })
             collectionSummary = bundle.collection
+            rowMetaShowId = showId
         } catch {
             Logger.database.error("load_failed setlist_row_meta: \(error.localizedDescription)")
+            // 同じ公演の読み直し (設定の切り替え等) で落ちたときは、前の答えを残す。
+            // 消すと区切りの見出しが全部「本編」に潰れ、落ちたことが画面の形の変化として出る。
+            guard rowMetaShowId != showId else { return }
             rowMetaByItemId = [:]
             collectionSummary = nil
+            rowMetaShowId = nil
         }
     }
 

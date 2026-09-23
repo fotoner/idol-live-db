@@ -19,6 +19,7 @@ final class SetlistViewModelTests: XCTestCase {
         var failPerformers = false
         var failCostumes = false
         var ticketsToReturn: [ShowTicket] = []
+        var rowMetaAnswers = RowMetaAnswers()
 
         func setlist(showId: String) async throws -> [SetlistRow] {
             if failSetlist { throw FakeError.boom }
@@ -42,7 +43,10 @@ final class SetlistViewModelTests: XCTestCase {
         func latestShow() async throws -> Show? { nil }
         func setlistRowMeta(
             showId: String, nameMode: PerformerNameMode, displayMode: SetlistDisplayMode
-        ) async throws -> SetlistRowMetaBundle { throw FakeError.notUsed }
+        ) async throws -> SetlistRowMetaBundle {
+            guard let bundle = rowMetaAnswers.next() else { throw FakeError.boom }
+            return bundle
+        }
         func showIdolIds(showId: String) async throws -> Set<String> { [] }
         func shows(criterion: ShowFilterCriterion) async throws -> [Show] { [] }
         func allShows(limit: Int) async throws -> [ShowWithEventName] { [] }
@@ -186,6 +190,38 @@ final class SetlistViewModelTests: XCTestCase {
         vm.setLike(songId: "s1", likeCount: 3, hasUserLiked: true)
         XCTAssertEqual(vm.likesBySongId["s1"]?.likeCount, 3)
         XCTAssertEqual(vm.likesBySongId["s1"]?.hasUserLiked, true)
+    }
+
+    /// 同じ公演の読み直しが落ちても、区切りの見出しは前の答えのまま残る。
+    /// 別の公演に移って落ちたときは、前の公演の答えを持ち越さない。
+    func testRowMetaReloadFailureKeepsTheSectionHeadings() async {
+        let shows = FakeShowReading(rows: [row("i1", song: "s1")])
+        shows.rowMetaAnswers.queue([SetlistRowMetaBundle(rows: [meta("i1", heading: "アンコール")], collection: nil)])
+        let vm = makeVM(shows: shows)
+
+        await vm.loadRowMeta(showId: "sh1", nameMode: .idolOnly, displayMode: .normal)
+        await vm.loadRowMeta(showId: "sh1", nameMode: .castOnly, displayMode: .normal)
+        XCTAssertEqual(vm.rowMetaByItemId["i1"]?.sectionHeading, "アンコール")
+
+        await vm.loadRowMeta(showId: "sh2", nameMode: .idolOnly, displayMode: .normal)
+        XCTAssertTrue(vm.rowMetaByItemId.isEmpty)
+    }
+
+    private func meta(_ itemId: String, heading: String) -> SetlistRowMetaRecord {
+        SetlistRowMetaRecord(
+            itemId: itemId, performerLabel: nil, unitNames: [], isFullCast: false, ordinal: 1,
+            ordinalLabel: "", isFirstPerformance: false, previousDate: nil, sinceLabel: nil,
+            noteGroups: [], sectionHeading: heading, startsSection: true, lineup: nil)
+    }
+}
+
+/// 行の添え物の答えを順に返す。尽きたら失敗扱い。
+private final class RowMetaAnswers: @unchecked Sendable {
+    private let lock = NSLock()
+    private var answers: [SetlistRowMetaBundle] = []
+    func queue(_ bundles: [SetlistRowMetaBundle]) { lock.withLock { answers = bundles } }
+    func next() -> SetlistRowMetaBundle? {
+        lock.withLock { answers.isEmpty ? nil : answers.removeFirst() }
     }
 }
 
