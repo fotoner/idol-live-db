@@ -57,9 +57,15 @@ Node の polyfill と挙動が割れる事故 (署名検証・ヘッダの大小
 `vitest.config.ts` は `wrangler.jsonc` をそのまま読む。`nodejs_compat` は pool の要件なので
 テスト実行時だけ `miniflare.compatibilityFlags` で足しており、本番 Worker のフラグは変えていない。
 
-D1 を叩くハンドラは、いまのところ `prepare().bind().first()` だけのスタブを渡してテストしている
-(`test/edit_requests.test.ts` の `stubDb`)。実 D1 が要るテストを書くときは
-`poolOptions.workers.miniflare.d1Databases` と `migrations/` の適用を足す。
+D1 は miniflare のローカル DB で、各テストファイルの前に `migrations/` を番号順に当てる
+(`test/support/apply_migrations.ts`)。本番の D1 には触らない。テスト内の書き込みはテストの終わりに
+巻き戻る (isolatedStorage)。ルートは `test/support/worker.ts` の `call` / `callJson` で `index.ts` の
+入口から通すので、ルーティング・App Attest のゲート・エッジキャッシュも本番と同じ経路を通る。
+外部への通信は `test/support/no_network.ts` が止めている (Apple / Google の JWKS 等は `fetchMock` で返す)。
+1 リクエストあたりの D1 の読み書き行数は `test/support/d1.ts` の `meterD1` で数えられる。
+
+発行する SQL そのものを検査したいテスト (歌詞本文の列を読まない等) は、今までどおりスタブの D1
+(`test/support/stub_d1.ts`) を渡す。
 
 ## Cron 確認
 
