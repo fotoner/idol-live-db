@@ -395,10 +395,11 @@ class SongRepository(
     }
 
     /**
-     * アイドルの原曲を「ソロ曲/ユニット曲/全体曲/その他」に節分けしたもの (0 件の節は含まない)。
-     * アイドル詳細「楽曲（原曲）」用。節分け・見出し・節内の並びは共有コアが決める
-     * (idolOriginalSongSections)。節をまたいで 1 回だけ Room で実体化し (Song::id で分配)、
-     * 節の数だけクエリを往復させない。
+     * アイドルの原曲を「ソロ曲/ユニット曲/全体曲/カバー/その他」に節分けしたもの
+     * (0 件の節は含まない)。アイドル詳細「楽曲（原曲）」用。節分け・見出し・節内の並びは
+     * 共有コアが決める (idolOriginalSongSections。親曲持ちの派生曲の除外、カバーの独立節化も
+     * コア側の規則)。節をまたいで 1 回だけ Room で実体化し (Song::id で分配)、節の数だけ
+     * クエリを往復させない。
      */
     suspend fun fetchIdolOriginalSongSections(idolId: String): List<IdolSongSection> {
         val sections = snapshots.query { store -> store.idolOriginalSongSections(idolId) }
@@ -407,6 +408,7 @@ class SongRepository(
         return sections.map { section ->
             IdolSongSection(
                 heading = section.heading,
+                shortHeading = section.shortHeading,
                 songs = section.songs.mapNotNull { songsById[it.songId] }
             )
         }

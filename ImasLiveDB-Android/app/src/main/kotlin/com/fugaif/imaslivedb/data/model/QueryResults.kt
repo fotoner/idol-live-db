@@ -168,13 +168,16 @@ data class IdolPerformedSong(
 )
 
 /**
- * アイドル詳細「楽曲（原曲）」の 1 節 (ソロ曲/ユニット曲/全体曲/その他)。
- * 節分け・見出し・並びは共有コア (idol_original_song_sections) が決める。iOS IdolSongSection の移植。
+ * アイドル詳細「楽曲（原曲）」の 1 節 (ソロ曲/ユニット曲/全体曲/カバー/その他)。
+ * 節分け・見出し・並びは共有コア (idol_original_song_sections) が決める
+ * (親曲を持つ派生曲の除外、カバーの独立節化も含む)。iOS IdolSongSection の移植。
  * Room の直接クエリ結果ではなく FFI の射影を Song に実体化して組み立てるので、
  * [IdolPerformedSong] と違って Room アノテーションは付けない。
  */
 data class IdolSongSection(
     val heading: String,
+    /** 小タブに出す短い見出し (「ソロ」等)。件数と組み合わせて「ソロ 12」のように使う。 */
+    val shortHeading: String,
     val songs: List<Song>
 )
 

@@ -516,6 +516,10 @@ private fun SongsBody(state: IdolDetailUiState, idol: Idol, onUnit: (String) -> 
         return
     }
     var showEmptyUnits by rememberSaveable(idol.id) { mutableStateOf(false) }
+    // 楽曲タブの小タブ (節) の選択。節の並びは originalSongSections が既にソロ→ユニット→
+    // 全体曲→カバー→その他の固定順・0 件節なしで返すので、初期値 0 がそのまま
+    // 「曲がある最初の枠」になる。
+    var selectedSongSectionIndex by rememberSaveable(idol.id) { mutableStateOf(0) }
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         if (state.unitsWithSongs.isNotEmpty()) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -554,10 +558,21 @@ private fun SongsBody(state: IdolDetailUiState, idol: Idol, onUnit: (String) -> 
                 }
             }
         }
-        state.originalSongSections.forEach { section ->
-            Column {
-                ImasSectionHeader(section.heading, count = "${section.songs.size}", tight = true)
-                section.songs.forEach { song -> SongRow(song, idol.color) { onSong(song.id) } }
+        if (state.originalSongSections.isNotEmpty()) {
+            // 枠が 1 つしか無いときは小タブを出さず一覧だけを出す。
+            val safeIndex = selectedSongSectionIndex.coerceIn(0, state.originalSongSections.lastIndex)
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (state.originalSongSections.size > 1) {
+                    ImasSegmented(
+                        labels = state.originalSongSections.map { "${it.shortHeading} ${it.songs.size}" },
+                        selection = safeIndex,
+                        onSelect = { selectedSongSectionIndex = it },
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                    )
+                }
+                state.originalSongSections[safeIndex].songs.forEach { song ->
+                    SongRow(song, idol.color) { onSong(song.id) }
+                }
             }
         }
     }
