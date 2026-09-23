@@ -126,7 +126,9 @@ final class MusicKitService {
         if let boxed = cache.object(forKey: cacheKey as NSString) { return boxed.value }
         // カタログを引くには認可が要る。起動時には取らないので、使う直前のここで取る。
         // 認可が無いまま引くと失敗が「この曲は無い」としてキャッシュに残るので、引かずに返す。
-        if authorizationStatus != .authorized { await requestAuthorization() }
+        // 求めるのはまだ決まっていないときだけ。拒否・制限の後に曲を開くたび求め直すと、
+        // そのたびに加入状況の確認まで走る (尋ねる画面はもう出ないので結果も変わらない)。
+        if authorizationStatus == .notDetermined { await requestAuthorization() }
         guard authorizationStatus == .authorized else { return nil }
         return await fetchById(appleMusicId: appleMusicId, cacheKey: cacheKey)
     }
