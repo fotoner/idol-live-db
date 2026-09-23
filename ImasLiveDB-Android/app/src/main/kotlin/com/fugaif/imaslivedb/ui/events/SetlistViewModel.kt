@@ -2,6 +2,7 @@ package com.fugaif.imaslivedb.ui.events
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -17,7 +18,9 @@ import com.fugaif.imaslivedb.data.model.Show
 import com.fugaif.imaslivedb.data.model.ShowTicket
 import com.fugaif.imaslivedb.data.model.UserMark
 import com.fugaif.imaslivedb.data.model.VenueDirectory
+import com.fugaif.imaslivedb.data.repository.SetlistRowMetaResult
 import com.fugaif.imaslivedb.di.AppModule
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -144,6 +147,7 @@ class SetlistViewModel(app: Application, private val showId: String) : AndroidVi
     private var loadJob: Job? = null
     /** 会場マスタは小さく公演で変わらないので、この画面で 1 回だけ読む。 */
     private var venues: VenueDirectory? = null
+    private val rowMetaCache = RowMetaCache()
 
     private data class LoadRequest(val nameMode: PerformerNameMode, val includeStreamInCollection: Boolean)
 
@@ -189,9 +193,18 @@ class SetlistViewModel(app: Application, private val showId: String) : AndroidVi
         val costumes = events.fetchShowCostumes(showId)
         val tickets = module.showTicketRepository.forShow(showId)
         // 名義も「いつぶりか」も「自分の回収」も共有コアが決める。ここは受け取って配るだけ。
-        val rowMeta = events.fetchSetlistRowMeta(
-            showId, request.nameMode, displayMode, request.includeStreamInCollection
-        )
+        // 読み直し (設定の切り替え等) が落ちても、同じ公演なら前の答えを残す
+        // (消すと区切りの見出しが全部「本編」に潰れ、落ちたことが画面の形の変化として出る)。
+        val rowMeta = try {
+            rowMetaCache.loaded(showId, events.fetchSetlistRowMeta(
+                showId, request.nameMode, displayMode, request.includeStreamInCollection
+            ))
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "load_failed setlist_row_meta", e)
+            rowMetaCache.failed(showId)
+        }
         val brandShortName = brandId?.let { events.fetchBrand(it)?.shortName }
         val venueDirectory = venues ?: events.fetchVenueDirectory().also { venues = it }
         loadMarks()
@@ -293,6 +306,8 @@ class SetlistViewModel(app: Application, private val showId: String) : AndroidVi
     }
 
     companion object {
+        private const val TAG = "SetlistViewModel"
+
         /** 公演ごとに 1 つ (画面は `viewModel(key = showId, factory = factory(showId))` で取る)。 */
         fun factory(showId: String): ViewModelProvider.Factory = viewModelFactory {
             initializer {
@@ -328,3 +343,29 @@ private object SetlistViewPrefs {
             .edit().putString(KEY_MODE, raw).apply()
     }
 }
+
+/**
+ * 行の添え物の最後の答えと、それがどの公演のものか (iOS `SetlistViewModel.rowMetaShowId` と同じ)。
+ * 読み直しが落ちたとき、同じ公演なら前の答えを残し、別の公演なら持ち越さない (空にする)。
+ */
+internal class RowMetaCache {
+    private var showId: String? = null
+    private var result = SetlistRowMetaResult()
+
+    /** 読めた答えを覚えて返す。 */
+    fun loaded(showId: String, result: SetlistRowMetaResult): SetlistRowMetaResult {
+        this.showId = showId
+        this.result = result
+        return result
+    }
+
+    /** 読み直しが落ちたときに出す答え。 */
+    fun failed(showId: String): SetlistRowMetaResult {
+        if (this.showId != showId) {
+            this.showId = null
+            result = SetlistRowMetaResult()
+        }
+        return result
+    }
+}
+
