@@ -291,5 +291,3 @@ export async function getAuthUser(
   // Apple identityToken (10 分有効) を直接受け付ける移行期間互換。
   return verifyAppleToken(token, env.APPLE_BUNDLE_ID);
 }
-
-/** クローンただ乗り対策の対象 = 認証不要で開いているコミュニティ集計の read。 */

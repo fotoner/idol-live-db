@@ -79,30 +79,6 @@ function checkOrigin(request: Request, env: Env): boolean {
   return getAllowlist(env).includes(origin);
 }
 
-// ---------------------------------------------------------------------------
-// Input helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Parse a query-string integer safely.
- * Returns defaultValue when the input is missing, empty, NaN or ≤ 0.
- * Caps the result at max.
- */
-
-/** Escape LIKE wildcards so user input is treated literally. */
-
-/** polls.scope_brand_ids / scope_entity_ids の JSON 配列文字列を string[] にパース。NULL や不正値は null を返す。 */
-
-/**
- * 投票候補スコープの ID 配列を検証 + DB 実在チェック。
- * - 配列型/文字列型/長さ範囲/エントリ長/重複の有無を順に検査
- * - allowDuplicates=false なら重複を 400 で弾く、true なら dedup して通す
- * - 通れば dedup 済み配列を JSON 文字列で返す。失敗時は error メッセージ文字列を返す。
- *
- * brand スコープ ({minLen:1, maxLen:16, maxEntryLen:32, allowDuplicates:true})、
- * manual スコープ ({minLen:2, maxLen:500, maxEntryLen:64, allowDuplicates:false}) で共用。
- */
-
 /**
  * 日次メンテナンス用の cron 式。wrangler.jsonc の crons と 1 文字でも
  * ずれると日次タスクが一生走らないので、両方を触るときは必ず対で直すこと。
@@ -123,13 +99,6 @@ async function cleanExpiredTransferCodes(db: D1Database): Promise<void> {
     .bind(new Date().toISOString())
     .run();
 }
-
-
-
-// ---------------------------------------------------------------------------
-// 不透明キー (song_id / idol_id / entity_id) 検証
-// ---------------------------------------------------------------------------
-
 
 function isCommunityRead(path: string, method: string): boolean {
   if (method !== "GET") return false;
@@ -232,11 +201,6 @@ function makeResponders(request: Request, env: Env) {
 
   return { json, error, rateLimitResponse, rateLimitSimple, cors };
 }
-
-// ---------------------------------------------------------------------------
-// Upsert user helper
-// ---------------------------------------------------------------------------
-
 
 // ---------------------------------------------------------------------------
 // Universal Links (deeplink) helpers
@@ -1354,9 +1318,3 @@ export default {
     await Promise.all(tasks);
   },
 };
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-

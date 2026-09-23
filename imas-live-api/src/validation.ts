@@ -47,11 +47,11 @@ export async function validateScopeIdsAgainstTable(
     allowDuplicates: boolean;
     /**
      * 実在チェック対象テーブル。 null の場合は実在チェックをスキップ。
+     * D1 に残っているマスタは brands だけ (songs / idols は 0019 で削除済み)。
      * - `brands`: 件数が少なく typo を弾きたいので必須
-     * - `songs`/`idols`: バンドル master.sqlite と server D1 の同期ラグで
-     *   クライアント側に存在する ID が server に未投入のことがあるため null 推奨
+     * - 曲・アイドルの ID は null (不透明キーとして扱う)
      */
-    table: "brands" | "songs" | "idols" | null;
+    table: "brands" | null;
     fieldName: string;
   }
 ): Promise<{ json: string } | { error: string }> {
