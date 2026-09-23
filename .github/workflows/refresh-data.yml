@@ -16,9 +16,11 @@ name: Refresh master data
 # ⚠️ セキュリティ前提 (設定は docs/DATA_PIPELINE.md 参照):
 #   - CloudKit 鍵は environment "cloudkit" の secret に置き、deployment branch を
 #     main と develop に絞る → feature ブランチ / PR で走る他ワークフローからは鍵を取得できない
-#     (schedule は既定ブランチ main で起動する。workflow_dispatch は develop からも起動できる)
+#     (schedule はリポジトリの既定ブランチ develop にあるこのファイルで起動する。
+#     workflow_dispatch も、鍵を使えるのは main / develop から起動したときだけ)
 #   - 鍵を使うのは export ジョブだけ。check ジョブは secret を使わない
-#   - main の branch protection + .github/ の CODEOWNERS でワークフロー改ざんを防ぐ
+#   - develop / main の branch protection + .github/ の CODEOWNERS でワークフロー改ざんを防ぐ
+#     (schedule が読むのは develop のこのファイルなので、develop の保護が要)
 
 on:
   schedule:
