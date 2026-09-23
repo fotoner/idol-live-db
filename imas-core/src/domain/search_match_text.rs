@@ -34,10 +34,10 @@ pub fn performer_names(label: &str) -> Vec<String> {
 /// `labels` は歌唱者の表記を優先順に (ユニット名 → 歌唱者表記 → 歌唱アイドル名の連結)。
 /// どの表記にも当たらなければ `None` (行はふだんの表記のまま)。
 pub fn performer_match_text(labels: &[String], needle: &str) -> Option<String> {
-    let needle = FoldedNeedle::new(needle.trim());
-    if needle.is_empty() {
-        return None;
-    }
+    performer_match_text_folded(labels, &fold_query(needle)?)
+}
+
+fn performer_match_text_folded(labels: &[String], needle: &FoldedNeedle) -> Option<String> {
     labels.iter().find_map(|label| {
         let names = performer_names(label);
         let matched = names.iter().find(|name| needle.matches(name))?;
@@ -53,10 +53,15 @@ pub fn creator_match_text(
     arranger: Option<&str>,
     needle: &str,
 ) -> Option<String> {
-    let needle = FoldedNeedle::new(needle.trim());
-    if needle.is_empty() {
-        return None;
-    }
+    creator_match_text_folded(lyricist, composer, arranger, &fold_query(needle)?)
+}
+
+fn creator_match_text_folded(
+    lyricist: Option<&str>,
+    composer: Option<&str>,
+    arranger: Option<&str>,
+    needle: &FoldedNeedle,
+) -> Option<String> {
     let parts: Vec<String> = [("作詞", lyricist), ("作曲", composer), ("編曲", arranger)]
         .into_iter()
         .filter_map(|(role, name)| name.filter(|n| needle.matches(n)).map(|n| format!("{role} {n}")))
@@ -83,16 +88,23 @@ pub struct SearchMatchRowInput {
     pub arranger: Option<String>,
 }
 
+/// 検索語を 1 回だけ畳む。空 (空白だけ) なら `None` = 文を添えない。
+fn fold_query(needle: &str) -> Option<FoldedNeedle> {
+    Some(FoldedNeedle::new(needle.trim())).filter(|n| !n.is_empty())
+}
+
 /// 画面に出ている行ぶんを 1 回で (行ごとに FFI を呼ばない)。入力と同じ並び・同じ数。
+/// 検索語は最初に 1 回だけ畳む (行ごとに畳み直さない)。
 pub fn search_match_texts(rows: &[SearchMatchRowInput], scope: SearchMatchScope, needle: &str) -> Vec<Option<String>> {
+    let Some(needle) = fold_query(needle) else { return vec![None; rows.len()] };
     rows.iter()
         .map(|row| match scope {
-            SearchMatchScope::Performer => performer_match_text(&row.performer_labels, needle),
-            SearchMatchScope::Creator => creator_match_text(
+            SearchMatchScope::Performer => performer_match_text_folded(&row.performer_labels, &needle),
+            SearchMatchScope::Creator => creator_match_text_folded(
                 row.lyricist.as_deref(),
                 row.composer.as_deref(),
                 row.arranger.as_deref(),
-                needle,
+                &needle,
             ),
         })
         .collect()
