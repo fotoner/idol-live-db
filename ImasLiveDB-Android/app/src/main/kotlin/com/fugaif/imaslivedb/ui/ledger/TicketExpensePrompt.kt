@@ -47,11 +47,10 @@ import kotlinx.coroutines.launch
 import uniffi.imas_core.ExpenseCategory
 import uniffi.imas_core.ShowTicket
 import uniffi.imas_core.TicketKind
-import uniffi.imas_core.expenseCategoryKey
 import uniffi.imas_core.formatYen
-import uniffi.imas_core.ticketKindFromAttendance
+import uniffi.imas_core.ticketExpenseNote
+import uniffi.imas_core.ticketExpensePrompt
 import uniffi.imas_core.ticketKindLabel
-import uniffi.imas_core.ticketsForKind
 
 private val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 
@@ -84,7 +83,7 @@ fun TicketExpensePrompt() {
             request = req,
             onSave = { ticket, amount ->
                 scope.launch {
-                    val note = if (ticket.isEstimate) "${ticket.name} (推定)" else ticket.name
+                    val note = ticketExpenseNote(ticket)
                     val expense = Expense.make(
                         date = req.date.ifEmpty { DATE_FORMAT.format(Instant.now().atZone(ZoneOffset.UTC)) },
                         category = ExpenseCategory.TICKET,
@@ -104,17 +103,13 @@ fun TicketExpensePrompt() {
 /**
  * 出す条件を調べる。**出さない理由が 1 つでもあれば黙って終わる**
  * (参加を付けただけなのに毎回シートが出ると、付ける作業が止まる)。
+ * 聞くかどうか (その形態の券があるか・この公演のチケット代を付けていないか) はコア
+ * (ticketExpensePrompt)。付けたかどうかを**読めなかった**ときは聞かない (iOS と同じ)。
  */
 private suspend fun prepare(module: AppModule, event: AttendanceMarkedEvent): TicketExpenseRequest? {
-    val kind = ticketKindFromAttendance(event.type.raw)
     val tickets = module.showTicketRepository.forShow(event.showId).map { it.toCore() }
-    val candidates = ticketsForKind(tickets, kind)
-    if (candidates.isEmpty()) return null
-
-    // 既にこの公演のチケット代を付けていれば聞かない (二重計上を防ぐ)。
-    val ticketKey = expenseCategoryKey(ExpenseCategory.TICKET)
-    val existing = module.expenseRepository.forShow(event.showId)
-    if (existing.any { it.category == ticketKey }) return null
+    val existing = runCatching { module.expenseRepository.forShow(event.showId) }.getOrNull() ?: return null
+    val prompt = ticketExpensePrompt(tickets, event.type.raw, existing.map { it.category }) ?: return null
 
     val option = module.expenseRepository.attendedShowOptions().firstOrNull { it.id == event.showId }
     return TicketExpenseRequest(
@@ -122,8 +117,8 @@ private suspend fun prepare(module: AppModule, event: AttendanceMarkedEvent): Ti
         showLabel = option?.label ?: "この公演",
         eventId = option?.eventId,
         date = option?.date.orEmpty(),
-        kind = kind,
-        tickets = candidates
+        kind = prompt.kind,
+        tickets = prompt.tickets
     )
 }
 
