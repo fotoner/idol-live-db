@@ -154,6 +154,16 @@ class SeedImporterTest {
         assertEquals(1, attempts)
     }
 
+    /** 新規インストールの初回投入の直後は、入れ直しの判定のために seed を複製し直さない (RedTeam A-L6)。 */
+    @Test
+    fun firstImportSkipsTheReseedCheck() = runBlocking {
+        assertTrue(SeedImporter.importIfNeeded(context, db))
+
+        var attempts = 0
+        SeedImporter.reseedIfNeeded(context, db) { attempts++; false }
+        assertEquals(0, attempts)
+    }
+
     private fun forgetReseedCheck() {
         context.getSharedPreferences("imas_seed", Context.MODE_PRIVATE).edit().clear().commit()
     }

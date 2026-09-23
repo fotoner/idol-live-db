@@ -74,6 +74,9 @@ object SeedImporter {
         try {
             withSeedFile(context) { seedPath -> copyMasterTables(db, seedPath, replace = false) }
             lastImportError = null
+            // 入れたばかりの seed は同梱のものそのものなので、この更新での入れ直しの判定は要らない
+            // (判定のために seed をもう一度複製して ATTACH しない)。
+            packageUpdateTime(context)?.let { markChecked(prefs(context), it) }
         } catch (e: Exception) {
             Log.e(TAG, "seed import 失敗 (CloudKit 同期にフォールバック)", e)
             lastImportError = "初期データの読み込みに失敗しました。アプリを再起動しても直らない場合は再インストールをお試しください。\n(詳細: ${e.message})"
@@ -106,7 +109,7 @@ object SeedImporter {
         reseed: (String) -> Boolean
     ): Boolean = withContext(Dispatchers.IO) {
         val updatedAt = packageUpdateTime(context)
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = prefs(context)
         if (updatedAt != null && prefs.contains(KEY_CHECKED_UPDATE) && prefs.getLong(KEY_CHECKED_UPDATE, 0L) == updatedAt) {
             return@withContext false
         }
@@ -124,6 +127,8 @@ object SeedImporter {
         if (updatedAt != null) markChecked(prefs, updatedAt)
         reseeded
     }
+
+    private fun prefs(context: Context) = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     private fun markChecked(prefs: android.content.SharedPreferences, updatedAt: Long) {
         prefs.edit().putLong(KEY_CHECKED_UPDATE, updatedAt).remove(KEY_FAILED_UPDATE).remove(KEY_FAILED_COUNT).apply()
