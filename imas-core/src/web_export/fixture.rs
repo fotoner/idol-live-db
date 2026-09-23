@@ -97,16 +97,9 @@ fn fact(label: &str, value: &str, style: &str) -> ProfileRow {
 /// 件数タイル 1 枚。
 fn tile(glyph: &str, value: u32, label: &str, href: Option<&str>) -> StatTile {
     let tile = StatTile::new(glyph, value, label);
-    return match href {
+    match href {
         Some(href) => tile.with_href(href),
         None => tile,
-    };
-    #[allow(unreachable_code)]
-    StatTile {
-        glyph: glyph.to_string(),
-        value,
-        label: label.to_string(),
-        href: href.map(str::to_string),
     }
 }
 
