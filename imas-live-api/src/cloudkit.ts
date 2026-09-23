@@ -161,9 +161,40 @@ export async function cloudKitModify(
     body,
   });
 
-  if (res.ok) return { ok: true };
+  if (res.ok) {
+    await logRecordErrors(res, operations.length);
+    return { ok: true };
+  }
   const text = await res.text().catch(() => "");
   return { ok: false, error: `CloudKit HTTP ${res.status}: ${text.slice(0, 300)}` };
+}
+
+/** 1 回のログに載せるレコード単位の失敗の上限。 */
+const MAX_LOGGED_RECORD_ERRORS = 20;
+
+/**
+ * HTTP 2xx でもレコード単位では失敗しうる (応答の records[] に serverErrorCode が入る)。
+ * 呼び出し側の扱い (成功として返す) は変えず、失敗したレコードをログに残す。
+ * 本文が読めないときは何もしない。
+ */
+async function logRecordErrors(res: Response, operations: number): Promise<void> {
+  const data = (await res.json().catch(() => null)) as
+    | { records?: Array<{ recordName?: string; serverErrorCode?: string; reason?: string }> }
+    | null;
+  const failed = (data?.records ?? []).filter((r) => r?.serverErrorCode);
+  if (failed.length === 0) return;
+  console.error(
+    JSON.stringify({
+      event: "cloudkit_modify_record_errors",
+      operations,
+      failed: failed.length,
+      errors: failed.slice(0, MAX_LOGGED_RECORD_ERRORS).map((r) => ({
+        recordName: r.recordName,
+        serverErrorCode: r.serverErrorCode,
+        reason: r.reason?.slice(0, 200),
+      })),
+    })
+  );
 }
 
 // ---------------------------------------------------------------------------
