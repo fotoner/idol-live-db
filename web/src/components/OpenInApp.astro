@@ -7,12 +7,11 @@ import type { AppOpen } from "../lib/schema/AppOpen";
  */
 interface Props {
   app: AppOpen;
-  themeKey?: string;
 }
-const { app, themeKey } = Astro.props;
+const { app } = Astro.props;
 ---
 
-<aside class="open-in-app" data-theme={themeKey} aria-label="アプリで開く">
+<aside class="open-in-app" aria-label="アプリで開く">
   <img
     class="open-in-app__icon"
     src="/icon-192.png"

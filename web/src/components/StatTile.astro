@@ -3,19 +3,17 @@
 interface Props {
   glyph: string;
   value: number | string;
-  unit?: string | null;
   label: string;
-  themeKey?: string;
   href?: string;
 }
-const { glyph, value, unit, label, themeKey, href } = Astro.props;
+const { glyph, value, label, href } = Astro.props;
 const Tag = href ? "a" : "div";
 ---
 
-<Tag class="stat-tile" data-theme={themeKey} href={href}>
+<Tag class="stat-tile" href={href}>
   <span class="stat-tile__icon" aria-hidden="true">{glyph}</span>
   <span class="stat-tile__value">
-    {value}{unit && <span class="stat-tile__unit">{unit}</span>}
+    {value}
   </span>
   <span class="stat-tile__label">{label}</span>
 </Tag>

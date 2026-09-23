@@ -7,10 +7,9 @@
 interface Props {
   title: string;
   artworkUrl?: string | null;
-  themeKey?: string;
   size?: "sm" | "md" | "hero";
 }
-const { title, artworkUrl, themeKey, size = "md" } = Astro.props;
+const { title, artworkUrl, size = "md" } = Astro.props;
 const px = { sm: 44, md: 56, hero: 160 }[size];
 const sizeClass = size === "md" ? "" : `artwork--${size}`;
 // ヒーローのジャケは折り返しの上にあり、そのページの LCP そのもの。
@@ -18,7 +17,7 @@ const sizeClass = size === "md" ? "" : `artwork--${size}`;
 const isHero = size === "hero";
 ---
 
-<span class:list={["artwork", sizeClass]} data-theme={themeKey}>
+<span class:list={["artwork", sizeClass]}>
   {/* 画像が無いときだけ曲名を描く。画像の上に敷いたままだと、
       見えていない文字を読み上げが拾って曲名が二重に読まれる。 */}
   {!artworkUrl && <span class="artwork__fallback">{title}</span>}

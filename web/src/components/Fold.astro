@@ -13,10 +13,10 @@ interface Props {
   label: string;
   themeKeys: readonly (string | null | undefined)[];
   force?: boolean;
-  threshold?: number;
 }
-const { label, themeKeys, force = false, threshold = 12 } = Astro.props;
-const folded = force || themeKeys.length > threshold;
+const { label, themeKeys, force = false } = Astro.props;
+const FOLD_OVER = 12;
+const folded = force || themeKeys.length > FOLD_OVER;
 const Wrap = folded ? "details" : "div";
 ---
 

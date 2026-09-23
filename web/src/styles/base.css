@@ -433,9 +433,6 @@ hr {
   flex-direction: column;
   gap: var(--sp4);
 }
-.u-stack--tight {
-  gap: var(--sp2);
-}
 .u-row {
   display: flex;
   flex-wrap: wrap;

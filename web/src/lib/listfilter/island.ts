@@ -16,13 +16,7 @@
  * 描画・重ね方・絞り込み中かの判定」が別々に書かれていて、軸を 1 本足すと
  * 6 箇所を直す必要があった (1 つ忘れても型は通り、URL 復元だけが壊れる)。
  */
-import type { SortOption } from "./query";
-
-/** 選択肢 1 件。値はそのまま条件に渡す文字列。 */
-export interface Option {
-  value: string;
-  label: string;
-}
+import type { FacetOption, SortOption } from "./query";
 
 /** 入力欄 1 つ。**この 1 行が軸のすべて**を決める。 */
 export interface FieldSpec {
@@ -37,7 +31,7 @@ export interface FieldSpec {
   /** プレースホルダ / 「すべて」の前に出す名前。`toggle` では帯の `aria-label`。 */
   label: string;
   /** select / toggle のときの選択肢。 */
-  options?: Option[];
+  options?: FacetOption[];
   /**
    * 条件側が配列で受ける軸。画面は単一選択で足りる
    * (アプリのピッカーに相当する UI は持たない)。
