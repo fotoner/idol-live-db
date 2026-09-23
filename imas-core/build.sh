@@ -68,7 +68,8 @@ TARGET_DIR=$(cargo metadata --locked --format-version 1 --no-deps --manifest-pat
 [[ -n "$TARGET_DIR" ]] || { echo "cargo metadata から target_directory を読めない" >&2; exit 1; }
 
 echo "==> host ビルド (バインディング生成用 cdylib)"
-cargo build --locked --manifest-path $CRATE/Cargo.toml --release
+# 下の bindgen の bin と同じ feature で作る (feature が違うと cargo run がライブラリを作り直す)。
+cargo build --locked --manifest-path $CRATE/Cargo.toml --release --features bindgen
 HOST_DYLIB=$TARGET_DIR/release/libimas_core.$HOST_EXT
 
 echo "==> バインディング生成 (Swift + Kotlin)"
@@ -79,11 +80,11 @@ if [[ $DO_IOS -eq 1 ]]; then
   remove_dir $OUT/swift
   remove_dir $OUT/headers
   mkdir -p $OUT/swift $OUT/headers
-  (cd $CRATE && cargo run --locked --release --bin uniffi-bindgen -- \
+  (cd $CRATE && cargo run --locked --release --features bindgen --bin uniffi-bindgen -- \
     generate --library "$HOST_DYLIB" --language swift --out-dir ../$OUT/swift)
 fi
 if [[ $DO_ANDROID -eq 1 ]]; then
-  (cd $CRATE && cargo run --locked --release --bin uniffi-bindgen -- \
+  (cd $CRATE && cargo run --locked --release --features bindgen --bin uniffi-bindgen -- \
     generate --library "$HOST_DYLIB" --language kotlin --out-dir ../$ANDROID_APP/src/main/kotlin)
 fi
 if [[ $DO_IOS -eq 1 ]]; then

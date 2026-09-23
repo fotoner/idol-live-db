@@ -9,9 +9,12 @@ name = "imas_core"
 # staticlib: iOS xcframework 用 / cdylib: Android .so + バインディング生成用
 crate-type = ["lib", "staticlib", "cdylib"]
 
+# バインディングの生成 (build.sh) でだけ使う。uniffi の cli (clap / askama / goblin など) を
+# ライブラリ本体の依存から外すため、bindgen feature を要求する。
 [[bin]]
 name = "uniffi-bindgen"
 path = "src/bin/uniffi-bindgen.rs"
+required-features = ["bindgen"]
 
 # Web 出面 (静的サイト) の JSON エクスポータ。
 # required-features を付けるのは build.sh が `cargo build --release --target aarch64-apple-ios`
@@ -43,9 +46,11 @@ web-export = ["dep:ts-rs"]
 # domain 側の規則 (agent_tools / entity_resolution / proposal) はこの feature に関係なく
 # 常時コンパイルされ、既定の cargo test で検証される。
 agent = []
+# uniffi-bindgen の bin (build.sh がバインディングを作るときだけ使う)。既定 off。
+bindgen = ["uniffi/cli"]
 
 [dependencies]
-uniffi = { version = "0.32.0", features = ["cli"] }
+uniffi = { version = "0.32.0" }
 chrono = { version = "0.4.45", default-features = false, features = ["std", "clock"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
