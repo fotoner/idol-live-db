@@ -60,9 +60,6 @@ class PollDetailViewModel(app: Application) : AndroidViewModel(app) {
         else -> songRepo.fetchSong(id)?.title ?: id
     }
 
-    /** サインイン中のユーザー ID。お題の作成者と突き合わせて削除導線を出すかを決める。 */
-    val myUserId: String? get() = api.currentUserId
-
     /** 削除に成功したら [onDeleted] (詳細を閉じる) を呼ぶ。失敗理由は uiState.deleteError に出す。 */
     fun delete(onDeleted: () -> Unit) {
         val id = pollId ?: return

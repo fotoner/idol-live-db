@@ -57,12 +57,11 @@ class WorkerClientsTest {
 
     @Test
     fun communityApiTurnsFailuresIntoEmptyResults() = runBlocking {
-        val auth = AuthService(context)
-        val serverError = CommunityApi(http(FakeWorkerTransport { WorkerResponse(500, "oops") }), auth)
+        val serverError = CommunityApi(http(FakeWorkerTransport { WorkerResponse(500, "oops") }))
         assertEquals(emptyList<CommunityApi.SongTag>(), serverError.songTags("s1"))
         assertFalse(serverError.applyTag("s1", "t1"))
 
-        val offline = CommunityApi(http(FakeWorkerTransport { null }), auth)
+        val offline = CommunityApi(http(FakeWorkerTransport { null }))
         assertEquals(emptyList<CommunityApi.SongTag>(), offline.songTags("s1"))
         assertNull(offline.penlightVotes("s1"))
     }

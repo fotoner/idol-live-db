@@ -1,6 +1,5 @@
 package com.fugaif.imaslivedb.data.community
 
-import com.fugaif.imaslivedb.data.auth.AuthService
 import com.fugaif.imaslivedb.data.net.WorkerHttpClient
 import com.fugaif.imaslivedb.data.net.WorkerResponse
 import com.fugaif.imaslivedb.testing.FakeWorkerTransport
@@ -23,8 +22,7 @@ class CommunityApiConflictTest {
     private val context = RuntimeEnvironment.getApplication()
 
     private fun api(code: Int, body: String) = CommunityApi(
-        WorkerHttpClient(context, { "jwt" }, FakeWorkerTransport { WorkerResponse(code, body) }),
-        AuthService(context)
+        WorkerHttpClient(context, { "jwt" }, FakeWorkerTransport { WorkerResponse(code, body) })
     )
 
     @Test

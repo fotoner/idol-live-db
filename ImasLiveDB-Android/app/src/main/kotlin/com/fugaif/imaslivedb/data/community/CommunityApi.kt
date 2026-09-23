@@ -1,7 +1,6 @@
 package com.fugaif.imaslivedb.data.community
 
 import android.util.Log
-import com.fugaif.imaslivedb.data.auth.AuthService
 import com.fugaif.imaslivedb.data.net.WorkerHttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,7 +11,7 @@ import java.net.URLEncoder
 /** 集計系コミュニティ (タグ / ペンライト投票 / お題) の Worker D1 クライアント。iOS CommunityAPI の移植。
  *  サインイン済みなら Authorization: Bearer を全リクエストに付与する ([WorkerHttpClient])
  *  (投票系エンドポイントはサーバ側で認証必須。タグ/ペンライト等は未指定でも動く匿名 read/write)。 */
-class CommunityApi(private val http: WorkerHttpClient, private val authService: AuthService) {
+class CommunityApi(private val http: WorkerHttpClient) {
 
     data class SongTag(val id: String, val name: String, val color: String?, val voteCount: Int, val mine: Boolean)
     data class IdolTag(val id: String, val name: String, val color: String?, val voteCount: Int, val mine: Boolean)
@@ -93,8 +92,11 @@ class CommunityApi(private val http: WorkerHttpClient, private val authService: 
         val status: String = "active",
         /** 締切日時 (epoch millis)。未知/パース不可なら Long.MAX_VALUE (常に「開催中」扱い)。 */
         val endsAtMs: Long = Long.MAX_VALUE,
-        /** 作成者の uid。削除導線 (作成者 or admin) を出すかの判定に使う。 */
-        val createdBy: String? = null,
+        /**
+         * 呼び出した人のお題か (削除の導線を出す判定)。サーバが認証から決める
+         * (作成者の uid との比較を端末でしない。created_by は後でサーバから消える)。
+         */
+        val isOwnPoll: Boolean = false,
     ) {
         /** iOS Poll.isActive の移植: サーバが active かつ締切前。 */
         val isActive: Boolean get() = status == "active" && endsAtMs > System.currentTimeMillis()
@@ -767,25 +769,6 @@ class CommunityApi(private val http: WorkerHttpClient, private val authService: 
         )
     }
 
-    /**
-     * サインイン中のユーザー ID (= セッション JWT の `sub`)。未サインインなら null。
-     *
-     * サーバは「作成者本人 or 管理者」しか削除させないので、押しても 403 になるボタンを
-     * 出さないために自分の uid が要る。`/auth/me` を叩き直さず手元のトークンから読むのは、
-     * 導線の出し分けが 1 リクエスト待ちで遅れないようにするため (最終的な可否はサーバが決める)。
-     */
-    val currentUserId: String?
-        get() {
-            val payload = authService.sessionToken?.split(".")?.getOrNull(1) ?: return null
-            return runCatching {
-                val decoded = android.util.Base64.decode(
-                    payload,
-                    android.util.Base64.URL_SAFE or android.util.Base64.NO_PADDING or android.util.Base64.NO_WRAP
-                )
-                JSONObject(String(decoded, Charsets.UTF_8)).strOrNull("sub")
-            }.getOrNull()
-        }
-
     /** GET /polls/{id} — ポール詳細 (選択肢 + 票数 + 自分の投票)。 */
     suspend fun pollDetail(id: String): PollDetail? = withContext(Dispatchers.IO) {
         val json = get("/polls/${enc(id)}") ?: return@withContext null
@@ -808,7 +791,7 @@ class CommunityApi(private val http: WorkerHttpClient, private val authService: 
             myVoteCount = poll.optInt("my_vote_count"),
             status = poll.strOrNull("status") ?: "active",
             endsAtMs = epochSecToMs(poll.optLong("ends_at")),
-            createdBy = poll.strOrNull("created_by"),
+            isOwnPoll = poll.optBoolean("is_own_poll", false),
         )
     }
 

@@ -1,9 +1,7 @@
 package com.fugaif.imaslivedb.ui.polls
 
 import android.app.Application
-import android.content.Context
 import android.os.Looper
-import com.fugaif.imaslivedb.data.auth.AuthService
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.data.net.WorkerHttpClient
 import com.fugaif.imaslivedb.data.net.WorkerResponse
@@ -29,9 +27,7 @@ class PollsViewModelTest {
             check(request.url.contains("/polls?status=active")) { "一覧以外を読んだ: ${request.url}" }
             WorkerResponse(200, POLLS)
         }
-        val prefs = app.getSharedPreferences("polls_test", Context.MODE_PRIVATE)
-        val auth = AuthService(app, transport, openSecurePrefs = { prefs })
-        val api = CommunityApi(WorkerHttpClient(app, { null }, transport), auth)
+        val api = CommunityApi(WorkerHttpClient(app, { null }, transport))
         val viewModel = PollsViewModel(app, api) { type, id -> "$type:$id" }
 
         viewModel.refresh()

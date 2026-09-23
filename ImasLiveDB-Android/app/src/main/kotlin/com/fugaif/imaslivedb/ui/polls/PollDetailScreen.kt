@@ -72,10 +72,9 @@ fun PollDetailScreen(
     LaunchedEffect(pollId) { viewModel.load(pollId) }
 
     val detail = state.detail
-    // 削除は作成者本人か管理者だけ (iOS PollDetailView.canDelete と同じ条件)。
-    // 最終判定はサーバ (403) が持つので、ここは押しても無駄なボタンを出さないための前さばき。
-    val createdBy = detail?.createdBy
-    val canDelete = createdBy != null && (authState.isAdmin || createdBy == viewModel.myUserId)
+    // 削除は作成者本人か管理者だけ (iOS PollDetailView.canDelete と同じ条件)。自分のお題かは
+    // サーバ (is_own_poll) が決める。最終判定もサーバ (403) なので、ここは前さばき。
+    val canDelete = authState.isAdmin || detail?.isOwnPoll == true
 
     Scaffold(
         topBar = {
