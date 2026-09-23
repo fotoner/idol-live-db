@@ -72,6 +72,14 @@ pub struct MasteryGroup {
     /// 現地で聴いたのに未設定のままの曲数。ここが多い群は覚え時。
     pub heard_but_unset_count: u32,
     pub total: u32,
+    /// 段ごとの曲数。添字 = 段 (0 = 未設定 … steps)。長さは `steps + 1`。
+    /// 詳細画面の段の絞り込みチップと段ごとの棒は、これを並べるだけにする。
+    pub level_counts: Vec<u32>,
+    /// 1 段でも付いている曲数 (`total - level_counts[0]`)。
+    pub set_count: u32,
+    /// `song_ids` と同じ並びで、その曲が「現地で聴いたのに未設定」か。
+    /// 詳細画面の「聴いたのに未設定」の絞り込みはこれで行う (条件を画面に書かない)。
+    pub heard_but_unset: Vec<bool>,
 }
 
 /// 画面上部に出す全体のまとめ。
@@ -294,16 +302,21 @@ pub fn build_mastery_groups(
                 collected_count: 0,
                 heard_but_unset_count: 0,
                 total: 0,
+                level_counts: Vec::new(),
+                set_count: 0,
+                heard_but_unset: Vec::new(),
             }
         });
         entry.song_ids.push(song.song_id.clone());
         entry.titles.push(song.title.clone());
         entry.levels.push(song.level.min(max));
+        let heard_but_unset = song.collected && song.level == 0;
+        entry.heard_but_unset.push(heard_but_unset);
         if song.collected {
             entry.collected_count += 1;
-            if song.level == 0 {
-                entry.heard_but_unset_count += 1;
-            }
+        }
+        if heard_but_unset {
+            entry.heard_but_unset_count += 1;
         }
         if axis == MasteryAxis::Series {
             if let Some(cd) = non_empty(&song.cd_series) {
@@ -321,6 +334,8 @@ pub fn build_mastery_groups(
         .map(|k| {
             let mut g = by_key.remove(&k).expect("order と by_key は同時に作る");
             g.total = g.levels.len() as u32;
+            g.level_counts = level_counts(&g.levels, max);
+            g.set_count = g.total - g.level_counts[0];
             g.done_count = g.levels.iter().filter(|&&l| l == max).count() as u32;
             g.percent = percent_of(&g.levels, max);
             g.disc_count = discs.get(&k).map_or(0, |d| d.len()) as u32;
@@ -358,6 +373,15 @@ pub fn build_mastery_groups(
     groups
 }
 
+/// 段ごとの曲数 (添字 = 段、長さ `max + 1`)。`levels` は `max` で頭打ち済みの前提。
+fn level_counts(levels: &[u8], max: u8) -> Vec<u32> {
+    let mut counts = vec![0u32; max as usize + 1];
+    for &level in levels {
+        counts[level as usize] += 1;
+    }
+    counts
+}
+
 /// 画面上部のまとめ。群化とは独立に全曲から出す。
 pub fn mastery_summary(songs: &[MasterySong], steps: u8) -> MasterySummary {
     let max = clamp_steps(steps);
@@ -388,6 +412,34 @@ mod tests {
             level,
             collected: false,
         }
+    }
+
+    /// 詳細画面が描くだけで済む値 (段ごとの数・付けた数・聴いたのに未設定の行) を群が持つ。
+    #[test]
+    fn groups_carry_the_counts_the_detail_screen_draws() {
+        let mut heard = song("c", 0);
+        heard.collected = true;
+        let mut heard_set = song("d", 2);
+        heard_set.collected = true;
+        let songs = vec![song("a", 0), song("b", 4), heard, heard_set, song("e", 9)];
+        let groups = build_mastery_groups(
+            &songs,
+            MasteryAxis::Series,
+            4,
+            MasteryGroupSort::SongCount,
+            MasteryProgressFilter::All,
+            "",
+        );
+        let g = &groups[0];
+        // 段 0..=4。範囲外の 9 は最上段 4 に頭打ち。
+        assert_eq!(g.level_counts, vec![2, 0, 1, 0, 2]);
+        assert_eq!(g.level_counts.iter().sum::<u32>(), g.total);
+        assert_eq!(g.set_count, 3);
+        assert_eq!(g.done_count, g.level_counts[4]);
+        // 聴いたのに未設定は「現地で聴いた」かつ「未設定」の行だけ。数と行の印が揃う。
+        assert_eq!(g.heard_but_unset, vec![false, false, true, false, false]);
+        assert_eq!(g.heard_but_unset_count, 1);
+        assert_eq!(g.collected_count, 2);
     }
 
     #[test]
