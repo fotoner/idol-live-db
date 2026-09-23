@@ -786,6 +786,8 @@ struct SetlistView: View {
 
     /// Apple Music にプレイリストを作成してセトリの曲を追加
     private func addToAppleMusicPlaylist() async {
+        // 認可は起動時に取らないので、使う直前に取る (契約の有無もここで読み直す)。
+        await MusicKitService.shared.requestAuthorization()
         guard MusicKitService.shared.hasAppleMusicSubscription else {
             playlistMessage = "Apple Musicのサブスクリプションが必要です"
             showPlaylistAlert = true

@@ -498,7 +498,7 @@ struct IntroGameSetupView: View {
             IDActionButton(title: "Apple Music を許可する", style: .secondary) {
                 AppAnalytics.tap("intro_game_setup.music_auth")
                 Task {
-                    await MusicKitService.shared.requestAuthorization()
+                    await MusicKitService.shared.requestAuthorization(includingMediaLibrary: true)
                     authStatus = MusicKitService.shared.authorizationStatus
                 }
             }
@@ -530,7 +530,7 @@ struct IntroGameSetupView: View {
         isLoading = true
 
         if MusicKitService.shared.authorizationStatus == .notDetermined {
-            await MusicKitService.shared.requestAuthorization()
+            await MusicKitService.shared.requestAuthorization(includingMediaLibrary: true)
             authStatus = MusicKitService.shared.authorizationStatus
         }
 

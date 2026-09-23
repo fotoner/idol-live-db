@@ -53,7 +53,7 @@ struct IntroDonHomeView: View {
         }
         .task {
             if MusicKitService.shared.authorizationStatus == .notDetermined {
-                await MusicKitService.shared.requestAuthorization()
+                await MusicKitService.shared.requestAuthorization(includingMediaLibrary: true)
             }
             authStatus = MusicKitService.shared.authorizationStatus
         }
@@ -109,7 +109,7 @@ struct IntroDonHomeView: View {
             IDActionButton(title: "Apple Music を許可する", icon: "music.note", style: .secondary) {
                 AppAnalytics.tap("intro_don_home.music_auth")
                 Task {
-                    await MusicKitService.shared.requestAuthorization()
+                    await MusicKitService.shared.requestAuthorization(includingMediaLibrary: true)
                     authStatus = MusicKitService.shared.authorizationStatus
                 }
             }

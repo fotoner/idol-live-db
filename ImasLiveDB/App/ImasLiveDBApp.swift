@@ -115,9 +115,8 @@ struct ImasLiveDBApp: App {
                 // テストホストとして起動されたときは、外に出る副作用を起こさない。
                 // DB の準備とスナップショットのロードは止めない (テストがそれを読む)。
                 guard !ProcessInfo.processInfo.isRunningTests else { return }
-                #if !targetEnvironment(simulator)
-                await MusicKitService.shared.requestAuthorization()
-                #endif
+                // MusicKit の認可は起動時には取らない。使う画面 (曲詳細・セトリ・イントロクイズ・
+                // フル再生) が、使う直前に `MusicKitService.requestAuthorization()` で取る。
                 // 以降はいずれも初回描画に不要な非緊急処理。 .utility の detached に落として
                 // メインスレッド/協調プールの高優先度枠を初回レンダリングに明け渡す。
                 // CloudKit sync は fire-and-forget で fullSync が走っても UI が

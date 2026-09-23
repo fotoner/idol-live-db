@@ -357,6 +357,8 @@ struct SetlistPredictionView: View {
     // MARK: - Apple Music
 
     private func addToAppleMusicPlaylist() async {
+        // 認可は起動時に取らないので、使う直前に取る (契約の有無もここで読み直す)。
+        await MusicKitService.shared.requestAuthorization()
         guard MusicKitService.shared.hasAppleMusicSubscription else {
             alertMessage = "Apple Musicのサブスクリプションが必要です"
             showAlert = true

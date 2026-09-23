@@ -67,24 +67,32 @@ final class MusicKitService {
     private var player: AVPlayer?
     private var endObserverToken: NSObjectProtocol?
     private let musicPlayer = ApplicationMusicPlayer.shared
+    /// 契約の変化の監視を張ったか (何度認可を取り直しても 1 本だけにする)。
+    private var isObservingSubscription = false
 
     static let shared = MusicKitService()
     private init() {}
 
-    func requestAuthorization() async {
+    /// Apple Music の認可を取り、契約の有無を読み直す。
+    ///
+    /// 起動時には呼ばない。使う画面 (曲詳細・セトリ・イントロクイズ・フル再生) が、使う直前に呼ぶ。
+    /// 既に決まっていれば尋ねずにすぐ戻るので、何度呼んでもよい。
+    ///
+    /// - Parameter includingMediaLibrary: 端末のライブラリの認可も取る (イントロクイズだけ)。
+    ///   カタログのストリーミング再生が失敗する曲 (Orange Sapphire game version 等) を
+    ///   ライブラリ経由で鳴らす経路 (本家 IntroQuiz 方式) に要る。他の画面では尋ねない。
+    func requestAuthorization(includingMediaLibrary: Bool = false) async {
         authorizationStatus = await MusicAuthorization.request()
         await checkSubscription()
-        // MPMediaLibrary 認可も同時に要求する。これがないと MPMediaQuery で
-        // ユーザのライブラリにある曲 (プレイリスト/ライブラリ追加済み曲) を引けない。
-        // Catalog ストリーミング再生が失敗する曲 (Orange Sapphire game version 等) を
-        // Library 経由でフル尺再生する経路に必須 (本家 IntroQuiz 方式)。
-        if MPMediaLibrary.authorizationStatus() == .notDetermined {
+        if includingMediaLibrary, MPMediaLibrary.authorizationStatus() == .notDetermined {
             await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
                 MPMediaLibrary.requestAuthorization { _ in
                     continuation.resume()
                 }
             }
         }
+        guard !isObservingSubscription else { return }
+        isObservingSubscription = true
         Task { await observeSubscriptionUpdates() }
     }
 
@@ -116,6 +124,10 @@ final class MusicKitService {
         guard let appleMusicId, !appleMusicId.isEmpty else { return nil }
         let cacheKey = appleMusicId
         if let boxed = cache.object(forKey: cacheKey as NSString) { return boxed.value }
+        // カタログを引くには認可が要る。起動時には取らないので、使う直前のここで取る。
+        // 認可が無いまま引くと失敗が「この曲は無い」としてキャッシュに残るので、引かずに返す。
+        if authorizationStatus != .authorized { await requestAuthorization() }
+        guard authorizationStatus == .authorized else { return nil }
         return await fetchById(appleMusicId: appleMusicId, cacheKey: cacheKey)
     }
 
