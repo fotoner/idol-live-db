@@ -75,6 +75,8 @@ ID_FILTER_COLUMN = {
     "events": "id",
     "shows": "event_id",
     "units": "id",
+    "costumes": "id",
+    "costume_wears": "costume_id",
 }
 
 # 渡す id が「何の id か」。**列名からは決まらない** ので ID_FILTER_COLUMN とは別に持つ:
@@ -91,6 +93,8 @@ SCOPED_ID_SPACE = {
     "show_cast": "show",
     "idols": "idol",
     "units": "unit",
+    "costumes": "costume",
+    "costume_wears": "costume",
 }
 
 

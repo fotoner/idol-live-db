@@ -508,8 +508,10 @@ def apply_all(conn):
                     w,
                 )
             wear_count += len(rows)
-            affected["costumes"]  # 絞る列が無いので全件
-            affected["costume_wears"]  # 同上
+            # 投稿した衣装だけを押す (着用記録は costume_id で絞る)。表を丸ごと送ると、
+            # 手元の古い値で CloudKit の新しい値を上書きしうる。
+            affected["costumes"].add(c["id"])
+            affected["costume_wears"].add(c["id"])
         print(f"  ✓ costumes/{path.name}: {len(data['costumes'])} 着 / 着用 {wear_count} 件")
 
     ecol, shcol = cols(conn, "events"), cols(conn, "shows")

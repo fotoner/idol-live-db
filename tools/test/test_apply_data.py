@@ -77,9 +77,35 @@ class ApplyCostumesTest(unittest.TestCase):
         conn.close()
         # 曲の分かる記録はセトリの位置、分からない記録は末尾 (9999)。
         self.assertEqual(wears, [("sh_t_0007", "ml_t", 7), (None, None, 9999)])
-        # 衣装の表は id で絞れないので、両方とも全件 push (空集合) になる。
-        self.assertEqual(affected["costumes"], set())
-        self.assertEqual(affected["costume_wears"], set())
+        # 投稿した衣装の id だけを押す (着用記録は costume_id で絞る)。
+        self.assertEqual(affected["costumes"], {"cos_t"})
+        self.assertEqual(affected["costume_wears"], {"cos_t"})
+
+    def test_costumes_are_pushed_by_their_ids_only(self):
+        # 表を丸ごと送ると、手元の古い値で CloudKit の新しい値を上書きしうる。
+        conn = self.connect()
+        with contextlib.redirect_stdout(io.StringIO()):
+            affected = apply_data.apply_all(conn)
+        conn.close()
+        runs = []
+
+        def fake_call(cmd):
+            ids = None
+            if "--ids-file" in cmd:
+                with open(cmd[cmd.index("--ids-file") + 1], encoding="utf-8") as f:
+                    ids = f.read().split()
+            tables = cmd[cmd.index("--tables") + 1:cmd.index("--environment")]
+            runs.append((tables, ids))
+            return 0
+
+        saved = apply_data.subprocess.call
+        apply_data.subprocess.call = fake_call
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(apply_data.push_cloudkit(affected, production=False), 0)
+        finally:
+            apply_data.subprocess.call = saved
+        self.assertEqual(runs, [(["costumes", "costume_wears"], ["cos_t"])])
 
 
 class CheckWithoutThirdPartyModulesTest(unittest.TestCase):
