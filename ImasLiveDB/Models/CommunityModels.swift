@@ -519,27 +519,3 @@ struct TagsListResponse: Decodable, Sendable {
     let tags: [CommunityTag]
     let total: Int
 }
-
-// MARK: - Penlight / Tag Ack Types
-
-struct PenlightVoteAck: Decodable, Sendable {
-    let songId: String
-    let colorSetKey: String
-    let count: Int
-}
-
-struct PenlightCancelAck: Decodable, Sendable {
-    let songId: String
-    let cancelled: Bool
-}
-
-struct TagRemoveAck: Decodable, Sendable {
-    let songId: String
-    let tagId: String
-    let removed: Bool
-}
-
-struct TagReportAck: Decodable, Sendable {
-    let ok: Bool
-    let totalReports: Int
-}

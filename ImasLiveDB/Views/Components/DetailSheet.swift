@@ -147,7 +147,6 @@ struct DetailContentView: View {
 
 }
 
-
 // MARK: - Song Sheet Content
 
 /// 楽曲詳細のタブ。
@@ -572,52 +571,6 @@ struct SongSheetContent: View {
         return URL(string: "https://www.uta-net.com/search/?Keyword=\(encoded)") ?? URL(string: "https://www.uta-net.com")!
     }
 }
-/// 旧 IdolRowLabel 互換 (新規実装は IdolNameRow を直接使うこと)。
-private typealias IdolRowLabel = IdolNameRow
-
-// MARK: - タップ可能な履歴行コンポーネント
-
-struct ShowHistoryButton: View {
-    @Environment(AppDatabase.self) private var database
-    let showId: String
-    let eventName: String
-    let showName: String
-    let date: String
-    let navigate: (DetailDestination) -> Void
-
-    var body: some View {
-        Button {
-            Task {
-                if let show = try? await AppContainer.shared.showReading.show(id: showId) {
-                    navigate(.show(show))
-                }
-            }
-        } label: {
-            HStack {
-                VStack(alignment: .leading, spacing: DS.sp2) {
-                    Text(eventDisplayName(eventName))
-                        .font(.imasSubhead)
-                        .foregroundStyle(DS.ink)
-                    HStack {
-                        Text(showName)
-                            .font(.imasCaption)
-                            .foregroundStyle(DS.ink2)
-                        Spacer()
-                        Text(date)
-                            .font(.imasCaption)
-                            .foregroundStyle(DS.ink2)
-                    }
-                }
-                ImasRowChevron()
-            }
-        }
-    }
-}
-
-
-// MARK: - Tappable Value Row
-
-/// 値全体をタップして遷移する汎用行（LabeledContent のスタイルを維持）
 
 // MARK: - Credits Row
 

@@ -690,12 +690,6 @@ enum SongSortOrder: String, CaseIterable, Sendable {
     }
 }
 
-/// 楽曲一覧のソート方向。 SongSortOrder と直交させて、 UI から昇降を反転できるようにする。
-enum SongSortDirection: String, CaseIterable, Sendable {
-    case ascending = "昇順"
-    case descending = "降順"
-}
-
 // MARK: - Event Absence Info
 
 struct EventAbsenceInfo: Sendable {
