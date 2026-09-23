@@ -70,7 +70,7 @@ struct SongListView: View {
     @Environment(CloudKitSyncEngine.self) private var syncEngine
     @State private var vm = SongListViewModel()
     @State private var filter = SongSearchFilter()
-    @State private var sortOrder: SongSortOrder = .titleKana
+    @State private var sortOrder: SongSortOrder = .listDefault
     /// nil = sortOrder のデフォルト方向、 true=昇順、 false=降順
     @State private var sortAscending: Bool? = nil
     @State private var showFilter = false
@@ -719,7 +719,7 @@ struct SongListView: View {
 
     private func resetAllFilters() {
         filter = SongSearchFilter()
-        sortOrder = .titleKana
+        sortOrder = .listDefault
         sortAscending = nil
         listMode = .songs
         collectFilter = .all
@@ -806,17 +806,34 @@ struct SongListView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    /// 件数 + ソートコントロール (デザインの csort 行)。ソートボタンはフィルタシートを開く。
+    /// 件数 + ソートコントロール (デザインの csort 行)。
+    ///
+    /// 並び替えはその場のメニューで切り替える。フィルタシートを開かせると、並びだけ
+    /// 変えたい時に絞り込み全体を掻き分けることになる (シート側にも同じ項目は残す)。
     private func countSortBar(count: Int) -> some View {
         HStack {
             (Text("\(count)").font(.imasDisplay(15, weight: .bold)).foregroundStyle(DS.ink)
                 + Text(" 件").font(.imasFootnote).foregroundStyle(DS.ink2))
             Spacer()
-            Button {
-                showFilter = true
+            Menu {
+                Picker("並び順", selection: Binding(
+                    get: { sortOrder },
+                    set: { changeSortOrder($0) }
+                )) {
+                    ForEach(SongSortOrder.allCases, id: \.rawValue) { order in
+                        Text(order.rawValue).tag(order)
+                    }
+                }
+                Picker("方向", selection: Binding(
+                    get: { effectiveSortAscending },
+                    set: { changeSortAscending($0) }
+                )) {
+                    Label("昇順", systemImage: "arrow.up").tag(true)
+                    Label("降順", systemImage: "arrow.down").tag(false)
+                }
             } label: {
                 HStack(spacing: 5) {
-                    Image(systemName: "arrow.up.arrow.down")
+                    Image(systemName: effectiveSortAscending ? "arrow.up" : "arrow.down")
                         .font(.imasScaled( 13, weight: .semibold))
                         .foregroundStyle(DS.ink2)
                     Text(sortOrder.rawValue)
@@ -830,11 +847,30 @@ struct SongListView: View {
                 .background(DS.fill, in: RoundedRectangle(cornerRadius: DS.rSM, style: .continuous))
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("並び替え: \(sortOrder.rawValue)")
+            .accessibilityLabel("並び替え: \(sortOrder.rawValue)、\(effectiveSortAscending ? "昇順" : "降順")")
         }
         .padding(.horizontal, DS.sp5)
         .padding(.top, DS.sp2)
         .padding(.bottom, DS.sp2)
+    }
+
+    private var effectiveSortAscending: Bool { sortAscending ?? sortOrder.defaultAscending }
+
+    /// 軸を変えたら方向はその軸の既定に戻す。前の軸で選んだ向きを持ち越すと、
+    /// 「披露回数順」が少ない順から始まるような、選んだ直後に意図と逆の並びになる。
+    private func changeSortOrder(_ order: SongSortOrder) {
+        guard order != sortOrder else { return }
+        AppAnalytics.tap("song_list.quick_sort")
+        sortOrder = order
+        sortAscending = nil
+        reload()
+    }
+
+    private func changeSortAscending(_ ascending: Bool) {
+        guard ascending != effectiveSortAscending else { return }
+        AppAnalytics.tap("song_list.quick_sort_direction")
+        sortAscending = ascending
+        reload()
     }
 
     /// 並び順の根拠として行に出す指標。その順で並べていない時は出さない。

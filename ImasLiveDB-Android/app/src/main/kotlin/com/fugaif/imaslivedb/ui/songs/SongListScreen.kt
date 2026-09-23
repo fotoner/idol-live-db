@@ -3,6 +3,7 @@ package com.fugaif.imaslivedb.ui.songs
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,9 +16,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material.icons.filled.Warning
@@ -188,11 +191,11 @@ fun SongListScreen(
             TagFilterErrorBanner(visible = uiState.tagFilterError)
             KamisabiCompletionBanner(uiState = uiState)
 
-            // Count + sort control (件数 / 並び替え。タップでフィルタシートを開く)
+            // Count + sort control (件数 / 並び替え)。並び替えはその場のメニューで切り替える。
+            // フィルタシートを開かせると、並びだけ変えたい時に絞り込み全体を掻き分けることになる。
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { showFilter = true }
                     .padding(horizontal = 16.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -207,15 +210,12 @@ fun SongListScreen(
                     style = MaterialTheme.typography.bodySmall,
                     color = DS.ink2
                 )
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Sort,
-                        contentDescription = null,
-                        tint = DS.ink2,
-                        modifier = Modifier.padding(2.dp)
-                    )
-                    Text(text = uiState.sortOrder.label, style = MaterialTheme.typography.bodySmall, color = DS.ink)
-                }
+                SortMenu(
+                    sortOrder = uiState.sortOrder,
+                    ascending = uiState.sortAscending ?: uiState.sortOrder.defaultAscending,
+                    onSortOrder = viewModel::setSortOrder,
+                    onAscending = viewModel::setSortAscending
+                )
             }
 
             HorizontalDivider()
@@ -612,6 +612,66 @@ private fun RemovableFilterChipRow(uiState: SongListUiState, viewModel: SongList
                 tag.name
             }
             ImasRemovableChip(text = label, onRemove = { viewModel.removeTag(tag) })
+        }
+    }
+}
+
+/** 件数行の並び替えメニュー (軸 + 方向)。iOS SongListView.countSortBar の Menu と同じ構成。 */
+@Composable
+private fun SortMenu(
+    sortOrder: SongSortOrder,
+    ascending: Boolean,
+    onSortOrder: (SongSortOrder) -> Unit,
+    onAscending: (Boolean) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        Row(
+            modifier = Modifier
+                .clickable { expanded = true }
+                .padding(horizontal = 4.dp, vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            Icon(
+                imageVector = if (ascending) Icons.Filled.ArrowUpward else Icons.Filled.ArrowDownward,
+                contentDescription = null,
+                tint = DS.ink2,
+                modifier = Modifier.size(16.dp)
+            )
+            Text(text = sortOrder.label, style = MaterialTheme.typography.bodySmall, color = DS.ink)
+            Icon(
+                imageVector = Icons.Filled.ArrowDropDown,
+                contentDescription = "並び替え",
+                tint = DS.ink2
+            )
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            SongSortOrder.entries.forEach { order ->
+                DropdownMenuItem(
+                    text = { Text(order.label) },
+                    leadingIcon = {
+                        if (order == sortOrder) Icon(Icons.Filled.Check, contentDescription = "選択中")
+                    },
+                    onClick = {
+                        expanded = false
+                        onSortOrder(order)
+                    }
+                )
+            }
+            HorizontalDivider()
+            listOf(true to "昇順", false to "降順").forEach { (value, label) ->
+                DropdownMenuItem(
+                    text = { Text(label) },
+                    leadingIcon = {
+                        if (value == ascending) Icon(Icons.Filled.Check, contentDescription = "選択中")
+                    },
+                    onClick = {
+                        expanded = false
+                        onAscending(value)
+                    }
+                )
+            }
         }
     }
 }

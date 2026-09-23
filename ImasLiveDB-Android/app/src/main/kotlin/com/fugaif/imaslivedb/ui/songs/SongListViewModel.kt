@@ -73,7 +73,7 @@ data class SongListUiState(
     /** 表示形式 (楽曲 / アルバム / シリーズ)。 */
     val listMode: SongListMode = SongListMode.SONGS,
     val filter: SongSearchFilter = SongSearchFilter(),
-    val sortOrder: SongSortOrder = SongSortOrder.TITLE_KANA,
+    val sortOrder: SongSortOrder = SONG_LIST_DEFAULT_SORT,
     // nil = sortOrder のデフォルト方向 (iOS と同じ tri-state)。
     val sortAscending: Boolean? = null,
     // ブランド未選択(全件)時に「その他」(歌枠カバー等 brand_id='other') を出すか。既定 OFF で隠す。
@@ -172,6 +172,23 @@ class SongListViewModel : ViewModel() {
             myMarkFilter = myMarkFilter,
             listMode = listMode
         )
+        loadSongs()
+    }
+
+    /**
+     * 件数行のメニューから並び順だけを変える。軸を変えたら方向はその軸の既定に戻す
+     * (前の軸で選んだ向きを持ち越すと、選んだ直後に意図と逆の並びになる)。iOS changeSortOrder と同じ。
+     */
+    fun setSortOrder(order: SongSortOrder) {
+        if (_uiState.value.sortOrder == order) return
+        _uiState.value = _uiState.value.copy(sortOrder = order, sortAscending = null)
+        loadSongs()
+    }
+
+    fun setSortAscending(ascending: Boolean) {
+        val state = _uiState.value
+        if ((state.sortAscending ?: state.sortOrder.defaultAscending) == ascending) return
+        _uiState.value = state.copy(sortAscending = ascending)
         loadSongs()
     }
 
@@ -544,3 +561,6 @@ class SongListViewModel : ViewModel() {
         const val FUZZY_DEBOUNCE_MS = 250L
     }
 }
+
+/** 楽曲一覧を開いた時の並び。新しい曲から見たい使い方が主なのでリリース日順 (降順)。iOS `listDefault` と同じ。 */
+val SONG_LIST_DEFAULT_SORT: SongSortOrder = SongSortOrder.RELEASE_DATE

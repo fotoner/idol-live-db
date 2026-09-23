@@ -390,7 +390,7 @@ fun SongFilterSheet(
                     TextButton(
                         onClick = {
                             listMode = SongListMode.SONGS
-                            selectedSort = SongSortOrder.TITLE_KANA
+                            selectedSort = SONG_LIST_DEFAULT_SORT
                             sortAscending = null
                             brandIds = emptySet()
                             idolIds = emptySet()

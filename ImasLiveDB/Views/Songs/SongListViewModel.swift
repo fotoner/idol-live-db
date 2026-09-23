@@ -220,7 +220,7 @@ final class SongListViewModel {
         if let tagSongIds {
             ctx.tagSongIds = tagSongIds
             ctx.rankByTagVotes = request.selectedTagCount == 1
-                && request.sortOrder == .titleKana && request.sortAscending == nil
+                && request.sortOrder == .listDefault && request.sortAscending == nil
             ctx.tagVoteCounts = tagVoteCounts
         }
         // 集合 AND なので、要求が下りていない (`callGuideOnly == false`) ときや
@@ -470,4 +470,10 @@ struct SongListRequest {
     var searchText: String
     /// `searchText` を何に当てるか。歌詞のときは手元で絞れないので空文字が来る。
     var searchScope: SongSearchMode = .title
+}
+
+extension SongSortOrder {
+    /// 楽曲一覧を開いた時の並び。新しい曲から見たい使い方が主なのでリリース日順
+    /// (降順 = 新しい順)。解除ボタンもここへ戻す。
+    static let listDefault: SongSortOrder = .releaseDate
 }
