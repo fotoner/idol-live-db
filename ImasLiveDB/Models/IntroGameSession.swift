@@ -97,6 +97,17 @@ final class IntroGameSession {
         )
     }
 
+    /// 出題プール。候補は曲一覧の絞り込み (`preset`) か、選んだブランドの曲。
+    /// **どちらの入口でも**、出題できるかはコアが決める (`IntroQuizChoices.playable`)。
+    /// ブランド指定の経路だけ SQL で「apple_music_id がある曲」に絞っていたため、
+    /// Apple Music を契約していない端末で preview の無い曲が出題され、無音になっていた。
+    nonisolated static func questionPool(
+        preset: [Song]?, brandIds: Set<String>?, database: AppDatabase, hasAppleMusicSubscription: Bool
+    ) throws -> [Song] {
+        let candidates = try preset ?? database.fetchIntroDonSongs(brandIds: brandIds)
+        return IntroQuizChoices.playable(candidates, hasAppleMusicSubscription: hasAppleMusicSubscription)
+    }
+
     @ObservationIgnored private var rushTimerTask: Task<Void, Never>? = nil
 
     /// イントロ再生は共通エンジンに委譲 (ソロ/Rush/パーティで同一の安定ロジックを共有)。
@@ -129,8 +140,9 @@ final class IntroGameSession {
         isNewBest = false
 
         // プリセット (曲一覧の絞り込み) があればそれを使う。無ければブランド条件でDB取得。
-        let pool = try presetPool.map { Self.playable($0) }
-            ?? database.fetchIntroDonSongs(brandIds: settings.selectedBrandIds)
+        let pool = try Self.questionPool(
+            preset: presetPool, brandIds: settings.selectedBrandIds, database: database,
+            hasAppleMusicSubscription: MusicKitService.shared.hasAppleMusicSubscription)
 
         guard pool.count >= 4 else {
             phase = .idle

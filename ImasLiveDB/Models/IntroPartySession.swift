@@ -70,8 +70,9 @@ final class IntroPartySession {
     func generateQuestions(database: AppDatabase) async throws {
         phase = .loading
         audio.preferFull = settings.playback == .full
-        let pool = try presetPool.map { IntroGameSession.playable($0) }
-            ?? database.fetchIntroDonSongs(brandIds: settings.selectedBrandIds)
+        let pool = try IntroGameSession.questionPool(
+            preset: presetPool, brandIds: settings.selectedBrandIds, database: database,
+            hasAppleMusicSubscription: MusicKitService.shared.hasAppleMusicSubscription)
         guard pool.count >= 4 else {
             questions = []
             // .loading のまま固着させない (再戦ボタン等が読み込み中表示のまま止まる不具合対策)。

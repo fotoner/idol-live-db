@@ -51,16 +51,14 @@ extension AppDatabase {
         try Brand.order(Column("sort_order")).fetchAll(db)
     }
 
+    /// イントロドンの出題候補 (選んだブランドの曲)。出題できるかどうかはここでは決めない
+    /// (端末の契約状態を込みでコアが決める。`IntroGameSession.questionPool`)。
     func fetchIntroDonSongs(brandIds: Set<String>? = nil) throws -> [Song] {
         try dbQueue.read { db in
-            var sql = """
-                SELECT * FROM songs
-                WHERE apple_music_id IS NOT NULL AND apple_music_id != ''
-                  AND parent_song_id IS NULL
-                """
+            var sql = "SELECT * FROM songs"
             var args: [DatabaseValueConvertible] = []
             if let brandIds, !brandIds.isEmpty {
-                sql += "\n  AND brand_id IN (\(brandIds.map { _ in "?" }.joined(separator: ",")))"
+                sql += "\nWHERE brand_id IN (\(brandIds.map { _ in "?" }.joined(separator: ",")))"
                 args = Array(brandIds)
             }
             sql += "\nORDER BY RANDOM()"
