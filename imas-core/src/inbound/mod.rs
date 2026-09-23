@@ -58,6 +58,7 @@ pub mod intro_don_session;
 pub mod voice_answer;
 pub mod collection_dashboard;
 pub mod event_hero;
+pub mod search_match_text;
 pub mod auth_rules;
 pub mod share_text;
 pub mod sync_decisions;

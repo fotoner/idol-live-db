@@ -169,6 +169,7 @@ declare_and_call_checksums! {
     uniffi_imas_core_checksum_func_reseed_summary_label,
     uniffi_imas_core_checksum_func_reseed_target_tables,
     uniffi_imas_core_checksum_func_resolve_oshi_theme,
+    uniffi_imas_core_checksum_func_search_match_texts,
     uniffi_imas_core_checksum_func_seed_common_columns,
     uniffi_imas_core_checksum_func_seed_common_tables,
     uniffi_imas_core_checksum_func_setlist_display_mode_from_stored,
