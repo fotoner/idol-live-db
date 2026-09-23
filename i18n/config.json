@@ -1,0 +1,14 @@
+{
+  "guard": {
+    "ratchet": "report"
+  },
+  "languages": {
+    "ja": {
+      "channel": "release"
+    },
+    "ko": {
+      "channel": "dev"
+    }
+  },
+  "source_language": "ja"
+}

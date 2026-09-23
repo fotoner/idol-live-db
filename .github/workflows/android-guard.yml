@@ -16,6 +16,7 @@ on:
       - 'db/master.sql'
       - 'imas-core/**'
       - 'imas-text-fold/**'
+      - 'i18n/**'
       - '.github/workflows/android-guard.yml'
   pull_request:
     paths:
@@ -23,6 +24,7 @@ on:
       - 'db/master.sql'
       - 'imas-core/**'
       - 'imas-text-fold/**'
+      - 'i18n/**'
       - '.github/workflows/android-guard.yml'
   workflow_dispatch:
 
