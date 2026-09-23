@@ -28,8 +28,8 @@ struct Show: Codable, FetchableRecord, PersistableRecord, Identifiable, Hashable
     /// ライブビューイング実施の有無。nil=未設定→event 側にフォールバック。
     var hasLiveViewing: Bool? = nil
 
-    /// キャラライブかどうか
-    var isCharacterLive: Bool { performerType == "character" }
+    /// キャラライブかどうか (判定は imas-core `is_character_live`)。
+    var isCharacterLive: Bool { ImasLiveDB.isCharacterLive(performerType: performerType) }
 
     enum CodingKeys: String, CodingKey {
         case id
