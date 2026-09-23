@@ -138,8 +138,8 @@ class EnsureDbTest(unittest.TestCase):
         self.assertGreater(shows, 0)
 
 
-class SourceRequiredTest(unittest.TestCase):
-    """出典 (source) の無い投稿は --check で落とす。"""
+class PostFixture(unittest.TestCase):
+    """一時の data/ と master に投稿を置いて validate する土台。"""
 
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -154,6 +154,13 @@ class SourceRequiredTest(unittest.TestCase):
         apply_data.DATA_DIR, apply_data.ONLY_FILE = self._saved
         self.tmp.cleanup()
 
+    def song(self, **extra):
+        return dict({"id": "ml_new_song", "title": "新曲", "brand_id": "ml", "song_type": "solo"}, **extra)
+
+
+class SourceRequiredTest(PostFixture):
+    """出典 (source) の無い投稿は --check で落とす。"""
+
     def problems(self, kind, post):
         support.write_json(self.data / kind / "post.json", post)
         conn = sqlite3.connect(str(self.db))
@@ -161,9 +168,6 @@ class SourceRequiredTest(unittest.TestCase):
             return [p for p in apply_data.validate(conn) if "出典" in p]
         finally:
             conn.close()
-
-    def song(self, **extra):
-        return dict({"id": "ml_new_song", "title": "新曲", "brand_id": "ml", "song_type": "solo"}, **extra)
 
     def test_a_post_without_any_source_is_rejected(self):
         self.assertEqual(len(self.problems("songs", {"songs": [self.song()]})), 1)
@@ -209,6 +213,29 @@ class SourceRequiredTest(unittest.TestCase):
             self.assertEqual(apply_data.validate(conn), [])
         finally:
             conn.close()
+
+
+class TitleKanaRequiredTest(PostFixture):
+    """新曲は読み (ひらがな) が無いと --check で落とす。空だと五十音順・かな検索から漏れる。"""
+
+    def kana_problems(self, **extra):
+        post = {"source": "https://example.com/news", "songs": [self.song(**extra)]}
+        support.write_json(self.data / "songs" / "post.json", post)
+        conn = sqlite3.connect(str(self.db))
+        try:
+            return [p for p in apply_data.validate(conn) if "title_kana" in p]
+        finally:
+            conn.close()
+
+    def test_a_song_without_a_reading_is_rejected(self):
+        self.assertEqual(len(self.kana_problems()), 1)
+        self.assertEqual(len(self.kana_problems(title_kana="")), 1)
+
+    def test_a_katakana_reading_is_rejected(self):
+        self.assertEqual(len(self.kana_problems(title_kana="シンキョク")), 1)
+
+    def test_a_hiragana_reading_passes(self):
+        self.assertEqual(self.kana_problems(title_kana="しんきょく"), [])
 
 
 class AppliedPostsTest(unittest.TestCase):

@@ -190,6 +190,12 @@ def validate(conn):
                     problems.append(f"{tag}: original_singers の idol '{idol}' が存在しない")
             if s.get("unit_id") and not exists(conn, "units", s["unit_id"]):
                 problems.append(f"{tag}: unit_id '{s['unit_id']}' が存在しない")
+            # 読みが空だと五十音順・かな検索から漏れる。既存行は全部ひらがな。
+            kana = s.get("title_kana") or ""
+            if not kana:
+                problems.append(f"{tag}: title_kana が空")
+            elif re.search(r"[ァ-ヶ]", kana):
+                problems.append(f"{tag}: title_kana はひらがなで書く ({kana})")
 
     # 同じバッチで追加される新曲。セトリ側はこれも「存在する」として解決する。
     new_songs = [s for _, d in load("songs") for s in d.get("songs", [])]
