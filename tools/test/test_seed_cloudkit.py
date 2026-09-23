@@ -134,14 +134,16 @@ class SendingTest(unittest.TestCase):
         saved = sys.argv
         sys.argv = ["seed_cloudkit.py", "--db", str(self.db), "--key-id", "dummy",
                     "--key-file", str(self.key_file), *args]
+        out = io.StringIO()
         try:
-            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
                 sk.main()
             return 0
         except SystemExit as e:
             return e.code
         finally:
             sys.argv = saved
+            self.output = out.getvalue()
 
     def test_upload_goes_to_the_environment_chosen_last(self):
         sk._build_paths("production")
@@ -162,6 +164,14 @@ class SendingTest(unittest.TestCase):
     def test_ids_limit_the_rows_sent(self):
         self.assertEqual(self.run_main("--tables", "song_artists", "--ids", "other_song"), 0)
         self.assertEqual(self.ck.operations(), [])
+
+    def test_ids_that_match_no_row_are_warned(self):
+        # 渡した id が表の列に 1 つも当たらないのは、id の種類の取り違えが多い
+        # (shows に公演 id を渡す等)。黙って 0 件で終わらせない。
+        # 手元の DB に song_t の曲の行は無いが、song_artists には 1 行ある。
+        self.assertEqual(self.run_main("--tables", "songs", "song_artists", "--ids", "song_t"), 0)
+        self.assertIn("⚠️ songs: --ids で絞ったら 0 行", self.output)
+        self.assertNotIn("⚠️ song_artists:", self.output)
 
     def test_verify_counts_live_records_with_a_modified_at_query(self):
         def respond(url, payload):

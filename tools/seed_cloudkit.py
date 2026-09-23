@@ -160,7 +160,13 @@ def seed_table(
     rows = [dict(zip(cols, row)) for row in cur.fetchall()]
 
     if not rows:
-        print(f"  (empty table, skipping)")
+        if where:
+            # 渡した id が 1 つも当たらないのは、id の種類の取り違えが多い
+            # (shows は event_id で絞る、など)。黙って 0 件で終わらせない。
+            print(f"  ⚠️ {table}: --ids で絞ったら 0 行 ({id_col} に渡した {len(song_ids)} 件の"
+                  f" id が 1 つも無い)。id の種類と表の組み合わせを確かめること", file=sys.stderr)
+        else:
+            print(f"  (empty table, skipping)")
         return (0, 0)
 
     ops = rows_to_operations(table, rows, col_info, pk_cols, exclude_fields, include_fields, replace)
