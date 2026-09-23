@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import uniffi.imas_core.KamisabiCompletion
+import uniffi.imas_core.ShowWithEventNameRecord
 
 data class SongDetailUiState(
     val isLoading: Boolean = true,
@@ -29,7 +30,7 @@ data class SongDetailUiState(
     val unit: ImasUnit? = null,
     val brand: Brand? = null,
     /** 現地回収済み (参加ライブでこの曲が披露された) 公演一覧。 */
-    val collectedShows: List<PerformanceHistoryRow> = emptyList(),
+    val collectedShows: List<ShowWithEventNameRecord> = emptyList(),
     /** 関連楽曲 (同シリーズ/ユニット/原唱共有, ローカル算出)。 */
     val relatedSongs: List<Song> = emptyList(),
     /**

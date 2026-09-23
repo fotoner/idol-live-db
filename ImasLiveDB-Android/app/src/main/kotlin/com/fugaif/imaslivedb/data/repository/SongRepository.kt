@@ -28,6 +28,7 @@ import uniffi.imas_core.SongListSort
 import uniffi.imas_core.introQuizPlayableIndices
 import uniffi.imas_core.masterySongFilter
 import uniffi.imas_core.splitCreditNames
+import uniffi.imas_core.ShowWithEventNameRecord
 
 /**
  * クリエイター絞り込みの 1 行 (曲 + その曲でその人が担った役割)。
@@ -375,16 +376,16 @@ class SongRepository(
     suspend fun fetchUnitSongs(unitId: String): List<Song> =
         fetchSongsPreservingOrder(snapshots.query { it.unitSongIds(unitId) })
 
-    suspend fun fetchCollectedShows(songId: String): List<PerformanceHistoryRow> {
-        // 回収済み判定 (user_marks) はプラットフォームが正。全披露履歴をコアから取り、
-        // 参加 show / 参加イベント配下の公演だけ残す。参加種別 (text_value) は絞らない。
-        val attendedShows = db.userMarkDao().idsFor("show", "attended").toSet()
-        val attendedEvents = db.userMarkDao().idsFor("event", "attended").toSet()
-        return snapshots.query { store ->
-            store.songPerformanceHistory(songId)
-                .filter { it.showId in attendedShows || it.eventId in attendedEvents }
-                .map { it.toRow() }
-        }
+    /**
+     * この曲を現地で回収した公演 (新しい順・同じ公演は 1 行)。参加マークは一覧の回収バッジと
+     * 同じく回収に数える形態だけに絞って渡し (collectionAttendedShows)、リアルライブに
+     * 絞るのと並べるのはコア (songCollectedShows)。
+     */
+    suspend fun fetchCollectedShows(songId: String): List<ShowWithEventNameRecord> {
+        val includeStream = CollectionPreferences.includeStream
+        val attendedShowIds = CollectionAttendance.showIds(db, includeStream)
+        val attendedEventIds = CollectionAttendance.eventIds(db, includeStream)
+        return snapshots.query { store -> store.songCollectedShows(songId, attendedShowIds, attendedEventIds) }
     }
 
     /**

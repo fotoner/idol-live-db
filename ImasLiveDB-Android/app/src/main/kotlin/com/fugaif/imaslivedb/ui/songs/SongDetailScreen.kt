@@ -528,7 +528,7 @@ private fun InfoTab(
                     state.collectedShows.forEachIndexed { idx, show ->
                         if (idx > 0) HorizontalDivider(color = DS.sep)
                         Row(
-                            modifier = Modifier.fillMaxWidth().clickable { onShowClick(show.showId) }
+                            modifier = Modifier.fillMaxWidth().clickable { onShowClick(show.id) }
                                 .padding(vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -536,7 +536,7 @@ private fun InfoTab(
                             Column(Modifier.weight(1f).padding(start = 10.dp)) {
                                 Text(AppPreferences.eventDisplayName(show.eventName), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink,
                                     maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                Text(listOf(show.showName, show.date).filter { it.isNotEmpty() }.joinToString(" ・ "),
+                                Text(listOf(show.name, show.date).filter { it.isNotEmpty() }.joinToString(" ・ "),
                                     fontSize = 12.sp, color = DS.ink2, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             }
                         }
