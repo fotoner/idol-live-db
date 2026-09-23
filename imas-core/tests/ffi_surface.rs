@@ -322,6 +322,8 @@ declare_and_call_checksums! {
     uniffi_imas_core_checksum_method_snapshotstore_songs_by_ids_ordered,
     uniffi_imas_core_checksum_method_snapshotstore_songs_by_release_year,
     uniffi_imas_core_checksum_method_snapshotstore_songs_by_series_group,
+    uniffi_imas_core_checksum_method_snapshotstore_theme_derive_batch_for_brand_ids,
+    uniffi_imas_core_checksum_method_snapshotstore_theme_derive_for_brand_id,
     uniffi_imas_core_checksum_method_snapshotstore_timeline_bars,
     uniffi_imas_core_checksum_method_snapshotstore_unit_ids_with_songs,
     uniffi_imas_core_checksum_method_snapshotstore_unit_index_record,
