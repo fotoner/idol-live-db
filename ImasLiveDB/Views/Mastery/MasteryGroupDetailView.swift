@@ -34,6 +34,13 @@ struct MasteryGroupDetailView: View {
     /// 「現地で聴いたのに未設定」だけに絞る。段階の絞り込みとは排他。
     @State private var heardOnly = false
 
+    /// 群を組み直すきっかけ。
+    private struct GroupKey: Equatable {
+        let levels: [UInt8]
+        let steps: UInt8
+        let collected: Set<String>
+    }
+
     private struct UndoState {
         let label: String
         let previous: [String: UInt8]
@@ -89,7 +96,9 @@ struct MasteryGroupDetailView: View {
             DetailSheetView(destination: dest).environment(database)
         }
         .task { if !loaded { await load() } }
-        .task(id: levels) { rebuildGroup(levels) }
+        // 段・段の数・回収済みの集合のどれが変わっても組み直す。
+        .task(id: GroupKey(levels: levels, steps: marks.scale.steps,
+                           collected: marks.autoCollectedSongIds())) { rebuildGroup(levels) }
         .trackScreen("mastery_group")
     }
 
