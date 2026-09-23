@@ -70,7 +70,8 @@ struct NowPlayingBarView: View {
                     url: bar.artworkUrl.flatMap(URL.init(string:)),
                     size: Self.artworkSize,
                     songTitle: bar.title,
-                    seed: model.song?.brandId
+                    // seed は色 hex。ブランド ID をそのまま渡すと色として読まれる (P5-04)。
+                    seed: BrandColors.hex(for: model.song?.brandId)
                 )
 
                 VStack(alignment: .leading, spacing: 1) {
