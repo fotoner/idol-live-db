@@ -22,44 +22,116 @@
 
 ## モジュール構成 (`src/`)
 
+`index.ts` は薄いエントリ (362 行) に縮んでいる。ルーティングは `routes/` の各 `handleXxx` を
+順に試し、未一致なら次へ渡す形 (「ルートを `routes/` へ切り出す手順」節のとおり)。
+
 | ファイル | 役割 |
 |---|---|
-| `index.ts` | エントリ。`fetch` ハンドラ = ルーティング + `scheduled` (cron) 委譲。CORS・レスポンスヘルパ (`makeResponders`)・エッジキャッシュもここ。**切り出し済みのルート群は `routes/` へ委譲する** |
+| `index.ts` | エントリ。`fetch` = `ROUTES` (上から順に試す) の委譲 + `scheduled` を `scheduled.ts` へ委譲。CORS・レスポンスヘルパ (`makeResponders`)・エッジキャッシュの可否判定もここ |
 | `env.ts` | `Env` インターフェース (D1 binding + vars/secrets) の単一ソース |
-| `auth.ts` | Apple / Google の ID トークン検証、自前セッション JWT の署名・検証、`getAuthUser` |
+| `auth.ts` | Apple / Google の ID トークン検証、自前セッション JWT の署名・検証、`getAuthUser`、退会によるセッション失効判定 (`isRevokedSession`) |
+| `jwt.ts` | JWT の分解・HS256 署名検証・RS256 (JWKS) 検証・JWKS キャッシュ。クレーム判定は使う側 (`auth.ts` / `appattest.ts`) の責務 |
+| `bytes.ts` | base64 / base64url / UTF-8 / 定数時間比較 / SHA-256 / PEM のバイト列小物。`jwt.ts` / `appattest.ts` / `cloudkit.ts` / `routes/lyrics.ts` が個別に持っていた重複を集約 |
+| `time.ts` | D1 (SQLite) の日時文字列 ⇔ epoch 秒の変換 (iOS `APIClient` が秒 epoch を前提にデコードするための境界) |
 | `users.ts` | `users` テーブルの共通操作 (`upsertUser` / `checkIsAdmin`) |
 | `validation.ts` | リクエスト入力の共通バリデータ (`parsePositiveInt` / `validateOpaqueKey` / `escapeLike` / スコープ ID 検証) |
+| `scheduled.ts` | Cron (`scheduled`) ハンドラ。5 分ごとの掃除 (`api_rate_limits` の分バケット・`transfer_codes`) と日次の掃除・集計 (下記「IP レート制限の枠と掃除」参照) |
+| `rate_limit.ts` | D1 ベースのレート制限 (`INSERT…ON CONFLICT…RETURNING` で TOCTOU 排除)。IP 単位の枠 (`requireIpQuota`) は用途ごと (`"lyrics"` 等) に分けて渡す |
 | `routes/context.ts` | ルートハンドラが受け取る `RouteContext` (リクエスト毎のレスポンダを引数で渡す) |
-| `routes/device_aggregates.ts` | `/favorites/*` `/penlight/*` (device 単位の集計。認証不要) |
-| `routes/polls.ts` | `/polls/*` (みんなの投票) |
-| `routes/tags.ts` | `/tags` `/idol-tags` `/unit-tags` の 3 プール + `/{songs,idols,units}/:id/tags` + `/{songs,idols,units}/:id/similar`。タグ専用ヘルパもここに閉じている |
-| `routes/lyrics.ts` | 歌詞の配信・検索・投入 (`/songs/:id/lyrics` `/lyrics/search` `/admin/lyrics/*`)。**Bearer 必須・`no-store`** (JASRAC 許諾の条件) |
-| `routes/calls.ts` | コールガイドの保存 (`PUT /songs/:id/calls`) と整備状況の一覧 (`GET /calls/dashboard`)。一覧は件数・日時・表示名だけで歌詞の断片を含まないため公開キャッシュに載せる |
-| `lyrics_calls.ts` | コール (clap / calls) のドメインロジック。ボディ検証・アンカーの数え方 (Unicode スカラー)・歌詞差し替え時の引き継ぎ |
-| `call_stats.ts` | コールの数え方と派生メタデータ (`song_call_stats` / `call_edit_history`, migrations/0032) の書き込み。数え方の定義はここが唯一の正 |
+| `routes/guards.ts` | ルート入口で繰り返す確認 (端末 ID・IP の枠・本文・パスの値・BAN)。「値か、そのまま返せる `Response` か」を返し、呼び出し側は `if (x instanceof Response) return x;` で抜ける |
+| `routes/app_attest.ts` | App Attest (iOS) / Play Integrity (Android) 検証・アプリ実体トークン発行・コミュニティ読み取りのゲート (`gateCommunityRead`) |
+| `routes/app_links.ts` | AASA (`apple-app-site-association`) 配信・共有リンクのランディング |
+| `routes/auth.ts` | `/auth/*` (ログイン・リフレッシュ・`/auth/me`) |
+| `routes/users.ts` | `/users/*` |
+| `routes/edits.ts` | `/edits` 投稿の受付・検証 (`master_validators.ts`) → CloudKit 反映、フィード |
+| `routes/admin.ts` | `/admin/ban` `/admin/revert-user` `/admin/users/:id/edits` |
 | `routes/setlist_predictions.ts` | `/me/predictions` `/shows/:id/predictions` `/shows/:id/songs/:id/performers` `/shows/:id/likes` `/shows/:id/songs/:id/like` |
+| `routes/polls.ts` | `/polls/*` (みんなの投票) |
+| `routes/device_aggregates.ts` | `/favorites/*` `/penlight/*` (device 単位の集計。認証不要) |
+| `routes/tags.ts` | `/tags` `/idol-tags` `/unit-tags` の 3 プール + `/{songs,idols,units}/:id/tags` + `/{songs,idols,units}/:id/similar`。タグ専用ヘルパもここに閉じている |
+| `routes/lyrics.ts` | 歌詞の配信・検索・投入 (`/songs/:id/lyrics` `/lyrics/search` `/admin/lyrics/*`)。**配信・検索は未認証可**、投入は運用者トークン/admin 必須。詳細は下の「歌詞・コールの認証」 |
+| `routes/calls.ts` | コールガイドの保存 (`PUT /songs/:id/calls`) と整備状況の一覧 (`GET /calls/dashboard`)。一覧は件数・日時・表示名だけで歌詞の断片を含まないため公開キャッシュに載せる |
+| `routes/song_detail.ts` | `GET /songs/:id/detail` (tags + similar + penlight + 任意で歌詞を 1 リクエストに束ねる) |
+| `routes/transfer.ts` | `/transfer` (端末間の引き継ぎコード) |
+| `lyrics_calls.ts` | コール (clap / calls) のドメインロジック。ボディ検証・アンカーの数え方 (Unicode スカラー)・歌詞差し替え時の引き継ぎ |
+| `lyrics_index.ts` | 歌詞本文検索の索引 (候補を絞ってから全走査するための補助索引) |
+| `call_stats.ts` | コールの数え方と派生メタデータ (`song_call_stats` / `call_edit_history`, migrations/0032) の書き込み。数え方の定義はここが唯一の正 |
 | `cloudkit.ts` | CloudKit S2S クライアント (`cloudKitModify` / `cloudKitLookup` / forceUpdate・softDelete ビルダ)。`modifiedAt` 強制注入 |
 | `ck_schema.ts` | CloudKit Public DB スキーマ型情報の単一ソース |
-| `edits.ts` | `/edits` 投稿の受付・検証 (`master_validators.ts`) → CloudKit 反映 |
 | `master_validators.ts` | `/edits` のマスタ編集バリデーション |
 | `edit_history.ts` | オープン編集の監査基盤 (`edit_batch` / `edit_history` の D1 ヘルパ) |
+| `edit_requests.ts` | `/edits` の受付本体 (旧 `edits.ts` から分離)。`routes/edits.ts` が薄いハンドラとして呼ぶ |
 | `setlist_snapshot.ts` | setlist 編集を show 単位スナップショットで履歴化 |
 | `edit_good.ts` | 編集への「拍手」 |
-| `feed.ts` | 編集フィード (`/feed`、display_name マスク含む) |
+| `feed.ts` | 編集フィード (`display_name` マスク含む。マスクの実装は `masking.ts`) |
+| `masking.ts` | 表示名の先頭 8 文字マスク等、公開応答から個人特定情報を落とす処理 |
 | `revert.ts` | 編集の差し戻し / ユーザー単位 revert / 管理者編集一覧 |
-| `appattest.ts` | App Attest (iOS) / Play Integrity (Android) 検証 + アプリ実体トークン発行 (クローンただ乗り対策) |
-| `rate_limit.ts` | D1 ベースのレート制限 (`INSERT…ON CONFLICT…RETURNING` で TOCTOU 排除) |
+| `appattest.ts` | App Attest (iOS) / Play Integrity (Android) 検証の実装本体 (`routes/app_attest.ts` から呼ばれる) |
 | `badges.ts` | 貢献バッジ判定 |
-| `apply.ts` | Cron (`scheduled`) ハンドラ。`rate_limits` の日次掃除等 |
 
-## 主なエンドポイント群 (実在ルートは `index.ts` のルートマッチが正)
+## 歌詞・コールの認証 (2026-09 に変わった点)
 
-- 認証: `POST /auth/login` (Apple) / `GET /auth/me`
+**`GET /songs/:id/lyrics` と `GET /lyrics/search` は Bearer 不要 (未認証で配る)。** 以前は認証必須
+だったが、JASRAC の条件が要求するのは「まとめ取りできないこと (1 リクエスト 1 曲)」と
+「リクエスト回数が数えられること」で、どちらも認証の有無とは独立している。今の守りは:
+
+- **IP 単位のレート制限** (`rate_limit.ts` の `requireIpQuota(ctx, "lyrics", LYRICS_IP_LIMITS)`。
+  120/分・1,000/日)。用途ごとに名前空間を分けており、他の枠 (`"edit"` 等) と混ざらない。
+  会場の NAT で同じ IP に大勢が乗っても正常利用は 429 にならず、まとめ取りは日の上限で止まる。
+- **`Cache-Control: no-store`** に加え、`index.ts` のエッジ共有キャッシュ対象判定
+  (`edgeCacheEligible`) からパスを名指しで除外。認証で守っているのではなく、キャッシュに
+  絶対に載らないことと、まとめ取りできないことで守っている。
+- draft (未公開) の歌詞は `GET /songs/:id/lyrics` も `/lyrics/search` も admin にしか返さない
+  (`checkIsAdmin`。未認証はここで 404)。
+
+**歌詞・コールの投入・差し替えだけが引き続き認証を要求する**: `PUT /songs/:id/calls` は
+一般ユーザーの Bearer (自分の入力として `edit` 枠、100/日) か運用者トークン
+(`X-Push-Token` = `env.LYRICS_PUSH_TOKEN`、`lyrics_calls` 枠) のどちらか。
+`PUT /admin/lyrics/:id` と `/admin/lyrics/status|quota` は運用者トークンか admin Bearer 必須。
+
+## 主なエンドポイント群 (実在ルートは `index.ts` の `ROUTES` が正)
+
+- 認証: `POST /auth/login` (Apple) / `POST /auth/refresh` / `GET /auth/me`
 - オープン編集: `POST /edits` / `GET /edits` (feed) / `GET /me/edits` / `POST|DELETE /edits/:batchId/good` / `POST /edits/:batchId/revert` / `GET /master/:recordType/:recordName/history`
-- 歌詞/コール: `GET /songs/:id/lyrics` / `GET /lyrics/search` / `PUT /songs/:id/calls` / `GET /calls/dashboard` / `PUT /admin/lyrics/:id`
-- 集計系: `GET/POST /polls…` / `/shows/:id/predictions` / `/shows/:id/likes` / `/songs/:song_id/tags|similar` / `/tags…` / `/favorites…` / `/penlight…` / `/leaderboard` / `/users/:id/badges`
-- 管理: `POST /admin/cloudkit/save` / `POST /admin/ban` / `POST /admin/revert-user` / `GET /admin/users/:id/edits`
-- アプリ証明: `GET /app/challenge` / `POST /app/attest|assert|integrity`
+- 歌詞/コール: `GET /songs/:id/lyrics` (未認証可) / `GET /lyrics/search` (未認証可) / `PUT /songs/:id/calls` / `GET /calls/dashboard` / `POST /admin/lyrics/status` / `GET /admin/lyrics/quota` / `PUT /admin/lyrics/:id`
+- 曲詳細の束ね: `GET /songs/:id/detail` (tags + similar + penlight。Bearer 付きなら歌詞も同梱)
+- 集計系: `GET/POST /polls…` / `/shows/:id/predictions` / `/shows/:id/likes` / `/songs/:song_id/tags|similar` / `/tags…` / `/favorites…` / `/penlight…` / `/users/:id/badges`
+- 引き継ぎ: `POST /transfer` / `GET /transfer/:code`
+- 管理: `POST /admin/ban` / `POST /admin/revert-user` / `GET /admin/users/:id/edits`
+- アプリ証明・着地: `GET /app/challenge` / `POST /app/attest|assert` / `GET /app/events/:id` / `GET /app/shows/:id` / `GET /.well-known/apple-app-site-association`
+
+**撤去済み (X-03 で発見した食い違いの訂正)**: `GET /leaderboard`・`POST /admin/cloudkit/save`・
+`POST /app/integrity` は 2026-09 のリファクタで実装から消えており、コードベース全体を
+grep しても存在しない。旧版のこの文書がまだ挙げていたのを削った。
+
+## IP レート制限の枠と掃除
+
+`rate_limit.ts` の `requireIpQuota` は**用途ごとに名前空間を分けて**枠を持つ (`"lyrics"` など)。
+1 つの IP が複数の用途を叩いても、片方の枠を使い切ってもう片方が巻き添えで止まることはない。
+
+D1 の行の持ち方は `api_rate_limits` (分バケット = 正の鍵、日バケット = 負の鍵) の 1 表。
+掃除は `scheduled.ts` が持つ (旧 `apply.ts` は無くなり、cron のタスクは 1 つずつ独立させてある。
+1 つが失敗しても残りは走り、失敗は `cron_task_failed` の JSON 1 行でログに出る):
+
+- **5 分ごと**: 1 日より古い**分**バケット (正の鍵) だけを消す。**日バケット (負の鍵) はここでは
+  消さない** — 消すと IP の日の上限 (歌詞の 1,000/日) が 5 分ごとに 0 へ戻って効かなくなる。
+- **日次**: 前日までの**日**バケットを消す (今日の行は残す)。あわせて `rate_limits` (7 日超)・
+  `call_edit_history` (180 日超)・`transfer_codes` (期限切れ) の掃除と `song_tag_counts` の再計算。
+
+分バケットの掃除頻度を落とさないのは、フルスキャンに近かった旧実装 (索引無し・1 回 1,006 行 ×
+283 回/日 = 285,000 行/日) を索引 (`idx_api_rate_limits_bucket` / `idx_rate_limits_date`) と
+頻度調整で直した経緯があるため。日次分だけを日次 cron に分けてある。
+
+## セッションの失効 (退会)
+
+`auth.ts` の `isRevokedSession` が、自前セッション JWT だけを対象に次を見る:
+
+- `users` の行が無い (退会した) → 失効
+- その行が作られた時刻より 10 分以上前に発行されたセッション JWT (退会後に同じ人が
+  再登録した場合の、退会前トークンの持ち越し) → 失効
+
+Apple / Google の ID トークンには関与しない (自前セッション JWT の検証にだけ噛む)。
+`routes/guards.ts` の入口チェックがこれを通す。
 
 ## 歌詞の利用ログ (JASRAC リクエスト回数)
 
@@ -114,35 +186,22 @@ Bearer 付きで歌詞を同梱した `GET /songs/:id/detail` の両方)。
    本番のこの API を叩いているので、レスポンスキー・ステータス・`Cache-Control` の変化は
    そのまま既存インストールの不具合になる。
 
-## ⚠️ D1 スキーマの drift (未解決・要オーナー確認)
+## D1 スキーマの drift (解決済み)
 
-**`migrations/` だけから作った D1 は、本番と同じスキーマにならない。** ローカル開発・新環境・
-災害復旧で「動かない」原因になるので、本番の実スキーマを確認したうえで migration を補うこと。
+`setlist_song_likes` の `CREATE TABLE` 欠落は `0025_setlist_song_likes.sql` で補完済み
+(`IF NOT EXISTS` なので本番にあれば no-op)。
 
-| 対象 | 状態 |
-|---|---|
-| `setlist_song_likes` | `CREATE TABLE` がどの migration にも無かった → **`0025_setlist_song_likes.sql` で補完済み** (`IF NOT EXISTS` なので本番にあれば no-op)。**適用前に本番の `PRAGMA table_info` と一致するか確認すること。** |
-| `setlist_predictions` / `setlist_prediction_votes` | migration は **`event_id`**、コードは **`show_id`**。rename の migration が存在しない (後発の `setlist_performer_predictions` は正しく `show_id`)。**未解決。** |
-
-`event_id → show_id` を直すには本番の現状を先に見る必要がある:
-
-```bash
-npx wrangler d1 execute imas-live-db --remote \
-  --command "PRAGMA table_info(setlist_predictions);"
-```
-
-- 本番が既に `show_id` なら → 「ローカルだけ古い」ので、追いつくための migration を書く。
-  ただし D1 の migration は本番でも走るため、素の `ALTER TABLE ... RENAME COLUMN` は
-  本番側で `no such column: event_id` になって失敗する。テーブル作り直し (新テーブルへ
-  `INSERT SELECT` → `DROP` → `RENAME`) など、両方の状態で成立する形にする必要がある。
-- 本番が `event_id` のままなら → 予想セトリ機能は本番でも壊れている。まず動作を確認する。
-
-**推測で migration を書かないこと。** ユーザーの投票データが入っているテーブル。
+`setlist_predictions` / `setlist_prediction_votes` の `event_id` ↔ `show_id` の乖離
+(migration は `event_id`・本番とコードは `show_id`) は `migrations/0038_setlist_predictions_show_id.sql`
+で解決した。本番ではこの migration を流さない (表はすでにこの形)。`wrangler d1 migrations apply
+--remote` を新環境に対して実行する前に、`0038_setlist_predictions_show_id.sql` を「本番では
+適用済み」として `d1_migrations` に記録する手順が必要 (`imas-live-api/README.md`「D1 migration
+適用」に手順あり)。ローカル・テスト・新環境の D1 はこの migration により本番と同じ `show_id` の
+形になる。
 
 ## 改善余地
 
-- `index.ts` は 1,256 行 (着手時 4,271 行) まで縮んだ。残っているのは横断的関心事
-  (CORS・レスポンダ・エッジキャッシュ・App Attest・Universal Links) と、
-  `/auth/*` `/users/me` `/admin/*` `/edits` 系 `/leaderboard` `/transfer`。
-  さらに切り出すなら `/auth/*` + `/users/me` あたりが次の単位。
+- `index.ts` はルーティングをほぼ `routes/` へ切り出し終え、362 行まで縮んだ。残っているのは
+  横断的関心事 (CORS・レスポンダ・エッジキャッシュ可否判定・`scheduled` への委譲) と `ROUTES` の
+  組み立てだけ。
 - ~~不正 JSON ボディが一部 500 になる~~ → 解消済み (全ルートで 400 + `{"error":"invalid JSON body"}`)。

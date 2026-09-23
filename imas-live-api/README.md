@@ -208,17 +208,22 @@ Cron (scheduled) は掃除だけ:
 
 | Method | Path | 認証 | 概要 |
 |--------|------|------|------|
-| GET | /songs/:id/lyrics | Bearer | 歌詞 1 曲 (コール込み)。`no-store` |
-| GET | /lyrics/search | Bearer | 歌詞本文の横断検索 (返すのは song_id とスニペットのみ) |
-| PUT | /songs/:id/calls | Bearer | コールガイドの保存 (曲単位の全置換)。`no-store` |
+| GET | /songs/:id/lyrics | 任意 (未認証可) | 歌詞 1 曲 (コール込み)。`no-store`。IP 単位のレート制限 (分/日) で守る |
+| GET | /lyrics/search | 任意 (未認証可) | 歌詞本文の横断検索 (返すのは song_id とスニペットのみ)。同じ IP 制限。draft は admin にしか見せない |
+| PUT | /songs/:id/calls | Bearer か 運用者トークン (`X-Push-Token`) | コールガイドの保存 (曲単位の全置換)。`no-store`。レート制限は一般ユーザーが `edit` 枠 (100/日)、運用者は `lyrics_calls` 枠 |
 | GET | /calls/dashboard | - | コールガイドの整備状況 (件数・日時・表示名のみ)。`public, max-age=1800` |
 | POST | /admin/lyrics/status | 運用者/admin | 歌詞の公開状態の一括切替 |
 | GET | /admin/lyrics/quota | 運用者/admin | 掲載曲数 (JASRAC 年次報告用) |
 | PUT | /admin/lyrics/:id | 運用者/admin | 歌詞の投入・差し替え |
 
-⚠️ **歌詞本文とコール本文が出るのは Bearer 必須・`no-store` の経路だけ。**
-JASRAC 許諾の条件が「一括ダウンロードできない形式での配信」なので、認証を外すと
-`index.ts` の `edgeCacheEligible` が真になり、エッジ共有キャッシュに歌詞が載る。
+⚠️ **`GET /songs/:id/lyrics` と `GET /lyrics/search` は認証不要 (未認証でも配る)。**
+要件は「まとめ取りできないこと (1 リクエスト 1 曲)」と「リクエスト回数が数えられること」で、
+どちらも認証とは独立している。守りは IP 単位のレート制限 (`LYRICS_IP_LIMITS` = 120/分・1,000/日) と
+`no-store` (キャッシュに載せない)。`PUT /songs/:id/calls`・`/admin/lyrics/*` は運用者トークン
+(`X-Push-Token`) か admin Bearer が必須。**キャッシュ除外の方が大事な理由**は不変: JASRAC 許諾の条件が
+「一括ダウンロードできない形式での配信」なので、`index.ts` のエッジ共有キャッシュ対象判定
+(`edgeCacheEligible`) から歌詞系パスを名指しで外してある。認証で守っているのではなく、
+レート制限とキャッシュ除外で守っている。
 
 `GET /calls/dashboard` はその例外ではなく、**歌詞の断片を 1 文字も含まない**ので
 公開キャッシュに置ける。返すのは以下だけ (`src/routes/calls.ts`):
