@@ -63,7 +63,7 @@ data class IdolQuizSetupUiState(
 
 class IdolQuizSetupViewModel(app: Application) : AndroidViewModel(app) {
     private val idolRepository = AppModule.from(app).idolRepository
-    private val brandDao = AppModule.from(app).database.brandDao()
+    private val stats = AppModule.from(app).statsRepository
     private val snapshots = AppModule.from(app).snapshotStoreProvider
     private val prefs = app.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
@@ -80,7 +80,7 @@ class IdolQuizSetupViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         viewModelScope.launch {
-            val brands = brandDao.fetchBrands()
+            val brands = stats.fetchBrands()
             _uiState.value = _uiState.value.copy(brands = brands)
             castNames = fetchIdolCastNames(snapshots)
             estimatePool()

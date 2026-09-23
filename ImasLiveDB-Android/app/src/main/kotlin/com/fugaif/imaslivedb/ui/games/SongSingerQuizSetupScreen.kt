@@ -5,9 +5,7 @@ import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -56,7 +54,7 @@ data class SongSingerQuizSetupUiState(
 class SongSingerQuizSetupViewModel(app: Application) : AndroidViewModel(app) {
     private val idolRepository = AppModule.from(app).idolRepository
     private val songRepository = AppModule.from(app).songRepository
-    private val brandDao = AppModule.from(app).database.brandDao()
+    private val stats = AppModule.from(app).statsRepository
     private val prefs = app.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     private val _uiState = MutableStateFlow(
@@ -68,7 +66,7 @@ class SongSingerQuizSetupViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         viewModelScope.launch {
-            val brands = brandDao.fetchBrands()
+            val brands = stats.fetchBrands()
             _uiState.value = _uiState.value.copy(brands = brands)
             estimatePool()
         }

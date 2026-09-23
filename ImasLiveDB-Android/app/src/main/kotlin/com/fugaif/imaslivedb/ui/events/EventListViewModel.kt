@@ -105,7 +105,7 @@ class EventListViewModel : ViewModel() {
         viewModelScope.launch {
             val module = AppModule.from(context)
             eventsWithDate = module.eventRepository.fetchEventsWithFirstDate()
-            val brands = module.database.brandDao().fetchBrands()
+            val brands = module.statsRepository.fetchBrands()
             val directory = module.eventRepository.fetchVenueDirectory()
             loadMarkSets(context)
             sourceLoaded = true

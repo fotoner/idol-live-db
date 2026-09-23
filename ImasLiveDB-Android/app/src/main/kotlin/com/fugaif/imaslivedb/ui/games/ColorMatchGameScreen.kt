@@ -131,7 +131,7 @@ data class ColorMatchUiState(
 
 class ColorMatchViewModel(app: Application) : AndroidViewModel(app) {
     private val idolRepository = AppModule.from(app).idolRepository
-    private val brandDao = AppModule.from(app).database.brandDao()
+    private val stats = AppModule.from(app).statsRepository
     private val progressStore = AppModule.from(app).gameProgressStore
 
     private val _uiState = MutableStateFlow(ColorMatchUiState())
@@ -146,7 +146,7 @@ class ColorMatchViewModel(app: Application) : AndroidViewModel(app) {
     private fun load() {
         viewModelScope.launch {
             val all = idolRepository.fetchIdols()
-            val allBrands = brandDao.fetchBrands()
+            val allBrands = stats.fetchBrands()
             val built = colorMatchBuildPools(
                 idols = all.map {
                     ColorMatchIdolSource(

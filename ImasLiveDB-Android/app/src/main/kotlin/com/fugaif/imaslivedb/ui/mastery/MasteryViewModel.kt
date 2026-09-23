@@ -66,7 +66,7 @@ class MasteryViewModel(app: Application) : AndroidViewModel(app) {
 
     private val songRepo = AppModule.from(app).songRepository
     private val marks = AppModule.from(app).userMarkRepository
-    private val db = AppModule.from(app).database
+    private val stats = AppModule.from(app).statsRepository
 
     private val _uiState = MutableStateFlow(MasteryUiState())
     val uiState: StateFlow<MasteryUiState> = _uiState.asStateFlow()
@@ -83,7 +83,7 @@ class MasteryViewModel(app: Application) : AndroidViewModel(app) {
             levels = marks.masteryLevels()
             collected = marks.autoCollectedSongIds()
             _uiState.value = _uiState.value.copy(
-                brands = db.brandDao().fetchBrands(),
+                brands = stats.fetchBrands(),
                 scale = AppPreferences.masteryScale,
                 isLoading = false,
             )

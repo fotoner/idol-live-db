@@ -81,7 +81,7 @@ class SongDetailViewModel : ViewModel() {
                 null
             }
             val brand = song?.brandId?.let { brandId ->
-                module.database.brandDao().fetchBrands().firstOrNull { it.id == brandId }
+                module.eventRepository.fetchBrand(brandId)
             }
             val collectedShows = module.songRepository.fetchCollectedShows(songId)
             val relatedSongs = if (song != null) module.songRepository.fetchRelatedSongs(song, limit = 8) else emptyList()
