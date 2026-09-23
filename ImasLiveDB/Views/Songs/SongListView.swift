@@ -162,7 +162,7 @@ struct SongListView: View {
             defer { lyricsSearching = false }
             do {
                 let hits = try await AppContainer.shared.lyricsSearchReading
-                    .searchLyrics(query: LyricsSearchQuery.simple(query))
+                    .searchLyrics(query: simpleLyricsQuery(raw: query))
                 vm.applyFilter(searchText: "", scope: .lyrics,
                                lyricsHits: Dictionary(hits.map { ($0.songId, $0.snippets) },
                                                       uniquingKeysWith: { a, _ in a }))
