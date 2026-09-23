@@ -484,54 +484,6 @@ private fun formatDuration(sec: Int?): String? {
     return "%d:%02d".format(sec / 60, sec % 60)
 }
 
-/**
- * 除去対象の作品名プレフィックス。長いものを先に置く —
- * 「THE IDOLM@STER 」が先に当たると「THE IDOLM@STER SideM 」を落とし切れないため、
- * 前方一致は上から順に 1 つだけ適用する。
- */
-private val eventNamePrefixes = listOf(
-    "THE IDOLM@STER CINDERELLA GIRLS ",
-    "THE IDOLM@STER MILLION LIVE! ",
-    "THE IDOLM@STER MILLION LIVE!",
-    "THE IDOLM@STER SideM ",
-    "THE IDOLM@STER SHINY COLORS ",
-    "THE IDOLM@STER ",
-    "アイドルマスター シンデレラガールズ ",
-    "アイドルマスター ミリオンライブ! ",
-    "アイドルマスター シャイニーカラーズ ",
-    "アイドルマスター SideM ",
-    "学園アイドルマスター ",
-    "アイドルマスター ",
-)
-
-/**
- * ライブ名の先頭を埋める作品名プレフィックスを表示時だけ落とし、公演を識別しやすくする。
- * ブランドはリードバーの色で示しているので、行頭の作品名は冗長なだけ。
- * iOS `Extensions/EventDisplayName.swift` の移植で、iOS は同じ整形を披露履歴・
- * 現地回収一覧の行ラベルに掛けている。
- *
- * core に持たせない理由: これは永続化された表示設定 (iOS `event_name_abbreviate`) に
- * 依存する表示整形で、core は正式名称を返す責務に留める、と生成バインディングの
- * `timelineBars` doc が明示している (「呼び出し側は表示用省略を適用すること」)。
- * Android にはまだ省略 ON/OFF のトグルが無いので iOS の既定値 (ON = 省略) に固定する。
- * トグルを足すときはここへ設定値を渡す。
- *
- * 除去後が短くなりすぎる場合は元の名前を返す — 「THE IDOLM@STER」のような
- * プレフィックスだけのイベント名を空ラベルにしないため。
- * 正式名称が要る箇所 (詳細タイトル・共有文・カレンダー保存名) では使わないこと。
- *
- * 会場/日付で絞った公演一覧も同じ整形を掛けるので internal で共有する。
- *
- * **画面から直接呼ばないこと。** 設定「ライブ名を省略して表示」を無視してしまう。
- * 表示側は [com.fugaif.imaslivedb.ui.theme.AppPreferences.eventDisplayName] を通す
- * (実際に、カレンダー以外の 4 箇所が直接呼んでいてトグルが効いていなかった)。
- */
-internal fun eventDisplayName(name: String): String {
-    val prefix = eventNamePrefixes.firstOrNull { name.startsWith(it) } ?: return name
-    val stripped = name.removePrefix(prefix).trim()
-    return if (stripped.length >= 2) stripped else name
-}
-
 @Composable
 private fun InfoTab(
     song: Song,

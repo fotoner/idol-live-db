@@ -39,7 +39,6 @@ import com.fugaif.imaslivedb.data.model.CastShowRow
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.ImasLeadBar
 import com.fugaif.imaslivedb.ui.components.ImasSectionHeader
-import com.fugaif.imaslivedb.ui.songs.eventDisplayName
 import com.fugaif.imaslivedb.ui.theme.AppPreferences
 import com.fugaif.imaslivedb.ui.theme.DS
 

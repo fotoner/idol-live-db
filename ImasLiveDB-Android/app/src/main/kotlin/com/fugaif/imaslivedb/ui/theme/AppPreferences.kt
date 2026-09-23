@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.fugaif.imaslivedb.di.AppModule
 import uniffi.imas_core.PerformerNameMode
+import uniffi.imas_core.eventShortName
 
 /**
  * アプリ全体の見え方を変える表示設定の保存先 (iOS `@AppStorage` に対応する 1 箇所)。
@@ -170,16 +171,16 @@ object AppPreferences {
 
     /**
      * ライブ名の表示整形。設定 OFF なら正式名称をそのまま返す。
-     *
-     * プレフィックス表そのものは既存の [com.fugaif.imaslivedb.ui.songs.eventDisplayName]
-     * に任せる (同じ表を 2 箇所に置くと片方だけブランドが増えて食い違う)。
-     * 本来はあちらが直接この設定を読むべきだが、今回の変更範囲では `ui/songs` を
-     * 触らないため、設定を見る入口だけをここに置いて呼び分けている。
+     * 作品名を落とす規則はコアの eventShortName。ライブ名の種類は有界なので名前ごとに覚える
+     * (行ごとに FFI を呼ばない)。
      *
      * 正式名称が要る箇所 (詳細タイトル・共有文・端末カレンダーへ登録する予定名) では使わない。
      */
     fun eventDisplayName(name: String): String =
-        if (abbreviateEventNames) com.fugaif.imaslivedb.ui.songs.eventDisplayName(name) else name
+        if (abbreviateEventNames) synchronized(shortEventNames) { shortEventNames.getOrPut(name) { eventShortName(name) } }
+        else name
+
+    private val shortEventNames = HashMap<String, String>()
 
     /** 回収の集計条件をリポジトリへ反映する。DB は開かないので合成中に呼んでも重くない。 */
     private fun pushCollectionScope(context: Context) {

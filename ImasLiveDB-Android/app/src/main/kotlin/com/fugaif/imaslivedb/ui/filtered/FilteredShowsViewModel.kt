@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.fugaif.imaslivedb.data.model.Show
 import com.fugaif.imaslivedb.data.model.VenueDirectory
 import com.fugaif.imaslivedb.di.AppModule
-import com.fugaif.imaslivedb.ui.songs.eventDisplayName
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
