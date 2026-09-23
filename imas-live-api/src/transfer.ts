@@ -7,6 +7,7 @@
 // payload の中身 (JSON 妥当性含む) はクライアント側の責務。Worker はただの文字列ストレージ。
 
 import type { RateLimitAction, RateLimitResult } from "./rate_limit";
+import { readJsonBody, requireActiveUser } from "./routes/guards";
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 紛らわしい 0/O/1/I/L を除いた32文字
 const CODE_LENGTH = 10;
@@ -50,23 +51,17 @@ export async function handleCreateTransfer<E extends TransferEnv>(
   const user = await deps.getAuthUser(request, env);
   if (!user) return error("Unauthorized", 401);
 
-  const [dbUser, rl] = await Promise.all([
-    env.DB.prepare("SELECT is_banned FROM users WHERE id = ?")
-      .bind(user.uid)
-      .first<{ is_banned: number }>(),
+  const [inactive, rl] = await Promise.all([
+    requireActiveUser({ env, error }, user),
     deps.checkRateLimit(env.DB, user.uid, "transfer_create"),
   ]);
-  if (dbUser?.is_banned) return error("Banned", 403);
+  if (inactive) return inactive;
   if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
-  let body: { payload?: unknown } | null;
-  try {
-    body = (await request.json()) as { payload?: unknown };
-  } catch {
-    return error("invalid_json", 400);
-  }
+  const body = await readJsonBody({ request, error }, "invalid_json");
+  if (body instanceof Response) return body;
 
-  const payload = body?.payload;
+  const payload = body.payload;
   if (typeof payload !== "string") return error("payload must be a string", 400);
   if (payload.length > MAX_PAYLOAD_BYTES) return error("payload_too_large", 400);
 
@@ -111,13 +106,11 @@ export async function handleFetchTransfer<E extends TransferEnv>(
   const user = await deps.getAuthUser(request, env);
   if (!user) return error("Unauthorized", 401);
 
-  const [dbUser, rl] = await Promise.all([
-    env.DB.prepare("SELECT is_banned FROM users WHERE id = ?")
-      .bind(user.uid)
-      .first<{ is_banned: number }>(),
+  const [inactive, rl] = await Promise.all([
+    requireActiveUser({ env, error }, user),
     deps.checkRateLimit(env.DB, user.uid, "transfer_fetch"),
   ]);
-  if (dbUser?.is_banned) return error("Banned", 403);
+  if (inactive) return inactive;
   if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
   const normalizedCode = code.toUpperCase().trim();

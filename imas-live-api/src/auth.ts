@@ -11,6 +11,12 @@ export const SESSION_JWT_ISSUER = "imas-live-db";
 const SESSION_JWT_AUDIENCE = "imas-live-db-ios";
 export const SESSION_JWT_TTL_SECONDS = 60 * 60 * 24 * 365;
 
+/** 認証済みの呼び出し元。uid は Apple の sub か "google:" + Google の sub。 */
+export interface AuthUser {
+  uid: string;
+  email?: string;
+}
+
 // ---------------------------------------------------------------------------
 // Apple Sign In JWT verification
 // ---------------------------------------------------------------------------
@@ -277,10 +283,7 @@ export function peekJwtIssuer(token: string): string | null {
   }
 }
 
-export async function getAuthUser(
-  request: Request,
-  env: Env
-): Promise<{ uid: string; email?: string } | null> {
+export async function getAuthUser(request: Request, env: Env): Promise<AuthUser | null> {
   const auth = request.headers.get("Authorization");
   if (!auth?.startsWith("Bearer ")) return null;
   const token = auth.slice(7);

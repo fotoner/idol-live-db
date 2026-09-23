@@ -38,6 +38,7 @@ import {
   SIMILAR_CACHE_HEADERS,
 } from "./tags";
 import type { RouteContext } from "./context";
+import { clientIp } from "./guards";
 
 /** iOS の CommunityAPI.similarSongsByTags と同じ既定値 (候補を多めに取って端末側で抽選する)。 */
 const DEFAULT_SIMILAR_LIMIT = 50;
@@ -115,8 +116,9 @@ async function loadLyrics(
   uid: string
 ): Promise<Awaited<ReturnType<typeof fetchPublishedLyrics>>> {
   const { request, env } = ctx;
-  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-  const ipRl = await dryCheckIpRateLimit(env.DB, "lyrics", ip, { perMinute: LYRICS_IP_LIMITS.perMinute });
+  const ipRl = await dryCheckIpRateLimit(env.DB, "lyrics", clientIp(request), {
+    perMinute: LYRICS_IP_LIMITS.perMinute,
+  });
   if (!ipRl.allowed) {
     console.log("song_detail_lyrics_rate_limited", { songId });
     return null;

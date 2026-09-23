@@ -10,10 +10,10 @@ import { getAuthUser } from "../auth";
 import { checkRateLimit, VOTE_LIMIT } from "../rate_limit";
 import { upsertUser, checkIsAdmin } from "../users";
 import {
-  parsePositiveInt, validateOpaqueKey,
-  parseScopeIds, validateScopeIdsAgainstTable,
+  parsePositiveInt, parseScopeIds, validateScopeIdsAgainstTable,
 } from "../validation";
 import type { RouteContext } from "./context";
+import { readJsonBody, requireActiveUser, requireOpaqueKey } from "./guards";
 
 /**
  * /polls/* を処理する。
@@ -258,21 +258,19 @@ export async function handlePolls(ctx: RouteContext): Promise<Response | null> {
       const user = await getAuthUser(request, env);
       if (!user) return error("Unauthorized", 401);
 
-      const [dbUser, rl] = await Promise.all([
-        env.DB.prepare("SELECT is_banned FROM users WHERE id = ?")
-          .bind(user.uid)
-          .first<{ is_banned: number }>(),
+      const [inactive, rl] = await Promise.all([
+        requireActiveUser(ctx, user),
         checkRateLimit(env.DB, user.uid, "poll"),
       ]);
-      if (dbUser?.is_banned) return error("Banned", 403);
+      if (inactive) return inactive;
       if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
       await upsertUser(env, user.uid);
 
-      const body = (await request.json().catch(() => null)) as any;
-      if (body === null) return error("invalid JSON body");
+      const body = await readJsonBody(ctx);
+      if (body instanceof Response) return body;
       const { title, description, target_type, days } = body;
-      const candidateScope: string = body.candidate_scope ?? "all";
+      const candidateScope = body.candidate_scope ?? "all";
       const scopeBrandIdsInput = body.scope_brand_ids;
       const scopeEntityIdsInput = body.scope_entity_ids;
 
@@ -381,16 +379,13 @@ export async function handlePolls(ctx: RouteContext): Promise<Response | null> {
 
       // 投票の枠 (poll_vote) は、実際に票を入れると決まってから消費する (出演者予想と同じ順)。
       // 本文やお題の状態で断る投票・再投票まで数えると、正しい投票が枠切れになる。
-      const body = (await request.json().catch(() => null)) as any;
-      if (body === null) return error("invalid JSON body");
-      const { entity_id } = body;
-      const entityIdErr = validateOpaqueKey(entity_id, "entity_id");
-      if (entityIdErr) return error(entityIdErr);
+      const body = await readJsonBody(ctx);
+      if (body instanceof Response) return body;
+      const entity_id = requireOpaqueKey(ctx, body.entity_id, "entity_id");
+      if (entity_id instanceof Response) return entity_id;
 
-      const dbUser = await env.DB.prepare("SELECT is_banned FROM users WHERE id = ?")
-        .bind(user.uid)
-        .first<{ is_banned: number }>();
-      if (dbUser?.is_banned) return error("Banned", 403);
+      const inactive = await requireActiveUser(ctx, user);
+      if (inactive) return inactive;
 
       // poll 存在確認 + active チェック
       const poll = await env.DB.prepare(

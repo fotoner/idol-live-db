@@ -4,7 +4,7 @@ import {
   verifySessionTokenForRefresh, getAuthUser, peekJwtIssuer,
   SESSION_JWT_ISSUER, SESSION_JWT_TTL_SECONDS,
 } from "./auth";
-import { checkRateLimit, dryCheckIpRateLimit, commitIpRateLimit } from "./rate_limit";
+import { checkRateLimit, commitIpRateLimit } from "./rate_limit";
 import { upsertUser, checkIsAdmin, isAllowlistedAdmin } from "./users";
 import { handleDeviceAggregates } from "./routes/device_aggregates";
 import { handlePolls } from "./routes/polls";
@@ -13,6 +13,7 @@ import { handleLyrics } from "./routes/lyrics";
 import { handleLyricsCalls, handleCallsDashboard } from "./routes/calls";
 import { handleSongDetail } from "./routes/song_detail";
 import { handleSetlistPredictions } from "./routes/setlist_predictions";
+import { clientIp, readJsonBody, requireActiveUser, requireIpQuota } from "./routes/guards";
 import { fetchBadges, calcTier } from "./badges";
 import { handleScheduled } from "./apply";
 import { cloudKitModify, cloudKitLookup, buildForceUpdate, buildSoftDelete, CloudKitOperation } from "./cloudkit";
@@ -393,8 +394,7 @@ export default {
       // 同じ /app/ の下にある共有リンクの着地ページ (/app/{events,shows,polls}/:id) には掛けない。
       // 閲覧や OGP のクローラーで、同じ IP の端末のアプリ証明が 429 になるため。
       if (APP_ATTEST_PATHS.has(path)) {
-        const ip = request.headers.get("cf-connecting-ip") || "unknown";
-        const rl = await checkRateLimit(env.DB, "ip:" + ip, "app_attest");
+        const rl = await checkRateLimit(env.DB, "ip:" + clientIp(request), "app_attest");
         if (!rl.allowed) return error("rate limited", 429);
       }
 
@@ -628,8 +628,7 @@ export default {
 
         // IP 単位のレート制限 (未認証エンドポイントなので device/user 単位の制限は使えない)。
         // Apple/Google トークン検証の外部コスト枯渇を防ぐ一次防御。
-        const authLoginIp = request.headers.get("CF-Connecting-IP") ?? "unknown";
-        const authLoginRl = await checkRateLimit(env.DB, "ip:" + authLoginIp, "auth_login");
+        const authLoginRl = await checkRateLimit(env.DB, "ip:" + clientIp(request), "auth_login");
         if (!authLoginRl.allowed) {
           return rateLimitResponse(authLoginRl.used, authLoginRl.limit, authLoginRl.reset_at);
         }
@@ -693,8 +692,7 @@ export default {
         if (!env.SESSION_JWT_SECRET) return error("SESSION_JWT_SECRET not configured", 500);
 
         // IP 単位のレート制限 (auth/login と同じ理由。refresh は外部コストは無いが下限の防御)。
-        const authRefreshIp = request.headers.get("CF-Connecting-IP") ?? "unknown";
-        const authRefreshRl = await checkRateLimit(env.DB, "ip:" + authRefreshIp, "auth_refresh");
+        const authRefreshRl = await checkRateLimit(env.DB, "ip:" + clientIp(request), "auth_refresh");
         if (!authRefreshRl.allowed) {
           return rateLimitResponse(authRefreshRl.used, authRefreshRl.limit, authRefreshRl.reset_at);
         }
@@ -771,8 +769,9 @@ export default {
         // 先にボディを検証する。checkRateLimit は原子的にカウンタを +1 するので、
         // 検証より前に走らせると空文字・型不正など 400 になるリクエストでも 1日3枠を
         // 消費し、ユーザーが表示名を変更できなくなる (自爆ロックアウト)。検証後に課金する。
-        const body = (await request.json().catch(() => null)) as { display_name?: unknown } | null;
-        const raw = body?.display_name;
+        const body = await readJsonBody({ request, error }, "display_name is required");
+        if (body instanceof Response) return body;
+        const raw = body.display_name;
         if (typeof raw !== "string") return error("display_name is required");
         const name = raw.trim();
         if (name.length === 0) return error("display_name must not be empty");
@@ -780,13 +779,11 @@ export default {
         // 絵文字等を 2 文字とカウントして見た目40字未満を弾く誤判定を避ける。
         if ([...name].length > 40) return error("display_name too long (max 40)");
 
-        const [dbUser, rl] = await Promise.all([
-          env.DB.prepare("SELECT is_banned FROM users WHERE id = ?")
-            .bind(user.uid)
-            .first<{ is_banned: number }>(),
+        const [inactive, rl] = await Promise.all([
+          requireActiveUser({ env, error }, user),
           checkRateLimit(env.DB, user.uid, "profile"),
         ]);
-        if (dbUser?.is_banned) return error("Banned", 403);
+        if (inactive) return inactive;
         if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
         // upsertUser は使わない (display_name を email 等で上書きしうるため)。
@@ -958,9 +955,8 @@ export default {
       // ----------------------------------------------------------------
       if (path === "/edits" && request.method === "GET") {
         // 読み取りのみ。/search と同様 IP rate-limit (dryCheck → commit)。
-        const feedIp = request.headers.get("CF-Connecting-IP") ?? "unknown";
-        const feedRl = await dryCheckIpRateLimit(env.DB, "feed", feedIp);
-        if (!feedRl.allowed) return rateLimitSimple();
+        const feedRl = await requireIpQuota({ request, env, rateLimitSimple }, "feed");
+        if (feedRl instanceof Response) return feedRl;
         const res = await handleGetFeed(request, url, env, { getAuthUser, json, error });
         await commitIpRateLimit(env.DB, feedRl);
         return res;
@@ -1076,10 +1072,10 @@ export default {
         if (!(await checkIsAdmin(env, user.uid)))
           return error("Forbidden", 403);
 
-        const body = (await request.json().catch(() => null)) as any;
-        if (body === null) return error("invalid JSON body");
-        if (!body.user_id) return error("user_id required");
-        const targetUserId = body.user_id as string;
+        const body = await readJsonBody({ request, error });
+        if (body instanceof Response) return body;
+        const targetUserId = body.user_id;
+        if (!targetUserId) return error("user_id required");
 
         await env.DB.batch([
           env.DB.prepare("UPDATE users SET is_banned = 1 WHERE id = ?").bind(targetUserId),

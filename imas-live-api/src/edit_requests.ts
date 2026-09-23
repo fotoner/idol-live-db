@@ -7,6 +7,7 @@
 // コミュニティ投稿 (参考動画) は従来どおり /edits で全員オープン。ここはマスタ専用。
 
 import type { RateLimitAction, RateLimitResult } from "./rate_limit";
+import { requireActiveUser } from "./routes/guards";
 import { validateMasterEdit, type EditOp } from "./master_validators";
 
 export interface EditRequestEnv {
@@ -208,13 +209,11 @@ export async function handlePostEditRequests<E extends EditRequestEnv>(
     if (err) return error(`ops[${i}]: ${err}`);
   }
 
-  const [dbUser, rl] = await Promise.all([
-    env.DB.prepare("SELECT is_banned FROM users WHERE id = ?")
-      .bind(user.uid)
-      .first<{ is_banned: number }>(),
+  const [inactive, rl] = await Promise.all([
+    requireActiveUser({ env, error }, user),
     deps.checkRateLimit(env.DB, user.uid, "edit_request"),
   ]);
-  if (dbUser?.is_banned) return error("Banned", 403);
+  if (inactive) return inactive;
   if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
   if (!env.GITHUB_TOKEN) {

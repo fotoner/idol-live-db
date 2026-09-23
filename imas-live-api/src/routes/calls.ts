@@ -45,6 +45,7 @@ import {
 } from "./lyrics";
 import type { LyricLineRow } from "./lyrics";
 import type { RouteContext } from "./context";
+import { requireActiveUser } from "./guards";
 
 /** 運用者トークン (X-Push-Token) の主体名。authorizeLyricsWrite が返す固定値。 */
 const OPERATOR_SUBJECT = "__lyrics_push__";
@@ -75,10 +76,8 @@ export async function handleLyricsCalls(ctx: RouteContext): Promise<Response | n
   } else {
     const authUser = await getAuthUser(request, env);
     if (!authUser) return error("Unauthorized", 401);
-    const banned = await env.DB.prepare("SELECT is_banned FROM users WHERE id = ?")
-      .bind(authUser.uid)
-      .first<{ is_banned: number }>();
-    if (banned?.is_banned) return error("Banned", 403);
+    const inactive = await requireActiveUser(ctx, authUser);
+    if (inactive) return inactive;
     subject = authUser.uid;
   }
 

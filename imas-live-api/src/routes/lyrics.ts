@@ -20,7 +20,7 @@
 // このファイルは日時文字列を JS 側で組み立てず、必ず SQL の datetime('now') で書く。
 
 import { getAuthUser } from "../auth";
-import { checkRateLimit, dryCheckIpRateLimit, commitIpRateLimit } from "../rate_limit";
+import { checkRateLimit, commitIpRateLimit } from "../rate_limit";
 import { checkIsAdmin } from "../users";
 import { carryOverAnnotation } from "../lyrics_calls";
 import {
@@ -30,6 +30,7 @@ import {
 import { updateGramIndex } from "../lyrics_index";
 import type { ClapKind, LyricCall } from "../lyrics_calls";
 import type { RouteContext } from "./context";
+import { requireIpQuota } from "./guards";
 import type { Env } from "../env";
 
 // tools/lyrics/lyrics_json.py の MAX_LINES / MAX_LINE_CHARS と同値にしてある。
@@ -582,7 +583,7 @@ export async function authorizeLyricsWrite(request: Request, env: Env): Promise<
 }
 
 export async function handleLyrics(ctx: RouteContext): Promise<Response | null> {
-  const { request, env, url, path, json, error, rateLimitResponse, rateLimitSimple } = ctx;
+  const { request, env, url, path, json, error, rateLimitResponse } = ctx;
 
   // ----------------------------------------------------------------
   // GET /lyrics/search?q=... — 歌詞本文の横断検索 (未認証でも可)
@@ -609,9 +610,8 @@ export async function handleLyrics(ctx: RouteContext): Promise<Response | null> 
     // 位置は「その曲で実際に一致した語」で決める。OR だと曲ごとに違う語で当たる。
     const terms = collectTerms(expr);
 
-    const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-    const ipRl = await dryCheckIpRateLimit(env.DB, "lyrics", ip, LYRICS_IP_LIMITS);
-    if (!ipRl.allowed) return rateLimitSimple();
+    const ipRl = await requireIpQuota(ctx, "lyrics", LYRICS_IP_LIMITS);
+    if (ipRl instanceof Response) return ipRl;
 
     // draft は admin にしか見せない (GET /songs/:id/lyrics と同じ規則)。
     // 検索だけ緩めると、本文は読めないのにスニペットからは読める状態になる。
@@ -751,9 +751,8 @@ export async function handleLyrics(ctx: RouteContext): Promise<Response | null> 
     // IP 単位の上限 (分と日、LYRICS_IP_LIMITS)。会場の NAT で同じ IP に大勢が乗っても
     // 正常利用が 429 にならない値にし、まとめ取りは日の上限で押さえる。
     // 成功が確定してから commit する (404 等で枠を消費させない)。
-    const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-    const ipRl = await dryCheckIpRateLimit(env.DB, "lyrics", ip, LYRICS_IP_LIMITS);
-    if (!ipRl.allowed) return rateLimitSimple();
+    const ipRl = await requireIpQuota(ctx, "lyrics", LYRICS_IP_LIMITS);
+    if (ipRl instanceof Response) return ipRl;
 
     const lines = parseLines(header.lines_json);
     await commitIpRateLimit(env.DB, ipRl);

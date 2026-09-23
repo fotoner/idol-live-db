@@ -25,6 +25,7 @@
 //   失敗時: CloudKit 失敗 → 502 (edit_batch は cloudkit_ok=0 のまま、edit_history は書かない)
 
 import type { RateLimitAction, RateLimitResult } from "./rate_limit";
+import { requireActiveUser } from "./routes/guards";
 import {
   buildForceUpdate,
   buildSoftDelete,
@@ -243,13 +244,11 @@ export async function handlePostEdits<E extends EditsEnv>(
   if (ops.length > MAX_OPS) return error(`too many ops (max ${MAX_OPS})`, 413);
 
   // (2)(3) ban + rate を並列確認
-  const [dbUser, rl] = await Promise.all([
-    env.DB.prepare("SELECT is_banned FROM users WHERE id = ?")
-      .bind(user.uid)
-      .first<{ is_banned: number }>(),
+  const [inactive, rl] = await Promise.all([
+    requireActiveUser({ env, error }, user),
     deps.checkRateLimit(env.DB, user.uid, "edit"),
   ]);
-  if (dbUser?.is_banned) return error("Banned", 403);
+  if (inactive) return inactive;
   if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
   const isAdmin = await deps.checkIsAdmin(env, user.uid);

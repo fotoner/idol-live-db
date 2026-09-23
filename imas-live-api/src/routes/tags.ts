@@ -11,10 +11,11 @@
 //    ステータスコードも Cache-Control も変えていない。
 
 import { getAuthUser } from "../auth";
-import { checkRateLimit, dryCheckIpRateLimit, commitIpRateLimit } from "../rate_limit";
+import { checkRateLimit, commitIpRateLimit } from "../rate_limit";
 import { checkIsAdmin } from "../users";
 import { parsePositiveInt, escapeLike } from "../validation";
 import type { RouteContext } from "./context";
+import { readJsonBody, requireActiveUser, requireDeviceWrite } from "./guards";
 
 // REPORT_THRESHOLD はタグ通報 (POST /tags/:id/report) で使用。
 // 投稿承認系の APPROVAL_THRESHOLD は submission 撤去 (0014) に伴い削除。
@@ -237,7 +238,7 @@ export const SIMILAR_CACHE_HEADERS: Record<string, string> = {
  * どのルートにも一致しなければ `null` を返し、呼び出し元の if チェーンへ処理を戻す。
  */
 export async function handleTags(ctx: RouteContext): Promise<Response | null> {
-  const { request, env, url, path, json, error, rateLimitResponse, rateLimitSimple } = ctx;
+  const { request, env, url, path, json, error, rateLimitResponse } = ctx;
 
     // ================================================================
     // ユーザータグ API
@@ -247,17 +248,12 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // POST /tags — タグ新規作成
     // ----------------------------------------------------------------
     if (path === "/tags" && request.method === "POST") {
-      const deviceId = request.headers.get("X-Device-Id");
-      if (!deviceId) return error("X-Device-Id header is required");
+      const guard = await requireDeviceWrite(ctx);
+      if (guard instanceof Response) return guard;
+      const { deviceId, ipQuota } = guard;
 
-      const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
-      if (!ipDry.allowed) {
-        return rateLimitSimple();
-      }
-
-      const body = (await request.json().catch(() => null)) as any;
-      if (body === null) return error("invalid JSON body");
+      const body = await readJsonBody(ctx);
+      if (body instanceof Response) return body;
       let { name, description, category, color } = body as {
         name: string;
         description?: string;
@@ -301,7 +297,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       ]);
 
       const tag = await env.DB.prepare("SELECT * FROM tags WHERE id = ?").bind(candidateId).first();
-      await commitIpRateLimit(env.DB, ipDry);
+      await commitIpRateLimit(env.DB, ipQuota);
       return json({ tag, created: true }, 201);
     }
 
@@ -493,13 +489,11 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       // is_banned チェック + レート制限 (マスタ編集 /edits と同じ "edit" quota を共有し、
       // 大量改竄の速度を抑える一次防御とする)。POST 側の同名チェックに対応する
       // タグ乱立防止は device_tag_create_quota が既に別途担っている。
-      const [dbUser, rl] = await Promise.all([
-        env.DB.prepare("SELECT is_banned FROM users WHERE id = ?")
-          .bind(authUser.uid)
-          .first<{ is_banned: number }>(),
+      const [inactive, rl] = await Promise.all([
+        requireActiveUser(ctx, authUser),
         checkRateLimit(env.DB, authUser.uid, "edit"),
       ]);
-      if (dbUser?.is_banned) return error("Banned", 403);
+      if (inactive) return inactive;
       if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
       const tag = await env.DB.prepare("SELECT * FROM tags WHERE id = ?").bind(tagId).first<{
@@ -508,8 +502,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       if (!tag) return error("Tag not found", 404);
       if (tag.status === "removed") return error("Tag has been removed", 403);
 
-      const body = (await request.json().catch(() => null)) as any;
-      if (body === null) return error("invalid JSON body");
+      const body = await readJsonBody(ctx);
+      if (body instanceof Response) return body;
       const { description, category, color } = body as {
         description?: string;
         category?: string;
@@ -601,16 +595,11 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     const tagReportMatch = path.match(/^\/tags\/([^/]+)\/report$/);
     if (tagReportMatch && request.method === "POST") {
       const tagId = decodeURIComponent(tagReportMatch[1]);
-      const deviceId = request.headers.get("X-Device-Id");
-      if (!deviceId) return error("X-Device-Id header is required");
-
       // IP 単位の rate-limit: 複数デバイス回しで 1 タグを連続通報する spam を弾く。
       // device 単位の per-day 制限 (下記 already_reported) は二重防御として残す。
-      const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
-      if (!ipDry.allowed) {
-        return rateLimitSimple();
-      }
+      const guard = await requireDeviceWrite(ctx);
+      if (guard instanceof Response) return guard;
+      const { deviceId, ipQuota } = guard;
 
       const tag = await env.DB.prepare("SELECT id FROM tags WHERE id = ?").bind(tagId).first();
       if (!tag) return error("Tag not found", 404);
@@ -621,8 +610,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       ).bind(tagId, deviceId, today).first();
       if (alreadyReported) return error("Already reported today", 429);
 
-      const body = (await request.json().catch(() => null)) as any;
-      if (body === null) return error("invalid JSON body");
+      const body = await readJsonBody(ctx);
+      if (body instanceof Response) return body;
       const now = Math.floor(Date.now() / 1000);
       await env.DB.prepare(
         `INSERT INTO tag_reports (tag_id, reported_by, reason, reported_at) VALUES (?, ?, ?, ?)`
@@ -639,7 +628,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         ).bind(tagId).run();
       }
 
-      await commitIpRateLimit(env.DB, ipDry);
+      await commitIpRateLimit(env.DB, ipQuota);
       return json({ ok: true, total_reports: total });
     }
 
@@ -653,17 +642,12 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // POST /idol-tags — アイドルタグ新規作成
     // ----------------------------------------------------------------
     if (path === "/idol-tags" && request.method === "POST") {
-      const deviceId = request.headers.get("X-Device-Id");
-      if (!deviceId) return error("X-Device-Id header is required");
+      const guard = await requireDeviceWrite(ctx);
+      if (guard instanceof Response) return guard;
+      const { deviceId, ipQuota } = guard;
 
-      const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
-      if (!ipDry.allowed) {
-        return rateLimitSimple();
-      }
-
-      const body = (await request.json().catch(() => null)) as any;
-      if (body === null) return error("invalid JSON body");
+      const body = await readJsonBody(ctx);
+      if (body instanceof Response) return body;
       let { name, description, category, color } = body as {
         name: string;
         description?: string;
@@ -706,7 +690,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       ]);
 
       const tag = await env.DB.prepare("SELECT * FROM idol_tag_master WHERE id = ?").bind(candidateId).first();
-      await commitIpRateLimit(env.DB, ipDry);
+      await commitIpRateLimit(env.DB, ipQuota);
       return json({ tag, created: true }, 201);
     }
 
@@ -792,13 +776,11 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       const deviceId = request.headers.get("X-Device-Id") || authUser.uid;
 
       // is_banned チェック + レート制限 (/tags/:id PUT と同方針。"edit" quota を共有)。
-      const [dbUser, rl] = await Promise.all([
-        env.DB.prepare("SELECT is_banned FROM users WHERE id = ?")
-          .bind(authUser.uid)
-          .first<{ is_banned: number }>(),
+      const [inactive, rl] = await Promise.all([
+        requireActiveUser(ctx, authUser),
         checkRateLimit(env.DB, authUser.uid, "edit"),
       ]);
-      if (dbUser?.is_banned) return error("Banned", 403);
+      if (inactive) return inactive;
       if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
       const tag = await env.DB.prepare("SELECT * FROM idol_tag_master WHERE id = ?").bind(tagId).first<{
@@ -807,8 +789,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       if (!tag) return error("Tag not found", 404);
       if (tag.status === "removed") return error("Tag has been removed", 403);
 
-      const body = (await request.json().catch(() => null)) as any;
-      if (body === null) return error("invalid JSON body");
+      const body = await readJsonBody(ctx);
+      if (body instanceof Response) return body;
       const { description, category, color } = body as {
         description?: string;
         category?: string;
@@ -899,14 +881,9 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     const idolTagReportMatch = path.match(/^\/idol-tags\/([^/]+)\/report$/);
     if (idolTagReportMatch && request.method === "POST") {
       const tagId = decodeURIComponent(idolTagReportMatch[1]);
-      const deviceId = request.headers.get("X-Device-Id");
-      if (!deviceId) return error("X-Device-Id header is required");
-
-      const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
-      if (!ipDry.allowed) {
-        return rateLimitSimple();
-      }
+      const guard = await requireDeviceWrite(ctx);
+      if (guard instanceof Response) return guard;
+      const { deviceId, ipQuota } = guard;
 
       const tag = await env.DB.prepare("SELECT id FROM idol_tag_master WHERE id = ?").bind(tagId).first();
       if (!tag) return error("Tag not found", 404);
@@ -917,8 +894,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       ).bind(tagId, deviceId, today).first();
       if (alreadyReported) return error("Already reported today", 429);
 
-      const body = (await request.json().catch(() => null)) as any;
-      if (body === null) return error("invalid JSON body");
+      const body = await readJsonBody(ctx);
+      if (body instanceof Response) return body;
       const now = Math.floor(Date.now() / 1000);
       await env.DB.prepare(
         `INSERT INTO idol_tag_reports (tag_id, reported_by, reason, reported_at) VALUES (?, ?, ?, ?)`
@@ -935,7 +912,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         ).bind(tagId).run();
       }
 
-      await commitIpRateLimit(env.DB, ipDry);
+      await commitIpRateLimit(env.DB, ipQuota);
       return json({ ok: true, total_reports: total });
     }
 
@@ -945,17 +922,12 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     const songTagsPostMatch = path.match(/^\/songs\/([^/]+)\/tags$/);
     if (songTagsPostMatch && request.method === "POST") {
       const songId = decodeURIComponent(songTagsPostMatch[1]);
-      const deviceId = request.headers.get("X-Device-Id");
-      if (!deviceId) return error("X-Device-Id header is required");
+      const guard = await requireDeviceWrite(ctx);
+      if (guard instanceof Response) return guard;
+      const { deviceId, ipQuota } = guard;
 
-      const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
-      if (!ipDry.allowed) {
-        return rateLimitSimple();
-      }
-
-      const body = (await request.json().catch(() => null)) as any;
-      if (body === null) return error("invalid JSON body");
+      const body = await readJsonBody(ctx);
+      if (body instanceof Response) return body;
       const tagIds = body.tag_ids as string[];
       if (!Array.isArray(tagIds) || tagIds.length === 0) return error("tag_ids must be a non-empty array");
 
@@ -987,7 +959,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         }
       }
 
-      await commitIpRateLimit(env.DB, ipDry);
+      await commitIpRateLimit(env.DB, ipQuota);
       return json({ song_id: songId, applied_tag_ids: appliedTagIds });
     }
 
@@ -998,14 +970,9 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     if (songTagDeleteMatch && request.method === "DELETE") {
       const songId = decodeURIComponent(songTagDeleteMatch[1]);
       const tagId = decodeURIComponent(songTagDeleteMatch[2]);
-      const deviceId = request.headers.get("X-Device-Id");
-      if (!deviceId) return error("X-Device-Id header is required");
-
-      const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
-      if (!ipDry.allowed) {
-        return rateLimitSimple();
-      }
+      const guard = await requireDeviceWrite(ctx);
+      if (guard instanceof Response) return guard;
+      const { deviceId, ipQuota } = guard;
 
       // device削除 + vote_count-1 (MAX(0,...)) + 0以下なら song_tags 削除 を batch で原子化
       const [deleted] = await env.DB.batch([
@@ -1025,7 +992,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         recountSongTags(env.DB, songId),
       ]);
 
-      await commitIpRateLimit(env.DB, ipDry);
+      await commitIpRateLimit(env.DB, ipQuota);
       return json({ song_id: songId, tag_id: tagId, removed: deleted.meta.changes > 0 });
     }
 
@@ -1045,17 +1012,12 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     const idolTagsPostMatch = path.match(/^\/idols\/([^/]+)\/tags$/);
     if (idolTagsPostMatch && request.method === "POST") {
       const idolId = decodeURIComponent(idolTagsPostMatch[1]);
-      const deviceId = request.headers.get("X-Device-Id");
-      if (!deviceId) return error("X-Device-Id header is required");
+      const guard = await requireDeviceWrite(ctx);
+      if (guard instanceof Response) return guard;
+      const { deviceId, ipQuota } = guard;
 
-      const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
-      if (!ipDry.allowed) {
-        return rateLimitSimple();
-      }
-
-      const body = (await request.json().catch(() => null)) as any;
-      if (body === null) return error("invalid JSON body");
+      const body = await readJsonBody(ctx);
+      if (body instanceof Response) return body;
       const tagIds = body.tag_ids as string[];
       if (!Array.isArray(tagIds) || tagIds.length === 0) return error("tag_ids must be a non-empty array");
 
@@ -1084,7 +1046,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         }
       }
 
-      await commitIpRateLimit(env.DB, ipDry);
+      await commitIpRateLimit(env.DB, ipQuota);
       return json({ idol_id: idolId, applied_tag_ids: appliedTagIds });
     }
 
@@ -1095,14 +1057,9 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     if (idolTagDeleteMatch && request.method === "DELETE") {
       const idolId = decodeURIComponent(idolTagDeleteMatch[1]);
       const tagId = decodeURIComponent(idolTagDeleteMatch[2]);
-      const deviceId = request.headers.get("X-Device-Id");
-      if (!deviceId) return error("X-Device-Id header is required");
-
-      const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
-      if (!ipDry.allowed) {
-        return rateLimitSimple();
-      }
+      const guard = await requireDeviceWrite(ctx);
+      if (guard instanceof Response) return guard;
+      const { deviceId, ipQuota } = guard;
 
       const [deleted] = await env.DB.batch([
         env.DB.prepare(
@@ -1119,7 +1076,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         ).bind(idolId, tagId),
       ]);
 
-      await commitIpRateLimit(env.DB, ipDry);
+      await commitIpRateLimit(env.DB, ipQuota);
       return json({ idol_id: idolId, tag_id: tagId, removed: deleted.meta.changes > 0 });
     }
 
@@ -1158,17 +1115,12 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     // POST /unit-tags — ユニットタグ新規作成
     // ----------------------------------------------------------------
     if (path === "/unit-tags" && request.method === "POST") {
-      const deviceId = request.headers.get("X-Device-Id");
-      if (!deviceId) return error("X-Device-Id header is required");
+      const guard = await requireDeviceWrite(ctx);
+      if (guard instanceof Response) return guard;
+      const { deviceId, ipQuota } = guard;
 
-      const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
-      if (!ipDry.allowed) {
-        return rateLimitSimple();
-      }
-
-      const body = (await request.json().catch(() => null)) as any;
-      if (body === null) return error("invalid JSON body");
+      const body = await readJsonBody(ctx);
+      if (body instanceof Response) return body;
       let { name, description, category, color } = body as {
         name: string;
         description?: string;
@@ -1211,7 +1163,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       ]);
 
       const tag = await env.DB.prepare("SELECT * FROM unit_tag_master WHERE id = ?").bind(candidateId).first();
-      await commitIpRateLimit(env.DB, ipDry);
+      await commitIpRateLimit(env.DB, ipQuota);
       return json({ tag, created: true }, 201);
     }
 
@@ -1297,13 +1249,11 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       const deviceId = request.headers.get("X-Device-Id") || authUser.uid;
 
       // is_banned チェック + レート制限 (/tags/:id PUT と同方針。"edit" quota を共有)。
-      const [dbUser, rl] = await Promise.all([
-        env.DB.prepare("SELECT is_banned FROM users WHERE id = ?")
-          .bind(authUser.uid)
-          .first<{ is_banned: number }>(),
+      const [inactive, rl] = await Promise.all([
+        requireActiveUser(ctx, authUser),
         checkRateLimit(env.DB, authUser.uid, "edit"),
       ]);
-      if (dbUser?.is_banned) return error("Banned", 403);
+      if (inactive) return inactive;
       if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
       const tag = await env.DB.prepare("SELECT * FROM unit_tag_master WHERE id = ?").bind(tagId).first<{
@@ -1312,8 +1262,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       if (!tag) return error("Tag not found", 404);
       if (tag.status === "removed") return error("Tag has been removed", 403);
 
-      const body = (await request.json().catch(() => null)) as any;
-      if (body === null) return error("invalid JSON body");
+      const body = await readJsonBody(ctx);
+      if (body instanceof Response) return body;
       const { description, category, color } = body as {
         description?: string;
         category?: string;
@@ -1404,14 +1354,9 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     const unitTagReportMatch = path.match(/^\/unit-tags\/([^/]+)\/report$/);
     if (unitTagReportMatch && request.method === "POST") {
       const tagId = decodeURIComponent(unitTagReportMatch[1]);
-      const deviceId = request.headers.get("X-Device-Id");
-      if (!deviceId) return error("X-Device-Id header is required");
-
-      const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
-      if (!ipDry.allowed) {
-        return rateLimitSimple();
-      }
+      const guard = await requireDeviceWrite(ctx);
+      if (guard instanceof Response) return guard;
+      const { deviceId, ipQuota } = guard;
 
       const tag = await env.DB.prepare("SELECT id FROM unit_tag_master WHERE id = ?").bind(tagId).first();
       if (!tag) return error("Tag not found", 404);
@@ -1422,8 +1367,8 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
       ).bind(tagId, deviceId, today).first();
       if (alreadyReported) return error("Already reported today", 429);
 
-      const body = (await request.json().catch(() => null)) as any;
-      if (body === null) return error("invalid JSON body");
+      const body = await readJsonBody(ctx);
+      if (body instanceof Response) return body;
       const now = Math.floor(Date.now() / 1000);
       await env.DB.prepare(
         `INSERT INTO unit_tag_reports (tag_id, reported_by, reason, reported_at) VALUES (?, ?, ?, ?)`
@@ -1440,7 +1385,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         ).bind(tagId).run();
       }
 
-      await commitIpRateLimit(env.DB, ipDry);
+      await commitIpRateLimit(env.DB, ipQuota);
       return json({ ok: true, total_reports: total });
     }
 
@@ -1450,17 +1395,12 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     const unitTagsPostMatch = path.match(/^\/units\/([^/]+)\/tags$/);
     if (unitTagsPostMatch && request.method === "POST") {
       const unitId = decodeURIComponent(unitTagsPostMatch[1]);
-      const deviceId = request.headers.get("X-Device-Id");
-      if (!deviceId) return error("X-Device-Id header is required");
+      const guard = await requireDeviceWrite(ctx);
+      if (guard instanceof Response) return guard;
+      const { deviceId, ipQuota } = guard;
 
-      const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
-      if (!ipDry.allowed) {
-        return rateLimitSimple();
-      }
-
-      const body = (await request.json().catch(() => null)) as any;
-      if (body === null) return error("invalid JSON body");
+      const body = await readJsonBody(ctx);
+      if (body instanceof Response) return body;
       const tagIds = body.tag_ids as string[];
       if (!Array.isArray(tagIds) || tagIds.length === 0) return error("tag_ids must be a non-empty array");
 
@@ -1489,7 +1429,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         }
       }
 
-      await commitIpRateLimit(env.DB, ipDry);
+      await commitIpRateLimit(env.DB, ipQuota);
       return json({ unit_id: unitId, applied_tag_ids: appliedTagIds });
     }
 
@@ -1500,14 +1440,9 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
     if (unitTagDeleteMatch && request.method === "DELETE") {
       const unitId = decodeURIComponent(unitTagDeleteMatch[1]);
       const tagId = decodeURIComponent(unitTagDeleteMatch[2]);
-      const deviceId = request.headers.get("X-Device-Id");
-      if (!deviceId) return error("X-Device-Id header is required");
-
-      const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-      const ipDry = await dryCheckIpRateLimit(env.DB, "community", ip);
-      if (!ipDry.allowed) {
-        return rateLimitSimple();
-      }
+      const guard = await requireDeviceWrite(ctx);
+      if (guard instanceof Response) return guard;
+      const { deviceId, ipQuota } = guard;
 
       const [deleted] = await env.DB.batch([
         env.DB.prepare(
@@ -1524,7 +1459,7 @@ export async function handleTags(ctx: RouteContext): Promise<Response | null> {
         ).bind(unitId, tagId),
       ]);
 
-      await commitIpRateLimit(env.DB, ipDry);
+      await commitIpRateLimit(env.DB, ipQuota);
       return json({ unit_id: unitId, tag_id: tagId, removed: deleted.meta.changes > 0 });
     }
 

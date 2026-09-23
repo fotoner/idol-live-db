@@ -21,6 +21,7 @@
 //   (6) COUNT(*) で goodCount 再算出して返す (レスポンスは { batchId, goodCount, gooded })
 
 import type { RateLimitAction, RateLimitResult } from "./rate_limit";
+import { requireActiveUser } from "./routes/guards";
 
 export interface EditGoodEnv {
   DB: D1Database;
@@ -62,15 +63,13 @@ async function authorizeGood<E extends EditGoodEnv>(
   if (!Number.isInteger(batchId) || batchId <= 0) return error("invalid batchId", 400);
 
   // (2)(3) ban + rate (取消にはレート制限をかけない: トグルの往復で枯渇させないため)
-  const [dbUser, rl] = await Promise.all([
-    env.DB.prepare("SELECT is_banned FROM users WHERE id = ?")
-      .bind(user.uid)
-      .first<{ is_banned: number }>(),
+  const [inactive, rl] = await Promise.all([
+    requireActiveUser({ env, error }, user),
     enforceRateLimit
       ? deps.checkRateLimit(env.DB, user.uid, "good")
       : Promise.resolve(null),
   ]);
-  if (dbUser?.is_banned) return error("Banned", 403);
+  if (inactive) return inactive;
   if (rl && !rl.allowed) return deps.rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
   // (4) batch 検証

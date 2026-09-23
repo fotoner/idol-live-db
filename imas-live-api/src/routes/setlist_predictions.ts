@@ -15,6 +15,7 @@ import { checkRateLimit, VOTE_LIMIT } from "../rate_limit";
 import { upsertUser } from "../users";
 import { validateOpaqueKey } from "../validation";
 import type { RouteContext } from "./context";
+import { readJsonBody, requireActiveUser, requireOpaqueKey } from "./guards";
 
 /**
  * /me/predictions, /shows/:showId/predictions,
@@ -98,22 +99,19 @@ export async function handleSetlistPredictions(ctx: RouteContext): Promise<Respo
       const user = await getAuthUser(request, env);
       if (!user) return error("Unauthorized", 401);
 
-      const [dbUser, rl] = await Promise.all([
-        env.DB.prepare("SELECT is_banned FROM users WHERE id = ?")
-          .bind(user.uid)
-          .first<{ is_banned: number }>(),
+      const [inactive, rl] = await Promise.all([
+        requireActiveUser(ctx, user),
         checkRateLimit(env.DB, user.uid, "prediction"),
       ]);
-      if (dbUser?.is_banned) return error("Banned", 403);
+      if (inactive) return inactive;
       if (!rl.allowed) return rateLimitResponse(rl.used, rl.limit, rl.reset_at);
 
       await upsertUser(env, user.uid);
 
-      const body = (await request.json().catch(() => null)) as any;
-      if (body === null) return error("invalid JSON body");
-      const { song_id } = body;
-      const songIdErr = validateOpaqueKey(song_id, "song_id");
-      if (songIdErr) return error(songIdErr);
+      const body = await readJsonBody(ctx);
+      if (body instanceof Response) return body;
+      const song_id = requireOpaqueKey(ctx, body.song_id, "song_id");
+      if (song_id instanceof Response) return song_id;
 
       // 曲存在チェックは行わない。song_id は不透明キーとして保存し、曲メタは iOS local が解決する。
       // (D1 songs ミラーで検証すると、CloudKit にあるが D1 に未同期の新曲が 404 になる)
@@ -288,16 +286,13 @@ export async function handleSetlistPredictions(ctx: RouteContext): Promise<Respo
       const user = await getAuthUser(request, env);
       if (!user) return error("Unauthorized", 401);
 
-      const dbUser = await env.DB.prepare("SELECT is_banned FROM users WHERE id = ?")
-        .bind(user.uid)
-        .first<{ is_banned: number }>();
-      if (dbUser?.is_banned) return error("Banned", 403);
+      const inactive = await requireActiveUser(ctx, user);
+      if (inactive) return inactive;
 
-      const body = (await request.json().catch(() => null)) as any;
-      if (body === null) return error("invalid JSON body");
-      const { idol_id } = body;
-      const idolIdErr = validateOpaqueKey(idol_id, "idol_id");
-      if (idolIdErr) return error(idolIdErr);
+      const body = await readJsonBody(ctx);
+      if (body instanceof Response) return body;
+      const idol_id = requireOpaqueKey(ctx, body.idol_id, "idol_id");
+      if (idol_id instanceof Response) return idol_id;
 
       // idol_id は不透明キーとして保存 — 実在検証は行わない (既存 setlist 予想と同方針)。
 
@@ -450,10 +445,8 @@ export async function handleSetlistPredictions(ctx: RouteContext): Promise<Respo
       const likeSongIdErr = validateOpaqueKey(songId, "song_id");
       if (likeSongIdErr) return error(likeSongIdErr);
 
-      const dbUser = await env.DB.prepare("SELECT is_banned FROM users WHERE id = ?")
-        .bind(user.uid)
-        .first<{ is_banned: number }>();
-      if (dbUser?.is_banned) return error("Banned", 403);
+      const inactive = await requireActiveUser(ctx, user);
+      if (inactive) return inactive;
 
       await upsertUser(env, user.uid);
 

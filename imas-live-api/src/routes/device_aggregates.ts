@@ -9,9 +9,10 @@
 // ⚠️ ルート本文は index.ts から移動しただけで、SQL もレスポンス JSON のキーも
 //    ステータスコードも変えていない。審査済みリリース版が本番のこの API を叩いている。
 
-import { dryCheckIpRateLimit, commitIpRateLimit, type IpRateCheck } from "../rate_limit";
-import { parsePositiveInt, validateOpaqueKey } from "../validation";
+import { commitIpRateLimit } from "../rate_limit";
+import { parsePositiveInt } from "../validation";
 import type { RouteContext } from "./context";
+import { readJsonBody, requireDeviceWrite, requireOpaqueKey } from "./guards";
 
 
 /**
@@ -69,30 +70,6 @@ export async function fetchPenlightVotes(
 }
 
 /**
- * 書き込み系の共通ガード: X-Device-Id 必須 → IP レート制限の dry check。
- *
- * 元は各ルートに同じ 8 行がコピーされており、1 箇所で書き忘れるとそのルートだけ
- * 無防備になる形だった。判定の順序・エラー文言・ステータスは元のまま。
- * 実際の +1 コミットは成功直前に commitIpRateLimit(env.DB, ipLimit) を呼ぶ。
- */
-async function guardWrite(
-  ctx: RouteContext
-): Promise<{ deviceId: string; ipLimit: IpRateCheck } | Response> {
-  const { request, env, error, rateLimitSimple } = ctx;
-
-  const deviceId = request.headers.get("X-Device-Id");
-  if (!deviceId) return error("X-Device-Id header is required");
-
-  const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";
-  const ipLimit = await dryCheckIpRateLimit(env.DB, "community", ip);
-  if (!ipLimit.allowed) {
-    return rateLimitSimple();
-  }
-
-  return { deviceId, ipLimit };
-}
-
-/**
  * /favorites/* と /penlight/* を処理する。
  * どのルートにも一致しなければ `null` を返し、呼び出し元の if チェーンへ処理を戻す。
  */
@@ -103,19 +80,15 @@ export async function handleDeviceAggregates(ctx: RouteContext): Promise<Respons
     // POST /favorites/toggle — お気に入り登録/解除
     // ----------------------------------------------------------------
     if (path === "/favorites/toggle" && request.method === "POST") {
-      const guard = await guardWrite(ctx);
+      const guard = await requireDeviceWrite(ctx);
       if (guard instanceof Response) return guard;
-      const { deviceId, ipLimit } = guard;
+      const { deviceId, ipQuota } = guard;
 
-      // 不正な JSON は catch-all に落として 500 にせず 400 で返す
-      // (クライアントのバグがサーバ障害として観測されるのを防ぐ)。
-      // JSON として妥当な非オブジェクト (数値・文字列) は従来どおり
-      // 後段のフィールド検証に流し、エラー文言を変えない。
-      const body = (await request.json().catch(() => null)) as any;
-      if (body === null) return error("invalid JSON body");
-      const { song_id, value } = body;
-      const favSongIdErr = validateOpaqueKey(song_id, "song_id");
-      if (favSongIdErr) return error(favSongIdErr);
+      const body = await readJsonBody(ctx);
+      if (body instanceof Response) return body;
+      const song_id = requireOpaqueKey(ctx, body.song_id, "song_id");
+      if (song_id instanceof Response) return song_id;
+      const { value } = body;
       if (typeof value !== "boolean") return error("value must be boolean");
 
       // 数は端末の行が実際に変わったとき (直前の文の changes() > 0) だけ動かす。
@@ -147,7 +120,7 @@ export async function handleDeviceAggregates(ctx: RouteContext): Promise<Respons
         .bind(song_id)
         .first<{ count: number }>();
 
-      await commitIpRateLimit(env.DB, ipLimit);
+      await commitIpRateLimit(env.DB, ipQuota);
       return json({ song_id, count: row?.count ?? 0 });
     }
 
@@ -189,19 +162,15 @@ export async function handleDeviceAggregates(ctx: RouteContext): Promise<Respons
     // POST /penlight/vote — ペンライト色セット投票
     // ----------------------------------------------------------------
     if (path === "/penlight/vote" && request.method === "POST") {
-      const guard = await guardWrite(ctx);
+      const guard = await requireDeviceWrite(ctx);
       if (guard instanceof Response) return guard;
-      const { deviceId, ipLimit } = guard;
+      const { deviceId, ipQuota } = guard;
 
-      // 不正な JSON は catch-all に落として 500 にせず 400 で返す
-      // (クライアントのバグがサーバ障害として観測されるのを防ぐ)。
-      // JSON として妥当な非オブジェクト (数値・文字列) は従来どおり
-      // 後段のフィールド検証に流し、エラー文言を変えない。
-      const body = (await request.json().catch(() => null)) as any;
-      if (body === null) return error("invalid JSON body");
-      const { song_id, colors } = body;
-      const penlightSongIdErr = validateOpaqueKey(song_id, "song_id");
-      if (penlightSongIdErr) return error(penlightSongIdErr);
+      const body = await readJsonBody(ctx);
+      if (body instanceof Response) return body;
+      const song_id = requireOpaqueKey(ctx, body.song_id, "song_id");
+      if (song_id instanceof Response) return song_id;
+      const { colors } = body;
       if (!Array.isArray(colors) || colors.length === 0) return error("colors must be a non-empty array");
 
       const colorSetKey = [...colors].sort().join("-");
@@ -255,7 +224,7 @@ export async function handleDeviceAggregates(ctx: RouteContext): Promise<Respons
         .bind(song_id, colorSetKey)
         .first<{ count: number }>();
 
-      await commitIpRateLimit(env.DB, ipLimit);
+      await commitIpRateLimit(env.DB, ipQuota);
       return json({ song_id, color_set_key: colorSetKey, count: row?.count ?? 1 });
     }
 
@@ -263,9 +232,9 @@ export async function handleDeviceAggregates(ctx: RouteContext): Promise<Respons
     // DELETE /penlight/vote — 投票取消
     // ----------------------------------------------------------------
     if (path === "/penlight/vote" && request.method === "DELETE") {
-      const guard = await guardWrite(ctx);
+      const guard = await requireDeviceWrite(ctx);
       if (guard instanceof Response) return guard;
-      const { deviceId, ipLimit } = guard;
+      const { deviceId, ipQuota } = guard;
 
       const songId = url.searchParams.get("song_id");
       if (!songId) return error("song_id is required");
@@ -292,7 +261,7 @@ export async function handleDeviceAggregates(ctx: RouteContext): Promise<Respons
         ).bind(deviceId, songId),
       ]);
 
-      await commitIpRateLimit(env.DB, ipLimit);
+      await commitIpRateLimit(env.DB, ipQuota);
       return json({ song_id: songId, cancelled: true });
     }
 
