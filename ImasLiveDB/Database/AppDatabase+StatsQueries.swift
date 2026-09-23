@@ -25,10 +25,6 @@ extension AppDatabase {
         try dbQueue.read { db in try Self.fetchBrandsQuery(db) }
     }
 
-    func fetchBrandsAsync() async throws -> [Brand] {
-        try await dbQueue.read { db in try Self.fetchBrandsQuery(db) }
-    }
-
     private static func fetchBrandsQuery(_ db: Database) throws -> [Brand] {
         try Brand.order(Column("sort_order")).fetchAll(db)
     }

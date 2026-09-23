@@ -1,6 +1,5 @@
 import SwiftUI
 import MusicKit
-import GRDB
 import UniformTypeIdentifiers
 
 /// master.sqlite の全曲を MusicCatalogResourceRequest で fetch し、
@@ -138,7 +137,7 @@ struct PlayabilityCheckView: View {
 
         let songs: [SongRow]
         do {
-            songs = try fetchSongs(brandFilter: brandFilter)
+            songs = try await fetchSongs(brandFilter: brandFilter)
         } catch {
             errorMessage = "DB 読み込み失敗: \(error.localizedDescription)"
             return
@@ -343,32 +342,25 @@ struct AlternativeCandidate: Codable, Identifiable, Sendable {
     var id: String { songId }
 }
 
-// MARK: - DB
+// MARK: - 曲
 
-@MainActor
-private func fetchSongs(brandFilter: String) throws -> [SongRow] {
-    let db = AppDatabase.shared
-    let trimmed = brandFilter.trimmingCharacters(in: .whitespaces)
-    return try db.dbQueue.read { dbConn -> [SongRow] in
-        let baseSQL = """
-            SELECT id, title, apple_music_id, COALESCE(brand_id, ''), COALESCE(duration_sec, -1)
-            FROM songs
-            WHERE apple_music_id IS NOT NULL AND apple_music_id != ''
-            """
-        let (sql, args): (String, StatementArguments) = trimmed.isEmpty
-            ? (baseSQL + " ORDER BY brand_id, title", StatementArguments())
-            : (baseSQL + " AND brand_id = ? ORDER BY brand_id, title", StatementArguments([trimmed]))
-        let rows = try Row.fetchAll(dbConn, sql: sql, arguments: args)
-        return rows.map { row in
-            SongRow(
-                id: row[0] as String,
-                title: row[1] as String,
-                appleMusicId: row[2] as String,
-                brandId: row[3] as String,
-                durationSec: (row[4] as Int) == -1 ? nil : (row[4] as Int)
-            )
+/// Apple Music の id が付いた曲 (ブランドで絞れる)。再生できるかを確かめる道具なので、
+/// 派生曲もブランド外の曲も含める。読むのはほかの画面と同じスナップショット。
+private func fetchSongs(brandFilter: String) async throws -> [SongRow] {
+    let brandId = brandFilter.trimmingCharacters(in: .whitespaces)
+    var filter = SongSearchFilter(brandIds: brandId.isEmpty ? [] : [brandId], includeRemixes: true)
+    filter.includeOtherBrand = true
+    let songs = try await AppContainer.shared.songReading.songs(
+        filter: filter, sortOrder: .titleKana, ascending: nil
+    ).map(\.song)
+    return songs
+        .compactMap { song -> SongRow? in
+            guard let appleMusicId = song.appleMusicId, !appleMusicId.isEmpty else { return nil }
+            return SongRow(
+                id: song.id, title: song.title, appleMusicId: appleMusicId,
+                brandId: song.brandId ?? "", durationSec: song.durationSec)
         }
-    }
+        .sorted { ($0.brandId, $0.title) < ($1.brandId, $1.title) }
 }
 
 // MARK: - MusicKit

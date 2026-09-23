@@ -353,9 +353,11 @@ struct MasteryView: View {
 
     private func load() async {
         // 一覧に出る曲だけを分母にする (「ライブ履歴しか無い曲」を隠す既存の絞り込みに乗る)。
-        let rows = (try? await database.fetchSongsAsync()) ?? []
+        let container = AppContainer.shared
+        let rows = (try? await container.songReading.songs(
+            filter: SongSearchFilter(), sortOrder: .titleKana, ascending: nil)) ?? []
         songs = rows.map(\.song)
-        brands = (try? await database.fetchBrandsAsync()) ?? []
+        brands = (try? await container.brandReading.brands()) ?? []
         loaded = true
     }
 }

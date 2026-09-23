@@ -89,7 +89,7 @@ struct MasteryGroupDetailView: View {
 
     private func load() async {
         // 並びは群の中の並び (呼び出し側が発売順で渡している) を保つ。
-        let fetched = (try? await database.fetchSongsAsync(ids: songIds)) ?? []
+        let fetched = (try? await AppContainer.shared.songReading.songs(ids: songIds)) ?? []
         let byId = Dictionary(fetched.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
         songs = songIds.compactMap { byId[$0] }
         loaded = true
