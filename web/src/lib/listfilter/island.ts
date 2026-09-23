@@ -148,7 +148,11 @@ export function mountListFilter<F>(
       bindSortHeaders();
       renderSorts();
       setEnabled(true);
-      apply();
+      // 開いた直後が既定の状態 (絞り込みなし・既定の並び・向きの指定なし) なら、行は
+      // Rust が組んだ順のまま正しい。数千行を同じ順に付け替えるだけの DOM 移動をしない。
+      if (isNarrowed(fields, state) || state.__sort !== spec.fallbackSort || state.__ascending !== null) {
+        apply();
+      }
     } catch (e) {
       // 絞り込めないだけで一覧は読める。壊れた見た目のまま黙らない。
       el.status.textContent = "絞り込みを読み込めませんでした。再読み込みしてください。";
