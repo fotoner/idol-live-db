@@ -7,13 +7,11 @@
 
 import contextlib
 import io
-import itertools
 import os
 import sqlite3
 import subprocess
 import sys
 import tempfile
-import types
 import unittest
 from pathlib import Path
 
@@ -81,7 +79,7 @@ class CliTest(unittest.TestCase):
 
 
 class PushTest(unittest.TestCase):
-    """送る操作を偽物の送信で受け取って確かめる (seed_cloudkit ごと偽物に差し替える)。"""
+    """送る操作を偽物の送信口で受け取って確かめる。"""
 
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -92,33 +90,22 @@ class PushTest(unittest.TestCase):
         support.write_json(self.events_file, EVENTS)
         self.key_file = root / "dummy.pem"
         self.key_file.write_text("not a key")
-        self.sent = []
         self.errors_for = set()
-        clock = itertools.count(1)
-        fake = types.ModuleType("seed_cloudkit")
-        fake.BASE_URL, fake.MODIFY_PATH = "https://cloudkit.invalid", "/modify"
-        fake._build_paths = lambda env: None
-        fake.init_session = lambda key_id, key_file: None
-        fake.next_modified_ms = lambda: next(clock)
-        fake.post_json = self.fake_post
-        saved = sys.modules.get("seed_cloudkit")
-        sys.modules["seed_cloudkit"] = fake
-        self.addCleanup(lambda: sys.modules.__setitem__("seed_cloudkit", saved)
-                        if saved else sys.modules.pop("seed_cloudkit", None))
+        self.cloudkit = support.FakeCloudKit(self, self.respond)
 
     def tearDown(self):
         self.tmp.cleanup()
 
-    def fake_post(self, url, payload, auth=None):
-        records = []
-        for op in payload["operations"]:
-            self.sent.append(op)
-            name = op["record"]["recordName"]
-            if name in self.errors_for:
-                records.append({"recordName": name, "serverErrorCode": "SERVER_REJECTED_REQUEST"})
-            else:
-                records.append({"recordName": name, "recordType": op["record"]["recordType"]})
-        return {"records": records}
+    def respond(self, url, payload):
+        response = support.accept_all(url, payload)
+        for record in response["records"]:
+            if record["recordName"] in self.errors_for:
+                record["serverErrorCode"] = "SERVER_REJECTED_REQUEST"
+        return response
+
+    @property
+    def sent(self):
+        return self.cloudkit.operations()
 
     def run_main(self, *args):
         argv = ["insert_future_events.py", *args,

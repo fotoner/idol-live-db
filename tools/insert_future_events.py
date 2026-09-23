@@ -28,11 +28,13 @@ import sys
 import unicodedata
 from pathlib import Path
 
+from lib import cloudkit as ck
+from lib.ck_records import next_modified_ms
+
 TOOLS_DIR = Path(__file__).resolve().parent
 DB_PATH = TOOLS_DIR.parent / "ImasLiveDB" / "Resources" / "master.sqlite"
 EVENTS_FILE = TOOLS_DIR / "future_events.json"
 DEFAULT_KEY_FILE = TOOLS_DIR / "eckey.pem"
-BATCH_SIZE = 200
 
 # 発表の時点では分からないので、新しいイベントには空・0 で入れる列。
 # 既存の行を送り直すときは送らない (CloudKit 側で直した値を消さないため)。
@@ -163,25 +165,17 @@ def insert_events(conn: sqlite3.Connection, events: list, resend_existing: bool 
 
 
 def push(ops: dict, production: bool, key_id: str, key_file: Path) -> int:
-    """ops を CloudKit へ送り、レコード単位のエラーの件数を返す。"""
-    import seed_cloudkit as sk  # 送るときだけ要る (requests / ecdsa を使う)
-
-    sk._build_paths("production" if production else "development")
-    sk.init_session(key_id, key_file)
-    url = sk.BASE_URL + sk.MODIFY_PATH
+    """ops を CloudKit へ送り、レコード単位のエラーの件数を返す (Event → Show → ShowCast の順)。"""
+    signer = ck.load_signer(key_id, key_file)
+    url = ck.BASE_URL + ck.records_path("production" if production else "development", "modify")
     errors = 0
-    for record_type, label in (("Event", "events"), ("Show", "shows"), ("ShowCast", "show_cast")):
+    for record_type in ("Event", "Show", "ShowCast"):
         records = ops[record_type]
         for op in records:
-            op["record"]["fields"]["modifiedAt"] = {"value": sk.next_modified_ms(), "type": "TIMESTAMP"}
-        for i in range(0, len(records), BATCH_SIZE):
-            batch = records[i : i + BATCH_SIZE]
-            r = sk.post_json(url, {"operations": batch})
-            errs = [x for x in r.get("records", []) if "serverErrorCode" in x]
-            errors += len(errs)
-            print(f"  {label}: {min(i + BATCH_SIZE, len(records))}/{len(records)} (errors {len(errs)})")
-            if errs:
-                print("  first err:", errs[0], file=sys.stderr)
+            op["record"]["fields"]["modifiedAt"] = {"value": next_modified_ms(), "type": "TIMESTAMP"}
+        _, failed = ck.upload_operations(
+            records, url, False, record_type, post=lambda u, p: ck.post_json(u, p, signer))
+        errors += failed
     return errors
 
 
