@@ -12,7 +12,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import uniffi.imas_core.CkRow
@@ -21,6 +24,7 @@ import uniffi.imas_core.SyncMode
 import uniffi.imas_core.SyncStartupState
 import uniffi.imas_core.SyncStep
 import uniffi.imas_core.syncCompletionPlan
+import uniffi.imas_core.syncDefaultFullSyncIntervalSeconds
 import uniffi.imas_core.syncOrphanIds
 import uniffi.imas_core.syncParseCompositeRecordName
 import uniffi.imas_core.syncRunStartPlan
@@ -40,10 +44,11 @@ import kotlin.math.roundToLong
  * ここは HTTP (CloudKitClient) と Room への実書き込みだけを担う。
  * CloudKit の transport は iOS (CloudKit.framework) と非対称なので共有しない。
  *
- * Android は iOS 固有の機能を持たないので、コアには「退化した入力」を渡す:
+ * Android は iOS 固有の機能の一部を持たないので、コアには「退化した入力」を渡す:
  *  - 中断されたフル同期の再開が無い → hasPendingFullSync=false / checkpointEpoch=null
- *  - 定期フル再取得 (iOS 24h) が無い → fullSyncIntervalSeconds=null
  *  - cursor の概念が無い ([CloudKitClient] が continuationMarker を内部で使い切る)
+ * 定期フル再取得は iOS と同じ間隔 (コアの既定 24h) で行う。フルの実行は epoch から全件を
+ * 取り直し、単一 PK の表の孤児 (CloudKit で物理削除された行) も掃除する。
  */
 class CloudKitSyncEngine(
     context: Context,
@@ -67,6 +72,13 @@ class CloudKitSyncEngine(
 
     private val _state = MutableStateFlow<SyncState>(SyncState.Idle)
     val state: StateFlow<SyncState> = _state.asStateFlow()
+
+    /**
+     * 同期を通さずにマスタが入れ替わった (seed の初回投入・アプリ更新時の入れ直し)。
+     * スナップショットはこれでも作り直す (同期の完了を待つと、その間は古いマスタを読む)。
+     */
+    private val _localDataReplaced = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val localDataReplaced: SharedFlow<Unit> = _localDataReplaced.asSharedFlow()
 
     sealed class SyncState {
         data object Idle : SyncState()
@@ -288,13 +300,20 @@ class CloudKitSyncEngine(
      * sync() で最新差分を当てる。投入後にデータがあるか (= UI を即表示してよいか) を返す。
      */
     suspend fun ensureLocalData(): Boolean {
+        val wasEmpty = dao.brandCount() == 0
         val hasData = SeedImporter.importIfNeeded(appContext, db)
         // seed 投入に失敗しデータが依然として空の場合、無言で「データを準備中…」に留まらせず
         // 既存の Error state を通じてユーザーに可視化する (iOS ImasLiveDBApp の起動時アラート相当)。
         if (!hasData) {
             SeedImporter.lastImportError?.let { _state.value = SyncState.Error(it) }
+            return false
         }
-        return hasData
+        // アプリを更新して同梱の seed が新しくなっていれば、マスタ表を入れ直す (iOS の reseed)。
+        // seed を作った時点より後の変更を取り直すため、次の同期はフルにする (差分の起点を捨てる)。
+        val reseeded = SeedImporter.reseedIfNeeded(appContext, db)
+        if (reseeded) prefs.edit().remove(KEY_LAST_SYNC).remove(KEY_BACKFILLED).apply()
+        if (wasEmpty || reseeded) _localDataReplaced.tryEmit(Unit)
+        return true
     }
 
     /**
@@ -323,11 +342,15 @@ class CloudKitSyncEngine(
         scope.async {
             current?.join()
             if (full) prefs.edit().remove(KEY_LAST_SYNC).remove(KEY_BACKFILLED).apply()
-            runSync()
+            runSync(manualFull = full)
         }.also { running = it }
     }
 
-    private suspend fun runSync() {
+    /**
+     * @param manualFull 設定画面からの全データ同期か。24h のフル再取得のタイマーは、起動や
+     *   一覧の更新から走った実行 (iOS の起動時同期に当たる) だけが進める (コアの completion_plan)。
+     */
+    private suspend fun runSync(manualFull: Boolean) {
         if (!isConfigured()) {
             // token 未設定でもエラーにしない: seed DB の実データで継続する (最新化だけ行わない)。
             // 主にコントリビューターのローカルビルド向け。リリース版は token を注入する。
@@ -345,11 +368,11 @@ class CloudKitSyncEngine(
                 SyncStartupState(
                     hasPendingFullSync = false,     // Android は中断フルの再開を持たない
                     localDataEmpty = dao.brandCount() == 0,
-                    lastFullSyncEpoch = null,
+                    lastFullSyncEpoch = prefs.getLong(KEY_LAST_FULL_SYNC, 0L).takeIf { it > 0L }?.toEpochSeconds(),
                     // prefs の既定値 0 は「起点なし」= フルの合図なので None に写す。
                     lastSyncEpoch = prefs.getLong(KEY_LAST_SYNC, 0L).takeIf { it > 0L }?.toEpochSeconds(),
                     nowEpoch = startMs.toEpochSeconds(),
-                    fullSyncIntervalSeconds = null  // 定期フル再取得は iOS だけの機能
+                    fullSyncIntervalSeconds = syncDefaultFullSyncIntervalSeconds()
                 )
             )
             val isFullSync = plan.mode == SyncMode.FULL
@@ -436,8 +459,7 @@ class CloudKitSyncEngine(
             val completion = syncCompletionPlan(
                 SyncCompletionState(
                     isFullSync = isFullSync,
-                    // last_full_sync_at は 24h 判定 (iOS のみ) を進める書き込みなので Android では立てない。
-                    isStartupRun = false,
+                    isStartupRun = !manualFull,
                     effectiveStartEpoch = runStart.effectiveStartEpoch,
                     syncStartEpoch = startMs.toEpochSeconds(),
                     completionEpoch = System.currentTimeMillis().toEpochSeconds(),
@@ -447,6 +469,9 @@ class CloudKitSyncEngine(
             )
             if (completion.shouldSaveLastSync) {
                 prefs.edit().putLong(KEY_LAST_SYNC, completion.lastSyncEpochToSave.toEpochMillis()).apply()
+            }
+            completion.lastFullSyncEpochToSave?.takeIf { completion.shouldUpdateLastFullSync }?.let {
+                prefs.edit().putLong(KEY_LAST_FULL_SYNC, it.toEpochMillis()).apply()
             }
             // shouldNotifyMasterChanged は使わない: Android は Completed を購読して
             // スナップショットを再ロードしており、0 件同期でも state は必ず進める必要がある。
@@ -473,6 +498,8 @@ class CloudKitSyncEngine(
     companion object {
         private const val TAG = "CloudKitSync"
         private const val KEY_LAST_SYNC = "last_sync_ms"
+        /** 直近の (起動側の) フル同期の完了時刻。24h のフル再取得の起点。 */
+        private const val KEY_LAST_FULL_SYNC = "last_full_sync_ms"
 
         /** epoch から一度取り直したレコードタイプ (v8→v9 移行の埋め直しを 1 回に限るため)。 */
         private const val KEY_BACKFILLED = "backfilled_record_types"

@@ -69,6 +69,8 @@ class SnapshotStoreProvider(
                 .filterIsInstance<CloudKitSyncEngine.SyncState.Completed>()
                 .collect { reload() }
         }
+        // seed の初回投入・アプリ更新時の入れ直しでも作り直す (同期の完了を待たない)。
+        scope.launch { syncEngine.localDataReplaced.collect { reload() } }
     }
 
     /**

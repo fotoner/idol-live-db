@@ -102,6 +102,44 @@ class SeedImporterTest {
         }
     }
 
+    /**
+     * 同梱の seed が端末より新しければ、マスタ表を seed で入れ直す。複合 PK の表に残った
+     * 余剰行 (CloudKit で物理削除された歌唱者など) も消え、端末にしかない表は残る。
+     */
+    @Test
+    fun reseedReplacesMasterTablesAndKeepsLocalData() = runBlocking {
+        assertTrue(SeedImporter.importIfNeeded(context, db))
+        val room = db.openHelper.writableDatabase
+        val item = rows(room, "SELECT id FROM setlist_items LIMIT 1")[0][0]
+        room.execSQL("INSERT INTO setlist_performers (setlist_item_id, idol_id) VALUES ('$item', 'removed_idol')")
+        room.execSQL("INSERT INTO user_marks (entity_type, entity_id, kind, bool_value, text_value, updated_at) VALUES ('song', 's', 'favorite', 1, NULL, 't')")
+        room.execSQL("INSERT INTO personal_tags (entity_type, entity_id, tag_name, created_at) VALUES ('song', 's', 'tag', 't')")
+        room.execSQL("INSERT INTO expenses (id, date, category, amount, updated_at) VALUES ('e1', '2026-01-01', 'ticket', 100, 't')")
+        // 端末は前の版の seed で入っている。
+        room.execSQL("UPDATE meta SET value = '1' WHERE key = 'data_version'")
+        room.execSQL("DELETE FROM meta WHERE key = 'content_hash'")
+
+        assertTrue(SeedImporter.reseedFrom(db, seedFile.path))
+
+        assertEquals("余剰の歌唱者が残った", count(seed, "setlist_performers"), count(room, "setlist_performers"))
+        for (table in listOf("user_marks", "personal_tags", "expenses")) {
+            assertEquals("$table が消えた", 1, count(room, table))
+        }
+        val meta = "SELECT key, value FROM meta WHERE key IN ('data_version', 'content_hash') ORDER BY key"
+        assertEquals(rows(seed, meta), rows(room, meta))
+    }
+
+    /** seed が端末と同じなら入れ直さない (端末の行はそのまま)。 */
+    @Test
+    fun reseedSkipsWhenSeedIsNotNewer() = runBlocking {
+        assertTrue(SeedImporter.importIfNeeded(context, db))
+        val room = db.openHelper.writableDatabase
+        room.execSQL("DELETE FROM songs")
+
+        assertTrue(!SeedImporter.reseedFrom(db, seedFile.path))
+        assertEquals(0, count(room, "songs"))
+    }
+
     private fun tables(db: SQLiteDatabase): List<String> =
         db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null).use { c ->
             buildList { while (c.moveToNext()) add(c.getString(0)) }

@@ -115,6 +115,38 @@ class CloudKitSyncEngineTest {
         assertTrue("1 回で ${dao.maxBrandDeleteBatch} 件消そうとした", dao.maxBrandDeleteBatch in 1..900)
     }
 
+    /**
+     * 起動側の同期は、前のフル同期から 24h を過ぎたら (記録が無ければすぐ) epoch から全件を取り直す
+     * (iOS と同じ間隔。孤児の掃除もフルでだけ走る)。設定画面の全データ同期は 24h のタイマーを進めない。
+     */
+    @Test
+    fun startupSyncFallsBackToFullEvery24Hours() = runBlocking {
+        db.syncDao().upsertBrands(listOf(Brand("b0", "ブランド", "B", null, 0)))
+        val prefs = context.getSharedPreferences("imas_sync", Context.MODE_PRIVATE)
+        val hourAgo = System.currentTimeMillis() - 3_600_000L
+        prefs.edit().putLong("last_sync_ms", hourAgo).commit()
+        val brandSince = mutableListOf<Long>()
+        val engine = engine { recordType, since ->
+            if (recordType == "Brand") brandSince += since
+            if (recordType == "Brand") listOf(brandRecord("b0")) else emptyList()
+        }
+        suspend fun run(full: Boolean = false) = withTimeout(30_000) {
+            (if (full) engine.requestFullSync() else engine.requestSync()).await()
+        }
+
+        run()   // フル同期の記録が無い → フル
+        run()   // 直後 → 差分
+        prefs.edit().putLong("last_full_sync_ms", System.currentTimeMillis() - 25 * 3_600_000L).commit()
+        run()   // 25h 前 → フル
+        assertEquals(0L, brandSince[0])
+        assertTrue("差分にならない: $brandSince", brandSince[1] > 0L)
+        assertEquals(0L, brandSince[2])
+
+        prefs.edit().remove("last_full_sync_ms").commit()
+        run(full = true)
+        assertTrue("全データ同期が 24h のタイマーを進めた", !prefs.contains("last_full_sync_ms"))
+    }
+
     private fun brandRecord(id: String) =
         """{"recordName":"$id","recordType":"Brand","fields":{"name":{"value":"ブランド","type":"STRING"},"shortName":{"value":"B","type":"STRING"}}}"""
 
