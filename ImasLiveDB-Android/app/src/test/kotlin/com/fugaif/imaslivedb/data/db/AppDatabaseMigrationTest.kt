@@ -37,9 +37,15 @@ class AppDatabaseMigrationTest {
 
     private val context: Context get() = InstrumentationRegistry.getInstrumentation().targetContext
 
+    /** 配布済みの Room 4 / 7 の端末は、この版を通って上がってくる (MIGRATION_9_10 が索引を作る)。 */
+    @Test fun migrates9ToLatest() = assertMigrates(from = 9)
+
     @Test fun migrates13ToLatest() = assertMigrates(from = 13)
 
     @Test fun migrates15ToLatest() = assertMigrates(from = 15)
+
+    /** v10〜v18 を新規に作った端末には索引が無い。MIGRATION_18_19 が作る。 */
+    @Test fun migrates18ToLatest() = assertMigrates(from = 18)
 
     private fun assertMigrates(from: Int) {
         val validated = "validated_$from.sqlite"
@@ -89,7 +95,7 @@ class AppDatabaseMigrationTest {
 
     private companion object {
         /** `@Database(version = …)` と同じ値。版を上げたらここも上げる。 */
-        const val LATEST = 18
+        const val LATEST = 19
 
         /** 家計簿 (expenses) を作った版 (MIGRATION_16_17)。 */
         const val EXPENSES_SINCE = 17

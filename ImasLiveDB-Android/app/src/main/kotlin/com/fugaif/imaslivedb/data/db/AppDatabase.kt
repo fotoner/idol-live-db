@@ -81,7 +81,7 @@ import com.fugaif.imaslivedb.data.model.UserMark
         Expense::class,
         ShowTicket::class
     ],
-    version = 18,
+    version = 19,
     // 確定スキーマを app/schemas へ JSON で吐く。共有コア (imas-core) が持つ
     // マスタ DDL と突き合わせて、片方だけスキーマを変えた事故を CI で捕まえるため。
     exportSchema = true
@@ -488,11 +488,27 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * songs の unit_version_id 索引を、どの経路で来た DB にも揃える。
+         *
+         * MIGRATION_9_10 はこの索引を作るのに、Song の `@Entity` は宣言していなかった。
+         * Room 2.6.1 は索引も集合として厳密に照合するので、v9 以前 (配布済みの 4 / 7) から
+         * 上がった端末は「Migration didn't properly handle: songs」で起動のたびに落ち、
+         * データ消去 (= 担当・お気に入り・家計簿の喪失) でしか抜けられなかった。
+         * 宣言を足した上で、v10〜v18 を新規に作った端末 (索引が無い) にもここで作る。
+         * v9 以前から来た端末では既にあるので IF NOT EXISTS で何もしない。
+         */
+        val MIGRATION_18_19 = object : Migration(18, 19) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE INDEX IF NOT EXISTS idx_songs_unit_version ON songs(unit_version_id)")
+            }
+        }
+
         /** 登録する移行の全部 (古い順)。本番の builder と移行テストが同じ並びを使う。 */
         val ALL_MIGRATIONS: Array<Migration> = arrayOf(
             MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9,
             MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14,
-            MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18
+            MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19
         )
     }
 }

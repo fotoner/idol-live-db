@@ -9,7 +9,10 @@ import androidx.room.PrimaryKey
     tableName = "songs",
     indices = [
         Index(name = "idx_songs_brand", value = ["brand_id"]),
-        Index(name = "idx_songs_composer", value = ["composer"])
+        Index(name = "idx_songs_composer", value = ["composer"]),
+        // MIGRATION_9_10 が作る索引。宣言しないと v9 以前から上がった端末の DB が
+        // Room の照合に落ちて起動できなくなる (MIGRATION_18_19 の KDoc)。
+        Index(name = "idx_songs_unit_version", value = ["unit_version_id"])
     ]
 )
 data class Song(
