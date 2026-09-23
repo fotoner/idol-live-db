@@ -80,7 +80,7 @@ class MasteryViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         viewModelScope.launch {
-            allSongs = songRepo.fetchSongs().map { it.song }
+            allSongs = songRepo.fetchMasterySongs()
             levels = marks.masteryLevels()
             collected = marks.autoCollectedSongIds()
             _uiState.value = _uiState.value.copy(

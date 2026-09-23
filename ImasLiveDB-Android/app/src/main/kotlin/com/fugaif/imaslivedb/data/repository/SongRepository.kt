@@ -26,6 +26,7 @@ import uniffi.imas_core.PickedSongRecord
 import uniffi.imas_core.SongListFilter
 import uniffi.imas_core.SongListSort
 import uniffi.imas_core.introQuizPlayableIndices
+import uniffi.imas_core.masterySongFilter
 import uniffi.imas_core.splitCreditNames
 
 /**
@@ -115,6 +116,17 @@ class SongRepository(
         // タグ絞り込みは通過フィルタ (並びはコアの表示順が正)。
         val visibleIds = if (tagFilterSongIds != null) ids.filter { it in tagFilterSongIds } else ids
         return fetchSongsPreservingOrder(visibleIds).withArtists()
+    }
+
+    /**
+     * 習熟度の分母になる曲 (50 音順)。どの曲を数えるか (リミックス・別版・other ブランド・
+     * ライブ履歴にしか無い曲を数えない) はコアの masterySongFilter が決める。
+     */
+    suspend fun fetchMasterySongs(): List<Song> {
+        val ids = snapshots.query { store ->
+            store.songList(masterySongFilter(), SongListSort.TITLE_KANA, null, emptyList(), emptyList())
+        }
+        return fetchSongsPreservingOrder(ids)
     }
 
     /** song_id → 現地回収回数 (行アイコン/回収済みフィルタ用の bulk 取得)。 */
