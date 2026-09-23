@@ -432,6 +432,9 @@ export function sqliteTimestampToEpochSeconds(ts: string | null | undefined): nu
  *
  * ⚠️ 形式 (JSON 1 行・キー名) はバッチ側のパーサと 1:1 の契約。変えるなら
  *    collect_request_logs.py の parse_event も同時に変えること。
+ *
+ * 出す口: GET /songs/:id/lyrics、曲詳細の束ね (歌詞を同梱したとき)、
+ * PUT /songs/:id/calls (応答が保存後の歌詞全文なので。運用者トークンの一括投入は除く)。
  */
 export function logLyricsRead(songId: string): void {
   console.log(JSON.stringify({ event: "lyrics_read", song_id: songId }));

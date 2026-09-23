@@ -39,6 +39,7 @@ import {
 import {
   authorizeLyricsWrite,
   buildLyricsPayload,
+  logLyricsRead,
   parseLines,
   sqliteTimestampToEpochSeconds,
   NO_STORE,
@@ -176,6 +177,9 @@ export async function handleLyricsCalls(ctx: RouteContext): Promise<Response | n
     saved ?? { source: null, updated_at: null },
     parseLines(saved?.lines_json ?? null)
   );
+  // 応答は保存後の歌詞全文なので、歌詞の読み取りとして数える (GET と同じ lyrics_read)。
+  // 運用者トークンでの一括投入は利用者の閲覧ではないので数えない (admin の JWT は数える)。
+  if (subject !== OPERATOR_SUBJECT) logLyricsRead(songId);
   // 応答には歌詞本文が含まれる。歌詞と同じく no-store。
   return json({ ...payload, status: saved?.status ?? header.status }, 200, NO_STORE);
 }
