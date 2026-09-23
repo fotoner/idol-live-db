@@ -384,9 +384,9 @@ struct PollDetailView: View {
 
     // MARK: - Delete
 
+    /// 自分のお題かはサーバ (`is_own_poll`) が決める。admin はどのお題でも消せる。
     private func canDelete(poll: Poll) -> Bool {
-        guard let userId = AuthService.shared.userId else { return false }
-        return AuthService.shared.isAdmin || poll.createdBy == userId
+        AuthService.shared.isAdmin || poll.isOwnPoll == true
     }
 
     private func deleteButton(poll: Poll) -> some View {

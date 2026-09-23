@@ -455,7 +455,8 @@ struct Poll: Codable, Identifiable, Hashable, Sendable {
     let title: String
     let description: String?
     let targetType: PollTargetType
-    let createdBy: String
+    /// 作成者 uid。サーバは `is_own_poll` に移ったので、判定には使わない (後でサーバから消える)。
+    let createdBy: String?
     let createdAt: Date
     let endsAt: Date
     let status: String
@@ -471,6 +472,8 @@ struct Poll: Codable, Identifiable, Hashable, Sendable {
     let scopeEntityIds: [String]?
     /// 現在1位の曲/アイドルの entity_id (無投票なら nil)。一覧行のサムネイルに使う。
     let topEntityId: String?
+    /// 呼び出した人のお題か (削除の導線を出す判定)。サーバが認証から決める。古いサーバでは nil。
+    var isOwnPoll: Bool? = nil
 
     /// nil 時のフォールバックを内包したアクセサ。
     var scope: PollCandidateScope { candidateScope ?? .all }
