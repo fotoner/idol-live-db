@@ -29,7 +29,6 @@ import uniffi.imas_core.masterySummary
 data class MasteryDetailState(
     val group: MasteryGroup,
     val songs: List<Song>,
-    val levels: Map<String, UByte>,
     val collectedIds: Set<String>,
 )
 
@@ -133,8 +132,8 @@ class MasteryViewModel(app: Application) : AndroidViewModel(app) {
     /** 段階を書き換えた後の後始末 (再集計 + 開いていれば詳細も差し替え)。 */
     private suspend fun onMarksChanged() {
         levels = marks.masteryLevels()
+        // 詳細の数も群から出すので、群を作り直してから差し替える ([recompute] の終わり)。
         recompute(immediate = true)
-        refreshDetail()
     }
 
     // ---- 群の詳細 (画面内で完結させる。ナビは触らない = StatsScreen と同じ流儀) ----
@@ -149,7 +148,6 @@ class MasteryViewModel(app: Application) : AndroidViewModel(app) {
             _detail.value = MasteryDetailState(
                 group = group,
                 songs = group.songIds.mapNotNull { byId[it] },
-                levels = levels,
                 collectedIds = collected,
             )
         }
@@ -160,7 +158,7 @@ class MasteryViewModel(app: Application) : AndroidViewModel(app) {
     private fun refreshDetail() {
         val current = _detail.value ?: return
         val refreshed = _uiState.value.groups.firstOrNull { it.key == current.group.key }
-        _detail.value = current.copy(group = refreshed ?: current.group, levels = levels)
+        _detail.value = current.copy(group = refreshed ?: current.group)
     }
 
     fun reloadScale() {
@@ -198,6 +196,7 @@ class MasteryViewModel(app: Application) : AndroidViewModel(app) {
                 stageCounts = counts.toList(),
                 scopedCount = scoped.size,
             )
+            refreshDetail()
         }
     }
 }

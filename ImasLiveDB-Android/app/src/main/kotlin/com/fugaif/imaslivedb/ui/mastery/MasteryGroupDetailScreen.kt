@@ -40,7 +40,6 @@ fun MasteryGroupDetailScreen(
     group: MasteryGroup,
     scale: MasteryScale,
     songs: List<Song>,
-    levels: Map<String, UByte>,
     collectedIds: Set<String>,
     onBack: () -> Unit,
     onOpenSong: (String) -> Unit,
@@ -52,15 +51,19 @@ fun MasteryGroupDetailScreen(
     var showBulk by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<Song?>(null) }
 
-    val levelOf: (Song) -> UByte = { levels[it.id] ?: 0u }
+    // 段・「聴いたのに未設定」・数はコアが群に入れて返す (group.songIds と同じ並び)。
+    // 画面で marks から数え直さない。
+    val indexById = remember(group) { group.songIds.withIndex().associate { it.value to it.index } }
+    val levelOf: (Song) -> UByte = { song -> indexById[song.id]?.let { group.levels[it].toUByte() } ?: 0u }
+    val heardButUnset: (Song) -> Boolean = { song -> indexById[song.id]?.let { group.heardButUnset[it] } == true }
     val shown = songs.filter { song ->
         when {
-            heardOnly -> levelOf(song).toInt() == 0 && song.id in collectedIds
+            heardOnly -> heardButUnset(song)
             levelFilter != null -> levelOf(song) == levelFilter
             else -> true
         }
     }
-    val heardUnset = songs.count { levelOf(it).toInt() == 0 && it.id in collectedIds }
+    val heardUnset = group.heardButUnsetCount.toInt()
 
     Scaffold(
         topBar = {
@@ -90,7 +93,7 @@ fun MasteryGroupDetailScreen(
                         MasteryRing(group.percent.toInt() / 100.0, Modifier.size(92.dp))
                         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Row(verticalAlignment = Alignment.Bottom) {
-                                Text("${group.levels.count { it.toInt() > 0 }}",
+                                Text("${group.setCount}",
                                      fontSize = 30.sp, fontWeight = FontWeight.Bold, color = DS.ink)
                                 Text(" / ${group.total}曲", fontSize = 15.sp, color = DS.ink2)
                             }
@@ -113,7 +116,7 @@ fun MasteryGroupDetailScreen(
                         }
                         for (i in 0..scale.steps.toInt()) {
                             val level = i.toUByte()
-                            val count = songs.count { levelOf(it) == level }
+                            val count = group.levelCounts.getOrElse(i) { 0u }
                             ImasFilterChip("${scale.shortLabel(level)} $count",
                                            levelFilter == level, {
                                 levelFilter = if (levelFilter == level) null else level
@@ -237,7 +240,7 @@ fun MasteryLevelPickerSheet(title: String, current: UByte, scale: MasteryScale,
 @Composable
 private fun BulkSheet(group: MasteryGroup, scale: MasteryScale,
                       onPick: (MasteryBulkScope, UByte) -> Unit, onDismiss: () -> Unit) {
-    val unset = group.levels.count { it.toInt() == 0 }
+    val unset = group.levelCounts.firstOrNull()?.toInt() ?: 0
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = DS.bg) {
         Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
             if (unset > 0) {

@@ -76,7 +76,7 @@ fun MasteryScreen(
     detail?.let { d ->
         MasteryGroupDetailScreen(
             group = d.group, scale = state.scale, songs = d.songs,
-            levels = d.levels, collectedIds = d.collectedIds,
+            collectedIds = d.collectedIds,
             onBack = viewModel::closeGroup,
             onOpenSong = onOpenSong,
             onSetLevel = viewModel::setMastery,
