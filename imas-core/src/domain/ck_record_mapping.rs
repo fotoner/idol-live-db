@@ -1090,30 +1090,34 @@ pub fn map_record(record_type: &str, record: &CkRecordInput, now_millis: i64) ->
 /// この recordType を取り込むか。取り込まない型では変換を試みず、
 /// 「必須キー欠損で捨てた」ログにも載せない (iOS の switch の break 相当)。
 pub fn is_ingested_record_type(record_type: &str) -> bool {
-    matches!(
-        record_type,
-        "Brand"
-            | "Idol"
-            | "Event"
-            | "Show"
-            | "Venue"
-            | "VenueName"
-            | "UnitVersion"
-            | "Costume"
-            | "CostumeWear"
-            | "Creator"
-            | "VenueHall"
-            | "Song"
-            | "ImasUnit"
-            | "IdolBrand"
-            | "SongArtist"
-            | "UnitMember"
-            | "ShowCast"
-            | "SetlistItem"
-            | "SetlistPerformer"
-            | "SongVideo"
-    )
+    INGESTED_RECORD_TYPES.contains(&record_type)
 }
+
+/// 取り込む recordType の一覧。[`map_record`] が変換する型と同じ。
+/// 同期のステップ (`sync_planning::all_steps`) と一致することをテストで固定している。
+pub const INGESTED_RECORD_TYPES: &[&str] = &[
+    "Brand",
+    "Idol",
+    "Event",
+    "Show",
+    "Venue",
+    "VenueName",
+    "UnitVersion",
+    "Costume",
+    "CostumeWear",
+    "Creator",
+    "VenueHall",
+    "Song",
+    "ImasUnit",
+    "IdolBrand",
+    "SongArtist",
+    "UnitMember",
+    "ShowCast",
+    "SetlistItem",
+    "SetlistPerformer",
+    "SongVideo",
+    "ShowTicket",
+];
 
 /// 1 recordType 分のバッチ仕分け。deletedAt の有無で削除/生存に割り、
 /// 生存側だけ行に変換する (iOS の分割 + compactMap と同じ順序)。
@@ -1160,6 +1164,25 @@ pub fn ingest_web_services_batch(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// 取り込む型は、同期の全ステップ (sync_planning::all_steps) とちょうど同じ。
+    /// ステップを足してここを足し忘れると、Android (この関数で絞る) だけ
+    /// その型の同期が黙って 0 行になる (ShowTicket で実際に起きた)。
+    #[test]
+    fn ingested_record_types_match_the_sync_steps() {
+        use crate::domain::sync_planning::{all_steps, table_info};
+        use std::collections::BTreeSet;
+        let steps: BTreeSet<String> = all_steps().into_iter().map(|s| s.record_type).collect();
+        let ingested: BTreeSet<String> = INGESTED_RECORD_TYPES.iter().map(|t| t.to_string()).collect();
+        assert_eq!(ingested, steps);
+        for t in &steps {
+            assert!(is_ingested_record_type(t), "{t} を取り込まない");
+            assert!(table_info(t).is_some(), "{t} の表が無い");
+        }
+        for retired in ["CastMember", "IdolCast", "Unknown"] {
+            assert!(!is_ingested_record_type(retired), "{retired} は取り込まない");
+        }
+    }
 
     fn rec(name: &str, fields: &[(&str, CkValue)]) -> CkRecordInput {
         CkRecordInput {
