@@ -69,4 +69,25 @@ class FavoriteAggregationTest {
         aggregation.flushPending()
         assertEquals("3 回失敗したら諦める", 2, sent.size)
     }
+
+    /**
+     * 送れずに積んだ (A, true) の後で (A, false) を送れたら、積み残しの (A, true) は捨てる。
+     * 残っていると、前面に出たときに古い true を送り直して集計が戻る (RedTeam A-L2)。
+     */
+    @Test
+    fun aSuccessfulReportDropsTheStalePendingValue() = runBlocking {
+        var online = false
+        val sent = mutableListOf<Pair<String, Boolean>>()
+        val aggregation = FavoriteAggregation(context, CoroutineScope(Dispatchers.Unconfined)) { id, value ->
+            if (!online) error("offline")
+            sent += id to value
+        }
+
+        aggregation.report("stale", true)
+        online = true
+        aggregation.report("stale", false)
+        aggregation.flushPending()
+
+        assertEquals("古い値を送り直した", listOf("stale" to false), sent)
+    }
 }

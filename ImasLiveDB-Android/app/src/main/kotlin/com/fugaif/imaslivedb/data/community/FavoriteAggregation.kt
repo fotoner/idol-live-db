@@ -32,11 +32,19 @@ class FavoriteAggregation(
         scope.launch {
             try {
                 send(songId, value)
+                // 送れたら、同じ曲の積み残し (前に送れなかった古い値) は捨てる。残すと前面に
+                // 出たときに古い値を送り直して、集計が戻る。
+                dropPending(songId)
             } catch (e: Exception) {
                 Log.w(TAG, "favorite toggle failed, enqueue: $songId", e)
                 lock.withLock { save(load().filter { it.songId != songId } + Pending(songId, value, 0)) }
             }
         }
+    }
+
+    private suspend fun dropPending(songId: String) = lock.withLock {
+        val pending = load()
+        if (pending.any { it.songId == songId }) save(pending.filter { it.songId != songId })
     }
 
     /** 積んである未送信を送り直す (アプリが前面に出たとき)。 */
