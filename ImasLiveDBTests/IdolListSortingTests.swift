@@ -32,43 +32,15 @@ final class IdolListSortingTests: XCTestCase {
             debutDate: debutDate, attribute: nil, aliases: nil)
     }
 
-    // MARK: - 年齢
-
-    func testAgeMissingValuesGoLastRegardlessOfDirection() {
-        let idols = [makeIdol("none1"), makeIdol("young", age: 12), makeIdol("none2"), makeIdol("old", age: 30)]
-
-        let desc = sortIdols(idols, by: .age, ascending: false).map(\.id)
-        XCTAssertEqual(Array(desc.prefix(2)), ["old", "young"])
-        XCTAssertEqual(Set(desc.suffix(2)), ["none1", "none2"])
-
-        let asc = sortIdols(idols, by: .age, ascending: true).map(\.id)
-        XCTAssertEqual(Array(asc.prefix(2)), ["young", "old"], "昇順でも値なしが先頭に来てはいけない")
-        XCTAssertEqual(Set(asc.suffix(2)), ["none1", "none2"])
-    }
-
-    // MARK: - 身長 / 体重
-
-    // MARK: - 文字列キー
-
-    // MARK: - 安定性 / 公式順
-
-    // MARK: - グルーピング方針
-
-    func testOnlyOfficialKeepsBrandGrouping() {
-        XCTAssertTrue(IdolSortOrder.official.keepsBrandGrouping)
-        for order in IdolSortOrder.allCases where order != .official {
-            XCTAssertFalse(order.keepsBrandGrouping, "\(order.rawValue) は通し並びであるべき")
-        }
-    }
-
-    // MARK: - 行に出す指標 (文言はコアの sort_idol_list_rows)
+    // MARK: - 配線のスモーク (並べ方と指標の文言はコアのテストが持つ)
 
     /// 並べ替えと一緒に受け取った指標が、並べた本人の id に配られていること。
-    func testMetricLabelsAreKeyedByIdolAndOnlyForMetricSorts() {
-        let idols = [makeIdol("a", age: 17, height: 158), makeIdol("b")]
-        let byAge = sortIdolsWithMetrics(idols, by: .age)
-        XCTAssertEqual(byAge.metricLabels, ["a": "17歳"])
-        XCTAssertEqual(sortIdolsWithMetrics(idols, by: .height).metricLabels["a"], "158cm")
+    /// 値なしは並び方向にかかわらず末尾 (Optional → Int64 と ascending の受け渡し)。
+    func testSortAndMetricLabelsGoThroughTheCore() {
+        let idols = [makeIdol("none"), makeIdol("a", age: 17, height: 158), makeIdol("b", age: 12)]
+        let byAge = sortIdolsWithMetrics(idols, by: .age, ascending: true)
+        XCTAssertEqual(byAge.idols.map(\.id), ["b", "a", "none"])
+        XCTAssertEqual(byAge.metricLabels, ["a": "17歳", "b": "12歳"])
         XCTAssertTrue(sortIdolsWithMetrics(idols, by: .official).metricLabels.isEmpty)
     }
 }

@@ -52,18 +52,11 @@ enum IdolSortOrder: String, CaseIterable, Sendable {
     var descendingLabel: String { Self.meta[self]!.descendingLabel }
 }
 
-/// アイドル一覧を指定の並び順で整列する。
+/// アイドル一覧を指定の並び順で整列し、行に添える指標も受け取る。
 ///
-/// 本体は imas-core の domain/idol_list_filtering.rs (`sort_idol_list`)。値なしを並び方向に
-/// かかわらず末尾へ送る理由・同値を公式順 (sortOrder) で安定させる理由もそちらに記載。
-/// ここはエンティティ全体を FFI へ渡さないための薄いラッパ: `Idol` を判定に要る
-/// フィールドの射影 (`IdolListEntry`) へ落とし、返ってきた index 列で自国の配列を
-/// 引き直すだけ。`ascending` 未指定 (nil) の既定方向解決も Rust 側が担う。
-func sortIdols(_ idols: [Idol], by order: IdolSortOrder, ascending: Bool? = nil) -> [Idol] {
-    sortIdolsWithMetrics(idols, by: order, ascending: ascending).idols
-}
-
-/// 並べ替えと、行に添える指標 (`17歳` / `158cm` / `4月3日` / デビュー日) を 1 回で受け取る。
+/// 並べ方の本体は imas-core の domain/idol_list_filtering.rs (値なしを並び方向にかかわらず
+/// 末尾へ送る・同値を公式順で安定させる)。ここは `Idol` を判定に要るフィールドの射影
+/// (`IdolListEntry`) へ落とし、返ってきた index 列で自国の配列を引き直すだけ。
 /// 指標の文言もコア (`sort_idol_list_rows`) が作る。行ごとに FFI を呼ばないよう、
 /// 添え物は idol id → 文言の表で返す (公式順・五十音は空)。
 func sortIdolsWithMetrics(
