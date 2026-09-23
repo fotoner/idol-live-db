@@ -468,9 +468,9 @@ struct WeekTimeGridView: View {
     private func timedMinutes(of entry: CalendarEntry, on date: Date) -> (start: Int, end: Int)? {
         switch entry {
         case .show(let row):
-            guard let start = Self.parseTimeMinutes(row.show.startTime) else { return nil }
-            // 終了時刻データは無いため仮に 2 時間ぶんの高さで描画する
-            return (start, min(start + Metric.defaultShowDurationMinutes, 24 * 60))
+            // 公演の欄 (開始から 2 時間・24:00 で止める。開始時刻が無ければ終日) はコア。
+            guard let block = showTimeBlock(startTime: row.show.startTime) else { return nil }
+            return (Int(block.startMinutes), Int(block.endMinutes))
         case .release, .birthday, .staffBirthday, .anniversary, .ticket, .ticketPeriod:
             return nil
         case .personal(let event):
@@ -484,15 +484,6 @@ struct WeekTimeGridView: View {
             let endMin = Int(end.timeIntervalSince(dayStart) / 60)
             return (startMin, max(endMin, startMin + 15))
         }
-    }
-
-    /// "HH:MM" → 0:00 からの経過分。
-    static func parseTimeMinutes(_ time: String?) -> Int? {
-        guard let time else { return nil }
-        let parts = time.split(separator: ":")
-        guard parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]),
-              (0..<24).contains(h), (0..<60).contains(m) else { return nil }
-        return h * 60 + m
     }
 
     // MARK: - 重なりレイアウト
@@ -512,33 +503,21 @@ struct WeekTimeGridView: View {
     }
 
     /// 同時刻の重なりを最大 2 列に振り分け、収まらない分を +n に集約する。
+    /// 置き方 (並べ順・列・半分幅・溢れ) はコアの `week_timed_layout` (日ごとに 1 回)。
     private func layoutTimedBlocks(_ blocks: [TimedBlock]) -> (visible: [TimedBlock], overflow: [OverflowBadge]) {
-        let sorted = blocks.sorted { ($0.startMinutes, $0.endMinutes) < ($1.startMinutes, $1.endMinutes) }
-        var visible: [TimedBlock] = []
-        var hidden: [TimedBlock] = []
-        var laneEnds = [Int.min, Int.min]  // 各レーンの最終終了分
-
-        for var block in sorted {
-            if let lane = laneEnds.firstIndex(where: { $0 <= block.startMinutes }) {
-                block.lane = lane
-                laneEnds[lane] = block.endMinutes
-                visible.append(block)
-            } else {
-                hidden.append(block)
-            }
+        let layout = weekTimedLayout(blocks: blocks.map {
+            TimedBlockInput(startMinutes: UInt32(clamping: $0.startMinutes),
+                            endMinutes: UInt32(clamping: $0.endMinutes))
+        })
+        let visible = layout.placements.map { placement -> TimedBlock in
+            var block = blocks[Int(placement.index)]
+            block.lane = Int(placement.lane)
+            block.isHalfWidth = placement.halfWidth
+            return block
         }
-
-        // 他の可視ブロックと時間帯が重なるものだけ半分幅にする
-        for i in visible.indices {
-            let a = visible[i]
-            visible[i].isHalfWidth = visible.contains { b in
-                b.id != a.id && a.startMinutes < b.endMinutes && b.startMinutes < a.endMinutes
-            }
+        let overflow = layout.overflow.map {
+            OverflowBadge(startMinutes: Int($0.startMinutes), count: Int($0.count))
         }
-
-        let overflow = Dictionary(grouping: hidden, by: \.startMinutes)
-            .map { OverflowBadge(startMinutes: $0.key, count: $0.value.count) }
-            .sorted { $0.startMinutes < $1.startMinutes }
         return (visible, overflow)
     }
 }

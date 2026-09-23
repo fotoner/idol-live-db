@@ -65,51 +65,33 @@ struct CalendarPeriodBand: Identifiable {
 
 extension CalendarPeriodBand {
     /// この週 (weekDays) に重なる受付期間スパンを列範囲へ落とし込み、重ならないようレーン詰めする。
-    /// 描画は呼び出し側 (月セル / 週レーン) に任せ、ここは列インデックスとレーン段組みだけを返す。
+    /// 描画は呼び出し側 (月セル / 週レーン) に任せる。列・端の丸め・レーンはコアの
+    /// `week_period_bands` (週ごとに 1 回)。
     static func pack(
         weekDays: [Date],
         entriesByDate: [Date: [CalendarEntry]],
         calendar: Calendar
     ) -> [CalendarPeriodBand] {
         guard let firstDay = weekDays.first else { return [] }
-        let weekStart = calendar.startOfDay(for: firstDay)
-        let weekEnd = calendar.startOfDay(for: weekDays.last ?? firstDay)
-
-        var seen = Set<String>()
-        var bands: [CalendarPeriodBand] = []
+        var entryById: [String: (entry: CalendarEntry, name: String)] = [:]
+        var spans: [PeriodSpanInput] = []
         for date in weekDays {
             for entry in entriesByDate[calendar.startOfDay(for: date)] ?? [] {
-                guard case .ticketPeriod(let row) = entry, seen.insert(row.eventId).inserted else { continue }
-                guard let start = JSTDay.date(row.start),
-                      let end = JSTDay.date(row.end) else { continue }
-                let startDay = calendar.startOfDay(for: start)
-                let endDay = calendar.startOfDay(for: end)
-                let startRaw = calendar.dateComponents([.day], from: weekStart, to: startDay).day ?? 0
-                let endRaw = calendar.dateComponents([.day], from: weekStart, to: endDay).day ?? 0
-                let startCol = min(max(startRaw, 0), 6)
-                let endCol = min(max(endRaw, 0), 6)
-                guard endRaw >= 0, startRaw <= 6, endCol >= startCol else { continue }
-                bands.append(CalendarPeriodBand(
-                    id: row.eventId, entry: entry, name: row.eventName,
-                    startCol: startCol, endCol: endCol,
-                    roundLeading: startDay >= weekStart, roundTrailing: endDay <= weekEnd
-                ))
+                guard case .ticketPeriod(let row) = entry, entryById[row.eventId] == nil else { continue }
+                entryById[row.eventId] = (entry, row.eventName)
+                spans.append(PeriodSpanInput(id: row.eventId, start: row.start, end: row.end))
             }
         }
-
-        // レーン詰め (貪欲): 各レーンの最終 endCol より後に始まる帯を同レーンへ。空きが無ければ新レーン。
-        bands.sort { $0.startCol < $1.startCol }
-        var laneEnds: [Int] = []
-        for i in bands.indices {
-            if let lane = laneEnds.indices.first(where: { laneEnds[$0] < bands[i].startCol }) {
-                bands[i].lane = lane
-                laneEnds[lane] = bands[i].endCol
-            } else {
-                bands[i].lane = laneEnds.count
-                laneEnds.append(bands[i].endCol)
-            }
+        guard !spans.isEmpty else { return [] }
+        let weekStart = JSTDay.key(calendar.startOfDay(for: firstDay))
+        return weekPeriodBands(weekStart: weekStart, periods: spans).compactMap { band in
+            guard let found = entryById[band.id] else { return nil }
+            return CalendarPeriodBand(
+                id: band.id, entry: found.entry, name: found.name,
+                startCol: Int(band.startCol), endCol: Int(band.endCol),
+                roundLeading: band.roundLeading, roundTrailing: band.roundTrailing,
+                lane: Int(band.lane))
         }
-        return bands
     }
 
     /// 帯リストが占めるレーン数 (0 = 帯なし)。

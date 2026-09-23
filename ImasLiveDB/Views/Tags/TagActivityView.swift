@@ -270,10 +270,7 @@ struct TagActivityView: View {
     }
 
     private func relativeTime(_ date: Date) -> String {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .short
-        formatter.locale = Locale(identifier: "ja_JP")
-        return formatter.localizedString(for: date, relativeTo: Date())
+        EditFeedFormat.relativeTime(date)
     }
 
     // MARK: - Load

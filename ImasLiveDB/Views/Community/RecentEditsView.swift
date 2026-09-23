@@ -513,12 +513,13 @@ enum EditFeedFormat {
         }
     }
 
-    static func relativeTime(_ date: Date) -> String {
-        // RelativeDateTimeFormatter は non-Sendable のため static 共有を避け都度生成する
-        // (生成コストは軽微。呼び出しは UI 描画時のみ)。
-        let f = RelativeDateTimeFormatter()
-        f.locale = Locale(identifier: "ja_JP")
-        f.unitsStyle = .short
-        return f.localizedString(for: date, relativeTo: .now)
+    /// 「たった今」「N分前」「N時間前」「N日前」、1 か月以上前は JST の日付。言い回しはコアの
+    /// `relative_time` (Android と同じ)。
+    static func relativeTime(_ date: Date, now: Date = .now) -> String {
+        ImasLiveDB.relativeTime(epochMs: epochMillis(date), nowMs: epochMillis(now))
+    }
+
+    private static func epochMillis(_ date: Date) -> Int64 {
+        Int64((date.timeIntervalSince1970 * 1000).rounded(.down))
     }
 }
