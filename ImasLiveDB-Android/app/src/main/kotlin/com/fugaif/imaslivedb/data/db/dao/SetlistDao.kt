@@ -33,10 +33,6 @@ interface SetlistDao {
     """)
     suspend fun fetchAllPerformers(showId: String): List<AllPerformerRow>
 
-    /** ある SetlistItem が属する showId (編集フィードの対象タイトル解決用)。 */
-    @Query("SELECT show_id FROM setlist_items WHERE id = :itemId LIMIT 1")
-    suspend fun fetchShowIdForItem(itemId: String): String?
-
     // --- オープン編集 (セトリ編集) のローカル楽観反映用書き込み ---
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

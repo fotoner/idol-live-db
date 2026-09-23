@@ -9,6 +9,7 @@ import com.fugaif.imaslivedb.data.repository.CalendarShowDetail
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
+import uniffi.imas_core.showDisplayTitle
 
 /**
  * 公演を端末のカレンダーアプリへ登録する (iOS の `CalendarExportService` に対応)。
@@ -37,9 +38,8 @@ object DeviceCalendar {
     fun addShow(context: Context, row: CalShowRow, detail: CalendarShowDetail?): Boolean {
         val date = runCatching { LocalDate.parse(row.date) }.getOrNull() ?: return false
         val startMinutes = parseTimeMinutes(detail?.startTime)
-        val title = listOfNotNull(row.eventName, row.showName.takeIf { it.isNotBlank() })
-            .distinct()
-            .joinToString(" ")
+        // 公演の正式な呼び名 (ライブ名と重なる部分は 2 度出さない) はコア。
+        val title = showDisplayTitle(row.eventName, row.showName, row.date)
 
         val intent = Intent(Intent.ACTION_INSERT)
             .setData(CalendarContract.Events.CONTENT_URI)

@@ -115,7 +115,7 @@ class AppModule private constructor(context: Context) {
     val communityApi: CommunityApi by lazy { CommunityApi(workerHttpClient, authService) }
     val editApi: EditApi by lazy { EditApi(workerHttpClient, authService) }
     val setlistLikeService: SetlistLikeService by lazy { SetlistLikeService(workerHttpClient) }
-    val editFeedRepository: EditFeedRepository by lazy { EditFeedRepository(database, snapshotStoreProvider) }
+    val editFeedRepository: EditFeedRepository by lazy { EditFeedRepository(snapshotStoreProvider) }
     val masterEditRepository: MasterEditRepository by lazy { MasterEditRepository(database, snapshotStoreProvider) }
     val syncEngine: CloudKitSyncEngine by lazy { CloudKitSyncEngine(appContext, database, scope = appScope) }
     val localContributionLog: LocalContributionLog by lazy { LocalContributionLog(appContext) }
