@@ -7,6 +7,9 @@ import SwiftUI
 struct SongRowMatch: Equatable {
     let text: String
     let scope: SongSearchMode
+    /// 行がなぜ当たったかの説明 (「田中琴葉 ほか51人」「作詞 ○○ / 作曲 ○○」)。
+    /// 組み立てはコア (`search_match_texts`) で、一覧が画面の行ぶんを 1 回で作って渡す。
+    var described: String? = nil
 }
 
 /// 並び順の根拠として一覧行に出す指標。
@@ -180,32 +183,21 @@ struct SongRowView: View {
     /// 普段の表示はユニット名 (`displayLabel`) だが、「田中」で引いた曲が
     /// 「765 MILLION ALLSTARS」としか出ないと、当たった理由が行から消える。
     /// 連名をそのまま出しても 1 行に収まらず、当たった箇所が右端で切れて同じことになる。
+    /// よみだけで当たったとき (説明が無いとき) は普段の表示のまま。
     private var performerText: String {
-        guard searchMatch?.scope == .performer, let needle = trimmedMatch else {
+        guard searchMatch?.scope == .performer, let described = searchMatch?.described else {
             return displayLabel
         }
-        if let matched = item.performerIdols.first(where: { contains($0.name, needle) }) {
-            return withOtherCount(matched.name)
-        }
-        // 出演アイドルに無く歌唱者表記で当たった場合 (song_artists 未整備の曲など)。
-        for label in [song.unitName, song.singerLabel, item.artistNames].compactMap({ $0 }) {
-            if let segment = matchedSegment(in: label, needle) { return withOtherCount(segment) }
-        }
-        // よみだけで当たった場合。表記側に範囲が無いので敷けないが、誰なのかは出す。
-        return displayLabel
+        return described
     }
 
-    /// 「田中琴葉 ほか51人」。当たった 1 人だけだと規模が分からないので人数を添える。
-    private func withOtherCount(_ name: String) -> String {
-        let others = max(0, item.performerIdols.count - 1)
-        return others > 0 ? "\(name) ほか\(others)人" : name
-    }
-
-    /// 連名表記 (「天海春香、春日未来、…」) から、当たった 1 人ぶんだけ抜き出す。
-    private func matchedSegment(in label: String, _ needle: String) -> String? {
-        label.split(whereSeparator: { "、,・/／".contains($0) })
-            .map { $0.trimmingCharacters(in: .whitespaces) }
-            .first { contains($0, needle) }
+    /// 説明の組み立てに渡す、この行の歌唱者の表記 (優先順)。最後に歌唱アイドル名の連結を置く
+    /// (song_artists 未整備の曲でも当たった人が出るように)。
+    static func performerLabels(of item: SongWithArtists) -> [String] {
+        [item.song.unitName, item.song.singerLabel, item.artistNames,
+         item.performerIdols.map(\.name).joined(separator: "、")]
+            .compactMap { $0 }
+            .filter { !$0.isEmpty }
     }
 
     /// 作詞・作曲・編曲で絞っているときだけ出す行。普段の一覧には要らない情報なので、
@@ -220,33 +212,13 @@ struct SongRowView: View {
         }
     }
 
-    /// 一致したクリエイターの役割と名前。複数の役割で当たったらまとめて出す。
-    private var matchedCreatorText: String? {
-        guard let needle = trimmedMatch else { return nil }
-        let parts = [("作詞", song.lyricist), ("作曲", song.composer), ("編曲", song.arranger)]
-            .compactMap { role, name -> String? in
-                guard let name, contains(name, needle) else { return nil }
-                return "\(role) \(name)"
-            }
-        return parts.isEmpty ? nil : parts.joined(separator: " / ")
-    }
+    /// 一致したクリエイターの役割と名前 (組み立てはコア)。
+    private var matchedCreatorText: String? { searchMatch?.described }
 
     /// 空白を落とした絞り込み語。空なら nil。
     private var trimmedMatch: String? {
         let text = searchMatch?.text.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         return text.isEmpty ? nil : text
-    }
-
-    /// 行がなぜ出ているかを説明するときの一致判定。
-    ///
-    /// 規則は `String.searchMatchRange(of:)` (= コアの照合そのもの) に任せる。
-    /// ここに条件を書き足すと、一覧に載せる判定と食い違う。
-    private func matchRange(of needle: String, in haystack: String) -> Range<String.Index>? {
-        haystack.searchMatchRange(of: needle)
-    }
-
-    private func contains(_ haystack: String, _ needle: String) -> Bool {
-        matchRange(of: needle, in: haystack) != nil
     }
 
     // MARK: - マイマーク (リリース日 / 担当♥ / メモ / 現地回収✓)

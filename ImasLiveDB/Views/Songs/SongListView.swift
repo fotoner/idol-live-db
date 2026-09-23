@@ -854,9 +854,34 @@ struct SongListView: View {
         }
     }
 
+    /// 行がなぜ当たったかの説明を、画面の行ぶん 1 回で作る (行ごとに FFI を呼ばない)。
+    private func matchDescriptions(for rows: [SongWithArtists]) -> [String: String] {
+        let scope: SearchMatchScope
+        switch searchMode {
+        case .performer: scope = .performer
+        case .creator: scope = .creator
+        case .title, .lyrics: return [:]
+        }
+        let needle = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !needle.isEmpty, !rows.isEmpty else { return [:] }
+        let texts = searchMatchTexts(
+            rows: rows.map {
+                SearchMatchRowInput(performerLabels: SongRowView.performerLabels(of: $0),
+                                    lyricist: $0.song.lyricist, composer: $0.song.composer,
+                                    arranger: $0.song.arranger)
+            },
+            scope: scope, needle: needle)
+        var result: [String: String] = [:]
+        for (row, text) in zip(rows, texts) {
+            if let text { result[row.song.id] = text }
+        }
+        return result
+    }
+
     private func songsList(_ display: [SongWithArtists], fuzzy: [SongWithArtists]) -> some View {
-        List {
-            ForEach(display) { songRow($0) }
+        let described = matchDescriptions(for: display + fuzzy)
+        return List {
+            ForEach(display) { songRow($0, described: described[$0.song.id]) }
             if !fuzzy.isEmpty {
                 // 打った通りではない候補なので、区切って理由を書く。黙って下に足すと
                 // 「なぜこの曲が出ているのか」が読めず、一致の精度を疑わせる。
@@ -866,7 +891,7 @@ struct SongListView: View {
                     .listRowInsets(EdgeInsets(top: 0, leading: DS.sp5, bottom: 0, trailing: DS.sp5))
                     .listRowBackground(DS.bg)
                     .listRowSeparator(.hidden)
-                ForEach(fuzzy) { songRow($0) }
+                ForEach(fuzzy) { songRow($0, described: described[$0.song.id]) }
             }
         }
         .listStyle(.plain)
@@ -874,7 +899,7 @@ struct SongListView: View {
         .background(DS.bg)
     }
 
-    private func songRow(_ item: SongWithArtists) -> some View {
+    private func songRow(_ item: SongWithArtists, described: String? = nil) -> some View {
         // iOS 18 では Button label 内に Button (再生ボタン等) を
         // 入れ子にすると tap が両方とも吸われて反応領域が狭くなる。
         // 行全体は onTapGesture で受け、内側の再生ボタンは独立して機能させる。
@@ -888,7 +913,7 @@ struct SongListView: View {
             tagVoteCount: selectedTags.count == 1 ? vm.tagVoteCounts[item.song.id] : nil,
             lyricsSnippets: vm.lyricsHits?[item.song.id] ?? [],
             searchMatch: searchText.isEmpty
-                ? nil : SongRowMatch(text: searchText, scope: searchMode),
+                ? nil : SongRowMatch(text: searchText, scope: searchMode, described: described),
             metric: rowMetric(for: item.song.id)
         )
         .contentShape(Rectangle())
