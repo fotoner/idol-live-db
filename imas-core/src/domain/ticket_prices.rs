@@ -74,6 +74,50 @@ pub fn tickets_for_kind(tickets: &[ShowTicket], kind: TicketKind) -> Vec<ShowTic
     list
 }
 
+/// 参加を付けた直後に「チケット代を記録しますか」と聞くときの中身。
+#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
+pub struct TicketExpensePrompt {
+    /// 参加形態から決めた券の形態。
+    pub kind: TicketKind,
+    /// 選ばせる券種 ([`tickets_for_kind`] の並び)。1 つなら金額そのまま、複数なら選ばせる。
+    pub tickets: Vec<ShowTicket>,
+}
+
+/// 公演の名前が分からないときにシートに出す呼び方。
+pub const TICKET_PROMPT_FALLBACK_SHOW_LABEL: &str = "この公演";
+
+/// 参加を付けた直後に、チケット代を記録するか聞くか。聞くなら候補の券種。
+///
+/// **聞かない理由が 1 つでもあれば `None`** (参加を付けるたびにシートが出ると、付ける作業が止まる):
+/// - その形態の券種がマスタに無い
+/// - その公演のチケット代を既に記録してある (`existing_expense_categories` に `ticket` がある。
+///   二重計上を防ぐ)
+///
+/// 記録済みかを**読めなかった**ときは OS が呼ばずに終わること (分からないまま聞くと
+/// 二重計上になりうる。iOS の今の振る舞い)。
+pub fn ticket_expense_prompt(
+    show_tickets: &[ShowTicket],
+    attendance_type: &str,
+    existing_expense_categories: &[String],
+) -> Option<TicketExpensePrompt> {
+    let kind = ticket_kind_from_attendance(attendance_type);
+    let tickets = tickets_for_kind(show_tickets, kind);
+    let ticket_key = crate::domain::ledger::expense_category_key(
+        crate::domain::ledger::ExpenseCategory::Ticket,
+    );
+    let already_recorded = existing_expense_categories.contains(&ticket_key);
+    (!tickets.is_empty() && !already_recorded).then_some(TicketExpensePrompt { kind, tickets })
+}
+
+/// 記録する行のメモ (`S席` / 推定値なら `S席 (推定)`)。
+pub fn ticket_expense_note(ticket: &ShowTicket) -> String {
+    if ticket.is_estimate {
+        format!("{} (推定)", ticket.name)
+    } else {
+        ticket.name.clone()
+    }
+}
+
 /// 参加を付けたときに既定で提案する 1 枚。
 ///
 /// **候補が 1 つのときだけ決める**。複数あるなら選ばせる — S席と立見で
@@ -177,6 +221,32 @@ mod tests {
             note: None,
             sort_order: sort,
         }
+    }
+
+    /// 両 OS の TicketExpensePrompt から移した「聞くかどうか」。
+    #[test]
+    fn prompt_only_when_tickets_exist_and_nothing_is_recorded_yet() {
+        let tickets = sample();
+        let prompt = ticket_expense_prompt(&tickets, "live", &[]).expect("現地の券がある");
+        assert_eq!(prompt.kind, TicketKind::Live);
+        assert_eq!(prompt.tickets, tickets_for_kind(&tickets, TicketKind::Live));
+        // 形態なし (旧データ) は現地扱い。
+        assert_eq!(ticket_expense_prompt(&tickets, "", &[]).map(|p| p.kind), Some(TicketKind::Live));
+        // チケット代を記録済みなら聞かない。ほかの費目は関係ない。
+        assert!(ticket_expense_prompt(&tickets, "live", &["ticket".to_string()]).is_none());
+        assert!(ticket_expense_prompt(&tickets, "live", &["transport".to_string()]).is_some());
+        // その形態の券が無ければ聞かない。
+        let live_only: Vec<ShowTicket> =
+            tickets.iter().filter(|t| t.kind == TicketKind::Live).cloned().collect();
+        assert!(ticket_expense_prompt(&live_only, "live_viewing", &[]).is_none());
+    }
+
+    #[test]
+    fn expense_note_marks_estimates() {
+        let mut t = ticket("t", TicketKind::Live, "S席", 13200, 0);
+        assert_eq!(ticket_expense_note(&t), "S席");
+        t.is_estimate = true;
+        assert_eq!(ticket_expense_note(&t), "S席 (推定)");
     }
 
     fn sample() -> Vec<ShowTicket> {

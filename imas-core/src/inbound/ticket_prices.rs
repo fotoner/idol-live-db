@@ -3,7 +3,7 @@
 //! 公演 1 つぶんの券種をまとめて渡して、選んだ結果や価格帯を受け取る。
 
 use crate::domain::ticket_prices::{
-    ShowTicket, TicketInputError, TicketKind, TicketPriceRange,
+    ShowTicket, TicketExpensePrompt, TicketInputError, TicketKind, TicketPriceRange,
 };
 
 #[uniffi::export]
@@ -39,6 +39,27 @@ pub fn ticket_kind_label(kind: TicketKind) -> String {
 #[uniffi::export]
 pub fn validate_ticket(name: String, price: i64) -> Option<TicketInputError> {
     crate::domain::ticket_prices::validate_ticket(&name, price)
+}
+
+/// 参加を付けた直後にチケット代を記録するか聞くか (聞くなら候補)。聞かない理由が
+/// 1 つでもあれば `None`。`existing_expense_categories` はその公演の記録済みの費目キー。
+#[uniffi::export]
+pub fn ticket_expense_prompt(
+    show_tickets: Vec<ShowTicket>,
+    attendance_type: String,
+    existing_expense_categories: Vec<String>,
+) -> Option<TicketExpensePrompt> {
+    crate::domain::ticket_prices::ticket_expense_prompt(
+        &show_tickets,
+        &attendance_type,
+        &existing_expense_categories,
+    )
+}
+
+/// 記録する行のメモ (推定値なら `(推定)` を添える)。
+#[uniffi::export]
+pub fn ticket_expense_note(ticket: ShowTicket) -> String {
+    crate::domain::ticket_prices::ticket_expense_note(&ticket)
 }
 
 #[cfg(test)]
