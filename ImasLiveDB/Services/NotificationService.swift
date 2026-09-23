@@ -133,7 +133,7 @@ final class NotificationService {
         return try store.notificationPlan(input: input)
     }
 
-    /// 予定 1 件を通知にする。日付 + 時・分で、くり返さない (積み直しのたびに次の 1 回を積む)。
+    /// 予定 1 件を通知にする。
     private func notificationRequest(for item: PlannedNotificationRecord) -> UNNotificationRequest {
         let content = UNMutableNotificationContent()
         content.title = item.title
@@ -143,17 +143,22 @@ final class NotificationService {
            let attachment = customImageAttachment(idolId: idolId, identifier: "\(item.id)_img") {
             content.attachments = [attachment]
         }
+        return UNNotificationRequest(identifier: item.id, content: content, trigger: Self.trigger(for: item))
+    }
+
+    /// くり返してよい予定 (`repeatsYearly`: 2/29 以外の担当の誕生日) は月日・時刻で毎年くり返す
+    /// (アプリを開かない年も鳴る)。それ以外は返された日付に 1 回だけ (年も入れる)。
+    nonisolated static func trigger(for item: PlannedNotificationRecord) -> UNCalendarNotificationTrigger {
         var components = DateComponents()
         let dateParts = item.date.split(separator: "-").compactMap { Int($0) }
         if dateParts.count == 3 {
-            components.year = dateParts[0]
+            if !item.repeatsYearly { components.year = dateParts[0] }
             components.month = dateParts[1]
             components.day = dateParts[2]
         }
         components.hour = Int(item.hour)
         components.minute = Int(item.minute)
-        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-        return UNNotificationRequest(identifier: item.id, content: content, trigger: trigger)
+        return UNCalendarNotificationTrigger(dateMatching: components, repeats: item.repeatsYearly)
     }
 
     // MARK: - Helpers
