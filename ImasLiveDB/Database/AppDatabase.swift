@@ -4,9 +4,40 @@ import Observation
 import os
 
 @Observable
-final class AppDatabase: @unchecked Sendable {
-    /// シングルトン
-    static let shared = AppDatabase()
+final class AppDatabase: Sendable {
+    /// 起動時に `DatabaseBoot` が `prepare()` で開いた DB。
+    ///
+    /// 起動の流れを通らずに先に触られたときは、その場で開く (開けなければ止める。以前の起動と同じ)。
+    /// 起動画面の後の経路では、開き終えたものが返るだけで待つことは無い。
+    static var shared: AppDatabase {
+        do {
+            return try prepare()
+        } catch {
+            fatalError("Database initialization failed: \(error)")
+        }
+    }
+
+    /// 開き終えた DB。失敗は覚えない (復旧画面の「もう一度試す」で開き直せるように)。
+    private static let preparedDatabase = OSAllocatedUnfairLock<AppDatabase?>(initialState: nil)
+
+    /// 端末の DB (Documents/master.sqlite) を開く。無ければ同梱 DB を置き、移行・コアのスキーマ・
+    /// reseed まで済ませる。1 度開けたら、以後は同じものを返す。
+    ///
+    /// 重い (初回は同梱 DB のコピーと移行、アプデ後は reseed) ので main thread から呼ばない。
+    /// 起動時は `DatabaseBoot` が detached で呼ぶ。
+    static func prepare() throws -> AppDatabase {
+        try preparedDatabase.withLock { prepared in
+            if let prepared { return prepared }
+            let documents = try FileManager.default.url(
+                for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            let pool = try openDatabase(
+                at: documents.appendingPathComponent("master.sqlite"),
+                bundleURL: Bundle.main.url(forResource: "master", withExtension: "sqlite"))
+            let database = AppDatabase(writer: pool, reseedFailureMessage: lastReseedFailure)
+            prepared = database
+            return database
+        }
+    }
 
     /// データベース書き込み口（WALモードの DatabasePool）。
     /// `DatabasePool` は WAL のリーダ/ライタ並行を活かし、同期や reseed の長尺 write 中も
@@ -33,26 +64,17 @@ final class AppDatabase: @unchecked Sendable {
         reseedState.withLock { $0.failureDetail }
     }
 
-    /// 起動時 reseed が失敗した場合のユーザー可視メッセージ。UI 監視用に init 時点で確定する。
-    /// (静的状態を @Observable なインスタンスに写して、起動フローの alert から参照できるようにする)
-    var reseedFailureMessage: String?
+    /// 起動時 reseed が失敗した場合のユーザー可視メッセージ (起動アラートに出す)。開いた時点で決まる。
+    let reseedFailureMessage: String?
 
-    private init() {
-        do {
-            let documents = try FileManager.default.url(
-                for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-            self.dbQueue = try Self.openDatabase(
-                at: documents.appendingPathComponent("master.sqlite"),
-                bundleURL: Bundle.main.url(forResource: "master", withExtension: "sqlite"))
-        } catch {
-            fatalError("Database initialization failed: \(error)")
-        }
-        self.reseedFailureMessage = Self.lastReseedFailure
+    private init(writer: any DatabaseWriter, reseedFailureMessage: String?) {
+        self.dbQueue = writer
+        self.reseedFailureMessage = reseedFailureMessage
     }
 
     /// テスト用イニシャライザ
-    init(dbQueue: any DatabaseWriter) throws {
-        self.dbQueue = dbQueue
+    convenience init(dbQueue: any DatabaseWriter) throws {
+        self.init(writer: dbQueue, reseedFailureMessage: nil)
     }
 
     // MARK: - Database Setup
@@ -108,8 +130,8 @@ final class AppDatabase: @unchecked Sendable {
         if let bundleURL {
             if !fileManager.fileExists(atPath: dbURL.path) {
                 try fileManager.copyItem(at: bundleURL, to: dbURL)
-                // 万一 Bundle DB が破損していたら検知して削除。コード署名で
-                // 起こり得ない前提だが、破損したまま起動するより停止する方が安全。
+                // 万一 Bundle DB が破損していたら検知して削除し、開くのをやめる (復旧画面になる)。
+                // コード署名で起こり得ない前提だが、破損したまま使い始めるより安全。
                 try verifyIntegrityOrDelete(at: dbURL)
             }
         } else if !fileManager.fileExists(atPath: dbURL.path) {
@@ -167,8 +189,8 @@ final class AppDatabase: @unchecked Sendable {
     /// **必ず GRDB の移行の後に呼ぶこと。** 理由は `openDatabase` 側の呼び出しコメントに書いた
     /// (先に呼ぶと seedMigrationHistoryIfNeeded の印が嘘になり、移行が持つデータ投入が飛ぶ)。
     ///
-    /// **失敗しても投げない。** ここが throw すると `openDatabase` 経由で `init` の `fatalError`
-    /// に直結して起動不能になる (マスタ削除で FK 孤児 → 起動クラッシュ → 審査 reject の実例がある)。
+    /// **失敗しても投げない。** ここが throw すると DB を開けず、起動が復旧画面で止まる
+    /// (マスタ削除で FK 孤児 → 起動クラッシュ → 審査 reject の実例がある)。
     /// 移行の後に呼ぶ以上、表と列は既に揃っている。ここで落ちて欠けるのは「正本にしか無い分」
     /// = `song_units` と、v20_ensure_indexes が持たない索引 (idx_song_units_song /
     /// idx_song_units_unit / idx_songs_series_group) だけで、遅くなっても壊れはしない。

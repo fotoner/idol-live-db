@@ -4,8 +4,12 @@ import UIKit
 
 @main
 struct ImasLiveDBApp: App {
-    @State private var appDatabase = AppDatabase.shared
+    /// 端末の DB を開く流れ。開けるまで ContentView は作らない (DB を読む画面が先に動かないように)。
+    @State private var boot = DatabaseBoot()
     @State private var syncEngine = CloudKitSyncEngine()
+    /// DB を開き終える前に届いたリンク (ウィジェットからの起動など)。
+    /// その時点では ContentView が居ないので預かり、開けたら ContentView に渡す。
+    @State private var pendingLaunchURL: URL?
 
     /// オンボーディング (HelpView) を初回起動で 1 度だけ自動表示するためのフラグ。
     /// オープン編集モデルへの刷新に伴い v2 へ更新 (既存ユーザーにも新しい説明を 1 度再表示する)。
@@ -74,99 +78,118 @@ struct ImasLiveDBApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(appDatabase)
-                .environment(syncEngine)
-                .task {
-                    // 起動時 reseed が失敗していれば、旧データで動作中であることをユーザーに知らせる。
-                    if appDatabase.reseedFailureMessage != nil {
-                        showReseedAlert = true
+            Group {
+                switch boot.state {
+                case .preparing:
+                    DatabasePreparingView()
+                case .failed(let detail):
+                    DatabaseRecoveryView(detail: detail) {
+                        Task { await boot.prepare() }
                     }
-                    // テストホストとして起動されたときは、外に出る副作用を起こさない。
-                    // DB の準備とスナップショットのロードは止めない (テストがそれを読む)。
-                    guard !ProcessInfo.processInfo.isRunningTests else { return }
-                    #if !targetEnvironment(simulator)
-                    await MusicKitService.shared.requestAuthorization()
-                    #endif
-                    // 以降はいずれも初回描画に不要な非緊急処理。 .utility の detached に落として
-                    // メインスレッド/協調プールの高優先度枠を初回レンダリングに明け渡す。
-                    // CloudKit sync は fire-and-forget で fullSync が走っても UI が
-                    // 待たされないようにする (既存ローカルデータはすぐ表示される)。
-                    // 進捗は SyncEngine.state を見て UI 側で控えめバナー等に出せる。
-                    Task.detached(priority: .utility) {
-                        await syncEngine.performStartupSync(database: appDatabase)
-                    }
-                    // sessionToken / isAdmin を起動時に最新化。
-                    // sessionToken が期限切れだった場合はここで再ログインを促す UI に切り替わる。
-                    Task.detached(priority: .utility) { await AuthService.shared.refreshMe() }
-                    // ローカル通知を再スケジュール (既認可の場合のみ実行される)。
-                    Task.detached(priority: .utility) { await NotificationService.shared.rescheduleAll(database: appDatabase) }
-                    // 担当画像ウィジェット用に App Group へギャラリーをミラー。
-                    Task.detached(priority: .utility) { await WidgetImageBridge.sync(database: appDatabase) }
-                    // 情報ウィジェット(次のライブ/今日の1曲/チケット締切)用スナップショットを更新。
-                    Task.detached(priority: .utility) { await InfoWidgetBridge.sync() }
-                    // App Store に新版が出ていたらお知らせ (iTunes Lookup で自動判定)。
-                    Task.detached(priority: .utility) { await updateService.check() }
+                case .ready(let database):
+                    root(database)
                 }
-                .onChange(of: scenePhase) { _, phase in
-                    // フォアグラウンド復帰で同期を再開/継続する。フルsyncが途中で中断されて
-                    // いれば残りステップ/チャンクから再開、そうでなければ差分syncで最新化。
-                    // (再入は SyncEngine 側でガード済みなので二重には走らない)
-                    guard phase == .active, !ProcessInfo.processInfo.isRunningTests else { return }
-                    Task.detached(priority: .utility) {
-                        await syncEngine.performStartupSync(database: appDatabase)
-                    }
-                    // アプリを開かない日が続いた後でも、開いた時点で当日の内容に戻す。
-                    Task.detached(priority: .utility) { await InfoWidgetBridge.sync() }
-                }
-                .onReceive(NotificationCenter.default.publisher(for: .coreSnapshotDidLoad)) { _ in
-                    // 同期やローカル編集でマスタが変わったら、情報ウィジェットの中身も作り直す。
-                    guard !ProcessInfo.processInfo.isRunningTests else { return }
-                    Task.detached(priority: .utility) { await InfoWidgetBridge.sync() }
-                }
-                .onOpenURL { _ in
-                    // deeplink 着地時は起動シート (オンボーディング/日替わりピック) を閉じて
-                    // 詳細ページの提示 (ContentView 側の onOpenURL) を優先する。
-                    // オンボーディング既読フラグは onDismiss で通常どおり確定される。
-                    launchSheet = nil
-                }
-                .sheet(item: $launchSheet, onDismiss: {
-                    // オンボーディングを見たフラグは閉じたら確定 (今日の1曲を閉じた場合は既に true)。
-                    UserDefaults.standard.set(true, forKey: Self.onboardingStorageKey)
-                }) { item in
-                    switch item {
-                    case .onboarding:
-                        HelpView()
-                    case .announcements:
-                        InboxView()
-                    case .dailyVote:
-                        DailyPickSheet()
-                            .environment(appDatabase)
-                    }
-                }
-                .alert("新しいバージョンがあります", isPresented: Binding(
-                    get: { updateService.shouldNotify },
-                    set: { if !$0 { updateService.dismiss() } }
-                )) {
-                    Button("更新") {
-                        if let u = updateService.storeURL { UIApplication.shared.open(u) }
-                        updateService.dismiss()
-                    }
-                    Button("後で", role: .cancel) { updateService.dismiss() }
-                } message: {
-                    Text("バージョン \(updateService.availableVersion ?? "") が App Store で公開されています。")
-                }
-                .alert("データ更新に失敗しました", isPresented: $showReseedAlert) {
-                    Button("OK", role: .cancel) {}
-                } message: {
-                    Text(appDatabase.reseedFailureMessage ?? "")
-                }
-                // コールガイドの見た目確認用 (DEBUG のみ)。CALL_GUIDE_PREVIEW 未指定なら何も出ない。
-                #if DEBUG
-                .fullScreenCover(isPresented: .constant(CallGuidePreviewHarness.envMode != nil)) {
-                    CallGuidePreviewHarness(mode: CallGuidePreviewHarness.envMode ?? .view)
-                }
-                #endif
+            }
+            .task { await boot.prepare() }
+            .onOpenURL { url in
+                // deeplink 着地時は起動シート (オンボーディング/日替わりピック) を閉じて
+                // 詳細ページの提示 (ContentView 側の onOpenURL) を優先する。
+                // オンボーディング既読フラグは onDismiss で通常どおり確定される。
+                launchSheet = nil
+                if case .ready = boot.state { return }
+                pendingLaunchURL = url
+            }
         }
+    }
+
+    /// DB を開けた後の画面。
+    private func root(_ appDatabase: AppDatabase) -> some View {
+        ContentView(launchURL: pendingLaunchURL)
+            .environment(appDatabase)
+            .environment(syncEngine)
+            .task {
+                // 起動時 reseed が失敗していれば、旧データで動作中であることをユーザーに知らせる。
+                if appDatabase.reseedFailureMessage != nil {
+                    showReseedAlert = true
+                }
+                // テストホストとして起動されたときは、外に出る副作用を起こさない。
+                // DB の準備とスナップショットのロードは止めない (テストがそれを読む)。
+                guard !ProcessInfo.processInfo.isRunningTests else { return }
+                #if !targetEnvironment(simulator)
+                await MusicKitService.shared.requestAuthorization()
+                #endif
+                // 以降はいずれも初回描画に不要な非緊急処理。 .utility の detached に落として
+                // メインスレッド/協調プールの高優先度枠を初回レンダリングに明け渡す。
+                // CloudKit sync は fire-and-forget で fullSync が走っても UI が
+                // 待たされないようにする (既存ローカルデータはすぐ表示される)。
+                // 進捗は SyncEngine.state を見て UI 側で控えめバナー等に出せる。
+                Task.detached(priority: .utility) {
+                    await syncEngine.performStartupSync(database: appDatabase)
+                }
+                // sessionToken / isAdmin を起動時に最新化。
+                // sessionToken が期限切れだった場合はここで再ログインを促す UI に切り替わる。
+                Task.detached(priority: .utility) { await AuthService.shared.refreshMe() }
+                // ローカル通知を再スケジュール (既認可の場合のみ実行される)。
+                Task.detached(priority: .utility) { await NotificationService.shared.rescheduleAll(database: appDatabase) }
+                // 担当画像ウィジェット用に App Group へギャラリーをミラー。
+                Task.detached(priority: .utility) { await WidgetImageBridge.sync(database: appDatabase) }
+                // 情報ウィジェット(次のライブ/今日の1曲/チケット締切)用スナップショットを更新。
+                Task.detached(priority: .utility) { await InfoWidgetBridge.sync() }
+                // App Store に新版が出ていたらお知らせ (iTunes Lookup で自動判定)。
+                Task.detached(priority: .utility) { await updateService.check() }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                // フォアグラウンド復帰で同期を再開/継続する。フルsyncが途中で中断されて
+                // いれば残りステップ/チャンクから再開、そうでなければ差分syncで最新化。
+                // (再入は SyncEngine 側でガード済みなので二重には走らない)
+                guard phase == .active, !ProcessInfo.processInfo.isRunningTests else { return }
+                Task.detached(priority: .utility) {
+                    await syncEngine.performStartupSync(database: appDatabase)
+                }
+                // アプリを開かない日が続いた後でも、開いた時点で当日の内容に戻す。
+                Task.detached(priority: .utility) { await InfoWidgetBridge.sync() }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .coreSnapshotDidLoad)) { _ in
+                // 同期やローカル編集でマスタが変わったら、情報ウィジェットの中身も作り直す。
+                guard !ProcessInfo.processInfo.isRunningTests else { return }
+                Task.detached(priority: .utility) { await InfoWidgetBridge.sync() }
+            }
+            .sheet(item: $launchSheet, onDismiss: {
+                // オンボーディングを見たフラグは閉じたら確定 (今日の1曲を閉じた場合は既に true)。
+                UserDefaults.standard.set(true, forKey: Self.onboardingStorageKey)
+            }) { item in
+                switch item {
+                case .onboarding:
+                    HelpView()
+                case .announcements:
+                    InboxView()
+                case .dailyVote:
+                    DailyPickSheet()
+                        .environment(appDatabase)
+                }
+            }
+            .alert("新しいバージョンがあります", isPresented: Binding(
+                get: { updateService.shouldNotify },
+                set: { if !$0 { updateService.dismiss() } }
+            )) {
+                Button("更新") {
+                    if let u = updateService.storeURL { UIApplication.shared.open(u) }
+                    updateService.dismiss()
+                }
+                Button("後で", role: .cancel) { updateService.dismiss() }
+            } message: {
+                Text("バージョン \(updateService.availableVersion ?? "") が App Store で公開されています。")
+            }
+            .alert("データ更新に失敗しました", isPresented: $showReseedAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(appDatabase.reseedFailureMessage ?? "")
+            }
+            // コールガイドの見た目確認用 (DEBUG のみ)。CALL_GUIDE_PREVIEW 未指定なら何も出ない。
+            #if DEBUG
+            .fullScreenCover(isPresented: .constant(CallGuidePreviewHarness.envMode != nil)) {
+                CallGuidePreviewHarness(mode: CallGuidePreviewHarness.envMode ?? .view)
+            }
+            #endif
     }
 }
