@@ -406,27 +406,43 @@ struct ImasAwardChip: View {
 // MARK: - SectionHeader
 
 struct ImasSectionHeader: View {
-    let title: String
-    var count: String? = nil
+    let title: DisplayText
+    var count: DisplayText? = nil
     var seeAll: (() -> Void)? = nil
     /// tight = 小さめのサブ見出し (実画面の sheadTight)。
     var tight: Bool = false
 
+    /// 文言は `.key(L10n.X.y)`、データは `.verbatim(name)`、コア由来は `.core(label)`。
+    /// DisplayText は文字列リテラルから作れないので、リテラルは下の移行用入口にしか入らない。
+    init(title: DisplayText, count: DisplayText? = nil, seeAll: (() -> Void)? = nil, tight: Bool = false) {
+        self.title = title
+        self.count = count
+        self.seeAll = seeAll
+        self.tight = tight
+    }
+
+    /// 移行中だけ残す入口。未移行の呼び出しを今と 1 バイトも違わずに描く (verbatim)。
+    /// 警告の数 = 残りの作業。画面の移行が全部終わったら削除する。
+    @available(*, deprecated, message: "文言は .key(L10n.*)、データは .verbatim / .core で渡す (i18n 移行中)")
+    init(title: String, count: String? = nil, seeAll: (() -> Void)? = nil, tight: Bool = false) {
+        self.init(title: .verbatim(title), count: count.map(DisplayText.verbatim), seeAll: seeAll, tight: tight)
+    }
+
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
             if tight {
-                Text(title).font(.imasScaled( 13, weight: .semibold)).foregroundStyle(DS.ink2)
+                Text(display: title).font(.imasScaled( 13, weight: .semibold)).foregroundStyle(DS.ink2)
             } else {
                 HStack(spacing: 8) {
-                    Text(title).font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
-                    if let count { Text(count).font(.imasFootnote.weight(.semibold)).foregroundStyle(DS.ink3) }
+                    Text(display: title).font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
+                    if let count { Text(display: count).font(.imasFootnote.weight(.semibold)).foregroundStyle(DS.ink3) }
                 }
             }
             Spacer(minLength: 12)
             if let seeAll {
                 Button(action: seeAll) {
                     HStack(spacing: 2) {
-                        Text("すべて見る").font(.imasScaled( 14, weight: .medium))
+                        Text(L10n.Common.actionSeeAll).font(.imasScaled( 14, weight: .medium))
                         Image(systemName: "chevron.right").font(.imasScaled( 12, weight: .semibold))
                     }
                     .foregroundStyle(DS.ink2)

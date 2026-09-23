@@ -1,0 +1,60 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "common.action.login" : {
+      "comment" : "未ログインの人に出すインライン導線 (InlineLoginPrompt) のボタン。Android は同じ部品を持たずダイアログで案内する (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ログイン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "로그인"
+          }
+        }
+      }
+    },
+    "common.action.retry" : {
+      "comment" : "読み込み失敗などの空状態に出す再試行ボタン (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再試行"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다시 시도"
+          }
+        }
+      }
+    },
+    "common.action.see_all" : {
+      "comment" : "セクション見出し右の導線 (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて見る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모두 보기"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

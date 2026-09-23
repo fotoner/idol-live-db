@@ -48,9 +48,9 @@ struct UnitListContent: View {
                 Spacer()
                 ImasEmptyState(
                     systemImage: "line.3.horizontal.decrease",
-                    title: "絞り込み結果がありません",
-                    message: "「\(vm.searchText)」に一致するユニットがありません",
-                    actionTitle: "絞り込みを解除",
+                    title: String(localized: L10n.Units.listFilterEmptyTitle),
+                    message: String(localized: L10n.Units.listFilterEmptyMessage(query: vm.searchText)),
+                    actionTitle: String(localized: L10n.Units.listFilterEmptyActionClear),
                     action: { vm.searchText = "" }
                 )
                 Spacer()
@@ -58,8 +58,8 @@ struct UnitListContent: View {
                 Spacer()
                 ImasEmptyState(
                     systemImage: "person.3",
-                    title: "ユニットがありません",
-                    message: "登録されているユニットがまだありません。"
+                    title: String(localized: L10n.Units.listEmptyTitle),
+                    message: String(localized: L10n.Units.listEmptyMessage)
                 )
                 Spacer()
             } else if listMode == .grid {
@@ -69,7 +69,7 @@ struct UnitListContent: View {
             }
         }
         .background(DS.bg.ignoresSafeArea())
-        .navigationTitle("ユニット")
+        .navigationTitle(L10n.Units.listTitle)
         // 絞り込み欄をナビバーの中に置くので、タイトルは inline 固定
         // (大タイトルを出すとヘッダーが 2 行になり、畳んだ意味が無くなる)。
         .navigationBarTitleDisplayMode(.inline)
@@ -81,7 +81,7 @@ struct UnitListContent: View {
             // 絞り込み欄はナビバーの中。以前は一覧の先頭に `NameFilterField` を敷いていたが、
             // アイドル一覧と並ぶタブなのにヘッダーの高さと欄の見た目が揃わなかった。
             ToolbarItem(placement: .principal) {
-                ListSearchField(prompt: "ユニット名", text: $vm.searchText)
+                ListSearchField(prompt: String(localized: L10n.Units.listSearchFieldPrompt), text: $vm.searchText)
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
@@ -90,7 +90,7 @@ struct UnitListContent: View {
                 } label: {
                     Image(systemName: listMode == .grid ? "list.bullet" : "square.grid.3x2")
                 }
-                .accessibilityLabel(listMode == .grid ? "リスト表示" : "グリッド表示")
+                .accessibilityLabel(listMode == .grid ? L10n.Units.listViewModeListA11y : L10n.Units.listViewModeGridA11y)
             }
         }
         .navigationDestination(for: Unit.self) { unit in

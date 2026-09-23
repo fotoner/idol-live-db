@@ -9,13 +9,14 @@ enum RootTab: Int, CaseIterable, Hashable {
     /// 「他のタブに N 件」で押せる先。検索欄を持つ一覧だけ。
     static let searchable: [RootTab] = [.events, .songs, .idols]
 
-    var label: String {
+    /// タブ名。下のタブバー (ContentView) と同じカタログのキーを引く。
+    var label: LocalizedStringResource {
         switch self {
-        case .schedule: return "スケジュール"
-        case .events: return "ライブ"
-        case .songs: return "楽曲"
-        case .idols: return "アイドル"
-        case .produce: return "プロデュース"
+        case .schedule: return L10n.Nav.tabSchedule
+        case .events: return L10n.Nav.tabEvents
+        case .songs: return L10n.Nav.tabSongs
+        case .idols: return L10n.Nav.tabIdols
+        case .produce: return L10n.Nav.tabProduce
         }
     }
 }
@@ -78,11 +79,13 @@ struct CrossTabCountChips: View {
                         // 上のスコープ列 (「ほかに」) と同じ形の見出しを置く。
                         // 見出しが無いと、同じ見た目のチップ列が 2 段あるだけになり、
                         // 「絞り込む対象を変える」のか「別の画面へ移る」のかが読めない。
-                        Text("別のタブ")
+                        Text(L10n.Search.crossTabHeader)
                             .font(.imasCaption)
                             .foregroundStyle(DS.ink3)
                         ForEach(suggestions, id: \.tab) { item in
-                            ImasFilterChip(text: "\(item.tab.label)に \(item.count)", isSelected: false) {
+                            // ImasFilterChip はまだ String を受ける (DS の入力契約は未移行) ので、ここで解決して渡す
+                            ImasFilterChip(text: String(localized: L10n.Search.crossTabChip(tab: item.tab.label, count: item.count)),
+                                           isSelected: false) {
                                 AppAnalytics.tap("cross_tab_search.jump")
                                 CrossTabSearch.shared.hand(query, to: item.tab)
                             }

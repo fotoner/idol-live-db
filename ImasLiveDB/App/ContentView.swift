@@ -66,23 +66,23 @@ struct ContentView: View {
             // スケジュールがデフォルト着地点。マイ/設定はプロデュース右上の歯車から開く。
             CalendarView()
                 .bottomBarsInset()
-                .tabItem { Label("スケジュール", systemImage: "calendar") }
+                .tabItem { Label(L10n.Nav.tabSchedule, systemImage: "calendar") }
                 .tag(0)
             EventListView()
                 .bottomBarsInset()
-                .tabItem { Label("ライブ", systemImage: "music.mic") }
+                .tabItem { Label(L10n.Nav.tabEvents, systemImage: "music.mic") }
                 .tag(1)
             SongListView()
                 .bottomBarsInset()
-                .tabItem { Label("楽曲", systemImage: "music.note.list") }
+                .tabItem { Label(L10n.Nav.tabSongs, systemImage: "music.note.list") }
                 .tag(2)
             IdolListView()
                 .bottomBarsInset()
-                .tabItem { Label("アイドル", systemImage: "person.3") }
+                .tabItem { Label(L10n.Nav.tabIdols, systemImage: "person.3") }
                 .tag(3)
             ProduceTabView()
                 .bottomBarsInset()
-                .tabItem { Label("プロデュース", systemImage: "star.fill") }
+                .tabItem { Label(L10n.Nav.tabProduce, systemImage: "star.fill") }
                 .tag(4)
         }
         .tint(themeTint)
@@ -213,7 +213,7 @@ struct SettingsToolbarButton: View {
         } label: {
             Image(systemName: "gearshape")
         }
-        .accessibilityLabel("設定・マイ")
+        .accessibilityLabel(L10n.Nav.settingsButtonA11y)
     }
 }
 

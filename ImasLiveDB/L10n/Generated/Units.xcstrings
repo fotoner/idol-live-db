@@ -1,0 +1,740 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "units.detail.community.login_prompt" : {
+      "comment" : "コミュニティの節の先頭に出す、未ログインの人への案内 (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ付け・投票にはログインが必要です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그를 달거나 투표하려면 로그인해야 해요"
+          }
+        }
+      }
+    },
+    "units.detail.copy.name" : {
+      "comment" : "ユニット名の長押しメニュー (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニット名をコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛 이름 복사"
+          }
+        }
+      }
+    },
+    "units.detail.copy.name_alt" : {
+      "comment" : "ユニット名の長押しメニュー (別名 = 英字表記など) (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "別名をコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다른 이름 복사"
+          }
+        }
+      }
+    },
+    "units.detail.load_error.message" : {
+      "comment" : "詳細の読み込みに失敗したときの説明 (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "読み込みに失敗しました。通信状況を確認してもう一度お試しください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "불러오지 못했어요. 통신 상태를 확인하고 다시 시도해 주세요."
+          }
+        }
+      }
+    },
+    "units.detail.load_error.title" : {
+      "comment" : "詳細の読み込みに失敗したときの空状態の見出し (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "読み込みに失敗しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "불러오지 못했어요"
+          }
+        }
+      }
+    },
+    "units.detail.members.empty.message" : {
+      "comment" : "メンバーが 1 人も無いときの空状態の説明 (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メンバー情報はまだ登録されていません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "멤버 정보가 아직 등록되지 않았어요."
+          }
+        }
+      }
+    },
+    "units.detail.members.empty.title" : {
+      "comment" : "メンバーが 1 人も無いときの空状態の見出し (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メンバーがいません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "멤버가 없어요"
+          }
+        }
+      }
+    },
+    "units.detail.members.header" : {
+      "comment" : "メンバーの節の見出し (右に人数) (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メンバー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "멤버"
+          }
+        }
+      }
+    },
+    "units.detail.personal_tags.action.remove" : {
+      "comment" : "マイタグの長押しメニュー (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイタグを削除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이 태그 삭제"
+          }
+        }
+      }
+    },
+    "units.detail.personal_tags.add.a11y" : {
+      "comment" : "マイタグの入力欄の右の ＋ ボタンの読み上げ (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイタグを追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이 태그 추가"
+          }
+        }
+      }
+    },
+    "units.detail.personal_tags.caption" : {
+      "comment" : "マイタグの節の見出しの下の説明 (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分だけに表示されます (コミュニティには公開されません)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "나에게만 보여요 (커뮤니티에는 공개되지 않아요)"
+          }
+        }
+      }
+    },
+    "units.detail.personal_tags.header" : {
+      "comment" : "マイタグ (自分だけのタグ) の節の見出し。Android は共通部品 PersonalTagsSection にある (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイタグ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이 태그"
+          }
+        }
+      }
+    },
+    "units.detail.personal_tags.placeholder" : {
+      "comment" : "マイタグの入力欄のプレースホルダ。例の語も訳す (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイタグを追加 (例: 聞いた)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이 태그 추가 (예: 들었음)"
+          }
+        }
+      }
+    },
+    "units.detail.similar.caption" : {
+      "comment" : "タグが似ているユニットの節の見出しの下の説明 (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "つけられたタグが似ているユニット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "달린 태그가 비슷한 유닛"
+          }
+        }
+      }
+    },
+    "units.detail.similar.header" : {
+      "comment" : "タグが似ているユニット (サーバ算出のおすすめ) の節の見出し (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグが似ているユニット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그가 비슷한 유닛"
+          }
+        }
+      }
+    },
+    "units.detail.similar.shared_tags" : {
+      "comment" : "おすすめのユニットの下に出す、共通するタグの数 (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "タグ%arg個一致"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "태그 %arg개 일치"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "units.detail.songs.collected" : {
+      "comment" : "楽曲の行のバッジ。ライブでその曲を聴いた (現地回収した) (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回収済"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "회수 완료"
+          }
+        }
+      }
+    },
+    "units.detail.songs.empty.message" : {
+      "comment" : "楽曲が 1 曲も無いときの空状態の説明 (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このユニットの楽曲情報はまだ登録されていません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 유닛의 곡 정보가 아직 등록되지 않았어요."
+          }
+        }
+      }
+    },
+    "units.detail.songs.empty.title" : {
+      "comment" : "楽曲が 1 曲も無いときの空状態の見出し (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡이 없어요"
+          }
+        }
+      }
+    },
+    "units.detail.songs.header" : {
+      "comment" : "楽曲の節の見出し (右に件数) (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡"
+          }
+        }
+      }
+    },
+    "units.detail.tab.community" : {
+      "comment" : "詳細の中のセグメント (楽曲 / メンバー / コミュニティ) (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コミュニティ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "커뮤니티"
+          }
+        }
+      }
+    },
+    "units.detail.tab.members" : {
+      "comment" : "詳細の中のセグメント (楽曲 / メンバー / コミュニティ) (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メンバー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "멤버"
+          }
+        }
+      }
+    },
+    "units.detail.tab.songs" : {
+      "comment" : "詳細の中のセグメント (楽曲 / メンバー / コミュニティ) (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡"
+          }
+        }
+      }
+    },
+    "units.detail.tags.action.add" : {
+      "comment" : "タグを付ける操作。iOS はタグが無いときの空状態のボタン、Android は ＋ ボタンの読み上げ (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグを追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 추가"
+          }
+        }
+      }
+    },
+    "units.detail.tags.action.remove" : {
+      "comment" : "自分が付けたタグの長押しメニュー (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグを外す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 해제"
+          }
+        }
+      }
+    },
+    "units.detail.tags.action.show_detail" : {
+      "comment" : "タグの長押しメニュー (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ詳細を見る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 상세 보기"
+          }
+        }
+      }
+    },
+    "units.detail.tags.add_button" : {
+      "comment" : "タグの節の見出し右の ＋ 付きボタン (短い形) (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그"
+          }
+        }
+      }
+    },
+    "units.detail.tags.empty.message" : {
+      "comment" : "タグが 1 つも無いときの誘い文句 (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このユニットを一言で表すタグを付けてみませんか？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 유닛을 한마디로 표현하는 태그를 달아 볼까요?"
+          }
+        }
+      }
+    },
+    "units.detail.tags.empty.title" : {
+      "comment" : "タグが 1 つも無いとき (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグはまだありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 태그가 없어요"
+          }
+        }
+      }
+    },
+    "units.detail.tags.header" : {
+      "comment" : "コミュニティタグの節の見出し (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그"
+          }
+        }
+      }
+    },
+    "units.list.empty.message" : {
+      "comment" : "ユニットが 1 件も無いときの空状態の説明 (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登録されているユニットがまだありません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "등록된 유닛이 아직 없어요."
+          }
+        }
+      }
+    },
+    "units.list.empty.title" : {
+      "comment" : "ユニットが 1 件も無いときの空状態の見出し (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニットがありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛이 없어요"
+          }
+        }
+      }
+    },
+    "units.list.filter_empty.action.clear" : {
+      "comment" : "絞り込みの語を消すボタン (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "絞り込みを解除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터 해제"
+          }
+        }
+      }
+    },
+    "units.list.filter_empty.message" : {
+      "comment" : "絞り込みで 1 件も残らなかったときの説明。query は利用者が打った語 (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」に一致するユニットがありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@”에 해당하는 유닛이 없어요"
+          }
+        }
+      }
+    },
+    "units.list.filter_empty.title" : {
+      "comment" : "絞り込みで 1 件も残らなかったときの空状態の見出し (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "絞り込み結果がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터 결과가 없어요"
+          }
+        }
+      }
+    },
+    "units.list.search_field.prompt" : {
+      "comment" : "ナビバーの中の絞り込み欄のプレースホルダ (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニット名"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛 이름"
+          }
+        }
+      }
+    },
+    "units.list.title" : {
+      "comment" : "ユニット一覧のナビゲーションタイトル。Android の同じ見出しは IdolListScreen (idols スライス) の TopAppBar にある (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛"
+          }
+        }
+      }
+    },
+    "units.list.view_mode.grid.a11y" : {
+      "comment" : "一覧/グリッド切替ボタンの読み上げ (今はリスト表示で、押すとグリッド表示になる) (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "グリッド表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "그리드로 보기"
+          }
+        }
+      }
+    },
+    "units.list.view_mode.list.a11y" : {
+      "comment" : "一覧/グリッド切替ボタンの読み上げ (今はグリッド表示で、押すとリスト表示になる)。Android の同じボタンは IdolListScreen (idols スライス) にある (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リスト表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "목록으로 보기"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

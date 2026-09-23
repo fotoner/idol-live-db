@@ -13,7 +13,8 @@ final class UnitDetailViewModel {
     private(set) var isLoading = false
     /// 直近ロードの失敗メッセージ。nil なら未失敗 (成功 or 未ロード)。
     /// songs/members が空でも loadError が nil なら「本当に空」、非 nil なら「失敗」と区別できる。
-    private(set) var loadError: String?
+    /// 解決済みの String ではなく文言の値で持ち、画面で文字列にする。
+    private(set) var loadError: DisplayText?
 
     private let unitReading: any UnitReading
     private let brandReading: any BrandReading
@@ -40,7 +41,7 @@ final class UnitDetailViewModel {
             loadError = nil
         } catch {
             Logger.database.error("load_failed unit_detail: \(error.localizedDescription)")
-            loadError = "読み込みに失敗しました。通信状況を確認してもう一度お試しください。"
+            loadError = .key(L10n.Units.detailLoadErrorMessage)
         }
     }
 }
