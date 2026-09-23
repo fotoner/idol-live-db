@@ -1,8 +1,10 @@
 package com.fugaif.imaslivedb
 
 import android.app.Application
+import android.util.Log
 import com.fugaif.imaslivedb.di.AppModule
 import com.fugaif.imaslivedb.player.AudioPreviewManager
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -14,8 +16,14 @@ class ImasLiveDBApplication : Application() {
     lateinit var appModule: AppModule
         private set
 
-    /** プロセス寿命の起動時タスク用。個々の失敗が他を巻き込まないよう SupervisorJob。 */
-    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    /**
+     * プロセス寿命の起動時タスク用。個々の失敗が他を巻き込まないよう SupervisorJob。
+     * 捕まえ損ねた例外でプロセスごと落とさないよう、ハンドラで受けて記録だけする。
+     */
+    private val appScope = CoroutineScope(
+        SupervisorJob() + Dispatchers.IO +
+            CoroutineExceptionHandler { _, e -> Log.e(TAG, "起動時の処理が失敗", e) }
+    )
 
     override fun onCreate() {
         super.onCreate()
@@ -35,5 +43,9 @@ class ImasLiveDBApplication : Application() {
     override fun onTerminate() {
         super.onTerminate()
         AudioPreviewManager.release()
+    }
+
+    private companion object {
+        const val TAG = "ImasLiveDBApplication"
     }
 }

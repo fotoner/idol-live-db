@@ -1,6 +1,7 @@
 package com.fugaif.imaslivedb.data.auth
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
@@ -46,28 +47,38 @@ class AuthService(private val appContext: Context) {
     private val webClientId =
         "612236234738-q1ku8tnnf4ce9jm1q006jp45k6mmmluc.apps.googleusercontent.com"
 
-    private val masterKey = MasterKey.Builder(appContext)
-        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-        .build()
+    /**
+     * セッション JWT などを置く暗号化 prefs (`imas_auth_secure`、バックアップ対象外)。
+     *
+     * キーストアが壊れた端末では開けずに例外になる。ここで投げると、起動時の refreshMe や
+     * 設定画面が AuthService に触れた瞬間にアプリが落ちる (起動のたびに落ち続ける) ので、
+     * 開けなければ null にして「未サインイン」として動かす。
+     */
+    private val prefs: SharedPreferences? = try {
+        EncryptedSharedPreferences.create(
+            appContext,
+            PREFS_NAME,
+            MasterKey.Builder(appContext).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build(),
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    } catch (e: Exception) {
+        Log.e(TAG, "認証情報の保存先を開けない → 未サインインとして続ける", e)
+        null
+    }
 
-    private val prefs = EncryptedSharedPreferences.create(
-        appContext,
-        "imas_auth_secure",
-        masterKey,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-    )
-
-    val sessionToken: String? get() = prefs.getString(KEY_SESSION_TOKEN, null)
+    val sessionToken: String? get() = prefs?.getString(KEY_SESSION_TOKEN, null)
 
     private val _state = MutableStateFlow(
-        AuthState(
-            isSignedIn = sessionToken != null,
-            displayName = prefs.getString(KEY_DISPLAY_NAME, null),
-            isAdmin = prefs.getBoolean(KEY_IS_ADMIN, false),
-            // 起動直後 (refreshMe が返る前) にも編集導線を畳めるよう、前回判明した BAN を復元する。
-            isBanned = prefs.getBoolean(KEY_IS_BANNED, false)
-        )
+        prefs?.let {
+            AuthState(
+                isSignedIn = sessionToken != null,
+                displayName = it.getString(KEY_DISPLAY_NAME, null),
+                isAdmin = it.getBoolean(KEY_IS_ADMIN, false),
+                // 起動直後 (refreshMe が返る前) にも編集導線を畳めるよう、前回判明した BAN を復元する。
+                isBanned = it.getBoolean(KEY_IS_BANNED, false)
+            )
+        } ?: AuthState()
     )
     val state: StateFlow<AuthState> = _state.asStateFlow()
 
@@ -98,7 +109,7 @@ class AuthService(private val appContext: Context) {
     }
 
     fun signOut() {
-        prefs.edit().clear().apply()
+        prefs?.edit()?.clear()?.apply()
         _state.value = AuthState()
     }
 
@@ -136,11 +147,11 @@ class AuthService(private val appContext: Context) {
             // JSON null は optString が "null" 文字列で返すので isNull で先に弾く。
             val displayName =
                 if (json.isNull("displayName")) null else json.optString("displayName").ifEmpty { null }
-            val editor = prefs.edit()
-                .putBoolean(KEY_IS_ADMIN, isAdmin)
-                .putBoolean(KEY_IS_BANNED, isBanned)
-            if (displayName != null) editor.putString(KEY_DISPLAY_NAME, displayName)
-            editor.apply()
+            prefs?.edit()?.let { editor ->
+                editor.putBoolean(KEY_IS_ADMIN, isAdmin).putBoolean(KEY_IS_BANNED, isBanned)
+                if (displayName != null) editor.putString(KEY_DISPLAY_NAME, displayName)
+                editor.apply()
+            }
             _state.value = _state.value.copy(
                 isAdmin = isAdmin,
                 isBanned = isBanned,
@@ -159,7 +170,7 @@ class AuthService(private val appContext: Context) {
      * iOS `AuthService.markBannedFromServer` と同じ best-effort 反映。
      */
     fun markBannedFromServer() {
-        prefs.edit().putBoolean(KEY_IS_BANNED, true).apply()
+        prefs?.edit()?.putBoolean(KEY_IS_BANNED, true)?.apply()
         _state.value = _state.value.copy(isBanned = true)
     }
 
@@ -168,7 +179,7 @@ class AuthService(private val appContext: Context) {
         try {
             val body = JSONObject().put("display_name", name)
             requestVoid("POST", "/users/me", body)
-            prefs.edit().putString(KEY_DISPLAY_NAME, name).apply()
+            prefs?.edit()?.putString(KEY_DISPLAY_NAME, name)?.apply()
             _state.value = _state.value.copy(displayName = name)
             Result.success(Unit)
         } catch (e: Exception) {
@@ -218,6 +229,10 @@ class AuthService(private val appContext: Context) {
 
     private suspend fun exchangeForSession(googleIdToken: String): Result<Unit> =
         withContext(Dispatchers.IO) {
+            // 保存先が開けない端末では、セッションを持てないのでサインインを完了させない。
+            val prefs = prefs ?: return@withContext Result.failure(
+                IllegalStateException("この端末ではサインイン情報を保存できません")
+            )
             try {
                 val url = URL("$BASE/auth/login")
                 val conn = (url.openConnection() as HttpURLConnection).apply {
@@ -264,6 +279,7 @@ class AuthService(private val appContext: Context) {
 
     companion object {
         private const val TAG = "AuthService"
+        private const val PREFS_NAME = "imas_auth_secure"
         private const val BASE = "https://imas-live-api.tokata3011.workers.dev"
         private const val KEY_SESSION_TOKEN = "session_token"
         private const val KEY_DISPLAY_NAME = "display_name"
