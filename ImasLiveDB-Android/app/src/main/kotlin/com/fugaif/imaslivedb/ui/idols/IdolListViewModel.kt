@@ -54,6 +54,8 @@ data class IdolListUiState(
     val noteIds: Set<String> = emptySet(),
     /** 絞り込み + 並べ替え済みの表示対象 ([rebuilt] が再計算して持つ)。 */
     val filteredIdols: List<Idol> = emptyList(),
+    /** 行に添える指標 (idol id → ラベル)。並べ替えと一緒にコアが返す。無い人は出さない。 */
+    val metricById: Map<String, String> = emptyMap(),
     /** ブランド別セクション。公式順以外 (通し並び) では空。 */
     val groupedByBrand: Map<String, List<Idol>> = emptyMap(),
     /** 1 人以上残っているブランドだけを公式の並び順で。 */
@@ -98,12 +100,14 @@ private fun IdolListUiState.rebuilt(): IdolListUiState {
         // 委譲すると CV 名検索・CV 名表示が両方死ぬ (供給元は idols.voice_actors の先頭)。
         castNames = castNames
     )
-    val filtered = sortIdols(filterIdols(idols, criteria), sortOrder, sortAscending)
+    val sorted = sortIdols(filterIdols(idols, criteria), sortOrder, sortAscending)
+    val filtered = sorted.idols
     // 公式順以外はブランドの区切りを外した通し並びにする
     // (身長順・年齢順はブランドを跨いで初めて意味を持つ指標のため)。
     val grouped = if (sortOrder.keepsBrandGrouping) filtered.groupBy { it.brandId } else emptyMap()
     return copy(
         filteredIdols = filtered,
+        metricById = sorted.metricById,
         groupedByBrand = grouped,
         // grouped に載るのは必ず 1 件以上なので、キー有無で表示ブランドを判定できる。
         visibleBrands = brands.filter { grouped.containsKey(it.id) }

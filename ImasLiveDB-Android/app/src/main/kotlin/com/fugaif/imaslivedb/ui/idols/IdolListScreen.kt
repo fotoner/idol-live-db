@@ -217,7 +217,7 @@ fun IdolListScreen(
                             groupedByBrand = groupedByBrand,
                             flatIdols = if (flatHeader == null) emptyList() else filteredIdols,
                             flatHeader = flatHeader,
-                            sortOrder = state.sortOrder,
+                            metricById = state.metricById,
                             collapsedBrands = state.collapsedBrands,
                             pickIds = state.pickIds,
                             favoriteIds = state.favoriteIds,
@@ -250,7 +250,7 @@ fun IdolListScreen(
                                         displayName = displayName(idol),
                                         secondary = secondaryText(idol),
                                         cvLine = cvLine(idol),
-                                        metric = state.sortOrder.metricLabel(idol),
+                                        metric = state.metricById[idol.id],
                                         onClick = { onNavigateToIdolDetail(idol.id) },
                                         onToggleMyPick = { viewModel.toggleMyPick(idol.id) }
                                     )
@@ -401,7 +401,7 @@ private fun IdolGrid(
     /** 通し表示 (公式順以外) のアイドル。空ならブランド別表示。 */
     flatIdols: List<Idol> = emptyList(),
     flatHeader: String? = null,
-    sortOrder: IdolSortOrder = IdolSortOrder.OFFICIAL,
+    metricById: Map<String, String> = emptyMap(),
     collapsedBrands: Set<String>,
     pickIds: Set<String>,
     favoriteIds: Set<String>,
@@ -431,7 +431,7 @@ private fun IdolGrid(
                     idol = idol,
                     isPick = pickIds.contains(idol.id),
                     isFavorite = favoriteIds.contains(idol.id),
-                    metric = sortOrder.metricLabel(idol),
+                    metric = metricById[idol.id],
                     onClick = { onSelect(idol) }
                 )
             }
@@ -451,7 +451,7 @@ private fun IdolGrid(
                         idol = idol,
                         isPick = pickIds.contains(idol.id),
                         isFavorite = favoriteIds.contains(idol.id),
-                        metric = sortOrder.metricLabel(idol),
+                        metric = metricById[idol.id],
                         onClick = { onSelect(idol) }
                     )
                 }

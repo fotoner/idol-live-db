@@ -7,7 +7,7 @@ import uniffi.imas_core.IdolSortKind
 import uniffi.imas_core.IdolSortOrderMeta
 import uniffi.imas_core.filterIdolList
 import uniffi.imas_core.idolSortOrderTable
-import uniffi.imas_core.sortIdolList
+import uniffi.imas_core.sortIdolListRows
 
 /**
  * アイドル一覧の並び順。
@@ -45,22 +45,6 @@ enum class IdolSortOrder(internal val kind: IdolSortKind) {
     /** 降順の言い回し (「年上から」等)。 */
     val descendingLabel: String get() = meta.descendingLabel
 
-    /**
-     * 行に併記する指標のラベル (null ならバッジを出さない)。
-     *
-     * ここだけ Kotlin 実装のまま残す (iOS も同じ判断で Swift 側に残している):
-     * 一覧の行ごとに呼ばれるため、FFI へ委譲すると「要素ごとの FFI 呼び出し」になり
-     * 境界規約に反する。中身は表示文字列の組み立てだけで、判定は持たない。
-     */
-    fun metricLabel(idol: Idol): String? = when (this) {
-        OFFICIAL, NAME_KANA -> null
-        AGE -> idol.age?.let { "${it}歳" }
-        HEIGHT -> idol.height?.let { "${it.toInt()}cm" }
-        WEIGHT -> idol.weight?.let { "${it.toInt()}kg" }
-        BIRTHDAY -> idol.birthday?.let(::formatBirthdayLabel)
-        DEBUT -> idol.debutDate
-    }
-
     private companion object {
         /**
          * Rust から一括で引いたメタ表。ケースごとに引くと 7 回の FFI ループになるため
@@ -73,11 +57,6 @@ enum class IdolSortOrder(internal val kind: IdolSortKind) {
     }
 }
 
-/** "--04-03" → "4月3日" (iOS `Idol.birthdayDisplay` 相当)。 */
-private fun formatBirthdayLabel(birthday: String): String =
-    birthday.removePrefix("--").split("-")
-        .let { if (it.size == 2) "${it[0].toIntOrNull() ?: it[0]}月${it[1].toIntOrNull() ?: it[1]}日" else birthday }
-
 /**
  * アイドル一覧を指定の並び順で整列する。
  *
@@ -87,8 +66,16 @@ private fun formatBirthdayLabel(birthday: String): String =
  * フィールドの射影 (`IdolListEntry`) へ落とし、返ってきた index 列で自前の配列を
  * 引き直すだけ。`ascending` 未指定 (null) の既定方向解決も Rust 側が担う。
  */
-fun sortIdols(idols: List<Idol>, order: IdolSortOrder, ascending: Boolean? = null): List<Idol> =
-    sortIdolList(idols.map(::idolListEntry), order.kind, ascending).map { idols[it.toInt()] }
+fun sortIdols(idols: List<Idol>, order: IdolSortOrder, ascending: Boolean? = null): SortedIdols {
+    val rows = sortIdolListRows(idols.map(::idolListEntry), order.kind, ascending)
+    return SortedIdols(
+        idols = rows.map { idols[it.index.toInt()] },
+        metricById = rows.mapNotNull { row -> row.metricLabel?.let { idols[row.index.toInt()].id to it } }.toMap()
+    )
+}
+
+/** 並べ替えた結果と、行に添える指標 (idol id → `17歳` / `158cm` / `4月3日` 等。文言はコア)。 */
+data class SortedIdols(val idols: List<Idol>, val metricById: Map<String, String>)
 
 /**
  * アイドル一覧へブランド/属性/マイマーク/テキスト検索の絞り込みを適用する。
