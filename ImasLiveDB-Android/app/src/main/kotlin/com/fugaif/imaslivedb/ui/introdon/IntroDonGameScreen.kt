@@ -61,6 +61,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.SubcomposeAsyncImage
 import com.fugaif.imaslivedb.data.games.GameKind
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.player.AudioPreviewManager
 import com.fugaif.imaslivedb.ui.share.IntroDonShareSheet
 import com.fugaif.imaslivedb.ui.share.IntroShareLine
@@ -104,7 +107,8 @@ data class IntroDonGameUiState(
     val playbackResetToken: Int = 0,
     val isNewBest: Boolean = false,
     val newBestTime: Boolean = false,
-    val errorMessage: String? = null
+    /** 始められないときの理由。解決済みの String ではなく文言の値で持ち、画面で文字列にする。 */
+    val errorMessage: DisplayText? = null
 ) {
     val currentQuestion: IntroDonQuestion? get() = questions.getOrNull(currentIndex)
     val totalCount: Int get() = questions.size
@@ -146,7 +150,7 @@ class IntroDonGameViewModel(app: Application, private val settings: IntroDonSett
             if (count == null) {
                 _uiState.value = _uiState.value.copy(
                     phase = IntroDonPhase.LOADING,
-                    errorMessage = "対象の曲が見つかりませんでした。ブランドを増やしてお試しください。"
+                    errorMessage = L10n.Introdon.errorNoSongs
                 )
                 return@launch
             }
@@ -371,7 +375,7 @@ fun IntroDonGameScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = { showExitDialog = true }) {
-                    Icon(Icons.Filled.Close, "終了", tint = DS.ink2)
+                    Icon(Icons.Filled.Close, L10n.Introdon.exitA11y.resolve(), tint = DS.ink2)
                 }
                 Spacer(Modifier.width(0.dp))
             }
@@ -387,28 +391,28 @@ fun IntroDonGameScreen(
     if (showExitDialog) {
         AlertDialog(
             onDismissRequest = { showExitDialog = false },
-            title = { Text("ゲームを終了しますか？") },
-            confirmButton = { TextButton(onClick = { showExitDialog = false; onExit() }) { Text("終了") } },
-            dismissButton = { TextButton(onClick = { showExitDialog = false }) { Text("キャンセル") } }
+            title = { Text(L10n.Introdon.gameExitTitle.resolve()) },
+            confirmButton = { TextButton(onClick = { showExitDialog = false; onExit() }) { Text(L10n.Introdon.exitConfirm.resolve()) } },
+            dismissButton = { TextButton(onClick = { showExitDialog = false }) { Text(L10n.Introdon.exitCancel.resolve()) } }
         )
     }
 }
 
 @Composable
-private fun LoadingBody(errorMessage: String?, onExit: () -> Unit) {
+private fun LoadingBody(errorMessage: DisplayText?, onExit: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         if (errorMessage != null) {
-            Text(errorMessage, color = DS.danger, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 32.dp))
+            Text(errorMessage.resolve(), color = DS.danger, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 32.dp))
             Spacer(Modifier.height(16.dp))
-            TextButton(onClick = onExit) { Text("戻る") }
+            TextButton(onClick = onExit) { Text(L10n.Introdon.errorBack.resolve()) }
         } else {
             CircularProgressIndicator(color = DS.ink2)
             Spacer(Modifier.height(16.dp))
-            Text("問題を生成中...", color = DS.ink2, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+            Text(L10n.Introdon.loadingGenerating.resolve(), color = DS.ink2, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
         }
     }
 }
@@ -506,12 +510,12 @@ private fun RoundBody(settings: IntroDonSettings, state: IntroDonGameUiState, vi
                     if (state.isPlayingIntro) Icons.Filled.MusicNote else Icons.Filled.MusicNote,
                     null, tint = DS.ink, modifier = Modifier.size(24.dp)
                 )
-                Text("曲名は？", fontSize = 13.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp, color = DS.ink2)
+                Text(L10n.Introdon.gamePromptGuess.resolve(), fontSize = 13.sp, fontWeight = FontWeight.Black, letterSpacing = 2.sp, color = DS.ink2)
             }
         } else if (state.phase == IntroDonPhase.PLAYING) {
             IntroDonEqAnimation(isAnimating = state.isPlayingIntro)
         } else {
-            Text("曲名を選んでください", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = DS.ink2)
+            Text(L10n.Introdon.gamePromptAnswerChoice.resolve(), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = DS.ink2)
         }
 
         if (!isFast) {
@@ -527,7 +531,7 @@ private fun RoundBody(settings: IntroDonSettings, state: IntroDonGameUiState, vi
                 Text("!", fontSize = 48.sp, fontWeight = FontWeight.Black, color = if (canBuzz) DS.bg else DS.ink3)
             }
             Text(
-                if (state.phase == IntroDonPhase.PLAYING) "わかったらタップ" else "",
+                if (state.phase == IntroDonPhase.PLAYING) L10n.Introdon.gameBuzzHint.resolve() else "",
                 fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2
             )
         }
@@ -567,7 +571,7 @@ private fun FlashEffect(tick: Int, correct: Boolean) {
 private fun ControlsRow(state: IntroDonGameUiState, viewModel: IntroDonGameViewModel) {
     var holding by remember { mutableStateOf(false) }
     Row(horizontalArrangement = Arrangement.spacedBy(28.dp), verticalAlignment = Alignment.CenterVertically) {
-        ControlButton(icon = Icons.Filled.Replay, label = "もう一度") { viewModel.replayIntro() }
+        ControlButton(icon = Icons.Filled.Replay, label = L10n.Introdon.gameControlReplay.resolve()) { viewModel.replayIntro() }
 
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Box(
@@ -586,10 +590,10 @@ private fun ControlsRow(state: IntroDonGameUiState, viewModel: IntroDonGameViewM
                     null, tint = if (state.isPlayingIntro) DS.ink else introDonAccent(), modifier = Modifier.size(17.dp)
                 )
             }
-            Text(if (state.isPlayingIntro) "再生中" else "続きから", fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3)
+            Text((if (state.isPlayingIntro) L10n.Introdon.gameControlPlaying else L10n.Introdon.gameControlResume).resolve(), fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3)
         }
 
-        ControlButton(icon = Icons.Filled.SkipNext, label = "次の曲") { viewModel.skipQuestion() }
+        ControlButton(icon = Icons.Filled.SkipNext, label = L10n.Introdon.gameControlSkip.resolve()) { viewModel.skipQuestion() }
     }
 }
 
@@ -635,7 +639,7 @@ private fun RevealedBody(state: IntroDonGameUiState, viewModel: IntroDonGameView
         IntroDonAnswerReveal(choices = q.choices, correctTitle = q.title, selectedTitle = state.selectedTitle)
 
         val isLast = state.currentIndex + 1 >= state.totalCount
-        IntroDonActionButton(title = if (isLast) "結果を見る" else "次の問題へ") { viewModel.nextQuestion() }
+        IntroDonActionButton(title = (if (isLast) L10n.Introdon.actionSeeResults else L10n.Introdon.gameNextQuestion).resolve()) { viewModel.nextQuestion() }
     }
 }
 
@@ -668,7 +672,7 @@ private fun IntroDonResultBody(
                 Text("${state.score}", fontSize = 52.sp, fontWeight = FontWeight.Black, color = DS.ink)
                 Text("/ $answered", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = DS.ink3)
             }
-            Text("正答率 $percentage%", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DS.ink2)
+            Text(L10n.Introdon.resultAccuracy(percent = percentage).resolve(), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DS.ink2)
             if (settings.mode == IntroDonMode.ALL_SONGS) {
                 val secs = (state.elapsedMs / 1000).toInt()
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -680,13 +684,13 @@ private fun IntroDonResultBody(
         }
 
         if (state.newBestTime) {
-            BestBanner("ベストタイム更新！", "NEW TIME")
+            BestBanner(L10n.Introdon.resultBestTime.resolve(), "NEW TIME")
         } else if (state.isNewBest) {
-            BestBanner("ベストスコア更新！", "NEW BEST")
+            BestBanner(L10n.Introdon.resultBestScore.resolve(), "NEW BEST")
         }
 
         if (settings.mode != IntroDonMode.ALL_SONGS) {
-            IntroDonSectionLabel(text = "全問の結果")
+            IntroDonSectionLabel(text = L10n.Introdon.resultAllQuestionsHeader.resolve())
             Column(
                 modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(DS.surface),
             ) {
@@ -697,7 +701,7 @@ private fun IntroDonResultBody(
             }
         }
 
-        IntroDonActionButton(title = "もう一度") { onReplay() }
+        IntroDonActionButton(title = L10n.Introdon.resultActionReplayAndroid.resolve()) { onReplay() }
 
         Row(
             modifier = Modifier
@@ -710,14 +714,14 @@ private fun IntroDonResultBody(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(Icons.Filled.Share, null, tint = DS.ink, modifier = Modifier.size(15.dp))
-            Text("結果をシェア", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DS.ink, modifier = Modifier.padding(start = 8.dp))
+            Text(L10n.Introdon.resultActionShare.resolve(), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DS.ink, modifier = Modifier.padding(start = 8.dp))
         }
 
         Row(
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(DS.surface).clickable(onClick = onExit).padding(vertical = 12.dp),
             horizontalArrangement = Arrangement.Center
         ) {
-            Text("ホームに戻る", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
+            Text(L10n.Introdon.resultActionHome.resolve(), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
         }
     }
 
@@ -725,7 +729,7 @@ private fun IntroDonResultBody(
         val isAllSongs = settings.mode == IntroDonMode.ALL_SONGS
         val secs = (state.elapsedMs / 1000).toInt()
         IntroDonShareSheet(
-            modeLabel = introDonModeLabel(settings),
+            modeLabel = introDonModeLabel(settings).resolve(),
             score = state.score,
             total = answered,
             percentage = percentage,
@@ -743,16 +747,16 @@ private fun IntroDonResultBody(
 @Composable
 private fun GradeBadge(percentage: Int) {
     val (label, color) = when {
-        percentage == 100 -> "パーフェクト! 🎵" to DS.favorite
-        percentage >= 80 -> "すごい！" to DS.success
-        percentage >= 60 -> "なかなか！" to introDonAccent()
-        percentage >= 40 -> "もう少し！" to DS.warning
-        else -> "練習あるのみ！" to DS.danger
+        percentage == 100 -> L10n.Introdon.gradePerfect to DS.favorite
+        percentage >= 80 -> L10n.Introdon.gradeGreat to DS.success
+        percentage >= 60 -> L10n.Introdon.gradeGood to introDonAccent()
+        percentage >= 40 -> L10n.Introdon.gradeAlmost to DS.warning
+        else -> L10n.Introdon.gradePractice to DS.danger
     }
     Row(
         modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(color.copy(alpha = 0.12f)).padding(horizontal = 20.dp, vertical = 8.dp)
     ) {
-        Text(label, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = color)
+        Text(label.resolve(), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = color)
     }
 }
 
@@ -783,17 +787,20 @@ private fun RecordRow(index: Int, record: IntroDonAnswerRecord) {
         Column(Modifier.weight(1f)) {
             Text(record.title, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink, maxLines = 1)
             if (!record.correct) {
-                Text(record.selectedTitle?.let { "回答: $it" } ?: "スキップ", fontSize = 11.sp, color = DS.ink3, maxLines = 1)
+                Text(
+                    (record.selectedTitle?.let { L10n.Introdon.resultRecordAnswer(title = it) } ?: L10n.Introdon.resultRecordSkipped).resolve(),
+                    fontSize = 11.sp, color = DS.ink3, maxLines = 1
+                )
             }
         }
     }
 }
 
 /** シェア文とシェアカードで同じモード表記を使うための 1 箇所。 */
-private fun introDonModeLabel(settings: IntroDonSettings): String = when (settings.mode) {
-    IntroDonMode.ALL_SONGS -> "全曲チャレンジ"
-    IntroDonMode.RUSH -> "ラッシュ ${settings.rushTimeLimitSec}秒"
-    else -> "ノーマル"
+private fun introDonModeLabel(settings: IntroDonSettings): DisplayText = when (settings.mode) {
+    IntroDonMode.ALL_SONGS -> L10n.Introdon.modeAllSongsName
+    IntroDonMode.RUSH -> L10n.Introdon.modeRushNameWithTime(seconds = settings.rushTimeLimitSec)
+    else -> L10n.Introdon.modeNormalName
 }
 
 /** 結果のシェア文。文面 (タイムの丸め・正答率・連続正解) はコアが作る (iOS と同じ)。 */

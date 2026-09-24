@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/introdon.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- introdon.action.see_results: 最後の問題 (パーティ対戦は最後のラウンド) の答え合わせのあと、結果へ進むボタン -->
+    <string name="introdon_action_see_results">結果を見る</string>
+    <!-- introdon.elapsed.label: イントロを流した秒数の表示 (再生 1.2秒)。title は elapsed.title、seconds は小数 1 桁に書式済みの数字 -->
+    <string name="introdon_elapsed_label">%1$s %2$s秒</string>
+    <!-- introdon.elapsed.title: イントロを流した秒数の表示の前に付く見出し (elapsed.label の title に入る) -->
+    <string name="introdon_elapsed_title">再生</string>
+    <!-- introdon.error.back: ゲームを始められないときのエラー表示の下のボタン (Android)。前の画面へ戻る -->
+    <string name="introdon_error_back">戻る</string>
+    <!-- introdon.error.no_songs: 出題できる曲が足りずゲームを始められないとき -->
+    <string name="introdon_error_no_songs">対象の曲が見つかりませんでした。ブランドを増やしてお試しください。</string>
+    <!-- introdon.exit.a11y: ゲーム・パーティ対戦の画面左上の × ボタンの読み上げ (Android) -->
+    <string name="introdon_exit_a11y">終了</string>
+    <!-- introdon.exit.cancel: ゲームを終了するかの確認ダイアログの、やめるボタン -->
+    <string name="introdon_exit_cancel">キャンセル</string>
+    <!-- introdon.exit.confirm: ゲームを終了するかの確認ダイアログの、終了するボタン -->
+    <string name="introdon_exit_confirm">終了</string>
+    <!-- introdon.game.buzz.hint: 中央の大きな「!」ボタン (早押し) の下の案内 -->
+    <string name="introdon_game_buzz_hint">わかったらタップ</string>
+    <!-- introdon.game.control.playing: イントロの続きを流すボタンの下のラベル (流している間) -->
+    <string name="introdon_game_control_playing">再生中</string>
+    <!-- introdon.game.control.replay: イントロを頭から流し直すボタンの下のラベル -->
+    <string name="introdon_game_control_replay">もう一度</string>
+    <!-- introdon.game.control.resume: イントロの続きを流すボタンの下のラベル (止まっているとき)。止めた位置から続きを流す -->
+    <string name="introdon_game_control_resume">続きから</string>
+    <!-- introdon.game.control.skip: 今の問題を飛ばして次の曲へ進むボタンの下のラベル -->
+    <string name="introdon_game_control_skip">次の曲</string>
+    <!-- introdon.game.exit.title: ゲーム中に × を押したときの確認ダイアログの見出し -->
+    <string name="introdon_game_exit_title">ゲームを終了しますか？</string>
+    <!-- introdon.game.next.question: 答え合わせのあと、次の問題へ進むボタン -->
+    <string name="introdon_game_next_question">次の問題へ</string>
+    <!-- introdon.game.prompt.answer_choice: 回答の番になったときの案内 (4択のモード) -->
+    <string name="introdon_game_prompt_answer_choice">曲名を選んでください</string>
+    <!-- introdon.game.prompt.guess: ラッシュ・全曲チャレンジで曲を流している間の問いかけ -->
+    <string name="introdon_game_prompt_guess">曲名は？</string>
+    <!-- introdon.grade.almost: 成績 (正答率 40% 以上)。結果画面とシェア画像 -->
+    <string name="introdon_grade_almost">もう少し！</string>
+    <!-- introdon.grade.good: 成績 (正答率 60% 以上)。結果画面とシェア画像 -->
+    <string name="introdon_grade_good">なかなか！</string>
+    <!-- introdon.grade.great: 成績 (正答率 80% 以上)。結果画面とシェア画像 -->
+    <string name="introdon_grade_great">すごい！</string>
+    <!-- introdon.grade.perfect: 結果画面の成績バッジ (正答率 100%)。! は半角。シェア画像は grade.perfect_card -->
+    <string name="introdon_grade_perfect">パーフェクト! 🎵</string>
+    <!-- introdon.grade.perfect_card: 結果のシェア画像の成績 (正答率 100%)。結果画面の grade.perfect と ja が違う -->
+    <string name="introdon_grade_perfect_card">パーフェクト！</string>
+    <!-- introdon.grade.practice: 成績 (正答率 40% 未満)。結果画面とシェア画像 -->
+    <string name="introdon_grade_practice">練習あるのみ！</string>
+    <!-- introdon.home.action.start: ホームの主ボタン。押すと設定画面へ進む -->
+    <string name="introdon_home_action_start">ゲームをはじめる</string>
+    <!-- introdon.home.hero.caption_android: ホームの先頭カードの説明 (Android)。iOS の home.hero.caption_ios と ja が違う (Android は Apple Music を使わない) -->
+    <string name="introdon_home_hero_caption_android">曲のイントロを聴いて\n曲名をいち早く当てよう</string>
+    <!-- introdon.home.hero.title: ホーム画面の先頭カードの大きな見出し (ゲーム名)。上の小さな英字 INTRO DON は飾りで訳さない -->
+    <string name="introdon_home_hero_title">イントロドン</string>
+    <!-- introdon.home.preview_notice.message: ホームの案内カードの説明 (Android) -->
+    <string name="introdon_home_preview_notice_message">各曲の30秒プレビューからイントロ部分を再生します。プレビューを持たない曲は出題対象外です。</string>
+    <!-- introdon.home.preview_notice.title: ホームの案内カードの見出し (Android)。Android は曲の 30 秒プレビューでイントロを流す -->
+    <string name="introdon_home_preview_notice_title">プレビュー再生で出題します</string>
+    <!-- introdon.home.title: イントロドン (イントロ当てゲーム) のホーム画面の上のバーのタイトル -->
+    <string name="introdon_home_title">イントロドン</string>
+    <!-- introdon.loading.generating: 問題を作っている間の表示 (設定画面のボタン・ゲーム画面・パーティ対戦画面) -->
+    <string name="introdon_loading_generating">問題を生成中...</string>
+    <!-- introdon.mode.all_songs.caption: モード「全曲チャレンジ」の説明 (設定画面のモードの行) -->
+    <string name="introdon_mode_all_songs_caption">全曲出し切るまで・タイムと正答率を競う</string>
+    <!-- introdon.mode.all_songs.name: ゲームのモード名。出題範囲の全曲を出し切るまで挑戦し、タイムを競う -->
+    <string name="introdon_mode_all_songs_name">全曲チャレンジ</string>
+    <!-- introdon.mode.normal.caption: モード「ノーマル」の説明 (設定画面のモードの行) -->
+    <string name="introdon_mode_normal_caption">決めた問題数で挑戦</string>
+    <!-- introdon.mode.normal.name: ゲームのモード名。決めた問題数で挑戦する (設定画面・結果のシェア画像) -->
+    <string name="introdon_mode_normal_name">ノーマル</string>
+    <!-- introdon.mode.party.caption: モード「パーティ対戦」の説明 (設定画面のモードの行) -->
+    <string name="introdon_mode_party_caption">1台2人・分割画面で早押し</string>
+    <!-- introdon.mode.party.name: ゲームのモード名。1 台の端末を 2 人で使い、画面を上下に分けて早押しで対戦する -->
+    <string name="introdon_mode_party_name">パーティ対戦</string>
+    <!-- introdon.mode.rush.caption: モード「ラッシュ」の説明 (設定画面のモードの行) -->
+    <string name="introdon_mode_rush_caption">制限時間内に何問正解できるか</string>
+    <!-- introdon.mode.rush.name: ゲームのモード名。制限時間内に何問正解できるか -->
+    <string name="introdon_mode_rush_name">ラッシュ</string>
+    <!-- introdon.mode.rush.name_with_time: 結果のシェア画像に出すモード名。seconds は制限時間 (30・60・120) -->
+    <string name="introdon_mode_rush_name_with_time">ラッシュ %1$d秒</string>
+    <!-- introdon.party.action.leave: パーティ対戦の結果のボタン。設定画面へ戻る -->
+    <string name="introdon_party_action_leave">退出</string>
+    <!-- introdon.party.action.replay: パーティ対戦の結果のボタン。同じ設定でもう一度対戦する -->
+    <string name="introdon_party_action_replay">もう一度</string>
+    <!-- introdon.party.answer.label: 誰も正解しなかったときに出す、正解の曲名の上の小さな見出し -->
+    <string name="introdon_party_answer_label">正解</string>
+    <!-- introdon.party.answering: 早押しした人の半分の画面の上。player はプレイヤー名 (1P・2P) -->
+    <string name="introdon_party_answering">%1$s 回答中</string>
+    <!-- introdon.party.buzz.prompt: パーティ対戦の各プレイヤーの半分の画面。タップすると早押しになる -->
+    <string name="introdon_party_buzz_prompt">タップで早押し！</string>
+    <!-- introdon.party.buzzed: 中央の帯。誰かが早押ししたとき -->
+    <string name="introdon_party_buzzed">早押し成立！回答してください</string>
+    <!-- introdon.party.correct: 正解した人の半分の画面。1 点入る -->
+    <string name="introdon_party_correct">正解！ +1</string>
+    <!-- introdon.party.draw: パーティ対戦の結果。同点のとき -->
+    <string name="introdon_party_draw">引き分け</string>
+    <!-- introdon.party.exit.title: パーティ対戦中に × を押したときの確認ダイアログの見出し -->
+    <string name="introdon_party_exit_title">対戦を終了しますか？</string>
+    <!-- introdon.party.give_up: 中央の帯のボタン。2 人とも分からないときに答えを見る -->
+    <string name="introdon_party_give_up">わからない</string>
+    <!-- introdon.party.next.round: 答え合わせのあと、次のラウンドへ進むボタン -->
+    <string name="introdon_party_next_round">次のラウンドへ</string>
+    <!-- introdon.party.opponent_answering: パーティ対戦で相手が先に押したとき、押されなかった側に出す -->
+    <string name="introdon_party_opponent_answering">相手が回答中…</string>
+    <!-- introdon.party.play.hint_android: 中央の帯の再生ボタンの横の案内 (Android)。タップでイントロを流し直す。iOS の party.play.hint と ja が違う -->
+    <string name="introdon_party_play_hint_android">タップでもう一度</string>
+    <!-- introdon.party.winner: パーティ対戦の結果。player は勝ったプレイヤー名 (1P・2P) -->
+    <string name="introdon_party_winner">%1$s の勝ち！</string>
+    <!-- introdon.result.accuracy: 結果画面の大きな点数の下。percent は 0〜100 の整数 -->
+    <string name="introdon_result_accuracy">正答率 %1$d%%</string>
+    <!-- introdon.result.action.home: 結果画面のボタン。イントロドンのホームへ戻る -->
+    <string name="introdon_result_action_home">ホームに戻る</string>
+    <!-- introdon.result.action.replay_android: 結果画面のボタン (Android)。同じ設定でもう一度遊ぶ。iOS の result.action.replay と ja が違う -->
+    <string name="introdon_result_action_replay_android">もう一度</string>
+    <!-- introdon.result.action.share: 結果画面のボタン (Android)。結果のカードの共有シートを開く -->
+    <string name="introdon_result_action_share">結果をシェア</string>
+    <!-- introdon.result.all_questions.header: 結果画面の節の見出し。1 問ずつの正誤の一覧 -->
+    <string name="introdon_result_all_questions_header">全問の結果</string>
+    <!-- introdon.result.best_score: これまでより多く正解したときの帯。右の英字 NEW BEST は飾りで訳さない -->
+    <string name="introdon_result_best_score">ベストスコア更新！</string>
+    <!-- introdon.result.best_time: 全曲チャレンジでこれまでより速く終えたときの帯。右の英字 NEW TIME は飾りで訳さない -->
+    <string name="introdon_result_best_time">ベストタイム更新！</string>
+    <!-- introdon.result.record.answer: 1 問ずつの結果の、間違えた問題の下に出す自分の答え。title は選んだ曲名 (訳さない) -->
+    <string name="introdon_result_record_answer">回答: %1$s</string>
+    <!-- introdon.result.record.skipped: 1 問ずつの結果の、答えずに飛ばした問題の下の表示 -->
+    <string name="introdon_result_record_skipped">スキップ</string>
+    <!-- introdon.setup.action.start: 設定画面の一番下の、ゲームを始めるボタン -->
+    <string name="introdon_setup_action_start">スタート</string>
+    <!-- introdon.setup.all_songs.note: 全曲チャレンジを選んだときの説明 -->
+    <string name="introdon_setup_all_songs_note">選択した出題範囲の全曲を出し切るまで挑戦。タイムと正答率を競います。</string>
+    <!-- introdon.setup.candidates: 設定画面の下の、出題できる曲の数 (Android)。1000 以上は桁区切りが付く (出題候補: 1,234 曲) -->
+    <plurals name="introdon_setup_candidates">
+        <item quantity="other">出題候補: %1$,d 曲</item>
+    </plurals>
+    <!-- introdon.setup.count.header: 設定画面の節の見出し。何問出すか (5・10・20 問) -->
+    <string name="introdon_setup_count_header">問題数</string>
+    <!-- introdon.setup.duration.header: 設定の見出し。イントロを何秒流すか (短いほど難しい) -->
+    <string name="introdon_setup_duration_header">難易度 (イントロ再生時間)</string>
+    <!-- introdon.setup.duration.play: イントロ再生時間のボタン (2秒・5秒・10秒) の下の小さなラベル -->
+    <string name="introdon_setup_duration_play">再生</string>
+    <!-- introdon.setup.duration.slider_label: イントロ再生時間のスライダーの上のラベル (1 秒以上のとき) -->
+    <string name="introdon_setup_duration_slider_label">再生時間</string>
+    <!-- introdon.setup.duration.ultra: イントロ再生時間が 1 秒未満のときの呼び名。0.2秒 のボタンの下と、スライダーの上のラベルに出す -->
+    <string name="introdon_setup_duration_ultra">超イントロ</string>
+    <!-- introdon.setup.insufficient: 出題できる曲が 4 曲未満のときの警告 (Android)。4 は固定の値 -->
+    <string name="introdon_setup_insufficient">出題するにはプレビュー付きの曲が最低 4 曲必要です。ブランドの選択を増やしてください。</string>
+    <!-- introdon.setup.mode.header: 設定画面の節の見出し。ゲームのモード (ノーマル・ラッシュ…) を選ぶ -->
+    <string name="introdon_setup_mode_header">モード</string>
+    <!-- introdon.setup.range.header: 設定画面の節の見出し。どの曲から出題するか -->
+    <string name="introdon_setup_range_header">出題範囲</string>
+    <!-- introdon.setup.range.hint: 「出題範囲」の見出しの右の補足。下のブランドのアイコンで出題する曲を絞る -->
+    <string name="introdon_setup_range_hint">ブランドで絞る</string>
+    <!-- introdon.setup.rush_time.header: 設定画面の節の見出し (ラッシュのとき)。30・60・120 秒から選ぶ -->
+    <string name="introdon_setup_rush_time_header">制限時間</string>
+    <!-- introdon.setup.seconds: イントロ再生時間の秒数 (0.2秒・2秒・5.0秒 など)。seconds は書式済みの数字 (小数を含む) -->
+    <string name="introdon_setup_seconds">%1$s秒</string>
+    <!-- introdon.setup.title: ゲームの設定画面の上のバーのタイトル -->
+    <string name="introdon_setup_title">設定</string>
+    <!-- introdon.setup.unit.questions: 問題数のボタンの数字 (5・10・20) の下に出す単位 -->
+    <string name="introdon_setup_unit_questions">問</string>
+    <!-- introdon.setup.unit.seconds: 制限時間のボタンの数字 (30・60・120) の下に出す単位 -->
+    <string name="introdon_setup_unit_seconds">秒</string>
+    <!-- introdon.share_card.footer.lead: 結果のシェア画像の一番下の宣伝の 1 行目。本家アプリ = 姉妹アプリ「イントロクイズ」 -->
+    <string name="introdon_share_card_footer_lead">もっと遊ぶなら 本家アプリ</string>
+    <!-- introdon.share_card.footer.store_android: 結果のシェア画像の宣伝の 2 行目 (Android)。「イントロクイズ」はストアでの本家アプリの名前 (固有名詞。検索語なので訳さない) -->
+    <string name="introdon_share_card_footer_store_android">Google Playで「イントロクイズ」</string>
+    <!-- introdon.share_card.more_songs: 結果のシェア画像の曲別の内訳で、載せきれなかった曲の数。1000 以上は桁区切りが付く (ほか 1,234曲) -->
+    <plurals name="introdon_share_card_more_songs">
+        <item quantity="other">ほか %1$,d曲</item>
+    </plurals>
+    <!-- introdon.share_card.sheet.title: 結果のシェアシートの見出し (Android) -->
+    <string name="introdon_share_card_sheet_title">結果をシェア</string>
+    <!-- introdon.share_card.stat.accuracy: 結果のシェア画像の数字の下のラベル (正答率 %) -->
+    <string name="introdon_share_card_stat_accuracy">正解率</string>
+    <!-- introdon.share_card.stat.max_combo: 結果のシェア画像の数字の下のラベル (連続正解の最大数 ×N) -->
+    <string name="introdon_share_card_stat_max_combo">最大コンボ</string>
+    <!-- introdon.share_card.stat.time: 結果のシェア画像の数字の下のラベル (全曲チャレンジのクリアタイム 分:秒) -->
+    <string name="introdon_share_card_stat_time">タイム</string>
+    <!-- introdon.share_card.title: 結果のシェア画像の一番上の見出し (ゲーム名)。下の英字 PERFECT / RESULT は飾りで訳さない -->
+    <string name="introdon_share_card_title">イントロドン</string>
+</resources>

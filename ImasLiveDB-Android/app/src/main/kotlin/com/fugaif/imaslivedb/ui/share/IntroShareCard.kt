@@ -31,6 +31,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 
@@ -90,7 +93,7 @@ fun IntroResultShareCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text("イントロドン", fontSize = 26.sp, fontWeight = FontWeight.Black, color = DS.ink)
+                Text(L10n.Introdon.shareCardTitle.resolve(), fontSize = 26.sp, fontWeight = FontWeight.Black, color = DS.ink)
                 Text(
                     if (isPerfect) "PERFECT" else "RESULT",
                     fontSize = 11.sp,
@@ -122,7 +125,7 @@ fun IntroResultShareCard(
                         .background(gradeColor.copy(alpha = 0.14f))
                         .padding(horizontal = 14.dp, vertical = 6.dp)
                 ) {
-                    Text(gradeLabel, fontSize = 17.sp, fontWeight = FontWeight.Black, color = gradeColor)
+                    Text(gradeLabel.resolve(), fontSize = 17.sp, fontWeight = FontWeight.Black, color = gradeColor)
                 }
             }
 
@@ -138,14 +141,14 @@ fun IntroResultShareCard(
                     .padding(vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                StatItem("正解率", "$percentage%", Modifier.weight(1f))
+                StatItem(L10n.Introdon.shareCardStatAccuracy.resolve(), "$percentage%", Modifier.weight(1f))
                 if (timeText != null) {
                     StatDivider()
-                    StatItem("タイム", timeText, Modifier.weight(1f))
+                    StatItem(L10n.Introdon.shareCardStatTime.resolve(), timeText, Modifier.weight(1f))
                 }
                 if (bestCombo >= 2) {
                     StatDivider()
-                    StatItem("最大コンボ", "×$bestCombo", Modifier.weight(1f))
+                    StatItem(L10n.Introdon.shareCardStatMaxCombo.resolve(), "×$bestCombo", Modifier.weight(1f))
                 }
             }
 
@@ -211,7 +214,7 @@ private fun Breakdown(lines: List<IntroShareLine>, modifier: Modifier = Modifier
         }
         if (extra > 0) {
             Text(
-                "ほか ${extra}曲",
+                L10n.Introdon.shareCardMoreSongs(count = extra).resolve(),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = DS.ink2,
@@ -232,21 +235,21 @@ private fun IntroShareFooter(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Text("もっと遊ぶなら 本家アプリ", fontSize = 11.sp, fontWeight = FontWeight.Medium, color = DS.ink2)
+        Text(L10n.Introdon.shareCardFooterLead.resolve(), fontSize = 11.sp, fontWeight = FontWeight.Medium, color = DS.ink2)
         // ストア名は iOS の文言をそのまま使わない。Android の画面から出たカードが
         // 「App Store で探せ」と言うと、その端末では辿り着けない案内になる。
-        Text("Google Playで「イントロクイズ」", fontSize = 17.sp, fontWeight = FontWeight.Black, color = DS.ink)
+        Text(L10n.Introdon.shareCardFooterStoreAndroid.resolve(), fontSize = 17.sp, fontWeight = FontWeight.Black, color = DS.ink)
     }
 }
 
 /** 正答率 → グレード表記と色。iOS IntroResultShareCard.grade と同じ刻み。 */
-private fun introGrade(percentage: Int): Pair<String, Color> = when {
-    percentage >= 100 -> "パーフェクト！" to DS.favorite
-    percentage >= 80 -> "すごい！" to DS.success
+private fun introGrade(percentage: Int): Pair<DisplayText, Color> = when {
+    percentage >= 100 -> L10n.Introdon.gradePerfectCard to DS.favorite
+    percentage >= 80 -> L10n.Introdon.gradeGreat to DS.success
     // iOS の accentBlue に相当する固定色は Android に無いので、ゲーム画面と同じアクセントを使う。
-    percentage >= 60 -> "なかなか！" to ImasTheme.derive(seed = null, brand = null, dark = true).accent
-    percentage >= 40 -> "もう少し！" to DS.warning
-    else -> "練習あるのみ！" to DS.pick
+    percentage >= 60 -> L10n.Introdon.gradeGood to ImasTheme.derive(seed = null, brand = null, dark = true).accent
+    percentage >= 40 -> L10n.Introdon.gradeAlmost to DS.warning
+    else -> L10n.Introdon.gradePractice to DS.pick
 }
 
 /**
@@ -268,7 +271,7 @@ fun IntroDonShareSheet(
     shareText: String,
     onDismiss: () -> Unit
 ) {
-    ShareCardSheet(title = "結果をシェア", onDismiss = onDismiss) {
+    ShareCardSheet(title = L10n.Introdon.shareCardSheetTitle.resolve(), onDismiss = onDismiss) {
         ShareCardActionPane(
             ratios = listOf(ShareCardRatio.PORTRAIT),
             shareText = shareText,

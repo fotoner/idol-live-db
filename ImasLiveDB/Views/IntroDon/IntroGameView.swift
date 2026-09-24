@@ -82,19 +82,25 @@ struct IntroGameView: View {
         }
         .toolbarColorScheme(.dark, for: .navigationBar)
         .toolbar(.hidden, for: .tabBar)
-        .alert("ゲームを終了しますか？", isPresented: $showExitAlert) {
-            Button("終了", role: .destructive) {
+        .alert(Text(L10n.Introdon.gameExitTitle), isPresented: $showExitAlert) {
+            Button(role: .destructive) {
                 stopSpeech()
                 session.stopPlayback()
                 session.reset()
                 dismiss()
+            } label: {
+                Text(L10n.Introdon.exitConfirm)
             }
-            Button("キャンセル", role: .cancel) {}
+            Button(role: .cancel) {} label: {
+                Text(L10n.Introdon.exitCancel)
+            }
         }
-        .alert("音声認識を許可してください", isPresented: $showSpeechDenied) {
-            Button("OK", role: .cancel) {}
+        .alert(Text(L10n.Introdon.gameSpeechDeniedTitle), isPresented: $showSpeechDenied) {
+            Button(role: .cancel) {} label: {
+                Text(L10n.Introdon.gameSpeechDeniedOk)
+            }
         } message: {
-            Text("設定アプリから「マイク」と「音声認識」の権限を許可してください。")
+            Text(L10n.Introdon.gameSpeechDeniedMessage)
         }
         // **結果は push しない。** push すると Game が隠れ、SwiftUI が Game の
         // `onChange` を走らせなくなる (body は再評価されるのに onChange だけ来ない)。
@@ -163,7 +169,7 @@ struct IntroGameView: View {
             ProgressView()
                 .tint(ID.t2)
                 .scaleEffect(1.2)
-            Text("問題を生成中...")
+            Text(L10n.Introdon.loadingGenerating)
                 .font(ID.font(14, weight: .semibold))
                 .foregroundColor(ID.t2)
         }
@@ -372,7 +378,7 @@ struct IntroGameView: View {
                 Image(systemName: session.isPlayingIntro ? "speaker.wave.2.fill" : "music.note")
                     .font(.imasScaled( 24, weight: .bold))
                     .foregroundColor(ID.t0)
-                Text("曲名は？")
+                Text(L10n.Introdon.gamePromptGuess)
                     .font(ID.font(13, weight: .black))
                     .tracking(2)
                     .foregroundColor(ID.t2)
@@ -382,7 +388,7 @@ struct IntroGameView: View {
                           color: ID.t0, isAnimating: session.isPlayingIntro)
                 .frame(height: 50)
         case .answering:
-            Text(useVoice ? "曲名を声で答えてください" : "曲名を選んでください")
+            Text(useVoice ? L10n.Introdon.gamePromptAnswerVoice : L10n.Introdon.gamePromptAnswerChoice)
                 .font(ID.font(14, weight: .bold))
                 .foregroundColor(ID.t2)
         default:
@@ -417,7 +423,7 @@ struct IntroGameView: View {
     @ViewBuilder
     private var buzzHint: some View {
         if session.phase == .playing {
-            Text("わかったらタップ")
+            Text(L10n.Introdon.gameBuzzHint)
                 .font(ID.font(12, weight: .semibold))
                 .foregroundColor(ID.t2)
         } else {
@@ -429,7 +435,7 @@ struct IntroGameView: View {
 
     private var controlsRow: some View {
         HStack(spacing: 28) {
-            controlButton(icon: "arrow.counterclockwise", label: "もう一度") {
+            controlButton(icon: "arrow.counterclockwise", label: L10n.Introdon.gameControlReplay) {
                 AppAnalytics.tap("intro_game.replay")
                 stopSpeech()
                 playbackResetToken &+= 1   // 経過秒を 0 に戻す
@@ -468,12 +474,12 @@ struct IntroGameView: View {
                         session.continueIntroForDuration()
                     }
                 }
-                Text(session.isPlayingIntro ? "再生中" : "続きから")
+                Text(session.isPlayingIntro ? L10n.Introdon.gameControlPlaying : L10n.Introdon.gameControlResume)
                     .font(ID.font(10, weight: .semibold))
                     .foregroundColor(ID.t3)
             }
 
-            controlButton(icon: "forward.end.fill", label: "次の曲") {
+            controlButton(icon: "forward.end.fill", label: L10n.Introdon.gameControlSkip) {
                 AppAnalytics.tap("intro_game.skip")
                 stopSpeech()
                 session.skipQuestion()
@@ -482,7 +488,7 @@ struct IntroGameView: View {
         .frame(maxWidth: .infinity)
     }
 
-    private func controlButton(icon: String, label: String, action: @escaping () -> Void) -> some View {
+    private func controlButton(icon: String, label: LocalizedStringResource, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: DS.sp2) {
                 ZStack {
@@ -530,27 +536,27 @@ struct IntroGameView: View {
     private var voiceStatusCard: some View {
         VStack(spacing: DS.sp3) {
             if speechService.authStatus == .denied || speechService.authStatus == .restricted {
-                Text("設定アプリでマイクと音声認識を許可してください")
+                Text(L10n.Introdon.gameVoiceDenied)
                     .font(ID.font(13, weight: .semibold))
                     .foregroundColor(ID.incorrect)
                     .multilineTextAlignment(.center)
             } else if speechService.authStatus == .notDetermined {
-                Text("マイクをタップして声で回答")
+                Text(L10n.Introdon.gameVoiceTapToSpeak)
                     .font(ID.font(13, weight: .semibold))
                     .foregroundColor(ID.t2)
             } else if speechService.isListening {
                 HStack(spacing: DS.sp3) {
                     PulseDot(color: ID.accentPink)
                     Text(speechService.recognizedText.isEmpty
-                        ? "聴取中… 曲名を声で答えてください"
-                        : "「\(speechService.recognizedText)」")
+                        ? L10n.Introdon.gameVoiceListening
+                        : L10n.Introdon.gameVoiceRecognized(text: speechService.recognizedText))
                         .font(ID.font(14, weight: .bold))
                         .foregroundColor(speechService.recognizedText.isEmpty ? ID.t2 : ID.t0)
                         .lineLimit(1)
                 }
             } else {
                 // 聴取していない時は前回の認識テキストを出さない (次の曲に残らないように)。
-                Text("マイクをタップして回答")
+                Text(L10n.Introdon.gameVoiceTapToAnswer)
                     .font(ID.font(13, weight: .semibold))
                     .foregroundColor(ID.t2)
             }
@@ -569,7 +575,7 @@ struct IntroGameView: View {
             HStack(spacing: DS.sp3) {
                 Image(systemName: speechService.isListening ? "mic.slash.fill" : "mic.fill")
                     .font(.imasScaled( 15, weight: .bold))
-                Text(speechService.isListening ? "聴取を停止" : "マイクで回答")
+                Text(speechService.isListening ? L10n.Introdon.gameVoiceStop : L10n.Introdon.gameVoiceStart)
                     .font(ID.font(14, weight: .bold))
             }
             .foregroundColor(speechService.isListening ? ID.incorrect : ID.t0)
@@ -616,7 +622,7 @@ struct IntroGameView: View {
             } label: {
                 let isLast = !isRush && session.currentIndex + 1 >= session.totalCount
                 HStack(spacing: DS.sp3) {
-                    Text(isLast ? "結果を見る" : "次の問題へ")
+                    Text(isLast ? L10n.Introdon.actionSeeResults : L10n.Introdon.gameNextQuestion)
                         .font(ID.font(16, weight: .bold))
                     Image(systemName: isLast ? "flag.checkered" : "arrow.right")
                         .font(.imasScaled( 14, weight: .semibold))

@@ -1,0 +1,903 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "introdon",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/introdon/",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/share/IntroShareCard.kt"
+    ],
+    "ios": [
+      "ImasLiveDB/Views/IntroDon/"
+    ]
+  },
+  "strings": {
+    "action.see_results": {
+      "ja": "結果を見る",
+      "ko": "결과 보기",
+      "note": "最後の問題 (パーティ対戦は最後のラウンド) の答え合わせのあと、結果へ進むボタン"
+    },
+    "answer_mode.choices.caption": {
+      "ja": "タップで回答",
+      "ko": "탭해서 답하기",
+      "note": "回答方式「4択」のボタンの下の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "answer_mode.choices.name": {
+      "ja": "4択",
+      "ko": "4지선다",
+      "note": "回答方式のボタン。4 つの曲名から選ぶ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "answer_mode.voice.caption": {
+      "ja": "声で曲名を回答",
+      "ko": "목소리로 곡 제목 답하기",
+      "note": "回答方式「音声判定」のボタンの下の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "answer_mode.voice.name": {
+      "ja": "音声判定",
+      "ko": "음성 판정",
+      "note": "回答方式のボタン。曲名を声で言って判定する",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "auth.action.allow": {
+      "ja": "Apple Music を許可する",
+      "ko": "Apple Music 허용",
+      "note": "Apple Music の利用許可を求めるボタン (ホーム・設定画面の警告カード)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "auth.warning": {
+      "ja": "Apple Music が未認証です",
+      "ko": "Apple Music 접근이 허용되지 않았어요",
+      "note": "Apple Music の利用を許可していないときの警告 (ホーム・設定画面)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "elapsed.label": {
+      "args": [
+        {
+          "name": "title",
+          "type": "text"
+        },
+        {
+          "name": "seconds",
+          "type": "string"
+        }
+      ],
+      "ja": "{title} {seconds}秒",
+      "ko": "{title} {seconds}초",
+      "note": "イントロを流した秒数の表示 (再生 1.2秒)。title は elapsed.title、seconds は小数 1 桁に書式済みの数字"
+    },
+    "elapsed.title": {
+      "ja": "再生",
+      "ko": "재생",
+      "note": "イントロを流した秒数の表示の前に付く見出し (elapsed.label の title に入る)"
+    },
+    "error.back": {
+      "ja": "戻る",
+      "ko": "돌아가기",
+      "note": "ゲームを始められないときのエラー表示の下のボタン (Android)。前の画面へ戻る",
+      "platforms": [
+        "android"
+      ]
+    },
+    "error.generic": {
+      "args": [
+        {
+          "name": "message",
+          "type": "string"
+        }
+      ],
+      "ja": "エラー: {message}",
+      "ko": "오류: {message}",
+      "note": "問題の生成に失敗したとき (設定画面)。message は OS やサーバが返したエラーの説明 (訳さない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "error.no_songs": {
+      "ja": "対象の曲が見つかりませんでした。ブランドを増やしてお試しください。",
+      "ko": "대상 곡을 찾지 못했어요. 브랜드를 더 선택해서 다시 시도해 주세요.",
+      "note": "出題できる曲が足りずゲームを始められないとき"
+    },
+    "exit.a11y": {
+      "ja": "終了",
+      "ko": "종료",
+      "note": "ゲーム・パーティ対戦の画面左上の × ボタンの読み上げ (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "exit.cancel": {
+      "ja": "キャンセル",
+      "ko": "취소",
+      "note": "ゲームを終了するかの確認ダイアログの、やめるボタン"
+    },
+    "exit.confirm": {
+      "ja": "終了",
+      "ko": "종료",
+      "note": "ゲームを終了するかの確認ダイアログの、終了するボタン"
+    },
+    "game.buzz.hint": {
+      "ja": "わかったらタップ",
+      "ko": "정답을 알면 탭하세요",
+      "note": "中央の大きな「!」ボタン (早押し) の下の案内"
+    },
+    "game.control.playing": {
+      "ja": "再生中",
+      "ko": "재생 중",
+      "note": "イントロの続きを流すボタンの下のラベル (流している間)"
+    },
+    "game.control.replay": {
+      "ja": "もう一度",
+      "ko": "다시 듣기",
+      "note": "イントロを頭から流し直すボタンの下のラベル"
+    },
+    "game.control.resume": {
+      "ja": "続きから",
+      "ko": "이어서",
+      "note": "イントロの続きを流すボタンの下のラベル (止まっているとき)。止めた位置から続きを流す"
+    },
+    "game.control.skip": {
+      "ja": "次の曲",
+      "ko": "다음 곡",
+      "note": "今の問題を飛ばして次の曲へ進むボタンの下のラベル"
+    },
+    "game.exit.title": {
+      "ja": "ゲームを終了しますか？",
+      "ko": "게임을 끝낼까요?",
+      "note": "ゲーム中に × を押したときの確認ダイアログの見出し"
+    },
+    "game.next.question": {
+      "ja": "次の問題へ",
+      "ko": "다음 문제로",
+      "note": "答え合わせのあと、次の問題へ進むボタン"
+    },
+    "game.prompt.answer_choice": {
+      "ja": "曲名を選んでください",
+      "ko": "곡 제목을 골라 주세요",
+      "note": "回答の番になったときの案内 (4択のモード)"
+    },
+    "game.prompt.answer_voice": {
+      "ja": "曲名を声で答えてください",
+      "ko": "곡 제목을 목소리로 말해 주세요",
+      "note": "回答の番になったときの案内 (音声で答えるモード)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "game.prompt.guess": {
+      "ja": "曲名は？",
+      "ko": "곡 제목은?",
+      "note": "ラッシュ・全曲チャレンジで曲を流している間の問いかけ"
+    },
+    "game.speech_denied.message": {
+      "ja": "設定アプリから「マイク」と「音声認識」の権限を許可してください。",
+      "ko": "설정 앱에서 “마이크”와 “음성 인식” 권한을 허용해 주세요.",
+      "note": "マイク・音声認識が許可されていないときのアラートの本文",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "game.speech_denied.ok": {
+      "ja": "OK",
+      "ko": "확인",
+      "note": "マイク・音声認識が許可されていないときのアラートの閉じるボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "game.speech_denied.title": {
+      "ja": "音声認識を許可してください",
+      "ko": "음성 인식을 허용해 주세요",
+      "note": "音声で答えるモードでマイク・音声認識が許可されていないときのアラートの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "game.voice.denied": {
+      "ja": "設定アプリでマイクと音声認識を許可してください",
+      "ko": "설정 앱에서 마이크와 음성 인식을 허용해 주세요",
+      "note": "音声で答える欄の案内。マイク・音声認識が拒否されているとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "game.voice.listening": {
+      "ja": "聴取中… 曲名を声で答えてください",
+      "ko": "듣는 중… 곡 제목을 말해 주세요",
+      "note": "音声で答える欄の案内。聞き取り中でまだ何も認識していないとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "game.voice.recognized": {
+      "args": [
+        {
+          "name": "text",
+          "type": "string"
+        }
+      ],
+      "ja": "「{text}」",
+      "ko": "“{text}”",
+      "note": "音声で答える欄に出す、聞き取った言葉。text は音声認識の結果 (訳さない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "game.voice.start": {
+      "ja": "マイクで回答",
+      "ko": "마이크로 답하기",
+      "note": "マイクのボタン。聞き取りを始める",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "game.voice.stop": {
+      "ja": "聴取を停止",
+      "ko": "듣기 중지",
+      "note": "マイクのボタン。聞き取りを止める",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "game.voice.tap_to_answer": {
+      "ja": "マイクをタップして回答",
+      "ko": "마이크를 탭해서 답해 주세요",
+      "note": "音声で答える欄の案内。聞き取りを止めているとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "game.voice.tap_to_speak": {
+      "ja": "マイクをタップして声で回答",
+      "ko": "마이크를 탭하고 목소리로 답해 주세요",
+      "note": "音声で答える欄の案内。まだマイクの許可を聞いていないとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "grade.almost": {
+      "ja": "もう少し！",
+      "ko": "조금만 더!",
+      "note": "成績 (正答率 40% 以上)。結果画面とシェア画像"
+    },
+    "grade.good": {
+      "ja": "なかなか！",
+      "ko": "꽤 잘했어요!",
+      "note": "成績 (正答率 60% 以上)。結果画面とシェア画像"
+    },
+    "grade.great": {
+      "ja": "すごい！",
+      "ko": "대단해요!",
+      "note": "成績 (正答率 80% 以上)。結果画面とシェア画像"
+    },
+    "grade.perfect": {
+      "ja": "パーフェクト! 🎵",
+      "ko": "퍼펙트! 🎵",
+      "note": "結果画面の成績バッジ (正答率 100%)。! は半角。シェア画像は grade.perfect_card"
+    },
+    "grade.perfect_card": {
+      "ja": "パーフェクト！",
+      "ko": "퍼펙트!",
+      "note": "結果のシェア画像の成績 (正答率 100%)。結果画面の grade.perfect と ja が違う"
+    },
+    "grade.practice": {
+      "ja": "練習あるのみ！",
+      "ko": "연습만이 살길!",
+      "note": "成績 (正答率 40% 未満)。結果画面とシェア画像"
+    },
+    "home.action.start": {
+      "ja": "ゲームをはじめる",
+      "ko": "게임 시작",
+      "note": "ホームの主ボタン。押すと設定画面へ進む"
+    },
+    "home.battle.header": {
+      "ja": "対戦モード",
+      "ko": "대전 모드",
+      "note": "ホームの節の見出し。姉妹アプリ (対戦できる本家アプリ) の案内カードの上",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "home.battle.message": {
+      "ja": "姉妹アプリ「イントロドン」でローカル\n・オンライン対戦ができます",
+      "ko": "자매 앱 “인트로돈”에서\n로컬·온라인 대전을 할 수 있어요",
+      "note": "姉妹アプリの案内カードの説明。「ローカル・オンライン対戦」の途中で改行している",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "home.battle.open_store": {
+      "ja": "App Store で開く",
+      "ko": "App Store에서 열기",
+      "note": "姉妹アプリの案内カードのリンク。App Store の姉妹アプリのページを開く",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "home.battle.title": {
+      "ja": "友達と対戦したい方へ",
+      "ko": "친구와 대전하고 싶다면",
+      "note": "姉妹アプリの案内カードの見出し。上の小さな英字 BATTLE MODE は飾りで訳さない",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "home.hero.caption_android": {
+      "ja": "曲のイントロを聴いて\n曲名をいち早く当てよう",
+      "ko": "곡의 인트로를 듣고\n누구보다 빨리 곡 제목을 맞혀 보세요",
+      "note": "ホームの先頭カードの説明 (Android)。iOS の home.hero.caption_ios と ja が違う (Android は Apple Music を使わない)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "home.hero.caption_ios": {
+      "ja": "Apple Music のイントロを聴いて\n曲名をいち早く当てよう",
+      "ko": "Apple Music 인트로를 듣고\n누구보다 빨리 곡 제목을 맞혀 보세요",
+      "note": "ホームの先頭カードの説明 (iOS)。iOS は Apple Music でイントロを流す。Android の home.hero.caption_android と ja が違う",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "home.hero.title": {
+      "ja": "イントロドン",
+      "ko": "인트로돈",
+      "note": "ホーム画面の先頭カードの大きな見出し (ゲーム名)。上の小さな英字 INTRO DON は飾りで訳さない"
+    },
+    "home.preview_notice.message": {
+      "ja": "各曲の30秒プレビューからイントロ部分を再生します。プレビューを持たない曲は出題対象外です。",
+      "ko": "각 곡의 30초 미리 듣기에서 인트로 부분을 재생해요. 미리 듣기가 없는 곡은 출제되지 않아요.",
+      "note": "ホームの案内カードの説明 (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "home.preview_notice.title": {
+      "ja": "プレビュー再生で出題します",
+      "ko": "미리 듣기로 출제해요",
+      "note": "ホームの案内カードの見出し (Android)。Android は曲の 30 秒プレビューでイントロを流す",
+      "platforms": [
+        "android"
+      ]
+    },
+    "home.title": {
+      "ja": "イントロドン",
+      "ko": "인트로돈",
+      "note": "イントロドン (イントロ当てゲーム) のホーム画面の上のバーのタイトル"
+    },
+    "loading.generating": {
+      "ja": "問題を生成中...",
+      "ko": "문제를 만드는 중...",
+      "note": "問題を作っている間の表示 (設定画面のボタン・ゲーム画面・パーティ対戦画面)"
+    },
+    "mode.all_songs.caption": {
+      "ja": "全曲出し切るまで・タイムと正答率を競う",
+      "ko": "모든 곡이 나올 때까지 · 시간과 정답률 겨루기",
+      "note": "モード「全曲チャレンジ」の説明 (設定画面のモードの行)"
+    },
+    "mode.all_songs.name": {
+      "ja": "全曲チャレンジ",
+      "ko": "전곡 챌린지",
+      "note": "ゲームのモード名。出題範囲の全曲を出し切るまで挑戦し、タイムを競う"
+    },
+    "mode.normal.caption": {
+      "ja": "決めた問題数で挑戦",
+      "ko": "정한 문제 수만큼 도전",
+      "note": "モード「ノーマル」の説明 (設定画面のモードの行)"
+    },
+    "mode.normal.name": {
+      "ja": "ノーマル",
+      "ko": "노멀",
+      "note": "ゲームのモード名。決めた問題数で挑戦する (設定画面・結果のシェア画像)"
+    },
+    "mode.party.caption": {
+      "ja": "1台2人・分割画面で早押し",
+      "ko": "기기 1대에 2명 · 화면을 나눠 먼저 누르기",
+      "note": "モード「パーティ対戦」の説明 (設定画面のモードの行)"
+    },
+    "mode.party.name": {
+      "ja": "パーティ対戦",
+      "ko": "파티 대전",
+      "note": "ゲームのモード名。1 台の端末を 2 人で使い、画面を上下に分けて早押しで対戦する"
+    },
+    "mode.rush.caption": {
+      "ja": "制限時間内に何問正解できるか",
+      "ko": "제한 시간 안에 정답을 몇 개 맞힐 수 있을까",
+      "note": "モード「ラッシュ」の説明 (設定画面のモードの行)"
+    },
+    "mode.rush.name": {
+      "ja": "ラッシュ",
+      "ko": "러시",
+      "note": "ゲームのモード名。制限時間内に何問正解できるか"
+    },
+    "mode.rush.name_with_time": {
+      "args": [
+        {
+          "name": "seconds",
+          "type": "int"
+        }
+      ],
+      "ja": "ラッシュ {seconds}秒",
+      "ko": "러시 {seconds}초",
+      "note": "結果のシェア画像に出すモード名。seconds は制限時間 (30・60・120)"
+    },
+    "party.action.leave": {
+      "ja": "退出",
+      "ko": "나가기",
+      "note": "パーティ対戦の結果のボタン。設定画面へ戻る"
+    },
+    "party.action.replay": {
+      "ja": "もう一度",
+      "ko": "다시 하기",
+      "note": "パーティ対戦の結果のボタン。同じ設定でもう一度対戦する"
+    },
+    "party.answer.label": {
+      "ja": "正解",
+      "ko": "정답",
+      "note": "誰も正解しなかったときに出す、正解の曲名の上の小さな見出し"
+    },
+    "party.answering": {
+      "args": [
+        {
+          "name": "player",
+          "type": "string"
+        }
+      ],
+      "ja": "{player} 回答中",
+      "ko": "{player} 답하는 중",
+      "note": "早押しした人の半分の画面の上。player はプレイヤー名 (1P・2P)"
+    },
+    "party.buzz.prompt": {
+      "ja": "タップで早押し！",
+      "ko": "먼저 탭하세요!",
+      "note": "パーティ対戦の各プレイヤーの半分の画面。タップすると早押しになる"
+    },
+    "party.buzzed": {
+      "ja": "早押し成立！回答してください",
+      "ko": "먼저 눌렀어요! 답해 주세요",
+      "note": "中央の帯。誰かが早押ししたとき"
+    },
+    "party.correct": {
+      "ja": "正解！ +1",
+      "ko": "정답! +1",
+      "note": "正解した人の半分の画面。1 点入る"
+    },
+    "party.draw": {
+      "ja": "引き分け",
+      "ko": "무승부",
+      "note": "パーティ対戦の結果。同点のとき"
+    },
+    "party.exit.title": {
+      "ja": "対戦を終了しますか？",
+      "ko": "대전을 끝낼까요?",
+      "note": "パーティ対戦中に × を押したときの確認ダイアログの見出し"
+    },
+    "party.give_up": {
+      "ja": "わからない",
+      "ko": "모르겠어요",
+      "note": "中央の帯のボタン。2 人とも分からないときに答えを見る"
+    },
+    "party.next.round": {
+      "ja": "次のラウンドへ",
+      "ko": "다음 라운드로",
+      "note": "答え合わせのあと、次のラウンドへ進むボタン"
+    },
+    "party.opponent_answering": {
+      "ja": "相手が回答中…",
+      "ko": "상대가 답하는 중…",
+      "note": "パーティ対戦で相手が先に押したとき、押されなかった側に出す"
+    },
+    "party.play.hint": {
+      "ja": "長押しでもう少し",
+      "ko": "길게 눌러 더 듣기",
+      "note": "中央の帯の再生ボタンの横の案内 (iOS)。長押しの間イントロを流し続ける。Android の party.play.hint_android と ja が違う",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "party.play.hint_android": {
+      "ja": "タップでもう一度",
+      "ko": "탭해서 다시 듣기",
+      "note": "中央の帯の再生ボタンの横の案内 (Android)。タップでイントロを流し直す。iOS の party.play.hint と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "party.winner": {
+      "args": [
+        {
+          "name": "player",
+          "type": "string"
+        }
+      ],
+      "ja": "{player} の勝ち！",
+      "ko": "{player} 승리!",
+      "note": "パーティ対戦の結果。player は勝ったプレイヤー名 (1P・2P)"
+    },
+    "playback.full.caption": {
+      "ja": "実イントロ(要サブスク)",
+      "ko": "실제 인트로 (구독 필요)",
+      "note": "再生方式「フル再生」の説明。Apple Music の購読が必要",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "playback.full.name": {
+      "ja": "フル再生",
+      "ko": "전체 재생",
+      "note": "再生方式のボタン。Apple Music のカタログで曲の頭からイントロを流す",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "playback.preview.caption": {
+      "ja": "30秒・サクサク",
+      "ko": "30초 · 가볍게",
+      "note": "再生方式「プレビュー」の説明 (30 秒の試聴で軽快に進む)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "playback.preview.name": {
+      "ja": "プレビュー",
+      "ko": "미리 듣기",
+      "note": "再生方式のボタン。30 秒の試聴音源で流す",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "result.accuracy": {
+      "args": [
+        {
+          "name": "percent",
+          "type": "int"
+        }
+      ],
+      "ja": "正答率 {percent}%",
+      "ko": "정답률 {percent}%",
+      "note": "結果画面の大きな点数の下。percent は 0〜100 の整数"
+    },
+    "result.action.home": {
+      "ja": "ホームに戻る",
+      "ko": "홈으로 돌아가기",
+      "note": "結果画面のボタン。イントロドンのホームへ戻る"
+    },
+    "result.action.replay": {
+      "ja": "もう一度あそぶ",
+      "ko": "다시 하기",
+      "note": "結果画面のボタン。設定画面へ戻ってもう一度遊ぶ (iOS)。Android の result.action.replay_android と ja が違う",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "result.action.replay_android": {
+      "ja": "もう一度",
+      "ko": "다시 하기",
+      "note": "結果画面のボタン (Android)。同じ設定でもう一度遊ぶ。iOS の result.action.replay と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "result.action.share": {
+      "ja": "結果をシェア",
+      "ko": "결과 공유",
+      "note": "結果画面のボタン (Android)。結果のカードの共有シートを開く",
+      "platforms": [
+        "android"
+      ]
+    },
+    "result.action.share_image": {
+      "ja": "結果を画像でシェア",
+      "ko": "결과를 이미지로 공유",
+      "note": "結果画面のボタン。結果のカードを画像にして共有する",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "result.all_questions.header": {
+      "ja": "全問の結果",
+      "ko": "전체 문제 결과",
+      "note": "結果画面の節の見出し。1 問ずつの正誤の一覧"
+    },
+    "result.best_score": {
+      "ja": "ベストスコア更新！",
+      "ko": "최고 점수 갱신!",
+      "note": "これまでより多く正解したときの帯。右の英字 NEW BEST は飾りで訳さない"
+    },
+    "result.best_time": {
+      "ja": "ベストタイム更新！",
+      "ko": "최단 기록 갱신!",
+      "note": "全曲チャレンジでこれまでより速く終えたときの帯。右の英字 NEW TIME は飾りで訳さない"
+    },
+    "result.record.answer": {
+      "args": [
+        {
+          "name": "title",
+          "type": "string"
+        }
+      ],
+      "ja": "回答: {title}",
+      "ko": "내 답: {title}",
+      "note": "1 問ずつの結果の、間違えた問題の下に出す自分の答え。title は選んだ曲名 (訳さない)"
+    },
+    "result.record.skipped": {
+      "ja": "スキップ",
+      "ko": "건너뜀",
+      "note": "1 問ずつの結果の、答えずに飛ばした問題の下の表示"
+    },
+    "result.title": {
+      "ja": "結果",
+      "ko": "결과",
+      "note": "結果画面の上のバーのタイトル",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setup.action.start": {
+      "ja": "スタート",
+      "ko": "시작",
+      "note": "設定画面の一番下の、ゲームを始めるボタン"
+    },
+    "setup.advanced.header": {
+      "ja": "詳細設定",
+      "ko": "상세 설정",
+      "note": "設定画面の折りたたみの見出し (再生方式・難易度)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setup.all_songs.note": {
+      "ja": "選択した出題範囲の全曲を出し切るまで挑戦。タイムと正答率を競います。",
+      "ko": "선택한 출제 범위의 모든 곡이 나올 때까지 도전해요. 시간과 정답률을 겨뤄요.",
+      "note": "全曲チャレンジを選んだときの説明"
+    },
+    "setup.answer_mode.header": {
+      "ja": "回答方式",
+      "ko": "답하는 방식",
+      "note": "設定画面の節の見出し (ノーマルのとき)。4択か音声で答えるか",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setup.brand.all": {
+      "ja": "全て",
+      "ko": "전체",
+      "note": "ブランドの選択の先頭の「すべてのブランド」のアイコンの下のラベル",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setup.brand.all_icon": {
+      "ja": "全",
+      "ko": "전체",
+      "note": "「すべてのブランド」の丸いアイコンの中に書く文字 (ブランドのアイコンの略称と同じ位置)。1〜2 文字が望ましい",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setup.candidates": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "出題候補: {count} 曲",
+      "ko": "출제 후보: {count}곡",
+      "note": "設定画面の下の、出題できる曲の数 (Android)。1000 以上は桁区切りが付く (出題候補: 1,234 曲)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "setup.count.header": {
+      "ja": "問題数",
+      "ko": "문제 수",
+      "note": "設定画面の節の見出し。何問出すか (5・10・20 問)"
+    },
+    "setup.duration.header": {
+      "ja": "難易度 (イントロ再生時間)",
+      "ko": "난이도 (인트로 재생 시간)",
+      "note": "設定の見出し。イントロを何秒流すか (短いほど難しい)"
+    },
+    "setup.duration.play": {
+      "ja": "再生",
+      "ko": "재생",
+      "note": "イントロ再生時間のボタン (2秒・5秒・10秒) の下の小さなラベル"
+    },
+    "setup.duration.slider_label": {
+      "ja": "再生時間",
+      "ko": "재생 시간",
+      "note": "イントロ再生時間のスライダーの上のラベル (1 秒以上のとき)"
+    },
+    "setup.duration.ultra": {
+      "ja": "超イントロ",
+      "ko": "초단 인트로",
+      "note": "イントロ再生時間が 1 秒未満のときの呼び名。0.2秒 のボタンの下と、スライダーの上のラベルに出す"
+    },
+    "setup.insufficient": {
+      "ja": "出題するにはプレビュー付きの曲が最低 4 曲必要です。ブランドの選択を増やしてください。",
+      "ko": "출제하려면 미리 듣기가 있는 곡이 최소 4곡 필요해요. 브랜드를 더 선택해 주세요.",
+      "note": "出題できる曲が 4 曲未満のときの警告 (Android)。4 は固定の値",
+      "platforms": [
+        "android"
+      ]
+    },
+    "setup.mode.header": {
+      "ja": "モード",
+      "ko": "모드",
+      "note": "設定画面の節の見出し。ゲームのモード (ノーマル・ラッシュ…) を選ぶ"
+    },
+    "setup.playback.header": {
+      "ja": "再生方式",
+      "ko": "재생 방식",
+      "note": "詳細設定の中の見出し。フル再生かプレビューか",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setup.range.change": {
+      "ja": "出題範囲を変更",
+      "ko": "출제 범위 변경",
+      "note": "曲一覧で絞り込んだ範囲を出題中のとき、曲一覧を開き直して範囲を選び直すボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setup.range.header": {
+      "ja": "出題範囲",
+      "ko": "출제 범위",
+      "note": "設定画面の節の見出し。どの曲から出題するか"
+    },
+    "setup.range.hint": {
+      "ja": "ブランドで絞る",
+      "ko": "브랜드로 필터링",
+      "note": "「出題範囲」の見出しの右の補足。下のブランドのアイコンで出題する曲を絞る"
+    },
+    "setup.range.preset_default": {
+      "ja": "曲一覧の絞り込み",
+      "ko": "곡 목록 필터",
+      "note": "曲一覧で絞り込んだ範囲のカードの見出し。絞り込みの説明 (曲一覧が作る) が無いときに出す",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setup.range.refine": {
+      "ja": "タグ・担当・検索で絞り込んで出題",
+      "ko": "태그·담당·검색으로 필터링해서 출제",
+      "note": "曲一覧を開いてタグ・担当・検索で出題する曲を絞り込むボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setup.range.song_count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}曲から出題",
+      "ko": "{count}곡에서 출제",
+      "note": "曲一覧で絞り込んだ範囲のカードの説明。count は出題できる曲の数。1000 以上は桁区切りが付く (1,234曲から出題)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setup.rounds.header": {
+      "ja": "ラウンド数",
+      "ko": "라운드 수",
+      "note": "設定画面の節の見出し (パーティ対戦のとき)。何ラウンド戦うか",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setup.rush_time.header": {
+      "ja": "制限時間",
+      "ko": "제한 시간",
+      "note": "設定画面の節の見出し (ラッシュのとき)。30・60・120 秒から選ぶ"
+    },
+    "setup.seconds": {
+      "args": [
+        {
+          "name": "seconds",
+          "type": "string"
+        }
+      ],
+      "ja": "{seconds}秒",
+      "ko": "{seconds}초",
+      "note": "イントロ再生時間の秒数 (0.2秒・2秒・5.0秒 など)。seconds は書式済みの数字 (小数を含む)"
+    },
+    "setup.title": {
+      "ja": "設定",
+      "ko": "설정",
+      "note": "ゲームの設定画面の上のバーのタイトル"
+    },
+    "setup.unit.questions": {
+      "ja": "問",
+      "ko": "문제",
+      "note": "問題数のボタンの数字 (5・10・20) の下に出す単位"
+    },
+    "setup.unit.seconds": {
+      "ja": "秒",
+      "ko": "초",
+      "note": "制限時間のボタンの数字 (30・60・120) の下に出す単位"
+    },
+    "share_card.footer.lead": {
+      "ja": "もっと遊ぶなら 本家アプリ",
+      "ko": "더 즐기려면 원조 앱",
+      "note": "結果のシェア画像の一番下の宣伝の 1 行目。本家アプリ = 姉妹アプリ「イントロクイズ」"
+    },
+    "share_card.footer.store_android": {
+      "ja": "Google Playで「イントロクイズ」",
+      "ko": "Google Play에서 “イントロクイズ”",
+      "note": "結果のシェア画像の宣伝の 2 行目 (Android)。「イントロクイズ」はストアでの本家アプリの名前 (固有名詞。検索語なので訳さない)",
+      "platforms": [
+        "android"
+      ],
+      "verbatim_ok": true
+    },
+    "share_card.footer.store_ios": {
+      "ja": "App Storeで「イントロクイズ」",
+      "ko": "App Store에서 “イントロクイズ”",
+      "note": "結果のシェア画像の宣伝の 2 行目 (iOS)。「イントロクイズ」はストアでの本家アプリの名前 (固有名詞。検索語なので訳さない)",
+      "platforms": [
+        "ios"
+      ],
+      "verbatim_ok": true
+    },
+    "share_card.more_songs": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "ほか {count}曲",
+      "ko": "외 {count}곡",
+      "note": "結果のシェア画像の曲別の内訳で、載せきれなかった曲の数。1000 以上は桁区切りが付く (ほか 1,234曲)"
+    },
+    "share_card.sheet.title": {
+      "ja": "結果をシェア",
+      "ko": "결과 공유",
+      "note": "結果のシェアシートの見出し (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "share_card.stat.accuracy": {
+      "ja": "正解率",
+      "ko": "정답률",
+      "note": "結果のシェア画像の数字の下のラベル (正答率 %)"
+    },
+    "share_card.stat.max_combo": {
+      "ja": "最大コンボ",
+      "ko": "최대 콤보",
+      "note": "結果のシェア画像の数字の下のラベル (連続正解の最大数 ×N)"
+    },
+    "share_card.stat.time": {
+      "ja": "タイム",
+      "ko": "시간",
+      "note": "結果のシェア画像の数字の下のラベル (全曲チャレンジのクリアタイム 分:秒)"
+    },
+    "share_card.title": {
+      "ja": "イントロドン",
+      "ko": "인트로돈",
+      "note": "結果のシェア画像の一番上の見出し (ゲーム名)。下の英字 PERFECT / RESULT は飾りで訳さない"
+    }
+  }
+}

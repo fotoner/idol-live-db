@@ -41,13 +41,17 @@ struct IntroPartyGameView: View {
             }
         }
         .toolbarColorScheme(.dark, for: .navigationBar)
-        .alert("対戦を終了しますか？", isPresented: $showExitAlert) {
-            Button("終了", role: .destructive) {
+        .alert(Text(L10n.Introdon.partyExitTitle), isPresented: $showExitAlert) {
+            Button(role: .destructive) {
                 session.stopPlayback()
                 session.reset()
                 dismiss()
+            } label: {
+                Text(L10n.Introdon.exitConfirm)
             }
-            Button("キャンセル", role: .cancel) {}
+            Button(role: .cancel) {} label: {
+                Text(L10n.Introdon.exitCancel)
+            }
         }
         .onChange(of: session.phase) { _, newValue in
             if newValue == .revealed { scheduleNext() }
@@ -90,7 +94,7 @@ struct IntroPartyGameView: View {
 
             case .buzzed:
                 Color(white: 0.06)
-                Text("相手が回答中…")
+                Text(L10n.Introdon.partyOpponentAnswering)
                     .font(ID.font(15, weight: .bold))
                     .foregroundColor(ID.t3)
                     .rotationEffect(.degrees(rotation))
@@ -131,7 +135,7 @@ struct IntroPartyGameView: View {
                 Text(player.name)
                     .font(.imasScaled( 40, weight: .black))
                     .foregroundColor(ID.menuCardDarkText)
-                Text("タップで早押し！")
+                Text(L10n.Introdon.partyBuzzPrompt)
                     .font(ID.font(14, weight: .bold))
                     .foregroundColor(ID.menuCardDarkText.opacity(0.85))
             }
@@ -140,7 +144,7 @@ struct IntroPartyGameView: View {
 
     private func answerChoices(for index: Int) -> some View {
         VStack(spacing: 10) {
-            Text("\(session.players[index].name) 回答中")
+            Text(L10n.Introdon.partyAnswering(player: session.players[index].name))
                 .font(ID.font(12, weight: .bold))
                 .foregroundColor(ID.t2)
             if let q = session.currentQuestion {
@@ -183,13 +187,13 @@ struct IntroPartyGameView: View {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.imasScaled( 28, weight: .bold))
                     .foregroundColor(ID.correct)
-                Text("正解！ +1")
+                Text(L10n.Introdon.partyCorrect)
                     .font(ID.font(16, weight: .black))
                     .foregroundColor(ID.correct)
             }
         } else if let q = session.currentQuestion {
             VStack(spacing: DS.sp2) {
-                Text("正解")
+                Text(L10n.Introdon.partyAnswerLabel)
                     .font(ID.font(11, weight: .bold))
                     .foregroundColor(ID.t3)
                 Text(q.title)
@@ -225,7 +229,7 @@ struct IntroPartyGameView: View {
                         Task { await session.nextRound() }
                     } label: {
                         let isLast = session.currentIndex + 1 >= session.totalRounds
-                        Text(isLast ? "結果を見る" : "次のラウンドへ")
+                        Text(isLast ? L10n.Introdon.actionSeeResults : L10n.Introdon.partyNextRound)
                             .font(ID.font(14, weight: .bold))
                             .foregroundColor(ID.menuCardDarkText)
                             .padding(.horizontal, 22)
@@ -236,7 +240,7 @@ struct IntroPartyGameView: View {
                     .idPress()
 
                 case .buzzed:
-                    Text("早押し成立！回答してください")
+                    Text(L10n.Introdon.partyBuzzed)
                         .font(ID.font(12, weight: .semibold))
                         .foregroundColor(ID.accentPurple)
 
@@ -292,7 +296,7 @@ struct IntroPartyGameView: View {
                     Task { await session.replayIntro() }
                 }
             }
-            Text("長押しでもう少し")
+            Text(L10n.Introdon.partyPlayHint)
                 .font(ID.font(10, weight: .semibold))
                 .foregroundColor(ID.t3)
         }
@@ -303,7 +307,7 @@ struct IntroPartyGameView: View {
             AppAnalytics.tap("intro_party.giveup")
             session.giveUp()
         } label: {
-            Text("わからない")
+            Text(L10n.Introdon.partyGiveUp)
                 .font(ID.font(12, weight: .semibold))
                 .foregroundColor(ID.t3)
                 .padding(.horizontal, 14)
@@ -319,7 +323,7 @@ struct IntroPartyGameView: View {
     private var loadingOverlay: some View {
         VStack(spacing: DS.sp5) {
             ProgressView().tint(ID.t2).scaleEffect(1.2)
-            Text("問題を生成中...")
+            Text(L10n.Introdon.loadingGenerating)
                 .font(ID.font(14, weight: .semibold))
                 .foregroundColor(ID.t2)
         }
@@ -329,11 +333,11 @@ struct IntroPartyGameView: View {
     private var finishedOverlay: some View {
         VStack(spacing: DS.sp6) {
             if let w = session.winner {
-                Text("\(session.players[w].name) の勝ち！")
+                Text(L10n.Introdon.partyWinner(player: session.players[w].name))
                     .font(.imasScaled( 28, weight: .black))
                     .foregroundColor(Color(hexString: session.players[w].colorHex))
             } else {
-                Text("引き分け")
+                Text(L10n.Introdon.partyDraw)
                     .font(.imasScaled( 28, weight: .black))
                     .foregroundColor(ID.t0)
             }
@@ -348,7 +352,7 @@ struct IntroPartyGameView: View {
                 Button {
                     Task { try? await session.generateQuestions(database: database) }
                 } label: {
-                    Text("もう一度")
+                    Text(L10n.Introdon.partyActionReplay)
                         .font(ID.font(16, weight: .bold))
                         .foregroundColor(ID.menuCardDarkText)
                         .frame(maxWidth: .infinity)
@@ -362,7 +366,7 @@ struct IntroPartyGameView: View {
                     session.reset()
                     dismiss()
                 } label: {
-                    Text("退出")
+                    Text(L10n.Introdon.partyActionLeave)
                         .font(ID.font(15, weight: .semibold))
                         .foregroundColor(ID.t2)
                         .frame(maxWidth: .infinity)

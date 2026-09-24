@@ -25,12 +25,12 @@ struct IntroGameResultView: View {
         return String(format: "%d:%02d", s / 60, s % 60)
     }
 
-    private var modeLabel: String {
-        if session.isAllSongsChallenge { return "全曲チャレンジ" }
+    private var modeLabel: LocalizedStringResource {
+        if session.isAllSongsChallenge { return L10n.Introdon.modeAllSongsName }
         switch session.settings.mode {
-        case .rush: return "ラッシュ \(Int(session.settings.rushTimeLimit))秒"
-        case .party: return "パーティ対戦"
-        case .allSongs, .normal: return "ノーマル"
+        case .rush: return L10n.Introdon.modeRushNameWithTime(seconds: Int(session.settings.rushTimeLimit))
+        case .party: return L10n.Introdon.modePartyName
+        case .allSongs, .normal: return L10n.Introdon.modeNormalName
         }
     }
 
@@ -82,7 +82,7 @@ struct IntroGameResultView: View {
                     .padding(.top, DS.sp7)
 
                 if session.isAllSongsChallenge && session.newBestTimeAchieved {
-                    banner(icon: "stopwatch.fill", text: "ベストタイム更新！", tag: "NEW TIME")
+                    banner(icon: "stopwatch.fill", text: L10n.Introdon.resultBestTime, tag: "NEW TIME")
                         .padding(.horizontal, DS.sp6)
                         .padding(.top, DS.sp4)
                 } else if session.isNewBest {
@@ -93,7 +93,7 @@ struct IntroGameResultView: View {
 
                 Spacer().frame(height: 28)
 
-                IDSectionLabel(text: "全問の結果")
+                IDSectionLabel(text: String(localized: L10n.Introdon.resultAllQuestionsHeader))
                     .padding(.horizontal, DS.sp6)
                 Spacer().frame(height: 12)
                 questionsLog
@@ -108,7 +108,7 @@ struct IntroGameResultView: View {
             }
         }
         .background(ID.menuBg.ignoresSafeArea())
-        .navigationTitle("結果")
+        .navigationTitle(L10n.Introdon.resultTitle)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .trackScreen("intro_game_result")
@@ -128,7 +128,7 @@ struct IntroGameResultView: View {
                         .padding(.bottom, 6)
                 }
 
-                Text("正答率 \(percentage)%")
+                Text(L10n.Introdon.resultAccuracy(percent: percentage))
                     .font(ID.font(16, weight: .bold))
                     .foregroundColor(ID.menuTextSecondary)
 
@@ -163,21 +163,21 @@ struct IntroGameResultView: View {
             .clipShape(IDCorner(radius: 10))
     }
 
-    private var gradeInfo: (String, Color) {
+    private var gradeInfo: (LocalizedStringResource, Color) {
         switch percentage {
-        case 100:   return ("パーフェクト! 🎵", ID.accentGold)
-        case 80...: return ("すごい！",         ID.correct)
-        case 60...: return ("なかなか！",        ID.accentBlue)
-        case 40...: return ("もう少し！",        ID.warning)
-        default:    return ("練習あるのみ！",    ID.incorrect)
+        case 100:   return (L10n.Introdon.gradePerfect,  ID.accentGold)
+        case 80...: return (L10n.Introdon.gradeGreat,    ID.correct)
+        case 60...: return (L10n.Introdon.gradeGood,     ID.accentBlue)
+        case 40...: return (L10n.Introdon.gradeAlmost,   ID.warning)
+        default:    return (L10n.Introdon.gradePractice, ID.incorrect)
         }
     }
 
     private var bestBanner: some View {
-        banner(icon: "star.fill", text: "ベストスコア更新！", tag: "NEW BEST")
+        banner(icon: "star.fill", text: L10n.Introdon.resultBestScore, tag: "NEW BEST")
     }
 
-    private func banner(icon: String, text: String, tag: String) -> some View {
+    private func banner(icon: String, text: LocalizedStringResource, tag: String) -> some View {
         HStack(spacing: 10) {
             Image(systemName: icon)
                 .foregroundColor(ID.accentGold)
@@ -237,7 +237,7 @@ struct IntroGameResultView: View {
                     .lineLimit(1)
 
                 if !record.correct {
-                    Text(record.selectedTitle.map { "回答: \($0)" } ?? "スキップ")
+                    Text(record.selectedTitle.map { L10n.Introdon.resultRecordAnswer(title: $0) } ?? L10n.Introdon.resultRecordSkipped)
                         .font(.imasCaption2)
                         .minimumScaleFactor(0.8)
                         .foregroundColor(ID.menuTextSecondary)
@@ -260,7 +260,7 @@ struct IntroGameResultView: View {
                 HStack(spacing: DS.sp3) {
                     Image(systemName: "square.and.arrow.up")
                         .font(.imasScaled( 15, weight: .semibold))
-                    Text("結果を画像でシェア")
+                    Text(L10n.Introdon.resultActionShareImage)
                         .font(ID.font(16, weight: .bold))
                 }
                 .foregroundColor(ID.menuText)
@@ -286,7 +286,7 @@ struct IntroGameResultView: View {
                 HStack(spacing: DS.sp3) {
                     Image(systemName: "arrow.counterclockwise")
                         .font(.imasScaled( 15, weight: .semibold))
-                    Text("もう一度あそぶ")
+                    Text(L10n.Introdon.resultActionReplay)
                         .font(ID.font(17, weight: .bold))
                 }
                 .foregroundColor(ID.menuCardDarkText)
@@ -303,7 +303,7 @@ struct IntroGameResultView: View {
                 // replay と同じ理由でここでも reset しない (下の画面が空表示に化ける)。
                 onHome()
             } label: {
-                Text("ホームに戻る")
+                Text(L10n.Introdon.resultActionHome)
                     .font(ID.font(14, weight: .semibold))
                     .foregroundColor(ID.menuTextSecondary)
                     .frame(maxWidth: .infinity)

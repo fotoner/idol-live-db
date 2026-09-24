@@ -1,0 +1,2176 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "introdon.action.see_results" : {
+      "comment" : "最後の問題 (パーティ対戦は最後のラウンド) の答え合わせのあと、結果へ進むボタン (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "結果を見る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "결과 보기"
+          }
+        }
+      }
+    },
+    "introdon.answer_mode.choices.caption" : {
+      "comment" : "回答方式「4択」のボタンの下の説明 (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タップで回答"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "탭해서 답하기"
+          }
+        }
+      }
+    },
+    "introdon.answer_mode.choices.name" : {
+      "comment" : "回答方式のボタン。4 つの曲名から選ぶ (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4択"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "4지선다"
+          }
+        }
+      }
+    },
+    "introdon.answer_mode.voice.caption" : {
+      "comment" : "回答方式「音声判定」のボタンの下の説明 (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "声で曲名を回答"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "목소리로 곡 제목 답하기"
+          }
+        }
+      }
+    },
+    "introdon.answer_mode.voice.name" : {
+      "comment" : "回答方式のボタン。曲名を声で言って判定する (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音声判定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "음성 판정"
+          }
+        }
+      }
+    },
+    "introdon.auth.action.allow" : {
+      "comment" : "Apple Music の利用許可を求めるボタン (ホーム・設定画面の警告カード) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Music を許可する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Apple Music 허용"
+          }
+        }
+      }
+    },
+    "introdon.auth.warning" : {
+      "comment" : "Apple Music の利用を許可していないときの警告 (ホーム・設定画面) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Music が未認証です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Apple Music 접근이 허용되지 않았어요"
+          }
+        }
+      }
+    },
+    "introdon.elapsed.label" : {
+      "comment" : "イントロを流した秒数の表示 (再生 1.2秒)。title は elapsed.title、seconds は小数 1 桁に書式済みの数字 (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@秒"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ %2$@초"
+          }
+        }
+      }
+    },
+    "introdon.elapsed.title" : {
+      "comment" : "イントロを流した秒数の表示の前に付く見出し (elapsed.label の title に入る) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "재생"
+          }
+        }
+      }
+    },
+    "introdon.error.generic" : {
+      "comment" : "問題の生成に失敗したとき (設定画面)。message は OS やサーバが返したエラーの説明 (訳さない) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エラー: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오류: %1$@"
+          }
+        }
+      }
+    },
+    "introdon.error.no_songs" : {
+      "comment" : "出題できる曲が足りずゲームを始められないとき (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "対象の曲が見つかりませんでした。ブランドを増やしてお試しください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "대상 곡을 찾지 못했어요. 브랜드를 더 선택해서 다시 시도해 주세요."
+          }
+        }
+      }
+    },
+    "introdon.exit.cancel" : {
+      "comment" : "ゲームを終了するかの確認ダイアログの、やめるボタン (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャンセル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "취소"
+          }
+        }
+      }
+    },
+    "introdon.exit.confirm" : {
+      "comment" : "ゲームを終了するかの確認ダイアログの、終了するボタン (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終了"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "종료"
+          }
+        }
+      }
+    },
+    "introdon.game.buzz.hint" : {
+      "comment" : "中央の大きな「!」ボタン (早押し) の下の案内 (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "わかったらタップ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정답을 알면 탭하세요"
+          }
+        }
+      }
+    },
+    "introdon.game.control.playing" : {
+      "comment" : "イントロの続きを流すボタンの下のラベル (流している間) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生中"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "재생 중"
+          }
+        }
+      }
+    },
+    "introdon.game.control.replay" : {
+      "comment" : "イントロを頭から流し直すボタンの下のラベル (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もう一度"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다시 듣기"
+          }
+        }
+      }
+    },
+    "introdon.game.control.resume" : {
+      "comment" : "イントロの続きを流すボタンの下のラベル (止まっているとき)。止めた位置から続きを流す (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "続きから"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이어서"
+          }
+        }
+      }
+    },
+    "introdon.game.control.skip" : {
+      "comment" : "今の問題を飛ばして次の曲へ進むボタンの下のラベル (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次の曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다음 곡"
+          }
+        }
+      }
+    },
+    "introdon.game.exit.title" : {
+      "comment" : "ゲーム中に × を押したときの確認ダイアログの見出し (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゲームを終了しますか？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "게임을 끝낼까요?"
+          }
+        }
+      }
+    },
+    "introdon.game.next.question" : {
+      "comment" : "答え合わせのあと、次の問題へ進むボタン (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次の問題へ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다음 문제로"
+          }
+        }
+      }
+    },
+    "introdon.game.prompt.answer_choice" : {
+      "comment" : "回答の番になったときの案内 (4択のモード) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲名を選んでください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 제목을 골라 주세요"
+          }
+        }
+      }
+    },
+    "introdon.game.prompt.answer_voice" : {
+      "comment" : "回答の番になったときの案内 (音声で答えるモード) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲名を声で答えてください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 제목을 목소리로 말해 주세요"
+          }
+        }
+      }
+    },
+    "introdon.game.prompt.guess" : {
+      "comment" : "ラッシュ・全曲チャレンジで曲を流している間の問いかけ (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲名は？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 제목은?"
+          }
+        }
+      }
+    },
+    "introdon.game.speech_denied.message" : {
+      "comment" : "マイク・音声認識が許可されていないときのアラートの本文 (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定アプリから「マイク」と「音声認識」の権限を許可してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "설정 앱에서 “마이크”와 “음성 인식” 권한을 허용해 주세요."
+          }
+        }
+      }
+    },
+    "introdon.game.speech_denied.ok" : {
+      "comment" : "マイク・音声認識が許可されていないときのアラートの閉じるボタン (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "확인"
+          }
+        }
+      }
+    },
+    "introdon.game.speech_denied.title" : {
+      "comment" : "音声で答えるモードでマイク・音声認識が許可されていないときのアラートの見出し (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音声認識を許可してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "음성 인식을 허용해 주세요"
+          }
+        }
+      }
+    },
+    "introdon.game.voice.denied" : {
+      "comment" : "音声で答える欄の案内。マイク・音声認識が拒否されているとき (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定アプリでマイクと音声認識を許可してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "설정 앱에서 마이크와 음성 인식을 허용해 주세요"
+          }
+        }
+      }
+    },
+    "introdon.game.voice.listening" : {
+      "comment" : "音声で答える欄の案内。聞き取り中でまだ何も認識していないとき (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聴取中… 曲名を声で答えてください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "듣는 중… 곡 제목을 말해 주세요"
+          }
+        }
+      }
+    },
+    "introdon.game.voice.recognized" : {
+      "comment" : "音声で答える欄に出す、聞き取った言葉。text は音声認識の結果 (訳さない) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@”"
+          }
+        }
+      }
+    },
+    "introdon.game.voice.start" : {
+      "comment" : "マイクのボタン。聞き取りを始める (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイクで回答"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이크로 답하기"
+          }
+        }
+      }
+    },
+    "introdon.game.voice.stop" : {
+      "comment" : "マイクのボタン。聞き取りを止める (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聴取を停止"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "듣기 중지"
+          }
+        }
+      }
+    },
+    "introdon.game.voice.tap_to_answer" : {
+      "comment" : "音声で答える欄の案内。聞き取りを止めているとき (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイクをタップして回答"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이크를 탭해서 답해 주세요"
+          }
+        }
+      }
+    },
+    "introdon.game.voice.tap_to_speak" : {
+      "comment" : "音声で答える欄の案内。まだマイクの許可を聞いていないとき (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイクをタップして声で回答"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이크를 탭하고 목소리로 답해 주세요"
+          }
+        }
+      }
+    },
+    "introdon.grade.almost" : {
+      "comment" : "成績 (正答率 40% 以上)。結果画面とシェア画像 (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もう少し！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "조금만 더!"
+          }
+        }
+      }
+    },
+    "introdon.grade.good" : {
+      "comment" : "成績 (正答率 60% 以上)。結果画面とシェア画像 (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "なかなか！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "꽤 잘했어요!"
+          }
+        }
+      }
+    },
+    "introdon.grade.great" : {
+      "comment" : "成績 (正答率 80% 以上)。結果画面とシェア画像 (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すごい！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "대단해요!"
+          }
+        }
+      }
+    },
+    "introdon.grade.perfect" : {
+      "comment" : "結果画面の成績バッジ (正答率 100%)。! は半角。シェア画像は grade.perfect_card (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パーフェクト! 🎵"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "퍼펙트! 🎵"
+          }
+        }
+      }
+    },
+    "introdon.grade.perfect_card" : {
+      "comment" : "結果のシェア画像の成績 (正答率 100%)。結果画面の grade.perfect と ja が違う (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パーフェクト！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "퍼펙트!"
+          }
+        }
+      }
+    },
+    "introdon.grade.practice" : {
+      "comment" : "成績 (正答率 40% 未満)。結果画面とシェア画像 (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "練習あるのみ！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "연습만이 살길!"
+          }
+        }
+      }
+    },
+    "introdon.home.action.start" : {
+      "comment" : "ホームの主ボタン。押すと設定画面へ進む (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゲームをはじめる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "게임 시작"
+          }
+        }
+      }
+    },
+    "introdon.home.battle.header" : {
+      "comment" : "ホームの節の見出し。姉妹アプリ (対戦できる本家アプリ) の案内カードの上 (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "対戦モード"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "대전 모드"
+          }
+        }
+      }
+    },
+    "introdon.home.battle.message" : {
+      "comment" : "姉妹アプリの案内カードの説明。「ローカル・オンライン対戦」の途中で改行している (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "姉妹アプリ「イントロドン」でローカル\n・オンライン対戦ができます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "자매 앱 “인트로돈”에서\n로컬·온라인 대전을 할 수 있어요"
+          }
+        }
+      }
+    },
+    "introdon.home.battle.open_store" : {
+      "comment" : "姉妹アプリの案内カードのリンク。App Store の姉妹アプリのページを開く (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Store で開く"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "App Store에서 열기"
+          }
+        }
+      }
+    },
+    "introdon.home.battle.title" : {
+      "comment" : "姉妹アプリの案内カードの見出し。上の小さな英字 BATTLE MODE は飾りで訳さない (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "友達と対戦したい方へ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "친구와 대전하고 싶다면"
+          }
+        }
+      }
+    },
+    "introdon.home.hero.caption_ios" : {
+      "comment" : "ホームの先頭カードの説明 (iOS)。iOS は Apple Music でイントロを流す。Android の home.hero.caption_android と ja が違う (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Music のイントロを聴いて\n曲名をいち早く当てよう"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Apple Music 인트로를 듣고\n누구보다 빨리 곡 제목을 맞혀 보세요"
+          }
+        }
+      }
+    },
+    "introdon.home.hero.title" : {
+      "comment" : "ホーム画面の先頭カードの大きな見出し (ゲーム名)。上の小さな英字 INTRO DON は飾りで訳さない (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イントロドン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "인트로돈"
+          }
+        }
+      }
+    },
+    "introdon.home.title" : {
+      "comment" : "イントロドン (イントロ当てゲーム) のホーム画面の上のバーのタイトル (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イントロドン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "인트로돈"
+          }
+        }
+      }
+    },
+    "introdon.loading.generating" : {
+      "comment" : "問題を作っている間の表示 (設定画面のボタン・ゲーム画面・パーティ対戦画面) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "問題を生成中..."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "문제를 만드는 중..."
+          }
+        }
+      }
+    },
+    "introdon.mode.all_songs.caption" : {
+      "comment" : "モード「全曲チャレンジ」の説明 (設定画面のモードの行) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全曲出し切るまで・タイムと正答率を競う"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모든 곡이 나올 때까지 · 시간과 정답률 겨루기"
+          }
+        }
+      }
+    },
+    "introdon.mode.all_songs.name" : {
+      "comment" : "ゲームのモード名。出題範囲の全曲を出し切るまで挑戦し、タイムを競う (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全曲チャレンジ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전곡 챌린지"
+          }
+        }
+      }
+    },
+    "introdon.mode.normal.caption" : {
+      "comment" : "モード「ノーマル」の説明 (設定画面のモードの行) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "決めた問題数で挑戦"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정한 문제 수만큼 도전"
+          }
+        }
+      }
+    },
+    "introdon.mode.normal.name" : {
+      "comment" : "ゲームのモード名。決めた問題数で挑戦する (設定画面・結果のシェア画像) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ノーマル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "노멀"
+          }
+        }
+      }
+    },
+    "introdon.mode.party.caption" : {
+      "comment" : "モード「パーティ対戦」の説明 (設定画面のモードの行) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1台2人・分割画面で早押し"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "기기 1대에 2명 · 화면을 나눠 먼저 누르기"
+          }
+        }
+      }
+    },
+    "introdon.mode.party.name" : {
+      "comment" : "ゲームのモード名。1 台の端末を 2 人で使い、画面を上下に分けて早押しで対戦する (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パーティ対戦"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "파티 대전"
+          }
+        }
+      }
+    },
+    "introdon.mode.rush.caption" : {
+      "comment" : "モード「ラッシュ」の説明 (設定画面のモードの行) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "制限時間内に何問正解できるか"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "제한 시간 안에 정답을 몇 개 맞힐 수 있을까"
+          }
+        }
+      }
+    },
+    "introdon.mode.rush.name" : {
+      "comment" : "ゲームのモード名。制限時間内に何問正解できるか (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ラッシュ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "러시"
+          }
+        }
+      }
+    },
+    "introdon.mode.rush.name_with_time" : {
+      "comment" : "結果のシェア画像に出すモード名。seconds は制限時間 (30・60・120) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ラッシュ %1$@秒"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "러시 %1$@초"
+          }
+        }
+      }
+    },
+    "introdon.party.action.leave" : {
+      "comment" : "パーティ対戦の結果のボタン。設定画面へ戻る (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "나가기"
+          }
+        }
+      }
+    },
+    "introdon.party.action.replay" : {
+      "comment" : "パーティ対戦の結果のボタン。同じ設定でもう一度対戦する (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もう一度"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다시 하기"
+          }
+        }
+      }
+    },
+    "introdon.party.answer.label" : {
+      "comment" : "誰も正解しなかったときに出す、正解の曲名の上の小さな見出し (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正解"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정답"
+          }
+        }
+      }
+    },
+    "introdon.party.answering" : {
+      "comment" : "早押しした人の半分の画面の上。player はプレイヤー名 (1P・2P) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ 回答中"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 답하는 중"
+          }
+        }
+      }
+    },
+    "introdon.party.buzz.prompt" : {
+      "comment" : "パーティ対戦の各プレイヤーの半分の画面。タップすると早押しになる (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タップで早押し！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "먼저 탭하세요!"
+          }
+        }
+      }
+    },
+    "introdon.party.buzzed" : {
+      "comment" : "中央の帯。誰かが早押ししたとき (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "早押し成立！回答してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "먼저 눌렀어요! 답해 주세요"
+          }
+        }
+      }
+    },
+    "introdon.party.correct" : {
+      "comment" : "正解した人の半分の画面。1 点入る (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正解！ +1"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정답! +1"
+          }
+        }
+      }
+    },
+    "introdon.party.draw" : {
+      "comment" : "パーティ対戦の結果。同点のとき (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "引き分け"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "무승부"
+          }
+        }
+      }
+    },
+    "introdon.party.exit.title" : {
+      "comment" : "パーティ対戦中に × を押したときの確認ダイアログの見出し (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "対戦を終了しますか？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "대전을 끝낼까요?"
+          }
+        }
+      }
+    },
+    "introdon.party.give_up" : {
+      "comment" : "中央の帯のボタン。2 人とも分からないときに答えを見る (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "わからない"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모르겠어요"
+          }
+        }
+      }
+    },
+    "introdon.party.next.round" : {
+      "comment" : "答え合わせのあと、次のラウンドへ進むボタン (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次のラウンドへ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다음 라운드로"
+          }
+        }
+      }
+    },
+    "introdon.party.opponent_answering" : {
+      "comment" : "パーティ対戦で相手が先に押したとき、押されなかった側に出す (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "相手が回答中…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "상대가 답하는 중…"
+          }
+        }
+      }
+    },
+    "introdon.party.play.hint" : {
+      "comment" : "中央の帯の再生ボタンの横の案内 (iOS)。長押しの間イントロを流し続ける。Android の party.play.hint_android と ja が違う (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長押しでもう少し"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "길게 눌러 더 듣기"
+          }
+        }
+      }
+    },
+    "introdon.party.winner" : {
+      "comment" : "パーティ対戦の結果。player は勝ったプレイヤー名 (1P・2P) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ の勝ち！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 승리!"
+          }
+        }
+      }
+    },
+    "introdon.playback.full.caption" : {
+      "comment" : "再生方式「フル再生」の説明。Apple Music の購読が必要 (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "実イントロ(要サブスク)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "실제 인트로 (구독 필요)"
+          }
+        }
+      }
+    },
+    "introdon.playback.full.name" : {
+      "comment" : "再生方式のボタン。Apple Music のカタログで曲の頭からイントロを流す (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フル再生"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체 재생"
+          }
+        }
+      }
+    },
+    "introdon.playback.preview.caption" : {
+      "comment" : "再生方式「プレビュー」の説明 (30 秒の試聴で軽快に進む) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30秒・サクサク"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "30초 · 가볍게"
+          }
+        }
+      }
+    },
+    "introdon.playback.preview.name" : {
+      "comment" : "再生方式のボタン。30 秒の試聴音源で流す (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プレビュー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "미리 듣기"
+          }
+        }
+      }
+    },
+    "introdon.result.accuracy" : {
+      "comment" : "結果画面の大きな点数の下。percent は 0〜100 の整数 (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正答率 %1$@%%"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정답률 %1$@%%"
+          }
+        }
+      }
+    },
+    "introdon.result.action.home" : {
+      "comment" : "結果画面のボタン。イントロドンのホームへ戻る (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホームに戻る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "홈으로 돌아가기"
+          }
+        }
+      }
+    },
+    "introdon.result.action.replay" : {
+      "comment" : "結果画面のボタン。設定画面へ戻ってもう一度遊ぶ (iOS)。Android の result.action.replay_android と ja が違う (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もう一度あそぶ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다시 하기"
+          }
+        }
+      }
+    },
+    "introdon.result.action.share_image" : {
+      "comment" : "結果画面のボタン。結果のカードを画像にして共有する (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "結果を画像でシェア"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "결과를 이미지로 공유"
+          }
+        }
+      }
+    },
+    "introdon.result.all_questions.header" : {
+      "comment" : "結果画面の節の見出し。1 問ずつの正誤の一覧 (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全問の結果"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체 문제 결과"
+          }
+        }
+      }
+    },
+    "introdon.result.best_score" : {
+      "comment" : "これまでより多く正解したときの帯。右の英字 NEW BEST は飾りで訳さない (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ベストスコア更新！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최고 점수 갱신!"
+          }
+        }
+      }
+    },
+    "introdon.result.best_time" : {
+      "comment" : "全曲チャレンジでこれまでより速く終えたときの帯。右の英字 NEW TIME は飾りで訳さない (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ベストタイム更新！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최단 기록 갱신!"
+          }
+        }
+      }
+    },
+    "introdon.result.record.answer" : {
+      "comment" : "1 問ずつの結果の、間違えた問題の下に出す自分の答え。title は選んだ曲名 (訳さない) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回答: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "내 답: %1$@"
+          }
+        }
+      }
+    },
+    "introdon.result.record.skipped" : {
+      "comment" : "1 問ずつの結果の、答えずに飛ばした問題の下の表示 (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スキップ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "건너뜀"
+          }
+        }
+      }
+    },
+    "introdon.result.title" : {
+      "comment" : "結果画面の上のバーのタイトル (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "結果"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "결과"
+          }
+        }
+      }
+    },
+    "introdon.setup.action.start" : {
+      "comment" : "設定画面の一番下の、ゲームを始めるボタン (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スタート"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "시작"
+          }
+        }
+      }
+    },
+    "introdon.setup.advanced.header" : {
+      "comment" : "設定画面の折りたたみの見出し (再生方式・難易度) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細設定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "상세 설정"
+          }
+        }
+      }
+    },
+    "introdon.setup.all_songs.note" : {
+      "comment" : "全曲チャレンジを選んだときの説明 (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択した出題範囲の全曲を出し切るまで挑戦。タイムと正答率を競います。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "선택한 출제 범위의 모든 곡이 나올 때까지 도전해요. 시간과 정답률을 겨뤄요."
+          }
+        }
+      }
+    },
+    "introdon.setup.answer_mode.header" : {
+      "comment" : "設定画面の節の見出し (ノーマルのとき)。4択か音声で答えるか (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回答方式"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "답하는 방식"
+          }
+        }
+      }
+    },
+    "introdon.setup.brand.all" : {
+      "comment" : "ブランドの選択の先頭の「すべてのブランド」のアイコンの下のラベル (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全て"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "introdon.setup.brand.all_icon" : {
+      "comment" : "「すべてのブランド」の丸いアイコンの中に書く文字 (ブランドのアイコンの略称と同じ位置)。1〜2 文字が望ましい (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "introdon.setup.count.header" : {
+      "comment" : "設定画面の節の見出し。何問出すか (5・10・20 問) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "問題数"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "문제 수"
+          }
+        }
+      }
+    },
+    "introdon.setup.duration.header" : {
+      "comment" : "設定の見出し。イントロを何秒流すか (短いほど難しい) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "難易度 (イントロ再生時間)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "난이도 (인트로 재생 시간)"
+          }
+        }
+      }
+    },
+    "introdon.setup.duration.play" : {
+      "comment" : "イントロ再生時間のボタン (2秒・5秒・10秒) の下の小さなラベル (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "재생"
+          }
+        }
+      }
+    },
+    "introdon.setup.duration.slider_label" : {
+      "comment" : "イントロ再生時間のスライダーの上のラベル (1 秒以上のとき) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生時間"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "재생 시간"
+          }
+        }
+      }
+    },
+    "introdon.setup.duration.ultra" : {
+      "comment" : "イントロ再生時間が 1 秒未満のときの呼び名。0.2秒 のボタンの下と、スライダーの上のラベルに出す (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "超イントロ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "초단 인트로"
+          }
+        }
+      }
+    },
+    "introdon.setup.mode.header" : {
+      "comment" : "設定画面の節の見出し。ゲームのモード (ノーマル・ラッシュ…) を選ぶ (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "モード"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모드"
+          }
+        }
+      }
+    },
+    "introdon.setup.playback.header" : {
+      "comment" : "詳細設定の中の見出し。フル再生かプレビューか (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生方式"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "재생 방식"
+          }
+        }
+      }
+    },
+    "introdon.setup.range.change" : {
+      "comment" : "曲一覧で絞り込んだ範囲を出題中のとき、曲一覧を開き直して範囲を選び直すボタン (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出題範囲を変更"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출제 범위 변경"
+          }
+        }
+      }
+    },
+    "introdon.setup.range.header" : {
+      "comment" : "設定画面の節の見出し。どの曲から出題するか (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出題範囲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출제 범위"
+          }
+        }
+      }
+    },
+    "introdon.setup.range.hint" : {
+      "comment" : "「出題範囲」の見出しの右の補足。下のブランドのアイコンで出題する曲を絞る (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランドで絞る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드로 필터링"
+          }
+        }
+      }
+    },
+    "introdon.setup.range.preset_default" : {
+      "comment" : "曲一覧で絞り込んだ範囲のカードの見出し。絞り込みの説明 (曲一覧が作る) が無いときに出す (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲一覧の絞り込み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 목록 필터"
+          }
+        }
+      }
+    },
+    "introdon.setup.range.refine" : {
+      "comment" : "曲一覧を開いてタグ・担当・検索で出題する曲を絞り込むボタン (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ・担当・検索で絞り込んで出題"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그·담당·검색으로 필터링해서 출제"
+          }
+        }
+      }
+    },
+    "introdon.setup.range.song_count" : {
+      "comment" : "曲一覧で絞り込んだ範囲のカードの説明。count は出題できる曲の数。1000 以上は桁区切りが付く (1,234曲から出題) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg曲から出題"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg곡에서 출제"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "introdon.setup.rounds.header" : {
+      "comment" : "設定画面の節の見出し (パーティ対戦のとき)。何ラウンド戦うか (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ラウンド数"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라운드 수"
+          }
+        }
+      }
+    },
+    "introdon.setup.rush_time.header" : {
+      "comment" : "設定画面の節の見出し (ラッシュのとき)。30・60・120 秒から選ぶ (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "制限時間"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "제한 시간"
+          }
+        }
+      }
+    },
+    "introdon.setup.seconds" : {
+      "comment" : "イントロ再生時間の秒数 (0.2秒・2秒・5.0秒 など)。seconds は書式済みの数字 (小数を含む) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@秒"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@초"
+          }
+        }
+      }
+    },
+    "introdon.setup.title" : {
+      "comment" : "ゲームの設定画面の上のバーのタイトル (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "설정"
+          }
+        }
+      }
+    },
+    "introdon.setup.unit.questions" : {
+      "comment" : "問題数のボタンの数字 (5・10・20) の下に出す単位 (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "問"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "문제"
+          }
+        }
+      }
+    },
+    "introdon.setup.unit.seconds" : {
+      "comment" : "制限時間のボタンの数字 (30・60・120) の下に出す単位 (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "秒"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "초"
+          }
+        }
+      }
+    },
+    "introdon.share_card.footer.lead" : {
+      "comment" : "結果のシェア画像の一番下の宣伝の 1 行目。本家アプリ = 姉妹アプリ「イントロクイズ」 (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もっと遊ぶなら 本家アプリ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "더 즐기려면 원조 앱"
+          }
+        }
+      }
+    },
+    "introdon.share_card.footer.store_ios" : {
+      "comment" : "結果のシェア画像の宣伝の 2 行目 (iOS)。「イントロクイズ」はストアでの本家アプリの名前 (固有名詞。検索語なので訳さない) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Storeで「イントロクイズ」"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "App Store에서 “イントロクイズ”"
+          }
+        }
+      }
+    },
+    "introdon.share_card.more_songs" : {
+      "comment" : "結果のシェア画像の曲別の内訳で、載せきれなかった曲の数。1000 以上は桁区切りが付く (ほか 1,234曲) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "ほか %arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "외 %arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "introdon.share_card.stat.accuracy" : {
+      "comment" : "結果のシェア画像の数字の下のラベル (正答率 %) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正解率"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정답률"
+          }
+        }
+      }
+    },
+    "introdon.share_card.stat.max_combo" : {
+      "comment" : "結果のシェア画像の数字の下のラベル (連続正解の最大数 ×N) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最大コンボ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최대 콤보"
+          }
+        }
+      }
+    },
+    "introdon.share_card.stat.time" : {
+      "comment" : "結果のシェア画像の数字の下のラベル (全曲チャレンジのクリアタイム 分:秒) (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイム"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "시간"
+          }
+        }
+      }
+    },
+    "introdon.share_card.title" : {
+      "comment" : "結果のシェア画像の一番上の見出し (ゲーム名)。下の英字 PERFECT / RESULT は飾りで訳さない (i18n/catalog/introdon.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イントロドン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "인트로돈"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -1,6 +1,8 @@
 package com.fugaif.imaslivedb.ui.introdon
 
 import com.fugaif.imaslivedb.data.model.Song
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlin.random.Random
 import uniffi.imas_core.IntroQuizSongRef
 import uniffi.imas_core.IntroSessionKind
@@ -9,12 +11,16 @@ import uniffi.imas_core.introQuizChoicesBatch
 /**
  * イントロドンのゲームモード。iOS IntroGameMode の移植。
  * Android には音声判定 (SpeechRecognizer 基盤なし) が無いため回答方式は常に 4択。
+ * ルートの引数には name を渡す (表示名は保存・比較に使わない)。
+ *
+ * @property label モード名 (設定画面の行の見出し)。
+ * @property caption モードの説明 (設定画面の行の 2 行目)。
  */
-enum class IntroDonMode(val label: String, val icon: String) {
-    NORMAL("ノーマル", "決めた問題数で挑戦"),
-    RUSH("ラッシュ", "制限時間内に何問正解できるか"),
-    ALL_SONGS("全曲チャレンジ", "全曲出し切るまで・タイムと正答率を競う"),
-    PARTY("パーティ対戦", "1台2人・分割画面で早押し")
+enum class IntroDonMode(val label: DisplayText, val caption: DisplayText) {
+    NORMAL(L10n.Introdon.modeNormalName, L10n.Introdon.modeNormalCaption),
+    RUSH(L10n.Introdon.modeRushName, L10n.Introdon.modeRushCaption),
+    ALL_SONGS(L10n.Introdon.modeAllSongsName, L10n.Introdon.modeAllSongsCaption),
+    PARTY(L10n.Introdon.modePartyName, L10n.Introdon.modePartyCaption)
 }
 
 /** 高速形式 (押すまで流す・選択肢常時・即次へ)。Rush と 全曲チャレンジ。 */

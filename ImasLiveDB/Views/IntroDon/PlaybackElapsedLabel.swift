@@ -12,8 +12,8 @@ import SwiftUI
 /// 呼び出し側は phase 分岐で出し入れせず常にツリーに置き、opacity 等で見せ隠しすること
 /// (取り外すと @State がリセットされる)。
 struct PlaybackElapsedLabel: View {
-    /// ラベル見出し ("再生" 等)。
-    var title: String = "再生"
+    /// ラベル見出し (既定は elapsed.title の「再生」)。
+    var title: LocalizedStringResource = L10n.Introdon.elapsedTitle
     /// 先頭アイコン。
     var systemImage: String = "speaker.wave.2.fill"
     /// 今まさに計測中か。`isPlaying && !isLoading` で渡す想定。
@@ -30,7 +30,8 @@ struct PlaybackElapsedLabel: View {
 
     var body: some View {
         TimelineView(.animation(paused: runStartedAt == nil)) { ctx in
-            Label(String(format: "\(title) %.1f秒", displayed(at: ctx.date)), systemImage: systemImage)
+            Label(L10n.Introdon.elapsedLabel(title: title, seconds: String(format: "%.1f", displayed(at: ctx.date))),
+                  systemImage: systemImage)
                 .font(font)
                 .foregroundStyle(color)
                 .monospacedDigit()

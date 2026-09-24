@@ -44,7 +44,8 @@ struct IntroShareLine: Identifiable {
 
 /// 結果シェアカード (1080×1350)。見出し/大スコア/グレード/メトリクス/曲別内訳 + 本家宣伝。
 struct IntroResultShareCard: View {
-    let modeLabel: String
+    /// モード名 (mode.*.name / mode.rush.name_with_time)。
+    let modeLabel: LocalizedStringResource
     let score: Int
     let total: Int
     let percentage: Int
@@ -54,13 +55,13 @@ struct IntroResultShareCard: View {
 
     private static let maxRows = 10
     private var isPerfect: Bool { percentage >= 100 }
-    private var grade: (String, Color) {
+    private var grade: (LocalizedStringResource, Color) {
         switch percentage {
-        case 100:   return ("パーフェクト！", ID.accentGold)
-        case 80...: return ("すごい！", ID.correct)
-        case 60...: return ("なかなか！", ID.accentBlue)
-        case 40...: return ("もう少し！", ID.warning)
-        default:    return ("練習あるのみ！", ID.accentPink)
+        case 100:   return (L10n.Introdon.gradePerfectCard, ID.accentGold)
+        case 80...: return (L10n.Introdon.gradeGreat, ID.correct)
+        case 60...: return (L10n.Introdon.gradeGood, ID.accentBlue)
+        case 40...: return (L10n.Introdon.gradeAlmost, ID.warning)
+        default:    return (L10n.Introdon.gradePractice, ID.accentPink)
         }
     }
 
@@ -68,7 +69,7 @@ struct IntroResultShareCard: View {
         VStack(spacing: 0) {
             // ヘッダ
             VStack(spacing: DS.sp4) {
-                Text("イントロドン")
+                Text(L10n.Introdon.shareCardTitle)
                     .font(.system(size: 52, weight: .black, design: .rounded))
                     .foregroundColor(ID.t0)
                 Text(isPerfect ? "PERFECT" : "RESULT")
@@ -105,9 +106,9 @@ struct IntroResultShareCard: View {
 
             // メトリクス行
             HStack(spacing: 0) {
-                statItem("正解率", "\(percentage)%")
-                if let timeText { divider; statItem("タイム", timeText) }
-                if bestCombo >= 2 { divider; statItem("最大コンボ", "×\(bestCombo)") }
+                statItem(L10n.Introdon.shareCardStatAccuracy, "\(percentage)%")
+                if let timeText { divider; statItem(L10n.Introdon.shareCardStatTime, timeText) }
+                if bestCombo >= 2 { divider; statItem(L10n.Introdon.shareCardStatMaxCombo, "×\(bestCombo)") }
             }
             .padding(.vertical, 28)
             .frame(maxWidth: .infinity)
@@ -142,7 +143,7 @@ struct IntroResultShareCard: View {
         Rectangle().fill(ID.t3.opacity(0.25)).frame(width: 1, height: 56)
     }
 
-    private func statItem(_ label: String, _ value: String) -> some View {
+    private func statItem(_ label: LocalizedStringResource, _ value: String) -> some View {
         VStack(spacing: DS.sp3) {
             Text(value)
                 .font(.system(size: 52, weight: .black, design: .rounded))
@@ -172,7 +173,7 @@ struct IntroResultShareCard: View {
                 }
             }
             if extra > 0 {
-                Text("ほか \(extra)曲")
+                Text(L10n.Introdon.shareCardMoreSongs(count: extra))
                     .font(.system(size: 22, weight: .semibold))
                     .foregroundColor(ID.t2)
                     .frame(maxWidth: .infinity)
@@ -188,10 +189,10 @@ struct IntroResultShareCard: View {
 
     private var footer: some View {
         VStack(spacing: DS.sp3) {
-            Text("もっと遊ぶなら 本家アプリ")
+            Text(L10n.Introdon.shareCardFooterLead)
                 .font(.system(size: 22, weight: .medium))
                 .foregroundColor(ID.t2)
-            Text("App Storeで「イントロクイズ」")
+            Text(L10n.Introdon.shareCardFooterStoreIos)
                 .font(.system(size: 34, weight: .black))
                 .foregroundColor(ID.t0)
         }

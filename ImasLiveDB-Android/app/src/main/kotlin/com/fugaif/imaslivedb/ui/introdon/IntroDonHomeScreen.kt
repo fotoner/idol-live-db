@@ -29,6 +29,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 
 /**
@@ -47,8 +49,10 @@ fun IntroDonHomeScreen(onBack: () -> Unit, onNavigateToSetup: () -> Unit = {}) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("イントロドン", fontWeight = FontWeight.Bold) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "戻る") } }
+                title = { Text(L10n.Introdon.homeTitle.resolve(), fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, L10n.Common.actionBack.resolve()) }
+                }
             )
         }
     ) { padding ->
@@ -57,7 +61,7 @@ fun IntroDonHomeScreen(onBack: () -> Unit, onNavigateToSetup: () -> Unit = {}) {
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             heroCard(accent)
-            IntroDonActionButton(title = "ゲームをはじめる") { onNavigateToSetup() }
+            IntroDonActionButton(title = L10n.Introdon.homeActionStart.resolve()) { onNavigateToSetup() }
             previewNoticeCard()
         }
     }
@@ -76,11 +80,11 @@ private fun heroCard(accent: androidx.compose.ui.graphics.Color) {
             ) { Icon(Icons.Filled.MusicNote, null, tint = accent, modifier = Modifier.size(28.dp)) }
             Column {
                 Text("INTRO DON", fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp, color = DS.ink3)
-                Text("イントロドン", fontSize = 26.sp, fontWeight = FontWeight.Black, color = DS.ink)
+                Text(L10n.Introdon.homeHeroTitle.resolve(), fontSize = 26.sp, fontWeight = FontWeight.Black, color = DS.ink)
             }
         }
         Text(
-            "曲のイントロを聴いて\n曲名をいち早く当てよう",
+            L10n.Introdon.homeHeroCaptionAndroid.resolve(),
             fontSize = 14.sp, color = DS.ink2, lineHeight = 20.sp
         )
     }
@@ -94,9 +98,9 @@ private fun previewNoticeCard() {
     ) {
         Icon(Icons.Filled.Info, null, tint = DS.ink2, modifier = Modifier.size(18.dp))
         Column {
-            Text("プレビュー再生で出題します", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
+            Text(L10n.Introdon.homePreviewNoticeTitle.resolve(), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
             Text(
-                "各曲の30秒プレビューからイントロ部分を再生します。プレビューを持たない曲は出題対象外です。",
+                L10n.Introdon.homePreviewNoticeMessage.resolve(),
                 fontSize = 12.sp, color = DS.ink3
             )
         }

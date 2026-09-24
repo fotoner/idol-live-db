@@ -53,6 +53,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.player.AudioPreviewManager
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.hexToColor
@@ -85,7 +88,8 @@ data class IntroDonPartyUiState(
     val lastAnswerer: Int? = null,
     val lastCorrect: Boolean = false,
     val isPlayingIntro: Boolean = false,
-    val errorMessage: String? = null
+    /** 始められないときの理由。解決済みの String ではなく文言の値で持ち、画面で文字列にする。 */
+    val errorMessage: DisplayText? = null
 ) {
     val currentQuestion: IntroDonQuestion? get() = questions.getOrNull(currentIndex)
     val totalRounds: Int get() = questions.size
@@ -117,7 +121,7 @@ class IntroDonPartyViewModel(app: Application, private val settings: IntroDonSet
             // 始められるか (4 曲の門) と何問出すかはコア。
             val count = introQuestionCount(IntroSessionKind.STANDARD, pool.size.toUInt(), settings.questionCount.toUInt())
             if (count == null) {
-                _uiState.value = _uiState.value.copy(errorMessage = "対象の曲が見つかりませんでした。ブランドを増やしてお試しください。")
+                _uiState.value = _uiState.value.copy(errorMessage = L10n.Introdon.errorNoSongs)
                 return@launch
             }
             val questions = buildIntroDonQuestions(pool, count.toInt())
@@ -256,31 +260,31 @@ fun IntroDonPartyScreen(
         }
 
         IconButton(onClick = { showExitDialog = true }, modifier = Modifier.padding(8.dp)) {
-            Icon(Icons.Filled.Close, "終了", tint = DS.ink2)
+            Icon(Icons.Filled.Close, L10n.Introdon.exitA11y.resolve(), tint = DS.ink2)
         }
     }
 
     if (showExitDialog) {
         AlertDialog(
             onDismissRequest = { showExitDialog = false },
-            title = { Text("対戦を終了しますか？") },
-            confirmButton = { TextButton(onClick = { showExitDialog = false; onExit() }) { Text("終了") } },
-            dismissButton = { TextButton(onClick = { showExitDialog = false }) { Text("キャンセル") } }
+            title = { Text(L10n.Introdon.partyExitTitle.resolve()) },
+            confirmButton = { TextButton(onClick = { showExitDialog = false; onExit() }) { Text(L10n.Introdon.exitConfirm.resolve()) } },
+            dismissButton = { TextButton(onClick = { showExitDialog = false }) { Text(L10n.Introdon.exitCancel.resolve()) } }
         )
     }
 }
 
 @Composable
-private fun LoadingOverlay(errorMessage: String?, onExit: () -> Unit) {
+private fun LoadingOverlay(errorMessage: DisplayText?, onExit: () -> Unit) {
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         if (errorMessage != null) {
-            Text(errorMessage, color = DS.danger, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 32.dp))
+            Text(errorMessage.resolve(), color = DS.danger, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 32.dp))
             Spacer(Modifier.height(16.dp))
-            TextButton(onClick = onExit) { Text("戻る") }
+            TextButton(onClick = onExit) { Text(L10n.Introdon.errorBack.resolve()) }
         } else {
             CircularProgressIndicator(color = DS.ink2)
             Spacer(Modifier.height(16.dp))
-            Text("問題を生成中...", color = DS.ink2, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+            Text(L10n.Introdon.loadingGenerating.resolve(), color = DS.ink2, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
         }
     }
 }
@@ -317,7 +321,7 @@ private fun PlayerHalf(index: Int, rotationDeg: Float, state: IntroDonPartyUiSta
         Box(Modifier.graphicsLayer(rotationZ = rotationDeg)) {
             when {
                 state.phase == PartyPhase.BUZZED && state.buzzedPlayer == index -> AnswerChoices(index, state, viewModel)
-                state.phase == PartyPhase.BUZZED -> Text("相手が回答中…", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DS.ink3)
+                state.phase == PartyPhase.BUZZED -> Text(L10n.Introdon.partyOpponentAnswering.resolve(), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DS.ink3)
                 state.phase == PartyPhase.REVEALED -> RevealHalfContent(index, state)
                 else -> BuzzContent(player, eliminated)
             }
@@ -333,7 +337,7 @@ private fun BuzzContent(player: PartyPlayer, eliminated: Boolean) {
             Text("OUT", fontSize = 16.sp, fontWeight = FontWeight.Black, color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.4f))
         } else {
             Text(player.name, fontSize = 40.sp, fontWeight = FontWeight.Black, color = androidx.compose.ui.graphics.Color.White)
-            Text("タップで早押し！", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.85f))
+            Text(L10n.Introdon.partyBuzzPrompt.resolve(), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.85f))
         }
     }
 }
@@ -342,7 +346,7 @@ private fun BuzzContent(player: PartyPlayer, eliminated: Boolean) {
 private fun AnswerChoices(index: Int, state: IntroDonPartyUiState, viewModel: IntroDonPartyViewModel) {
     val q = state.currentQuestion ?: return
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(horizontal = 20.dp)) {
-        Text("${partyPlayers[index].name} 回答中", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DS.ink2)
+        Text(L10n.Introdon.partyAnswering(player = partyPlayers[index].name).resolve(), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DS.ink2)
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -371,12 +375,12 @@ private fun RevealHalfContent(index: Int, state: IntroDonPartyUiState) {
     if (state.lastCorrect && state.lastAnswerer == index) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Icon(Icons.Filled.CheckCircle, null, tint = DS.success, modifier = Modifier.size(28.dp))
-            Text("正解！ +1", fontSize = 16.sp, fontWeight = FontWeight.Black, color = DS.success)
+            Text(L10n.Introdon.partyCorrect.resolve(), fontSize = 16.sp, fontWeight = FontWeight.Black, color = DS.success)
         }
     } else {
         val q = state.currentQuestion ?: return
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(horizontal = 16.dp)) {
-            Text("正解", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = DS.ink3)
+            Text(L10n.Introdon.partyAnswerLabel.resolve(), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = DS.ink3)
             Text(q.title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DS.ink, textAlign = TextAlign.Center, maxLines = 2)
         }
     }
@@ -405,15 +409,15 @@ private fun CenterStrip(state: IntroDonPartyUiState, viewModel: IntroDonPartyVie
                         .padding(horizontal = 22.dp, vertical = 10.dp)
                 ) {
                     val isLast = state.currentIndex + 1 >= state.totalRounds
-                    Text(if (isLast) "結果を見る" else "次のラウンドへ", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = androidx.compose.ui.graphics.Color.White)
+                    Text((if (isLast) L10n.Introdon.actionSeeResults else L10n.Introdon.partyNextRound).resolve(), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = androidx.compose.ui.graphics.Color.White)
                 }
             }
-            PartyPhase.BUZZED -> Text("早押し成立！回答してください", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = introDonAccent())
+            PartyPhase.BUZZED -> Text(L10n.Introdon.partyBuzzed.resolve(), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = introDonAccent())
             else -> Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
                 PlayButton(state, viewModel)
                 Box(
                     modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(DS.fill).clickable { viewModel.giveUp() }.padding(horizontal = 14.dp, vertical = 9.dp)
-                ) { Text("わからない", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3) }
+                ) { Text(L10n.Introdon.partyGiveUp.resolve(), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3) }
             }
         }
     }
@@ -435,7 +439,7 @@ private fun PlayButton(state: IntroDonPartyUiState, viewModel: IntroDonPartyView
                 tint = if (state.isPlayingIntro) DS.ink else introDonAccent(), modifier = Modifier.size(15.dp)
             )
         }
-        Text("タップでもう一度", fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3)
+        Text(L10n.Introdon.partyPlayHintAndroid.resolve(), fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3)
     }
 }
 
@@ -457,9 +461,9 @@ private fun FinishedOverlay(state: IntroDonPartyUiState, onReplay: () -> Unit, o
     ) {
         val winner = state.winner
         if (winner != null) {
-            Text("${partyPlayers[winner].name} の勝ち！", fontSize = 28.sp, fontWeight = FontWeight.Black, color = hexToColor(partyPlayers[winner].colorHex))
+            Text(L10n.Introdon.partyWinner(player = partyPlayers[winner].name).resolve(), fontSize = 28.sp, fontWeight = FontWeight.Black, color = hexToColor(partyPlayers[winner].colorHex))
         } else {
-            Text("引き分け", fontSize = 28.sp, fontWeight = FontWeight.Black, color = DS.ink)
+            Text(L10n.Introdon.partyDraw.resolve(), fontSize = 28.sp, fontWeight = FontWeight.Black, color = DS.ink)
         }
         Spacer(Modifier.height(20.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(24.dp), verticalAlignment = Alignment.Bottom) {
@@ -468,12 +472,12 @@ private fun FinishedOverlay(state: IntroDonPartyUiState, onReplay: () -> Unit, o
             FinalScore(1, state)
         }
         Spacer(Modifier.height(24.dp))
-        IntroDonActionButton(title = "もう一度") { onReplay() }
+        IntroDonActionButton(title = L10n.Introdon.partyActionReplay.resolve()) { onReplay() }
         Spacer(Modifier.height(10.dp))
         Row(
             modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(DS.surface).clickable(onClick = onExit).padding(vertical = 13.dp),
             horizontalArrangement = Arrangement.Center
-        ) { Text("退出", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2) }
+        ) { Text(L10n.Introdon.partyActionLeave.resolve(), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2) }
     }
 }
 

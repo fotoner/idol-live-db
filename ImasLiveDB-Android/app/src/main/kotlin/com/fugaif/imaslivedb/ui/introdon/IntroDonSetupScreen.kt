@@ -44,6 +44,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.games.QuizSetupBrandSection
 import com.fugaif.imaslivedb.ui.games.QuizSetupCountRow
 import com.fugaif.imaslivedb.ui.games.QuizSetupInsufficientBanner
@@ -59,8 +61,9 @@ import kotlinx.coroutines.launch
  * トグルは出さない (常にプレビュー)。同様に音声判定回答モードも省略 (常に4択)。
  */
 private val questionCounts = listOf(5, 10, 20)
+/** イントロ再生時間の選択肢。first は表示用の秒数 (introdon.setup.seconds の引数)。 */
 private val durations = listOf(
-    Pair("0.2秒", 200L), Pair("2秒", 2_000L), Pair("5秒", 5_000L), Pair("10秒", 10_000L)
+    Pair("0.2", 200L), Pair("2", 2_000L), Pair("5", 5_000L), Pair("10", 10_000L)
 )
 private val rushTimes = listOf(30, 60, 120)
 
@@ -148,8 +151,10 @@ fun IntroDonSetupScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("設定", fontWeight = FontWeight.Bold) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "戻る") } }
+                title = { Text(L10n.Introdon.setupTitle.resolve(), fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, L10n.Common.actionBack.resolve()) }
+                }
             )
         }
     ) { padding ->
@@ -158,12 +163,12 @@ fun IntroDonSetupScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                IntroDonSectionLabel(text = "モード")
+                IntroDonSectionLabel(text = L10n.Introdon.setupModeHeader.resolve())
                 ModeSection(state.mode, viewModel::setMode)
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                IntroDonSectionLabel(text = "出題範囲", hint = "ブランドで絞る")
+                IntroDonSectionLabel(text = L10n.Introdon.setupRangeHeader.resolve(), hint = L10n.Introdon.setupRangeHint.resolve())
                 QuizSetupBrandSection(
                     brands = state.brands, selectedBrandIds = state.selectedBrandIds,
                     onToggle = viewModel::toggleBrand, onClearAll = viewModel::clearBrands
@@ -172,11 +177,11 @@ fun IntroDonSetupScreen(
 
             when (state.mode) {
                 IntroDonMode.NORMAL, IntroDonMode.PARTY -> Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    IntroDonSectionLabel(text = "問題数")
+                    IntroDonSectionLabel(text = L10n.Introdon.setupCountHeader.resolve())
                     CountSection(state.questionCount, viewModel::setQuestionCount)
                 }
                 IntroDonMode.RUSH -> Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    IntroDonSectionLabel(text = "制限時間")
+                    IntroDonSectionLabel(text = L10n.Introdon.setupRushTimeHeader.resolve())
                     RushTimeSection(state.rushTimeLimitSec, viewModel::setRushTimeLimit)
                 }
                 IntroDonMode.ALL_SONGS -> AllSongsNote()
@@ -184,19 +189,19 @@ fun IntroDonSetupScreen(
 
             if (state.mode == IntroDonMode.NORMAL || state.mode == IntroDonMode.PARTY) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    IntroDonSectionLabel(text = "難易度 (イントロ再生時間)")
+                    IntroDonSectionLabel(text = L10n.Introdon.setupDurationHeader.resolve())
                     DurationSection(state.introDurationMs, viewModel::setIntroDuration)
                 }
             }
 
             QuizSetupCountRow(isEstimating = state.isEstimating) {
-                Text("出題候補: ${state.estimatedCount} 曲", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
+                Text(L10n.Introdon.setupCandidates(count = state.estimatedCount).resolve(), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
             }
             if (!state.isEstimating && state.estimatedCount < 4) {
-                QuizSetupInsufficientBanner("出題するにはプレビュー付きの曲が最低 4 曲必要です。ブランドの選択を増やしてください。")
+                QuizSetupInsufficientBanner(L10n.Introdon.setupInsufficient.resolve())
             }
 
-            IntroDonActionButton(title = "スタート", enabled = state.canStart) {
+            IntroDonActionButton(title = L10n.Introdon.setupActionStart.resolve(), enabled = state.canStart) {
                 if (state.mode == IntroDonMode.PARTY) onStartParty(state.toSettings()) else onStartGame(state.toSettings())
             }
 
@@ -233,8 +238,8 @@ private fun ModeSection(selected: IntroDonMode, onSelect: (IntroDonMode) -> Unit
                     modifier = Modifier.size(20.dp)
                 )
                 Column(Modifier.weight(1f)) {
-                    Text(mode.label, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = if (isSelected) androidx.compose.ui.graphics.Color.White else DS.ink)
-                    Text(mode.icon, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = if (isSelected) androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f) else DS.ink3)
+                    Text(mode.label.resolve(), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = if (isSelected) androidx.compose.ui.graphics.Color.White else DS.ink)
+                    Text(mode.caption.resolve(), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = if (isSelected) androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f) else DS.ink3)
                 }
                 if (isSelected) Icon(Icons.Filled.CheckCircle, null, tint = androidx.compose.ui.graphics.Color.White, modifier = Modifier.size(18.dp))
             }
@@ -246,7 +251,7 @@ private fun ModeSection(selected: IntroDonMode, onSelect: (IntroDonMode) -> Unit
 private fun CountSection(selected: Int, onSelect: (Int) -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
         questionCounts.forEach { n ->
-            SegmentButton(primary = "$n", secondary = "問", selected = selected == n, modifier = Modifier.weight(1f)) { onSelect(n) }
+            SegmentButton(primary = "$n", secondary = L10n.Introdon.setupUnitQuestions.resolve(), selected = selected == n, modifier = Modifier.weight(1f)) { onSelect(n) }
         }
     }
 }
@@ -255,7 +260,7 @@ private fun CountSection(selected: Int, onSelect: (Int) -> Unit) {
 private fun RushTimeSection(selectedSec: Int, onSelect: (Int) -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
         rushTimes.forEach { sec ->
-            SegmentButton(primary = "$sec", secondary = "秒", selected = selectedSec == sec, modifier = Modifier.weight(1f)) { onSelect(sec) }
+            SegmentButton(primary = "$sec", secondary = L10n.Introdon.setupUnitSeconds.resolve(), selected = selectedSec == sec, modifier = Modifier.weight(1f)) { onSelect(sec) }
         }
     }
 }
@@ -264,18 +269,22 @@ private fun RushTimeSection(selectedSec: Int, onSelect: (Int) -> Unit) {
 private fun DurationSection(selectedMs: Long, onSelect: (Long) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            durations.forEach { (label, ms) ->
-                SegmentButton(primary = label, secondary = if (ms < 1000) "超イントロ" else "再生", selected = selectedMs == ms, modifier = Modifier.weight(1f)) { onSelect(ms) }
+            durations.forEach { (seconds, ms) ->
+                SegmentButton(
+                    primary = L10n.Introdon.setupSeconds(seconds = seconds).resolve(),
+                    secondary = (if (ms < 1000) L10n.Introdon.setupDurationUltra else L10n.Introdon.setupDurationPlay).resolve(),
+                    selected = selectedMs == ms, modifier = Modifier.weight(1f)
+                ) { onSelect(ms) }
             }
         }
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    if (selectedMs < 1000) "超イントロ" else "再生時間",
+                    (if (selectedMs < 1000) L10n.Introdon.setupDurationUltra else L10n.Introdon.setupDurationSliderLabel).resolve(),
                     fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
                     color = if (selectedMs < 1000) DS.favorite else DS.ink2, modifier = Modifier.weight(1f)
                 )
-                Text(String.format("%.1f秒", selectedMs / 1000.0), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+                Text(L10n.Introdon.setupSeconds(seconds = String.format("%.1f", selectedMs / 1000.0)).resolve(), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = DS.ink)
             }
             Slider(
                 value = (selectedMs / 100).toFloat(),
@@ -293,7 +302,7 @@ private fun AllSongsNote() {
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Icon(Icons.Filled.AllInclusive, null, tint = DS.favorite, modifier = Modifier.size(16.dp))
-        Text("選択した出題範囲の全曲を出し切るまで挑戦。タイムと正答率を競います。", fontSize = 12.sp, color = DS.ink2)
+        Text(L10n.Introdon.setupAllSongsNote.resolve(), fontSize = 12.sp, color = DS.ink2)
     }
 }
 

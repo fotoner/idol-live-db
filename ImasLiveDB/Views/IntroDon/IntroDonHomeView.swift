@@ -16,7 +16,7 @@ struct IntroDonHomeView: View {
 
                 VStack(spacing: DS.sp4) {
                     IDActionButton(
-                        title: "ゲームをはじめる",
+                        title: String(localized: L10n.Introdon.homeActionStart),
                         icon: "play.fill",
                         style: .primary
                     ) {
@@ -33,7 +33,7 @@ struct IntroDonHomeView: View {
 
                 Spacer().frame(height: 28)
 
-                IDSectionLabel(text: "対戦モード")
+                IDSectionLabel(text: String(localized: L10n.Introdon.homeBattleHeader))
                     .padding(.horizontal, DS.sp6)
 
                 Spacer().frame(height: 12)
@@ -45,7 +45,7 @@ struct IntroDonHomeView: View {
             }
         }
         .background(ID.menuBg.ignoresSafeArea())
-        .navigationTitle("イントロドン")
+        .navigationTitle(L10n.Introdon.homeTitle)
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: $showSetup) {
             IntroGameSetupView()
@@ -76,14 +76,14 @@ struct IntroDonHomeView: View {
                         .font(ID.font(11, weight: .bold))
                         .tracking(2)
                         .foregroundColor(ID.menuTextSecondary)
-                    Text("イントロドン")
+                    Text(L10n.Introdon.homeHeroTitle)
                         .font(ID.font(28, weight: .black))
                         .tracking(-0.5)
                         .foregroundColor(ID.menuText)
                 }
             }
 
-            Text("Apple Music のイントロを聴いて\n曲名をいち早く当てよう")
+            Text(L10n.Introdon.homeHeroCaptionIos)
                 .font(.imasScaled( 14))
                 .foregroundColor(ID.menuTextSecondary)
                 .lineSpacing(3)
@@ -99,13 +99,13 @@ struct IntroDonHomeView: View {
             HStack(spacing: DS.sp3) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundColor(ID.accentGold)
-                Text("Apple Music が未認証です")
+                Text(L10n.Introdon.authWarning)
                     .font(ID.font(14, weight: .semibold))
                     .foregroundColor(ID.menuText)
                 Spacer()
             }
 
-            IDActionButton(title: "Apple Music を許可する", icon: "music.note", style: .secondary) {
+            IDActionButton(title: String(localized: L10n.Introdon.authActionAllow), icon: "music.note", style: .secondary) {
                 AppAnalytics.tap("intro_don_home.music_auth")
                 Task {
                     await MusicKitService.shared.requestAuthorization(includingMediaLibrary: true)
@@ -132,11 +132,11 @@ struct IntroDonHomeView: View {
                         .font(ID.font(11, weight: .bold))
                         .tracking(2)
                         .foregroundColor(ID.menuTextSecondary)
-                    Text("友達と対戦したい方へ")
+                    Text(L10n.Introdon.homeBattleTitle)
                         .font(ID.font(18, weight: .black))
                         .tracking(-0.3)
                         .foregroundColor(ID.menuText)
-                    Text("姉妹アプリ「イントロドン」でローカル\n・オンライン対戦ができます")
+                    Text(L10n.Introdon.homeBattleMessage)
                         .font(.imasCaption)
                         .foregroundColor(ID.menuTextSecondary)
                         .lineSpacing(2)
@@ -157,7 +157,7 @@ struct IntroDonHomeView: View {
 
             Link(destination: searchUrl) {
                 HStack(spacing: DS.sp3) {
-                    Text("App Store で開く")
+                    Text(L10n.Introdon.homeBattleOpenStore)
                         .font(ID.font(14, weight: .semibold))
                         .foregroundColor(ID.menuTextSecondary)
                     Image(systemName: "arrow.up.right")

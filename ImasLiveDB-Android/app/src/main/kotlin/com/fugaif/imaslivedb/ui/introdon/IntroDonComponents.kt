@@ -39,6 +39,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import kotlinx.coroutines.delay
@@ -147,7 +149,10 @@ fun IntroDonElapsedLabel(isRunning: Boolean, resetKey: Any, modifier: Modifier =
 
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         Icon(Icons.Filled.MusicNote, null, tint = DS.ink2, modifier = Modifier.size(12.dp))
-        Text(String.format("再生 %.1f秒", seconds), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DS.ink2)
+        Text(
+            L10n.Introdon.elapsedLabel(title = L10n.Introdon.elapsedTitle, seconds = String.format("%.1f", seconds)).resolve(),
+            fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DS.ink2
+        )
     }
 }
 
