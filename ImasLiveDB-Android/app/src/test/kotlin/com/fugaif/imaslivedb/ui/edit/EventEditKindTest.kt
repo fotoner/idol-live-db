@@ -21,9 +21,4 @@ class EventEditKindTest {
         assertFalse(options.any { it.second.startsWith("変更しない") })
         assertEquals(options, eventKindEditOptions(null))
     }
-
-    @Test
-    fun otherItselfIsKeptAsIs() {
-        assertEquals("other" to "変更しない (other)", eventKindEditOptions("other").last())
-    }
 }

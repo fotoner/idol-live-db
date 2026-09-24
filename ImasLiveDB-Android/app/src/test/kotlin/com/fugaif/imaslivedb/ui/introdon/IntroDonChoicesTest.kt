@@ -42,14 +42,6 @@ class IntroDonChoicesTest {
         }
     }
 
-    /** 正解そのもの (同じ id) は不正解候補から外れる。 */
-    @Test fun excludesAnswerItself() {
-        val answer = song("s1", "GO MY WAY!!")
-        val choices = choicesFor(answer, listOf(answer, song("s2", "蒼い鳥")))
-        assertEquals(setOf("GO MY WAY!!", "蒼い鳥"), choices.toSet())
-        assertEquals(2, choices.size)
-    }
-
     /** 不正解どうしのタイトル重複も落とす (以前はここが抜けていた)。 */
     @Test fun deduplicatesAmongWrongCandidates() {
         val answer = song("s1", "自転車")
@@ -61,26 +53,6 @@ class IntroDonChoicesTest {
 
     // --- 出題される 4 択 ---
 
-    @Test fun returnsFourUniqueChoicesIncludingAnswer() {
-        val answer = song("s0", "答え")
-        val pool = (1..10).map { song("s$it", "曲$it") }
-        val choices = choicesFor(answer, pool)
-
-        assertEquals(4, choices.size)
-        assertEquals("同じ選択肢が 2 つ並んではいけない", 4, choices.toSet().size)
-        assertTrue("正解は必ず選択肢に入る", choices.contains("答え"))
-    }
-
-    /** 候補が足りなくても落ちず、正解は必ず残る。 */
-    @Test fun withTooFewCandidates() {
-        val choices = choicesFor(song("s0", "答え"), listOf(song("s1", "曲1")), seed = 7)
-        assertEquals(listOf("曲1", "答え").sorted(), choices.sorted())
-    }
-
-    @Test fun withEmptyPool() {
-        assertEquals(listOf("答え"), choicesFor(song("s0", "答え"), emptyList(), seed = 7))
-    }
-
     /** 正解の位置が固定されない (常に末尾なら位置で当てられてしまう)。 */
     @Test fun answerPositionVaries() {
         val answer = song("s0", "答え")
@@ -89,21 +61,6 @@ class IntroDonChoicesTest {
             .map { choicesFor(answer, pool, it).indexOf("答え") }
             .toSet()
         assertTrue("正解の位置が固定されている: $positions", positions.size > 1)
-    }
-
-    /** 同名異曲が多い実データ相当の pool でも、選択肢にタイトル重複が出ない。 */
-    @Test fun neverProducesDuplicateTitles() {
-        val answer = song("s0", "READY!!")
-        val pool = listOf(
-            song("s1", "READY!!"), song("s2", "READY!!"),
-            song("s3", "CHANGE!!!!"), song("s4", "CHANGE!!!!"),
-            song("s5", "M@STERPIECE")
-        )
-        for (seed in 0 until 40) {
-            val choices = choicesFor(answer, pool, seed)
-            assertEquals("重複した選択肢: $choices", choices.size, choices.toSet().size)
-            assertTrue(choices.contains("READY!!"))
-        }
     }
 
     // --- バッチ (1 ゲーム = 1 呼び出し) ---

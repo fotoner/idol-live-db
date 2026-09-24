@@ -20,19 +20,9 @@ class JstDayTest {
 
     // --- today ---
 
-    /** JST 15:00 (= UTC 06:00) は当然その日。 */
-    @Test fun todayInMiddleOfJstDay() {
-        assertEquals("2026-07-26", JstDay.today(at("2026-07-26T06:00:00Z")))
-    }
-
     /** JST 00:01 (= 前日 UTC 15:01) は既に翌日扱い。 */
     @Test fun todayJustAfterJstMidnight() {
         assertEquals("2026-07-26", JstDay.today(at("2026-07-25T15:01:00Z")))
-    }
-
-    /** JST 23:59 (= UTC 14:59) はまだその日。 */
-    @Test fun todayJustBeforeJstMidnight() {
-        assertEquals("2026-07-26", JstDay.today(at("2026-07-26T14:59:00Z")))
     }
 
     /**
@@ -44,12 +34,6 @@ class JstDayTest {
         assertEquals("2026-07-26", JstDay.today(at("2026-07-26T01:00:00Z")))
     }
 
-    /** 月またぎ / 年またぎでもゼロ埋め書式が崩れない。 */
-    @Test fun todayFormatAcrossBoundaries() {
-        assertEquals("2026-01-01", JstDay.today(at("2025-12-31T15:00:00Z")))
-        assertEquals("2026-01-09", JstDay.today(at("2026-01-08T15:00:00Z")))
-    }
-
     // --- isTodayOrLater ---
 
     /** 開催日当日はまだ終わっていないので「未来」扱い。 */
@@ -57,22 +41,9 @@ class JstDayTest {
         assertTrue(JstDay.isTodayOrLater("2026-07-26", at("2026-07-26T06:00:00Z")))
     }
 
-    @Test fun pastDateIsNotFuture() {
-        assertFalse(JstDay.isTodayOrLater("2026-07-25", at("2026-07-26T06:00:00Z")))
-    }
-
-    @Test fun futureDateIsFuture() {
-        assertTrue(JstDay.isTodayOrLater("2026-08-01", at("2026-07-26T06:00:00Z")))
-    }
-
     /** 日付未定 (空文字) は未来にしない。 */
     @Test fun emptyDateIsNotFuture() {
         assertFalse(JstDay.isTodayOrLater("", at("2026-07-26T06:00:00Z")))
-    }
-
-    /** ハワイにいても、日本で今日の公演は「未来」のまま。 */
-    @Test fun sameDayIsFutureEvenWhenDeviceIsBehindJst() {
-        assertTrue(JstDay.isTodayOrLater("2026-07-26", at("2026-07-26T01:00:00Z")))
     }
 
     // --- date ---

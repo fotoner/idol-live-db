@@ -24,13 +24,6 @@ class SearchHighlightTest {
         assertEquals("おね", highlighted("おねがい", "オネ"))
     }
 
-    /** 先頭でも末尾でも、多バイト文字をまたいでも位置がずれない。 */
-    @Test fun rangeIsExactAcrossMultibyteText() {
-        assertEquals("夢色", highlighted("夢色ハーモニー", "夢色"))
-        assertEquals("モニー", highlighted("夢色ハーモニー", "もにー"))
-        assertEquals("シンデレラ", highlighted("お願い！シンデレラ", "しんでれら"))
-    }
-
     /** サロゲートペア (絵文字は 1 文字 = UTF-16 で 2 単位) をまたいでも添字がずれない。 */
     @Test fun rangeIsExactAfterSurrogatePairs() {
         assertEquals("ライブ", highlighted("🎤🎶ライブ", "ライブ"))

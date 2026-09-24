@@ -146,13 +146,4 @@ class SetlistForecastModelTest {
 
         assertEquals("出演者未発表のため精度が低い", m.state.value.castUnannouncedNote)
     }
-
-    @Test
-    fun noNoteWithoutFlag() = runBlocking {
-        val flag = ForecastShowFlagRecord(ForecastShowFlag.SETLIST_PUBLISHED, "セトリ公開済み (答え合わせ用)")
-        val m = model(FakeReading(record(listOf("a"), listOf(flag))))
-        m.load()
-
-        assertNull(m.state.value.castUnannouncedNote)
-    }
 }

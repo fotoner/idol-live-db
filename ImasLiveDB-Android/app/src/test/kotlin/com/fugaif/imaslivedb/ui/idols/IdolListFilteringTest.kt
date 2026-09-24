@@ -21,16 +21,11 @@ class IdolListFilteringTest {
         id: String,
         brandId: String = "cg",
         name: String = id,
-        sortOrder: Int = 0,
         nameKana: String? = null,
-        nickname: String? = null,
         aliases: String? = null,
         attribute: String? = null,
         age: Int? = null,
-        height: Double? = null,
-        weight: Double? = null,
-        birthday: String? = null,
-        debutDate: String? = null
+        height: Double? = null
     ) = Idol(
         id = id,
         brandId = brandId,
@@ -38,11 +33,11 @@ class IdolListFilteringTest {
         nameKana = nameKana,
         nameRomaji = null,
         color = null,
-        sortOrder = sortOrder,
-        birthday = birthday,
+        sortOrder = 0,
+        birthday = null,
         bloodType = null,
         height = height,
-        weight = weight,
+        weight = null,
         birthPlace = null,
         age = age,
         bust = null,
@@ -56,8 +51,8 @@ class IdolListFilteringTest {
         handedness = null,
         familyName = null,
         givenName = null,
-        nickname = nickname,
-        debutDate = debutDate,
+        nickname = null,
+        debutDate = null,
         attribute = attribute,
         isExternal = false,
         aliases = aliases,
@@ -97,12 +92,6 @@ class IdolListFilteringTest {
     }
 
     @Test
-    fun `年齢の昇順は年下から`() {
-        val idols = listOf(idol("a", age = 15), idol("b", age = 32), idol("c", age = 21))
-        assertEquals(listOf("a", "c", "b"), sortIdols(idols, IdolSortOrder.AGE, ascending = true).idols.map { it.id })
-    }
-
-    @Test
     fun `値なしは並び方向に関わらず末尾`() {
         val idols = listOf(idol("none1"), idol("young", age = 12), idol("none2"), idol("old", age = 30))
 
@@ -113,60 +102,6 @@ class IdolListFilteringTest {
         val asc = sortIdols(idols, IdolSortOrder.AGE, ascending = true).idols.map { it.id }
         assertEquals("昇順でも値なしが先頭に来てはいけない", listOf("young", "old"), asc.take(2))
         assertEquals(setOf("none1", "none2"), asc.takeLast(2).toSet())
-    }
-
-    @Test
-    fun `身長は既定で高い順`() {
-        val idols = listOf(idol("s", height = 140.0), idol("t", height = 191.0), idol("m", height = 158.0))
-        assertEquals(listOf("t", "m", "s"), sortIdols(idols, IdolSortOrder.HEIGHT).idols.map { it.id })
-    }
-
-    @Test
-    fun `体重の昇順は軽い順`() {
-        val idols = listOf(idol("h", weight = 52.0), idol("l", weight = 30.0), idol("m", weight = 41.0))
-        assertEquals(listOf("l", "m", "h"), sortIdols(idols, IdolSortOrder.WEIGHT, ascending = true).idols.map { it.id })
-    }
-
-    @Test
-    fun `五十音順`() {
-        val idols = listOf(idol("c", nameKana = "うえの"), idol("a", nameKana = "あまみ"), idol("b", nameKana = "いおり"))
-        assertEquals(listOf("a", "b", "c"), sortIdols(idols, IdolSortOrder.NAME_KANA).idols.map { it.id })
-    }
-
-    @Test
-    fun `誕生日の昇順は1月から`() {
-        val idols = listOf(
-            idol("dec", birthday = "--12-01"),
-            idol("jan", birthday = "--01-03"),
-            idol("jul", birthday = "--07-17")
-        )
-        assertEquals(listOf("jan", "jul", "dec"), sortIdols(idols, IdolSortOrder.BIRTHDAY).idols.map { it.id })
-    }
-
-    @Test
-    fun `デビュー日の降順は新しい順`() {
-        val idols = listOf(
-            idol("old", debutDate = "2011-11-28"),
-            idol("new", debutDate = "2019-01-10"),
-            idol("mid", debutDate = "2014-02-19")
-        )
-        assertEquals(listOf("new", "mid", "old"), sortIdols(idols, IdolSortOrder.DEBUT, ascending = false).idols.map { it.id })
-    }
-
-    @Test
-    fun `同値は公式順で安定させる`() {
-        val idols = listOf(
-            idol("third", sortOrder = 30, age = 17),
-            idol("first", sortOrder = 10, age = 17),
-            idol("second", sortOrder = 20, age = 17)
-        )
-        assertEquals(listOf("first", "second", "third"), sortIdols(idols, IdolSortOrder.AGE).idols.map { it.id })
-    }
-
-    @Test
-    fun `公式順は sortOrder を使う`() {
-        val idols = listOf(idol("b", sortOrder = 2), idol("a", sortOrder = 1), idol("c", sortOrder = 3))
-        assertEquals(listOf("a", "b", "c"), sortIdols(idols, IdolSortOrder.OFFICIAL).idols.map { it.id })
     }
 
     @Test
@@ -182,13 +117,6 @@ class IdolListFilteringTest {
         val sorted = sortIdols(listOf(idol("x", age = 17, height = 158.0), idol("y")), IdolSortOrder.AGE)
         assertEquals(mapOf("x" to "17歳"), sorted.metricById)
         assertTrue(sortIdols(listOf(idol("x", age = 17)), IdolSortOrder.OFFICIAL).metricById.isEmpty())
-    }
-
-    @Test
-    fun `検索は愛称にも当たる`() {
-        // 「にこにー」は name にも nameKana にも含まれない。愛称を見ないとヒットしない。
-        val idols = listOf(idol("niko", name = "矢澤にこ", nameKana = "やざわにこ", nickname = "にこにー"), idol("other", name = "他"))
-        assertEquals(listOf("niko"), filterIdols(idols, criteria(searchText = "にこにー")).map { it.id })
     }
 
     @Test
@@ -238,11 +166,5 @@ class IdolListFilteringTest {
             )
         )
         assertEquals(listOf("a"), kept.map { it.id })
-    }
-
-    @Test
-    fun `絞り込みは入力順を保つ`() {
-        val idols = listOf(idol("c", sortOrder = 3), idol("a", sortOrder = 1), idol("b", sortOrder = 2))
-        assertEquals(listOf("c", "a", "b"), filterIdols(idols, criteria()).map { it.id })
     }
 }

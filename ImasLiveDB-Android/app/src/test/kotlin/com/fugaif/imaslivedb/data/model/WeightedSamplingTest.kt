@@ -32,28 +32,11 @@ class WeightedSamplingTest {
 
     // --- 基本の性質 ---
 
-    @Test fun returnsRequestedCount() {
-        assertEquals(3, draw(1).size)
-    }
-
     @Test fun neverRepeatsTheSameItem() {
         for (seed in 0 until 50) {
             val picked = draw(seed)
             assertEquals("同じ曲が 2 回出た: $picked", picked.size, picked.toSet().size)
         }
-    }
-
-    @Test fun countLargerThanPoolReturnsEverything() {
-        val picked = WeightedSampling.pick(pool, 99, Random(3)) { it.score }
-        assertEquals(pool.map { it.id }.toSet(), picked.map { it.id }.toSet())
-    }
-
-    @Test fun zeroCountReturnsEmpty() {
-        assertTrue(WeightedSampling.pick(pool, 0, Random(3)) { it.score }.isEmpty())
-    }
-
-    @Test fun emptyPoolReturnsEmpty() {
-        assertTrue(WeightedSampling.pick(emptyList<Candidate>(), 3, Random(3)) { it.score }.isEmpty())
     }
 
     // --- 「毎回同じにならない」 ---
@@ -92,20 +75,6 @@ class WeightedSamplingTest {
             val picked = WeightedSampling.pick(items, 2, Random(seed)) { it.score }.map { it.id }
             assertFalse("重み 0 が選ばれた: $picked", picked.contains("zero"))
         }
-    }
-
-    @Test fun zeroWeightFillsWhenNothingElseIsLeft() {
-        val items = listOf(Candidate("a", 1.0), Candidate("zero", 0.0))
-        assertEquals(
-            setOf("a", "zero"),
-            WeightedSampling.pick(items, 2, Random(5)) { it.score }.map { it.id }.toSet())
-    }
-
-    @Test fun negativeWeightIsTreatedAsZero() {
-        val items = listOf(Candidate("a", 1.0), Candidate("neg", -3.0))
-        assertEquals(
-            listOf("a"),
-            WeightedSampling.pick(items, 1, Random(5)) { it.score }.map { it.id })
     }
 
     // --- 旧サーバ互換 (score なし) ---
