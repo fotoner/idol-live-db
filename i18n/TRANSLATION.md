@@ -16,7 +16,7 @@ UI の文言 (`i18n/catalog/<名前空間>.json`) を訳す人・訳を確かめ
 このファイルは `i18n/config.json` と `i18n/glossary.json` から `generate` が作る (手で直さない)。
 用語や文体の決まりを変えるときは `glossary.json` を直して `generate` し、このファイルも同じ commit に入れる。
 
-> 用語集の状態: 草案 (オーナー確定前)。en・zh-Hans の語と style は ko のあとに足した草案で、オーナーの確認待ち。確定したら status を消し、確定者と日付を note に書く
+> 用語集の状態: 草案 (オーナー確定前)。ko・en・zh-Hans の語と style はどれもオーナーの確認待ち (en・zh-Hans は ko のあとに足した)。言語ごとに確定したら、ここにその言語の確定者と日付を書く (例: ko は <名前> が YYYY-MM-DD に確定)。全部の言語が確定したら status を消し、確定の記録は note に移す
 
 ## 言語
 
@@ -97,7 +97,7 @@ python3 tools/i18n/i18n.py stats      # 言語ごとの 確定 / 未検収 / sta
 |---|---|
 | planned | 用語集に語と文体 (style) の草案を書いた。カタログに訳を書き始めてよい (ビルドには入らない) |
 | dev | 主な画面の訳がそろい、Debug ビルドで見て確かめたい。`config.json` の channel を変える PR をオーナーが受ける |
-| beta | ui / system の名前空間に 欠落・未検収・stale・edited が 0 件 (check の出荷ゲートが止める)。用語集と文体をオーナーが確定した (glossary.json の status を消す)。データの字形の組版 (i18n/README.md の「漢字の字形」) を実装した。Beta 構成を作る |
+| beta | ui / system の名前空間に 欠落・未検収・stale・edited が 0 件 (check の出荷ゲートが止める)。その言語の用語と文体をオーナーが確定した (glossary.json の status にその言語の確定者と日付を書く。全部の言語が確定したら status を消す)。データの字形の組版 (i18n/README.md の「漢字の字形」) を実装した。Beta 構成を作る |
 | release | beta で主な画面を実機で確かめた。ストアの説明文などアプリの外の文言もそろった。オーナーが決める |
 
 ## 言語別の決まり
