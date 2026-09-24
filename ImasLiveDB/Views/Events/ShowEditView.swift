@@ -21,7 +21,8 @@ struct ShowEditView: View {
     @State private var sortOrder: Int
     @State private var performerType: String
     @State private var isSaving = false
-    @State private var errorMessage: String?
+    /// 解決済みの String ではなく文言の値で持ち、alert で文字列にする。
+    @State private var errorMessage: LocalizedStringResource?
     @State private var requestSent = false
 
     /// 既存編集用。
@@ -55,21 +56,22 @@ struct ShowEditView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("基本情報") {
+                Section(L10n.Edit.formSectionBasic) {
                     if let original = mode.original {
                         LabeledContent("ID") { Text(original.id).foregroundStyle(DS.ink2) }
                     }
-                    TextField("公演名", text: $name)
-                    TextField("日付 (YYYY-MM-DD)", text: $date)
+                    TextField(L10n.Edit.showFieldName, text: $name, prompt: nil)
+                    TextField(L10n.Edit.showFieldDate, text: $date, prompt: nil)
                         .autocapitalization(.none)
                         .autocorrectionDisabled()
-                    TextField("会場", text: $venue)
-                    TextField("会場所在地", text: $venueCity)
-                    TextField("開演時刻 (HH:mm)", text: $startTime)
-                    Stepper("並び順: \(sortOrder)", value: $sortOrder, in: 0...999)
-                    Picker("出演形態", selection: $performerType) {
+                    TextField(L10n.Edit.showFieldVenue, text: $venue, prompt: nil)
+                    TextField(L10n.Edit.showFieldVenueCity, text: $venueCity, prompt: nil)
+                    TextField(L10n.Edit.showFieldStartTime, text: $startTime, prompt: nil)
+                    Stepper(L10n.Edit.formSortOrderIos(value: sortOrder), value: $sortOrder, in: 0...999)
+                    Picker(L10n.Edit.showFieldPerformerType, selection: $performerType) {
                         ForEach(performerTypes, id: \.self) {
-                            Text($0.isEmpty ? "未指定" : $0).tag($0)
+                            // 空 = 未指定。それ以外は保存する値 (character / cast / mixed) をそのまま出す
+                            Text(display: $0.isEmpty ? .key(L10n.Edit.formOptionUnspecified) : .verbatim($0)).tag($0)
                         }
                     }
                 }
@@ -78,24 +80,24 @@ struct ShowEditView: View {
             }
             .scrollContentBackground(.hidden)
             .background(DS.bg.ignoresSafeArea())
-            .navigationTitle(mode.isCreate ? "公演追加" : "公演編集")
+            .navigationTitle(mode.isCreate ? L10n.Edit.showTitleCreateIos : L10n.Edit.showTitleEdit)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("キャンセル") { dismiss() }
+                    Button { dismiss() } label: { Text(L10n.Edit.actionCancel) }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") { AppAnalytics.tap("show_edit.save"); Task { await save() } }
+                    Button { AppAnalytics.tap("show_edit.save"); Task { await save() } } label: { Text(L10n.Edit.actionSave) }
                         .disabled(isSaving || !canSave)
                 }
             }
             .overlay { if isSaving { savingOverlay } }
-            .alert("エラー", isPresented: Binding(
+            .alert(L10n.Edit.formErrorTitle, isPresented: Binding(
                 get: { errorMessage != nil },
                 set: { if !$0 { errorMessage = nil } }
             )) {
                 Button("OK") {}
-            } message: { Text(errorMessage ?? "") }
+            } message: { if let errorMessage { Text(errorMessage) } }
             .editRequestSentAlert(isPresented: $requestSent, onDismiss: { dismiss() })
             .trackScreen("show_edit")
         }
@@ -110,7 +112,7 @@ struct ShowEditView: View {
     private var savingOverlay: some View {
         ZStack {
             Color.black.opacity(0.3).ignoresSafeArea()
-            ProgressView("保存中…").padding(DS.sp7)
+            ProgressView(L10n.Edit.formSaving).padding(DS.sp7)
                 .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
         }
     }
@@ -122,12 +124,12 @@ struct ShowEditView: View {
         let trimmedName = name.trimmingCharacters(in: .whitespaces)
         let trimmedDate = date.trimmingCharacters(in: .whitespaces)
         guard !trimmedName.isEmpty, !trimmedDate.isEmpty else {
-            errorMessage = "公演名と日付は必須です"
+            errorMessage = L10n.Edit.showErrorRequired
             return
         }
         // 日付フォーマットの軽い前段チェック (サーバ側でも検証されるが UX のため)。
         guard isValidDate(trimmedDate) else {
-            errorMessage = "日付は YYYY-MM-DD 形式で入力してください"
+            errorMessage = L10n.Edit.showErrorDateFormat
             return
         }
 
@@ -152,6 +154,7 @@ struct ShowEditView: View {
         )
 
         do {
+            // i18n-ignore(storage): 編集履歴に残るサマリ (サーバに送るデータ)。画面の言語で変えない
             let outcome = try await EditService.shared.submitMaster(ops: [op], summary: mode.isCreate ? "公演追加" : "公演編集")
             guard case .applied(let resp) = outcome else {
                 requestSent = true
@@ -160,7 +163,7 @@ struct ShowEditView: View {
             // ローカル upsert はサーバ確定 recordName を使う (create はサーバ採番 ID)。
             let resolvedId = resp.primaryRecordName(fallback: mode.original?.id)
             guard let id = resolvedId else {
-                errorMessage = "保存に失敗しました (ID 未確定)"
+                errorMessage = L10n.Edit.formErrorIdUnresolved
                 return
             }
             let saved = Show(
@@ -178,7 +181,7 @@ struct ShowEditView: View {
             Logger.database.notice("show_\(mode.isCreate ? "created" : "edited", privacy: .public) id=\(id, privacy: .public)")
             dismiss()
         } catch {
-            errorMessage = "保存失敗: \(error.localizedDescription)"
+            errorMessage = L10n.Edit.formErrorSaveFailed(detail: error.localizedDescription)
         }
     }
 

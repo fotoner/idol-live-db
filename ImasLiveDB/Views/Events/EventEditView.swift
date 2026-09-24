@@ -23,7 +23,8 @@ struct EventEditView: View {
     @State private var jointBrandIds: String
     @State private var allBrands: [Brand] = []
     @State private var isSaving = false
-    @State private var errorMessage: String?
+    /// 解決済みの String ではなく文言の値で持ち、alert で文字列にする。
+    @State private var errorMessage: LocalizedStringResource?
     @State private var requestSent = false
 
     /// 既存編集用。
@@ -57,36 +58,36 @@ struct EventEditView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("基本情報") {
+                Section(L10n.Edit.formSectionBasic) {
                     if let original = mode.original {
                         LabeledContent("ID") { Text(original.id).foregroundStyle(DS.ink2) }
                     }
-                    TextField("イベント名", text: $name)
-                    Picker("ブランド", selection: $brandId) {
-                        Text("未指定").tag("")
+                    TextField(L10n.Edit.eventFieldName, text: $name, prompt: nil)
+                    Picker(L10n.Edit.formFieldBrand, selection: $brandId) {
+                        Text(L10n.Edit.formOptionUnspecified).tag("")
                         ForEach(allBrands) { brand in
                             Text(brand.name).tag(brand.id)
                         }
                     }
-                    Picker("種別", selection: $kind) {
+                    Picker(L10n.Edit.eventFieldKind, selection: $kind) {
                         // 「その他」は知らない種別の受け皿なので、書き込む値としては出さない。
                         ForEach(EventKind.allCases.filter { $0 != .other }, id: \.self) {
                             Text($0.displayLabel).tag($0)
                         }
                         if let raw = unlistedKindRaw {
-                            Text("変更しない (\(raw))").tag(EventKind.other)
+                            Text(L10n.Edit.eventKindUnchanged(raw: raw)).tag(EventKind.other)
                         }
                     }
-                    TextField("合同ブランド (カンマ区切り)", text: $jointBrandIds)
+                    TextField(L10n.Edit.eventFieldJointBrands, text: $jointBrandIds, prompt: nil)
                         .autocapitalization(.none)
                         .autocorrectionDisabled()
                 }
                 .listRowBackground(DS.surface)
                 .listRowSeparatorTint(DS.sep)
-                Section("チケット") {
-                    TextField("受付開始 (YYYY-MM-DD)", text: $ticketOpenDate)
-                    TextField("先行締切 (YYYY-MM-DD)", text: $ticketDeadline)
-                    TextField("当落発表 (YYYY-MM-DD)", text: $ticketLotteryDate)
+                Section(L10n.Edit.eventSectionTicket) {
+                    TextField(L10n.Edit.eventFieldTicketOpen, text: $ticketOpenDate, prompt: nil)
+                    TextField(L10n.Edit.eventFieldTicketDeadline, text: $ticketDeadline, prompt: nil)
+                    TextField(L10n.Edit.eventFieldTicketLottery, text: $ticketLotteryDate, prompt: nil)
                     TextField("URL", text: $ticketUrl)
                         .keyboardType(.URL)
                         .autocapitalization(.none)
@@ -97,24 +98,24 @@ struct EventEditView: View {
             }
             .scrollContentBackground(.hidden)
             .background(DS.bg.ignoresSafeArea())
-            .navigationTitle(mode.isCreate ? "イベント追加" : "イベント編集")
+            .navigationTitle(mode.isCreate ? L10n.Edit.eventTitleCreateIos : L10n.Edit.eventTitleEditIos)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("キャンセル") { dismiss() }
+                    Button { dismiss() } label: { Text(L10n.Edit.actionCancel) }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") { AppAnalytics.tap("event_edit.save"); Task { await save() } }
+                    Button { AppAnalytics.tap("event_edit.save"); Task { await save() } } label: { Text(L10n.Edit.actionSave) }
                         .disabled(isSaving || name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
             .overlay { if isSaving { savingOverlay } }
-            .alert("エラー", isPresented: Binding(
+            .alert(L10n.Edit.formErrorTitle, isPresented: Binding(
                 get: { errorMessage != nil },
                 set: { if !$0 { errorMessage = nil } }
             )) {
                 Button("OK") {}
-            } message: { Text(errorMessage ?? "") }
+            } message: { if let errorMessage { Text(errorMessage) } }
             .editRequestSentAlert(isPresented: $requestSent, onDismiss: { dismiss() })
             .task {
                 allBrands = (try? await AppContainer.shared.brandReading.brands()) ?? []
@@ -126,7 +127,7 @@ struct EventEditView: View {
     private var savingOverlay: some View {
         ZStack {
             Color.black.opacity(0.3).ignoresSafeArea()
-            ProgressView("保存中…").padding(DS.sp7)
+            ProgressView(L10n.Edit.formSaving).padding(DS.sp7)
                 .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
         }
     }
@@ -147,7 +148,7 @@ struct EventEditView: View {
 
         let trimmedName = name.trimmingCharacters(in: .whitespaces)
         guard !trimmedName.isEmpty else {
-            errorMessage = "イベント名を入力してください"
+            errorMessage = L10n.Edit.eventErrorNameRequired
             return
         }
 
@@ -184,6 +185,7 @@ struct EventEditView: View {
         )
 
         do {
+            // i18n-ignore(storage): 編集履歴に残るサマリ (サーバに送るデータ)。画面の言語で変えない
             let outcome = try await EditService.shared.submitMaster(ops: [op], summary: mode.isCreate ? "イベント追加" : "イベント編集")
             guard case .applied(let resp) = outcome else {
                 requestSent = true
@@ -192,7 +194,7 @@ struct EventEditView: View {
             // ローカル upsert はサーバ確定 recordName を使う (create はサーバ採番 ID)。
             let resolvedId = resp.primaryRecordName(fallback: original?.id)
             guard let id = resolvedId else {
-                errorMessage = "保存に失敗しました (ID 未確定)"
+                errorMessage = L10n.Edit.formErrorIdUnresolved
                 return
             }
             let saved = Event(
@@ -213,7 +215,7 @@ struct EventEditView: View {
             Logger.database.notice("event_\(mode.isCreate ? "created" : "edited", privacy: .public) id=\(id, privacy: .public)")
             dismiss()
         } catch {
-            errorMessage = "保存失敗: \(error.localizedDescription)"
+            errorMessage = L10n.Edit.formErrorSaveFailed(detail: error.localizedDescription)
         }
     }
 }

@@ -46,8 +46,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.text.KeyboardOptions
 import com.fugaif.imaslivedb.data.edit.EditApi
-import com.fugaif.imaslivedb.data.edit.friendlyMessage
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 
 // =============================================================================
@@ -83,11 +85,11 @@ fun MasterEditScaffold(
             TopAppBar(
                 title = { Text(title, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onCancel) { Icon(Icons.Filled.Close, "キャンセル") }
+                    IconButton(onClick = onCancel) { Icon(Icons.Filled.Close, L10n.Edit.actionCancel.resolve()) }
                 },
                 actions = {
                     TextButton(onClick = onSave, enabled = canSave && !isSaving) {
-                        Text("保存", fontWeight = FontWeight.SemiBold)
+                        Text(L10n.Edit.actionSave.resolve(), fontWeight = FontWeight.SemiBold)
                     }
                 }
             )
@@ -111,7 +113,7 @@ fun MasterEditScaffold(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         CircularProgressIndicator()
-                        Text("保存中…", fontSize = 13.sp, color = DS.ink2, modifier = Modifier.padding(top = 8.dp))
+                        Text(L10n.Edit.formSaving.resolve(), fontSize = 13.sp, color = DS.ink2, modifier = Modifier.padding(top = 8.dp))
                     }
                 }
             }
@@ -170,17 +172,18 @@ fun EditTextField(
 
 /**
  * 選択肢から 1 つ選ぶ行 (iOS の `Picker`)。
- * `options` は (内部値, 表示ラベル)。未選択を許す場合は空文字の選択肢を先頭に入れておく。
+ * `options` は (内部値, 表示ラベル)。ラベルは文言 (`L10n.*`)・データ ([DisplayText.Verbatim])・
+ * コアの語 ([DisplayText.Core]) のどれか。未選択を許す場合は空文字の選択肢を先頭に入れておく。
  */
 @Composable
 fun EditDropdownField(
     label: String,
-    options: List<Pair<String, String>>,
+    options: List<Pair<String, DisplayText>>,
     selected: String,
     onSelect: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val selectedLabel = options.firstOrNull { it.first == selected }?.second ?: selected
+    val selectedLabel = options.firstOrNull { it.first == selected }?.second?.resolve() ?: selected
     Box(Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth().clickable { expanded = true }.padding(vertical = 10.dp),
@@ -197,7 +200,7 @@ fun EditDropdownField(
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { (value, optionLabel) ->
                 DropdownMenuItem(
-                    text = { Text(optionLabel) },
+                    text = { Text(optionLabel.resolve()) },
                     onClick = { onSelect(value); expanded = false }
                 )
             }
@@ -205,14 +208,18 @@ fun EditDropdownField(
     }
 }
 
-/** 整数を ± で刻む行 (iOS の `Stepper`)。並び順のように範囲が決まっている値に使う。 */
+/**
+ * 整数を ± で刻む行 (iOS の `Stepper`)。並び順のように範囲が決まっている値に使う。
+ * [text] は値を含んだ行の文言 (`L10n.Edit.formSortOrderAndroid(value = …)`。値は桁区切りしない。
+ * iOS の Stepper は以前から桁区切りして出すので、別キー `form.sort_order_ios` を使う)。
+ */
 @Composable
-fun EditStepperRow(label: String, value: Int, range: IntRange, onValueChange: (Int) -> Unit) {
+fun EditStepperRow(text: DisplayText, value: Int, range: IntRange, onValueChange: (Int) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("$label: $value", fontSize = 15.sp, color = DS.ink, modifier = Modifier.weight(1f))
+        Text(text.resolve(), fontSize = 15.sp, color = DS.ink, modifier = Modifier.weight(1f))
         TextButton(onClick = { onValueChange((value - 1).coerceIn(range)) }) { Text("−", fontSize = 18.sp) }
         TextButton(onClick = { onValueChange((value + 1).coerceIn(range)) }) { Text("＋", fontSize = 18.sp) }
     }
@@ -250,14 +257,14 @@ fun EditReadonlyRow(label: String, value: String) {
     }
 }
 
-/** 保存に失敗した時のダイアログ (iOS の `.alert("エラー")`)。 */
+/** 保存に失敗した時のダイアログ (iOS の `.alert(L10n.Edit.formErrorTitle)`)。 */
 @Composable
-fun EditErrorDialog(message: String, onDismiss: () -> Unit) {
+fun EditErrorDialog(message: DisplayText, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = { TextButton(onClick = onDismiss) { Text("OK") } },
-        title = { Text("エラー") },
-        text = { Text(message) }
+        title = { Text(L10n.Edit.formErrorTitle.resolve()) },
+        text = { Text(message.resolve()) }
     )
 }
 
@@ -270,13 +277,13 @@ fun EditRequestSentDialog(issueUrl: String?, onDismiss: () -> Unit) {
     val uriHandler = LocalUriHandler.current
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("編集リクエストを送信しました") },
+        title = { Text(L10n.Edit.requestSentTitle.resolve()) },
         text = {
             Column {
-                Text("この編集はすぐには反映されず、承認後に反映されます。")
+                Text(L10n.Edit.requestSentMessage.resolve())
                 if (issueUrl != null) {
                     Text(
-                        "進捗を見る",
+                        L10n.Edit.requestSentProgress.resolve(),
                         color = DS.pick,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(top = 8.dp).clickable { uriHandler.openUri(issueUrl) }
@@ -300,7 +307,7 @@ sealed class MasterEditSubmitResult {
     /** 修正リクエストとして受理された。CloudKit 未反映なのでローカルは触っていない。 */
     data class Requested(val issueUrl: String?) : MasterEditSubmitResult()
 
-    data class Failed(val message: String) : MasterEditSubmitResult()
+    data class Failed(val message: DisplayText) : MasterEditSubmitResult()
 }
 
 /**
@@ -310,7 +317,7 @@ sealed class MasterEditSubmitResult {
  * - [applyLocally] は [com.fugaif.imaslivedb.data.repository.MasterEditRepository] を通して書く。
  *   あちらが 1 トランザクションで書き、その場でスナップショットを作り直す (省くとスナップショット
  *   経由で読む口だけが次の同期完了まで編集前の値を返し、「編集直後に自分の編集が見えない」になる)。
- * - 例外はここで日本語の短文に畳む。呼び出し側が 401/403/429 を個別に扱う必要はない。
+ * - 例外はここで利用者向けの短文 (カタログの文言) に畳む。呼び出し側が 401/403/429 を個別に扱う必要はない。
  *
  * @param fallbackRecordName create でクライアント採番した ID (Song など)。サーバが
  *        recordName を返さなかった時の保険。
@@ -327,7 +334,7 @@ suspend fun submitMasterEdit(
         when (val outcome = module.editApi.submitMaster(ops, summary)) {
             is EditApi.MasterEditOutcome.Applied -> {
                 val resolved = outcome.response.primaryRecordName(fallbackRecordName)
-                    ?: return MasterEditSubmitResult.Failed("保存に失敗しました (ID 未確定)")
+                    ?: return MasterEditSubmitResult.Failed(L10n.Edit.formErrorIdUnresolved)
                 // 端末の DB への反映 (と、スナップショットの作り直し) は MasterEditRepository が行う。
                 applyLocally(resolved)
                 MasterEditSubmitResult.Applied(resolved)
@@ -336,9 +343,10 @@ suspend fun submitMasterEdit(
                 MasterEditSubmitResult.Requested(outcome.response.issueUrl)
         }
     } catch (e: EditApi.ApiException) {
-        MasterEditSubmitResult.Failed(e.friendlyMessage())
+        MasterEditSubmitResult.Failed(e.userMessage)
     } catch (e: Exception) {
-        MasterEditSubmitResult.Failed("保存失敗: ${e.message}")
+        // e.message が null のときは今までどおり "null" と出す (文字列補間と同じ)
+        MasterEditSubmitResult.Failed(L10n.Edit.formErrorSaveFailed(detail = e.message.toString()))
     }
 }
 

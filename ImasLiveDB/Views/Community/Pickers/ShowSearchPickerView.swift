@@ -17,16 +17,16 @@ struct ShowSearchPickerView: View {
                 if results.isEmpty && !query.isEmpty {
                     ImasEmptyState(
                         systemImage: "magnifyingglass",
-                        title: "見つかりません",
-                        message: "「\(query)」に一致する公演がありません"
+                        title: String(localized: L10n.Edit.pickerEmptyTitle),
+                        message: String(localized: L10n.Edit.showPickerEmptyNoMatch(query: query))
                     )
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets())
                 } else if results.isEmpty && query.isEmpty {
                     ImasEmptyState(
                         systemImage: "ticket",
-                        title: "公演を検索",
-                        message: "公演名またはイベント名を入力して検索してください"
+                        title: String(localized: L10n.Edit.showPickerEmptyTitle),
+                        message: String(localized: L10n.Edit.showPickerEmptyMessage)
                     )
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets())
@@ -79,12 +79,13 @@ struct ShowSearchPickerView: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .background(DS.bg)
-            .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "公演名・イベント名で検索")
-            .navigationTitle("公演を選択")
+            .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
+                        prompt: L10n.Edit.showPickerSearchPrompt)
+            .navigationTitle(L10n.Edit.showPickerTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("キャンセル") { dismiss() }
+                    Button { dismiss() } label: { Text(L10n.Edit.actionCancel) }
                 }
             }
             .onChange(of: query) { _, newValue in

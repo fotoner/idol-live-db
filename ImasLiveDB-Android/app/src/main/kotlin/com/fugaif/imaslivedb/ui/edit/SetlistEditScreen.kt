@@ -53,13 +53,15 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.edit.EditApi
-import com.fugaif.imaslivedb.data.edit.friendlyMessage
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.SetlistItem
 import com.fugaif.imaslivedb.data.model.SetlistPerformer
 import com.fugaif.imaslivedb.data.model.SetlistRow
 import com.fugaif.imaslivedb.data.model.Show
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -71,12 +73,15 @@ import uniffi.imas_core.setlistItemIndexesNeedingSync
 import uniffi.imas_core.setlistPerformerIndexesNeedingSync
 import java.util.UUID
 
-/** 編集中の 1 行 (iOS `EditableSetlistRow` の移植)。 */
+/**
+ * 編集中の 1 行 (iOS `EditableSetlistRow` の移植)。
+ * [songTitle] は曲名 (データ)。曲をまだ選んでいない行は空で、表示で「(曲を選択)」を出す。
+ */
 data class EditableSetlistRow(
     val rowId: String = UUID.randomUUID().toString(),
     val existingItemId: String? = null,
     val songId: String = "",
-    val songTitle: String = "(曲を選択)",
+    val songTitle: String = "",
     val section: String? = null,
     val castIds: Set<String> = emptySet()
 )
@@ -84,7 +89,7 @@ data class EditableSetlistRow(
 sealed class SetlistSaveOutcome {
     object Applied : SetlistSaveOutcome()
     data class Requested(val issueUrl: String?) : SetlistSaveOutcome()
-    data class Failed(val message: String) : SetlistSaveOutcome()
+    data class Failed(val message: DisplayText) : SetlistSaveOutcome()
 }
 
 data class SetlistEditUiState(
@@ -101,7 +106,8 @@ data class SetlistEditUiState(
     val idolById: Map<String, Idol> = emptyMap(),
     val isLoading: Boolean = true,
     val isSaving: Boolean = false,
-    val errorMessage: String? = null,
+    /** 解決済みの String ではなく文言の値で持ち、画面で resolve() する。 */
+    val errorMessage: DisplayText? = null,
     val saveOutcome: SetlistSaveOutcome? = null
 )
 
@@ -147,7 +153,10 @@ class SetlistEditViewModel(app: Application, private val show: Show) : AndroidVi
                 isLoading = false
             )
         } catch (e: Exception) {
-            _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = "セトリ読み込み失敗: ${e.message}")
+            _uiState.value = _uiState.value.copy(
+                isLoading = false,
+                errorMessage = L10n.Edit.setlistErrorLoadFailed(detail = e.message.toString())
+            )
         }
     }
 
@@ -204,7 +213,7 @@ class SetlistEditViewModel(app: Application, private val show: Show) : AndroidVi
     fun save() {
         val state = _uiState.value
         if (state.rows.any { it.songId.isEmpty() }) {
-            _uiState.value = state.copy(errorMessage = "曲が未選択の行があります")
+            _uiState.value = state.copy(errorMessage = L10n.Edit.setlistErrorSongMissing)
             return
         }
         _uiState.value = state.copy(isSaving = true)
@@ -310,6 +319,7 @@ class SetlistEditViewModel(app: Application, private val show: Show) : AndroidVi
                     return@launch
                 }
 
+                // i18n-ignore(storage): 編集履歴に残るサマリ (サーバに送るデータ)。画面の言語で変えない
                 val outcome = editApi.submitMaster(ops, summary = "セトリ編集")
                 when (outcome) {
                     is EditApi.MasterEditOutcome.Applied -> {
@@ -331,9 +341,12 @@ class SetlistEditViewModel(app: Application, private val show: Show) : AndroidVi
                     }
                 }
             } catch (e: EditApi.ApiException) {
-                _uiState.value = _uiState.value.copy(isSaving = false, errorMessage = e.friendlyMessage())
+                _uiState.value = _uiState.value.copy(isSaving = false, errorMessage = e.userMessage)
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(isSaving = false, errorMessage = "保存失敗: ${e.message}")
+                _uiState.value = _uiState.value.copy(
+                    isSaving = false,
+                    errorMessage = L10n.Edit.formErrorSaveFailed(detail = e.message.toString())
+                )
             }
         }
     }
@@ -391,9 +404,11 @@ fun SetlistEditScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("セトリ編集", fontWeight = FontWeight.Bold) },
+                title = { Text(L10n.Edit.setlistTitle.resolve(), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onDismiss) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "キャンセル") }
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, L10n.Edit.actionCancel.resolve())
+                    }
                 },
                 actions = {
                     TextButton(
@@ -405,7 +420,7 @@ fun SetlistEditScreen(
                             }
                         },
                         enabled = !state.isSaving
-                    ) { Text("保存", fontWeight = FontWeight.SemiBold) }
+                    ) { Text(L10n.Edit.actionSave.resolve(), fontWeight = FontWeight.SemiBold) }
                 }
             )
         }
@@ -416,7 +431,8 @@ fun SetlistEditScreen(
             } else {
                 Column(Modifier.fillMaxSize()) {
                     Text(
-                        "$eventName ・ ${show.name}", fontSize = 13.sp, color = DS.ink2,
+                        L10n.Edit.setlistHeaderEventShow(event = eventName, show = show.name).resolve(),
+                        fontSize = 13.sp, color = DS.ink2,
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
                     )
                     LazyColumn(modifier = Modifier.fillMaxSize().weight(1f)) {
@@ -443,7 +459,10 @@ fun SetlistEditScreen(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Icon(Icons.Filled.AddCircle, contentDescription = null, tint = DS.pick)
-                                Text("曲を追加", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.pick)
+                                Text(
+                                    L10n.Edit.setlistActionAddSong.resolve(),
+                                    fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.pick
+                                )
                             }
                         }
                     }
@@ -457,7 +476,7 @@ fun SetlistEditScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         CircularProgressIndicator()
-                        Text("保存中…", fontSize = 13.sp, color = DS.ink2, modifier = Modifier.padding(top = 8.dp))
+                        Text(L10n.Edit.formSaving.resolve(), fontSize = 13.sp, color = DS.ink2, modifier = Modifier.padding(top = 8.dp))
                     }
                 }
             }
@@ -468,8 +487,8 @@ fun SetlistEditScreen(
         AlertDialog(
             onDismissRequest = { viewModel.clearError() },
             confirmButton = { TextButton(onClick = { viewModel.clearError() }) { Text("OK") } },
-            title = { Text("エラー") },
-            text = { Text(state.errorMessage ?: "") }
+            title = { Text(L10n.Edit.formErrorTitle.resolve()) },
+            text = { Text(state.errorMessage?.resolve() ?: "") }
         )
     }
 
@@ -478,13 +497,13 @@ fun SetlistEditScreen(
         val uriHandler = LocalUriHandler.current
         AlertDialog(
             onDismissRequest = { requestedOutcome = null; onSaved() },
-            title = { Text("編集リクエストを送信しました") },
+            title = { Text(L10n.Edit.requestSentTitle.resolve()) },
             text = {
                 Column {
-                    Text("この編集はすぐには反映されず、承認後に反映されます。")
+                    Text(L10n.Edit.requestSentMessage.resolve())
                     if (issueUrl != null) {
                         Text(
-                            "進捗を見る",
+                            L10n.Edit.requestSentProgress.resolve(),
                             color = DS.pick,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(top = 8.dp).clickable { uriHandler.openUri(issueUrl) }
@@ -501,12 +520,16 @@ fun SetlistEditScreen(
     if (showClearConfirm) {
         AlertDialog(
             onDismissRequest = { showClearConfirm = false },
-            title = { Text("セトリを全削除しますか?") },
-            text = { Text("この公演のセトリ ${state.initialItemIds.size} 件をすべて削除します。この操作は取り消せません。") },
+            title = { Text(L10n.Edit.setlistClearTitle.resolve()) },
+            text = { Text(L10n.Edit.setlistClearMessageAndroid(count = state.initialItemIds.size).resolve()) },
             confirmButton = {
-                TextButton(onClick = { showClearConfirm = false; viewModel.save() }) { Text("削除する") }
+                TextButton(onClick = { showClearConfirm = false; viewModel.save() }) {
+                    Text(L10n.Edit.setlistClearConfirm.resolve())
+                }
             },
-            dismissButton = { TextButton(onClick = { showClearConfirm = false }) { Text("キャンセル") } }
+            dismissButton = {
+                TextButton(onClick = { showClearConfirm = false }) { Text(L10n.Edit.actionCancel.resolve()) }
+            }
         )
     }
 
@@ -552,7 +575,20 @@ private class SetlistEditViewModelFactory(
     }
 }
 
+// i18n-ignore(storage): マスタ (CloudKit) の section 列に入る語彙。訳さない・変えない (表示は sectionLabel)
 private val sections = listOf("本編", "アンコール", "MC", "ダブルアンコール")
+
+// i18n-ignore(storage): 本編 = section 列を持たない (保存しない) 区分
+private const val MAIN_SECTION = "本編"
+
+/** 区分の保存値 → 表示名。知らない値 (自由入力) はそのまま出す。 */
+private fun sectionLabel(section: String): DisplayText = when (section) {
+    sections[0] -> L10n.Edit.setlistSectionMain
+    sections[1] -> L10n.Edit.setlistSectionEncore
+    sections[2] -> L10n.Edit.setlistSectionMc
+    sections[3] -> L10n.Edit.setlistSectionDoubleEncore
+    else -> DisplayText.Verbatim(section)
+}
 
 @Composable
 private fun SetlistEditRowView(
@@ -582,7 +618,11 @@ private fun SetlistEditRowView(
             ) {
                 Icon(Icons.Filled.MusicNote, contentDescription = null, tint = DS.ink2)
                 Text(
-                    row.songTitle,
+                    if (row.songId.isEmpty() && row.songTitle.isEmpty()) {
+                        L10n.Edit.setlistRowSongPlaceholder.resolve()
+                    } else {
+                        row.songTitle
+                    },
                     fontSize = 15.sp,
                     color = if (row.songId.isEmpty()) DS.ink2 else DS.ink,
                     maxLines = 2, overflow = TextOverflow.Ellipsis,
@@ -590,13 +630,13 @@ private fun SetlistEditRowView(
                 )
             }
             IconButton(onClick = onMoveUp, enabled = !isFirst) {
-                Icon(Icons.Filled.KeyboardArrowUp, contentDescription = "上へ")
+                Icon(Icons.Filled.KeyboardArrowUp, contentDescription = L10n.Edit.setlistRowMoveUpA11y.resolve())
             }
             IconButton(onClick = onMoveDown, enabled = !isLast) {
-                Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "下へ")
+                Icon(Icons.Filled.KeyboardArrowDown, contentDescription = L10n.Edit.setlistRowMoveDownA11y.resolve())
             }
             IconButton(onClick = onRemove) {
-                Icon(Icons.Filled.Close, contentDescription = "削除", tint = DS.danger)
+                Icon(Icons.Filled.Close, contentDescription = L10n.Edit.setlistRowRemoveA11y.resolve(), tint = DS.danger)
             }
         }
 
@@ -604,12 +644,12 @@ private fun SetlistEditRowView(
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            sections.forEach { label ->
-                val selected = (row.section ?: "本編") == label
+            sections.forEach { section ->
+                val selected = (row.section ?: MAIN_SECTION) == section
                 FilterChip(
                     selected = selected,
-                    onClick = { onSectionChange(if (label == "本編") null else label) },
-                    label = { Text(label, fontSize = 12.sp) }
+                    onClick = { onSectionChange(if (section == MAIN_SECTION) null else section) },
+                    label = { Text(sectionLabel(section).resolve(), fontSize = 12.sp) }
                 )
             }
         }
@@ -621,7 +661,7 @@ private fun SetlistEditRowView(
         ) {
             Icon(Icons.Filled.Person, contentDescription = null, tint = DS.ink2)
             if (row.castIds.isEmpty()) {
-                Text("(出演者なし — タップで追加)", fontSize = 13.sp, color = DS.ink2)
+                Text(L10n.Edit.setlistRowNoCast.resolve(), fontSize = 13.sp, color = DS.ink2)
             } else {
                 Text(
                     row.castIds.mapNotNull { idolById[it]?.name }.sorted().joinToString(" / "),

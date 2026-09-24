@@ -37,7 +37,7 @@ struct PrimaryActionButton: View {
         .disabled(isDisabled || isLoading)
         .animation(.smooth(duration: 0.2), value: isLoading)
         .accessibilityLabel(label)
-        .accessibilityHint(isLoading ? "送信中" : "")
+        .accessibilityHint(isLoading ? String(localized: L10n.Edit.primaryButtonSendingA11yHint) : "")
     }
 }
 

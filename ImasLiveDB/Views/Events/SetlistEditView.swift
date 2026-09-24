@@ -31,7 +31,8 @@ struct SetlistEditView: View {
     @State private var idolById: [String: Idol] = [:]
     @State private var isLoading = true
     @State private var isSaving = false
-    @State private var errorMessage: String?
+    /// 解決済みの String ではなく文言の値で持ち、alert で文字列にする。
+    @State private var errorMessage: LocalizedStringResource?
     @State private var requestSent = false
     @State private var showClearConfirm = false
 
@@ -41,14 +42,14 @@ struct SetlistEditView: View {
     var body: some View {
         NavigationStack {
             content
-                .navigationTitle("セトリ編集")
+                .navigationTitle(L10n.Edit.setlistTitle)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("キャンセル") { dismiss() }
+                        Button { dismiss() } label: { Text(L10n.Edit.actionCancel) }
                     }
                     ToolbarItem(placement: .confirmationAction) {
-                        Button("保存") {
+                        Button {
                             AppAnalytics.tap("setlist_edit.save")
                             // 既存セトリがあったのに 0 行で保存しようとした時は確認。
                             // 意図的な全削除 / 投稿前のリセットは許可するが誤操作を防ぐ。
@@ -57,6 +58,8 @@ struct SetlistEditView: View {
                             } else {
                                 Task { await save() }
                             }
+                        } label: {
+                            Text(L10n.Edit.actionSave)
                         }
                         .disabled(isSaving)
                     }
@@ -67,27 +70,29 @@ struct SetlistEditView: View {
                 .overlay {
                     if isSaving {
                         Color.black.opacity(0.3).ignoresSafeArea()
-                        ProgressView("保存中…")
+                        ProgressView(L10n.Edit.formSaving)
                             .padding(DS.sp7)
                             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
                     }
                 }
-                .alert("エラー", isPresented: Binding(
+                .alert(L10n.Edit.formErrorTitle, isPresented: Binding(
                     get: { errorMessage != nil },
                     set: { if !$0 { errorMessage = nil } }
                 )) {
                     Button("OK") {}
                 } message: {
-                    Text(errorMessage ?? "")
+                    if let errorMessage { Text(errorMessage) }
                 }
                 .editRequestSentAlert(isPresented: $requestSent, onDismiss: { dismiss() })
-                .alert("セトリを全削除しますか?", isPresented: $showClearConfirm) {
-                    Button("削除する", role: .destructive) {
+                .alert(L10n.Edit.setlistClearTitle, isPresented: $showClearConfirm) {
+                    Button(role: .destructive) {
                         Task { await save() }
+                    } label: {
+                        Text(L10n.Edit.setlistClearConfirm)
                     }
-                    Button("キャンセル", role: .cancel) {}
+                    Button(role: .cancel) {} label: { Text(L10n.Edit.actionCancel) }
                 } message: {
-                    Text("この公演のセトリ \(initialItemIds.count) 件をすべて削除します。 この操作は取り消せません。")
+                    Text(L10n.Edit.setlistClearMessageIos(count: initialItemIds.count))
                 }
                 .sheet(item: $songPickerForRowId) { wrapper in
                     SongPickerView { song in
@@ -102,7 +107,7 @@ struct SetlistEditView: View {
                 .sheet(item: $castPickerForRowId) { wrapper in
                     if let idx = rows.firstIndex(where: { $0.id == wrapper.id }) {
                         IdolPickerView(
-                            title: "出演者",
+                            title: String(localized: L10n.Edit.setlistCastPickerTitle),
                             idols: allIdols,
                             selected: rows[idx].castIds
                         ) { newSelection in
@@ -142,16 +147,17 @@ struct SetlistEditView: View {
                 Section {
                     Button {
                         AppAnalytics.tap("setlist_edit.add_song")
+                        // 曲名は空のまま。行の表示で「(曲を選択)」を出す (SetlistEditRow)
                         let newRow = EditableSetlistRow(
                             songId: "",
-                            songTitle: "(曲を選択)",
+                            songTitle: "",
                             section: nil,
                             castIds: []
                         )
                         rows.append(newRow)
                         songPickerForRowId = PickerSheetRowId(id: newRow.id)
                     } label: {
-                        Label("曲を追加", systemImage: "plus.circle.fill")
+                        Label(L10n.Edit.setlistActionAddSong, systemImage: "plus.circle.fill")
                     }
                     .listRowBackground(DS.surface)
                     .listRowSeparatorTint(DS.sep)
@@ -190,7 +196,7 @@ struct SetlistEditView: View {
             idolById = Dictionary(uniqueKeysWithValues: allIdols.map { ($0.id, $0) })
             isLoading = false
         } catch {
-            errorMessage = "セトリ読み込み失敗: \(error.localizedDescription)"
+            errorMessage = L10n.Edit.setlistErrorLoadFailed(detail: error.localizedDescription)
             isLoading = false
         }
     }
@@ -204,7 +210,7 @@ struct SetlistEditView: View {
         // 1. 検証
         for (i, row) in rows.enumerated() {
             if row.songId.isEmpty {
-                errorMessage = "\(i + 1) 行目: 曲が未選択"
+                errorMessage = L10n.Edit.setlistErrorRowSongMissing(row: i + 1)
                 return
             }
         }
@@ -258,7 +264,7 @@ struct SetlistEditView: View {
             Logger.database.notice("setlist_edit_saved show=\(show.id, privacy: .public) items=\(newItems.count) performers=\(newPerformers.count) delItems=\(deletedItemNames.count) delPerf=\(deletedPerformerNames.count)")
             dismiss()
         } catch {
-            errorMessage = "保存失敗: \(error.localizedDescription)"
+            errorMessage = L10n.Edit.formErrorSaveFailed(detail: error.localizedDescription)
         }
     }
 
@@ -334,6 +340,7 @@ struct SetlistEditView: View {
         // 「修正リクエストを送信しました」の表示も出さずに閉じる (何も送っていないため)。
         guard !ops.isEmpty else { return true }
 
+        // i18n-ignore(storage): 編集履歴に残るサマリ (サーバに送るデータ)。画面の言語で変えない
         let outcome = try await EditService.shared.submitMaster(ops: ops, summary: "セトリ編集")
         if case .applied = outcome { return true }
         return false
@@ -369,7 +376,13 @@ private struct SetlistEditRow: View {
     let onPickSong: () -> Void
     let onPickCasts: () -> Void
 
+    // i18n-ignore(storage): マスタ (CloudKit) の section 列に入る語彙。訳さない・変えない (表示は sectionLabels)
     private let sections = ["本編", "アンコール", "MC", "ダブルアンコール"]
+    /// sections と同じ並びの表示名 (文言は作った時点の言語で固まるので、保持せず毎回引く)。
+    private var sectionLabels: [LocalizedStringResource] {
+        [L10n.Edit.setlistSectionMain, L10n.Edit.setlistSectionEncore,
+         L10n.Edit.setlistSectionMc, L10n.Edit.setlistSectionDoubleEncore]
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
@@ -377,7 +390,7 @@ private struct SetlistEditRow: View {
                 HStack {
                     Image(systemName: "music.note")
                         .foregroundStyle(DS.ink2)
-                    Text(row.songTitle)
+                    Text(display: songTitleText)
                         .foregroundStyle(row.songId.isEmpty ? DS.ink2 : DS.ink)
                         .lineLimit(2)
                     Spacer()
@@ -386,8 +399,10 @@ private struct SetlistEditRow: View {
             }
             .buttonStyle(.plain)
 
-            ImasSegmented(labels: sections, selection: Binding(
+            ImasSegmented(labels: sectionLabels.map { String(localized: $0) }, selection: Binding(
+                // i18n-ignore(storage): 本編 = section 列を持たない (保存しない) ことの判定
                 get: { sections.firstIndex(of: row.section ?? "本編") ?? 0 },
+                // i18n-ignore(storage): 本編 = section 列を持たない (保存しない) ことの判定
                 set: { row.section = (sections[$0] == "本編") ? nil : sections[$0] }
             ))
 
@@ -396,7 +411,7 @@ private struct SetlistEditRow: View {
                     Image(systemName: "person.2")
                         .foregroundStyle(DS.ink2)
                     if row.castIds.isEmpty {
-                        Text("(出演者なし — タップで追加)")
+                        Text(L10n.Edit.setlistRowNoCast)
                             .foregroundStyle(DS.ink2)
                     } else {
                         Text(performerNames())
@@ -410,6 +425,11 @@ private struct SetlistEditRow: View {
             .buttonStyle(.plain)
         }
         .padding(.vertical, DS.sp2)
+    }
+
+    /// 曲をまだ選んでいない新しい行は「(曲を選択)」、それ以外は曲名 (データ)。
+    private var songTitleText: DisplayText {
+        row.songId.isEmpty && row.songTitle.isEmpty ? .key(L10n.Edit.setlistRowSongPlaceholder) : .verbatim(row.songTitle)
     }
 
     private func performerNames() -> String {

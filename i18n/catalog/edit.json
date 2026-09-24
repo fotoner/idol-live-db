@@ -1,0 +1,1361 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "edit",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/data/edit/EditApi.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/edit/EditPickers.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/edit/EventEditScreen.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/edit/IdolEditScreen.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/edit/MasterEditForm.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/edit/SetlistEditScreen.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/edit/ShowEditScreen.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/edit/SongEditScreen.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/edit/VideoEditSheet.kt"
+    ],
+    "ios": [
+      "ImasLiveDB/Views/Community/Components/PrimaryActionButton.swift",
+      "ImasLiveDB/Views/Community/Pickers/EventSearchPickerView.swift",
+      "ImasLiveDB/Views/Community/Pickers/ShowSearchPickerView.swift",
+      "ImasLiveDB/Views/Community/Pickers/SongSearchPickerView.swift",
+      "ImasLiveDB/Views/Events/EventEditView.swift",
+      "ImasLiveDB/Views/Events/SetlistEditView.swift",
+      "ImasLiveDB/Views/Events/ShowEditView.swift",
+      "ImasLiveDB/Views/Idols/IdolEditView.swift",
+      "ImasLiveDB/Views/Songs/SongCommunityEditView.swift",
+      "ImasLiveDB/Views/Songs/SongEditView.swift"
+    ]
+  },
+  "strings": {
+    "action.cancel": {
+      "ja": "キャンセル",
+      "ko": "취소",
+      "note": "編集フォーム・ピッカー・シートを閉じるボタン (Android は閉じる/戻るアイコンの読み上げにも使う)"
+    },
+    "action.save": {
+      "ja": "保存",
+      "ko": "저장",
+      "note": "編集フォームの保存ボタン"
+    },
+    "error.auth_expired": {
+      "ja": "認証の有効期限が切れています。再度サインインしてください。",
+      "ko": "인증이 만료됐어요. 다시 로그인해 주세요.",
+      "note": "編集の送信で認証が切れていたとき (HTTP 401)"
+    },
+    "error.banned": {
+      "ja": "この操作は制限されています。",
+      "ko": "이 작업은 제한되어 있어요.",
+      "note": "編集の送信で利用停止 (BAN) と返されたとき (HTTP 403)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "error.rate_limited": {
+      "ja": "投稿が多すぎます。しばらく待ってからお試しください。",
+      "ko": "너무 자주 게시했어요. 잠시 기다린 뒤 다시 시도해 주세요.",
+      "note": "編集の送信がレート制限に当たったとき (HTTP 429)"
+    },
+    "error.server": {
+      "args": [
+        {
+          "name": "status",
+          "type": "int"
+        }
+      ],
+      "ja": "保存に失敗しました ({status})",
+      "ko": "저장하지 못했어요 ({status})",
+      "note": "編集の送信でサーバがエラーを返したとき。status は HTTP の状態コード",
+      "platforms": [
+        "android"
+      ]
+    },
+    "error.transport": {
+      "args": [
+        {
+          "name": "detail",
+          "type": "string"
+        }
+      ],
+      "ja": "通信に失敗しました: {detail}",
+      "ko": "서버에 연결하지 못했어요: {detail}",
+      "note": "編集の送信が通信エラーで失敗したとき。detail は通信ライブラリの説明 (訳さない)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "event.basic.footer": {
+      "ja": "合同ブランドはブランド ID をカンマ区切りで (例: 315,283)。",
+      "ko": "합동 브랜드는 브랜드 ID를 쉼표로 구분해서 입력해요 (예: 315,283).",
+      "note": "ライブの編集フォームの基本情報の節の下の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "event.error.name_required": {
+      "ja": "イベント名を入力してください",
+      "ko": "이벤트 이름을 입력해 주세요",
+      "note": "ライブの編集フォームで名前を空のまま保存しようとしたとき"
+    },
+    "event.field.joint_brands": {
+      "ja": "合同ブランド (カンマ区切り)",
+      "ko": "합동 브랜드 (쉼표로 구분)",
+      "note": "ライブの編集フォームの合同ブランド (ブランド ID をカンマで並べる) の入力欄"
+    },
+    "event.field.kind": {
+      "ja": "種別",
+      "ko": "종류",
+      "note": "ライブの編集フォームの種別 (ライブ・フェス・リリイベ…) の選択欄"
+    },
+    "event.field.name": {
+      "ja": "イベント名",
+      "ko": "이벤트 이름",
+      "note": "ライブの編集フォームの名前の入力欄"
+    },
+    "event.field.ticket_deadline": {
+      "ja": "先行締切 (YYYY-MM-DD)",
+      "ko": "선행 마감 (YYYY-MM-DD)",
+      "note": "チケットの先行受付の締切日の入力欄 (Android はコアの語彙「申込締切」から作る)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "event.field.ticket_lottery": {
+      "ja": "当落発表 (YYYY-MM-DD)",
+      "ko": "추첨 결과 발표 (YYYY-MM-DD)",
+      "note": "チケットの当落発表日の入力欄 (Android はコアの語彙から作る)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "event.field.ticket_open": {
+      "ja": "受付開始 (YYYY-MM-DD)",
+      "ko": "접수 시작 (YYYY-MM-DD)",
+      "note": "チケットの受付開始日の入力欄 (Android はコアの語彙から作る)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "event.kind.unchanged": {
+      "args": [
+        {
+          "name": "raw",
+          "type": "string"
+        }
+      ],
+      "ja": "変更しない ({raw})",
+      "ko": "변경 안 함 ({raw})",
+      "note": "種別の選択肢。アプリが知らない種別のイベントを直すとき、元の値のまま送り返す。raw は元の種別の生の値 (訳さない)"
+    },
+    "event.section.ticket": {
+      "ja": "チケット",
+      "ko": "티켓",
+      "note": "ライブの編集フォームのチケットの日程の節の見出し"
+    },
+    "event.title.create_android": {
+      "ja": "ライブを追加",
+      "ko": "라이브 추가",
+      "note": "ライブの新規作成フォームの見出し (Android の文言。iOS は create_ios)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "event.title.create_ios": {
+      "ja": "イベント追加",
+      "ko": "이벤트 추가",
+      "note": "ライブ (イベント) の新規作成フォームの見出し (iOS の文言。Android は create_android)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "event.title.edit_android": {
+      "ja": "ライブ編集",
+      "ko": "라이브 편집",
+      "note": "ライブの編集フォームの見出し (Android の文言。iOS は edit_ios)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "event.title.edit_ios": {
+      "ja": "イベント編集",
+      "ko": "이벤트 편집",
+      "note": "ライブ (イベント) の編集フォームの見出し (iOS の文言。Android は edit_android)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "event_picker.empty.message": {
+      "ja": "イベント名を入力して検索してください",
+      "ko": "이벤트 이름을 입력해서 검색해 주세요",
+      "note": "イベントのピッカーを開いた直後 (未入力) の空状態の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "event_picker.empty.no_match": {
+      "args": [
+        {
+          "name": "query",
+          "type": "string"
+        }
+      ],
+      "ja": "「{query}」に一致するイベントがありません",
+      "ko": "“{query}”에 해당하는 이벤트가 없어요",
+      "note": "イベントのピッカーで検索に一致するものが無いとき。query は入力した検索語",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "event_picker.empty.title": {
+      "ja": "イベントを検索",
+      "ko": "이벤트 검색",
+      "note": "イベントのピッカーを開いた直後 (未入力) の空状態の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "event_picker.search.prompt": {
+      "ja": "イベント名で検索",
+      "ko": "이벤트 이름으로 검색",
+      "note": "イベントのピッカーの検索欄のプレースホルダ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "event_picker.title": {
+      "ja": "イベントを選択",
+      "ko": "이벤트 선택",
+      "note": "イベント (ライブ) を 1 つ選ぶピッカーの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "feed.editor_anonymous": {
+      "ja": "名無しのプロデューサー",
+      "ko": "이름 없는 프로듀서",
+      "note": "最近の編集で、編集者の表示名が無い・メールアドレスの形のときに代わりに出す名前。最近の編集 (edit_feed) の画面と iOS の EditFeedService もこのキーを使う (同じ文言の別キーを作らない)。iOS から引くようになったら platforms を外す",
+      "platforms": [
+        "android"
+      ]
+    },
+    "form.error.id_unresolved": {
+      "ja": "保存に失敗しました (ID 未確定)",
+      "ko": "저장하지 못했어요 (ID 미확정)",
+      "note": "管理者の即時反映でサーバが確定 ID を返さなかったとき (ライブ・公演・マスタ編集)"
+    },
+    "form.error.save_failed": {
+      "args": [
+        {
+          "name": "detail",
+          "type": "string"
+        }
+      ],
+      "ja": "保存失敗: {detail}",
+      "ko": "저장 실패: {detail}",
+      "note": "編集フォームの保存が例外で失敗したとき。detail は OS / 通信ライブラリが返すエラーの説明 (訳さない)"
+    },
+    "form.error.title": {
+      "ja": "エラー",
+      "ko": "오류",
+      "note": "編集フォームで保存・検証に失敗したときのダイアログの見出し"
+    },
+    "form.field.brand": {
+      "ja": "ブランド",
+      "ko": "브랜드",
+      "note": "編集フォームのブランドの選択欄 (ライブ・曲・アイドル)"
+    },
+    "form.option.unspecified": {
+      "ja": "未指定",
+      "ko": "지정 안 함",
+      "note": "選択欄の「選ばない」選択肢 (ブランド・公演の出演形態)"
+    },
+    "form.saving": {
+      "ja": "保存中…",
+      "ko": "저장 중…",
+      "note": "編集フォームで保存を送っている間の全面オーバーレイ"
+    },
+    "form.section.basic": {
+      "ja": "基本情報",
+      "ko": "기본 정보",
+      "note": "ライブ・公演・曲の編集フォームの最初の節の見出し"
+    },
+    "form.sort_order_android": {
+      "args": [
+        {
+          "name": "value",
+          "type": "int"
+        }
+      ],
+      "ja": "並び順: {value}",
+      "ko": "정렬 순서: {value}",
+      "note": "マスタ (アイドル・公演) の並び順 (sortOrder) を ± で変える行 (Android)。value は並び順の番号で、以前の Android と同じく桁区切りしない (1001)。iOS は桁区切りするので form.sort_order_ios に分けた",
+      "platforms": [
+        "android"
+      ]
+    },
+    "form.sort_order_ios": {
+      "args": [
+        {
+          "name": "value",
+          "type": "count"
+        }
+      ],
+      "ja": "並び順: {value}",
+      "ko": "정렬 순서: {value}",
+      "note": "マスタ (アイドル・公演) の並び順 (sortOrder) を ± で変える Stepper の見出し (iOS)。value は並び順の番号。数量ではないが、以前の iOS (SwiftUI の補間) と同じく桁区切りを付けるため count にした (アイドルの並び順は 1000 以上が普通で「並び順: 1,001」と出る)。ja・ko の複数形は other だけ。Android は区切らないので form.sort_order_android に分けた",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "idol.field.aliases": {
+      "ja": "別名 (カンマ区切り)",
+      "ko": "다른 이름 (쉼표로 구분)",
+      "note": "アイドルの編集フォームの別名の入力欄"
+    },
+    "idol.field.attribute": {
+      "ja": "属性 (cute/cool/passion 等)",
+      "ko": "속성 (cute/cool/passion 등)",
+      "note": "アイドルの編集フォームの属性の入力欄。例の値 (cute/cool/passion) は入力する値なので訳さない"
+    },
+    "idol.field.birthday": {
+      "ja": "誕生日 (MM-DD)",
+      "ko": "생일 (MM-DD)",
+      "note": "アイドルの編集フォームの誕生日の入力欄"
+    },
+    "idol.field.birthplace": {
+      "ja": "出身地",
+      "ko": "출신지",
+      "note": "アイドルの編集フォームの出身地の入力欄"
+    },
+    "idol.field.blood_type": {
+      "ja": "血液型",
+      "ko": "혈액형",
+      "note": "アイドルの編集フォームの血液型の入力欄"
+    },
+    "idol.field.color": {
+      "ja": "カラー (#hex)",
+      "ko": "컬러 (#hex)",
+      "note": "アイドルの編集フォームのイメージカラーの入力欄"
+    },
+    "idol.field.debut_date": {
+      "ja": "実装日 (YYYY-MM-DD)",
+      "ko": "실장일 (YYYY-MM-DD)",
+      "note": "アイドルの編集フォームの実装日 (ゲームに登場した日) の入力欄"
+    },
+    "idol.field.kana": {
+      "ja": "カナ",
+      "ko": "가나 표기",
+      "note": "アイドルの編集フォームの名前の読み (カタカナ) の入力欄"
+    },
+    "idol.field.name": {
+      "ja": "名前",
+      "ko": "이름",
+      "note": "アイドルの編集フォームの名前の入力欄"
+    },
+    "idol.field.romaji": {
+      "ja": "ローマ字",
+      "ko": "로마자",
+      "note": "アイドルの編集フォームの名前のローマ字の入力欄"
+    },
+    "idol.profile.footer": {
+      "ja": "カラーは #RRGGBB。# を省いても保存時に補います。",
+      "ko": "컬러는 #RRGGBB 형식이에요. #를 빼도 저장할 때 채워 줘요.",
+      "note": "アイドルの編集フォームのプロフィールの節の下の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "idol.section.category": {
+      "ja": "分類",
+      "ko": "분류",
+      "note": "アイドルの編集フォームの分類 (ブランド・属性・並び順) の節の見出し"
+    },
+    "idol.section.name": {
+      "ja": "名前",
+      "ko": "이름",
+      "note": "アイドルの編集フォームの名前の節の見出し"
+    },
+    "idol.section.profile": {
+      "ja": "プロフィール",
+      "ko": "프로필",
+      "note": "アイドルの編集フォームのプロフィールの節の見出し"
+    },
+    "idol.title": {
+      "ja": "アイドル編集",
+      "ko": "아이돌 편집",
+      "note": "アイドルの編集フォームの見出し"
+    },
+    "idol_picker.action.confirm": {
+      "ja": "決定",
+      "ko": "확인",
+      "note": "アイドルを複数選ぶシートの確定ボタン",
+      "platforms": [
+        "android"
+      ]
+    },
+    "idol_picker.header": {
+      "args": [
+        {
+          "name": "title",
+          "type": "text"
+        },
+        {
+          "name": "count",
+          "type": "int"
+        }
+      ],
+      "ja": "{title} ({count})",
+      "ko": "{title} ({count})",
+      "note": "アイドルを複数選ぶシートの見出し。title は用途 (出演者を選択・歌唱アイドル)、count は選んだ人数 (桁区切りしない)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "idol_picker.search.prompt": {
+      "ja": "アイドル名で検索",
+      "ko": "아이돌 이름으로 검색",
+      "note": "アイドルを複数選ぶシートの検索欄のプレースホルダ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "idol_picker.title": {
+      "ja": "出演者を選択",
+      "ko": "출연자 선택",
+      "note": "セトリの 1 行の出演者を選ぶシートの見出し (既定)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.clear.a11y": {
+      "ja": "クリア",
+      "ko": "지우기",
+      "note": "ピッカーの検索欄の × ボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.empty.title": {
+      "ja": "見つかりません",
+      "ko": "찾을 수 없어요",
+      "note": "ライブ・公演・曲を選ぶピッカーで、検索に一致するものが無いときの空状態の見出し"
+    },
+    "primary_button.sending.a11y_hint": {
+      "ja": "送信中",
+      "ko": "전송 중",
+      "note": "送信ボタン (PrimaryActionButton) が送信中のときの VoiceOver のヒント",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "request_sent.message": {
+      "ja": "この編集はすぐには反映されず、承認後に反映されます。",
+      "ko": "이 편집은 바로 반영되지 않고, 승인된 뒤에 반영돼요.",
+      "note": "修正リクエストを送ったときのダイアログの本文",
+      "platforms": [
+        "android"
+      ]
+    },
+    "request_sent.progress": {
+      "ja": "進捗を見る",
+      "ko": "진행 상황 보기",
+      "note": "修正リクエストの進み具合 (GitHub の issue) を開くリンク",
+      "platforms": [
+        "android"
+      ]
+    },
+    "request_sent.title": {
+      "ja": "編集リクエストを送信しました",
+      "ko": "편집 요청을 보냈어요",
+      "note": "一般ユーザーの編集が修正リクエスト (承認待ち) になったときのダイアログの見出し。iOS は別の部品 (EditRequestAlert) が出す",
+      "platforms": [
+        "android"
+      ]
+    },
+    "setlist.action.add_song": {
+      "ja": "曲を追加",
+      "ko": "곡 추가",
+      "note": "セトリの末尾に行を足すボタン"
+    },
+    "setlist.cast_picker.title": {
+      "ja": "出演者",
+      "ko": "출연자",
+      "note": "セトリの 1 行の出演者を選ぶ画面の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setlist.clear.confirm": {
+      "ja": "削除する",
+      "ko": "삭제",
+      "note": "セトリ全削除の確認で削除を実行するボタン"
+    },
+    "setlist.clear.message_android": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "この公演のセトリ {count} 件をすべて削除します。この操作は取り消せません。",
+      "ko": "이 공연의 세트리스트 {count}건을 모두 삭제해요. 이 작업은 되돌릴 수 없어요.",
+      "note": "セトリ全削除の確認の本文 (Android の文言。iOS は message_ios)。count は消える行の数 (1000 以上なら桁区切りが付くが、セトリの行数なので実際には出ない)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "setlist.clear.message_ios": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "この公演のセトリ {count} 件をすべて削除します。 この操作は取り消せません。",
+      "ko": "이 공연의 세트리스트 {count}건을 모두 삭제해요. 이 작업은 되돌릴 수 없어요.",
+      "note": "セトリ全削除の確認の本文 (iOS の文言。「。」のあとに空白がある。Android は message_android)。count は消える行の数 (1000 以上なら桁区切りが付くが、セトリの行数なので実際には出ない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setlist.clear.title": {
+      "ja": "セトリを全削除しますか?",
+      "ko": "세트리스트를 모두 삭제할까요?",
+      "note": "既存のセトリを 0 行にして保存しようとしたときの確認の見出し"
+    },
+    "setlist.error.load_failed": {
+      "args": [
+        {
+          "name": "detail",
+          "type": "string"
+        }
+      ],
+      "ja": "セトリ読み込み失敗: {detail}",
+      "ko": "세트리스트를 불러오지 못했어요: {detail}",
+      "note": "セトリの編集画面で今のセトリを読めなかったとき。detail はエラーの説明 (訳さない)"
+    },
+    "setlist.error.row_song_missing": {
+      "args": [
+        {
+          "name": "row",
+          "type": "int"
+        }
+      ],
+      "ja": "{row} 行目: 曲が未選択",
+      "ko": "{row}번째 줄: 곡을 선택하지 않았어요",
+      "note": "曲を選んでいない行があるまま保存しようとしたとき。row は行の番号 (1 から)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setlist.error.song_missing": {
+      "ja": "曲が未選択の行があります",
+      "ko": "곡을 선택하지 않은 줄이 있어요",
+      "note": "曲を選んでいない行があるまま保存しようとしたとき",
+      "platforms": [
+        "android"
+      ]
+    },
+    "setlist.header.event_show": {
+      "args": [
+        {
+          "name": "event",
+          "type": "string"
+        },
+        {
+          "name": "show",
+          "type": "string"
+        }
+      ],
+      "ja": "{event} ・ {show}",
+      "ko": "{event} · {show}",
+      "note": "セトリの編集画面の上に出す対象。event はイベント名、show は公演名",
+      "platforms": [
+        "android"
+      ]
+    },
+    "setlist.row.move_down.a11y": {
+      "ja": "下へ",
+      "ko": "아래로",
+      "note": "セトリの行を 1 つ下へ動かすボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "setlist.row.move_up.a11y": {
+      "ja": "上へ",
+      "ko": "위로",
+      "note": "セトリの行を 1 つ上へ動かすボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "setlist.row.no_cast": {
+      "ja": "(出演者なし — タップで追加)",
+      "ko": "(출연자 없음 — 탭해서 추가)",
+      "note": "セトリの行で出演者を 1 人も選んでいないときの表示 (押すと出演者を選ぶ)"
+    },
+    "setlist.row.remove.a11y": {
+      "ja": "削除",
+      "ko": "삭제",
+      "note": "セトリの行を消すボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "setlist.row.song_placeholder": {
+      "ja": "(曲を選択)",
+      "ko": "(곡 선택)",
+      "note": "セトリの行で、まだ曲を選んでいないときの表示"
+    },
+    "setlist.section.double_encore": {
+      "ja": "ダブルアンコール",
+      "ko": "더블 앙코르",
+      "note": "セトリの行の区分の選択肢: ダブルアンコール"
+    },
+    "setlist.section.encore": {
+      "ja": "アンコール",
+      "ko": "앙코르",
+      "note": "セトリの行の区分の選択肢: アンコール"
+    },
+    "setlist.section.main": {
+      "ja": "本編",
+      "ko": "본편",
+      "note": "セトリの行の区分の選択肢: 本編 (区分なし)"
+    },
+    "setlist.section.mc": {
+      "ja": "MC",
+      "ko": "MC",
+      "note": "セトリの行の区分の選択肢: MC (トーク)"
+    },
+    "setlist.title": {
+      "ja": "セトリ編集",
+      "ko": "세트리스트 편집",
+      "note": "セトリの編集画面の見出し"
+    },
+    "show.error.date_format": {
+      "ja": "日付は YYYY-MM-DD 形式で入力してください",
+      "ko": "날짜는 YYYY-MM-DD 형식으로 입력해 주세요",
+      "note": "公演の編集フォームで日付の形が正しくないとき"
+    },
+    "show.error.required": {
+      "ja": "公演名と日付は必須です",
+      "ko": "공연 이름과 날짜는 필수예요",
+      "note": "公演の編集フォームで名前か日付が空のまま保存しようとしたとき"
+    },
+    "show.field.date": {
+      "ja": "日付 (YYYY-MM-DD)",
+      "ko": "날짜 (YYYY-MM-DD)",
+      "note": "公演の編集フォームの公演日の入力欄"
+    },
+    "show.field.name": {
+      "ja": "公演名",
+      "ko": "공연 이름",
+      "note": "公演の編集フォームの名前の入力欄"
+    },
+    "show.field.performer_type": {
+      "ja": "出演形態",
+      "ko": "출연 형태",
+      "note": "公演の編集フォームの出演形態 (character / cast / mixed。選択肢の値は訳さない) の選択欄"
+    },
+    "show.field.start_time": {
+      "ja": "開演時刻 (HH:mm)",
+      "ko": "공연 시작 시각 (HH:mm)",
+      "note": "公演の編集フォームの開演時刻の入力欄"
+    },
+    "show.field.venue": {
+      "ja": "会場",
+      "ko": "공연장",
+      "note": "公演の編集フォームの会場名の入力欄"
+    },
+    "show.field.venue_city": {
+      "ja": "会場所在地",
+      "ko": "공연장 소재지",
+      "note": "公演の編集フォームの会場の所在地 (都市) の入力欄"
+    },
+    "show.title.create_android": {
+      "ja": "公演を追加",
+      "ko": "공연 추가",
+      "note": "公演の新規作成フォームの見出し (Android の文言。iOS は create_ios)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "show.title.create_ios": {
+      "ja": "公演追加",
+      "ko": "공연 추가",
+      "note": "公演の新規作成フォームの見出し (iOS の文言。Android は create_android)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "show.title.edit": {
+      "ja": "公演編集",
+      "ko": "공연 편집",
+      "note": "公演の編集フォームの見出し"
+    },
+    "show_picker.empty.message": {
+      "ja": "公演名またはイベント名を入力して検索してください",
+      "ko": "공연 이름이나 이벤트 이름을 입력해서 검색해 주세요",
+      "note": "公演のピッカーを開いた直後 (未入力) の空状態の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "show_picker.empty.no_match": {
+      "args": [
+        {
+          "name": "query",
+          "type": "string"
+        }
+      ],
+      "ja": "「{query}」に一致する公演がありません",
+      "ko": "“{query}”에 해당하는 공연이 없어요",
+      "note": "公演のピッカーで検索に一致するものが無いとき。query は入力した検索語"
+    },
+    "show_picker.empty.recent": {
+      "ja": "最近の公演がここに表示されます",
+      "ko": "최근 공연이 여기에 표시돼요",
+      "note": "公演のピッカーで、未入力なのに結果が無いときの説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "show_picker.empty.title": {
+      "ja": "公演を検索",
+      "ko": "공연 검색",
+      "note": "公演のピッカーを開いた直後 (未入力) の空状態の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "show_picker.row.subtitle": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "date",
+          "type": "string"
+        }
+      ],
+      "ja": "{name} ・ {date}",
+      "ko": "{name} · {date}",
+      "note": "公演のピッカーの行の 2 行目。name は公演名、date は公演日 (YYYY-MM-DD。書式済み)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "show_picker.search.prompt": {
+      "ja": "公演名・イベント名で検索",
+      "ko": "공연 이름·이벤트 이름으로 검색",
+      "note": "公演のピッカーの検索欄のプレースホルダ"
+    },
+    "show_picker.title": {
+      "ja": "公演を選択",
+      "ko": "공연 선택",
+      "note": "公演を 1 つ選ぶピッカーの見出し"
+    },
+    "song.apple_music.clear": {
+      "ja": "Apple Music 関連を全て空にする",
+      "ko": "Apple Music 관련 항목 모두 비우기",
+      "note": "曲の編集フォームで Apple Music の ID・ジャケ写・試聴の URL をまとめて消すボタン"
+    },
+    "song.apple_music.clear_footer": {
+      "ja": "誤紐付けで他の曲が再生されるときに使う。サブスク未配信の曲はクリアすべき。",
+      "ko": "잘못 연결돼서 다른 곡이 재생될 때 써요. 스트리밍에 없는 곡은 비워 두세요.",
+      "note": "Apple Music の項目を空にするボタンの下の説明 (サブスク = 定額の配信サービス)"
+    },
+    "song.apple_music.fix_header": {
+      "ja": "誤紐付けの修正",
+      "ko": "잘못된 연결 수정",
+      "note": "曲の編集フォームの Apple Music の項目を空にする節の見出し",
+      "platforms": [
+        "android"
+      ]
+    },
+    "song.artists.footer": {
+      "ja": "一覧でアイコンを出すために必要です。ソロ曲なら 1 名、ユニット曲なら全員を選んでください。",
+      "ko": "목록에 아이콘을 표시하는 데 필요해요. 솔로곡이면 1명, 유닛곡이면 전원을 선택해 주세요.",
+      "note": "歌唱アイドルの節の下の説明"
+    },
+    "song.artists.label_count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "int"
+        }
+      ],
+      "ja": "歌唱アイドル ({count})",
+      "ko": "가창 아이돌 ({count})",
+      "note": "歌唱アイドルを選ぶ行のラベル。count は選んだ人数 (桁区切りしない)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "song.artists.placeholder": {
+      "ja": "歌唱アイドルを選択",
+      "ko": "가창 아이돌 선택",
+      "note": "歌唱アイドルをまだ選んでいないときの表示 (押すと選ぶ画面)"
+    },
+    "song.artists.title": {
+      "ja": "歌唱アイドル",
+      "ko": "가창 아이돌",
+      "note": "曲の新規作成で歌うアイドル (オリジナルメンバー) を選ぶ節の見出しと、アイドルを選ぶ画面の見出し"
+    },
+    "song.error.artists_required": {
+      "ja": "歌唱アイドルを 1 名以上選択してください",
+      "ko": "가창 아이돌을 1명 이상 선택해 주세요",
+      "note": "曲の新規作成で歌唱アイドルを選ばずに保存しようとしたとき"
+    },
+    "song.error.artwork_required": {
+      "ja": "Apple Music ID を設定する場合は artwork URL も必須です (一覧のジャケ写表示に使います)",
+      "ko": "Apple Music ID를 설정하려면 artwork URL도 필요해요 (목록의 재킷 이미지 표시에 써요)",
+      "note": "Apple Music の ID だけ入れてジャケ写の URL が空のまま保存しようとしたとき"
+    },
+    "song.error.duration_format": {
+      "ja": "再生時間は秒数 (整数) で入力してください",
+      "ko": "재생 시간은 초 단위 (정수)로 입력해 주세요",
+      "note": "曲の編集フォームで再生時間が数でないとき"
+    },
+    "song.error.release_date_format": {
+      "ja": "リリース日は YYYY-MM-DD 形式で入力してください",
+      "ko": "발매일은 YYYY-MM-DD 형식으로 입력해 주세요",
+      "note": "曲の編集フォームでリリース日の形が正しくないとき"
+    },
+    "song.error.title_required": {
+      "ja": "タイトルを入力してください",
+      "ko": "제목을 입력해 주세요",
+      "note": "曲の編集フォームで曲名を空のまま保存しようとしたとき"
+    },
+    "song.field.arranger": {
+      "ja": "編曲",
+      "ko": "편곡",
+      "note": "曲の編集フォームの編曲者の入力欄"
+    },
+    "song.field.composer": {
+      "ja": "作曲",
+      "ko": "작곡",
+      "note": "曲の編集フォームの作曲者の入力欄"
+    },
+    "song.field.duration": {
+      "ja": "再生時間 (秒)",
+      "ko": "재생 시간 (초)",
+      "note": "曲の編集フォームの再生時間 (秒数) の入力欄"
+    },
+    "song.field.lyricist": {
+      "ja": "作詞",
+      "ko": "작사",
+      "note": "曲の編集フォームの作詞者の入力欄"
+    },
+    "song.field.lyrics_url": {
+      "ja": "歌詞 URL",
+      "ko": "가사 URL",
+      "note": "曲の編集フォームの歌詞ページの URL の入力欄"
+    },
+    "song.field.release_date": {
+      "ja": "リリース日 (YYYY-MM-DD)",
+      "ko": "발매일 (YYYY-MM-DD)",
+      "note": "曲の編集フォームのリリース日の入力欄"
+    },
+    "song.field.singer_label": {
+      "ja": "歌唱表記 (例: 春香・千早)",
+      "ko": "가창 표기 (예: 春香・千早)",
+      "note": "曲の編集フォームの歌唱者の表記の入力欄。例はマスタに入る書き方そのもの (アイドル名と区切りの ・) なので訳さない",
+      "verbatim_ok": true
+    },
+    "song.field.title": {
+      "ja": "タイトル",
+      "ko": "제목",
+      "note": "曲の編集フォームの曲名の入力欄"
+    },
+    "song.field.title_kana": {
+      "ja": "タイトル (カナ)",
+      "ko": "제목 (가나)",
+      "note": "曲の編集フォームの曲名の読みの入力欄"
+    },
+    "song.field.type": {
+      "ja": "種別",
+      "ko": "종류",
+      "note": "曲の編集フォームの曲種別 (ソロ・ユニット…。語はコアの語彙) の選択欄"
+    },
+    "song.field.unit_name": {
+      "ja": "ユニット名",
+      "ko": "유닛 이름",
+      "note": "曲の編集フォームのユニット名の入力欄"
+    },
+    "song.save_notice": {
+      "ja": "保存すると、この編集は「最近の編集」に記録されます。",
+      "ko": "저장하면 이 편집은 “최근 편집”에 기록돼요.",
+      "note": "曲の編集フォームの最後の注意書き。「最近の編集」は編集の一覧画面の名前",
+      "platforms": [
+        "android"
+      ]
+    },
+    "song.section.cd_other": {
+      "ja": "CD / その他",
+      "ko": "CD / 기타",
+      "note": "曲の編集フォームの CD・ISRC・歌詞 URL の節の見出し"
+    },
+    "song.section.credits": {
+      "ja": "制作情報",
+      "ko": "제작 정보",
+      "note": "曲の編集フォームの作家・リリースの節の見出し"
+    },
+    "song.title.create": {
+      "ja": "曲を追加",
+      "ko": "곡 추가",
+      "note": "曲の新規作成フォームの見出し"
+    },
+    "song.title.edit": {
+      "ja": "曲編集",
+      "ko": "곡 편집",
+      "note": "曲の編集フォームの見出し"
+    },
+    "song_picker.action.add": {
+      "ja": "追加",
+      "ko": "추가",
+      "note": "曲のピッカーの確定ボタン (まだ 1 曲も選んでいないとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.action.add_count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "追加 ({count})",
+      "ko": "추가 ({count})",
+      "note": "曲のピッカーの確定ボタン (曲を選んだあと)。count は選んだ曲の数。1000 以上は桁区切りが付く (以前の iOS の SwiftUI の補間と同じ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.action.done": {
+      "ja": "完了",
+      "ko": "완료",
+      "note": "曲のピッカーの絞り込みシートを閉じるボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.action.reset": {
+      "ja": "リセット",
+      "ko": "초기화",
+      "note": "曲のピッカーの絞り込みシートで、絞り込みを全部外すボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.cd_series.title": {
+      "ja": "CDシリーズ",
+      "ko": "CD 시리즈",
+      "note": "曲のピッカーの絞り込みシートの CD シリーズの節の見出しと、そこから開く一覧の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.empty.hint": {
+      "ja": "右上のフィルターか曲名で絞り込めます",
+      "ko": "오른쪽 위 필터나 곡명으로 범위를 좁힐 수 있어요",
+      "note": "曲のピッカーで、未入力なのに結果が無いときの案内",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.empty.no_match": {
+      "args": [
+        {
+          "name": "query",
+          "type": "string"
+        }
+      ],
+      "ja": "「{query}」に一致する楽曲がありません",
+      "ko": "“{query}”에 해당하는 곡이 없어요",
+      "note": "曲のピッカーで検索に一致するものが無いとき。query は入力した検索語"
+    },
+    "song_picker.filter.a11y": {
+      "ja": "フィルター",
+      "ko": "필터",
+      "note": "曲のピッカーの右上の絞り込みボタンの読み上げ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.filter.cast_original_only": {
+      "ja": "出演者のオリ曲のみ",
+      "ko": "출연자 오리지널 곡만",
+      "note": "絞り込み: その公演の出演者がオリジナルメンバーの曲だけにするスイッチ (オリ曲 = オリジナル曲)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.filter.footer": {
+      "ja": "「ライブ履歴のみ」は、セトリ追加で生まれただけでカタログ情報が無い曲 (カバー・歌枠等) を隠します。",
+      "ko": "“라이브 기록에만 있는 곡 숨기기”를 켜면, 세트리스트에 추가되면서 생겼을 뿐 카탈로그 정보가 없는 곡 (커버·노래 방송 등)을 숨겨요.",
+      "note": "絞り込みの節の下の説明。「ライブ履歴のみ」は上のスイッチのこと。歌枠 = 配信で歌う枠",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.filter.header": {
+      "ja": "絞り込み",
+      "ko": "필터",
+      "note": "曲のピッカーの絞り込みシートのスイッチの節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.filter.hide_live_only": {
+      "ja": "ライブ履歴のみの曲を隠す",
+      "ko": "라이브 기록에만 있는 곡 숨기기",
+      "note": "絞り込み: セトリにしか出てこない (カタログ情報の無い) 曲を隠すスイッチ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.filter.include_remixes": {
+      "ja": "リミックスを含める",
+      "ko": "리믹스 포함",
+      "note": "絞り込み: リミックス曲も出すスイッチ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.filter_sheet.title": {
+      "ja": "フィルター / 並び順",
+      "ko": "필터 / 정렬",
+      "note": "曲のピッカーの絞り込みシートの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.header.count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}曲",
+      "ko": "{count}곡",
+      "note": "曲のピッカーの一覧の見出し (曲を選ぶ前)。count は一覧の曲数。1000 以上は桁区切りが付く (1,234曲)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.header.selected": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        },
+        {
+          "name": "selected",
+          "type": "string"
+        }
+      ],
+      "ja": "{count}曲 ・ {selected}曲選択中",
+      "ko": "{count}곡 · {selected}곡 선택됨",
+      "note": "曲のピッカーの一覧の見出し (曲を選んだあと)。count は一覧の曲数 (1000 以上は桁区切りが付く)、selected は選んだ曲の数を呼び出し側で桁区切りした文字列 (1,234。以前の iOS の SwiftUI の補間と同じ。count は 1 キーに 1 つまでなので文字列で渡す)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.idols.header": {
+      "ja": "アイドル",
+      "ko": "아이돌",
+      "note": "曲のピッカーの絞り込みシートのアイドルの節の見出しと、そこから開くアイドル選択の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.mark.favorite_only": {
+      "ja": "お気に入りのみ",
+      "ko": "즐겨찾기만",
+      "note": "絞り込み: お気に入りの曲だけにするスイッチ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.mark.header": {
+      "ja": "マイマーク",
+      "ko": "마이 마크",
+      "note": "曲のピッカーの絞り込みシートのマイマーク (担当・お気に入り) の節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.mark.my_pick_only": {
+      "ja": "担当アイドルの曲のみ",
+      "ko": "담당 아이돌 곡만",
+      "note": "絞り込み: 担当アイドルが歌う曲だけにするスイッチ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.option.none": {
+      "ja": "選択なし",
+      "ko": "선택 안 함",
+      "note": "曲のピッカーの絞り込みシートで、タグ・アイドル・シリーズを何も選んでいないときの表示",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.search.prompt": {
+      "ja": "曲名で検索",
+      "ko": "곡명으로 검색",
+      "note": "曲のピッカーの検索欄のプレースホルダ"
+    },
+    "song_picker.select_title": {
+      "ja": "曲を選択",
+      "ko": "곡 선택",
+      "note": "セトリの 1 行に曲を 1 つ選ぶピッカーの見出し",
+      "platforms": [
+        "android"
+      ]
+    },
+    "song_picker.series.title": {
+      "ja": "シリーズ",
+      "ko": "시리즈",
+      "note": "曲のピッカーの絞り込みシートのシリーズの節の見出しと、そこから開く一覧の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.song_type.all": {
+      "ja": "全て",
+      "ko": "전체",
+      "note": "曲タイプの選択肢: 絞り込まない",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.song_type.header": {
+      "ja": "曲タイプ",
+      "ko": "곡 유형",
+      "note": "曲のピッカーの絞り込みシートの曲タイプ (ソロ・ユニット・全体曲) の節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.songwriter.header": {
+      "ja": "作詞 / 作曲 / 編曲者",
+      "ko": "작사 / 작곡 / 편곡자",
+      "note": "曲のピッカーの絞り込みシートの作家名の節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.songwriter.placeholder": {
+      "ja": "名前を入力",
+      "ko": "이름 입력",
+      "note": "作家名の入力欄のプレースホルダ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.sort.performance_count": {
+      "ja": "披露回数順",
+      "ko": "공연 횟수순",
+      "note": "並び順の選択肢: ライブで歌われた回数の多い順",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.sort.release_date": {
+      "ja": "リリース日順",
+      "ko": "발매일순",
+      "note": "並び順の選択肢: リリース日の新しい順",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.sort.title": {
+      "ja": "並び順",
+      "ko": "정렬",
+      "note": "曲のピッカーの絞り込みシートの並び順の選択欄と、その節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.sort.title_kana": {
+      "ja": "五十音順",
+      "ko": "50음순",
+      "note": "並び順の選択肢: 曲名の読みの五十音順",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.tag_filter.error": {
+      "ja": "タグ絞り込みの取得に失敗しました。電波状況をご確認ください。",
+      "ko": "태그 필터를 불러오지 못했어요. 통신 상태를 확인해 주세요.",
+      "note": "曲のピッカーで、タグの絞り込みを取れず結果が 0 件のときの注意",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.tag_filter.error_stale": {
+      "ja": "タグ絞り込みの取得に失敗しました (表示中の結果には未反映です)",
+      "ko": "태그 필터를 불러오지 못했어요 (지금 보이는 결과에는 반영되지 않았어요)",
+      "note": "曲のピッカーで、タグの絞り込みを取れなかったが前の結果を出し続けているときの注意",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.tags.footer": {
+      "ja": "複数選択時は全てのタグを含む曲だけに絞り込みます。",
+      "ko": "여러 개를 고르면 모든 태그가 달린 곡만 필터링해요.",
+      "note": "タグの節の下の説明 (複数のタグは AND で絞る)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.tags.header": {
+      "ja": "タグ",
+      "ko": "태그",
+      "note": "曲のピッカーの絞り込みシートのタグの節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_picker.title": {
+      "ja": "曲を追加",
+      "ko": "곡 추가",
+      "note": "曲を複数選んで追加するピッカー (セトリ予想・投票のお題など) の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "video.error.note_too_long": {
+      "args": [
+        {
+          "name": "max",
+          "type": "int"
+        }
+      ],
+      "ja": "メモは {max} 文字以内で入力してください",
+      "ko": "메모는 {max}자 이내로 입력해 주세요",
+      "note": "参考動画のメモが長すぎるとき。max は上限の文字数 (桁区切りしない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "video.error.save_failed": {
+      "args": [
+        {
+          "name": "detail",
+          "type": "string"
+        }
+      ],
+      "ja": "保存に失敗しました: {detail}",
+      "ko": "저장하지 못했어요: {detail}",
+      "note": "参考動画の保存が例外で失敗したとき。detail はエラーの説明 (訳さない)"
+    },
+    "video.error.title_too_long": {
+      "args": [
+        {
+          "name": "max",
+          "type": "int"
+        }
+      ],
+      "ja": "タイトルは {max} 文字以内で入力してください",
+      "ko": "제목은 {max}자 이내로 입력해 주세요",
+      "note": "参考動画のタイトルが長すぎるとき。max は上限の文字数",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "video.error.url_required": {
+      "ja": "YouTube の URL を入力してください",
+      "ko": "YouTube URL을 입력해 주세요",
+      "note": "参考動画のフォームで URL が YouTube の動画のものでないとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "video.field.note": {
+      "ja": "メモ (任意)",
+      "ko": "메모 (선택)",
+      "note": "参考動画のフォームのメモの入力欄 (省略できる)"
+    },
+    "video.field.title": {
+      "ja": "動画タイトル (任意)",
+      "ko": "영상 제목 (선택)",
+      "note": "参考動画のフォームの動画タイトルの入力欄 (省略できる)"
+    },
+    "video.note.footer_android": {
+      "args": [
+        {
+          "name": "length",
+          "type": "int"
+        },
+        {
+          "name": "max",
+          "type": "int"
+        }
+      ],
+      "ja": "どの公演の映像かなどの補足。メモ {length}/{max} 文字",
+      "ko": "어느 공연 영상인지 등을 적는 보충 설명. 메모 {length}/{max}자",
+      "note": "参考動画のシートのメモの入力欄の下の説明と文字数 (Android)。length は今の文字数、max は上限 (1000)。以前の Android と同じく両方とも桁区切りしない (1000)。iOS は桁区切りするので video.note.footer_ios に分けた",
+      "platforms": [
+        "android"
+      ]
+    },
+    "video.note.footer_ios": {
+      "args": [
+        {
+          "name": "length",
+          "type": "string"
+        },
+        {
+          "name": "max",
+          "type": "count"
+        }
+      ],
+      "ja": "どの公演の映像かなどの補足。メモ {length}/{max} 文字",
+      "ko": "어느 공연 영상인지 등을 적는 보충 설명. 메모 {length}/{max}자",
+      "note": "参考動画のフォームのメモの節の下の説明と文字数 (iOS)。length は今の文字数を呼び出し側で桁区切りした文字列 (1000 以上は 1,234)、max は上限の 1000 で、いつも桁区切りが付く (1,000)。以前の iOS も SwiftUI の補間で桁区切りして出していた (Android は区切らないので video.note.footer_android に分けた)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "video.note.header": {
+      "ja": "補足",
+      "ko": "보충 설명",
+      "note": "参考動画のフォームのタイトル・メモの節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "video.title.create": {
+      "ja": "参考動画を投稿",
+      "ko": "참고 영상 올리기",
+      "note": "参考動画の投稿フォームの見出し"
+    },
+    "video.title.edit": {
+      "ja": "参考動画を編集",
+      "ko": "참고 영상 편집",
+      "note": "参考動画の編集フォームの見出し"
+    },
+    "video.url.footer": {
+      "ja": "YouTube の watch / youtu.be / shorts / embed URL に対応。",
+      "ko": "YouTube의 watch / youtu.be / shorts / embed URL을 지원해요.",
+      "note": "参考動画の URL の入力欄の下の説明。watch などは URL の形の名前なので訳さない"
+    },
+    "video.url.header": {
+      "ja": "動画 URL",
+      "ko": "영상 URL",
+      "note": "参考動画のフォームの URL の節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    }
+  }
+}

@@ -26,13 +26,16 @@ import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.data.model.SongArtist
 import com.fugaif.imaslivedb.data.model.Vocab
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import kotlinx.coroutines.launch
 import java.util.UUID
 
 /** 選べる曲種別 (値と語はコアの vocabulary。マスタにある 5 種)。 */
-private val SONG_TYPES: List<Pair<String, String>>
-    get() = Vocab.table.songTypes.map { it.value to it.shortLabel }
+private val SONG_TYPES: List<Pair<String, DisplayText>>
+    get() = Vocab.table.songTypes.map { it.value to DisplayText.Core(it.shortLabel) }
 
 /**
  * 曲の新規作成 / 編集。iOS `SongEditView` の移植。ログイン済みユーザーが使える
@@ -89,7 +92,7 @@ fun SongEditScreen(
     var brands by remember { mutableStateOf<List<Brand>>(emptyList()) }
     var idolById by remember { mutableStateOf<Map<String, Idol>>(emptyMap()) }
     var isSaving by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var errorMessage by remember { mutableStateOf<DisplayText?>(null) }
     var requestedIssueUrl by remember { mutableStateOf<String?>(null) }
     var requestSent by remember { mutableStateOf(false) }
 
@@ -103,7 +106,10 @@ fun SongEditScreen(
     }
 
     // ブランドは「未指定」を許す (iOS の Picker 先頭の空タグと同じ)。
-    val brandOptions = remember(brands) { listOf("" to "未指定") + brands.map { it.id to it.name } }
+    val brandOptions = remember(brands) {
+        listOf<Pair<String, DisplayText>>("" to L10n.Edit.formOptionUnspecified) +
+            brands.map { it.id to DisplayText.Verbatim(it.name) }
+    }
 
     fun save() {
         val trimmedTitle = title.trim()
@@ -114,23 +120,23 @@ fun SongEditScreen(
 
         // --- 以下のバリデーションは iOS SongEditView.save() と 1:1 で同条件にすること ---
         if (trimmedTitle.isEmpty()) {
-            errorMessage = "タイトルを入力してください"; return
+            errorMessage = L10n.Edit.songErrorTitleRequired; return
         }
         // appleMusicId を入れるなら artworkUrl も必須。一覧のジャケ写は songs.artwork_url を
         // 直接見るので、ID だけ入ると「音は鳴るが絵が出ない曲」ができる。
         if (trimmedAmId.isNotEmpty() && artworkUrl.trim().isEmpty()) {
-            errorMessage = "Apple Music ID を設定する場合は artwork URL も必須です (一覧のジャケ写表示に使います)"
+            errorMessage = L10n.Edit.songErrorArtworkRequired
             return
         }
         if (isCreate && artistIdolIds.isEmpty()) {
-            errorMessage = "歌唱アイドルを 1 名以上選択してください"; return
+            errorMessage = L10n.Edit.songErrorArtistsRequired; return
         }
         if (trimmedReleaseDate.isNotEmpty() && !isValidIsoDate(trimmedReleaseDate)) {
-            errorMessage = "リリース日は YYYY-MM-DD 形式で入力してください"; return
+            errorMessage = L10n.Edit.songErrorReleaseDateFormat; return
         }
         // 非数値は toIntOrNull() が null になるので、iOS の `(parsedDuration ?? -1) < 0` と同じく弾く。
         if (trimmedDuration.isNotEmpty() && (parsedDuration ?: -1) < 0) {
-            errorMessage = "再生時間は秒数 (整数) で入力してください"; return
+            errorMessage = L10n.Edit.songErrorDurationFormat; return
         }
 
         val songId = original?.id ?: "song_${UUID.randomUUID().toString().lowercase()}"
@@ -190,6 +196,7 @@ fun SongEditScreen(
             val result = submitMasterEdit(
                 context = context,
                 ops = ops,
+                // i18n-ignore(storage): 編集履歴に残るサマリ (サーバに送るデータ)。画面の言語で変えない
                 summary = if (isCreate) "曲を追加" else "曲編集",
                 fallbackRecordName = songId
             ) { resolvedId ->
@@ -236,42 +243,42 @@ fun SongEditScreen(
     }
 
     MasterEditScaffold(
-        title = if (isCreate) "曲を追加" else "曲編集",
+        title = (if (isCreate) L10n.Edit.songTitleCreate else L10n.Edit.songTitleEdit).resolve(),
         canSave = title.trim().isNotEmpty(),
         isSaving = isSaving,
         onCancel = onDismiss,
         onSave = ::save
     ) {
-        EditSection("基本情報") {
+        EditSection(L10n.Edit.formSectionBasic.resolve()) {
             if (original != null) EditReadonlyRow("ID", original.id)
-            EditTextField("タイトル", title, { title = it })
-            EditTextField("タイトル (カナ)", titleKana, { titleKana = it })
-            EditDropdownField("ブランド", brandOptions, brandId) { brandId = it }
-            EditDropdownField("種別", SONG_TYPES, songType) { songType = it }
-            EditTextField("ユニット名", unitName, { unitName = it })
+            EditTextField(L10n.Edit.songFieldTitle.resolve(), title, { title = it })
+            EditTextField(L10n.Edit.songFieldTitleKana.resolve(), titleKana, { titleKana = it })
+            EditDropdownField(L10n.Edit.formFieldBrand.resolve(), brandOptions, brandId) { brandId = it }
+            EditDropdownField(L10n.Edit.songFieldType.resolve(), SONG_TYPES, songType) { songType = it }
+            EditTextField(L10n.Edit.songFieldUnitName.resolve(), unitName, { unitName = it })
         }
 
         if (isCreate) {
             EditSection(
-                "歌唱アイドル",
-                footer = "一覧でアイコンを出すために必要です。ソロ曲なら 1 名、ユニット曲なら全員を選んでください。"
+                L10n.Edit.songArtistsTitle.resolve(),
+                footer = L10n.Edit.songArtistsFooter.resolve()
             ) {
                 EditNavRow(
-                    label = "歌唱アイドル (${artistIdolIds.size})",
+                    label = L10n.Edit.songArtistsLabelCount(count = artistIdolIds.size).resolve(),
                     value = artistIdolIds.mapNotNull { idolById[it]?.name }.sorted().joinToString(" / "),
-                    placeholder = "歌唱アイドルを選択",
+                    placeholder = L10n.Edit.songArtistsPlaceholder.resolve(),
                     onClick = { showArtistPicker = true }
                 )
             }
         }
 
-        EditSection("制作情報") {
-            EditTextField("作詞", lyricist, { lyricist = it })
-            EditTextField("作曲", composer, { composer = it })
-            EditTextField("編曲", arranger, { arranger = it })
-            EditTextField("リリース日 (YYYY-MM-DD)", releaseDate, { releaseDate = it })
-            EditTextField("歌唱表記 (例: 春香・千早)", singerLabel, { singerLabel = it })
-            EditTextField("再生時間 (秒)", durationSecText, { durationSecText = it }, numeric = true)
+        EditSection(L10n.Edit.songSectionCredits.resolve()) {
+            EditTextField(L10n.Edit.songFieldLyricist.resolve(), lyricist, { lyricist = it })
+            EditTextField(L10n.Edit.songFieldComposer.resolve(), composer, { composer = it })
+            EditTextField(L10n.Edit.songFieldArranger.resolve(), arranger, { arranger = it })
+            EditTextField(L10n.Edit.songFieldReleaseDate.resolve(), releaseDate, { releaseDate = it })
+            EditTextField(L10n.Edit.songFieldSingerLabel.resolve(), singerLabel, { singerLabel = it })
+            EditTextField(L10n.Edit.songFieldDuration.resolve(), durationSecText, { durationSecText = it }, numeric = true)
         }
 
         EditSection("Apple Music") {
@@ -281,17 +288,17 @@ fun SongEditScreen(
             EditTextField("preview URL", previewUrl, { previewUrl = it })
         }
 
-        EditSection("CD / その他") {
+        EditSection(L10n.Edit.songSectionCdOther.resolve()) {
             EditTextField("cd_series", cdSeries, { cdSeries = it })
             EditTextField("cd_title", cdTitle, { cdTitle = it })
             EditTextField("ISRC", isrc, { isrc = it })
-            EditTextField("歌詞 URL", lyricsUrl, { lyricsUrl = it })
+            EditTextField(L10n.Edit.songFieldLyricsUrl.resolve(), lyricsUrl, { lyricsUrl = it })
         }
 
         if (!isCreate) {
             EditSection(
-                "誤紐付けの修正",
-                footer = "誤紐付けで他の曲が再生されるときに使う。サブスク未配信の曲はクリアすべき。"
+                L10n.Edit.songAppleMusicFixHeader.resolve(),
+                footer = L10n.Edit.songAppleMusicClearFooter.resolve()
             ) {
                 TextButton(
                     onClick = {
@@ -302,14 +309,14 @@ fun SongEditScreen(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Apple Music 関連を全て空にする", color = DS.danger)
+                    Text(L10n.Edit.songAppleMusicClear.resolve(), color = DS.danger)
                 }
             }
         }
 
         Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
             Text(
-                "保存すると、この編集は「最近の編集」に記録されます。",
+                L10n.Edit.songSaveNotice.resolve(),
                 fontSize = 11.sp, color = DS.ink3
             )
         }
@@ -320,7 +327,7 @@ fun SongEditScreen(
             selected = artistIdolIds,
             onDismiss = { showArtistPicker = false },
             onConfirm = { artistIdolIds = it; showArtistPicker = false },
-            title = "歌唱アイドル"
+            title = L10n.Edit.songArtistsTitle
         )
     }
 

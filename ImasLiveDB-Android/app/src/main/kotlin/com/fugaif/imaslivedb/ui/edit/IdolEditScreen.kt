@@ -15,6 +15,9 @@ import com.fugaif.imaslivedb.data.edit.putClearable
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import kotlinx.coroutines.launch
 import uniffi.imas_core.themeNormalizedHex
 
@@ -55,7 +58,7 @@ fun IdolEditScreen(
 
     var brands by remember { mutableStateOf<List<Brand>>(emptyList()) }
     var isSaving by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var errorMessage by remember { mutableStateOf<DisplayText?>(null) }
     var requestedIssueUrl by remember { mutableStateOf<String?>(null) }
     var requestSent by remember { mutableStateOf(false) }
 
@@ -63,7 +66,7 @@ fun IdolEditScreen(
         brands = runCatching { AppModule.from(context).statsRepository.fetchBrands() }.getOrDefault(emptyList())
     }
     // Idol.brandId は非 null 列なので「未指定」は出さない (iOS の Picker も全ブランドのみ)。
-    val brandOptions = remember(brands) { brands.map { it.id to it.name } }
+    val brandOptions = remember(brands) { brands.map<Brand, Pair<String, DisplayText>> { it.id to DisplayText.Verbatim(it.name) } }
 
     /**
      * マスタの色は `#RRGGBB` 表記で統一されており、サーバ validator (HEX_RE) もそれを正とする。
@@ -127,6 +130,7 @@ fun IdolEditScreen(
             val result = submitMasterEdit(
                 context = context,
                 ops = listOf(op),
+                // i18n-ignore(storage): 編集履歴に残るサマリ (サーバに送るデータ)。画面の言語で変えない
                 summary = "アイドル編集",
                 fallbackRecordName = original.id
             ) { resolvedId ->
@@ -145,7 +149,7 @@ fun IdolEditScreen(
     }
 
     MasterEditScaffold(
-        title = "アイドル編集",
+        title = L10n.Edit.idolTitle.resolve(),
         // iOS の保存ボタンは isSaving 以外で無効化しない。ここだけ厳しくすると
         // 「iOS では保存できるのに Android では保存できない」ズレになるので揃える。
         canSave = true,
@@ -153,24 +157,24 @@ fun IdolEditScreen(
         onCancel = onDismiss,
         onSave = ::save
     ) {
-        EditSection("名前") {
+        EditSection(L10n.Edit.idolSectionName.resolve()) {
             EditReadonlyRow("ID", original.id)
-            EditTextField("名前", name, { name = it })
-            EditTextField("カナ", nameKana, { nameKana = it })
-            EditTextField("ローマ字", nameRomaji, { nameRomaji = it })
-            EditTextField("別名 (カンマ区切り)", aliases, { aliases = it })
+            EditTextField(L10n.Edit.idolFieldName.resolve(), name, { name = it })
+            EditTextField(L10n.Edit.idolFieldKana.resolve(), nameKana, { nameKana = it })
+            EditTextField(L10n.Edit.idolFieldRomaji.resolve(), nameRomaji, { nameRomaji = it })
+            EditTextField(L10n.Edit.idolFieldAliases.resolve(), aliases, { aliases = it })
         }
-        EditSection("分類") {
-            EditDropdownField("ブランド", brandOptions, brandId) { brandId = it }
-            EditTextField("属性 (cute/cool/passion 等)", attribute, { attribute = it })
-            EditStepperRow("並び順", sortOrder, 0..9999) { sortOrder = it }
+        EditSection(L10n.Edit.idolSectionCategory.resolve()) {
+            EditDropdownField(L10n.Edit.formFieldBrand.resolve(), brandOptions, brandId) { brandId = it }
+            EditTextField(L10n.Edit.idolFieldAttribute.resolve(), attribute, { attribute = it })
+            EditStepperRow(L10n.Edit.formSortOrderAndroid(value = sortOrder), sortOrder, 0..9999) { sortOrder = it }
         }
-        EditSection("プロフィール", footer = "カラーは #RRGGBB。# を省いても保存時に補います。") {
-            EditTextField("カラー (#hex)", color, { color = it })
-            EditTextField("誕生日 (MM-DD)", birthday, { birthday = it })
-            EditTextField("血液型", bloodType, { bloodType = it })
-            EditTextField("出身地", birthPlace, { birthPlace = it })
-            EditTextField("実装日 (YYYY-MM-DD)", debutDate, { debutDate = it })
+        EditSection(L10n.Edit.idolSectionProfile.resolve(), footer = L10n.Edit.idolProfileFooter.resolve()) {
+            EditTextField(L10n.Edit.idolFieldColor.resolve(), color, { color = it })
+            EditTextField(L10n.Edit.idolFieldBirthday.resolve(), birthday, { birthday = it })
+            EditTextField(L10n.Edit.idolFieldBloodType.resolve(), bloodType, { bloodType = it })
+            EditTextField(L10n.Edit.idolFieldBirthplace.resolve(), birthPlace, { birthPlace = it })
+            EditTextField(L10n.Edit.idolFieldDebutDate.resolve(), debutDate, { debutDate = it })
         }
     }
 

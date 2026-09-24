@@ -17,16 +17,16 @@ struct EventSearchPickerView: View {
                 if results.isEmpty && !query.isEmpty {
                     ImasEmptyState(
                         systemImage: "magnifyingglass",
-                        title: "見つかりません",
-                        message: "「\(query)」に一致するイベントがありません"
+                        title: String(localized: L10n.Edit.pickerEmptyTitle),
+                        message: String(localized: L10n.Edit.eventPickerEmptyNoMatch(query: query))
                     )
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets())
                 } else if results.isEmpty && query.isEmpty {
                     ImasEmptyState(
                         systemImage: "calendar",
-                        title: "イベントを検索",
-                        message: "イベント名を入力して検索してください"
+                        title: String(localized: L10n.Edit.eventPickerEmptyTitle),
+                        message: String(localized: L10n.Edit.eventPickerEmptyMessage)
                     )
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets())
@@ -73,12 +73,13 @@ struct EventSearchPickerView: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .background(DS.bg)
-            .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "イベント名で検索")
-            .navigationTitle("イベントを選択")
+            .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
+                        prompt: L10n.Edit.eventPickerSearchPrompt)
+            .navigationTitle(L10n.Edit.eventPickerTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("キャンセル") { dismiss() }
+                    Button { dismiss() } label: { Text(L10n.Edit.actionCancel) }
                 }
             }
             .onChange(of: query) { _, newValue in

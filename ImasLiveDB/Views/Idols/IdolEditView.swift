@@ -24,7 +24,8 @@ struct IdolEditView: View {
     @State private var sortOrder: Int
     @State private var allBrands: [Brand] = []
     @State private var isSaving = false
-    @State private var errorMessage: String?
+    /// 解決済みの String ではなく文言の値で持ち、alert で文字列にする。
+    @State private var errorMessage: LocalizedStringResource?
     @State private var requestSent = false
 
     init(idol: Idol) {
@@ -46,54 +47,55 @@ struct IdolEditView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("名前") {
+                Section(L10n.Edit.idolSectionName) {
                     LabeledContent("ID") { Text(original.id).foregroundStyle(DS.ink2) }
-                    TextField("名前", text: $name)
-                    TextField("カナ", text: $nameKana)
-                    TextField("ローマ字", text: $nameRomaji)
-                    TextField("別名 (カンマ区切り)", text: $aliases)
+                    TextField(L10n.Edit.idolFieldName, text: $name, prompt: nil)
+                    TextField(L10n.Edit.idolFieldKana, text: $nameKana, prompt: nil)
+                    TextField(L10n.Edit.idolFieldRomaji, text: $nameRomaji, prompt: nil)
+                    TextField(L10n.Edit.idolFieldAliases, text: $aliases, prompt: nil)
                 }
                 .listRowBackground(DS.surface)
                 .listRowSeparatorTint(DS.sep)
-                Section("分類") {
-                    Picker("ブランド", selection: $brandId) {
+                Section(L10n.Edit.idolSectionCategory) {
+                    Picker(L10n.Edit.formFieldBrand, selection: $brandId) {
                         ForEach(allBrands) { Text($0.name).tag($0.id) }
                     }
-                    TextField("属性 (cute/cool/passion 等)", text: $attribute)
-                    Stepper("並び順: \(sortOrder)", value: $sortOrder, in: 0...9999)
+                    TextField(L10n.Edit.idolFieldAttribute, text: $attribute, prompt: nil)
+                    Stepper(L10n.Edit.formSortOrderIos(value: sortOrder), value: $sortOrder, in: 0...9999)
                 }
                 .listRowBackground(DS.surface)
                 .listRowSeparatorTint(DS.sep)
-                Section("プロフィール") {
-                    TextField("カラー (#hex)", text: $color)
+                Section(L10n.Edit.idolSectionProfile) {
+                    TextField(L10n.Edit.idolFieldColor, text: $color, prompt: nil)
                         .autocapitalization(.none).autocorrectionDisabled()
-                    TextField("誕生日 (MM-DD)", text: $birthday)
-                    TextField("血液型", text: $bloodType)
-                    TextField("出身地", text: $birthPlace)
-                    TextField("実装日 (YYYY-MM-DD)", text: $debutDate)
+                    TextField(L10n.Edit.idolFieldBirthday, text: $birthday, prompt: nil)
+                    TextField(L10n.Edit.idolFieldBloodType, text: $bloodType, prompt: nil)
+                    TextField(L10n.Edit.idolFieldBirthplace, text: $birthPlace, prompt: nil)
+                    TextField(L10n.Edit.idolFieldDebutDate, text: $debutDate, prompt: nil)
                 }
                 .listRowBackground(DS.surface)
                 .listRowSeparatorTint(DS.sep)
             }
             .scrollContentBackground(.hidden)
             .background(DS.bg.ignoresSafeArea())
-            .navigationTitle("アイドル編集")
+            .navigationTitle(L10n.Edit.idolTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("キャンセル") { dismiss() }
+                    Button { dismiss() } label: { Text(L10n.Edit.actionCancel) }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") { AppAnalytics.tap("idol_edit.save"); Task { await save() } }.disabled(isSaving)
+                    Button { AppAnalytics.tap("idol_edit.save"); Task { await save() } } label: { Text(L10n.Edit.actionSave) }
+                        .disabled(isSaving)
                 }
             }
             .overlay { if isSaving { savingOverlay } }
-            .alert("エラー", isPresented: Binding(
+            .alert(L10n.Edit.formErrorTitle, isPresented: Binding(
                 get: { errorMessage != nil },
                 set: { if !$0 { errorMessage = nil } }
             )) {
                 Button("OK") {}
-            } message: { Text(errorMessage ?? "") }
+            } message: { if let errorMessage { Text(errorMessage) } }
             .editRequestSentAlert(isPresented: $requestSent, onDismiss: { dismiss() })
             .task { allBrands = (try? await AppContainer.shared.brandReading.brands()) ?? [] }
             .trackScreen("idol_edit")
@@ -103,7 +105,7 @@ struct IdolEditView: View {
     private var savingOverlay: some View {
         ZStack {
             Color.black.opacity(0.3).ignoresSafeArea()
-            ProgressView("保存中…").padding(DS.sp7)
+            ProgressView(L10n.Edit.formSaving).padding(DS.sp7)
                 .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
         }
     }
@@ -157,6 +159,7 @@ struct IdolEditView: View {
         )
 
         do {
+            // i18n-ignore(storage): 編集履歴に残るサマリ (サーバに送るデータ)。画面の言語で変えない
             let outcome = try await EditService.shared.submitMaster(ops: [op], summary: "アイドル編集")
             switch outcome {
             case .applied(let resp):
@@ -169,7 +172,7 @@ struct IdolEditView: View {
                 requestSent = true
             }
         } catch {
-            errorMessage = "保存失敗: \(error.localizedDescription)"
+            errorMessage = L10n.Edit.formErrorSaveFailed(detail: error.localizedDescription)
         }
     }
 }

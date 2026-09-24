@@ -3,6 +3,9 @@ package com.fugaif.imaslivedb.data.edit
 import android.util.Log
 import com.fugaif.imaslivedb.data.auth.AuthService
 import com.fugaif.imaslivedb.data.net.WorkerHttpClient
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.UserFacing
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -83,7 +86,23 @@ class EditApi(private val http: WorkerHttpClient, private val authService: AuthS
         val reverted: Boolean,
         val source: String?
     ) {
-        /** 投稿者表示名。privaterelay 系 / メール形式は「名無しのプロデューサー」へマスク。 */
+        /**
+         * 投稿者表示名。privaterelay 系 / メール形式は「名無しのプロデューサー」(文言) へマスクし、
+         * それ以外は表示名そのもの (データ) を出す。画面で resolve() する。
+         */
+        val editorDisplayText: DisplayText
+            get() {
+                val name = editorDisplayName
+                if (name.isNullOrEmpty() || name.contains("@")) return L10n.Edit.feedEditorAnonymous
+                return DisplayText.Verbatim(name)
+            }
+
+        /**
+         * 投稿者表示名 (解決済み)。まだ [editorDisplayText] に移していない画面のために残す。
+         * 最近の編集 (edit_feed の RecentEditsScreen) が `entry.editorDisplayText.resolve()` に移ったら消す
+         * (代わりの名前は edit.feed.editor_anonymous。edit_feed に同じ文言の別キーを作らない)。
+         */
+        @Deprecated("i18n 移行中: editorDisplayText を画面で resolve() する", ReplaceWith("editorDisplayText"))
         val editorDisplayLabel: String
             get() {
                 val name = editorDisplayName
@@ -110,6 +129,7 @@ class EditApi(private val http: WorkerHttpClient, private val authService: AuthS
         FORBIDDEN("forbidden"),
         FAILED("failed");
 
+        /** 一覧 1 行のラベル。iOS では管理者用の画面 (UserModerationView) だけが出す。Android はまだどこも出していない。 */
         val label: String
             get() = when (this) {
                 REVERTED -> "巻き戻し済み"
@@ -139,12 +159,22 @@ class EditApi(private val http: WorkerHttpClient, private val authService: AuthS
         val reverted: Boolean
     )
 
-    sealed class ApiException(message: String) : Exception(message) {
+    sealed class ApiException(message: String) : Exception(message), UserFacing {
         object NotAuthorized : ApiException("unauthorized")
         object Banned : ApiException("banned")
         data class RateLimited(val retryAfter: Int? = null) : ApiException("rate_limited")
         data class Server(val status: Int, val body: String) : ApiException("server_error($status)")
         data class Transport(override val message: String) : ApiException(message)
+
+        /** 利用者に見せる文言 (画面・ViewModel はこれを持ち、出口で resolve() する)。 */
+        override val userMessage: DisplayText
+            get() = when (this) {
+                is NotAuthorized -> L10n.Edit.errorAuthExpired
+                is Banned -> L10n.Edit.errorBanned
+                is RateLimited -> L10n.Edit.errorRateLimited
+                is Server -> L10n.Edit.errorServer(status = status)
+                is Transport -> L10n.Edit.errorTransport(detail = message)
+            }
     }
 
     // MARK: - POST /edits (admin 直接反映)
@@ -330,7 +360,12 @@ fun MutableMap<String, Any?>.putClearable(key: String, raw: String, original: St
     }
 }
 
-/** [EditApi.ApiException] をユーザー向け文言に変換する共通ヘルパー。 */
+/**
+ * [EditApi.ApiException] をユーザー向け文言 (日本語の解決済み文字列) に変換する旧ヘルパー。
+ * 文言は [EditApi.ApiException.userMessage] に移した。まだ String の状態を持つ画面のために残す
+ * (最近の編集 (edit_feed の RecentEditsViewModel) が userMessage を持つようになり、呼び出しが無くなったら消す)。
+ */
+@Deprecated("i18n 移行中: userMessage (DisplayText) を持ち、出口で resolve() する", ReplaceWith("userMessage"))
 fun EditApi.ApiException.friendlyMessage(): String = when (this) {
     is EditApi.ApiException.NotAuthorized -> "認証の有効期限が切れています。再度サインインしてください。"
     is EditApi.ApiException.Banned -> "この操作は制限されています。"

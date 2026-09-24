@@ -15,6 +15,9 @@ import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.Event
 import com.fugaif.imaslivedb.data.model.Vocab
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import kotlinx.coroutines.launch
 
 /**
@@ -49,20 +52,23 @@ fun EventEditScreen(
 
     var brands by remember { mutableStateOf<List<Brand>>(emptyList()) }
     var isSaving by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var errorMessage by remember { mutableStateOf<DisplayText?>(null) }
     var requestedIssueUrl by remember { mutableStateOf<String?>(null) }
     var requestSent by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         brands = runCatching { AppModule.from(context).statsRepository.fetchBrands() }.getOrDefault(emptyList())
     }
-    val brandOptions = remember(brands) { listOf("" to "未指定") + brands.map { it.id to it.name } }
+    val brandOptions = remember(brands) {
+        listOf<Pair<String, DisplayText>>("" to L10n.Edit.formOptionUnspecified) +
+            brands.map { it.id to DisplayText.Verbatim(it.name) }
+    }
 
     fun save() {
         val trimmedName = name.trim()
         // iOS EventEditView.save() と同条件: イベント名だけが必須。
         if (trimmedName.isEmpty()) {
-            errorMessage = "イベント名を入力してください"; return
+            errorMessage = L10n.Edit.eventErrorNameRequired; return
         }
 
         // 互換フィールド (isStreaming / isSolo) は既存値を維持し、新規は既定値。
@@ -103,6 +109,7 @@ fun EventEditScreen(
             val result = submitMasterEdit(
                 context = context,
                 ops = listOf(op),
+                // i18n-ignore(storage): 編集履歴に残るサマリ (サーバに送るデータ)。画面の言語で変えない
                 summary = if (isCreate) "イベント追加" else "イベント編集",
                 fallbackRecordName = original?.id
             ) { resolvedId ->
@@ -136,20 +143,20 @@ fun EventEditScreen(
     }
 
     MasterEditScaffold(
-        title = if (isCreate) "ライブを追加" else "ライブ編集",
+        title = (if (isCreate) L10n.Edit.eventTitleCreateAndroid else L10n.Edit.eventTitleEditAndroid).resolve(),
         canSave = name.trim().isNotEmpty(),
         isSaving = isSaving,
         onCancel = onDismiss,
         onSave = ::save
     ) {
-        EditSection("基本情報", footer = "合同ブランドはブランド ID をカンマ区切りで (例: 315,283)。") {
+        EditSection(L10n.Edit.formSectionBasic.resolve(), footer = L10n.Edit.eventBasicFooter.resolve()) {
             if (original != null) EditReadonlyRow("ID", original.id)
-            EditTextField("イベント名", name, { name = it })
-            EditDropdownField("ブランド", brandOptions, brandId) { brandId = it }
-            EditDropdownField("種別", eventKindEditOptions(original?.kind), kind) { kind = it }
-            EditTextField("合同ブランド (カンマ区切り)", jointBrandIds, { jointBrandIds = it })
+            EditTextField(L10n.Edit.eventFieldName.resolve(), name, { name = it })
+            EditDropdownField(L10n.Edit.formFieldBrand.resolve(), brandOptions, brandId) { brandId = it }
+            EditDropdownField(L10n.Edit.eventFieldKind.resolve(), eventKindEditOptions(original?.kind), kind) { kind = it }
+            EditTextField(L10n.Edit.eventFieldJointBrands.resolve(), jointBrandIds, { jointBrandIds = it })
         }
-        EditSection("チケット") {
+        EditSection(L10n.Edit.eventSectionTicket.resolve()) {
             // 語はコアの vocabulary (値は events の列名)。
             EditTextField("${Vocab.ticketDate("ticket_open_date")?.label} (YYYY-MM-DD)", ticketOpenDate, { ticketOpenDate = it })
             EditTextField("${Vocab.ticketDate("ticket_deadline")?.label} (YYYY-MM-DD)", ticketDeadline, { ticketDeadline = it })
@@ -178,12 +185,13 @@ private fun emptyEvent(id: String) = Event(
  * 種別の選択肢。語彙の種別から受け皿の「その他」を外し、元の値が語彙に無い (または `other`)
  * ときだけ「変更しない (元の値)」を足す。選び直さない限り、状態は元の生の値のまま送り返す
  * (黙って `other` などに書き換えると、新しい種別のイベントを直した人がその種別を消してしまう)。
- * iOS `EventEditView` と同じ。
+ * iOS `EventEditView` と同じ。語彙の種別の語はコア由来 ([DisplayText.Core])。
  */
-internal fun eventKindEditOptions(originalKind: String?): List<Pair<String, String>> {
-    val listed = Vocab.table.eventKinds.filter { it.value != OTHER_EVENT_KIND }.map { it.value to it.shortLabel }
+internal fun eventKindEditOptions(originalKind: String?): List<Pair<String, DisplayText>> {
+    val listed: List<Pair<String, DisplayText>> = Vocab.table.eventKinds.filter { it.value != OTHER_EVENT_KIND }
+        .map { it.value to DisplayText.Core(it.shortLabel) }
     val unlisted = originalKind?.takeIf { raw -> listed.none { it.first == raw } }
-    return listed + listOfNotNull(unlisted?.let { it to "変更しない ($it)" })
+    return listed + listOfNotNull(unlisted?.let { it to L10n.Edit.eventKindUnchanged(raw = it) })
 }
 
 /** 語彙の「その他」(知らない種別の受け皿)。選択肢には出さない。 */

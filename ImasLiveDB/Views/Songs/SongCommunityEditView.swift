@@ -46,7 +46,8 @@ struct VideoEditView: View {
     @State private var videoTitle: String
     @State private var note: String
     @State private var isSaving = false
-    @State private var errorMessage: String?
+    /// 解決済みの String ではなく文言の値で持ち、alert で文字列にする。
+    @State private var errorMessage: LocalizedStringResource?
 
     /// 下書き保持: バックグラウンド/終了されても新規投稿の入力を失わない (songId 照合で復元)。
     @SceneStorage("draft.songVideo.create") private var draftStore: String = ""
@@ -81,21 +82,21 @@ struct VideoEditView: View {
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                 } header: {
-                    Text("動画 URL")
+                    Text(L10n.Edit.videoUrlHeader)
                 } footer: {
-                    Text("YouTube の watch / youtu.be / shorts / embed URL に対応。")
+                    Text(L10n.Edit.videoUrlFooter)
                 }
                 .listRowBackground(DS.surface)
                 .listRowSeparatorTint(DS.sep)
 
                 Section {
-                    TextField("動画タイトル (任意)", text: $videoTitle)
-                    TextField("メモ (任意)", text: $note, axis: .vertical)
+                    TextField(L10n.Edit.videoFieldTitle, text: $videoTitle, prompt: nil)
+                    TextField(L10n.Edit.videoFieldNote, text: $note, prompt: nil, axis: .vertical)
                         .lineLimit(2...6)
                 } header: {
-                    Text("補足")
+                    Text(L10n.Edit.videoNoteHeader)
                 } footer: {
-                    Text("どの公演の映像かなどの補足。メモ \(note.count)/\(Self.maxNote) 文字")
+                    Text(L10n.Edit.videoNoteFooterIos(length: note.count.formatted(), max: Self.maxNote))
                         .foregroundStyle(note.count > Self.maxNote ? DS.danger : DS.ink2)
                 }
                 .listRowBackground(DS.surface)
@@ -103,24 +104,24 @@ struct VideoEditView: View {
             }
             .scrollContentBackground(.hidden)
             .background(DS.bg.ignoresSafeArea())
-            .navigationTitle(mode.isCreate ? "参考動画を投稿" : "参考動画を編集")
+            .navigationTitle(mode.isCreate ? L10n.Edit.videoTitleCreate : L10n.Edit.videoTitleEdit)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("キャンセル") { clearDraft(); dismiss() }
+                    Button { clearDraft(); dismiss() } label: { Text(L10n.Edit.actionCancel) }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") { AppAnalytics.tap("video_edit.save"); Task { await save() } }
+                    Button { AppAnalytics.tap("video_edit.save"); Task { await save() } } label: { Text(L10n.Edit.actionSave) }
                         .disabled(isSaving || !isValid)
                 }
             }
             .overlay { if isSaving { SavingOverlay() } }
-            .alert("エラー", isPresented: Binding(
+            .alert(L10n.Edit.formErrorTitle, isPresented: Binding(
                 get: { errorMessage != nil },
                 set: { if !$0 { errorMessage = nil } }
             )) {
                 Button("OK") {}
-            } message: { Text(errorMessage ?? "") }
+            } message: { if let errorMessage { Text(errorMessage) } }
             .trackScreen("video_edit")
         }
         .onAppear { restoreDraft() }
@@ -172,15 +173,15 @@ struct VideoEditView: View {
 
     private func save() async {
         guard Self.isYouTubeURL(trimmedUrl) else {
-            errorMessage = "YouTube の URL を入力してください"
+            errorMessage = L10n.Edit.videoErrorUrlRequired
             return
         }
         guard trimmedTitle.count <= Self.maxTitle else {
-            errorMessage = "タイトルは \(Self.maxTitle) 文字以内で入力してください"
+            errorMessage = L10n.Edit.videoErrorTitleTooLong(max: Self.maxTitle)
             return
         }
         guard trimmedNote.count <= Self.maxNote else {
-            errorMessage = "メモは \(Self.maxNote) 文字以内で入力してください"
+            errorMessage = L10n.Edit.videoErrorNoteTooLong(max: Self.maxNote)
             return
         }
 
@@ -205,6 +206,7 @@ struct VideoEditView: View {
         do {
             let resp = try await EditService.shared.submit(
                 ops: [op],
+                // i18n-ignore(storage): 編集履歴に残るサマリ (サーバに送るデータ)。画面の言語で変えない
                 summary: mode.isCreate ? "参考動画を追加" : "参考動画を編集"
             )
             let resolvedId = resp.primaryRecordName(fallback: mode.original?.id)
@@ -236,20 +238,20 @@ private struct SavingOverlay: View {
     var body: some View {
         ZStack {
             Color.black.opacity(0.3).ignoresSafeArea()
-            ProgressView("保存中…").padding(DS.sp7)
+            ProgressView(L10n.Edit.formSaving).padding(DS.sp7)
                 .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
         }
     }
 }
 
-/// EditService.submit の throw を日本語の短文へ変換する。
-private func friendlyEditError(_ error: Error) -> String {
+/// EditService.submit の throw を利用者向けの短文 (カタログの文言) へ変換する。
+private func friendlyEditError(_ error: Error) -> LocalizedStringResource {
     switch error {
     case APIClientError.notAuthorized:
-        return "認証の有効期限が切れています。再度サインインしてください。"
+        return L10n.Edit.errorAuthExpired
     case APIClientError.rateLimited:
-        return "投稿が多すぎます。しばらく待ってからお試しください。"
+        return L10n.Edit.errorRateLimited
     default:
-        return "保存に失敗しました: \(error.localizedDescription)"
+        return L10n.Edit.videoErrorSaveFailed(detail: error.localizedDescription)
     }
 }

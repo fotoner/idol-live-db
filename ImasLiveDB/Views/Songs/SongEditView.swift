@@ -43,7 +43,8 @@ struct SongEditView: View {
     @State private var showArtistPicker = false
 
     @State private var isSaving = false
-    @State private var errorMessage: String?
+    /// 解決済みの String ではなく文言の値で持ち、alert で文字列にする。
+    @State private var errorMessage: LocalizedStringResource?
     @State private var requestSent = false
 
     /// 選べる曲種別 (値と語はコアの vocabulary。マスタにある 5 種)。
@@ -100,20 +101,20 @@ struct SongEditView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("基本情報") {
+                Section(L10n.Edit.formSectionBasic) {
                     if let original = mode.original {
                         LabeledContent("ID") { Text(original.id).foregroundStyle(DS.ink2) }
                     }
-                    TextField("タイトル", text: $title)
-                    TextField("タイトル (カナ)", text: $titleKana)
-                    Picker("ブランド", selection: $brandId) {
-                        Text("未指定").tag("")
+                    TextField(L10n.Edit.songFieldTitle, text: $title, prompt: nil)
+                    TextField(L10n.Edit.songFieldTitleKana, text: $titleKana, prompt: nil)
+                    Picker(L10n.Edit.formFieldBrand, selection: $brandId) {
+                        Text(L10n.Edit.formOptionUnspecified).tag("")
                         ForEach(allBrands) { Text($0.name).tag($0.id) }
                     }
-                    Picker("種別", selection: $songType) {
+                    Picker(L10n.Edit.songFieldType, selection: $songType) {
                         ForEach(songTypes, id: \.value) { Text($0.shortLabel).tag($0.value) }
                     }
-                    TextField("ユニット名", text: $unitName)
+                    TextField(L10n.Edit.songFieldUnitName, text: $unitName, prompt: nil)
                 }
                 .listRowBackground(DS.surface)
                 .listRowSeparatorTint(DS.sep)
@@ -122,15 +123,15 @@ struct SongEditView: View {
                     artistSection
                 }
 
-                Section("制作情報") {
-                    TextField("作詞", text: $lyricist)
-                    TextField("作曲", text: $composer)
-                    TextField("編曲", text: $arranger)
-                    TextField("リリース日 (YYYY-MM-DD)", text: $releaseDate)
+                Section(L10n.Edit.songSectionCredits) {
+                    TextField(L10n.Edit.songFieldLyricist, text: $lyricist, prompt: nil)
+                    TextField(L10n.Edit.songFieldComposer, text: $composer, prompt: nil)
+                    TextField(L10n.Edit.songFieldArranger, text: $arranger, prompt: nil)
+                    TextField(L10n.Edit.songFieldReleaseDate, text: $releaseDate, prompt: nil)
                         .keyboardType(.numbersAndPunctuation)
                         .autocapitalization(.none).autocorrectionDisabled()
-                    TextField("歌唱表記 (例: 春香・千早)", text: $singerLabel)
-                    TextField("再生時間 (秒)", text: $durationSecText)
+                    TextField(L10n.Edit.songFieldSingerLabel, text: $singerLabel, prompt: nil)
+                    TextField(L10n.Edit.songFieldDuration, text: $durationSecText, prompt: nil)
                         .keyboardType(.numberPad)
                 }
                 .listRowBackground(DS.surface)
@@ -148,26 +149,28 @@ struct SongEditView: View {
                 }
                 .listRowBackground(DS.surface)
                 .listRowSeparatorTint(DS.sep)
-                Section("CD / その他") {
+                Section(L10n.Edit.songSectionCdOther) {
                     TextField("cd_series", text: $cdSeries)
                     TextField("cd_title", text: $cdTitle)
                     TextField("ISRC", text: $isrc)
                         .autocapitalization(.none).autocorrectionDisabled()
-                    TextField("歌詞 URL", text: $lyricsUrl)
+                    TextField(L10n.Edit.songFieldLyricsUrl, text: $lyricsUrl, prompt: nil)
                         .keyboardType(.URL).autocapitalization(.none).autocorrectionDisabled()
                 }
                 .listRowBackground(DS.surface)
                 .listRowSeparatorTint(DS.sep)
                 if !mode.isCreate {
                     Section {
-                        Button("Apple Music 関連を全て空にする", role: .destructive) {
+                        Button(role: .destructive) {
                             appleMusicId = ""
                             appleMusicAlbumId = ""
                             artworkUrl = ""
                             previewUrl = ""
+                        } label: {
+                            Text(L10n.Edit.songAppleMusicClear)
                         }
                     } footer: {
-                        Text("誤紐付けで他の曲が再生されるときに使う。サブスク未配信の曲はクリアすべき。")
+                        Text(L10n.Edit.songAppleMusicClearFooter)
                     }
                     .listRowBackground(DS.surface)
                     .listRowSeparatorTint(DS.sep)
@@ -175,27 +178,28 @@ struct SongEditView: View {
             }
             .scrollContentBackground(.hidden)
             .background(DS.bg.ignoresSafeArea())
-            .navigationTitle(mode.isCreate ? "曲を追加" : "曲編集")
+            .navigationTitle(mode.isCreate ? L10n.Edit.songTitleCreate : L10n.Edit.songTitleEdit)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("キャンセル") { dismiss() }
+                    Button { dismiss() } label: { Text(L10n.Edit.actionCancel) }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") { AppAnalytics.tap("song_edit.save"); Task { await save() } }
+                    Button { AppAnalytics.tap("song_edit.save"); Task { await save() } } label: { Text(L10n.Edit.actionSave) }
                         .disabled(isSaving || title.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
             .overlay { if isSaving { savingOverlay } }
-            .alert("エラー", isPresented: Binding(
+            .alert(L10n.Edit.formErrorTitle, isPresented: Binding(
                 get: { errorMessage != nil },
                 set: { if !$0 { errorMessage = nil } }
             )) {
                 Button("OK") {}
-            } message: { Text(errorMessage ?? "") }
+            } message: { if let errorMessage { Text(errorMessage) } }
             .editRequestSentAlert(isPresented: $requestSent, onDismiss: { dismiss() })
             .sheet(isPresented: $showArtistPicker) {
-                IdolPickerView(title: "歌唱アイドル", idols: allIdols, selected: artistIdolIds) { newSelection in
+                IdolPickerView(title: String(localized: L10n.Edit.songArtistsTitle), idols: allIdols,
+                               selected: artistIdolIds) { newSelection in
                     artistIdolIds = newSelection
                     showArtistPicker = false
                 }
@@ -222,7 +226,7 @@ struct SongEditView: View {
                     Image(systemName: "person.2")
                         .foregroundStyle(DS.ink2)
                     if artistIdolIds.isEmpty {
-                        Text("歌唱アイドルを選択")
+                        Text(L10n.Edit.songArtistsPlaceholder)
                             .foregroundStyle(DS.ink2)
                     } else {
                         Text(artistNames())
@@ -236,9 +240,9 @@ struct SongEditView: View {
             }
             .buttonStyle(.plain)
         } header: {
-            Text("歌唱アイドル")
+            Text(L10n.Edit.songArtistsTitle)
         } footer: {
-            Text("一覧でアイコンを出すために必要です。ソロ曲なら 1 名、ユニット曲なら全員を選んでください。")
+            Text(L10n.Edit.songArtistsFooter)
         }
         .listRowBackground(DS.surface)
         .listRowSeparatorTint(DS.sep)
@@ -254,7 +258,7 @@ struct SongEditView: View {
     private var savingOverlay: some View {
         ZStack {
             Color.black.opacity(0.3).ignoresSafeArea()
-            ProgressView("保存中…").padding(DS.sp7)
+            ProgressView(L10n.Edit.formSaving).padding(DS.sp7)
                 .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
         }
     }
@@ -265,32 +269,32 @@ struct SongEditView: View {
 
         let trimmedTitle = title.trimmingCharacters(in: .whitespaces)
         guard !trimmedTitle.isEmpty else {
-            errorMessage = "タイトルを入力してください"
+            errorMessage = L10n.Edit.songErrorTitleRequired
             return
         }
         // appleMusicId を設定するなら artworkUrl 必須 (一覧ジャケ写は songs.artwork_url 直参照)。
         // MEMORY: feedback_song_artwork_required。RedTeam Medium に従い警告ではなくブロック。
         let trimmedAmId = appleMusicId.trimmingCharacters(in: .whitespaces)
         if !trimmedAmId.isEmpty && artworkUrl.trimmingCharacters(in: .whitespaces).isEmpty {
-            errorMessage = "Apple Music ID を設定する場合は artwork URL も必須です (一覧のジャケ写表示に使います)"
+            errorMessage = L10n.Edit.songErrorArtworkRequired
             return
         }
         // 新規作成は歌唱アイドル必須 (一覧アイコンの根拠データ)。
         if mode.isCreate && artistIdolIds.isEmpty {
-            errorMessage = "歌唱アイドルを 1 名以上選択してください"
+            errorMessage = L10n.Edit.songErrorArtistsRequired
             return
         }
         // リリース日はサーバ validator (YYYY-MM-DD) と一致する形式のみ許可。
         let trimmedReleaseDate = releaseDate.trimmingCharacters(in: .whitespaces)
         if !trimmedReleaseDate.isEmpty && !isValidISODate(trimmedReleaseDate) {
-            errorMessage = "リリース日は YYYY-MM-DD 形式で入力してください"
+            errorMessage = L10n.Edit.songErrorReleaseDateFormat
             return
         }
         // 再生時間は秒数 (非負整数) のみ許可。
         let trimmedDuration = durationSecText.trimmingCharacters(in: .whitespaces)
         let parsedDuration = Int(trimmedDuration)
         if !trimmedDuration.isEmpty && (parsedDuration ?? -1) < 0 {
-            errorMessage = "再生時間は秒数 (整数) で入力してください"
+            errorMessage = L10n.Edit.songErrorDurationFormat
             return
         }
 
@@ -356,6 +360,7 @@ struct SongEditView: View {
         }
 
         do {
+            // i18n-ignore(storage): 編集履歴に残るサマリ (サーバに送るデータ)。画面の言語で変えない
             let outcome = try await EditService.shared.submitMaster(ops: ops, summary: mode.isCreate ? "曲を追加" : "曲編集")
             switch outcome {
             case .applied(let resp):
@@ -373,7 +378,7 @@ struct SongEditView: View {
                 requestSent = true
             }
         } catch {
-            errorMessage = "保存失敗: \(error.localizedDescription)"
+            errorMessage = L10n.Edit.formErrorSaveFailed(detail: error.localizedDescription)
         }
     }
 

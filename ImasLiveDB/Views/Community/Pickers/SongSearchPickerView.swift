@@ -120,8 +120,8 @@ struct SongSearchPickerView: View {
     private var baseContent: some View {
         content
             .background(DS.bg)
-            .searchable(text: $query, prompt: "曲名で検索")
-            .navigationTitle("曲を追加")
+            .searchable(text: $query, prompt: L10n.Edit.songPickerSearchPrompt)
+            .navigationTitle(L10n.Edit.songPickerTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbarContent }
             .sheet(isPresented: $showFilter) {
@@ -166,7 +166,7 @@ struct SongSearchPickerView: View {
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         ToolbarItem(placement: .cancellationAction) {
-            Button("キャンセル") { dismiss() }
+            Button { dismiss() } label: { Text(L10n.Edit.actionCancel) }
         }
         if showsFilterButton {
             ToolbarItem(placement: .topBarTrailing) {
@@ -175,14 +175,17 @@ struct SongSearchPickerView: View {
                         ? "line.3.horizontal.decrease.circle.fill"
                         : "line.3.horizontal.decrease.circle")
                 }
-                .accessibilityLabel("フィルター")
+                .accessibilityLabel(L10n.Edit.songPickerFilterA11y)
             }
         }
         ToolbarItem(placement: .confirmationAction) {
-            Button(selected.isEmpty ? "追加" : "追加 (\(selected.count))") {
+            Button {
                 AppAnalytics.tap("song_search_picker.submit")
                 onSubmit(selected)
                 dismiss()
+            } label: {
+                Text(selected.isEmpty ? L10n.Edit.songPickerActionAdd
+                     : L10n.Edit.songPickerActionAddCount(count: selected.count))
             }
             .disabled(selected.isEmpty)
             .fontWeight(.semibold)
@@ -206,11 +209,12 @@ struct SongSearchPickerView: View {
             VStack(spacing: 0) {
                 ImasEmptyState(
                     systemImage: "magnifyingglass",
-                    title: "見つかりません",
-                    message: query.isEmpty ? "右上のフィルターか曲名で絞り込めます" : "「\(query)」に一致する楽曲がありません"
+                    title: String(localized: L10n.Edit.pickerEmptyTitle),
+                    message: String(localized: query.isEmpty ? L10n.Edit.songPickerEmptyHint
+                                    : L10n.Edit.songPickerEmptyNoMatch(query: query))
                 )
                 if tagFilterError {
-                    Text("タグ絞り込みの取得に失敗しました。電波状況をご確認ください。")
+                    Text(L10n.Edit.songPickerTagFilterError)
                         .font(.imasCaption).foregroundStyle(DS.warning)
                         .padding(.top, DS.sp3)
                 }
@@ -225,7 +229,7 @@ struct SongSearchPickerView: View {
         List {
             if tagFilterError {
                 Section {
-                    Label("タグ絞り込みの取得に失敗しました (表示中の結果には未反映です)", systemImage: "exclamationmark.triangle")
+                    Label(L10n.Edit.songPickerTagFilterErrorStale, systemImage: "exclamationmark.triangle")
                         .font(.imasCaption).foregroundStyle(DS.warning)
                 }
                 .listRowBackground(DS.surface)
@@ -249,7 +253,8 @@ struct SongSearchPickerView: View {
                     .listRowSeparatorTint(DS.sep)
                 }
             } header: {
-                Text(selected.isEmpty ? "\(results.count)曲" : "\(results.count)曲 ・ \(selected.count)曲選択中")
+                Text(selected.isEmpty ? L10n.Edit.songPickerHeaderCount(count: results.count)
+                     : L10n.Edit.songPickerHeaderSelected(count: results.count, selected: selected.count.formatted()))
                     .font(.imasCaption).foregroundStyle(DS.ink3)
             }
         }
@@ -408,24 +413,24 @@ private struct SongPickerFilterSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    Picker("並び順", selection: $sortOrder) {
+                    Picker(L10n.Edit.songPickerSortTitle, selection: $sortOrder) {
                         ForEach(availableSortOrders, id: \.self) { order in
-                            Text(order.rawValue).tag(order)
+                            Text(display: Self.sortLabel(order)).tag(order)
                         }
                     }
                 } header: {
-                    Text("並び順")
+                    Text(L10n.Edit.songPickerSortTitle)
                 }
 
                 Section {
                     Toggle(isOn: $myMarkFilter.requireMyPick) {
-                        Label("担当アイドルの曲のみ", systemImage: "heart.fill").foregroundStyle(DS.pick)
+                        Label(L10n.Edit.songPickerMarkMyPickOnly, systemImage: "heart.fill").foregroundStyle(DS.pick)
                     }
                     Toggle(isOn: $myMarkFilter.requireFavorite) {
-                        Label("お気に入りのみ", systemImage: "star.fill").foregroundStyle(DS.favorite)
+                        Label(L10n.Edit.songPickerMarkFavoriteOnly, systemImage: "star.fill").foregroundStyle(DS.favorite)
                     }
                 } header: {
-                    Text("マイマーク")
+                    Text(L10n.Edit.songPickerMarkHeader)
                 }
 
                 Section {
@@ -434,7 +439,7 @@ private struct SongPickerFilterSheet: View {
                     } label: {
                         HStack {
                             if selectedTags.isEmpty {
-                                Text("選択なし").foregroundStyle(DS.ink2)
+                                Text(L10n.Edit.songPickerOptionNone).foregroundStyle(DS.ink2)
                             } else {
                                 Text(selectedTags.map(\.name).joined(separator: " ＋ "))
                             }
@@ -443,39 +448,39 @@ private struct SongPickerFilterSheet: View {
                         }
                     }
                 } header: {
-                    Text("タグ")
+                    Text(L10n.Edit.songPickerTagsHeader)
                 } footer: {
-                    Text("複数選択時は全てのタグを含む曲だけに絞り込みます。")
+                    Text(L10n.Edit.songPickerTagsFooter)
                         .font(.imasCaption2).foregroundStyle(DS.ink3)
                 }
 
                 BrandFilterSection(brands: brands, selectedBrandIds: $brandIds)
 
                 Section {
-                    Toggle("ライブ履歴のみの曲を隠す", isOn: $excludeLiveOnly)
-                    Toggle("リミックスを含める", isOn: $includeRemixes)
+                    Toggle(L10n.Edit.songPickerFilterHideLiveOnly, isOn: $excludeLiveOnly)
+                    Toggle(L10n.Edit.songPickerFilterIncludeRemixes, isOn: $includeRemixes)
                     if showsCastOriginalToggle {
-                        Toggle("出演者のオリ曲のみ", isOn: $castOriginalOnly)
+                        Toggle(L10n.Edit.songPickerFilterCastOriginalOnly, isOn: $castOriginalOnly)
                     }
                 } header: {
-                    Text("絞り込み")
+                    Text(L10n.Edit.songPickerFilterHeader)
                 } footer: {
-                    Text("「ライブ履歴のみ」は、セトリ追加で生まれただけでカタログ情報が無い曲 (カバー・歌枠等) を隠します。")
+                    Text(L10n.Edit.songPickerFilterFooter)
                         .font(.imasCaption2).foregroundStyle(DS.ink3)
                 }
 
-                Section("曲タイプ") {
+                Section(L10n.Edit.songPickerSongTypeHeader) {
                     songTypePicker
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                 }
 
-                Section("アイドル") {
+                Section(L10n.Edit.songPickerIdolsHeader) {
                     Button {
                         showIdolPicker = true
                     } label: {
                         HStack {
                             if selectedIdolIds.isEmpty {
-                                Text("選択なし").foregroundStyle(DS.ink2)
+                                Text(L10n.Edit.songPickerOptionNone).foregroundStyle(DS.ink2)
                             } else {
                                 FlowLayout(spacing: DS.sp2) {
                                     ForEach(selectedIdolNames, id: \.self) { name in
@@ -493,35 +498,38 @@ private struct SongPickerFilterSheet: View {
                     }
                 }
 
-                Section("作詞 / 作曲 / 編曲者") {
-                    TextField("名前を入力", text: $songwriterText).textFieldStyle(.plain)
+                Section(L10n.Edit.songPickerSongwriterHeader) {
+                    TextField(L10n.Edit.songPickerSongwriterPlaceholder, text: $songwriterText, prompt: nil)
+                        .textFieldStyle(.plain)
                 }
 
-                Section("シリーズ") {
+                Section(L10n.Edit.songPickerSeriesTitle) {
                     NavigationLink {
-                        ListPickerView(title: "シリーズ", items: seriesGroupList, selected: $selectedSeriesGroup)
+                        ListPickerView(title: String(localized: L10n.Edit.songPickerSeriesTitle),
+                                       items: seriesGroupList, selected: $selectedSeriesGroup)
                     } label: {
-                        Text(selectedSeriesGroup ?? "選択なし")
+                        Text(display: Self.selectionText(selectedSeriesGroup))
                             .foregroundStyle(selectedSeriesGroup == nil ? DS.ink2 : DS.ink)
                     }
                 }
 
-                Section("CDシリーズ") {
+                Section(L10n.Edit.songPickerCdSeriesTitle) {
                     NavigationLink {
-                        ListPickerView(title: "CDシリーズ", items: cdSeriesList, selected: $selectedCdSeries)
+                        ListPickerView(title: String(localized: L10n.Edit.songPickerCdSeriesTitle),
+                                       items: cdSeriesList, selected: $selectedCdSeries)
                     } label: {
-                        Text(selectedCdSeries ?? "選択なし")
+                        Text(display: Self.selectionText(selectedCdSeries))
                             .foregroundStyle(selectedCdSeries == nil ? DS.ink2 : DS.ink)
                     }
                 }
             }
             .scrollContentBackground(.hidden)
             .background(DS.bg)
-            .navigationTitle("フィルター / 並び順")
+            .navigationTitle(L10n.Edit.songPickerFilterSheetTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("リセット") {
+                    Button {
                         brandIds.removeAll()
                         sortOrder = .titleKana
                         excludeLiveOnly = false
@@ -534,16 +542,18 @@ private struct SongPickerFilterSheet: View {
                         selectedCdSeries = nil
                         myMarkFilter = SongMyMarkFilter()
                         selectedTags.removeAll()
+                    } label: {
+                        Text(L10n.Edit.songPickerActionReset)
                     }
                     .disabled(!isAnyFilterActive)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("完了") { dismiss() }.fontWeight(.semibold)
+                    Button { dismiss() } label: { Text(L10n.Edit.songPickerActionDone) }.fontWeight(.semibold)
                 }
             }
             .sheet(isPresented: $showIdolPicker) {
                 IdolPickerView(
-                    title: "アイドル",
+                    title: String(localized: L10n.Edit.songPickerIdolsHeader),
                     idols: idols,
                     selected: selectedIdolIds
                 ) { selectedIdolIds = $0 }
@@ -559,22 +569,40 @@ private struct SongPickerFilterSheet: View {
     private var songTypePicker: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 6) {
-                songTypeChip(value: nil, label: "全て")
+                songTypeChip(value: nil, label: .key(L10n.Edit.songPickerSongTypeAll))
                 // 絞り込みは今までどおり先頭の 3 種 (ソロ / ユニット / 全体曲)。語はコアの vocabulary。
                 ForEach(Vocab.table.songTypes.prefix(3), id: \.value) { term in
-                    songTypeChip(value: term.value, label: term.shortLabel)
+                    songTypeChip(value: term.value, label: .core(term.shortLabel))
                 }
             }
         }
     }
 
-    private func songTypeChip(value: String?, label: String) -> some View {
+    private func songTypeChip(value: String?, label: DisplayText) -> some View {
         let isSelected = songType == value
         return Button {
             songType = value
         } label: {
-            ImasChip(text: label, style: isSelected ? .selected : .neutral)
+            // ImasChip はまだ String を受ける (DS の入力契約は未移行) ので、ここで解決して渡す
+            ImasChip(text: label.resolved, style: isSelected ? .selected : .neutral)
         }
         .buttonStyle(.plain)
+    }
+
+    /// 並び順の表示名。SongSortOrder の rawValue は日本語だが表示にしか使っていない
+    /// (保存しない) ので値はそのままにして、ここで文言を引く。ピッカーに出す 3 つ以外は来ないが、
+    /// 来たら今までどおり rawValue を出す。SongSortOrder 自体に表示名が付いたらそちらに寄せる。
+    static func sortLabel(_ order: SongSortOrder) -> DisplayText {
+        switch order {
+        case .titleKana: .key(L10n.Edit.songPickerSortTitleKana)
+        case .releaseDate: .key(L10n.Edit.songPickerSortReleaseDate)
+        case .performanceCount: .key(L10n.Edit.songPickerSortPerformanceCount)
+        case .collectedCount, .collectedRate: .verbatim(order.rawValue)
+        }
+    }
+
+    /// 選んだシリーズ名 (データ) か、未選択の「選択なし」。
+    static func selectionText(_ value: String?) -> DisplayText {
+        value.map(DisplayText.verbatim) ?? .key(L10n.Edit.songPickerOptionNone)
     }
 }

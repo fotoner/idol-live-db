@@ -27,9 +27,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.edit.EditApi
-import com.fugaif.imaslivedb.data.edit.friendlyMessage
 import com.fugaif.imaslivedb.data.model.SongVideo
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -61,7 +63,7 @@ fun VideoEditSheet(
     var videoTitle by remember { mutableStateOf(existing?.videoTitle ?: "") }
     var note by remember { mutableStateOf(existing?.note ?: "") }
     var isSaving by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var errorMessage by remember { mutableStateOf<DisplayText?>(null) }
 
     val trimmedUrl = youtubeUrl.trim()
     val trimmedTitle = videoTitle.trim()
@@ -80,7 +82,10 @@ fun VideoEditSheet(
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(if (existing == null) "参考動画を投稿" else "参考動画を編集", fontSize = 20.sp, color = DS.ink)
+            Text(
+                (if (existing == null) L10n.Edit.videoTitleCreate else L10n.Edit.videoTitleEdit).resolve(),
+                fontSize = 20.sp, color = DS.ink
+            )
 
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 OutlinedTextField(
@@ -92,7 +97,7 @@ fun VideoEditSheet(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Text(
-                    "YouTube の watch / youtu.be / shorts / embed URL に対応。",
+                    L10n.Edit.videoUrlFooter.resolve(),
                     fontSize = 12.sp,
                     color = if (trimmedUrl.isEmpty() || urlOk) DS.ink2 else DS.danger
                 )
@@ -102,7 +107,7 @@ fun VideoEditSheet(
                 OutlinedTextField(
                     value = videoTitle,
                     onValueChange = { videoTitle = it },
-                    label = { Text("動画タイトル (任意)") },
+                    label = { Text(L10n.Edit.videoFieldTitle.resolve()) },
                     singleLine = true,
                     isError = trimmedTitle.length > MAX_VIDEO_TITLE,
                     modifier = Modifier.fillMaxWidth()
@@ -110,24 +115,24 @@ fun VideoEditSheet(
                 OutlinedTextField(
                     value = note,
                     onValueChange = { note = it },
-                    label = { Text("メモ (任意)") },
+                    label = { Text(L10n.Edit.videoFieldNote.resolve()) },
                     minLines = 2,
                     isError = trimmedNote.length > MAX_VIDEO_NOTE,
                     modifier = Modifier.fillMaxWidth()
                 )
                 Text(
-                    "どの公演の映像かなどの補足。メモ ${trimmedNote.length}/$MAX_VIDEO_NOTE 文字",
+                    L10n.Edit.videoNoteFooterAndroid(length = trimmedNote.length, max = MAX_VIDEO_NOTE).resolve(),
                     fontSize = 12.sp,
                     color = if (trimmedNote.length <= MAX_VIDEO_NOTE) DS.ink2 else DS.danger
                 )
             }
 
-            if (errorMessage != null) {
-                Text(errorMessage!!, color = DS.danger, fontSize = 13.sp)
+            errorMessage?.let {
+                Text(it.resolve(), color = DS.danger, fontSize = 13.sp)
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("キャンセル") }
+                TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text(L10n.Edit.actionCancel.resolve()) }
                 Button(
                     onClick = {
                         errorMessage = null
@@ -148,6 +153,7 @@ fun VideoEditSheet(
                             try {
                                 val resp = module.editApi.submit(
                                     listOf(op),
+                                    // i18n-ignore(storage): 編集履歴に残るサマリ (サーバに送るデータ)。画面の言語で変えない
                                     summary = if (existing == null) "参考動画を追加" else "参考動画を編集"
                                 )
                                 // create はサーバ採番 (ytref_<uuid>)。確定 recordName でローカルへ入れる。
@@ -169,10 +175,10 @@ fun VideoEditSheet(
                                 onDismiss()
                             } catch (e: EditApi.ApiException) {
                                 isSaving = false
-                                errorMessage = e.friendlyMessage()
+                                errorMessage = e.userMessage
                             } catch (e: Exception) {
                                 isSaving = false
-                                errorMessage = "保存に失敗しました: ${e.message}"
+                                errorMessage = L10n.Edit.videoErrorSaveFailed(detail = e.message.toString())
                             }
                         }
                     },
@@ -182,7 +188,7 @@ fun VideoEditSheet(
                     if (isSaving) {
                         CircularProgressIndicator(modifier = Modifier.size(18.dp), color = DS.ink)
                     } else {
-                        Text("保存")
+                        Text(L10n.Edit.actionSave.resolve())
                     }
                 }
             }

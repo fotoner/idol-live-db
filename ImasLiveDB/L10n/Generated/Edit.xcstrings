@@ -1,0 +1,2826 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "edit.action.cancel" : {
+      "comment" : "編集フォーム・ピッカー・シートを閉じるボタン (Android は閉じる/戻るアイコンの読み上げにも使う) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャンセル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "취소"
+          }
+        }
+      }
+    },
+    "edit.action.save" : {
+      "comment" : "編集フォームの保存ボタン (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "저장"
+          }
+        }
+      }
+    },
+    "edit.error.auth_expired" : {
+      "comment" : "編集の送信で認証が切れていたとき (HTTP 401) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "認証の有効期限が切れています。再度サインインしてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "인증이 만료됐어요. 다시 로그인해 주세요."
+          }
+        }
+      }
+    },
+    "edit.error.rate_limited" : {
+      "comment" : "編集の送信がレート制限に当たったとき (HTTP 429) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投稿が多すぎます。しばらく待ってからお試しください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "너무 자주 게시했어요. 잠시 기다린 뒤 다시 시도해 주세요."
+          }
+        }
+      }
+    },
+    "edit.event.error.name_required" : {
+      "comment" : "ライブの編集フォームで名前を空のまま保存しようとしたとき (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イベント名を入力してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이벤트 이름을 입력해 주세요"
+          }
+        }
+      }
+    },
+    "edit.event.field.joint_brands" : {
+      "comment" : "ライブの編集フォームの合同ブランド (ブランド ID をカンマで並べる) の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "合同ブランド (カンマ区切り)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "합동 브랜드 (쉼표로 구분)"
+          }
+        }
+      }
+    },
+    "edit.event.field.kind" : {
+      "comment" : "ライブの編集フォームの種別 (ライブ・フェス・リリイベ…) の選択欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "種別"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "종류"
+          }
+        }
+      }
+    },
+    "edit.event.field.name" : {
+      "comment" : "ライブの編集フォームの名前の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イベント名"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이벤트 이름"
+          }
+        }
+      }
+    },
+    "edit.event.field.ticket_deadline" : {
+      "comment" : "チケットの先行受付の締切日の入力欄 (Android はコアの語彙「申込締切」から作る) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "先行締切 (YYYY-MM-DD)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "선행 마감 (YYYY-MM-DD)"
+          }
+        }
+      }
+    },
+    "edit.event.field.ticket_lottery" : {
+      "comment" : "チケットの当落発表日の入力欄 (Android はコアの語彙から作る) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当落発表 (YYYY-MM-DD)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "추첨 결과 발표 (YYYY-MM-DD)"
+          }
+        }
+      }
+    },
+    "edit.event.field.ticket_open" : {
+      "comment" : "チケットの受付開始日の入力欄 (Android はコアの語彙から作る) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "受付開始 (YYYY-MM-DD)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "접수 시작 (YYYY-MM-DD)"
+          }
+        }
+      }
+    },
+    "edit.event.kind.unchanged" : {
+      "comment" : "種別の選択肢。アプリが知らない種別のイベントを直すとき、元の値のまま送り返す。raw は元の種別の生の値 (訳さない) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "変更しない (%1$@)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "변경 안 함 (%1$@)"
+          }
+        }
+      }
+    },
+    "edit.event.section.ticket" : {
+      "comment" : "ライブの編集フォームのチケットの日程の節の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チケット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "티켓"
+          }
+        }
+      }
+    },
+    "edit.event.title.create_ios" : {
+      "comment" : "ライブ (イベント) の新規作成フォームの見出し (iOS の文言。Android は create_android) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イベント追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이벤트 추가"
+          }
+        }
+      }
+    },
+    "edit.event.title.edit_ios" : {
+      "comment" : "ライブ (イベント) の編集フォームの見出し (iOS の文言。Android は edit_android) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イベント編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이벤트 편집"
+          }
+        }
+      }
+    },
+    "edit.event_picker.empty.message" : {
+      "comment" : "イベントのピッカーを開いた直後 (未入力) の空状態の説明 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イベント名を入力して検索してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이벤트 이름을 입력해서 검색해 주세요"
+          }
+        }
+      }
+    },
+    "edit.event_picker.empty.no_match" : {
+      "comment" : "イベントのピッカーで検索に一致するものが無いとき。query は入力した検索語 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」に一致するイベントがありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@”에 해당하는 이벤트가 없어요"
+          }
+        }
+      }
+    },
+    "edit.event_picker.empty.title" : {
+      "comment" : "イベントのピッカーを開いた直後 (未入力) の空状態の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イベントを検索"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이벤트 검색"
+          }
+        }
+      }
+    },
+    "edit.event_picker.search.prompt" : {
+      "comment" : "イベントのピッカーの検索欄のプレースホルダ (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イベント名で検索"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이벤트 이름으로 검색"
+          }
+        }
+      }
+    },
+    "edit.event_picker.title" : {
+      "comment" : "イベント (ライブ) を 1 つ選ぶピッカーの見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イベントを選択"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이벤트 선택"
+          }
+        }
+      }
+    },
+    "edit.form.error.id_unresolved" : {
+      "comment" : "管理者の即時反映でサーバが確定 ID を返さなかったとき (ライブ・公演・マスタ編集) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存に失敗しました (ID 未確定)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "저장하지 못했어요 (ID 미확정)"
+          }
+        }
+      }
+    },
+    "edit.form.error.save_failed" : {
+      "comment" : "編集フォームの保存が例外で失敗したとき。detail は OS / 通信ライブラリが返すエラーの説明 (訳さない) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存失敗: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "저장 실패: %1$@"
+          }
+        }
+      }
+    },
+    "edit.form.error.title" : {
+      "comment" : "編集フォームで保存・検証に失敗したときのダイアログの見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エラー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오류"
+          }
+        }
+      }
+    },
+    "edit.form.field.brand" : {
+      "comment" : "編集フォームのブランドの選択欄 (ライブ・曲・アイドル) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランド"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드"
+          }
+        }
+      }
+    },
+    "edit.form.option.unspecified" : {
+      "comment" : "選択欄の「選ばない」選択肢 (ブランド・公演の出演形態) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未指定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "지정 안 함"
+          }
+        }
+      }
+    },
+    "edit.form.saving" : {
+      "comment" : "編集フォームで保存を送っている間の全面オーバーレイ (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存中…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "저장 중…"
+          }
+        }
+      }
+    },
+    "edit.form.section.basic" : {
+      "comment" : "ライブ・公演・曲の編集フォームの最初の節の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "基本情報"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "기본 정보"
+          }
+        }
+      }
+    },
+    "edit.form.sort_order_ios" : {
+      "comment" : "マスタ (アイドル・公演) の並び順 (sortOrder) を ± で変える Stepper の見出し (iOS)。value は並び順の番号。数量ではないが、以前の iOS (SwiftUI の補間) と同じく桁区切りを付けるため count にした (アイドルの並び順は 1000 以上が普通で「並び順: 1,001」と出る)。ja・ko の複数形は other だけ。Android は区切らないので form.sort_order_android に分けた (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@value@"
+          },
+          "substitutions" : {
+            "value" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "並び順: %arg"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@value@"
+          },
+          "substitutions" : {
+            "value" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "정렬 순서: %arg"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "edit.idol.field.aliases" : {
+      "comment" : "アイドルの編集フォームの別名の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "別名 (カンマ区切り)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다른 이름 (쉼표로 구분)"
+          }
+        }
+      }
+    },
+    "edit.idol.field.attribute" : {
+      "comment" : "アイドルの編集フォームの属性の入力欄。例の値 (cute/cool/passion) は入力する値なので訳さない (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "属性 (cute/cool/passion 等)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "속성 (cute/cool/passion 등)"
+          }
+        }
+      }
+    },
+    "edit.idol.field.birthday" : {
+      "comment" : "アイドルの編集フォームの誕生日の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "誕生日 (MM-DD)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "생일 (MM-DD)"
+          }
+        }
+      }
+    },
+    "edit.idol.field.birthplace" : {
+      "comment" : "アイドルの編集フォームの出身地の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出身地"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출신지"
+          }
+        }
+      }
+    },
+    "edit.idol.field.blood_type" : {
+      "comment" : "アイドルの編集フォームの血液型の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "血液型"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "혈액형"
+          }
+        }
+      }
+    },
+    "edit.idol.field.color" : {
+      "comment" : "アイドルの編集フォームのイメージカラーの入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カラー (#hex)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "컬러 (#hex)"
+          }
+        }
+      }
+    },
+    "edit.idol.field.debut_date" : {
+      "comment" : "アイドルの編集フォームの実装日 (ゲームに登場した日) の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "実装日 (YYYY-MM-DD)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "실장일 (YYYY-MM-DD)"
+          }
+        }
+      }
+    },
+    "edit.idol.field.kana" : {
+      "comment" : "アイドルの編集フォームの名前の読み (カタカナ) の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カナ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가나 표기"
+          }
+        }
+      }
+    },
+    "edit.idol.field.name" : {
+      "comment" : "アイドルの編集フォームの名前の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이름"
+          }
+        }
+      }
+    },
+    "edit.idol.field.romaji" : {
+      "comment" : "アイドルの編集フォームの名前のローマ字の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ローマ字"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "로마자"
+          }
+        }
+      }
+    },
+    "edit.idol.section.category" : {
+      "comment" : "アイドルの編集フォームの分類 (ブランド・属性・並び順) の節の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分類"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "분류"
+          }
+        }
+      }
+    },
+    "edit.idol.section.name" : {
+      "comment" : "アイドルの編集フォームの名前の節の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이름"
+          }
+        }
+      }
+    },
+    "edit.idol.section.profile" : {
+      "comment" : "アイドルの編集フォームのプロフィールの節の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロフィール"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "프로필"
+          }
+        }
+      }
+    },
+    "edit.idol.title" : {
+      "comment" : "アイドルの編集フォームの見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 편집"
+          }
+        }
+      }
+    },
+    "edit.picker.empty.title" : {
+      "comment" : "ライブ・公演・曲を選ぶピッカーで、検索に一致するものが無いときの空状態の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "見つかりません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "찾을 수 없어요"
+          }
+        }
+      }
+    },
+    "edit.primary_button.sending.a11y_hint" : {
+      "comment" : "送信ボタン (PrimaryActionButton) が送信中のときの VoiceOver のヒント (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "送信中"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전송 중"
+          }
+        }
+      }
+    },
+    "edit.setlist.action.add_song" : {
+      "comment" : "セトリの末尾に行を足すボタン (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲を追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 추가"
+          }
+        }
+      }
+    },
+    "edit.setlist.cast_picker.title" : {
+      "comment" : "セトリの 1 行の出演者を選ぶ画面の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出演者"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출연자"
+          }
+        }
+      }
+    },
+    "edit.setlist.clear.confirm" : {
+      "comment" : "セトリ全削除の確認で削除を実行するボタン (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "삭제"
+          }
+        }
+      }
+    },
+    "edit.setlist.clear.message_ios" : {
+      "comment" : "セトリ全削除の確認の本文 (iOS の文言。「。」のあとに空白がある。Android は message_android)。count は消える行の数 (1000 以上なら桁区切りが付くが、セトリの行数なので実際には出ない) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "この公演のセトリ %arg 件をすべて削除します。 この操作は取り消せません。"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "이 공연의 세트리스트 %arg건을 모두 삭제해요. 이 작업은 되돌릴 수 없어요."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "edit.setlist.clear.title" : {
+      "comment" : "既存のセトリを 0 行にして保存しようとしたときの確認の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリを全削除しますか?"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트를 모두 삭제할까요?"
+          }
+        }
+      }
+    },
+    "edit.setlist.error.load_failed" : {
+      "comment" : "セトリの編集画面で今のセトリを読めなかったとき。detail はエラーの説明 (訳さない) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリ読み込み失敗: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트를 불러오지 못했어요: %1$@"
+          }
+        }
+      }
+    },
+    "edit.setlist.error.row_song_missing" : {
+      "comment" : "曲を選んでいない行があるまま保存しようとしたとき。row は行の番号 (1 から) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ 行目: 曲が未選択"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@번째 줄: 곡을 선택하지 않았어요"
+          }
+        }
+      }
+    },
+    "edit.setlist.row.no_cast" : {
+      "comment" : "セトリの行で出演者を 1 人も選んでいないときの表示 (押すと出演者を選ぶ) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(出演者なし — タップで追加)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "(출연자 없음 — 탭해서 추가)"
+          }
+        }
+      }
+    },
+    "edit.setlist.row.song_placeholder" : {
+      "comment" : "セトリの行で、まだ曲を選んでいないときの表示 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(曲を選択)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "(곡 선택)"
+          }
+        }
+      }
+    },
+    "edit.setlist.section.double_encore" : {
+      "comment" : "セトリの行の区分の選択肢: ダブルアンコール (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ダブルアンコール"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "더블 앙코르"
+          }
+        }
+      }
+    },
+    "edit.setlist.section.encore" : {
+      "comment" : "セトリの行の区分の選択肢: アンコール (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アンコール"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "앙코르"
+          }
+        }
+      }
+    },
+    "edit.setlist.section.main" : {
+      "comment" : "セトリの行の区分の選択肢: 本編 (区分なし) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本編"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "본편"
+          }
+        }
+      }
+    },
+    "edit.setlist.section.mc" : {
+      "comment" : "セトリの行の区分の選択肢: MC (トーク) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MC"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "MC"
+          }
+        }
+      }
+    },
+    "edit.setlist.title" : {
+      "comment" : "セトリの編集画面の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリ編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 편집"
+          }
+        }
+      }
+    },
+    "edit.show.error.date_format" : {
+      "comment" : "公演の編集フォームで日付の形が正しくないとき (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日付は YYYY-MM-DD 形式で入力してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "날짜는 YYYY-MM-DD 형식으로 입력해 주세요"
+          }
+        }
+      }
+    },
+    "edit.show.error.required" : {
+      "comment" : "公演の編集フォームで名前か日付が空のまま保存しようとしたとき (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演名と日付は必須です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 이름과 날짜는 필수예요"
+          }
+        }
+      }
+    },
+    "edit.show.field.date" : {
+      "comment" : "公演の編集フォームの公演日の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日付 (YYYY-MM-DD)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "날짜 (YYYY-MM-DD)"
+          }
+        }
+      }
+    },
+    "edit.show.field.name" : {
+      "comment" : "公演の編集フォームの名前の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演名"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 이름"
+          }
+        }
+      }
+    },
+    "edit.show.field.performer_type" : {
+      "comment" : "公演の編集フォームの出演形態 (character / cast / mixed。選択肢の値は訳さない) の選択欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出演形態"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출연 형태"
+          }
+        }
+      }
+    },
+    "edit.show.field.start_time" : {
+      "comment" : "公演の編集フォームの開演時刻の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開演時刻 (HH:mm)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 시작 시각 (HH:mm)"
+          }
+        }
+      }
+    },
+    "edit.show.field.venue" : {
+      "comment" : "公演の編集フォームの会場名の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会場"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연장"
+          }
+        }
+      }
+    },
+    "edit.show.field.venue_city" : {
+      "comment" : "公演の編集フォームの会場の所在地 (都市) の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会場所在地"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연장 소재지"
+          }
+        }
+      }
+    },
+    "edit.show.title.create_ios" : {
+      "comment" : "公演の新規作成フォームの見出し (iOS の文言。Android は create_android) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 추가"
+          }
+        }
+      }
+    },
+    "edit.show.title.edit" : {
+      "comment" : "公演の編集フォームの見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 편집"
+          }
+        }
+      }
+    },
+    "edit.show_picker.empty.message" : {
+      "comment" : "公演のピッカーを開いた直後 (未入力) の空状態の説明 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演名またはイベント名を入力して検索してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 이름이나 이벤트 이름을 입력해서 검색해 주세요"
+          }
+        }
+      }
+    },
+    "edit.show_picker.empty.no_match" : {
+      "comment" : "公演のピッカーで検索に一致するものが無いとき。query は入力した検索語 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」に一致する公演がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@”에 해당하는 공연이 없어요"
+          }
+        }
+      }
+    },
+    "edit.show_picker.empty.title" : {
+      "comment" : "公演のピッカーを開いた直後 (未入力) の空状態の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演を検索"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 검색"
+          }
+        }
+      }
+    },
+    "edit.show_picker.search.prompt" : {
+      "comment" : "公演のピッカーの検索欄のプレースホルダ (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演名・イベント名で検索"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 이름·이벤트 이름으로 검색"
+          }
+        }
+      }
+    },
+    "edit.show_picker.title" : {
+      "comment" : "公演を 1 つ選ぶピッカーの見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演を選択"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 선택"
+          }
+        }
+      }
+    },
+    "edit.song.apple_music.clear" : {
+      "comment" : "曲の編集フォームで Apple Music の ID・ジャケ写・試聴の URL をまとめて消すボタン (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Music 関連を全て空にする"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Apple Music 관련 항목 모두 비우기"
+          }
+        }
+      }
+    },
+    "edit.song.apple_music.clear_footer" : {
+      "comment" : "Apple Music の項目を空にするボタンの下の説明 (サブスク = 定額の配信サービス) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "誤紐付けで他の曲が再生されるときに使う。サブスク未配信の曲はクリアすべき。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "잘못 연결돼서 다른 곡이 재생될 때 써요. 스트리밍에 없는 곡은 비워 두세요."
+          }
+        }
+      }
+    },
+    "edit.song.artists.footer" : {
+      "comment" : "歌唱アイドルの節の下の説明 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一覧でアイコンを出すために必要です。ソロ曲なら 1 名、ユニット曲なら全員を選んでください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "목록에 아이콘을 표시하는 데 필요해요. 솔로곡이면 1명, 유닛곡이면 전원을 선택해 주세요."
+          }
+        }
+      }
+    },
+    "edit.song.artists.placeholder" : {
+      "comment" : "歌唱アイドルをまだ選んでいないときの表示 (押すと選ぶ画面) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌唱アイドルを選択"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가창 아이돌 선택"
+          }
+        }
+      }
+    },
+    "edit.song.artists.title" : {
+      "comment" : "曲の新規作成で歌うアイドル (オリジナルメンバー) を選ぶ節の見出しと、アイドルを選ぶ画面の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌唱アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가창 아이돌"
+          }
+        }
+      }
+    },
+    "edit.song.error.artists_required" : {
+      "comment" : "曲の新規作成で歌唱アイドルを選ばずに保存しようとしたとき (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌唱アイドルを 1 名以上選択してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가창 아이돌을 1명 이상 선택해 주세요"
+          }
+        }
+      }
+    },
+    "edit.song.error.artwork_required" : {
+      "comment" : "Apple Music の ID だけ入れてジャケ写の URL が空のまま保存しようとしたとき (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Music ID を設定する場合は artwork URL も必須です (一覧のジャケ写表示に使います)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Apple Music ID를 설정하려면 artwork URL도 필요해요 (목록의 재킷 이미지 표시에 써요)"
+          }
+        }
+      }
+    },
+    "edit.song.error.duration_format" : {
+      "comment" : "曲の編集フォームで再生時間が数でないとき (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生時間は秒数 (整数) で入力してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "재생 시간은 초 단위 (정수)로 입력해 주세요"
+          }
+        }
+      }
+    },
+    "edit.song.error.release_date_format" : {
+      "comment" : "曲の編集フォームでリリース日の形が正しくないとき (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リリース日は YYYY-MM-DD 形式で入力してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "발매일은 YYYY-MM-DD 형식으로 입력해 주세요"
+          }
+        }
+      }
+    },
+    "edit.song.error.title_required" : {
+      "comment" : "曲の編集フォームで曲名を空のまま保存しようとしたとき (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイトルを入力してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "제목을 입력해 주세요"
+          }
+        }
+      }
+    },
+    "edit.song.field.arranger" : {
+      "comment" : "曲の編集フォームの編曲者の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "편곡"
+          }
+        }
+      }
+    },
+    "edit.song.field.composer" : {
+      "comment" : "曲の編集フォームの作曲者の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "작곡"
+          }
+        }
+      }
+    },
+    "edit.song.field.duration" : {
+      "comment" : "曲の編集フォームの再生時間 (秒数) の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生時間 (秒)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "재생 시간 (초)"
+          }
+        }
+      }
+    },
+    "edit.song.field.lyricist" : {
+      "comment" : "曲の編集フォームの作詞者の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作詞"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "작사"
+          }
+        }
+      }
+    },
+    "edit.song.field.lyrics_url" : {
+      "comment" : "曲の編集フォームの歌詞ページの URL の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌詞 URL"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가사 URL"
+          }
+        }
+      }
+    },
+    "edit.song.field.release_date" : {
+      "comment" : "曲の編集フォームのリリース日の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リリース日 (YYYY-MM-DD)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "발매일 (YYYY-MM-DD)"
+          }
+        }
+      }
+    },
+    "edit.song.field.singer_label" : {
+      "comment" : "曲の編集フォームの歌唱者の表記の入力欄。例はマスタに入る書き方そのもの (アイドル名と区切りの ・) なので訳さない (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌唱表記 (例: 春香・千早)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가창 표기 (예: 春香・千早)"
+          }
+        }
+      }
+    },
+    "edit.song.field.title" : {
+      "comment" : "曲の編集フォームの曲名の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイトル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "제목"
+          }
+        }
+      }
+    },
+    "edit.song.field.title_kana" : {
+      "comment" : "曲の編集フォームの曲名の読みの入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイトル (カナ)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "제목 (가나)"
+          }
+        }
+      }
+    },
+    "edit.song.field.type" : {
+      "comment" : "曲の編集フォームの曲種別 (ソロ・ユニット…。語はコアの語彙) の選択欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "種別"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "종류"
+          }
+        }
+      }
+    },
+    "edit.song.field.unit_name" : {
+      "comment" : "曲の編集フォームのユニット名の入力欄 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニット名"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛 이름"
+          }
+        }
+      }
+    },
+    "edit.song.section.cd_other" : {
+      "comment" : "曲の編集フォームの CD・ISRC・歌詞 URL の節の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CD / その他"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "CD / 기타"
+          }
+        }
+      }
+    },
+    "edit.song.section.credits" : {
+      "comment" : "曲の編集フォームの作家・リリースの節の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "制作情報"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "제작 정보"
+          }
+        }
+      }
+    },
+    "edit.song.title.create" : {
+      "comment" : "曲の新規作成フォームの見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲を追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 추가"
+          }
+        }
+      }
+    },
+    "edit.song.title.edit" : {
+      "comment" : "曲の編集フォームの見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 편집"
+          }
+        }
+      }
+    },
+    "edit.song_picker.action.add" : {
+      "comment" : "曲のピッカーの確定ボタン (まだ 1 曲も選んでいないとき) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "추가"
+          }
+        }
+      }
+    },
+    "edit.song_picker.action.add_count" : {
+      "comment" : "曲のピッカーの確定ボタン (曲を選んだあと)。count は選んだ曲の数。1000 以上は桁区切りが付く (以前の iOS の SwiftUI の補間と同じ) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "追加 (%arg)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "추가 (%arg)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "edit.song_picker.action.done" : {
+      "comment" : "曲のピッカーの絞り込みシートを閉じるボタン (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完了"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "완료"
+          }
+        }
+      }
+    },
+    "edit.song_picker.action.reset" : {
+      "comment" : "曲のピッカーの絞り込みシートで、絞り込みを全部外すボタン (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リセット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "초기화"
+          }
+        }
+      }
+    },
+    "edit.song_picker.cd_series.title" : {
+      "comment" : "曲のピッカーの絞り込みシートの CD シリーズの節の見出しと、そこから開く一覧の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CDシリーズ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "CD 시리즈"
+          }
+        }
+      }
+    },
+    "edit.song_picker.empty.hint" : {
+      "comment" : "曲のピッカーで、未入力なのに結果が無いときの案内 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "右上のフィルターか曲名で絞り込めます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오른쪽 위 필터나 곡명으로 범위를 좁힐 수 있어요"
+          }
+        }
+      }
+    },
+    "edit.song_picker.empty.no_match" : {
+      "comment" : "曲のピッカーで検索に一致するものが無いとき。query は入力した検索語 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」に一致する楽曲がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@”에 해당하는 곡이 없어요"
+          }
+        }
+      }
+    },
+    "edit.song_picker.filter.a11y" : {
+      "comment" : "曲のピッカーの右上の絞り込みボタンの読み上げ (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フィルター"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터"
+          }
+        }
+      }
+    },
+    "edit.song_picker.filter.cast_original_only" : {
+      "comment" : "絞り込み: その公演の出演者がオリジナルメンバーの曲だけにするスイッチ (オリ曲 = オリジナル曲) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出演者のオリ曲のみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출연자 오리지널 곡만"
+          }
+        }
+      }
+    },
+    "edit.song_picker.filter.footer" : {
+      "comment" : "絞り込みの節の下の説明。「ライブ履歴のみ」は上のスイッチのこと。歌枠 = 配信で歌う枠 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「ライブ履歴のみ」は、セトリ追加で生まれただけでカタログ情報が無い曲 (カバー・歌枠等) を隠します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“라이브 기록에만 있는 곡 숨기기”를 켜면, 세트리스트에 추가되면서 생겼을 뿐 카탈로그 정보가 없는 곡 (커버·노래 방송 등)을 숨겨요."
+          }
+        }
+      }
+    },
+    "edit.song_picker.filter.header" : {
+      "comment" : "曲のピッカーの絞り込みシートのスイッチの節の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "絞り込み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터"
+          }
+        }
+      }
+    },
+    "edit.song_picker.filter.hide_live_only" : {
+      "comment" : "絞り込み: セトリにしか出てこない (カタログ情報の無い) 曲を隠すスイッチ (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ履歴のみの曲を隠す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브 기록에만 있는 곡 숨기기"
+          }
+        }
+      }
+    },
+    "edit.song_picker.filter.include_remixes" : {
+      "comment" : "絞り込み: リミックス曲も出すスイッチ (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リミックスを含める"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "리믹스 포함"
+          }
+        }
+      }
+    },
+    "edit.song_picker.filter_sheet.title" : {
+      "comment" : "曲のピッカーの絞り込みシートの見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フィルター / 並び順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터 / 정렬"
+          }
+        }
+      }
+    },
+    "edit.song_picker.header.count" : {
+      "comment" : "曲のピッカーの一覧の見出し (曲を選ぶ前)。count は一覧の曲数。1000 以上は桁区切りが付く (1,234曲) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "edit.song_picker.header.selected" : {
+      "comment" : "曲のピッカーの一覧の見出し (曲を選んだあと)。count は一覧の曲数 (1000 以上は桁区切りが付く)、selected は選んだ曲の数を呼び出し側で桁区切りした文字列 (1,234。以前の iOS の SwiftUI の補間と同じ。count は 1 キーに 1 つまでなので文字列で渡す) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg曲 ・ %2$@曲選択中"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg곡 · %2$@곡 선택됨"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "edit.song_picker.idols.header" : {
+      "comment" : "曲のピッカーの絞り込みシートのアイドルの節の見出しと、そこから開くアイドル選択の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌"
+          }
+        }
+      }
+    },
+    "edit.song_picker.mark.favorite_only" : {
+      "comment" : "絞り込み: お気に入りの曲だけにするスイッチ (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入りのみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기만"
+          }
+        }
+      }
+    },
+    "edit.song_picker.mark.header" : {
+      "comment" : "曲のピッカーの絞り込みシートのマイマーク (担当・お気に入り) の節の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイマーク"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이 마크"
+          }
+        }
+      }
+    },
+    "edit.song_picker.mark.my_pick_only" : {
+      "comment" : "絞り込み: 担当アイドルが歌う曲だけにするスイッチ (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当アイドルの曲のみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 아이돌 곡만"
+          }
+        }
+      }
+    },
+    "edit.song_picker.option.none" : {
+      "comment" : "曲のピッカーの絞り込みシートで、タグ・アイドル・シリーズを何も選んでいないときの表示 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択なし"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "선택 안 함"
+          }
+        }
+      }
+    },
+    "edit.song_picker.search.prompt" : {
+      "comment" : "曲のピッカーの検索欄のプレースホルダ (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲名で検索"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡명으로 검색"
+          }
+        }
+      }
+    },
+    "edit.song_picker.series.title" : {
+      "comment" : "曲のピッカーの絞り込みシートのシリーズの節の見出しと、そこから開く一覧の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シリーズ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "시리즈"
+          }
+        }
+      }
+    },
+    "edit.song_picker.song_type.all" : {
+      "comment" : "曲タイプの選択肢: 絞り込まない (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全て"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "edit.song_picker.song_type.header" : {
+      "comment" : "曲のピッカーの絞り込みシートの曲タイプ (ソロ・ユニット・全体曲) の節の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲タイプ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 유형"
+          }
+        }
+      }
+    },
+    "edit.song_picker.songwriter.header" : {
+      "comment" : "曲のピッカーの絞り込みシートの作家名の節の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作詞 / 作曲 / 編曲者"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "작사 / 작곡 / 편곡자"
+          }
+        }
+      }
+    },
+    "edit.song_picker.songwriter.placeholder" : {
+      "comment" : "作家名の入力欄のプレースホルダ (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前を入力"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이름 입력"
+          }
+        }
+      }
+    },
+    "edit.song_picker.sort.performance_count" : {
+      "comment" : "並び順の選択肢: ライブで歌われた回数の多い順 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "披露回数順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 횟수순"
+          }
+        }
+      }
+    },
+    "edit.song_picker.sort.release_date" : {
+      "comment" : "並び順の選択肢: リリース日の新しい順 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リリース日順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "발매일순"
+          }
+        }
+      }
+    },
+    "edit.song_picker.sort.title" : {
+      "comment" : "曲のピッカーの絞り込みシートの並び順の選択欄と、その節の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "並び順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정렬"
+          }
+        }
+      }
+    },
+    "edit.song_picker.sort.title_kana" : {
+      "comment" : "並び順の選択肢: 曲名の読みの五十音順 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "五十音順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "50음순"
+          }
+        }
+      }
+    },
+    "edit.song_picker.tag_filter.error" : {
+      "comment" : "曲のピッカーで、タグの絞り込みを取れず結果が 0 件のときの注意 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ絞り込みの取得に失敗しました。電波状況をご確認ください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 필터를 불러오지 못했어요. 통신 상태를 확인해 주세요."
+          }
+        }
+      }
+    },
+    "edit.song_picker.tag_filter.error_stale" : {
+      "comment" : "曲のピッカーで、タグの絞り込みを取れなかったが前の結果を出し続けているときの注意 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ絞り込みの取得に失敗しました (表示中の結果には未反映です)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 필터를 불러오지 못했어요 (지금 보이는 결과에는 반영되지 않았어요)"
+          }
+        }
+      }
+    },
+    "edit.song_picker.tags.footer" : {
+      "comment" : "タグの節の下の説明 (複数のタグは AND で絞る) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "複数選択時は全てのタグを含む曲だけに絞り込みます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "여러 개를 고르면 모든 태그가 달린 곡만 필터링해요."
+          }
+        }
+      }
+    },
+    "edit.song_picker.tags.header" : {
+      "comment" : "曲のピッカーの絞り込みシートのタグの節の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그"
+          }
+        }
+      }
+    },
+    "edit.song_picker.title" : {
+      "comment" : "曲を複数選んで追加するピッカー (セトリ予想・投票のお題など) の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲を追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 추가"
+          }
+        }
+      }
+    },
+    "edit.video.error.note_too_long" : {
+      "comment" : "参考動画のメモが長すぎるとき。max は上限の文字数 (桁区切りしない) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メモは %1$@ 文字以内で入力してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "메모는 %1$@자 이내로 입력해 주세요"
+          }
+        }
+      }
+    },
+    "edit.video.error.save_failed" : {
+      "comment" : "参考動画の保存が例外で失敗したとき。detail はエラーの説明 (訳さない) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存に失敗しました: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "저장하지 못했어요: %1$@"
+          }
+        }
+      }
+    },
+    "edit.video.error.title_too_long" : {
+      "comment" : "参考動画のタイトルが長すぎるとき。max は上限の文字数 (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイトルは %1$@ 文字以内で入力してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "제목은 %1$@자 이내로 입력해 주세요"
+          }
+        }
+      }
+    },
+    "edit.video.error.url_required" : {
+      "comment" : "参考動画のフォームで URL が YouTube の動画のものでないとき (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube の URL を入力してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "YouTube URL을 입력해 주세요"
+          }
+        }
+      }
+    },
+    "edit.video.field.note" : {
+      "comment" : "参考動画のフォームのメモの入力欄 (省略できる) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メモ (任意)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "메모 (선택)"
+          }
+        }
+      }
+    },
+    "edit.video.field.title" : {
+      "comment" : "参考動画のフォームの動画タイトルの入力欄 (省略できる) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "動画タイトル (任意)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "영상 제목 (선택)"
+          }
+        }
+      }
+    },
+    "edit.video.note.footer_ios" : {
+      "comment" : "参考動画のフォームのメモの節の下の説明と文字数 (iOS)。length は今の文字数を呼び出し側で桁区切りした文字列 (1000 以上は 1,234)、max は上限の 1000 で、いつも桁区切りが付く (1,000)。以前の iOS も SwiftUI の補間で桁区切りして出していた (Android は区切らないので video.note.footer_android に分けた) (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@max@"
+          },
+          "substitutions" : {
+            "max" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "どの公演の映像かなどの補足。メモ %1$@/%arg 文字"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@max@"
+          },
+          "substitutions" : {
+            "max" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "어느 공연 영상인지 등을 적는 보충 설명. 메모 %1$@/%arg자"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "edit.video.note.header" : {
+      "comment" : "参考動画のフォームのタイトル・メモの節の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "補足"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "보충 설명"
+          }
+        }
+      }
+    },
+    "edit.video.title.create" : {
+      "comment" : "参考動画の投稿フォームの見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参考動画を投稿"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참고 영상 올리기"
+          }
+        }
+      }
+    },
+    "edit.video.title.edit" : {
+      "comment" : "参考動画の編集フォームの見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参考動画を編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참고 영상 편집"
+          }
+        }
+      }
+    },
+    "edit.video.url.footer" : {
+      "comment" : "参考動画の URL の入力欄の下の説明。watch などは URL の形の名前なので訳さない (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YouTube の watch / youtu.be / shorts / embed URL に対応。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "YouTube의 watch / youtu.be / shorts / embed URL을 지원해요."
+          }
+        }
+      }
+    },
+    "edit.video.url.header" : {
+      "comment" : "参考動画のフォームの URL の節の見出し (i18n/catalog/edit.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "動画 URL"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "영상 URL"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -58,6 +58,9 @@ import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.ShowWithEventName
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.BrandFilterChips
 import com.fugaif.imaslivedb.ui.components.BrandFilterItem
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
@@ -110,17 +113,19 @@ fun ShowSearchPickerSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.9f)) {
             Text(
-                "公演を選択", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink,
+                L10n.Edit.showPickerTitle.resolve(), fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
             )
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                placeholder = { Text("公演名・イベント名で検索") },
+                placeholder = { Text(L10n.Edit.showPickerSearchPrompt.resolve()) },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 trailingIcon = {
                     if (query.isNotEmpty()) {
-                        IconButton(onClick = { query = "" }) { Icon(Icons.Filled.Clear, contentDescription = "クリア") }
+                        IconButton(onClick = { query = "" }) {
+                            Icon(Icons.Filled.Clear, contentDescription = L10n.Edit.pickerClearA11y.resolve())
+                        }
                     }
                 },
                 singleLine = true,
@@ -129,8 +134,9 @@ fun ShowSearchPickerSheet(
             if (results.isEmpty()) {
                 ImasEmptyState(
                     icon = Icons.Filled.ConfirmationNumber,
-                    title = "見つかりません",
-                    message = if (query.isEmpty()) "最近の公演がここに表示されます" else "「$query」に一致する公演がありません"
+                    title = L10n.Edit.pickerEmptyTitle.resolve(),
+                    message = (if (query.isEmpty()) L10n.Edit.showPickerEmptyRecent
+                        else L10n.Edit.showPickerEmptyNoMatch(query = query)).resolve()
                 )
             } else {
                 LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)) {
@@ -149,7 +155,8 @@ fun ShowSearchPickerSheet(
                             Column(Modifier.weight(1f)) {
                                 Text(show.eventName, fontSize = 15.sp, fontWeight = FontWeight.Medium, color = DS.ink,
                                     maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                Text("${show.name} ・ ${show.date.take(10)}", fontSize = 12.sp, color = DS.ink2,
+                                Text(L10n.Edit.showPickerRowSubtitle(name = show.name, date = show.date.take(10)).resolve(),
+                                    fontSize = 12.sp, color = DS.ink2,
                                     maxLines = 1, overflow = TextOverflow.Ellipsis)
                             }
                         }
@@ -195,17 +202,19 @@ fun SongPickerSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.9f)) {
             Text(
-                "曲を選択", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink,
+                L10n.Edit.songPickerSelectTitle.resolve(), fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
             )
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                placeholder = { Text("曲名で検索") },
+                placeholder = { Text(L10n.Edit.songPickerSearchPrompt.resolve()) },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 trailingIcon = {
                     if (query.isNotEmpty()) {
-                        IconButton(onClick = { query = "" }) { Icon(Icons.Filled.Clear, contentDescription = "クリア") }
+                        IconButton(onClick = { query = "" }) {
+                            Icon(Icons.Filled.Clear, contentDescription = L10n.Edit.pickerClearA11y.resolve())
+                        }
                     }
                 },
                 singleLine = true,
@@ -216,7 +225,10 @@ fun SongPickerSheet(
                     CircularProgressIndicator()
                 }
             } else if (results.isEmpty()) {
-                ImasEmptyState(Icons.Filled.MusicNote, "見つかりません", "「$query」に一致する楽曲がありません")
+                ImasEmptyState(
+                    Icons.Filled.MusicNote, L10n.Edit.pickerEmptyTitle.resolve(),
+                    L10n.Edit.songPickerEmptyNoMatch(query = query).resolve()
+                )
             } else {
                 LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)) {
                     lazyColumnItems(results, key = { it.id }) { song ->
@@ -266,7 +278,7 @@ class IdolMultiSelectViewModel(app: Application) : AndroidViewModel(app) {
  * アイドルを複数選ぶ。既存選択の解除も含め自由にトグルできる (お題ピッカーと違い一方通行ではない)。
  *
  * セトリ 1 行の出演者と、曲の歌唱アイドル (SongArtist role=original) の両方で使うので、
- * 見出しだけ [title] で差し替える。中身は同じ母集団・同じ絞り込みでよい。
+ * 見出しだけ [title] (文言) で差し替える。中身は同じ母集団・同じ絞り込みでよい。
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -274,7 +286,7 @@ fun IdolMultiSelectSheet(
     selected: Set<String>,
     onDismiss: () -> Unit,
     onConfirm: (Set<String>) -> Unit,
-    title: String = "出演者を選択",
+    title: DisplayText = L10n.Edit.idolPickerTitle,
     viewModel: IdolMultiSelectViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -313,7 +325,7 @@ fun IdolMultiSelectSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.92f)) {
             Text(
-                "$title (${current.size})",
+                L10n.Edit.idolPickerHeader(title = title, count = current.size).resolve(),
                 fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
             )
@@ -325,11 +337,13 @@ fun IdolMultiSelectSheet(
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                placeholder = { Text("アイドル名で検索") },
+                placeholder = { Text(L10n.Edit.idolPickerSearchPrompt.resolve()) },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 trailingIcon = {
                     if (query.isNotEmpty()) {
-                        IconButton(onClick = { query = "" }) { Icon(Icons.Filled.Clear, contentDescription = "クリア") }
+                        IconButton(onClick = { query = "" }) {
+                            Icon(Icons.Filled.Clear, contentDescription = L10n.Edit.pickerClearA11y.resolve())
+                        }
                     }
                 },
                 singleLine = true,
@@ -384,8 +398,10 @@ fun IdolMultiSelectSheet(
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Button(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("キャンセル") }
-                Button(onClick = { onConfirm(current) }, modifier = Modifier.weight(1f)) { Text("決定") }
+                Button(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text(L10n.Edit.actionCancel.resolve()) }
+                Button(onClick = { onConfirm(current) }, modifier = Modifier.weight(1f)) {
+                    Text(L10n.Edit.idolPickerActionConfirm.resolve())
+                }
             }
         }
     }

@@ -13,15 +13,19 @@ import com.fugaif.imaslivedb.data.edit.EditApi
 import com.fugaif.imaslivedb.data.edit.putClearable
 import com.fugaif.imaslivedb.data.model.Show
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import kotlinx.coroutines.launch
 
-/** 出演形態。iOS `ShowEditView.performerTypes` と同じ 4 択 (空 = 未指定)。 */
-private val PERFORMER_TYPES = listOf(
-    "" to "未指定",
-    "character" to "character",
-    "cast" to "cast",
-    "mixed" to "mixed"
-)
+/** 出演形態。iOS `ShowEditView.performerTypes` と同じ 4 択 (空 = 未指定。それ以外は保存する値をそのまま出す)。 */
+private val PERFORMER_TYPES: List<Pair<String, DisplayText>>
+    get() = listOf(
+        "" to L10n.Edit.formOptionUnspecified,
+        "character" to DisplayText.Verbatim("character"),
+        "cast" to DisplayText.Verbatim("cast"),
+        "mixed" to DisplayText.Verbatim("mixed")
+    )
 
 /**
  * 公演 (Show) の新規作成 / 編集。iOS `ShowEditView` の移植。
@@ -55,7 +59,7 @@ fun ShowEditScreen(
     var performerType by rememberSaveable(key) { mutableStateOf(original?.performerType ?: "") }
 
     var isSaving by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var errorMessage by remember { mutableStateOf<DisplayText?>(null) }
     var requestedIssueUrl by remember { mutableStateOf<String?>(null) }
     var requestSent by remember { mutableStateOf(false) }
 
@@ -64,10 +68,10 @@ fun ShowEditScreen(
         val trimmedDate = date.trim()
         // iOS ShowEditView.save() と同条件: 公演名と日付が必須、日付は YYYY-MM-DD。
         if (trimmedName.isEmpty() || trimmedDate.isEmpty()) {
-            errorMessage = "公演名と日付は必須です"; return
+            errorMessage = L10n.Edit.showErrorRequired; return
         }
         if (!isValidShowDate(trimmedDate)) {
-            errorMessage = "日付は YYYY-MM-DD 形式で入力してください"; return
+            errorMessage = L10n.Edit.showErrorDateFormat; return
         }
 
         val fields = mutableMapOf<String, Any?>(
@@ -93,6 +97,7 @@ fun ShowEditScreen(
             val result = submitMasterEdit(
                 context = context,
                 ops = listOf(op),
+                // i18n-ignore(storage): 編集履歴に残るサマリ (サーバに送るデータ)。画面の言語で変えない
                 summary = if (isCreate) "公演追加" else "公演編集",
                 fallbackRecordName = original?.id
             ) { resolvedId ->
@@ -124,21 +129,21 @@ fun ShowEditScreen(
     }
 
     MasterEditScaffold(
-        title = if (isCreate) "公演を追加" else "公演編集",
+        title = (if (isCreate) L10n.Edit.showTitleCreateAndroid else L10n.Edit.showTitleEdit).resolve(),
         canSave = name.trim().isNotEmpty() && date.trim().isNotEmpty(),
         isSaving = isSaving,
         onCancel = onDismiss,
         onSave = ::save
     ) {
-        EditSection("基本情報") {
+        EditSection(L10n.Edit.formSectionBasic.resolve()) {
             if (original != null) EditReadonlyRow("ID", original.id)
-            EditTextField("公演名", name, { name = it })
-            EditTextField("日付 (YYYY-MM-DD)", date, { date = it })
-            EditTextField("会場", venue, { venue = it })
-            EditTextField("会場所在地", venueCity, { venueCity = it })
-            EditTextField("開演時刻 (HH:mm)", startTime, { startTime = it })
-            EditStepperRow("並び順", sortOrder, 0..999) { sortOrder = it }
-            EditDropdownField("出演形態", PERFORMER_TYPES, performerType) { performerType = it }
+            EditTextField(L10n.Edit.showFieldName.resolve(), name, { name = it })
+            EditTextField(L10n.Edit.showFieldDate.resolve(), date, { date = it })
+            EditTextField(L10n.Edit.showFieldVenue.resolve(), venue, { venue = it })
+            EditTextField(L10n.Edit.showFieldVenueCity.resolve(), venueCity, { venueCity = it })
+            EditTextField(L10n.Edit.showFieldStartTime.resolve(), startTime, { startTime = it })
+            EditStepperRow(L10n.Edit.formSortOrderAndroid(value = sortOrder), sortOrder, 0..999) { sortOrder = it }
+            EditDropdownField(L10n.Edit.showFieldPerformerType.resolve(), PERFORMER_TYPES, performerType) { performerType = it }
         }
     }
 
