@@ -33,7 +33,7 @@ object L10nCatalogKeys {
 
     /** 全キー × 見本 */
     val all: List<L10nCatalogSample>
-        get() = about0() + announcements0() + common0() + edit0() + edit1() + events0() + events1() + filtered0() + help0() + help1() + i18n0() + introdon0() + ledger0() + legal0() + mastery0() + mypage0() + nav0() + produce0() + schedule0() + search0() + settings0() + settings1() + songs0() + songs1() + stats0() + system0() + tags0() + tags1() + timeline0() + units0() + widget0()
+        get() = about0() + announcements0() + app0() + common0() + edit0() + edit1() + events0() + events1() + filtered0() + help0() + help1() + i18n0() + introdon0() + ledger0() + legal0() + mastery0() + model0() + mypage0() + nav0() + produce0() + schedule0() + search0() + settings0() + settings1() + songs0() + songs1() + stats0() + system0() + tags0() + tags1() + timeline0() + units0() + widget0()
 
     private fun about0(): List<L10nCatalogSample> = listOf(
         L10nCatalogSample("about.oss.core.license", "about_oss_core_license", listOf("ja", "ko"), "", { L10n.About.ossCoreLicense }, mapOf("ja" to "iOS 版と共有する自作のコアライブラリです。外部ライセンスはありません。", "ko" to "iOS 버전과 공유하는 자체 제작 코어 라이브러리예요. 외부 라이선스는 없어요.")),
@@ -133,6 +133,23 @@ object L10nCatalogKeys {
         L10nCatalogSample("announcements.widget_polish.body.p3", "announcements_widget_polish_body_p3", listOf("ja", "ko"), "", { L10n.Announcements.widgetPolishBodyP3 }, mapOf("ja" to "ギャラリーの表示や、画像まわりの細かな不具合を修正しました。", "ko" to "갤러리 표시와 이미지 관련 자잘한 문제를 고쳤어요.")),
         L10nCatalogSample("announcements.widget_polish.summary", "announcements_widget_polish_summary", listOf("ja", "ko"), "", { L10n.Announcements.widgetPolishSummary }, mapOf("ja" to "ウィジェットに出す画像を選べるようになり、アイドル選択も探しやすくなりました。", "ko" to "위젯에 보여 줄 이미지를 고를 수 있게 되고, 아이돌 선택도 찾기 쉬워졌어요.")),
         L10nCatalogSample("announcements.widget_polish.title", "announcements_widget_polish_title", listOf("ja", "ko"), "", { L10n.Announcements.widgetPolishTitle }, mapOf("ja" to "スライドショーの画像を選べるように", "ko" to "슬라이드쇼 이미지를 고를 수 있게")),
+    )
+
+    private fun app0(): List<L10nCatalogSample> = listOf(
+        L10nCatalogSample("app.boot.load_error.message", "app_boot_load_error_message", listOf("ja", "ko"), "message=<i18n.language_tag>, detail=<i18n.language_tag>", { L10n.App.bootLoadErrorMessage(message = L10n.I18n.languageTag, detail = L10n.I18n.languageTag) }, mapOf("ja" to "ja\n(詳細: ja)", "ko" to "ko\n(상세: ko)")),
+        L10nCatalogSample("app.boot.load_error.unknown_detail", "app_boot_load_error_unknown_detail", listOf("ja", "ko"), "", { L10n.App.bootLoadErrorUnknownDetail }, mapOf("ja" to "不明", "ko" to "알 수 없음")),
+        L10nCatalogSample("app.boot.preparing_android", "app_boot_preparing_android", listOf("ja", "ko"), "", { L10n.App.bootPreparingAndroid }, mapOf("ja" to "データを準備中…", "ko" to "데이터를 준비하는 중…")),
+        L10nCatalogSample("app.boot.recovery.detail", "app_boot_recovery_detail", listOf("ja", "ko"), "detail=かな カナ1", { L10n.App.bootRecoveryDetail(detail = "かな カナ1") }, mapOf("ja" to "詳細: かな カナ1", "ko" to "상세: かな カナ1")),
+        L10nCatalogSample("app.boot.recovery.message", "app_boot_recovery_message", listOf("ja", "ko"), "", { L10n.App.bootRecoveryMessage }, mapOf("ja" to "端末に保存しているデータを開く途中で問題が起きました。データは消えていません。もう一度試しても開けないときは、アプリを最新版に更新してください。", "ko" to "기기에 저장된 데이터를 여는 중에 문제가 생겼어요. 데이터는 지워지지 않았어요. 다시 시도해도 열리지 않으면 앱을 최신 버전으로 업데이트해 주세요.")),
+        L10nCatalogSample("app.boot.recovery.retry", "app_boot_recovery_retry", listOf("ja", "ko"), "", { L10n.App.bootRecoveryRetry }, mapOf("ja" to "もう一度試す", "ko" to "다시 시도")),
+        L10nCatalogSample("app.boot.recovery.title", "app_boot_recovery_title", listOf("ja", "ko"), "", { L10n.App.bootRecoveryTitle }, mapOf("ja" to "データを開けませんでした", "ko" to "데이터를 열지 못했어요")),
+        L10nCatalogSample("app.boot.sync_error.title", "app_boot_sync_error_title", listOf("ja", "ko"), "", { L10n.App.bootSyncErrorTitle }, mapOf("ja" to "データの取得に失敗しました", "ko" to "데이터를 가져오지 못했어요")),
+        L10nCatalogSample("app.boot.sync_progress", "app_boot_sync_progress", listOf("ja", "ko"), "label=かな カナ1, step=2026, total=2026", { L10n.App.bootSyncProgress(label = "かな カナ1", step = 2026, total = 2026) }, mapOf("ja" to "かな カナ1 を取得中… (2026/2026)", "ko" to "かな カナ1 가져오는 중… (2026/2026)")),
+        L10nCatalogSample("app.text_scale.large", "app_text_scale_large", listOf("ja", "ko"), "", { L10n.App.textScaleLarge }, mapOf("ja" to "大", "ko" to "크게")),
+        L10nCatalogSample("app.text_scale.medium", "app_text_scale_medium", listOf("ja", "ko"), "", { L10n.App.textScaleMedium }, mapOf("ja" to "中", "ko" to "보통")),
+        L10nCatalogSample("app.text_scale.small", "app_text_scale_small", listOf("ja", "ko"), "", { L10n.App.textScaleSmall }, mapOf("ja" to "小", "ko" to "작게")),
+        L10nCatalogSample("app.text_scale.xlarge", "app_text_scale_xlarge", listOf("ja", "ko"), "", { L10n.App.textScaleXlarge }, mapOf("ja" to "特大", "ko" to "최대")),
+        L10nCatalogSample("app.text_scale.xsmall", "app_text_scale_xsmall", listOf("ja", "ko"), "", { L10n.App.textScaleXsmall }, mapOf("ja" to "極小", "ko" to "최소")),
     )
 
     private fun common0(): List<L10nCatalogSample> = listOf(
@@ -839,6 +856,45 @@ object L10nCatalogKeys {
         L10nCatalogSample("mastery.summary.total_songs", "mastery_summary_total_songs", listOf("ja", "ko"), "count=3", { L10n.Mastery.summaryTotalSongs(count = 3) }, mapOf("ja" to "/ 3曲", "ko" to "/ 3곡")),
         L10nCatalogSample("mastery.summary.total_songs", "mastery_summary_total_songs", listOf("ja", "ko"), "count=1234", { L10n.Mastery.summaryTotalSongs(count = 1234) }, mapOf("ja" to "/ 1,234曲", "ko" to "/ 1,234곡")),
         L10nCatalogSample("mastery.write_action.record", "mastery_write_action_record", listOf("ja", "ko"), "", { L10n.Mastery.writeActionRecord }, mapOf("ja" to "習熟度の記録", "ko" to "숙련도 기록")),
+    )
+
+    private fun model0(): List<L10nCatalogSample> = listOf(
+        L10nCatalogSample("model.mastery.preset.name", "model_mastery_preset_name", listOf("ja", "ko"), "steps=2026", { L10n.Model.masteryPresetName(steps = 2026) }, mapOf("ja" to "2026段", "ko" to "2026단계")),
+        L10nCatalogSample("model.mastery.preset.steps2.level1", "model_mastery_preset_steps2_level1", listOf("ja", "ko"), "", { L10n.Model.masteryPresetSteps2Level1 }, mapOf("ja" to "聞いた", "ko" to "들음")),
+        L10nCatalogSample("model.mastery.preset.steps2.level2", "model_mastery_preset_steps2_level2", listOf("ja", "ko"), "", { L10n.Model.masteryPresetSteps2Level2 }, mapOf("ja" to "覚えた", "ko" to "외움")),
+        L10nCatalogSample("model.mastery.preset.steps3.level1", "model_mastery_preset_steps3_level1", listOf("ja", "ko"), "", { L10n.Model.masteryPresetSteps3Level1 }, mapOf("ja" to "聞いた", "ko" to "들음")),
+        L10nCatalogSample("model.mastery.preset.steps3.level2", "model_mastery_preset_steps3_level2", listOf("ja", "ko"), "", { L10n.Model.masteryPresetSteps3Level2 }, mapOf("ja" to "覚えた", "ko" to "외움")),
+        L10nCatalogSample("model.mastery.preset.steps3.level3", "model_mastery_preset_steps3_level3", listOf("ja", "ko"), "", { L10n.Model.masteryPresetSteps3Level3 }, mapOf("ja" to "完璧", "ko" to "완벽")),
+        L10nCatalogSample("model.mastery.preset.steps4.level1", "model_mastery_preset_steps4_level1", listOf("ja", "ko"), "", { L10n.Model.masteryPresetSteps4Level1 }, mapOf("ja" to "聞いた", "ko" to "들음")),
+        L10nCatalogSample("model.mastery.preset.steps4.level2", "model_mastery_preset_steps4_level2", listOf("ja", "ko"), "", { L10n.Model.masteryPresetSteps4Level2 }, mapOf("ja" to "だいたい", "ko" to "대강")),
+        L10nCatalogSample("model.mastery.preset.steps4.level3", "model_mastery_preset_steps4_level3", listOf("ja", "ko"), "", { L10n.Model.masteryPresetSteps4Level3 }, mapOf("ja" to "覚えた", "ko" to "외움")),
+        L10nCatalogSample("model.mastery.preset.steps4.level4", "model_mastery_preset_steps4_level4", listOf("ja", "ko"), "", { L10n.Model.masteryPresetSteps4Level4 }, mapOf("ja" to "完璧", "ko" to "완벽")),
+        L10nCatalogSample("model.mastery.unset", "model_mastery_unset", listOf("ja", "ko"), "", { L10n.Model.masteryUnset }, mapOf("ja" to "未設定", "ko" to "미설정")),
+        L10nCatalogSample("model.poll_achievement.rank", "model_poll_achievement_rank", listOf("ja", "ko"), "rank=2026", { L10n.Model.pollAchievementRank(rank = 2026) }, mapOf("ja" to "第2026位", "ko" to "2026위")),
+        L10nCatalogSample("model.poll_achievement.winner", "model_poll_achievement_winner", listOf("ja", "ko"), "", { L10n.Model.pollAchievementWinner }, mapOf("ja" to "優勝", "ko" to "우승")),
+        L10nCatalogSample("model.poll_create.error.restricted", "model_poll_create_error_restricted", listOf("ja", "ko"), "", { L10n.Model.pollCreateErrorRestricted }, mapOf("ja" to "この操作は制限されています。", "ko" to "이 작업은 제한되어 있어요.")),
+        L10nCatalogSample("model.poll_create.error.signin_required", "model_poll_create_error_signin_required", listOf("ja", "ko"), "", { L10n.Model.pollCreateErrorSigninRequired }, mapOf("ja" to "お題の作成にはサインインが必要です", "ko" to "주제를 만들려면 로그인해야 해요")),
+        L10nCatalogSample("model.poll_status.closing_today", "model_poll_status_closing_today", listOf("ja", "ko"), "", { L10n.Model.pollStatusClosingToday }, mapOf("ja" to "本日締切", "ko" to "오늘 마감")),
+        L10nCatalogSample("model.poll_status.days_left", "model_poll_status_days_left", listOf("ja", "ko"), "days=1", { L10n.Model.pollStatusDaysLeft(days = 1) }, mapOf("ja" to "残り1日", "ko" to "1일 남음")),
+        L10nCatalogSample("model.poll_status.days_left", "model_poll_status_days_left", listOf("ja", "ko"), "days=3", { L10n.Model.pollStatusDaysLeft(days = 3) }, mapOf("ja" to "残り3日", "ko" to "3일 남음")),
+        L10nCatalogSample("model.poll_status.days_left", "model_poll_status_days_left", listOf("ja", "ko"), "days=1234", { L10n.Model.pollStatusDaysLeft(days = 1234) }, mapOf("ja" to "残り1,234日", "ko" to "1,234일 남음")),
+        L10nCatalogSample("model.poll_status.ended", "model_poll_status_ended", listOf("ja", "ko"), "", { L10n.Model.pollStatusEnded }, mapOf("ja" to "終了", "ko" to "종료")),
+        L10nCatalogSample("model.search_scope.empty_noun.all", "model_search_scope_empty_noun_all", listOf("ja", "ko"), "", { L10n.Model.searchScopeEmptyNounAll }, mapOf("ja" to "項目", "ko" to "항목")),
+        L10nCatalogSample("model.search_scope.empty_noun.events", "model_search_scope_empty_noun_events", listOf("ja", "ko"), "", { L10n.Model.searchScopeEmptyNounEvents }, mapOf("ja" to "ライブ", "ko" to "라이브")),
+        L10nCatalogSample("model.search_scope.empty_noun.idols", "model_search_scope_empty_noun_idols", listOf("ja", "ko"), "", { L10n.Model.searchScopeEmptyNounIdols }, mapOf("ja" to "アイドル", "ko" to "아이돌")),
+        L10nCatalogSample("model.search_scope.empty_noun.songs", "model_search_scope_empty_noun_songs", listOf("ja", "ko"), "", { L10n.Model.searchScopeEmptyNounSongs }, mapOf("ja" to "楽曲", "ko" to "곡")),
+        L10nCatalogSample("model.search_scope.label.all", "model_search_scope_label_all", listOf("ja", "ko"), "", { L10n.Model.searchScopeLabelAll }, mapOf("ja" to "すべて", "ko" to "전체")),
+        L10nCatalogSample("model.search_scope.label.events", "model_search_scope_label_events", listOf("ja", "ko"), "", { L10n.Model.searchScopeLabelEvents }, mapOf("ja" to "ライブ", "ko" to "라이브")),
+        L10nCatalogSample("model.search_scope.label.idols", "model_search_scope_label_idols", listOf("ja", "ko"), "", { L10n.Model.searchScopeLabelIdols }, mapOf("ja" to "アイドル", "ko" to "아이돌")),
+        L10nCatalogSample("model.search_scope.label.songs", "model_search_scope_label_songs", listOf("ja", "ko"), "", { L10n.Model.searchScopeLabelSongs }, mapOf("ja" to "楽曲", "ko" to "곡")),
+        L10nCatalogSample("model.search_scope.prompt.all", "model_search_scope_prompt_all", listOf("ja", "ko"), "", { L10n.Model.searchScopePromptAll }, mapOf("ja" to "ライブ・楽曲・アイドルを検索", "ko" to "라이브·곡·아이돌 검색")),
+        L10nCatalogSample("model.search_scope.prompt.events", "model_search_scope_prompt_events", listOf("ja", "ko"), "", { L10n.Model.searchScopePromptEvents }, mapOf("ja" to "ライブ名 / 会場で検索", "ko" to "라이브 이름 / 공연장으로 검색")),
+        L10nCatalogSample("model.search_scope.prompt.idols", "model_search_scope_prompt_idols", listOf("ja", "ko"), "", { L10n.Model.searchScopePromptIdols }, mapOf("ja" to "アイドル名 / CV名で検索", "ko" to "아이돌 이름 / CV 이름으로 검색")),
+        L10nCatalogSample("model.search_scope.prompt.songs", "model_search_scope_prompt_songs", listOf("ja", "ko"), "", { L10n.Model.searchScopePromptSongs }, mapOf("ja" to "曲名で検索", "ko" to "곡명으로 검색")),
+        L10nCatalogSample("model.seed.import_failed", "model_seed_import_failed", listOf("ja", "ko"), "detail=かな カナ1", { L10n.Model.seedImportFailed(detail = "かな カナ1") }, mapOf("ja" to "初期データの読み込みに失敗しました。アプリを再起動しても直らない場合は再インストールをお試しください。\n(詳細: かな カナ1)", "ko" to "초기 데이터를 불러오지 못했어요. 앱을 다시 시작해도 해결되지 않으면 다시 설치해 보세요.\n(상세: かな カナ1)")),
+        L10nCatalogSample("model.snapshot.db_missing", "model_snapshot_db_missing", listOf("ja", "ko"), "", { L10n.Model.snapshotDbMissing }, mapOf("ja" to "DB がまだ無い", "ko" to "DB가 아직 없어요")),
+        L10nCatalogSample("model.snapshot.unavailable", "model_snapshot_unavailable", listOf("ja", "ko"), "", { L10n.Model.snapshotUnavailable }, mapOf("ja" to "マスタデータを読み込めませんでした", "ko" to "마스터 데이터를 불러오지 못했어요")),
+        L10nCatalogSample("model.sync.error.failed", "model_sync_error_failed", listOf("ja", "ko"), "", { L10n.Model.syncErrorFailed }, mapOf("ja" to "同期に失敗しました", "ko" to "동기화하지 못했어요")),
     )
 
     private fun mypage0(): List<L10nCatalogSample> = listOf(

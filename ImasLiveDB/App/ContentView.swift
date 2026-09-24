@@ -137,15 +137,15 @@ struct ContentView: View {
                 // 次の sheet dismiss 時に onDismiss → presentPendingDeeplink で復活する)。
                 .onAppear { pendingDeeplinkDestination = nil }
         }
-        .alert("リンク先が見つかりません", isPresented: $showDeeplinkNotFound) {
+        .alert(Text(L10n.App.deeplinkNotFoundTitle), isPresented: $showDeeplinkNotFound) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text("このイベント・公演はまだ同期されていない可能性があります。しばらくしてからもう一度お試しください。")
+            Text(L10n.App.deeplinkNotFoundMessage)
         }
-        .alert("読み込みに失敗しました", isPresented: $showDeeplinkLoadFailed) {
+        .alert(Text(L10n.App.deeplinkLoadFailedTitle), isPresented: $showDeeplinkLoadFailed) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text("リンク先の読み込み中にエラーが発生しました。もう一度お試しください。")
+            Text(L10n.App.deeplinkLoadFailedMessage)
         }
     }
 

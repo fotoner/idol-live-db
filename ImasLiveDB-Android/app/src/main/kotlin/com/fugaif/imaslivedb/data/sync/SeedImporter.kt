@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.fugaif.imaslivedb.data.db.AppDatabase
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uniffi.imas_core.reseedCommonColumns
@@ -54,8 +56,9 @@ object SeedImporter {
      * 組み合わせだと、旧実装では Log.e だけで握り潰され、UI は「データを準備中…」のまま
      * 無限に待たされていた (MainActivity の hasData が false のまま state も進まない)。
      * @Volatile: importIfNeeded は Dispatchers.IO、読み手は Main スレッド。
+     * 解決済みの String ではなく文言の値で持ち、出す側 (Context を持つ側) で resolve する。
      */
-    @Volatile var lastImportError: String? = null
+    @Volatile var lastImportError: DisplayText? = null
         private set
 
     /**
@@ -79,7 +82,7 @@ object SeedImporter {
             packageUpdateTime(context)?.let { markChecked(prefs(context), it) }
         } catch (e: Exception) {
             Log.e(TAG, "seed import 失敗 (CloudKit 同期にフォールバック)", e)
-            lastImportError = "初期データの読み込みに失敗しました。アプリを再起動しても直らない場合は再インストールをお試しください。\n(詳細: ${e.message})"
+            lastImportError = L10n.Model.seedImportFailed(detail = "${e.message}")
         }
         db.syncDao().brandCount() > 0  // 投入後の状態を返す
     }

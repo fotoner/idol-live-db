@@ -173,22 +173,26 @@ struct ImasLiveDBApp: App {
                         .environment(appDatabase)
                 }
             }
-            .alert("新しいバージョンがあります", isPresented: Binding(
+            .alert(Text(L10n.App.updateTitle), isPresented: Binding(
                 get: { updateService.shouldNotify },
                 set: { if !$0 { updateService.dismiss() } }
             )) {
-                Button("更新") {
+                Button {
                     if let u = updateService.storeURL { UIApplication.shared.open(u) }
                     updateService.dismiss()
+                } label: {
+                    Text(L10n.App.updateActionUpdate)
                 }
-                Button("後で", role: .cancel) { updateService.dismiss() }
+                Button(role: .cancel) { updateService.dismiss() } label: {
+                    Text(L10n.App.updateActionLater)
+                }
             } message: {
-                Text("バージョン \(updateService.availableVersion ?? "") が App Store で公開されています。")
+                Text(L10n.App.updateMessage(version: updateService.availableVersion ?? ""))
             }
-            .alert("データ更新に失敗しました", isPresented: $showReseedAlert) {
+            .alert(Text(L10n.App.reseedFailedTitle), isPresented: $showReseedAlert) {
                 Button("OK", role: .cancel) {}
             } message: {
-                Text(appDatabase.reseedFailureMessage ?? "")
+                Text(display: appDatabase.reseedFailureMessage ?? .verbatim(""))
             }
             // コールガイドの見た目確認用 (DEBUG のみ)。CALL_GUIDE_PREVIEW 未指定なら何も出ない。
             #if DEBUG

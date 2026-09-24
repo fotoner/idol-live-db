@@ -1,0 +1,435 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "callguide",
+  "platforms": [
+    "ios"
+  ],
+  "slices": {
+    "ios": [
+      "ImasLiveDB/Views/CallGuideDashboard/",
+      "ImasLiveDB/Views/Components/CallGuide/",
+      "ImasLiveDB/Services/CallGuideAPI.swift"
+    ]
+  },
+  "strings": {
+    "dashboard.dropped": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count} 曲は、この端末の曲一覧に出ない曲 (別バージョン等) のため表示していません。",
+      "ko": "{count}곡은 이 기기의 곡 목록에 나오지 않는 곡 (다른 버전 등)이라 표시하지 않아요.",
+      "note": "サーバにはあるが端末の曲一覧に無いので出せない曲の数の断り書き。1000 以上は桁区切りが付く (今も同じ)"
+    },
+    "dashboard.edit.added": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        },
+        {
+          "name": "lines",
+          "type": "int"
+        }
+      ],
+      "ja": "コールを付けた ({count}件・{lines}行)",
+      "ko": "콜 추가 ({count}건 · {lines}줄)",
+      "note": "最近の編集の中身: コールが無かった曲に付けた。count はコールの数 (1000 以上は桁区切りが付く。今は付かないが 1 曲では出ない数)、lines は行数"
+    },
+    "dashboard.edit.removed": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "コールを削除した ({count}件→0)",
+      "ko": "콜 삭제 ({count}건→0)",
+      "note": "最近の編集の中身: コールを全部消した。count は消す前のコールの数 (1000 以上は桁区切りが付く。1 曲では出ない数)"
+    },
+    "dashboard.edit.updated": {
+      "args": [
+        {
+          "name": "before",
+          "type": "int"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "コールを更新 ({before}→{count}件)",
+      "ko": "콜 업데이트 ({before}→{count}건)",
+      "note": "最近の編集の中身: コールの数が変わった。before は前の数、count は後の数 (1000 以上は桁区切りが付く。1 曲では出ない数)"
+    },
+    "dashboard.generated_at": {
+      "args": [
+        {
+          "name": "time",
+          "type": "core"
+        }
+      ],
+      "ja": "{time}時点の情報です (最大 30 分ほど遅れます)。",
+      "ko": "{time} 기준 정보예요 (최대 30분 정도 늦을 수 있어요).",
+      "note": "サーバが一覧を作った時刻の断り書き。time は相対時刻 (例: 5分前。コアが作る)"
+    },
+    "dashboard.intro": {
+      "ja": "歌詞の行ごとに「ここでこう叫ぶ」を書き込むのがコールガイドです。歌詞タブから直接付けられます。",
+      "ko": "가사 줄마다 “여기서 이렇게 외친다”를 적어 넣는 것이 콜 가이드예요. 가사 탭에서 바로 달 수 있어요.",
+      "note": "画面の上の説明"
+    },
+    "dashboard.load_error": {
+      "args": [
+        {
+          "name": "message",
+          "type": "string"
+        }
+      ],
+      "ja": "コールガイドの情報を取得できませんでした ({message})",
+      "ko": "콜 가이드 정보를 가져오지 못했어요 ({message})",
+      "note": "読み込みに失敗したときの帯。message はエラーの文言 (model.api_error.* かサーバの文言)"
+    },
+    "dashboard.recent.empty.message": {
+      "ja": "誰かがコールを書き込むと、ここに残ります。",
+      "ko": "누군가 콜을 적으면 여기에 남아요.",
+      "note": "2 つ目の節が空のときの説明"
+    },
+    "dashboard.recent.empty.title": {
+      "ja": "まだ編集がありません",
+      "ko": "아직 편집이 없어요",
+      "note": "2 つ目の節が空のときの見出し"
+    },
+    "dashboard.recent.header": {
+      "ja": "最近の編集",
+      "ko": "최근 편집",
+      "note": "2 つ目の節の見出し (誰がいつコールを書いたか)"
+    },
+    "dashboard.row.subtitle": {
+      "args": [
+        {
+          "name": "detail",
+          "type": "text"
+        },
+        {
+          "name": "time",
+          "type": "core"
+        },
+        {
+          "name": "by",
+          "type": "string"
+        }
+      ],
+      "ja": "{detail} ・ {time} ・ {by}",
+      "ko": "{detail} · {time} · {by}",
+      "note": "曲の行の下の 1 行。detail は dashboard.row.summary か dashboard.edit.*、time は相対時刻 (コアが作る)、by は書いた人の伏せ字の名前 (データ)"
+    },
+    "dashboard.row.subtitle_no_time": {
+      "args": [
+        {
+          "name": "detail",
+          "type": "text"
+        },
+        {
+          "name": "by",
+          "type": "string"
+        }
+      ],
+      "ja": "{detail} ・ {by}",
+      "ko": "{detail} · {by}",
+      "note": "dashboard.row.subtitle の時刻が無い版 (更新の記録が無い曲)"
+    },
+    "dashboard.row.summary": {
+      "args": [
+        {
+          "name": "lines",
+          "type": "int"
+        },
+        {
+          "name": "calls",
+          "type": "count"
+        }
+      ],
+      "ja": "{lines}行・{calls}コール",
+      "ko": "{lines}줄 · {calls}콜",
+      "note": "曲の行の下に出す、コールが付いた行数とコールの数。calls は 1000 以上で桁区切りが付く (1 曲では実際には出ない)"
+    },
+    "dashboard.stat.tagged": {
+      "ja": "コール曲タグ",
+      "ko": "콜 곡 태그",
+      "note": "上の数字のタイル: 「コール曲」タグ (コールのある曲に付けるタグ) の付いた曲の数"
+    },
+    "dashboard.stat.unit_songs": {
+      "ja": "曲",
+      "ko": "곡",
+      "note": "上の数字のタイルの単位 (数字の右に小さく出す)"
+    },
+    "dashboard.stat.wanted": {
+      "ja": "書き手募集中",
+      "ko": "작성자 모집 중",
+      "note": "上の数字のタイル: タグはあるのにまだコールが書かれていない曲の数"
+    },
+    "dashboard.stat.with_calls": {
+      "ja": "ガイドあり",
+      "ko": "가이드 있음",
+      "note": "上の数字のタイル: コールガイドが書かれている曲の数"
+    },
+    "dashboard.title": {
+      "ja": "コールガイド",
+      "ko": "콜 가이드",
+      "note": "コールガイドの整備状況の画面のタイトル (プロデュース → コールガイド)"
+    },
+    "dashboard.wanted.empty.message": {
+      "ja": "「コール曲」タグが付いた曲は、いまのところ全部書かれています。",
+      "ko": "“콜 곡” 태그가 달린 곡은 지금은 모두 작성되어 있어요.",
+      "note": "3 つ目の節が空のときの説明。「コール曲」はコールのある曲に付けるタグ。ko は dashboard.stat.tagged・dashboard.wanted.header と同じく訳す (“콜 곡”)"
+    },
+    "dashboard.wanted.empty.title": {
+      "ja": "未整備の曲はありません",
+      "ko": "아직 안 쓴 곡이 없어요",
+      "note": "3 つ目の節が空のときの見出し"
+    },
+    "dashboard.wanted.header": {
+      "ja": "コール曲タグが付いているのに未整備",
+      "ko": "콜 곡 태그는 있지만 아직 안 쓴 곡",
+      "note": "3 つ目の節の見出し (タグの内訳を読めないとき)。コール曲タグ = コールのある曲に付けるタグ"
+    },
+    "dashboard.wanted.header_count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "コール曲タグが付いているのに未整備 ({count}曲)",
+      "ko": "콜 곡 태그는 있지만 아직 안 쓴 곡 ({count}곡)",
+      "note": "3 つ目の節の見出し。count はまだ書ける曲の数 (1000 以上は桁区切りが付く。今は付かない)"
+    },
+    "dashboard.wanted.login_to_write": {
+      "ja": "ログインして書く",
+      "ko": "로그인하고 쓰기",
+      "note": "3 つ目の節の曲の行のボタン (未ログインのとき。ログインの案内を開く)"
+    },
+    "dashboard.wanted.see_tag": {
+      "args": [
+        {
+          "name": "tag",
+          "type": "string"
+        }
+      ],
+      "ja": "「{tag}」タグを見る",
+      "ko": "“{tag}” 태그 보기",
+      "note": "タグの詳細へのリンク。tag はタグの名前 (データ)"
+    },
+    "dashboard.wanted.truncated": {
+      "ja": "ここに出ているのは、タグの票が多い順に上位 100 件です。",
+      "ko": "여기에 나온 것은 태그 투표가 많은 순으로 상위 100건이에요.",
+      "note": "3 つ目の節がサーバの上限で打ち切られているときの断り書き"
+    },
+    "dashboard.wanted.without_lyrics": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "歌詞が未登録の {count} 曲は、歌詞が入るまで書けません。",
+      "ko": "가사가 등록되지 않은 {count}곡은 가사가 들어올 때까지 쓸 수 없어요.",
+      "note": "3 つ目の節の下の断り書き。1000 以上は桁区切りが付く (今も同じ)"
+    },
+    "dashboard.wanted.write": {
+      "ja": "書く",
+      "ko": "쓰기",
+      "note": "3 つ目の節の曲の行のボタン (歌詞タブを開く)"
+    },
+    "dashboard.with_calls.empty.message": {
+      "ja": "「コール曲」タグの付いた曲から書き始められます。",
+      "ko": "“콜 곡” 태그가 달린 곡부터 쓰기 시작할 수 있어요.",
+      "note": "1 つ目の節が空のときの説明。「コール曲」はコールのある曲に付けるタグ。ko は dashboard.stat.tagged・dashboard.wanted.header と同じく訳す (“콜 곡”)"
+    },
+    "dashboard.with_calls.empty.title": {
+      "ja": "まだコールガイドがありません",
+      "ko": "아직 콜 가이드가 없어요",
+      "note": "1 つ目の節が空のときの見出し"
+    },
+    "dashboard.with_calls.header": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "コールガイドがある曲 ({count}曲)",
+      "ko": "콜 가이드가 있는 곡 ({count}곡)",
+      "note": "1 つ目の節の見出し。count は曲数 (サーバの上限が 200 なので桁区切りは出ない)"
+    },
+    "dashboard.with_calls.truncated": {
+      "ja": "ここに出ているのは、最近更新された 200 曲です。",
+      "ko": "여기에 나온 것은 최근 업데이트된 200곡이에요.",
+      "note": "1 つ目の節がサーバの上限で打ち切られているときの断り書き"
+    },
+    "editor.anchor.header": {
+      "ja": "アンカー",
+      "ko": "앵커",
+      "note": "コールの入力シートの節の見出し。コールが掛かる歌詞の位置"
+    },
+    "editor.anchor.line_end": {
+      "ja": "行末（追っかけ）— 歌詞に被せず、この行の後で返すコール",
+      "ko": "행 끝 (따라 외치기) — 가사에 겹치지 않고 이 줄이 끝난 뒤 외치는 콜",
+      "note": "アンカーが行末のとき (歌詞のどこにも掛からない) の説明。追っかけ = 歌い終わってから客が返すコール"
+    },
+    "editor.cancel": {
+      "ja": "キャンセル",
+      "ko": "취소",
+      "note": "コールの入力シートの左上のボタン"
+    },
+    "editor.delete": {
+      "ja": "このコールを削除",
+      "ko": "이 콜 삭제",
+      "note": "コールの入力シートの下の削除ボタン"
+    },
+    "editor.done": {
+      "ja": "完了",
+      "ko": "완료",
+      "note": "コールの入力シートの右上のボタン (保存して閉じる)"
+    },
+    "editor.emphasis.header": {
+      "ja": "強調",
+      "ko": "강조",
+      "note": "コールの入力シートの節の見出し (普通 / おこのみで / 演者要望)"
+    },
+    "editor.emphasis.hint.normal": {
+      "ja": "通常のコール。凡例には出ない。",
+      "ko": "일반 콜. 범례에는 나오지 않아요.",
+      "note": "強調の選択肢の説明 (通常)"
+    },
+    "editor.emphasis.hint.optional": {
+      "ja": "おこのみで（緑）。やってもやらなくてもよい。",
+      "ko": "자유롭게 (초록). 해도 되고 안 해도 돼요.",
+      "note": "強調の選択肢の説明 (おこのみで = してもしなくてもよいコール。緑で出す)"
+    },
+    "editor.emphasis.hint.performer_request": {
+      "ja": "演者要望（赤）。演者から明示的に求められたもの。",
+      "ko": "출연자 요청 (빨강). 출연자가 직접 요청한 콜이에요.",
+      "note": "強調の選択肢の説明 (演者要望 = 出演者から頼まれたコール。赤で出す)"
+    },
+    "editor.input.header": {
+      "ja": "コール文言",
+      "ko": "콜 문구",
+      "note": "コールの入力シートの節の見出し (叫ぶ言葉を入れる欄)"
+    },
+    "editor.input.hint": {
+      "ja": "繰り返しは「× 26」のように文言へ直接書く。",
+      "ko": "반복은 “× 26”처럼 문구에 바로 적어요.",
+      "note": "コールの入力欄の下の説明"
+    },
+    "editor.input.placeholder": {
+      "ja": "(Hi!) など",
+      "ko": "(Hi!) 등",
+      "note": "コールの入力欄のプレースホルダ。(Hi!) はコールの例なので訳さない"
+    },
+    "editor.palette.header": {
+      "ja": "パレット（タップで末尾に追加）",
+      "ko": "팔레트 (탭하면 끝에 추가)",
+      "note": "よく使うコールの一覧の見出し。押すと入力欄の末尾に足す"
+    },
+    "editor.palette.lyric_call": {
+      "ja": "歌詞コール",
+      "ko": "가사 콜",
+      "note": "パレットの組の名前 (選んだ歌詞の語をそのまま叫ぶコール)"
+    },
+    "editor.timing.header": {
+      "ja": "タイミング",
+      "ko": "타이밍",
+      "note": "コールの入力シートの節の見出し (歌に被せるか、後で返すか)"
+    },
+    "editor.title.add": {
+      "ja": "コールを追加",
+      "ko": "콜 추가",
+      "note": "コールの入力シートのタイトル (新しく付ける)"
+    },
+    "editor.title.edit": {
+      "ja": "コールを編集",
+      "ko": "콜 편집",
+      "note": "コールの入力シートのタイトル (付いているコールを直す)"
+    },
+    "legend.over_timing": {
+      "ja": "歌に被せる",
+      "ko": "노래에 겹치기",
+      "note": "コール表の凡例: 「同時」の札の意味 (歌に重ねて叫ぶ)"
+    },
+    "line.append_call.a11y": {
+      "ja": "行末にコールを追加",
+      "ko": "행 끝에 콜 추가",
+      "note": "歌詞の行の末尾の ＋ ボタンの読み上げ"
+    },
+    "line.call.a11y": {
+      "args": [
+        {
+          "name": "place",
+          "type": "string"
+        },
+        {
+          "name": "text",
+          "type": "string"
+        },
+        {
+          "name": "emphasis",
+          "type": "string"
+        }
+      ],
+      "ja": "{place}のコール: {text}。{emphasis}",
+      "ko": "{place} 콜: {text}. {emphasis}",
+      "note": "コールの行の読み上げ。place は同時 / 追っかけ / 行末、text はコールの文言 (データ)、emphasis は強調の名前"
+    },
+    "line.clap.a11y": {
+      "ja": "手拍子を指定",
+      "ko": "박수 지정",
+      "note": "編集中、手拍子の記号が無い行の頭の ＋ の読み上げ"
+    },
+    "line.line_end": {
+      "ja": "行末",
+      "ko": "행 끝",
+      "note": "歌詞に掛からず行の後で返すコールの札。読み上げの「{place}のコール」の place にも使う"
+    },
+    "line.select.a11y_hint": {
+      "ja": "語をタップすると、その語に被せるコールを付けられます。長押しからなぞると語をまたいだ範囲を選べます",
+      "ko": "단어를 탭하면 그 단어에 겹치는 콜을 달 수 있어요. 길게 눌러 드래그하면 여러 단어에 걸친 범위를 고를 수 있어요",
+      "note": "編集中の歌詞の行の読み上げのヒント"
+    },
+    "line.stale": {
+      "ja": "ズレ",
+      "ko": "어긋남",
+      "note": "歌詞が直されてアンカーの位置がずれたコールの札"
+    },
+    "palette.group.clap": {
+      "ja": "クラップ",
+      "ko": "박수",
+      "note": "パレットの組の名前 (手拍子)"
+    },
+    "palette.group.count": {
+      "ja": "カウント",
+      "ko": "카운트",
+      "note": "パレットの組の名前 (3・2・1 などの数える掛け声)"
+    },
+    "palette.group.oh": {
+      "ja": "オーイング / 警報",
+      "ko": "오~ 콜 / 경보",
+      "note": "パレットの組の名前 (「オー」と伸ばす掛け声と、警報 (ハーイハーイ…) の掛け声)。ko の表記はオーナー確定待ち"
+    },
+    "palette.group.section": {
+      "ja": "セクション",
+      "ko": "구간",
+      "note": "パレットの組の名前 (前奏・間奏など曲の区切り)"
+    },
+    "palette.group.voice": {
+      "ja": "発声",
+      "ko": "구호",
+      "note": "パレットの組の名前 ((Hi!) (Oi!) などの掛け声)"
+    }
+  }
+}

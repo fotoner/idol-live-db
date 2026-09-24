@@ -1,6 +1,8 @@
 package com.fugaif.imaslivedb.ui.theme
 
 import androidx.compose.ui.graphics.Color
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 
 /**
  * 習熟度の段階の定義 (ラベルと数)。iOS `Models/MasteryScale.swift` の移植。
@@ -15,17 +17,28 @@ data class MasteryScale(val labels: List<String>) {
     /** 段数。コアに渡す `steps`。 */
     val steps: UByte get() = labels.size.coerceIn(1, 8).toUByte()
 
-    /** 表示名。`0` は未設定。 */
+    /** 表示名。`0` は未設定。移行中の互換 (ja の文字列)。画面は [labelText] を使う。 */
     fun label(level: UByte): String {
         if (level.toInt() == 0) return "未設定"
         val i = level.toInt() - 1
         return labels.getOrNull(i) ?: "LV.$level"
     }
 
-    /** 一覧のチップに出す短い名前。 */
-    fun shortLabel(level: UByte): String {
-        val full = label(level)
-        return if (full.length <= 6) full else full.take(5) + "…"
+    /** 一覧のチップに出す短い名前。移行中の互換 (ja の文字列)。画面は [labelText] を [shorten] して使う。 */
+    fun shortLabel(level: UByte): String = shorten(label(level))
+
+    /**
+     * 表示名 (文言の値)。`0` は未設定。
+     *
+     * 保存しているのは利用者が選んだラベルの文字列そのもの ([AppPreferences.masteryScale])。
+     * それが ja のプリセットのまま (書き換えていない) なら今の言語の文言で出し、書き換えていれば
+     * 利用者の入力なのでそのまま出す (設計 §9.3。保存の形は変えない)。
+     */
+    fun labelText(level: UByte): DisplayText {
+        if (level.toInt() == 0) return L10n.Model.masteryUnset
+        val i = level.toInt() - 1
+        val stored = labels.getOrNull(i) ?: return DisplayText.Verbatim("LV.$level")
+        return presetLabelTexts(labels)?.getOrNull(i) ?: DisplayText.Verbatim(stored)
     }
 
     companion object {
@@ -37,15 +50,44 @@ data class MasteryScale(val labels: List<String>) {
          * 収まらず途中で切れる**。短く言い切れる 3 段にした。語彙の好みは人によるので
          * 設定で変えられる。
          */
+        // i18n-ignore(storage): 保存するラベルの既定値 (mastery_scale_labels_v1)。表示は labelText が引く
         val defaultLabels = listOf("聞いた", "覚えた", "完璧")
         val standard = MasteryScale(defaultLabels)
 
-        /** 段数を変えるときの出発点。どれも 4 文字以内にして操作面で切れないようにする。 */
+        // i18n-ignore(storage): 選ぶと保存されるラベル (ja のまま保存し、表示は labelText が引く)
+        private val twoStepLabels = listOf("聞いた", "覚えた")
+        // i18n-ignore(storage): 選ぶと保存されるラベル (ja のまま保存し、表示は labelText が引く)
+        private val fourStepLabels = listOf("聞いた", "だいたい", "覚えた", "完璧")
+
+        /**
+         * 段数を変えるときの出発点。どれも 4 文字以内にして操作面で切れないようにする。
+         * 名前 (2段…) は移行中の互換 (ja の文字列)。画面は [presetNameText] を使う。
+         */
         val presets: List<Pair<String, MasteryScale>> = listOf(
-            "2段" to MasteryScale(listOf("聞いた", "覚えた")),
+            "2段" to MasteryScale(twoStepLabels),
             "3段" to MasteryScale(defaultLabels),
-            "4段" to MasteryScale(listOf("聞いた", "だいたい", "覚えた", "完璧")),
+            "4段" to MasteryScale(fourStepLabels),
         )
+
+        /** プリセットの名前 (2段 / 3段 / 4段) の文言。steps は段数。 */
+        fun presetNameText(steps: Int): DisplayText = L10n.Model.masteryPresetName(steps = steps)
+
+        /** 一覧のチップに出す短い名前 (長いラベルは頭から詰める)。 */
+        fun shorten(full: String): String = if (full.length <= 6) full else full.take(5) + "…"
+
+        /** 保存しているラベルが ja のプリセットと一致するとき、その段ごとの文言。一致しなければ null。 */
+        private fun presetLabelTexts(stored: List<String>): List<DisplayText>? = when (stored) {
+            twoStepLabels -> listOf(L10n.Model.masteryPresetSteps2Level1, L10n.Model.masteryPresetSteps2Level2)
+            defaultLabels -> listOf(
+                L10n.Model.masteryPresetSteps3Level1, L10n.Model.masteryPresetSteps3Level2,
+                L10n.Model.masteryPresetSteps3Level3,
+            )
+            fourStepLabels -> listOf(
+                L10n.Model.masteryPresetSteps4Level1, L10n.Model.masteryPresetSteps4Level2,
+                L10n.Model.masteryPresetSteps4Level3, L10n.Model.masteryPresetSteps4Level4,
+            )
+            else -> null
+        }
     }
 }
 

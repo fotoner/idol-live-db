@@ -23,12 +23,13 @@ enum TimelineLane: String, Sendable, CaseIterable, Identifiable, Hashable {
 
     var id: String { rawValue }
 
-    var title: String {
+    /// レーンの名前。Domain は文言の値を返すだけで、文字列にするのは画面 (`Text(lane.title)`)。
+    var title: LocalizedStringResource {
         switch self {
-        case .milestone: return "節目"
-        case .live: return "ライブ"
-        case .music: return "楽曲"
-        case .other: return "その他"
+        case .milestone: L10n.Model.timelineLaneMilestone
+        case .live: L10n.Model.timelineLaneLive
+        case .music: L10n.Model.timelineLaneMusic
+        case .other: L10n.Model.timelineLaneOther
         }
     }
 

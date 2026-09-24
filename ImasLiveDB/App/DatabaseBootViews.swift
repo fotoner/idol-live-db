@@ -16,7 +16,7 @@ struct DatabasePreparingView: View {
         .overlay(alignment: .bottom) {
             if showsProgress {
                 ProgressView {
-                    Text("データを準備しています").font(.imasSubhead).foregroundStyle(DS.ink2)
+                    Text(L10n.App.bootPreparing).font(.imasSubhead).foregroundStyle(DS.ink2)
                 }
                 .padding(.bottom, DS.sp9)
                 .transition(.opacity)
@@ -42,13 +42,12 @@ struct DatabaseRecoveryView: View {
                 VStack(spacing: DS.sp3) {
                     ImasEmptyState(
                         systemImage: "exclamationmark.triangle",
-                        title: "データを開けませんでした",
-                        message: "端末に保存しているデータを開く途中で問題が起きました。データは消えていません。"
-                            + "もう一度試しても開けないときは、アプリを最新版に更新してください。",
-                        actionTitle: "もう一度試す",
+                        title: String(localized: L10n.App.bootRecoveryTitle),
+                        message: String(localized: L10n.App.bootRecoveryMessage),
+                        actionTitle: String(localized: L10n.App.bootRecoveryRetry),
                         action: retry
                     )
-                    Text("詳細: \(detail)")
+                    Text(L10n.App.bootRecoveryDetail(detail: detail))
                         .font(.imasCaption)
                         .foregroundStyle(DS.ink2)
                         .multilineTextAlignment(.center)

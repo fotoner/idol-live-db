@@ -35,7 +35,7 @@ struct CallGuideDashboardView: View {
             .padding(.bottom, DS.sp7)
         }
         .background(DS.bg.ignoresSafeArea())
-        .navigationTitle("コールガイド")
+        .navigationTitle(L10n.Callguide.dashboardTitle)
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $sheetDestination) { dest in
             DetailSheetView(destination: dest)
@@ -56,23 +56,26 @@ struct CallGuideDashboardView: View {
         VStack(alignment: .leading, spacing: DS.sp3) {
             HStack(spacing: DS.sp3) {
                 ImasStatTile(systemImage: "hands.clap.fill", value: "\(vm.withCalls.count)",
-                             unit: "曲", label: "ガイドあり")
+                             unit: String(localized: L10n.Callguide.dashboardStatUnitSongs),
+                             label: String(localized: L10n.Callguide.dashboardStatWithCalls))
                 ImasStatTile(systemImage: "tag.fill", value: "\(vm.tag?.tagged ?? 0)",
-                             unit: "曲", label: "コール曲タグ")
+                             unit: String(localized: L10n.Callguide.dashboardStatUnitSongs),
+                             label: String(localized: L10n.Callguide.dashboardStatTagged))
                 ImasStatTile(systemImage: "square.and.pencil", value: "\(vm.tag?.writable ?? 0)",
-                             unit: "曲", label: "書き手募集中")
+                             unit: String(localized: L10n.Callguide.dashboardStatUnitSongs),
+                             label: String(localized: L10n.Callguide.dashboardStatWanted))
             }
             VStack(alignment: .leading, spacing: DS.sp1) {
-                Text("歌詞の行ごとに「ここでこう叫ぶ」を書き込むのがコールガイドです。歌詞タブから直接付けられます。")
+                Text(L10n.Callguide.dashboardIntro)
                 if let generatedAt = vm.generatedAt {
                     // 全端末で共有するキャッシュ (最大 30 分) 越しなので「今」ではない。
                     // 自分が書いた直後に出てこない理由が、ここを見れば分かるようにする。
-                    Text("\(EditFeedFormat.relativeTime(generatedAt))時点の情報です (最大 30 分ほど遅れます)。")
+                    Text(L10n.Callguide.dashboardGeneratedAt(time: EditFeedFormat.relativeTime(generatedAt)))
                 }
                 if vm.droppedCount > 0 {
                     // 派生曲・「その他」ブランド・手元に未同期の曲。曲一覧と同じ母集合に
                     // 揃えている以上ここには出せないので、数だけ正直に出す。
-                    Text("\(vm.droppedCount) 曲は、この端末の曲一覧に出ない曲 (別バージョン等) のため表示していません。")
+                    Text(L10n.Callguide.dashboardDropped(count: vm.droppedCount))
                 }
             }
             .font(.imasCaption)
@@ -81,12 +84,12 @@ struct CallGuideDashboardView: View {
         }
     }
 
-    private func errorBanner(_ message: String) -> some View {
+    private func errorBanner(_ message: DisplayText) -> some View {
         HStack(spacing: 6) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.imasCaption)
                 .foregroundStyle(DS.warning)
-            Text("コールガイドの情報を取得できませんでした (\(message))")
+            Text(L10n.Callguide.dashboardLoadError(message: message.resolved))
                 .font(.imasCaption)
                 .foregroundStyle(DS.ink2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -99,12 +102,12 @@ struct CallGuideDashboardView: View {
     private var withCallsSection: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
             // 件数は見出しの文字列に入れる (`ImasSectionHeader` の `count` は tight では出ない)。
-            ImasSectionHeader(title: "コールガイドがある曲 (\(vm.withCalls.count)曲)", tight: true)
+            ImasSectionHeader(title: .key(L10n.Callguide.dashboardWithCallsHeader(count: vm.withCalls.count)), tight: true)
             if vm.withCalls.isEmpty {
                 ImasEmptyState(
                     systemImage: "music.mic",
-                    title: "まだコールガイドがありません",
-                    message: "「コール曲」タグの付いた曲から書き始められます。"
+                    title: String(localized: L10n.Callguide.dashboardWithCallsEmptyTitle),
+                    message: String(localized: L10n.Callguide.dashboardWithCallsEmptyMessage)
                 )
             } else {
                 let times = EditFeedFormat.relativeTimes(
@@ -118,7 +121,7 @@ struct CallGuideDashboardView: View {
                     }
                 }
                 if vm.withCallsTruncated {
-                    Text("ここに出ているのは、最近更新された 200 曲です。")
+                    Text(L10n.Callguide.dashboardWithCallsTruncated)
                         .font(.imasCaption)
                         .foregroundStyle(DS.ink3)
                 }
@@ -126,11 +129,11 @@ struct CallGuideDashboardView: View {
         }
     }
 
-    private func subtitle(for row: CallGuideSongRow, time: String?) -> String {
-        var parts = [row.detailLabel]
-        if let time { parts.append(time) }
-        parts.append(row.updatedBy)
-        return parts.joined(separator: " ・ ")
+    private func subtitle(for row: CallGuideSongRow, time: String?) -> LocalizedStringResource {
+        if let time {
+            return L10n.Callguide.dashboardRowSubtitle(detail: row.detailLabel, time: time, by: row.updatedBy)
+        }
+        return L10n.Callguide.dashboardRowSubtitleNoTime(detail: row.detailLabel, by: row.updatedBy)
     }
 
     // MARK: - ② 最近の編集
@@ -138,12 +141,12 @@ struct CallGuideDashboardView: View {
     @ViewBuilder
     private var recentEditsSection: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
-            ImasSectionHeader(title: "最近の編集", tight: true)
+            ImasSectionHeader(title: .key(L10n.Callguide.dashboardRecentHeader), tight: true)
             if vm.recentEdits.isEmpty {
                 ImasEmptyState(
                     systemImage: "square.and.pencil",
-                    title: "まだ編集がありません",
-                    message: "誰かがコールを書き込むと、ここに残ります。"
+                    title: String(localized: L10n.Callguide.dashboardRecentEmptyTitle),
+                    message: String(localized: L10n.Callguide.dashboardRecentEmptyMessage)
                 )
             } else {
                 let times = EditFeedFormat.relativeTimes(vm.recentEdits.map { ($0.id, $0.at) })
@@ -151,7 +154,8 @@ struct CallGuideDashboardView: View {
                     ForEach(Array(vm.recentEdits.enumerated()), id: \.element.id) { idx, row in
                         if idx > 0 { ImasRowDivider(inset: DS.sp4) }
                         songRow(row.song,
-                                subtitle: "\(row.label) ・ \(times[row.id] ?? "") ・ \(row.by)") {
+                                subtitle: L10n.Callguide.dashboardRowSubtitle(
+                                    detail: row.label, time: times[row.id] ?? "", by: row.by)) {
                             open(row.song, from: "recent_edit")
                         }
                     }
@@ -166,12 +170,12 @@ struct CallGuideDashboardView: View {
     private var wantedSection: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
             // 件数はサーバの内訳から出す (一覧は上限 100 件で打ち切られるため、行数とは一致しない)。
-            ImasSectionHeader(title: wantedSectionTitle, tight: true)
+            ImasSectionHeader(title: .key(wantedSectionTitle), tight: true)
             if vm.wanted.isEmpty {
                 ImasEmptyState(
                     systemImage: "checkmark.seal",
-                    title: "未整備の曲はありません",
-                    message: "「コール曲」タグが付いた曲は、いまのところ全部書かれています。"
+                    title: String(localized: L10n.Callguide.dashboardWantedEmptyTitle),
+                    message: String(localized: L10n.Callguide.dashboardWantedEmptyMessage)
                 )
             } else {
                 ImasListContainer {
@@ -185,10 +189,9 @@ struct CallGuideDashboardView: View {
         }
     }
 
-    private var wantedSectionTitle: String {
-        let base = "コール曲タグが付いているのに未整備"
-        guard let tag = vm.tag else { return base }
-        return "\(base) (\(tag.writable)曲)"
+    private var wantedSectionTitle: LocalizedStringResource {
+        guard let tag = vm.tag else { return L10n.Callguide.dashboardWantedHeader }
+        return L10n.Callguide.dashboardWantedHeaderCount(count: tag.writable)
     }
 
     private func wantedRow(_ row: CallGuideWantedRow) -> some View {
@@ -213,7 +216,8 @@ struct CallGuideDashboardView: View {
                 Spacer(minLength: DS.sp2)
                 // ボタンは縮ませない。曲名の方を省略する
                 // (「ログイン…」まで潰れると、何のボタンか読めなくなる)。
-                ImasChip(text: signedIn ? "書く" : "ログインして書く",
+                ImasChip(text: String(localized: signedIn ? L10n.Callguide.dashboardWantedWrite
+                                                        : L10n.Callguide.dashboardWantedLoginToWrite),
                          systemImage: "square.and.pencil", style: .selected)
                     .fixedSize(horizontal: true, vertical: false)
                     .layoutPriority(1)
@@ -229,16 +233,16 @@ struct CallGuideDashboardView: View {
     private var wantedFooter: some View {
         VStack(alignment: .leading, spacing: DS.sp2) {
             if let tag = vm.tag, tag.withoutLyrics > 0 {
-                Text("歌詞が未登録の \(tag.withoutLyrics) 曲は、歌詞が入るまで書けません。")
+                Text(L10n.Callguide.dashboardWantedWithoutLyrics(count: tag.withoutLyrics))
             }
             if vm.wantedTruncated {
-                Text("ここに出ているのは、タグの票が多い順に上位 100 件です。")
+                Text(L10n.Callguide.dashboardWantedTruncated)
             }
             if let tag = vm.tag {
                 NavigationLink {
                     TagDetailView(tagId: tag.tagId, tagName: tag.tagName)
                 } label: {
-                    Text("「\(tag.tagName)」タグを見る")
+                    Text(L10n.Callguide.dashboardWantedSeeTag(tag: tag.tagName))
                         .font(.imasCaption.weight(.semibold))
                 }
                 .buttonStyle(.plain)
@@ -251,7 +255,7 @@ struct CallGuideDashboardView: View {
 
     // MARK: - 共通行
 
-    private func songRow(_ song: Song, subtitle: String, action: @escaping () -> Void) -> some View {
+    private func songRow(_ song: Song, subtitle: LocalizedStringResource, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: DS.sp3) {
                 ImasArtwork(title: song.title, seed: nil, size: 40,

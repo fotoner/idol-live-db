@@ -23,28 +23,31 @@ final class CloudKitSyncEngine: @unchecked Sendable {
 
     enum SyncState: Sendable, Equatable {
         case idle
+        /// 同期している段の名前 (コア由来の `SyncStep.displayName`)。
         case syncing(String)
         case completed(Date)
-        case error(String)
+        /// 失敗の文言。解決済みの String ではなく文言の値で持ち、`description` で文字列にする。
+        case error(DisplayText)
 
+        /// 画面に出す状態の文言。呼ぶたびに今の言語で解決する。
         var description: String {
             switch self {
             case .idle:
-                return "待機中"
+                return String(localized: L10n.Model.syncStateIdle)
             case .syncing(let type):
-                return "\(type)を同期中…"
+                return String(localized: L10n.Model.syncStateSyncing(step: type))
             case .completed(let date):
                 let formatter = DateFormatter()
                 formatter.dateStyle = .short
                 formatter.timeStyle = .short
-                return "最終同期: \(formatter.string(from: date))"
+                return String(localized: L10n.Model.syncStateCompleted(date: formatter.string(from: date)))
             case .error(let message):
-                return "エラー: \(message)"
+                return String(localized: L10n.Model.syncStateError(message: message.resolved))
             }
         }
 
-        /// 全件再同期が必要なことを示すエラー状態
-        static let requiresFullResync = SyncState.error("全件再同期が必要です")
+        /// 全件再同期が必要なことを示すエラー状態 (比べるたびに作る。文言を static let に置かない)
+        static var requiresFullResync: SyncState { .error(.key(L10n.Model.syncErrorFullResyncRequired)) }
     }
 
     // MARK: - Properties
@@ -208,13 +211,14 @@ final class CloudKitSyncEngine: @unchecked Sendable {
             let status = try await CloudKitService.shared.accountStatus()
             guard status == .available else {
                 await MainActor.run {
-                    state = .error("iCloudアカウントが利用できません")
+                    state = .error(.key(L10n.Model.syncErrorIcloudUnavailable))
                 }
                 return
             }
         } catch {
+            let message = DisplayText.key(L10n.Model.syncErrorIcloudStatusFailed(detail: error.localizedDescription))
             await MainActor.run {
-                state = .error("iCloud状態の確認に失敗: \(error.localizedDescription)")
+                state = .error(message)
             }
             return
         }
@@ -349,27 +353,31 @@ final class CloudKitSyncEngine: @unchecked Sendable {
                     let isIndexError = msg.contains("not queryable") || msg.contains("not sortable")
                     if isIndexError {
                         logger.error("[Sync] CloudKit スキーマ未設定 (\(step.recordType)): \(msg)")
+                        let message = DisplayText.key(L10n.Model.syncErrorSchemaRequired(recordType: step.recordType))
                         await MainActor.run {
-                            state = .error(
-                                "スキーマ設定が必要です: CloudKit Dashboard で \(step.recordType) の modifiedAt を QUERYABLE + SORTABLE に設定してください"
-                            )
+                            state = .error(message)
                         }
                     } else {
+                        let message = DisplayText.key(L10n.Model.syncErrorStepFailed(step: step.displayName, detail: msg))
                         await MainActor.run {
-                            state = .error("\(step.displayName)の同期に失敗: \(msg)")
+                            state = .error(message)
                         }
                     }
                     return
                 default:
+                    let message = DisplayText.key(
+                        L10n.Model.syncErrorStepFailed(step: step.displayName, detail: ckError.localizedDescription))
                     await MainActor.run {
-                        state = .error("\(step.displayName)の同期に失敗: \(ckError.localizedDescription)")
+                        state = .error(message)
                     }
                     return
                 }
             } catch {
                 AppAnalytics.event("sync_error")
+                let message = DisplayText.key(
+                    L10n.Model.syncErrorStepFailed(step: step.displayName, detail: error.localizedDescription))
                 await MainActor.run {
-                    state = .error("\(step.displayName)の同期に失敗: \(error.localizedDescription)")
+                    state = .error(message)
                 }
                 return
             }
@@ -381,8 +389,9 @@ final class CloudKitSyncEngine: @unchecked Sendable {
         do {
             try database.updateLastSyncDate(lastSyncToSave)
         } catch {
+            let message = DisplayText.key(L10n.Model.syncErrorSaveDateFailed(detail: error.localizedDescription))
             await MainActor.run {
-                state = .error("同期日時の保存に失敗: \(error.localizedDescription)")
+                state = .error(message)
             }
             return
         }

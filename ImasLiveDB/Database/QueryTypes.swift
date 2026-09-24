@@ -308,14 +308,15 @@ enum SongFilterCriterion: Hashable, Sendable {
     case creator(String)      // 作詞・作曲・編曲いずれかで関わったクリエイター名
     case songIds([String], title: String)  // 任意の楽曲ID集合 (お気に入り・記録曲など)
 
+    /// 画面タイトル。呼ぶたびに今の言語で解決する (DetailSheet の id にも使われるので String のまま)。
     var navigationTitle: String {
         switch self {
-        case .brand(_, let label): return "\(label)の楽曲"
+        case .brand(_, let label): return String(localized: L10n.Model.songFilterTitleBrand(label: label))
         case .cdSeries(let s): return s
         case .seriesGroup(let s): return s
-        case .songType(let t): return "\(t)の楽曲"
-        case .releaseYear(let y): return "\(y)年リリースの楽曲"
-        case .creator(let n): return "\(n)が関わった楽曲"
+        case .songType(let t): return String(localized: L10n.Model.songFilterTitleSongType(type: t))
+        case .releaseYear(let y): return String(localized: L10n.Model.songFilterTitleReleaseYear(year: y))
+        case .creator(let n): return String(localized: L10n.Model.songFilterTitleCreator(name: n))
         case .songIds(_, let title): return title
         }
     }
@@ -329,6 +330,7 @@ struct SongWithRoles: Identifiable, Sendable {
     var artists: [Idol]
     var roles: [String]  // ["作曲", "編曲"] 等
 
+    // i18n-ignore(core): 役割名 (作詞・作曲・編曲) はコア由来の日本語なので、区切りも原文に合わせる
     var rolesLabel: String { roles.joined(separator: "・") }
 }
 
@@ -359,13 +361,14 @@ enum IdolFilterCriterion: Hashable, Sendable {
     case birthPlace(String)
     case bloodType(String)
 
+    /// 画面タイトル。呼ぶたびに今の言語で解決する (DetailSheet の id にも使われるので String のまま)。
     var navigationTitle: String {
         switch self {
-        case .brand(_, let label): return "\(label)のアイドル"
-        case .birthMonth(let m): return "\(m)月生まれのアイドル"
-        case .constellation(let c): return "\(c)のアイドル"
-        case .birthPlace(let p): return "\(p)出身のアイドル"
-        case .bloodType(let t): return "\(t)型のアイドル"
+        case .brand(_, let label): return String(localized: L10n.Model.idolFilterTitleBrand(label: label))
+        case .birthMonth(let m): return String(localized: L10n.Model.idolFilterTitleBirthMonth(month: m))
+        case .constellation(let c): return String(localized: L10n.Model.idolFilterTitleConstellation(name: c))
+        case .birthPlace(let p): return String(localized: L10n.Model.idolFilterTitleBirthPlace(place: p))
+        case .bloodType(let t): return String(localized: L10n.Model.idolFilterTitleBloodType(type: t))
         }
     }
 }
@@ -374,10 +377,11 @@ enum EventFilterCriterion: Hashable, Sendable {
     case brand(id: String, label: String)
     case year(Int)
 
+    /// 画面タイトル。呼ぶたびに今の言語で解決する (DetailSheet の id にも使われるので String のまま)。
     var navigationTitle: String {
         switch self {
-        case .brand(_, let label): return "\(label)のライブ"
-        case .year(let y): return "\(y)年のライブ"
+        case .brand(_, let label): return String(localized: L10n.Model.eventFilterTitleBrand(label: label))
+        case .year(let y): return String(localized: L10n.Model.eventFilterTitleYear(year: y))
         }
     }
 }
@@ -386,10 +390,11 @@ enum ShowFilterCriterion: Hashable, Sendable {
     case venue(String)
     case date(String)  // "YYYY-MM-DD"
 
+    /// 画面タイトル。呼ぶたびに今の言語で解決する (DetailSheet の id にも使われるので String のまま)。
     var navigationTitle: String {
         switch self {
-        case .venue(let v): return "\(v)での公演"
-        case .date(let d): return "\(d)の公演"
+        case .venue(let v): return String(localized: L10n.Model.showFilterTitleVenue(venue: v))
+        case .date(let d): return String(localized: L10n.Model.showFilterTitleDate(date: d))
         }
     }
 }
@@ -612,9 +617,21 @@ struct SongSearchFilter: Sendable {
 /// 楽曲一覧の「現地回収」軸での絞り込みモード。
 /// 回収済のみ / 未回収のみ / 制限なし の 3 値。
 enum SongCollectFilter: String, CaseIterable, Sendable {
+    // i18n-ignore(storage): rawValue は @AppStorage("songs_collect_filter") の保存値。変えると設定が初期化される
     case all = "すべて"
+    // i18n-ignore(storage): 保存値 (上と同じ)
     case collected = "回収済のみ"
+    // i18n-ignore(storage): 保存値 (上と同じ)
     case uncollected = "未回収のみ"
+
+    /// 表示名。保存値 (rawValue) とは別に、今の言語の文言を引く (画面では rawValue を出さない)。
+    var label: LocalizedStringResource {
+        switch self {
+        case .all: L10n.Model.songCollectFilterAll
+        case .collected: L10n.Model.songCollectFilterCollected
+        case .uncollected: L10n.Model.songCollectFilterUncollected
+        }
+    }
 }
 
 /// 楽曲一覧の「マイマーク」 軸での絞り込み。 旧 MyMarks タブを楽曲フィルタに統合した結果。
@@ -635,11 +652,27 @@ struct SongMyMarkFilter: Sendable, Equatable {
 }
 
 enum SongSortOrder: String, CaseIterable, Sendable {
+    // i18n-ignore(data): rawValue は識別子として残す (Picker の tag・id)。表示は label を使う
     case titleKana = "五十音順"
+    // i18n-ignore(data): 識別子 (上と同じ)
     case releaseDate = "リリース日順"
+    // i18n-ignore(data): 識別子 (上と同じ)
     case performanceCount = "披露回数順"
+    // i18n-ignore(data): 識別子 (上と同じ)
     case collectedCount = "現地回収回数順"
+    // i18n-ignore(data): 識別子 (上と同じ)
     case collectedRate = "回収率順"
+
+    /// 表示名。rawValue とは別に、今の言語の文言を引く (画面では rawValue を出さない)。
+    var label: LocalizedStringResource {
+        switch self {
+        case .titleKana: L10n.Model.songSortTitleKana
+        case .releaseDate: L10n.Model.songSortReleaseDate
+        case .performanceCount: L10n.Model.songSortPerformanceCount
+        case .collectedCount: L10n.Model.songSortCollectedCount
+        case .collectedRate: L10n.Model.songSortCollectedRate
+        }
+    }
 
     /// この sort のデフォルト方向。 五十音順は昇順、 回数/日付系は降順 (多い/新しい順)。
     var defaultAscending: Bool {
@@ -741,7 +774,7 @@ struct EventAttendance: Sendable {
 extension AlbumSummary: GridCardItem {
     var title: String { cdSeries }
     var subtitle: String? {
-        var parts: [String] = ["\(songCount)曲"]
+        var parts: [String] = [String(localized: L10n.Model.albumSubtitle(count: songCount))]
         if let year = yearDisplay { parts.append(year) }
         return parts.joined(separator: " / ")
     }
@@ -751,7 +784,7 @@ extension AlbumSummary: GridCardItem {
 extension SeriesSummary: GridCardItem {
     var title: String { name }
     var subtitle: String? {
-        var parts: [String] = ["\(cdCount)枚 / \(songCount)曲"]
+        var parts: [String] = [String(localized: L10n.Model.seriesSubtitle(discs: cdCount, count: songCount))]
         if let years = yearDisplay { parts.append("· \(years)") }
         return parts.joined(separator: " ")
     }

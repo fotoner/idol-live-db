@@ -1,0 +1,1342 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "callguide.dashboard.dropped" : {
+      "comment" : "サーバにはあるが端末の曲一覧に無いので出せない曲の数の断り書き。1000 以上は桁区切りが付く (今も同じ) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg 曲は、この端末の曲一覧に出ない曲 (別バージョン等) のため表示していません。"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg곡은 이 기기의 곡 목록에 나오지 않는 곡 (다른 버전 등)이라 표시하지 않아요."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "callguide.dashboard.edit.added" : {
+      "comment" : "最近の編集の中身: コールが無かった曲に付けた。count はコールの数 (1000 以上は桁区切りが付く。今は付かないが 1 曲では出ない数)、lines は行数 (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "コールを付けた (%arg件・%2$@行)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "콜 추가 (%arg건 · %2$@줄)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "callguide.dashboard.edit.removed" : {
+      "comment" : "最近の編集の中身: コールを全部消した。count は消す前のコールの数 (1000 以上は桁区切りが付く。1 曲では出ない数) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "コールを削除した (%arg件→0)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "콜 삭제 (%arg건→0)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "callguide.dashboard.edit.updated" : {
+      "comment" : "最近の編集の中身: コールの数が変わった。before は前の数、count は後の数 (1000 以上は桁区切りが付く。1 曲では出ない数) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "コールを更新 (%1$@→%arg件)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "콜 업데이트 (%1$@→%arg건)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "callguide.dashboard.generated_at" : {
+      "comment" : "サーバが一覧を作った時刻の断り書き。time は相対時刻 (例: 5分前。コアが作る) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@時点の情報です (最大 30 分ほど遅れます)。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 기준 정보예요 (최대 30분 정도 늦을 수 있어요)."
+          }
+        }
+      }
+    },
+    "callguide.dashboard.intro" : {
+      "comment" : "画面の上の説明 (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌詞の行ごとに「ここでこう叫ぶ」を書き込むのがコールガイドです。歌詞タブから直接付けられます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가사 줄마다 “여기서 이렇게 외친다”를 적어 넣는 것이 콜 가이드예요. 가사 탭에서 바로 달 수 있어요."
+          }
+        }
+      }
+    },
+    "callguide.dashboard.load_error" : {
+      "comment" : "読み込みに失敗したときの帯。message はエラーの文言 (model.api_error.* かサーバの文言) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コールガイドの情報を取得できませんでした (%1$@)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜 가이드 정보를 가져오지 못했어요 (%1$@)"
+          }
+        }
+      }
+    },
+    "callguide.dashboard.recent.empty.message" : {
+      "comment" : "2 つ目の節が空のときの説明 (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "誰かがコールを書き込むと、ここに残ります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "누군가 콜을 적으면 여기에 남아요."
+          }
+        }
+      }
+    },
+    "callguide.dashboard.recent.empty.title" : {
+      "comment" : "2 つ目の節が空のときの見出し (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだ編集がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 편집이 없어요"
+          }
+        }
+      }
+    },
+    "callguide.dashboard.recent.header" : {
+      "comment" : "2 つ目の節の見出し (誰がいつコールを書いたか) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最近の編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최근 편집"
+          }
+        }
+      }
+    },
+    "callguide.dashboard.row.subtitle" : {
+      "comment" : "曲の行の下の 1 行。detail は dashboard.row.summary か dashboard.edit.*、time は相対時刻 (コアが作る)、by は書いた人の伏せ字の名前 (データ) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ ・ %2$@ ・ %3$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ · %2$@ · %3$@"
+          }
+        }
+      }
+    },
+    "callguide.dashboard.row.subtitle_no_time" : {
+      "comment" : "dashboard.row.subtitle の時刻が無い版 (更新の記録が無い曲) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ ・ %2$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "callguide.dashboard.row.summary" : {
+      "comment" : "曲の行の下に出す、コールが付いた行数とコールの数。calls は 1000 以上で桁区切りが付く (1 曲では実際には出ない) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@calls@"
+          },
+          "substitutions" : {
+            "calls" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%1$@行・%argコール"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@calls@"
+          },
+          "substitutions" : {
+            "calls" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%1$@줄 · %arg콜"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "callguide.dashboard.stat.tagged" : {
+      "comment" : "上の数字のタイル: 「コール曲」タグ (コールのある曲に付けるタグ) の付いた曲の数 (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コール曲タグ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜 곡 태그"
+          }
+        }
+      }
+    },
+    "callguide.dashboard.stat.unit_songs" : {
+      "comment" : "上の数字のタイルの単位 (数字の右に小さく出す) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡"
+          }
+        }
+      }
+    },
+    "callguide.dashboard.stat.wanted" : {
+      "comment" : "上の数字のタイル: タグはあるのにまだコールが書かれていない曲の数 (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "書き手募集中"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "작성자 모집 중"
+          }
+        }
+      }
+    },
+    "callguide.dashboard.stat.with_calls" : {
+      "comment" : "上の数字のタイル: コールガイドが書かれている曲の数 (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ガイドあり"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가이드 있음"
+          }
+        }
+      }
+    },
+    "callguide.dashboard.title" : {
+      "comment" : "コールガイドの整備状況の画面のタイトル (プロデュース → コールガイド) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コールガイド"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜 가이드"
+          }
+        }
+      }
+    },
+    "callguide.dashboard.wanted.empty.message" : {
+      "comment" : "3 つ目の節が空のときの説明。「コール曲」はコールのある曲に付けるタグ。ko は dashboard.stat.tagged・dashboard.wanted.header と同じく訳す (“콜 곡”) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「コール曲」タグが付いた曲は、いまのところ全部書かれています。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“콜 곡” 태그가 달린 곡은 지금은 모두 작성되어 있어요."
+          }
+        }
+      }
+    },
+    "callguide.dashboard.wanted.empty.title" : {
+      "comment" : "3 つ目の節が空のときの見出し (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未整備の曲はありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 안 쓴 곡이 없어요"
+          }
+        }
+      }
+    },
+    "callguide.dashboard.wanted.header" : {
+      "comment" : "3 つ目の節の見出し (タグの内訳を読めないとき)。コール曲タグ = コールのある曲に付けるタグ (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コール曲タグが付いているのに未整備"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜 곡 태그는 있지만 아직 안 쓴 곡"
+          }
+        }
+      }
+    },
+    "callguide.dashboard.wanted.header_count" : {
+      "comment" : "3 つ目の節の見出し。count はまだ書ける曲の数 (1000 以上は桁区切りが付く。今は付かない) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "コール曲タグが付いているのに未整備 (%arg曲)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "콜 곡 태그는 있지만 아직 안 쓴 곡 (%arg곡)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "callguide.dashboard.wanted.login_to_write" : {
+      "comment" : "3 つ目の節の曲の行のボタン (未ログインのとき。ログインの案内を開く) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ログインして書く"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "로그인하고 쓰기"
+          }
+        }
+      }
+    },
+    "callguide.dashboard.wanted.see_tag" : {
+      "comment" : "タグの詳細へのリンク。tag はタグの名前 (データ) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」タグを見る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@” 태그 보기"
+          }
+        }
+      }
+    },
+    "callguide.dashboard.wanted.truncated" : {
+      "comment" : "3 つ目の節がサーバの上限で打ち切られているときの断り書き (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ここに出ているのは、タグの票が多い順に上位 100 件です。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "여기에 나온 것은 태그 투표가 많은 순으로 상위 100건이에요."
+          }
+        }
+      }
+    },
+    "callguide.dashboard.wanted.without_lyrics" : {
+      "comment" : "3 つ目の節の下の断り書き。1000 以上は桁区切りが付く (今も同じ) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "歌詞が未登録の %arg 曲は、歌詞が入るまで書けません。"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "가사가 등록되지 않은 %arg곡은 가사가 들어올 때까지 쓸 수 없어요."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "callguide.dashboard.wanted.write" : {
+      "comment" : "3 つ目の節の曲の行のボタン (歌詞タブを開く) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "書く"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "쓰기"
+          }
+        }
+      }
+    },
+    "callguide.dashboard.with_calls.empty.message" : {
+      "comment" : "1 つ目の節が空のときの説明。「コール曲」はコールのある曲に付けるタグ。ko は dashboard.stat.tagged・dashboard.wanted.header と同じく訳す (“콜 곡”) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「コール曲」タグの付いた曲から書き始められます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“콜 곡” 태그가 달린 곡부터 쓰기 시작할 수 있어요."
+          }
+        }
+      }
+    },
+    "callguide.dashboard.with_calls.empty.title" : {
+      "comment" : "1 つ目の節が空のときの見出し (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだコールガイドがありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 콜 가이드가 없어요"
+          }
+        }
+      }
+    },
+    "callguide.dashboard.with_calls.header" : {
+      "comment" : "1 つ目の節の見出し。count は曲数 (サーバの上限が 200 なので桁区切りは出ない) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "コールガイドがある曲 (%arg曲)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "콜 가이드가 있는 곡 (%arg곡)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "callguide.dashboard.with_calls.truncated" : {
+      "comment" : "1 つ目の節がサーバの上限で打ち切られているときの断り書き (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ここに出ているのは、最近更新された 200 曲です。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "여기에 나온 것은 최근 업데이트된 200곡이에요."
+          }
+        }
+      }
+    },
+    "callguide.editor.anchor.header" : {
+      "comment" : "コールの入力シートの節の見出し。コールが掛かる歌詞の位置 (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アンカー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "앵커"
+          }
+        }
+      }
+    },
+    "callguide.editor.anchor.line_end" : {
+      "comment" : "アンカーが行末のとき (歌詞のどこにも掛からない) の説明。追っかけ = 歌い終わってから客が返すコール (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行末（追っかけ）— 歌詞に被せず、この行の後で返すコール"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "행 끝 (따라 외치기) — 가사에 겹치지 않고 이 줄이 끝난 뒤 외치는 콜"
+          }
+        }
+      }
+    },
+    "callguide.editor.cancel" : {
+      "comment" : "コールの入力シートの左上のボタン (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャンセル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "취소"
+          }
+        }
+      }
+    },
+    "callguide.editor.delete" : {
+      "comment" : "コールの入力シートの下の削除ボタン (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このコールを削除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 콜 삭제"
+          }
+        }
+      }
+    },
+    "callguide.editor.done" : {
+      "comment" : "コールの入力シートの右上のボタン (保存して閉じる) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完了"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "완료"
+          }
+        }
+      }
+    },
+    "callguide.editor.emphasis.header" : {
+      "comment" : "コールの入力シートの節の見出し (普通 / おこのみで / 演者要望) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "強調"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "강조"
+          }
+        }
+      }
+    },
+    "callguide.editor.emphasis.hint.normal" : {
+      "comment" : "強調の選択肢の説明 (通常) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通常のコール。凡例には出ない。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "일반 콜. 범례에는 나오지 않아요."
+          }
+        }
+      }
+    },
+    "callguide.editor.emphasis.hint.optional" : {
+      "comment" : "強調の選択肢の説明 (おこのみで = してもしなくてもよいコール。緑で出す) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "おこのみで（緑）。やってもやらなくてもよい。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "자유롭게 (초록). 해도 되고 안 해도 돼요."
+          }
+        }
+      }
+    },
+    "callguide.editor.emphasis.hint.performer_request" : {
+      "comment" : "強調の選択肢の説明 (演者要望 = 出演者から頼まれたコール。赤で出す) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "演者要望（赤）。演者から明示的に求められたもの。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출연자 요청 (빨강). 출연자가 직접 요청한 콜이에요."
+          }
+        }
+      }
+    },
+    "callguide.editor.input.header" : {
+      "comment" : "コールの入力シートの節の見出し (叫ぶ言葉を入れる欄) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コール文言"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜 문구"
+          }
+        }
+      }
+    },
+    "callguide.editor.input.hint" : {
+      "comment" : "コールの入力欄の下の説明 (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "繰り返しは「× 26」のように文言へ直接書く。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "반복은 “× 26”처럼 문구에 바로 적어요."
+          }
+        }
+      }
+    },
+    "callguide.editor.input.placeholder" : {
+      "comment" : "コールの入力欄のプレースホルダ。(Hi!) はコールの例なので訳さない (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(Hi!) など"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "(Hi!) 등"
+          }
+        }
+      }
+    },
+    "callguide.editor.palette.header" : {
+      "comment" : "よく使うコールの一覧の見出し。押すと入力欄の末尾に足す (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パレット（タップで末尾に追加）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "팔레트 (탭하면 끝에 추가)"
+          }
+        }
+      }
+    },
+    "callguide.editor.palette.lyric_call" : {
+      "comment" : "パレットの組の名前 (選んだ歌詞の語をそのまま叫ぶコール) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌詞コール"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가사 콜"
+          }
+        }
+      }
+    },
+    "callguide.editor.timing.header" : {
+      "comment" : "コールの入力シートの節の見出し (歌に被せるか、後で返すか) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイミング"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "타이밍"
+          }
+        }
+      }
+    },
+    "callguide.editor.title.add" : {
+      "comment" : "コールの入力シートのタイトル (新しく付ける) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コールを追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜 추가"
+          }
+        }
+      }
+    },
+    "callguide.editor.title.edit" : {
+      "comment" : "コールの入力シートのタイトル (付いているコールを直す) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コールを編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜 편집"
+          }
+        }
+      }
+    },
+    "callguide.legend.over_timing" : {
+      "comment" : "コール表の凡例: 「同時」の札の意味 (歌に重ねて叫ぶ) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌に被せる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "노래에 겹치기"
+          }
+        }
+      }
+    },
+    "callguide.line.append_call.a11y" : {
+      "comment" : "歌詞の行の末尾の ＋ ボタンの読み上げ (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行末にコールを追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "행 끝에 콜 추가"
+          }
+        }
+      }
+    },
+    "callguide.line.call.a11y" : {
+      "comment" : "コールの行の読み上げ。place は同時 / 追っかけ / 行末、text はコールの文言 (データ)、emphasis は強調の名前 (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@のコール: %2$@。%3$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 콜: %2$@. %3$@"
+          }
+        }
+      }
+    },
+    "callguide.line.clap.a11y" : {
+      "comment" : "編集中、手拍子の記号が無い行の頭の ＋ の読み上げ (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手拍子を指定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "박수 지정"
+          }
+        }
+      }
+    },
+    "callguide.line.line_end" : {
+      "comment" : "歌詞に掛からず行の後で返すコールの札。読み上げの「{place}のコール」の place にも使う (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行末"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "행 끝"
+          }
+        }
+      }
+    },
+    "callguide.line.select.a11y_hint" : {
+      "comment" : "編集中の歌詞の行の読み上げのヒント (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "語をタップすると、その語に被せるコールを付けられます。長押しからなぞると語をまたいだ範囲を選べます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "단어를 탭하면 그 단어에 겹치는 콜을 달 수 있어요. 길게 눌러 드래그하면 여러 단어에 걸친 범위를 고를 수 있어요"
+          }
+        }
+      }
+    },
+    "callguide.line.stale" : {
+      "comment" : "歌詞が直されてアンカーの位置がずれたコールの札 (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ズレ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "어긋남"
+          }
+        }
+      }
+    },
+    "callguide.palette.group.clap" : {
+      "comment" : "パレットの組の名前 (手拍子) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クラップ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "박수"
+          }
+        }
+      }
+    },
+    "callguide.palette.group.count" : {
+      "comment" : "パレットの組の名前 (3・2・1 などの数える掛け声) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カウント"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "카운트"
+          }
+        }
+      }
+    },
+    "callguide.palette.group.oh" : {
+      "comment" : "パレットの組の名前 (「オー」と伸ばす掛け声と、警報 (ハーイハーイ…) の掛け声)。ko の表記はオーナー確定待ち (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オーイング / 警報"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오~ 콜 / 경보"
+          }
+        }
+      }
+    },
+    "callguide.palette.group.section" : {
+      "comment" : "パレットの組の名前 (前奏・間奏など曲の区切り) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セクション"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "구간"
+          }
+        }
+      }
+    },
+    "callguide.palette.group.voice" : {
+      "comment" : "パレットの組の名前 ((Hi!) (Oi!) などの掛け声) (i18n/catalog/callguide.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発声"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "구호"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

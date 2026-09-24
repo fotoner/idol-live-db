@@ -78,6 +78,7 @@ struct FakeCallGuideDashboardReading: CallGuideDashboardReading {
             filter: SongSearchFilter(), sortOrder: .titleKana, ascending: nil)
         let ids = songs.map(\.song.id)
         let now = Int(Date().timeIntervalSince1970)
+        // i18n-ignore(sample): DEBUG の見た目確認用のフェイク (サーバが返す伏せ字の名前の見本)
         let names = ["f***", "匿名", "p***", "み***"]
 
         let withCalls = ids.prefix(withCallsCount).enumerated().map { i, id in
@@ -105,6 +106,7 @@ struct FakeCallGuideDashboardReading: CallGuideDashboardReading {
             recentEdits: Array(recent),
             taggedWithoutCalls: wanted,
             callTag: CallGuideTagStatus(
+                // i18n-ignore(sample): DEBUG の見た目確認用のフェイク (サーバのタグ名の見本)
                 tagId: "tag_44Kz44O844Or5puy", tagName: "コール曲",
                 tagged: 291, withCalls: withCalls.count, withoutLyrics: 46))
     }

@@ -1,0 +1,997 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "model",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/data/community/CommunityApi.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/data/core/SnapshotStoreProvider.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/data/repository/SearchRepository.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/data/sync/CloudKitSyncEngine.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/data/sync/SeedImporter.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/theme/MasteryScale.kt"
+    ],
+    "ios": [
+      "ImasLiveDB/Database/DatabaseMigrations.swift",
+      "ImasLiveDB/Database/QueryTypes.swift",
+      "ImasLiveDB/Domain/Ports/TimelineReading.swift",
+      "ImasLiveDB/Domain/UseCases/IdolListFiltering.swift",
+      "ImasLiveDB/Domain/UseCases/InputLimits.swift",
+      "ImasLiveDB/Models/Brand.swift",
+      "ImasLiveDB/Models/CommunityModels.swift",
+      "ImasLiveDB/Services/APIClient.swift",
+      "ImasLiveDB/Services/CloudKitSyncEngine.swift"
+    ]
+  },
+  "strings": {
+    "album.subtitle": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}曲",
+      "ko": "{count}곡",
+      "note": "CD (アルバム) のカードの下に出す曲数。1000 以上は桁区切りが付くが、1 枚の曲数なので実際には出ない",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "api_error.conflict": {
+      "ja": "重複しています",
+      "ko": "중복되어 있어요",
+      "note": "API が 409 (同じものが既にある) を返し、サーバが理由を付けなかったとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "api_error.decoding": {
+      "ja": "レスポンス形式エラー",
+      "ko": "응답 형식 오류",
+      "note": "API の応答を読めなかったとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "api_error.not_authorized": {
+      "ja": "認証エラー",
+      "ko": "인증 오류",
+      "note": "サーバ (Worker) の API が 401 を返したとき (ログインの期限切れなど)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "api_error.not_found": {
+      "ja": "見つかりませんでした",
+      "ko": "찾을 수 없어요",
+      "note": "API が 404 を返したとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "api_error.rate_limited": {
+      "ja": "1日の上限に達しました。明日また試してください",
+      "ko": "하루 한도에 도달했어요. 내일 다시 시도해 주세요",
+      "note": "API が 429 (1 日の回数の上限) を返したとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "api_error.server": {
+      "args": [
+        {
+          "name": "status",
+          "type": "int"
+        }
+      ],
+      "ja": "サーバーエラー ({status})",
+      "ko": "서버 오류 ({status})",
+      "note": "API が 5xx などを返したとき。status は HTTP の状態コード",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "api_error.server_detail": {
+      "args": [
+        {
+          "name": "status",
+          "type": "int"
+        },
+        {
+          "name": "detail",
+          "type": "string"
+        }
+      ],
+      "ja": "サーバーエラー ({status}): {detail}",
+      "ko": "서버 오류 ({status}): {detail}",
+      "note": "api_error.server にサーバの説明が付いていたとき。detail はサーバ (Worker) の文言 (訳さない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "api_error.transport": {
+      "ja": "通信エラー",
+      "ko": "통신 오류",
+      "note": "通信そのものが失敗したとき (圏外など)。ほかの理由が分からない失敗の既定の文言にも使う",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "brand.icon_cg": {
+      "ja": "デレ",
+      "ko": "데레",
+      "max_len": 4,
+      "note": "ブランドの丸いアイコンに載せる略称 (2〜4 文字。公式ロゴの代わり)。シンデレラガールズのファンの呼び方で、正式名ではない。ko の表記はオーナー確定待ち",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "brand.icon_gakuen": {
+      "ja": "学マス",
+      "ko": "학마스",
+      "max_len": 4,
+      "note": "ブランドの丸いアイコンに載せる略称 (2〜4 文字。公式ロゴの代わり)。学園アイドルマスターのファンの呼び方で、正式名ではない。ko の表記はオーナー確定待ち",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "brand.icon_ml": {
+      "ja": "ミリ",
+      "ko": "밀리",
+      "max_len": 4,
+      "note": "ブランドの丸いアイコンに載せる略称 (2〜4 文字。公式ロゴの代わり)。ミリオンライブ!のファンの呼び方で、正式名ではない。ko の表記はオーナー確定待ち",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "brand.icon_other": {
+      "ja": "他",
+      "ko": "기타",
+      "max_len": 3,
+      "note": "ブランドの丸いアイコンに載せる短い文字 (「その他」のブランド)。1〜2 文字",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "brand.icon_sc": {
+      "ja": "シャニ",
+      "ko": "샤니",
+      "max_len": 4,
+      "note": "ブランドの丸いアイコンに載せる略称 (2〜4 文字。公式ロゴの代わり)。シャイニーカラーズのファンの呼び方で、正式名ではない。ko の表記はオーナー確定待ち",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "brand.icon_valv": {
+      "ja": "ヴィ",
+      "ko": "브이",
+      "max_len": 4,
+      "note": "ブランドの丸いアイコンに載せる略称 (2〜4 文字。公式ロゴの代わり)。vα-livのファンの呼び方で、正式名ではない。ko の表記はオーナー確定待ち",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "event_filter.title.brand": {
+      "args": [
+        {
+          "name": "label",
+          "type": "string"
+        }
+      ],
+      "ja": "{label}のライブ",
+      "ko": "{label} 라이브",
+      "note": "絞り込んだライブ一覧の画面タイトル。label はブランド名 (データ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "event_filter.title.year": {
+      "args": [
+        {
+          "name": "year",
+          "type": "int"
+        }
+      ],
+      "ja": "{year}年のライブ",
+      "ko": "{year}년 라이브",
+      "note": "絞り込んだライブ一覧の画面タイトル。year は開催年",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "idol_filter.title.birth_month": {
+      "args": [
+        {
+          "name": "month",
+          "type": "int"
+        }
+      ],
+      "ja": "{month}月生まれのアイドル",
+      "ko": "{month}월생 아이돌",
+      "note": "絞り込んだアイドル一覧の画面タイトル。month は誕生月 (1〜12)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "idol_filter.title.birth_place": {
+      "args": [
+        {
+          "name": "place",
+          "type": "string"
+        }
+      ],
+      "ja": "{place}出身のアイドル",
+      "ko": "{place} 출신 아이돌",
+      "note": "絞り込んだアイドル一覧の画面タイトル。place は出身地 (データ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "idol_filter.title.blood_type": {
+      "args": [
+        {
+          "name": "type",
+          "type": "string"
+        }
+      ],
+      "ja": "{type}型のアイドル",
+      "ko": "{type}형 아이돌",
+      "note": "絞り込んだアイドル一覧の画面タイトル。type は血液型 (A / B / O / AB)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "idol_filter.title.brand": {
+      "args": [
+        {
+          "name": "label",
+          "type": "string"
+        }
+      ],
+      "ja": "{label}のアイドル",
+      "ko": "{label} 아이돌",
+      "note": "絞り込んだアイドル一覧の画面タイトル。label はブランド名 (データ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "idol_filter.title.constellation": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "ja": "{name}のアイドル",
+      "ko": "{name} 아이돌",
+      "note": "絞り込んだアイドル一覧の画面タイトル。name は星座の名前 (データ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "idol_sort.age": {
+      "ja": "年齢",
+      "ko": "나이",
+      "note": "アイドル一覧の並び順の名前。画面によっては「◯◯順」と組み合わせる",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "idol_sort.birthday": {
+      "ja": "誕生日",
+      "ko": "생일",
+      "note": "アイドル一覧の並び順の名前",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "idol_sort.debut": {
+      "ja": "デビュー日",
+      "ko": "데뷔일",
+      "note": "アイドル一覧の並び順の名前",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "idol_sort.height": {
+      "ja": "身長",
+      "ko": "키",
+      "note": "アイドル一覧の並び順の名前",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "idol_sort.name_kana": {
+      "ja": "五十音順",
+      "ko": "오십음순",
+      "note": "アイドル一覧の並び順の名前 (よみがなの五十音順)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "idol_sort.official": {
+      "ja": "公式順",
+      "ko": "공식순",
+      "note": "アイドル一覧の並び順の名前 (公式の並び)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "idol_sort.weight": {
+      "ja": "体重",
+      "ko": "몸무게",
+      "note": "アイドル一覧の並び順の名前",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "input_limits.counter": {
+      "args": [
+        {
+          "name": "length",
+          "type": "int"
+        },
+        {
+          "name": "max",
+          "type": "int"
+        }
+      ],
+      "ja": "{length} / {max}文字",
+      "ko": "{length} / {max}자",
+      "note": "入力欄の下の文字数の数え (例: 12 / 30文字)。length は今の文字数、max は上限 (どちらも 300 以下)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "mastery.preset.name": {
+      "args": [
+        {
+          "name": "steps",
+          "type": "int"
+        }
+      ],
+      "ja": "{steps}段",
+      "ko": "{steps}단계",
+      "note": "習熟度の段数のプリセットの名前 (2段 / 3段 / 4段) (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "mastery.preset.steps2.level1": {
+      "ja": "聞いた",
+      "ko": "들음",
+      "max_len": 4,
+      "note": "習熟度 2 段のプリセットの 1 段目 (Android)。スワイプのボタンに収まるよう 4 文字以内",
+      "platforms": [
+        "android"
+      ]
+    },
+    "mastery.preset.steps2.level2": {
+      "ja": "覚えた",
+      "ko": "외움",
+      "max_len": 4,
+      "note": "習熟度 2 段のプリセットの 2 段目 (Android)。4 文字以内",
+      "platforms": [
+        "android"
+      ]
+    },
+    "mastery.preset.steps3.level1": {
+      "ja": "聞いた",
+      "ko": "들음",
+      "max_len": 4,
+      "note": "習熟度 3 段 (既定) のプリセットの 1 段目 (Android)。4 文字以内",
+      "platforms": [
+        "android"
+      ]
+    },
+    "mastery.preset.steps3.level2": {
+      "ja": "覚えた",
+      "ko": "외움",
+      "max_len": 4,
+      "note": "習熟度 3 段 (既定) のプリセットの 2 段目 (Android)。4 文字以内",
+      "platforms": [
+        "android"
+      ]
+    },
+    "mastery.preset.steps3.level3": {
+      "ja": "完璧",
+      "ko": "완벽",
+      "max_len": 4,
+      "note": "習熟度 3 段 (既定) のプリセットの 3 段目 (Android)。4 文字以内",
+      "platforms": [
+        "android"
+      ]
+    },
+    "mastery.preset.steps4.level1": {
+      "ja": "聞いた",
+      "ko": "들음",
+      "max_len": 4,
+      "note": "習熟度 4 段のプリセットの 1 段目 (Android)。4 文字以内",
+      "platforms": [
+        "android"
+      ]
+    },
+    "mastery.preset.steps4.level2": {
+      "ja": "だいたい",
+      "ko": "대강",
+      "max_len": 4,
+      "note": "習熟度 4 段のプリセットの 2 段目 (だいたい覚えた) (Android)。4 文字以内",
+      "platforms": [
+        "android"
+      ]
+    },
+    "mastery.preset.steps4.level3": {
+      "ja": "覚えた",
+      "ko": "외움",
+      "max_len": 4,
+      "note": "習熟度 4 段のプリセットの 3 段目 (Android)。4 文字以内",
+      "platforms": [
+        "android"
+      ]
+    },
+    "mastery.preset.steps4.level4": {
+      "ja": "完璧",
+      "ko": "완벽",
+      "max_len": 4,
+      "note": "習熟度 4 段のプリセットの 4 段目 (Android)。4 文字以内",
+      "platforms": [
+        "android"
+      ]
+    },
+    "mastery.unset": {
+      "ja": "未設定",
+      "ko": "미설정",
+      "note": "習熟度の段がまだ付いていない曲 (Android。iOS は mastery 側)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "poll_achievement.rank": {
+      "args": [
+        {
+          "name": "rank",
+          "type": "int"
+        }
+      ],
+      "ja": "第{rank}位",
+      "ko": "{rank}위",
+      "note": "終了したお題での順位 (2 位・3 位)。rank は順位"
+    },
+    "poll_achievement.winner": {
+      "ja": "優勝",
+      "ko": "우승",
+      "note": "終了したお題で 1 位を取ったことを示す札"
+    },
+    "poll_create.error.restricted": {
+      "ja": "この操作は制限されています。",
+      "ko": "이 작업은 제한되어 있어요.",
+      "note": "お題を作ろうとしてサーバが 403 を返したとき (利用制限中) (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "poll_create.error.signin_required": {
+      "ja": "お題の作成にはサインインが必要です",
+      "ko": "주제를 만들려면 로그인해야 해요",
+      "note": "お題を作ろうとしてサーバが 401 を返したとき (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "poll_status.closing_today": {
+      "ja": "本日締切",
+      "ko": "오늘 마감",
+      "note": "お題の状態の札。今日締め切るお題 (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "poll_status.days_left": {
+      "args": [
+        {
+          "name": "days",
+          "type": "count"
+        }
+      ],
+      "ja": "残り{days}日",
+      "ko": "{days}일 남음",
+      "note": "お題の状態の札。締め切りまでの日数 (Android)。1000 以上は桁区切りが付くが、お題の期間は長くても数十日",
+      "platforms": [
+        "android"
+      ]
+    },
+    "poll_status.ended": {
+      "ja": "終了",
+      "ko": "종료",
+      "note": "お題の状態の札。締め切ったお題 (Android。iOS は polls 側)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "poll_target.idol": {
+      "ja": "アイドル",
+      "ko": "아이돌",
+      "note": "お題の対象の種類 (アイドルについて投票する)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "poll_target.song": {
+      "ja": "曲",
+      "ko": "곡",
+      "note": "お題の対象の種類 (曲について投票する)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "poll_target.unit": {
+      "ja": "ユニット",
+      "ko": "유닛",
+      "note": "お題の対象の種類 (ユニットについて投票する)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "search_scope.empty_noun.all": {
+      "ja": "項目",
+      "ko": "항목",
+      "note": "検索結果が無いときの文に入れる名詞 (全種類) (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "search_scope.empty_noun.events": {
+      "ja": "ライブ",
+      "ko": "라이브",
+      "note": "検索結果が無いときの文に入れる名詞 (ライブ) (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "search_scope.empty_noun.idols": {
+      "ja": "アイドル",
+      "ko": "아이돌",
+      "note": "検索結果が無いときの文に入れる名詞 (アイドル) (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "search_scope.empty_noun.songs": {
+      "ja": "楽曲",
+      "ko": "곡",
+      "note": "検索結果が無いときの文に入れる名詞 (楽曲) (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "search_scope.label.all": {
+      "ja": "すべて",
+      "ko": "전체",
+      "note": "検索の範囲の名前 (全種類) (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "search_scope.label.events": {
+      "ja": "ライブ",
+      "ko": "라이브",
+      "note": "検索の範囲の名前 (ライブ) (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "search_scope.label.idols": {
+      "ja": "アイドル",
+      "ko": "아이돌",
+      "note": "検索の範囲の名前 (アイドル) (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "search_scope.label.songs": {
+      "ja": "楽曲",
+      "ko": "곡",
+      "note": "検索の範囲の名前 (楽曲) (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "search_scope.prompt.all": {
+      "ja": "ライブ・楽曲・アイドルを検索",
+      "ko": "라이브·곡·아이돌 검색",
+      "note": "検索欄のプレースホルダ (全種類) (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "search_scope.prompt.events": {
+      "ja": "ライブ名 / 会場で検索",
+      "ko": "라이브 이름 / 공연장으로 검색",
+      "note": "検索欄のプレースホルダ (ライブ) (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "search_scope.prompt.idols": {
+      "ja": "アイドル名 / CV名で検索",
+      "ko": "아이돌 이름 / CV 이름으로 검색",
+      "note": "検索欄のプレースホルダ (アイドル)。CV は声優 (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "search_scope.prompt.songs": {
+      "ja": "曲名で検索",
+      "ko": "곡명으로 검색",
+      "note": "検索欄のプレースホルダ (楽曲) (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "seed.import_failed": {
+      "args": [
+        {
+          "name": "detail",
+          "type": "string"
+        }
+      ],
+      "ja": "初期データの読み込みに失敗しました。アプリを再起動しても直らない場合は再インストールをお試しください。\n(詳細: {detail})",
+      "ko": "초기 데이터를 불러오지 못했어요. 앱을 다시 시작해도 해결되지 않으면 다시 설치해 보세요.\n(상세: {detail})",
+      "note": "初回起動で同梱のデータを入れられなかったとき (Android。まだ端末にデータが無いので再インストールを勧めてよい)。detail はエラーの本文",
+      "platforms": [
+        "android"
+      ]
+    },
+    "series.subtitle": {
+      "args": [
+        {
+          "name": "discs",
+          "type": "int"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{discs}枚 / {count}曲",
+      "ko": "{discs}장 / {count}곡",
+      "note": "CD シリーズのカードの下に出す枚数と曲数。count は曲数 (1000 以上は桁区切りが付く。今は付かないが、1 シリーズでそこまでの曲数は無い見込み)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "show_filter.title.date": {
+      "args": [
+        {
+          "name": "date",
+          "type": "string"
+        }
+      ],
+      "ja": "{date}の公演",
+      "ko": "{date} 공연",
+      "note": "絞り込んだ公演一覧の画面タイトル。date は日付の文字列 (YYYY-MM-DD)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "show_filter.title.venue": {
+      "args": [
+        {
+          "name": "venue",
+          "type": "string"
+        }
+      ],
+      "ja": "{venue}での公演",
+      "ko": "{venue}에서 열린 공연",
+      "note": "絞り込んだ公演一覧の画面タイトル。venue は会場名 (データ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "snapshot.db_missing": {
+      "ja": "DB がまだ無い",
+      "ko": "DB가 아직 없어요",
+      "note": "snapshot.unavailable の原因 (詳細欄)。端末に DB ファイルがまだ作られていない (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "snapshot.unavailable": {
+      "ja": "マスタデータを読み込めませんでした",
+      "ko": "마스터 데이터를 불러오지 못했어요",
+      "note": "マスタ (曲・アイドル・ライブ) のデータを読み込めなかったとき (Android)。起動画面のエラーに出る",
+      "platforms": [
+        "android"
+      ]
+    },
+    "song_collect_filter.all": {
+      "ja": "すべて",
+      "ko": "전체",
+      "note": "楽曲一覧の「現地回収」の絞り込み (絞り込まない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_collect_filter.collected": {
+      "ja": "回収済のみ",
+      "ko": "회수한 곡만",
+      "note": "楽曲一覧の「現地回収」の絞り込み (ライブで聴いた曲だけ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_collect_filter.uncollected": {
+      "ja": "未回収のみ",
+      "ko": "미회수 곡만",
+      "note": "楽曲一覧の「現地回収」の絞り込み (まだライブで聴いていない曲だけ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_filter.title.brand": {
+      "args": [
+        {
+          "name": "label",
+          "type": "string"
+        }
+      ],
+      "ja": "{label}の楽曲",
+      "ko": "{label} 곡",
+      "note": "絞り込んだ楽曲一覧の画面タイトル。label はブランド名 (データ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_filter.title.creator": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "ja": "{name}が関わった楽曲",
+      "ko": "{name} 참여 곡",
+      "note": "絞り込んだ楽曲一覧の画面タイトル。name は作詞・作曲・編曲した人の名前",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_filter.title.release_year": {
+      "args": [
+        {
+          "name": "year",
+          "type": "string"
+        }
+      ],
+      "ja": "{year}年リリースの楽曲",
+      "ko": "{year}년 발매 곡",
+      "note": "絞り込んだ楽曲一覧の画面タイトル。year は発売年 (西暦 4 桁の文字列)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_filter.title.song_type": {
+      "args": [
+        {
+          "name": "type",
+          "type": "string"
+        }
+      ],
+      "ja": "{type}の楽曲",
+      "ko": "{type} 곡",
+      "note": "絞り込んだ楽曲一覧の画面タイトル。type は曲の種類の名前 (データ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_sort.collected_count": {
+      "ja": "現地回収回数順",
+      "ko": "현장 회수 횟수순",
+      "note": "楽曲一覧の並び順の名前 (自分が現地で聴いた回数)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_sort.collected_rate": {
+      "ja": "回収率順",
+      "ko": "회수율순",
+      "note": "楽曲一覧の並び順の名前 (披露回数のうち自分が現地で聴いた割合)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_sort.performance_count": {
+      "ja": "披露回数順",
+      "ko": "공연 횟수순",
+      "note": "楽曲一覧の並び順の名前 (ライブで歌われた回数)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_sort.release_date": {
+      "ja": "リリース日順",
+      "ko": "발매일순",
+      "note": "楽曲一覧の並び順の名前",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_sort.title_kana": {
+      "ja": "五十音順",
+      "ko": "오십음순",
+      "note": "楽曲一覧の並び順の名前 (曲名のよみがなの五十音順)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "sync.error.failed": {
+      "ja": "同期に失敗しました",
+      "ko": "동기화하지 못했어요",
+      "note": "同期が失敗し、理由の本文が無いとき (Android)。起動画面と設定の同期の状態に出る",
+      "platforms": [
+        "android"
+      ]
+    },
+    "sync.error.full_resync_required": {
+      "ja": "全件再同期が必要です",
+      "ko": "전체 재동기화가 필요해요",
+      "note": "差分では追いつけず、全データの同期をやり直す必要があるとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "sync.error.icloud_status_failed": {
+      "args": [
+        {
+          "name": "detail",
+          "type": "string"
+        }
+      ],
+      "ja": "iCloud状態の確認に失敗: {detail}",
+      "ko": "iCloud 상태 확인 실패: {detail}",
+      "note": "iCloud の状態を問い合わせられなかったとき。detail は OS のエラーの本文",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "sync.error.icloud_unavailable": {
+      "ja": "iCloudアカウントが利用できません",
+      "ko": "iCloud 계정을 사용할 수 없어요",
+      "note": "端末で iCloud にサインインしていない・制限されているとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "sync.error.save_date_failed": {
+      "args": [
+        {
+          "name": "detail",
+          "type": "string"
+        }
+      ],
+      "ja": "同期日時の保存に失敗: {detail}",
+      "ko": "동기화 일시 저장 실패: {detail}",
+      "note": "同期の最後に日時を書けなかったとき。detail はエラーの本文",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "sync.error.schema_required": {
+      "args": [
+        {
+          "name": "record_type",
+          "type": "string"
+        }
+      ],
+      "ja": "スキーマ設定が必要です: CloudKit Dashboard で {record_type} の modifiedAt を QUERYABLE + SORTABLE に設定してください",
+      "ko": "스키마 설정이 필요해요: CloudKit Dashboard에서 {record_type}의 modifiedAt을 QUERYABLE + SORTABLE로 설정해 주세요",
+      "note": "CloudKit 側の設定漏れ (開発者向け)。record_type はレコード型の名前。CloudKit Dashboard / modifiedAt / QUERYABLE / SORTABLE は訳さない",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "sync.error.step_failed": {
+      "args": [
+        {
+          "name": "step",
+          "type": "core"
+        },
+        {
+          "name": "detail",
+          "type": "string"
+        }
+      ],
+      "ja": "{step}の同期に失敗: {detail}",
+      "ko": "{step} 동기화 실패: {detail}",
+      "note": "ある段の同期が失敗したとき。step は段の名前 (コア由来)、detail はエラーの本文",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "sync.state.completed": {
+      "args": [
+        {
+          "name": "date",
+          "type": "string"
+        }
+      ],
+      "ja": "最終同期: {date}",
+      "ko": "마지막 동기화: {date}",
+      "note": "CloudKit 同期の状態 (完了)。date は書式済みの日時",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "sync.state.error": {
+      "args": [
+        {
+          "name": "message",
+          "type": "string"
+        }
+      ],
+      "ja": "エラー: {message}",
+      "ko": "오류: {message}",
+      "note": "CloudKit 同期の状態 (失敗)。message は model.sync.error.* のどれか (解決済み)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "sync.state.idle": {
+      "ja": "待機中",
+      "ko": "대기 중",
+      "note": "CloudKit 同期の状態 (何もしていない)。同期の帯とマイページに出る",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "sync.state.syncing": {
+      "args": [
+        {
+          "name": "step",
+          "type": "core"
+        }
+      ],
+      "ja": "{step}を同期中…",
+      "ko": "{step} 동기화 중…",
+      "note": "CloudKit 同期の状態 (同期中)。step は同期している段の名前 (コア由来)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "timeline_lane.live": {
+      "ja": "ライブ",
+      "ko": "라이브",
+      "note": "年表の横帯の名前 (ライブ・フェス)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "timeline_lane.milestone": {
+      "ja": "節目",
+      "ko": "이정표",
+      "note": "年表の横帯の名前 (サービス開始・アニメ放映などの節目)。細い列に出るので短く",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "timeline_lane.music": {
+      "ja": "楽曲",
+      "ko": "곡",
+      "note": "年表の横帯の名前 (CD シリーズ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "timeline_lane.other": {
+      "ja": "その他",
+      "ko": "기타",
+      "note": "年表の横帯の名前 (リリイベ・ラジオ・配信番組など)",
+      "platforms": [
+        "ios"
+      ]
+    }
+  }
+}

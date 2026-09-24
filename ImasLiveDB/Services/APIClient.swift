@@ -14,16 +14,18 @@ enum APIClientError: LocalizedError, Sendable {
     case decoding(Error)
     case transport(Error)
 
-    var errorDescription: String? {
+    /// 利用者に見せる文言 (文言の値)。表示文言への対応はここ 1 か所だけに書く。
+    /// サーバ (Worker) が返した文言はデータなので訳さない (`.verbatim`)。
+    var userMessage: DisplayText {
         switch self {
         case .notAuthorized:
-            return "認証エラー"
+            return .key(L10n.Model.apiErrorNotAuthorized)
         case .rateLimited:
-            return "1日の上限に達しました。明日また試してください"
+            return .key(L10n.Model.apiErrorRateLimited)
         case .conflict(let m):
-            return m ?? "重複しています"
+            return m.map(DisplayText.verbatim) ?? .key(L10n.Model.apiErrorConflict)
         case .notFound:
-            return "見つかりませんでした"
+            return .key(L10n.Model.apiErrorNotFound)
         case .server(let s, let body):
             // Workers の catch ハンドラは {"error": "..."} 形式で詳細を返すので、本文を抽出して見せる
             let detail = (body?.data(using: .utf8))
@@ -31,15 +33,18 @@ enum APIClientError: LocalizedError, Sendable {
                 .flatMap { $0["error"] as? String }
                 ?? body?.prefix(120).description
             if let detail, !detail.isEmpty {
-                return "サーバーエラー (\(s)): \(detail)"
+                return .key(L10n.Model.apiErrorServerDetail(status: s, detail: detail))
             }
-            return "サーバーエラー (\(s))"
+            return .key(L10n.Model.apiErrorServer(status: s))
         case .decoding:
-            return "レスポンス形式エラー"
+            return .key(L10n.Model.apiErrorDecoding)
         case .transport:
-            return "通信エラー"
+            return .key(L10n.Model.apiErrorTransport)
         }
     }
+
+    /// OS の境界 (`error.localizedDescription`) ではここで一度だけ文字列にする。
+    var errorDescription: String? { userMessage.resolved }
 }
 
 // MARK: - APIClient

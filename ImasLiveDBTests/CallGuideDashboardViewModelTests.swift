@@ -225,11 +225,45 @@ final class CallGuideDashboardViewModelTests: XCTestCase {
 
         await vm.load()
 
-        XCTAssertEqual(vm.recentEdits.map(\.label), [
+        // 文言の値で持つので、ja の表で引いて今までと同じ文字列になることを見る
+        // (シミュレータの言語に左右されないよう locale を指定する)。
+        XCTAssertEqual(vm.recentEdits.map { ja($0.label) }, [
             "コールを付けた (42件・18行)",
             "コールを更新 (42→50件)",
             "コールを削除した (42件→0)",
         ])
+    }
+
+    /// 曲の行の下に出す数え (行数・コール数) も、今までと同じ ja になる。
+    func testSongRowDetailLabel() async {
+        let dashboard = CallGuideDashboard(
+            generatedAt: 1, songsWithCalls: [summary("s1", lines: 4, count: 10)],
+            recentEdits: [], taggedWithoutCalls: [], callTag: nil)
+        let (vm, _, _) = makeVM(dashboard, known: ["s1"])
+
+        await vm.load()
+
+        XCTAssertEqual(vm.withCalls.map { ja($0.detailLabel) }, ["4行・10コール"])
+    }
+
+    /// 読み込みの失敗は文言の値で持つ (API 以外の失敗は「通信エラー」)。
+    func testLoadErrorIsTransportMessageForNonAPIErrors() async {
+        let (vm, port, _) = makeVM(
+            CallGuideDashboard(generatedAt: 0, songsWithCalls: [], recentEdits: [],
+                               taggedWithoutCalls: [], callTag: nil),
+            known: [])
+        port.shouldThrow = true
+
+        await vm.load()
+
+        XCTAssertEqual(vm.loadError, .key(L10n.Model.apiErrorTransport))
+    }
+
+    /// ja の表で文字列にする。
+    private func ja(_ resource: LocalizedStringResource) -> String {
+        var resource = resource
+        resource.locale = Locale(identifier: "ja")
+        return String(localized: resource)
     }
 
     /// I5: 曲の解決は 3 セクションぶんまとめて 1 回だけ。

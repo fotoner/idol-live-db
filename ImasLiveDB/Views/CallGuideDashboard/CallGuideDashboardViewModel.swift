@@ -14,7 +14,8 @@ import Observation
 @Observable
 final class CallGuideDashboardViewModel {
     private(set) var isLoading = false
-    private(set) var loadError: String?
+    /// 直近の読み込みの失敗の文言。解決済みの String ではなく文言の値で持ち、画面で文字列にする。
+    private(set) var loadError: DisplayText?
     private(set) var withCalls: [CallGuideSongRow] = []
     private(set) var recentEdits: [CallGuideEditRow] = []
     private(set) var wanted: [CallGuideWantedRow] = []
@@ -96,13 +97,14 @@ final class CallGuideDashboardViewModel {
             loadError = nil
             droppedCount = max(0, ids.count - songs.count)
             if droppedCount > 0 {
+                // i18n-ignore(log): ログの本文 (画面には出ない)
                 Logger.database.debug("call_guide_dashboard: 未解決の曲 \(self.droppedCount) 件を非表示")
             }
         } catch {
             // 古い世代の失敗で、新しい読み込みの成功を上書きしない。
             guard currentLoadId == loadId else { return }
             // 失敗しても既に出ている行は消さない (再読み込みで一瞬空になるのを避ける)。
-            loadError = (error as? APIClientError)?.errorDescription ?? "通信エラー"
+            loadError = (error as? APIClientError)?.userMessage ?? .key(L10n.Model.apiErrorTransport)
         }
     }
 }
@@ -119,7 +121,7 @@ struct CallGuideSongRow: Identifiable, Sendable {
     let updatedAt: Date?
     let updatedBy: String
 
-    var detailLabel: String { "\(callLines)行・\(callCount)コール" }
+    var detailLabel: LocalizedStringResource { L10n.Callguide.dashboardRowSummary(lines: callLines, calls: callCount) }
 }
 
 struct CallGuideEditRow: Identifiable, Sendable {
@@ -133,10 +135,12 @@ struct CallGuideEditRow: Identifiable, Sendable {
 
     /// サーバの `summary` は監査用の機械文字列なので、表示文言はここで組み立てる
     /// (純粋な導出なのでテスト対象)。
-    var label: String {
-        if countBefore == 0 && countAfter > 0 { return "コールを付けた (\(countAfter)件・\(linesAfter)行)" }
-        if countAfter == 0 && countBefore > 0 { return "コールを削除した (\(countBefore)件→0)" }
-        return "コールを更新 (\(countBefore)→\(countAfter)件)"
+    var label: LocalizedStringResource {
+        if countBefore == 0 && countAfter > 0 {
+            return L10n.Callguide.dashboardEditAdded(count: countAfter, lines: linesAfter)
+        }
+        if countAfter == 0 && countBefore > 0 { return L10n.Callguide.dashboardEditRemoved(count: countBefore) }
+        return L10n.Callguide.dashboardEditUpdated(before: countBefore, count: countAfter)
     }
 }
 

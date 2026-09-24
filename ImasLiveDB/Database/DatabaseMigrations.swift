@@ -2,6 +2,8 @@ import Foundation
 import GRDB
 import os
 
+// i18n-ignore-file(data): 移行の中身 (ID・SQL・データの値) だけで、画面に出す文言は無い
+
 /// GRDB マイグレーション定義。
 ///
 /// ## マイグレーションを追加する時の規約 (重要)

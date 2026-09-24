@@ -1,0 +1,276 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "app.boot.preparing" : {
+      "comment" : "起動時に端末の DB を開くのが長引いたとき、起動画面のロゴの下に出す (iOS) (i18n/catalog/app.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データを準備しています"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "데이터를 준비하고 있어요"
+          }
+        }
+      }
+    },
+    "app.boot.recovery.detail" : {
+      "comment" : "復旧画面の下に小さく出す技術的な詳細。detail はエラーの本文 (訳さない) (i18n/catalog/app.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "상세: %1$@"
+          }
+        }
+      }
+    },
+    "app.boot.recovery.message" : {
+      "comment" : "復旧画面の説明。データは消していないので再インストールは勧めない (i18n/catalog/app.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "端末に保存しているデータを開く途中で問題が起きました。データは消えていません。もう一度試しても開けないときは、アプリを最新版に更新してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "기기에 저장된 데이터를 여는 중에 문제가 생겼어요. 데이터는 지워지지 않았어요. 다시 시도해도 열리지 않으면 앱을 최신 버전으로 업데이트해 주세요."
+          }
+        }
+      }
+    },
+    "app.boot.recovery.retry" : {
+      "comment" : "復旧画面のボタン。DB をもう一度開く (i18n/catalog/app.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もう一度試す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다시 시도"
+          }
+        }
+      }
+    },
+    "app.boot.recovery.title" : {
+      "comment" : "端末の DB を開けなかったときの復旧画面の見出し (i18n/catalog/app.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データを開けませんでした"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "데이터를 열지 못했어요"
+          }
+        }
+      }
+    },
+    "app.deeplink.load_failed.message" : {
+      "comment" : "deeplink.load_failed.title のアラートの本文 (i18n/catalog/app.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リンク先の読み込み中にエラーが発生しました。もう一度お試しください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "링크 대상을 불러오는 중에 오류가 발생했어요. 다시 시도해 주세요."
+          }
+        }
+      }
+    },
+    "app.deeplink.load_failed.title" : {
+      "comment" : "リンク先を開く途中で DB のエラーが起きたときのアラートの見出し (i18n/catalog/app.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "読み込みに失敗しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "불러오지 못했어요"
+          }
+        }
+      }
+    },
+    "app.deeplink.not_found.message" : {
+      "comment" : "deeplink.not_found.title のアラートの本文 (i18n/catalog/app.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このイベント・公演はまだ同期されていない可能性があります。しばらくしてからもう一度お試しください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 이벤트·공연은 아직 동기화되지 않았을 수 있어요. 잠시 후 다시 시도해 주세요."
+          }
+        }
+      }
+    },
+    "app.deeplink.not_found.title" : {
+      "comment" : "共有されたリンクやウィジェットから開いたイベント・公演が端末のデータに無いときのアラートの見出し (i18n/catalog/app.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リンク先が見つかりません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "링크 대상을 찾을 수 없어요"
+          }
+        }
+      }
+    },
+    "app.reseed_failed.message" : {
+      "comment" : "reseed_failed.title のアラートの本文。detail はエラーの本文 (訳さない)。再インストールは勧めない (端末にしか無いデータが消える) (i18n/catalog/app.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最新のデータ更新を取り込めませんでした。これまでのデータのまま使えます (次に起動したときにもう一度試します)。\n(詳細: %1$@)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최신 데이터 업데이트를 반영하지 못했어요. 지금까지의 데이터로 계속 쓸 수 있어요 (다음에 앱을 열 때 다시 시도해요).\n(상세: %1$@)"
+          }
+        }
+      }
+    },
+    "app.reseed_failed.title" : {
+      "comment" : "アプリ更新後にマスタデータの入れ直し (reseed) が失敗したときのアラートの見出し (i18n/catalog/app.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データ更新に失敗しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "데이터를 업데이트하지 못했어요"
+          }
+        }
+      }
+    },
+    "app.update.action.later" : {
+      "comment" : "update.title のアラートの閉じるボタン (i18n/catalog/app.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "後で"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "나중에"
+          }
+        }
+      }
+    },
+    "app.update.action.update" : {
+      "comment" : "update.title のアラートのボタン。App Store を開く (i18n/catalog/app.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "업데이트"
+          }
+        }
+      }
+    },
+    "app.update.message" : {
+      "comment" : "update.title のアラートの本文。version は版番号 (例: 2.3.0) (i18n/catalog/app.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バージョン %1$@ が App Store で公開されています。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "App Store에 새 버전(%1$@)이 공개되었어요."
+          }
+        }
+      }
+    },
+    "app.update.title" : {
+      "comment" : "App Store に新しい版が出ているときに起動時に出すアラートの見出し (i18n/catalog/app.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新しいバージョンがあります"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "새 버전이 있어요"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

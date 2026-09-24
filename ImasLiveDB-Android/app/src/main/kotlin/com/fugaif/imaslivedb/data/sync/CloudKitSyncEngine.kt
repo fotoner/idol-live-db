@@ -5,6 +5,8 @@ import android.util.Log
 import com.fugaif.imaslivedb.data.db.AppDatabase
 import com.fugaif.imaslivedb.data.db.dao.SyncDao
 import com.fugaif.imaslivedb.data.core.SQLITE_IN_CHUNK
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.CancellationException
@@ -244,6 +246,7 @@ class CloudKitSyncEngine(
         if (unparsed.isNotEmpty()) {
             Log.w(
                 TAG,
+                // i18n-ignore(log): ログの本文 (画面には出ない)
                 "$recordType: recordName を PK に分解できず削除を適用できません " +
                     "count=${unparsed.size} names=${unparsed.take(5)}"
             )
@@ -322,7 +325,8 @@ class CloudKitSyncEngine(
         // seed 投入に失敗しデータが依然として空の場合、無言で「データを準備中…」に留まらせず
         // 既存の Error state を通じてユーザーに可視化する (iOS ImasLiveDBApp の起動時アラート相当)。
         if (!hasData) {
-            SeedImporter.lastImportError?.let { _state.value = SyncState.Error(it) }
+            // SyncState.Error は String を持つ (設定画面が文字列のまま出す) ので、ここでアプリの言語で解決する。
+            SeedImporter.lastImportError?.let { _state.value = SyncState.Error(it.resolve(appContext)) }
             return false
         }
         // アプリを更新して同梱の seed が新しくなっていれば、マスタ表を入れ直す (iOS の reseed)。
@@ -500,7 +504,7 @@ class CloudKitSyncEngine(
             throw e
         } catch (e: Exception) {
             Log.e(TAG, "sync failed", e)
-            _state.value = SyncState.Error(e.message ?: "同期に失敗しました")
+            _state.value = SyncState.Error(e.message ?: L10n.Model.syncErrorFailed.resolve(appContext))
         }
     }
 

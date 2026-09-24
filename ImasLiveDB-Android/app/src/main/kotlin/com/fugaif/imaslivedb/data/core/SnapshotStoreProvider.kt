@@ -3,6 +3,9 @@ package com.fugaif.imaslivedb.data.core
 import android.content.Context
 import android.util.Log
 import com.fugaif.imaslivedb.data.sync.CloudKitSyncEngine
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.UserFacing
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -15,8 +18,20 @@ import java.util.concurrent.atomic.AtomicBoolean
 import uniffi.imas_core.SnapshotException
 import uniffi.imas_core.SnapshotStore
 
-/** スナップショットを読み込めなかった (DB がまだ無い・読み込みに失敗した)。 */
-class SnapshotUnavailableException(message: String, cause: Throwable? = null) : Exception(message, cause)
+/**
+ * スナップショットを読み込めなかった (DB がまだ無い・読み込みに失敗した)。
+ * 画面には [message] (ログ用) ではなく [userMessage] を出す。
+ */
+class SnapshotUnavailableException(message: String, cause: Throwable? = null) : Exception(message, cause), UserFacing {
+    override val userMessage: DisplayText get() = L10n.Model.snapshotUnavailable
+}
+
+/** 端末に DB ファイルがまだ無い ([SnapshotUnavailableException] の原因)。起動画面の詳細欄に出る。 */
+private class SnapshotDatabaseMissingException :
+    // i18n-ignore(log): 例外の本文 (ログ用)。画面は userMessage を出す
+    IllegalStateException("DB がまだ無い"), UserFacing {
+    override val userMessage: DisplayText get() = L10n.Model.snapshotDbMissing
+}
 
 /**
  * 共有コア (imas-core) のインメモリスナップショットをアプリで単一保持するプロバイダ。
@@ -84,6 +99,7 @@ class SnapshotStoreProvider(
             reloadMutex.withLock { if (!store.isLoaded()) loadLocked() }
         }
         if (!store.isLoaded()) {
+            // i18n-ignore(log): 例外の本文 (ログ用)。画面は SnapshotUnavailableException.userMessage を出す
             throw SnapshotUnavailableException("マスタデータを読み込めませんでした", lastLoadFailure)
         }
         return store
@@ -101,7 +117,7 @@ class SnapshotStoreProvider(
         // Room は初回アクセスまでファイルを作らない。
         val dbFile = appContext.getDatabasePath(DB_NAME)
         if (!dbFile.exists()) {
-            lastLoadFailure = IllegalStateException("DB がまだ無い")
+            lastLoadFailure = SnapshotDatabaseMissingException()
             Log.i(TAG, "DB 未作成のため load をスキップ")
             return
         }

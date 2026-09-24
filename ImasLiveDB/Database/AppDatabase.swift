@@ -49,9 +49,11 @@ final class AppDatabase: Sendable {
     /// マイページ診断や起動アラートから読まれるため、`OSAllocatedUnfairLock` で保護する
     /// (旧 `nonisolated(unsafe) static var` のデータ競合対策)。
     private struct ReseedState: Sendable {
+        // i18n-ignore(log): DEBUG ビルドのマイページ診断欄だけに出す開発者向けの記録
         var summary: String = "未実行"
         /// non-nil の間はユーザー可視のアラート対象 (reseed が失敗した)。
-        var failureDetail: String?
+        /// 解決済みの String ではなく文言の値で持ち、アラートを出すときに文字列にする。
+        var failureMessage: DisplayText?
     }
     private static let reseedState = OSAllocatedUnfairLock(initialState: ReseedState())
 
@@ -60,14 +62,14 @@ final class AppDatabase: Sendable {
         reseedState.withLock { $0.summary }
     }
     /// reseed が失敗した場合のユーザー可視メッセージ (成功時は nil)。起動アラートに使う。
-    static var lastReseedFailure: String? {
-        reseedState.withLock { $0.failureDetail }
+    static var lastReseedFailure: DisplayText? {
+        reseedState.withLock { $0.failureMessage }
     }
 
     /// 起動時 reseed が失敗した場合のユーザー可視メッセージ (起動アラートに出す)。開いた時点で決まる。
-    let reseedFailureMessage: String?
+    let reseedFailureMessage: DisplayText?
 
-    private init(writer: any DatabaseWriter, reseedFailureMessage: String?) {
+    private init(writer: any DatabaseWriter, reseedFailureMessage: DisplayText?) {
         self.dbQueue = writer
         self.reseedFailureMessage = reseedFailureMessage
     }
@@ -169,11 +171,13 @@ final class AppDatabase: Sendable {
             try reseedMasterTablesIfNeeded(pool, bundleURL: bundleURL)
         } catch {
             let detail = "\(error.localizedDescription) | \(String(describing: error))"
+            // ユーザーには「マスタ更新が反映されず旧データで動作している」ことを伝える。
+            // 再インストールは勧めない。マイタグと家計簿は iCloud に無く、消えると戻せない。
+            let failureMessage = DisplayText.key(L10n.App.reseedFailedMessage(detail: error.localizedDescription))
             reseedState.withLock {
+                // i18n-ignore(log): DEBUG ビルドのマイページ診断欄だけに出す開発者向けの記録
                 $0.summary = "失敗: \(detail)"
-                // ユーザーには「マスタ更新が反映されず旧データで動作している」ことを伝える。
-                // 再インストールは勧めない。マイタグと家計簿は iCloud に無く、消えると戻せない。
-                $0.failureDetail = "最新のデータ更新を取り込めませんでした。これまでのデータのまま使えます (次に起動したときにもう一度試します)。\n(詳細: \(error.localizedDescription))"
+                $0.failureMessage = failureMessage
             }
             Logger.database.error("reseedMasterTablesIfNeeded failed: \(detail, privacy: .public)")
         }
@@ -209,6 +213,7 @@ final class AppDatabase: Sendable {
             // コア側の適用はトランザクションを張らず、最初の失敗でそれ以降の手を捨てる。
             // 「どこで止まったか」だけが手掛かりになるので、失敗した手の理由を含む本文をそのまま出す。
             Logger.database.error(
+                // i18n-ignore(log): ログの本文 (画面には出ない)
                 "[core-schema] failed (以降の手は流れていない): \(String(describing: error), privacy: .public)"
             )
         }
@@ -254,7 +259,7 @@ final class AppDatabase: Sendable {
             ok: UInt32(ok), skipped: UInt32(skipped))
         reseedState.withLock {
             $0.summary = summary
-            $0.failureDetail = nil
+            $0.failureMessage = nil
         }
         Logger.database.info("[reseed] done \(summary, privacy: .public)")
     }

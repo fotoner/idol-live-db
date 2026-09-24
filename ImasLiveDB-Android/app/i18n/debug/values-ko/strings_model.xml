@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/model.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources>
+    <string name="model_mastery_preset_name">%1$d단계</string>
+    <string name="model_mastery_preset_steps2_level1">들음</string>
+    <string name="model_mastery_preset_steps2_level2">외움</string>
+    <string name="model_mastery_preset_steps3_level1">들음</string>
+    <string name="model_mastery_preset_steps3_level2">외움</string>
+    <string name="model_mastery_preset_steps3_level3">완벽</string>
+    <string name="model_mastery_preset_steps4_level1">들음</string>
+    <string name="model_mastery_preset_steps4_level2">대강</string>
+    <string name="model_mastery_preset_steps4_level3">외움</string>
+    <string name="model_mastery_preset_steps4_level4">완벽</string>
+    <string name="model_mastery_unset">미설정</string>
+    <string name="model_poll_achievement_rank">%1$d위</string>
+    <string name="model_poll_achievement_winner">우승</string>
+    <string name="model_poll_create_error_restricted">이 작업은 제한되어 있어요.</string>
+    <string name="model_poll_create_error_signin_required">주제를 만들려면 로그인해야 해요</string>
+    <string name="model_poll_status_closing_today">오늘 마감</string>
+    <plurals name="model_poll_status_days_left">
+        <item quantity="other">%1$,d일 남음</item>
+    </plurals>
+    <string name="model_poll_status_ended">종료</string>
+    <string name="model_search_scope_empty_noun_all">항목</string>
+    <string name="model_search_scope_empty_noun_events">라이브</string>
+    <string name="model_search_scope_empty_noun_idols">아이돌</string>
+    <string name="model_search_scope_empty_noun_songs">곡</string>
+    <string name="model_search_scope_label_all">전체</string>
+    <string name="model_search_scope_label_events">라이브</string>
+    <string name="model_search_scope_label_idols">아이돌</string>
+    <string name="model_search_scope_label_songs">곡</string>
+    <string name="model_search_scope_prompt_all">라이브·곡·아이돌 검색</string>
+    <string name="model_search_scope_prompt_events">라이브 이름 / 공연장으로 검색</string>
+    <string name="model_search_scope_prompt_idols">아이돌 이름 / CV 이름으로 검색</string>
+    <string name="model_search_scope_prompt_songs">곡명으로 검색</string>
+    <string name="model_seed_import_failed">초기 데이터를 불러오지 못했어요. 앱을 다시 시작해도 해결되지 않으면 다시 설치해 보세요.\n(상세: %1$s)</string>
+    <string name="model_snapshot_db_missing">DB가 아직 없어요</string>
+    <string name="model_snapshot_unavailable">마스터 데이터를 불러오지 못했어요</string>
+    <string name="model_sync_error_failed">동기화하지 못했어요</string>
+</resources>

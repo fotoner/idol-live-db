@@ -36,6 +36,11 @@ import com.fugaif.imaslivedb.data.db.DatabaseBoot
 import com.fugaif.imaslivedb.data.notification.NotificationScheduler
 import com.fugaif.imaslivedb.data.sync.CloudKitSyncEngine
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.UserFacing
+import com.fugaif.imaslivedb.i18n.coreText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.games.DailyPickSheet
 import com.fugaif.imaslivedb.ui.ledger.TicketExpensePrompt
@@ -85,8 +90,8 @@ class MainActivity : ComponentActivity() {
         // null=判定中 / true=データあり / false=データ無し
         var hasData by remember { mutableStateOf<Boolean?>(null) }
         var retryKey by remember { mutableStateOf(0) }
-        /** マスタのスナップショットを読み込めなかったときの詳細。 */
-        var loadError by remember { mutableStateOf<String?>(null) }
+        /** マスタのスナップショットを読み込めなかったときの詳細 (文言の値。画面で resolve する)。 */
+        var loadError by remember { mutableStateOf<DisplayText?>(null) }
         LaunchedEffect(retryKey) {
             loadError = null
             // 初回 (データ無し) は seed DB を投入してから判定する。これで CloudKit token
@@ -98,7 +103,12 @@ class MainActivity : ComponentActivity() {
             val prepared = try {
                 LocalDataStartup.prepare(sync, module.snapshotStoreProvider) != null
             } catch (e: SnapshotUnavailableException) {
-                loadError = "${e.message}\n(詳細: ${e.cause?.message ?: "不明"})"
+                // 原因が利用者向けの文言を持っていればそれを、無ければ例外の本文 (データ) を出す。
+                val cause = e.cause
+                val detail = (cause as? UserFacing)?.userMessage
+                    ?: cause?.message?.let { DisplayText.Verbatim(it) }
+                    ?: L10n.App.bootLoadErrorUnknownDetail
+                loadError = L10n.App.bootLoadErrorMessage(message = e.userMessage, detail = detail)
                 return@LaunchedEffect
             }
             // データありなら即UI表示してバックグラウンド差分同期 (アプリのスコープで走る)。
@@ -137,7 +147,7 @@ class MainActivity : ComponentActivity() {
         } else {
             // seed 投入失敗などでデータが無いまま Error になった場合、再起動せず
             // その場でやり直せるように再試行を用意する (無限「データを準備中…」の防止)。
-            val shown = loadError?.let { CloudKitSyncEngine.SyncState.Error(it) } ?: state
+            val shown = loadError?.let { CloudKitSyncEngine.SyncState.Error(it.resolve()) } ?: state
             SyncLoadingScreen(shown, onRetry = { retryKey++ })
         }
     }
@@ -193,15 +203,14 @@ private fun DatabaseRecoveryScreen(detail: String, onRetry: () -> Unit) {
         ) {
             ImasEmptyState(
                 icon = Icons.Filled.Warning,
-                title = "データを開けませんでした",
-                message = "端末に保存しているデータを開く途中で問題が起きました。データは消えていません。" +
-                    "もう一度試しても開けないときは、アプリを最新版に更新してください。",
-                actionTitle = "もう一度試す",
+                title = L10n.App.bootRecoveryTitle.resolve(),
+                message = L10n.App.bootRecoveryMessage.resolve(),
+                actionTitle = L10n.App.bootRecoveryRetry.resolve(),
                 onAction = onRetry
             )
             SelectionContainer {
                 Text(
-                    "詳細: $detail",
+                    L10n.App.bootRecoveryDetail(detail = detail).resolve(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -223,7 +232,7 @@ private fun SyncLoadingScreen(state: CloudKitSyncEngine.SyncState, onRetry: () -
             when (state) {
                 is CloudKitSyncEngine.SyncState.Error -> {
                     Text(
-                        "データの取得に失敗しました",
+                        L10n.App.bootSyncErrorTitle.resolve(),
                         style = MaterialTheme.typography.titleMedium,
                         textAlign = TextAlign.Center
                     )
@@ -235,13 +244,14 @@ private fun SyncLoadingScreen(state: CloudKitSyncEngine.SyncState, onRetry: () -
                         modifier = Modifier.padding(top = 8.dp)
                     )
                     androidx.compose.material3.Button(onClick = onRetry, modifier = Modifier.padding(top = 16.dp)) {
-                        Text("再試行")
+                        Text(L10n.Common.actionRetry.resolve())
                     }
                 }
                 is CloudKitSyncEngine.SyncState.Syncing -> {
                     CircularProgressIndicator(modifier = Modifier.size(48.dp))
                     Text(
-                        "${state.label} を取得中… (${state.step}/${state.total})",
+                        L10n.App.bootSyncProgress(label = coreText(state.label), step = state.step, total = state.total)
+                            .resolve(),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(top = 16.dp)
                     )
@@ -249,7 +259,7 @@ private fun SyncLoadingScreen(state: CloudKitSyncEngine.SyncState, onRetry: () -
                 else -> {
                     CircularProgressIndicator(modifier = Modifier.size(48.dp))
                     Text(
-                        "データを準備中…",
+                        L10n.App.bootPreparingAndroid.resolve(),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(top = 16.dp)
                     )

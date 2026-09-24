@@ -1,14 +1,19 @@
 package com.fugaif.imaslivedb.data.repository
 
 import com.fugaif.imaslivedb.data.core.SnapshotStoreProvider
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import com.fugaif.imaslivedb.ui.search.CrossTabSearchCounts
 
-/** 検索スコープ。UI 上の絞り込み単位 (iOS `UnifiedSearchScope` の移植)。 */
-enum class SearchScope(val label: String, val prompt: String, val emptyNoun: String) {
-    ALL("すべて", "ライブ・楽曲・アイドルを検索", "項目"),
-    EVENTS("ライブ", "ライブ名 / 会場で検索", "ライブ"),
-    SONGS("楽曲", "曲名で検索", "楽曲"),
-    IDOLS("アイドル", "アイドル名 / CV名で検索", "アイドル")
+/**
+ * 検索スコープ。UI 上の絞り込み単位 (iOS `UnifiedSearchScope` の移植)。
+ * 表示の文言は値 ([DisplayText]) で持ち、画面で resolve する。
+ */
+enum class SearchScope(val label: DisplayText, val prompt: DisplayText, val emptyNoun: DisplayText) {
+    ALL(L10n.Model.searchScopeLabelAll, L10n.Model.searchScopePromptAll, L10n.Model.searchScopeEmptyNounAll),
+    EVENTS(L10n.Model.searchScopeLabelEvents, L10n.Model.searchScopePromptEvents, L10n.Model.searchScopeEmptyNounEvents),
+    SONGS(L10n.Model.searchScopeLabelSongs, L10n.Model.searchScopePromptSongs, L10n.Model.searchScopeEmptyNounSongs),
+    IDOLS(L10n.Model.searchScopeLabelIdols, L10n.Model.searchScopePromptIdols, L10n.Model.searchScopeEmptyNounIdols)
 }
 
 /**

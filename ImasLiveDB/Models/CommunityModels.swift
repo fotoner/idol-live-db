@@ -424,14 +424,17 @@ enum PollTargetType: String, Codable, Sendable {
         self = PollTargetType(rawValue: raw) ?? .song
     }
 
-    /// UI 表示用の日本語ラベル。
-    var label: String {
+    /// UI 表示用のラベル (文言の値)。
+    var labelResource: LocalizedStringResource {
         switch self {
-        case .song: return "曲"
-        case .idol: return "アイドル"
-        case .unit: return "ユニット"
+        case .song: L10n.Model.pollTargetSong
+        case .idol: L10n.Model.pollTargetIdol
+        case .unit: L10n.Model.pollTargetUnit
         }
     }
+
+    /// UI 表示用のラベル。呼ぶたびに今の言語で解決する (String を受ける画面向け)。
+    var label: String { String(localized: labelResource) }
 }
 
 /// 投票候補の絞り込みスコープ。
@@ -519,8 +522,13 @@ struct PollAchievement: Codable, Identifiable, Sendable {
     let voteCount: Int
     let rnk: Int
 
-    /// 「優勝」or「第N位」。
-    var rankLabel: String { rnk == 1 ? "優勝" : "第\(rnk)位" }
+    /// 「優勝」or「第N位」(文言の値)。
+    var rankResource: LocalizedStringResource {
+        rnk == 1 ? L10n.Model.pollAchievementWinner : L10n.Model.pollAchievementRank(rank: rnk)
+    }
+
+    /// 「優勝」or「第N位」。呼ぶたびに今の言語で解決する。
+    var rankLabel: String { String(localized: rankResource) }
 }
 
 struct TagsListResponse: Decodable, Sendable {

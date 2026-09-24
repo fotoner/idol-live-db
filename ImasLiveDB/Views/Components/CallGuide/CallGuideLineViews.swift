@@ -42,7 +42,7 @@ struct CallGuideClapGlyph: View {
                 Image(systemName: "plus.circle")
                     .font(.imasCaption2)
                     .foregroundStyle(DS.ink3)
-                    .accessibilityLabel("手拍子を指定")
+                    .accessibilityLabel(L10n.Callguide.lineClapA11y)
             } else {
                 Color.clear
             }
@@ -112,10 +112,10 @@ struct CallGuideCallRows: View {
             if call.isOverlapping {
                 tag(CallTiming.over.label, color: DS.sys2)
             } else if isMixed, !call.hasAnchor {
-                tag("行末", color: DS.ink3)
+                tag(String(localized: L10n.Callguide.lineLineEnd), color: DS.ink3)
             }
             if call.isStale {
-                tag("ズレ", color: DS.warning)
+                tag(String(localized: L10n.Callguide.lineStale), color: DS.warning)
             }
             Spacer(minLength: 0)
         }
@@ -126,8 +126,8 @@ struct CallGuideCallRows: View {
     }
 
     private func accessibilityLabel(_ call: LyricCall) -> String {
-        let place = call.hasAnchor ? call.timing.label : "行末"
-        return "\(place)のコール: \(call.text)。\(call.emphasis.label)"
+        let place = call.hasAnchor ? call.timing.label : String(localized: L10n.Callguide.lineLineEnd)
+        return String(localized: L10n.Callguide.lineCallA11y(place: place, text: call.text, emphasis: call.emphasis.label))
     }
 
     private func tag(_ text: String, color: Color) -> some View {
@@ -173,7 +173,7 @@ struct CallGuideAppendCallButton: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("行末にコールを追加")
+        .accessibilityLabel(L10n.Callguide.lineAppendCallA11y)
         .accessibilityHidden(isAccessibilityHidden)
     }
 }
@@ -204,7 +204,7 @@ struct CallGuideLegend: View {
                     legendItem(symbol: clap.symbol, text: clap.label)
                 }
                 if showsOverTiming {
-                    legendItem(symbol: CallTiming.over.label, text: "歌に被せる")
+                    legendItem(symbol: CallTiming.over.label, text: String(localized: L10n.Callguide.legendOverTiming))
                 }
             }
         }
@@ -318,10 +318,10 @@ struct CallGuideSelectableLine: View {
         .onChange(of: resetToken) { _, _ in reset() }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(text)
-        .accessibilityHint("語をタップすると、その語に被せるコールを付けられます。長押しからなぞると語をまたいだ範囲を選べます")
+        .accessibilityHint(Text(L10n.Callguide.lineSelectA11yHint))
         .accessibilityActions {
             if let onAppendCall {
-                Button("行末にコールを追加", action: onAppendCall)
+                Button(action: onAppendCall) { Text(L10n.Callguide.lineAppendCallA11y) }
             }
         }
     }

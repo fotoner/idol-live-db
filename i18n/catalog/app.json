@@ -1,0 +1,249 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "app",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/MainActivity.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/theme/AppPreferences.kt"
+    ],
+    "ios": [
+      "ImasLiveDB/App/",
+      "ImasLiveDB/Database/AppDatabase.swift"
+    ]
+  },
+  "strings": {
+    "boot.load_error.message": {
+      "args": [
+        {
+          "name": "message",
+          "type": "text"
+        },
+        {
+          "name": "detail",
+          "type": "text"
+        }
+      ],
+      "ja": "{message}\n(詳細: {detail})",
+      "ko": "{message}\n(상세: {detail})",
+      "note": "マスタデータを読み込めなかったときのエラーの本文 (Android)。message は何が起きたか (model.snapshot.unavailable)、detail は原因の本文か boot.load_error.unknown_detail",
+      "platforms": [
+        "android"
+      ]
+    },
+    "boot.load_error.unknown_detail": {
+      "ja": "不明",
+      "ko": "알 수 없음",
+      "note": "boot.load_error.message の詳細。原因が分からないとき (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "boot.preparing": {
+      "ja": "データを準備しています",
+      "ko": "데이터를 준비하고 있어요",
+      "note": "起動時に端末の DB を開くのが長引いたとき、起動画面のロゴの下に出す (iOS)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "boot.preparing_android": {
+      "ja": "データを準備中…",
+      "ko": "데이터를 준비하는 중…",
+      "note": "起動時にデータを用意している間の表示 (Android)。iOS の boot.preparing と ja が違う (統一はオーナーが別 PR で)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "boot.recovery.detail": {
+      "args": [
+        {
+          "name": "detail",
+          "type": "string"
+        }
+      ],
+      "ja": "詳細: {detail}",
+      "ko": "상세: {detail}",
+      "note": "復旧画面の下に小さく出す技術的な詳細。detail はエラーの本文 (訳さない)"
+    },
+    "boot.recovery.message": {
+      "ja": "端末に保存しているデータを開く途中で問題が起きました。データは消えていません。もう一度試しても開けないときは、アプリを最新版に更新してください。",
+      "ko": "기기에 저장된 데이터를 여는 중에 문제가 생겼어요. 데이터는 지워지지 않았어요. 다시 시도해도 열리지 않으면 앱을 최신 버전으로 업데이트해 주세요.",
+      "note": "復旧画面の説明。データは消していないので再インストールは勧めない"
+    },
+    "boot.recovery.retry": {
+      "ja": "もう一度試す",
+      "ko": "다시 시도",
+      "note": "復旧画面のボタン。DB をもう一度開く"
+    },
+    "boot.recovery.title": {
+      "ja": "データを開けませんでした",
+      "ko": "데이터를 열지 못했어요",
+      "note": "端末の DB を開けなかったときの復旧画面の見出し"
+    },
+    "boot.sync_error.title": {
+      "ja": "データの取得に失敗しました",
+      "ko": "데이터를 가져오지 못했어요",
+      "note": "起動時にデータを用意できなかったときの見出し (Android)。下にエラーの本文と再試行ボタン",
+      "platforms": [
+        "android"
+      ]
+    },
+    "boot.sync_progress": {
+      "args": [
+        {
+          "name": "label",
+          "type": "core"
+        },
+        {
+          "name": "step",
+          "type": "int"
+        },
+        {
+          "name": "total",
+          "type": "int"
+        }
+      ],
+      "ja": "{label} を取得中… ({step}/{total})",
+      "ko": "{label} 가져오는 중… ({step}/{total})",
+      "note": "起動時の同期の進み具合 (Android)。label は同期している段の名前 (コア由来)、step / total は何段目か",
+      "platforms": [
+        "android"
+      ]
+    },
+    "deeplink.load_failed.message": {
+      "ja": "リンク先の読み込み中にエラーが発生しました。もう一度お試しください。",
+      "ko": "링크 대상을 불러오는 중에 오류가 발생했어요. 다시 시도해 주세요.",
+      "note": "deeplink.load_failed.title のアラートの本文",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "deeplink.load_failed.title": {
+      "ja": "読み込みに失敗しました",
+      "ko": "불러오지 못했어요",
+      "note": "リンク先を開く途中で DB のエラーが起きたときのアラートの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "deeplink.not_found.message": {
+      "ja": "このイベント・公演はまだ同期されていない可能性があります。しばらくしてからもう一度お試しください。",
+      "ko": "이 이벤트·공연은 아직 동기화되지 않았을 수 있어요. 잠시 후 다시 시도해 주세요.",
+      "note": "deeplink.not_found.title のアラートの本文",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "deeplink.not_found.title": {
+      "ja": "リンク先が見つかりません",
+      "ko": "링크 대상을 찾을 수 없어요",
+      "note": "共有されたリンクやウィジェットから開いたイベント・公演が端末のデータに無いときのアラートの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "reseed_failed.message": {
+      "args": [
+        {
+          "name": "detail",
+          "type": "string"
+        }
+      ],
+      "ja": "最新のデータ更新を取り込めませんでした。これまでのデータのまま使えます (次に起動したときにもう一度試します)。\n(詳細: {detail})",
+      "ko": "최신 데이터 업데이트를 반영하지 못했어요. 지금까지의 데이터로 계속 쓸 수 있어요 (다음에 앱을 열 때 다시 시도해요).\n(상세: {detail})",
+      "note": "reseed_failed.title のアラートの本文。detail はエラーの本文 (訳さない)。再インストールは勧めない (端末にしか無いデータが消える)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "reseed_failed.title": {
+      "ja": "データ更新に失敗しました",
+      "ko": "데이터를 업데이트하지 못했어요",
+      "note": "アプリ更新後にマスタデータの入れ直し (reseed) が失敗したときのアラートの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "text_scale.large": {
+      "ja": "大",
+      "ko": "크게",
+      "note": "設定の文字サイズの選択肢 (2 番目に大きい) (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "text_scale.medium": {
+      "ja": "中",
+      "ko": "보통",
+      "note": "設定の文字サイズの選択肢 (標準) (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "text_scale.small": {
+      "ja": "小",
+      "ko": "작게",
+      "note": "設定の文字サイズの選択肢 (2 番目に小さい) (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "text_scale.xlarge": {
+      "ja": "特大",
+      "ko": "최대",
+      "note": "設定の文字サイズの選択肢 (いちばん大きい) (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "text_scale.xsmall": {
+      "ja": "極小",
+      "ko": "최소",
+      "note": "設定の文字サイズの選択肢 (5 段のいちばん小さい)。セグメントに並ぶので短く (Android。iOS は mypage 側)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "update.action.later": {
+      "ja": "後で",
+      "ko": "나중에",
+      "note": "update.title のアラートの閉じるボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "update.action.update": {
+      "ja": "更新",
+      "ko": "업데이트",
+      "note": "update.title のアラートのボタン。App Store を開く",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "update.message": {
+      "args": [
+        {
+          "name": "version",
+          "type": "string"
+        }
+      ],
+      "ja": "バージョン {version} が App Store で公開されています。",
+      "ko": "App Store에 새 버전({version})이 공개되었어요.",
+      "note": "update.title のアラートの本文。version は版番号 (例: 2.3.0)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "update.title": {
+      "ja": "新しいバージョンがあります",
+      "ko": "새 버전이 있어요",
+      "note": "App Store に新しい版が出ているときに起動時に出すアラートの見出し",
+      "platforms": [
+        "ios"
+      ]
+    }
+  }
+}

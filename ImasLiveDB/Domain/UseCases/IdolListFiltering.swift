@@ -9,13 +9,34 @@ import Foundation
 /// 列挙という Swift 側の顔だから。各プロパティは起動後 1 回の FFI 呼び出しで
 /// 引いたメタ表 (`idolSortOrderTable`) の参照だけで、判定はしない。
 enum IdolSortOrder: String, CaseIterable, Sendable {
+    // i18n-ignore(storage): rawValue は @AppStorage("idols_sort_order") の保存値。変えると設定が初期化される
     case official = "公式順"
+    // i18n-ignore(storage): 保存値 (上と同じ)
     case nameKana = "五十音順"
+    // i18n-ignore(storage): 保存値 (上と同じ)
     case age = "年齢"
+    // i18n-ignore(storage): 保存値 (上と同じ)
     case height = "身長"
+    // i18n-ignore(storage): 保存値 (上と同じ)
     case weight = "体重"
+    // i18n-ignore(storage): 保存値 (上と同じ)
     case birthday = "誕生日"
+    // i18n-ignore(storage): 保存値 (上と同じ)
     case debut = "デビュー日"
+
+    /// 表示名。保存値 (rawValue) とは別に、今の言語の文言を引く (画面では rawValue を出さない)。
+    /// ja は rawValue と同じ文字列。
+    var label: LocalizedStringResource {
+        switch self {
+        case .official: L10n.Model.idolSortOfficial
+        case .nameKana: L10n.Model.idolSortNameKana
+        case .age: L10n.Model.idolSortAge
+        case .height: L10n.Model.idolSortHeight
+        case .weight: L10n.Model.idolSortWeight
+        case .birthday: L10n.Model.idolSortBirthday
+        case .debut: L10n.Model.idolSortDebut
+        }
+    }
 
     /// 生成バインディング側の対応値 (`sortIdols` が FFI へ渡す)。
     fileprivate var kind: IdolSortKind {

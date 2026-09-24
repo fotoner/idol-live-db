@@ -15,32 +15,43 @@ import SwiftUI
 
 struct CallPaletteGroup: Identifiable {
     let id: String
-    let title: String
+    /// 組の名前 (画面の言語で引く)。
+    let title: LocalizedStringResource
+    /// コールの文言そのもの。押すと入力欄に入り、サーバに保存されるデータなので訳さない。
     let items: [String]
 }
 
 enum CallPalette {
-    static let groups: [CallPaletteGroup] = [
-        CallPaletteGroup(id: "voice", title: "発声", items: [
-            "(Hi!)", "(Oi!)", "(Hey!!)", "(Fuu!)", "(FuFuu!)", "(Fuu--!)",
-            "(u--)", "（ふぅっ）", "(Fuwa × 4)", "(Yeah!)", "(Wow)", "(Woooo,Yeah!!)",
-        ]),
-        CallPaletteGroup(id: "clap", title: "クラップ", items: [
-            "x　Pan! x Pan!", "Pan Pan Pan Pan!", "(Pan Pan Pan PaPan)",
-            "Pan Pa Pan Hyu-!", "Oooo Hyu!",
-        ]),
-        CallPaletteGroup(id: "oh", title: "オーイング / 警報", items: [
-            "(o-- Hi!)", "(-- Hi!)", "（ハーイハーイハイハイハイハイ）", "（せーの！）",
-        ]),
-        CallPaletteGroup(id: "count", title: "カウント", items: [
-            "3・2・1・GO!!",
-            "（いち・にの・さん・レッツ・ゴー！）",
-            "（いち・に・ついて・よ〜い・ドン！）",
-        ]),
-        CallPaletteGroup(id: "section", title: "セクション", items: [
-            "（前奏）", "（間奏）",
-        ]),
-    ]
+    /// 組の名前は文言の値なので、static let に置かず呼ぶたびに作る (作った時点の言語で固まらないように)。
+    static var groups: [CallPaletteGroup] {
+        [
+            CallPaletteGroup(id: "voice", title: L10n.Callguide.paletteGroupVoice, items: [
+                "(Hi!)", "(Oi!)", "(Hey!!)", "(Fuu!)", "(FuFuu!)", "(Fuu--!)",
+                // i18n-ignore(data): コールの文言そのもの (入力欄に入りサーバに保存される)。訳さない
+                "(u--)", "（ふぅっ）", "(Fuwa × 4)", "(Yeah!)", "(Wow)", "(Woooo,Yeah!!)",
+            ]),
+            CallPaletteGroup(id: "clap", title: L10n.Callguide.paletteGroupClap, items: [
+                "x　Pan! x Pan!", "Pan Pan Pan Pan!", "(Pan Pan Pan PaPan)",
+                "Pan Pa Pan Hyu-!", "Oooo Hyu!",
+            ]),
+            CallPaletteGroup(id: "oh", title: L10n.Callguide.paletteGroupOh, items: [
+                // i18n-ignore(data): コールの文言そのもの。訳さない
+                "(o-- Hi!)", "(-- Hi!)", "（ハーイハーイハイハイハイハイ）", "（せーの！）",
+            ]),
+            CallPaletteGroup(id: "count", title: L10n.Callguide.paletteGroupCount, items: [
+                // i18n-ignore(data): コールの文言そのもの。訳さない
+                "3・2・1・GO!!",
+                // i18n-ignore(data): コールの文言そのもの。訳さない
+                "（いち・にの・さん・レッツ・ゴー！）",
+                // i18n-ignore(data): コールの文言そのもの。訳さない
+                "（いち・に・ついて・よ〜い・ドン！）",
+            ]),
+            CallPaletteGroup(id: "section", title: L10n.Callguide.paletteGroupSection, items: [
+                // i18n-ignore(data): コールの文言そのもの (曲の区切りの札として歌詞に入る)。訳さない
+                "（前奏）", "（間奏）",
+            ]),
+        ]
+    }
 
     /// 「歌詞コール」= 選択した歌詞語をそのまま繰り返すコール。
     /// 固定文言では表現できないので、選択範囲から動的に組み立てる。

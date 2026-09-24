@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/model.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- model.mastery.preset.name: 習熟度の段数のプリセットの名前 (2段 / 3段 / 4段) (Android) -->
+    <string name="model_mastery_preset_name">%1$d段</string>
+    <!-- model.mastery.preset.steps2.level1: 習熟度 2 段のプリセットの 1 段目 (Android)。スワイプのボタンに収まるよう 4 文字以内 -->
+    <string name="model_mastery_preset_steps2_level1">聞いた</string>
+    <!-- model.mastery.preset.steps2.level2: 習熟度 2 段のプリセットの 2 段目 (Android)。4 文字以内 -->
+    <string name="model_mastery_preset_steps2_level2">覚えた</string>
+    <!-- model.mastery.preset.steps3.level1: 習熟度 3 段 (既定) のプリセットの 1 段目 (Android)。4 文字以内 -->
+    <string name="model_mastery_preset_steps3_level1">聞いた</string>
+    <!-- model.mastery.preset.steps3.level2: 習熟度 3 段 (既定) のプリセットの 2 段目 (Android)。4 文字以内 -->
+    <string name="model_mastery_preset_steps3_level2">覚えた</string>
+    <!-- model.mastery.preset.steps3.level3: 習熟度 3 段 (既定) のプリセットの 3 段目 (Android)。4 文字以内 -->
+    <string name="model_mastery_preset_steps3_level3">完璧</string>
+    <!-- model.mastery.preset.steps4.level1: 習熟度 4 段のプリセットの 1 段目 (Android)。4 文字以内 -->
+    <string name="model_mastery_preset_steps4_level1">聞いた</string>
+    <!-- model.mastery.preset.steps4.level2: 習熟度 4 段のプリセットの 2 段目 (だいたい覚えた) (Android)。4 文字以内 -->
+    <string name="model_mastery_preset_steps4_level2">だいたい</string>
+    <!-- model.mastery.preset.steps4.level3: 習熟度 4 段のプリセットの 3 段目 (Android)。4 文字以内 -->
+    <string name="model_mastery_preset_steps4_level3">覚えた</string>
+    <!-- model.mastery.preset.steps4.level4: 習熟度 4 段のプリセットの 4 段目 (Android)。4 文字以内 -->
+    <string name="model_mastery_preset_steps4_level4">完璧</string>
+    <!-- model.mastery.unset: 習熟度の段がまだ付いていない曲 (Android。iOS は mastery 側) -->
+    <string name="model_mastery_unset">未設定</string>
+    <!-- model.poll_achievement.rank: 終了したお題での順位 (2 位・3 位)。rank は順位 -->
+    <string name="model_poll_achievement_rank">第%1$d位</string>
+    <!-- model.poll_achievement.winner: 終了したお題で 1 位を取ったことを示す札 -->
+    <string name="model_poll_achievement_winner">優勝</string>
+    <!-- model.poll_create.error.restricted: お題を作ろうとしてサーバが 403 を返したとき (利用制限中) (Android) -->
+    <string name="model_poll_create_error_restricted">この操作は制限されています。</string>
+    <!-- model.poll_create.error.signin_required: お題を作ろうとしてサーバが 401 を返したとき (Android) -->
+    <string name="model_poll_create_error_signin_required">お題の作成にはサインインが必要です</string>
+    <!-- model.poll_status.closing_today: お題の状態の札。今日締め切るお題 (Android) -->
+    <string name="model_poll_status_closing_today">本日締切</string>
+    <!-- model.poll_status.days_left: お題の状態の札。締め切りまでの日数 (Android)。1000 以上は桁区切りが付くが、お題の期間は長くても数十日 -->
+    <plurals name="model_poll_status_days_left">
+        <item quantity="other">残り%1$,d日</item>
+    </plurals>
+    <!-- model.poll_status.ended: お題の状態の札。締め切ったお題 (Android。iOS は polls 側) -->
+    <string name="model_poll_status_ended">終了</string>
+    <!-- model.search_scope.empty_noun.all: 検索結果が無いときの文に入れる名詞 (全種類) (Android) -->
+    <string name="model_search_scope_empty_noun_all">項目</string>
+    <!-- model.search_scope.empty_noun.events: 検索結果が無いときの文に入れる名詞 (ライブ) (Android) -->
+    <string name="model_search_scope_empty_noun_events">ライブ</string>
+    <!-- model.search_scope.empty_noun.idols: 検索結果が無いときの文に入れる名詞 (アイドル) (Android) -->
+    <string name="model_search_scope_empty_noun_idols">アイドル</string>
+    <!-- model.search_scope.empty_noun.songs: 検索結果が無いときの文に入れる名詞 (楽曲) (Android) -->
+    <string name="model_search_scope_empty_noun_songs">楽曲</string>
+    <!-- model.search_scope.label.all: 検索の範囲の名前 (全種類) (Android) -->
+    <string name="model_search_scope_label_all">すべて</string>
+    <!-- model.search_scope.label.events: 検索の範囲の名前 (ライブ) (Android) -->
+    <string name="model_search_scope_label_events">ライブ</string>
+    <!-- model.search_scope.label.idols: 検索の範囲の名前 (アイドル) (Android) -->
+    <string name="model_search_scope_label_idols">アイドル</string>
+    <!-- model.search_scope.label.songs: 検索の範囲の名前 (楽曲) (Android) -->
+    <string name="model_search_scope_label_songs">楽曲</string>
+    <!-- model.search_scope.prompt.all: 検索欄のプレースホルダ (全種類) (Android) -->
+    <string name="model_search_scope_prompt_all">ライブ・楽曲・アイドルを検索</string>
+    <!-- model.search_scope.prompt.events: 検索欄のプレースホルダ (ライブ) (Android) -->
+    <string name="model_search_scope_prompt_events">ライブ名 / 会場で検索</string>
+    <!-- model.search_scope.prompt.idols: 検索欄のプレースホルダ (アイドル)。CV は声優 (Android) -->
+    <string name="model_search_scope_prompt_idols">アイドル名 / CV名で検索</string>
+    <!-- model.search_scope.prompt.songs: 検索欄のプレースホルダ (楽曲) (Android) -->
+    <string name="model_search_scope_prompt_songs">曲名で検索</string>
+    <!-- model.seed.import_failed: 初回起動で同梱のデータを入れられなかったとき (Android。まだ端末にデータが無いので再インストールを勧めてよい)。detail はエラーの本文 -->
+    <string name="model_seed_import_failed">初期データの読み込みに失敗しました。アプリを再起動しても直らない場合は再インストールをお試しください。\n(詳細: %1$s)</string>
+    <!-- model.snapshot.db_missing: snapshot.unavailable の原因 (詳細欄)。端末に DB ファイルがまだ作られていない (Android) -->
+    <string name="model_snapshot_db_missing">DB がまだ無い</string>
+    <!-- model.snapshot.unavailable: マスタ (曲・アイドル・ライブ) のデータを読み込めなかったとき (Android)。起動画面のエラーに出る -->
+    <string name="model_snapshot_unavailable">マスタデータを読み込めませんでした</string>
+    <!-- model.sync.error.failed: 同期が失敗し、理由の本文が無いとき (Android)。起動画面と設定の同期の状態に出る -->
+    <string name="model_sync_error_failed">同期に失敗しました</string>
+</resources>

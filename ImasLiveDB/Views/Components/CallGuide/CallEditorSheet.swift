@@ -54,17 +54,19 @@ struct CallEditorSheet: View {
                 .padding(DS.sp5)
             }
             .background(DS.bg)
-            .navigationTitle(request.existing == nil ? "コールを追加" : "コールを編集")
+            .navigationTitle(request.existing == nil ? L10n.Callguide.editorTitleAdd : L10n.Callguide.editorTitleEdit)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("キャンセル") { dismiss() }
+                    Button { dismiss() } label: { Text(L10n.Callguide.editorCancel) }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("完了") {
+                    Button {
                         onSubmit(text.trimmingCharacters(in: .whitespacesAndNewlines),
                                  emphasis, request.hasAnchor ? timing : .after)
                         dismiss()
+                    } label: {
+                        Text(L10n.Callguide.editorDone)
                     }
                     .fontWeight(.semibold)
                     .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -86,9 +88,9 @@ struct CallEditorSheet: View {
     @ViewBuilder
     private var anchorSection: some View {
         VStack(alignment: .leading, spacing: DS.sp2) {
-            Text("アンカー").font(.imasCaption).foregroundStyle(DS.ink2)
+            Text(L10n.Callguide.editorAnchorHeader).font(.imasCaption).foregroundStyle(DS.ink2)
             if request.anchorText.isEmpty {
-                Label("行末（追っかけ）— 歌詞に被せず、この行の後で返すコール",
+                Label(L10n.Callguide.editorAnchorLineEnd,
                       systemImage: "arrow.turn.down.right")
                     .font(.imasSubhead)
                     .foregroundStyle(DS.ink2)
@@ -125,7 +127,7 @@ struct CallEditorSheet: View {
     private var timingSection: some View {
         if request.hasAnchor {
             VStack(alignment: .leading, spacing: DS.sp2) {
-                Text("タイミング").font(.imasCaption).foregroundStyle(DS.ink2)
+                Text(L10n.Callguide.editorTimingHeader).font(.imasCaption).foregroundStyle(DS.ink2)
                 ImasSegmented(options: CallTiming.allCases, selection: $timing, seed: seed) { $0.label }
                 Text(timing.hint).font(.imasCaption2).foregroundStyle(DS.ink3)
             }
@@ -136,14 +138,14 @@ struct CallEditorSheet: View {
 
     private var inputSection: some View {
         VStack(alignment: .leading, spacing: DS.sp2) {
-            Text("コール文言").font(.imasCaption).foregroundStyle(DS.ink2)
-            TextField("(Hi!) など", text: $text, axis: .vertical)
+            Text(L10n.Callguide.editorInputHeader).font(.imasCaption).foregroundStyle(DS.ink2)
+            TextField(String(localized: L10n.Callguide.editorInputPlaceholder), text: $text, axis: .vertical)
                 .font(.imasBody)
                 .lineLimit(1...4)
                 .focused($focused)
                 .padding(DS.sp4)
                 .background(DS.surface, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
-            Text("繰り返しは「× 26」のように文言へ直接書く。")
+            Text(L10n.Callguide.editorInputHint)
                 .font(.imasCaption2)
                 .foregroundStyle(DS.ink3)
         }
@@ -153,7 +155,7 @@ struct CallEditorSheet: View {
 
     private var emphasisSection: some View {
         VStack(alignment: .leading, spacing: DS.sp2) {
-            Text("強調").font(.imasCaption).foregroundStyle(DS.ink2)
+            Text(L10n.Callguide.editorEmphasisHeader).font(.imasCaption).foregroundStyle(DS.ink2)
             ImasSegmented(options: CallEmphasis.allCases, selection: $emphasis, seed: seed) { $0.label }
             HStack(spacing: DS.sp2) {
                 Circle()
@@ -164,11 +166,11 @@ struct CallEditorSheet: View {
         }
     }
 
-    private var emphasisHint: String {
+    private var emphasisHint: LocalizedStringResource {
         switch emphasis {
-        case .normal:           return "通常のコール。凡例には出ない。"
-        case .optional:         return "おこのみで（緑）。やってもやらなくてもよい。"
-        case .performerRequest: return "演者要望（赤）。演者から明示的に求められたもの。"
+        case .normal:           return L10n.Callguide.editorEmphasisHintNormal
+        case .optional:         return L10n.Callguide.editorEmphasisHintOptional
+        case .performerRequest: return L10n.Callguide.editorEmphasisHintPerformerRequest
         }
     }
 
@@ -176,10 +178,10 @@ struct CallEditorSheet: View {
 
     private var paletteSection: some View {
         VStack(alignment: .leading, spacing: DS.sp4) {
-            Text("パレット（タップで末尾に追加）")
+            Text(L10n.Callguide.editorPaletteHeader)
                 .font(.imasCaption).foregroundStyle(DS.ink2)
             if let lyricCall = CallPalette.lyricCall(anchorText: request.anchorText) {
-                paletteGroup(title: "歌詞コール", items: [lyricCall])
+                paletteGroup(title: L10n.Callguide.editorPaletteLyricCall, items: [lyricCall])
             }
             ForEach(CallPalette.groups) { group in
                 paletteGroup(title: group.title, items: group.items)
@@ -187,7 +189,7 @@ struct CallEditorSheet: View {
         }
     }
 
-    private func paletteGroup(title: String, items: [String]) -> some View {
+    private func paletteGroup(title: LocalizedStringResource, items: [String]) -> some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
             Text(title).font(.imasCaption2.weight(.semibold)).foregroundStyle(DS.ink3)
             CallGuideFlowLayout(itemSpacing: DS.sp2, lineSpacing: DS.sp2) {
@@ -212,7 +214,7 @@ struct CallEditorSheet: View {
             onDelete?()
             dismiss()
         } label: {
-            Label("このコールを削除", systemImage: "trash")
+            Label(L10n.Callguide.editorDelete, systemImage: "trash")
                 .font(.imasSubhead.weight(.semibold))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 11)

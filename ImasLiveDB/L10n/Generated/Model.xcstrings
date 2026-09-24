@@ -1,0 +1,1222 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "model.album.subtitle" : {
+      "comment" : "CD (アルバム) のカードの下に出す曲数。1000 以上は桁区切りが付くが、1 枚の曲数なので実際には出ない (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "model.api_error.conflict" : {
+      "comment" : "API が 409 (同じものが既にある) を返し、サーバが理由を付けなかったとき (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重複しています"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "중복되어 있어요"
+          }
+        }
+      }
+    },
+    "model.api_error.decoding" : {
+      "comment" : "API の応答を読めなかったとき (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "レスポンス形式エラー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "응답 형식 오류"
+          }
+        }
+      }
+    },
+    "model.api_error.not_authorized" : {
+      "comment" : "サーバ (Worker) の API が 401 を返したとき (ログインの期限切れなど) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "認証エラー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "인증 오류"
+          }
+        }
+      }
+    },
+    "model.api_error.not_found" : {
+      "comment" : "API が 404 を返したとき (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "見つかりませんでした"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "찾을 수 없어요"
+          }
+        }
+      }
+    },
+    "model.api_error.rate_limited" : {
+      "comment" : "API が 429 (1 日の回数の上限) を返したとき (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1日の上限に達しました。明日また試してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "하루 한도에 도달했어요. 내일 다시 시도해 주세요"
+          }
+        }
+      }
+    },
+    "model.api_error.server" : {
+      "comment" : "API が 5xx などを返したとき。status は HTTP の状態コード (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーエラー (%1$@)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "서버 오류 (%1$@)"
+          }
+        }
+      }
+    },
+    "model.api_error.server_detail" : {
+      "comment" : "api_error.server にサーバの説明が付いていたとき。detail はサーバ (Worker) の文言 (訳さない) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーエラー (%1$@): %2$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "서버 오류 (%1$@): %2$@"
+          }
+        }
+      }
+    },
+    "model.api_error.transport" : {
+      "comment" : "通信そのものが失敗したとき (圏外など)。ほかの理由が分からない失敗の既定の文言にも使う (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通信エラー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "통신 오류"
+          }
+        }
+      }
+    },
+    "model.brand.icon_cg" : {
+      "comment" : "ブランドの丸いアイコンに載せる略称 (2〜4 文字。公式ロゴの代わり)。シンデレラガールズのファンの呼び方で、正式名ではない。ko の表記はオーナー確定待ち (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "デレ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "데레"
+          }
+        }
+      }
+    },
+    "model.brand.icon_gakuen" : {
+      "comment" : "ブランドの丸いアイコンに載せる略称 (2〜4 文字。公式ロゴの代わり)。学園アイドルマスターのファンの呼び方で、正式名ではない。ko の表記はオーナー確定待ち (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "学マス"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "학마스"
+          }
+        }
+      }
+    },
+    "model.brand.icon_ml" : {
+      "comment" : "ブランドの丸いアイコンに載せる略称 (2〜4 文字。公式ロゴの代わり)。ミリオンライブ!のファンの呼び方で、正式名ではない。ko の表記はオーナー確定待ち (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミリ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "밀리"
+          }
+        }
+      }
+    },
+    "model.brand.icon_other" : {
+      "comment" : "ブランドの丸いアイコンに載せる短い文字 (「その他」のブランド)。1〜2 文字 (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "他"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "기타"
+          }
+        }
+      }
+    },
+    "model.brand.icon_sc" : {
+      "comment" : "ブランドの丸いアイコンに載せる略称 (2〜4 文字。公式ロゴの代わり)。シャイニーカラーズのファンの呼び方で、正式名ではない。ko の表記はオーナー確定待ち (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シャニ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "샤니"
+          }
+        }
+      }
+    },
+    "model.brand.icon_valv" : {
+      "comment" : "ブランドの丸いアイコンに載せる略称 (2〜4 文字。公式ロゴの代わり)。vα-livのファンの呼び方で、正式名ではない。ko の表記はオーナー確定待ち (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヴィ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브이"
+          }
+        }
+      }
+    },
+    "model.event_filter.title.brand" : {
+      "comment" : "絞り込んだライブ一覧の画面タイトル。label はブランド名 (データ) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@のライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 라이브"
+          }
+        }
+      }
+    },
+    "model.event_filter.title.year" : {
+      "comment" : "絞り込んだライブ一覧の画面タイトル。year は開催年 (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@年のライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@년 라이브"
+          }
+        }
+      }
+    },
+    "model.idol_filter.title.birth_month" : {
+      "comment" : "絞り込んだアイドル一覧の画面タイトル。month は誕生月 (1〜12) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@月生まれのアイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@월생 아이돌"
+          }
+        }
+      }
+    },
+    "model.idol_filter.title.birth_place" : {
+      "comment" : "絞り込んだアイドル一覧の画面タイトル。place は出身地 (データ) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@出身のアイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 출신 아이돌"
+          }
+        }
+      }
+    },
+    "model.idol_filter.title.blood_type" : {
+      "comment" : "絞り込んだアイドル一覧の画面タイトル。type は血液型 (A / B / O / AB) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@型のアイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@형 아이돌"
+          }
+        }
+      }
+    },
+    "model.idol_filter.title.brand" : {
+      "comment" : "絞り込んだアイドル一覧の画面タイトル。label はブランド名 (データ) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@のアイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 아이돌"
+          }
+        }
+      }
+    },
+    "model.idol_filter.title.constellation" : {
+      "comment" : "絞り込んだアイドル一覧の画面タイトル。name は星座の名前 (データ) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@のアイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 아이돌"
+          }
+        }
+      }
+    },
+    "model.idol_sort.age" : {
+      "comment" : "アイドル一覧の並び順の名前。画面によっては「◯◯順」と組み合わせる (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "年齢"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "나이"
+          }
+        }
+      }
+    },
+    "model.idol_sort.birthday" : {
+      "comment" : "アイドル一覧の並び順の名前 (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "誕生日"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "생일"
+          }
+        }
+      }
+    },
+    "model.idol_sort.debut" : {
+      "comment" : "アイドル一覧の並び順の名前 (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "デビュー日"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "데뷔일"
+          }
+        }
+      }
+    },
+    "model.idol_sort.height" : {
+      "comment" : "アイドル一覧の並び順の名前 (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "身長"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "키"
+          }
+        }
+      }
+    },
+    "model.idol_sort.name_kana" : {
+      "comment" : "アイドル一覧の並び順の名前 (よみがなの五十音順) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "五十音順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오십음순"
+          }
+        }
+      }
+    },
+    "model.idol_sort.official" : {
+      "comment" : "アイドル一覧の並び順の名前 (公式の並び) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公式順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공식순"
+          }
+        }
+      }
+    },
+    "model.idol_sort.weight" : {
+      "comment" : "アイドル一覧の並び順の名前 (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "体重"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "몸무게"
+          }
+        }
+      }
+    },
+    "model.input_limits.counter" : {
+      "comment" : "入力欄の下の文字数の数え (例: 12 / 30文字)。length は今の文字数、max は上限 (どちらも 300 以下) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ / %2$@文字"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ / %2$@자"
+          }
+        }
+      }
+    },
+    "model.poll_achievement.rank" : {
+      "comment" : "終了したお題での順位 (2 位・3 位)。rank は順位 (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "第%1$@位"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@위"
+          }
+        }
+      }
+    },
+    "model.poll_achievement.winner" : {
+      "comment" : "終了したお題で 1 位を取ったことを示す札 (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "優勝"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "우승"
+          }
+        }
+      }
+    },
+    "model.poll_target.idol" : {
+      "comment" : "お題の対象の種類 (アイドルについて投票する) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌"
+          }
+        }
+      }
+    },
+    "model.poll_target.song" : {
+      "comment" : "お題の対象の種類 (曲について投票する) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡"
+          }
+        }
+      }
+    },
+    "model.poll_target.unit" : {
+      "comment" : "お題の対象の種類 (ユニットについて投票する) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛"
+          }
+        }
+      }
+    },
+    "model.series.subtitle" : {
+      "comment" : "CD シリーズのカードの下に出す枚数と曲数。count は曲数 (1000 以上は桁区切りが付く。今は付かないが、1 シリーズでそこまでの曲数は無い見込み) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%1$@枚 / %arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%1$@장 / %arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "model.show_filter.title.date" : {
+      "comment" : "絞り込んだ公演一覧の画面タイトル。date は日付の文字列 (YYYY-MM-DD) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@の公演"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 공연"
+          }
+        }
+      }
+    },
+    "model.show_filter.title.venue" : {
+      "comment" : "絞り込んだ公演一覧の画面タイトル。venue は会場名 (データ) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@での公演"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@에서 열린 공연"
+          }
+        }
+      }
+    },
+    "model.song_collect_filter.all" : {
+      "comment" : "楽曲一覧の「現地回収」の絞り込み (絞り込まない) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "model.song_collect_filter.collected" : {
+      "comment" : "楽曲一覧の「現地回収」の絞り込み (ライブで聴いた曲だけ) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回収済のみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "회수한 곡만"
+          }
+        }
+      }
+    },
+    "model.song_collect_filter.uncollected" : {
+      "comment" : "楽曲一覧の「現地回収」の絞り込み (まだライブで聴いていない曲だけ) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未回収のみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "미회수 곡만"
+          }
+        }
+      }
+    },
+    "model.song_filter.title.brand" : {
+      "comment" : "絞り込んだ楽曲一覧の画面タイトル。label はブランド名 (データ) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@の楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 곡"
+          }
+        }
+      }
+    },
+    "model.song_filter.title.creator" : {
+      "comment" : "絞り込んだ楽曲一覧の画面タイトル。name は作詞・作曲・編曲した人の名前 (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@が関わった楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 참여 곡"
+          }
+        }
+      }
+    },
+    "model.song_filter.title.release_year" : {
+      "comment" : "絞り込んだ楽曲一覧の画面タイトル。year は発売年 (西暦 4 桁の文字列) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@年リリースの楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@년 발매 곡"
+          }
+        }
+      }
+    },
+    "model.song_filter.title.song_type" : {
+      "comment" : "絞り込んだ楽曲一覧の画面タイトル。type は曲の種類の名前 (データ) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@の楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 곡"
+          }
+        }
+      }
+    },
+    "model.song_sort.collected_count" : {
+      "comment" : "楽曲一覧の並び順の名前 (自分が現地で聴いた回数) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現地回収回数順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "현장 회수 횟수순"
+          }
+        }
+      }
+    },
+    "model.song_sort.collected_rate" : {
+      "comment" : "楽曲一覧の並び順の名前 (披露回数のうち自分が現地で聴いた割合) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回収率順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "회수율순"
+          }
+        }
+      }
+    },
+    "model.song_sort.performance_count" : {
+      "comment" : "楽曲一覧の並び順の名前 (ライブで歌われた回数) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "披露回数順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 횟수순"
+          }
+        }
+      }
+    },
+    "model.song_sort.release_date" : {
+      "comment" : "楽曲一覧の並び順の名前 (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リリース日順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "발매일순"
+          }
+        }
+      }
+    },
+    "model.song_sort.title_kana" : {
+      "comment" : "楽曲一覧の並び順の名前 (曲名のよみがなの五十音順) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "五十音順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오십음순"
+          }
+        }
+      }
+    },
+    "model.sync.error.full_resync_required" : {
+      "comment" : "差分では追いつけず、全データの同期をやり直す必要があるとき (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全件再同期が必要です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체 재동기화가 필요해요"
+          }
+        }
+      }
+    },
+    "model.sync.error.icloud_status_failed" : {
+      "comment" : "iCloud の状態を問い合わせられなかったとき。detail は OS のエラーの本文 (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud状態の確認に失敗: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "iCloud 상태 확인 실패: %1$@"
+          }
+        }
+      }
+    },
+    "model.sync.error.icloud_unavailable" : {
+      "comment" : "端末で iCloud にサインインしていない・制限されているとき (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloudアカウントが利用できません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "iCloud 계정을 사용할 수 없어요"
+          }
+        }
+      }
+    },
+    "model.sync.error.save_date_failed" : {
+      "comment" : "同期の最後に日時を書けなかったとき。detail はエラーの本文 (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同期日時の保存に失敗: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "동기화 일시 저장 실패: %1$@"
+          }
+        }
+      }
+    },
+    "model.sync.error.schema_required" : {
+      "comment" : "CloudKit 側の設定漏れ (開発者向け)。record_type はレコード型の名前。CloudKit Dashboard / modifiedAt / QUERYABLE / SORTABLE は訳さない (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スキーマ設定が必要です: CloudKit Dashboard で %1$@ の modifiedAt を QUERYABLE + SORTABLE に設定してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "스키마 설정이 필요해요: CloudKit Dashboard에서 %1$@의 modifiedAt을 QUERYABLE + SORTABLE로 설정해 주세요"
+          }
+        }
+      }
+    },
+    "model.sync.error.step_failed" : {
+      "comment" : "ある段の同期が失敗したとき。step は段の名前 (コア由来)、detail はエラーの本文 (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@の同期に失敗: %2$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 동기화 실패: %2$@"
+          }
+        }
+      }
+    },
+    "model.sync.state.completed" : {
+      "comment" : "CloudKit 同期の状態 (完了)。date は書式済みの日時 (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最終同期: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마지막 동기화: %1$@"
+          }
+        }
+      }
+    },
+    "model.sync.state.error" : {
+      "comment" : "CloudKit 同期の状態 (失敗)。message は model.sync.error.* のどれか (解決済み) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エラー: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오류: %1$@"
+          }
+        }
+      }
+    },
+    "model.sync.state.idle" : {
+      "comment" : "CloudKit 同期の状態 (何もしていない)。同期の帯とマイページに出る (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "待機中"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "대기 중"
+          }
+        }
+      }
+    },
+    "model.sync.state.syncing" : {
+      "comment" : "CloudKit 同期の状態 (同期中)。step は同期している段の名前 (コア由来) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@を同期中…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 동기화 중…"
+          }
+        }
+      }
+    },
+    "model.timeline_lane.live" : {
+      "comment" : "年表の横帯の名前 (ライブ・フェス) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브"
+          }
+        }
+      }
+    },
+    "model.timeline_lane.milestone" : {
+      "comment" : "年表の横帯の名前 (サービス開始・アニメ放映などの節目)。細い列に出るので短く (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "節目"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이정표"
+          }
+        }
+      }
+    },
+    "model.timeline_lane.music" : {
+      "comment" : "年表の横帯の名前 (CD シリーズ) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡"
+          }
+        }
+      }
+    },
+    "model.timeline_lane.other" : {
+      "comment" : "年表の横帯の名前 (リリイベ・ラジオ・配信番組など) (i18n/catalog/model.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "その他"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "기타"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
