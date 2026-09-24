@@ -1241,12 +1241,18 @@ a.labeled-row .labeled-row__value {
   font-size: var(--fs-footnote);
   color: var(--ds-ink2);
 }
+/* 曲の補足 (自由文の 1 文)。よみより一段濃く、本文として読める色にする。 */
+.hero__note {
+  margin-top: var(--sp2);
+  font-size: var(--fs-footnote);
+  color: var(--ds-ink);
+}
 .hero__meta {
   display: flex;
   flex-wrap: wrap;
   gap: var(--sp2);
   align-items: center;
-  margin-top: var(--sp1);
+  margin-top: var(--sp2);
 }
 .hero__date {
   font-weight: 600;
