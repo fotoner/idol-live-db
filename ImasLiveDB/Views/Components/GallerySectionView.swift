@@ -10,8 +10,9 @@ import PhotosUI
 struct GallerySectionView: View {
     let kind: GalleryKind
     let entityId: String
-    /// 空状態メッセージに使う呼称 (例: "アイコン")。
-    var entityLabel: String = "アイコン"
+    /// 空状態メッセージ・先頭画像のバッジ・長押しメニューに使う呼称 (既定は「アイコン」)。
+    /// String のまま受ける (呼び出し元の型を変えない)。既定値はカタログの文言を表示時の言語で引く。
+    var entityLabel: String = String(localized: L10n.Idols.galleryPrimaryBadge)
 
     @State private var imageService = CustomImageService.shared
     @State private var galleryPicks: [PhotosPickerItem] = []
@@ -22,17 +23,18 @@ struct GallerySectionView: View {
         let urls = imageService.imageURLs(for: entityId, kind: kind)
         VStack(alignment: .leading, spacing: DS.sp3) {
             HStack {
-                ImasSectionHeader(title: "ギャラリー", count: urls.isEmpty ? nil : "\(urls.count)", tight: true)
+                ImasSectionHeader(title: .key(L10n.Idols.galleryHeader), count: urls.isEmpty ? nil : .verbatim("\(urls.count)"),
+                                  tight: true)
                 Spacer()
                 PhotosPicker(selection: $galleryPicks, maxSelectionCount: 10, matching: .images) {
-                    Label("追加", systemImage: "plus")
+                    Label(L10n.Idols.galleryActionAdd, systemImage: "plus")
                         .font(.imasSubhead.weight(.medium))
                 }
             }
             .padding(.horizontal, DS.sp5)
 
             if urls.isEmpty {
-                Text("画像を追加すると、先頭の1枚が\(entityLabel)になります。")
+                Text(L10n.Idols.galleryEmptyHintLabel(label: entityLabel))
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink2)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -40,7 +42,7 @@ struct GallerySectionView: View {
             } else {
                 galleryGrid(urls: urls)
 
-                Text("長押しで\(entityLabel)に設定・削除できます。")
+                Text(L10n.Idols.galleryLongPressHintLabel(label: entityLabel))
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink3)
                     .padding(.horizontal, DS.sp5)
@@ -112,13 +114,13 @@ struct GallerySectionView: View {
                     Button {
                         imageService.setPrimary(url, for: entityId, kind: kind)
                     } label: {
-                        Label("\(entityLabel)にする", systemImage: "star")
+                        Label(L10n.Idols.galleryActionSetPrimaryLabel(label: entityLabel), systemImage: "star")
                     }
                 }
                 Button(role: .destructive) {
                     Task { try? await imageService.deleteImage(at: url, for: entityId, kind: kind) }
                 } label: {
-                    Label("削除", systemImage: "trash")
+                    Label(L10n.Idols.galleryActionDelete, systemImage: "trash")
                 }
             }
     }
@@ -126,7 +128,7 @@ struct GallerySectionView: View {
 
 #Preview {
     ScrollView {
-        GallerySectionView(kind: .unit, entityId: "preview-unit", entityLabel: "アイコン")
+        GallerySectionView(kind: .unit, entityId: "preview-unit")
             .padding(.vertical)
     }
 }

@@ -15,6 +15,7 @@ object L10n {
     val Filtered: L10nFiltered get() = L10nFiltered
     val Help: L10nHelp get() = L10nHelp
     val I18n: L10nI18n get() = L10nI18n
+    val Idols: L10nIdols get() = L10nIdols
     val Introdon: L10nIntrodon get() = L10nIntrodon
     val Ledger: L10nLedger get() = L10nLedger
     val Legal: L10nLegal get() = L10nLegal

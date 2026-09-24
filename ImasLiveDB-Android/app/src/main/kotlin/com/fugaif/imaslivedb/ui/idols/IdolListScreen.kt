@@ -61,6 +61,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.Idol
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
 import com.fugaif.imaslivedb.ui.components.NameFilterField
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
@@ -121,7 +123,7 @@ fun IdolListScreen(
     val flatHeader = if (state.sortOrder.keepsBrandGrouping) {
         null
     } else {
-        "${state.sortOrder.label}順 ・ ${filteredIdols.size}人"
+        L10n.Idols.listFlatHeader(order = state.sortOrder.labelText, count = filteredIdols.size).resolve()
     }
 
     fun displayName(idol: Idol): String =
@@ -138,7 +140,7 @@ fun IdolListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (tab == 0) "アイドル" else "ユニット", fontWeight = FontWeight.Bold) },
+                title = { Text((if (tab == 0) L10n.Idols.listTitle else L10n.Idols.listTitleUnits).resolve(), fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = {
                         if (tab == 0) {
@@ -150,7 +152,7 @@ fun IdolListScreen(
                         val isGrid = if (tab == 0) state.listMode == IdolListMode.GRID else unitState.listMode == UnitListMode.GRID
                         Icon(
                             if (isGrid) Icons.Filled.ViewList else Icons.Filled.GridView,
-                            contentDescription = if (isGrid) "リスト表示" else "グリッド表示"
+                            contentDescription = (if (isGrid) L10n.Idols.listViewModeList else L10n.Idols.listViewModeGrid).resolve()
                         )
                     }
                     if (tab == 0) {
@@ -158,7 +160,7 @@ fun IdolListScreen(
                             BadgedBox(badge = {
                                 if (state.filterBadgeCount > 0) Badge { Text("${state.filterBadgeCount}") }
                             }) {
-                                Icon(Icons.Filled.FilterList, contentDescription = "フィルタ")
+                                Icon(Icons.Filled.FilterList, contentDescription = L10n.Idols.listFilterA11y.resolve())
                             }
                         }
                     }
@@ -168,7 +170,7 @@ fun IdolListScreen(
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             ImasSegmented(
-                labels = listOf("アイドル", "ユニット"),
+                labels = listOf(L10n.Idols.listTabIdols.resolve(), L10n.Idols.listTabUnits.resolve()),
                 selection = tab, onSelect = { tab = it },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)
             )
@@ -176,7 +178,7 @@ fun IdolListScreen(
                 UnitListBody(onNavigateToUnitDetail = onNavigateToUnitDetail, viewModel = unitListViewModel)
             } else {
             NameFilterField(
-                prompt = "アイドル・CV名で絞り込み",
+                prompt = L10n.Idols.listNameFilterPrompt.resolve(),
                 value = state.searchText,
                 onValueChange = viewModel::setSearchText
             )
@@ -194,14 +196,18 @@ fun IdolListScreen(
                     else ImasListSkeleton(rows = 12, thumb = SkeletonThumb.Circle)
                 }
                 state.searchText.isNotEmpty() && filteredIdols.isEmpty() -> {
-                    ImasEmptyState(icon = Icons.Filled.Person, title = "見つかりませんでした", message = "「${state.searchText}」に一致するアイドルはいません。")
+                    ImasEmptyState(
+                        icon = Icons.Filled.Person,
+                        title = L10n.Idols.listFilterEmptyTitleAndroid.resolve(),
+                        message = L10n.Idols.listFilterEmptyMessageAndroid(query = state.searchText).resolve()
+                    )
                 }
                 filteredIdols.isEmpty() -> {
                     ImasEmptyState(
                         icon = Icons.Filled.FilterAltOff,
-                        title = "該当するアイドルがいません",
-                        message = "フィルタ条件を変更するか、フィルタを解除してください。",
-                        actionTitle = if (state.filterBadgeCount > 0) "フィルタを解除" else null,
+                        title = L10n.Idols.listNoMatchTitle.resolve(),
+                        message = L10n.Idols.listNoMatchMessage.resolve(),
+                        actionTitle = if (state.filterBadgeCount > 0) L10n.Idols.listActionClearFilters.resolve() else null,
                         onAction = if (state.filterBadgeCount > 0) { { viewModel.clearQuickFilters() } } else null
                     )
                 }
@@ -317,7 +323,8 @@ private fun BrandSectionHeader(brand: Brand, count: Int, expanded: Boolean, onTo
         Text(" $count", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3)
         Box(Modifier.weight(1f))
         Icon(if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-            contentDescription = if (expanded) "折りたたむ" else "展開", tint = DS.ink2)
+            contentDescription = (if (expanded) L10n.Common.actionCollapse else L10n.Common.actionExpand).resolve(),
+            tint = DS.ink2)
     }
 }
 
@@ -368,7 +375,9 @@ private fun IdolRow(
             )
         }
         MarkIconButton(active = isPick, activeIcon = Icons.Filled.Favorite, inactiveIcon = Icons.Filled.FavoriteBorder,
-            tint = DS.pick, contentDescription = if (isPick) "担当解除" else "担当に追加", onClick = onToggleMyPick)
+            tint = DS.pick,
+            contentDescription = (if (isPick) L10n.Idols.listRowPickRemoveA11y else L10n.Idols.listRowPickAddA11y).resolve(),
+            onClick = onToggleMyPick)
         Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = DS.ink3, modifier = Modifier.size(16.dp))
     }
 }

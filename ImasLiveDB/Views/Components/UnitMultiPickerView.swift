@@ -64,11 +64,11 @@ struct UnitMultiPickerView: View {
                     unitList
                 }
             }
-            .navigationTitle("ユニットを選択 (\(selection.count))")
+            .navigationTitle(L10n.Idols.unitPickerTitle(count: selection.count))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("キャンセル") { dismiss() }
+                    Button { dismiss() } label: { Text(L10n.Idols.pickerActionCancel) }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -77,17 +77,19 @@ struct UnitMultiPickerView: View {
                     } label: {
                         Image(systemName: displayMode == .grid ? "list.bullet" : "square.grid.3x2")
                     }
-                    .accessibilityLabel(displayMode == .grid ? "リスト表示" : "グリッド表示")
+                    .accessibilityLabel(displayMode == .grid ? L10n.Idols.listViewModeList : L10n.Idols.listViewModeGrid)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("決定") {
+                    Button {
                         AppAnalytics.tap("unit_multi_picker.commit")
                         onCommit(selection)
                         dismiss()
+                    } label: {
+                        Text(L10n.Idols.pickerActionDone)
                     }
                 }
             }
-            .searchable(text: $query, prompt: "ユニット名で検索")
+            .searchable(text: $query, prompt: Text(L10n.Idols.pickerUnitSearchPrompt))
             .task {
                 brands = (try? await AppContainer.shared.brandReading.brands()) ?? []
                 if units.isEmpty {
@@ -109,7 +111,8 @@ struct UnitMultiPickerView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
                     Button { selectedBrandIds = [] } label: {
-                        ImasChip(text: "すべて", style: selectedBrandIds.isEmpty ? .selected : .neutral)
+                        ImasChip(text: String(localized: L10n.Idols.pickerBrandFilterAll),
+                                 style: selectedBrandIds.isEmpty ? .selected : .neutral)
                     }
                     .buttonStyle(.plain)
                     ForEach(brands) { brand in

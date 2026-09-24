@@ -11,7 +11,7 @@ struct StackedAvatars: View {
     var body: some View {
         stack
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("出演者 \(idols.count)名")
+            .accessibilityLabel(L10n.Idols.stackedAvatarsA11y(count: idols.count))
     }
 
     /// onTap が指定されている時だけタップを受ける。nil の場合は親 View の

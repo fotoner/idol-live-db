@@ -14,8 +14,8 @@ struct IdolPickerView: View {
     enum Mode { case single, multi }
 
     /// ナビバーのタイトル。ツールバー項目が最大 4 つ並ぶので **短く** すること
-    /// (長いと iOS が「アイド…」のように省略する)。
-    var title: String = "アイドル"
+    /// (長いと iOS が「アイド…」のように省略する)。既定は init の `L10n.Idols.pickerTitle`。
+    var title: String
     var mode: Mode = .multi
     /// 呼び出し元が既に持っているアイドル配列。空なら自力でロードする。
     var idols: [Idol] = []
@@ -35,7 +35,7 @@ struct IdolPickerView: View {
     @AppStorage("idol_picker_mode") private var displayModeRaw: String = IdolListMode.grid.rawValue
 
     init(
-        title: String = "アイドル",
+        title: String = String(localized: L10n.Idols.pickerTitle),
         mode: Mode = .multi,
         idols: [Idol] = [],
         selected: Set<String> = [],
@@ -126,7 +126,7 @@ struct IdolPickerView: View {
             .navigationTitle(mode == .multi ? "\(title) (\(selection.count))" : title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbarContent }
-            .searchable(text: $query, prompt: "アイドル名 / CV名で検索")
+            .searchable(text: $query, prompt: Text(L10n.Idols.pickerSearchPrompt))
             .sheet(isPresented: $showUnitPicker) {
                 UnitMemberAddPicker { addedIdolIds in
                     selection.formUnion(addedIdolIds)
@@ -147,7 +147,7 @@ struct IdolPickerView: View {
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         ToolbarItem(placement: .cancellationAction) {
-            Button("キャンセル") { dismiss() }
+            Button { dismiss() } label: { Text(L10n.Idols.pickerActionCancel) }
         }
         ToolbarItem(placement: .topBarTrailing) {
             Button {
@@ -156,7 +156,7 @@ struct IdolPickerView: View {
             } label: {
                 Image(systemName: displayMode == .grid ? "list.bullet" : "square.grid.3x2")
             }
-            .accessibilityLabel(displayMode == .grid ? "リスト表示" : "グリッド表示")
+            .accessibilityLabel(displayMode == .grid ? L10n.Idols.listViewModeList : L10n.Idols.listViewModeGrid)
         }
         if mode == .multi {
             ToolbarItem(placement: .topBarTrailing) {
@@ -165,13 +165,15 @@ struct IdolPickerView: View {
                 } label: {
                     Image(systemName: "person.3.fill")
                 }
-                .accessibilityLabel("ユニットから追加")
+                .accessibilityLabel(L10n.Idols.pickerAddFromUnit)
             }
             ToolbarItem(placement: .confirmationAction) {
-                Button("決定") {
+                Button {
                     AppAnalytics.tap("idol_picker.commit")
                     onCommit(selection)
                     dismiss()
+                } label: {
+                    Text(L10n.Idols.pickerActionDone)
                 }
                 .fontWeight(.bold)
             }
@@ -183,10 +185,10 @@ struct IdolPickerView: View {
             Spacer()
             ImasEmptyState(
                 systemImage: "magnifyingglass",
-                title: "見つかりません",
+                title: String(localized: L10n.Idols.pickerEmptyTitle),
                 message: query.isEmpty
-                    ? "このブランドに該当するアイドルがいません"
-                    : "「\(query)」に一致するアイドルがいません"
+                    ? String(localized: L10n.Idols.pickerEmptyMessageBrand)
+                    : String(localized: L10n.Idols.pickerEmptyMessageQuery(query: query))
             )
             Spacer()
         }
@@ -202,7 +204,8 @@ struct IdolPickerView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: DS.sp3) {
                     Button { selectedBrandIds = [] } label: {
-                        ImasChip(text: "すべて", style: selectedBrandIds.isEmpty ? .selected : .neutral)
+                        ImasChip(text: String(localized: L10n.Idols.pickerBrandFilterAll),
+                                 style: selectedBrandIds.isEmpty ? .selected : .neutral)
                     }
                     .buttonStyle(.plain)
                     ForEach(brands) { brand in
@@ -401,7 +404,8 @@ private struct UnitMemberAddPicker: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: DS.sp3) {
                             Button { selectedBrandIds = [] } label: {
-                                ImasChip(text: "すべて", style: selectedBrandIds.isEmpty ? .selected : .neutral)
+                                ImasChip(text: String(localized: L10n.Idols.pickerBrandFilterAll),
+                                         style: selectedBrandIds.isEmpty ? .selected : .neutral)
                             }
                             .buttonStyle(.plain)
                             ForEach(brands) { brand in
@@ -460,14 +464,14 @@ private struct UnitMemberAddPicker: View {
                 .scrollContentBackground(.hidden)
                 .background(DS.bg)
             }
-            .navigationTitle("ユニットから追加")
+            .navigationTitle(L10n.Idols.pickerAddFromUnit)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("キャンセル") { dismiss() }
+                    Button { dismiss() } label: { Text(L10n.Idols.pickerActionCancel) }
                 }
             }
-            .searchable(text: $query, prompt: "ユニット名で検索")
+            .searchable(text: $query, prompt: Text(L10n.Idols.pickerUnitSearchPrompt))
             .task {
                 brands = (try? await AppContainer.shared.brandReading.brands()) ?? []
                 units = (try? await AppContainer.shared.unitReading.allUnits()) ?? []

@@ -9,6 +9,9 @@ import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.UserMark
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,14 +25,50 @@ enum class IdolListMode { LIST, GRID }
  * ブランド内サブカテゴリ属性 (idols.attribute) の定義。(内部値, 表示ラベル)。
  * iOS `FilterSheet.swift` の `brandAttributes` と同一。
  * 表示ラベルの対応表は imas-core に無く、iOS も Swift 定数として持っているのでここに残す。
+ * ラベルはカタログの文言 (i18n/catalog/idols.json の attribute.*)。英字の名前 (Sol 等) は訳さないのでそのまま。
  */
-val IDOL_BRAND_ATTRIBUTES: Map<String, List<Pair<String, String>>> = mapOf(
-    "cg" to listOf("cute" to "キュート", "cool" to "クール", "passion" to "パッション"),
-    "ml" to listOf("princess" to "プリンセス", "fairy" to "フェアリー", "angel" to "エンジェル"),
-    "765as" to listOf("princess" to "プリンセス", "fairy" to "フェアリー", "angel" to "エンジェル"),
-    "sidem" to listOf("intelli" to "インテリ", "physical" to "フィジカル", "mental" to "メンタル"),
-    "sc" to listOf("sol" to "Sol", "luna" to "Luna", "stella" to "Stella")
+val IDOL_BRAND_ATTRIBUTES: Map<String, List<Pair<String, DisplayText>>> = mapOf(
+    "cg" to listOf(
+        "cute" to L10n.Idols.attributeCute,
+        "cool" to L10n.Idols.attributeCool,
+        "passion" to L10n.Idols.attributePassion
+    ),
+    "ml" to listOf(
+        "princess" to L10n.Idols.attributePrincess,
+        "fairy" to L10n.Idols.attributeFairy,
+        "angel" to L10n.Idols.attributeAngel
+    ),
+    "765as" to listOf(
+        "princess" to L10n.Idols.attributePrincess,
+        "fairy" to L10n.Idols.attributeFairy,
+        "angel" to L10n.Idols.attributeAngel
+    ),
+    "sidem" to listOf(
+        "intelli" to L10n.Idols.attributeIntelli,
+        "physical" to L10n.Idols.attributePhysical,
+        "mental" to L10n.Idols.attributeMental
+    ),
+    "sc" to listOf(
+        "sol" to DisplayText.Verbatim("Sol"),
+        "luna" to DisplayText.Verbatim("Luna"),
+        "stella" to DisplayText.Verbatim("Stella")
+    )
 )
+
+/**
+ * 並び順の表示名 (カタログの文言 sort_order.*)。保存値は enum の name のままで変えない。
+ * ja はコアの表示名 ([IdolSortOrder.label]) と同じ文字列。ko は「〜순」まで含む。
+ */
+val IdolSortOrder.labelText: DisplayText
+    get() = when (this) {
+        IdolSortOrder.OFFICIAL -> L10n.Idols.sortOrderOfficial
+        IdolSortOrder.NAME_KANA -> L10n.Idols.sortOrderNameKana
+        IdolSortOrder.AGE -> L10n.Idols.sortOrderAge
+        IdolSortOrder.HEIGHT -> L10n.Idols.sortOrderHeight
+        IdolSortOrder.WEIGHT -> L10n.Idols.sortOrderWeight
+        IdolSortOrder.BIRTHDAY -> L10n.Idols.sortOrderBirthday
+        IdolSortOrder.DEBUT -> L10n.Idols.sortOrderDebut
+    }
 
 data class IdolListUiState(
     val idols: List<Idol> = emptyList(),
@@ -213,7 +252,9 @@ class IdolListViewModel(app: Application) : AndroidViewModel(app) {
     // 集合の更新と同時に再計算する。
     fun toggleMyPick(idolId: String) {
         viewModelScope.launch {
-            val now = localWrite("担当の切り替え") { marksRepo.toggle(UserMark.IDOL, idolId, UserMark.PICK) }
+            // 知らせの操作名 (localWrite の action は String) はこの時点の言語で文字列にする
+            val action = L10n.Idols.writeActionTogglePick.resolve(getApplication<Application>())
+            val now = localWrite(action) { marksRepo.toggle(UserMark.IDOL, idolId, UserMark.PICK) }
                 ?: return@launch
             val current = _uiState.value.pickIds.toMutableSet()
             if (now) current.add(idolId) else current.remove(idolId)

@@ -90,6 +90,9 @@ import com.fugaif.imaslivedb.data.model.ImasUnit
 import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.data.model.UserMark
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.CommunityLoginPromptDialog
 import com.fugaif.imaslivedb.ui.edit.IdolEditScreen
 import com.fugaif.imaslivedb.ui.edit.RecordHistorySheet
@@ -180,18 +183,18 @@ fun IdolDetailScreen(
                 title = { Text(idol?.name ?: "", maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 },
                 actions = {
                     IconButton(onClick = { showMenu = true }) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = "その他")
+                        Icon(Icons.Filled.MoreVert, contentDescription = L10n.Idols.detailMenuA11y.resolve())
                     }
                     DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
                         // BAN 済みには編集導線を出さない (押しても 403 になるだけ)。判定はコア。
                         if (idol != null && canEditHere) {
                             DropdownMenuItem(
-                                text = { Text("編集") },
+                                text = { Text(L10n.Idols.detailMenuEdit.resolve()) },
                                 onClick = {
                                     showMenu = false
                                     startCommunityEdit { showIdolEdit = true }
@@ -199,7 +202,7 @@ fun IdolDetailScreen(
                             )
                         }
                         DropdownMenuItem(
-                            text = { Text("編集履歴") },
+                            text = { Text(L10n.Idols.detailMenuHistory.resolve()) },
                             onClick = { showMenu = false; showRecordHistory = true }
                         )
                     }
@@ -215,7 +218,12 @@ fun IdolDetailScreen(
             Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState())) {
                 Hero(idol, state.brand?.shortName, t)
                 ImasSegmented(
-                    labels = listOf("ライブ", "楽曲・ユニット", "プロフィール", "コミュニティ"),
+                    labels = listOf(
+                        L10n.Idols.detailTabLive.resolve(),
+                        L10n.Idols.detailTabSongsAndroid.resolve(),
+                        L10n.Idols.detailTabProfile.resolve(),
+                        L10n.Idols.detailTabCommunity.resolve()
+                    ),
                     selection = segment, onSelect = { segment = it },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)
                 )
@@ -289,7 +297,7 @@ fun IdolDetailScreen(
 
     if (showLoginPrompt) {
         CommunityLoginPromptDialog(
-            message = "タグ付け・投票にはログインが必要です。",
+            message = L10n.Idols.detailCommunityLoginDialog.resolve(),
             onDismiss = { showLoginPrompt = false }
         )
     }
@@ -321,20 +329,20 @@ private fun CommunityBody(
                     .clip(RoundedCornerShape(12.dp)).background(DS.fill).padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("タグ付け・投票にはログインが必要です", fontSize = 12.5.sp, color = DS.ink2)
+                Text(L10n.Idols.detailCommunityLoginPrompt.resolve(), fontSize = 12.5.sp, color = DS.ink2)
             }
         }
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                ImasSectionHeader("タグ", count = "${tags.size}", modifier = Modifier.weight(1f))
+                ImasSectionHeader(L10n.Idols.detailTagsHeader, count = DisplayText.Verbatim("${tags.size}"), modifier = Modifier.weight(1f))
                 if (canEditHere) {
                     IconButton(onClick = onOpenTagPicker, modifier = Modifier.padding(end = 8.dp)) {
-                        Icon(Icons.Filled.Add, contentDescription = "タグを追加", tint = DS.ink2)
+                        Icon(Icons.Filled.Add, contentDescription = L10n.Idols.detailTagsActionAdd.resolve(), tint = DS.ink2)
                     }
                 }
             }
             if (tags.isEmpty()) {
-                Text("タグはまだありません", fontSize = 13.sp, color = DS.ink3,
+                Text(L10n.Idols.detailTagsEmptyTitle.resolve(), fontSize = 13.sp, color = DS.ink3,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp))
             } else {
                 FlowRow(
@@ -365,7 +373,7 @@ private fun CommunityBody(
         }
         // タグが似ているアイドル (この人が好きな人にはこの人も, サーバ算出)
         if (similarTagIdols.isNotEmpty()) {
-            IdolGridSection("タグが似ているアイドル", similarTagIdols, onIdolClick, badge = similarSharedTags)
+            IdolGridSection(L10n.Idols.detailSimilarHeader.resolve(), similarTagIdols, onIdolClick, badge = similarSharedTags)
         }
     }
 }
@@ -407,7 +415,7 @@ private fun Hero(idol: Idol, brandShortName: String?, t: ImasTheme) {
                     .clickable(onClick = pickAvatar),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Filled.PhotoCamera, contentDescription = "アイコン写真を変更",
+                Icon(Icons.Filled.PhotoCamera, contentDescription = L10n.Idols.detailHeroChangeIconA11y.resolve(),
                     tint = t.onAccent, modifier = Modifier.size(14.dp))
             }
         }
@@ -422,11 +430,14 @@ private fun Hero(idol: Idol, brandShortName: String?, t: ImasTheme) {
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            HeroToggle("担当", pick, DS.pick, t) {
-                scope.launch { localWrite("担当の切り替え") { marks.toggle(UserMark.IDOL, idol.id, UserMark.PICK) }?.let { pick = it } }
+            HeroToggle(L10n.Idols.detailHeroPick.resolve(), pick, DS.pick, t) {
+                // 知らせの操作名は押した時点の言語で文字列にする (localWrite の action は String)
+                val action = L10n.Idols.writeActionTogglePick.resolve(context)
+                scope.launch { localWrite(action) { marks.toggle(UserMark.IDOL, idol.id, UserMark.PICK) }?.let { pick = it } }
             }
-            HeroToggle("お気に入り", fav, DS.favorite, t) {
-                scope.launch { localWrite("お気に入りの切り替え") { marks.toggle(UserMark.IDOL, idol.id, UserMark.FAVORITE) }?.let { fav = it } }
+            HeroToggle(L10n.Idols.detailHeroFavorite.resolve(), fav, DS.favorite, t) {
+                val action = L10n.Idols.writeActionToggleFavorite.resolve(context)
+                scope.launch { localWrite(action) { marks.toggle(UserMark.IDOL, idol.id, UserMark.FAVORITE) }?.let { fav = it } }
             }
         }
     }
@@ -457,8 +468,8 @@ private fun LiveBody(
     onSongHistory: (String) -> Unit
 ) {
     if (state.performedSongs.isEmpty() && state.castShows.isEmpty()) {
-        ImasEmptyState(Icons.Filled.MusicNote, "ライブ記録はまだありません",
-            "このアイドルのライブ出演・歌唱記録はまだ登録されていません。", seed = idol.color, brand = idol.brandId)
+        ImasEmptyState(Icons.Filled.MusicNote, L10n.Idols.detailLiveEmptyTitleAndroid.resolve(),
+            L10n.Idols.detailLiveEmptyMessage.resolve(), seed = idol.color, brand = idol.brandId)
         return
     }
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -467,7 +478,7 @@ private fun LiveBody(
         }
         if (state.performedSongs.isNotEmpty()) {
             Column {
-                ImasSectionHeader("ライブ歌唱曲", count = "${state.performedSongs.size}", tight = true)
+                ImasSectionHeader(L10n.Idols.detailPerformedSongsHeader, count = DisplayText.Verbatim("${state.performedSongs.size}"), tight = true)
                 state.performedSongs.forEach { item ->
                     SongRow(item.song, idol.color, performCount = item.performCount) { onSongHistory(item.song.id) }
                 }
@@ -475,7 +486,7 @@ private fun LiveBody(
         }
         if (state.castShows.isNotEmpty()) {
             Column {
-                ImasSectionHeader("出演履歴", count = "${state.castShows.size}", tight = true)
+                ImasSectionHeader(L10n.Idols.detailCastShowsHeader, count = DisplayText.Verbatim("${state.castShows.size}"), tight = true)
                 state.castShows.forEach { ShowRow(it, idol) { onShow(it.showId) } }
             }
         }
@@ -494,12 +505,12 @@ private fun UpcomingCard(row: CastShowRow, idol: Idol, onClick: (String) -> Unit
     ) {
         Box(Modifier.width(4.dp).fillMaxHeight().background(t.accent))
         Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("次の出演 ・ ${monthDay(row.date)}", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = t.accent)
+            Text(L10n.Idols.detailUpcomingLabel(date = monthDay(row.date)).resolve(), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = t.accent)
             Text(row.eventName, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 Icon(Icons.Filled.LocationOn, null, tint = DS.ink2, modifier = Modifier.size(12.dp))
                 Text(
-                    listOfNotNull(row.venue, row.showName).filter { it.isNotEmpty() }.joinToString(" ・ "),
+                    listOfNotNull(row.venue, row.showName).filter { it.isNotEmpty() }.joinToString(L10n.Idols.metaSeparator.resolve()),
                     fontSize = 13.sp, color = DS.ink2, maxLines = 1, overflow = TextOverflow.Ellipsis
                 )
             }
@@ -511,8 +522,8 @@ private fun UpcomingCard(row: CastShowRow, idol: Idol, onClick: (String) -> Unit
 @Composable
 private fun SongsBody(state: IdolDetailUiState, idol: Idol, onUnit: (String) -> Unit, onSong: (String) -> Unit) {
     if (state.unitsWithSongs.isEmpty() && state.unitsWithoutSongs.isEmpty() && state.originalSongSections.isEmpty()) {
-        ImasEmptyState(Icons.Filled.MusicNote, "楽曲・ユニットがありません",
-            "原曲・所属ユニットの情報はまだ登録されていません。", seed = idol.color, brand = idol.brandId)
+        ImasEmptyState(Icons.Filled.MusicNote, L10n.Idols.detailSongsEmptyTitleAndroid.resolve(),
+            L10n.Idols.detailSongsEmptyMessageAndroid.resolve(), seed = idol.color, brand = idol.brandId)
         return
     }
     var showEmptyUnits by rememberSaveable(idol.id) { mutableStateOf(false) }
@@ -523,7 +534,7 @@ private fun SongsBody(state: IdolDetailUiState, idol: Idol, onUnit: (String) -> 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         if (state.unitsWithSongs.isNotEmpty()) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                ImasSectionHeader("所属ユニット", count = "${state.unitsWithSongs.size}", tight = true)
+                ImasSectionHeader(L10n.Idols.detailUnitsHeader, count = DisplayText.Verbatim("${state.unitsWithSongs.size}"), tight = true)
                 FlowRow(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -540,7 +551,7 @@ private fun SongsBody(state: IdolDetailUiState, idol: Idol, onUnit: (String) -> 
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Text("曲なしユニット", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
+                    Text(L10n.Idols.detailUnitsWithoutSongs.resolve(), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
                     Text("${state.unitsWithoutSongs.size}", fontSize = 12.sp, color = DS.ink3)
                     Box(Modifier.weight(1f))
                     Icon(
@@ -624,7 +635,7 @@ private fun ProfileBody(
         )
     }
     Column {
-        ImasSectionHeader("プロフィール", tight = true)
+        ImasSectionHeader(L10n.Idols.detailProfileHeader, tight = true)
         rows.forEach { row ->
             val action = row.action
             // コアが返すのは「何をしたいか」の種類だけ。実行はこちらの責務。
@@ -678,12 +689,16 @@ private fun SameProfileSection(idol: Idol, brand: Brand?, onFilteredIdolsClick: 
     val chips = buildList {
         brand?.let { add(Triple(IdolFilterKind.BRAND, it.id, it.shortName)) }
         idol.constellation?.takeIf { it.isNotEmpty() }?.let { add(Triple(IdolFilterKind.CONSTELLATION, it, it)) }
-        idol.birthPlace?.takeIf { it.isNotEmpty() }?.let { add(Triple(IdolFilterKind.BIRTH_PLACE, it, "${it}出身")) }
-        idol.bloodType?.takeIf { it.isNotEmpty() }?.let { add(Triple(IdolFilterKind.BLOOD_TYPE, it, "${it}型")) }
+        idol.birthPlace?.takeIf { it.isNotEmpty() }?.let {
+            add(Triple(IdolFilterKind.BIRTH_PLACE, it, L10n.Idols.detailSameProfileBirthPlace(place = it).resolve()))
+        }
+        idol.bloodType?.takeIf { it.isNotEmpty() }?.let {
+            add(Triple(IdolFilterKind.BLOOD_TYPE, it, L10n.Idols.detailSameProfileBloodType(type = it).resolve()))
+        }
     }
     if (chips.isEmpty()) return
     Column {
-        ImasSectionHeader("同じプロフィールのアイドル", tight = true)
+        ImasSectionHeader(L10n.Idols.detailSameProfileHeader, tight = true)
         FlowRow(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -760,16 +775,16 @@ private fun GallerySection(idolId: String) {
 
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            ImasSectionHeader("ギャラリー", count = "${files.size}", tight = true, modifier = Modifier.weight(1f))
+            ImasSectionHeader(L10n.Idols.galleryHeader, count = DisplayText.Verbatim("${files.size}"), tight = true, modifier = Modifier.weight(1f))
             TextButton(onClick = addImages) {
                 Icon(Icons.Filled.Add, contentDescription = null, tint = DS.ink2, modifier = Modifier.size(16.dp))
-                Text("追加", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = DS.ink2,
+                Text(L10n.Idols.galleryActionAdd.resolve(), fontSize = 13.sp, fontWeight = FontWeight.Medium, color = DS.ink2,
                     modifier = Modifier.padding(start = 4.dp))
             }
         }
         if (files.isEmpty()) {
             Text(
-                "画像を追加すると、先頭の1枚がアイコンになります。画像はこの端末の中だけに保存され、どこにも送信されません。",
+                L10n.Idols.galleryIdolEmptyHintAndroid.resolve(),
                 fontSize = 12.sp, color = DS.ink2,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
             )
@@ -792,7 +807,7 @@ private fun GallerySection(idolId: String) {
                 }
             }
             Text(
-                "長押しでアイコン設定・ウィジェットのスライドショー対象・削除を切り替えられます。",
+                L10n.Idols.galleryIdolLongPressHintAndroid.resolve(),
                 fontSize = 11.sp, color = DS.ink3,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
             )
@@ -834,14 +849,14 @@ private fun GalleryThumb(
             ) {
                 Icon(Icons.Filled.Star, contentDescription = null, tint = Color.White,
                     modifier = Modifier.size(9.dp))
-                Text("アイコン", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.White,
+                Text(L10n.Idols.galleryPrimaryBadge.resolve(), fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.White,
                     modifier = Modifier.padding(start = 3.dp))
             }
         }
         DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
             if (!isPrimary) {
                 DropdownMenuItem(
-                    text = { Text("アイコンにする") },
+                    text = { Text(L10n.Idols.galleryActionSetPrimary.resolve()) },
                     onClick = {
                         menuOpen = false
                         scope.launch { store.setPrimary(file, idolId) }
@@ -849,14 +864,14 @@ private fun GalleryThumb(
                 )
             }
             DropdownMenuItem(
-                text = { Text(if (inSlideshow) "スライドショーから外す" else "スライドショーに入れる") },
+                text = { Text((if (inSlideshow) L10n.Idols.gallerySlideshowRemove else L10n.Idols.gallerySlideshowAdd).resolve()) },
                 onClick = {
                     menuOpen = false
                     scope.launch { store.setInSlideshow(!inSlideshow, file, idolId) }
                 }
             )
             DropdownMenuItem(
-                text = { Text("削除", color = DS.danger) },
+                text = { Text(L10n.Idols.galleryActionDelete.resolve(), color = DS.danger) },
                 onClick = {
                     menuOpen = false
                     scope.launch { store.deleteImage(file, idolId) }
@@ -883,7 +898,7 @@ private fun SongRow(song: Song, seed: String?, performCount: Int? = null, onClic
             val sub = song.singerLabel ?: song.unitName
             if (!sub.isNullOrEmpty()) Text(sub, fontSize = 12.sp, color = DS.ink2, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (performCount != null) {
-                Text("${performCount}回", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3)
+                Text(L10n.Idols.detailSongPerformCount(count = performCount).resolve(), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3)
             }
         }
     }
@@ -900,12 +915,13 @@ private fun ShowRow(row: CastShowRow, idol: Idol, onClick: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(row.eventName, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 if (row.isLead) {
-                    RoleTag("主演", t)
+                    RoleTag(L10n.Idols.detailShowLead.resolve(), t)
                 } else if (row.isGuest) {
-                    RoleTag("ゲスト", t)
+                    RoleTag(L10n.Idols.detailShowGuest.resolve(), t)
                 }
             }
-            Text(listOf(row.date, row.venue, row.showName).mapNotNull { it?.takeIf { s -> s.isNotEmpty() } }.joinToString(" ・ "),
+            Text(listOf(row.date, row.venue, row.showName).mapNotNull { it?.takeIf { s -> s.isNotEmpty() } }
+                .joinToString(L10n.Idols.metaSeparator.resolve()),
                 fontSize = 12.sp, color = DS.ink2, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }

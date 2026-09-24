@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.model.Idol
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.theme.DS
@@ -65,10 +67,10 @@ fun IdolsByBirthMonthScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("${month}月生まれのアイドル", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                title = { Text(L10n.Idols.birthMonthTitle(month = month).resolve(), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 }
             )
@@ -78,12 +80,12 @@ fun IdolsByBirthMonthScreen(
             when {
                 state.isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 state.idols.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    ImasEmptyState(icon = Icons.Filled.Person, title = "アイドルが見つかりません")
+                    ImasEmptyState(icon = Icons.Filled.Person, title = L10n.Idols.birthMonthEmpty.resolve())
                 }
                 else -> LazyColumn(Modifier.fillMaxSize()) {
                     item(key = "count") {
                         Text(
-                            "${state.idols.size}人",
+                            L10n.Idols.listIdolCount(count = state.idols.size).resolve(),
                             fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         )

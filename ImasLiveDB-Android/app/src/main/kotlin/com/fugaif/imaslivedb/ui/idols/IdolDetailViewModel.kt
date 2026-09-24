@@ -14,6 +14,8 @@ import com.fugaif.imaslivedb.data.model.JstDay
 import com.fugaif.imaslivedb.data.model.PersonalTag
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -92,7 +94,10 @@ class IdolDetailViewModel(app: Application, private val idolId: String) : Androi
     /** 個人用タグを追加。サーバーには送信しない。足せたときだけ [onAdded] (入力欄を空にする)。 */
     fun addPersonalTag(name: String, onAdded: () -> Unit) {
         viewModelScope.launch {
-            localWrite("マイタグの追加") { personalTagRepo.addTag(PersonalTag.IDOL, idolId, name) }
+            // 知らせの操作名 (localWrite の action は String) はこの時点の言語で文字列にする
+            localWrite(L10n.Idols.writeActionAddPersonalTag.resolve(getApplication<Application>())) {
+                personalTagRepo.addTag(PersonalTag.IDOL, idolId, name)
+            }
                 ?: return@launch
             onAdded()
             loadPersonalTags()
@@ -102,7 +107,9 @@ class IdolDetailViewModel(app: Application, private val idolId: String) : Androi
     /** 個人用タグを削除。 */
     fun removePersonalTag(name: String) {
         viewModelScope.launch {
-            localWrite("マイタグの削除") { personalTagRepo.removeTag(PersonalTag.IDOL, idolId, name) }
+            localWrite(L10n.Idols.writeActionRemovePersonalTag.resolve(getApplication<Application>())) {
+                personalTagRepo.removeTag(PersonalTag.IDOL, idolId, name)
+            }
             loadPersonalTags()
         }
     }

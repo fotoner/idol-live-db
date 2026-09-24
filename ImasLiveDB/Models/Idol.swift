@@ -73,12 +73,14 @@ struct Idol: Codable, FetchableRecord, PersistableRecord, Identifiable, Hashable
 
     // MARK: - Computed
 
-    /// 誕生日表示用（"--04-03" → "4月3日"）
+    /// 誕生日表示用（"--04-03" → "4月3日" / ko: "4월 3일"）
+    ///
+    /// 呼び出し元 (カレンダーの日の詳細など) が String を受けるので、呼ぶたびにその時の言語で解決する。
     var birthdayDisplay: String? {
         guard let birthday, birthday.hasPrefix("--") else { return birthday }
         let parts = birthday.dropFirst(2).split(separator: "-")
         guard parts.count == 2, let m = Int(parts[0]), let d = Int(parts[1]) else { return birthday }
-        return "\(m)月\(d)日"
+        return String(localized: L10n.Idols.profileBirthday(month: m, day: d))
     }
 
     // MARK: - Associations

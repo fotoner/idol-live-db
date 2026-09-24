@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/idols.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- idols.attribute.angel: ブランド内の属性の名前 (ゲームの公式の属性名)。Android のフィルタシートの属性チップ。判定は英字の内部値で行う。ko は韓国のファンが使う音訳。ミリオンライブ・765AS -->
+    <string name="idols_attribute_angel">エンジェル</string>
+    <!-- idols.attribute.cool: ブランド内の属性の名前 (ゲームの公式の属性名)。Android のフィルタシートの属性チップ。判定は英字の内部値で行う。ko は韓国のファンが使う音訳。シンデレラガールズ -->
+    <string name="idols_attribute_cool">クール</string>
+    <!-- idols.attribute.cute: ブランド内の属性の名前 (ゲームの公式の属性名)。Android のフィルタシートの属性チップ。判定は英字の内部値で行う。ko は韓国のファンが使う音訳。シンデレラガールズ -->
+    <string name="idols_attribute_cute">キュート</string>
+    <!-- idols.attribute.fairy: ブランド内の属性の名前 (ゲームの公式の属性名)。Android のフィルタシートの属性チップ。判定は英字の内部値で行う。ko は韓国のファンが使う音訳。ミリオンライブ・765AS -->
+    <string name="idols_attribute_fairy">フェアリー</string>
+    <!-- idols.attribute.intelli: ブランド内の属性の名前 (ゲームの公式の属性名)。Android のフィルタシートの属性チップ。判定は英字の内部値で行う。ko は韓国のファンが使う音訳。SideM -->
+    <string name="idols_attribute_intelli">インテリ</string>
+    <!-- idols.attribute.mental: ブランド内の属性の名前 (ゲームの公式の属性名)。Android のフィルタシートの属性チップ。判定は英字の内部値で行う。ko は韓国のファンが使う音訳。SideM -->
+    <string name="idols_attribute_mental">メンタル</string>
+    <!-- idols.attribute.passion: ブランド内の属性の名前 (ゲームの公式の属性名)。Android のフィルタシートの属性チップ。判定は英字の内部値で行う。ko は韓国のファンが使う音訳。シンデレラガールズ -->
+    <string name="idols_attribute_passion">パッション</string>
+    <!-- idols.attribute.physical: ブランド内の属性の名前 (ゲームの公式の属性名)。Android のフィルタシートの属性チップ。判定は英字の内部値で行う。ko は韓国のファンが使う音訳。SideM -->
+    <string name="idols_attribute_physical">フィジカル</string>
+    <!-- idols.attribute.princess: ブランド内の属性の名前 (ゲームの公式の属性名)。Android のフィルタシートの属性チップ。判定は英字の内部値で行う。ko は韓国のファンが使う音訳。ミリオンライブ・765AS -->
+    <string name="idols_attribute_princess">プリンセス</string>
+    <!-- idols.birth_month.empty: 誕生月で絞ったアイドル一覧が空のとき (Android) -->
+    <string name="idols_birth_month_empty">アイドルが見つかりません</string>
+    <!-- idols.birth_month.title: 誕生月で絞ったアイドル一覧の見出し (Android)。month は 1〜12。iOS の同じ画面は FilteredIdolsView (filtered) -->
+    <string name="idols_birth_month_title">%1$d月生まれのアイドル</string>
+    <!-- idols.detail.cast_shows.header: ライブのタブの節の見出し。このアイドルが出演した公演 (右に件数) -->
+    <string name="idols_detail_cast_shows_header">出演履歴</string>
+    <!-- idols.detail.community.login_dialog: 未ログインでタグを付けようとしたときのダイアログの本文 (Android) -->
+    <string name="idols_detail_community_login_dialog">タグ付け・投票にはログインが必要です。</string>
+    <!-- idols.detail.community.login_prompt: コミュニティのタブの先頭に出す、未ログインの人への案内 -->
+    <string name="idols_detail_community_login_prompt">タグ付け・投票にはログインが必要です</string>
+    <!-- idols.detail.hero.change_icon.a11y: アバター右下のカメラボタンの読み上げ (Android)。選んだ写真がアイコンになる -->
+    <string name="idols_detail_hero_change_icon_a11y">アイコン写真を変更</string>
+    <!-- idols.detail.hero.favorite: 詳細の上部のボタン。お気に入りにする (Android は状態によらずこの文言) -->
+    <string name="idols_detail_hero_favorite">お気に入り</string>
+    <!-- idols.detail.hero.pick: 詳細の上部のボタン。担当 (推し) にする/外す。担当にしているときも同じ文言 -->
+    <string name="idols_detail_hero_pick">担当</string>
+    <!-- idols.detail.live.empty.message: ライブのタブで記録が 1 件も無いときの説明 -->
+    <string name="idols_detail_live_empty_message">このアイドルのライブ出演・歌唱記録はまだ登録されていません。</string>
+    <!-- idols.detail.live.empty.title_android: Android の文言。iOS の detail.live.empty.title と ja が違う (統一はオーナーが別 PR で) -->
+    <string name="idols_detail_live_empty_title_android">ライブ記録はまだありません</string>
+    <!-- idols.detail.menu.a11y: 詳細の上部バー右のメニューボタン (︙) の読み上げ (Android) -->
+    <string name="idols_detail_menu_a11y">その他</string>
+    <!-- idols.detail.menu.edit: 詳細のメニュー項目。アイドル情報を編集する -->
+    <string name="idols_detail_menu_edit">編集</string>
+    <!-- idols.detail.menu.history: 詳細のメニュー項目。このアイドルの編集履歴を見る -->
+    <string name="idols_detail_menu_history">編集履歴</string>
+    <!-- idols.detail.performed_songs.header: ライブのタブの節の見出し。このアイドルがライブで歌った曲 (右に曲数) -->
+    <string name="idols_detail_performed_songs_header">ライブ歌唱曲</string>
+    <!-- idols.detail.profile.header: プロフィールのタブの節の見出し (Android) -->
+    <string name="idols_detail_profile_header">プロフィール</string>
+    <!-- idols.detail.same_profile.birth_place: 出身地のチップ。place は DB の出身地 (都道府県名など。訳さない) -->
+    <string name="idols_detail_same_profile_birth_place">%1$s出身</string>
+    <!-- idols.detail.same_profile.blood_type: 血液型のチップ。type は DB の血液型 (A・B・O・AB) -->
+    <string name="idols_detail_same_profile_blood_type">%1$s型</string>
+    <!-- idols.detail.same_profile.header: プロフィールの属性 (ブランド・星座・出身地・血液型) から同じ人の一覧へ飛ぶチップの節の見出し (Android) -->
+    <string name="idols_detail_same_profile_header">同じプロフィールのアイドル</string>
+    <!-- idols.detail.show.guest: 出演履歴の行のタグ。その公演にゲストで出た -->
+    <string name="idols_detail_show_guest">ゲスト</string>
+    <!-- idols.detail.show.lead: 出演履歴の行のタグ。その公演の主演 -->
+    <string name="idols_detail_show_lead">主演</string>
+    <!-- idols.detail.similar.header: タグが似ているアイドル (サーバ算出のおすすめ) の節の見出し -->
+    <string name="idols_detail_similar_header">タグが似ているアイドル</string>
+    <!-- idols.detail.song.perform_count: ライブ歌唱曲の行に出す、この曲を歌った回数。1000 回以上なら桁区切りが付く -->
+    <plurals name="idols_detail_song_perform_count">
+        <item quantity="other">%1$,d回</item>
+    </plurals>
+    <!-- idols.detail.songs.empty.message_android: Android の文言 (楽曲・ユニットのタブ)。iOS の detail.songs.empty.message と ja が違う -->
+    <string name="idols_detail_songs_empty_message_android">原曲・所属ユニットの情報はまだ登録されていません。</string>
+    <!-- idols.detail.songs.empty.title_android: Android の文言 (楽曲・ユニットのタブ)。iOS の detail.songs.empty.title と ja が違う -->
+    <string name="idols_detail_songs_empty_title_android">楽曲・ユニットがありません</string>
+    <!-- idols.detail.tab.community: 詳細の中のセグメント (ライブ / 楽曲 / プロフィール / コミュニティ) -->
+    <string name="idols_detail_tab_community">コミュニティ</string>
+    <!-- idols.detail.tab.live: 詳細の中のセグメント (ライブ / 楽曲 / プロフィール / コミュニティ) -->
+    <string name="idols_detail_tab_live">ライブ</string>
+    <!-- idols.detail.tab.profile: 詳細の中のセグメント (ライブ / 楽曲 / プロフィール / コミュニティ) -->
+    <string name="idols_detail_tab_profile">プロフィール</string>
+    <!-- idols.detail.tab.songs_android: Android の詳細の中のセグメント。iOS の detail.tab.songs と ja が違う (Android はこのタブに所属ユニットも出す) -->
+    <string name="idols_detail_tab_songs_android">楽曲・ユニット</string>
+    <!-- idols.detail.tags.action.add: タグを付ける操作。iOS はタグが無いときの空状態のボタン、Android は ＋ ボタンの読み上げ -->
+    <string name="idols_detail_tags_action_add">タグを追加</string>
+    <!-- idols.detail.tags.empty.title: タグが 1 つも無いとき -->
+    <string name="idols_detail_tags_empty_title">タグはまだありません</string>
+    <!-- idols.detail.tags.header: コミュニティタグの節の見出し -->
+    <string name="idols_detail_tags_header">タグ</string>
+    <!-- idols.detail.units.header: 所属ユニットの節の見出し (右に数)。iOS はプロフィールのタブ、Android は楽曲・ユニットのタブ -->
+    <string name="idols_detail_units_header">所属ユニット</string>
+    <!-- idols.detail.units.without_songs: 持ち歌の無いユニットの折りたたみ見出し (右に数) -->
+    <string name="idols_detail_units_without_songs">曲なしユニット</string>
+    <!-- idols.detail.upcoming.label: 次に出演する公演のカードの一行目。date は公演日を「6/21」の形 (月/日の数字) にしたもの -->
+    <string name="idols_detail_upcoming_label">次の出演 ・ %1$s</string>
+    <!-- idols.display_mode.cv_name: 表示形式の選択肢 (名前を CV = 声優の名前で出す)。iOS は IdolDisplayMode.label (保存値の rawValue とは別)、Android はフィルタシートのセグメント -->
+    <string name="idols_display_mode_cv_name">CV名</string>
+    <!-- idols.display_mode.idol_name: 表示形式の選択肢 (名前をアイドル名で出す)。iOS は IdolDisplayMode.label (保存値の rawValue とは別)、Android はフィルタシートのセグメント -->
+    <string name="idols_display_mode_idol_name">アイドル名</string>
+    <!-- idols.filter.action.apply: Android のアイドル一覧のフィルタシート。ボタン。条件を一覧に当てて閉じる -->
+    <string name="idols_filter_action_apply">適用</string>
+    <!-- idols.filter.action.reset: Android のアイドル一覧のフィルタシート。ボタン。条件を既定に戻す -->
+    <string name="idols_filter_action_reset">リセット</string>
+    <!-- idols.filter.attribute.all: Android のアイドル一覧のフィルタシート。属性のチップ。属性で絞らない -->
+    <string name="idols_filter_attribute_all">全て</string>
+    <!-- idols.filter.attribute.header: Android のアイドル一覧のフィルタシート。属性 (キュート/クール/パッション等) の節の見出し。ブランドを 1 つだけ選んだとき出る -->
+    <string name="idols_filter_attribute_header">属性</string>
+    <!-- idols.filter.brand.header: Android のアイドル一覧のフィルタシート。ブランドの節の見出し -->
+    <string name="idols_filter_brand_header">ブランド</string>
+    <!-- idols.filter.display_mode.header: Android のアイドル一覧のフィルタシート。表示形式 (アイドル名 / CV名) の節の見出し -->
+    <string name="idols_filter_display_mode_header">表示形式</string>
+    <!-- idols.filter.my_mark.favorite_only: Android のアイドル一覧のフィルタシート。スイッチ。お気に入りのアイドルだけ出す -->
+    <string name="idols_filter_my_mark_favorite_only">お気に入りのみ</string>
+    <!-- idols.filter.my_mark.header: Android のアイドル一覧のフィルタシート。マイマーク (担当・お気に入り・メモ) の節の見出し -->
+    <string name="idols_filter_my_mark_header">マイマーク</string>
+    <!-- idols.filter.my_mark.note_only: Android のアイドル一覧のフィルタシート。スイッチ。メモを書いたアイドルだけ出す -->
+    <string name="idols_filter_my_mark_note_only">メモがあるアイドルのみ</string>
+    <!-- idols.filter.my_mark.pick_only: Android のアイドル一覧のフィルタシート。スイッチ。担当のアイドルだけ出す -->
+    <string name="idols_filter_my_mark_pick_only">担当のみ</string>
+    <!-- idols.filter.show_cv.subtitle: Android のアイドル一覧のフィルタシート。「CV名を併記」スイッチの説明 -->
+    <string name="idols_filter_show_cv_subtitle">アイドル名表示中、CV名を別行で表示する</string>
+    <!-- idols.filter.show_cv.title: Android のアイドル一覧のフィルタシート。スイッチの名前。アイドル名の下に CV (声優) 名も出す -->
+    <string name="idols_filter_show_cv_title">CV名を併記</string>
+    <!-- idols.filter.sort.flat_note: Android のアイドル一覧のフィルタシート。公式順以外を選んだときの注記 -->
+    <string name="idols_filter_sort_flat_note">ブランドの区切りを外して通しで並べます</string>
+    <!-- idols.filter.sort.header: Android のアイドル一覧のフィルタシート。並び順の節の見出し -->
+    <string name="idols_filter_sort_header">並び順</string>
+    <!-- idols.filter.title: Android のアイドル一覧のフィルタシート。シートの見出し -->
+    <string name="idols_filter_title">フィルタ</string>
+    <!-- idols.gallery.action.add: ギャラリーの見出し右の、画像を選んで足すボタン -->
+    <string name="idols_gallery_action_add">追加</string>
+    <!-- idols.gallery.action.delete: ギャラリーの画像の長押しメニュー。画像を消す -->
+    <string name="idols_gallery_action_delete">削除</string>
+    <!-- idols.gallery.action.set_primary: ギャラリーの画像の長押しメニュー。その画像をアイコン (先頭) にする。ko は汎用ギャラリーの gallery.action.set_primary_label (既定の呼称で「아이콘 설정」) と長押しの案内 (gallery.idol.long_press_hint の「아이콘 설정」) にそろえる -->
+    <string name="idols_gallery_action_set_primary">アイコンにする</string>
+    <!-- idols.gallery.header: 取り込んだ画像のギャラリーの節の見出し (右に枚数) -->
+    <string name="idols_gallery_header">ギャラリー</string>
+    <!-- idols.gallery.idol.empty_hint_android: Android の文言。iOS の gallery.idol.empty_hint と ja が違う -->
+    <string name="idols_gallery_idol_empty_hint_android">画像を追加すると、先頭の1枚がアイコンになります。画像はこの端末の中だけに保存され、どこにも送信されません。</string>
+    <!-- idols.gallery.idol.long_press_hint_android: Android の文言。iOS の gallery.idol.long_press_hint と ja が違う (Android は削除もここから) -->
+    <string name="idols_gallery_idol_long_press_hint_android">長押しでアイコン設定・ウィジェットのスライドショー対象・削除を切り替えられます。</string>
+    <!-- idols.gallery.primary_badge: ギャラリーの先頭の画像に付くバッジ (その画像がアイコンになる)。iOS の GallerySectionView では呼称 (entityLabel) の既定値にも使う -->
+    <string name="idols_gallery_primary_badge">アイコン</string>
+    <!-- idols.gallery.slideshow.add: ギャラリーの画像の長押しメニュー。ウィジェットのスライドショーに出す -->
+    <string name="idols_gallery_slideshow_add">スライドショーに入れる</string>
+    <!-- idols.gallery.slideshow.remove: ギャラリーの画像の長押しメニュー。ウィジェットのスライドショーに出さない -->
+    <string name="idols_gallery_slideshow_remove">スライドショーから外す</string>
+    <!-- idols.list.action.clear_filters: フィルタ (ブランド・属性・表示形式・マイマーク) をまとめて外す。iOS はメニュー項目と空状態のボタン、Android は空状態のボタン -->
+    <string name="idols_list_action_clear_filters">フィルタを解除</string>
+    <!-- idols.list.filter.a11y: 上部バーのフィルタボタンの読み上げ (Android)。iOS は共通のツールバー部品が持つ -->
+    <string name="idols_list_filter_a11y">フィルタ</string>
+    <!-- idols.list.filter_empty.message_android: Android の文言。iOS の list.filter_empty.message と ja が違う (統一はオーナーが別 PR で)。query は利用者が打った語 -->
+    <string name="idols_list_filter_empty_message_android">「%1$s」に一致するアイドルはいません。</string>
+    <!-- idols.list.filter_empty.title_android: Android の文言。iOS の list.filter_empty.title と ja が違う (統一はオーナーが別 PR で) -->
+    <string name="idols_list_filter_empty_title_android">見つかりませんでした</string>
+    <!-- idols.list.flat_header: 公式順以外で並べたとき (ブランドの区切りを外した通し表示) の見出し。order は並び順の名前 (sort_order.*。ko は「〜순」まで含む)、count は人数。ja は order のあとに「順」を足すので、五十音順では「五十音順順」になる (今の表示のまま。直すのは別 PR)。1000 人以上なら桁区切りが付く (1,000人) -->
+    <plurals name="idols_list_flat_header">
+        <item quantity="other">%1$s順 ・ %2$,d人</item>
+    </plurals>
+    <!-- idols.list.idol_count: アイドルの人数。iOS は通し並びの見出しの右、Android は誕生月のアイドル一覧の先頭。1000 人以上なら桁区切りが付く (1,000人) -->
+    <plurals name="idols_list_idol_count">
+        <item quantity="other">%1$,d人</item>
+    </plurals>
+    <!-- idols.list.name_filter.prompt: 一覧の先頭の絞り込み欄のプレースホルダ (Android)。アイドル名と CV (声優) 名の両方で絞れる -->
+    <string name="idols_list_name_filter_prompt">アイドル・CV名で絞り込み</string>
+    <!-- idols.list.no_match.message: フィルタで 1 人も残らなかったときの空状態の説明 -->
+    <string name="idols_list_no_match_message">フィルタ条件を変更するか、フィルタを解除してください。</string>
+    <!-- idols.list.no_match.title: フィルタ (ブランド・属性・マイマーク) で 1 人も残らなかったときの空状態の見出し -->
+    <string name="idols_list_no_match_title">該当するアイドルがいません</string>
+    <!-- idols.list.row.pick_add.a11y: 一覧の行のハートボタンの読み上げ (まだ担当でないとき)。Android だけ (iOS は共通部品 MyPickToggleButton) -->
+    <string name="idols_list_row_pick_add_a11y">担当に追加</string>
+    <!-- idols.list.row.pick_remove.a11y: 一覧の行のハートボタンの読み上げ (担当にしているとき)。Android だけ (iOS は共通部品 MyPickToggleButton) -->
+    <string name="idols_list_row_pick_remove_a11y">担当解除</string>
+    <!-- idols.list.tab.idols: 一覧の上のセグメント (アイドル / ユニット) のアイドル側 -->
+    <string name="idols_list_tab_idols">アイドル</string>
+    <!-- idols.list.tab.units: 一覧の上のセグメント (アイドル / ユニット) のユニット側 -->
+    <string name="idols_list_tab_units">ユニット</string>
+    <!-- idols.list.title: アイドル一覧の見出し (iOS はナビゲーションタイトル、Android は上部バーでアイドルのタブを選んでいるとき) -->
+    <string name="idols_list_title">アイドル</string>
+    <!-- idols.list.title_units: Android のアイドル一覧の上部バーの見出し (ユニットのタブを選んでいるとき)。iOS のユニット一覧の見出しは units.list.title -->
+    <string name="idols_list_title_units">ユニット</string>
+    <!-- idols.list.view_mode.grid: 一覧/グリッドの切替 (今はリスト表示で、押すとグリッド表示になる)。iOS はアイドル一覧のメニュー項目と選択画面のボタンの読み上げ、Android は上部バーのボタンの読み上げ -->
+    <string name="idols_list_view_mode_grid">グリッド表示</string>
+    <!-- idols.list.view_mode.list: 一覧/グリッドの切替 (今はグリッド表示で、押すとリスト表示になる)。iOS はアイドル一覧のメニュー項目と選択画面のボタンの読み上げ、Android は上部バーのボタンの読み上げ -->
+    <string name="idols_list_view_mode_list">リスト表示</string>
+    <!-- idols.meta.separator: 日付・会場・公演名を 1 行に並べるときの区切り (前後の空白込み)。出演履歴・次の出演・披露履歴の行 -->
+    <string name="idols_meta_separator">" ・ "</string>
+    <!-- idols.song_history.empty.message: 披露履歴が 1 件も無いときの説明。idol はアイドル名、song は曲名 (どちらもデータ。訳さない) -->
+    <string name="idols_song_history_empty_message">%1$s による「%2$s」の披露記録はありません</string>
+    <!-- idols.song_history.empty.title: 披露履歴が 1 件も無いときの見出し -->
+    <string name="idols_song_history_empty_title">披露履歴がありません</string>
+    <!-- idols.song_history.header: アイドル × 曲の披露履歴 (この人がこの曲を歌った公演) の節の見出し (右に件数) -->
+    <string name="idols_song_history_header">披露履歴</string>
+    <!-- idols.sort_order.age: アイドル一覧の並び順の名前。表示用で、保存値 (iOS の rawValue・Android の enum 名) とは別。ja は今の表示 (コアの表示名と同じ) のまま。ko は「〜순」まで含める (ja は見出し list.flat_header の側で「順」を足す)。年齢順 -->
+    <string name="idols_sort_order_age">年齢</string>
+    <!-- idols.sort_order.birthday: アイドル一覧の並び順の名前。表示用で、保存値 (iOS の rawValue・Android の enum 名) とは別。ja は今の表示 (コアの表示名と同じ) のまま。ko は「〜순」まで含める (ja は見出し list.flat_header の側で「順」を足す)。誕生日 (月日) 順 -->
+    <string name="idols_sort_order_birthday">誕生日</string>
+    <!-- idols.sort_order.debut: アイドル一覧の並び順の名前。表示用で、保存値 (iOS の rawValue・Android の enum 名) とは別。ja は今の表示 (コアの表示名と同じ) のまま。ko は「〜순」まで含める (ja は見出し list.flat_header の側で「順」を足す)。デビュー日 (実装日) 順 -->
+    <string name="idols_sort_order_debut">デビュー日</string>
+    <!-- idols.sort_order.height: アイドル一覧の並び順の名前。表示用で、保存値 (iOS の rawValue・Android の enum 名) とは別。ja は今の表示 (コアの表示名と同じ) のまま。ko は「〜순」まで含める (ja は見出し list.flat_header の側で「順」を足す)。身長順 -->
+    <string name="idols_sort_order_height">身長</string>
+    <!-- idols.sort_order.name_kana: アイドル一覧の並び順の名前。表示用で、保存値 (iOS の rawValue・Android の enum 名) とは別。ja は今の表示 (コアの表示名と同じ) のまま。ko は「〜순」まで含める (ja は見出し list.flat_header の側で「順」を足す)。名前の日本語のよみ (かな) の五十音順。ko は「50음순」(「가나다순」はハングルの順と読めるので使わない) -->
+    <string name="idols_sort_order_name_kana">五十音順</string>
+    <!-- idols.sort_order.official: アイドル一覧の並び順の名前。表示用で、保存値 (iOS の rawValue・Android の enum 名) とは別。ja は今の表示 (コアの表示名と同じ) のまま。ko は「〜순」まで含める (ja は見出し list.flat_header の側で「順」を足す)。公式 = ブランドごとの公式の並び -->
+    <string name="idols_sort_order_official">公式順</string>
+    <!-- idols.sort_order.weight: アイドル一覧の並び順の名前。表示用で、保存値 (iOS の rawValue・Android の enum 名) とは別。ja は今の表示 (コアの表示名と同じ) のまま。ko は「〜순」まで含める (ja は見出し list.flat_header の側で「順」を足す)。体重順 -->
+    <string name="idols_sort_order_weight">体重</string>
+    <!-- idols.write_action.add_personal_tag: 端末への書き込みに失敗したときの知らせに入る操作の名前 (LocalWriteFailure の action。知らせの本文は「{action}に失敗しました。…」)。名詞句で訳す。Android のマイタグの追加 -->
+    <string name="idols_write_action_add_personal_tag">マイタグの追加</string>
+    <!-- idols.write_action.remove_personal_tag: 端末への書き込みに失敗したときの知らせに入る操作の名前 (LocalWriteFailure の action。知らせの本文は「{action}に失敗しました。…」)。名詞句で訳す。Android のマイタグの削除 -->
+    <string name="idols_write_action_remove_personal_tag">マイタグの削除</string>
+    <!-- idols.write_action.toggle_favorite: 端末への書き込みに失敗したときの知らせに入る操作の名前 (LocalWriteFailure の action。知らせの本文は「{action}に失敗しました。…」)。名詞句で訳す。お気に入りにする/外す -->
+    <string name="idols_write_action_toggle_favorite">お気に入りの切り替え</string>
+    <!-- idols.write_action.toggle_pick: 端末への書き込みに失敗したときの知らせに入る操作の名前 (LocalWriteFailure の action。知らせの本文は「{action}に失敗しました。…」)。名詞句で訳す。担当にする/外す -->
+    <string name="idols_write_action_toggle_pick">担当の切り替え</string>
+</resources>

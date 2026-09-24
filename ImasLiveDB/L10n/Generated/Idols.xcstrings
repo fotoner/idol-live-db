@@ -1,0 +1,1962 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "idols.copy.cv" : {
+      "comment" : "詳細の名前の長押しメニュー。CV = 担当声優 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CV名をコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "CV 이름 복사"
+          }
+        }
+      }
+    },
+    "idols.copy.kana" : {
+      "comment" : "アイドル名の長押しメニュー。よみ = 名前の読み仮名 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "よみをコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "읽는 법 복사"
+          }
+        }
+      }
+    },
+    "idols.copy.name" : {
+      "comment" : "アイドル名の長押しメニュー (一覧の行・詳細の名前) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル名をコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 이름 복사"
+          }
+        }
+      }
+    },
+    "idols.detail.cast_shows.header" : {
+      "comment" : "ライブのタブの節の見出し。このアイドルが出演した公演 (右に件数) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出演履歴"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출연 기록"
+          }
+        }
+      }
+    },
+    "idols.detail.community.login_prompt" : {
+      "comment" : "コミュニティのタブの先頭に出す、未ログインの人への案内 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ付け・投票にはログインが必要です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그를 달거나 투표하려면 로그인해야 해요"
+          }
+        }
+      }
+    },
+    "idols.detail.hero.favorite" : {
+      "comment" : "詳細の上部のボタン。お気に入りにする (Android は状態によらずこの文言) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入り"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기"
+          }
+        }
+      }
+    },
+    "idols.detail.hero.favorite_on" : {
+      "comment" : "詳細の上部のボタン。お気に入りにしているとき。ko は状態を表す「즐겨찾기됨」(「즐겨찾기함」は「お気に入りの箱・フォルダ」と読めるので使わない) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入り済"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기됨"
+          }
+        }
+      }
+    },
+    "idols.detail.hero.note" : {
+      "comment" : "詳細の上部のボタン。メモを書く (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メモ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "메모"
+          }
+        }
+      }
+    },
+    "idols.detail.hero.note_on" : {
+      "comment" : "詳細の上部のボタン。メモを書いてあるとき (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メモあり"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "메모 있음"
+          }
+        }
+      }
+    },
+    "idols.detail.hero.pick" : {
+      "comment" : "詳細の上部のボタン。担当 (推し) にする/外す。担当にしているときも同じ文言 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당"
+          }
+        }
+      }
+    },
+    "idols.detail.live.empty.message" : {
+      "comment" : "ライブのタブで記録が 1 件も無いときの説明 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このアイドルのライブ出演・歌唱記録はまだ登録されていません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 아이돌의 라이브 출연·가창 기록이 아직 등록되지 않았어요."
+          }
+        }
+      }
+    },
+    "idols.detail.live.empty.title" : {
+      "comment" : "ライブのタブで出演・歌唱の記録が 1 件も無いときの見出し (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ情報がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브 정보가 없어요"
+          }
+        }
+      }
+    },
+    "idols.detail.menu.edit" : {
+      "comment" : "詳細のメニュー項目。アイドル情報を編集する (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "편집"
+          }
+        }
+      }
+    },
+    "idols.detail.menu.history" : {
+      "comment" : "詳細のメニュー項目。このアイドルの編集履歴を見る (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編集履歴"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "편집 기록"
+          }
+        }
+      }
+    },
+    "idols.detail.performed_songs.header" : {
+      "comment" : "ライブのタブの節の見出し。このアイドルがライブで歌った曲 (右に曲数) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ歌唱曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브 가창곡"
+          }
+        }
+      }
+    },
+    "idols.detail.personal_tags.action.remove" : {
+      "comment" : "マイタグの長押しメニュー (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイタグを削除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이 태그 삭제"
+          }
+        }
+      }
+    },
+    "idols.detail.personal_tags.caption" : {
+      "comment" : "マイタグの節の見出しの下の説明 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分だけに表示されます (コミュニティには公開されません)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "나에게만 보여요 (커뮤니티에는 공개되지 않아요)"
+          }
+        }
+      }
+    },
+    "idols.detail.personal_tags.header" : {
+      "comment" : "マイタグ (自分だけのタグ) の節の見出し。Android は共通部品 PersonalTagsSection にある (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイタグ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이 태그"
+          }
+        }
+      }
+    },
+    "idols.detail.personal_tags.placeholder" : {
+      "comment" : "マイタグの入力欄のプレースホルダ。例の語も訳す (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイタグを追加 (例: 聞いた)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이 태그 추가 (예: 들었음)"
+          }
+        }
+      }
+    },
+    "idols.detail.show.guest" : {
+      "comment" : "出演履歴の行のタグ。その公演にゲストで出た (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゲスト"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "게스트"
+          }
+        }
+      }
+    },
+    "idols.detail.show.lead" : {
+      "comment" : "出演履歴の行のタグ。その公演の主演 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主演"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "주연"
+          }
+        }
+      }
+    },
+    "idols.detail.similar.caption" : {
+      "comment" : "タグが似ているアイドルの節の見出しの下の説明 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "つけられたタグが似ているアイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "달린 태그가 비슷한 아이돌"
+          }
+        }
+      }
+    },
+    "idols.detail.similar.header" : {
+      "comment" : "タグが似ているアイドル (サーバ算出のおすすめ) の節の見出し (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグが似ているアイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그가 비슷한 아이돌"
+          }
+        }
+      }
+    },
+    "idols.detail.similar.shared_tags" : {
+      "comment" : "おすすめのアイドルの下に出す、共通するタグの数 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "タグ%arg個一致"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "태그 %arg개 일치"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "idols.detail.song.collected" : {
+      "comment" : "楽曲の行のバッジ。ライブでその曲を聴いた (現地回収した)。ko は用語集 (回収済み → 회수함) に合わせる。units.detail.songs.collected (今は「회수 완료」) もそろえる (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回収済"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "회수함"
+          }
+        }
+      }
+    },
+    "idols.detail.song.perform_count" : {
+      "comment" : "ライブ歌唱曲の行に出す、この曲を歌った回数。1000 回以上なら桁区切りが付く (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg回"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg회"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "idols.detail.songs.empty.message" : {
+      "comment" : "楽曲のタブで原曲が 1 曲も無いときの説明。原曲 = このアイドルが持ち歌として歌う曲 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "原曲の情報はまだ登録されていません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "원곡 정보가 아직 등록되지 않았어요."
+          }
+        }
+      }
+    },
+    "idols.detail.songs.empty.title" : {
+      "comment" : "楽曲のタブで原曲が 1 曲も無いときの見出し (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡이 없어요"
+          }
+        }
+      }
+    },
+    "idols.detail.tab.community" : {
+      "comment" : "詳細の中のセグメント (ライブ / 楽曲 / プロフィール / コミュニティ) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コミュニティ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "커뮤니티"
+          }
+        }
+      }
+    },
+    "idols.detail.tab.live" : {
+      "comment" : "詳細の中のセグメント (ライブ / 楽曲 / プロフィール / コミュニティ) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브"
+          }
+        }
+      }
+    },
+    "idols.detail.tab.profile" : {
+      "comment" : "詳細の中のセグメント (ライブ / 楽曲 / プロフィール / コミュニティ) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロフィール"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "프로필"
+          }
+        }
+      }
+    },
+    "idols.detail.tab.songs" : {
+      "comment" : "詳細の中のセグメント (ライブ / 楽曲 / プロフィール / コミュニティ) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡"
+          }
+        }
+      }
+    },
+    "idols.detail.tags.action.add" : {
+      "comment" : "タグを付ける操作。iOS はタグが無いときの空状態のボタン、Android は ＋ ボタンの読み上げ (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグを追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 추가"
+          }
+        }
+      }
+    },
+    "idols.detail.tags.action.remove" : {
+      "comment" : "自分が付けたタグの長押しメニュー (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグを外す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 해제"
+          }
+        }
+      }
+    },
+    "idols.detail.tags.action.show_detail" : {
+      "comment" : "タグの長押しメニュー (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ詳細を見る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 상세 보기"
+          }
+        }
+      }
+    },
+    "idols.detail.tags.add_button" : {
+      "comment" : "タグの節の見出し右の ＋ 付きボタン (短い形) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그"
+          }
+        }
+      }
+    },
+    "idols.detail.tags.empty.message" : {
+      "comment" : "タグが 1 つも無いときの誘い文句 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このアイドルを一言で表すタグを付けてみませんか？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 아이돌을 한마디로 표현하는 태그를 달아 볼까요?"
+          }
+        }
+      }
+    },
+    "idols.detail.tags.empty.title" : {
+      "comment" : "タグが 1 つも無いとき (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグはまだありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 태그가 없어요"
+          }
+        }
+      }
+    },
+    "idols.detail.tags.header" : {
+      "comment" : "コミュニティタグの節の見出し (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그"
+          }
+        }
+      }
+    },
+    "idols.detail.units.header" : {
+      "comment" : "所属ユニットの節の見出し (右に数)。iOS はプロフィールのタブ、Android は楽曲・ユニットのタブ (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所属ユニット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "소속 유닛"
+          }
+        }
+      }
+    },
+    "idols.detail.units.without_songs" : {
+      "comment" : "持ち歌の無いユニットの折りたたみ見出し (右に数) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲なしユニット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 없는 유닛"
+          }
+        }
+      }
+    },
+    "idols.detail.upcoming.label" : {
+      "comment" : "次に出演する公演のカードの一行目。date は公演日を「6/21」の形 (月/日の数字) にしたもの (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次の出演 ・ %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다음 출연 · %1$@"
+          }
+        }
+      }
+    },
+    "idols.display_mode.cv_name" : {
+      "comment" : "表示形式の選択肢 (名前を CV = 声優の名前で出す)。iOS は IdolDisplayMode.label (保存値の rawValue とは別)、Android はフィルタシートのセグメント (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CV名"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "CV 이름"
+          }
+        }
+      }
+    },
+    "idols.display_mode.idol_name" : {
+      "comment" : "表示形式の選択肢 (名前をアイドル名で出す)。iOS は IdolDisplayMode.label (保存値の rawValue とは別)、Android はフィルタシートのセグメント (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル名"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 이름"
+          }
+        }
+      }
+    },
+    "idols.gallery.action.add" : {
+      "comment" : "ギャラリーの見出し右の、画像を選んで足すボタン (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "추가"
+          }
+        }
+      }
+    },
+    "idols.gallery.action.delete" : {
+      "comment" : "ギャラリーの画像の長押しメニュー。画像を消す (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "삭제"
+          }
+        }
+      }
+    },
+    "idols.gallery.action.set_primary" : {
+      "comment" : "ギャラリーの画像の長押しメニュー。その画像をアイコン (先頭) にする。ko は汎用ギャラリーの gallery.action.set_primary_label (既定の呼称で「아이콘 설정」) と長押しの案内 (gallery.idol.long_press_hint の「아이콘 설정」) にそろえる (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイコンにする"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이콘 설정"
+          }
+        }
+      }
+    },
+    "idols.gallery.action.set_primary_label" : {
+      "comment" : "汎用ギャラリー (GallerySectionView、今はユニット詳細) の長押しメニュー。label は呼称 (既定は gallery.primary_badge =「アイコン」)。ko は助詞を使わない「{label} 설정」(label の終わりの音で助詞の形が変わらないように。アイドルの gallery.action.set_primary「아이콘 설정」・案内の gallery.long_press_hint_label「{label} 설정·삭제」とそろえる) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@にする"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 설정"
+          }
+        }
+      }
+    },
+    "idols.gallery.empty_hint_label" : {
+      "comment" : "汎用ギャラリー (GallerySectionView) で画像が無いときの説明。label は呼称 (既定は「アイコン」)。ko は名詞の終わりで形が変わらない助詞「에」を使う (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像を追加すると、先頭の1枚が%1$@になります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이미지를 추가하면 첫 번째 이미지를 %1$@에 사용해요."
+          }
+        }
+      }
+    },
+    "idols.gallery.header" : {
+      "comment" : "取り込んだ画像のギャラリーの節の見出し (右に枚数) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ギャラリー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "갤러리"
+          }
+        }
+      }
+    },
+    "idols.gallery.idol.empty_hint" : {
+      "comment" : "アイドル詳細のギャラリーで画像が無いときの説明 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像を追加すると、先頭の1枚がアイコンになります。ホーム画面ウィジェットにも使えます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이미지를 추가하면 첫 번째 이미지가 아이콘이 돼요. 홈 화면 위젯에도 쓸 수 있어요."
+          }
+        }
+      }
+    },
+    "idols.gallery.idol.long_press_hint" : {
+      "comment" : "アイドル詳細のギャラリーの下の操作の案内。スライドショー = ホーム画面ウィジェットで順に出す画像 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長押しでアイコン設定・ウィジェットのスライドショー対象を切り替えられます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "길게 눌러 아이콘 설정·위젯 슬라이드쇼 대상을 바꿀 수 있어요."
+          }
+        }
+      }
+    },
+    "idols.gallery.long_press_hint_label" : {
+      "comment" : "汎用ギャラリー (GallerySectionView) の下の操作の案内。label は呼称 (既定は「アイコン」) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長押しで%1$@に設定・削除できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "길게 눌러 %1$@ 설정·삭제를 할 수 있어요."
+          }
+        }
+      }
+    },
+    "idols.gallery.primary_badge" : {
+      "comment" : "ギャラリーの先頭の画像に付くバッジ (その画像がアイコンになる)。iOS の GallerySectionView では呼称 (entityLabel) の既定値にも使う (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイコン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이콘"
+          }
+        }
+      }
+    },
+    "idols.gallery.slideshow.add" : {
+      "comment" : "ギャラリーの画像の長押しメニュー。ウィジェットのスライドショーに出す (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スライドショーに入れる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "슬라이드쇼에 넣기"
+          }
+        }
+      }
+    },
+    "idols.gallery.slideshow.excluded.a11y" : {
+      "comment" : "ギャラリーの画像の右下の印の読み上げ。ウィジェットのスライドショーに出さない画像 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スライドショー対象外"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "슬라이드쇼 제외됨"
+          }
+        }
+      }
+    },
+    "idols.gallery.slideshow.remove" : {
+      "comment" : "ギャラリーの画像の長押しメニュー。ウィジェットのスライドショーに出さない (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スライドショーから外す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "슬라이드쇼에서 빼기"
+          }
+        }
+      }
+    },
+    "idols.list.action.clear_filters" : {
+      "comment" : "フィルタ (ブランド・属性・表示形式・マイマーク) をまとめて外す。iOS はメニュー項目と空状態のボタン、Android は空状態のボタン (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フィルタを解除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터 해제"
+          }
+        }
+      }
+    },
+    "idols.list.filter_empty.action.clear" : {
+      "comment" : "絞り込みの語 (一覧の上の入力欄に打った語) を消すボタン。ko はフィルタ (ブランド・属性など) をまとめて外す list.action.clear_filters (필터 해제) と分けるため、用語集の絞り込みの別訳「찾기」を使う (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "絞り込みを解除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "찾기 해제"
+          }
+        }
+      }
+    },
+    "idols.list.filter_empty.message" : {
+      "comment" : "絞り込みの語で 1 人も残らなかったときの説明。query は利用者が打った語 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」に一致するアイドルがいません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@”에 해당하는 아이돌이 없어요"
+          }
+        }
+      }
+    },
+    "idols.list.filter_empty.title" : {
+      "comment" : "絞り込みの語で 1 人も残らなかったときの空状態の見出し。ko は list.filter_empty.action.clear と同じく「찾기」を使う (フィルタの「필터」と分ける) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "絞り込み結果がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "찾기 결과가 없어요"
+          }
+        }
+      }
+    },
+    "idols.list.flat_header" : {
+      "comment" : "公式順以外で並べたとき (ブランドの区切りを外した通し表示) の見出し。order は並び順の名前 (sort_order.*。ko は「〜순」まで含む)、count は人数。ja は order のあとに「順」を足すので、五十音順では「五十音順順」になる (今の表示のまま。直すのは別 PR)。1000 人以上なら桁区切りが付く (1,000人) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%1$@順 ・ %arg人"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%1$@ · %arg명"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "idols.list.flat_list.heading" : {
+      "comment" : "リスト表示の通し並び (公式順以外) の左の見出し。右に人数 (list.idol_count)。order は sort_order.* (ko は「〜순」まで含むので、ko はそのまま出す) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@"
+          }
+        }
+      }
+    },
+    "idols.list.idol_count" : {
+      "comment" : "アイドルの人数。iOS は通し並びの見出しの右、Android は誕生月のアイドル一覧の先頭。1000 人以上なら桁区切りが付く (1,000人) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg人"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg명"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "idols.list.no_match.message" : {
+      "comment" : "フィルタで 1 人も残らなかったときの空状態の説明 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フィルタ条件を変更するか、フィルタを解除してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터 조건을 바꾸거나 필터를 해제해 주세요."
+          }
+        }
+      }
+    },
+    "idols.list.no_match.title" : {
+      "comment" : "フィルタ (ブランド・属性・マイマーク) で 1 人も残らなかったときの空状態の見出し (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "該当するアイドルがいません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "해당하는 아이돌이 없어요"
+          }
+        }
+      }
+    },
+    "idols.list.search_field.prompt" : {
+      "comment" : "ナビバーの中の絞り込み欄のプレースホルダ。アイドル名と CV (声優) 名の両方で絞れる (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル名・CV名"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 이름·CV 이름"
+          }
+        }
+      }
+    },
+    "idols.list.tab.idols" : {
+      "comment" : "一覧の上のセグメント (アイドル / ユニット) のアイドル側 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌"
+          }
+        }
+      }
+    },
+    "idols.list.tab.units" : {
+      "comment" : "一覧の上のセグメント (アイドル / ユニット) のユニット側 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛"
+          }
+        }
+      }
+    },
+    "idols.list.title" : {
+      "comment" : "アイドル一覧の見出し (iOS はナビゲーションタイトル、Android は上部バーでアイドルのタブを選んでいるとき) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌"
+          }
+        }
+      }
+    },
+    "idols.list.view_mode.grid" : {
+      "comment" : "一覧/グリッドの切替 (今はリスト表示で、押すとグリッド表示になる)。iOS はアイドル一覧のメニュー項目と選択画面のボタンの読み上げ、Android は上部バーのボタンの読み上げ (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "グリッド表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "그리드로 보기"
+          }
+        }
+      }
+    },
+    "idols.list.view_mode.list" : {
+      "comment" : "一覧/グリッドの切替 (今はグリッド表示で、押すとリスト表示になる)。iOS はアイドル一覧のメニュー項目と選択画面のボタンの読み上げ、Android は上部バーのボタンの読み上げ (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リスト表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "목록으로 보기"
+          }
+        }
+      }
+    },
+    "idols.meta.separator" : {
+      "comment" : "日付・会場・公演名を 1 行に並べるときの区切り (前後の空白込み)。出演履歴・次の出演・披露履歴の行 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " ・ "
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : " · "
+          }
+        }
+      }
+    },
+    "idols.picker.action.cancel" : {
+      "comment" : "アイドル・ユニットの選択画面の左上のボタン。選ばずに閉じる (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャンセル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "취소"
+          }
+        }
+      }
+    },
+    "idols.picker.action.done" : {
+      "comment" : "アイドル・ユニットの選択画面の右上のボタン。選んだものを確定して閉じる (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "決定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "완료"
+          }
+        }
+      }
+    },
+    "idols.picker.add_from_unit" : {
+      "comment" : "アイドル選択画面 (IdolPickerView)。ユニットを選んでメンバーをまとめて足す。ボタンの読み上げと、ユニットを選ぶ画面の見出し (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニットから追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛에서 추가"
+          }
+        }
+      }
+    },
+    "idols.picker.brand_filter.all" : {
+      "comment" : "選択画面の上のブランドのチップ。ブランドで絞らない (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "idols.picker.empty.message_brand" : {
+      "comment" : "アイドル選択画面 (IdolPickerView)。選んだブランドに 1 人もいないときの説明 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このブランドに該当するアイドルがいません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 브랜드에 해당하는 아이돌이 없어요"
+          }
+        }
+      }
+    },
+    "idols.picker.empty.message_query" : {
+      "comment" : "アイドル選択画面 (IdolPickerView)。検索の語で 1 人も残らなかったときの説明。query は利用者が打った語 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」に一致するアイドルがいません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@”에 해당하는 아이돌이 없어요"
+          }
+        }
+      }
+    },
+    "idols.picker.empty.title" : {
+      "comment" : "アイドル選択画面 (IdolPickerView)。1 人も残らなかったときの見出し (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "見つかりません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "찾을 수 없어요"
+          }
+        }
+      }
+    },
+    "idols.picker.search_prompt" : {
+      "comment" : "アイドル選択画面 (IdolPickerView)。検索欄のプレースホルダ (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル名 / CV名で検索"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 이름 / CV 이름으로 검색"
+          }
+        }
+      }
+    },
+    "idols.picker.title" : {
+      "comment" : "アイドル選択画面 (IdolPickerView)。既定のナビゲーションタイトル (呼び出し元が別のタイトルを渡すこともある)。ツールバーが混むので短く (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌"
+          }
+        }
+      }
+    },
+    "idols.picker.unit_search_prompt" : {
+      "comment" : "ユニットを選ぶ画面の検索欄のプレースホルダ (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニット名で検索"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛 이름으로 검색"
+          }
+        }
+      }
+    },
+    "idols.profile.birthday" : {
+      "comment" : "誕生日の表示 (Idol.birthdayDisplay。カレンダーの日の詳細などに出る)。month・day は数字 (桁区切りなし) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@月%2$@日"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@월 %2$@일"
+          }
+        }
+      }
+    },
+    "idols.song_history.empty.message" : {
+      "comment" : "披露履歴が 1 件も無いときの説明。idol はアイドル名、song は曲名 (どちらもデータ。訳さない) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ による「%2$@」の披露記録はありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@의 “%2$@” 공연 기록이 없어요"
+          }
+        }
+      }
+    },
+    "idols.song_history.empty.title" : {
+      "comment" : "披露履歴が 1 件も無いときの見出し (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "披露履歴がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 기록이 없어요"
+          }
+        }
+      }
+    },
+    "idols.song_history.header" : {
+      "comment" : "アイドル × 曲の披露履歴 (この人がこの曲を歌った公演) の節の見出し (右に件数) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "披露履歴"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 기록"
+          }
+        }
+      }
+    },
+    "idols.sort_order.age" : {
+      "comment" : "アイドル一覧の並び順の名前。表示用で、保存値 (iOS の rawValue・Android の enum 名) とは別。ja は今の表示 (コアの表示名と同じ) のまま。ko は「〜순」まで含める (ja は見出し list.flat_header の側で「順」を足す)。年齢順 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "年齢"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "나이순"
+          }
+        }
+      }
+    },
+    "idols.sort_order.birthday" : {
+      "comment" : "アイドル一覧の並び順の名前。表示用で、保存値 (iOS の rawValue・Android の enum 名) とは別。ja は今の表示 (コアの表示名と同じ) のまま。ko は「〜순」まで含める (ja は見出し list.flat_header の側で「順」を足す)。誕生日 (月日) 順 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "誕生日"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "생일순"
+          }
+        }
+      }
+    },
+    "idols.sort_order.debut" : {
+      "comment" : "アイドル一覧の並び順の名前。表示用で、保存値 (iOS の rawValue・Android の enum 名) とは別。ja は今の表示 (コアの表示名と同じ) のまま。ko は「〜순」まで含める (ja は見出し list.flat_header の側で「順」を足す)。デビュー日 (実装日) 順 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "デビュー日"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "데뷔일순"
+          }
+        }
+      }
+    },
+    "idols.sort_order.height" : {
+      "comment" : "アイドル一覧の並び順の名前。表示用で、保存値 (iOS の rawValue・Android の enum 名) とは別。ja は今の表示 (コアの表示名と同じ) のまま。ko は「〜순」まで含める (ja は見出し list.flat_header の側で「順」を足す)。身長順 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "身長"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "키순"
+          }
+        }
+      }
+    },
+    "idols.sort_order.name_kana" : {
+      "comment" : "アイドル一覧の並び順の名前。表示用で、保存値 (iOS の rawValue・Android の enum 名) とは別。ja は今の表示 (コアの表示名と同じ) のまま。ko は「〜순」まで含める (ja は見出し list.flat_header の側で「順」を足す)。名前の日本語のよみ (かな) の五十音順。ko は「50음순」(「가나다순」はハングルの順と読めるので使わない) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "五十音順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "50음순"
+          }
+        }
+      }
+    },
+    "idols.sort_order.official" : {
+      "comment" : "アイドル一覧の並び順の名前。表示用で、保存値 (iOS の rawValue・Android の enum 名) とは別。ja は今の表示 (コアの表示名と同じ) のまま。ko は「〜순」まで含める (ja は見出し list.flat_header の側で「順」を足す)。公式 = ブランドごとの公式の並び (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公式順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공식순"
+          }
+        }
+      }
+    },
+    "idols.sort_order.weight" : {
+      "comment" : "アイドル一覧の並び順の名前。表示用で、保存値 (iOS の rawValue・Android の enum 名) とは別。ja は今の表示 (コアの表示名と同じ) のまま。ko は「〜순」まで含める (ja は見出し list.flat_header の側で「順」を足す)。体重順 (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "体重"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "몸무게순"
+          }
+        }
+      }
+    },
+    "idols.stacked_avatars.a11y" : {
+      "comment" : "出演者のアイコンを重ねて並べた部品 (StackedAvatars) の読み上げ。count は人数。1000 人以上なら桁区切りが付く (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "出演者 %arg名"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "출연자 %arg명"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "idols.unit_picker.title" : {
+      "comment" : "ユニットを複数選ぶ画面 (お題の作成・投票) のナビゲーションタイトル。count は選んでいる数。1000 以上なら桁区切りが付く (もとの navigationTitle の文字列補間も LocalizedStringKey なので同じ) (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "ユニットを選択 (%arg)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "유닛 선택 (%arg)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "idols.write_action.toggle_favorite" : {
+      "comment" : "端末への書き込みに失敗したときの知らせに入る操作の名前 (LocalWriteFailure の action。知らせの本文は「{action}に失敗しました。…」)。名詞句で訳す。お気に入りにする/外す (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入りの切り替え"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기 변경"
+          }
+        }
+      }
+    },
+    "idols.write_action.toggle_pick" : {
+      "comment" : "端末への書き込みに失敗したときの知らせに入る操作の名前 (LocalWriteFailure の action。知らせの本文は「{action}に失敗しました。…」)。名詞句で訳す。担当にする/外す (i18n/catalog/idols.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当の切り替え"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 변경"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

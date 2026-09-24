@@ -38,6 +38,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.model.Brand
+import com.fugaif.imaslivedb.i18n.coreText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasFilterChip
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
 import com.fugaif.imaslivedb.ui.theme.DS
@@ -94,7 +97,7 @@ fun IdolFilterSheet(
             modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(bottom = 32.dp)
         ) {
             Text(
-                "フィルタ",
+                L10n.Idols.filterTitle.resolve(),
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
                 color = DS.ink,
@@ -102,32 +105,32 @@ fun IdolFilterSheet(
             )
             HorizontalDivider(color = DS.sep)
 
-            SectionLabel("表示形式")
+            SectionLabel(L10n.Idols.filterDisplayModeHeader.resolve())
             ImasSegmented(
-                labels = listOf("アイドル名", "CV名"),
+                labels = listOf(L10n.Idols.displayModeIdolName.resolve(), L10n.Idols.displayModeCvName.resolve()),
                 selection = if (displayMode == IdolDisplayMode.CV_NAME) 1 else 0,
                 onSelect = { displayMode = if (it == 1) IdolDisplayMode.CV_NAME else IdolDisplayMode.IDOL_NAME },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
             )
             SwitchRow(
-                title = "CV名を併記",
-                subtitle = "アイドル名表示中、CV名を別行で表示する",
+                title = L10n.Idols.filterShowCvTitle.resolve(),
+                subtitle = L10n.Idols.filterShowCvSubtitle.resolve(),
                 checked = showCV,
                 enabled = displayMode == IdolDisplayMode.IDOL_NAME,
                 onCheckedChange = { showCV = it }
             )
 
             HorizontalDivider(color = DS.sep)
-            SectionLabel("並び順")
+            SectionLabel(L10n.Idols.filterSortHeader.resolve())
             Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                 OutlinedButton(onClick = { sortMenuExpanded = true }) {
-                    Text(sortOrder.label, color = DS.ink)
+                    Text(sortOrder.labelText.resolve(), color = DS.ink)
                     Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = DS.ink2)
                 }
                 DropdownMenu(expanded = sortMenuExpanded, onDismissRequest = { sortMenuExpanded = false }) {
                     IdolSortOrder.entries.forEach { order ->
                         DropdownMenuItem(
-                            text = { Text(order.label) },
+                            text = { Text(order.labelText.resolve()) },
                             onClick = {
                                 sortOrder = order
                                 // 並び順を変えたら方向は新しい並び順の既定に戻す
@@ -140,14 +143,15 @@ fun IdolFilterSheet(
                 }
             }
             ImasSegmented(
-                labels = listOf(sortOrder.ascendingLabel, sortOrder.descendingLabel),
+                // 昇順・降順の言い回し (「年下から」等) はコアが作る
+                labels = listOf(coreText(sortOrder.ascendingLabel), coreText(sortOrder.descendingLabel)),
                 selection = if (sortAscending ?: sortOrder.defaultAscending) 0 else 1,
                 onSelect = { sortAscending = it == 0 },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
             )
             if (!sortOrder.keepsBrandGrouping) {
                 Text(
-                    "ブランドの区切りを外して通しで並べます",
+                    L10n.Idols.filterSortFlatNote.resolve(),
                     fontSize = 12.sp,
                     color = DS.ink3,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
@@ -155,7 +159,7 @@ fun IdolFilterSheet(
             }
 
             HorizontalDivider(color = DS.sep)
-            SectionLabel("ブランド")
+            SectionLabel(L10n.Idols.filterBrandHeader.resolve())
             FlowRow(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -180,24 +184,30 @@ fun IdolFilterSheet(
 
             if (attributesForBrand.isNotEmpty()) {
                 HorizontalDivider(color = DS.sep)
-                SectionLabel("属性")
+                SectionLabel(L10n.Idols.filterAttributeHeader.resolve())
                 FlowRow(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    ImasFilterChip(label = "全て", selected = attribute == null, onClick = { attribute = null })
+                    ImasFilterChip(label = L10n.Idols.filterAttributeAll.resolve(), selected = attribute == null, onClick = { attribute = null })
                     attributesForBrand.forEach { (value, label) ->
-                        ImasFilterChip(label = label, selected = attribute == value, onClick = { attribute = value })
+                        ImasFilterChip(label = label.resolve(), selected = attribute == value, onClick = { attribute = value })
                     }
                 }
             }
 
             HorizontalDivider(color = DS.sep)
-            SectionLabel("マイマーク")
-            SwitchRow(title = "担当のみ", checked = requireMyPick, onCheckedChange = { requireMyPick = it }, tint = DS.pick)
-            SwitchRow(title = "お気に入りのみ", checked = requireFavorite, onCheckedChange = { requireFavorite = it }, tint = DS.favorite)
-            SwitchRow(title = "メモがあるアイドルのみ", checked = requireNote, onCheckedChange = { requireNote = it })
+            SectionLabel(L10n.Idols.filterMyMarkHeader.resolve())
+            SwitchRow(
+                title = L10n.Idols.filterMyMarkPickOnly.resolve(), checked = requireMyPick,
+                onCheckedChange = { requireMyPick = it }, tint = DS.pick
+            )
+            SwitchRow(
+                title = L10n.Idols.filterMyMarkFavoriteOnly.resolve(), checked = requireFavorite,
+                onCheckedChange = { requireFavorite = it }, tint = DS.favorite
+            )
+            SwitchRow(title = L10n.Idols.filterMyMarkNoteOnly.resolve(), checked = requireNote, onCheckedChange = { requireNote = it })
 
             Spacer(Modifier.height(8.dp))
             HorizontalDivider(color = DS.sep)
@@ -216,14 +226,14 @@ fun IdolFilterSheet(
                         sortAscending = null
                     },
                     modifier = Modifier.weight(1f)
-                ) { Text("リセット") }
+                ) { Text(L10n.Idols.filterActionReset.resolve()) }
                 Button(
                     onClick = {
                         onApply(brandIds, attribute, displayMode, showCV, requireMyPick, requireFavorite, requireNote, sortOrder, sortAscending)
                         onDismiss()
                     },
                     modifier = Modifier.weight(1f)
-                ) { Text("適用") }
+                ) { Text(L10n.Idols.filterActionApply.resolve()) }
             }
         }
     }

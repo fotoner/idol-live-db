@@ -173,9 +173,10 @@ struct IdolDetailView: View {
                         .lineLimit(2)
                         .minimumScaleFactor(0.7)
                         .imasCopyable([
-                            CopyItem("アイドル名をコピー", idol.name, key: "idol_name"),
-                            CopyItem("よみをコピー", idol.nameKana, key: "kana"),
-                            CopyItem("CV名をコピー", VoiceActorDirectory.shared.current(for: idol.id), key: "voice_actor"),
+                            CopyItem(String(localized: L10n.Idols.copyName), idol.name, key: "idol_name"),
+                            CopyItem(String(localized: L10n.Idols.copyKana), idol.nameKana, key: "kana"),
+                            CopyItem(String(localized: L10n.Idols.copyCv), VoiceActorDirectory.shared.current(for: idol.id),
+                                     key: "voice_actor"),
                         ])
                     if let brand = vm.brand {
                         Button {
@@ -199,8 +200,8 @@ struct IdolDetailView: View {
 
             HStack(spacing: DS.sp3) {
                 heroActionButton(
-                    title: "担当",
-                    activeTitle: "担当",
+                    title: L10n.Idols.detailHeroPick,
+                    activeTitle: L10n.Idols.detailHeroPick,
                     systemImage: isPick ? "heart.fill" : "heart",
                     isOn: isPick,
                     onColor: t.accent,
@@ -209,12 +210,12 @@ struct IdolDetailView: View {
                     do {
                         try markService.toggle(.myPick, entity: .idol, id: idol.id)
                     } catch {
-                        LocalWriteFailure.report(error, action: "担当の切り替え")
+                        LocalWriteFailure.report(error, action: String(localized: L10n.Idols.writeActionTogglePick))
                     }
                 }
                 heroActionButton(
-                    title: "お気に入り",
-                    activeTitle: "お気に入り済",
+                    title: L10n.Idols.detailHeroFavorite,
+                    activeTitle: L10n.Idols.detailHeroFavoriteOn,
                     systemImage: isFavorite ? "star.fill" : "star",
                     isOn: isFavorite,
                     onColor: t.chipBg,
@@ -224,15 +225,15 @@ struct IdolDetailView: View {
                     do {
                         try markService.toggle(.favorite, entity: .idol, id: idol.id)
                     } catch {
-                        LocalWriteFailure.report(error, action: "お気に入りの切り替え")
+                        LocalWriteFailure.report(error, action: String(localized: L10n.Idols.writeActionToggleFavorite))
                     }
                 }
                 Spacer(minLength: 0)
                 // メモ。担当/お気に入りと同じピル型ボタンに揃える (UserMarkBar のタイル型は
                 // 50pt四方+ラベルで縦に大きく、横並びだと担当/お気に入りより不釣り合いに高かった)。
                 heroActionButton(
-                    title: "メモ",
-                    activeTitle: "メモあり",
+                    title: L10n.Idols.detailHeroNote,
+                    activeTitle: L10n.Idols.detailHeroNoteOn,
                     systemImage: hasNote ? "note.text.badge.plus" : "note.text",
                     isOn: hasNote,
                     onColor: t.chipBg,
@@ -255,8 +256,8 @@ struct IdolDetailView: View {
     }
 
     private func heroActionButton(
-        title: String,
-        activeTitle: String,
+        title: LocalizedStringResource,
+        activeTitle: LocalizedStringResource,
         systemImage: String,
         isOn: Bool,
         onColor: Color,
@@ -284,7 +285,8 @@ struct IdolDetailView: View {
 
     private var segmentedBar: some View {
         ImasSegmented(
-            labels: ["ライブ", "楽曲", "プロフィール", "コミュニティ"],
+            labels: [String(localized: L10n.Idols.detailTabLive), String(localized: L10n.Idols.detailTabSongs),
+                     String(localized: L10n.Idols.detailTabProfile), String(localized: L10n.Idols.detailTabCommunity)],
             selection: $segment,
             seed: seed,
             brand: brandColor
@@ -317,7 +319,8 @@ struct IdolDetailView: View {
 
             if !vm.performedSongs.isEmpty {
                 VStack(spacing: DS.sp3) {
-                    ImasSectionHeader(title: "ライブ歌唱曲", count: "\(vm.performedSongs.count)", tight: true)
+                    ImasSectionHeader(title: .key(L10n.Idols.detailPerformedSongsHeader),
+                                      count: .verbatim("\(vm.performedSongs.count)"), tight: true)
                     ImasListContainer {
                         ForEach(Array(vm.performedSongs.enumerated()), id: \.element.id) { idx, item in
                             if idx > 0 { ImasRowDivider(inset: 66) }
@@ -336,7 +339,8 @@ struct IdolDetailView: View {
 
             if !vm.castShows.isEmpty {
                 VStack(spacing: DS.sp3) {
-                    ImasSectionHeader(title: "出演履歴", count: "\(vm.castShows.count)", tight: true)
+                    ImasSectionHeader(title: .key(L10n.Idols.detailCastShowsHeader),
+                                      count: .verbatim("\(vm.castShows.count)"), tight: true)
                     ImasListContainer {
                         ForEach(Array(vm.castShows.enumerated()), id: \.offset) { idx, row in
                             if idx > 0 { ImasRowDivider(inset: DS.sp4) }
@@ -350,8 +354,8 @@ struct IdolDetailView: View {
             if vm.performedSongs.isEmpty && vm.castShows.isEmpty && nextShow == nil {
                 ImasEmptyState(
                     systemImage: "music.mic",
-                    title: "ライブ情報がありません",
-                    message: "このアイドルのライブ出演・歌唱記録はまだ登録されていません。",
+                    title: String(localized: L10n.Idols.detailLiveEmptyTitle),
+                    message: String(localized: L10n.Idols.detailLiveEmptyMessage),
                     seed: seed,
                     brand: brandColor
                 )
@@ -373,7 +377,7 @@ struct IdolDetailView: View {
             HStack(spacing: 0) {
                 Rectangle().fill(t.accent).frame(width: 4)
                 VStack(alignment: .leading, spacing: 5) {
-                    Text("次の出演 ・ \(monthDay(row.date))")
+                    Text(L10n.Idols.detailUpcomingLabel(date: monthDay(row.date)))
                         .font(.imasDisplay(12, weight: .semibold))
                         .foregroundStyle(t.accent)
                     Text(eventDisplayName(row.eventName))
@@ -382,7 +386,8 @@ struct IdolDetailView: View {
                         .lineLimit(2)
                     HStack(spacing: DS.sp2) {
                         Image(systemName: "mappin.and.ellipse").font(.imasCaption)
-                        Text([row.venue, row.showName].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " ・ "))
+                        Text([row.venue, row.showName].compactMap { $0 }.filter { !$0.isEmpty }
+                            .joined(separator: String(localized: L10n.Idols.metaSeparator)))
                             .lineLimit(1)
                     }
                     .font(.imasFootnote)
@@ -456,8 +461,8 @@ struct IdolDetailView: View {
             } else {
                 ImasEmptyState(
                     systemImage: "music.note.list",
-                    title: "楽曲がありません",
-                    message: "原曲の情報はまだ登録されていません。",
+                    title: String(localized: L10n.Idols.detailSongsEmptyTitle),
+                    message: String(localized: L10n.Idols.detailSongsEmptyMessage),
                     seed: seed,
                     brand: brandColor
                 )
@@ -478,7 +483,8 @@ struct IdolDetailView: View {
         VStack(spacing: DS.sp6) {
             if !vm.unitsWithSongs.isEmpty {
                 VStack(alignment: .leading, spacing: DS.sp3) {
-                    ImasSectionHeader(title: "所属ユニット", count: "\(vm.unitsWithSongs.count)", tight: true)
+                    ImasSectionHeader(title: .key(L10n.Idols.detailUnitsHeader),
+                                      count: .verbatim("\(vm.unitsWithSongs.count)"), tight: true)
                     FlowChips(units: vm.unitsWithSongs, seed: seed, brand: brandColor) { unit in
                         go(.unit(unit))
                     }
@@ -492,7 +498,7 @@ struct IdolDetailView: View {
                         withAnimation(.easeInOut(duration: 0.2)) { showEmptyUnits.toggle() }
                     } label: {
                         HStack(spacing: 6) {
-                            Text("曲なしユニット").font(.imasFootnote.weight(.semibold)).foregroundStyle(DS.ink2)
+                            Text(L10n.Idols.detailUnitsWithoutSongs).font(.imasFootnote.weight(.semibold)).foregroundStyle(DS.ink2)
                             Text("\(vm.unitsWithoutSongs.count)").font(.imasCaption).foregroundStyle(DS.ink3)
                             Spacer(minLength: 4)
                             Image(systemName: "chevron.right")
@@ -536,7 +542,7 @@ struct IdolDetailView: View {
     private var communityBody: some View {
         VStack(spacing: DS.sp5) {
             PollAchievementBadges(entityId: idol.id)
-            InlineLoginPrompt(message: "タグ付け・投票にはログインが必要です", seed: seed)
+            InlineLoginPrompt(message: String(localized: L10n.Idols.detailCommunityLoginPrompt), seed: seed)
             communityIdolTags
             personalIdolTags
             if !similarTagIdols.isEmpty { communitySimilarIdols }
@@ -559,7 +565,7 @@ struct IdolDetailView: View {
     private var communityIdolTags: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
             HStack(alignment: .firstTextBaseline) {
-                Text("タグ").font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
+                Text(L10n.Idols.detailTagsHeader).font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
                 Spacer(minLength: 12)
                 if EditPermission.showEditAffordance {
                     Button {
@@ -568,7 +574,7 @@ struct IdolDetailView: View {
                     } label: {
                         HStack(spacing: DS.sp2) {
                             Image(systemName: "plus").font(.imasScaled( 13, weight: .semibold))
-                            Text("タグ").font(.imasScaled( 14, weight: .semibold))
+                            Text(L10n.Idols.detailTagsAddButton).font(.imasScaled( 14, weight: .semibold))
                         }
                         .foregroundStyle(ImasTheme.derive(seed: seed, brand: brandColor, scheme: scheme).accent)
                     }
@@ -591,16 +597,18 @@ struct IdolDetailView: View {
                                         try? await AppContainer.shared.communityTagWriting.removeIdolTag(idolId: idol.id, tagId: tag.id)
                                         await loadIdolTags()
                                     }
-                                } label: { Label("タグを外す", systemImage: "tag.slash") }
+                                } label: { Label(L10n.Idols.detailTagsActionRemove, systemImage: "tag.slash") }
                             }
-                            Button { sheetDestination = .idolTagDetail(tag) } label: { Label("タグ詳細を見る", systemImage: "tag") }
+                            Button { sheetDestination = .idolTagDetail(tag) } label: {
+                                Label(L10n.Idols.detailTagsActionShowDetail, systemImage: "tag")
+                            }
                         }
                     }
                 }
             } else {
-                ImasEmptyState(systemImage: "tag", title: "タグはまだありません",
-                               message: "このアイドルを一言で表すタグを付けてみませんか？",
-                               actionTitle: EditPermission.showEditAffordance ? "タグを追加" : nil,
+                ImasEmptyState(systemImage: "tag", title: String(localized: L10n.Idols.detailTagsEmptyTitle),
+                               message: String(localized: L10n.Idols.detailTagsEmptyMessage),
+                               actionTitle: EditPermission.showEditAffordance ? String(localized: L10n.Idols.detailTagsActionAdd) : nil,
                                action: EditPermission.showEditAffordance ? { startCommunityEdit { showIdolTagPicker = true } } : nil,
                                seed: seed)
             }
@@ -617,9 +625,9 @@ struct IdolDetailView: View {
             VStack(alignment: .leading, spacing: DS.sp1) {
                 HStack(spacing: 6) {
                     Image(systemName: "lock.fill").font(.imasScaled(13, weight: .semibold)).foregroundStyle(DS.ink3)
-                    Text("マイタグ").font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
+                    Text(L10n.Idols.detailPersonalTagsHeader).font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
                 }
-                Text("自分だけに表示されます (コミュニティには公開されません)")
+                Text(L10n.Idols.detailPersonalTagsCaption)
                     .font(.imasCaption).foregroundStyle(DS.ink3)
             }
             if !tags.isEmpty {
@@ -629,13 +637,14 @@ struct IdolDetailView: View {
                             .contextMenu {
                                 Button(role: .destructive) {
                                     personalTagService.removeTag(entityType: "idol", entityId: idol.id, name: tag.tagName)
-                                } label: { Label("マイタグを削除", systemImage: "trash") }
+                                } label: { Label(L10n.Idols.detailPersonalTagsActionRemove, systemImage: "trash") }
                             }
                     }
                 }
             }
             HStack(spacing: DS.sp3) {
-                TextField("マイタグを追加 (例: 聞いた)", text: $newPersonalTagName)
+                // LocalizedStringResource を受ける TextField(_:text:) は iOS 26 からなので、prompt: 付きの版 (iOS 16) を使う
+                TextField(L10n.Idols.detailPersonalTagsPlaceholder, text: $newPersonalTagName, prompt: nil)
                     .font(.imasSubhead)
                     .foregroundStyle(DS.ink)
                     .autocorrectionDisabled()
@@ -685,9 +694,9 @@ struct IdolDetailView: View {
     private var communitySimilarIdols: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
             VStack(alignment: .leading, spacing: DS.sp1) {
-                Text("タグが似ているアイドル")
+                Text(L10n.Idols.detailSimilarHeader)
                     .font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
-                Text("つけられたタグが似ているアイドル")
+                Text(L10n.Idols.detailSimilarCaption)
                     .font(.imasCaption).foregroundStyle(DS.ink2)
             }
             ScrollView(.horizontal, showsIndicators: false) {
@@ -703,7 +712,7 @@ struct IdolDetailView: View {
                                     .lineLimit(1)
                                     .foregroundStyle(DS.ink)
                                 if let shared = similarSharedTags[other.id] {
-                                    Text("タグ\(shared)個一致")
+                                    Text(L10n.Idols.detailSimilarSharedTags(count: shared))
                                         .font(.imasScaled(10))
                                         .foregroundStyle(DS.ink3)
                                 }
@@ -744,17 +753,18 @@ struct IdolDetailView: View {
         let urls = imageService.imageURLs(for: idol.id)
         VStack(alignment: .leading, spacing: DS.sp3) {
             HStack {
-                ImasSectionHeader(title: "ギャラリー", count: urls.isEmpty ? nil : "\(urls.count)", tight: true)
+                ImasSectionHeader(title: .key(L10n.Idols.galleryHeader), count: urls.isEmpty ? nil : .verbatim("\(urls.count)"),
+                                  tight: true)
                 Spacer()
                 PhotosPicker(selection: $galleryPicks, maxSelectionCount: 10, matching: .images) {
-                    Label("追加", systemImage: "plus")
+                    Label(L10n.Idols.galleryActionAdd, systemImage: "plus")
                         .font(.imasSubhead.weight(.medium))
                 }
             }
             .padding(.horizontal, DS.sp5)
 
             if urls.isEmpty {
-                Text("画像を追加すると、先頭の1枚がアイコンになります。ホーム画面ウィジェットにも使えます。")
+                Text(L10n.Idols.galleryIdolEmptyHint)
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink2)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -762,7 +772,7 @@ struct IdolDetailView: View {
             } else {
                 galleryGrid(urls: urls)
 
-                Text("長押しでアイコン設定・ウィジェットのスライドショー対象を切り替えられます。")
+                Text(L10n.Idols.galleryIdolLongPressHint)
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink3)
                     .padding(.horizontal, DS.sp5)
@@ -820,7 +830,7 @@ struct IdolDetailView: View {
             .clipShape(RoundedRectangle(cornerRadius: DS.rSM, style: .continuous))
             .overlay(alignment: .topLeading) {
                 if isPrimary {
-                    Label("アイコン", systemImage: "star.fill")
+                    Label(L10n.Idols.galleryPrimaryBadge, systemImage: "star.fill")
                         .font(.imasScaled(9, weight: .bold))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 6).padding(.vertical, 3)
@@ -836,7 +846,7 @@ struct IdolDetailView: View {
                         .padding(5)
                         .background(.black.opacity(0.55), in: Circle())
                         .padding(5)
-                        .accessibilityLabel("スライドショー対象外")
+                        .accessibilityLabel(L10n.Idols.gallerySlideshowExcludedA11y)
                 }
             }
             .contextMenu {
@@ -845,14 +855,14 @@ struct IdolDetailView: View {
                         imageService.setPrimary(url, for: idol.id)
                         syncWidget()
                     } label: {
-                        Label("アイコンにする", systemImage: "star")
+                        Label(L10n.Idols.galleryActionSetPrimary, systemImage: "star")
                     }
                 }
                 Button {
                     imageService.setInSlideshow(!inSlideshow, url: url, for: idol.id)
                     syncWidget()
                 } label: {
-                    Label(inSlideshow ? "スライドショーから外す" : "スライドショーに入れる",
+                    Label(inSlideshow ? L10n.Idols.gallerySlideshowRemove : L10n.Idols.gallerySlideshowAdd,
                           systemImage: inSlideshow ? "play.slash" : "play.rectangle")
                 }
                 Button(role: .destructive) {
@@ -861,7 +871,7 @@ struct IdolDetailView: View {
                         await WidgetImageBridge.sync(database: database)
                     }
                 } label: {
-                    Label("削除", systemImage: "trash")
+                    Label(L10n.Idols.galleryActionDelete, systemImage: "trash")
                 }
             }
     }
@@ -967,13 +977,13 @@ struct IdolDetailView: View {
                     if collected || performCount != nil {
                         HStack(spacing: DS.sp3) {
                             if collected {
-                                Label("回収済", systemImage: "checkmark")
+                                Label(L10n.Idols.detailSongCollected, systemImage: "checkmark")
                                     .labelStyle(.titleAndIcon)
                                     .font(.imasCaption.weight(.semibold))
                                     .foregroundStyle(DS.success)
                             }
                             if let performCount {
-                                Text("\(performCount)回")
+                                Text(L10n.Idols.detailSongPerformCount(count: performCount))
                                     .font(.imasDisplay(11, weight: .semibold))
                                     .foregroundStyle(DS.ink3)
                             }
@@ -1008,12 +1018,13 @@ struct IdolDetailView: View {
                             .foregroundStyle(DS.ink)
                             .lineLimit(1)
                         if row.isLead {
-                            ImasTagChip(text: "主演", kind: .lead, seed: seed, brand: brandColor)
+                            ImasTagChip(text: String(localized: L10n.Idols.detailShowLead), kind: .lead, seed: seed, brand: brandColor)
                         } else if row.isGuest {
-                            ImasTagChip(text: "ゲスト", kind: .guest, seed: seed, brand: brandColor)
+                            ImasTagChip(text: String(localized: L10n.Idols.detailShowGuest), kind: .guest, seed: seed, brand: brandColor)
                         }
                     }
-                    Text([row.date, row.venue, row.showName].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " ・ "))
+                    Text([row.date, row.venue, row.showName].compactMap { $0 }.filter { !$0.isEmpty }
+                        .joined(separator: String(localized: L10n.Idols.metaSeparator)))
                         .font(.imasFootnote)
                         .foregroundStyle(DS.ink2)
                         .lineLimit(1)
@@ -1037,13 +1048,13 @@ struct IdolDetailView: View {
             Menu {
                 if EditPermission.showEditAffordance {
                     Button { startEdit() } label: {
-                        Label("編集", systemImage: "pencil")
+                        Label(L10n.Idols.detailMenuEdit, systemImage: "pencil")
                     }
                 }
                 NavigationLink {
                     EditHistoryView(recordType: "Idol", recordName: idol.id, title: idol.name)
                 } label: {
-                    Label("編集履歴", systemImage: "clock.arrow.circlepath")
+                    Label(L10n.Idols.detailMenuHistory, systemImage: "clock.arrow.circlepath")
                 }
             } label: {
                 Image(systemName: "ellipsis.circle")

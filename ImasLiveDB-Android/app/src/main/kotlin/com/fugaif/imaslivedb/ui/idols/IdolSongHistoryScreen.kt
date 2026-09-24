@@ -36,6 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.model.CastShowRow
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.ImasLeadBar
 import com.fugaif.imaslivedb.ui.components.ImasSectionHeader
@@ -78,7 +81,7 @@ fun IdolSongHistoryScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 }
             )
@@ -90,16 +93,20 @@ fun IdolSongHistoryScreen(
                 state.history.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     ImasEmptyState(
                         icon = Icons.Filled.Mic,
-                        title = "披露履歴がありません",
+                        title = L10n.Idols.songHistoryEmptyTitle.resolve(),
                         message = listOfNotNull(idol?.name, song?.title)
                             .takeIf { it.size == 2 }
-                            ?.let { "${it[0]} による「${it[1]}」の披露記録はありません" },
+                            ?.let { L10n.Idols.songHistoryEmptyMessage(idol = it[0], song = it[1]).resolve() },
                         seed = idol?.color, brand = idol?.brandId
                     )
                 }
                 else -> LazyColumn(Modifier.fillMaxSize()) {
                     item(key = "header") {
-                        ImasSectionHeader(title = "披露履歴", count = "${state.history.size}", tight = true)
+                        ImasSectionHeader(
+                            title = L10n.Idols.songHistoryHeader,
+                            count = DisplayText.Verbatim("${state.history.size}"),
+                            tight = true
+                        )
                     }
                     items(state.history, key = { it.showId }) { row ->
                         HistoryRow(row, seed = idol?.color, brand = idol?.brandId) { onShowClick(row.showId) }
@@ -128,7 +135,7 @@ private fun HistoryRow(row: CastShowRow, seed: String?, brand: String?, onClick:
             )
             val sub = listOfNotNull(row.date, row.venue, row.showName)
                 .filter { it.isNotEmpty() }
-                .joinToString(" ・ ")
+                .joinToString(L10n.Idols.metaSeparator.resolve())
             if (sub.isNotEmpty()) {
                 Text(sub, fontSize = 12.sp, color = DS.ink2, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }

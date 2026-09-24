@@ -22,15 +22,15 @@ struct IdolSongHistoryView: View {
                 } else if history.isEmpty {
                     ImasEmptyState(
                         systemImage: "music.microphone",
-                        title: "披露履歴がありません",
-                        message: "\(idol.name) による「\(song.title)」の披露記録はありません",
+                        title: String(localized: L10n.Idols.songHistoryEmptyTitle),
+                        message: String(localized: L10n.Idols.songHistoryEmptyMessage(idol: idol.name, song: song.title)),
                         seed: seed,
                         brand: brandColor
                     )
                     .padding(.top, DS.sp6)
                 } else {
                     VStack(spacing: DS.sp3) {
-                        ImasSectionHeader(title: "披露履歴", count: "\(history.count)", tight: true)
+                        ImasSectionHeader(title: .key(L10n.Idols.songHistoryHeader), count: .verbatim("\(history.count)"), tight: true)
                         ImasListContainer {
                             ForEach(Array(history.enumerated()), id: \.offset) { idx, row in
                                 if idx > 0 { ImasRowDivider(inset: DS.sp4) }
@@ -66,7 +66,8 @@ struct IdolSongHistoryView: View {
                         .font(.imasBody.weight(.semibold))
                         .foregroundStyle(DS.ink)
                         .lineLimit(1)
-                    Text([row.date, row.venue, row.showName].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " ・ "))
+                    Text([row.date, row.venue, row.showName].compactMap { $0 }.filter { !$0.isEmpty }
+                        .joined(separator: String(localized: L10n.Idols.metaSeparator)))
                         .font(.imasFootnote)
                         .foregroundStyle(DS.ink2)
                         .lineLimit(1)

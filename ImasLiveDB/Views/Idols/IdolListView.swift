@@ -2,13 +2,40 @@ import os
 import SwiftUI
 
 enum IdolDisplayMode: String, CaseIterable {
+    // i18n-ignore(storage): @AppStorage("idol_display_mode") の保存値。訳さない・変えない (表示は label)
     case idolName = "アイドル名"
+    // i18n-ignore(storage): @AppStorage("idol_display_mode") の保存値。訳さない・変えない (表示は label)
     case cvName = "CV名"
+
+    /// 表示名。保存値 (rawValue) とは別に引く (ja は rawValue と同じ文字列)。
+    var label: LocalizedStringResource {
+        switch self {
+        case .idolName: return L10n.Idols.displayModeIdolName
+        case .cvName: return L10n.Idols.displayModeCvName
+        }
+    }
 }
 
 enum IdolListMode: String, CaseIterable {
     case list
     case grid
+}
+
+extension IdolSortOrder {
+    /// 並び順の表示名。保存値 (`rawValue`) は `@AppStorage` の値なので表示に使わず、
+    /// カタログの文言を引く (ja は rawValue と同じ文字列。ko は「〜순」まで含む)。
+    /// 一覧の見出しのほか、フィルタシートの並び順の表示にも使える (Android の `IdolSortOrder.labelText` と同じ役目)。
+    var label: LocalizedStringResource {
+        switch self {
+        case .official: return L10n.Idols.sortOrderOfficial
+        case .nameKana: return L10n.Idols.sortOrderNameKana
+        case .age: return L10n.Idols.sortOrderAge
+        case .height: return L10n.Idols.sortOrderHeight
+        case .weight: return L10n.Idols.sortOrderWeight
+        case .birthday: return L10n.Idols.sortOrderBirthday
+        case .debut: return L10n.Idols.sortOrderDebut
+        }
+    }
 }
 
 struct IdolListView: View {
@@ -97,7 +124,7 @@ struct IdolListView: View {
         var actions: [ListToolbarAction] = [
             ListToolbarAction(
                 id: "grid",
-                title: idolListMode == .grid ? "リスト表示" : "グリッド表示",
+                title: String(localized: idolListMode == .grid ? L10n.Idols.listViewModeList : L10n.Idols.listViewModeGrid),
                 systemImage: idolListMode == .grid ? "list.bullet" : "square.grid.3x2"
             ) {
                 AppAnalytics.tap("idol_list.grid_toggle")
@@ -105,7 +132,7 @@ struct IdolListView: View {
             }
         ]
         if filterBadgeCount > 0 {
-            actions.append(ListToolbarAction(id: "clear", title: "フィルタを解除",
+            actions.append(ListToolbarAction(id: "clear", title: String(localized: L10n.Idols.listActionClearFilters),
                                              systemImage: "xmark.circle", isDestructive: true) {
                 AppAnalytics.tap("idol_list.filter_clear")
                 clearAllFilters()
@@ -146,7 +173,8 @@ struct IdolListView: View {
 
     /// 一覧タブ (アイドル/ユニット)。ナビゲーションタイトル下・検索バー上に固定表示する。
     private var listTabBar: some View {
-        ImasSegmented(labels: ["アイドル", "ユニット"], selection: $listTab)
+        ImasSegmented(labels: [String(localized: L10n.Idols.listTabIdols), String(localized: L10n.Idols.listTabUnits)],
+                      selection: $listTab)
             .padding(.horizontal, DS.sp5)
             .padding(.top, DS.sp3)
             .padding(.bottom, DS.sp2)
@@ -170,9 +198,9 @@ struct IdolListView: View {
                 Spacer()
                 ImasEmptyState(
                     systemImage: "line.3.horizontal.decrease",
-                    title: "絞り込み結果がありません",
-                    message: "「\(searchText)」に一致するアイドルがいません",
-                    actionTitle: "絞り込みを解除",
+                    title: String(localized: L10n.Idols.listFilterEmptyTitle),
+                    message: String(localized: L10n.Idols.listFilterEmptyMessage(query: searchText)),
+                    actionTitle: String(localized: L10n.Idols.listFilterEmptyActionClear),
                     action: { searchText = "" }
                 )
                 Spacer()
@@ -180,9 +208,9 @@ struct IdolListView: View {
                 Spacer()
                 ImasEmptyState(
                     systemImage: "line.3.horizontal.decrease.circle",
-                    title: "該当するアイドルがいません",
-                    message: "フィルタ条件を変更するか、フィルタを解除してください。",
-                    actionTitle: activeFilterCount > 0 ? "フィルタを解除" : nil,
+                    title: String(localized: L10n.Idols.listNoMatchTitle),
+                    message: String(localized: L10n.Idols.listNoMatchMessage),
+                    actionTitle: activeFilterCount > 0 ? String(localized: L10n.Idols.listActionClearFilters) : nil,
                     action: activeFilterCount > 0 ? {
                         AppAnalytics.tap("idol_list.filter_clear")
                         clearAllFilters()
@@ -197,7 +225,8 @@ struct IdolListView: View {
                     metricLabels: vm.metricLabels,
                     flatHeader: sortOrder.keepsBrandGrouping
                         ? nil
-                        : "\(sortOrder.rawValue)順 ・ \(vm.filteredIdols.count)人"
+                        : String(localized: L10n.Idols.listFlatHeader(order: sortOrder.label,
+                                                                      count: vm.filteredIdols.count))
                 ) { idol in
                     sheetIdol = idol
                 }
@@ -213,7 +242,7 @@ struct IdolListView: View {
         // 絞り込み欄がナビバーの中にあるので `.searchable` のキャンセルボタンが無い。
         // スクロールでキーボードを閉じられないと、打った後に一覧が半分隠れたままになる。
         .scrollDismissesKeyboard(.immediately)
-        .navigationTitle("アイドル")
+        .navigationTitle(L10n.Idols.listTitle)
         // 絞り込みフィールドはナビバーの中 (standardListToolbar の principal)。
         // 大タイトルを出すと 2 行になってしまうので inline 固定。
         .navigationBarTitleDisplayMode(.inline)
@@ -235,7 +264,7 @@ struct IdolListView: View {
                 },
                 menuActions: idolMenuActions
             ) {
-                ListSearchField(prompt: "アイドル名・CV名", text: $searchText)
+                ListSearchField(prompt: String(localized: L10n.Idols.listSearchFieldPrompt), text: $searchText)
             }
         }
         .navigationDestination(for: Idol.self) { idol in
@@ -294,11 +323,11 @@ struct IdolListView: View {
     private var flatListSection: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
             HStack {
-                Text("\(sortOrder.rawValue)順")
+                Text(L10n.Idols.listFlatListHeading(order: sortOrder.label))
                     .font(.imasScaled(13, weight: .semibold))
                     .foregroundStyle(DS.ink2)
                 Spacer()
-                Text("\(vm.filteredIdols.count)人")
+                Text(L10n.Idols.listIdolCount(count: vm.filteredIdols.count))
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink3)
             }
@@ -513,7 +542,7 @@ private struct IdolRowView: View {
         .padding(.vertical, DS.sp3)
         .padding(.leading, DS.sp2)
         .contentShape(Rectangle())
-        .imasCopyable([CopyItem("アイドル名をコピー", idol.name, key: "idol_name"),
-                       CopyItem("よみをコピー", idol.nameKana, key: "kana")])
+        .imasCopyable([CopyItem(String(localized: L10n.Idols.copyName), idol.name, key: "idol_name"),
+                       CopyItem(String(localized: L10n.Idols.copyKana), idol.nameKana, key: "kana")])
     }
 }
