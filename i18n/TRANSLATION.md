@@ -101,7 +101,7 @@ python3 tools/i18n/i18n.py stats      # 言語ごとの 確定 / 未検収 / sta
 |---|---|
 | planned | 用語集に語と文体 (style) の草案を書いた。カタログに訳を書き始めてよい (ビルドには入らない) |
 | dev | 主な画面の訳がそろい、Debug ビルドで見て確かめたい。`config.json` の channel を変える PR をオーナーが受ける |
-| beta | ui / system の名前空間に 欠落・未検収・stale・edited が 0 件 (check の出荷ゲートが止める)。その言語の用語と文体をオーナーが確定した (glossary.json の status にその言語の確定者と日付を書く。全部の言語が確定したら status を消す)。データの字形の組版 (i18n/README.md の「漢字の字形」) を実装した。Beta 構成を作る |
+| beta | ui / system の名前空間に 欠落・未検収・stale・edited が 0 件 (check の出荷ゲートが止める)。その言語の用語と文体をオーナーが確定した (glossary.json の status にその言語の確定者と日付を書く。全部の言語が確定したら status を消す)。データの字形の組版 (i18n/README.md の「漢字の字形」) を実装した (Android のウィジェット (Glance) は localeList が無いので、別の方法で付けるか既知の制限として書く)。Beta 構成を作る |
 | release | beta で主な画面を実機で確かめた。ストアの説明文などアプリの外の文言もそろった。オーナーが決める |
 
 ## 言語別の決まり
