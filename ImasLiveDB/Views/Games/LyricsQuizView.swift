@@ -83,6 +83,8 @@ struct LyricsQuizView: View {
         .scrollContentBackground(.hidden)
         .navigationTitle(mode == .title ? "歌詞クイズ · 曲名当て" : "歌詞クイズ · 続きはどれ")
         .navigationBarTitleDisplayMode(.inline)
+        // 解答後の「次の問題」がタブバーに隠れないよう、遊んでいる間は隠す (イントロドンと同じ)。
+        .toolbar(.hidden, for: .tabBar)
         .sensoryFeedback(trigger: lastCorrect) { _, new in
             guard let new else { return nil }
             return new ? .success : .error
@@ -158,8 +160,14 @@ struct LyricsQuizView: View {
                     lyricLine(next, style: .context)
                         .transition(.move(edge: .top).combined(with: .opacity))
                 }
-                if mode == .nextLine && !answered {
-                    lyricLine("？？？", style: .blank)
+                if mode == .nextLine {
+                    if answered, p.excerpt.choices.indices.contains(Int(p.excerpt.answer)) {
+                        // 解答後は正解の行を歌詞の並びに戻す (曲名当てが続きの行を出すのと揃える)。
+                        lyricLine(p.excerpt.choices[Int(p.excerpt.answer)], style: .answer)
+                            .transition(.opacity)
+                    } else {
+                        lyricLine("？？？", style: .blank)
+                    }
                 }
             }
 
@@ -182,21 +190,38 @@ struct LyricsQuizView: View {
         .background(DS.surface, in: RoundedRectangle(cornerRadius: DS.rLG, style: .continuous))
     }
 
-    private enum LineStyle { case prompt, context, blank }
+    private enum LineStyle { case prompt, context, blank, answer }
 
     /// 歌詞 1 行。出題行は大きく・左に縦線、ヒントで開いた行は控えめに出す。
     private func lyricLine(_ text: String, style: LineStyle) -> some View {
         HStack(alignment: .top, spacing: DS.sp4) {
             Capsule()
-                .fill(style == .prompt ? DS.sys : DS.ink3.opacity(0.5))
+                .fill(barColor(style))
                 .frame(width: 3)
             Text(text)
-                .font(style == .prompt ? .imasTitle3.weight(.bold) : .imasCallout)
-                .foregroundStyle(style == .prompt ? DS.ink : (style == .blank ? DS.ink3 : DS.ink2))
+                .font(style == .prompt || style == .answer ? .imasTitle3.weight(.bold) : .imasCallout)
+                .foregroundStyle(textColor(style))
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func barColor(_ style: LineStyle) -> Color {
+        switch style {
+        case .prompt:          return DS.sys
+        case .answer:          return DS.success
+        case .context, .blank: return DS.ink3.opacity(0.5)
+        }
+    }
+
+    private func textColor(_ style: LineStyle) -> Color {
+        switch style {
+        case .prompt:  return DS.ink
+        case .answer:  return DS.success
+        case .context: return DS.ink2
+        case .blank:   return DS.ink3
+        }
     }
 
     private func songRow(_ s: SongWithArtists, caption: String?) -> some View {

@@ -379,7 +379,7 @@ struct ProduceTabView: View {
                 ImasEntryCard(
                     systemImage: "gamecontroller.fill",
                     title: "クイズ・ゲーム",
-                    preview: "イントロドン・アイドル当て・カラー合わせ",
+                    preview: "イントロドン・歌詞クイズ・アイドル当てほか",
                     brand: pickBrandSeed
                 )
             }
