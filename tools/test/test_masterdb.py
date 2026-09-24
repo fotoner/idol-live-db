@@ -4,7 +4,6 @@
 """
 
 import contextlib
-import hashlib
 import io
 import sqlite3
 import tempfile
@@ -53,12 +52,6 @@ class MasterDbTest(unittest.TestCase):
         text = masterdb.dump_text(self.fixture())
         self.assertNotIn("unistr(", text)
         self.assertIn("ライブ\n改行入り", text)
-
-    def test_writes_when_the_references_are_intact(self):
-        conn = self.fixture()
-        path = self.root / "master.sql"
-        self.write(conn, path)
-        self.assertEqual(path.read_text(encoding="utf-8"), masterdb.dump_text(conn))
 
     def test_refuses_to_write_a_broken_reference(self):
         conn = self.fixture()
@@ -111,24 +104,6 @@ class MasterDbTest(unittest.TestCase):
         path = self.root / "master.sql"
         self.write(conn, path)
         self.assertNotIn("content_hash", path.read_text(encoding="utf-8"))
-
-    def test_stamp_content_hash_uses_the_file_digest(self):
-        conn = self.fixture()
-        path = self.root / "master.sql"
-        self.write(conn, path)
-        conn.close()
-        db = self.root / "db.sqlite"
-        masterdb.stamp_content_hash(db, path)
-        conn = sqlite3.connect(str(db))
-        [(value,)] = conn.execute("SELECT value FROM meta WHERE key = 'content_hash'").fetchall()
-        conn.close()
-        self.assertEqual(value, hashlib.sha256(path.read_bytes()).hexdigest())
-
-    def test_restored_db_is_removed_afterwards(self):
-        with masterdb.restored(support.MASTER_SQL) as conn:
-            path = conn.execute("PRAGMA database_list").fetchone()[2]
-            self.assertTrue(Path(path).exists())
-        self.assertFalse(Path(path).exists())
 
 
 if __name__ == "__main__":

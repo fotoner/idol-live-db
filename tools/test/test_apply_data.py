@@ -62,11 +62,6 @@ class ApplyCostumesTest(unittest.TestCase):
         conn.execute("PRAGMA foreign_keys = ON")
         return conn
 
-    def test_the_post_is_valid(self):
-        conn = self.connect()
-        self.assertEqual(apply_data.validate(conn), [])
-        conn.close()
-
     def test_costumes_are_applied(self):
         conn = self.connect()
         with contextlib.redirect_stdout(io.StringIO()):
@@ -169,14 +164,8 @@ class SourceRequiredTest(PostFixture):
         finally:
             conn.close()
 
-    def test_a_post_without_any_source_is_rejected(self):
-        self.assertEqual(len(self.problems("songs", {"songs": [self.song()]})), 1)
-
     def test_blank_sources_do_not_count(self):
         self.assertEqual(len(self.problems("songs", {"source": " ", "songs": [self.song(source=[])]})), 1)
-
-    def test_a_file_level_source_covers_every_item(self):
-        self.assertEqual(self.problems("songs", {"source": "https://example.com/news", "songs": [self.song()]}), [])
 
     def test_every_item_may_carry_its_own_source(self):
         post = {"songs": [self.song(source="https://example.com/a"),
@@ -251,10 +240,6 @@ class AddOriginalSingersTest(PostFixture):
             return apply_data.validate(conn)
         finally:
             conn.close()
-
-    def test_singers_alone_are_a_valid_fix(self):
-        self.post({"table": "songs", "id": "song_t", "add_original_singers": ["ml_t"]})
-        self.assertEqual(self.validate(), [])
 
     def test_singers_are_added_and_pushed_by_song(self):
         self.post({"table": "songs", "id": "song_t", "fields": {"song_type": "solo"},

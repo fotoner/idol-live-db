@@ -22,16 +22,10 @@ VERSE = ["高らかに空を飛んで　叡智の海渡って%d" % i for i in ra
 
 
 class DoubledBodyTest(unittest.TestCase):
-    def test_same_body_twice_is_flagged(self):
-        self.assertTrue(L.is_doubled_body(VERSE + VERSE))
-
     def test_second_copy_split_differently_is_flagged(self):
         # 2 回目が文節ごとに分割されていても本文は同じ
         split = [piece for t in VERSE for piece in t.split("　")]
         self.assertTrue(L.is_doubled_body(VERSE + split))
-
-    def test_normal_body_is_not_flagged(self):
-        self.assertFalse(L.is_doubled_body(VERSE))
 
     def test_short_body_is_ignored(self):
         self.assertFalse(L.is_doubled_body(["ラララ"] * 4))

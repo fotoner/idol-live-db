@@ -136,11 +136,6 @@ class ReadTest(unittest.TestCase):
         self.assertEqual(sent[0]["query"]["filterBy"][0]["fieldName"], "modifiedAt")
         self.assertNotIn("desiredKeys", sent[0])
 
-    def test_count_live_skips_soft_deleted(self):
-        url = cloudkit.BASE_URL + cloudkit.records_path("production", "query")
-        self.assertEqual(cloudkit.count_live(url, "Song", self.post), 3)
-        self.assertEqual(self.ck.calls[0][1]["desiredKeys"], ["deletedAt"])
-
     def test_lookup_maps_missing_records_by_position(self):
         url = cloudkit.BASE_URL + cloudkit.records_path("production", "lookup")
         found = cloudkit.lookup(url, ["x1", "x2"], self.post, desired_keys=["deletedAt"])

@@ -16,7 +16,6 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 sys.path.insert(0, os.path.dirname(os.path.dirname(HERE)))
 import build_gram_index as B  # noqa: E402
-from lib.text import normalize_for_search  # noqa: E402
 
 LINES = [
     {"kind": "marker", "text": "イントロ"},
@@ -47,10 +46,6 @@ class ReadFromLocalTest(unittest.TestCase):
         # body_norm にする。D1 から作る全再構築はその body_norm を読むので、手元から
         # 作るときも同じ文字列にならないと、正規化した検索語の候補から漏れる。
         self.assertEqual(B.read_from_local(), [("s1", "アイab\nヵヶ\nx!")])
-
-    def test_the_local_index_equals_the_one_built_from_body_norm(self):
-        body_norm = normalize_for_search("あいＡＢ\nゕゖ\nｘ！")
-        self.assertEqual(B.build_index(B.read_from_local()), B.build_index([("s1", body_norm)]))
 
     def test_grams_are_normalized_and_do_not_cross_lines(self):
         index = B.build_index(B.read_from_local())

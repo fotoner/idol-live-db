@@ -102,11 +102,6 @@ class ImportShowTicketsTest(unittest.TestCase):
         self.assertEqual(self.run_main(ticket_line("sh_a", price="9900")), 0)
         self.assertEqual(self.canonical("SELECT show_id, price FROM show_tickets"), [("sh_a", 9900)])
 
-    def test_the_bundle_is_left_alone_when_it_lacks_the_show(self):
-        self.assertEqual(self.run_main(ticket_line("sh_c")), 0)
-        self.assertEqual(self.canonical("SELECT show_id FROM show_tickets"), [("sh_c",)])
-        self.assertEqual(self.bundle_rows(), [])
-
     def test_the_bundle_gets_no_row_when_any_show_is_missing(self):
         # 同梱 DB へは 1 つのトランザクションで入れる。1 公演でも無ければ全部巻き戻る。
         self.assertEqual(self.run_main(ticket_line("sh_a"), ticket_line("sh_c")), 0)

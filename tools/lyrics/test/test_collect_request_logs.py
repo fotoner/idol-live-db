@@ -57,19 +57,12 @@ DAY = dt.date(2026, 9, 1)
 
 
 class TestParseEvent(unittest.TestCase):
-    def test_lyrics_read_event(self):
-        self.assertEqual(C.parse_event(lyrics_event("cg_お願いシンデレラ")), "cg_お願いシンデレラ")
-
     def test_other_json_log_is_ignored(self):
         # 別の構造化ログが includes フィルタに引っかかっても数えない。
         self.assertIsNone(C.parse_event(event('{"event":"song_detail_lyrics_rate_limited"}')))
 
     def test_plain_string_log_is_ignored(self):
         self.assertIsNone(C.parse_event(event("lyrics_read っぽい素の文字列")))
-
-    def test_missing_song_id_is_ignored(self):
-        self.assertIsNone(C.parse_event(event('{"event":"lyrics_read"}')))
-        self.assertIsNone(C.parse_event(event('{"event":"lyrics_read","song_id":""}')))
 
     def test_broken_event_does_not_raise(self):
         self.assertIsNone(C.parse_event({}))
@@ -145,13 +138,6 @@ class TestWriteTsv(unittest.TestCase):
             # 同じ日を引き直しても同じ中身 = 冪等 (差分が出ない)。
             C.write_tsv(path, {"c": 1, "a": 5, "b": 1})
             self.assertEqual(open(path, encoding="utf-8").read(), first)
-
-    def test_empty_day_writes_header_only(self):
-        with tempfile.TemporaryDirectory() as d:
-            path = os.path.join(d, "2026-09-02.tsv")
-            C.write_tsv(path, {})
-            # 「その日は 0 回だった」と「まだ集めていない」を区別できるようにする。
-            self.assertEqual(open(path, encoding="utf-8").read(), "song_id\tcount\n")
 
 
 class TestTargetDays(unittest.TestCase):

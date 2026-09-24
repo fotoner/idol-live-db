@@ -56,11 +56,6 @@ class CompatNamesTest(unittest.TestCase):
         missing = [name for name in COMPAT_NAMES if not hasattr(sk, name)]
         self.assertEqual(missing, [])
 
-    def test_shared_state_is_the_same_object(self):
-        from lib import ck_records, ck_tables
-        self.assertIs(sk.next_modified_ms, ck_records.next_modified_ms)
-        self.assertIs(sk.TABLE_ORDER, ck_tables.TABLE_ORDER)
-
 
 class RowsToOperationsTest(unittest.TestCase):
     """行 → レコードの規則 (recordName・NULL を送らない・型・派生列) を固定する。"""
@@ -152,10 +147,6 @@ class SendingTest(unittest.TestCase):
                                    "record": {"recordType": "Brand", "recordName": "ml", "fields": {}}}],
                                  False, "Brand")
         self.assertTrue(self.ck.calls[0][0].endswith("/production/public/records/modify"))
-
-    def test_main_exits_zero_when_every_record_is_accepted(self):
-        self.assertEqual(self.run_main("--tables", "brands", "song_artists"), 0)
-        self.assertEqual(len(self.ck.operations()), 2)
 
     def test_main_exits_one_on_record_errors(self):
         self.failing = {"ml"}

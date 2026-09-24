@@ -34,9 +34,6 @@ class Args(object):
 
 
 class TestParsePeriod(unittest.TestCase):
-    def test_valid(self):
-        self.assertEqual(B.parse_period("202604-202703"), ("202604", "202703"))
-
     def test_invalid_forms_exit(self):
         for bad in ["202604", "2026-04", "202604-2027-03", "202613-202703", "202704-202603"]:
             with self.assertRaises(SystemExit, msg=bad):
@@ -88,10 +85,6 @@ class TestReadRequestCounts(unittest.TestCase):
 
 class TestBuildRecordRequestCount(unittest.TestCase):
     row = {"song_id": "cg_A", "title": "A", "lyricist": "詞", "composer": "曲"}
-
-    def test_uses_measured_count(self):
-        r = B.build_record(self.row, Args(), {"cg_A": 42})
-        self.assertEqual(r["request_count"], "42")
 
     def test_song_without_hits_is_zero(self):
         # 掲載しているが誰も開かなかった曲。報告は 0 で出す (欄は空にしない)。

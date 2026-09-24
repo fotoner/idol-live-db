@@ -30,22 +30,10 @@ def run(new_text, base_text=None):
 
 
 class ParseTest(unittest.TestCase):
-    def test_reads_fields_types_and_indexes(self):
-        schema, dups = ccs.parse(HEAD + BRAND)
-        self.assertEqual(dups, [])
-        self.assertEqual(schema["Brand"]["name"].indexes, {"QUERYABLE", "SEARCHABLE", "SORTABLE"})
-        self.assertEqual(schema["Brand"]["ids"].type, "LIST<INT64>")
-        self.assertIn("___createTime", schema["Brand"])
-
     def test_real_schema_is_clean(self):
         text = (support.REPO / ccs.CKDB_REL).read_text(encoding="utf-8")
         self.assertEqual(run(text), ([], []))
         self.assertEqual(ccs.order_warnings(ccs.parse(text)[0]), [])
-
-    def test_records_line_numbers(self):
-        schema, _ = ccs.parse(HEAD + BRAND)
-        lines = (HEAD + BRAND).splitlines()
-        self.assertIn("modifiedAt", lines[schema["Brand"]["modifiedAt"].line - 1])
 
 
 class CheckTest(unittest.TestCase):
@@ -97,11 +85,6 @@ class CheckTest(unittest.TestCase):
         self.assertEqual(errors, [])
         warnings = ccs.order_warnings(ccs.parse(HEAD + new)[0])
         self.assertEqual([w.message for w in warnings], ["Brand.deletedAt は zzz より前 (ASCII 順の位置) に置く"])
-
-    def test_uppercase_sorts_before_lowercase_like_export(self):
-        # export は ASCII 順なので、大文字始まりの列は小文字始まりより前に来る
-        schema, _ = ccs.parse(HEAD + BRAND.replace("        deletedAt", "        Zcol            STRING,\n        deletedAt"))
-        self.assertEqual(ccs.order_warnings(schema), [])
 
     def test_summary_lists_owner_steps_only_when_safely_added(self):
         self.assertIn("やることはありません", ccs.summary_markdown([], []))

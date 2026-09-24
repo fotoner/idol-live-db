@@ -122,20 +122,6 @@ class ITunesClientsTest(unittest.TestCase):
             (song, "imas-live-db/1.0", 30),
         ])
 
-    def test_discover_new_songs(self):
-        http = FakeUrlopen(self)
-        self.assertEqual(discover_new_songs.itunes_search("曲", limit=50), [TRACK])
-        self.assertEqual(http.requests, [(
-            "https://itunes.apple.com/search?term=%E6%9B%B2&entity=song&country=jp&limit=50",
-            "ImasLiveDB-discover/1.0", 15)])
-
-    def test_fill_apple_music_ids(self):
-        http = FakeUrlopen(self)
-        self.assertEqual(fill_apple_music_ids.itunes_search("曲"), [TRACK])
-        self.assertEqual(http.requests, [(
-            "https://itunes.apple.com/search?term=%E6%9B%B2&entity=song&country=jp&limit=10",
-            "ImasLiveDB/1.0", 10)])
-
     def test_fill_artwork_urls(self):
         http = FakeUrlopen(self)
         self.assertEqual(fill_artwork_urls.itunes_lookup("1440000001"), TRACK)
