@@ -509,6 +509,8 @@ struct ImasEntryCard: View {
     var preview: String? = nil
     var seed: String? = nil
     var brand: String? = nil
+    /// true なら右端の chevron をくるくるに替える (押してから外へ飛ぶまでの待ち)。
+    var isLoading: Bool = false
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
@@ -524,7 +526,11 @@ struct ImasEntryCard: View {
                 if let preview { Text(preview).font(.imasFootnote).foregroundStyle(DS.ink2).lineLimit(2) }
             }
             Spacer(minLength: 8)
-            Image(systemName: "chevron.right").font(.imasScaled( 16, weight: .semibold)).foregroundStyle(DS.ink3)
+            if isLoading {
+                ProgressView().controlSize(.small)
+            } else {
+                Image(systemName: "chevron.right").font(.imasScaled( 16, weight: .semibold)).foregroundStyle(DS.ink3)
+            }
         }
         .padding(16)
         .background(DS.surface, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))

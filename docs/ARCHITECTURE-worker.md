@@ -53,6 +53,9 @@
 | `routes/calls.ts` | コールガイドの保存 (`PUT /songs/:id/calls`) と整備状況の一覧 (`GET /calls/dashboard`)。一覧は件数・日時・表示名だけで歌詞の断片を含まないため公開キャッシュに載せる |
 | `routes/song_detail.ts` | `GET /songs/:id/detail` (tags + similar + penlight + 任意で歌詞を 1 リクエストに束ねる) |
 | `routes/transfer.ts` | `/transfer` (端末間の引き継ぎコード) |
+| `routes/discord.ts` | Discord のロール受け取り。`POST /discord/link` (アプリから認可 URL を発行) → `GET /discord/callback` (サーバーに参加させ、編集 10 件以上なら「データ協力」)。`POST /discord/interactions` (スラッシュコマンド `/申請`、Ed25519 署名検証) → `GET /github/callback` (マージ済み PR があれば「コントリビューター」) |
+| `discord.ts` | Discord / GitHub OAuth の REST 呼び出し・Interactions の署名検証・OAuth 後の結果ページ |
+| `discord_digest.ts` | 5 分 cron で、前回から増えた編集・コールガイド・タグ・お題を #更新通知 に 1 通にまとめて投稿 (rowid の範囲で新しい行だけ読む。編集者は出さない) |
 | `lyrics_calls.ts` | コール (clap / calls) のドメインロジック。ボディ検証・アンカーの数え方 (Unicode スカラー)・歌詞差し替え時の引き継ぎ |
 | `lyrics_index.ts` | 歌詞本文検索の索引 (候補を絞ってから全走査するための補助索引) |
 | `call_stats.ts` | コールの数え方と派生メタデータ (`song_call_stats` / `call_edit_history`, migrations/0032) の書き込み。数え方の定義はここが唯一の正 |
@@ -97,6 +100,7 @@
 - 曲詳細の束ね: `GET /songs/:id/detail` (tags + similar + penlight。Bearer 付きなら歌詞も同梱)
 - 集計系: `GET/POST /polls…` / `/shows/:id/predictions` / `/shows/:id/likes` / `/songs/:song_id/tags|similar` / `/tags…` / `/favorites…` / `/penlight…` / `/users/:id/badges`
 - 引き継ぎ: `POST /transfer` / `GET /transfer/:code`
+- Discord: `POST /discord/link` / `GET /discord/callback` / `POST /discord/interactions` / `GET /github/callback`
 - 管理: `POST /admin/ban` / `POST /admin/revert-user` / `GET /admin/users/:id/edits`
 - アプリ証明・着地: `GET /app/challenge` / `POST /app/attest|assert` / `GET /app/events/:id` / `GET /app/shows/:id` / `GET /.well-known/apple-app-site-association`
 

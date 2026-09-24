@@ -30,6 +30,7 @@ import com.fugaif.imaslivedb.data.repository.StatsRepository
 import com.fugaif.imaslivedb.data.repository.UnitRepository
 import com.fugaif.imaslivedb.data.repository.UserMarkRepository
 import com.fugaif.imaslivedb.data.community.CommunityApi
+import com.fugaif.imaslivedb.data.community.DiscordLinkService
 import com.fugaif.imaslivedb.data.community.FavoriteAggregation
 import com.fugaif.imaslivedb.data.community.LocalContributionLog
 import com.fugaif.imaslivedb.data.community.LocalPollVoteLog
@@ -123,6 +124,8 @@ class AppModule private constructor(context: Context) {
     val communityApi: CommunityApi by lazy { CommunityApi(workerHttpClient) }
     val editApi: EditApi by lazy { EditApi(workerHttpClient, authService) }
     val setlistLikeService: SetlistLikeService by lazy { SetlistLikeService(workerHttpClient) }
+    /** Discord のロール受け取り (認可 URL の発行)。 */
+    val discordLinkService: DiscordLinkService by lazy { DiscordLinkService(workerHttpClient) }
     /** セトリ予想 (みんなの予想)。覚え書きを画面をまたいで共有するため、アプリで 1 つ。 */
     val setlistPredictionService: SetlistPredictionService by lazy { SetlistPredictionService(workerHttpClient) }
     /** セトリ予想への投票 (機械予測の「予想に入れる」が使う)。 */

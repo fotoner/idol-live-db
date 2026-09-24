@@ -8,6 +8,7 @@
 // 失敗は 1 行の JSON (event: "cron_task_failed") でログに出す。最後に失敗をまとめて投げ直すので、
 // cron の実行としても失敗が記録される。
 
+import { postDiscordDigest } from "./discord_digest";
 import type { Env } from "./env";
 
 /**
@@ -16,7 +17,8 @@ import type { Env } from "./env";
  */
 export const DAILY_CRON = "17 15 * * *";
 
-type ScheduledEnv = Pick<Env, "DB">;
+// DB 以外 (Discord / CloudKit の設定) は通知のタスクだけが読む。無ければそのタスクは何もしない。
+type ScheduledEnv = Pick<Env, "DB"> & Partial<Env>;
 
 interface CronTask {
   /** ログに出す名前。 */
@@ -46,6 +48,19 @@ const EVERY_RUN: CronTask[] = [
       env.DB.prepare("DELETE FROM transfer_codes WHERE expires_at < ?")
         .bind(new Date().toISOString())
         .run(),
+  },
+  {
+    name: "discord_oauth_states",
+    // 期限切れの Discord / GitHub の OAuth state (routes/discord.ts)。
+    run: (env) =>
+      env.DB.prepare("DELETE FROM discord_oauth_states WHERE expires_at < ?")
+        .bind(new Date().toISOString())
+        .run(),
+  },
+  {
+    name: "discord_digest",
+    // #更新通知 へのまとめ投稿。rowid の範囲で新しい行だけ読む (discord_digest.ts)。
+    run: postDiscordDigest,
   },
 ];
 
