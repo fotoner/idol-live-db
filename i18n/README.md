@@ -184,7 +184,7 @@ Android では同じ名前の `L10n.Songs.listSortTitle` (DS 部品にはその�
 
 `lock/<言語>.json` と今のカタログから決まる。`stamp <言語> --reviewer <名前>` は、完全キーごとに
 `{"source": 原文の sha256, "target": 訳の sha256, "reviewer": 名前}` を書く (訳の sha256 は、文字列ならそのまま、
-複数形なら範疇を整列した JSON から)。`--reviewer` は必須で、**訳を確かめた人**の名前を書く (AI エージェントは
+複数形なら範疇を整列した JSON から。other だけの複数形は同じ文字列と同じに数える)。`--reviewer` は必須で、**訳を確かめた人**の名前を書く (AI エージェントは
 `stamp` しない)。
 
 | 状態 | 意味 | xcstrings の state | 出荷ゲート (beta / release) |
