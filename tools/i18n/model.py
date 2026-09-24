@@ -603,6 +603,12 @@ def build_namespace(path, stem, raw, config, problems):
     return ns
 
 
+def valid_reviewer(name):
+    """lock に書けるレビュアー名か (空・前後の空白・制御文字は不可)。stamp と lock の読み込みが同じ規則を使う。"""
+    return (isinstance(name, str) and bool(name.strip()) and name == name.strip()
+            and not any(ord(c) < 0x20 or ord(c) == 0x7f for c in name))
+
+
 def _stamp(value):
     """lock の値 1 つ → Stamp (読めなければ None)。"""
     if isinstance(value, str):
@@ -612,8 +618,7 @@ def _stamp(value):
     source, target, reviewer = value["source"], value["target"], value["reviewer"]
     if not (isinstance(source, str) and SHA256_RE.match(source) and isinstance(target, str) and SHA256_RE.match(target)):
         return None
-    if (not isinstance(reviewer, str) or not reviewer.strip() or reviewer != reviewer.strip()
-            or any(ord(c) < 0x20 for c in reviewer)):
+    if not valid_reviewer(reviewer):
         return None
     return Stamp(source=source, target=target, reviewer=reviewer)
 
