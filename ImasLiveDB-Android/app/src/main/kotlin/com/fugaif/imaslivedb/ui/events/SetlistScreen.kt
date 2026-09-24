@@ -50,6 +50,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -87,6 +88,7 @@ import com.fugaif.imaslivedb.ui.components.CommunityLoginPromptDialog
 import com.fugaif.imaslivedb.ui.components.GradientHeader
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.ImasLabeledRow
+import com.fugaif.imaslivedb.ui.components.ImasSegmented
 import com.fugaif.imaslivedb.ui.components.ImasSectionHeader
 import com.fugaif.imaslivedb.ui.components.ImasTagChip
 import com.fugaif.imaslivedb.ui.components.PerformerChip
@@ -168,6 +170,8 @@ fun SetlistScreen(
     }
 
     var menuOpen by remember { mutableStateOf(false) }
+    // 未来の公演で予想と実セトリが両方あるときの内部タブ (0 = セットリスト, 1 = 予想)。
+    var contentTab by rememberSaveable(showId) { mutableStateOf(0) }
     var showAttendanceDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
     var showHistorySheet by remember { mutableStateOf(false) }
@@ -239,6 +243,11 @@ fun SetlistScreen(
         } else {
             val isCharacterLive = uiState.isCharacterLive
             val seedHex = BrandColors.hex(uiState.brandId)
+            // 公演前か。「今日」は JST 固定 (JstDay) — 端末ローカルの TZ で判定すると
+            // 海外にいるユーザーだけ 1 日ずれる。
+            val isFuture = uiState.show?.date?.let { JstDay.isTodayOrLater(it) } ?: false
+            // 予想タブを開いている間は、実セトリ側 (投票の一言・回収の要約・曲の行) を出さない。
+            val showingPrediction = isFuture && hasSetlist && contentTab == 1
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -344,12 +353,29 @@ fun SetlistScreen(
                     }
                 }
 
+                // 予想と実セトリが両方あるときは内部タブで切り替える (実セトリが入った後も予想を見られる)。
+                if (isFuture && hasSetlist) {
+                    item(key = "content_tab") {
+                        ImasSegmented(
+                            labels = listOf("セットリスト", "予想"),
+                            selection = contentTab,
+                            onSelect = { contentTab = it },
+                            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp)
+                        )
+                    }
+                }
+
+                // 予想: 未来の公演で、実セトリが未登録か、予想タブを選んでいるとき (iOS と同じ)。
+                if (isFuture && (!hasSetlist || contentTab == 1)) {
+                    item(key = "prediction") {
+                        SetlistPredictionSection(showId = showId, seed = seedHex)
+                    }
+                }
+
                 if (!hasSetlist) {
                     item(key = "empty") {
-                        // 公演前かどうかで文言と導線を変える。「今日」は JST 固定 (JstDay) —
-                        // 端末ローカルの TZ で判定すると海外にいるユーザーだけ 1 日ずれる。
+                        // 公演前かどうかで文言と導線を変える。
                         // 未来の公演に「セトリを追加」を出しても、まだ書ける中身が無い。
-                        val isFuture = uiState.show?.date?.let { JstDay.isTodayOrLater(it) } ?: false
                         val canAdd = canShowEditActions && !isFuture
                         ImasEmptyState(
                             icon = Icons.Filled.MusicNote,
@@ -365,7 +391,7 @@ fun SetlistScreen(
 
                 // 投票導線。シンプル表示では出さない — 行に 👍 自体が無く、
                 // スクショに誘導文が写り込むだけになる。
-                if (hasSetlist && !simpleMode) {
+                if (hasSetlist && !simpleMode && !showingPrediction) {
                     item(key = "vote_note") {
                         VoteHintRow(isSignedIn = isSignedIn, onLoginClick = viewModel::requestLogin)
                     }
@@ -373,13 +399,13 @@ fun SetlistScreen(
 
                 // 自分の回収の要約。セトリの真上に置いて、この下の並びの読み方を先に言う。
                 // 出すかどうかも文言も共有コアが決める (null なら何も出さない)。
-                uiState.collectionSummary?.let { summary ->
+                uiState.collectionSummary?.takeIf { !showingPrediction }?.let { summary ->
                     item(key = "collection_summary") {
                         CollectionSummaryRow(summary = summary)
                     }
                 }
 
-                uiState.sections.forEachIndexed { sectionIndex, section ->
+                (if (showingPrediction) emptyList() else uiState.sections).forEachIndexed { sectionIndex, section ->
                     // 同じ見出しが 2 度来ても鍵がぶつからないよう、塊の順番を鍵にする。
                     stickyHeader(key = "section_$sectionIndex") {
                         Surface(
