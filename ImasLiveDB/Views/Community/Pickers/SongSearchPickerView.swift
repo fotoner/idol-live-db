@@ -589,16 +589,9 @@ private struct SongPickerFilterSheet: View {
         .buttonStyle(.plain)
     }
 
-    /// 並び順の表示名。SongSortOrder の rawValue は日本語だが表示にしか使っていない
-    /// (保存しない) ので値はそのままにして、ここで文言を引く。ピッカーに出す 3 つ以外は来ないが、
-    /// 来たら今までどおり rawValue を出す。SongSortOrder 自体に表示名が付いたらそちらに寄せる。
+    /// 並び順の表示名 (SongSortOrder.label。楽曲一覧と同じ文言)。
     static func sortLabel(_ order: SongSortOrder) -> DisplayText {
-        switch order {
-        case .titleKana: .key(L10n.Edit.songPickerSortTitleKana)
-        case .releaseDate: .key(L10n.Edit.songPickerSortReleaseDate)
-        case .performanceCount: .key(L10n.Edit.songPickerSortPerformanceCount)
-        case .collectedCount, .collectedRate: .verbatim(order.rawValue)
-        }
+        .key(order.label)
     }
 
     /// 選んだシリーズ名 (データ) か、未選択の「選択なし」。

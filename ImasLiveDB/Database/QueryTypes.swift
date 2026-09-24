@@ -625,11 +625,12 @@ enum SongCollectFilter: String, CaseIterable, Sendable {
     case uncollected = "未回収のみ"
 
     /// 表示名。保存値 (rawValue) とは別に、今の言語の文言を引く (画面では rawValue を出さない)。
+    /// ja は rawValue と同じ文字列。
     var label: LocalizedStringResource {
         switch self {
-        case .all: L10n.Model.songCollectFilterAll
-        case .collected: L10n.Model.songCollectFilterCollected
-        case .uncollected: L10n.Model.songCollectFilterUncollected
+        case .all: L10n.Songs.filterCollectAll
+        case .collected: L10n.Songs.filterCollectCollected
+        case .uncollected: L10n.Songs.filterCollectUncollected
         }
     }
 }
@@ -664,13 +665,14 @@ enum SongSortOrder: String, CaseIterable, Sendable {
     case collectedRate = "回収率順"
 
     /// 表示名。rawValue とは別に、今の言語の文言を引く (画面では rawValue を出さない)。
+    /// 楽曲一覧・フィルタ・曲のピッカーで共通 (ja は rawValue と同じ文字列)。
     var label: LocalizedStringResource {
         switch self {
-        case .titleKana: L10n.Model.songSortTitleKana
-        case .releaseDate: L10n.Model.songSortReleaseDate
-        case .performanceCount: L10n.Model.songSortPerformanceCount
-        case .collectedCount: L10n.Model.songSortCollectedCount
-        case .collectedRate: L10n.Model.songSortCollectedRate
+        case .titleKana: L10n.Songs.sortTitleKana
+        case .releaseDate: L10n.Songs.sortReleaseDate
+        case .performanceCount: L10n.Songs.sortPerformanceCount
+        case .collectedCount: L10n.Songs.sortCollectedCount
+        case .collectedRate: L10n.Songs.sortCollectedRate
         }
     }
 

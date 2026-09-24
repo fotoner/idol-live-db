@@ -63,9 +63,9 @@ struct SongFilterView: View {
 
                     if listMode == .songs {
                         Picker(selection: $collectFilter) {
-                            // 表示は songsListLabel。rawValue は @AppStorage に保存される値なので画面に出さない。
+                            // 表示は label。rawValue は @AppStorage に保存される値なので画面に出さない。
                             ForEach(SongCollectFilter.allCases, id: \.rawValue) { c in
-                                Text(c.songsListLabel).tag(c)
+                                Text(c.label).tag(c)
                             }
                         } label: {
                             Text(L10n.Songs.filterCollectHeader)
@@ -123,7 +123,7 @@ struct SongFilterView: View {
                 Section {
                     Picker(selection: $sortOrder) {
                         ForEach(SongSortOrder.allCases, id: \.rawValue) { order in
-                            Text(order.songsListLabel).tag(order)
+                            Text(order.label).tag(order)
                         }
                     } label: {
                         Text(L10n.Songs.filterSortPicker)

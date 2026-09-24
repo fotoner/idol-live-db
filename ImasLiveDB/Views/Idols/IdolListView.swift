@@ -21,23 +21,6 @@ enum IdolListMode: String, CaseIterable {
     case grid
 }
 
-extension IdolSortOrder {
-    /// 並び順の表示名。保存値 (`rawValue`) は `@AppStorage` の値なので表示に使わず、
-    /// カタログの文言を引く (ja は rawValue と同じ文字列。ko は「〜순」まで含む)。
-    /// 一覧の見出しのほか、フィルタシートの並び順の表示にも使える (Android の `IdolSortOrder.labelText` と同じ役目)。
-    var label: LocalizedStringResource {
-        switch self {
-        case .official: return L10n.Idols.sortOrderOfficial
-        case .nameKana: return L10n.Idols.sortOrderNameKana
-        case .age: return L10n.Idols.sortOrderAge
-        case .height: return L10n.Idols.sortOrderHeight
-        case .weight: return L10n.Idols.sortOrderWeight
-        case .birthday: return L10n.Idols.sortOrderBirthday
-        case .debut: return L10n.Idols.sortOrderDebut
-        }
-    }
-}
-
 struct IdolListView: View {
     @Environment(AppDatabase.self) private var database
     @Environment(CloudKitSyncEngine.self) private var syncEngine

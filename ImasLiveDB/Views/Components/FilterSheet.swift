@@ -364,33 +364,6 @@ private var brandAttributes: [String: [(value: String, label: DisplayText)]] {
     return ["cg": cinderella, "ml": princess, "765as": princess, "sidem": sidem, "sc": shiny]
 }
 
-/// 表示形式の選択肢の文言。rawValue (「アイドル名」「CV名」) は @AppStorage に入る保存値なので変えず、
-/// 表示だけカタログを引く。
-private extension IdolDisplayMode {
-    var filterSheetLabel: LocalizedStringResource {
-        switch self {
-        case .idolName: L10n.Common.filterSheetDisplayModeIdolName
-        case .cvName: L10n.Common.filterSheetDisplayModeCvName
-        }
-    }
-}
-
-/// 並び順の選択肢の文言。rawValue (「公式順」など) は @AppStorage に入る保存値なので変えず、
-/// 表示だけカタログを引く。
-private extension IdolSortOrder {
-    var filterSheetLabel: LocalizedStringResource {
-        switch self {
-        case .official: L10n.Common.filterSheetIdolSortOfficial
-        case .nameKana: L10n.Common.filterSheetIdolSortNameKana
-        case .age: L10n.Common.filterSheetIdolSortAge
-        case .height: L10n.Common.filterSheetIdolSortHeight
-        case .weight: L10n.Common.filterSheetIdolSortWeight
-        case .birthday: L10n.Common.filterSheetIdolSortBirthday
-        case .debut: L10n.Common.filterSheetIdolSortDebut
-        }
-    }
-}
-
 struct IdolFilterSheet: View {
     @Environment(AppDatabase.self) private var database
     @Environment(\.dismiss) private var dismiss
@@ -433,7 +406,7 @@ struct IdolFilterSheet: View {
             List {
                 Section(L10n.Common.filterSheetDisplayModeHeader) {
                     ImasSegmented(options: IdolDisplayMode.allCases, selection: $localDisplayMode) {
-                        String(localized: $0.filterSheetLabel)
+                        String(localized: $0.label)
                     }
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
 
@@ -445,7 +418,7 @@ struct IdolFilterSheet: View {
                 Section {
                     Picker(L10n.Common.filterSheetSortHeader, selection: $localSortOrder) {
                         ForEach(IdolSortOrder.allCases, id: \.rawValue) { order in
-                            Text(order.filterSheetLabel).tag(order)
+                            Text(order.label).tag(order)
                         }
                     }
                     .pickerStyle(.menu)

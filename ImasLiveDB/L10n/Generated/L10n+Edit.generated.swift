@@ -504,21 +504,9 @@ extension L10n {
         static var songPickerSongwriterPlaceholder: LocalizedStringResource {
             LocalizedStringResource("edit.song_picker.songwriter.placeholder", defaultValue: "名前を入力", table: "Edit", bundle: L10n.bundle)
         }
-        /// 披露回数順 — 並び順の選択肢: ライブで歌われた回数の多い順
-        static var songPickerSortPerformanceCount: LocalizedStringResource {
-            LocalizedStringResource("edit.song_picker.sort.performance_count", defaultValue: "披露回数順", table: "Edit", bundle: L10n.bundle)
-        }
-        /// リリース日順 — 並び順の選択肢: リリース日の新しい順
-        static var songPickerSortReleaseDate: LocalizedStringResource {
-            LocalizedStringResource("edit.song_picker.sort.release_date", defaultValue: "リリース日順", table: "Edit", bundle: L10n.bundle)
-        }
         /// 並び順 — 曲のピッカーの絞り込みシートの並び順の選択欄と、その節の見出し
         static var songPickerSortTitle: LocalizedStringResource {
             LocalizedStringResource("edit.song_picker.sort.title", defaultValue: "並び順", table: "Edit", bundle: L10n.bundle)
-        }
-        /// 五十音順 — 並び順の選択肢: 曲名の読みの五十音順
-        static var songPickerSortTitleKana: LocalizedStringResource {
-            LocalizedStringResource("edit.song_picker.sort.title_kana", defaultValue: "五十音順", table: "Edit", bundle: L10n.bundle)
         }
         /// タグ絞り込みの取得に失敗しました。電波状況をご確認ください。 — 曲のピッカーで、タグの絞り込みを取れず結果が 0 件のときの注意
         static var songPickerTagFilterError: LocalizedStringResource {

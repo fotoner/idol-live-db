@@ -2411,42 +2411,6 @@
         }
       }
     },
-    "edit.song_picker.sort.performance_count" : {
-      "comment" : "並び順の選択肢: ライブで歌われた回数の多い順 (i18n/catalog/edit.json)",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "披露回数順"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "공연 횟수순"
-          }
-        }
-      }
-    },
-    "edit.song_picker.sort.release_date" : {
-      "comment" : "並び順の選択肢: リリース日の新しい順 (i18n/catalog/edit.json)",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リリース日順"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "발매일순"
-          }
-        }
-      }
-    },
     "edit.song_picker.sort.title" : {
       "comment" : "曲のピッカーの絞り込みシートの並び順の選択欄と、その節の見出し (i18n/catalog/edit.json)",
       "extractionState" : "manual",
@@ -2461,24 +2425,6 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "정렬 순서"
-          }
-        }
-      }
-    },
-    "edit.song_picker.sort.title_kana" : {
-      "comment" : "並び順の選択肢: 曲名の読みの五十音順 (i18n/catalog/edit.json)",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "五十音順"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "50음순"
           }
         }
       }

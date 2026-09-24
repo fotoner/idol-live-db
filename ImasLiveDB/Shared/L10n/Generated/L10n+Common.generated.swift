@@ -180,45 +180,9 @@ extension L10n {
         static var filterSheetDisplayShowEmptyEvents: LocalizedStringResource {
             LocalizedStringResource("common.filter_sheet.display.show_empty_events", defaultValue: "セトリ情報がないイベントも表示", table: "Common", bundle: L10n.bundle)
         }
-        /// CV名 — 表示形式の選択肢 (一覧の見出しを声優名にする)。保存値 (rawValue) は変えず、表示だけこの文言にする
-        static var filterSheetDisplayModeCvName: LocalizedStringResource {
-            LocalizedStringResource("common.filter_sheet.display_mode.cv_name", defaultValue: "CV名", table: "Common", bundle: L10n.bundle)
-        }
         /// 表示形式 — アイドルの絞り込みシートの表示形式の節の見出し
         static var filterSheetDisplayModeHeader: LocalizedStringResource {
             LocalizedStringResource("common.filter_sheet.display_mode.header", defaultValue: "表示形式", table: "Common", bundle: L10n.bundle)
-        }
-        /// アイドル名 — 表示形式の選択肢 (一覧の見出しをアイドル名にする)。保存値 (rawValue) は変えず、表示だけこの文言にする
-        static var filterSheetDisplayModeIdolName: LocalizedStringResource {
-            LocalizedStringResource("common.filter_sheet.display_mode.idol_name", defaultValue: "アイドル名", table: "Common", bundle: L10n.bundle)
-        }
-        /// 年齢 — アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする
-        static var filterSheetIdolSortAge: LocalizedStringResource {
-            LocalizedStringResource("common.filter_sheet.idol_sort.age", defaultValue: "年齢", table: "Common", bundle: L10n.bundle)
-        }
-        /// 誕生日 — アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする
-        static var filterSheetIdolSortBirthday: LocalizedStringResource {
-            LocalizedStringResource("common.filter_sheet.idol_sort.birthday", defaultValue: "誕生日", table: "Common", bundle: L10n.bundle)
-        }
-        /// デビュー日 — アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする
-        static var filterSheetIdolSortDebut: LocalizedStringResource {
-            LocalizedStringResource("common.filter_sheet.idol_sort.debut", defaultValue: "デビュー日", table: "Common", bundle: L10n.bundle)
-        }
-        /// 身長 — アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする
-        static var filterSheetIdolSortHeight: LocalizedStringResource {
-            LocalizedStringResource("common.filter_sheet.idol_sort.height", defaultValue: "身長", table: "Common", bundle: L10n.bundle)
-        }
-        /// 五十音順 — アイドルの並び順の選択肢 (名前のかな読みの五十音順)。保存値は変えず、表示だけこの文言にする
-        static var filterSheetIdolSortNameKana: LocalizedStringResource {
-            LocalizedStringResource("common.filter_sheet.idol_sort.name_kana", defaultValue: "五十音順", table: "Common", bundle: L10n.bundle)
-        }
-        /// 公式順 — アイドルの並び順の選択肢。保存値 (rawValue) は変えず、表示だけこの文言にする
-        static var filterSheetIdolSortOfficial: LocalizedStringResource {
-            LocalizedStringResource("common.filter_sheet.idol_sort.official", defaultValue: "公式順", table: "Common", bundle: L10n.bundle)
-        }
-        /// 体重 — アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする
-        static var filterSheetIdolSortWeight: LocalizedStringResource {
-            LocalizedStringResource("common.filter_sheet.idol_sort.weight", defaultValue: "体重", table: "Common", bundle: L10n.bundle)
         }
         /// 全て表示中 — 種別の節の下。除外している種別が無いとき
         static var filterSheetKindAllShown: LocalizedStringResource {

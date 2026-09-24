@@ -5,7 +5,7 @@ import XCTest
 ///
 /// `SongSortOrder` / `SongCollectFilter` は日本語の rawValue をそのまま画面に出していた。
 /// rawValue は変えずに (`SongCollectFilter` は `@AppStorage("songs_collect_filter")` の保存値)、
-/// 表示だけ `songsListLabel` 経由でカタログを引くようにしたので、
+/// 表示だけ `label` 経由でカタログを引くようにしたので、
 /// - ja の表示が以前の rawValue と 1 バイトも違わないこと
 /// - 保存値の rawValue が変わっていないこと
 /// を固定する。言語は `LocalizedStringResource.locale` で指定する (シミュレータの言語に左右されない)。
@@ -19,7 +19,7 @@ final class SongsDisplayLabelTests: XCTestCase {
 
     func testSortOrderLabelInJapaneseIsTheFormerRawValue() {
         for order in SongSortOrder.allCases {
-            XCTAssertEqual(resolve(order.songsListLabel, "ja"), order.rawValue, "\(order)")
+            XCTAssertEqual(resolve(order.label, "ja"), order.rawValue, "\(order)")
         }
     }
 
@@ -30,13 +30,13 @@ final class SongsDisplayLabelTests: XCTestCase {
 
     func testCollectFilterLabelInJapaneseIsTheFormerRawValue() {
         for filter in SongCollectFilter.allCases {
-            XCTAssertEqual(resolve(filter.songsListLabel, "ja"), filter.rawValue, "\(filter)")
+            XCTAssertEqual(resolve(filter.label, "ja"), filter.rawValue, "\(filter)")
         }
     }
 
     func testLabelsAreTranslatedInKorean() {
-        XCTAssertEqual(resolve(SongCollectFilter.all.songsListLabel, "ko"), "전체")
-        XCTAssertEqual(resolve(SongSortOrder.releaseDate.songsListLabel, "ko"), "발매일순")
+        XCTAssertEqual(resolve(SongCollectFilter.all.label, "ko"), "전체")
+        XCTAssertEqual(resolve(SongSortOrder.releaseDate.label, "ko"), "발매일순")
     }
 
     /// 曲詳細のタブ名。以前の固定文字列と ja が同じ。

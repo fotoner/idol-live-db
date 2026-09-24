@@ -272,62 +272,6 @@
         "ios"
       ]
     },
-    "idol_sort.age": {
-      "ja": "年齢",
-      "ko": "나이",
-      "note": "アイドル一覧の並び順の名前。画面によっては「◯◯順」と組み合わせる",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "idol_sort.birthday": {
-      "ja": "誕生日",
-      "ko": "생일",
-      "note": "アイドル一覧の並び順の名前",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "idol_sort.debut": {
-      "ja": "デビュー日",
-      "ko": "데뷔일",
-      "note": "アイドル一覧の並び順の名前",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "idol_sort.height": {
-      "ja": "身長",
-      "ko": "키",
-      "note": "アイドル一覧の並び順の名前",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "idol_sort.name_kana": {
-      "ja": "五十音順",
-      "ko": "50음순",
-      "note": "アイドル一覧の並び順の名前 (よみがなの五十音順)",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "idol_sort.official": {
-      "ja": "公式順",
-      "ko": "공식순",
-      "note": "アイドル一覧の並び順の名前 (公式の並び)",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "idol_sort.weight": {
-      "ja": "体重",
-      "ko": "몸무게",
-      "note": "アイドル一覧の並び順の名前",
-      "platforms": [
-        "ios"
-      ]
-    },
     "input_limits.counter": {
       "args": [
         {
@@ -707,30 +651,6 @@
         "android"
       ]
     },
-    "song_collect_filter.all": {
-      "ja": "すべて",
-      "ko": "전체",
-      "note": "楽曲一覧の「現地回収」の絞り込み (絞り込まない)",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "song_collect_filter.collected": {
-      "ja": "回収済のみ",
-      "ko": "회수한 곡만",
-      "note": "楽曲一覧の「現地回収」の絞り込み (ライブで聴いた曲だけ)",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "song_collect_filter.uncollected": {
-      "ja": "未回収のみ",
-      "ko": "미회수 곡만",
-      "note": "楽曲一覧の「現地回収」の絞り込み (まだライブで聴いていない曲だけ)",
-      "platforms": [
-        "ios"
-      ]
-    },
     "song_filter.title.brand": {
       "args": [
         {
@@ -783,46 +703,6 @@
       "ja": "{type}の楽曲",
       "ko": "{type} 곡",
       "note": "絞り込んだ楽曲一覧の画面タイトル。type は曲の種類の名前 (データ)",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "song_sort.collected_count": {
-      "ja": "現地回収回数順",
-      "ko": "현장 회수 횟수순",
-      "note": "楽曲一覧の並び順の名前 (自分が現地で聴いた回数)",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "song_sort.collected_rate": {
-      "ja": "回収率順",
-      "ko": "회수율순",
-      "note": "楽曲一覧の並び順の名前 (披露回数のうち自分が現地で聴いた割合)",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "song_sort.performance_count": {
-      "ja": "披露回数順",
-      "ko": "공연 횟수순",
-      "note": "楽曲一覧の並び順の名前 (ライブで歌われた回数)",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "song_sort.release_date": {
-      "ja": "リリース日順",
-      "ko": "발매일순",
-      "note": "楽曲一覧の並び順の名前",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "song_sort.title_kana": {
-      "ja": "五十音順",
-      "ko": "50음순",
-      "note": "楽曲一覧の並び順の名前 (曲名のよみがなの五十音順)",
       "platforms": [
         "ios"
       ]

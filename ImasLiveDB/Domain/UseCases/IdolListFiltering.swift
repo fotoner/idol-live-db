@@ -25,16 +25,17 @@ enum IdolSortOrder: String, CaseIterable, Sendable {
     case debut = "デビュー日"
 
     /// 表示名。保存値 (rawValue) とは別に、今の言語の文言を引く (画面では rawValue を出さない)。
-    /// ja は rawValue と同じ文字列。
+    /// ja は rawValue と同じ文字列。ko は「〜순」まで含む (一覧の見出し・フィルタシートの選択肢で共通。
+    /// Android の `IdolSortOrder.labelText` と同じキー)。
     var label: LocalizedStringResource {
         switch self {
-        case .official: L10n.Model.idolSortOfficial
-        case .nameKana: L10n.Model.idolSortNameKana
-        case .age: L10n.Model.idolSortAge
-        case .height: L10n.Model.idolSortHeight
-        case .weight: L10n.Model.idolSortWeight
-        case .birthday: L10n.Model.idolSortBirthday
-        case .debut: L10n.Model.idolSortDebut
+        case .official: L10n.Idols.sortOrderOfficial
+        case .nameKana: L10n.Idols.sortOrderNameKana
+        case .age: L10n.Idols.sortOrderAge
+        case .height: L10n.Idols.sortOrderHeight
+        case .weight: L10n.Idols.sortOrderWeight
+        case .birthday: L10n.Idols.sortOrderBirthday
+        case .debut: L10n.Idols.sortOrderDebut
         }
     }
 

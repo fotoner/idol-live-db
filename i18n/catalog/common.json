@@ -473,82 +473,10 @@
         "ios"
       ]
     },
-    "filter_sheet.display_mode.cv_name": {
-      "ja": "CV名",
-      "ko": "CV 이름",
-      "note": "表示形式の選択肢 (一覧の見出しを声優名にする)。保存値 (rawValue) は変えず、表示だけこの文言にする",
-      "platforms": [
-        "ios"
-      ]
-    },
     "filter_sheet.display_mode.header": {
       "ja": "表示形式",
       "ko": "표시 형식",
       "note": "アイドルの絞り込みシートの表示形式の節の見出し",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "filter_sheet.display_mode.idol_name": {
-      "ja": "アイドル名",
-      "ko": "아이돌 이름",
-      "note": "表示形式の選択肢 (一覧の見出しをアイドル名にする)。保存値 (rawValue) は変えず、表示だけこの文言にする",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "filter_sheet.idol_sort.age": {
-      "ja": "年齢",
-      "ko": "나이",
-      "note": "アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "filter_sheet.idol_sort.birthday": {
-      "ja": "誕生日",
-      "ko": "생일",
-      "note": "アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "filter_sheet.idol_sort.debut": {
-      "ja": "デビュー日",
-      "ko": "데뷔일",
-      "note": "アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "filter_sheet.idol_sort.height": {
-      "ja": "身長",
-      "ko": "키",
-      "note": "アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "filter_sheet.idol_sort.name_kana": {
-      "ja": "五十音順",
-      "ko": "50음순",
-      "note": "アイドルの並び順の選択肢 (名前のかな読みの五十音順)。保存値は変えず、表示だけこの文言にする",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "filter_sheet.idol_sort.official": {
-      "ja": "公式順",
-      "ko": "공식순",
-      "note": "アイドルの並び順の選択肢。保存値 (rawValue) は変えず、表示だけこの文言にする",
-      "platforms": [
-        "ios"
-      ]
-    },
-    "filter_sheet.idol_sort.weight": {
-      "ja": "体重",
-      "ko": "몸무게",
-      "note": "アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする",
       "platforms": [
         "ios"
       ]

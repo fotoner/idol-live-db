@@ -65,35 +65,6 @@ enum SongListMode: String, CaseIterable {
     }
 }
 
-extension SongSortOrder {
-    /// 画面に出す並び順の名前。rawValue (「五十音順」など) は表示に使わない
-    /// (rawValue は型の識別子で、言語を切り替えても変わらない)。
-    ///
-    /// 名前を `label` / `displayName` にしないのは、QueryTypes.swift (別のスライス) の側で
-    /// 同じ名前の表示名が足されたときに再宣言でぶつからないようにするため。
-    var songsListLabel: LocalizedStringResource {
-        switch self {
-        case .titleKana:        L10n.Songs.sortTitleKana
-        case .releaseDate:      L10n.Songs.sortReleaseDate
-        case .performanceCount: L10n.Songs.sortPerformanceCount
-        case .collectedCount:   L10n.Songs.sortCollectedCount
-        case .collectedRate:    L10n.Songs.sortCollectedRate
-        }
-    }
-}
-
-extension SongCollectFilter {
-    /// 画面に出す選択肢の名前。rawValue (「すべて」など) は `@AppStorage("songs_collect_filter")` に
-    /// 保存される値なので変えない。表示はこちらを使う (名前の付け方は `SongSortOrder.songsListLabel` と同じ理由)。
-    var songsListLabel: LocalizedStringResource {
-        switch self {
-        case .all:         L10n.Songs.filterCollectAll
-        case .collected:   L10n.Songs.filterCollectCollected
-        case .uncollected: L10n.Songs.filterCollectUncollected
-        }
-    }
-}
-
 struct SongListView: View {
     @Environment(AppDatabase.self) private var database
     @Environment(CloudKitSyncEngine.self) private var syncEngine
@@ -868,7 +839,7 @@ struct SongListView: View {
                     set: { changeSortOrder($0) }
                 )) {
                     ForEach(SongSortOrder.allCases, id: \.rawValue) { order in
-                        Text(order.songsListLabel).tag(order)
+                        Text(order.label).tag(order)
                     }
                 } label: {
                     Text(L10n.Songs.listSortPicker)
@@ -887,7 +858,7 @@ struct SongListView: View {
                     Image(systemName: effectiveSortAscending ? "arrow.up" : "arrow.down")
                         .font(.imasScaled( 13, weight: .semibold))
                         .foregroundStyle(DS.ink2)
-                    Text(sortOrder.songsListLabel)
+                    Text(sortOrder.label)
                         .font(.imasScaled( 13.5, weight: .semibold))
                         .foregroundStyle(DS.ink)
                     Image(systemName: "chevron.down")
@@ -899,7 +870,7 @@ struct SongListView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(L10n.Songs.listSortA11y(
-                order: sortOrder.songsListLabel,
+                order: sortOrder.label,
                 direction: effectiveSortAscending ? L10n.Songs.sortAscending : L10n.Songs.sortDescending))
         }
         .padding(.horizontal, DS.sp5)

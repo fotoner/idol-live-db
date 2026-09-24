@@ -92,34 +92,6 @@ extension L10n {
         static func idolFilterTitleConstellation(name: String) -> LocalizedStringResource {
             LocalizedStringResource("model.idol_filter.title.constellation", defaultValue: "\(name)のアイドル", table: "Model", bundle: L10n.bundle)
         }
-        /// 年齢 — アイドル一覧の並び順の名前。画面によっては「◯◯順」と組み合わせる
-        static var idolSortAge: LocalizedStringResource {
-            LocalizedStringResource("model.idol_sort.age", defaultValue: "年齢", table: "Model", bundle: L10n.bundle)
-        }
-        /// 誕生日 — アイドル一覧の並び順の名前
-        static var idolSortBirthday: LocalizedStringResource {
-            LocalizedStringResource("model.idol_sort.birthday", defaultValue: "誕生日", table: "Model", bundle: L10n.bundle)
-        }
-        /// デビュー日 — アイドル一覧の並び順の名前
-        static var idolSortDebut: LocalizedStringResource {
-            LocalizedStringResource("model.idol_sort.debut", defaultValue: "デビュー日", table: "Model", bundle: L10n.bundle)
-        }
-        /// 身長 — アイドル一覧の並び順の名前
-        static var idolSortHeight: LocalizedStringResource {
-            LocalizedStringResource("model.idol_sort.height", defaultValue: "身長", table: "Model", bundle: L10n.bundle)
-        }
-        /// 五十音順 — アイドル一覧の並び順の名前 (よみがなの五十音順)
-        static var idolSortNameKana: LocalizedStringResource {
-            LocalizedStringResource("model.idol_sort.name_kana", defaultValue: "五十音順", table: "Model", bundle: L10n.bundle)
-        }
-        /// 公式順 — アイドル一覧の並び順の名前 (公式の並び)
-        static var idolSortOfficial: LocalizedStringResource {
-            LocalizedStringResource("model.idol_sort.official", defaultValue: "公式順", table: "Model", bundle: L10n.bundle)
-        }
-        /// 体重 — アイドル一覧の並び順の名前
-        static var idolSortWeight: LocalizedStringResource {
-            LocalizedStringResource("model.idol_sort.weight", defaultValue: "体重", table: "Model", bundle: L10n.bundle)
-        }
         /// {length} / {max}文字 — 入力欄の下の文字数の数え (例: 12 / 30文字)。length は今の文字数、max は上限 (どちらも 300 以下) — 引数: length (int), max (int)
         static func inputLimitsCounter(length: Int, max: Int) -> LocalizedStringResource {
             LocalizedStringResource("model.input_limits.counter", defaultValue: "\(String(length)) / \(String(max))文字", table: "Model", bundle: L10n.bundle)
@@ -156,18 +128,6 @@ extension L10n {
         static func showFilterTitleVenue(venue: String) -> LocalizedStringResource {
             LocalizedStringResource("model.show_filter.title.venue", defaultValue: "\(venue)での公演", table: "Model", bundle: L10n.bundle)
         }
-        /// すべて — 楽曲一覧の「現地回収」の絞り込み (絞り込まない)
-        static var songCollectFilterAll: LocalizedStringResource {
-            LocalizedStringResource("model.song_collect_filter.all", defaultValue: "すべて", table: "Model", bundle: L10n.bundle)
-        }
-        /// 回収済のみ — 楽曲一覧の「現地回収」の絞り込み (ライブで聴いた曲だけ)
-        static var songCollectFilterCollected: LocalizedStringResource {
-            LocalizedStringResource("model.song_collect_filter.collected", defaultValue: "回収済のみ", table: "Model", bundle: L10n.bundle)
-        }
-        /// 未回収のみ — 楽曲一覧の「現地回収」の絞り込み (まだライブで聴いていない曲だけ)
-        static var songCollectFilterUncollected: LocalizedStringResource {
-            LocalizedStringResource("model.song_collect_filter.uncollected", defaultValue: "未回収のみ", table: "Model", bundle: L10n.bundle)
-        }
         /// {label}の楽曲 — 絞り込んだ楽曲一覧の画面タイトル。label はブランド名 (データ) — 引数: label (string)
         static func songFilterTitleBrand(label: String) -> LocalizedStringResource {
             LocalizedStringResource("model.song_filter.title.brand", defaultValue: "\(label)の楽曲", table: "Model", bundle: L10n.bundle)
@@ -183,26 +143,6 @@ extension L10n {
         /// {type}の楽曲 — 絞り込んだ楽曲一覧の画面タイトル。type は曲の種類の名前 (データ) — 引数: type (string)
         static func songFilterTitleSongType(type: String) -> LocalizedStringResource {
             LocalizedStringResource("model.song_filter.title.song_type", defaultValue: "\(type)の楽曲", table: "Model", bundle: L10n.bundle)
-        }
-        /// 現地回収回数順 — 楽曲一覧の並び順の名前 (自分が現地で聴いた回数)
-        static var songSortCollectedCount: LocalizedStringResource {
-            LocalizedStringResource("model.song_sort.collected_count", defaultValue: "現地回収回数順", table: "Model", bundle: L10n.bundle)
-        }
-        /// 回収率順 — 楽曲一覧の並び順の名前 (披露回数のうち自分が現地で聴いた割合)
-        static var songSortCollectedRate: LocalizedStringResource {
-            LocalizedStringResource("model.song_sort.collected_rate", defaultValue: "回収率順", table: "Model", bundle: L10n.bundle)
-        }
-        /// 披露回数順 — 楽曲一覧の並び順の名前 (ライブで歌われた回数)
-        static var songSortPerformanceCount: LocalizedStringResource {
-            LocalizedStringResource("model.song_sort.performance_count", defaultValue: "披露回数順", table: "Model", bundle: L10n.bundle)
-        }
-        /// リリース日順 — 楽曲一覧の並び順の名前
-        static var songSortReleaseDate: LocalizedStringResource {
-            LocalizedStringResource("model.song_sort.release_date", defaultValue: "リリース日順", table: "Model", bundle: L10n.bundle)
-        }
-        /// 五十音順 — 楽曲一覧の並び順の名前 (曲名のよみがなの五十音順)
-        static var songSortTitleKana: LocalizedStringResource {
-            LocalizedStringResource("model.song_sort.title_kana", defaultValue: "五十音順", table: "Model", bundle: L10n.bundle)
         }
         /// 全件再同期が必要です — 差分では追いつけず、全データの同期をやり直す必要があるとき
         static var syncErrorFullResyncRequired: LocalizedStringResource {
