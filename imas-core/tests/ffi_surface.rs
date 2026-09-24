@@ -43,6 +43,7 @@ macro_rules! declare_and_call_checksums {
 declare_and_call_checksums! {
     uniffi_imas_core_checksum_constructor_snapshotstore_new,
     uniffi_imas_core_checksum_constructor_textsearchcatalog_new,
+    uniffi_imas_core_checksum_func_app_navigation_sections,
     uniffi_imas_core_checksum_func_attendance_status,
     uniffi_imas_core_checksum_func_auth_admin_capabilities,
     uniffi_imas_core_checksum_func_auth_adopt_session_response,

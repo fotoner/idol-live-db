@@ -89,6 +89,7 @@ pub mod notification_plan;
 pub mod lyrics_query;
 pub mod relative_time;
 pub mod auth_rules;
+pub mod app_navigation;
 pub mod share_text;
 pub mod sync_decisions;
 pub mod screen_composition;
