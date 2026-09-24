@@ -153,7 +153,7 @@ class ChannelPlacementTest(unittest.TestCase):
     def emit(self, channel):
         with Fixture(self.CATALOG, {"ja": "release", "ko": channel}) as fx:
             if channel != "dev":
-                fx.run("stamp", "ko")
+                fx.run("stamp", "ko", "--reviewer", "hana")
             files, _ = fx.emit()
             return files
 

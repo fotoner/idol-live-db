@@ -197,8 +197,11 @@ class LockStateTest(unittest.TestCase):
                 files, _ = fx.emit()
                 return json.loads(files[APP + "/Common.xcstrings"])["strings"]["common.x"]["localizations"]["ko"]["stringUnit"]["state"]
             self.assertEqual(state(), "needs_review")
-            self.assertEqual(fx.run("stamp", "ko")[0], 0)
+            self.assertEqual(fx.run("stamp", "ko", "--reviewer", "hana")[0], 0)
             self.assertEqual(state(), "translated")
+            fx.write_json("i18n/catalog/common.json",
+                          {"namespace": "common", "kind": "ui", "strings": {"x": {"ja": "曲", "ko": "노래"}}})
+            self.assertEqual(state(), "needs_review")  # edited
             fx.write_json("i18n/catalog/common.json",
                           {"namespace": "common", "kind": "ui", "strings": {"x": {"ja": "楽曲", "ko": "곡"}}})
             self.assertEqual(state(), "needs_review")  # stale

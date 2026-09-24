@@ -2,13 +2,13 @@
 """文言カタログ (i18n/catalog) の検査と、iOS / Android の生成物づくり。
 
     python3 tools/i18n/i18n.py check                 カタログの検査
-    python3 tools/i18n/i18n.py generate              生成物を作り直す (決定的)
+    python3 tools/i18n/i18n.py generate              生成物 (i18n/TRANSLATION.md も) を作り直す (決定的)
     python3 tools/i18n/i18n.py generate --check      生成物が古くないか (書かずに比べる)
     python3 tools/i18n/i18n.py outputs               生成器が持つ出力の経路のうち、在るもの
     python3 tools/i18n/i18n.py outputs --check-committed   生成物が git に入っているか (CI)
     python3 tools/i18n/i18n.py gate --config Release XCSTRINGS_LANGUAGES_TO_COMPILE に入れる言語
     python3 tools/i18n/i18n.py add <ns> <相対キー> "<原文>" [--arg 名前:型 …] [--note …] [--ko …]
-    python3 tools/i18n/i18n.py stamp <言語> [--ns …] [--keys …]   訳を検収済みにする
+    python3 tools/i18n/i18n.py stamp <言語> --reviewer <名前> [--ns …] [--keys …]   人が確かめた訳を検収済みにする
     python3 tools/i18n/i18n.py stats                 網羅率など (Markdown)
     python3 tools/i18n/i18n.py scan [--ratchet] [--update] [--list]   日本語リテラルの数 (報告だけ)
     python3 tools/i18n/i18n.py parity [--strict]     両プラットフォームのキーの使い方
@@ -36,12 +36,16 @@ import parity  # noqa: E402
 import scan  # noqa: E402
 import source_json  # noqa: E402
 import stats  # noqa: E402
+import translation_doc  # noqa: E402
 import validate  # noqa: E402
 
 REPO = os.path.dirname(os.path.dirname(HERE))
 
 # 生成器が持つ出力の経路。generate はここを空にしてから作り直す (手のコードは置かない)
 OWNED_ROOTS = emit_apple.OWNED_ROOTS + emit_android.OWNED_ROOTS
+# 生成器が持つ 1 ファイルの出力 (置き場のディレクトリは手の物もあるので、ファイルだけを持つ)
+OWNED_FILES = (model.TRANSLATION_DOC_PATH,)
+OUTPUT_PATHS = OWNED_ROOTS + OWNED_FILES
 
 LITERALS_BASELINE = "%s/literals.json" % model.BASELINE_DIR
 
@@ -67,6 +71,7 @@ def emit(catalog):
     files = {}
     files.update(emit_apple.emit(catalog))
     files.update(emit_android.emit(catalog))
+    files.update(translation_doc.emit(catalog))
     return files
 
 
@@ -104,7 +109,7 @@ def git_tracked(root, paths):
 
 
 def files_on_disk(root):
-    out = set()
+    out = {f for f in OWNED_FILES if os.path.isfile(os.path.join(root, f))}
     for r in OWNED_ROOTS:
         top = os.path.join(root, r)
         if not os.path.isdir(top):
@@ -124,6 +129,10 @@ def write_outputs(root, files):
             raise SystemExit("✗ %s がシンボリックリンクなので消さない (生成物の置き場は普通のディレクトリにする)" % r)
         if os.path.isdir(path):
             shutil.rmtree(path)
+    for f in OWNED_FILES:
+        path = os.path.join(root, f)
+        if os.path.isfile(path) or os.path.islink(path):
+            os.remove(path)
     for rel in sorted(files):
         path = os.path.join(root, rel)
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -207,7 +216,7 @@ def cmd_outputs(args):
                 return 1
             print("生成物なし (カタログが空)")
             return 0
-        tracked = git_tracked(args.root, OWNED_ROOTS)
+        tracked = git_tracked(args.root, OUTPUT_PATHS)
         if tracked is None:
             print("✗ git の索引を読めない")
             return 1
@@ -219,10 +228,13 @@ def cmd_outputs(args):
             return 1
         print("✓ 生成物 %d ファイルが git に入っている" % len(files))
         return 0
-    tracked = git_tracked(args.root, OWNED_ROOTS) or set()
+    tracked = git_tracked(args.root, OUTPUT_PATHS) or set()
     for r in OWNED_ROOTS:
         if os.path.exists(os.path.join(args.root, r)) or any(t.startswith(r + "/") for t in tracked):
             print(r)
+    for f in OWNED_FILES:
+        if os.path.exists(os.path.join(args.root, f)) or f in tracked:
+            print(f)
     return 0
 
 
@@ -326,9 +338,14 @@ def cmd_stamp(args):
         if catalog.find(k) is None:
             print("✗ キー %s は無い" % k)
             return 1
-    new_lock, stamped, skipped = lock.stamp(catalog, args.lang, args.ns, args.keys)
+    reviewer = args.reviewer.strip()
+    if not reviewer or reviewer != args.reviewer or any(c in reviewer for c in "\r\n\t"):
+        print("✗ --reviewer には訳を確かめた人の名前を書く (空・前後の空白・改行は不可)")
+        return 1
+    new_lock, stamped, skipped = lock.stamp(catalog, args.lang, reviewer, args.ns, args.keys)
     lock.write(args.root, args.lang, new_lock)
-    print("✓ %s の %d 件を検収済みにした (訳が無くて飛ばした %d 件)" % (args.lang, len(stamped), len(skipped)))
+    print("✓ %s の %d 件を %s が検収したことにした (訳が無くて飛ばした %d 件)" % (
+        args.lang, len(stamped), reviewer, len(skipped)))
     files = regenerate(args.root)
     if files is False:
         return 1
@@ -414,8 +431,9 @@ def parser():
     a.add_argument("--platforms", help="ios,android の一部だけにするとき")
     a.set_defaults(func=cmd_add)
 
-    s = sub.add_parser("stamp", help="訳を検収済みにする")
+    s = sub.add_parser("stamp", help="人が確かめた訳を検収済みにする (AI は使わない)")
     s.add_argument("lang")
+    s.add_argument("--reviewer", required=True, help="訳を確かめた人の名前 (lock に残る)")
     s.add_argument("--ns", action="append", help="名前空間 (繰り返せる)")
     s.add_argument("--keys", action="append", help="完全キー (繰り返せる)")
     s.set_defaults(func=cmd_stamp)

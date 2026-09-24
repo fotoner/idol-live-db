@@ -3,6 +3,7 @@
 - ImasLiveDB-Android/app/i18n/<overlay>/values[-xx]/strings_<ns>.xml
   main: 基準言語 (既定の values/) と channel=release の言語。
   debug: channel=dev / beta の言語 (Debug ビルドにだけ入る。beta 用の overlay は Beta 構成を作るときに足す)。
+  channel=planned の言語はどこにも置かない (locale_config・i18n_meta・テストの期待値にも出さない)。
 - overlay ごとに xml/locale_config.xml (その overlay までで入る言語) と
   values/i18n_meta.xml (言語が 2 つ以上なら設定画面に言語の行を出す bool)。
 - アクセサ: src/main/kotlin/…/i18n/generated/L10n.kt (索引) と L10n<Ns>.kt。
@@ -49,9 +50,12 @@ _CHUNK = 100
 
 
 def overlay_of(config, lang):
-    """lang のリソースを置く overlay (main / debug)。"""
-    if lang == config.source_language or config.channel(lang) == "release":
+    """lang のリソースを置く overlay (main / debug)。planned はどこにも置かない (None)。"""
+    channel = config.channel(lang)
+    if lang == config.source_language or channel == "release":
         return "main"
+    if channel == "planned":
+        return None
     return "debug"
 
 
@@ -310,7 +314,7 @@ def _kotlin_map(pairs):
 
 
 def test_keys_kotlin(catalog, namespaces):
-    langs = list(catalog.config.languages)
+    langs = catalog.config.built_languages()
     rows = []  # (関数名, 行)
     for ns in namespaces:
         items = []
@@ -376,15 +380,16 @@ def emit(catalog):
     namespaces = [ns for ns in catalog.namespaces if ns.android_entries()]
     if not namespaces:
         return files
+    built = config.built_languages()
     for ns in namespaces:
-        for lang in config.languages:
+        for lang in built:
             if lang != config.source_language and not any(e.has(lang) for e in ns.android_entries()):
                 continue
             path = "%s/%s/%s/strings_%s.xml" % (RES_ROOT, overlay_of(config, lang), values_dir(config, lang), ns.name)
             files[path] = strings_xml(catalog, ns, lang)
         files["%s/%s.kt" % (KOTLIN_MAIN, object_name(ns))] = accessor_kotlin(catalog, ns)
     overlays = ["main"]
-    if any(overlay_of(config, lang) == "debug" for lang in config.languages):
+    if any(overlay_of(config, lang) == "debug" for lang in built):
         overlays.append("debug")
     for overlay in overlays:
         files["%s/%s/xml/locale_config.xml" % (RES_ROOT, overlay)] = locale_config_xml(config, overlay)
@@ -402,9 +407,11 @@ def invariant_problems(catalog, files):
 
     - values-<lang> に、既定の values/ に無い名前を書かない (ExtraTranslation は Fatal)。
     - i18n/main/ には release 言語 (と基準言語) しか無い。
+    - planned の言語はどの overlay にも無い。
     """
     config = catalog.config
     out = []
+    planned_dirs = {values_dir(config, lang) for lang, ch in config.languages.items() if ch == "planned"}
     base = {}
     for path, text in files.items():
         m = re.match(r"^%s/main/values/strings_([a-z0-9_]+)\.xml$" % re.escape(RES_ROOT), path)
@@ -416,6 +423,8 @@ def invariant_problems(catalog, files):
         if not m:
             continue
         overlay, vdir, ns = m.groups()
+        if vdir in planned_dirs:
+            out.append(model.error(path, None, "planned の言語 (%s) はビルドに入れない" % vdir))
         if overlay == "main" and vdir not in release_dirs:
             out.append(model.error(path, None, "i18n/main/ に release でない言語 (%s) がある" % vdir))
         if vdir == "values":

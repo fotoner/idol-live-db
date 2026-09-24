@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from dataclasses import dataclass, field
 
@@ -17,7 +18,8 @@ import cldr
 
 ARG_TYPES = ("int", "count", "string", "core", "text")
 KINDS = ("ui", "system", "content", "reserved")
-CHANNELS = ("dev", "beta", "release")
+# 低い順。planned はどのビルドにも入らない (カタログ・用語集・lock に値を持てるだけ)
+CHANNELS = ("planned", "dev", "beta", "release")
 PLATFORMS = ("ios", "android")
 IOS_BUNDLES = ("app", "widget")
 RATCHET_MODES = ("report", "enforce")
@@ -25,7 +27,7 @@ RATCHET_MODES = ("report", "enforce")
 # ios.infoplist の target → project.yml のターゲット名
 IOS_TARGETS = {"app": "ImasLiveDB", "widget": "ImasLiveDBWidget"}
 
-# ビルド構成 → 入る言語のチャネル (i18n/README.md の「言語とチャネル」)
+# ビルド構成 → 入る言語のチャネル (i18n/README.md の「言語とチャネル」)。planned はどこにも無い
 CONFIG_CHANNELS = {
     "Release": ("release",),
     "Beta": ("release", "beta"),
@@ -43,6 +45,12 @@ NS_FIELDS = ("namespace", "kind", "ios_bundles", "platforms", "slices", "strings
 ENTRY_FIELDS = ("args", "note", "platforms", "max_len", "keep_whitespace", "verbatim_ok", "ios")
 IOS_ENTRY_FIELDS = ("infoplist", "intent_metadata")
 CONFIG_FIELDS = ("source_language", "languages", "guard")
+GLOSSARY_FIELDS = ("note", "status", "style", "terms")
+GLOSSARY_TERM_FIELDS = ("ja", "note", "keep")  # これと言語コード
+LOCK_FIELDS = ("reviewer", "source", "target")
+
+# 翻訳の状態 (Catalog.status)。stats の列の順
+STATUSES = ("reviewed", "unreviewed", "stale", "edited", "missing")
 
 # テーブル名として使えない (Xcode が予約している)
 # Localizable / InfoPlist は Xcode の予約表。残りは生成 Swift が使う識別子で、
@@ -58,6 +66,7 @@ CONFIG_PATH = "i18n/config.json"
 LOCK_DIR = "i18n/lock"
 GLOSSARY_PATH = "i18n/glossary.json"
 BASELINE_DIR = "i18n/baseline"
+TRANSLATION_DOC_PATH = "i18n/TRANSLATION.md"
 
 
 # ---------------------------------------------------------------- 問題の報告
@@ -171,6 +180,13 @@ def ja_hash(text):
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def value_hash(value):
+    """lock に書く訳のハッシュ。文字列はそのまま (ja_hash と同じ)、複数形は範疇を整列した JSON。"""
+    if isinstance(value, str):
+        return ja_hash(value)
+    return ja_hash(json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":")))
+
+
 # ---------------------------------------------------------------- 型
 
 @dataclass
@@ -189,8 +205,12 @@ class Config:
         return self.languages.get(lang)
 
     def others(self):
-        """基準言語以外の言語 (整列済み)。"""
+        """基準言語以外の言語 (整列済み。planned も含む)。"""
         return [lang for lang in self.languages if lang != self.source_language]
+
+    def built_languages(self):
+        """どれかのビルドに入る言語 (planned を除く。基準言語が先頭)。生成器が出すのはこの言語だけ。"""
+        return [lang for lang, ch in self.languages.items() if ch != "planned"]
 
     def languages_for(self, config_name):
         """ビルド構成に入る言語 (基準言語が先頭)。"""
@@ -290,11 +310,29 @@ class Namespace:
         return [e for e in self.entries if e.on("android")]
 
 
+@dataclass(frozen=True)
+class Stamp:
+    """lock の 1 件。旧形式 (値が原文のハッシュの文字列だけ) は target と reviewer が None。"""
+
+    source: str  # stamp したときの基準言語の原文のハッシュ
+    target: str | None = None  # stamp したときの訳のハッシュ (value_hash)
+    reviewer: str | None = None
+
+    @property
+    def legacy(self):
+        return self.target is None
+
+    def to_json(self):
+        if self.legacy:
+            return self.source
+        return {"reviewer": self.reviewer, "source": self.source, "target": self.target}
+
+
 @dataclass
 class Catalog:
     config: Config
     namespaces: list  # 名前順
-    lock: dict = field(default_factory=dict)  # 言語 → {完全キー: ハッシュ}
+    lock: dict = field(default_factory=dict)  # 言語 → {完全キー: Stamp}
     glossary: dict = field(default_factory=dict)
     parity_baseline: dict = field(default_factory=dict)
 
@@ -316,7 +354,11 @@ class Catalog:
         return None
 
     def status(self, entry, lang):
-        """翻訳の状態: missing / unreviewed / reviewed / stale。基準言語は常に reviewed。"""
+        """翻訳の状態: missing / unreviewed / reviewed / stale / edited。基準言語は常に reviewed。
+
+        stale: stamp のあとで原文が変わった (訳も変わっていても stale)。
+        edited: 原文は同じで、stamp のあとで訳だけが変わった (旧形式の lock では見分けられない)。
+        """
         if lang == self.config.source_language:
             return "reviewed"
         if not entry.has(lang):
@@ -324,7 +366,11 @@ class Catalog:
         stamped = self.lock.get(lang, {}).get(entry.full_key)
         if stamped is None:
             return "unreviewed"
-        return "reviewed" if stamped == ja_hash(entry.source) else "stale"
+        if stamped.source != ja_hash(entry.source):
+            return "stale"
+        if not stamped.legacy and stamped.target != value_hash(entry.values[lang]):
+            return "edited"
+        return "reviewed"
 
 
 # ---------------------------------------------------------------- 生の dict から組む
@@ -557,6 +603,43 @@ def build_namespace(path, stem, raw, config, problems):
     return ns
 
 
+def _stamp(value):
+    """lock の値 1 つ → Stamp (読めなければ None)。"""
+    if isinstance(value, str):
+        return Stamp(source=value) if SHA256_RE.match(value) else None
+    if not isinstance(value, dict) or set(value) != set(LOCK_FIELDS):
+        return None
+    source, target, reviewer = value["source"], value["target"], value["reviewer"]
+    if not (isinstance(source, str) and SHA256_RE.match(source) and isinstance(target, str) and SHA256_RE.match(target)):
+        return None
+    if (not isinstance(reviewer, str) or not reviewer.strip() or reviewer != reviewer.strip()
+            or any(ord(c) < 0x20 for c in reviewer)):
+        return None
+    return Stamp(source=source, target=target, reviewer=reviewer)
+
+
+def build_lock(path, raw, problems):
+    """lock/<言語>.json → {完全キー: Stamp}。1 件でも読めなければ None (ファイルごと使わない)。"""
+    shape = ("lock は {完全キー: 値} にする。値は {\"source\": 原文の sha256, \"target\": 訳の sha256, "
+             "\"reviewer\": 名前} (旧形式は原文の sha256 の文字列だけ)")
+    if not isinstance(raw, dict):
+        problems.append(error(path, None, shape))
+        return None
+    stamps = {}
+    bad = []
+    for key, value in raw.items():
+        st = _stamp(value)
+        if st is None:
+            bad.append(key)
+        else:
+            stamps[key] = st
+    if bad:
+        problems.append(error(path, None, "読めない値が %d 件 (%s)" % (len(bad), ", ".join(bad[:5]) + (" …" if len(bad) > 5 else "")),
+                              shape + "。python3 tools/i18n/i18n.py stamp が書く"))
+        return None
+    return stamps
+
+
 def build(raw_repo, problems):
     """source_json.RawRepo から Catalog を組む。組めなければ None (問題は problems に入る)。"""
     if raw_repo.config is None:
@@ -574,14 +657,14 @@ def build(raw_repo, problems):
 
     lock = {}
     for lang, (path, raw) in sorted(raw_repo.locks.items()):
-        if not isinstance(raw, dict) or not all(isinstance(v, str) and SHA256_RE.match(v) for v in raw.values()):
-            problems.append(error(path, None, "lock は {完全キー: sha256 の 16 進 64 桁} にする"))
+        stamps = build_lock(path, raw, problems)
+        if stamps is None:
             continue
         if lang not in config.languages:
             problems.append(warning(path, None, "言語 %s は config.json に無い (lock を消すか言語を足す)" % lang))
         elif lang == config.source_language:
             problems.append(warning(path, None, "基準言語の lock は使わない"))
-        lock[lang] = dict(raw)
+        lock[lang] = stamps
 
     glossary = raw_repo.glossary if isinstance(raw_repo.glossary, dict) else {}
     baseline = raw_repo.parity_baseline if isinstance(raw_repo.parity_baseline, dict) else {}
