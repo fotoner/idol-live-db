@@ -111,6 +111,18 @@ actor LyricsAPI {
         }
     }
 
+    /// 歌詞を公開している曲の id (歌詞クイズの出題母集団)。本文は含まない。
+    ///
+    /// 1 セッションの間だけ持てば足りるので、ここではキャッシュしない
+    /// (サーバ側がエッジで 30 分キャッシュしている)。
+    func publishedSongIds() async throws -> [String] {
+        let response: PublishedSongIdsResponse = try await client.request(
+            "GET",
+            path: "/lyrics/published"
+        )
+        return response.songIds
+    }
+
     /// routes/lyrics.ts の SEARCH_MIN_CHARS と同値。
     /// 1文字を許すのは、日本語だと「桜」「夢」のような1文字の検索に意味があるため。
     static let minSearchLength = 1
@@ -129,6 +141,12 @@ actor LyricsAPI {
 
 extension LyricsAPI: LyricsReading {}
 extension LyricsAPI: LyricsSearchReading {}
+extension LyricsAPI: LyricsQuizReading {}
+
+/// `GET /lyrics/published` の応答。
+private struct PublishedSongIdsResponse: Decodable {
+    let songIds: [String]
+}
 
 #if DEBUG
 /// サーバ未完成時に見た目を確認するためのフェイク実装。
@@ -242,6 +260,20 @@ struct FakeLyricsReading: LyricsReading {
 ///
 /// 曲 id を持たないので、当たる曲は `songReading` から先頭 N 件を借りる
 /// (どの曲が当たるかは見た目の確認に関係なく、行にスニペットが出るかだけが問題)。
+/// 歌詞クイズのフェイク。同梱 SQLite の先頭 40 曲を「公開済み」とみなし、
+/// 本文は `FakeLyricsReading` のダミー文言を返す (著作物は使わない)。
+struct FakeLyricsQuizReading: LyricsQuizReading {
+    func publishedSongIds() async throws -> [String] {
+        let songs = try await AppContainer.shared.songReading.songs(
+            filter: SongSearchFilter(), sortOrder: .titleKana, ascending: nil)
+        return songs.prefix(40).map(\.song.id)
+    }
+
+    func lyrics(songId: String) async throws -> Lyrics? {
+        try await FakeLyricsReading().lyrics(songId: songId)
+    }
+}
+
 struct FakeLyricsSearchReading: LyricsSearchReading {
     /// 何曲ヒットさせるか。
     var hitCount = 24

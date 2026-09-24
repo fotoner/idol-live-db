@@ -196,6 +196,8 @@ async function handleRoot(ctx: RouteContext): Promise<Response | null> {
       "GET /songs/:song_id/lyrics",
       // 歌詞検索。返すのは song_id と一致箇所まわりのスニペットだけ。
       "GET /lyrics/search",
+      // 歌詞クイズの出題母集団。公開中の曲 id だけ (本文は含まない)。
+      "GET /lyrics/published",
       "PUT /admin/lyrics/:song_id",
       "PUT /songs/:song_id/calls",
     ],

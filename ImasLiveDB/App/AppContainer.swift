@@ -145,6 +145,18 @@ final class AppContainer: Sendable {
         return LyricsAPI.shared
     }()
 
+    /// 歌詞クイズの出題母集団と 1 曲ぶんの歌詞の読み取り実装。
+    /// ⚠️ 歌詞を含むので、ディスクキャッシュ無しの経路 (LyricsAPI) を通す。
+    /// DEBUG かつ `FAKE_LYRICS=1` のときはダミー歌詞で遊べるフェイク。
+    let lyricsQuizReading: any LyricsQuizReading = {
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["FAKE_LYRICS"] == "1" {
+            return FakeLyricsQuizReading()
+        }
+        #endif
+        return LyricsAPI.shared
+    }()
+
     /// コールガイド (歌詞行に紐づくコール / 手拍子指示) の書き込み実装。
     /// ⚠️ 歌詞の断片が乗るので、こちらもディスクキャッシュ無しの経路を通す。
     /// DEBUG かつ `FAKE_LYRICS=1` のときは、サーバ未実装でも編集動線を確認できるフェイク。

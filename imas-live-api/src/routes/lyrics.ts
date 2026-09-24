@@ -63,6 +63,11 @@ const MAX_STATUS_IDS = 90;
 // 「実際に掲載した曲」なので、何曲公開しているかは結局要る。
 
 /** 歌詞応答は端末にもエッジにも残さない (許諾条件の「一括ダウンロード不可」の実効性)。 */
+/** 公開曲 id 一覧は本文を含まないのでエッジに載せる (routes/calls.ts の一覧と同じ扱い)。 */
+const PUBLISHED_IDS_CACHE: Record<string, string> = {
+  "Cache-Control": "public, max-age=1800",
+};
+
 export const NO_STORE: Record<string, string> = { "Cache-Control": "no-store" };
 
 // ---- 歌詞・コールガイドの取得 (GET /songs/:id/lyrics, GET /lyrics/search) の IP 上限 ----
@@ -694,6 +699,25 @@ export async function handleLyrics(ctx: RouteContext): Promise<Response | null> 
 
     await commitIpRateLimit(env.DB, ipRl);
     return json({ query, hits }, 200, NO_STORE);
+  }
+
+  // ----------------------------------------------------------------
+  // GET /lyrics/published — 歌詞を公開している曲の id 一覧 (未認証でも可)
+  //   歌詞クイズの出題母集団に使う。アプリは「どの曲に歌詞があるか」を持っていない
+  //   (本文をマスタに入れない方針なので、公開状態もマスタに無い)。
+  //   ⚠️ 返すのは song_id だけ。本文・行・スニペットを足さないこと。足した瞬間に
+  //      「1リクエストで多数の曲の本文が手に入る」まとめ取りの口になる。
+  //   本文を含まないのでエッジにキャッシュしてよい (公開状態の反映は max-age ぶん遅れる)。
+  // ----------------------------------------------------------------
+  if (path === "/lyrics/published" && request.method === "GET") {
+    const rows = await env.DB.prepare(
+      `SELECT song_id FROM song_lyrics WHERE status = 'published' ORDER BY song_id`
+    ).all<{ song_id: string }>();
+    return json(
+      { songIds: (rows.results ?? []).map((r) => r.song_id) },
+      200,
+      PUBLISHED_IDS_CACHE
+    );
   }
 
   // ----------------------------------------------------------------
