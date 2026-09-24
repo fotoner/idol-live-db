@@ -249,6 +249,7 @@ struct EventListView: View {
                         .listRowSeparator(.hidden)
                 }
                 .listStyle(.plain)
+                .readableContentMargins()
                 .environment(\.defaultMinListRowHeight, 0)
                 .scrollContentBackground(.hidden)
                 .background(DS.bg)

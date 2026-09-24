@@ -103,16 +103,7 @@ struct ProduceTabView: View {
             }
             // みんなの投票 (PollListView) は自前スタックを持たず、ここ(親の1スタック)に
             // 遷移先を登録する。これで「一覧→詳細」の2階層目を同じスタック上に push できる。
-            .navigationDestination(for: PollRoute.self) { route in
-                switch route {
-                case .list:
-                    PollListView()
-                case let .detail(pollId):
-                    PollDetailView(pollId: pollId)
-                case .hallOfFame:
-                    PollHallOfFameView()
-                }
-            }
+            .navigationDestination(for: PollRoute.self) { PollRouteView(route: $0) }
             .sheet(item: $sheetDestination) { dest in
                 DetailSheetView(destination: dest)
                     .environment(database)

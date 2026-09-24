@@ -936,3 +936,33 @@ struct ImasListContainer<Content: View>: View {
             .clipShape(RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
     }
 }
+
+// MARK: - 広い画面での本文幅
+
+extension DS {
+    /// 広い画面 (iPad / Mac) で一覧の本文が伸びきらない幅。Web の本文段と揃える。
+    static let readableContentWidth: CGFloat = 880
+}
+
+extension View {
+    /// 一覧 (List / ScrollView) の本文を `DS.readableContentWidth` に収め、左右の余りを
+    /// 余白にする。ナビバーや背景は全幅のまま、スクロールも画面全体で効く
+    /// (`frame(maxWidth:)` で縮めると余白部分でスクロールできなくなる)。
+    /// 狭い画面では余りが出ないので何も変わらない。
+    ///
+    /// ⚠️ 余白は配下のスクロールビューにも伝わる。横スクロールのチップ列などを
+    /// 含む階層ではなく、縦の一覧そのものに付けること。
+    func readableContentMargins() -> some View {
+        modifier(ReadableContentMargins())
+    }
+}
+
+private struct ReadableContentMargins: ViewModifier {
+    @State private var width: CGFloat = 0
+
+    func body(content: Content) -> some View {
+        content
+            .contentMargins(.horizontal, max(0, (width - DS.readableContentWidth) / 2), for: .scrollContent)
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+    }
+}

@@ -9,12 +9,18 @@ extension Notification.Name {
 
 
 struct ContentView: View {
-    @State private var selectedTab: Int = {
-        if let raw = ProcessInfo.processInfo.environment["INITIAL_TAB"], let idx = Int(raw) {
-            return idx
+    @State private var selection: AppDestination = {
+        if let raw = ProcessInfo.processInfo.environment["INITIAL_TAB"], let idx = Int(raw),
+           let tab = RootTab(rawValue: idx) {
+            return tab.destination
         }
-        return 0
+        return .schedule
     }()
+    /// 行き先の一覧 (並び・見出し・タブバーに載るか) はコアが決める。
+    private let navSections = appNavigationSections(lyricsAvailable: LyricsFeature.isAvailable)
+    private var primaryItems: [NavItem] { navSections.flatMap(\.items).filter(\.inTabBar) }
+    /// サイドバーだけに出る見出し。狭い画面ではタブバーに載らない。
+    private var secondarySections: [NavSection] { navSections.filter { $0.title != nil } }
     /// タブを跨いだ検索の引き継ぎ (「他のタブに N 件」を押されたとき)。
     @State private var crossTab = CrossTabSearch.shared
     /// 設定・マイページ sheet (全タブ共通)。
@@ -61,36 +67,14 @@ struct ContentView: View {
     }
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            // 確定 IA: スケジュール / ライブ / 楽曲 / アイドル / プロデュース。
-            // スケジュールがデフォルト着地点。マイ/設定はプロデュース右上の歯車から開く。
-            CalendarView()
-                .bottomBarsInset()
-                .tabItem { Label("スケジュール", systemImage: "calendar") }
-                .tag(0)
-            EventListView()
-                .bottomBarsInset()
-                .tabItem { Label("ライブ", systemImage: "music.mic") }
-                .tag(1)
-            SongListView()
-                .bottomBarsInset()
-                .tabItem { Label("楽曲", systemImage: "music.note.list") }
-                .tag(2)
-            IdolListView()
-                .bottomBarsInset()
-                .tabItem { Label("アイドル", systemImage: "person.3") }
-                .tag(3)
-            ProduceTabView()
-                .bottomBarsInset()
-                .tabItem { Label("プロデュース", systemImage: "star.fill") }
-                .tag(4)
-        }
+        rootTabs
+            .background { destinationShortcuts }
         .tint(themeTint)
         // 再生中バーの引き直し。View ごとに持たせると 5 タブで 5 回引くので、
         // 状態が変わったとき 1 回だけここで回す。
         .task(id: MusicKitService.shared.playbackKey) { await NowPlayingModel.shared.refresh() }
         .task {
-            AppAnalytics.screen(Self.tabName(selectedTab))
+            AppAnalytics.screen(selection.analyticsKey)
             // 一覧やピッカーは Idol の配列しか持たないので、CV 名は辞書から引く。
             // 行ごとに DB を叩くと N+1 になる (300件程度なのでまとめて持つ)。
             await VoiceActorDirectory.shared.load()
@@ -103,11 +87,11 @@ struct ContentView: View {
                 requestReview()
             }
         }
-        .onChange(of: selectedTab) { _, tab in AppAnalytics.screen(Self.tabName(tab)) }
+        .onChange(of: selection) { _, dest in AppAnalytics.screen(dest.analyticsKey) }
         // 「他のタブに N 件」を押されたら、そのタブへ移る。語の受け渡しは
         // 移った先の一覧が `CrossTabSearch.take(for:)` で拾う。
         .onChange(of: crossTab.target) { _, target in
-            if let target { selectedTab = target.rawValue }
+            if let target { selection = target.destination }
         }
         .environment(\.imasTextScale, textScale)
         // アプリ既定フォントを imas (スケール対応) にする。これで明示フォント未指定の Text や
@@ -149,27 +133,45 @@ struct ContentView: View {
         }
     }
 
-    /// deeplink (Universal Links / imaslivedb://) を解決して該当ページへ遷移する。
-    /// 対象外 URL は無視、未知 ID / DB エラーはアラート (クラッシュ・空白画面にしない)。
-    /// アナリティクス用のタブ識別子 (確定 IA: 0=スケジュール / 1=ライブ / 2=楽曲 / 3=アイドル / 4=プロデュース)。
-    private static func tabName(_ tab: Int) -> String {
-        switch tab {
-        case 0: return "schedule"
-        case 1: return "events"
-        case 2: return "songs"
-        case 3: return "idols"
-        case 4: return "produce"
-        default: return "tab_\(tab)"
+    // MARK: - 行き先 (タブバー / サイドバー)
+
+    /// 狭い画面はタブバー、広い画面 (iPad / Mac) はサイドバーになる。
+    /// 中身はどちらも同じ画面 — サイドバーだけに出る行き先も、狭い画面では
+    /// プロデュースの入口カードから開くのと同じ View を使う (出し方を iPhone と揃える)。
+    @ViewBuilder
+    private var rootTabs: some View {
+        if #available(iOS 18, *) {
+            AdaptiveRootTabs(selection: $selection, primary: primaryItems, secondary: secondarySections)
+        } else {
+            TabView(selection: $selection) {
+                ForEach(primaryItems, id: \.destination) { item in
+                    DestinationScreen(destination: item.destination)
+                        .tabItem { Label(item.label, systemImage: item.destination.systemImage) }
+                        .tag(item.destination)
+                }
+            }
         }
     }
 
+    /// ハードウェアキーボードの ⌘1〜⌘5。番号の割り当てはコアが決める。
+    private var destinationShortcuts: some View {
+        ForEach(navSections.flatMap(\.items).filter { $0.shortcutDigit != nil }, id: \.destination) { item in
+            Button(item.label) { selection = item.destination }
+                .keyboardShortcut(KeyEquivalent(Character(String(item.shortcutDigit!))), modifiers: .command)
+        }
+        .opacity(0)
+        .accessibilityHidden(true)
+    }
+
+    /// deeplink (Universal Links / imaslivedb://) を解決して該当ページへ遷移する。
+    /// 対象外 URL は無視、未知 ID / DB エラーはアラート (クラッシュ・空白画面にしない)。
     private func handleDeeplink(_ url: URL) {
         guard let link = DeeplinkRouter.parse(url) else { return }
         // 着地タブは対象の住所に合わせる (イベント/公演=ライブ、お題=プロデュース)。
         // シートを閉じた後に「元居た場所」として自然な一覧が残るようにする。
-        selectedTab = switch link {
-        case .poll: 4
-        default: 1
+        selection = switch link {
+        case .poll: .produce
+        default: .events
         }
         let destination: DetailDestination?
         do {
@@ -217,3 +219,74 @@ struct SettingsToolbarButton: View {
     }
 }
 
+/// 行き先 1 つぶんの画面。タブバーでもサイドバーでも同じものを出す。
+private struct DestinationScreen: View {
+    let destination: AppDestination
+
+    var body: some View {
+        switch destination {
+        case .schedule: CalendarView().bottomBarsInset()
+        case .events: EventListView().bottomBarsInset()
+        case .songs: SongListView().bottomBarsInset()
+        case .idols: IdolListView().bottomBarsInset()
+        case .produce: ProduceTabView().bottomBarsInset()
+        // StatsView は自前の NavigationStack を持つ (プロデュースから push しても同じ)。
+        case .stats: StatsView().bottomBarsInset()
+        case .timeline: NavigationStack { BrandTimelineView() }.bottomBarsInset()
+        case .polls:
+            NavigationStack {
+                PollListView()
+                    .navigationDestination(for: PollRoute.self) { PollRouteView(route: $0) }
+            }
+            .bottomBarsInset()
+        case .callGuide: NavigationStack { CallGuideDashboardView() }.bottomBarsInset()
+        case .communityActivity: NavigationStack { RecentEditsView() }.bottomBarsInset()
+        case .tagActivity: NavigationStack { TagActivityView() }.bottomBarsInset()
+        case .games: NavigationStack { GamesHubView() }.bottomBarsInset()
+        }
+    }
+}
+
+/// iOS 18 以降のルート。狭い画面はタブバー、広い画面はサイドバーに自動で切り替わる。
+@available(iOS 18, *)
+private struct AdaptiveRootTabs: View {
+    @Binding var selection: AppDestination
+    let primary: [NavItem]
+    let secondary: [NavSection]
+    @Environment(\.horizontalSizeClass) private var sizeClass
+
+    /// サイドバーだけの行き先は狭い画面では載せない。`defaultVisibility(.hidden)` だけだと
+    /// iPhone のタブバーが 5 枠を超えたと数えて「その他」に畳み、プロデュースが隠れる。
+    private var sidebarSections: [NavSection] { sizeClass == .compact ? [] : secondary }
+
+    var body: some View {
+        TabView(selection: $selection) {
+            ForEach(primary, id: \.destination) { item in
+                tab(item)
+            }
+            ForEach(sidebarSections, id: \.title) { section in
+                TabSection(section.title ?? "") {
+                    ForEach(section.items, id: \.destination) { item in
+                        tab(item).defaultVisibility(.hidden, for: .tabBar)
+                    }
+                }
+            }
+        }
+        .tabViewStyle(.sidebarAdaptable)
+        // 広い画面は最初からサイドバーで開く (タブバーへの切替はツールバーのボタンで残る)。
+        .defaultAdaptableTabBarPlacement(.sidebar)
+        // iPad の画面分割などで狭くなったとき、サイドバーだけの行き先に居たら
+        // 同じ画面の入口があるプロデュースへ戻す (空の選択を残さない)。
+        .onChange(of: sizeClass) { _, newValue in
+            if newValue == .compact, !primary.contains(where: { $0.destination == selection }) {
+                selection = .produce
+            }
+        }
+    }
+
+    private func tab(_ item: NavItem) -> some TabContent<AppDestination> {
+        Tab(item.label, systemImage: item.destination.systemImage, value: item.destination) {
+            DestinationScreen(destination: item.destination)
+        }
+    }
+}

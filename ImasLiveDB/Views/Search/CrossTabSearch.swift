@@ -9,15 +9,18 @@ enum RootTab: Int, CaseIterable, Hashable {
     /// 「他のタブに N 件」で押せる先。検索欄を持つ一覧だけ。
     static let searchable: [RootTab] = [.events, .songs, .idols]
 
-    var label: String {
+    /// タブとしての行き先。文言もそちら (コア) から引く。
+    var destination: AppDestination {
         switch self {
-        case .schedule: return "スケジュール"
-        case .events: return "ライブ"
-        case .songs: return "楽曲"
-        case .idols: return "アイドル"
-        case .produce: return "プロデュース"
+        case .schedule: return .schedule
+        case .events: return .events
+        case .songs: return .songs
+        case .idols: return .idols
+        case .produce: return .produce
         }
     }
+
+    var label: String { destination.label }
 }
 
 /// タブを跨いだ検索の引き継ぎ。
