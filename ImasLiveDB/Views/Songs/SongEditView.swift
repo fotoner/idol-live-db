@@ -32,6 +32,7 @@ struct SongEditView: View {
     @State private var arranger: String
     @State private var releaseDate: String
     @State private var singerLabel: String
+    @State private var note: String
     @State private var isrc: String
     @State private var durationSecText: String
     @State private var allBrands: [Brand] = []
@@ -69,6 +70,7 @@ struct SongEditView: View {
         _arranger = State(initialValue: song.arranger ?? "")
         _releaseDate = State(initialValue: song.releaseDate ?? "")
         _singerLabel = State(initialValue: song.singerLabel ?? "")
+        _note = State(initialValue: song.note ?? "")
         _isrc = State(initialValue: song.isrc ?? "")
         _durationSecText = State(initialValue: song.durationSec.map(String.init) ?? "")
     }
@@ -93,6 +95,7 @@ struct SongEditView: View {
         _arranger = State(initialValue: "")
         _releaseDate = State(initialValue: "")
         _singerLabel = State(initialValue: "")
+        _note = State(initialValue: "")
         _isrc = State(initialValue: "")
         _durationSecText = State(initialValue: "")
     }
@@ -130,6 +133,7 @@ struct SongEditView: View {
                         .keyboardType(.numbersAndPunctuation)
                         .autocapitalization(.none).autocorrectionDisabled()
                     TextField("歌唱表記 (例: 春香・千早)", text: $singerLabel)
+                    TextField("補足 (例: ミリシタ 1 周年記念楽曲)", text: $note)
                     TextField("再生時間 (秒)", text: $durationSecText)
                         .keyboardType(.numberPad)
                 }
@@ -321,6 +325,7 @@ struct SongEditView: View {
         songFields["arranger"] = AnyEncodable.clearable(arranger, original: original?.arranger)
         songFields["releaseDate"] = AnyEncodable.clearable(trimmedReleaseDate, original: original?.releaseDate)
         songFields["singerLabel"] = AnyEncodable.clearable(singerLabel, original: original?.singerLabel)
+        songFields["note"] = AnyEncodable.clearable(note, original: original?.note)
         songFields["isrc"] = AnyEncodable.clearable(isrc, original: original?.isrc)
         if let v = parsedDuration {
             songFields["durationSec"] = AnyEncodable(v)
@@ -423,6 +428,7 @@ struct SongEditView: View {
         song.arranger = nonEmpty(arranger)
         song.releaseDate = nonEmpty(releaseDate)
         song.singerLabel = nonEmpty(singerLabel)
+        song.note = nonEmpty(note)
         song.isrc = nonEmpty(isrc)
         song.durationSec = Int(durationSecText.trimmingCharacters(in: .whitespaces))
         return song

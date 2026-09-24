@@ -69,6 +69,7 @@ fun SongEditScreen(
     var arranger by rememberSaveable(key) { mutableStateOf(original?.arranger ?: "") }
     var releaseDate by rememberSaveable(key) { mutableStateOf(original?.releaseDate ?: "") }
     var singerLabel by rememberSaveable(key) { mutableStateOf(original?.singerLabel ?: "") }
+    var note by rememberSaveable(key) { mutableStateOf(original?.note ?: "") }
     var durationSecText by rememberSaveable(key) { mutableStateOf(original?.durationSec?.toString() ?: "") }
     var appleMusicId by rememberSaveable(key) { mutableStateOf(original?.appleMusicId ?: "") }
     var appleMusicAlbumId by rememberSaveable(key) { mutableStateOf(original?.appleMusicAlbumId ?: "") }
@@ -156,6 +157,7 @@ fun SongEditScreen(
         fields.putClearable("arranger", arranger, original?.arranger)
         fields.putClearable("releaseDate", trimmedReleaseDate, original?.releaseDate)
         fields.putClearable("singerLabel", singerLabel, original?.singerLabel)
+        fields.putClearable("note", note, original?.note)
         fields.putClearable("isrc", isrc, original?.isrc)
         if (parsedDuration != null) {
             fields["durationSec"] = parsedDuration
@@ -215,6 +217,7 @@ fun SongEditScreen(
                     arranger = arranger.nonEmptyTrimmed(),
                     releaseDate = trimmedReleaseDate.ifEmpty { null },
                     singerLabel = singerLabel.nonEmptyTrimmed(),
+                    note = note.nonEmptyTrimmed(),
                     isrc = isrc.nonEmptyTrimmed(),
                     durationSec = parsedDuration
                 )
@@ -271,6 +274,7 @@ fun SongEditScreen(
             EditTextField("編曲", arranger, { arranger = it })
             EditTextField("リリース日 (YYYY-MM-DD)", releaseDate, { releaseDate = it })
             EditTextField("歌唱表記 (例: 春香・千早)", singerLabel, { singerLabel = it })
+            EditTextField("補足 (例: ミリシタ 1 周年記念楽曲)", note, { note = it })
             EditTextField("再生時間 (秒)", durationSecText, { durationSecText = it }, numeric = true)
         }
 

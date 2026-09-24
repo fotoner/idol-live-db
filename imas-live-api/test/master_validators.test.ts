@@ -74,6 +74,13 @@ describe("validateMasterEdit — 値の形式", () => {
     expect(withDate("2013/04/10")).toMatch(/invalid format/);
   });
 
+  it("Song.note は一般ユーザーが編集でき、長すぎる文は弾く", () => {
+    const withNote = (note: string) =>
+      ok({ recordType: "Song", op: "update", recordName: "ml_union", fields: { note } });
+    expect(withNote("ミリシタ 1 周年記念楽曲")).toBeNull();
+    expect(withNote("あ".repeat(201))).toMatch(/note/);
+  });
+
   it("SongArtist.role は enum に限る", () => {
     const withRole = (role: string) =>
       ok({ recordType: "SongArtist", op: "create", fields: { songId: "s", idolId: "i", role } });
