@@ -1,6 +1,6 @@
 """tools/check_domain_purity.sh (Domain と Shared の依存ガード) の落ちる例・通る例。
 
-    python3 -m unittest discover -s tools -p 'test_check_domain_purity.py'
+    python3 -m unittest discover -s tools/test -p 'test_check_domain_purity.py'
 
 一時ディレクトリに ImasLiveDB/Domain と ImasLiveDB/Shared を作り、ルートを引数に渡して走らせる。
 最後に本物のリポジトリでも走らせて、今の木が新しい規則に通ることを確かめる。
@@ -12,7 +12,7 @@ import subprocess
 import tempfile
 import unittest
 
-TOOLS = os.path.dirname(os.path.abspath(__file__))
+TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = os.path.dirname(TOOLS)
 SCRIPT = os.path.join(TOOLS, "check_domain_purity.sh")
 

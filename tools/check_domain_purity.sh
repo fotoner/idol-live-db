@@ -15,7 +15,7 @@
 #
 # 使い方: bash tools/check_domain_purity.sh [ROOT]   (ROOT の既定はカレントディレクトリ = リポジトリルート)
 # CI (.github/workflows/architecture-guard.yml) で走る。違反があれば exit 1。
-# 検査の正規表現は tools/test_check_domain_purity.py が落ちる例・通る例で固定している。
+# 検査の正規表現は tools/test/test_check_domain_purity.py が落ちる例・通る例で固定している。
 set -euo pipefail
 
 ROOT="${1:-.}"

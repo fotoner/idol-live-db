@@ -113,7 +113,7 @@ Android では同じ名前の `L10n.Songs.listSortTitle` (DS 部品にはその�
 
 | 状態 | 意味 | xcstrings の state |
 |---|---|---|
-| 欠落 | 訳が無い | (項目を出さない) |
+| 欠落 | 訳が無い | (項目を出さない。引数のある項目だけ基準言語の値を `new` で出す) |
 | 未検収 | 訳はあるが `stamp` していない | `needs_review` |
 | 確定 | `stamp` したときの原文のハッシュが今の原文と同じ | `translated` |
 | stale | `stamp` のあとで原文が変わった | `needs_review` |
@@ -155,7 +155,10 @@ state はコンパイルに影響しない。出荷を止めるのは `check` �
   (tools/i18n/test/test_emit_apple.py の SwiftRuntimeTest が Foundation で実際に引いて期待値と比べる)。
 - `xcstringstool compile -l ja` は ja.lproj だけを出す (出荷ゲートの仕組み)。
 - 表に無いキーは defaultValue で書式される (リテラルの `%` は defaultValue 側では自動で逃がされる)。
-- `xcodebuild build` / `test` (Xcode 26.0.1) は生成物の xcstrings を書き換えない (ビルドのあとも
+- Xcode 27.0 の `xcstringstool compile` は、引数のある項目で訳の無い言語の表に「キーそのもの」を値として書く
+  (26.0.1 は書かなかった)。そのままだと実行時にキーが画面に出るので、生成器は引数のある項目に限り、
+  訳の無い言語にも基準言語の値を state `new` で出す (tools/i18n/emit_apple.py の `_localizations`)。
+- `xcodebuild build` / `test` (Xcode 26.0.1 と 27.0) は生成物の xcstrings を書き換えない (ビルドのあとも
   `generate --check` が通る)。Debug のアプリとウィジェット拡張の両方に `ko.lproj` (表と `InfoPlist.strings`) が入る。
   Release の `XCSTRINGS_LANGUAGES_TO_COMPILE` は両ターゲットとも `ja` (`xcodebuild -showBuildSettings` で確認。
   Release の成果物そのものはまだ開いていない)。
@@ -163,8 +166,9 @@ state はコンパイルに影響しない。出荷を止めるのは `check` �
   SwiftUI の `Text(LocalizedStringResource)` 経路での `%`。
 - SwiftUI で `DisplayText` を出す init は `Text(display:)` とラベルを付ける。ラベルの無い `Text(_: DisplayText)` を
   足すと、すべての `Text("…")` の呼び出しで候補の多重定義が 1 つ増え、型検査が重くなる。
-- `CalendarView` の body は Xcode 26.0.1 だと「reasonable time で型検査できない」で落ちる (develop でも同じ。
-  CI の Xcode 26.2 では通る)。手元が 26.0.1 なら body を一時的に分けて試し、その変更は commit しない。
+- `CalendarView` の body は Xcode 26.0.1 だと「reasonable time で型検査できない」で落ちる (develop でも同じ)。
+  Xcode 27.0 (macOS 27、iOS 26.0 のシミュレータ) では分けずにビルドでき、iOS のテスト 242 件が通る。
+  手元が 26.0.1 のままなら body を一時的に分けて試し、その変更は commit しない。
 - `count` 型は桁区切りが付くので、もとは補間だけだった `units.detail.similar.shared_tags` (タグ{count}個一致) は
   1000 以上のときだけ表示が変わる (1000 → 1,000)。一致するタグの数としては出ない値なので、そのままにしている。
 
