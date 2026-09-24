@@ -146,9 +146,20 @@ Android では同じ名前の `L10n.Songs.listSortTitle` (DS 部品にはその�
 - **iOS**: OS がユーザーの「優先する言語」(アプリごとの言語を設定していればそれ) を上から見て、アプリのバンドルに
   lproj がある最初の言語を選ぶ。どれも無ければ開発言語 (`CFBundleDevelopmentRegion` = `ja`) になる。
   Release は `XCSTRINGS_LANGUAGES_TO_COMPILE` = `ja` なので常に ja。Debug は ja と ko (たとえば「English → 한국어」の
-  端末では ko、「English」だけなら ja)。
-- **Android**: OS の言語の一覧 (アプリの言語を設定していればそれ) を上から見て、合う `values-xx` がある最初の言語を
-  選ぶ。どれも無ければ既定の `values/` (= ja)。アプリの言語 (Android 13+) に出るのは `locale_config.xml` の言語。
+  端末では ko、「English」だけなら ja)。これは iOS の場合で、Android は下のとおり違う。
+- **Android**: OS の言語の一覧 (アプリの言語を設定していればそれ) を上から見て、APK のリソースにある言語と最初に合う
+  言語を選ぶ (`ResourcesImpl` → `LocaleList.getFirstMatchWithEnglishSupported`)。iOS と違うところが 2 つある。
+  ① 合うかどうかは APK の全リソースの言語で決まる。アプリの `values-xx` だけでなく、AppCompat・Material などの
+  ライブラリが持つ `values-fr`・`values-zh-rCN`・`values-en-rGB` なども入る (今の Debug の APK で 80 あまり)。
+  ② 英語は APK に無くても常に合うと見なされる (既定の `values/` を英語と仮定する)。
+  選ばれた言語にアプリの `values-xx` が無ければ、アプリの文言は既定の `values/` (= ja)。どれも合わなければ一覧の
+  先頭の言語になり、やはり既定の `values/`。そのため Debug で「English → 한국어」「Français → 한국어」の端末は、
+  iOS では ko、Android では ja になる (後者はライブラリの文言だけ仏語)。ko を一番上にするか、アプリの言語で ko を
+  選べば両方 ko。zh-Hans が planned のうちは、zh-CN の端末はライブラリの `values-zh-rCN` に合って zh-CN が選ばれ、
+  アプリの文言は ja になる。アプリの言語 (Android 13+) に出るのは `locale_config.xml` の言語。
+- iOS と揃えるなら、`android { androidResources { localeFilters += … } }` (AGP 8.8 にある。値は
+  `Config.built_languages()` から作る) でライブラリの訳を落とせる。英語の扱いは変わらない。疑似言語
+  `en-rXA` / `ar-rXB` が残るかは確かめる。**まだ入れていない。**
 - **キー単位**: 選ばれた言語に訳の無いキーは、iOS は defaultValue、Android は既定の `values/` で、どちらも ja が出る。
 - ja を基準 (開発言語・既定の `values/`) のままにする。英語を既定にはしない (原文とデータが日本語で、
   Release の利用者は ja が前提のため)。
