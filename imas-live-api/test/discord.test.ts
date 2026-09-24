@@ -112,6 +112,16 @@ describe("GET /discord/callback", () => {
     expect(await res.text()).toContain("あと 7 件編集すると");
   });
 
+  it("差し戻された編集は数えない", async () => {
+    await insertUser(UID);
+    await seedEdits(UID, 10);
+    await exec("UPDATE edit_batch SET reverted_at = ? WHERE id = (SELECT MIN(id) FROM edit_batch)", Date.now());
+    const state = await startLink();
+    serveDiscordLogin(204);
+    const res = await call("GET", `/discord/callback?code=c&state=${state}`, { env: configured() });
+    expect(await res.text()).toContain("あと 1 件編集すると");
+  });
+
   it("認可画面でキャンセルしたら code が無い", async () => {
     await insertUser(UID);
     const state = await startLink();

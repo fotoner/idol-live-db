@@ -6,7 +6,8 @@
 //   GET  /github/callback       /申請 コントリビューター から。GitHub で本人確認し「コントリビューター」を付ける
 //
 // ロールの条件:
-//   データ協力       … アプリでの編集が DATA_ROLE_MIN_EDITS 件以上 (badges.ts の bronze と同じ)
+//   データ協力       … アプリでの編集が DATA_ROLE_MIN_EDITS 件以上 (badges.ts の bronze と同じ件数)。
+//                      ただしバッジと違い、差し戻された編集は数えない (雑な編集でロールを取りにいけないように)
 //   コントリビューター … GITHUB_REPO にマージ済みの PR がある
 // どちらも付けるだけで外さない (条件を満たさなくなっても、後から外す処理は持たない)。
 //
@@ -15,7 +16,6 @@
 // 管理画面には https://<この Worker>/discord/callback と /github/callback を登録しておく。
 
 import { getAuthUser } from "../auth";
-import { fetchBadges } from "../badges";
 import {
   addGuildMember,
   addGuildMemberRole,
@@ -37,6 +37,20 @@ import { requireActiveUser } from "./guards";
 /** 「データ協力」の条件 (編集件数)。badges.ts の bronze と揃える。 */
 export const DATA_ROLE_MIN_EDITS = 10;
 const STATE_TTL_MS = 10 * 60 * 1000;
+
+/**
+ * ロールの条件に使う編集件数。badges.ts の editCount と同じ数え方から、差し戻された batch
+ * (reverted_at IS NOT NULL) を除く。バッジは「通算の活動量」なので残すが、ロールは「今も残っている貢献」で見る。
+ */
+async function countKeptEdits(db: D1Database, userId: string): Promise<number> {
+  const row = await db
+    .prepare(
+      "SELECT COUNT(*) AS cnt FROM edit_batch WHERE editor_id = ? AND cloudkit_ok = 1 AND source = 'app' AND reverted_at IS NULL"
+    )
+    .bind(userId)
+    .first<{ cnt: number }>();
+  return Number(row?.cnt) || 0;
+}
 
 export async function handleDiscord(ctx: RouteContext): Promise<Response | null> {
   const { request, path } = ctx;
@@ -174,7 +188,7 @@ async function discordCallback(ctx: RouteContext): Promise<Response> {
     });
   }
 
-  const { editCount } = await fetchBadges(env.DB, row.user_id);
+  const editCount = await countKeptEdits(env.DB, row.user_id);
   if (editCount < DATA_ROLE_MIN_EDITS) {
     return renderResultPage({
       heading: "サーバーに参加しました",
