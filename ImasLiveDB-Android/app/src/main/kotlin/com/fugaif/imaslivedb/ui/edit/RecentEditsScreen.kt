@@ -86,7 +86,7 @@ import uniffi.imas_core.relativeTimes
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RecentEditsScreen(onBack: () -> Unit, viewModel: RecentEditsViewModel = viewModel()) {
+fun RecentEditsScreen(onBack: (() -> Unit)?, viewModel: RecentEditsViewModel = viewModel()) {
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val authService = remember { AppModule.from(context).authService }
@@ -117,7 +117,10 @@ fun RecentEditsScreen(onBack: () -> Unit, viewModel: RecentEditsViewModel = view
                 TopAppBar(
                     title = { Text(if (tab == 1) "自分の編集" else "最近の編集", fontWeight = FontWeight.Bold) },
                     navigationIcon = {
-                        IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "戻る") }
+                        // サイドバーの根として開いたときは戻る先が無いので出さない。
+                        onBack?.let { back ->
+                            IconButton(onClick = back) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "戻る") }
+                        }
                     }
                 )
                 ImasSegmented(

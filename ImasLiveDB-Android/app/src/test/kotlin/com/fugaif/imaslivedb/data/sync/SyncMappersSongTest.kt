@@ -40,8 +40,25 @@ class SyncMappersSongTest {
         assertEquals(false, songs.getValue("s2").hasKamisabiCard)
     }
 
+    @Test fun readsNote() {
+        val rows = listOf(
+            CkRow.Song(baseSongRow(id = "s1", isCollab = false, hasKamisabiCard = false, note = "ミリシタ 1 周年記念楽曲")),
+            CkRow.Song(baseSongRow(id = "s2", isCollab = false, hasKamisabiCard = false))
+        )
+
+        val songs = SyncMappers.songs(rows).associateBy { it.id }
+
+        assertEquals("ミリシタ 1 周年記念楽曲", songs.getValue("s1").note)
+        assertEquals(null, songs.getValue("s2").note)
+    }
+
     /** 検証に関係ない列は固定値で埋めた最小の [CkSongRow]。 */
-    private fun baseSongRow(id: String, isCollab: Boolean, hasKamisabiCard: Boolean) = CkSongRow(
+    private fun baseSongRow(
+        id: String,
+        isCollab: Boolean,
+        hasKamisabiCard: Boolean,
+        note: String? = null
+    ) = CkSongRow(
         id = id,
         title = "title-$id",
         titleKana = null,
@@ -68,6 +85,7 @@ class SyncMappersSongTest {
         unitVersionId = null,
         jointBrandIds = null,
         isCollab = isCollab,
-        hasKamisabiCard = hasKamisabiCard
+        hasKamisabiCard = hasKamisabiCard,
+        note = note
     )
 }

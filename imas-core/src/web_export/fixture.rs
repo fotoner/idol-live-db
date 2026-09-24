@@ -608,6 +608,7 @@ fn song_page(reference: &Ref, minimal: bool) -> SongPage {
         joint_brands: if minimal { vec![] } else { vec![brand_cg()] },
         collab_label: (!minimal).then(|| content::SONG_COLLAB_LABEL.to_string()),
         kamisabi_label: (!minimal).then(|| content::SONG_KAMISABI_LABEL.to_string()),
+        note: (!minimal).then(|| "ミリシタ 1 周年記念楽曲".to_string()),
         // 種別は実データの語彙 (solo / unit / all / cover / tie_in) から取る。
         song_type_label: content::song_type_label(if minimal { "cover" } else { "all" })
             .map(str::to_string),

@@ -43,6 +43,8 @@ struct IdolListView: View {
     @State private var sheetIdol: Idol?
     @State private var showFilterSheet = false
     @State private var searchText = ""
+    /// 検索欄の語をアイドル名 / CV 名のどちらとして引くか。
+    @AppStorage("idols_search_target") private var searchTargetRaw: String = IdolSearchTarget.name.rawValue
     /// タブを跨いだ検索の引き継ぎ (「他のタブに N 件」の受け側)。
     @State private var crossTab = CrossTabSearch.shared
     /// 一覧タブ (0=アイドル, 1=ユニット)。
@@ -50,6 +52,10 @@ struct IdolListView: View {
     /// ユニットタブの ViewModel。ここで hoist して `UnitListContent` に注入することで、
     /// タブ切替で `UnitListContent` が再生成されても検索語・ロード済みデータ・スクロール位置を保持する。
     @State private var unitVM = UnitListViewModel()
+
+    private var searchTarget: IdolSearchTarget {
+        IdolSearchTarget(rawValue: searchTargetRaw) ?? .name
+    }
 
     private var idolListMode: IdolListMode {
         IdolListMode(rawValue: idolListModeRaw) ?? .list
@@ -155,6 +161,7 @@ struct IdolListView: View {
     @ViewBuilder
     private var idolBody: some View {
         VStack(spacing: 0) {
+            searchTargetBar
             // 同じ語が曲・ライブに何件あるか (虫眼鏡を畳んだ代わりの導線)。
             CrossTabCountChips(query: searchText, from: .idols)
             if vm.isLoading {
@@ -168,13 +175,24 @@ struct IdolListView: View {
                 .scrollDisabled(true)
             } else if !searchText.isEmpty && vm.filteredIdols.isEmpty {
                 Spacer()
-                ImasEmptyState(
-                    systemImage: "line.3.horizontal.decrease",
-                    title: "絞り込み結果がありません",
-                    message: "「\(searchText)」に一致するアイドルがいません",
-                    actionTitle: "絞り込みを解除",
-                    action: { searchText = "" }
-                )
+                if let other = otherSearchTarget, count(for: other) > 0 {
+                    // もう片方でなら当たる。分けたせいで引けなくなったように見せない。
+                    ImasEmptyState(
+                        systemImage: "line.3.horizontal.decrease",
+                        title: "\(searchTarget.rawValue)には見つかりません",
+                        message: "「\(searchText)」は\(other.rawValue)で \(count(for: other)) 人見つかります",
+                        actionTitle: "\(other.rawValue)で探す",
+                        action: { selectSearchTarget(other) }
+                    )
+                } else {
+                    ImasEmptyState(
+                        systemImage: "line.3.horizontal.decrease",
+                        title: "絞り込み結果がありません",
+                        message: "「\(searchText)」に一致するアイドルがいません",
+                        actionTitle: "絞り込みを解除",
+                        action: { searchText = "" }
+                    )
+                }
                 Spacer()
             } else if vm.filteredIdols.isEmpty {
                 Spacer()
@@ -218,6 +236,9 @@ struct IdolListView: View {
         // 大タイトルを出すと 2 行になってしまうので inline 固定。
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: searchText) { _, _ in
+            vm.rebuild(filter: filterContext, sortOrder: sortOrder, ascending: sortAscending)
+        }
+        .onChange(of: searchTargetRaw) { _, _ in
             vm.rebuild(filter: filterContext, sortOrder: sortOrder, ascending: sortAscending)
         }
         // 「他のタブに N 件」から飛んで来たら、その語で絞り込む。
@@ -413,6 +434,36 @@ struct IdolListView: View {
         }
     }
 
+    // MARK: - Search Target
+
+    /// 検索語を打っている間だけ出す「アイドル名 / CV名」の切替。件数を添えて、
+    /// 今の切替で 0 件でももう片方に居ることが一目で分かるようにする。
+    @ViewBuilder
+    private var searchTargetBar: some View {
+        if !searchText.isEmpty, vm.searchCounts != nil {
+            ImasSegmented(
+                options: IdolSearchTarget.allCases,
+                selection: Binding(get: { searchTarget }, set: { selectSearchTarget($0) })
+            ) { target in "\(target.rawValue) \(count(for: target))" }
+                .padding(.horizontal, DS.sp5)
+                .padding(.vertical, DS.sp2)
+        }
+    }
+
+    private var otherSearchTarget: IdolSearchTarget? {
+        IdolSearchTarget.allCases.first { $0 != searchTarget }
+    }
+
+    private func count(for target: IdolSearchTarget) -> Int {
+        guard let counts = vm.searchCounts else { return 0 }
+        return Int(target == .name ? counts.name : counts.voiceActor)
+    }
+
+    private func selectSearchTarget(_ target: IdolSearchTarget) {
+        AppAnalytics.tap("idol_list.search_target")
+        searchTargetRaw = target.rawValue
+    }
+
     // MARK: - Filter Context
 
     /// View 側の選択状態 + マーク集合 (UserMarkService 参照は @Observable 観測のため View 文脈) を
@@ -422,7 +473,8 @@ struct IdolListView: View {
         var ctx = IdolFilterContext(
             selectedBrandIds: selectedBrandIds,
             selectedAttribute: selectedAttribute,
-            searchText: searchText)
+            searchText: searchText,
+            searchTarget: searchTarget)
         if requireMyPick {
             ctx.requireMyPick = true
             ctx.myPickIds = Set(markService.allMarked(kind: .myPick, entity: .idol))

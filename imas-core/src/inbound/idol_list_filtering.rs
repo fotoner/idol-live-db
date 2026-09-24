@@ -5,7 +5,8 @@
 //! 並び順のメタ情報も、ケースごとの FFI 呼び出しループにならないよう表で一括して返す。
 
 use crate::domain::idol_list_filtering::{
-    IdolListEntry, IdolListFilterCriteria, IdolListSortedRow, IdolSortKind, IdolSortOrderMeta,
+    IdolListEntry, IdolListFilterCriteria, IdolListSortedRow, IdolSearchTargetCounts, IdolSortKind,
+    IdolSortOrderMeta,
 };
 
 /// ブランド/属性/マイマーク/テキスト検索の絞り込みを適用し、採用した index 列を返す
@@ -13,6 +14,17 @@ use crate::domain::idol_list_filtering::{
 #[uniffi::export]
 pub fn filter_idol_list(entries: Vec<IdolListEntry>, criteria: IdolListFilterCriteria) -> Vec<u32> {
     crate::domain::idol_list_filtering::filter_idol_list(&entries, &criteria)
+}
+
+/// 検索欄の語を「名前として」「CV 名として」引いたときの件数 (切替に添える)。
+/// 検索以外の軸は `criteria` のとおり効かせる。
+#[uniffi::export]
+pub fn idol_search_target_counts(
+    entries: Vec<IdolListEntry>,
+    criteria: IdolListFilterCriteria,
+    text: String,
+) -> IdolSearchTargetCounts {
+    crate::domain::idol_list_filtering::idol_search_target_counts(&entries, &criteria, &text)
 }
 
 /// 指定の並び順で整列した index 列を返す。`ascending` が None なら既定方向。

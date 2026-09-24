@@ -23,6 +23,8 @@ web_dto! {
         pub collab_label: Option<String>,
         /// KAMISABI の収録札 (`content::SONG_KAMISABI_LABEL`)。収録でなければ `None`。
         pub kamisabi_label: Option<String>,
+        /// 曲の補足 (自由文、例: 「ミリシタ 1 周年記念楽曲」)。無ければ `None`。
+        pub note: Option<String>,
         /// コミュニティ集計 (タグ・お気に入り・ペンライト)。焼き込み。
         pub community: SongCommunity,
         /// 「みんなの記録」の節を出すか (タグ・お気に入り・ペンライトのどれかがある)。

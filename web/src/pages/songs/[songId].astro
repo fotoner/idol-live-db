@@ -32,6 +32,8 @@ const song = page<SongPage>(Astro.props.data);
       {song.songTypeLabel && <p class="hero__eyebrow">{song.songTypeLabel}</p>}
       <h1 class="hero__title" id="song-title">{song.title}</h1>
       {song.titleKana && <p class="hero__kana">{song.titleKana}</p>}
+      {/* 曲の補足 (「ミリシタ 1 周年記念楽曲」など)。アプリの曲詳細と同じく曲名の下に 1 文。 */}
+      {song.note && <p class="hero__note">{song.note}</p>}
       {/* 全体曲は 49 人。セトリの行と同じ畳み (色の点 + 人数、開けば全員)。 */}
       {
         song.originalArtists.length > 0 && (

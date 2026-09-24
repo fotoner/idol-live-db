@@ -852,6 +852,9 @@ struct SongListView: View {
         .padding(.horizontal, DS.sp5)
         .padding(.top, DS.sp2)
         .padding(.bottom, DS.sp2)
+        // 下の一覧 (`readableContentMargins`) と左右を揃える。
+        .frame(maxWidth: DS.readableContentWidth)
+        .frame(maxWidth: .infinity)
     }
 
     private var effectiveSortAscending: Bool { sortAscending ?? sortOrder.defaultAscending }
@@ -906,6 +909,7 @@ struct SongListView: View {
             }
         }
         .listStyle(.plain)
+        .readableContentMargins()
         .scrollContentBackground(.hidden)
         .background(DS.bg)
     }

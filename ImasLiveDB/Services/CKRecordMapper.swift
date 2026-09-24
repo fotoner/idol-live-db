@@ -307,7 +307,9 @@ enum CKRecordMapper {
             isCollab: row.isCollab,
             // 同じ理由。落とすと同期のたびに KAMISABI 収録フラグが消え、フィルタ/バッジが消える。
             // `CKRecordMapperCoverageTests` がこれを捕まえる。
-            hasKamisabiCard: row.hasKamisabiCard
+            hasKamisabiCard: row.hasKamisabiCard,
+            // 同じ理由。落とすと同期のたびに曲の補足が消える。
+            note: row.note
         )
     }
 

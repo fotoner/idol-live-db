@@ -6,6 +6,7 @@ import com.fugaif.imaslivedb.data.backup.BackupTransferApi
 import com.fugaif.imaslivedb.data.backup.BackupTransferException
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.data.community.DeviceIdentity
+import com.fugaif.imaslivedb.data.community.DiscordLinkService
 import com.fugaif.imaslivedb.data.community.SetlistLikeService
 import com.fugaif.imaslivedb.data.edit.EditApi
 import com.fugaif.imaslivedb.testing.FakeWorkerTransport
@@ -104,6 +105,32 @@ class WorkerClientsTest {
         val service = SetlistLikeService(http(FakeWorkerTransport { WorkerResponse(401, null) }))
         assertThrows<SetlistLikeService.Unauthorized> { service.like("sh1", "s1") }
         assertEquals(emptyList<SetlistLikeService.LikeEntry>(), service.fetch("sh1"))
+    }
+
+    @Test
+    fun discordLinkReturnsUrlAndMapsFailuresToMessages() = runBlocking {
+        val ok = FakeWorkerTransport {
+            WorkerResponse(200, """{"url":"https://discord.com/oauth2/authorize?state=x"}""")
+        }
+        assertEquals("https://discord.com/oauth2/authorize?state=x", DiscordLinkService(http(ok)).authorizeUrl())
+        val sent = ok.requests.single()
+        assertEquals("POST", sent.method)
+        assertTrue(sent.url.endsWith("/discord/link"))
+        assertEquals("{}", sent.body)
+        assertEquals("Bearer jwt", sent.headers["Authorization"])
+
+        suspend fun message(transport: FakeWorkerTransport): String? = try {
+            DiscordLinkService(http(transport)).authorizeUrl()
+            null
+        } catch (e: DiscordLinkService.LinkException) {
+            e.message
+        }
+        assertEquals(DiscordLinkService.NOT_CONFIGURED_MESSAGE,
+            message(FakeWorkerTransport { WorkerResponse(503, """{"error":"discord_not_configured"}""") }))
+        assertEquals(DiscordLinkService.GENERIC_MESSAGE, message(FakeWorkerTransport { WorkerResponse(429, null) }))
+        assertEquals(DiscordLinkService.GENERIC_MESSAGE, message(FakeWorkerTransport { WorkerResponse(401, null) }))
+        assertEquals(DiscordLinkService.GENERIC_MESSAGE, message(FakeWorkerTransport { WorkerResponse(200, "{}") }))
+        assertEquals(DiscordLinkService.GENERIC_MESSAGE, message(FakeWorkerTransport { null }))
     }
 
     private suspend inline fun <reified T : Throwable> assertThrows(block: suspend () -> Unit) {

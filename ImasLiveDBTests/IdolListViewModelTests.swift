@@ -100,8 +100,11 @@ final class IdolListViewModelTests: XCTestCase {
 
         var ctx = IdolFilterContext()
         ctx.searchText = "大橋" // 呼び出し側は castNames を詰めない
+        ctx.searchTarget = .voiceActor
         vm.rebuild(filter: ctx)
 
         XCTAssertEqual(vm.filteredIdols.map(\.id), ["a"])
+        XCTAssertEqual(vm.searchCounts?.voiceActor, 1)
+        XCTAssertEqual(vm.searchCounts?.name, 0)
     }
 }

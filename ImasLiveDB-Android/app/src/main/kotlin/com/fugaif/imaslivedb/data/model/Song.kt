@@ -116,7 +116,14 @@ data class Song(
      * あるか。カード番号は非公表・ノーマル/レアは同曲の版違いなので真偽値 1 本で足りる。
      */
     @ColumnInfo(name = "has_kamisabi_card")
-    val hasKamisabiCard: Boolean = false
+    val hasKamisabiCard: Boolean = false,
+
+    /**
+     * 曲の補足 (自由文)。「ミリシタ 1 周年記念楽曲」のように、他の列では持てない由来や
+     * 位置づけを一文で書く。公式の出典があるものだけ入る。曲詳細にそのまま出す。
+     */
+    @ColumnInfo(name = "note")
+    val note: String? = null
 ) {
     val isRemix: Boolean get() = parentSongId != null
 }

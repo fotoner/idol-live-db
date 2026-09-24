@@ -540,6 +540,8 @@ pub struct CkSongRow {
     pub is_collab: bool,
     /// 音楽カードゲーム「KAMISABI」にこの曲のカードがあるか。
     pub has_kamisabi_card: bool,
+    /// 曲の補足 (自由文)。
+    pub note: Option<String>,
 }
 
 /// units
@@ -942,6 +944,8 @@ pub fn song(record: &CkRecordInput) -> Option<CkSongRow> {
         joint_brand_ids: f.str("jointBrandIds"),
         is_collab: f.bool_value("isCollab", false),
         has_kamisabi_card: f.bool_value("hasKamisabiCard", false),
+        // 読み落とすと同期のたびに補足が消える (上の jointBrandIds と同じ壊れ方)。
+        note: f.str("note"),
     })
 }
 
@@ -1738,6 +1742,17 @@ mod tests {
 
         let plain = song(&rec("s2", &[("title", text("GO MY WAY!!"))])).unwrap();
         assert!(!plain.has_kamisabi_card);
+    }
+
+    #[test]
+    fn song_reads_note() {
+        // 読み落とすと同期のたびに補足が消えるので、読んでいることを固定する。
+        let s = song(&rec("s1", &[("title", text("UNION!!")), ("note", text("ミリシタ 1 周年記念楽曲"))]))
+            .unwrap();
+        assert_eq!(s.note.as_deref(), Some("ミリシタ 1 周年記念楽曲"));
+
+        let plain = song(&rec("s2", &[("title", text("GO MY WAY!!"))])).unwrap();
+        assert_eq!(plain.note, None);
     }
 
     #[test]

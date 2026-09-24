@@ -413,6 +413,12 @@ private fun Hero(
                 Text(artistLine, fontSize = 15.sp, color = DS.ink2, textAlign = TextAlign.Center,
                     maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 2.dp))
             }
+            // 曲の補足 (「ミリシタ 1 周年記念楽曲」など)。どのタブでも曲の位置づけが分かるよう、
+            // 曲名・歌唱者のすぐ下に 1 文で添える (iOS の Hero と同じ位置)。無い曲は何も出さない。
+            song.note?.takeIf { it.isNotBlank() }?.let { note ->
+                Text(note, fontSize = 13.sp, color = DS.ink2, textAlign = TextAlign.Center,
+                    maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp))
+            }
             if (song.hasKamisabiCard) {
                 // 語はコアの kamisabiCardLabel() をそのまま出す。iOS / Web と語がバラバラだった
                 // (RedTeam M-6) ので、ここで新しい文言を作らない。

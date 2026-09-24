@@ -19,16 +19,23 @@ final class IdolListFilteringTests: XCTestCase {
             debutDate: nil, attribute: attribute, aliases: aliases)
     }
 
-    func testSearchMatchesCastName() {
+    /// 検索欄の語は `searchTarget` の側にだけ当たる (名前と CV 名を混ぜない)。
+    func testSearchTargetSelectsNameOrCastName() {
         let idols = [makeIdol("a", name: "島村卯月"), makeIdol("b", name: "渋谷凛")]
         var ctx = IdolFilterContext()
-        ctx.searchText = "おおぬま" // 名前には無いがキャスト名で一致
+        ctx.searchText = "大橋" // 名前には無いがキャスト名で一致
         ctx.castNames = ["a": "大橋彩香", "b": "福原綾香"]
-        // どちらのキャストにも「おおぬま」は無い → 0件
-        XCTAssertTrue(filterIdols(idols, ctx).isEmpty)
+        XCTAssertTrue(filterIdols(idols, ctx).isEmpty, "既定 (アイドル名) では CV 名に当てない")
 
-        ctx.castNames = ["a": "おおぬま某", "b": "福原綾香"]
+        ctx.searchTarget = .voiceActor
         XCTAssertEqual(filterIdols(idols, ctx).map(\.id), ["a"])
+
+        ctx.searchText = "島村"
+        XCTAssertTrue(filterIdols(idols, ctx).isEmpty, "CV 名の検索ではアイドル名に当てない")
+
+        let counts = idolSearchCounts(idols, ctx)
+        XCTAssertEqual(counts.name, 1)
+        XCTAssertEqual(counts.voiceActor, 0)
     }
 
     /// 表示名を短くしたアイドルを、別名 (フルネーム) でも引けること。

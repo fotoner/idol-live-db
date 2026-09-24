@@ -15,6 +15,7 @@ import { handleLyrics } from "./routes/lyrics";
 import { handleLyricsCalls, handleCallsDashboard } from "./routes/calls";
 import { handleSongDetail } from "./routes/song_detail";
 import { handleTransfer } from "./routes/transfer";
+import { handleDiscord } from "./routes/discord";
 
 // ALLOWED_ORIGINS は wrangler.jsonc の vars で設定する。
 // iOS ネイティブは Origin ヘッダを送らないため、空リストでも動作する。
@@ -196,8 +197,12 @@ async function handleRoot(ctx: RouteContext): Promise<Response | null> {
       "GET /songs/:song_id/lyrics",
       // 歌詞検索。返すのは song_id と一致箇所まわりのスニペットだけ。
       "GET /lyrics/search",
+      // 歌詞クイズの出題母集団。公開中の曲 id だけ (本文は含まない)。
+      "GET /lyrics/published",
       "PUT /admin/lyrics/:song_id",
       "PUT /songs/:song_id/calls",
+      "POST /discord/link",
+      "POST /discord/interactions",
     ],
   });
 }
@@ -244,6 +249,8 @@ const ROUTES: ReadonlyArray<(ctx: RouteContext) => Promise<Response | null>> = [
   //    (routes/song_detail.ts 冒頭のコメント参照)。
   handleSongDetail,
   handleTransfer,
+  // Discord のロール受け取り (/discord/link・/discord/callback・/discord/interactions・/github/callback)。
+  handleDiscord,
 ];
 
 /** ROUTES を順に試す。無ければ 404、失敗は request id 付きの 500 (エラー文は応答に出さない)。 */

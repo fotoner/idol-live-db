@@ -3,9 +3,11 @@ package com.fugaif.imaslivedb.ui.idols
 import com.fugaif.imaslivedb.data.model.Idol
 import uniffi.imas_core.IdolListEntry
 import uniffi.imas_core.IdolListFilterCriteria
+import uniffi.imas_core.IdolSearchTargetCounts
 import uniffi.imas_core.IdolSortKind
 import uniffi.imas_core.IdolSortOrderMeta
 import uniffi.imas_core.filterIdolList
+import uniffi.imas_core.idolSearchTargetCounts
 import uniffi.imas_core.idolSortOrderTable
 import uniffi.imas_core.sortIdolListRows
 
@@ -86,6 +88,13 @@ data class SortedIdols(val idols: List<Idol>, val metricById: Map<String, String
  */
 fun filterIdols(idols: List<Idol>, criteria: IdolListFilterCriteria): List<Idol> =
     filterIdolList(idols.map(::idolListEntry), criteria).map { idols[it.toInt()] }
+
+/**
+ * 検索欄の語を「アイドル名として」「CV 名として」引いたときの件数。切替に添える。
+ * 検索以外の軸は [criteria] のとおり効かせる (本体は imas-core の `idol_search_target_counts`)。
+ */
+fun idolSearchCounts(idols: List<Idol>, criteria: IdolListFilterCriteria, text: String): IdolSearchTargetCounts =
+    idolSearchTargetCounts(idols.map(::idolListEntry), criteria, text)
 
 /**
  * FFI 射影: 絞り込み・並べ替えの判定に要るフィールドだけを `IdolListEntry` へ落とす。

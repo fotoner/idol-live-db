@@ -1,6 +1,11 @@
 package com.fugaif.imaslivedb.ui.navigation
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalConfiguration
+import uniffi.imas_core.AppDestination
+import uniffi.imas_core.appNavigationSections
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -85,78 +90,84 @@ private const val ROUTE_COLLECTED_SONGS = "collected_songs"
 /** 年表を「ブランド指定なし」で開くための番人役の値 ([NavRoutes.BrandTimeline] の引数は必須)。 */
 private const val ALL_BRANDS = "all"
 
+/** 年表をサイドバーから開くときの根。ブランド未指定 = 先頭ブランド (ルート引数の要らない入口)。 */
+private const val ROUTE_TIMELINE_ROOT = "brand_timeline_root"
+
+/** 広い画面とみなす幅。iOS の regular size class (iPad 全幅・Mac) に当たる。 */
+private const val WIDE_SCREEN_MIN_DP = 600
+
 @Composable
 fun AppNavigation() {
-    var currentTab by rememberSaveable { mutableStateOf(TopLevelTab.Schedule) }
+    var current by rememberSaveable { mutableStateOf(AppDestination.SCHEDULE) }
+    // 行き先の一覧 (並び・見出し・タブバーに載るか) はコアが決める。
+    // Android には歌詞 (コールガイド) が無いので lyricsAvailable = false。
+    val sections = remember { appNavigationSections(lyricsAvailable = false) }
+    val tabItems = remember(sections) { sections.flatMap { it.items }.filter { it.inTabBar } }
+    val wide = LocalConfiguration.current.screenWidthDp >= WIDE_SCREEN_MIN_DP
+    // 狭くなったら (画面分割など) サイドバーだけの行き先から、同じ画面の入口がある
+    // プロデュースへ戻す。iOS の AdaptiveRootTabs と同じ規則。
+    LaunchedEffect(wide) {
+        if (!wide && tabItems.none { it.destination == current }) current = AppDestination.PRODUCE
+    }
     // 「他のタブに N 件」を押されたら、そのタブへ移る。語の受け渡しは移った先の
     // 一覧が `CrossTabSearch.take()` で拾う。generation を鍵にするのは、同じタブへ
     // 続けて渡したときも気づけるようにするため。
     LaunchedEffect(CrossTabSearch.generation) {
-        CrossTabSearch.target?.let { currentTab = it }
+        CrossTabSearch.target?.let { current = it.destination }
     }
 
-    // One NavController per tab to maintain independent back stacks
-    val scheduleNavController = rememberNavController()
-    val eventsNavController = rememberNavController()
-    val songsNavController = rememberNavController()
-    val idolsNavController = rememberNavController()
-    val produceNavController = rememberNavController()
+    // One NavController per destination to maintain independent back stacks
+    val navControllers = AppDestination.entries.associateWith { rememberNavController() }
 
-    Scaffold(
-        bottomBar = {
-            // 再生中バーはナビゲーションバーの真上。鳴っている間だけ出る。
-            // タップした曲は「楽曲」タブの詳細で開く (どのタブから鳴らしても行き先は同じ)。
-            Column {
-                NowPlayingBar(onSongClick = { songId ->
-                    currentTab = TopLevelTab.Songs
-                    songsNavController.navigate(NavRoutes.SongDetail.createRoute(songId))
-                })
-                BottomNavBar(
-                    currentTab = currentTab,
-                    onTabSelected = { currentTab = it }
-                )
+    Row {
+        if (wide) {
+            AppSidebar(sections = sections, current = current, onSelect = { current = it })
+        }
+        Scaffold(
+            bottomBar = {
+                // 再生中バーはナビゲーションバーの真上。鳴っている間だけ出る。
+                // タップした曲は「楽曲」タブの詳細で開く (どのタブから鳴らしても行き先は同じ)。
+                Column {
+                    NowPlayingBar(onSongClick = { songId ->
+                        current = AppDestination.SONGS
+                        navControllers.getValue(AppDestination.SONGS)
+                            .navigate(NavRoutes.SongDetail.createRoute(songId))
+                    })
+                    if (!wide) {
+                        BottomNavBar(items = tabItems, current = current, onSelect = { current = it })
+                    }
+                }
+            }
+        ) { innerPadding ->
+            Box(modifier = Modifier.padding(innerPadding)) {
+                // 行き先ごとに NavHost を持つので戻る履歴は独立。表示中の 1 つだけ組む。
+                DestinationNavHost(current, navControllers.getValue(current))
             }
         }
-    ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            // Each tab gets its own NavHost so back stacks are independent.
-            // Only the active tab is visible; others remain in composition.
-            if (currentTab == TopLevelTab.Schedule) {
-                TabNavHost(
-                    navController = scheduleNavController,
-                    startDestination = NavRoutes.Schedule.route,
-                    graphBuilder = { scheduleNavGraph(scheduleNavController) }
-                )
-            }
-            if (currentTab == TopLevelTab.Events) {
-                TabNavHost(
-                    navController = eventsNavController,
-                    startDestination = NavRoutes.EventList.route,
-                    graphBuilder = { eventsNavGraph(eventsNavController) }
-                )
-            }
-            if (currentTab == TopLevelTab.Songs) {
-                TabNavHost(
-                    navController = songsNavController,
-                    startDestination = NavRoutes.SongList.route,
-                    graphBuilder = { songsNavGraph(songsNavController) }
-                )
-            }
-            if (currentTab == TopLevelTab.Idols) {
-                TabNavHost(
-                    navController = idolsNavController,
-                    startDestination = NavRoutes.IdolList.route,
-                    graphBuilder = { idolsNavGraph(idolsNavController) }
-                )
-            }
-            if (currentTab == TopLevelTab.Produce) {
-                TabNavHost(
-                    navController = produceNavController,
-                    startDestination = NavRoutes.Produce.route,
-                    graphBuilder = { produceNavGraph(produceNavController) }
-                )
-            }
-        }
+    }
+}
+
+/** 戻る先があるときだけ「戻る」を返す。サイドバーの根として開いた画面には矢印を出さない。 */
+private fun NavHostController.backOrNull(): (() -> Unit)? =
+    if (previousBackStackEntry != null) ({ popBackStack() }) else null
+
+@Composable
+private fun DestinationNavHost(destination: AppDestination, navController: NavHostController) {
+    when (destination) {
+        AppDestination.SCHEDULE -> TabNavHost(navController, NavRoutes.Schedule.route) { scheduleNavGraph(navController) }
+        AppDestination.EVENTS -> TabNavHost(navController, NavRoutes.EventList.route) { eventsNavGraph(navController) }
+        AppDestination.SONGS -> TabNavHost(navController, NavRoutes.SongList.route) { songsNavGraph(navController) }
+        AppDestination.IDOLS -> TabNavHost(navController, NavRoutes.IdolList.route) { idolsNavGraph(navController) }
+        AppDestination.PRODUCE -> TabNavHost(navController, NavRoutes.Produce.route) { produceNavGraph(navController) }
+        // サイドバーだけの行き先。中身はプロデュースから push するのと同じ画面 (同じグラフ) を根から開く。
+        AppDestination.STATS -> TabNavHost(navController, NavRoutes.Stats.route) { produceNavGraph(navController) }
+        AppDestination.TIMELINE -> TabNavHost(navController, ROUTE_TIMELINE_ROOT) { produceNavGraph(navController) }
+        AppDestination.POLLS -> TabNavHost(navController, NavRoutes.Polls.route) { produceNavGraph(navController) }
+        AppDestination.COMMUNITY_ACTIVITY -> TabNavHost(navController, NavRoutes.EditHistory.route) { produceNavGraph(navController) }
+        AppDestination.TAG_ACTIVITY -> TabNavHost(navController, NavRoutes.TagActivity.route) { produceNavGraph(navController) }
+        AppDestination.GAMES -> TabNavHost(navController, NavRoutes.GamesHub.route) { produceNavGraph(navController) }
+        // Android には歌詞が無いのでコアがこの行き先を返さない。
+        AppDestination.CALL_GUIDE -> Unit
     }
 }
 
@@ -268,6 +279,16 @@ internal fun NavGraphBuilder.produceNavGraph(navController: NavHostController) {
             onSongClick = { navController.navigate(NavRoutes.SongDetail.createRoute(it)) }
         )
     }
+    composable(ROUTE_TIMELINE_ROOT) {
+        BrandTimelineScreen(
+            initialBrandId = null,
+            onBack = navController.backOrNull(),
+            onEventClick = { navController.navigate(NavRoutes.EventDetail.createRoute(it)) },
+            onFilteredSongsClick = { kind, value ->
+                navController.navigate(NavRoutes.FilteredSongs.createRoute(kind, value))
+            }
+        )
+    }
     composable(NavRoutes.BrandTimeline.ROUTE) { backStackEntry ->
         val raw = backStackEntry.arguments?.getString("brandId")
         BrandTimelineScreen(
@@ -287,7 +308,7 @@ internal fun NavGraphBuilder.produceNavGraph(navController: NavHostController) {
     composable(NavRoutes.Settings.route) { SettingsScreen() }
     composable(NavRoutes.Polls.route) {
         PollsScreen(
-            onBack = { navController.popBackStack() },
+            onBack = navController.backOrNull(),
             onPollClick = { navController.navigate(NavRoutes.PollDetail.createRoute(it)) },
             onHallOfFameClick = { navController.navigate(NavRoutes.PollHallOfFame.route) }
         )
@@ -320,7 +341,7 @@ internal fun NavGraphBuilder.produceNavGraph(navController: NavHostController) {
         MyVotesScreen(onBack = { navController.popBackStack() })
     }
     composable(NavRoutes.EditHistory.route) {
-        RecentEditsScreen(onBack = { navController.popBackStack() })
+        RecentEditsScreen(onBack = navController.backOrNull())
     }
     composable(NavRoutes.TagList.route) {
         TagListScreen(
@@ -339,7 +360,7 @@ internal fun NavGraphBuilder.produceNavGraph(navController: NavHostController) {
     }
     composable(NavRoutes.TagActivity.route) {
         TagActivityScreen(
-            onBack = { navController.popBackStack() },
+            onBack = navController.backOrNull(),
             onSongTagClick = { navController.navigate(NavRoutes.TagDetail.createRoute(it)) },
             onIdolTagClick = { navController.navigate(NavRoutes.IdolTagDetail.createRoute(it)) },
             onSongClick = { navController.navigate(NavRoutes.SongDetail.createRoute(it)) },
@@ -348,7 +369,7 @@ internal fun NavGraphBuilder.produceNavGraph(navController: NavHostController) {
     }
     composable(NavRoutes.GamesHub.route) {
         GamesHubScreen(
-            onBack = { navController.popBackStack() },
+            onBack = navController.backOrNull(),
             onNavigateToIntroDon = { navController.navigate(NavRoutes.IntroDonHome.route) },
             onNavigateToColorMatch = { navController.navigate(NavRoutes.GamesColorMatch.route) },
             onNavigateToIdolQuizSetup = { navController.navigate(NavRoutes.GamesIdolQuizSetup.route) },

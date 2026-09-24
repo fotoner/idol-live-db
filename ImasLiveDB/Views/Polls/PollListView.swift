@@ -9,6 +9,20 @@ enum PollRoute: Hashable {
     case hallOfFame
 }
 
+/// `PollRoute` の行き先。プロデュースのスタックとサイドバーの「みんなの投票」の
+/// 2 箇所が同じ振り分けを使う。
+struct PollRouteView: View {
+    let route: PollRoute
+
+    var body: some View {
+        switch route {
+        case .list: PollListView()
+        case let .detail(pollId): PollDetailView(pollId: pollId)
+        case .hallOfFame: PollHallOfFameView()
+        }
+    }
+}
+
 /// みんなの投票 — お題一覧。[開催中 / 終了] タブ切替。
 struct PollListView: View {
     @State private var segmentIndex = 0

@@ -1,5 +1,7 @@
 package com.fugaif.imaslivedb.ui.navigation
 
+import uniffi.imas_core.AppDestination
+
 sealed class NavRoutes(val route: String) {
     data object EventList : NavRoutes("event_list")
     data class EventDetail(val eventId: String) : NavRoutes("event_detail/{eventId}") {
@@ -205,6 +207,16 @@ enum class TopLevelTab(val route: String, val label: String) {
     Songs("tab_songs", "楽曲"),
     Idols("tab_idols", "アイドル"),
     Produce("tab_produce", "プロデュース");
+
+    /** タブとしての行き先 (並びと文言はコアの `appNavigationSections` が持つ)。 */
+    val destination: AppDestination
+        get() = when (this) {
+            Schedule -> AppDestination.SCHEDULE
+            Events -> AppDestination.EVENTS
+            Songs -> AppDestination.SONGS
+            Idols -> AppDestination.IDOLS
+            Produce -> AppDestination.PRODUCE
+        }
 
     companion object {
         /** 「他のタブに N 件」で押せる先。検索欄を持つ一覧だけ。 */

@@ -24,4 +24,18 @@ export interface Env {
   // マスタ修正リクエストの GitHub issue 化用 (secret: wrangler secret put GITHUB_TOKEN)。
   GITHUB_TOKEN?: string;
   GITHUB_REPO?: string;            // "owner/repo" 省略時 "fuga-if/idol-live-db"
+  // Discord (routes/discord.ts のロール受け取りと、discord_digest.ts の更新通知)。
+  // ID と公開鍵は秘密ではないので vars、Bot トークンと OAuth のシークレットは secret。
+  // どれかが欠けていれば、その機能だけ止まる (ロール受け取りは 503、通知は投稿しない)。
+  DISCORD_APPLICATION_ID?: string;
+  DISCORD_PUBLIC_KEY?: string;     // Interactions の署名検証用 (Ed25519 公開鍵, hex)
+  DISCORD_GUILD_ID?: string;
+  DISCORD_DATA_ROLE_ID?: string;          // 「データ協力」
+  DISCORD_CONTRIBUTOR_ROLE_ID?: string;   // 「コントリビューター」
+  DISCORD_UPDATES_CHANNEL_ID?: string;    // #更新通知
+  DISCORD_BOT_TOKEN?: string;      // secret
+  DISCORD_CLIENT_SECRET?: string;  // secret
+  // コントリビューターの確認 (GitHub OAuth App)。
+  GITHUB_OAUTH_CLIENT_ID?: string;
+  GITHUB_OAUTH_CLIENT_SECRET?: string;  // secret
 }

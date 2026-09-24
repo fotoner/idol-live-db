@@ -44,6 +44,11 @@ master.sqlite → CloudKit に一括反映します（直接 CloudKit に書く�
 ```json
 { "fixes": [ { "table": "songs", "id": "対象id", "fields": { "release_date": "2024-09-04" } } ] }
 ```
+曲の補足 (「ミリシタ 1 周年記念楽曲」のような由来・位置づけの 1 文) は songs の `note` に書く。
+曲詳細 (iOS / Android / Web) の曲名の下にそのまま出るので、公式の出典があることだけを短く。
+```json
+{ "fixes": [ { "table": "songs", "id": "ml_union", "fields": { "note": "ミリシタ 1 周年記念楽曲" } } ] }
+```
 曲の原唱者が足りないときは `add_original_singers` に idol_id を並べる（`fields` と一緒でも、これだけでもよい）。
 足すだけで、既存の原唱者は消えない（消す必要があるときは PR でオーナーに相談）。
 ```json

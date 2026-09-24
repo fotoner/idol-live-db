@@ -162,8 +162,10 @@ pub struct IdolQuery {
     pub attribute: Option<String>,
     /// 誕生月 (1..=12)。
     pub birth_month: Option<u32>,
-    /// 名前 / かな / CV 名 / 別名 / 愛称の部分一致。
+    /// 名前 / かな / 別名 / 愛称の部分一致。CV 名は見ない ([`Self::voice_actor`])。
     pub search_text: String,
+    /// CV (声優) 名の部分一致。名前の検索とは別の軸で、両方あれば AND。
+    pub voice_actor: String,
     /// `IdolSortKind::key()` の値。未知の鍵は既定 (公式順) に倒れる。
     pub sort: String,
     /// 省略時はその並びの既定方向。
@@ -171,12 +173,13 @@ pub struct IdolQuery {
 }
 
 impl IdolQuery {
-    /// 絞り込み条件へ。CV 名は検索対象なので呼び出し側が解決して渡す。
+    /// 絞り込み条件へ。CV 名は照合に使うので呼び出し側が解決して渡す。
     pub fn to_criteria(&self, cast_names: HashMap<String, String>) -> IdolListFilterCriteria {
         IdolListFilterCriteria {
             selected_brand_ids: self.brand_ids.clone(),
             selected_attribute: self.attribute.clone(),
             search_text: self.search_text.clone(),
+            voice_actor_text: self.voice_actor.clone(),
             birth_month: self.birth_month,
             cast_names,
             ..IdolListFilterCriteria::default()
@@ -232,9 +235,16 @@ pub struct IdolListFilterCriteria {
     pub favorite_ids: Vec<String>,
     pub require_note: bool,
     pub note_ids: Vec<String>,
-    /// 名前/かな/キャスト名/別名/愛称の部分一致検索 (空 = 検索なし)。
+    /// 名前/かな/別名/愛称の部分一致検索 (空 = 検索なし)。
+    ///
+    /// **CV 名はここでは見ない** ([`Self::voice_actor_text`] が別軸)。混ぜていた頃は
+    /// 名前で探したつもりの一覧に CV 名で当たった別人が混ざり、どちらで当たったのかが
+    /// 一覧から読み取れなかった。
     pub search_text: String,
-    /// idol_id → キャスト(声優)名。検索対象に含める。
+    /// CV (声優) 名の部分一致検索 (空 = 検索なし)。`search_text` と両方あれば AND。
+    #[uniffi(default = "")]
+    pub voice_actor_text: String,
+    /// idol_id → キャスト(声優)名。`voice_actor_text` の照合先。
     pub cast_names: HashMap<String, String>,
     /// 誕生月 (1..=12)。None = 誕生月で絞らない。
     ///
@@ -250,32 +260,92 @@ pub struct IdolListFilterCriteria {
 /// index は `entries` の添字で、入力順を保持する (並べ替えは [`sort_idol_list`] が担う)。
 /// マーク系条件は AND (すべて満たすものだけ残す)。
 pub fn filter_idol_list(entries: &[IdolListEntry], criteria: &IdolListFilterCriteria) -> Vec<u32> {
-    let brands: HashSet<&str> = criteria.selected_brand_ids.iter().map(String::as_str).collect();
-    let my_picks: HashSet<&str> = criteria.my_pick_ids.iter().map(String::as_str).collect();
-    let favorites: HashSet<&str> = criteria.favorite_ids.iter().map(String::as_str).collect();
-    let notes: HashSet<&str> = criteria.note_ids.iter().map(String::as_str).collect();
-    // 検索語は 1 回だけ小文字化して全行で使い回す (行ごとに畳み込まない)。
+    let axes = NonTextAxes::new(criteria);
+    // 検索語は 1 回だけ畳んで全行で使い回す (行ごとに畳み込まない)。
     // iOS 原本は query を trim しない (空白込みで一致を見る) のでここでも trim しない。
-    let needle = (!criteria.search_text.is_empty()).then(|| FoldedNeedle::new(&criteria.search_text));
-
+    let name = needle_of(&criteria.search_text);
+    let voice_actor = needle_of(&criteria.voice_actor_text);
     entries
         .iter()
         .enumerate()
         .filter(|(_, e)| {
-            let id = e.idol_id.as_str();
-            (brands.is_empty() || brands.contains(e.brand_id.as_str()))
-                && criteria
-                    .selected_attribute
-                    .as_deref()
-                    .is_none_or(|attr| e.attribute.as_deref() == Some(attr))
-                && (!criteria.require_my_pick || my_picks.contains(id))
-                && (!criteria.require_favorite || favorites.contains(id))
-                && (!criteria.require_note || notes.contains(id))
-                && criteria.birth_month.is_none_or(|m| birthday_in_month(e, m))
-                && needle.as_ref().is_none_or(|q| matches_search(e, &criteria.cast_names, q))
+            axes.passes(e)
+                && name.as_ref().is_none_or(|q| matches_name(e, q))
+                && voice_actor.as_ref().is_none_or(|q| matches_voice_actor(e, &criteria.cast_names, q))
         })
         .map(|(i, _)| i as u32)
         .collect()
+}
+
+/// 検索欄 1 本を「名前で探す / CV 名で探す」で切り替える画面のための、切替先ごとの件数。
+#[derive(uniffi::Record, Clone, Copy, Debug, PartialEq, Eq)]
+pub struct IdolSearchTargetCounts {
+    /// `text` を名前 (かな・別名・愛称含む) として引いたときの件数。
+    pub name: u32,
+    /// `text` を CV 名として引いたときの件数。
+    pub voice_actor: u32,
+}
+
+/// `text` を名前として / CV 名として引いたとき、それぞれ何人残るか。
+///
+/// 検索以外の軸 (ブランド・属性・マーク・誕生月) は `criteria` のとおり効かせ、
+/// `criteria` 自身の検索語 (`search_text` / `voice_actor_text`) は無視する。
+/// 切替に件数を添えておけば、CV 名を打って「名前」側で 0 件になった人が
+/// 切替の存在に気づける (空の一覧だけ見せると、分けたことで引けなくなったように見える)。
+pub fn idol_search_target_counts(
+    entries: &[IdolListEntry],
+    criteria: &IdolListFilterCriteria,
+    text: &str,
+) -> IdolSearchTargetCounts {
+    let axes = NonTextAxes::new(criteria);
+    let Some(needle) = needle_of(text) else {
+        let all = entries.iter().filter(|e| axes.passes(e)).count() as u32;
+        return IdolSearchTargetCounts { name: all, voice_actor: all };
+    };
+    let (mut name, mut voice_actor) = (0, 0);
+    for e in entries.iter().filter(|e| axes.passes(e)) {
+        name += matches_name(e, &needle) as u32;
+        voice_actor += matches_voice_actor(e, &criteria.cast_names, &needle) as u32;
+    }
+    IdolSearchTargetCounts { name, voice_actor }
+}
+
+/// 検索語以外の軸 (ブランド / 属性 / マーク / 誕生月)。集合は 1 回だけ組んで使い回す。
+struct NonTextAxes<'a> {
+    criteria: &'a IdolListFilterCriteria,
+    brands: HashSet<&'a str>,
+    my_picks: HashSet<&'a str>,
+    favorites: HashSet<&'a str>,
+    notes: HashSet<&'a str>,
+}
+
+impl<'a> NonTextAxes<'a> {
+    fn new(criteria: &'a IdolListFilterCriteria) -> Self {
+        let set = |ids: &'a [String]| ids.iter().map(String::as_str).collect();
+        Self {
+            criteria,
+            brands: set(&criteria.selected_brand_ids),
+            my_picks: set(&criteria.my_pick_ids),
+            favorites: set(&criteria.favorite_ids),
+            notes: set(&criteria.note_ids),
+        }
+    }
+
+    fn passes(&self, e: &IdolListEntry) -> bool {
+        let c = self.criteria;
+        let id = e.idol_id.as_str();
+        (self.brands.is_empty() || self.brands.contains(e.brand_id.as_str()))
+            && c.selected_attribute.as_deref().is_none_or(|attr| e.attribute.as_deref() == Some(attr))
+            && (!c.require_my_pick || self.my_picks.contains(id))
+            && (!c.require_favorite || self.favorites.contains(id))
+            && (!c.require_note || self.notes.contains(id))
+            && c.birth_month.is_none_or(|m| birthday_in_month(e, m))
+    }
+}
+
+/// 空の検索語は「絞らない」。
+fn needle_of(text: &str) -> Option<FoldedNeedle> {
+    (!text.is_empty()).then(|| FoldedNeedle::new(text))
 }
 
 /// 誕生日がその月か。`birthday` は `"--MM-DD"` (年なし) なので前方一致で判定する。
@@ -284,16 +354,20 @@ fn birthday_in_month(entry: &IdolListEntry, month: u32) -> bool {
     entry.birthday.as_deref().is_some_and(|b| b.starts_with(&format!("--{month:02}-")))
 }
 
-/// 検索語が名前/かな/キャスト名/別名/愛称のどれかに部分一致するか。
+/// 検索語が名前/かな/別名/愛称のどれかに部分一致するか。
 ///
 /// 当たり方は横断検索・一覧の索引と同じ `FoldedNeedle` (大文字小文字と ひらがな↔カタカナを
 /// 畳む。Q-06)。以前の `str::to_lowercase` の部分一致の上位集合なので、当たる件数は増えうる。
-fn matches_search(entry: &IdolListEntry, cast_names: &HashMap<String, String>, needle: &FoldedNeedle) -> bool {
+fn matches_name(entry: &IdolListEntry, needle: &FoldedNeedle) -> bool {
     needle.matches(&entry.name)
         || needle.matches_opt(entry.name_kana.as_deref())
-        || needle.matches_opt(cast_names.get(&entry.idol_id).map(String::as_str))
         || alias_list(entry.aliases.as_deref()).any(|alias| needle.matches(alias))
         || needle.matches_opt(entry.nickname.as_deref())
+}
+
+/// 検索語が現任 CV 名に部分一致するか。当たり方は [`matches_name`] と同じ。
+fn matches_voice_actor(entry: &IdolListEntry, cast_names: &HashMap<String, String>, needle: &FoldedNeedle) -> bool {
+    needle.matches_opt(cast_names.get(&entry.idol_id).map(String::as_str))
 }
 
 /// 別名カンマ区切りの分割規則 (iOS `Idol.aliasList` と同一): 前後空白 trim・空要素除外。
@@ -566,7 +640,7 @@ mod tests {
     }
 
     #[test]
-    fn search_matches_cast_name() {
+    fn voice_actor_text_matches_cast_name() {
         let mut a = entry("a");
         a.name = "島村卯月".to_string();
         let mut b = entry("b");
@@ -575,7 +649,7 @@ mod tests {
 
         // 名前には無いがキャスト名で一致させたい検索語。まずどちらのキャストにも無い → 0 件
         let mut ctx = IdolListFilterCriteria {
-            search_text: "おおぬま".to_string(),
+            voice_actor_text: "おおぬま".to_string(),
             cast_names: HashMap::from([
                 ("a".to_string(), "大橋彩香".to_string()),
                 ("b".to_string(), "福原綾香".to_string()),
@@ -586,6 +660,67 @@ mod tests {
 
         ctx.cast_names.insert("a".to_string(), "おおぬま某".to_string());
         assert_eq!(picked_ids(&idols, &filter_idol_list(&idols, &ctx)), vec_of(&["a"]));
+    }
+
+    /// 名前の検索は CV 名を見ない。CV 名の検索はアイドル名を見ない。
+    #[test]
+    fn name_and_voice_actor_are_separate_axes() {
+        let mut haruka = entry("haruka");
+        haruka.name = "天海春香".to_string();
+        haruka.name_kana = Some("あまみはるか".to_string());
+        let mut chihaya = entry("chihaya");
+        chihaya.name = "如月千早".to_string();
+        let idols = [haruka, chihaya];
+        let cast_names = HashMap::from([
+            ("haruka".to_string(), "中村繪里子".to_string()),
+            // 名前の語と同じ綴りを CV 側にだけ持たせる
+            ("chihaya".to_string(), "はるか某".to_string()),
+        ]);
+        let hits = |name: &str, va: &str| {
+            let ctx = IdolListFilterCriteria {
+                search_text: name.into(),
+                voice_actor_text: va.into(),
+                cast_names: cast_names.clone(),
+                ..Default::default()
+            };
+            picked_ids(&idols, &filter_idol_list(&idols, &ctx))
+        };
+        assert_eq!(hits("はるか", ""), vec_of(&["haruka"]), "名前の検索に CV の一致が混ざらない");
+        assert_eq!(hits("", "はるか"), vec_of(&["chihaya"]), "CV の検索にアイドル名の一致が混ざらない");
+        assert_eq!(hits("中村", ""), Vec::<String>::new(), "CV 名は名前の検索では引けない");
+        assert_eq!(hits("天海", "中村"), vec_of(&["haruka"]), "両方あれば AND");
+        assert_eq!(hits("天海", "はるか"), Vec::<String>::new(), "両方あれば AND (食い違えば 0)");
+    }
+
+    #[test]
+    fn target_counts_apply_other_axes_and_ignore_criteria_text() {
+        let mut a = entry("a");
+        a.name = "天海春香".to_string();
+        a.brand_id = "765as".to_string();
+        let mut b = entry("b");
+        b.name = "島村卯月".to_string();
+        let mut c = entry("c");
+        c.name = "渋谷凛".to_string();
+        let idols = [a, b, c];
+        let mut ctx = IdolListFilterCriteria {
+            // 件数は `text` で数える。条件側の検索語は効かない。
+            search_text: "関係ない語".to_string(),
+            voice_actor_text: "関係ない語".to_string(),
+            cast_names: HashMap::from([
+                ("a".to_string(), "中村繪里子".to_string()),
+                ("b".to_string(), "大橋彩香".to_string()),
+                ("c".to_string(), "福原綾香".to_string()),
+            ]),
+            ..Default::default()
+        };
+        let counts = |ctx: &IdolListFilterCriteria, t: &str| idol_search_target_counts(&idols, ctx, t);
+        assert_eq!(counts(&ctx, "天海"), IdolSearchTargetCounts { name: 1, voice_actor: 0 });
+        assert_eq!(counts(&ctx, "香"), IdolSearchTargetCounts { name: 1, voice_actor: 2 });
+        assert_eq!(counts(&ctx, ""), IdolSearchTargetCounts { name: 3, voice_actor: 3 });
+
+        ctx.selected_brand_ids = vec!["cg".to_string()];
+        assert_eq!(counts(&ctx, "香"), IdolSearchTargetCounts { name: 0, voice_actor: 2 });
+        assert_eq!(counts(&ctx, "中村"), IdolSearchTargetCounts { name: 0, voice_actor: 0 }, "ブランドで外れた人は数えない");
     }
 
     /// 表示名を短くしたアイドルを、別名 (フルネーム) でも引けること。

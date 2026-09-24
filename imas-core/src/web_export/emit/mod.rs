@@ -222,6 +222,7 @@ fn shippable_song(song: crate::domain::snapshot::Song) -> crate::domain::snapsho
         joint_brand_ids,
         is_collab,
         has_kamisabi_card,
+        note,
     } = song;
     Song {
         id,
@@ -254,6 +255,8 @@ fn shippable_song(song: crate::domain::snapshot::Song) -> crate::domain::snapsho
         is_collab,
         // KAMISABI の収録札。出面の曲ページ・一覧フィルタが読む。
         has_kamisabi_card,
+        // 曲の補足。出面の曲ページが読む。
+        note,
     }
 }
 

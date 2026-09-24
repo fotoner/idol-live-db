@@ -349,6 +349,17 @@ struct SongSheetContent: View {
                         .multilineTextAlignment(.center)
                         .lineLimit(2)
                 }
+                // 曲の補足 (「ミリシタ 1 周年記念楽曲」など)。どのタブを開いていても曲の
+                // 位置づけが分かるよう、曲名・歌唱者のすぐ下に 1 文で添える。無い曲は何も出さない。
+                if let note = song.note, !note.isEmpty {
+                    Text(note)
+                        .font(.imasFootnote)
+                        .foregroundStyle(DS.ink2)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(3)
+                        .padding(.top, DS.sp1)
+                        .imasCopyable([CopyItem("補足をコピー", note, key: "song_note")])
+                }
                 // KAMISABI (音楽カードゲーム) 収録曲のときだけ、その札をチップで出す。
                 // 語 (`kamisabiCardLabel()` = 「KAMISABI 収録」) はコアが決めるので手書きしない。
                 // 「楽曲情報」の行 (key: value の並び) にすると値が空になり形が合わないため、

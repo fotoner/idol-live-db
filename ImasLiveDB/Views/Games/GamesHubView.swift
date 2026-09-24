@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// クイズ・ゲームのハブ。プロデュース → 「クイズ・ゲーム」から push。
-/// イントロドン／アイドル当て／ソロ曲／メンバーカラー合わせを束ねる。
+/// イントロドン／アイドル当て／ソロ曲／メンバーカラー合わせ／歌詞クイズを束ねる。
 struct GamesHubView: View {
     @Environment(\.colorScheme) private var scheme
     @State private var progress = GameProgressStore.shared
@@ -21,6 +21,8 @@ struct GamesHubView: View {
               blurb: "プロフィールから4択で誰かを当てる"),
         .init(kind: .songSingerQuiz, systemImage: "music.microphone", title: "ソロ曲クイズ",
               blurb: "ソロ曲を歌うアイドルを4択で当てる"),
+        .init(kind: .lyricsQuiz, systemImage: "text.quote", title: "歌詞クイズ",
+              blurb: "歌詞から曲名や続きのフレーズを当てる"),
         .init(kind: .colorMatch, systemImage: "paintpalette.fill", title: "メンバーカラー合わせ",
               blurb: "似た色のメンバーを正しいカラーに紐づける"),
     ]
@@ -114,6 +116,7 @@ struct GamesHubView: View {
         case .idolQuiz: IdolQuizSetupView()
         case .songSingerQuiz: SongSingerQuizSetupView()
         case .colorMatch: ColorMatchGameView()
+        case .lyricsQuiz: LyricsQuizSetupView()
         }
     }
 }

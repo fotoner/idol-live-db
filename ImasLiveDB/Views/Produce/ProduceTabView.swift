@@ -43,6 +43,10 @@ struct ProduceTabView: View {
     @State private var activePoll: Poll?
     @State private var showInbox = false
     @State private var inboxStore = AnnouncementStore.shared
+    /// Discord ロール受け取り: 認可 URL を発行してもらっている間 true (二度押し防止 + くるくる)。
+    @State private var isLinkingDiscord = false
+    @State private var discordErrorMessage: String?
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         NavigationStack(path: $navPath) {
@@ -80,6 +84,14 @@ struct ProduceTabView: View {
             .sheet(isPresented: $showInbox) {
                 InboxView()
             }
+            .alert("エラー", isPresented: Binding(
+                get: { discordErrorMessage != nil },
+                set: { if !$0 { discordErrorMessage = nil } }
+            )) {
+                Button("OK") { discordErrorMessage = nil }
+            } message: {
+                Text(discordErrorMessage ?? "")
+            }
             .navigationDestination(for: Idol.self) { idol in
                 IdolDetailView(idol: idol)
             }
@@ -91,16 +103,7 @@ struct ProduceTabView: View {
             }
             // みんなの投票 (PollListView) は自前スタックを持たず、ここ(親の1スタック)に
             // 遷移先を登録する。これで「一覧→詳細」の2階層目を同じスタック上に push できる。
-            .navigationDestination(for: PollRoute.self) { route in
-                switch route {
-                case .list:
-                    PollListView()
-                case let .detail(pollId):
-                    PollDetailView(pollId: pollId)
-                case .hallOfFame:
-                    PollHallOfFameView()
-                }
-            }
+            .navigationDestination(for: PollRoute.self) { PollRouteView(route: $0) }
             .sheet(item: $sheetDestination) { dest in
                 DetailSheetView(destination: dest)
                     .environment(database)
@@ -373,13 +376,30 @@ struct ProduceTabView: View {
             }
             .buttonStyle(.plain)
 
+            // 編集の協力者に Discord のロールを渡す入口。セッションで本人を確かめるので
+            // ログイン中だけ出す (未ログインで押しても 401 になるだけ)。
+            if AuthService.shared.isSignedIn {
+                Button {
+                    Task { await openDiscordLink() }
+                } label: {
+                    ImasEntryCard(
+                        systemImage: "rosette",
+                        title: "Discordでロールを受け取る",
+                        preview: "アプリで10件以上編集すると「データ協力」ロールが付きます",
+                        brand: secondaryBrandSeed,
+                        isLoading: isLinkingDiscord
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+
             NavigationLink {
                 GamesHubView()
             } label: {
                 ImasEntryCard(
                     systemImage: "gamecontroller.fill",
                     title: "クイズ・ゲーム",
-                    preview: "イントロドン・アイドル当て・カラー合わせ",
+                    preview: "イントロドン・歌詞クイズ・アイドル当てほか",
                     brand: pickBrandSeed
                 )
             }
@@ -437,6 +457,21 @@ struct ProduceTabView: View {
                 )
             }
             .buttonStyle(.plain)
+        }
+    }
+
+    /// Worker から 1 回限りの Discord 認可 URL をもらってブラウザで開く。
+    /// ロール付与の結果は Worker のページが出すので、ここは開くところまで。
+    private func openDiscordLink() async {
+        guard !isLinkingDiscord else { return }
+        AppAnalytics.tap("produce_tab.discord_link")
+        isLinkingDiscord = true
+        defer { isLinkingDiscord = false }
+        do {
+            let url = try await DiscordLinkService.authorizeURL()
+            openURL(url)
+        } catch {
+            discordErrorMessage = DiscordLinkService.errorMessage(for: error)
         }
     }
 
