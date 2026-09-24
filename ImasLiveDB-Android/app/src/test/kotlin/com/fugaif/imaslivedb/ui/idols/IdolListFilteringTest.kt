@@ -74,6 +74,7 @@ class IdolListFilteringTest {
         requireNote: Boolean = false,
         noteIds: List<String> = emptyList(),
         searchText: String = "",
+        voiceActorText: String = "",
         castNames: Map<String, String> = emptyMap()
     ) = IdolListFilterCriteria(
         selectedBrandIds = selectedBrandIds,
@@ -85,6 +86,7 @@ class IdolListFilteringTest {
         requireNote = requireNote,
         noteIds = noteIds,
         searchText = searchText,
+        voiceActorText = voiceActorText,
         castNames = castNames
     )
 
@@ -200,10 +202,15 @@ class IdolListFilteringTest {
     }
 
     @Test
-    fun `検索はCV名にも当たる`() {
+    fun `名前の検索はCV名に当てずCV名の検索で当たる`() {
         val idols = listOf(idol("uzuki", name = "島村卯月"), idol("rin", name = "渋谷凛"))
-        val hit = filterIdols(idols, criteria(searchText = "大橋", castNames = mapOf("uzuki" to "大橋彩香")))
+        val casts = mapOf("uzuki" to "大橋彩香")
+        assertTrue(filterIdols(idols, criteria(searchText = "大橋", castNames = casts)).isEmpty())
+        val hit = filterIdols(idols, criteria(voiceActorText = "大橋", castNames = casts))
         assertEquals(listOf("uzuki"), hit.map { it.id })
+        val counts = idolSearchCounts(idols, criteria(castNames = casts), "大橋")
+        assertEquals(0u, counts.name)
+        assertEquals(1u, counts.voiceActor)
     }
 
     @Test

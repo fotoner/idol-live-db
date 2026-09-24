@@ -14,8 +14,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import uniffi.imas_core.IdolListFilterCriteria
+import uniffi.imas_core.IdolSearchTargetCounts
 
 enum class IdolDisplayMode { IDOL_NAME, CV_NAME }
+
+/** 検索欄の語を何として引くか (iOS `IdolSearchTarget`)。名前と CV 名は混ぜて当てない。 */
+enum class IdolSearchTarget(val label: String) { NAME("アイドル名"), VOICE_ACTOR("CV名") }
 enum class IdolListMode { LIST, GRID }
 
 /**
@@ -34,11 +38,15 @@ val IDOL_BRAND_ATTRIBUTES: Map<String, List<Pair<String, String>>> = mapOf(
 data class IdolListUiState(
     val idols: List<Idol> = emptyList(),
     val brands: List<Brand> = emptyList(),
-    /** idol_id → 現役CV名 (name/nameKana に加えて検索対象にする)。 */
+    /** idol_id → 現役CV名 ([searchTarget] が CV 名のときの照合先)。 */
     val castNames: Map<String, String> = emptyMap(),
     val selectedBrandIds: Set<String> = emptySet(),
     val selectedAttribute: String? = null,
     val searchText: String = "",
+    /** 検索欄の語をアイドル名 / CV 名のどちらとして引くか。 */
+    val searchTarget: IdolSearchTarget = IdolSearchTarget.NAME,
+    /** 検索語をアイドル名 / CV 名として引いたときの件数 (検索語が空なら null)。 */
+    val searchCounts: IdolSearchTargetCounts? = null,
     val collapsedBrands: Set<String> = emptySet(),
     val displayMode: IdolDisplayMode = IdolDisplayMode.IDOL_NAME,
     val showCV: Boolean = false,
@@ -95,10 +103,12 @@ private fun IdolListUiState.rebuilt(): IdolListUiState {
         favoriteIds = favoriteIds.toList(),
         requireNote = requireNote,
         noteIds = noteIds.toList(),
-        searchText = searchText,
+        searchText = if (searchTarget == IdolSearchTarget.NAME) searchText else "",
+        voiceActorText = if (searchTarget == IdolSearchTarget.VOICE_ACTOR) searchText else "",
         // CV 名は現任の声優 (声優の履歴 idol_voice_actors からコアが選ぶ。iOS と同じ)。
         castNames = castNames
     )
+    val counts = if (searchText.isEmpty()) null else idolSearchCounts(idols, criteria, searchText)
     val sorted = sortIdols(filterIdols(idols, criteria), sortOrder, sortAscending)
     val filtered = sorted.idols
     // 公式順以外はブランドの区切りを外した通し並びにする
@@ -106,6 +116,7 @@ private fun IdolListUiState.rebuilt(): IdolListUiState {
     val grouped = if (sortOrder.keepsBrandGrouping) filtered.groupBy { it.brandId } else emptyMap()
     return copy(
         filteredIdols = filtered,
+        searchCounts = counts,
         metricById = sorted.metricById,
         groupedByBrand = grouped,
         // grouped に載るのは必ず 1 件以上なので、キー有無で表示ブランドを判定できる。
@@ -152,6 +163,11 @@ class IdolListViewModel(app: Application) : AndroidViewModel(app) {
                 IdolDisplayMode.IDOL_NAME
             },
             showCV = prefs.getBoolean(KEY_SHOW_CV, false),
+            searchTarget = if (prefs.getString(KEY_SEARCH_TARGET, null) == VALUE_CV) {
+                IdolSearchTarget.VOICE_ACTOR
+            } else {
+                IdolSearchTarget.NAME
+            },
             listMode = if (prefs.getString(KEY_LIST_MODE, null) == VALUE_GRID) {
                 IdolListMode.GRID
             } else {
@@ -229,6 +245,11 @@ class IdolListViewModel(app: Application) : AndroidViewModel(app) {
         _uiState.value = _uiState.value.copy(searchText = text).rebuilt()
     }
 
+    fun setSearchTarget(target: IdolSearchTarget) {
+        prefs.edit().putString(KEY_SEARCH_TARGET, if (target == IdolSearchTarget.VOICE_ACTOR) VALUE_CV else VALUE_IDOL).apply()
+        _uiState.value = _uiState.value.copy(searchTarget = target).rebuilt()
+    }
+
     fun toggleBrandCollapse(brandId: String) {
         val current = _uiState.value.collapsedBrands.toMutableSet()
         if (!current.add(brandId)) current.remove(brandId)
@@ -289,6 +310,7 @@ class IdolListViewModel(app: Application) : AndroidViewModel(app) {
         private const val KEY_DEFAULT_BRAND = "default_brand_id"
         private const val KEY_DISPLAY_MODE = "display_mode"
         private const val KEY_SHOW_CV = "show_cv"
+        private const val KEY_SEARCH_TARGET = "search_target"
         private const val KEY_LIST_MODE = "list_mode"
         private const val KEY_SORT_ORDER = "sort_order"
         private const val KEY_SORT_ASCENDING = "sort_ascending"

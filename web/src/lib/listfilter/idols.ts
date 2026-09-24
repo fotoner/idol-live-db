@@ -2,7 +2,7 @@
  * アイドル一覧の絞り込み設定。
  *
  * アプリの絞り込み (`filter_idol_list`) と同じ軸: ブランド / 属性 / 誕生月 /
- * 名前・CV 名の検索。**誕生月は今までどおり別ページとしても残っていて**、
+ * 名前の検索 / CV 名の検索 (名前と CV 名は別の欄。混ぜて当てない)。**誕生月は今までどおり別ページとしても残っていて**、
  * ここでは他の軸と組み合わせられる形にしてある。
  */
 import type { IdolFacets } from "../schema/IdolFacets";
@@ -22,7 +22,8 @@ export function mountIdolFilter(root: HTMLElement): void {
     facets: (e) => JSON.parse(e.idol_facets()) as IdolFacets,
     ids: (e, json) => e.idol_ids(json),
     fields: (f): FieldSpec[] => [
-      { key: "searchText", kind: "text", label: "名前・CV 名で絞り込み" },
+      { key: "searchText", kind: "text", label: "名前で絞り込み" },
+      { key: "voiceActor", kind: "text", label: "CV 名" },
       { key: "brandIds", kind: "select", label: "ブランド", options: f.brands, multi: true },
       { key: "attribute", kind: "select", label: "属性", options: f.attributes },
       { key: "birthMonth", kind: "select", label: "誕生月", options: f.birthMonths, numeric: true },

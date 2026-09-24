@@ -33,6 +33,8 @@ final class IdolListViewModel {
     private(set) var filteredIdols: [Idol] = []
     /// idol id → 行に添える指標 (並び順が公式順・五十音のときは空)。文言はコア。
     private(set) var metricLabels: [String: String] = [:]
+    /// 検索語をアイドル名 / CV 名として引いたときの件数 (検索語が空なら nil)。
+    private(set) var searchCounts: IdolSearchTargetCounts?
     private(set) var groupedByBrand: [String: [Idol]] = [:]
     private(set) var visibleBrands: [Brand] = []
 
@@ -92,6 +94,7 @@ final class IdolListViewModel {
         let (result, labels) = sortIdolsWithMetrics(filterIdols(idols, ctx), by: sortOrder, ascending: ascending)
         filteredIdols = result
         metricLabels = labels
+        searchCounts = ctx.searchText.isEmpty ? nil : idolSearchCounts(idols, ctx)
 
         guard sortOrder.keepsBrandGrouping else {
             groupedByBrand = [:]

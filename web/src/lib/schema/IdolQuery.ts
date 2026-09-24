@@ -21,9 +21,13 @@ attribute: string | null,
  */
 birthMonth: number | null, 
 /**
- * 名前 / かな / CV 名 / 別名 / 愛称の部分一致。
+ * 名前 / かな / 別名 / 愛称の部分一致。CV 名は見ない ([`Self::voice_actor`])。
  */
 searchText: string, 
+/**
+ * CV (声優) 名の部分一致。名前の検索とは別の軸で、両方あれば AND。
+ */
+voiceActor: string, 
 /**
  * `IdolSortKind::key()` の値。未知の鍵は既定 (公式順) に倒れる。
  */

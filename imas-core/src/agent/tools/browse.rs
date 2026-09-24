@@ -58,7 +58,7 @@ pub fn catalog() -> Vec<ToolSpec> {
                 "attribute": { "type": "string", "description": "ブランド内の属性 (例 cute / cool / passion)。" },
                 "voice_actor": { "type": "string", "description": "CV (声優) 名の完全一致。歴代すべてが対象。" },
                 "unit_id": { "type": "string", "description": "所属ユニットの id。" },
-                "query": { "type": "string", "description": "名前 / 読み / 別名 / 愛称 / CV 名の部分一致。" },
+                "query": { "type": "string", "description": "名前 / 読み / 別名 / 愛称の部分一致。CV 名は見ない (voice_actor を使う)。" },
                 "sort": { "type": "string", "description": "official (既定) / kana / age / height / weight / birthday / debut。" },
                 "limit": { "type": "integer", "description": "既定 30・最大 200。" }
             }),

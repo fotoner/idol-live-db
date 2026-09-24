@@ -78,6 +78,7 @@ import com.fugaif.imaslivedb.ui.navigation.TopLevelTab
 import com.fugaif.imaslivedb.ui.search.CrossTabCountChips
 import androidx.compose.runtime.LaunchedEffect
 import com.fugaif.imaslivedb.ui.search.CrossTabSearch
+import uniffi.imas_core.IdolSearchTargetCounts
 
 /**
  * アイドル一覧。iOS `IdolListView` の構成: ブランド別セクション (見出し + 行/グリッド)。
@@ -180,6 +181,18 @@ fun IdolListScreen(
                 value = state.searchText,
                 onValueChange = viewModel::setSearchText
             )
+            // 打っている間だけ「アイドル名 / CV名」の切替を件数つきで出す
+            // (今の切替で 0 件でも、もう片方に居ることが一目で分かるように)。
+            val counts = state.searchCounts
+            if (state.searchText.isNotEmpty() && counts != null) {
+                val targets = IdolSearchTarget.entries
+                ImasSegmented(
+                    labels = targets.map { "${it.label} ${counts.of(it)}" },
+                    selection = targets.indexOf(state.searchTarget),
+                    onSelect = { viewModel.setSearchTarget(targets[it]) },
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)
+                )
+            }
             // 同じ語が曲・ライブに何件あるか (虫眼鏡を畳んだ代わりの導線)。
             CrossTabCountChips(query = state.searchText, from = TopLevelTab.Idols)
             // 「他のタブに N 件」から飛んで来たら、その語で絞り込む。
@@ -194,7 +207,20 @@ fun IdolListScreen(
                     else ImasListSkeleton(rows = 12, thumb = SkeletonThumb.Circle)
                 }
                 state.searchText.isNotEmpty() && filteredIdols.isEmpty() -> {
-                    ImasEmptyState(icon = Icons.Filled.Person, title = "見つかりませんでした", message = "「${state.searchText}」に一致するアイドルはいません。")
+                    val other = IdolSearchTarget.entries.first { it != state.searchTarget }
+                    val otherCount = state.searchCounts?.of(other) ?: 0
+                    if (otherCount > 0) {
+                        // もう片方でなら当たる。分けたせいで引けなくなったように見せない。
+                        ImasEmptyState(
+                            icon = Icons.Filled.Person,
+                            title = "${state.searchTarget.label}には見つかりません",
+                            message = "「${state.searchText}」は${other.label}で ${otherCount} 人見つかります",
+                            actionTitle = "${other.label}で探す",
+                            onAction = { viewModel.setSearchTarget(other) }
+                        )
+                    } else {
+                        ImasEmptyState(icon = Icons.Filled.Person, title = "見つかりませんでした", message = "「${state.searchText}」に一致するアイドルはいません。")
+                    }
                 }
                 filteredIdols.isEmpty() -> {
                     ImasEmptyState(
@@ -480,4 +506,10 @@ private fun IdolGridCell(
             Text(metric, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3, maxLines = 1)
         }
     }
+}
+
+/** 切替先ごとの件数。 */
+private fun IdolSearchTargetCounts.of(target: IdolSearchTarget): Int = when (target) {
+    IdolSearchTarget.NAME -> name.toInt()
+    IdolSearchTarget.VOICE_ACTOR -> voiceActor.toInt()
 }

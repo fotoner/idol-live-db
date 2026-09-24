@@ -72,6 +72,13 @@ func sortIdolsWithMetrics(
     return (sorted, labels)
 }
 
+/// 検索欄の語を何として引くか。名前と CV 名は別の軸で、混ぜて当てない
+/// (照合の本体は imas-core の `filter_idol_list`)。rawValue は `@AppStorage` の保存値。
+enum IdolSearchTarget: String, CaseIterable, Sendable {
+    case name = "アイドル名"
+    case voiceActor = "CV名"
+}
+
 /// アイドル一覧の絞り込みに必要な、解決済みの条件・集合。
 /// マーク集合・キャスト名は呼び出し側 (View) が事前に解決して渡す。
 struct IdolFilterContext {
@@ -84,9 +91,10 @@ struct IdolFilterContext {
     var favoriteIds: Set<String> = []
     var requireNote: Bool = false
     var noteIds: Set<String> = []
-    /// 名前/かな/キャスト名/別名/愛称の部分一致検索 (空 = 検索なし)。
+    /// 検索欄の語 (空 = 検索なし)。何に当てるかは `searchTarget`。
     var searchText: String = ""
-    /// idol_id → キャスト(声優)名。検索対象に含める。
+    var searchTarget: IdolSearchTarget = .name
+    /// idol_id → キャスト(声優)名。`searchTarget == .voiceActor` の照合先。
     var castNames: [String: String] = [:]
 }
 
@@ -98,7 +106,18 @@ struct IdolFilterContext {
 /// 生成側の型名が `IdolListFilterCriteria` なのは、この既存 struct と同一モジュール内で
 /// 衝突するため。
 func filterIdols(_ idols: [Idol], _ ctx: IdolFilterContext) -> [Idol] {
-    let criteria = IdolListFilterCriteria(
+    filterIdolList(entries: idols.map(idolListEntry), criteria: criteria(ctx))
+        .map { idols[Int($0)] }
+}
+
+/// 検索欄の語を「アイドル名として」「CV 名として」引いたときの件数。切替に添える。
+/// 検索以外の軸は `ctx` のとおり効かせる (本体は imas-core の `idol_search_target_counts`)。
+func idolSearchCounts(_ idols: [Idol], _ ctx: IdolFilterContext) -> IdolSearchTargetCounts {
+    idolSearchTargetCounts(entries: idols.map(idolListEntry), criteria: criteria(ctx), text: ctx.searchText)
+}
+
+private func criteria(_ ctx: IdolFilterContext) -> IdolListFilterCriteria {
+    IdolListFilterCriteria(
         selectedBrandIds: Array(ctx.selectedBrandIds),
         selectedAttribute: ctx.selectedAttribute,
         requireMyPick: ctx.requireMyPick,
@@ -107,10 +126,9 @@ func filterIdols(_ idols: [Idol], _ ctx: IdolFilterContext) -> [Idol] {
         favoriteIds: Array(ctx.favoriteIds),
         requireNote: ctx.requireNote,
         noteIds: Array(ctx.noteIds),
-        searchText: ctx.searchText,
+        searchText: ctx.searchTarget == .name ? ctx.searchText : "",
+        voiceActorText: ctx.searchTarget == .voiceActor ? ctx.searchText : "",
         castNames: ctx.castNames)
-    return filterIdolList(entries: idols.map(idolListEntry), criteria: criteria)
-        .map { idols[Int($0)] }
 }
 
 /// FFI 射影: 絞り込み・並べ替えの判定に要るフィールドだけを `IdolListEntry` へ落とす。
