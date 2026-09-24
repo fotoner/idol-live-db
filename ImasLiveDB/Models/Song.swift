@@ -45,9 +45,12 @@ struct Song: Codable, FetchableRecord, PersistableRecord, Identifiable, Hashable
     /// 音楽カードゲーム「KAMISABI」(バンダイナムコミュージックライブ/Lantis, 2026) にこの曲の
     /// カードが存在するか。カード番号は非公表・ノーマル/レアは版違いなので真偽値 1 本で足りる。
     var hasKamisabiCard: Bool = false
+    /// 曲の補足 (自由文)。「ミリシタ 1 周年記念楽曲」のように、他の列では持てない由来や
+    /// 位置づけを一文で書く。公式の出典があるものだけ入る。曲詳細にそのまま出す。
+    var note: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, title, composer, lyricist, arranger, isrc
+        case id, title, composer, lyricist, arranger, isrc, note
         case titleKana = "title_kana"
         case brandId = "brand_id"
         case songType = "song_type"

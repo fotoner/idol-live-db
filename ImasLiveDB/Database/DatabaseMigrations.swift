@@ -1018,6 +1018,16 @@ enum DatabaseMigrations {
                           columns: ["show_id"], ifNotExists: true)
         }
 
+        // v34: songs.note カラム追加 (曲の補足、自由文)。
+        //
+        // 同梱 master.sqlite は既にこの列を持つので、v31 と同じく確認してから冪等に足す。
+        migrator.registerMigration("v34_songs_note") { db in
+            let songsColumns = try Row.fetchAll(db, sql: "PRAGMA table_info(songs)").map { $0["name"] as String? }
+            if !songsColumns.contains("note") {
+                try db.execute(sql: "ALTER TABLE songs ADD COLUMN note TEXT")
+            }
+        }
+
         return migrator
     }
 }

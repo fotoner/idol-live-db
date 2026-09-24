@@ -160,7 +160,8 @@ final class CKRecordMapperCoverageTests: XCTestCase {
                 appleMusicAlbumId: v("appleMusicAlbumId"), isrc: v("isrc"), lyricsUrl: v("lyricsUrl"),
                 parentSongId: v("parentSongId"), singerLabel: v("singerLabel"), unitName: v("unitName"),
                 unitId: v("unitId"), seriesGroup: v("seriesGroup"), unitVersionId: v("unitVersionId"),
-                jointBrandIds: v("jointBrandIds"), isCollab: flag, hasKamisabiCard: !flag)),
+                jointBrandIds: v("jointBrandIds"), isCollab: flag, hasKamisabiCard: !flag,
+                note: v("note"))),
             .unit(row: CkUnitRow(
                 id: v("id"), brandId: v("brandId"), name: v("name"), isPermanent: flag,
                 nameAlt: v("nameAlt"), nameKana: v("nameKana"))),
@@ -316,6 +317,7 @@ final class CKRecordMapperCoverageTests: XCTestCase {
         rec["seriesGroup"] = "LIVE THE@TER FORWARD" as NSString
         rec["isCollab"] = 1 as NSNumber
         rec["hasKamisabiCard"] = true as NSNumber
+        rec["note"] = "ミリシタ 1 周年記念楽曲" as NSString
 
         let song = try XCTUnwrap(CKRecordMapper.song(from: rec))
         XCTAssertEqual(song.title, "蒼い鳥")
@@ -323,5 +325,6 @@ final class CKRecordMapperCoverageTests: XCTestCase {
         XCTAssertEqual(song.seriesGroup, "LIVE THE@TER FORWARD")
         XCTAssertTrue(song.isCollab)
         XCTAssertTrue(song.hasKamisabiCard)
+        XCTAssertEqual(song.note, "ミリシタ 1 周年記念楽曲")
     }
 }
