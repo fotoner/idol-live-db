@@ -19,7 +19,11 @@ import com.fugaif.imaslivedb.data.repository.IdolRepository
 import com.fugaif.imaslivedb.data.repository.MasterEditRepository
 import com.fugaif.imaslivedb.data.repository.PerformanceEvidenceRepository
 import com.fugaif.imaslivedb.data.repository.PersonalTagRepository
+import com.fugaif.imaslivedb.data.repository.CoreSetlistForecastRepository
+import com.fugaif.imaslivedb.data.repository.PredictionServiceVoting
 import com.fugaif.imaslivedb.data.repository.SearchRepository
+import com.fugaif.imaslivedb.data.repository.SetlistForecastReading
+import com.fugaif.imaslivedb.data.repository.SetlistPredictionVoting
 import com.fugaif.imaslivedb.data.repository.ShowTicketRepository
 import com.fugaif.imaslivedb.data.repository.SongRepository
 import com.fugaif.imaslivedb.data.repository.StatsRepository
@@ -30,6 +34,7 @@ import com.fugaif.imaslivedb.data.community.FavoriteAggregation
 import com.fugaif.imaslivedb.data.community.LocalContributionLog
 import com.fugaif.imaslivedb.data.community.LocalPollVoteLog
 import com.fugaif.imaslivedb.data.community.SetlistLikeService
+import com.fugaif.imaslivedb.data.community.SetlistPredictionService
 import com.fugaif.imaslivedb.data.net.WorkerHttpClient
 import com.fugaif.imaslivedb.data.games.GameProgressStore
 import com.fugaif.imaslivedb.data.sync.CloudKitSyncEngine
@@ -118,6 +123,12 @@ class AppModule private constructor(context: Context) {
     val communityApi: CommunityApi by lazy { CommunityApi(workerHttpClient) }
     val editApi: EditApi by lazy { EditApi(workerHttpClient, authService) }
     val setlistLikeService: SetlistLikeService by lazy { SetlistLikeService(workerHttpClient) }
+    /** セトリ予想 (みんなの予想)。覚え書きを画面をまたいで共有するため、アプリで 1 つ。 */
+    val setlistPredictionService: SetlistPredictionService by lazy { SetlistPredictionService(workerHttpClient) }
+    /** セトリ予想への投票 (機械予測の「予想に入れる」が使う)。 */
+    val setlistPredictionVoting: SetlistPredictionVoting by lazy { PredictionServiceVoting(setlistPredictionService) }
+    /** セトリの機械予測。点数も理由もコアのスナップショットが答える。 */
+    val setlistForecastReading: SetlistForecastReading by lazy { CoreSetlistForecastRepository(snapshotStoreProvider) }
     val editFeedRepository: EditFeedRepository by lazy { EditFeedRepository(snapshotStoreProvider) }
     val masterEditRepository: MasterEditRepository by lazy { MasterEditRepository(database, snapshotStoreProvider) }
     val syncEngine: CloudKitSyncEngine by lazy { CloudKitSyncEngine(appContext, database, scope = appScope) }
