@@ -183,6 +183,8 @@ fn load_songs(conn: &Connection) -> Result<Vec<Song>, String> {
     } else {
         "0 AS has_kamisabi_card"
     };
+    // 曲の補足も同じ扱い。
+    let note = if columns.contains("note") { "note" } else { "NULL AS note" };
     // ユニットの版も同じ扱い。
     let unit_version =
         if columns.contains("unit_version_id") { "unit_version_id" } else { "NULL AS unit_version_id" };
@@ -192,7 +194,7 @@ fn load_songs(conn: &Connection) -> Result<Vec<Song>, String> {
                     composer, lyricist, arranger, cd_series, cd_title, artwork_url, preview_url,
                     apple_music_id, apple_music_album_id, isrc, lyrics_url, parent_song_id,
                     singer_label, unit_name, unit_id, series_group, {jasrac}, {joint}, {collab},
-                    {kamisabi}, {unit_version}
+                    {kamisabi}, {unit_version}, {note}
              FROM songs ORDER BY id"),
         )
         .map_err(|e| e.to_string())?;
@@ -227,6 +229,7 @@ fn load_songs(conn: &Connection) -> Result<Vec<Song>, String> {
                 joint_brand_ids: r.get(24)?,
                 is_collab: r.get::<_, i64>(25)? != 0,
                 has_kamisabi_card: r.get::<_, i64>(26)? != 0,
+                note: r.get(28)?,
             })
         })
         .map_err(|e| e.to_string())?;

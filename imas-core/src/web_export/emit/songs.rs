@@ -150,6 +150,7 @@ pub fn song_page(ctx: &Ctx, song_id: &str) -> Option<SongPage> {
         kamisabi_label: record
             .has_kamisabi_card
             .then(|| content::SONG_KAMISABI_LABEL.to_string()),
+        note: record.note.clone(),
         song_type_label: record
             .song_type
             .as_deref()

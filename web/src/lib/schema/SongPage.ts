@@ -33,6 +33,10 @@ collabLabel: string | null,
  */
 kamisabiLabel: string | null, 
 /**
+ * 曲の補足 (自由文、例: 「ミリシタ 1 周年記念楽曲」)。無ければ `None`。
+ */
+note: string | null, 
+/**
  * コミュニティ集計 (タグ・お気に入り・ペンライト)。焼き込み。
  */
 community: SongCommunity, 
