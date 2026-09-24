@@ -102,9 +102,10 @@ def _state(catalog, entry, lang):
     return "translated" if catalog.status(entry, lang) == "reviewed" else "needs_review"
 
 
-def localization(catalog, entry, lang):
-    state = _state(catalog, entry, lang)
-    forms = entry.forms(lang)
+def localization(catalog, entry, lang, fallback=False):
+    """lang の項目。fallback のときは基準言語の値を state new で入れる (_localizations を参照)。"""
+    state = "new" if fallback else _state(catalog, entry, lang)
+    forms = entry.forms(catalog.config.source_language if fallback else lang)
     count = entry.count_arg
     if count is None:
         return {"stringUnit": {"state": state, "value": ios_format(entry, model.parse_template(forms["other"]))}}
@@ -133,6 +134,22 @@ def comment(ns, entry, with_key=False):
     return source
 
 
+def _localizations(catalog, entry):
+    """訳のある言語の項目。訳の無い言語は基本は出さない (defaultValue = 基準言語に落ちる)。
+
+    ただし引数のある項目は、訳の無い言語にも基準言語の値を state new で出す。Xcode 27.0 の
+    xcstringstool は、引数のある項目で訳の無い言語の表に「キーそのもの」を値として書き、
+    実行時にキーが画面に出てしまう (26.0.1 は書かなかった)。明示しておけば版によらず基準言語に落ちる。
+    """
+    out = {}
+    for lang in catalog.config.languages:
+        if entry.has(lang):
+            out[lang] = localization(catalog, entry, lang)
+        elif entry.args:
+            out[lang] = localization(catalog, entry, lang, fallback=True)
+    return out
+
+
 def _document(catalog, items):
     """items: (表のキー, Namespace, Entry, キーをコメントに入れるか)。"""
     strings = {}
@@ -140,7 +157,7 @@ def _document(catalog, items):
         strings[key] = {
             "comment": comment(ns, e, with_key),
             "extractionState": "manual",
-            "localizations": {lang: localization(catalog, e, lang) for lang in catalog.config.languages if e.has(lang)},
+            "localizations": _localizations(catalog, e),
         }
     return {"sourceLanguage": catalog.config.source_language, "strings": strings, "version": "1.0"}
 

@@ -130,6 +130,17 @@ class XcstringsFormatTest(unittest.TestCase):
         events = self.table(APP + "/Events.xcstrings")
         self.assertEqual(sorted(events["events.only_ja"]["localizations"]), ["ja"])
 
+    def test_missing_translation_with_args_falls_back_to_source(self):
+        # 引数のある項目は、訳の無い言語にも基準言語の値を state new で出す (Xcode 27 の xcstringstool 対策)
+        events = self.table(APP + "/Events.xcstrings")
+        loc = events["events.rate"]["localizations"]
+        self.assertEqual(sorted(loc), ["en", "ja", "ko"])
+        self.assertEqual(loc["ko"]["stringUnit"], {"state": "new", "value": loc["ja"]["stringUnit"]["value"]})
+        self.assertEqual(loc["en"]["stringUnit"]["state"], "new")
+        first = events["events.detail.first_show_year"]["localizations"]
+        self.assertEqual(first["ko"]["stringUnit"]["state"], "needs_review")  # 訳がある言語はそのまま
+        self.assertEqual(first["en"]["stringUnit"], {"state": "new", "value": "%1$@年"})
+
     def test_braces_and_escapes_in_swift(self):
         swift = self.files[SHARED + "/L10n+Common.generated.swift"]
         self.assertIn('defaultValue: "@担当 \'です\' \\"引用\\" & <b>"', swift)
