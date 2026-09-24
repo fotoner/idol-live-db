@@ -3,7 +3,7 @@ import type { AppOpen } from "./AppOpen";
 import type { EmptyText } from "./EmptyText";
 import type { IdolPerformedRow } from "./IdolPerformedRow";
 import type { IdolShowRow } from "./IdolShowRow";
-import type { IdolSongRow } from "./IdolSongRow";
+import type { IdolSongSection } from "./IdolSongSection";
 import type { ProfileRow } from "./ProfileRow";
 import type { Ref } from "./Ref";
 import type { SeoBlock } from "./SeoBlock";
@@ -35,9 +35,11 @@ profileRows: Array<ProfileRow>, currentVoiceActor: string | null,
  */
 voiceActorHistory: Array<VoiceActorRow>, units: Array<Ref>, 
 /**
- * 持ち曲 (release_date 降順)。
+ * 持ち曲を ソロ曲 / ユニット曲 / 全体曲 / カバー / その他 の棚に分けたもの
+ * (`idol_song_queries::idol_original_song_sections`。アプリの持ち歌と同じ棚)。
+ * 棚の中は release_date 降順。曲の無い棚は来ない。
  */
-songs: Array<IdolSongRow>, 
+songSections: Array<IdolSongSection>, 
 /**
  * 持ち曲が 1 曲も無いときの案内。
  */

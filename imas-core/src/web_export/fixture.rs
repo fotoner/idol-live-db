@@ -752,12 +752,17 @@ fn idol_page(reference: &Ref) -> IdolPage {
         voice_actor_history: vec![],
         units: vec![unit_sample()],
         songs_empty: None,
-        songs: vec![IdolSongRow {
-            song: song_sample(),
-            role: Some("original".to_string()),
-            release_date: Some("2019-03-13".to_string()),
-            performance_count: 12,
-            subtitle: Some("765MILLION ALLSTARS ・ 2019-03-13 ・ 12 回披露".to_string()),
+        song_sections: vec![IdolSongSection {
+            heading: "ユニット曲".to_string(),
+            short_heading: "ユニット".to_string(),
+            anchor: "idol-songs-unit".to_string(),
+            songs: vec![IdolSongRow {
+                song: song_sample(),
+                role: Some("original".to_string()),
+                release_date: Some("2019-03-13".to_string()),
+                performance_count: 12,
+                subtitle: Some("765MILLION ALLSTARS ・ 2019-03-13 ・ 12 回披露".to_string()),
+            }],
         }],
         performed_songs: vec![IdolPerformedRow {
             song: song_variant(),

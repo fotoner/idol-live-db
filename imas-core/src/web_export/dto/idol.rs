@@ -26,8 +26,10 @@ web_dto! {
         /// 言わないので空)。出す/出さないの線は Rust が引く。
         pub voice_actor_history: Vec<VoiceActorRow>,
         pub units: Vec<Ref>,
-        /// 持ち曲 (release_date 降順)。
-        pub songs: Vec<IdolSongRow>,
+        /// 持ち曲を ソロ曲 / ユニット曲 / 全体曲 / カバー / その他 の棚に分けたもの
+        /// (`idol_song_queries::idol_original_song_sections`。アプリの持ち歌と同じ棚)。
+        /// 棚の中は release_date 降順。曲の無い棚は来ない。
+        pub song_sections: Vec<IdolSongSection>,
         /// 持ち曲が 1 曲も無いときの案内。
         pub songs_empty: Option<EmptyText>,
         /// 歌ったことのある曲。
@@ -64,6 +66,20 @@ web_dto! {
         pub label: String,
         /// 1 行で出すときの表記 (名前と在任期間を `" ・ "` で繋いだもの)。
         pub display: String,
+    }
+}
+
+web_dto! {
+    /// 持ち曲の棚 1 つ。
+    #[derive(Eq)]
+    pub struct IdolSongSection {
+        /// 見出し (`ソロ曲`)。
+        pub heading: String,
+        /// 棚の切替に出す短い形 (`ソロ`)。
+        pub short_heading: String,
+        /// ページ内リンクの着地 (`idol-songs-solo`)。
+        pub anchor: String,
+        pub songs: Vec<IdolSongRow>,
     }
 }
 

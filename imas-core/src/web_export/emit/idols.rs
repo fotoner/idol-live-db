@@ -37,29 +37,39 @@ pub fn idol_page(ctx: &Ctx, idol_id: &str) -> Option<IdolPage> {
     // 長い一覧 3 本。数の帯 (上から各節へ飛ぶ) が長さを見るので、先に組む。
     // 持ち曲 = 原唱者として名を連ねる曲。歌っただけの曲は「ライブで歌った曲」に居る
     // (両方の役で載る曲が 2 行になり、カバーが持ち曲に混ざっていた)。
-    let songs: Vec<IdolSongRow> = idol_song_queries::idol_songs(ctx.snap, idol_id, Some("original"))
-            .into_iter()
-            .filter_map(|s| {
-                let performance_count = ctx
-                    .snap
-                    .song_index_by_id
-                    .get(&s.song_id)
-                    .map(|&i| ctx.snap.performance_counts[i as usize])
-                    .unwrap_or(0);
-                let song = ctx.song_ref(&s.song_id)?;
-                Some(IdolSongRow {
-                    subtitle: join_parts([
-                        song.sub.clone(),
-                        s.release_date.clone(),
-                        (performance_count > 0).then(|| format!("{performance_count} 回披露")),
-                    ]),
-                    song,
-                    role: Some(s.role),
-                    release_date: s.release_date,
-                    performance_count,
-                })
-            })
-            .collect();
+    let song_row = |s: idol_song_queries::IdolSongRecord| -> Option<IdolSongRow> {
+        let performance_count = ctx
+            .snap
+            .song_index_by_id
+            .get(&s.song_id)
+            .map(|&i| ctx.snap.performance_counts[i as usize])
+            .unwrap_or(0);
+        let song = ctx.song_ref(&s.song_id)?;
+        Some(IdolSongRow {
+            subtitle: join_parts([
+                song.sub.clone(),
+                s.release_date.clone(),
+                (performance_count > 0).then(|| format!("{performance_count} 回披露")),
+            ]),
+            song,
+            role: Some(s.role),
+            release_date: s.release_date,
+            performance_count,
+        })
+    };
+    // 棚分け (ソロ / ユニット / 全体曲 / カバー / その他) はアプリの持ち歌と同じ関数。
+    // 派生曲 (ソロ ver 違いなど) は棚に並べない (オーナー方針。親曲のページの「派生曲」に居る)。
+    let song_sections: Vec<IdolSongSection> = idol_song_queries::idol_original_song_sections(ctx.snap, idol_id)
+        .into_iter()
+        .map(|sec| IdolSongSection {
+            anchor: format!("idol-songs-{}", section_slug(sec.kind)),
+            heading: sec.heading,
+            short_heading: sec.short_heading,
+            songs: sec.songs.into_iter().filter_map(song_row).collect(),
+        })
+        .filter(|sec| !sec.songs.is_empty())
+        .collect();
+    let song_count: usize = song_sections.iter().map(|s| s.songs.len()).sum();
     let performed_songs: Vec<IdolPerformedRow> = idol_song_queries::idol_performed_songs(ctx.snap, idol_id)
             .into_iter()
             .filter_map(|s| {
@@ -77,7 +87,7 @@ pub fn idol_page(ctx: &Ctx, idol_id: &str) -> Option<IdolPage> {
     Some(IdolPage {
         schema_version: SCHEMA_VERSION,
         stat_tiles: nonzero_tiles([
-            StatTile::new("♪", songs.len() as u32, "持ち曲").with_href("#idol-songs"),
+            StatTile::new("♪", song_count as u32, "持ち曲").with_href("#idol-songs"),
             StatTile::new("♬", performed_songs.len() as u32, "ライブで歌った曲").with_href("#idol-performed"),
             StatTile::new("▤", shows.len() as u32, "出演公演").with_href("#idol-shows"),
         ]),
@@ -96,8 +106,8 @@ pub fn idol_page(ctx: &Ctx, idol_id: &str) -> Option<IdolPage> {
             .iter()
             .filter_map(|u| ctx.unit_ref(&u.id))
             .collect(),
-        songs_empty: content::empty_text(songs.is_empty(), content::EMPTY_IDOL_SONGS, None),
-        songs,
+        songs_empty: content::empty_text(song_count == 0, content::EMPTY_IDOL_SONGS, None),
+        song_sections,
         performed_songs,
         shows,
         description: record.description.clone(),
@@ -114,6 +124,18 @@ pub fn idol_page(ctx: &Ctx, idol_id: &str) -> Option<IdolPage> {
             breadcrumbs,
         ),
     })
+}
+
+/// 棚のページ内リンクの鍵。
+fn section_slug(kind: idol_song_queries::IdolSongSectionKind) -> &'static str {
+    use idol_song_queries::IdolSongSectionKind as K;
+    match kind {
+        K::Solo => "solo",
+        K::Unit => "unit",
+        K::All => "all",
+        K::Cover => "cover",
+        K::Other => "other",
+    }
 }
 
 /// プロフィール行。

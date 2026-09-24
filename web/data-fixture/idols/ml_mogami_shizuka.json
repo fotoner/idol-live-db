@@ -68,21 +68,28 @@
       "artworkUrl": null
     }
   ],
-  "songs": [
+  "songSections": [
     {
-      "song": {
-        "kind": "song",
-        "id": "ml_sample",
-        "name": "Thank You!",
-        "sub": "765MILLION ALLSTARS",
-        "path": "/songs/ml_sample/",
-        "themeKey": "brand:ml",
-        "artworkUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music/sample/600x600bb.jpg"
-      },
-      "role": "original",
-      "releaseDate": "2019-03-13",
-      "performanceCount": 12,
-      "subtitle": "765MILLION ALLSTARS ・ 2019-03-13 ・ 12 回披露"
+      "heading": "ユニット曲",
+      "shortHeading": "ユニット",
+      "anchor": "idol-songs-unit",
+      "songs": [
+        {
+          "song": {
+            "kind": "song",
+            "id": "ml_sample",
+            "name": "Thank You!",
+            "sub": "765MILLION ALLSTARS",
+            "path": "/songs/ml_sample/",
+            "themeKey": "brand:ml",
+            "artworkUrl": "https://is1-ssl.mzstatic.com/image/thumb/Music/sample/600x600bb.jpg"
+          },
+          "role": "original",
+          "releaseDate": "2019-03-13",
+          "performanceCount": 12,
+          "subtitle": "765MILLION ALLSTARS ・ 2019-03-13 ・ 12 回披露"
+        }
+      ]
     }
   ],
   "songsEmpty": null,

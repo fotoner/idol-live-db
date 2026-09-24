@@ -17,6 +17,7 @@ import type { IdolPage } from "../../lib/schema/IdolPage";
 export const getStaticPaths = () => pathsFor("idol", "idolId");
 
 const idol = page<IdolPage>(Astro.props.data);
+const songCount = idol.songSections.reduce((n, sec) => n + sec.songs.length, 0);
 ---
 
 {/* 電話ではプロフィール・ユニット (脇) より持ち曲・出演公演 (本体) を先に。 */}
@@ -85,24 +86,45 @@ const idol = page<IdolPage>(Astro.props.data);
     )
   }
 
-  <Section id="idol-songs" title="持ち曲" count={idol.songs.length}>
+  <Section id="idol-songs" title="持ち曲" count={songCount}>
     {
       idol.songsEmpty ? (
         <EmptyState {...idol.songsEmpty} />
       ) : (
-        <ListContainer as="ul">
-          {idol.songs.map((s) => (
-            <li>
-              {/* 披露回数は Rust が副題に畳んでいる (`N 回披露`)。末尾に重ねて出さない。 */}
-              <DatedRow
-                title={s.song.name}
-                href={s.song.path}
-                themeKey={s.song.themeKey}
-                meta={[s.subtitle]}
-              />
-            </li>
+        <div class="shelves">
+          {/* 棚の切替 = ページ内リンク (JS なし)。棚の並びと見出しはアプリの持ち歌と同じ (Rust)。 */}
+          {idol.songSections.length > 1 && (
+            <nav class="shelf-nav" aria-label="持ち曲の種類">
+              {idol.songSections.map((sec) => (
+                <a href={`#${sec.anchor}`}>
+                  {sec.shortHeading}
+                  <span class="u-num">{sec.songs.length}</span>
+                </a>
+              ))}
+            </nav>
+          )}
+          {idol.songSections.map((sec) => (
+            <section class="shelf" aria-labelledby={sec.anchor}>
+              <h3 class="shelf__title" id={sec.anchor}>
+                {sec.heading}
+                <span class="shelf__count u-num">{sec.songs.length}</span>
+              </h3>
+              <ListContainer as="ul">
+                {sec.songs.map((s) => (
+                  <li>
+                    {/* 披露回数は Rust が副題に畳んでいる (`N 回披露`)。末尾に重ねて出さない。 */}
+                    <DatedRow
+                      title={s.song.name}
+                      href={s.song.path}
+                      themeKey={s.song.themeKey}
+                      meta={[s.subtitle]}
+                    />
+                  </li>
+                ))}
+              </ListContainer>
+            </section>
           ))}
-        </ListContainer>
+        </div>
       )
     }
   </Section>

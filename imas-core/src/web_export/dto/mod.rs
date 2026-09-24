@@ -67,7 +67,7 @@ pub use common::{
 pub use event::{
     EventCast, EventCastMember, EventCastShow, EventPage, ReleaseInfo, ShowSummary, TicketDate, TicketInfo,
 };
-pub use idol::{IdolPage, IdolPerformedRow, IdolShowRow, IdolSongRow, ProfileRow, VoiceActorRow};
+pub use idol::{IdolPage, IdolPerformedRow, IdolShowRow, IdolSongRow, IdolSongSection, ProfileRow, VoiceActorRow};
 pub use index::{
     AboutLink, AboutPage, AboutSection, BrandListItem, BrandListPage, EventListItem,
     EventListKind, EventListPage, HomePage, Countdown, MonthSpan, IdolColumn, IdolListItem, IdolListKind, IdolListPage,

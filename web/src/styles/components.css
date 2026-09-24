@@ -2254,6 +2254,52 @@ a.labeled-row .labeled-row__value {
   font-variant-numeric: tabular-nums;
 }
 
+/* --- 棚 (アイドルの持ち曲: ソロ / ユニット / 全体曲 / カバー) ----------------
+   上に棚への切替 (ページ内リンクの札)、下に棚ごとの小見出しと行。 */
+.shelves {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp6);
+}
+.shelf-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp2);
+}
+.shelf-nav a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--r-pill);
+  background: var(--ds-surface);
+  box-shadow: inset 0 0 0 1px var(--ds-line);
+  font-size: var(--fs-footnote);
+  font-weight: 700;
+}
+.shelf-nav a:hover {
+  background: var(--ds-fill);
+}
+.shelf-nav .u-num {
+  color: var(--ds-ink2);
+}
+.shelf {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp3);
+}
+.shelf__title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp2);
+  padding-inline: var(--sp1);
+  font-size: var(--fs-callout);
+}
+.shelf__count {
+  color: var(--ds-ink2);
+  font-weight: 600;
+}
+
 /* --- 年グループ ----------------------------------------------------------- */
 .year-group {
   display: flex;

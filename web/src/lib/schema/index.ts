@@ -60,6 +60,7 @@ export type { IdolPerformedRow } from "./IdolPerformedRow";
 export type { IdolQuery } from "./IdolQuery";
 export type { IdolShowRow } from "./IdolShowRow";
 export type { IdolSongRow } from "./IdolSongRow";
+export type { IdolSongSection } from "./IdolSongSection";
 export type { KanaSection } from "./KanaSection";
 export type { Lineup } from "./Lineup";
 export type { LineupNote } from "./LineupNote";
