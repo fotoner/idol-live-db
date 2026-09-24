@@ -15,12 +15,12 @@ struct SeatEditorSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("例: アリーナ A6 12列 34番", text: $draft, axis: .vertical)
+                    TextField(String(localized: L10n.Events.seatEditorPlaceholderIos), text: $draft, axis: .vertical)
                         .lineLimit(1...3)
                         .focused($focused)
                         .scrollContentBackground(.hidden)
                 } footer: {
-                    Text("ブロック・列・番号など、自由に記録できます。")
+                    Text(L10n.Events.seatEditorFooter)
                         .foregroundStyle(DS.ink2)
                 }
                 .listRowBackground(DS.surface)
@@ -28,25 +28,29 @@ struct SeatEditorSheet: View {
             }
             .scrollContentBackground(.hidden)
             .background(DS.bg.ignoresSafeArea())
-            .navigationTitle("座席")
+            .navigationTitle(L10n.Events.seatEditorTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("キャンセル") {
+                    Button {
                         draft = markService.seat(entity: entity, id: entityId) ?? ""
                         dismiss()
+                    } label: {
+                        Text(L10n.Events.actionCancel)
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") {
+                    Button {
                         AppAnalytics.tap("seat_editor.save")
                         do {
                             try markService.setSeat(entity: entity, id: entityId, text: draft)
                             dismiss()
                         } catch {
                             // 書けなかったら閉じない (入れた座席を捨てずに、もう一度押せるように)。
-                            LocalWriteFailure.report(error, action: "座席の保存")
+                            LocalWriteFailure.report(error, action: String(localized: L10n.Events.localWriteSaveSeat))
                         }
+                    } label: {
+                        Text(L10n.Events.actionSave)
                     }
                     .fontWeight(.semibold)
                 }

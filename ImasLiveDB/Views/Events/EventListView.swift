@@ -68,6 +68,11 @@ struct EventListView: View {
     /// 端末ローカル TZ で判定すると海外にいるユーザーだけ 1 日ずれる。
     private var todayKey: String { JSTDay.today() }
 
+    /// 今後の予定 / 開催済み のセグメントの名前 (body の型検査を軽くするため外に出す)。
+    private var timeFilterLabels: [String] {
+        [String(localized: L10n.Events.listTabUpcoming), String(localized: L10n.Events.listTabPast)]
+    }
+
     /// 一覧の 1 行ぶんの表示単位。
     ///
     /// 以前は `ForEach(年グループ) { VStack { 見出し; ImasListContainer { ForEach(行) } } }` と
@@ -161,7 +166,7 @@ struct EventListView: View {
                 // (`eventAttendanceSwipe`) は List の行にしか効かず、ScrollView + LazyVStack
                 // に付けても無言で消える (習熟度画面で一度踏んだ罠と同じ)。
                 List {
-                    ImasSegmented(labels: ["今後の予定", "開催済み"], selection: $timeFilter)
+                    ImasSegmented(labels: timeFilterLabels, selection: $timeFilter)
                         .padding(.horizontal, DS.sp5)
                         .padding(.top, 6)
                         .listRowInsets(EdgeInsets())
@@ -187,7 +192,7 @@ struct EventListView: View {
                     ForEach(listItems) { item in
                         switch item {
                         case .yearHeader(let year, let isFirstGroup):
-                            ImasSectionHeader(title: year, tight: true)
+                            ImasSectionHeader(title: .core(year), tight: true)
                                 // 従来の「グループ VStack に付けていた上余白」と同じ値
                                 .padding(.top, isFirstGroup && !hasActiveFilterChips ? 6 : 18)
                                 .padding(.bottom, DS.sp3)
@@ -258,7 +263,7 @@ struct EventListView: View {
                     await vm.loadData(includeEmpty: showEmptyEvents, query: listQuery)
                 }
             }
-            .navigationTitle("ライブ")
+            .navigationTitle(L10n.Events.listTitle)
             // 絞り込みフィールドはナビバーの中 (standardListToolbar の principal)。
             // 大タイトルを出すと 2 行になってしまうので inline 固定。
             .navigationBarTitleDisplayMode(.inline)
@@ -275,7 +280,7 @@ struct EventListView: View {
                 ) {
                     // 虫眼鏡アイコンが用途を示すので、文言は対象だけ。
                     // 「〜で絞り込み」まで書くと狭い欄で末尾が切れる。
-                    ListSearchField(prompt: "ライブ名・会場", text: $searchText)
+                    ListSearchField(prompt: String(localized: L10n.Events.listSearchPrompt), text: $searchText)
                 }
             }
             // 「他のタブに N 件」から飛んで来たら、その語で絞り込む。
@@ -356,20 +361,20 @@ struct EventListView: View {
                         }
                     }
                     ForEach(Array(excludedKinds).sorted(by: { $0.rawValue < $1.rawValue }), id: \.self) { kind in
-                        removableChip("除外: \(kind.displayLabel)") {
+                        removableChip(String(localized: L10n.Events.filterKindExcluded(kinds: kind.displayLabel))) {
                             removeExcludedKind(kind)
                         }
                     }
                     if attendanceFilter == "attended" {
-                        removableChip("参加済み") { attendanceFilter = "all" }
+                        removableChip(String(localized: L10n.Events.filterAttendanceAttended)) { attendanceFilter = "all" }
                     } else if attendanceFilter == "not_attended" {
-                        removableChip("未参加") { attendanceFilter = "all" }
+                        removableChip(String(localized: L10n.Events.filterAttendanceNotAttended)) { attendanceFilter = "all" }
                     }
                     if requireFavorite {
-                        removableChip("お気に入り") { requireFavorite = false }
+                        removableChip(String(localized: L10n.Events.listFilterChipFavorite)) { requireFavorite = false }
                     }
                     if requireNote {
-                        removableChip("メモあり") { requireNote = false }
+                        removableChip(String(localized: L10n.Events.listFilterChipHasNote)) { requireNote = false }
                     }
                     if !venueFilter.isEmpty {
                         removableChip(venueDirectory.venue(id: venueFilter)?.name ?? venueFilter) {
@@ -402,13 +407,14 @@ struct EventListView: View {
     private var eventMenuActions: [ListToolbarAction] {
         var actions: [ListToolbarAction] = []
         if EditPermission.showEditAffordance {
-            actions.append(ListToolbarAction(id: "add", title: "イベントを追加", systemImage: "plus") {
+            actions.append(ListToolbarAction(id: "add", title: String(localized: L10n.Events.listMenuAddEvent),
+                                             systemImage: "plus") {
                 AppAnalytics.tap("event_list.add")
                 startCreate()
             })
         }
         if activeFilterCount > 0 {
-            actions.append(ListToolbarAction(id: "clear", title: "フィルタを解除",
+            actions.append(ListToolbarAction(id: "clear", title: String(localized: L10n.Events.listActionClearFilters),
                                              systemImage: "xmark.circle", isDestructive: true) {
                 AppAnalytics.tap("event_list.filter_clear")
                 clearAllFilters()
@@ -440,22 +446,22 @@ struct EventListView: View {
         if !appliedSearchText.isEmpty {
             ImasEmptyState(
                 systemImage: "line.3.horizontal.decrease",
-                title: "絞り込み結果がありません",
-                message: "「\(appliedSearchText)」に一致するライブがありません",
-                actionTitle: "絞り込みを解除",
+                title: String(localized: L10n.Events.listFilterEmptyTitle),
+                message: String(localized: L10n.Events.listFilterEmptyMessage(query: appliedSearchText)),
+                actionTitle: String(localized: L10n.Events.listFilterEmptyAction),
                 action: { searchText = ""; appliedSearchText = "" }
             )
             .padding(.top, 40)
         } else {
             ImasEmptyState(
                 systemImage: "music.mic",
-                title: timeFilter == 0 ? "今後の予定はありません" : "開催済みのライブがありません",
-                message: activeFilterCount > 0
-                    ? "フィルタ条件に合うライブが見つかりませんでした。"
+                title: String(localized: timeFilter == 0 ? L10n.Events.listEmptyUpcomingTitle : L10n.Events.listEmptyPastTitle),
+                message: String(localized: activeFilterCount > 0
+                    ? L10n.Events.listEmptyFilteredMessage
                     : (timeFilter == 0
-                        ? "現在、登録されている今後のライブはありません。「開催済み」タブもご確認ください。"
-                        : "開催済みのライブはまだ登録されていません。"),
-                actionTitle: activeFilterCount > 0 ? "フィルタを解除" : nil,
+                        ? L10n.Events.listEmptyUpcomingMessage
+                        : L10n.Events.listEmptyPastMessage)),
+                actionTitle: activeFilterCount > 0 ? String(localized: L10n.Events.listActionClearFilters) : nil,
                 action: activeFilterCount > 0 ? { clearAllFilters() } : nil
             )
             .padding(.top, 40)

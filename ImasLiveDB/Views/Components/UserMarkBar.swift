@@ -52,8 +52,8 @@ struct UserMarkBar: View {
             let hasNote = !(markService.note(entity: entity, id: entityId) ?? "").isEmpty
             markCell(
                 icon: hasNote ? "note.text.badge.plus" : "note.text",
-                label: "メモ", isOn: hasNote, theme: t,
-                a11y: hasNote ? "メモあり" : "メモ"
+                label: L10n.Events.userMarkKindNote, isOn: hasNote, theme: t,
+                a11y: hasNote ? L10n.Events.userMarkNoteFilledA11y : L10n.Events.userMarkKindNote
             ) {
                 noteDraft = markService.note(entity: entity, id: entityId) ?? ""
                 showingNote = true
@@ -63,8 +63,8 @@ struct UserMarkBar: View {
             let hasSeat = !seat.isEmpty
             markCell(
                 icon: hasSeat ? UserMarkKind.seat.activeIcon : UserMarkKind.seat.icon,
-                label: "座席", isOn: hasSeat, theme: t,
-                a11y: hasSeat ? "座席: \(seat)" : "座席を記録"
+                label: L10n.Events.userMarkKindSeat, isOn: hasSeat, theme: t,
+                a11y: hasSeat ? L10n.Events.userMarkSeatFilledA11y(seat: seat) : L10n.Events.userMarkSeatEmptyA11y
             ) {
                 seatDraft = seat
                 showingSeat = true
@@ -74,7 +74,7 @@ struct UserMarkBar: View {
             markCell(
                 icon: attendedIsOn ? UserMarkKind.attended.activeIcon : UserMarkKind.attended.icon,
                 label: UserMarkKind.attended.label, isOn: attendedIsOn, theme: t,
-                a11y: attendedIsOn ? "参加した公演を編集" : "参加した公演を選ぶ"
+                a11y: attendedIsOn ? L10n.Events.userMarkAttendedEditA11y : L10n.Events.userMarkAttendedSelectA11y
             ) {
                 onAttendedTap?()
             }
@@ -87,7 +87,7 @@ struct UserMarkBar: View {
                 do {
                     try markService.toggle(kind, entity: entity, id: entityId)
                 } catch {
-                    LocalWriteFailure.report(error, action: "\(kind.label)の切り替え")
+                    LocalWriteFailure.report(error, action: String(localized: L10n.Events.localWriteToggle(mark: kind.label)))
                 }
             }
         }
@@ -95,7 +95,8 @@ struct UserMarkBar: View {
 
     /// アイコンタイル + ラベルだけの軽量セル。外側の面カードを廃し (二重ボックス解消)、
     /// iOS 標準のアクションロー風に整える。タイルはタップ領域確保のため固定 50pt。
-    private func markCell(icon: String, label: String, isOn: Bool, theme t: ImasTheme, a11y: String, action: @escaping () -> Void) -> some View {
+    private func markCell(icon: String, label: LocalizedStringResource, isOn: Bool, theme t: ImasTheme,
+                          a11y: LocalizedStringResource, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 7) {
                 Image(systemName: icon)

@@ -8,6 +8,7 @@ package com.fugaif.imaslivedb.i18n.generated
 object L10n {
     val Common: L10nCommon get() = L10nCommon
     val Edit: L10nEdit get() = L10nEdit
+    val Events: L10nEvents get() = L10nEvents
     val I18n: L10nI18n get() = L10nI18n
     val Mypage: L10nMypage get() = L10nMypage
     val Nav: L10nNav get() = L10nNav

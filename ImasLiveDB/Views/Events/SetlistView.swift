@@ -226,8 +226,13 @@ struct SetlistView: View {
                 Spacer(minLength: 0)
             }
             .accessibilityElement(children: .contain)
-            .accessibilityLabel("上の階層")
+            .accessibilityLabel(L10n.Events.setlistBreadcrumbA11y)
         }
+    }
+
+    /// 未来の公演でセトリと予想が両方あるときのセグメントの名前 (0=セットリスト / 1=予想)。
+    private var contentTabLabels: [String] {
+        [String(localized: L10n.Events.setlistTabSetlist), String(localized: L10n.Events.setlistTabPrediction)]
     }
 
     private func brandHex(for item: SetlistRow) -> String? {
@@ -246,10 +251,26 @@ struct SetlistView: View {
                 result[last].items.append(item)
             } else {
                 result.append(SetlistSection(
-                    id: item.position, sectionName: meta?.sectionHeading ?? "本編", items: [item]))
+                    id: item.position, sectionName: Self.sectionHeading(meta?.sectionHeading), items: [item]))
             }
         }
         return result
+    }
+
+    /// コアの区切りの見出し (`sectionHeading`) を表示文言にする。
+    ///
+    /// コアは区切り無しなら「本編」、アンコール類なら「アンコール」、それ以外は入力 (自由文字列) を
+    /// そのまま返す。知っている 2 語だけカタログの文言に写し、残りはコアの文字列のまま出す。
+    /// 添え物がまだ無い (nil) ときも「本編」と同じ経路に通す — 読み込みの前後で同じ見出しの
+    /// 言語が入れ替わらないように。コアが見出しのキーを返すようになったら消す。
+    /// (テストから引くので private にしない)
+    static func sectionHeading(_ heading: String?) -> DisplayText {
+        guard let heading else { return .key(L10n.Events.setlistSectionMain) }
+        switch heading {
+        case "本編": return .key(L10n.Events.setlistSectionMain) // i18n-ignore(sentinel): コア (setlist_sections.rs) の MAIN_SECTION_HEADING と突き合わせる
+        case "アンコール": return .key(L10n.Events.setlistSectionEncore) // i18n-ignore(sentinel): コア (setlist_sections.rs) の ENCORE_LABEL と突き合わせる
+        default: return .core(heading)
+        }
     }
 
     var body: some View {
@@ -277,7 +298,7 @@ struct SetlistView: View {
             if simpleMode {
                 Section {
                     Text([venueDirectory.displayName(for: show), show.date]
-                        .compactMap { $0 }.joined(separator: " ・ "))
+                        .compactMap { $0 }.joined(separator: String(localized: L10n.Events.metaSeparator)))
                         .font(.imasCaption)
                         .foregroundStyle(DS.ink2)
                         .listRowBackground(Color.clear)
@@ -292,7 +313,8 @@ struct SetlistView: View {
                 ImasListContainer {
                     // 会場は ID で持つ。表示は公演日時点の名前 (改名前の公演は当時名)。
                     if let venueLabel = venueDirectory.displayName(for: show) {
-                        ImasLabeledRow(key: "会場", value: venueLabel, showChevron: true, tappable: true, seed: showBrandHex)
+                        ImasLabeledRow(key: String(localized: L10n.Events.setlistInfoVenue), value: venueLabel,
+                                       showChevron: true, tappable: true, seed: showBrandHex)
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 if let vid = show.venueId { go(.filteredShows(.venue(vid))) }
@@ -302,14 +324,16 @@ struct SetlistView: View {
                     }
                     // キャパが分かる会場では規模も出す (ホール指定があればホール側を優先)。
                     if let cap = venueDirectory.capacity(for: show) {
-                        ImasLabeledRow(key: "キャパ", value: "\(cap.formatted(.number.grouping(.automatic)))人", seed: showBrandHex)
+                        ImasLabeledRow(key: String(localized: L10n.Events.setlistInfoCapacity),
+                                       value: String(localized: L10n.Events.venueCapacity(count: cap)), seed: showBrandHex)
                         ImasRowDivider(inset: 16)
                     }
                     if let stream = show.streamPlatform, !stream.isEmpty {
-                        ImasLabeledRow(key: "配信", value: stream, seed: showBrandHex)
+                        ImasLabeledRow(key: String(localized: L10n.Events.setlistInfoStream), value: stream, seed: showBrandHex)
                         ImasRowDivider(inset: 16)
                     }
-                    ImasLabeledRow(key: "日付", value: show.date, showChevron: true, tappable: true, seed: showBrandHex)
+                    ImasLabeledRow(key: String(localized: L10n.Events.setlistInfoDate), value: show.date,
+                                   showChevron: true, tappable: true, seed: showBrandHex)
                         .contentShape(Rectangle())
                         .onTapGesture { go(.filteredShows(.date(show.date))) }
                 }
@@ -320,7 +344,7 @@ struct SetlistView: View {
 
             if !tickets.isEmpty {
                 Section {
-                    ImasSectionHeader(title: "チケット", tight: true)
+                    ImasSectionHeader(title: .key(L10n.Events.setlistTicketHeader), tight: true)
                     ImasListContainer {
                         // 並びと価格帯の作り方はコア (domain/ticket_prices.rs) 一本。
                         ForEach(Array(ticketPriceRanges(tickets: tickets).enumerated()),
@@ -331,7 +355,9 @@ struct SetlistView: View {
                             if range.count > 1 {
                                 ImasLabeledRow(
                                     key: ticketKindLabel(kind: range.kind),
-                                    value: range.hasEstimate ? "\(range.label) (推定含む)" : range.label,
+                                    value: range.hasEstimate
+                                        ? String(localized: L10n.Events.setlistTicketRangeEstimate(range: range.label))
+                                        : range.label,
                                     seed: showBrandHex
                                 )
                             }
@@ -340,8 +366,11 @@ struct SetlistView: View {
                                 if range.count > 1 || index > 0 { ImasRowDivider(inset: range.count > 1 ? 32 : 16) }
                                 ImasLabeledRow(
                                     key: range.count > 1
-                                        ? (ticket.isEstimate ? "\(ticket.name) (推定)" : ticket.name)
-                                        : "\(ticketKindLabel(kind: range.kind))・\(ticket.name)",
+                                        ? (ticket.isEstimate
+                                            ? String(localized: L10n.Events.setlistTicketNameEstimate(name: ticket.name))
+                                            : ticket.name)
+                                        : String(localized: L10n.Events.setlistTicketKindName(
+                                            kind: ticketKindLabel(kind: range.kind), name: ticket.name)),
                                     value: formatYen(amount: ticket.price),
                                     seed: showBrandHex
                                 )
@@ -356,7 +385,7 @@ struct SetlistView: View {
 
             if !costumes.isEmpty {
                 Section {
-                    ImasSectionHeader(title: "衣装 ・ \(costumes.count) 着", tight: true)
+                    ImasSectionHeader(title: .key(L10n.Events.setlistCostumeHeader(count: costumes.count)), tight: true)
                     ImasListContainer {
                         ForEach(Array(costumes.enumerated()), id: \.element.costume.id) { index, entry in
                             if index > 0 { ImasRowDivider(inset: 16) }
@@ -387,7 +416,7 @@ struct SetlistView: View {
             // 予想と実セトリが両方あるときは内部タブで切替 (実セトリ確定後も予想を見られる)。
             if isFutureShow && !setlist.isEmpty {
                 Section {
-                    ImasSegmented(labels: ["セットリスト", "予想"], selection: $contentTab, seed: showBrandHex)
+                    ImasSegmented(labels: contentTabLabels, selection: $contentTab, seed: showBrandHex)
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 0, trailing: 16))
                         .listRowSeparator(.hidden)
@@ -411,11 +440,12 @@ struct SetlistView: View {
                 Section {
                     ImasEmptyState(
                         systemImage: isFutureShow ? "calendar.badge.clock" : "music.note.list",
-                        title: isFutureShow ? "公演前です" : "セトリ未登録",
-                        message: isFutureShow
-                            ? "セトリは公演後に登録されます"
-                            : "このライブのセトリはまだ登録されていません。ログインして編集に参加できます",
-                        actionTitle: (isFutureShow || !EditPermission.showEditAffordance) ? nil : "セトリを追加",
+                        title: String(localized: isFutureShow ? L10n.Events.setlistEmptyFutureTitle : L10n.Events.setlistEmptyPastTitle),
+                        message: String(localized: isFutureShow
+                            ? L10n.Events.setlistEmptyFutureMessage
+                            : L10n.Events.setlistEmptyPastMessage),
+                        actionTitle: (isFutureShow || !EditPermission.showEditAffordance)
+                            ? nil : String(localized: L10n.Events.setlistEmptyAction),
                         action: (isFutureShow || !EditPermission.showEditAffordance) ? nil : { startEdit() },
                         seed: showBrandHex
                     )
@@ -433,11 +463,11 @@ struct SetlistView: View {
                         if AuthService.shared.isSignedIn {
                             HStack(spacing: 6) {
                                 Image(systemName: "hand.thumbsup.fill").font(.imasCaption).foregroundStyle(DS.pick)
-                                Text("良かったと思った曲に 👍 で投票しよう！")
+                                Text(L10n.Events.setlistVoteHintSignedIn)
                                     .font(.imasCaption).foregroundStyle(DS.ink2)
                             }
                         } else {
-                            InlineLoginPrompt(message: "👍 で投票するにはログインが必要です", seed: showBrandHex)
+                            InlineLoginPrompt(message: String(localized: L10n.Events.setlistVoteHintLogin), seed: showBrandHex)
                         }
                     }
                     .listRowBackground(Color.clear)
@@ -464,18 +494,19 @@ struct SetlistView: View {
                 }
             }
         }
-        .navigationTitle("セットリスト")
+        .navigationTitle(L10n.Events.setlistTitle)
         .listStyle(.plain)
         .listSectionSpacing(.compact)
-        .confirmationDialog("この公演への参加", isPresented: $showAttendanceDialog, titleVisibility: .visible) {
+        .confirmationDialog(Text(L10n.Events.setlistAttendanceTitle), isPresented: $showAttendanceDialog,
+                            titleVisibility: .visible) {
             // そのライブに実在した形態だけ提示 (show優先・eventフォールバック)。
             ForEach(AttendanceAvailability.options(show: show, event: event), id: \.self) { type in
-                Button("\(type.label)で参加") { setAttendance(type) }
+                Button { setAttendance(type) } label: { Text(L10n.Events.setlistAttendanceJoin(type: type.label)) }
             }
             if UserMarkService.shared.attendance(entity: .show, id: show.id) != nil {
-                Button("参加を取り消す", role: .destructive) { setAttendance(nil) }
+                Button(role: .destructive) { setAttendance(nil) } label: { Text(L10n.Events.setlistAttendanceRemove) }
             }
-            Button("キャンセル", role: .cancel) {}
+            Button(role: .cancel) {} label: { Text(L10n.Events.actionCancel) }
         }
         .scrollContentBackground(.hidden)
         .background(DS.bg)
@@ -485,30 +516,32 @@ struct SetlistView: View {
                 ShareLink(item: shareText) {
                     Image(systemName: "square.and.arrow.up")
                 }
-                .accessibilityLabel("この公演をシェア")
+                .accessibilityLabel(L10n.Events.setlistShareA11y)
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     // 3 値なのでトグルではなく選ぶ形にする。Menu の中の Picker なので
                     // 画面の行は 1 行も増えず、いま選んでいるものにチェックが付く。
                     // 並びも文言も imas-core (`setlistDisplayModes`) が持つ。
-                    Picker("表示", selection: displayModeBinding) {
+                    Picker(selection: displayModeBinding) {
                         ForEach(setlistDisplayModes(), id: \.raw) { option in
                             Text(option.label).tag(option.raw)
                         }
+                    } label: {
+                        Text(L10n.Events.setlistMenuDisplay)
                     }
                     .pickerStyle(.inline)
 
                     if EditPermission.showEditAffordance {
                         Button { startEdit() } label: {
-                            Label("セトリを編集", systemImage: "pencil")
+                            Label(L10n.Events.setlistMenuEdit, systemImage: "pencil")
                         }
                     }
                     // セトリ編集は show 単位スナップショット (ShowSetlist) として履歴化される。
                     NavigationLink {
                         EditHistoryView(recordType: "ShowSetlist", recordName: show.id, title: show.name)
                     } label: {
-                        Label("セトリの編集履歴", systemImage: "clock.arrow.circlepath")
+                        Label(L10n.Events.setlistMenuHistory, systemImage: "clock.arrow.circlepath")
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
@@ -519,20 +552,20 @@ struct SetlistView: View {
                     Button {
                         Task { await addToAppleMusicPlaylist() }
                     } label: {
-                        Label("Apple Musicプレイリストに追加", systemImage: "music.note.list")
+                        Label(L10n.Events.setlistMenuAddToAppleMusic, systemImage: "music.note.list")
                     }
 
                     Button {
                         Task { await playAllPreview() }
                     } label: {
-                        Label("全曲プレビュー再生", systemImage: "play.fill")
+                        Label(L10n.Events.setlistMenuPreviewAll, systemImage: "play.fill")
                     }
 
                     if MusicKitService.shared.isPlaying {
                         Button {
                             MusicKitService.shared.stop()
                         } label: {
-                            Label("再生停止", systemImage: "stop.fill")
+                            Label(L10n.Events.playlistActionStop, systemImage: "stop.fill")
                         }
                     }
                 } label: {
@@ -540,7 +573,7 @@ struct SetlistView: View {
                 }
             }
         }
-        .alert("プレイリスト", isPresented: $showPlaylistAlert) {
+        .alert(Text(L10n.Events.playlistAlertTitle), isPresented: $showPlaylistAlert) {
             Button("OK") {}
         } message: {
             Text(playlistMessage)
@@ -574,8 +607,8 @@ struct SetlistView: View {
                             .progressViewStyle(.circular)
                             .controlSize(.large)
                         Text(playlistProgress.total > 0
-                             ? "プレイリスト作成中… \(playlistProgress.current)/\(playlistProgress.total)"
-                             : "プレイリスト作成中…")
+                             ? L10n.Events.playlistProgress(current: playlistProgress.current, total: playlistProgress.total)
+                             : L10n.Events.playlistProgressIndeterminate)
                             .font(.imasSubhead)
                     }
                     .padding(28)
@@ -611,7 +644,7 @@ struct SetlistView: View {
         do {
             try UserMarkService.shared.setAttendance(entity: .show, id: show.id, type: type)
         } catch {
-            LocalWriteFailure.report(error, action: "参加の記録")
+            LocalWriteFailure.report(error, action: String(localized: L10n.Events.localWriteRecordAttendance))
         }
         attendanceVersion &+= 1
     }
@@ -697,7 +730,7 @@ struct SetlistView: View {
         // 認可は起動時に取らないので、使う直前に取る (契約の有無もここで読み直す)。
         await MusicKitService.shared.requestAuthorization()
         guard MusicKitService.shared.hasAppleMusicSubscription else {
-            playlistMessage = "Apple Musicのサブスクリプションが必要です"
+            playlistMessage = String(localized: L10n.Events.playlistErrorSubscription)
             showPlaylistAlert = true
             return
         }
@@ -708,7 +741,7 @@ struct SetlistView: View {
         }
 
         guard !songIds.isEmpty else {
-            playlistMessage = "Apple Music IDが登録されている曲がありません"
+            playlistMessage = String(localized: L10n.Events.playlistErrorNoIds)
             showPlaylistAlert = true
             return
         }
@@ -733,17 +766,17 @@ struct SetlistView: View {
             playlistProgress = (0, songs.count)
             let playlist = try await MusicLibrary.shared.createPlaylist(
                 name: show.name,
-                description: "アイドルライブDB から作成"
+                description: String(localized: L10n.Events.playlistDescriptionSetlist)
             )
             for (index, song) in songs.enumerated() {
                 try await MusicLibrary.shared.add(song, to: playlist)
                 playlistProgress = (index + 1, songs.count)
             }
 
-            playlistMessage = "「\(show.name)」プレイリストを作成しました（\(songs.count)曲）"
+            playlistMessage = String(localized: L10n.Events.playlistCreated(name: show.name, count: songs.count))
             showPlaylistAlert = true
         } catch {
-            playlistMessage = "プレイリスト作成に失敗しました: \(error.localizedDescription)"
+            playlistMessage = String(localized: L10n.Events.playlistErrorFailed(error: error.localizedDescription))
             showPlaylistAlert = true
         }
     }
@@ -764,7 +797,8 @@ struct SetlistView: View {
 
 private struct SetlistSection: Identifiable {
     var id: Int
-    var sectionName: String
+    /// 見出し。知っている区切りはカタログの文言、それ以外はコアの文字列 (`SetlistView.sectionHeading`)。
+    var sectionName: DisplayText
     var items: [SetlistRow]
 }
 

@@ -46,7 +46,7 @@ struct PerformerPredictionView: View {
                 Image(systemName: "person.2.fill")
                     .font(.imasScaled(11, weight: .semibold))
                     .foregroundStyle(DS.ink3)
-                Text("\(totalVotes)票")
+                Text(L10n.Events.predictionVotes(count: totalVotes))
                     .font(.imasCaption.monospacedDigit())
                     .foregroundStyle(DS.ink3)
             }
@@ -62,7 +62,7 @@ struct PerformerPredictionView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.vertical, DS.sp1)
         } else if castIdols.isEmpty {
-            Text("出演キャスト情報がありません")
+            Text(L10n.Events.predictionPerformersEmpty)
                 .font(.imasCaption)
                 .foregroundStyle(DS.ink3)
         } else {
@@ -170,8 +170,8 @@ private struct PerformerChip: View {
             )
             .contentShape(Capsule())
             .accessibilityLabel(hasUserVoted
-                ? "\(idol.name) の予想を取り消す (現在\(voteCount)票)"
-                : "\(idol.name) を予想 (現在\(voteCount)票)")
+                ? L10n.Events.predictionPerformersUnvoteA11y(name: idol.name, count: voteCount)
+                : L10n.Events.predictionPerformersVoteA11y(name: idol.name, count: voteCount))
         }
         .buttonStyle(.borderless)
     }

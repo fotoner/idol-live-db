@@ -1,0 +1,3974 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "events.action.cancel" : {
+      "comment" : "メモ・座席の入力と、公演への参加を選ぶダイアログの取り消しボタン (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャンセル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "취소"
+          }
+        }
+      }
+    },
+    "events.action.done" : {
+      "comment" : "参加した公演を選ぶシートを閉じるボタン (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完了"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "완료"
+          }
+        }
+      }
+    },
+    "events.action.save" : {
+      "comment" : "メモ・座席の入力の保存ボタン (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "저장"
+          }
+        }
+      }
+    },
+    "events.attendance_sheet.all_live" : {
+      "comment" : "全公演をまとめて現地参加にする行 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全公演に現地参加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모든 공연 현장 참가"
+          }
+        }
+      }
+    },
+    "events.attendance_sheet.footer_ios" : {
+      "comment" : "参加シートの説明。Android は attendance_sheet.footer_android (括弧の補足が無い) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演ごとに参加形態を選べます（配信・ライブビューイングは開催があった公演のみ）。回収率には現地参加だけが数えられます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연마다 참가 형태를 고를 수 있어요 (스트리밍·라이브 뷰잉은 해당 형태로 진행된 공연만). 회수율에는 현장 참가만 집계돼요."
+          }
+        }
+      }
+    },
+    "events.attendance_sheet.per_show_header" : {
+      "comment" : "参加シートの公演一覧の節の見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演ごとに選ぶ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연별로 고르기"
+          }
+        }
+      }
+    },
+    "events.attendance_sheet.show_count" : {
+      "comment" : "「全公演に現地参加」の行の右に出す公演数。1000 以上は桁区切りが付く (ありえない) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg公演"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "공연 %arg회"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "events.attendance_sheet.title" : {
+      "comment" : "イベントの公演ごとに参加を選ぶシートの見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加した公演"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가한 공연"
+          }
+        }
+      }
+    },
+    "events.cast.day.date" : {
+      "comment" : "出演パネルの DAY 見出しの日付。weekday は表示言語の 1 文字の曜日 (土 / 토) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@/%2$@(%3$@)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@/%2$@ (%3$@)"
+          }
+        }
+      }
+    },
+    "events.cast.empty.message" : {
+      "comment" : "出演パネルの空状態の説明 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリ・出演者が登録されると表示されます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트·출연자가 등록되면 표시돼요"
+          }
+        }
+      }
+    },
+    "events.cast.empty.title" : {
+      "comment" : "出演パネルの空状態の見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出演情報がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출연 정보가 없어요"
+          }
+        }
+      }
+    },
+    "events.cast.full_attendance.count" : {
+      "comment" : "全員集合の帯の右の人数 (出演 / ブランド全体)。1000 以上は桁区切りが付く (ありえない) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@total@"
+          },
+          "substitutions" : {
+            "total" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%1$@/%arg 名"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@total@"
+          },
+          "substitutions" : {
+            "total" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%1$@/%arg명"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "events.cast.full_attendance.title" : {
+      "comment" : "ブランドのアイドルが全員出演したライブの帯 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全員集合！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전원 집합!"
+          }
+        }
+      }
+    },
+    "events.cast.group.header" : {
+      "comment" : "出演パネル: DAY ごと・欠席などのまとまりの見出し。label はコアが付けた名前 (DAY1・欠席など)。1000 以上は桁区切りが付く (ありえない) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%1$@ ・ %arg名"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%1$@ · %arg명"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "events.cast.role.guest" : {
+      "comment" : "出演パネル: ゲストの節の見出し (1 人のとき) と、アバターの下の札 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゲスト"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "게스트"
+          }
+        }
+      }
+    },
+    "events.cast.role.guest_count" : {
+      "comment" : "出演パネル: ゲストの節の見出し (2 人以上のとき)。1000 以上は桁区切りが付く (ありえない) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "ゲスト ・ %arg名"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "게스트 · %arg명"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "events.cast.role.lead" : {
+      "comment" : "出演パネル: 主演の節の見出し (1 人のとき) と、アバターの下の札 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主演"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "주연"
+          }
+        }
+      }
+    },
+    "events.cast.role.lead_count" : {
+      "comment" : "出演パネル: 主演の節の見出し (2 人以上のとき)。1000 以上は桁区切りが付く (ありえない) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "主演 ・ %arg名"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "주연 · %arg명"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "events.cast.units.header" : {
+      "comment" : "出演パネル: 歌唱したユニットの節の見出し (出演者 / ブランド全体の人数)。1000 以上は桁区切りが付く (ありえない) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@total@"
+          },
+          "substitutions" : {
+            "total" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "披露ユニット ・ 全 %1$@/%arg 名"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@total@"
+          },
+          "substitutions" : {
+            "total" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "공연한 유닛 · 전체 %1$@/%arg명"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "events.detail.copy.name" : {
+      "comment" : "ライブ名の長押しメニュー (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ名をコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브 이름 복사"
+          }
+        }
+      }
+    },
+    "events.detail.hero.joint" : {
+      "comment" : "ライブ詳細の日付の行の後ろに付ける、合同ライブ (複数ブランド) の印 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "・ 合同"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "· 합동"
+          }
+        }
+      }
+    },
+    "events.detail.menu.edit" : {
+      "comment" : "ライブ詳細の右上メニュー: ライブを編集。Android は detail.menu.edit_android (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "편집"
+          }
+        }
+      }
+    },
+    "events.detail.menu.history" : {
+      "comment" : "ライブ詳細の右上メニュー (Android は公演の行の ⋮ メニューにも): 編集履歴を開く (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編集履歴"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "편집 기록"
+          }
+        }
+      }
+    },
+    "events.detail.share.a11y" : {
+      "comment" : "ライブ詳細の右上の共有ボタンの読み上げ (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このイベントをシェア"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 이벤트 공유"
+          }
+        }
+      }
+    },
+    "events.detail.shows.action.add" : {
+      "comment" : "公演一覧の見出しの右の、公演を追加するボタン (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "추가"
+          }
+        }
+      }
+    },
+    "events.detail.shows.action.add_show" : {
+      "comment" : "公演を追加する操作。iOS は公演が無いときの空状態のボタン、Android は右上メニュー (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演を追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 추가"
+          }
+        }
+      }
+    },
+    "events.detail.shows.action.edit_show" : {
+      "comment" : "公演の行のメニュー (iOS は長押し、Android は ⋮) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演を編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 편집"
+          }
+        }
+      }
+    },
+    "events.detail.shows.empty.message" : {
+      "comment" : "公演が無いときの空状態の説明 (編集できる人だけ)。「追加」は見出しの右のボタン (detail.shows.action.add) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「追加」から公演を登録できます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“추가”에서 공연을 등록할 수 있어요"
+          }
+        }
+      }
+    },
+    "events.detail.shows.empty.title" : {
+      "comment" : "公演が 1 つも無いときの空状態の見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演がまだありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 공연이 없어요"
+          }
+        }
+      }
+    },
+    "events.detail.shows.header" : {
+      "comment" : "公演一覧の節の見出し。行を押すとセトリへ進む。1000 以上は桁区切りが付く (ありえない) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "公演 ・ %arg 公演 → セトリへ"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "공연 · %arg회 → 세트리스트로"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "events.detail.tab.cast" : {
+      "comment" : "ライブ詳細の中のセグメント (公演・セトリ / 出演 / 情報) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出演"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출연"
+          }
+        }
+      }
+    },
+    "events.detail.tab.info" : {
+      "comment" : "ライブ詳細の中のセグメント (公演・セトリ / 出演 / 情報) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "情報"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정보"
+          }
+        }
+      }
+    },
+    "events.detail.tab.shows" : {
+      "comment" : "ライブ詳細の中のセグメント (公演・セトリ / 出演 / 情報) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演・セトリ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연·세트리스트"
+          }
+        }
+      }
+    },
+    "events.filter.attendance.attended" : {
+      "comment" : "参加状態の選択肢 (と適用中のチップ): 参加したライブだけ (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加済み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가함"
+          }
+        }
+      }
+    },
+    "events.filter.attendance.not_attended" : {
+      "comment" : "参加状態の選択肢 (と適用中のチップ): 参加していないライブだけ (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未参加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "미참가"
+          }
+        }
+      }
+    },
+    "events.filter.kind.excluded" : {
+      "comment" : "除外している種別。一覧のチップでは 1 つ、フィルタシートでは「 / 」区切りの並び。語はコア (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "除外: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "제외: %1$@"
+          }
+        }
+      }
+    },
+    "events.info.meta.brand" : {
+      "comment" : "情報パネルの行の名前: ブランド (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランド"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드"
+          }
+        }
+      }
+    },
+    "events.info.meta.year" : {
+      "comment" : "情報パネルの行の名前: 開催年 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "年度"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "연도"
+          }
+        }
+      }
+    },
+    "events.info.meta.year_value" : {
+      "comment" : "情報パネルの開催年の値 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@年"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@년"
+          }
+        }
+      }
+    },
+    "events.info.stats.cast" : {
+      "comment" : "情報パネルの数字のタイル: 出演者数 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャスト"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "캐스트"
+          }
+        }
+      }
+    },
+    "events.info.stats.shows" : {
+      "comment" : "情報パネルの数字のタイル: 公演数 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연"
+          }
+        }
+      }
+    },
+    "events.info.stats.total_songs" : {
+      "comment" : "情報パネルの数字のタイル: 全公演で歌われた曲数 (同じ曲も数える) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲（延べ）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 (누적)"
+          }
+        }
+      }
+    },
+    "events.info.stats.unique_songs" : {
+      "comment" : "情報パネルの数字のタイル: 歌われた曲の種類数 (同じ曲は 1 回) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニーク曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 (중복 제외)"
+          }
+        }
+      }
+    },
+    "events.info.ticket.action.edit" : {
+      "comment" : "チケット情報の見出しの右のボタン (情報があるとき) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "편집"
+          }
+        }
+      }
+    },
+    "events.info.ticket.action.register" : {
+      "comment" : "チケット情報の見出しの右のボタン (まだ情報が無いとき) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登録"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "등록"
+          }
+        }
+      }
+    },
+    "events.info.ticket.empty" : {
+      "comment" : "チケット情報が無いとき (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チケット情報は未登録です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "티켓 정보가 등록되지 않았어요"
+          }
+        }
+      }
+    },
+    "events.info.ticket.header" : {
+      "comment" : "情報パネル: チケット情報の節の見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チケット情報"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "티켓 정보"
+          }
+        }
+      }
+    },
+    "events.info.ticket.open_official" : {
+      "comment" : "チケット情報: 公式のチケットページへのリンク (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公式チケットページを開く"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공식 티켓 페이지 열기"
+          }
+        }
+      }
+    },
+    "events.info.ticket.register" : {
+      "comment" : "チケット情報が無いときの登録ボタン (編集できる人だけ) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チケット情報を登録"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "티켓 정보 등록"
+          }
+        }
+      }
+    },
+    "events.list.action.clear_filters" : {
+      "comment" : "絞り込みを全部外す (右上メニューと、絞り込みで 0 件のときの空状態のボタン) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フィルタを解除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터 해제"
+          }
+        }
+      }
+    },
+    "events.list.empty.filtered.message" : {
+      "comment" : "フィルタで 1 件も残らなかったときの説明 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フィルタ条件に合うライブが見つかりませんでした。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터 조건에 맞는 라이브를 찾지 못했어요."
+          }
+        }
+      }
+    },
+    "events.list.empty.past.message" : {
+      "comment" : "「開催済み」に 1 件も無いときの説明 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開催済みのライブはまだ登録されていません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "종료된 라이브가 아직 등록되지 않았어요."
+          }
+        }
+      }
+    },
+    "events.list.empty.past.title" : {
+      "comment" : "「開催済み」に 1 件も無いときの空状態の見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開催済みのライブがありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "종료된 라이브가 없어요"
+          }
+        }
+      }
+    },
+    "events.list.empty.upcoming.message" : {
+      "comment" : "「今後の予定」に 1 件も無いときの説明。「開催済み」は list.tab.past のタブの名前 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在、登録されている今後のライブはありません。「開催済み」タブもご確認ください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "지금 등록된 예정 라이브가 없어요. “종료” 탭도 확인해 주세요."
+          }
+        }
+      }
+    },
+    "events.list.empty.upcoming.title" : {
+      "comment" : "「今後の予定」に 1 件も無いときの空状態の見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今後の予定はありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "예정된 라이브가 없어요"
+          }
+        }
+      }
+    },
+    "events.list.filter_chip.favorite" : {
+      "comment" : "適用中の絞り込みのチップ: お気に入りだけ (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入り"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기"
+          }
+        }
+      }
+    },
+    "events.list.filter_chip.has_note" : {
+      "comment" : "適用中の絞り込みのチップ: メモがあるライブだけ (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メモあり"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "메모 있음"
+          }
+        }
+      }
+    },
+    "events.list.filter_empty.action" : {
+      "comment" : "名前の絞り込みを消すボタン (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "絞り込みを解除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터 해제"
+          }
+        }
+      }
+    },
+    "events.list.filter_empty.message" : {
+      "comment" : "名前の絞り込みで 1 件も残らなかったときの説明。query は入力した語 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」に一致するライブがありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@”에 해당하는 라이브가 없어요"
+          }
+        }
+      }
+    },
+    "events.list.filter_empty.title" : {
+      "comment" : "名前の絞り込みで 1 件も残らなかったときの空状態の見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "絞り込み結果がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터 결과가 없어요"
+          }
+        }
+      }
+    },
+    "events.list.menu.add_event" : {
+      "comment" : "ライブ一覧の右上メニュー: 新しいライブを作る (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イベントを追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이벤트 추가"
+          }
+        }
+      }
+    },
+    "events.list.search_prompt" : {
+      "comment" : "ナビバーの絞り込み欄のプレースホルダ (虫眼鏡が付くので対象だけ) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ名・会場"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브 이름·공연장"
+          }
+        }
+      }
+    },
+    "events.list.tab.past" : {
+      "comment" : "ライブ一覧のセグメント: 終わったライブ。list.empty.upcoming.message が「開催済み」タブと呼ぶ (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開催済み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "종료"
+          }
+        }
+      }
+    },
+    "events.list.tab.upcoming" : {
+      "comment" : "ライブ一覧のセグメント: これからのライブ (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今後の予定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "예정"
+          }
+        }
+      }
+    },
+    "events.list.title" : {
+      "comment" : "ライブ一覧の画面の見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브"
+          }
+        }
+      }
+    },
+    "events.local_write.record_attendance" : {
+      "comment" : "端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加の記録"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가 기록"
+          }
+        }
+      }
+    },
+    "events.local_write.record_owned" : {
+      "comment" : "端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (映像円盤の所有) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有の記録"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "소유 기록"
+          }
+        }
+      }
+    },
+    "events.local_write.save_note" : {
+      "comment" : "端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メモの保存"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "메모 저장"
+          }
+        }
+      }
+    },
+    "events.local_write.save_seat" : {
+      "comment" : "端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "座席の保存"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "좌석 저장"
+          }
+        }
+      }
+    },
+    "events.local_write.toggle" : {
+      "comment" : "端末への書き込みに失敗したときの知らせに入る操作名。mark はマークの種類名 (お気に入りなど) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@の切り替え"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 전환"
+          }
+        }
+      }
+    },
+    "events.meta.separator" : {
+      "comment" : "項目を 1 行に並べるときの区切り (前後に空白)。公演の「会場 ・ 日付」、会場の「キャパ ・ 旧名」など (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " ・ "
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : " · "
+          }
+        }
+      }
+    },
+    "events.my_predictions.empty.message" : {
+      "comment" : "マイ予想: 1 つも投票していないときの説明 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未来公演のセトリ予想で投票すると、ここに表示されます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "앞으로 열릴 공연의 세트리스트 예상에 투표하면 여기에 표시돼요"
+          }
+        }
+      }
+    },
+    "events.my_predictions.empty.title" : {
+      "comment" : "マイ予想: 1 つも投票していないときの見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだ予想していません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 예상하지 않았어요"
+          }
+        }
+      }
+    },
+    "events.my_predictions.login.message" : {
+      "comment" : "マイ予想: 未ログインのときの説明 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Sign In すると、投票した予想がここにまとまります"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Apple Sign In으로 로그인하면 투표한 예상이 여기에 모여요"
+          }
+        }
+      }
+    },
+    "events.my_predictions.login.title" : {
+      "comment" : "マイ予想: 未ログインのときの見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ログインが必要です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "로그인이 필요해요"
+          }
+        }
+      }
+    },
+    "events.my_predictions.title" : {
+      "comment" : "自分が投票したセトリ予想の一覧の見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイ予想"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "내 예상"
+          }
+        }
+      }
+    },
+    "events.note_editor.title" : {
+      "comment" : "メモの入力シート・ダイアログの見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メモ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "메모"
+          }
+        }
+      }
+    },
+    "events.playlist.action.stop" : {
+      "comment" : "プレビュー再生中の音楽メニュー: 止める (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生停止"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "재생 정지"
+          }
+        }
+      }
+    },
+    "events.playlist.alert.title" : {
+      "comment" : "プレイリストを作った結果のアラートの見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プレイリスト"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "플레이리스트"
+          }
+        }
+      }
+    },
+    "events.playlist.created" : {
+      "comment" : "プレイリストを作ったとき。name はプレイリスト名。1000 以上は桁区切りが付く (ありえない) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "「%1$@」プレイリストを作成しました（%arg曲）"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "“%1$@” 플레이리스트를 만들었어요 (%arg곡)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "events.playlist.description.prediction" : {
+      "comment" : "セトリ予想から Apple Music に作るプレイリストの説明欄。アプリ名 (アイドルライブDB) は訳さない (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドルライブDB 予想セトリから作成"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "アイドルライブDB 예상 세트리스트에서 만듦"
+          }
+        }
+      }
+    },
+    "events.playlist.description.setlist" : {
+      "comment" : "Apple Music に作るプレイリストの説明欄。アプリ名 (アイドルライブDB) は訳さない (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドルライブDB から作成"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "アイドルライブDB에서 만듦"
+          }
+        }
+      }
+    },
+    "events.playlist.error.failed" : {
+      "comment" : "プレイリストを作れなかったとき。error は OS のエラーの説明 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プレイリスト作成に失敗しました: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "플레이리스트를 만들지 못했어요: %1$@"
+          }
+        }
+      }
+    },
+    "events.playlist.error.no_ids" : {
+      "comment" : "プレイリストに入れられる曲が無いとき (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Music IDが登録されている曲がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Apple Music ID가 등록된 곡이 없어요"
+          }
+        }
+      }
+    },
+    "events.playlist.error.subscription" : {
+      "comment" : "Apple Music を契約していないとき (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Musicのサブスクリプションが必要です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Apple Music 구독이 필요해요"
+          }
+        }
+      }
+    },
+    "events.playlist.progress" : {
+      "comment" : "プレイリストを作っている間の進み具合 (何曲目 / 全曲数) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プレイリスト作成中… %1$@/%2$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "플레이리스트 만드는 중… %1$@/%2$@"
+          }
+        }
+      }
+    },
+    "events.playlist.progress_indeterminate" : {
+      "comment" : "プレイリストを作っている間 (曲数が決まる前) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プレイリスト作成中…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "플레이리스트 만드는 중…"
+          }
+        }
+      }
+    },
+    "events.prediction.action.add" : {
+      "comment" : "セトリ予想の見出しの右のボタン: 曲を選んで投票する。prediction.empty.message が「予想を追加」と呼ぶ (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "予想を追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "예상 추가"
+          }
+        }
+      }
+    },
+    "events.prediction.add.failed" : {
+      "comment" : "まとめて投票したうち、失敗した曲があったとき。1000 以上は桁区切りが付く (ありえない) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg曲の追加に失敗しました"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg곡을 추가하지 못했어요"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "events.prediction.add.overflow" : {
+      "comment" : "選んだ曲が残りの票より多かったとき。limit は 1 公演の上限、count は投票できなかった曲数 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "1公演%1$@票までなので、%arg曲は投票できませんでした"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "공연당 %1$@표까지라서 %arg곡은 투표하지 못했어요"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "events.prediction.empty.message" : {
+      "comment" : "セトリ予想が 1 つも無いときの説明。「予想を追加」は prediction.action.add のボタン (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「予想を追加」から、来そうな曲に投票しよう"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“예상 추가”에서 나올 것 같은 곡에 투표해 보세요"
+          }
+        }
+      }
+    },
+    "events.prediction.empty.title" : {
+      "comment" : "セトリ予想が 1 つも無いときの見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだ予想がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 예상이 없어요"
+          }
+        }
+      }
+    },
+    "events.prediction.error.invalid_response" : {
+      "comment" : "セトリ予想のエラー: サーバの応答が読めない (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーからの応答が不正です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "서버 응답이 올바르지 않아요"
+          }
+        }
+      }
+    },
+    "events.prediction.error.not_found" : {
+      "comment" : "セトリ予想の投票のエラー: 公演・曲が無い (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "対象が見つかりませんでした"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "대상을 찾지 못했어요"
+          }
+        }
+      }
+    },
+    "events.prediction.error.rate_limited" : {
+      "comment" : "セトリ予想の投票のエラー: 回数の制限 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票の制限に達しました。明日またお試しください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표 한도에 도달했어요. 내일 다시 시도해 주세요"
+          }
+        }
+      }
+    },
+    "events.prediction.error.server" : {
+      "comment" : "セトリ予想のエラー: サーバのエラー。message はサーバの文言 (訳さない) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーエラー: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "서버 오류: %1$@"
+          }
+        }
+      }
+    },
+    "events.prediction.error.too_many_performers" : {
+      "comment" : "歌唱メンバー予想の投票のエラー: 1 曲 8 人まで (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1曲につき予想できるのは8人までです"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "한 곡에 최대 8명까지 예상할 수 있어요"
+          }
+        }
+      }
+    },
+    "events.prediction.error.unauthorized" : {
+      "comment" : "セトリ予想の投票のエラー: 未ログイン (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票にはApple Sign Inが必要です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표하려면 Apple Sign In이 필요해요"
+          }
+        }
+      }
+    },
+    "events.prediction.error.vote_limit" : {
+      "comment" : "セトリ予想の投票のエラー: 1 公演の上限。count は上限の曲数 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "1公演につき投票できるのは%arg曲までです"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "공연당 최대 %arg곡까지 투표할 수 있어요"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "events.prediction.forecast.caption" : {
+      "comment" : "機械予測の節の見出しの下の説明 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "過去のセトリから推定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "과거 세트리스트에서 추정"
+          }
+        }
+      }
+    },
+    "events.prediction.forecast.promote" : {
+      "comment" : "機械予測の曲の行のボタン: その曲に投票する (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "予想に入れる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "예상에 넣기"
+          }
+        }
+      }
+    },
+    "events.prediction.forecast.promote.a11y" : {
+      "comment" : "機械予測の曲の行のボタンの読み上げ。title は曲名 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@を予想に入れる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 예상에 넣기"
+          }
+        }
+      }
+    },
+    "events.prediction.forecast.title" : {
+      "comment" : "過去のセトリから機械的に出した予測の節の見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "機械予測"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "기계 예측"
+          }
+        }
+      }
+    },
+    "events.prediction.header" : {
+      "comment" : "セトリ予想の節の見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリ予想"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 예상"
+          }
+        }
+      }
+    },
+    "events.prediction.login_prompt" : {
+      "comment" : "セトリ予想の節の未ログインの人への案内 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリ予想の投票にはログインが必要です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 예상에 투표하려면 로그인해야 해요"
+          }
+        }
+      }
+    },
+    "events.prediction.menu.a11y" : {
+      "comment" : "セトリ予想の ⋯ メニューボタンの読み上げ (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "操作"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "작업"
+          }
+        }
+      }
+    },
+    "events.prediction.menu.create_playlist" : {
+      "comment" : "セトリ予想の ⋯ メニュー: 上位の曲で Apple Music のプレイリストを作る (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appleプレイリスト作成"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Apple 플레이리스트 만들기"
+          }
+        }
+      }
+    },
+    "events.prediction.menu.preview_top" : {
+      "comment" : "セトリ予想の ⋯ メニュー: 上位の曲の試聴を順に流す (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上位曲をプレビュー再生"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "상위 곡 미리 듣기"
+          }
+        }
+      }
+    },
+    "events.prediction.my_votes" : {
+      "comment" : "自分が投票した曲数 / 1 公演の上限 (シェアの帯) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あなたの予想 %1$@/%2$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "내 예상 %1$@/%2$@"
+          }
+        }
+      }
+    },
+    "events.prediction.performers.empty" : {
+      "comment" : "歌唱メンバー予想: 公演の出演者が登録されていないとき (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出演キャスト情報がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출연 캐스트 정보가 없어요"
+          }
+        }
+      }
+    },
+    "events.prediction.performers.unvote.a11y" : {
+      "comment" : "歌唱メンバー予想のアイドルのチップの読み上げ (投票済みのとき)。name はアイドル名。1000 以上は桁区切りが付く (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%1$@ の予想を取り消す (現在%arg票)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%1$@ 예상 취소 (현재 %arg표)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "events.prediction.performers.vote.a11y" : {
+      "comment" : "歌唱メンバー予想のアイドルのチップの読み上げ (まだ投票していないとき)。name はアイドル名。1000 以上は桁区切りが付く (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%1$@ を予想 (現在%arg票)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%1$@ 예상하기 (현재 %arg표)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "events.prediction.playlist.name" : {
+      "comment" : "セトリ予想から Apple Music に作るプレイリストの名前。show は公演名 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ 予想セトリ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 예상 세트리스트"
+          }
+        }
+      }
+    },
+    "events.prediction.remaining" : {
+      "comment" : "セトリ予想の見出し: 自分の残りの票数 / 1 公演の上限 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "残り%1$@/%2$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "남은 표 %1$@/%2$@"
+          }
+        }
+      }
+    },
+    "events.prediction.row.performers_toggle" : {
+      "comment" : "セトリ予想の曲の行の下の、誰が歌うかの予想を開くボタン (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌唱メンバー予想"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가창 멤버 예상"
+          }
+        }
+      }
+    },
+    "events.prediction.row.unvote.a11y" : {
+      "comment" : "セトリ予想の曲の行の投票ボタンの読み上げ (投票済みのとき) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票を取り消す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표 취소"
+          }
+        }
+      }
+    },
+    "events.prediction.row.vote" : {
+      "comment" : "セトリ予想の曲の行の投票ボタン (まだ投票していないとき) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "予想"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "예상"
+          }
+        }
+      }
+    },
+    "events.prediction.row.vote.a11y" : {
+      "comment" : "セトリ予想の曲の行の投票ボタンの読み上げ (まだ投票していないとき) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この曲に投票"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 곡에 투표"
+          }
+        }
+      }
+    },
+    "events.prediction.row.voted" : {
+      "comment" : "セトリ予想の曲の行の投票ボタン (投票済みのとき。押すと取り消す) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票済"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표함"
+          }
+        }
+      }
+    },
+    "events.prediction.share.a11y" : {
+      "comment" : "自分の予想をシェアするボタンの読み上げ (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分のセトリ予想をシェア"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "내 세트리스트 예상 공유"
+          }
+        }
+      }
+    },
+    "events.prediction.share.button" : {
+      "comment" : "自分の予想をシェアするボタン (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "予想をシェア"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "예상 공유"
+          }
+        }
+      }
+    },
+    "events.prediction.votes" : {
+      "comment" : "セトリ予想の票数 (見出しの合計・曲ごと・歌唱メンバー予想の合計)。1000 以上は桁区切りが付く (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg票"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg표"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "events.releases.add.a11y" : {
+      "comment" : "映像円盤の所有トグルの読み上げ (持っていないとき)。title は円盤名 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ を所有に追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 소유로 표시"
+          }
+        }
+      }
+    },
+    "events.releases.caption" : {
+      "comment" : "映像円盤の節の下の説明 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "持っている円盤に印を付けられます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가지고 있는 디스크에 표시할 수 있어요."
+          }
+        }
+      }
+    },
+    "events.releases.header" : {
+      "comment" : "ライブの情報パネル: 映像円盤 (Blu-ray / DVD) の節の見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "映像円盤"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "영상 디스크"
+          }
+        }
+      }
+    },
+    "events.releases.not_owned" : {
+      "comment" : "映像円盤の行の所有トグル (持っていないとき) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未所有"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "미소유"
+          }
+        }
+      }
+    },
+    "events.releases.owned" : {
+      "comment" : "映像円盤の行の所有トグル (持っているとき) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "소유"
+          }
+        }
+      }
+    },
+    "events.releases.owned_count" : {
+      "comment" : "映像円盤の節の見出しの右: 持っている数 / 全部の数 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@/%2$@ 所有"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@/%2$@ 소유"
+          }
+        }
+      }
+    },
+    "events.releases.purchase" : {
+      "comment" : "映像円盤の行の、購入ページへのリンク (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "購入ページ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "구매 페이지"
+          }
+        }
+      }
+    },
+    "events.releases.remove.a11y" : {
+      "comment" : "映像円盤の所有トグルの読み上げ (持っているとき)。title は円盤名 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ を所有から外す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 소유 표시 해제"
+          }
+        }
+      }
+    },
+    "events.seat_editor.footer" : {
+      "comment" : "座席の入力欄の下の説明 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブロック・列・番号など、自由に記録できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "블록·열·번호 등을 자유롭게 기록할 수 있어요."
+          }
+        }
+      }
+    },
+    "events.seat_editor.placeholder_ios" : {
+      "comment" : "座席の入力欄のプレースホルダ。Android は seat_editor.placeholder_android (ja が違う) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "例: アリーナ A6 12列 34番"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "예: 아레나 A6 12열 34번"
+          }
+        }
+      }
+    },
+    "events.seat_editor.title" : {
+      "comment" : "座席の入力シート・ダイアログの見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "座席"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "좌석"
+          }
+        }
+      }
+    },
+    "events.setlist.attendance.join" : {
+      "comment" : "参加の形態を選ぶダイアログの選択肢。type は形態 (現地・配信など。コアの語) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@で参加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 참가"
+          }
+        }
+      }
+    },
+    "events.setlist.attendance.remove" : {
+      "comment" : "参加の形態を選ぶダイアログの、参加を外すボタン (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加を取り消す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가 취소"
+          }
+        }
+      }
+    },
+    "events.setlist.attendance.title" : {
+      "comment" : "参加の形態を選ぶダイアログの見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この公演への参加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 공연 참가"
+          }
+        }
+      }
+    },
+    "events.setlist.breadcrumb.a11y" : {
+      "comment" : "セトリ画面の上の「ブランド › イベント」のパンくずの読み上げ (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上の階層"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "상위 계층"
+          }
+        }
+      }
+    },
+    "events.setlist.costume.header" : {
+      "comment" : "セトリ画面の衣装の節の見出し。1000 以上は桁区切りが付く (ありえない) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "衣装 ・ %arg 着"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "의상 · %arg벌"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "events.setlist.empty.action" : {
+      "comment" : "セトリが無い過去の公演の空状態のボタン (編集できる人だけ) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリを追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 추가"
+          }
+        }
+      }
+    },
+    "events.setlist.empty.future.message" : {
+      "comment" : "セトリが無い未来の公演の空状態の説明 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリは公演後に登録されます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트는 공연 후에 등록돼요"
+          }
+        }
+      }
+    },
+    "events.setlist.empty.future.title" : {
+      "comment" : "セトリが無い未来の公演の空状態の見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演前です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 전이에요"
+          }
+        }
+      }
+    },
+    "events.setlist.empty.past.message" : {
+      "comment" : "セトリが無い過去の公演の空状態の説明 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このライブのセトリはまだ登録されていません。ログインして編集に参加できます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 라이브의 세트리스트가 아직 등록되지 않았어요. 로그인하면 편집에 참여할 수 있어요"
+          }
+        }
+      }
+    },
+    "events.setlist.empty.past.title" : {
+      "comment" : "セトリが無い過去の公演の空状態の見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリ未登録"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 미등록"
+          }
+        }
+      }
+    },
+    "events.setlist.info.capacity" : {
+      "comment" : "セトリ画面の会場カードの行の名前: 会場の収容人数 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャパ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "수용 인원"
+          }
+        }
+      }
+    },
+    "events.setlist.info.date" : {
+      "comment" : "セトリ画面の会場カードの行の名前: 公演日 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日付"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "날짜"
+          }
+        }
+      }
+    },
+    "events.setlist.info.stream" : {
+      "comment" : "セトリ画面の会場カードの行の名前: 配信サービス (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配信"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "스트리밍"
+          }
+        }
+      }
+    },
+    "events.setlist.info.venue" : {
+      "comment" : "セトリ画面の会場カードの行の名前: 会場 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会場"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연장"
+          }
+        }
+      }
+    },
+    "events.setlist.like.add.a11y" : {
+      "comment" : "セトリの行の 👍 ボタンの読み上げ (まだ押していないとき) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この曲が良かった"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 곡이 좋았어요"
+          }
+        }
+      }
+    },
+    "events.setlist.like.error.unauthorized_ios" : {
+      "comment" : "未ログインで 👍 したときのエラー。Android は setlist.like.error.unauthorized_android (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Like するには Apple Sign In が必要です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Like하려면 Apple Sign In이 필요해요"
+          }
+        }
+      }
+    },
+    "events.setlist.like.remove.a11y" : {
+      "comment" : "セトリの行の 👍 ボタンの読み上げ (押してあるとき) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Good を取り消す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Good 취소"
+          }
+        }
+      }
+    },
+    "events.setlist.menu.add_to_apple_music" : {
+      "comment" : "セトリ画面の音楽メニュー: セトリの曲で Apple Music のプレイリストを作る (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Musicプレイリストに追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Apple Music 플레이리스트에 추가"
+          }
+        }
+      }
+    },
+    "events.setlist.menu.display" : {
+      "comment" : "セトリ画面の右上メニューの、表示の詳しさを選ぶ項目の名前 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "표시"
+          }
+        }
+      }
+    },
+    "events.setlist.menu.edit" : {
+      "comment" : "セトリ画面の右上メニュー (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリを編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 편집"
+          }
+        }
+      }
+    },
+    "events.setlist.menu.history" : {
+      "comment" : "セトリ画面の右上メニュー (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリの編集履歴"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 편집 기록"
+          }
+        }
+      }
+    },
+    "events.setlist.menu.preview_all" : {
+      "comment" : "セトリ画面の音楽メニュー: 全曲の試聴を順に流す (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全曲プレビュー再生"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전곡 미리 듣기"
+          }
+        }
+      }
+    },
+    "events.setlist.row.comment_card" : {
+      "comment" : "セトリの行の長押しメニュー: 曲名と感想のシェア画像を作る (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "感想カードを作る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "감상 카드 만들기"
+          }
+        }
+      }
+    },
+    "events.setlist.row.copy.performers" : {
+      "comment" : "シンプル表示のセトリの行の長押しメニュー (歌った人の名前) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "演者をコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출연자 복사"
+          }
+        }
+      }
+    },
+    "events.setlist.row.copy.title" : {
+      "comment" : "シンプル表示のセトリの行の長押しメニュー (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲名をコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡명 복사"
+          }
+        }
+      }
+    },
+    "events.setlist.row.full_cast" : {
+      "comment" : "セトリの行の札: 出演者全員で歌った曲 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全員"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전원"
+          }
+        }
+      }
+    },
+    "events.setlist.section.encore" : {
+      "comment" : "セトリの区切りの見出し: アンコール (コアがアンコール類をこの語に畳む) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アンコール"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "앙코르"
+          }
+        }
+      }
+    },
+    "events.setlist.section.main" : {
+      "comment" : "セトリの区切りの見出し: 本編 (コアの見出し「本編」とメタ未取得のときに出す) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本編"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "본편"
+          }
+        }
+      }
+    },
+    "events.setlist.share.a11y" : {
+      "comment" : "セトリ画面の右上の共有ボタンの読み上げ (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この公演をシェア"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 공연 공유"
+          }
+        }
+      }
+    },
+    "events.setlist.tab.prediction" : {
+      "comment" : "未来の公演でセトリと予想が両方あるときのセグメント: セトリ予想 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "予想"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "예상"
+          }
+        }
+      }
+    },
+    "events.setlist.tab.setlist" : {
+      "comment" : "未来の公演でセトリと予想が両方あるときのセグメント: 実際のセトリ (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セットリスト"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트"
+          }
+        }
+      }
+    },
+    "events.setlist.ticket.header" : {
+      "comment" : "セトリ画面のチケット価格の節の見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チケット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "티켓"
+          }
+        }
+      }
+    },
+    "events.setlist.ticket.kind_name" : {
+      "comment" : "券の形態が 1 種類だけのときの行の名前。kind は形態 (コアの語)、name は券種名 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@・%2$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@·%2$@"
+          }
+        }
+      }
+    },
+    "events.setlist.ticket.name_estimate" : {
+      "comment" : "推定の価格の券種名。name は券種名 (データ) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ (推定)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ (추정)"
+          }
+        }
+      }
+    },
+    "events.setlist.ticket.range_estimate" : {
+      "comment" : "券の形態ごとの価格帯に推定の価格が混じるとき。range はコアが作った価格帯 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ (推定含む)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ (추정 포함)"
+          }
+        }
+      }
+    },
+    "events.setlist.title" : {
+      "comment" : "公演のセトリ画面の見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セットリスト"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트"
+          }
+        }
+      }
+    },
+    "events.setlist.vote_hint.login" : {
+      "comment" : "セトリの上の案内 (未ログイン) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👍 で投票するにはログインが必要です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "👍로 투표하려면 로그인해야 해요"
+          }
+        }
+      }
+    },
+    "events.setlist.vote_hint.signed_in" : {
+      "comment" : "セトリの上の案内 (ログイン済み) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "良かったと思った曲に 👍 で投票しよう！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "좋았던 곡에 👍로 투표해 보세요!"
+          }
+        }
+      }
+    },
+    "events.user_mark.attended.edit.a11y" : {
+      "comment" : "ライブ詳細のマイマークの帯の参加ボタンの読み上げ (参加済みの公演があるとき) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加した公演を編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가한 공연 편집"
+          }
+        }
+      }
+    },
+    "events.user_mark.attended.select.a11y" : {
+      "comment" : "ライブ詳細のマイマークの帯の参加ボタンの読み上げ (まだ参加が無いとき) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加した公演を選ぶ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가한 공연 고르기"
+          }
+        }
+      }
+    },
+    "events.user_mark.kind.attended" : {
+      "comment" : "マークの種類名: 公演に参加した。マイマークの帯のボタンの名前にもなる (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가"
+          }
+        }
+      }
+    },
+    "events.user_mark.kind.collected" : {
+      "comment" : "マークの種類名: 楽曲をライブで聴いた (現地回収した) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回収済"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "회수함"
+          }
+        }
+      }
+    },
+    "events.user_mark.kind.favorite" : {
+      "comment" : "マークの種類名: お気に入り。マイマークの帯のボタンの名前にもなる (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入り"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기"
+          }
+        }
+      }
+    },
+    "events.user_mark.kind.mastery" : {
+      "comment" : "マークの種類名: 楽曲の習熟度 (段階) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "習熟度"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "숙련도"
+          }
+        }
+      }
+    },
+    "events.user_mark.kind.my_pick" : {
+      "comment" : "マークの種類名: 担当 (推しのアイドル) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당"
+          }
+        }
+      }
+    },
+    "events.user_mark.kind.note" : {
+      "comment" : "マークの種類名: 自分用のメモ。マイマークの帯のボタンの名前にもなる (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メモ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "메모"
+          }
+        }
+      }
+    },
+    "events.user_mark.kind.owned" : {
+      "comment" : "マークの種類名: 映像円盤・カードを持っている (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "소유"
+          }
+        }
+      }
+    },
+    "events.user_mark.kind.seat" : {
+      "comment" : "マークの種類名: 参加した公演の座席。マイマークの帯のボタンの名前にもなる (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "座席"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "좌석"
+          }
+        }
+      }
+    },
+    "events.user_mark.note.filled.a11y" : {
+      "comment" : "マイマークの帯のメモボタンの読み上げ (メモが書いてあるとき) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メモあり"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "메모 있음"
+          }
+        }
+      }
+    },
+    "events.user_mark.seat.empty.a11y" : {
+      "comment" : "マイマークの帯の座席ボタンの読み上げ (まだ座席が無いとき) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "座席を記録"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "좌석 기록"
+          }
+        }
+      }
+    },
+    "events.user_mark.seat.filled.a11y" : {
+      "comment" : "マイマークの帯の座席ボタンの読み上げ (座席が書いてあるとき。seat は入力した座席) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "座席: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "좌석: %1$@"
+          }
+        }
+      }
+    },
+    "events.venue.capacity" : {
+      "comment" : "会場のキャパ (収容人数)。1000 以上は桁区切りが付く (14,500人) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg人"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg명"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "events.venue.name_with_area" : {
+      "comment" : "都道府県つきの会場名 (東京・日本武道館)。どちらもデータ (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@・%2$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@·%2$@"
+          }
+        }
+      }
+    },
+    "events.venue_picker.empty.message" : {
+      "comment" : "会場の絞り込みで 1 件も残らなかったときの説明。query は入力した語 (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」に一致する会場がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@”에 해당하는 공연장이 없어요"
+          }
+        }
+      }
+    },
+    "events.venue_picker.empty.title" : {
+      "comment" : "会場の絞り込みで 1 件も残らなかったときの見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "見つかりません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "찾을 수 없어요"
+          }
+        }
+      }
+    },
+    "events.venue_picker.former_name" : {
+      "comment" : "会場の行の副題: 以前の名前 (データ) (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旧: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "옛 이름: %1$@"
+          }
+        }
+      }
+    },
+    "events.venue_picker.none" : {
+      "comment" : "会場を選ぶ画面の先頭の行: 会場で絞らない (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択なし"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "선택 안 함"
+          }
+        }
+      }
+    },
+    "events.venue_picker.search_prompt" : {
+      "comment" : "会場を選ぶ画面の検索欄のプレースホルダ (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会場名・旧名・地域で検索"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연장 이름·옛 이름·지역으로 검색"
+          }
+        }
+      }
+    },
+    "events.venue_picker.title" : {
+      "comment" : "会場を選ぶ画面の見出し (i18n/catalog/events.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会場"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연장"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

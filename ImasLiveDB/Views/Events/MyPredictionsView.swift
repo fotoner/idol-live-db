@@ -29,14 +29,14 @@ struct MyPredictionsView: View {
             } else if !isSignedIn {
                 ImasEmptyState(
                     systemImage: "person.crop.circle.badge.questionmark",
-                    title: "ログインが必要です",
-                    message: "Apple Sign In すると、投票した予想がここにまとまります"
+                    title: String(localized: L10n.Events.myPredictionsLoginTitle),
+                    message: String(localized: L10n.Events.myPredictionsLoginMessage)
                 )
             } else if groups.isEmpty {
                 ImasEmptyState(
                     systemImage: "music.note.list",
-                    title: "まだ予想していません",
-                    message: "未来公演のセトリ予想で投票すると、ここに表示されます"
+                    title: String(localized: L10n.Events.myPredictionsEmptyTitle),
+                    message: String(localized: L10n.Events.myPredictionsEmptyMessage)
                 )
             } else {
                 List {
@@ -68,7 +68,7 @@ struct MyPredictionsView: View {
                 }
             }
         }
-        .navigationTitle("マイ予想")
+        .navigationTitle(L10n.Events.myPredictionsTitle)
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $sheetDestination) { dest in
             DetailSheetView(destination: dest).environment(database)

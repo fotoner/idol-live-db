@@ -51,13 +51,13 @@ struct Venue: Codable, FetchableRecord, PersistableRecord, Identifiable, Hashabl
     /// 「東京・日本武道館」のような地域つき表示。都道府県が無ければ名前だけ。
     var displayNameWithArea: String {
         guard let prefecture, !prefecture.isEmpty else { return name }
-        return "\(prefecture)・\(name)"
+        return String(localized: L10n.Events.venueNameWithArea(prefecture: prefecture, name: name))
     }
 
-    /// 「14,500人」。キャパ未登録なら nil。
-    var capacityLabel: String? {
+    /// 「14,500人」。キャパ未登録なら nil。桁区切りは表示言語の書式 (count 引数)。
+    var capacityLabel: LocalizedStringResource? {
         guard let capacity else { return nil }
-        return "\(capacity.formatted(.number.grouping(.automatic)))人"
+        return L10n.Events.venueCapacity(count: capacity)
     }
 }
 

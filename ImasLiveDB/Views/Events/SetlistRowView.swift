@@ -122,7 +122,7 @@ struct SetlistRowView: View {
             }
             .buttonStyle(.borderless)
             .disabled(likeBusy)
-            .accessibilityLabel(liked ? "Good を取り消す" : "この曲が良かった")
+            .accessibilityLabel(liked ? L10n.Events.setlistLikeRemoveA11y : L10n.Events.setlistLikeAddA11y)
 
             if count > 0 {
                 Text("\(count)")
@@ -239,7 +239,7 @@ struct SetlistRowView: View {
             Button {
                 showCommentShare = true
             } label: {
-                Label("感想カードを作る", systemImage: "square.and.arrow.up")
+                Label(L10n.Events.setlistRowCommentCard, systemImage: "square.and.arrow.up")
             }
         }
         .sheet(isPresented: $showCommentShare) {
@@ -375,7 +375,7 @@ struct SetlistRowView: View {
                 ImasTagChip(text: name, kind: .unit, seed: seed)
             }
         } else if isFullCast {
-            ImasTagChip(text: "全員", kind: .all, seed: seed)
+            ImasTagChip(text: String(localized: L10n.Events.setlistRowFullCast), kind: .all, seed: seed)
                 .contentShape(Rectangle())
                 .onTapGesture { showPerformersSheet = true }
         } else if !performers.isEmpty {

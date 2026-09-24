@@ -82,6 +82,9 @@ import com.fugaif.imaslivedb.data.model.SetlistRow
 import com.fugaif.imaslivedb.data.model.Show
 import com.fugaif.imaslivedb.data.model.ShowTicket
 import com.fugaif.imaslivedb.data.model.VenueDirectory
+import com.fugaif.imaslivedb.i18n.coreText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ArtworkImage
 import com.fugaif.imaslivedb.ui.components.CommunityLoginPromptDialog
 import com.fugaif.imaslivedb.ui.components.GradientHeader
@@ -183,12 +186,12 @@ fun SetlistScreen(
                 title = { Text(uiState.show?.name ?: "") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 },
                 actions = {
                     IconButton(onClick = { menuOpen = true }) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = "その他")
+                        Icon(Icons.Filled.MoreVert, contentDescription = L10n.Events.toolbarMoreA11y.resolve())
                     }
                     DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                         // 3 値なのでトグルではなく選ぶ形にする。メニューの中なので
@@ -212,13 +215,13 @@ fun SetlistScreen(
                         }
                         if (canShowEditActions) {
                             DropdownMenuItem(
-                                text = { Text("セトリを編集") },
+                                text = { Text(L10n.Events.setlistMenuEdit.resolve()) },
                                 leadingIcon = { Icon(Icons.Filled.Edit, null) },
                                 onClick = { menuOpen = false; startEdit() }
                             )
                         }
                         DropdownMenuItem(
-                            text = { Text("セトリの編集履歴") },
+                            text = { Text(L10n.Events.setlistMenuHistory.resolve()) },
                             leadingIcon = { Icon(Icons.Filled.History, null) },
                             onClick = { menuOpen = false; showHistorySheet = true }
                         )
@@ -282,7 +285,7 @@ fun SetlistScreen(
                                 val sub = listOfNotNull(
                                     uiState.venues.displayName(show) ?: show.venue?.takeIf { it.isNotBlank() },
                                     show.date.takeIf { it.isNotBlank() }
-                                ).joinToString(" ・ ")
+                                ).joinToString(L10n.Events.metaSeparator.resolve())
                                 if (sub.isNotEmpty()) {
                                     Text(sub, style = MaterialTheme.typography.bodySmall, color = DS.ink2)
                                 }
@@ -328,7 +331,8 @@ fun SetlistScreen(
                         }
                         item(key = "mark_bar") {
                             UserMarkBar(
-                                attendedLabel = marks.attendance?.let { "参加 (${it.label})" } ?: "参加",
+                                attendedLabel = (marks.attendance?.let { L10n.Events.userMarkAttendedWithType(type = it.label) }
+                                    ?: L10n.Events.userMarkKindAttended).resolve(),
                                 attendedOn = marks.attendance != null,
                                 onAttendedClick = { showAttendanceDialog = true },
                                 favoriteOn = marks.favoriteOn,
@@ -353,11 +357,12 @@ fun SetlistScreen(
                         val canAdd = canShowEditActions && !isFuture
                         ImasEmptyState(
                             icon = Icons.Filled.MusicNote,
-                            title = if (isFuture) "公演前です" else "セトリ未登録",
-                            message = if (isFuture) "セトリは公演後に登録されます"
-                            else "このライブのセトリはまだ登録されていません。ログインして編集に参加できます",
+                            title = (if (isFuture) L10n.Events.setlistEmptyFutureTitle else L10n.Events.setlistEmptyPastTitle)
+                                .resolve(),
+                            message = (if (isFuture) L10n.Events.setlistEmptyFutureMessage else L10n.Events.setlistEmptyPastMessage)
+                                .resolve(),
                             seed = seedHex,
-                            actionTitle = if (canAdd) "セトリを追加" else null,
+                            actionTitle = if (canAdd) L10n.Events.setlistEmptyAction.resolve() else null,
                             onAction = if (canAdd) ({ startEdit() }) else null
                         )
                     }
@@ -387,7 +392,7 @@ fun SetlistScreen(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = section.sectionName,
+                                text = section.sectionName.resolve(),
                                 style = MaterialTheme.typography.labelLarge,
                                 color = DS.ink2,
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
@@ -450,7 +455,7 @@ fun SetlistScreen(
 
     if (showLoginPrompt) {
         CommunityLoginPromptDialog(
-            message = "セトリの編集や 👍 での投票にはログインが必要です。",
+            message = L10n.Events.setlistLoginDialog.resolve(),
             onDismiss = viewModel::dismissLoginPrompt
         )
     }
@@ -498,13 +503,14 @@ private fun AttendanceDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("この公演への参加") },
+        title = { Text(L10n.Events.setlistAttendanceTitle.resolve()) },
         text = {
             Column {
                 AttendanceType.options().forEach { type ->
                     val on = current == type
                     Text(
-                        if (on) "${type.label}で参加 (取り消す)" else "${type.label}で参加",
+                        (if (on) L10n.Events.setlistAttendanceJoinSelected(type = type.label)
+                        else L10n.Events.setlistAttendanceJoin(type = type.label)).resolve(),
                         fontSize = 15.sp,
                         fontWeight = if (on) FontWeight.Bold else FontWeight.Normal,
                         color = if (on) DS.ink else DS.ink2,
@@ -517,7 +523,7 @@ private fun AttendanceDialog(
             }
         },
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("キャンセル") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(L10n.Events.actionCancel.resolve()) } }
     )
 }
 
@@ -575,8 +581,7 @@ private fun VoteHintRow(isSignedIn: Boolean, onLoginClick: () -> Unit) {
     ) {
         Icon(Icons.Filled.ThumbUp, contentDescription = null, tint = DS.pick, modifier = Modifier.size(14.dp))
         Text(
-            if (isSignedIn) "良かったと思った曲に 👍 で投票しよう！"
-            else "👍 で投票するにはログインが必要です",
+            (if (isSignedIn) L10n.Events.setlistVoteHintSignedIn else L10n.Events.setlistVoteHintLogin).resolve(),
             style = MaterialTheme.typography.bodySmall,
             color = DS.ink2
         )
@@ -736,7 +741,7 @@ private fun VenueDateCard(
         val venueLabel = venues.displayName(show) ?: show.venue
         if (!venueLabel.isNullOrEmpty()) {
             ImasLabeledRow(
-                key = "会場", value = venueLabel, brand = brandId,
+                key = L10n.Events.setlistInfoVenue.resolve(), value = venueLabel, brand = brandId,
                 tappable = venueId != null,
                 onClick = venueId?.let { id -> { onFilteredShowsClick(ShowFilterKind.VENUE, id) } }
             )
@@ -744,7 +749,7 @@ private fun VenueDateCard(
         }
         if (show.date.isNotEmpty()) {
             ImasLabeledRow(
-                key = "日付", value = show.date, brand = brandId, tappable = true,
+                key = L10n.Events.setlistInfoDate.resolve(), value = show.date, brand = brandId, tappable = true,
                 onClick = { onFilteredShowsClick(ShowFilterKind.DATE, show.date) }
             )
         }
@@ -762,7 +767,7 @@ private fun TicketCard(tickets: List<ShowTicket>, brandId: String?) {
     val coreTickets = remember(tickets) { tickets.map { it.toCore() } }
     val ranges = remember(coreTickets) { ticketPriceRanges(coreTickets) }
     Column(Modifier.padding(bottom = 8.dp).fillMaxWidth()) {
-        ImasSectionHeader(title = "チケット", tight = true)
+        ImasSectionHeader(title = L10n.Events.setlistTicketHeader, tight = true)
         Column(
             Modifier.padding(horizontal = 16.dp).fillMaxWidth()
                 .clip(RoundedCornerShape(14.dp)).background(DS.surface)
@@ -776,7 +781,11 @@ private fun TicketCard(tickets: List<ShowTicket>, brandId: String?) {
                 if (showsBand) {
                     ImasLabeledRow(
                         key = ticketKindLabel(range.kind),
-                        value = if (range.hasEstimate) "${range.label} (推定含む)" else range.label,
+                        value = if (range.hasEstimate) {
+                            L10n.Events.setlistTicketRangeEstimate(range = range.label).resolve()
+                        } else {
+                            coreText(range.label)
+                        },
                         brand = brandId
                     )
                 }
@@ -789,9 +798,9 @@ private fun TicketCard(tickets: List<ShowTicket>, brandId: String?) {
                     }
                     ImasLabeledRow(
                         key = if (showsBand) {
-                            if (ticket.isEstimate) "${ticket.name} (推定)" else ticket.name
+                            if (ticket.isEstimate) L10n.Events.setlistTicketNameEstimate(name = ticket.name).resolve() else ticket.name
                         } else {
-                            "${ticketKindLabel(range.kind)}・${ticket.name}"
+                            L10n.Events.setlistTicketKindName(kind = ticketKindLabel(range.kind), name = ticket.name).resolve()
                         },
                         value = formatYen(ticket.price),
                         brand = brandId
@@ -814,7 +823,7 @@ private fun CostumeCard(costumes: List<ShowCostumeRecord>, brandId: String?) {
     Column(Modifier.padding(bottom = 8.dp).fillMaxWidth()) {
         // 見出しは共通の小見出し (iOS の ImasSectionHeader(tight:) と対)。左右の余白は
         // コンポーネント側が持つので、ここで重ねて付けない。
-        ImasSectionHeader(title = "衣装 ・ ${costumes.size} 着", tight = true)
+        ImasSectionHeader(title = L10n.Events.setlistCostumeHeader(count = costumes.size), tight = true)
         Column(
             Modifier.padding(horizontal = 16.dp).fillMaxWidth()
                 .clip(RoundedCornerShape(14.dp)).background(DS.surface)
@@ -998,7 +1007,8 @@ private fun SetlistItemRow(
             // 披露の履歴と自分の回収はここに入れない ([`NoteGroupsBlock`])。同じ形の札で
             // 混ぜると「ユニット名」と「4 回目」が同じ重みに見えて、行が札の羅列になる。
             // オリメンの札・ユニット名 (無ければ「全員」) を 1 列に回り込ませる。
-            val tagNames = unitNames.ifEmpty { if (isFullCast) listOf("全員") else emptyList() }
+            val fullCastLabel = L10n.Events.setlistRowFullCast.resolve()
+            val tagNames = unitNames.ifEmpty { if (isFullCast) listOf(fullCastLabel) else emptyList() }
             if (lineup != null || tagNames.isNotEmpty()) {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -1096,7 +1106,8 @@ private fun LikeButton(entry: SetlistLikeService.LikeEntry?, onClick: () -> Unit
         IconButton(onClick = onClick, modifier = Modifier.size(40.dp)) {
             Icon(
                 if (liked) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
-                contentDescription = if (liked) "Good を取り消す" else "この曲が良かった",
+                contentDescription = (if (liked) L10n.Events.setlistLikeRemoveA11y else L10n.Events.setlistLikeAddA11y)
+                    .resolve(),
                 tint = if (liked) DS.pick else DS.ink3,
                 modifier = Modifier.size(18.dp)
             )

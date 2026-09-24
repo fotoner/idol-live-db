@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/events.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- events.action.cancel: メモ・座席の入力と、公演への参加を選ぶダイアログの取り消しボタン -->
+    <string name="events_action_cancel">キャンセル</string>
+    <!-- events.action.save: メモ・座席の入力の保存ボタン -->
+    <string name="events_action_save">保存</string>
+    <!-- events.attendance_sheet.all_live: 全公演をまとめて現地参加にする行 -->
+    <string name="events_attendance_sheet_all_live">全公演に現地参加</string>
+    <!-- events.attendance_sheet.footer_android: 参加シートの説明。iOS の attendance_sheet.footer_ios と ja が違う -->
+    <string name="events_attendance_sheet_footer_android">公演ごとに参加形態を選べます。回収率には現地参加だけが数えられます。</string>
+    <!-- events.attendance_sheet.show_count: 「全公演に現地参加」の行の右に出す公演数。1000 以上は桁区切りが付く (ありえない) -->
+    <plurals name="events_attendance_sheet_show_count">
+        <item quantity="other">%1$,d公演</item>
+    </plurals>
+    <!-- events.attendance_sheet.title: イベントの公演ごとに参加を選ぶシートの見出し -->
+    <string name="events_attendance_sheet_title">参加した公演</string>
+    <!-- events.cast.day.date: 出演パネルの DAY 見出しの日付。weekday は表示言語の 1 文字の曜日 (土 / 토) -->
+    <string name="events_cast_day_date">%1$d/%2$d(%3$s)</string>
+    <!-- events.cast.empty.message: 出演パネルの空状態の説明 -->
+    <string name="events_cast_empty_message">セトリ・出演者が登録されると表示されます</string>
+    <!-- events.cast.empty.title: 出演パネルの空状態の見出し -->
+    <string name="events_cast_empty_title">出演情報がありません</string>
+    <!-- events.cast.full_attendance.count: 全員集合の帯の右の人数 (出演 / ブランド全体)。1000 以上は桁区切りが付く (ありえない) -->
+    <plurals name="events_cast_full_attendance_count">
+        <item quantity="other">%1$d/%2$,d 名</item>
+    </plurals>
+    <!-- events.cast.full_attendance.title: ブランドのアイドルが全員出演したライブの帯 -->
+    <string name="events_cast_full_attendance_title">全員集合！</string>
+    <!-- events.cast.group.header: 出演パネル: DAY ごと・欠席などのまとまりの見出し。label はコアが付けた名前 (DAY1・欠席など)。1000 以上は桁区切りが付く (ありえない) -->
+    <plurals name="events_cast_group_header">
+        <item quantity="other">%1$s ・ %2$,d名</item>
+    </plurals>
+    <!-- events.cast.role.guest: 出演パネル: ゲストの節の見出し (1 人のとき) と、アバターの下の札 -->
+    <string name="events_cast_role_guest">ゲスト</string>
+    <!-- events.cast.role.guest_count: 出演パネル: ゲストの節の見出し (2 人以上のとき)。1000 以上は桁区切りが付く (ありえない) -->
+    <plurals name="events_cast_role_guest_count">
+        <item quantity="other">ゲスト ・ %1$,d名</item>
+    </plurals>
+    <!-- events.cast.role.lead: 出演パネル: 主演の節の見出し (1 人のとき) と、アバターの下の札 -->
+    <string name="events_cast_role_lead">主演</string>
+    <!-- events.cast.role.lead_count: 出演パネル: 主演の節の見出し (2 人以上のとき)。1000 以上は桁区切りが付く (ありえない) -->
+    <plurals name="events_cast_role_lead_count">
+        <item quantity="other">主演 ・ %1$,d名</item>
+    </plurals>
+    <!-- events.detail.hero.joint: ライブ詳細の日付の行の後ろに付ける、合同ライブ (複数ブランド) の印 -->
+    <string name="events_detail_hero_joint">・ 合同</string>
+    <!-- events.detail.login_dialog: 未ログインで編集しようとしたときのダイアログの本文 -->
+    <string name="events_detail_login_dialog">ライブ・公演の編集にはログインが必要です。</string>
+    <!-- events.detail.menu.edit_android: ライブ詳細の右上メニュー: ライブを編集。iOS の detail.menu.edit と ja が違う -->
+    <string name="events_detail_menu_edit_android">このライブを編集</string>
+    <!-- events.detail.menu.history: ライブ詳細の右上メニュー (Android は公演の行の ⋮ メニューにも): 編集履歴を開く -->
+    <string name="events_detail_menu_history">編集履歴</string>
+    <!-- events.detail.share.a11y: ライブ詳細の右上の共有ボタンの読み上げ -->
+    <string name="events_detail_share_a11y">このイベントをシェア</string>
+    <!-- events.detail.shows.action.add_show: 公演を追加する操作。iOS は公演が無いときの空状態のボタン、Android は右上メニュー -->
+    <string name="events_detail_shows_action_add_show">公演を追加</string>
+    <!-- events.detail.shows.action.edit_show: 公演の行のメニュー (iOS は長押し、Android は ⋮) -->
+    <string name="events_detail_shows_action_edit_show">公演を編集</string>
+    <!-- events.detail.shows.empty.title: 公演が 1 つも無いときの空状態の見出し -->
+    <string name="events_detail_shows_empty_title">公演がまだありません</string>
+    <!-- events.detail.shows.header: 公演一覧の節の見出し。行を押すとセトリへ進む。1000 以上は桁区切りが付く (ありえない) -->
+    <plurals name="events_detail_shows_header">
+        <item quantity="other">公演 ・ %1$,d 公演 → セトリへ</item>
+    </plurals>
+    <!-- events.detail.shows.menu.a11y: 公演の行の ⋮ ボタンの読み上げ -->
+    <string name="events_detail_shows_menu_a11y">公演の操作</string>
+    <!-- events.detail.tab.cast: ライブ詳細の中のセグメント (公演・セトリ / 出演 / 情報) -->
+    <string name="events_detail_tab_cast">出演</string>
+    <!-- events.detail.tab.info: ライブ詳細の中のセグメント (公演・セトリ / 出演 / 情報) -->
+    <string name="events_detail_tab_info">情報</string>
+    <!-- events.detail.tab.shows: ライブ詳細の中のセグメント (公演・セトリ / 出演 / 情報) -->
+    <string name="events_detail_tab_shows">公演・セトリ</string>
+    <!-- events.filter.action.apply: フィルタシートの、選択を一覧に反映するボタン -->
+    <string name="events_filter_action_apply">適用</string>
+    <!-- events.filter.action.reset: フィルタシートの、選択を初期状態に戻すボタン -->
+    <string name="events_filter_action_reset">リセット</string>
+    <!-- events.filter.attendance.all: 参加状態の選択肢: 絞らない -->
+    <string name="events_filter_attendance_all">すべて</string>
+    <!-- events.filter.attendance.attended: 参加状態の選択肢 (と適用中のチップ): 参加したライブだけ -->
+    <string name="events_filter_attendance_attended">参加済み</string>
+    <!-- events.filter.attendance.header: フィルタシートの節: 参加したかどうか -->
+    <string name="events_filter_attendance_header">参加状態</string>
+    <!-- events.filter.attendance.not_attended: 参加状態の選択肢 (と適用中のチップ): 参加していないライブだけ -->
+    <string name="events_filter_attendance_not_attended">未参加</string>
+    <!-- events.filter.brand.all: フィルタシート: ブランドで絞らないチップ -->
+    <string name="events_filter_brand_all">全て</string>
+    <!-- events.filter.brand.header: フィルタシートの節: ブランド -->
+    <string name="events_filter_brand_header">ブランド</string>
+    <!-- events.filter.display.header: フィルタシートの節: 一覧に出す範囲 -->
+    <string name="events_filter_display_header">表示設定</string>
+    <!-- events.filter.display.hide_streaming.subtitle: フィルタシートのスイッチの説明 -->
+    <string name="events_filter_display_hide_streaming_subtitle">配信・番組だけのイベント (公演として開かれていないもの) を一覧から隠す</string>
+    <!-- events.filter.display.hide_streaming.title: フィルタシートのスイッチ (と適用中のチップ): 配信・番組だけのイベントを隠す -->
+    <string name="events_filter_display_hide_streaming_title">配信を除く</string>
+    <!-- events.filter.display.show_empty.subtitle: フィルタシートのスイッチの説明 -->
+    <string name="events_filter_display_show_empty_subtitle">公演がまだ登録されていないライブを一覧に出す</string>
+    <!-- events.filter.display.show_empty.title: フィルタシートのスイッチ -->
+    <string name="events_filter_display_show_empty_title">セトリ情報がないライブも表示</string>
+    <!-- events.filter.kind.all_shown: フィルタシート: どの種別も除外していないとき -->
+    <string name="events_filter_kind_all_shown">全て表示中</string>
+    <!-- events.filter.kind.excluded: 除外している種別。一覧のチップでは 1 つ、フィルタシートでは「 / 」区切りの並び。語はコア -->
+    <string name="events_filter_kind_excluded">除外: %1$s</string>
+    <!-- events.filter.kind.header: フィルタシートの節: イベントの種別 (ライブ・フェスなど) -->
+    <string name="events_filter_kind_header">種別</string>
+    <!-- events.filter.marks.favorite_only: フィルタシートのスイッチ -->
+    <string name="events_filter_marks_favorite_only">お気に入りのみ</string>
+    <!-- events.filter.marks.header: フィルタシートの節: 自分で付けた印 (お気に入り・メモ) -->
+    <string name="events_filter_marks_header">マイマーク</string>
+    <!-- events.filter.marks.note_only: フィルタシートのスイッチ -->
+    <string name="events_filter_marks_note_only">メモがあるライブのみ</string>
+    <!-- events.filter.title: ライブ一覧のフィルタシートの見出しと、フィルタボタンの読み上げ -->
+    <string name="events_filter_title">フィルター</string>
+    <!-- events.info.meta.brand: 情報パネルの行の名前: ブランド -->
+    <string name="events_info_meta_brand">ブランド</string>
+    <!-- events.info.meta.year: 情報パネルの行の名前: 開催年 -->
+    <string name="events_info_meta_year">年度</string>
+    <!-- events.info.meta.year_value: 情報パネルの開催年の値 -->
+    <string name="events_info_meta_year_value">%1$d年</string>
+    <!-- events.info.stats.cast: 情報パネルの数字のタイル: 出演者数 -->
+    <string name="events_info_stats_cast">キャスト</string>
+    <!-- events.info.stats.shows: 情報パネルの数字のタイル: 公演数 -->
+    <string name="events_info_stats_shows">公演</string>
+    <!-- events.info.stats.total_songs: 情報パネルの数字のタイル: 全公演で歌われた曲数 (同じ曲も数える) -->
+    <string name="events_info_stats_total_songs">曲（延べ）</string>
+    <!-- events.info.stats.unique_songs: 情報パネルの数字のタイル: 歌われた曲の種類数 (同じ曲は 1 回) -->
+    <string name="events_info_stats_unique_songs">ユニーク曲</string>
+    <!-- events.info.ticket.empty: チケット情報が無いとき -->
+    <string name="events_info_ticket_empty">チケット情報は未登録です</string>
+    <!-- events.info.ticket.header: 情報パネル: チケット情報の節の見出し -->
+    <string name="events_info_ticket_header">チケット情報</string>
+    <!-- events.info.ticket.open_official: チケット情報: 公式のチケットページへのリンク -->
+    <string name="events_info_ticket_open_official">公式チケットページを開く</string>
+    <!-- events.list.count: 絞り込み後のライブの件数。1000 以上は桁区切りが付く (移行前の Android は区切り無し: 1234件 → 1,234件) -->
+    <plurals name="events_list_count">
+        <item quantity="other">%1$,d件</item>
+    </plurals>
+    <!-- events.list.empty.past.message: 「開催済み」に 1 件も無いときの説明 -->
+    <string name="events_list_empty_past_message">開催済みのライブはまだ登録されていません。</string>
+    <!-- events.list.empty.past.title: 「開催済み」に 1 件も無いときの空状態の見出し -->
+    <string name="events_list_empty_past_title">開催済みのライブがありません</string>
+    <!-- events.list.empty.upcoming.message: 「今後の予定」に 1 件も無いときの説明。「開催済み」は list.tab.past のタブの名前 -->
+    <string name="events_list_empty_upcoming_message">現在、登録されている今後のライブはありません。「開催済み」タブもご確認ください。</string>
+    <!-- events.list.empty.upcoming.title: 「今後の予定」に 1 件も無いときの空状態の見出し -->
+    <string name="events_list_empty_upcoming_title">今後の予定はありません</string>
+    <!-- events.list.filter_chip.favorite: 適用中の絞り込みのチップ: お気に入りだけ -->
+    <string name="events_list_filter_chip_favorite">お気に入り</string>
+    <!-- events.list.filter_chip.has_note: 適用中の絞り込みのチップ: メモがあるライブだけ -->
+    <string name="events_list_filter_chip_has_note">メモあり</string>
+    <!-- events.list.filter_chip.query: 適用中の絞り込みのチップ: 名前の絞り込み語 -->
+    <string name="events_list_filter_chip_query">「%1$s」</string>
+    <!-- events.list.filter_chip.show_empty: 適用中の絞り込みのチップ: 公演が無いライブも出す -->
+    <string name="events_list_filter_chip_show_empty">空イベントも表示</string>
+    <!-- events.list.name_filter_prompt: 一覧の上の絞り込み欄のプレースホルダ -->
+    <string name="events_list_name_filter_prompt">ライブ名で絞り込み</string>
+    <!-- events.list.tab.past: ライブ一覧のセグメント: 終わったライブ。list.empty.upcoming.message が「開催済み」タブと呼ぶ -->
+    <string name="events_list_tab_past">開催済み</string>
+    <!-- events.list.tab.upcoming: ライブ一覧のセグメント: これからのライブ -->
+    <string name="events_list_tab_upcoming">今後の予定</string>
+    <!-- events.list.title: ライブ一覧の画面の見出し -->
+    <string name="events_list_title">ライブ</string>
+    <!-- events.list.venue.chip: 会場で絞るチップ (会場を選んでいないとき) -->
+    <string name="events_list_venue_chip">会場</string>
+    <!-- events.list.venue.clear.a11y: 会場チップの × の読み上げ -->
+    <string name="events_list_venue_clear_a11y">会場絞り込みを解除</string>
+    <!-- events.local_write.record_attendance: 端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 -->
+    <string name="events_local_write_record_attendance">参加の記録</string>
+    <!-- events.local_write.save_note: 端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 -->
+    <string name="events_local_write_save_note">メモの保存</string>
+    <!-- events.local_write.save_seat: 端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 -->
+    <string name="events_local_write_save_seat">座席の保存</string>
+    <!-- events.local_write.toggle: 端末への書き込みに失敗したときの知らせに入る操作名。mark はマークの種類名 (お気に入りなど) -->
+    <string name="events_local_write_toggle">%1$sの切り替え</string>
+    <!-- events.meta.separator: 項目を 1 行に並べるときの区切り (前後に空白)。公演の「会場 ・ 日付」、会場の「キャパ ・ 旧名」など -->
+    <string name="events_meta_separator">" ・ "</string>
+    <!-- events.note_editor.placeholder: 公演のメモの入力欄のプレースホルダ -->
+    <string name="events_note_editor_placeholder">この公演の思い出・持ち物・同行者など</string>
+    <!-- events.note_editor.title: メモの入力シート・ダイアログの見出し -->
+    <string name="events_note_editor_title">メモ</string>
+    <!-- events.seat_editor.placeholder_android: 座席の入力欄のプレースホルダ。iOS の seat_editor.placeholder_ios と ja が違う (統一はオーナーが別 PR で) -->
+    <string name="events_seat_editor_placeholder_android">例: アリーナ A6 ブロック 12番</string>
+    <!-- events.seat_editor.title: 座席の入力シート・ダイアログの見出し -->
+    <string name="events_seat_editor_title">座席</string>
+    <!-- events.setlist.attendance.join: 参加の形態を選ぶダイアログの選択肢。type は形態 (現地・配信など。コアの語) -->
+    <string name="events_setlist_attendance_join">%1$sで参加</string>
+    <!-- events.setlist.attendance.join_selected: 参加の形態を選ぶダイアログの、選択中の選択肢 (押すと取り消す) -->
+    <string name="events_setlist_attendance_join_selected">%1$sで参加 (取り消す)</string>
+    <!-- events.setlist.attendance.title: 参加の形態を選ぶダイアログの見出し -->
+    <string name="events_setlist_attendance_title">この公演への参加</string>
+    <!-- events.setlist.costume.header: セトリ画面の衣装の節の見出し。1000 以上は桁区切りが付く (ありえない) -->
+    <plurals name="events_setlist_costume_header">
+        <item quantity="other">衣装 ・ %1$,d 着</item>
+    </plurals>
+    <!-- events.setlist.empty.action: セトリが無い過去の公演の空状態のボタン (編集できる人だけ) -->
+    <string name="events_setlist_empty_action">セトリを追加</string>
+    <!-- events.setlist.empty.future.message: セトリが無い未来の公演の空状態の説明 -->
+    <string name="events_setlist_empty_future_message">セトリは公演後に登録されます</string>
+    <!-- events.setlist.empty.future.title: セトリが無い未来の公演の空状態の見出し -->
+    <string name="events_setlist_empty_future_title">公演前です</string>
+    <!-- events.setlist.empty.past.message: セトリが無い過去の公演の空状態の説明 -->
+    <string name="events_setlist_empty_past_message">このライブのセトリはまだ登録されていません。ログインして編集に参加できます</string>
+    <!-- events.setlist.empty.past.title: セトリが無い過去の公演の空状態の見出し -->
+    <string name="events_setlist_empty_past_title">セトリ未登録</string>
+    <!-- events.setlist.info.date: セトリ画面の会場カードの行の名前: 公演日 -->
+    <string name="events_setlist_info_date">日付</string>
+    <!-- events.setlist.info.venue: セトリ画面の会場カードの行の名前: 会場 -->
+    <string name="events_setlist_info_venue">会場</string>
+    <!-- events.setlist.like.add.a11y: セトリの行の 👍 ボタンの読み上げ (まだ押していないとき) -->
+    <string name="events_setlist_like_add_a11y">この曲が良かった</string>
+    <!-- events.setlist.like.error.unauthorized_android: 未ログインで 👍 したときのエラー。iOS の setlist.like.error.unauthorized_ios と ja が違う -->
+    <string name="events_setlist_like_error_unauthorized_android">Like するにはログインが必要です</string>
+    <!-- events.setlist.like.remove.a11y: セトリの行の 👍 ボタンの読み上げ (押してあるとき) -->
+    <string name="events_setlist_like_remove_a11y">Good を取り消す</string>
+    <!-- events.setlist.login_dialog: 未ログインで編集・投票しようとしたときのダイアログの本文 -->
+    <string name="events_setlist_login_dialog">セトリの編集や 👍 での投票にはログインが必要です。</string>
+    <!-- events.setlist.menu.edit: セトリ画面の右上メニュー -->
+    <string name="events_setlist_menu_edit">セトリを編集</string>
+    <!-- events.setlist.menu.history: セトリ画面の右上メニュー -->
+    <string name="events_setlist_menu_history">セトリの編集履歴</string>
+    <!-- events.setlist.row.full_cast: セトリの行の札: 出演者全員で歌った曲 -->
+    <string name="events_setlist_row_full_cast">全員</string>
+    <!-- events.setlist.section.encore: セトリの区切りの見出し: アンコール (コアがアンコール類をこの語に畳む) -->
+    <string name="events_setlist_section_encore">アンコール</string>
+    <!-- events.setlist.section.main: セトリの区切りの見出し: 本編 (コアの見出し「本編」とメタ未取得のときに出す) -->
+    <string name="events_setlist_section_main">本編</string>
+    <!-- events.setlist.ticket.header: セトリ画面のチケット価格の節の見出し -->
+    <string name="events_setlist_ticket_header">チケット</string>
+    <!-- events.setlist.ticket.kind_name: 券の形態が 1 種類だけのときの行の名前。kind は形態 (コアの語)、name は券種名 -->
+    <string name="events_setlist_ticket_kind_name">%1$s・%2$s</string>
+    <!-- events.setlist.ticket.name_estimate: 推定の価格の券種名。name は券種名 (データ) -->
+    <string name="events_setlist_ticket_name_estimate">%1$s (推定)</string>
+    <!-- events.setlist.ticket.range_estimate: 券の形態ごとの価格帯に推定の価格が混じるとき。range はコアが作った価格帯 -->
+    <string name="events_setlist_ticket_range_estimate">%1$s (推定含む)</string>
+    <!-- events.setlist.vote_hint.login: セトリの上の案内 (未ログイン) -->
+    <string name="events_setlist_vote_hint_login">👍 で投票するにはログインが必要です</string>
+    <!-- events.setlist.vote_hint.signed_in: セトリの上の案内 (ログイン済み) -->
+    <string name="events_setlist_vote_hint_signed_in">良かったと思った曲に 👍 で投票しよう！</string>
+    <!-- events.toolbar.more.a11y: ライブ詳細・セトリ画面の右上の ⋮ メニューボタンの読み上げ -->
+    <string name="events_toolbar_more_a11y">その他</string>
+    <!-- events.user_mark.attended_with_type: マイマークの帯の参加ボタン。参加の形態 (現地・配信など。語はコア) が付いているとき -->
+    <string name="events_user_mark_attended_with_type">参加 (%1$s)</string>
+    <!-- events.user_mark.kind.attended: マークの種類名: 公演に参加した。マイマークの帯のボタンの名前にもなる -->
+    <string name="events_user_mark_kind_attended">参加</string>
+    <!-- events.user_mark.kind.favorite: マークの種類名: お気に入り。マイマークの帯のボタンの名前にもなる -->
+    <string name="events_user_mark_kind_favorite">お気に入り</string>
+    <!-- events.user_mark.kind.note: マークの種類名: 自分用のメモ。マイマークの帯のボタンの名前にもなる -->
+    <string name="events_user_mark_kind_note">メモ</string>
+    <!-- events.user_mark.kind.seat: マークの種類名: 参加した公演の座席。マイマークの帯のボタンの名前にもなる -->
+    <string name="events_user_mark_kind_seat">座席</string>
+    <!-- events.venue.capacity: 会場のキャパ (収容人数)。1000 以上は桁区切りが付く (14,500人) -->
+    <plurals name="events_venue_capacity">
+        <item quantity="other">%1$,d人</item>
+    </plurals>
+    <!-- events.venue.name_with_area: 都道府県つきの会場名 (東京・日本武道館)。どちらもデータ -->
+    <string name="events_venue_name_with_area">%1$s・%2$s</string>
+    <!-- events.venue_picker.empty.message: 会場の絞り込みで 1 件も残らなかったときの説明。query は入力した語 -->
+    <string name="events_venue_picker_empty_message">「%1$s」に一致する会場がありません</string>
+    <!-- events.venue_picker.empty.title: 会場の絞り込みで 1 件も残らなかったときの見出し -->
+    <string name="events_venue_picker_empty_title">見つかりません</string>
+    <!-- events.venue_picker.filter_prompt: 会場を選ぶ画面の絞り込み欄のプレースホルダ -->
+    <string name="events_venue_picker_filter_prompt">会場を絞り込み</string>
+    <!-- events.venue_picker.former_name: 会場の行の副題: 以前の名前 (データ) -->
+    <string name="events_venue_picker_former_name">旧: %1$s</string>
+    <!-- events.venue_picker.none: 会場を選ぶ画面の先頭の行: 会場で絞らない -->
+    <string name="events_venue_picker_none">選択なし</string>
+    <!-- events.venue_picker.title: 会場を選ぶ画面の見出し -->
+    <string name="events_venue_picker_title">会場</string>
+</resources>

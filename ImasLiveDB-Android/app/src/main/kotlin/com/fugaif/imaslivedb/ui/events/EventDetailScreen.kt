@@ -78,6 +78,11 @@ import com.fugaif.imaslivedb.data.model.Show
 import com.fugaif.imaslivedb.data.model.UserMark
 import com.fugaif.imaslivedb.data.model.Vocab
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayFormat
+import com.fugaif.imaslivedb.i18n.DisplayLocale
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.AttendanceSwipeRow
 import com.fugaif.imaslivedb.ui.components.CommunityLoginPromptDialog
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
@@ -96,6 +101,7 @@ import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.util.Locale
 import com.fugaif.imaslivedb.ui.share.SocialShare
 import uniffi.imas_core.shareEventText
 import uniffi.imas_core.AttendanceState
@@ -195,7 +201,7 @@ fun EventDetailScreen(
                 title = { Text(uiState.eventName, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 },
                 actions = {
@@ -203,26 +209,26 @@ fun EventDetailScreen(
                         // 文面と URL はコアが作る (iOS と同じ: イベント名 + イベントへのリンク)。
                         SocialShare.shareText(context, shareEventText(eventId, uiState.eventName))
                     }) {
-                        Icon(Icons.Filled.Share, contentDescription = "このイベントをシェア")
+                        Icon(Icons.Filled.Share, contentDescription = L10n.Events.detailShareA11y.resolve())
                     }
                     IconButton(onClick = { showMenu = true }) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = "その他")
+                        Icon(Icons.Filled.MoreVert, contentDescription = L10n.Events.toolbarMoreA11y.resolve())
                     }
                     DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
                         // BAN 済みには編集導線を出さない (押しても 403 になるだけ)。判定はコア。
                         if (canEditHere) {
                             DropdownMenuItem(
-                                text = { Text("このライブを編集") },
+                                text = { Text(L10n.Events.detailMenuEditAndroid.resolve()) },
                                 onClick = { showMenu = false; startEdit { showEventEdit = true } },
                                 enabled = eventRecord != null
                             )
                             DropdownMenuItem(
-                                text = { Text("公演を追加") },
+                                text = { Text(L10n.Events.detailShowsActionAddShow.resolve()) },
                                 onClick = { showMenu = false; startEdit { showCreate = true } }
                             )
                         }
                         DropdownMenuItem(
-                            text = { Text("編集履歴") },
+                            text = { Text(L10n.Events.detailMenuHistory.resolve()) },
                             onClick = { showMenu = false; showEventHistory = true }
                         )
                     }
@@ -243,14 +249,19 @@ fun EventDetailScreen(
                     state = uiState, t = t, favOn = favOn, attendOn = attendOn,
                     onFavToggle = {
                         scope.launch {
-                            localWrite("お気に入りの切り替え") { marks.toggle(UserMark.EVENT, eventId, UserMark.FAVORITE) }
-                                ?.let { favOn = it }
+                            localWrite(L10n.Events.localWriteToggle(mark = L10n.Events.userMarkKindFavorite).resolve(context)) {
+                                marks.toggle(UserMark.EVENT, eventId, UserMark.FAVORITE)
+                            }?.let { favOn = it }
                         }
                     },
                     onAttendToggle = { showAttendanceSheet = true }
                 )
                 ImasSegmented(
-                    labels = listOf("公演・セトリ", "出演", "情報"),
+                    labels = listOf(
+                        L10n.Events.detailTabShows.resolve(),
+                        L10n.Events.detailTabCast.resolve(),
+                        L10n.Events.detailTabInfo.resolve()
+                    ),
                     selection = segment,
                     onSelect = { segment = it },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)
@@ -346,7 +357,7 @@ fun EventDetailScreen(
 
     if (showLoginPrompt) {
         CommunityLoginPromptDialog(
-            message = "ライブ・公演の編集にはログインが必要です。",
+            message = L10n.Events.detailLoginDialog.resolve(),
             onDismiss = { showLoginPrompt = false }
         )
     }
@@ -390,13 +401,14 @@ private fun Hero(
                 Icon(Icons.Filled.CalendarMonth, null, tint = DS.ink2, modifier = Modifier.size(14.dp))
                 Spacer(Modifier.width(4.dp))
                 Text(subLine, fontSize = 13.sp, color = DS.ink2)
-                if (state.isJoint) Text(" ・ 合同", fontSize = 13.sp, color = t.accent)
+                // 前の日付の行と詰まらないよう半角空白を 1 つ挟む (iOS は HStack の間隔で空ける)。
+                if (state.isJoint) Text(" " + L10n.Events.detailHeroJoint.resolve(), fontSize = 13.sp, color = t.accent)
             }
         }
         Spacer(Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            HeroToggle("お気に入り", favOn, DS.favorite, onFavToggle)
-            HeroToggle("参加", attendOn, t.accent, onAttendToggle)
+            HeroToggle(L10n.Events.userMarkKindFavorite.resolve(), favOn, DS.favorite, onFavToggle)
+            HeroToggle(L10n.Events.userMarkKindAttended.resolve(), attendOn, t.accent, onAttendToggle)
         }
         // 参加の札 (参加予定・あと N 日 / 参加済み) の判定と文言はコア。
         state.hero?.attendance?.takeIf { it.state != AttendanceState.NONE }?.let { attendance ->
@@ -452,12 +464,12 @@ private fun LazyListScope.showsSection(
     onShowHistory: (Show) -> Unit,
     onAttendanceChange: () -> Unit
 ) {
-    item { ImasSectionHeader(title = "公演 ・ ${state.shows.size} 公演 → セトリへ", tight = true) }
+    item { ImasSectionHeader(title = L10n.Events.detailShowsHeader(count = state.shows.size), tight = true) }
     if (state.shows.isEmpty()) {
         item {
             ImasEmptyState(
                 icon = Icons.Filled.Mic,
-                title = "公演がまだありません",
+                title = L10n.Events.detailShowsEmptyTitle.resolve(),
                 seed = seed, brand = brand
             )
         }
@@ -505,25 +517,25 @@ private fun ShowRow(
                 maxLines = 1, overflow = TextOverflow.Ellipsis
             )
             Text(
-                listOfNotNull(show.venue, show.date).joinToString(" ・ "),
+                listOfNotNull(show.venue, show.date).joinToString(L10n.Events.metaSeparator.resolve()),
                 fontSize = 12.sp, color = DS.ink2, maxLines = 1, overflow = TextOverflow.Ellipsis
             )
         }
         Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = DS.ink3, modifier = Modifier.size(16.dp))
         Box {
             IconButton(onClick = { menuOpen = true }) {
-                Icon(Icons.Filled.MoreVert, contentDescription = "公演の操作", tint = DS.ink3,
+                Icon(Icons.Filled.MoreVert, contentDescription = L10n.Events.detailShowsMenuA11y.resolve(), tint = DS.ink3,
                     modifier = Modifier.size(18.dp))
             }
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                 if (canEdit) {
                     DropdownMenuItem(
-                        text = { Text("公演を編集") },
+                        text = { Text(L10n.Events.detailShowsActionEditShow.resolve()) },
                         onClick = { menuOpen = false; onEdit() }
                     )
                 }
                 DropdownMenuItem(
-                    text = { Text("編集履歴") },
+                    text = { Text(L10n.Events.detailMenuHistory.resolve()) },
                     onClick = { menuOpen = false; onHistory() }
                 )
             }
@@ -544,8 +556,8 @@ private fun LazyListScope.castSection(
         item {
             ImasEmptyState(
                 icon = Icons.Filled.Groups,
-                title = "出演情報がありません",
-                message = "セトリ・出演者が登録されると表示されます",
+                title = L10n.Events.castEmptyTitle.resolve(),
+                message = L10n.Events.castEmptyMessage.resolve(),
                 seed = seed, brand = brand
             )
         }
@@ -556,10 +568,17 @@ private fun LazyListScope.castSection(
         item {
             Column {
                 ImasSectionHeader(
-                    title = if (attendance.leadIdols.size > 1) "主演 ・ ${attendance.leadIdols.size}名" else "主演",
+                    title = if (attendance.leadIdols.size > 1) {
+                        L10n.Events.castRoleLeadCount(count = attendance.leadIdols.size)
+                    } else {
+                        L10n.Events.castRoleLead
+                    },
                     tight = true
                 )
-                RoleSection(attendance, attendance.leadByShow, attendance.leadIdols, "主演", seed, brand, onIdolClick)
+                RoleSection(
+                    attendance, attendance.leadByShow, attendance.leadIdols, L10n.Events.castRoleLead.resolve(),
+                    seed, brand, onIdolClick
+                )
             }
         }
     }
@@ -567,10 +586,17 @@ private fun LazyListScope.castSection(
         item {
             Column {
                 ImasSectionHeader(
-                    title = if (attendance.guestIdols.size > 1) "ゲスト ・ ${attendance.guestIdols.size}名" else "ゲスト",
+                    title = if (attendance.guestIdols.size > 1) {
+                        L10n.Events.castRoleGuestCount(count = attendance.guestIdols.size)
+                    } else {
+                        L10n.Events.castRoleGuest
+                    },
                     tight = true
                 )
-                RoleSection(attendance, attendance.guestByShow, attendance.guestIdols, "ゲスト", seed, brand, onIdolClick)
+                RoleSection(
+                    attendance, attendance.guestByShow, attendance.guestIdols, L10n.Events.castRoleGuest.resolve(),
+                    seed, brand, onIdolClick
+                )
             }
         }
     }
@@ -579,9 +605,10 @@ private fun LazyListScope.castSection(
     }
     items(attendance.groups, key = { it.id }) { group ->
         Column {
-            ImasSectionHeader(title = "${group.label} ・ ${group.idols.size}名", tight = true)
+            ImasSectionHeader(title = L10n.Events.castGroupHeader(label = group.label, count = group.idols.size), tight = true)
             AvatarGrid(
                 idols = group.idols, chipText = null, seed = seed, brand = brand,
+                // i18n-ignore(sentinel): コア (event_detail_queries.rs) が欠席のまとまりに付ける label と突き合わせる。訳さない
                 onClick = onIdolClick, dim = { group.label == "欠席" }
             )
         }
@@ -625,9 +652,10 @@ private fun DayHeader(index: Int, show: Show, t: ImasTheme) {
             modifier = Modifier.clip(RoundedCornerShape(50.dp)).background(t.accent)
                 .padding(horizontal = 8.dp, vertical = 3.dp)
         )
-        shortDate(show.date)?.let {
+        val locale = DisplayLocale.of(LocalContext.current).formattingLocale
+        shortDate(show.date, locale)?.let {
             Spacer(Modifier.width(6.dp))
-            Text(it, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = DS.ink2)
+            Text(it.resolve(), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = DS.ink2)
         }
         if (show.name.isNotEmpty() && show.name != "DAY${index + 1}") {
             Spacer(Modifier.width(6.dp))
@@ -636,11 +664,11 @@ private fun DayHeader(index: Int, show: Show, t: ImasTheme) {
     }
 }
 
-/** "2026-09-19" → "9/19(土)"。パース不能なら null。 */
-private fun shortDate(ymd: String): String? {
+/** "2026-09-19" → "9/19(土)" (曜日は [locale] の 1 文字)。パース不能なら null。 */
+private fun shortDate(ymd: String, locale: Locale): DisplayText? {
     val date = runCatching { LocalDate.parse(ymd) }.getOrNull() ?: return null
-    val wd = listOf("月", "火", "水", "木", "金", "土", "日")[date.dayOfWeek.value - 1]
-    return "${date.monthValue}/${date.dayOfMonth}(${wd})"
+    val wd = DisplayFormat.weekdayNarrow(date.dayOfWeek, locale)
+    return L10n.Events.castDayDate(month = date.monthValue, day = date.dayOfMonth, weekday = wd)
 }
 
 @Composable
@@ -652,8 +680,15 @@ private fun FullAttendanceBanner(attendance: EventAttendance) {
     ) {
         Icon(Icons.Filled.AutoAwesome, null, tint = DS.warning, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(8.dp))
-        Text("全員集合！", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink, modifier = Modifier.weight(1f))
-        Text("${attendance.brandIdols.size}/${attendance.brandIdols.size} 名", fontSize = 13.sp, color = DS.ink2)
+        Text(
+            L10n.Events.castFullAttendanceTitle.resolve(), fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            L10n.Events.castFullAttendanceCount(present = attendance.brandIdols.size, total = attendance.brandIdols.size)
+                .resolve(),
+            fontSize = 13.sp, color = DS.ink2
+        )
     }
 }
 
@@ -710,12 +745,24 @@ private fun LazyListScope.infoSection(
 private fun StatsGrid(stats: EventStats, seed: String?, brand: String?) {
     Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            ImasStatTile(Icons.Filled.Mic, "${stats.showCount}", "公演", seed = seed, brand = brand, modifier = Modifier.weight(1f))
-            ImasStatTile(Icons.Filled.LibraryMusic, "${stats.totalSongs}", "曲（延べ）", seed = seed, brand = brand, modifier = Modifier.weight(1f))
+            ImasStatTile(
+                Icons.Filled.Mic, "${stats.showCount}", L10n.Events.infoStatsShows.resolve(),
+                seed = seed, brand = brand, modifier = Modifier.weight(1f)
+            )
+            ImasStatTile(
+                Icons.Filled.LibraryMusic, "${stats.totalSongs}", L10n.Events.infoStatsTotalSongs.resolve(),
+                seed = seed, brand = brand, modifier = Modifier.weight(1f)
+            )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            ImasStatTile(Icons.Filled.MusicNote, "${stats.uniqueSongs}", "ユニーク曲", seed = seed, brand = brand, modifier = Modifier.weight(1f))
-            ImasStatTile(Icons.Filled.Groups, "${stats.castCount}", "キャスト", seed = seed, brand = brand, modifier = Modifier.weight(1f))
+            ImasStatTile(
+                Icons.Filled.MusicNote, "${stats.uniqueSongs}", L10n.Events.infoStatsUniqueSongs.resolve(),
+                seed = seed, brand = brand, modifier = Modifier.weight(1f)
+            )
+            ImasStatTile(
+                Icons.Filled.Groups, "${stats.castCount}", L10n.Events.infoStatsCast.resolve(),
+                seed = seed, brand = brand, modifier = Modifier.weight(1f)
+            )
         }
     }
 }
@@ -726,7 +773,7 @@ private fun TicketInfoSection(state: EventDetailUiState, seed: String?, brand: S
     val t = ImasTheme.forBrand(seed, brand)
     val hasAny = state.ticketDeadline != null || state.ticketLotteryDate != null || state.ticketUrl != null
     Column {
-        ImasSectionHeader(title = "チケット情報", tight = true)
+        ImasSectionHeader(title = L10n.Events.infoTicketHeader, tight = true)
         Column(
             Modifier.padding(horizontal = 16.dp).fillMaxWidth()
                 .clip(RoundedCornerShape(14.dp)).background(DS.surface)
@@ -750,13 +797,16 @@ private fun TicketInfoSection(state: EventDetailUiState, seed: String?, brand: S
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Icon(Icons.Filled.ConfirmationNumber, null, tint = t.accent, modifier = Modifier.size(16.dp))
-                    Text("公式チケットページを開く", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = t.accent)
+                    Text(
+                        L10n.Events.infoTicketOpenOfficial.resolve(), fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
+                        color = t.accent
+                    )
                 }
                 shown = true
             }
             if (!hasAny) {
                 Text(
-                    "チケット情報は未登録です", fontSize = 13.sp, color = DS.ink3,
+                    L10n.Events.infoTicketEmpty.resolve(), fontSize = 13.sp, color = DS.ink3,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 11.dp)
                 )
             }
@@ -781,7 +831,7 @@ private fun MetaSection(
             // brand_id がまだ解決できていない間は押せない普通の行にしておく
             // (押せる見た目だけ出して何も起きない方が悪い)。
             ImasLabeledRow(
-                key = "ブランド", value = name, seed = seed, brand = brand,
+                key = L10n.Events.infoMetaBrand.resolve(), value = name, seed = seed, brand = brand,
                 tappable = brandId != null,
                 onClick = brandId?.let { id -> { onFilteredEventsClick(EventFilterKind.BRAND, id) } }
             )
@@ -790,7 +840,8 @@ private fun MetaSection(
         firstShowYear(state)?.let { year ->
             if (shown) HorizontalDivider(color = DS.sep, modifier = Modifier.padding(start = 16.dp))
             ImasLabeledRow(
-                key = "年度", value = "${year}年", seed = seed, brand = brand,
+                key = L10n.Events.infoMetaYear.resolve(), value = L10n.Events.infoMetaYearValue(year = year).resolve(),
+                seed = seed, brand = brand,
                 tappable = true,
                 onClick = { onFilteredEventsClick(EventFilterKind.YEAR, year.toString()) }
             )

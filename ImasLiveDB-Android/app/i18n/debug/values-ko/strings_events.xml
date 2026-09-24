@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/events.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources>
+    <string name="events_action_cancel">취소</string>
+    <string name="events_action_save">저장</string>
+    <string name="events_attendance_sheet_all_live">모든 공연 현장 참가</string>
+    <string name="events_attendance_sheet_footer_android">공연마다 참가 형태를 고를 수 있어요. 회수율에는 현장 참가만 집계돼요.</string>
+    <plurals name="events_attendance_sheet_show_count">
+        <item quantity="other">공연 %1$,d회</item>
+    </plurals>
+    <string name="events_attendance_sheet_title">참가한 공연</string>
+    <string name="events_cast_day_date">%1$d/%2$d (%3$s)</string>
+    <string name="events_cast_empty_message">세트리스트·출연자가 등록되면 표시돼요</string>
+    <string name="events_cast_empty_title">출연 정보가 없어요</string>
+    <plurals name="events_cast_full_attendance_count">
+        <item quantity="other">%1$d/%2$,d명</item>
+    </plurals>
+    <string name="events_cast_full_attendance_title">전원 집합!</string>
+    <plurals name="events_cast_group_header">
+        <item quantity="other">%1$s · %2$,d명</item>
+    </plurals>
+    <string name="events_cast_role_guest">게스트</string>
+    <plurals name="events_cast_role_guest_count">
+        <item quantity="other">게스트 · %1$,d명</item>
+    </plurals>
+    <string name="events_cast_role_lead">주연</string>
+    <plurals name="events_cast_role_lead_count">
+        <item quantity="other">주연 · %1$,d명</item>
+    </plurals>
+    <string name="events_detail_hero_joint">· 합동</string>
+    <string name="events_detail_login_dialog">라이브·공연을 편집하려면 로그인해야 해요.</string>
+    <string name="events_detail_menu_edit_android">이 라이브 편집</string>
+    <string name="events_detail_menu_history">편집 기록</string>
+    <string name="events_detail_share_a11y">이 이벤트 공유</string>
+    <string name="events_detail_shows_action_add_show">공연 추가</string>
+    <string name="events_detail_shows_action_edit_show">공연 편집</string>
+    <string name="events_detail_shows_empty_title">아직 공연이 없어요</string>
+    <plurals name="events_detail_shows_header">
+        <item quantity="other">공연 · %1$,d회 → 세트리스트로</item>
+    </plurals>
+    <string name="events_detail_shows_menu_a11y">공연 메뉴</string>
+    <string name="events_detail_tab_cast">출연</string>
+    <string name="events_detail_tab_info">정보</string>
+    <string name="events_detail_tab_shows">공연·세트리스트</string>
+    <string name="events_filter_action_apply">적용</string>
+    <string name="events_filter_action_reset">초기화</string>
+    <string name="events_filter_attendance_all">전체</string>
+    <string name="events_filter_attendance_attended">참가함</string>
+    <string name="events_filter_attendance_header">참가 상태</string>
+    <string name="events_filter_attendance_not_attended">미참가</string>
+    <string name="events_filter_brand_all">전체</string>
+    <string name="events_filter_brand_header">브랜드</string>
+    <string name="events_filter_display_header">표시 설정</string>
+    <string name="events_filter_display_hide_streaming_subtitle">스트리밍·방송만 있는 이벤트 (공연으로 열리지 않은 것)를 목록에서 숨겨요</string>
+    <string name="events_filter_display_hide_streaming_title">스트리밍 제외</string>
+    <string name="events_filter_display_show_empty_subtitle">공연이 아직 등록되지 않은 라이브도 목록에 표시해요</string>
+    <string name="events_filter_display_show_empty_title">세트리스트 정보가 없는 라이브도 표시</string>
+    <string name="events_filter_kind_all_shown">모두 표시 중</string>
+    <string name="events_filter_kind_excluded">제외: %1$s</string>
+    <string name="events_filter_kind_header">종류</string>
+    <string name="events_filter_marks_favorite_only">즐겨찾기만</string>
+    <string name="events_filter_marks_header">마이 마크</string>
+    <string name="events_filter_marks_note_only">메모가 있는 라이브만</string>
+    <string name="events_filter_title">필터</string>
+    <string name="events_info_meta_brand">브랜드</string>
+    <string name="events_info_meta_year">연도</string>
+    <string name="events_info_meta_year_value">%1$d년</string>
+    <string name="events_info_stats_cast">캐스트</string>
+    <string name="events_info_stats_shows">공연</string>
+    <string name="events_info_stats_total_songs">곡 (누적)</string>
+    <string name="events_info_stats_unique_songs">곡 (중복 제외)</string>
+    <string name="events_info_ticket_empty">티켓 정보가 등록되지 않았어요</string>
+    <string name="events_info_ticket_header">티켓 정보</string>
+    <string name="events_info_ticket_open_official">공식 티켓 페이지 열기</string>
+    <plurals name="events_list_count">
+        <item quantity="other">%1$,d건</item>
+    </plurals>
+    <string name="events_list_empty_past_message">종료된 라이브가 아직 등록되지 않았어요.</string>
+    <string name="events_list_empty_past_title">종료된 라이브가 없어요</string>
+    <string name="events_list_empty_upcoming_message">지금 등록된 예정 라이브가 없어요. “종료” 탭도 확인해 주세요.</string>
+    <string name="events_list_empty_upcoming_title">예정된 라이브가 없어요</string>
+    <string name="events_list_filter_chip_favorite">즐겨찾기</string>
+    <string name="events_list_filter_chip_has_note">메모 있음</string>
+    <string name="events_list_filter_chip_query">“%1$s”</string>
+    <string name="events_list_filter_chip_show_empty">빈 이벤트도 표시</string>
+    <string name="events_list_name_filter_prompt">라이브 이름으로 찾기</string>
+    <string name="events_list_tab_past">종료</string>
+    <string name="events_list_tab_upcoming">예정</string>
+    <string name="events_list_title">라이브</string>
+    <string name="events_list_venue_chip">공연장</string>
+    <string name="events_list_venue_clear_a11y">공연장 필터 해제</string>
+    <string name="events_local_write_record_attendance">참가 기록</string>
+    <string name="events_local_write_save_note">메모 저장</string>
+    <string name="events_local_write_save_seat">좌석 저장</string>
+    <string name="events_local_write_toggle">%1$s 전환</string>
+    <string name="events_meta_separator">" · "</string>
+    <string name="events_note_editor_placeholder">이 공연의 추억·챙긴 물건·동행자 등</string>
+    <string name="events_note_editor_title">메모</string>
+    <string name="events_seat_editor_placeholder_android">예: 아레나 A6 블록 12번</string>
+    <string name="events_seat_editor_title">좌석</string>
+    <string name="events_setlist_attendance_join">%1$s 참가</string>
+    <string name="events_setlist_attendance_join_selected">%1$s 참가 (취소)</string>
+    <string name="events_setlist_attendance_title">이 공연 참가</string>
+    <plurals name="events_setlist_costume_header">
+        <item quantity="other">의상 · %1$,d벌</item>
+    </plurals>
+    <string name="events_setlist_empty_action">세트리스트 추가</string>
+    <string name="events_setlist_empty_future_message">세트리스트는 공연 후에 등록돼요</string>
+    <string name="events_setlist_empty_future_title">공연 전이에요</string>
+    <string name="events_setlist_empty_past_message">이 라이브의 세트리스트가 아직 등록되지 않았어요. 로그인하면 편집에 참여할 수 있어요</string>
+    <string name="events_setlist_empty_past_title">세트리스트 미등록</string>
+    <string name="events_setlist_info_date">날짜</string>
+    <string name="events_setlist_info_venue">공연장</string>
+    <string name="events_setlist_like_add_a11y">이 곡이 좋았어요</string>
+    <string name="events_setlist_like_error_unauthorized_android">Like하려면 로그인해야 해요</string>
+    <string name="events_setlist_like_remove_a11y">Good 취소</string>
+    <string name="events_setlist_login_dialog">세트리스트를 편집하거나 👍로 투표하려면 로그인해야 해요.</string>
+    <string name="events_setlist_menu_edit">세트리스트 편집</string>
+    <string name="events_setlist_menu_history">세트리스트 편집 기록</string>
+    <string name="events_setlist_row_full_cast">전원</string>
+    <string name="events_setlist_section_encore">앙코르</string>
+    <string name="events_setlist_section_main">본편</string>
+    <string name="events_setlist_ticket_header">티켓</string>
+    <string name="events_setlist_ticket_kind_name">%1$s·%2$s</string>
+    <string name="events_setlist_ticket_name_estimate">%1$s (추정)</string>
+    <string name="events_setlist_ticket_range_estimate">%1$s (추정 포함)</string>
+    <string name="events_setlist_vote_hint_login">👍로 투표하려면 로그인해야 해요</string>
+    <string name="events_setlist_vote_hint_signed_in">좋았던 곡에 👍로 투표해 보세요!</string>
+    <string name="events_toolbar_more_a11y">더 보기</string>
+    <string name="events_user_mark_attended_with_type">참가 (%1$s)</string>
+    <string name="events_user_mark_kind_attended">참가</string>
+    <string name="events_user_mark_kind_favorite">즐겨찾기</string>
+    <string name="events_user_mark_kind_note">메모</string>
+    <string name="events_user_mark_kind_seat">좌석</string>
+    <plurals name="events_venue_capacity">
+        <item quantity="other">%1$,d명</item>
+    </plurals>
+    <string name="events_venue_name_with_area">%1$s·%2$s</string>
+    <string name="events_venue_picker_empty_message">“%1$s”에 해당하는 공연장이 없어요</string>
+    <string name="events_venue_picker_empty_title">찾을 수 없어요</string>
+    <string name="events_venue_picker_filter_prompt">공연장 찾기</string>
+    <string name="events_venue_picker_former_name">옛 이름: %1$s</string>
+    <string name="events_venue_picker_none">선택 안 함</string>
+    <string name="events_venue_picker_title">공연장</string>
+</resources>

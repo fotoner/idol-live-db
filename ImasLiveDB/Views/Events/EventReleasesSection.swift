@@ -22,9 +22,9 @@ struct EventReleasesSection: View {
                 let t = ImasTheme.derive(seed: seed, brand: brand, scheme: scheme)
                 VStack(alignment: .leading, spacing: DS.sp3) {
                     HStack(spacing: 6) {
-                        ImasSectionHeader(title: "映像円盤", tight: true)
+                        ImasSectionHeader(title: .key(L10n.Events.releasesHeader), tight: true)
                         Spacer()
-                        Text("\(ownedIds.count)/\(releases.count) 所有")
+                        Text(L10n.Events.releasesOwnedCount(owned: ownedIds.count, total: releases.count))
                             .font(.imasCaption.weight(.semibold))
                             .foregroundStyle(DS.ink2)
                     }
@@ -38,7 +38,7 @@ struct EventReleasesSection: View {
                     }
                     .padding(.horizontal, DS.sp5)
 
-                    Text("持っている円盤に印を付けられます。")
+                    Text(L10n.Events.releasesCaption)
                         .font(.imasCaption)
                         .foregroundStyle(DS.ink3)
                         .padding(.horizontal, DS.sp5)
@@ -73,7 +73,7 @@ struct EventReleasesSection: View {
                     Button { openURL(url) } label: {
                         HStack(spacing: 3) {
                             Image(systemName: "cart").font(.imasScaled(10, weight: .semibold))
-                            Text("購入ページ").font(.imasScaled(11, weight: .semibold))
+                            Text(L10n.Events.releasesPurchase).font(.imasScaled(11, weight: .semibold))
                         }
                         .foregroundStyle(t.accent)
                     }
@@ -89,13 +89,14 @@ struct EventReleasesSection: View {
                 VStack(spacing: DS.sp1) {
                     Image(systemName: owned ? UserMarkKind.owned.activeIcon : UserMarkKind.owned.icon)
                         .font(.imasTitle3)
-                    Text(owned ? "所有" : "未所有")
+                    Text(owned ? L10n.Events.releasesOwned : L10n.Events.releasesNotOwned)
                         .font(.imasScaled(10, weight: .semibold))
                 }
                 .foregroundStyle(owned ? t.accent : DS.ink3)
                 .frame(width: 52)
                 .contentShape(Rectangle())
-                .accessibilityLabel(owned ? "\(release.title) を所有から外す" : "\(release.title) を所有に追加")
+                .accessibilityLabel(owned ? L10n.Events.releasesRemoveA11y(title: release.title)
+                                          : L10n.Events.releasesAddA11y(title: release.title))
             }
             .buttonStyle(.borderless)
         }
@@ -137,7 +138,7 @@ struct EventReleasesSection: View {
         do {
             try markService.setBool(.owned, entity: .release, id: release.id, value: now)
         } catch {
-            LocalWriteFailure.report(error, action: "所有の記録")
+            LocalWriteFailure.report(error, action: String(localized: L10n.Events.localWriteRecordOwned))
         }
         if now { ownedIds.insert(release.id) } else { ownedIds.remove(release.id) }
     }

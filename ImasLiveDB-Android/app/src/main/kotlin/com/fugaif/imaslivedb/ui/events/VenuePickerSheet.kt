@@ -33,6 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.model.Venue
 import com.fugaif.imaslivedb.data.model.VenueDirectory
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.NameFilterField
 import com.fugaif.imaslivedb.ui.theme.DS
@@ -75,14 +77,14 @@ fun VenuePickerSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.92f)) {
             Text(
-                "会場",
+                L10n.Events.venuePickerTitle.resolve(),
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
                 color = DS.ink,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
             )
             NameFilterField(
-                prompt = "会場を絞り込み",
+                prompt = L10n.Events.venuePickerFilterPrompt.resolve(),
                 value = query,
                 onValueChange = { query = it }
             )
@@ -92,8 +94,8 @@ fun VenuePickerSheet(
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
                     ImasEmptyState(
                         icon = Icons.Filled.Search,
-                        title = "見つかりません",
-                        message = "「$query」に一致する会場がありません"
+                        title = L10n.Events.venuePickerEmptyTitle.resolve(),
+                        message = L10n.Events.venuePickerEmptyMessage(query = query).resolve()
                     )
                 }
                 return@Column
@@ -101,7 +103,10 @@ fun VenuePickerSheet(
 
             LazyColumn(Modifier.fillMaxWidth()) {
                 item {
-                    VenueRow(label = "選択なし", subtitle = null, isSelected = selected == null, muted = true) {
+                    VenueRow(
+                        label = L10n.Events.venuePickerNone.resolve(), subtitle = null, isSelected = selected == null,
+                        muted = true
+                    ) {
                         onSelect(null)
                         onDismiss()
                     }
@@ -134,12 +139,11 @@ fun VenuePickerSheet(
 }
 
 /** キャパと旧名を副題に出す。キャパは出典が取れた会場だけ入っているので null もある。 */
+@Composable
 private fun venueSubtitle(venue: Venue): String? {
-    val parts = buildList {
-        venue.capacityLabel?.let { add(it) }
-        venue.aliasList.firstOrNull()?.let { add("旧: $it") }
-    }
-    return parts.joinToString(" ・ ").ifEmpty { null }
+    val capacity = venue.capacityLabel?.resolve()
+    val former = venue.aliasList.firstOrNull()?.let { L10n.Events.venuePickerFormerName(name = it).resolve() }
+    return listOfNotNull(capacity, former).joinToString(L10n.Events.metaSeparator.resolve()).ifEmpty { null }
 }
 
 @Composable

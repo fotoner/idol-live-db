@@ -42,6 +42,8 @@ import com.fugaif.imaslivedb.data.model.AttendanceType
 import com.fugaif.imaslivedb.data.model.Show
 import com.fugaif.imaslivedb.data.model.UserMark
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import kotlinx.coroutines.launch
@@ -82,7 +84,9 @@ fun EventAttendanceSheet(
 
     fun set(showId: String, type: AttendanceType?) {
         scope.launch {
-            localWrite("参加の記録") { marks.setAttendance(UserMark.SHOW, showId, type) }
+            localWrite(L10n.Events.localWriteRecordAttendance.resolve(context)) {
+                marks.setAttendance(UserMark.SHOW, showId, type)
+            }
             reload()
             onChange()
         }
@@ -91,7 +95,9 @@ fun EventAttendanceSheet(
     fun toggleAllLive() {
         val target = if (allLive) null else AttendanceType.LIVE
         scope.launch {
-            localWrite("参加の記録") { shows.forEach { marks.setAttendance(UserMark.SHOW, it.id, target) } }
+            localWrite(L10n.Events.localWriteRecordAttendance.resolve(context)) {
+                shows.forEach { marks.setAttendance(UserMark.SHOW, it.id, target) }
+            }
             reload()
             onChange()
         }
@@ -102,7 +108,7 @@ fun EventAttendanceSheet(
             modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(bottom = 32.dp)
         ) {
             Text(
-                "参加した公演",
+                L10n.Events.attendanceSheetTitle.resolve(),
                 fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
             )
@@ -120,12 +126,12 @@ fun EventAttendanceSheet(
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(Modifier.width(12.dp))
-                Text("全公演に現地参加", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
+                Text(L10n.Events.attendanceSheetAllLive.resolve(), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
                 Spacer(Modifier.weight(1f))
-                Text("${shows.size}公演", fontSize = 12.sp, color = DS.ink2)
+                Text(L10n.Events.attendanceSheetShowCount(count = shows.size).resolve(), fontSize = 12.sp, color = DS.ink2)
             }
             Text(
-                "公演ごとに参加形態を選べます。回収率には現地参加だけが数えられます。",
+                L10n.Events.attendanceSheetFooterAndroid.resolve(),
                 fontSize = 12.sp, color = DS.ink2,
                 modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 12.dp)
             )
@@ -135,7 +141,7 @@ fun EventAttendanceSheet(
                 Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)) {
                     Text(show.name, fontSize = 15.sp, color = DS.ink)
                     val sub = listOfNotNull(show.venue?.takeIf { it.isNotBlank() },
-                        show.date.takeIf { it.isNotBlank() }).joinToString(" ・ ")
+                        show.date.takeIf { it.isNotBlank() }).joinToString(L10n.Events.metaSeparator.resolve())
                     if (sub.isNotEmpty()) {
                         Spacer(Modifier.height(2.dp))
                         Text(sub, fontSize = 12.sp, color = DS.ink2)

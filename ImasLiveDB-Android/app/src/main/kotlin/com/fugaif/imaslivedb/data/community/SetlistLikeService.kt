@@ -2,6 +2,9 @@ package com.fugaif.imaslivedb.data.community
 
 import android.util.Log
 import com.fugaif.imaslivedb.data.net.WorkerHttpClient
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.UserFacing
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -29,8 +32,13 @@ class SetlistLikeService(private val http: WorkerHttpClient) {
     /** 1 曲ぶんの集計 + 自分の like 状態。 */
     data class LikeEntry(val songId: String, val likeCount: Int, val hasUserLiked: Boolean)
 
-    /** like / unlike が「認証されていない」で弾かれたことを表す。呼び出し側はログイン誘導に使う。 */
-    class Unauthorized : Exception("Like するにはログインが必要です")
+    /**
+     * like / unlike が「認証されていない」で弾かれたことを表す。呼び出し側はログイン誘導に使う。
+     * 利用者に見せる文言は [userMessage] (message は開発者向けの目印)。
+     */
+    class Unauthorized : Exception("setlist like: unauthorized"), UserFacing {
+        override val userMessage: DisplayText get() = L10n.Events.setlistLikeErrorUnauthorizedAndroid
+    }
 
     private class CacheHit(val entries: List<LikeEntry>, val atMillis: Long)
 

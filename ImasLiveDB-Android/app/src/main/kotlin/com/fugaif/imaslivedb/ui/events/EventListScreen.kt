@@ -44,6 +44,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.model.EventWithDateRange
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.ImasLeadBar
 import com.fugaif.imaslivedb.ui.components.EventAttendanceSwipeRow
@@ -103,7 +105,7 @@ fun EventListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("ライブ") },
+                title = { Text(L10n.Events.listTitle.resolve()) },
                 actions = {
                     BadgedBox(
                         badge = {
@@ -112,7 +114,7 @@ fun EventListScreen(
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
                         IconButton(onClick = { showFilterSheet = true }) {
-                            Icon(Icons.Filled.FilterList, contentDescription = "フィルター")
+                            Icon(Icons.Filled.FilterList, contentDescription = L10n.Events.filterTitle.resolve())
                         }
                     }
                 }
@@ -121,7 +123,7 @@ fun EventListScreen(
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             ImasSegmented(
-                labels = listOf("今後の予定", "開催済み"),
+                labels = listOf(L10n.Events.listTabUpcoming.resolve(), L10n.Events.listTabPast.resolve()),
                 selection = uiState.timeFilter,
                 onSelect = { viewModel.selectTimeFilter(it) },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)
@@ -130,7 +132,7 @@ fun EventListScreen(
             // 一覧そのものを絞る欄。虫眼鏡のシート (横断検索) だと結果がそこで完結してしまい、
             // ブランド絞り込みや期間フィルタと合わせられない。
             NameFilterField(
-                prompt = "ライブ名で絞り込み",
+                prompt = L10n.Events.listNameFilterPrompt.resolve(),
                 value = uiState.searchText,
                 onValueChange = { viewModel.setSearchText(it) }
             )
@@ -165,7 +167,7 @@ fun EventListScreen(
                     onClick = { showVenuePicker = true },
                     label = {
                         Text(
-                            uiState.venueDirectory.venue(uiState.venue)?.name ?: "会場",
+                            uiState.venueDirectory.venue(uiState.venue)?.name ?: L10n.Events.listVenueChip.resolve(),
                             style = MaterialTheme.typography.labelMedium,
                             maxLines = 1
                         )
@@ -177,7 +179,7 @@ fun EventListScreen(
                         {
                             Icon(
                                 imageVector = Icons.Filled.Clear,
-                                contentDescription = "会場絞り込みを解除",
+                                contentDescription = L10n.Events.listVenueClearA11y.resolve(),
                                 modifier = Modifier
                                     .size(18.dp)
                                     .clickable { viewModel.selectVenue(context, null) }
@@ -189,7 +191,7 @@ fun EventListScreen(
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = "${uiState.filteredCount}件",
+                    text = L10n.Events.listCount(count = uiState.filteredCount).resolve(),
                     style = MaterialTheme.typography.bodySmall,
                     color = DS.ink2
                 )
@@ -202,11 +204,12 @@ fun EventListScreen(
             } else if (uiState.groupedByYear.isEmpty()) {
                 ImasEmptyState(
                     icon = Icons.Filled.MusicNote,
-                    title = if (uiState.timeFilter == 0) "今後の予定はありません" else "開催済みのライブがありません",
+                    title = (if (uiState.timeFilter == 0) L10n.Events.listEmptyUpcomingTitle else L10n.Events.listEmptyPastTitle)
+                        .resolve(),
                     message = if (uiState.timeFilter == 0) {
-                        "現在、登録されている今後のライブはありません。「開催済み」タブもご確認ください。"
+                        L10n.Events.listEmptyUpcomingMessage.resolve()
                     } else {
-                        "開催済みのライブはまだ登録されていません。"
+                        L10n.Events.listEmptyPastMessage.resolve()
                     }
                 )
             } else {
@@ -269,7 +272,7 @@ private fun ActiveFilterChipRow(
     ) {
         if (uiState.appliedSearchText.isNotEmpty()) {
             ImasRemovableChip(
-                text = "「${uiState.appliedSearchText}」",
+                text = L10n.Events.listFilterChipQuery(query = uiState.appliedSearchText).resolve(),
                 onRemove = viewModel::clearSearchText
             )
         }
@@ -282,26 +285,32 @@ private fun ActiveFilterChipRow(
         }
         uiState.excludedKinds.sorted().forEach { kind ->
             ImasRemovableChip(
-                text = "除外: ${eventKindLabel(kind)}",
+                text = L10n.Events.filterKindExcluded(kinds = eventKindLabel(kind)).resolve(),
                 onRemove = { viewModel.removeExcludedKind(kind) }
             )
         }
         when (uiState.attendanceFilter) {
-            "attended" -> ImasRemovableChip(text = "参加済み", onRemove = viewModel::clearAttendanceFilter)
-            "not_attended" -> ImasRemovableChip(text = "未参加", onRemove = viewModel::clearAttendanceFilter)
+            "attended" -> ImasRemovableChip(
+                text = L10n.Events.filterAttendanceAttended.resolve(), onRemove = viewModel::clearAttendanceFilter
+            )
+            "not_attended" -> ImasRemovableChip(
+                text = L10n.Events.filterAttendanceNotAttended.resolve(), onRemove = viewModel::clearAttendanceFilter
+            )
             else -> {}
         }
         if (uiState.requireFavorite) {
-            ImasRemovableChip(text = "お気に入り", onRemove = viewModel::clearFavoriteFilter)
+            ImasRemovableChip(text = L10n.Events.listFilterChipFavorite.resolve(), onRemove = viewModel::clearFavoriteFilter)
         }
         if (uiState.requireNote) {
-            ImasRemovableChip(text = "メモあり", onRemove = viewModel::clearNoteFilter)
+            ImasRemovableChip(text = L10n.Events.listFilterChipHasNote.resolve(), onRemove = viewModel::clearNoteFilter)
         }
         if (uiState.showEmptyEvents) {
-            ImasRemovableChip(text = "空イベントも表示", onRemove = viewModel::clearShowEmptyEvents)
+            ImasRemovableChip(text = L10n.Events.listFilterChipShowEmpty.resolve(), onRemove = viewModel::clearShowEmptyEvents)
         }
         if (uiState.hideStreaming) {
-            ImasRemovableChip(text = "配信を除く", onRemove = viewModel::toggleHideStreaming)
+            ImasRemovableChip(
+                text = L10n.Events.filterDisplayHideStreamingTitle.resolve(), onRemove = viewModel::toggleHideStreaming
+            )
         }
         uiState.venue?.let { venueId ->
             ImasRemovableChip(

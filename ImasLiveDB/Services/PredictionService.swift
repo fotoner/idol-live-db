@@ -192,24 +192,28 @@ enum PredictionError: LocalizedError {
     case invalidResponse
     case serverError(String)
 
-    var errorDescription: String? {
+    /// 利用者に見せる文言。サーバの文言 (serverError) は訳さずにそのまま差し込む。
+    var userMessage: DisplayText {
         switch self {
         case .unauthorized:
-            return "投票にはApple Sign Inが必要です"
+            return .key(L10n.Events.predictionErrorUnauthorized)
         case .rateLimited:
-            return "投票の制限に達しました。明日またお試しください"
+            return .key(L10n.Events.predictionErrorRateLimited)
         case .tooManyPerformers:
-            return "1曲につき予想できるのは8人までです"
+            return .key(L10n.Events.predictionErrorTooManyPerformers)
         case .voteLimitReached:
-            return "1公演につき投票できるのは\(CommunityVoteLimit.perTarget)曲までです"
+            return .key(L10n.Events.predictionErrorVoteLimit(count: CommunityVoteLimit.perTarget))
         case .notFound:
-            return "対象が見つかりませんでした"
+            return .key(L10n.Events.predictionErrorNotFound)
         case .invalidResponse:
-            return "サーバーからの応答が不正です"
+            return .key(L10n.Events.predictionErrorInvalidResponse)
         case .serverError(let msg):
-            return "サーバーエラー: \(msg)"
+            return .key(L10n.Events.predictionErrorServer(message: msg))
         }
     }
+
+    /// OS の境界 (`error.localizedDescription`) ではここで 1 回だけ文字列にする。
+    var errorDescription: String? { userMessage.resolved }
 }
 
 // MARK: - SetlistPredictionVoting

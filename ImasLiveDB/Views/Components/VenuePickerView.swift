@@ -52,21 +52,21 @@ struct VenuePickerView: View {
     var body: some View {
         List {
             Section {
-                row(label: "選択なし", venue: nil, muted: true)
+                row(label: .key(L10n.Events.venuePickerNone), venue: nil, muted: true)
             }
 
             if filteredVenues.isEmpty {
                 ImasEmptyState(
                     systemImage: "magnifyingglass",
-                    title: "見つかりません",
-                    message: "「\(searchText)」に一致する会場がありません"
+                    title: String(localized: L10n.Events.venuePickerEmptyTitle),
+                    message: String(localized: L10n.Events.venuePickerEmptyMessage(query: searchText))
                 )
                 .listRowBackground(Color.clear)
             } else {
                 ForEach(grouped, id: \.area) { group in
                     Section(group.area) {
                         ForEach(group.venues) { venue in
-                            row(label: venue.name, venue: venue, muted: false)
+                            row(label: .verbatim(venue.name), venue: venue, muted: false)
                         }
                     }
                 }
@@ -75,14 +75,14 @@ struct VenuePickerView: View {
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
         .background(DS.bg)
-        .searchable(text: $searchText, prompt: "会場名・旧名・地域で検索")
-        .navigationTitle("会場")
+        .searchable(text: $searchText, prompt: Text(L10n.Events.venuePickerSearchPrompt))
+        .navigationTitle(L10n.Events.venuePickerTitle)
         .navigationBarTitleDisplayMode(.inline)
         .task { catalog = makeCatalog() }
     }
 
     @ViewBuilder
-    private func row(label: String, venue: Venue?, muted: Bool) -> some View {
+    private func row(label: DisplayText, venue: Venue?, muted: Bool) -> some View {
         let id = venue?.id
         Button {
             selected = id
@@ -90,7 +90,7 @@ struct VenuePickerView: View {
         } label: {
             HStack(spacing: DS.sp3) {
                 VStack(alignment: .leading, spacing: DS.sp1) {
-                    Text(label)
+                    Text(display: label)
                         .font(.imasSubhead)
                         .foregroundStyle(muted ? DS.ink2 : DS.ink)
                         .lineLimit(2)
@@ -119,8 +119,10 @@ struct VenuePickerView: View {
     /// キャパと旧名を副題に出す。キャパは出典が取れた会場だけ入っているので nil もある。
     private func subtitle(for venue: Venue) -> String? {
         var parts: [String] = []
-        if let cap = venue.capacityLabel { parts.append(cap) }
-        if let former = venue.aliasList.first { parts.append("旧: \(former)") }
-        return parts.isEmpty ? nil : parts.joined(separator: " ・ ")
+        if let cap = venue.capacityLabel { parts.append(String(localized: cap)) }
+        if let former = venue.aliasList.first {
+            parts.append(String(localized: L10n.Events.venuePickerFormerName(name: former)))
+        }
+        return parts.isEmpty ? nil : parts.joined(separator: String(localized: L10n.Events.metaSeparator))
     }
 }

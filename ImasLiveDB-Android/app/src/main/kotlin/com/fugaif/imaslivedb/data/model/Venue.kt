@@ -4,6 +4,8 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 
 /**
  * ライブ会場 (施設)。iOS `Venue` の 1:1 移植。
@@ -50,13 +52,17 @@ data class Venue(
     val aliasList: List<String>
         get() = aliases?.split("\n")?.filter { it.isNotBlank() } ?: emptyList()
 
-    /** 「東京・日本武道館」のような地域つき表示。都道府県が無ければ名前だけ。 */
-    val displayNameWithArea: String
-        get() = if (prefecture.isNullOrEmpty()) name else "$prefecture・$name"
+    /** 「東京・日本武道館」のような地域つき表示。都道府県が無ければ名前だけ。画面で resolve() する。 */
+    val displayNameWithArea: DisplayText
+        get() = if (prefecture.isNullOrEmpty()) {
+            DisplayText.Verbatim(name)
+        } else {
+            L10n.Events.venueNameWithArea(prefecture = prefecture, name = name)
+        }
 
-    /** 「14,500人」。キャパ未登録なら null。 */
-    val capacityLabel: String?
-        get() = capacity?.let { "%,d人".format(it) }
+    /** 「14,500人」(桁区切りは表示言語の書式)。キャパ未登録なら null。画面で resolve() する。 */
+    val capacityLabel: DisplayText?
+        get() = capacity?.let { L10n.Events.venueCapacity(count = it) }
 }
 
 /**

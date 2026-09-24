@@ -49,16 +49,17 @@ enum UserMarkKind: String, Codable, CaseIterable, Sendable {
     /// bool 系マークと違って**順序がある**ので、ラベルはユーザー設定から引く。
     case mastery
 
-    var label: String {
+    /// 表示名。保存値は rawValue (英字) で、こちらは画面に出すだけ。
+    var label: LocalizedStringResource {
         switch self {
-        case .collected: return "回収済"
-        case .favorite:  return "お気に入り"
-        case .myPick:    return "担当"
-        case .attended:  return "参加"
-        case .note:      return "メモ"
-        case .seat:      return "座席"
-        case .owned:     return "所有"
-        case .mastery:   return "習熟度"
+        case .collected: return L10n.Events.userMarkKindCollected
+        case .favorite:  return L10n.Events.userMarkKindFavorite
+        case .myPick:    return L10n.Events.userMarkKindMyPick
+        case .attended:  return L10n.Events.userMarkKindAttended
+        case .note:      return L10n.Events.userMarkKindNote
+        case .seat:      return L10n.Events.userMarkKindSeat
+        case .owned:     return L10n.Events.userMarkKindOwned
+        case .mastery:   return L10n.Events.userMarkKindMastery
         }
     }
 

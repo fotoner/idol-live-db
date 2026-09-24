@@ -1,0 +1,1916 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "events",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/data/community/SetlistLikeService.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/data/model/Venue.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/events/EventAttendanceSheet.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/events/EventDetailScreen.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/events/EventFilterSheet.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/events/EventListScreen.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/events/SetlistScreen.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/events/SetlistViewModel.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/events/UserMarkBar.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/events/VenuePickerSheet.kt"
+    ],
+    "ios": [
+      "ImasLiveDB/Models/UserMark.swift",
+      "ImasLiveDB/Models/Venue.swift",
+      "ImasLiveDB/Services/PredictionService.swift",
+      "ImasLiveDB/Services/SetlistLikeService.swift",
+      "ImasLiveDB/Views/Components/NoteEditorSheet.swift",
+      "ImasLiveDB/Views/Components/SeatEditorSheet.swift",
+      "ImasLiveDB/Views/Components/UserMarkBar.swift",
+      "ImasLiveDB/Views/Components/VenuePickerView.swift",
+      "ImasLiveDB/Views/Events/EventAttendanceSheet.swift",
+      "ImasLiveDB/Views/Events/EventDetailView.swift",
+      "ImasLiveDB/Views/Events/EventListView.swift",
+      "ImasLiveDB/Views/Events/EventReleasesSection.swift",
+      "ImasLiveDB/Views/Events/MyPredictionsView.swift",
+      "ImasLiveDB/Views/Events/PerformerPredictionView.swift",
+      "ImasLiveDB/Views/Events/SetlistPredictionView.swift",
+      "ImasLiveDB/Views/Events/SetlistRowView.swift",
+      "ImasLiveDB/Views/Events/SetlistSimpleRowView.swift",
+      "ImasLiveDB/Views/Events/SetlistView.swift"
+    ]
+  },
+  "strings": {
+    "action.cancel": {
+      "ja": "キャンセル",
+      "ko": "취소",
+      "note": "メモ・座席の入力と、公演への参加を選ぶダイアログの取り消しボタン"
+    },
+    "action.done": {
+      "ja": "完了",
+      "ko": "완료",
+      "note": "参加した公演を選ぶシートを閉じるボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "action.save": {
+      "ja": "保存",
+      "ko": "저장",
+      "note": "メモ・座席の入力の保存ボタン"
+    },
+    "attendance_sheet.all_live": {
+      "ja": "全公演に現地参加",
+      "ko": "모든 공연 현장 참가",
+      "note": "全公演をまとめて現地参加にする行"
+    },
+    "attendance_sheet.footer_android": {
+      "ja": "公演ごとに参加形態を選べます。回収率には現地参加だけが数えられます。",
+      "ko": "공연마다 참가 형태를 고를 수 있어요. 회수율에는 현장 참가만 집계돼요.",
+      "note": "参加シートの説明。iOS の attendance_sheet.footer_ios と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "attendance_sheet.footer_ios": {
+      "ja": "公演ごとに参加形態を選べます（配信・ライブビューイングは開催があった公演のみ）。回収率には現地参加だけが数えられます。",
+      "ko": "공연마다 참가 형태를 고를 수 있어요 (스트리밍·라이브 뷰잉은 해당 형태로 진행된 공연만). 회수율에는 현장 참가만 집계돼요.",
+      "note": "参加シートの説明。Android は attendance_sheet.footer_android (括弧の補足が無い)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "attendance_sheet.per_show_header": {
+      "ja": "公演ごとに選ぶ",
+      "ko": "공연별로 고르기",
+      "note": "参加シートの公演一覧の節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "attendance_sheet.show_count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}公演",
+      "ko": "공연 {count}회",
+      "note": "「全公演に現地参加」の行の右に出す公演数。1000 以上は桁区切りが付く (ありえない)"
+    },
+    "attendance_sheet.title": {
+      "ja": "参加した公演",
+      "ko": "참가한 공연",
+      "note": "イベントの公演ごとに参加を選ぶシートの見出し"
+    },
+    "cast.day.date": {
+      "args": [
+        {
+          "name": "month",
+          "type": "int"
+        },
+        {
+          "name": "day",
+          "type": "int"
+        },
+        {
+          "name": "weekday",
+          "type": "string"
+        }
+      ],
+      "ja": "{month}/{day}({weekday})",
+      "ko": "{month}/{day} ({weekday})",
+      "note": "出演パネルの DAY 見出しの日付。weekday は表示言語の 1 文字の曜日 (土 / 토)"
+    },
+    "cast.empty.message": {
+      "ja": "セトリ・出演者が登録されると表示されます",
+      "ko": "세트리스트·출연자가 등록되면 표시돼요",
+      "note": "出演パネルの空状態の説明"
+    },
+    "cast.empty.title": {
+      "ja": "出演情報がありません",
+      "ko": "출연 정보가 없어요",
+      "note": "出演パネルの空状態の見出し"
+    },
+    "cast.full_attendance.count": {
+      "args": [
+        {
+          "name": "present",
+          "type": "int"
+        },
+        {
+          "name": "total",
+          "type": "count"
+        }
+      ],
+      "ja": "{present}/{total} 名",
+      "ko": "{present}/{total}명",
+      "note": "全員集合の帯の右の人数 (出演 / ブランド全体)。1000 以上は桁区切りが付く (ありえない)"
+    },
+    "cast.full_attendance.title": {
+      "ja": "全員集合！",
+      "ko": "전원 집합!",
+      "note": "ブランドのアイドルが全員出演したライブの帯"
+    },
+    "cast.group.header": {
+      "args": [
+        {
+          "name": "label",
+          "type": "core"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{label} ・ {count}名",
+      "ko": "{label} · {count}명",
+      "note": "出演パネル: DAY ごと・欠席などのまとまりの見出し。label はコアが付けた名前 (DAY1・欠席など)。1000 以上は桁区切りが付く (ありえない)"
+    },
+    "cast.role.guest": {
+      "ja": "ゲスト",
+      "ko": "게스트",
+      "note": "出演パネル: ゲストの節の見出し (1 人のとき) と、アバターの下の札"
+    },
+    "cast.role.guest_count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "ゲスト ・ {count}名",
+      "ko": "게스트 · {count}명",
+      "note": "出演パネル: ゲストの節の見出し (2 人以上のとき)。1000 以上は桁区切りが付く (ありえない)"
+    },
+    "cast.role.lead": {
+      "ja": "主演",
+      "ko": "주연",
+      "note": "出演パネル: 主演の節の見出し (1 人のとき) と、アバターの下の札"
+    },
+    "cast.role.lead_count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "主演 ・ {count}名",
+      "ko": "주연 · {count}명",
+      "note": "出演パネル: 主演の節の見出し (2 人以上のとき)。1000 以上は桁区切りが付く (ありえない)"
+    },
+    "cast.units.header": {
+      "args": [
+        {
+          "name": "present",
+          "type": "int"
+        },
+        {
+          "name": "total",
+          "type": "count"
+        }
+      ],
+      "ja": "披露ユニット ・ 全 {present}/{total} 名",
+      "ko": "공연한 유닛 · 전체 {present}/{total}명",
+      "note": "出演パネル: 歌唱したユニットの節の見出し (出演者 / ブランド全体の人数)。1000 以上は桁区切りが付く (ありえない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.copy.name": {
+      "ja": "ライブ名をコピー",
+      "ko": "라이브 이름 복사",
+      "note": "ライブ名の長押しメニュー",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.hero.joint": {
+      "ja": "・ 合同",
+      "ko": "· 합동",
+      "note": "ライブ詳細の日付の行の後ろに付ける、合同ライブ (複数ブランド) の印"
+    },
+    "detail.login_dialog": {
+      "ja": "ライブ・公演の編集にはログインが必要です。",
+      "ko": "라이브·공연을 편집하려면 로그인해야 해요.",
+      "note": "未ログインで編集しようとしたときのダイアログの本文",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.menu.edit": {
+      "ja": "編集",
+      "ko": "편집",
+      "note": "ライブ詳細の右上メニュー: ライブを編集。Android は detail.menu.edit_android",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.menu.edit_android": {
+      "ja": "このライブを編集",
+      "ko": "이 라이브 편집",
+      "note": "ライブ詳細の右上メニュー: ライブを編集。iOS の detail.menu.edit と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.menu.history": {
+      "ja": "編集履歴",
+      "ko": "편집 기록",
+      "note": "ライブ詳細の右上メニュー (Android は公演の行の ⋮ メニューにも): 編集履歴を開く"
+    },
+    "detail.share.a11y": {
+      "ja": "このイベントをシェア",
+      "ko": "이 이벤트 공유",
+      "note": "ライブ詳細の右上の共有ボタンの読み上げ"
+    },
+    "detail.shows.action.add": {
+      "ja": "追加",
+      "ko": "추가",
+      "note": "公演一覧の見出しの右の、公演を追加するボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.shows.action.add_show": {
+      "ja": "公演を追加",
+      "ko": "공연 추가",
+      "note": "公演を追加する操作。iOS は公演が無いときの空状態のボタン、Android は右上メニュー"
+    },
+    "detail.shows.action.edit_show": {
+      "ja": "公演を編集",
+      "ko": "공연 편집",
+      "note": "公演の行のメニュー (iOS は長押し、Android は ⋮)"
+    },
+    "detail.shows.empty.message": {
+      "ja": "「追加」から公演を登録できます",
+      "ko": "“추가”에서 공연을 등록할 수 있어요",
+      "note": "公演が無いときの空状態の説明 (編集できる人だけ)。「追加」は見出しの右のボタン (detail.shows.action.add)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.shows.empty.title": {
+      "ja": "公演がまだありません",
+      "ko": "아직 공연이 없어요",
+      "note": "公演が 1 つも無いときの空状態の見出し"
+    },
+    "detail.shows.header": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "公演 ・ {count} 公演 → セトリへ",
+      "ko": "공연 · {count}회 → 세트리스트로",
+      "note": "公演一覧の節の見出し。行を押すとセトリへ進む。1000 以上は桁区切りが付く (ありえない)"
+    },
+    "detail.shows.menu.a11y": {
+      "ja": "公演の操作",
+      "ko": "공연 메뉴",
+      "note": "公演の行の ⋮ ボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.tab.cast": {
+      "ja": "出演",
+      "ko": "출연",
+      "note": "ライブ詳細の中のセグメント (公演・セトリ / 出演 / 情報)"
+    },
+    "detail.tab.info": {
+      "ja": "情報",
+      "ko": "정보",
+      "note": "ライブ詳細の中のセグメント (公演・セトリ / 出演 / 情報)"
+    },
+    "detail.tab.shows": {
+      "ja": "公演・セトリ",
+      "ko": "공연·세트리스트",
+      "note": "ライブ詳細の中のセグメント (公演・セトリ / 出演 / 情報)"
+    },
+    "filter.action.apply": {
+      "ja": "適用",
+      "ko": "적용",
+      "note": "フィルタシートの、選択を一覧に反映するボタン",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.action.reset": {
+      "ja": "リセット",
+      "ko": "초기화",
+      "note": "フィルタシートの、選択を初期状態に戻すボタン",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.attendance.all": {
+      "ja": "すべて",
+      "ko": "전체",
+      "note": "参加状態の選択肢: 絞らない",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.attendance.attended": {
+      "ja": "参加済み",
+      "ko": "참가함",
+      "note": "参加状態の選択肢 (と適用中のチップ): 参加したライブだけ"
+    },
+    "filter.attendance.header": {
+      "ja": "参加状態",
+      "ko": "참가 상태",
+      "note": "フィルタシートの節: 参加したかどうか",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.attendance.not_attended": {
+      "ja": "未参加",
+      "ko": "미참가",
+      "note": "参加状態の選択肢 (と適用中のチップ): 参加していないライブだけ"
+    },
+    "filter.brand.all": {
+      "ja": "全て",
+      "ko": "전체",
+      "note": "フィルタシート: ブランドで絞らないチップ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.brand.header": {
+      "ja": "ブランド",
+      "ko": "브랜드",
+      "note": "フィルタシートの節: ブランド",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.display.header": {
+      "ja": "表示設定",
+      "ko": "표시 설정",
+      "note": "フィルタシートの節: 一覧に出す範囲",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.display.hide_streaming.subtitle": {
+      "ja": "配信・番組だけのイベント (公演として開かれていないもの) を一覧から隠す",
+      "ko": "스트리밍·방송만 있는 이벤트 (공연으로 열리지 않은 것)를 목록에서 숨겨요",
+      "note": "フィルタシートのスイッチの説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.display.hide_streaming.title": {
+      "ja": "配信を除く",
+      "ko": "스트리밍 제외",
+      "note": "フィルタシートのスイッチ (と適用中のチップ): 配信・番組だけのイベントを隠す",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.display.show_empty.subtitle": {
+      "ja": "公演がまだ登録されていないライブを一覧に出す",
+      "ko": "공연이 아직 등록되지 않은 라이브도 목록에 표시해요",
+      "note": "フィルタシートのスイッチの説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.display.show_empty.title": {
+      "ja": "セトリ情報がないライブも表示",
+      "ko": "세트리스트 정보가 없는 라이브도 표시",
+      "note": "フィルタシートのスイッチ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.kind.all_shown": {
+      "ja": "全て表示中",
+      "ko": "모두 표시 중",
+      "note": "フィルタシート: どの種別も除外していないとき",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.kind.excluded": {
+      "args": [
+        {
+          "name": "kinds",
+          "type": "core"
+        }
+      ],
+      "ja": "除外: {kinds}",
+      "ko": "제외: {kinds}",
+      "note": "除外している種別。一覧のチップでは 1 つ、フィルタシートでは「 / 」区切りの並び。語はコア"
+    },
+    "filter.kind.header": {
+      "ja": "種別",
+      "ko": "종류",
+      "note": "フィルタシートの節: イベントの種別 (ライブ・フェスなど)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.marks.favorite_only": {
+      "ja": "お気に入りのみ",
+      "ko": "즐겨찾기만",
+      "note": "フィルタシートのスイッチ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.marks.header": {
+      "ja": "マイマーク",
+      "ko": "마이 마크",
+      "note": "フィルタシートの節: 自分で付けた印 (お気に入り・メモ)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.marks.note_only": {
+      "ja": "メモがあるライブのみ",
+      "ko": "메모가 있는 라이브만",
+      "note": "フィルタシートのスイッチ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.title": {
+      "ja": "フィルター",
+      "ko": "필터",
+      "note": "ライブ一覧のフィルタシートの見出しと、フィルタボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "info.meta.brand": {
+      "ja": "ブランド",
+      "ko": "브랜드",
+      "note": "情報パネルの行の名前: ブランド"
+    },
+    "info.meta.year": {
+      "ja": "年度",
+      "ko": "연도",
+      "note": "情報パネルの行の名前: 開催年"
+    },
+    "info.meta.year_value": {
+      "args": [
+        {
+          "name": "year",
+          "type": "int"
+        }
+      ],
+      "ja": "{year}年",
+      "ko": "{year}년",
+      "note": "情報パネルの開催年の値"
+    },
+    "info.stats.cast": {
+      "ja": "キャスト",
+      "ko": "캐스트",
+      "note": "情報パネルの数字のタイル: 出演者数"
+    },
+    "info.stats.shows": {
+      "ja": "公演",
+      "ko": "공연",
+      "note": "情報パネルの数字のタイル: 公演数"
+    },
+    "info.stats.total_songs": {
+      "ja": "曲（延べ）",
+      "ko": "곡 (누적)",
+      "note": "情報パネルの数字のタイル: 全公演で歌われた曲数 (同じ曲も数える)"
+    },
+    "info.stats.unique_songs": {
+      "ja": "ユニーク曲",
+      "ko": "곡 (중복 제외)",
+      "note": "情報パネルの数字のタイル: 歌われた曲の種類数 (同じ曲は 1 回)"
+    },
+    "info.ticket.action.edit": {
+      "ja": "編集",
+      "ko": "편집",
+      "note": "チケット情報の見出しの右のボタン (情報があるとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "info.ticket.action.register": {
+      "ja": "登録",
+      "ko": "등록",
+      "note": "チケット情報の見出しの右のボタン (まだ情報が無いとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "info.ticket.empty": {
+      "ja": "チケット情報は未登録です",
+      "ko": "티켓 정보가 등록되지 않았어요",
+      "note": "チケット情報が無いとき"
+    },
+    "info.ticket.header": {
+      "ja": "チケット情報",
+      "ko": "티켓 정보",
+      "note": "情報パネル: チケット情報の節の見出し"
+    },
+    "info.ticket.open_official": {
+      "ja": "公式チケットページを開く",
+      "ko": "공식 티켓 페이지 열기",
+      "note": "チケット情報: 公式のチケットページへのリンク"
+    },
+    "info.ticket.register": {
+      "ja": "チケット情報を登録",
+      "ko": "티켓 정보 등록",
+      "note": "チケット情報が無いときの登録ボタン (編集できる人だけ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.action.clear_filters": {
+      "ja": "フィルタを解除",
+      "ko": "필터 해제",
+      "note": "絞り込みを全部外す (右上メニューと、絞り込みで 0 件のときの空状態のボタン)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}件",
+      "ko": "{count}건",
+      "note": "絞り込み後のライブの件数。1000 以上は桁区切りが付く (移行前の Android は区切り無し: 1234件 → 1,234件)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.empty.filtered.message": {
+      "ja": "フィルタ条件に合うライブが見つかりませんでした。",
+      "ko": "필터 조건에 맞는 라이브를 찾지 못했어요.",
+      "note": "フィルタで 1 件も残らなかったときの説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.empty.past.message": {
+      "ja": "開催済みのライブはまだ登録されていません。",
+      "ko": "종료된 라이브가 아직 등록되지 않았어요.",
+      "note": "「開催済み」に 1 件も無いときの説明"
+    },
+    "list.empty.past.title": {
+      "ja": "開催済みのライブがありません",
+      "ko": "종료된 라이브가 없어요",
+      "note": "「開催済み」に 1 件も無いときの空状態の見出し"
+    },
+    "list.empty.upcoming.message": {
+      "ja": "現在、登録されている今後のライブはありません。「開催済み」タブもご確認ください。",
+      "ko": "지금 등록된 예정 라이브가 없어요. “종료” 탭도 확인해 주세요.",
+      "note": "「今後の予定」に 1 件も無いときの説明。「開催済み」は list.tab.past のタブの名前"
+    },
+    "list.empty.upcoming.title": {
+      "ja": "今後の予定はありません",
+      "ko": "예정된 라이브가 없어요",
+      "note": "「今後の予定」に 1 件も無いときの空状態の見出し"
+    },
+    "list.filter_chip.favorite": {
+      "ja": "お気に入り",
+      "ko": "즐겨찾기",
+      "note": "適用中の絞り込みのチップ: お気に入りだけ"
+    },
+    "list.filter_chip.has_note": {
+      "ja": "メモあり",
+      "ko": "메모 있음",
+      "note": "適用中の絞り込みのチップ: メモがあるライブだけ"
+    },
+    "list.filter_chip.query": {
+      "args": [
+        {
+          "name": "query",
+          "type": "string"
+        }
+      ],
+      "ja": "「{query}」",
+      "ko": "“{query}”",
+      "note": "適用中の絞り込みのチップ: 名前の絞り込み語",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.filter_chip.show_empty": {
+      "ja": "空イベントも表示",
+      "ko": "빈 이벤트도 표시",
+      "note": "適用中の絞り込みのチップ: 公演が無いライブも出す",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.filter_empty.action": {
+      "ja": "絞り込みを解除",
+      "ko": "필터 해제",
+      "note": "名前の絞り込みを消すボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.filter_empty.message": {
+      "args": [
+        {
+          "name": "query",
+          "type": "string"
+        }
+      ],
+      "ja": "「{query}」に一致するライブがありません",
+      "ko": "“{query}”에 해당하는 라이브가 없어요",
+      "note": "名前の絞り込みで 1 件も残らなかったときの説明。query は入力した語",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.filter_empty.title": {
+      "ja": "絞り込み結果がありません",
+      "ko": "필터 결과가 없어요",
+      "note": "名前の絞り込みで 1 件も残らなかったときの空状態の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.menu.add_event": {
+      "ja": "イベントを追加",
+      "ko": "이벤트 추가",
+      "note": "ライブ一覧の右上メニュー: 新しいライブを作る",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.name_filter_prompt": {
+      "ja": "ライブ名で絞り込み",
+      "ko": "라이브 이름으로 찾기",
+      "note": "一覧の上の絞り込み欄のプレースホルダ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.search_prompt": {
+      "ja": "ライブ名・会場",
+      "ko": "라이브 이름·공연장",
+      "note": "ナビバーの絞り込み欄のプレースホルダ (虫眼鏡が付くので対象だけ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.tab.past": {
+      "ja": "開催済み",
+      "ko": "종료",
+      "note": "ライブ一覧のセグメント: 終わったライブ。list.empty.upcoming.message が「開催済み」タブと呼ぶ"
+    },
+    "list.tab.upcoming": {
+      "ja": "今後の予定",
+      "ko": "예정",
+      "note": "ライブ一覧のセグメント: これからのライブ"
+    },
+    "list.title": {
+      "ja": "ライブ",
+      "ko": "라이브",
+      "note": "ライブ一覧の画面の見出し"
+    },
+    "list.venue.chip": {
+      "ja": "会場",
+      "ko": "공연장",
+      "note": "会場で絞るチップ (会場を選んでいないとき)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.venue.clear.a11y": {
+      "ja": "会場絞り込みを解除",
+      "ko": "공연장 필터 해제",
+      "note": "会場チップの × の読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "local_write.record_attendance": {
+      "ja": "参加の記録",
+      "ko": "참가 기록",
+      "note": "端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名"
+    },
+    "local_write.record_owned": {
+      "ja": "所有の記録",
+      "ko": "소유 기록",
+      "note": "端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (映像円盤の所有)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "local_write.save_note": {
+      "ja": "メモの保存",
+      "ko": "메모 저장",
+      "note": "端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名"
+    },
+    "local_write.save_seat": {
+      "ja": "座席の保存",
+      "ko": "좌석 저장",
+      "note": "端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名"
+    },
+    "local_write.toggle": {
+      "args": [
+        {
+          "name": "mark",
+          "type": "text"
+        }
+      ],
+      "ja": "{mark}の切り替え",
+      "ko": "{mark} 전환",
+      "note": "端末への書き込みに失敗したときの知らせに入る操作名。mark はマークの種類名 (お気に入りなど)"
+    },
+    "meta.separator": {
+      "ja": " ・ ",
+      "keep_whitespace": true,
+      "ko": " · ",
+      "note": "項目を 1 行に並べるときの区切り (前後に空白)。公演の「会場 ・ 日付」、会場の「キャパ ・ 旧名」など"
+    },
+    "my_predictions.empty.message": {
+      "ja": "未来公演のセトリ予想で投票すると、ここに表示されます",
+      "ko": "앞으로 열릴 공연의 세트리스트 예상에 투표하면 여기에 표시돼요",
+      "note": "マイ予想: 1 つも投票していないときの説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "my_predictions.empty.title": {
+      "ja": "まだ予想していません",
+      "ko": "아직 예상하지 않았어요",
+      "note": "マイ予想: 1 つも投票していないときの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "my_predictions.login.message": {
+      "ja": "Apple Sign In すると、投票した予想がここにまとまります",
+      "ko": "Apple Sign In으로 로그인하면 투표한 예상이 여기에 모여요",
+      "note": "マイ予想: 未ログインのときの説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "my_predictions.login.title": {
+      "ja": "ログインが必要です",
+      "ko": "로그인이 필요해요",
+      "note": "マイ予想: 未ログインのときの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "my_predictions.title": {
+      "ja": "マイ予想",
+      "ko": "내 예상",
+      "note": "自分が投票したセトリ予想の一覧の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "note_editor.placeholder": {
+      "ja": "この公演の思い出・持ち物・同行者など",
+      "ko": "이 공연의 추억·챙긴 물건·동행자 등",
+      "note": "公演のメモの入力欄のプレースホルダ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "note_editor.title": {
+      "ja": "メモ",
+      "ko": "메모",
+      "note": "メモの入力シート・ダイアログの見出し"
+    },
+    "playlist.action.stop": {
+      "ja": "再生停止",
+      "ko": "재생 정지",
+      "note": "プレビュー再生中の音楽メニュー: 止める",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "playlist.alert.title": {
+      "ja": "プレイリスト",
+      "ko": "플레이리스트",
+      "note": "プレイリストを作った結果のアラートの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "playlist.created": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "「{name}」プレイリストを作成しました（{count}曲）",
+      "ko": "“{name}” 플레이리스트를 만들었어요 ({count}곡)",
+      "note": "プレイリストを作ったとき。name はプレイリスト名。1000 以上は桁区切りが付く (ありえない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "playlist.description.prediction": {
+      "ja": "アイドルライブDB 予想セトリから作成",
+      "ko": "アイドルライブDB 예상 세트리스트에서 만듦",
+      "note": "セトリ予想から Apple Music に作るプレイリストの説明欄。アプリ名 (アイドルライブDB) は訳さない",
+      "platforms": [
+        "ios"
+      ],
+      "verbatim_ok": true
+    },
+    "playlist.description.setlist": {
+      "ja": "アイドルライブDB から作成",
+      "ko": "アイドルライブDB에서 만듦",
+      "note": "Apple Music に作るプレイリストの説明欄。アプリ名 (アイドルライブDB) は訳さない",
+      "platforms": [
+        "ios"
+      ],
+      "verbatim_ok": true
+    },
+    "playlist.error.failed": {
+      "args": [
+        {
+          "name": "error",
+          "type": "string"
+        }
+      ],
+      "ja": "プレイリスト作成に失敗しました: {error}",
+      "ko": "플레이리스트를 만들지 못했어요: {error}",
+      "note": "プレイリストを作れなかったとき。error は OS のエラーの説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "playlist.error.no_ids": {
+      "ja": "Apple Music IDが登録されている曲がありません",
+      "ko": "Apple Music ID가 등록된 곡이 없어요",
+      "note": "プレイリストに入れられる曲が無いとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "playlist.error.subscription": {
+      "ja": "Apple Musicのサブスクリプションが必要です",
+      "ko": "Apple Music 구독이 필요해요",
+      "note": "Apple Music を契約していないとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "playlist.progress": {
+      "args": [
+        {
+          "name": "current",
+          "type": "int"
+        },
+        {
+          "name": "total",
+          "type": "int"
+        }
+      ],
+      "ja": "プレイリスト作成中… {current}/{total}",
+      "ko": "플레이리스트 만드는 중… {current}/{total}",
+      "note": "プレイリストを作っている間の進み具合 (何曲目 / 全曲数)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "playlist.progress_indeterminate": {
+      "ja": "プレイリスト作成中…",
+      "ko": "플레이리스트 만드는 중…",
+      "note": "プレイリストを作っている間 (曲数が決まる前)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.action.add": {
+      "ja": "予想を追加",
+      "ko": "예상 추가",
+      "note": "セトリ予想の見出しの右のボタン: 曲を選んで投票する。prediction.empty.message が「予想を追加」と呼ぶ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.add.failed": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}曲の追加に失敗しました",
+      "ko": "{count}곡을 추가하지 못했어요",
+      "note": "まとめて投票したうち、失敗した曲があったとき。1000 以上は桁区切りが付く (ありえない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.add.overflow": {
+      "args": [
+        {
+          "name": "limit",
+          "type": "int"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "1公演{limit}票までなので、{count}曲は投票できませんでした",
+      "ko": "공연당 {limit}표까지라서 {count}곡은 투표하지 못했어요",
+      "note": "選んだ曲が残りの票より多かったとき。limit は 1 公演の上限、count は投票できなかった曲数",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.empty.message": {
+      "ja": "「予想を追加」から、来そうな曲に投票しよう",
+      "ko": "“예상 추가”에서 나올 것 같은 곡에 투표해 보세요",
+      "note": "セトリ予想が 1 つも無いときの説明。「予想を追加」は prediction.action.add のボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.empty.title": {
+      "ja": "まだ予想がありません",
+      "ko": "아직 예상이 없어요",
+      "note": "セトリ予想が 1 つも無いときの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.error.invalid_response": {
+      "ja": "サーバーからの応答が不正です",
+      "ko": "서버 응답이 올바르지 않아요",
+      "note": "セトリ予想のエラー: サーバの応答が読めない",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.error.not_found": {
+      "ja": "対象が見つかりませんでした",
+      "ko": "대상을 찾지 못했어요",
+      "note": "セトリ予想の投票のエラー: 公演・曲が無い",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.error.rate_limited": {
+      "ja": "投票の制限に達しました。明日またお試しください",
+      "ko": "투표 한도에 도달했어요. 내일 다시 시도해 주세요",
+      "note": "セトリ予想の投票のエラー: 回数の制限",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.error.server": {
+      "args": [
+        {
+          "name": "message",
+          "type": "string"
+        }
+      ],
+      "ja": "サーバーエラー: {message}",
+      "ko": "서버 오류: {message}",
+      "note": "セトリ予想のエラー: サーバのエラー。message はサーバの文言 (訳さない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.error.too_many_performers": {
+      "ja": "1曲につき予想できるのは8人までです",
+      "ko": "한 곡에 최대 8명까지 예상할 수 있어요",
+      "note": "歌唱メンバー予想の投票のエラー: 1 曲 8 人まで",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.error.unauthorized": {
+      "ja": "投票にはApple Sign Inが必要です",
+      "ko": "투표하려면 Apple Sign In이 필요해요",
+      "note": "セトリ予想の投票のエラー: 未ログイン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.error.vote_limit": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "1公演につき投票できるのは{count}曲までです",
+      "ko": "공연당 최대 {count}곡까지 투표할 수 있어요",
+      "note": "セトリ予想の投票のエラー: 1 公演の上限。count は上限の曲数",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.forecast.caption": {
+      "ja": "過去のセトリから推定",
+      "ko": "과거 세트리스트에서 추정",
+      "note": "機械予測の節の見出しの下の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.forecast.promote": {
+      "ja": "予想に入れる",
+      "ko": "예상에 넣기",
+      "note": "機械予測の曲の行のボタン: その曲に投票する",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.forecast.promote.a11y": {
+      "args": [
+        {
+          "name": "title",
+          "type": "string"
+        }
+      ],
+      "ja": "{title}を予想に入れる",
+      "ko": "{title} 예상에 넣기",
+      "note": "機械予測の曲の行のボタンの読み上げ。title は曲名",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.forecast.title": {
+      "ja": "機械予測",
+      "ko": "기계 예측",
+      "note": "過去のセトリから機械的に出した予測の節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.header": {
+      "ja": "セトリ予想",
+      "ko": "세트리스트 예상",
+      "note": "セトリ予想の節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.login_prompt": {
+      "ja": "セトリ予想の投票にはログインが必要です",
+      "ko": "세트리스트 예상에 투표하려면 로그인해야 해요",
+      "note": "セトリ予想の節の未ログインの人への案内",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.menu.a11y": {
+      "ja": "操作",
+      "ko": "작업",
+      "note": "セトリ予想の ⋯ メニューボタンの読み上げ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.menu.create_playlist": {
+      "ja": "Appleプレイリスト作成",
+      "ko": "Apple 플레이리스트 만들기",
+      "note": "セトリ予想の ⋯ メニュー: 上位の曲で Apple Music のプレイリストを作る",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.menu.preview_top": {
+      "ja": "上位曲をプレビュー再生",
+      "ko": "상위 곡 미리 듣기",
+      "note": "セトリ予想の ⋯ メニュー: 上位の曲の試聴を順に流す",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.my_votes": {
+      "args": [
+        {
+          "name": "count",
+          "type": "int"
+        },
+        {
+          "name": "limit",
+          "type": "int"
+        }
+      ],
+      "ja": "あなたの予想 {count}/{limit}",
+      "ko": "내 예상 {count}/{limit}",
+      "note": "自分が投票した曲数 / 1 公演の上限 (シェアの帯)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.performers.empty": {
+      "ja": "出演キャスト情報がありません",
+      "ko": "출연 캐스트 정보가 없어요",
+      "note": "歌唱メンバー予想: 公演の出演者が登録されていないとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.performers.unvote.a11y": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{name} の予想を取り消す (現在{count}票)",
+      "ko": "{name} 예상 취소 (현재 {count}표)",
+      "note": "歌唱メンバー予想のアイドルのチップの読み上げ (投票済みのとき)。name はアイドル名。1000 以上は桁区切りが付く",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.performers.vote.a11y": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{name} を予想 (現在{count}票)",
+      "ko": "{name} 예상하기 (현재 {count}표)",
+      "note": "歌唱メンバー予想のアイドルのチップの読み上げ (まだ投票していないとき)。name はアイドル名。1000 以上は桁区切りが付く",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.playlist.name": {
+      "args": [
+        {
+          "name": "show",
+          "type": "string"
+        }
+      ],
+      "ja": "{show} 予想セトリ",
+      "ko": "{show} 예상 세트리스트",
+      "note": "セトリ予想から Apple Music に作るプレイリストの名前。show は公演名",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.remaining": {
+      "args": [
+        {
+          "name": "remaining",
+          "type": "int"
+        },
+        {
+          "name": "limit",
+          "type": "int"
+        }
+      ],
+      "ja": "残り{remaining}/{limit}",
+      "ko": "남은 표 {remaining}/{limit}",
+      "note": "セトリ予想の見出し: 自分の残りの票数 / 1 公演の上限",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.row.performers_toggle": {
+      "ja": "歌唱メンバー予想",
+      "ko": "가창 멤버 예상",
+      "note": "セトリ予想の曲の行の下の、誰が歌うかの予想を開くボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.row.unvote.a11y": {
+      "ja": "投票を取り消す",
+      "ko": "투표 취소",
+      "note": "セトリ予想の曲の行の投票ボタンの読み上げ (投票済みのとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.row.vote": {
+      "ja": "予想",
+      "ko": "예상",
+      "note": "セトリ予想の曲の行の投票ボタン (まだ投票していないとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.row.vote.a11y": {
+      "ja": "この曲に投票",
+      "ko": "이 곡에 투표",
+      "note": "セトリ予想の曲の行の投票ボタンの読み上げ (まだ投票していないとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.row.voted": {
+      "ja": "投票済",
+      "ko": "투표함",
+      "note": "セトリ予想の曲の行の投票ボタン (投票済みのとき。押すと取り消す)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.share.a11y": {
+      "ja": "自分のセトリ予想をシェア",
+      "ko": "내 세트리스트 예상 공유",
+      "note": "自分の予想をシェアするボタンの読み上げ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.share.button": {
+      "ja": "予想をシェア",
+      "ko": "예상 공유",
+      "note": "自分の予想をシェアするボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "prediction.votes": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}票",
+      "ko": "{count}표",
+      "note": "セトリ予想の票数 (見出しの合計・曲ごと・歌唱メンバー予想の合計)。1000 以上は桁区切りが付く",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "releases.add.a11y": {
+      "args": [
+        {
+          "name": "title",
+          "type": "string"
+        }
+      ],
+      "ja": "{title} を所有に追加",
+      "ko": "{title} 소유로 표시",
+      "note": "映像円盤の所有トグルの読み上げ (持っていないとき)。title は円盤名",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "releases.caption": {
+      "ja": "持っている円盤に印を付けられます。",
+      "ko": "가지고 있는 디스크에 표시할 수 있어요.",
+      "note": "映像円盤の節の下の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "releases.header": {
+      "ja": "映像円盤",
+      "ko": "영상 디스크",
+      "note": "ライブの情報パネル: 映像円盤 (Blu-ray / DVD) の節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "releases.not_owned": {
+      "ja": "未所有",
+      "ko": "미소유",
+      "note": "映像円盤の行の所有トグル (持っていないとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "releases.owned": {
+      "ja": "所有",
+      "ko": "소유",
+      "note": "映像円盤の行の所有トグル (持っているとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "releases.owned_count": {
+      "args": [
+        {
+          "name": "owned",
+          "type": "int"
+        },
+        {
+          "name": "total",
+          "type": "int"
+        }
+      ],
+      "ja": "{owned}/{total} 所有",
+      "ko": "{owned}/{total} 소유",
+      "note": "映像円盤の節の見出しの右: 持っている数 / 全部の数",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "releases.purchase": {
+      "ja": "購入ページ",
+      "ko": "구매 페이지",
+      "note": "映像円盤の行の、購入ページへのリンク",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "releases.remove.a11y": {
+      "args": [
+        {
+          "name": "title",
+          "type": "string"
+        }
+      ],
+      "ja": "{title} を所有から外す",
+      "ko": "{title} 소유 표시 해제",
+      "note": "映像円盤の所有トグルの読み上げ (持っているとき)。title は円盤名",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "seat_editor.footer": {
+      "ja": "ブロック・列・番号など、自由に記録できます。",
+      "ko": "블록·열·번호 등을 자유롭게 기록할 수 있어요.",
+      "note": "座席の入力欄の下の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "seat_editor.placeholder_android": {
+      "ja": "例: アリーナ A6 ブロック 12番",
+      "ko": "예: 아레나 A6 블록 12번",
+      "note": "座席の入力欄のプレースホルダ。iOS の seat_editor.placeholder_ios と ja が違う (統一はオーナーが別 PR で)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "seat_editor.placeholder_ios": {
+      "ja": "例: アリーナ A6 12列 34番",
+      "ko": "예: 아레나 A6 12열 34번",
+      "note": "座席の入力欄のプレースホルダ。Android は seat_editor.placeholder_android (ja が違う)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "seat_editor.title": {
+      "ja": "座席",
+      "ko": "좌석",
+      "note": "座席の入力シート・ダイアログの見出し"
+    },
+    "setlist.attendance.join": {
+      "args": [
+        {
+          "name": "type",
+          "type": "core"
+        }
+      ],
+      "ja": "{type}で参加",
+      "ko": "{type} 참가",
+      "note": "参加の形態を選ぶダイアログの選択肢。type は形態 (現地・配信など。コアの語)"
+    },
+    "setlist.attendance.join_selected": {
+      "args": [
+        {
+          "name": "type",
+          "type": "core"
+        }
+      ],
+      "ja": "{type}で参加 (取り消す)",
+      "ko": "{type} 참가 (취소)",
+      "note": "参加の形態を選ぶダイアログの、選択中の選択肢 (押すと取り消す)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "setlist.attendance.remove": {
+      "ja": "参加を取り消す",
+      "ko": "참가 취소",
+      "note": "参加の形態を選ぶダイアログの、参加を外すボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setlist.attendance.title": {
+      "ja": "この公演への参加",
+      "ko": "이 공연 참가",
+      "note": "参加の形態を選ぶダイアログの見出し"
+    },
+    "setlist.breadcrumb.a11y": {
+      "ja": "上の階層",
+      "ko": "상위 계층",
+      "note": "セトリ画面の上の「ブランド › イベント」のパンくずの読み上げ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setlist.costume.header": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "衣装 ・ {count} 着",
+      "ko": "의상 · {count}벌",
+      "note": "セトリ画面の衣装の節の見出し。1000 以上は桁区切りが付く (ありえない)"
+    },
+    "setlist.empty.action": {
+      "ja": "セトリを追加",
+      "ko": "세트리스트 추가",
+      "note": "セトリが無い過去の公演の空状態のボタン (編集できる人だけ)"
+    },
+    "setlist.empty.future.message": {
+      "ja": "セトリは公演後に登録されます",
+      "ko": "세트리스트는 공연 후에 등록돼요",
+      "note": "セトリが無い未来の公演の空状態の説明"
+    },
+    "setlist.empty.future.title": {
+      "ja": "公演前です",
+      "ko": "공연 전이에요",
+      "note": "セトリが無い未来の公演の空状態の見出し"
+    },
+    "setlist.empty.past.message": {
+      "ja": "このライブのセトリはまだ登録されていません。ログインして編集に参加できます",
+      "ko": "이 라이브의 세트리스트가 아직 등록되지 않았어요. 로그인하면 편집에 참여할 수 있어요",
+      "note": "セトリが無い過去の公演の空状態の説明"
+    },
+    "setlist.empty.past.title": {
+      "ja": "セトリ未登録",
+      "ko": "세트리스트 미등록",
+      "note": "セトリが無い過去の公演の空状態の見出し"
+    },
+    "setlist.info.capacity": {
+      "ja": "キャパ",
+      "ko": "수용 인원",
+      "note": "セトリ画面の会場カードの行の名前: 会場の収容人数",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setlist.info.date": {
+      "ja": "日付",
+      "ko": "날짜",
+      "note": "セトリ画面の会場カードの行の名前: 公演日"
+    },
+    "setlist.info.stream": {
+      "ja": "配信",
+      "ko": "스트리밍",
+      "note": "セトリ画面の会場カードの行の名前: 配信サービス",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setlist.info.venue": {
+      "ja": "会場",
+      "ko": "공연장",
+      "note": "セトリ画面の会場カードの行の名前: 会場"
+    },
+    "setlist.like.add.a11y": {
+      "ja": "この曲が良かった",
+      "ko": "이 곡이 좋았어요",
+      "note": "セトリの行の 👍 ボタンの読み上げ (まだ押していないとき)"
+    },
+    "setlist.like.error.unauthorized_android": {
+      "ja": "Like するにはログインが必要です",
+      "ko": "Like하려면 로그인해야 해요",
+      "note": "未ログインで 👍 したときのエラー。iOS の setlist.like.error.unauthorized_ios と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "setlist.like.error.unauthorized_ios": {
+      "ja": "Like するには Apple Sign In が必要です",
+      "ko": "Like하려면 Apple Sign In이 필요해요",
+      "note": "未ログインで 👍 したときのエラー。Android は setlist.like.error.unauthorized_android",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setlist.like.remove.a11y": {
+      "ja": "Good を取り消す",
+      "ko": "Good 취소",
+      "note": "セトリの行の 👍 ボタンの読み上げ (押してあるとき)"
+    },
+    "setlist.login_dialog": {
+      "ja": "セトリの編集や 👍 での投票にはログインが必要です。",
+      "ko": "세트리스트를 편집하거나 👍로 투표하려면 로그인해야 해요.",
+      "note": "未ログインで編集・投票しようとしたときのダイアログの本文",
+      "platforms": [
+        "android"
+      ]
+    },
+    "setlist.menu.add_to_apple_music": {
+      "ja": "Apple Musicプレイリストに追加",
+      "ko": "Apple Music 플레이리스트에 추가",
+      "note": "セトリ画面の音楽メニュー: セトリの曲で Apple Music のプレイリストを作る",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setlist.menu.display": {
+      "ja": "表示",
+      "ko": "표시",
+      "note": "セトリ画面の右上メニューの、表示の詳しさを選ぶ項目の名前",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setlist.menu.edit": {
+      "ja": "セトリを編集",
+      "ko": "세트리스트 편집",
+      "note": "セトリ画面の右上メニュー"
+    },
+    "setlist.menu.history": {
+      "ja": "セトリの編集履歴",
+      "ko": "세트리스트 편집 기록",
+      "note": "セトリ画面の右上メニュー"
+    },
+    "setlist.menu.preview_all": {
+      "ja": "全曲プレビュー再生",
+      "ko": "전곡 미리 듣기",
+      "note": "セトリ画面の音楽メニュー: 全曲の試聴を順に流す",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setlist.row.comment_card": {
+      "ja": "感想カードを作る",
+      "ko": "감상 카드 만들기",
+      "note": "セトリの行の長押しメニュー: 曲名と感想のシェア画像を作る",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setlist.row.copy.performers": {
+      "ja": "演者をコピー",
+      "ko": "출연자 복사",
+      "note": "シンプル表示のセトリの行の長押しメニュー (歌った人の名前)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setlist.row.copy.title": {
+      "ja": "曲名をコピー",
+      "ko": "곡명 복사",
+      "note": "シンプル表示のセトリの行の長押しメニュー",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setlist.row.full_cast": {
+      "ja": "全員",
+      "ko": "전원",
+      "note": "セトリの行の札: 出演者全員で歌った曲"
+    },
+    "setlist.section.encore": {
+      "ja": "アンコール",
+      "ko": "앙코르",
+      "note": "セトリの区切りの見出し: アンコール (コアがアンコール類をこの語に畳む)"
+    },
+    "setlist.section.main": {
+      "ja": "本編",
+      "ko": "본편",
+      "note": "セトリの区切りの見出し: 本編 (コアの見出し「本編」とメタ未取得のときに出す)"
+    },
+    "setlist.share.a11y": {
+      "ja": "この公演をシェア",
+      "ko": "이 공연 공유",
+      "note": "セトリ画面の右上の共有ボタンの読み上げ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setlist.tab.prediction": {
+      "ja": "予想",
+      "ko": "예상",
+      "note": "未来の公演でセトリと予想が両方あるときのセグメント: セトリ予想",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setlist.tab.setlist": {
+      "ja": "セットリスト",
+      "ko": "세트리스트",
+      "note": "未来の公演でセトリと予想が両方あるときのセグメント: 実際のセトリ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setlist.ticket.header": {
+      "ja": "チケット",
+      "ko": "티켓",
+      "note": "セトリ画面のチケット価格の節の見出し"
+    },
+    "setlist.ticket.kind_name": {
+      "args": [
+        {
+          "name": "kind",
+          "type": "core"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "ja": "{kind}・{name}",
+      "ko": "{kind}·{name}",
+      "note": "券の形態が 1 種類だけのときの行の名前。kind は形態 (コアの語)、name は券種名"
+    },
+    "setlist.ticket.name_estimate": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "ja": "{name} (推定)",
+      "ko": "{name} (추정)",
+      "note": "推定の価格の券種名。name は券種名 (データ)"
+    },
+    "setlist.ticket.range_estimate": {
+      "args": [
+        {
+          "name": "range",
+          "type": "core"
+        }
+      ],
+      "ja": "{range} (推定含む)",
+      "ko": "{range} (추정 포함)",
+      "note": "券の形態ごとの価格帯に推定の価格が混じるとき。range はコアが作った価格帯"
+    },
+    "setlist.title": {
+      "ja": "セットリスト",
+      "ko": "세트리스트",
+      "note": "公演のセトリ画面の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "setlist.vote_hint.login": {
+      "ja": "👍 で投票するにはログインが必要です",
+      "ko": "👍로 투표하려면 로그인해야 해요",
+      "note": "セトリの上の案内 (未ログイン)"
+    },
+    "setlist.vote_hint.signed_in": {
+      "ja": "良かったと思った曲に 👍 で投票しよう！",
+      "ko": "좋았던 곡에 👍로 투표해 보세요!",
+      "note": "セトリの上の案内 (ログイン済み)"
+    },
+    "toolbar.more.a11y": {
+      "ja": "その他",
+      "ko": "더 보기",
+      "note": "ライブ詳細・セトリ画面の右上の ⋮ メニューボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "user_mark.attended.edit.a11y": {
+      "ja": "参加した公演を編集",
+      "ko": "참가한 공연 편집",
+      "note": "ライブ詳細のマイマークの帯の参加ボタンの読み上げ (参加済みの公演があるとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "user_mark.attended.select.a11y": {
+      "ja": "参加した公演を選ぶ",
+      "ko": "참가한 공연 고르기",
+      "note": "ライブ詳細のマイマークの帯の参加ボタンの読み上げ (まだ参加が無いとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "user_mark.attended_with_type": {
+      "args": [
+        {
+          "name": "type",
+          "type": "core"
+        }
+      ],
+      "ja": "参加 ({type})",
+      "ko": "참가 ({type})",
+      "note": "マイマークの帯の参加ボタン。参加の形態 (現地・配信など。語はコア) が付いているとき",
+      "platforms": [
+        "android"
+      ]
+    },
+    "user_mark.kind.attended": {
+      "ja": "参加",
+      "ko": "참가",
+      "note": "マークの種類名: 公演に参加した。マイマークの帯のボタンの名前にもなる"
+    },
+    "user_mark.kind.collected": {
+      "ja": "回収済",
+      "ko": "회수함",
+      "note": "マークの種類名: 楽曲をライブで聴いた (現地回収した)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "user_mark.kind.favorite": {
+      "ja": "お気に入り",
+      "ko": "즐겨찾기",
+      "note": "マークの種類名: お気に入り。マイマークの帯のボタンの名前にもなる"
+    },
+    "user_mark.kind.mastery": {
+      "ja": "習熟度",
+      "ko": "숙련도",
+      "note": "マークの種類名: 楽曲の習熟度 (段階)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "user_mark.kind.my_pick": {
+      "ja": "担当",
+      "ko": "담당",
+      "note": "マークの種類名: 担当 (推しのアイドル)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "user_mark.kind.note": {
+      "ja": "メモ",
+      "ko": "메모",
+      "note": "マークの種類名: 自分用のメモ。マイマークの帯のボタンの名前にもなる"
+    },
+    "user_mark.kind.owned": {
+      "ja": "所有",
+      "ko": "소유",
+      "note": "マークの種類名: 映像円盤・カードを持っている",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "user_mark.kind.seat": {
+      "ja": "座席",
+      "ko": "좌석",
+      "note": "マークの種類名: 参加した公演の座席。マイマークの帯のボタンの名前にもなる"
+    },
+    "user_mark.note.filled.a11y": {
+      "ja": "メモあり",
+      "ko": "메모 있음",
+      "note": "マイマークの帯のメモボタンの読み上げ (メモが書いてあるとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "user_mark.seat.empty.a11y": {
+      "ja": "座席を記録",
+      "ko": "좌석 기록",
+      "note": "マイマークの帯の座席ボタンの読み上げ (まだ座席が無いとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "user_mark.seat.filled.a11y": {
+      "args": [
+        {
+          "name": "seat",
+          "type": "string"
+        }
+      ],
+      "ja": "座席: {seat}",
+      "ko": "좌석: {seat}",
+      "note": "マイマークの帯の座席ボタンの読み上げ (座席が書いてあるとき。seat は入力した座席)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "venue.capacity": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}人",
+      "ko": "{count}명",
+      "note": "会場のキャパ (収容人数)。1000 以上は桁区切りが付く (14,500人)"
+    },
+    "venue.name_with_area": {
+      "args": [
+        {
+          "name": "prefecture",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "ja": "{prefecture}・{name}",
+      "ko": "{prefecture}·{name}",
+      "note": "都道府県つきの会場名 (東京・日本武道館)。どちらもデータ"
+    },
+    "venue_picker.empty.message": {
+      "args": [
+        {
+          "name": "query",
+          "type": "string"
+        }
+      ],
+      "ja": "「{query}」に一致する会場がありません",
+      "ko": "“{query}”에 해당하는 공연장이 없어요",
+      "note": "会場の絞り込みで 1 件も残らなかったときの説明。query は入力した語"
+    },
+    "venue_picker.empty.title": {
+      "ja": "見つかりません",
+      "ko": "찾을 수 없어요",
+      "note": "会場の絞り込みで 1 件も残らなかったときの見出し"
+    },
+    "venue_picker.filter_prompt": {
+      "ja": "会場を絞り込み",
+      "ko": "공연장 찾기",
+      "note": "会場を選ぶ画面の絞り込み欄のプレースホルダ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "venue_picker.former_name": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "ja": "旧: {name}",
+      "ko": "옛 이름: {name}",
+      "note": "会場の行の副題: 以前の名前 (データ)"
+    },
+    "venue_picker.none": {
+      "ja": "選択なし",
+      "ko": "선택 안 함",
+      "note": "会場を選ぶ画面の先頭の行: 会場で絞らない"
+    },
+    "venue_picker.search_prompt": {
+      "ja": "会場名・旧名・地域で検索",
+      "ko": "공연장 이름·옛 이름·지역으로 검색",
+      "note": "会場を選ぶ画面の検索欄のプレースホルダ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "venue_picker.title": {
+      "ja": "会場",
+      "ko": "공연장",
+      "note": "会場を選ぶ画面の見出し"
+    }
+  }
+}

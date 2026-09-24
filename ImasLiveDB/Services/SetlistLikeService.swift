@@ -90,7 +90,7 @@ enum LikeError: LocalizedError {
     case unauthorized
     var errorDescription: String? {
         switch self {
-        case .unauthorized: return "Like するには Apple Sign In が必要です"
+        case .unauthorized: return String(localized: L10n.Events.setlistLikeErrorUnauthorizedIos)
         }
     }
 }

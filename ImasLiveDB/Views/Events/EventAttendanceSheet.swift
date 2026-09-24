@@ -29,17 +29,17 @@ struct EventAttendanceSheet: View {
                             Image(systemName: allLive ? "checkmark.circle.fill" : "circle")
                                 .font(.imasScaled( 20))
                                 .foregroundStyle(allLive ? t.accent : DS.ink3)
-                            Text("全公演に現地参加")
+                            Text(L10n.Events.attendanceSheetAllLive)
                                 .font(.imasSubhead.weight(.semibold))
                                 .foregroundStyle(DS.ink)
                             Spacer()
-                            Text("\(shows.count)公演")
+                            Text(L10n.Events.attendanceSheetShowCount(count: shows.count))
                                 .font(.imasCaption).foregroundStyle(DS.ink2)
                         }
                     }
                     .buttonStyle(.plain)
                 } footer: {
-                    Text("公演ごとに参加形態を選べます（配信・ライブビューイングは開催があった公演のみ）。回収率には現地参加だけが数えられます。")
+                    Text(L10n.Events.attendanceSheetFooterIos)
                 }
                 .listRowBackground(DS.surface)
 
@@ -49,7 +49,7 @@ struct EventAttendanceSheet: View {
                             VStack(alignment: .leading, spacing: DS.sp1) {
                                 Text(show.name)
                                     .font(.imasSubhead).foregroundStyle(DS.ink).lineLimit(1)
-                                Text([show.venue, show.date].compactMap { $0 }.joined(separator: " ・ "))
+                                Text([show.venue, show.date].compactMap { $0 }.joined(separator: String(localized: L10n.Events.metaSeparator)))
                                     .font(.imasCaption).foregroundStyle(DS.ink2).lineLimit(1)
                             }
                             HStack(spacing: DS.sp2) {
@@ -63,18 +63,18 @@ struct EventAttendanceSheet: View {
                         .padding(.vertical, DS.sp1)
                     }
                 } header: {
-                    Text("公演ごとに選ぶ")
+                    Text(L10n.Events.attendanceSheetPerShowHeader)
                 }
                 .listRowBackground(DS.surface)
             }
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(DS.bg)
-            .navigationTitle("参加した公演")
+            .navigationTitle(L10n.Events.attendanceSheetTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("完了") { dismiss() }.fontWeight(.semibold)
+                    Button { dismiss() } label: { Text(L10n.Events.actionDone) }.fontWeight(.semibold)
                 }
             }
             .onAppear(perform: reload)
@@ -111,7 +111,7 @@ struct EventAttendanceSheet: View {
         do {
             try markService.setAttendance(entity: .show, id: show.id, type: type)
         } catch {
-            LocalWriteFailure.report(error, action: "参加の記録")
+            LocalWriteFailure.report(error, action: String(localized: L10n.Events.localWriteRecordAttendance))
         }
         if let type { attendance[show.id] = type } else { attendance.removeValue(forKey: show.id) }
         onChange()
@@ -123,7 +123,7 @@ struct EventAttendanceSheet: View {
             do {
                 try markService.setAttendance(entity: .show, id: show.id, type: target)
             } catch {
-                LocalWriteFailure.report(error, action: "参加の記録")
+                LocalWriteFailure.report(error, action: String(localized: L10n.Events.localWriteRecordAttendance))
             }
         }
         reload()

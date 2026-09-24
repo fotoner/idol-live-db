@@ -87,7 +87,7 @@ struct SetlistPredictionView: View {
             predictionHeader
 
             if !authService.isSignedIn {
-                InlineLoginPrompt(message: "セトリ予想の投票にはログインが必要です", seed: seed)
+                InlineLoginPrompt(message: String(localized: L10n.Events.predictionLoginPrompt), seed: seed)
                     .listRowInsets(EdgeInsets(top: 0, leading: DS.sp5, bottom: DS.sp3, trailing: DS.sp5))
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
@@ -112,8 +112,8 @@ struct SetlistPredictionView: View {
                             .progressViewStyle(.circular)
                             .controlSize(.large)
                         Text(playlistProgress.total > 0
-                             ? "プレイリスト作成中… \(playlistProgress.current)/\(playlistProgress.total)"
-                             : "プレイリスト作成中…")
+                             ? L10n.Events.playlistProgress(current: playlistProgress.current, total: playlistProgress.total)
+                             : L10n.Events.playlistProgressIndeterminate)
                             .font(.imasSubhead)
                     }
                     .padding(28)
@@ -123,7 +123,7 @@ struct SetlistPredictionView: View {
             }
         }
         .animation(.easeInOut(duration: 0.15), value: isCreatingPlaylist)
-        .alert("プレイリスト", isPresented: $showAlert) {
+        .alert(Text(L10n.Events.playlistAlertTitle), isPresented: $showAlert) {
             Button("OK") {}
         } message: {
             Text(alertMessage)
@@ -139,8 +139,8 @@ struct SetlistPredictionView: View {
             ImasInlineLoading()
         } else if predictions.isEmpty {
             ImasEmptyState(systemImage: "music.note.list",
-                           title: "まだ予想がありません",
-                           message: "「予想を追加」から、来そうな曲に投票しよう",
+                           title: String(localized: L10n.Events.predictionEmptyTitle),
+                           message: String(localized: L10n.Events.predictionEmptyMessage),
                            seed: seed)
         } else {
             // 残票 0 なら未投票曲の「予想」ボタンを落とす (押してから 409 で弾かれるより、
@@ -221,8 +221,8 @@ struct SetlistPredictionView: View {
     /// 「機械予測」の見出しと注記。出演者未発表の注記はコアの label をそのまま出す。
     private func forecastHeading(note: String?) -> some View {
         VStack(alignment: .leading, spacing: DS.sp1) {
-            Text("機械予測").font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
-            Text("過去のセトリから推定").font(.imasCaption).foregroundStyle(DS.ink3)
+            Text(L10n.Events.predictionForecastTitle).font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
+            Text(L10n.Events.predictionForecastCaption).font(.imasCaption).foregroundStyle(DS.ink3)
             if let note {
                 Label(note, systemImage: "exclamationmark.circle")
                     .font(.imasCaption).foregroundStyle(DS.ink2)
@@ -237,14 +237,14 @@ struct SetlistPredictionView: View {
         if let votePayload {
             let t = ImasTheme.derive(seed: seed, scheme: scheme)
             HStack(spacing: DS.sp2) {
-                Text("あなたの予想 \(myVotedPredictions.count)/\(CommunityVoteLimit.perTarget)")
+                Text(L10n.Events.predictionMyVotes(count: myVotedPredictions.count, limit: CommunityVoteLimit.perTarget))
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink3)
                 Spacer(minLength: 8)
                 SocialShareMenu(payload: votePayload, analyticsKey: "setlist_prediction.share") {
-                    SocialShareChipLabel(title: "予想をシェア", accent: t.accent)
+                    SocialShareChipLabel(title: String(localized: L10n.Events.predictionShareButton), accent: t.accent)
                 }
-                .accessibilityLabel("自分のセトリ予想をシェア")
+                .accessibilityLabel(L10n.Events.predictionShareA11y)
             }
             .padding(.top, DS.sp1)
         }
@@ -258,13 +258,13 @@ struct SetlistPredictionView: View {
         let t = ImasTheme.derive(seed: seed, scheme: scheme)
         return VStack(alignment: .leading, spacing: DS.sp2) {
             HStack(alignment: .firstTextBaseline) {
-                Text("セトリ予想").font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
+                Text(L10n.Events.predictionHeader).font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
                 if totalVotes > 0 {
-                    Text("\(totalVotes)票").font(.imasFootnote.weight(.semibold)).foregroundStyle(DS.ink3)
+                    Text(L10n.Events.predictionVotes(count: totalVotes)).font(.imasFootnote.weight(.semibold)).foregroundStyle(DS.ink3)
                 }
                 // 残り票数はログイン済みのときだけ意味を持つ (未ログインは常に3票のままなので出さない)。
                 if authService.isSignedIn {
-                    Text("残り\(remaining)/\(CommunityVoteLimit.perTarget)")
+                    Text(L10n.Events.predictionRemaining(remaining: remaining, limit: CommunityVoteLimit.perTarget))
                         .font(.imasFootnote.weight(.semibold))
                         .foregroundStyle(remaining > 0 ? DS.ink3 : DS.danger)
                 }
@@ -280,7 +280,7 @@ struct SetlistPredictionView: View {
                 } label: {
                     HStack(spacing: DS.sp2) {
                         Image(systemName: "plus").font(.imasScaled( 13, weight: .semibold))
-                        Text("予想を追加").font(.imasScaled( 14, weight: .semibold))
+                        Text(L10n.Events.predictionActionAdd).font(.imasScaled( 14, weight: .semibold))
                     }
                     .foregroundStyle(canAddVote ? t.accent : DS.ink3)
                 }
@@ -311,14 +311,14 @@ struct SetlistPredictionView: View {
             Button {
                 Task { await addToAppleMusicPlaylist() }
             } label: {
-                Label("Appleプレイリスト作成", systemImage: "music.note.list")
+                Label(L10n.Events.predictionMenuCreatePlaylist, systemImage: "music.note.list")
             }
             .disabled(predictions.isEmpty)
 
             Button {
                 Task { await playAllPreviews() }
             } label: {
-                Label("上位曲をプレビュー再生", systemImage: "play.fill")
+                Label(L10n.Events.predictionMenuPreviewTop, systemImage: "play.fill")
             }
             .disabled(predictions.isEmpty)
 
@@ -326,14 +326,14 @@ struct SetlistPredictionView: View {
                 Button(role: .destructive) {
                     MusicKitService.shared.stop()
                 } label: {
-                    Label("再生停止", systemImage: "stop.fill")
+                    Label(L10n.Events.playlistActionStop, systemImage: "stop.fill")
                 }
             }
         } label: {
             Image(systemName: "ellipsis.circle")
                 .font(.imasSubhead)
                 .foregroundStyle(DS.ink2)
-                .accessibilityLabel("操作")
+                .accessibilityLabel(L10n.Events.predictionMenuA11y)
         }
     }
 
@@ -383,9 +383,9 @@ struct SetlistPredictionView: View {
         }
         // loadPredictions() が errorMessage をクリアするので、メッセージは再読込の後に立てる。
         let notice: String? = if failed > 0 {
-            "\(failed)曲の追加に失敗しました"
+            String(localized: L10n.Events.predictionAddFailed(count: failed))
         } else if overflow > 0 {
-            "1公演\(CommunityVoteLimit.perTarget)票までなので、\(overflow)曲は投票できませんでした"
+            String(localized: L10n.Events.predictionAddOverflow(limit: CommunityVoteLimit.perTarget, count: overflow))
         } else {
             nil
         }
@@ -443,7 +443,7 @@ struct SetlistPredictionView: View {
         // 認可は起動時に取らないので、使う直前に取る (契約の有無もここで読み直す)。
         await MusicKitService.shared.requestAuthorization()
         guard MusicKitService.shared.hasAppleMusicSubscription else {
-            alertMessage = "Apple Musicのサブスクリプションが必要です"
+            alertMessage = String(localized: L10n.Events.playlistErrorSubscription)
             showAlert = true
             return
         }
@@ -455,7 +455,7 @@ struct SetlistPredictionView: View {
         }
 
         guard !songIds.isEmpty else {
-            alertMessage = "Apple Music IDが登録されている曲がありません"
+            alertMessage = String(localized: L10n.Events.playlistErrorNoIds)
             showAlert = true
             return
         }
@@ -476,19 +476,20 @@ struct SetlistPredictionView: View {
             }
 
             playlistProgress = (0, songs.count)
+            let playlistName = String(localized: L10n.Events.predictionPlaylistName(show: showName))
             let playlist = try await MusicLibrary.shared.createPlaylist(
-                name: "\(showName) 予想セトリ",
-                description: "アイドルライブDB 予想セトリから作成"
+                name: playlistName,
+                description: String(localized: L10n.Events.playlistDescriptionPrediction)
             )
             for (index, song) in songs.enumerated() {
                 try await MusicLibrary.shared.add(song, to: playlist)
                 playlistProgress = (index + 1, songs.count)
             }
 
-            alertMessage = "「\(showName) 予想セトリ」プレイリストを作成しました（\(songs.count)曲）"
+            alertMessage = String(localized: L10n.Events.playlistCreated(name: playlistName, count: songs.count))
             showAlert = true
         } catch {
-            alertMessage = "プレイリスト作成に失敗しました: \(error.localizedDescription)"
+            alertMessage = String(localized: L10n.Events.playlistErrorFailed(error: error.localizedDescription))
             showAlert = true
         }
     }
@@ -554,7 +555,7 @@ private struct PredictionRowView: View {
                         Image(systemName: "hand.thumbsup.fill")
                             .font(.imasScaled( 10))
                             .foregroundStyle(DS.ink3)
-                        Text("\(prediction.voteCount)票")
+                        Text(L10n.Events.predictionVotes(count: prediction.voteCount))
                             .font(.imasCaption.monospacedDigit())
                             .foregroundStyle(DS.ink2)
                     }
@@ -571,7 +572,7 @@ private struct PredictionRowView: View {
                     HStack(spacing: DS.sp2) {
                         Image(systemName: prediction.hasUserVoted ? "hand.thumbsup.fill" : "hand.thumbsup")
                             .font(.imasSubhead.weight(.semibold))
-                        Text(prediction.hasUserVoted ? "投票済" : "予想")
+                        Text(prediction.hasUserVoted ? L10n.Events.predictionRowVoted : L10n.Events.predictionRowVote)
                             .font(.imasCaption.weight(.semibold))
                     }
                     .foregroundStyle(prediction.hasUserVoted ? t.onAccent : (voteDisabled ? DS.ink3 : t.accent))
@@ -579,7 +580,7 @@ private struct PredictionRowView: View {
                     .background(prediction.hasUserVoted ? AnyShapeStyle(t.accent) : AnyShapeStyle(t.chipBg),
                                 in: Capsule())
                     .contentShape(Capsule())
-                    .accessibilityLabel(prediction.hasUserVoted ? "投票を取り消す" : "この曲に投票")
+                    .accessibilityLabel(prediction.hasUserVoted ? L10n.Events.predictionRowUnvoteA11y : L10n.Events.predictionRowVoteA11y)
                 }
                 // List セル内に複数ボタンがある時 .plain だとタップがセル全体に散って効かない。
                 // .borderless で各ボタンにタップをスコープする。
@@ -619,7 +620,7 @@ private struct PredictionRowView: View {
             HStack(spacing: DS.sp2) {
                 Image(systemName: "person.2")
                     .font(.imasScaled(10, weight: .semibold))
-                Text("歌唱メンバー予想")
+                Text(L10n.Events.predictionRowPerformersToggle)
                     .font(.imasScaled(12, weight: .semibold))
                 Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                     .font(.imasScaled(9, weight: .semibold))
@@ -686,7 +687,7 @@ private struct ForecastRowView: View {
                     if isPromoting {
                         ProgressView().controlSize(.small)
                     } else {
-                        Text("予想に入れる").font(.imasCaption.weight(.semibold))
+                        Text(L10n.Events.predictionForecastPromote).font(.imasCaption.weight(.semibold))
                     }
                 }
                 .foregroundStyle(canPromote ? t.accent : DS.ink3)
@@ -696,7 +697,7 @@ private struct ForecastRowView: View {
             }
             .buttonStyle(.borderless)
             .disabled(!canPromote)
-            .accessibilityLabel("\(song.title)を予想に入れる")
+            .accessibilityLabel(L10n.Events.predictionForecastPromoteA11y(title: song.title))
         }
         .padding(.horizontal, DS.sp4)
         .padding(.vertical, DS.sp3)

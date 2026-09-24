@@ -32,6 +32,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.Vocab
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasFilterChip
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
 import com.fugaif.imaslivedb.ui.theme.DS
@@ -54,8 +57,15 @@ fun eventKindLabel(kind: String): String = Vocab.eventKind(kind)?.shortLabel ?: 
  */
 fun eventTypeLabel(eventType: String): String? = Vocab.eventType(eventType)?.shortLabel
 
-/** 参加状態フィルタの値。コアの EventFilterCriteria.attendanceFilter がそのまま受ける文字列。 */
-private val ATTENDANCE_OPTIONS = listOf("all" to "すべて", "attended" to "参加済み", "not_attended" to "未参加")
+/**
+ * 参加状態フィルタの値と表示名。値 (first) はコアの EventFilterCriteria.attendanceFilter がそのまま受ける
+ * 文字列で、訳さない。表示名 (second) は画面で resolve() する。
+ */
+private val ATTENDANCE_OPTIONS: List<Pair<String, DisplayText>> = listOf(
+    "all" to L10n.Events.filterAttendanceAll,
+    "attended" to L10n.Events.filterAttendanceAttended,
+    "not_attended" to L10n.Events.filterAttendanceNotAttended
+)
 
 /**
  * ライブ一覧のフィルタシート (iOS `EventFilterSheet` の移植)。
@@ -104,20 +114,23 @@ fun EventFilterSheet(
                 .padding(bottom = 32.dp)
         ) {
             Text(
-                text = "フィルター",
+                text = L10n.Events.filterTitle.resolve(),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
             )
             HorizontalDivider()
 
             // ブランド (複数選択 = OR。合同ライブは joint_brand_ids 側も見る)
-            SectionLabel("ブランド")
+            SectionLabel(L10n.Events.filterBrandHeader.resolve())
             FlowRow(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                ImasFilterChip(label = "全て", selected = brandIds.isEmpty(), onClick = { brandIds = emptySet() })
+                ImasFilterChip(
+                    label = L10n.Events.filterBrandAll.resolve(), selected = brandIds.isEmpty(),
+                    onClick = { brandIds = emptySet() }
+                )
                 brands.forEach { brand ->
                     ImasFilterChip(
                         label = brand.shortName,
@@ -134,7 +147,7 @@ fun EventFilterSheet(
 
             // 種別: チップは「表示する種別」を示す (ON = 表示)。内部では除外集合で持つ。
             // 未知 kind を除外集合に入れないことで、将来 kind が増えても勝手に消えない。
-            SectionLabel("種別")
+            SectionLabel(L10n.Events.filterKindHeader.resolve())
             FlowRow(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -153,9 +166,10 @@ fun EventFilterSheet(
             }
             Text(
                 text = if (excludedKinds.isEmpty()) {
-                    "全て表示中"
+                    L10n.Events.filterKindAllShown.resolve()
                 } else {
-                    "除外: " + excludedKinds.map(::eventKindLabel).sorted().joinToString(" / ")
+                    L10n.Events.filterKindExcluded(kinds = excludedKinds.map(::eventKindLabel).sorted().joinToString(" / "))
+                        .resolve()
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = DS.ink3,
@@ -164,9 +178,9 @@ fun EventFilterSheet(
             HorizontalDivider()
 
             // 参加状態
-            SectionLabel("参加状態")
+            SectionLabel(L10n.Events.filterAttendanceHeader.resolve())
             ImasSegmented(
-                labels = ATTENDANCE_OPTIONS.map { it.second },
+                labels = ATTENDANCE_OPTIONS.map { it.second.resolve() },
                 selection = ATTENDANCE_OPTIONS.indexOfFirst { it.first == attendance }.coerceAtLeast(0),
                 onSelect = { attendance = ATTENDANCE_OPTIONS[it].first },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
@@ -175,15 +189,15 @@ fun EventFilterSheet(
             HorizontalDivider()
 
             // マイマーク
-            SectionLabel("マイマーク")
+            SectionLabel(L10n.Events.filterMarksHeader.resolve())
             SwitchRow(
-                title = "お気に入りのみ",
+                title = L10n.Events.filterMarksFavoriteOnly.resolve(),
                 checked = requireFavorite,
                 tint = DS.favorite,
                 onCheckedChange = { requireFavorite = it }
             )
             SwitchRow(
-                title = "メモがあるライブのみ",
+                title = L10n.Events.filterMarksNoteOnly.resolve(),
                 checked = requireNote,
                 tint = DS.warning,
                 onCheckedChange = { requireNote = it }
@@ -191,17 +205,17 @@ fun EventFilterSheet(
             HorizontalDivider()
 
             // 表示設定
-            SectionLabel("表示設定")
+            SectionLabel(L10n.Events.filterDisplayHeader.resolve())
             SwitchRow(
-                title = "セトリ情報がないライブも表示",
-                subtitle = "公演がまだ登録されていないライブを一覧に出す",
+                title = L10n.Events.filterDisplayShowEmptyTitle.resolve(),
+                subtitle = L10n.Events.filterDisplayShowEmptySubtitle.resolve(),
                 checked = showEmptyEvents,
                 tint = DS.success,
                 onCheckedChange = { showEmptyEvents = it }
             )
             SwitchRow(
-                title = "配信を除く",
-                subtitle = "配信・番組だけのイベント (公演として開かれていないもの) を一覧から隠す",
+                title = L10n.Events.filterDisplayHideStreamingTitle.resolve(),
+                subtitle = L10n.Events.filterDisplayHideStreamingSubtitle.resolve(),
                 checked = hideStreaming,
                 onCheckedChange = { hideStreaming = it }
             )
@@ -222,7 +236,7 @@ fun EventFilterSheet(
                         hideStreaming = false
                     },
                     modifier = Modifier.weight(1f)
-                ) { Text("リセット") }
+                ) { Text(L10n.Events.filterActionReset.resolve()) }
                 Button(
                     onClick = {
                         onApply(
@@ -231,7 +245,7 @@ fun EventFilterSheet(
                         )
                     },
                     modifier = Modifier.weight(1f)
-                ) { Text("適用") }
+                ) { Text(L10n.Events.filterActionApply.resolve()) }
             }
         }
     }

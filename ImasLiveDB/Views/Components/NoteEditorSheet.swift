@@ -12,17 +12,19 @@ struct NoteEditorSheet: View {
         NavigationStack {
             TextEditor(text: $draft)
                 .padding()
-                .navigationTitle("メモ")
+                .navigationTitle(L10n.Events.noteEditorTitle)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("キャンセル") {
+                        Button {
                             draft = markService.note(entity: entity, id: entityId) ?? ""
                             dismiss()
+                        } label: {
+                            Text(L10n.Events.actionCancel)
                         }
                     }
                     ToolbarItem(placement: .confirmationAction) {
-                        Button("保存") {
+                        Button {
                             AppAnalytics.tap("note_editor.save")
                             let trimmed = draft.trimmingCharacters(in: .whitespacesAndNewlines)
                             do {
@@ -34,8 +36,10 @@ struct NoteEditorSheet: View {
                                 dismiss()
                             } catch {
                                 // 書けなかったら閉じない (打ったメモを捨てずに、もう一度押せるように)。
-                                LocalWriteFailure.report(error, action: "メモの保存")
+                                LocalWriteFailure.report(error, action: String(localized: L10n.Events.localWriteSaveNote))
                             }
+                        } label: {
+                            Text(L10n.Events.actionSave)
                         }
                         .fontWeight(.semibold)
                     }

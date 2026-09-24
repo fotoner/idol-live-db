@@ -20,6 +20,9 @@ import com.fugaif.imaslivedb.data.model.UserMark
 import com.fugaif.imaslivedb.data.model.VenueDirectory
 import com.fugaif.imaslivedb.data.repository.SetlistRowMetaResult
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -38,9 +41,27 @@ import uniffi.imas_core.ShowCostumeRecord
 import uniffi.imas_core.setlistDisplayModeFromStored
 
 data class SetlistSection(
-    val sectionName: String,
+    /** 見出し。知っている区切りはカタログの文言、それ以外はコアの文字列 ([sectionHeadingText])。画面で resolve() する。 */
+    val sectionName: DisplayText,
     val items: List<SetlistRow>
 )
+
+/**
+ * コアの区切りの見出し (`sectionHeading`) を表示文言にする (iOS `SetlistView.sectionHeading` と対)。
+ *
+ * コアは区切り無しなら「本編」、アンコール類なら「アンコール」、それ以外は入力 (自由文字列) を
+ * そのまま返す。知っている 2 語だけカタログの文言に写し、残りはコアの文字列のまま出す。
+ * 添え物がまだ無い (null) ときも「本編」と同じ経路に通す — 読み込みの前後で同じ見出しの
+ * 言語が入れ替わらないように。コアが見出しのキーを返すようになったら消す。
+ */
+internal fun sectionHeadingText(heading: String?): DisplayText {
+    if (heading == null) return L10n.Events.setlistSectionMain
+    return when (heading) {
+        "本編" -> L10n.Events.setlistSectionMain // i18n-ignore(sentinel): コア (setlist_sections.rs) の MAIN_SECTION_HEADING と突き合わせる
+        "アンコール" -> L10n.Events.setlistSectionEncore // i18n-ignore(sentinel): コア (setlist_sections.rs) の ENCORE_LABEL と突き合わせる
+        else -> DisplayText.Core(heading)
+    }
+}
 
 data class SetlistUiState(
     val isLoading: Boolean = true,
@@ -87,7 +108,7 @@ data class SetlistUiState(
             for (item in setlist) {
                 val meta = rowMetaByItemId[item.id]
                 if (result.isEmpty() || meta?.startsSection == true) {
-                    result.add(SetlistSection(sectionName = meta?.sectionHeading ?: "本編", items = listOf(item)))
+                    result.add(SetlistSection(sectionName = sectionHeadingText(meta?.sectionHeading), items = listOf(item)))
                 } else {
                     val last = result.last()
                     result[result.lastIndex] = last.copy(items = last.items + item)
@@ -118,6 +139,9 @@ class SetlistViewModel(app: Application, private val showId: String) : AndroidVi
     private val events = module.eventRepository
     private val marks = module.userMarkRepository
     private val likeService = module.setlistLikeService
+
+    /** 端末への書き込みに失敗したときの知らせに入る操作名 (LocalWriteFailure が文字列で受けるので、ここで解決する)。 */
+    private fun actionName(text: DisplayText): String = text.resolve(getApplication<Application>())
 
     private val _uiState = MutableStateFlow(SetlistUiState())
     val uiState: StateFlow<SetlistUiState> = _uiState.asStateFlow()
@@ -236,14 +260,15 @@ class SetlistViewModel(app: Application, private val showId: String) : AndroidVi
     }
 
     fun toggleFavorite() = write {
-        val on = localWrite("お気に入りの切り替え") { marks.toggle(UserMark.SHOW, showId, UserMark.FAVORITE) }
-            ?: return@write
+        val on = localWrite(actionName(L10n.Events.localWriteToggle(mark = L10n.Events.userMarkKindFavorite))) {
+            marks.toggle(UserMark.SHOW, showId, UserMark.FAVORITE)
+        } ?: return@write
         _marks.update { it.copy(favoriteOn = on) }
     }
 
     /** 保存できたときだけ [onSaved] (編集を閉じる)。書けなかったら入力を捨てない。 */
     fun setNote(text: String?, onSaved: () -> Unit) = write {
-        localWrite("メモの保存") { marks.setNote(UserMark.SHOW, showId, text) } ?: return@write
+        localWrite(actionName(L10n.Events.localWriteSaveNote)) { marks.setNote(UserMark.SHOW, showId, text) } ?: return@write
         val saved = marks.note(UserMark.SHOW, showId)
         _marks.update { it.copy(note = saved) }
         withContext(Dispatchers.Main) { onSaved() }
@@ -251,7 +276,7 @@ class SetlistViewModel(app: Application, private val showId: String) : AndroidVi
 
     /** 保存できたときだけ [onSaved] (編集を閉じる)。書けなかったら入力を捨てない。 */
     fun setSeat(text: String?, onSaved: () -> Unit) = write {
-        localWrite("座席の保存") { marks.setSeat(UserMark.SHOW, showId, text) } ?: return@write
+        localWrite(actionName(L10n.Events.localWriteSaveSeat)) { marks.setSeat(UserMark.SHOW, showId, text) } ?: return@write
         val saved = marks.seat(UserMark.SHOW, showId)
         _marks.update { it.copy(seat = saved) }
         withContext(Dispatchers.Main) { onSaved() }
@@ -259,7 +284,9 @@ class SetlistViewModel(app: Application, private val showId: String) : AndroidVi
 
     /** 参加を付け外しすると回収の札と要約が変わるので、行の添え物も読み直す。 */
     fun setAttendance(type: AttendanceType?) = write {
-        localWrite("参加の記録") { marks.setAttendance(UserMark.SHOW, showId, type) } ?: return@write
+        localWrite(actionName(L10n.Events.localWriteRecordAttendance)) {
+            marks.setAttendance(UserMark.SHOW, showId, type)
+        } ?: return@write
         loadMarks()
         // 読み直しは画面のスコープ (メインスレッド) で。画面を離れていれば読み直すものも無い。
         viewModelScope.launch { reload() }

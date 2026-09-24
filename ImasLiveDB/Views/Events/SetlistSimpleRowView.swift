@@ -54,8 +54,9 @@ struct SetlistSimpleRowView: View {
         .padding(.vertical, DS.sp2)
         .contentShape(Rectangle())
         .imasCopyable([
-            CopyItem("曲名をコピー", item.songTitle, key: "song_title"),
-            CopyItem("演者をコピー", performerLabel.isEmpty ? nil : performerLabel, key: "performers"),
+            CopyItem(String(localized: L10n.Events.setlistRowCopyTitle), item.songTitle, key: "song_title"),
+            CopyItem(String(localized: L10n.Events.setlistRowCopyPerformers), performerLabel.isEmpty ? nil : performerLabel,
+                     key: "performers"),
         ])
     }
 }

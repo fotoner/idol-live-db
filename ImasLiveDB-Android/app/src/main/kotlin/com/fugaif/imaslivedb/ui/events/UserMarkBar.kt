@@ -36,6 +36,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 
@@ -85,7 +87,7 @@ fun UserMarkBar(
         )
         MarkCell(
             icon = if (favoriteOn) Icons.Filled.Star else Icons.Filled.StarBorder,
-            label = "お気に入り",
+            label = L10n.Events.userMarkKindFavorite.resolve(),
             isOn = favoriteOn,
             theme = t,
             modifier = Modifier.weight(1f),
@@ -93,7 +95,7 @@ fun UserMarkBar(
         )
         MarkCell(
             icon = Icons.Filled.EditNote,
-            label = "メモ",
+            label = L10n.Events.userMarkKindNote.resolve(),
             isOn = !note.isNullOrBlank(),
             theme = t,
             modifier = Modifier.weight(1f),
@@ -103,7 +105,7 @@ fun UserMarkBar(
         if (attendedOn) {
             MarkCell(
                 icon = Icons.Filled.Chair,
-                label = seat?.takeIf { it.isNotBlank() } ?: "座席",
+                label = seat?.takeIf { it.isNotBlank() } ?: L10n.Events.userMarkKindSeat.resolve(),
                 isOn = !seat.isNullOrBlank(),
                 theme = t,
                 modifier = Modifier.weight(1f),
@@ -114,8 +116,8 @@ fun UserMarkBar(
 
     if (editingNote) {
         TextMarkDialog(
-            title = "メモ",
-            placeholder = "この公演の思い出・持ち物・同行者など",
+            title = L10n.Events.noteEditorTitle.resolve(),
+            placeholder = L10n.Events.noteEditorPlaceholder.resolve(),
             initial = note.orEmpty(),
             singleLine = false,
             onDismiss = { editingNote = false },
@@ -124,8 +126,8 @@ fun UserMarkBar(
     }
     if (editingSeat) {
         TextMarkDialog(
-            title = "座席",
-            placeholder = "例: アリーナ A6 ブロック 12番",
+            title = L10n.Events.seatEditorTitle.resolve(),
+            placeholder = L10n.Events.seatEditorPlaceholderAndroid.resolve(),
             initial = seat.orEmpty(),
             singleLine = true,
             onDismiss = { editingSeat = false },
@@ -210,8 +212,8 @@ private fun TextMarkDialog(
             )
         },
         confirmButton = {
-            TextButton(onClick = { onSave(draft.trim().ifEmpty { null }) }) { Text("保存") }
+            TextButton(onClick = { onSave(draft.trim().ifEmpty { null }) }) { Text(L10n.Events.actionSave.resolve()) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("キャンセル") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(L10n.Events.actionCancel.resolve()) } }
     )
 }
