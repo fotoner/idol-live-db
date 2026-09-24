@@ -83,6 +83,7 @@ struct LyricsQuizResultShareCard: View {
             Text("歌詞クイズ")
                 .font(.system(size: 30, weight: .bold))
                 .foregroundColor(.white.opacity(0.8))
+                .shadow(color: .black.opacity(0.7), radius: 10, y: 2)
             Text(modeLabel)
                 .font(.system(size: 104, weight: .black))
                 .foregroundColor(.white)
@@ -101,6 +102,8 @@ struct LyricsQuizResultShareCard: View {
                         .padding(.leading, 8)
                 }
                 .foregroundColor(.white)
+                // 明るいジャケットの上に乗る高さなので、影で地から剥がす (「/10」が白地に溶けていた)。
+                .shadow(color: .black.opacity(0.6), radius: 14, y: 3)
                 Spacer(minLength: 0)
                 gradeBadge
             }
