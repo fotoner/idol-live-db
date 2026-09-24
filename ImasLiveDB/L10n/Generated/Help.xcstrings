@@ -1,0 +1,2634 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "help.category.calendar.colors.detail" : {
+      "comment" : "ヘルプ「カレンダー」の項目の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "それぞれ別色で表示。タップで詳細にジャンプ。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "각각 다른 색으로 표시돼요. 탭하면 상세로 이동해요."
+          }
+        }
+      }
+    },
+    "help.category.calendar.colors.label" : {
+      "comment" : "ヘルプ「カレンダー」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ・リリース・誕生日を色分け"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브·발매·생일을 색으로 구분"
+          }
+        }
+      }
+    },
+    "help.category.calendar.open.detail" : {
+      "comment" : "ヘルプ「カレンダー」の項目の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月単位で全アイマスイベントを俯瞰。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "월 단위로 모든 아이마스 이벤트를 한눈에 볼 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.calendar.open.label" : {
+      "comment" : "ヘルプ「カレンダー」の項目の見出し。iOS の文言 (カレンダーの場所。Android は label_android)。タブの名前は nav.tab.* の訳に合わせる (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロデュースタブ → カレンダー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "프로듀스 탭 → 캘린더"
+          }
+        }
+      }
+    },
+    "help.category.calendar.summary" : {
+      "comment" : "ヘルプの機能カテゴリ「カレンダー」の一行説明 (一覧の行の見出しの下と詳細画面の先頭) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ・CD リリース・アイドル誕生日を月別に表示。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브·CD 발매·아이돌 생일을 월별로 보여 줘요."
+          }
+        }
+      }
+    },
+    "help.category.calendar.title" : {
+      "comment" : "ヘルプの機能カテゴリ「カレンダー」の名前 (一覧の行の見出しと詳細画面のタイトル) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カレンダー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "캘린더"
+          }
+        }
+      }
+    },
+    "help.category.edit.contribution.detail" : {
+      "comment" : "ヘルプ「みんなで編集」の項目の説明。「良かった」は編集に付けるリアクションのボタンの文言 (ko はそちらの訳に合わせる) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編集した数と「良かった」をもらった数で貢献度が積み上がり、マイページに称号バッジとして表示されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "편집한 수와 “좋아요”를 받은 수로 기여도가 쌓여서 마이페이지에 칭호 배지로 표시돼요."
+          }
+        }
+      }
+    },
+    "help.category.edit.contribution.label" : {
+      "comment" : "ヘルプ「みんなで編集」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "貢献が積み上がる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "기여가 쌓임"
+          }
+        }
+      }
+    },
+    "help.category.edit.direct.detail" : {
+      "comment" : "ヘルプ「みんなで編集」の項目の説明。CloudKit・Wikipedia はサービス名なので訳さない (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "承認待ちはありません。ログインユーザーがセトリ・新曲・新イベント・参考動画などを直接追加・修正でき、CloudKit 経由ですぐ全員の端末に届きます。Wikipedia のような共同編集スタイルです。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "승인 대기는 없어요. 로그인한 사용자가 세트리스트·신곡·새 이벤트·참고 영상 등을 직접 추가·수정할 수 있고, CloudKit을 거쳐 바로 모두의 기기에 전달돼요. Wikipedia 같은 공동 편집 방식이에요."
+          }
+        }
+      }
+    },
+    "help.category.edit.direct.label" : {
+      "comment" : "ヘルプ「みんなで編集」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直接編集して、すぐ反映"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "직접 편집하고 바로 반영"
+          }
+        }
+      }
+    },
+    "help.category.edit.history.detail" : {
+      "comment" : "ヘルプ「みんなで編集」の項目の説明。「最近の編集」はプロデュースタブの節の文言 (ko はそちらの訳に合わせる) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "誰がいつ何を変えたかが変更前後つきで記録されます。各データの編集履歴や、プロデュースタブの「最近の編集」フィードからたどれます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "누가 언제 무엇을 바꿨는지 변경 전후와 함께 기록돼요. 각 데이터의 편집 기록이나 프로듀스 탭의 “최근 편집” 피드에서 확인할 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.edit.history.label" : {
+      "comment" : "ヘルプ「みんなで編集」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべての編集に履歴が残る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모든 편집에 기록이 남음"
+          }
+        }
+      }
+    },
+    "help.category.edit.likes.detail" : {
+      "comment" : "ヘルプ「みんなで編集」の項目の説明。「良かった」は編集に付けるリアクションのボタンの文言 (ko はそちらの訳に合わせる) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "他の人の編集に「良かった」を付けられます。人気・感謝の指標で、付けた数・もらった数がマイページに表示されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다른 사람의 편집에 “좋아요”를 누를 수 있어요. 인기·감사의 지표로, 누른 수·받은 수가 마이페이지에 표시돼요."
+          }
+        }
+      }
+    },
+    "help.category.edit.likes.label" : {
+      "comment" : "ヘルプ「みんなで編集」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「良かった」で感謝を伝える"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“좋아요”로 고마움 전하기"
+          }
+        }
+      }
+    },
+    "help.category.edit.login.detail" : {
+      "comment" : "ヘルプ「みんなで編集」の項目の説明。iOS の文言 (Android はログインの手段と場所が違うので *_android)。Sign in with Apple はサービス名なので訳さない (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "閲覧はログイン不要。編集に参加したい時だけマイページからログインしてください。各画面の「+」や鉛筆アイコンから編集できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "보기만 할 때는 로그인이 필요 없어요. 편집에 참여하고 싶을 때만 마이페이지에서 로그인해 주세요. 각 화면의 “+”나 연필 아이콘에서 편집할 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.edit.login.label" : {
+      "comment" : "ヘルプ「みんなで編集」の項目の見出し。iOS の文言 (Android はログインの手段と場所が違うので *_android)。ko は Apple の公式表記『Apple로 로그인』(ボタンの表示と同じ) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編集には Sign in with Apple"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "편집에는 Apple로 로그인"
+          }
+        }
+      }
+    },
+    "help.category.edit.revert.detail" : {
+      "comment" : "ヘルプ「みんなで編集」の項目の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分の編集はいつでも取り消せます。誤りや荒らしはワンタップで元に戻され、悪質な場合はアカウントが利用停止になります。安心して編集してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "내 편집은 언제든 취소할 수 있어요. 오류나 악의적인 편집은 한 번의 탭으로 되돌려지고, 악질적인 경우에는 계정 이용이 정지돼요. 안심하고 편집해 주세요."
+          }
+        }
+      }
+    },
+    "help.category.edit.revert.label" : {
+      "comment" : "ヘルプ「みんなで編集」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "間違いはすぐ戻せる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "실수는 바로 되돌릴 수 있음"
+          }
+        }
+      }
+    },
+    "help.category.edit.summary" : {
+      "comment" : "ヘルプの機能カテゴリ「みんなで編集」の一行説明 (一覧の行の見出しの下と詳細画面の先頭) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ログインすればセトリ・楽曲・ライブ情報を直接編集でき、その場で全員に反映されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "로그인하면 세트리스트·곡·라이브 정보를 직접 편집할 수 있고, 바로 모두에게 반영돼요."
+          }
+        }
+      }
+    },
+    "help.category.edit.title" : {
+      "comment" : "ヘルプの機能カテゴリ「みんなで編集」の名前 (一覧の行の見出しと詳細画面のタイトル) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "みんなで編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다 함께 편집"
+          }
+        }
+      }
+    },
+    "help.category.events.attended.detail" : {
+      "comment" : "ヘルプ「ライブを探す」の項目の説明。「参加した」はライブ詳細のトグルの文言 (ko はそちらの訳に合わせる) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細画面から「参加した」をオンにすると、マイページの参加カウントに加算されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "상세 화면에서 “참가함”을 켜면 마이페이지의 참가 횟수에 더해져요."
+          }
+        }
+      }
+    },
+    "help.category.events.attended.label" : {
+      "comment" : "ヘルプ「ライブを探す」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加したライブを記録"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가한 라이브 기록"
+          }
+        }
+      }
+    },
+    "help.category.events.brand_filter.detail" : {
+      "comment" : "ヘルプ「ライブを探す」の項目の説明。ブランドの略称は ko のファンが使う呼び方にした (ヴイアラは正式表記の vα-liv) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "右上の絞り込みボタンから、765AS / シンデレラ / ミリオン / SideM / シャニ / 学マス / ヴイアラ など特定ブランドだけに絞れます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오른쪽 위의 필터 버튼에서 765AS / 신데렐라 / 밀리언 / SideM / 샤니 / 학마스 / vα-liv 등 특정 브랜드만 골라 볼 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.events.brand_filter.label" : {
+      "comment" : "ヘルプ「ライブを探す」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランドでフィルタ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드로 필터"
+          }
+        }
+      }
+    },
+    "help.category.events.event_detail.detail" : {
+      "comment" : "ヘルプ「ライブを探す」の項目の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブをタップすると、公演日ごとのセトリ、出演アイドル、参考動画、チケット情報まで確認できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브를 탭하면 공연일별 세트리스트, 출연 아이돌, 참고 영상, 티켓 정보까지 확인할 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.events.event_detail.label" : {
+      "comment" : "ヘルプ「ライブを探す」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細でセトリ・出演者・チケット情報を確認"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "상세에서 세트리스트·출연자·티켓 정보 확인"
+          }
+        }
+      }
+    },
+    "help.category.events.kind_filter.detail" : {
+      "comment" : "ヘルプ「ライブを探す」の項目の説明。live / stream / event / other はデータの種別の名前なので訳さない (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本ライブ・配信・イベント・その他を切り替え可能。配信中心の活動だけ追いたい時に便利。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정규 라이브·방송·이벤트·기타를 바꿔 가며 볼 수 있어요. 방송 중심의 활동만 따라가고 싶을 때 편리해요."
+          }
+        }
+      }
+    },
+    "help.category.events.kind_filter.label" : {
+      "comment" : "ヘルプ「ライブを探す」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "種別 (live / stream / event / other) で絞れる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "종류 (live / stream / event / other)로 필터"
+          }
+        }
+      }
+    },
+    "help.category.events.summary" : {
+      "comment" : "ヘルプの機能カテゴリ「ライブを探す」の一行説明 (一覧の行の見出しの下と詳細画面の先頭) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全ブランドのライブ・公演・セットリストを年別に閲覧できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모든 브랜드의 라이브·공연·세트리스트를 연도별로 볼 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.events.title" : {
+      "comment" : "ヘルプの機能カテゴリ「ライブを探す」の名前 (一覧の行の見出しと詳細画面のタイトル) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブを探す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브 찾기"
+          }
+        }
+      }
+    },
+    "help.category.events.year_list.detail" : {
+      "comment" : "ヘルプ「ライブを探す」の項目の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1000公演以上を年で分けて表示。新しい順なので、最新のライブから過去まで一気に俯瞰できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 1000회 이상을 연도별로 나눠 보여 줘요. 최신순이라 최근 라이브부터 과거까지 한눈에 훑어볼 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.events.year_list.label" : {
+      "comment" : "ヘルプ「ライブを探す」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "年別リストで時系列に追える"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "연도별 목록으로 시간순 보기"
+          }
+        }
+      }
+    },
+    "help.category.idols.aliases.detail" : {
+      "comment" : "ヘルプ「アイドル・CVを探す」の項目の説明。ロコ・伴田路子 はアイドル名 (データ。検索も ja の名前で引く) なので訳さない (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ロコ ↔ 伴田路子 のような別名表記も内部で同一アイドルとして紐づいています。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "ロコ ↔ 伴田路子 같은 다른 이름 표기도 내부에서 같은 아이돌로 연결되어 있어요."
+          }
+        }
+      }
+    },
+    "help.category.idols.aliases.label" : {
+      "comment" : "ヘルプ「アイドル・CVを探す」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "別名 (aliases) も検索対象"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다른 이름 (aliases)도 검색 대상"
+          }
+        }
+      }
+    },
+    "help.category.idols.attributes.detail" : {
+      "comment" : "ヘルプ「アイドル・CVを探す」の項目の説明。属性の名前は絞り込みパネルの文言 (ko はそちらの訳に合わせる)。CG / ML はブランドの略号 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キュート/クール/パッション (CG)、 Fairy/Angel/Princess (ML)、 1年/3年 (学マス) などブランドごとの属性で絞れます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "큐트/쿨/패션 (CG), Fairy/Angel/Princess (ML), 1학년/3학년 (학마스) 등 브랜드별 속성으로 필터할 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.idols.attributes.label" : {
+      "comment" : "ヘルプ「アイドル・CVを探す」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "属性で絞り込み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "속성으로 필터"
+          }
+        }
+      }
+    },
+    "help.category.idols.cv_names.detail" : {
+      "comment" : "ヘルプ「アイドル・CVを探す」の項目の説明。「CV名で表示」は絞り込みパネルの文言 (ko はそちらの訳に合わせる) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "絞り込みパネルから「CV名で表示」に切り替えると、 声優名で一覧化されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터 패널에서 “CV 이름으로 표시”로 바꾸면 성우 이름으로 목록이 나와요."
+          }
+        }
+      }
+    },
+    "help.category.idols.cv_names.label" : {
+      "comment" : "ヘルプ「アイドル・CVを探す」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル名 ↔ CV 名 で表示切替"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 이름 ↔ CV 이름 표시 전환"
+          }
+        }
+      }
+    },
+    "help.category.idols.idol_detail.detail" : {
+      "comment" : "ヘルプ「アイドル・CVを探す」の項目の説明。ここの担当曲はそのアイドルが歌う曲 (ユーザーの担当ではない) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドルをタップすると、担当曲リスト・出演ライブ・誕生日・カラーが見られます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌을 탭하면 참여 곡 목록·출연 라이브·생일·컬러를 볼 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.idols.idol_detail.label" : {
+      "comment" : "ヘルプ「アイドル・CVを探す」の項目の見出し。ここの担当曲はそのアイドルが歌う曲 (ユーザーの担当ではない) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル詳細で担当曲・出演ライブを確認"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 상세에서 참여 곡·출연 라이브 확인"
+          }
+        }
+      }
+    },
+    "help.category.idols.layout.detail" : {
+      "comment" : "ヘルプ「アイドル・CVを探す」の項目の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上部の切り替えボタンで、密な一覧 (リスト) と画像中心のグリッドを切り替えられます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "위쪽의 전환 버튼으로 촘촘한 목록 (리스트)과 이미지 중심의 그리드를 바꿀 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.idols.layout.label" : {
+      "comment" : "ヘルプ「アイドル・CVを探す」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リスト / グリッド 切り替え"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "리스트 / 그리드 전환"
+          }
+        }
+      }
+    },
+    "help.category.idols.summary" : {
+      "comment" : "ヘルプの機能カテゴリ「アイドル・CVを探す」の一行説明 (一覧の行の見出しの下と詳細画面の先頭) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全ブランドのアイドルを名前・CV名・属性で横断検索できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모든 브랜드의 아이돌을 이름·CV 이름·속성으로 통합 검색할 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.idols.title" : {
+      "comment" : "ヘルプの機能カテゴリ「アイドル・CVを探す」の名前 (一覧の行の見出しと詳細画面のタイトル) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル・CVを探す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌·CV 찾기"
+          }
+        }
+      }
+    },
+    "help.category.image_import.aliases.detail" : {
+      "comment" : "ヘルプ「画像インポート」の項目の説明。ロコ・伴田路子 はアイドル名 (データ。型紙の JSON のキーも ja の名前) なので訳さない (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "型紙には別名表記も含まれているので、 ロコ でも 伴田路子 でも好きな表記の URL を書けます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "템플릿에는 다른 이름 표기도 들어 있어서 ロコ든 伴田路子든 원하는 표기에 URL을 쓸 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.image_import.aliases.label" : {
+      "comment" : "ヘルプ「画像インポート」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル別名にも対応"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 다른 이름도 지원"
+          }
+        }
+      }
+    },
+    "help.category.image_import.open.detail" : {
+      "comment" : "ヘルプ「画像インポート」の項目の説明。{アイドル名: 画像URL} は取り込む JSON の形の説明 (キーがアイドル名、値が画像の URL) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "JSON で {アイドル名: 画像URL} の形式を渡せば、まとめてダウンロード+保存できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "JSON으로 {아이돌 이름: 이미지 URL} 형식을 넘기면 한꺼번에 다운로드+저장할 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.image_import.open.label" : {
+      "comment" : "ヘルプ「画像インポート」の項目の見出し。iOS の文言 (画像の取り込みの場所。Android は label_android)。メニューの名前は ko もそちらの訳に合わせる (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイページ → 画像インポート"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이페이지 → 이미지 가져오기"
+          }
+        }
+      }
+    },
+    "help.category.image_import.reset.detail" : {
+      "comment" : "ヘルプ「画像インポート」の項目の説明。「カスタム画像を全削除」は画像の取り込み画面のボタンの文言 (ko はそちらの訳に合わせる) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "失敗したり差し替えたい時は「カスタム画像を全削除」でリセットできます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "실패했거나 바꾸고 싶을 때는 “커스텀 이미지 모두 삭제”로 초기화할 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.image_import.reset.label" : {
+      "comment" : "ヘルプ「画像インポート」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全画像リセット可能"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모든 이미지 초기화 가능"
+          }
+        }
+      }
+    },
+    "help.category.image_import.summary" : {
+      "comment" : "ヘルプの機能カテゴリ「画像インポート」の一行説明 (一覧の行の見出しの下と詳細画面の先頭) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル・ブランドのアイコン画像を一括取り込み。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌·브랜드 아이콘 이미지를 한꺼번에 가져와요."
+          }
+        }
+      }
+    },
+    "help.category.image_import.template.detail" : {
+      "comment" : "ヘルプ「画像インポート」の項目の説明。型紙 = 取り込み用の JSON のひな形 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリ内から型紙 (全アイドル/全ブランド名がキーになった JSON) を書き出せます。それに画像URLを書き足すだけ。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "앱에서 템플릿 (모든 아이돌/브랜드 이름이 키인 JSON)을 내보낼 수 있어요. 거기에 이미지 URL만 채워 넣으면 돼요."
+          }
+        }
+      }
+    },
+    "help.category.image_import.template.label" : {
+      "comment" : "ヘルプ「画像インポート」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "型紙 JSON をダウンロード"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "템플릿 JSON 다운로드"
+          }
+        }
+      }
+    },
+    "help.category.image_import.title" : {
+      "comment" : "ヘルプの機能カテゴリ「画像インポート」の名前 (一覧の行の見出しと詳細画面のタイトル) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像インポート"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이미지 가져오기"
+          }
+        }
+      }
+    },
+    "help.category.intro.best.detail" : {
+      "comment" : "ヘルプ「イントロドン」の項目の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランドごとに自己ベストが残ります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드별로 자기 최고 기록이 남아요."
+          }
+        }
+      }
+    },
+    "help.category.intro.best.label" : {
+      "comment" : "ヘルプ「イントロドン」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ベストスコアを記録"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "베스트 스코어 기록"
+          }
+        }
+      }
+    },
+    "help.category.intro.difficulty.detail" : {
+      "comment" : "ヘルプ「イントロドン」の項目の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランド絞り込みや、再生秒数で難易度調整できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드 필터나 재생 시간으로 난이도를 조절할 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.intro.difficulty.label" : {
+      "comment" : "ヘルプ「イントロドン」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランド・難易度を選択"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드·난이도 선택"
+          }
+        }
+      }
+    },
+    "help.category.intro.preview.detail" : {
+      "comment" : "ヘルプ「イントロドン」の項目の説明。iOS だけの項目 (Android は intro.streamable)。サブスク = Apple Music の定額契約 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Music サブスク加入者はカタログのフル再生、未加入でも 30 秒プレビューで遊べます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Apple Music 구독자는 카탈로그 전곡 재생으로, 구독하지 않아도 30초 미리 듣기로 즐길 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.intro.preview.label" : {
+      "comment" : "ヘルプ「イントロドン」の項目の見出し。iOS だけの項目 (Android は intro.streamable)。サブスク = Apple Music の定額契約 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未加入でもプレビュー再生で遊べる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "구독하지 않아도 미리 듣기로 플레이 가능"
+          }
+        }
+      }
+    },
+    "help.category.intro.summary" : {
+      "comment" : "ヘルプの機能カテゴリ「イントロドン」の一行説明 (一覧の行の見出しの下と詳細画面の先頭) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲のイントロを聴いて曲名を当てるクイズ。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡의 인트로를 듣고 곡명을 맞히는 퀴즈예요."
+          }
+        }
+      }
+    },
+    "help.category.intro.title" : {
+      "comment" : "ヘルプの機能カテゴリ「イントロドン」の名前 (一覧の行の見出しと詳細画面のタイトル) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イントロドン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "인트로돈"
+          }
+        }
+      }
+    },
+    "help.category.intro.voice.detail" : {
+      "comment" : "ヘルプ「イントロドン」の項目の説明。iOS だけの項目 (Android は intro.choices)。Speech は Apple の音声認識のフレームワーク名 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイクで曲名を読み上げると、 Speech 認識で自動回答できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이크로 곡명을 말하면 Speech 인식으로 자동으로 답할 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.intro.voice.label" : {
+      "comment" : "ヘルプ「イントロドン」の項目の見出し。iOS だけの項目 (Android は intro.choices)。Speech は Apple の音声認識のフレームワーク名 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音声入力で回答可能"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "음성 입력으로 답하기"
+          }
+        }
+      }
+    },
+    "help.category.marks.attended.detail" : {
+      "comment" : "ヘルプ「マイマーク（記録）」の項目の説明。「参加した」はライブ詳細のトグルの文言 (ko はそちらの訳に合わせる) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ詳細から「参加した」を付けると、マイページに参加履歴が積み上がります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브 상세에서 “참가함”을 표시하면 마이페이지에 참가 기록이 쌓여요."
+          }
+        }
+      }
+    },
+    "help.category.marks.attended.label" : {
+      "comment" : "ヘルプ「マイマーク（記録）」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加ライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가 라이브"
+          }
+        }
+      }
+    },
+    "help.category.marks.collected.detail" : {
+      "comment" : "ヘルプ「マイマーク（記録）」の項目の説明。「回収済」「回収済のみ」は楽曲の画面の文言 (ko はそちらの訳に合わせる) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲詳細から「回収済」を付けると、自分のコレクション管理ができます。楽曲一覧で「回収済のみ」表示も可能。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 상세에서 “회수함”을 표시하면 내 컬렉션을 관리할 수 있어요. 곡 목록에서 “회수함만” 보기도 돼요."
+          }
+        }
+      }
+    },
+    "help.category.marks.collected.label" : {
+      "comment" : "ヘルプ「マイマーク（記録）」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回収済 (持ってる) 楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "회수한 (갖고 있는) 곡"
+          }
+        }
+      }
+    },
+    "help.category.marks.local.detail" : {
+      "comment" : "ヘルプ「マイマーク（記録）」の項目の説明。iOS の文言 (Android は端末間の移し方が違うので detail_android) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ローカル保存されるので、ログインなしで使えます。 CloudKit 同期にも対応 (端末間で同期可能)。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "기기에 저장되므로 로그인 없이 쓸 수 있어요. CloudKit 동기화도 지원해요 (기기 간 동기화 가능)."
+          }
+        }
+      }
+    },
+    "help.category.marks.local.label" : {
+      "comment" : "ヘルプ「マイマーク（記録）」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイマークは端末に保存"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이 마크는 기기에 저장"
+          }
+        }
+      }
+    },
+    "help.category.marks.oshi.detail" : {
+      "comment" : "ヘルプ「マイマーク（記録）」の項目の説明。「担当」はアイドル詳細のマイマークの文言 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル詳細から「担当」を付けると、マイページに集約されて確認できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 상세에서 “담당”을 표시하면 마이페이지에 모아서 확인할 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.marks.oshi.label" : {
+      "comment" : "ヘルプ「マイマーク（記録）」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 아이돌"
+          }
+        }
+      }
+    },
+    "help.category.marks.summary" : {
+      "comment" : "ヘルプの機能カテゴリ「マイマーク（記録）」の一行説明 (一覧の行の見出しの下と詳細画面の先頭) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当アイドル・回収済楽曲・参加ライブを記録できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 아이돌·회수한 곡·참가 라이브를 기록할 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.marks.title" : {
+      "comment" : "ヘルプの機能カテゴリ「マイマーク（記録）」の名前 (一覧の行の見出しと詳細画面のタイトル) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイマーク（記録）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이 마크 (기록)"
+          }
+        }
+      }
+    },
+    "help.category.penlight.one_vote.detail" : {
+      "comment" : "ヘルプ「ペンライト投票」の項目の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同じ曲に複数回投票しても、最新の選択で上書きされます (端末単位)。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "같은 곡에 여러 번 투표해도 가장 최근 선택으로 바뀌어요 (기기 단위)."
+          }
+        }
+      }
+    },
+    "help.category.penlight.one_vote.label" : {
+      "comment" : "ヘルプ「ペンライト投票」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 端末 1 票で差し替え可能"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "기기 1대당 1표, 변경 가능"
+          }
+        }
+      }
+    },
+    "help.category.penlight.results.detail" : {
+      "comment" : "ヘルプ「ペンライト投票」の項目の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票結果は色セット別の票数で表示。ライブ前の「色合わせ」用にどうぞ。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표 결과는 색 세트별 득표 수로 보여 줘요. 라이브 전 “색 맞추기”에 활용해 보세요."
+          }
+        }
+      }
+    },
+    "help.category.penlight.results.label" : {
+      "comment" : "ヘルプ「ペンライト投票」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "集計結果を確認"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "집계 결과 확인"
+          }
+        }
+      }
+    },
+    "help.category.penlight.summary" : {
+      "comment" : "ヘルプの機能カテゴリ「ペンライト投票」の一行説明 (一覧の行の見出しの下と詳細画面の先頭) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲ごとの「振る色」をみんなで投票して可視化。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡마다 “흔드는 색”을 다 함께 투표해 한눈에 보여 줘요."
+          }
+        }
+      }
+    },
+    "help.category.penlight.title" : {
+      "comment" : "ヘルプの機能カテゴリ「ペンライト投票」の名前 (一覧の行の見出しと詳細画面のタイトル) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ペンライト投票"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "펜라이트 투표"
+          }
+        }
+      }
+    },
+    "help.category.penlight.vote.detail" : {
+      "comment" : "ヘルプ「ペンライト投票」の項目の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公式パレットの中から、その曲で振りたい色 (単色 / 複数色) を選んで投票できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공식 팔레트 중에서 그 곡에서 흔들고 싶은 색 (단색 / 여러 색)을 골라 투표할 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.penlight.vote.label" : {
+      "comment" : "ヘルプ「ペンライト投票」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲詳細から好きな色セットを投票"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 상세에서 원하는 색 세트 투표"
+          }
+        }
+      }
+    },
+    "help.category.search.aliases.detail" : {
+      "comment" : "ヘルプ「検索」の項目の説明。ロコ・伴田路子 はアイドル名 (データ。検索も ja の名前で引く) なので訳さない。シャニ・ミリはブランドの略称 (ko のファンの呼び方にする。events.brand_filter と揃える) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「ロコ」と検索しても「伴田路子」がヒット。シャニやミリの別名表記も内部で名寄せ済み。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“ロコ”로 검색해도 “伴田路子”가 나와요. 샤니나 밀리의 다른 이름 표기도 내부에서 하나로 묶어 두었어요."
+          }
+        }
+      }
+    },
+    "help.category.search.aliases.label" : {
+      "comment" : "ヘルプ「検索」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル別名にも対応"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 다른 이름도 지원"
+          }
+        }
+      }
+    },
+    "help.category.search.fallback.detail" : {
+      "comment" : "ヘルプ「検索」の項目の説明。「全体から検索」は検索結果が無いときに出るボタンの文言 (ko はそちらの訳に合わせる) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タブ内検索で結果が無いときは「全体から検索」ボタンが出ます。同じ語句のまま 1 タップで横断検索に切り替えられます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "탭 내 검색 결과가 없을 때는 “전체에서 검색” 버튼이 나와요. 같은 검색어 그대로 한 번 탭해서 통합 검색으로 바꿀 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.search.fallback.label" : {
+      "comment" : "ヘルプ「検索」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "見つからなければ全体検索へ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "못 찾으면 전체 검색으로"
+          }
+        }
+      }
+    },
+    "help.category.search.global.detail" : {
+      "comment" : "ヘルプ「検索」の項目の説明。iOS の文言 (全体検索のボタンの位置と形が Android と違う) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "左上のキラキラ虫眼鏡から、楽曲・アイドル・ライブをまとめて横断検索できます。タブをまたいで一気に目的の項目へ飛べます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "왼쪽 위의 반짝이는 돋보기에서 곡·아이돌·라이브를 한꺼번에 통합 검색할 수 있어요. 탭을 넘나들며 원하는 항목으로 바로 이동할 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.search.global.label" : {
+      "comment" : "ヘルプ「検索」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全体検索 = 横断して探す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체 검색 = 통합해서 찾기"
+          }
+        }
+      }
+    },
+    "help.category.search.in_tab.detail" : {
+      "comment" : "ヘルプ「検索」の項目の説明。ライブ / 楽曲 / アイドル は下のタブの名前 (nav.tab.* の訳に合わせる) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ / 楽曲 / アイドル 各タブの検索バーは、いま表示中の一覧 (適用中の絞り込みも含む) をその場で絞り込みます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브 / 곡 / 아이돌 각 탭의 검색창은 지금 보이는 목록 (적용 중인 필터 포함)을 바로 좁혀 줘요."
+          }
+        }
+      }
+    },
+    "help.category.search.in_tab.label" : {
+      "comment" : "ヘルプ「検索」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タブ内検索 = この一覧を絞り込む"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "탭 내 검색 = 이 목록 좁히기"
+          }
+        }
+      }
+    },
+    "help.category.search.summary" : {
+      "comment" : "ヘルプの機能カテゴリ「検索」の一行説明 (一覧の行の見出しの下と詳細画面の先頭) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「このタブを絞り込む」検索と、「全体を横断する」検索の 2 種類があります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“이 탭 안에서 좁히는” 검색과 “전체를 아우르는” 검색, 2가지가 있어요."
+          }
+        }
+      }
+    },
+    "help.category.search.title" : {
+      "comment" : "ヘルプの機能カテゴリ「検索」の名前 (一覧の行の見出しと詳細画面のタイトル) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "検索"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "검색"
+          }
+        }
+      }
+    },
+    "help.category.songs.apple_music.detail" : {
+      "comment" : "ヘルプ「楽曲を探す」の項目の説明。iOS だけの項目 (Android は songs.preview)。ジャケ写 = ジャケット写真 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Music に契約していればプレビュー再生 / フル再生 OK。ジャケ写も自動取得。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Apple Music을 구독 중이면 미리 듣기 / 전곡 재생이 돼요. 재킷 사진도 자동으로 가져와요."
+          }
+        }
+      }
+    },
+    "help.category.songs.apple_music.label" : {
+      "comment" : "ヘルプ「楽曲を探す」の項目の見出し。iOS だけの項目 (Android は songs.preview)。ジャケ写 = ジャケット写真 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Music 連携"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Apple Music 연동"
+          }
+        }
+      }
+    },
+    "help.category.songs.collect_filter.detail" : {
+      "comment" : "ヘルプ「楽曲を探す」の項目の説明。「回収済」は楽曲のマイマークの文言 (ko はそちらの訳に合わせる) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイマークで「回収済」を付けた曲だけ、または未回収だけを表示できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이 마크로 “회수함”을 표시한 곡만, 또는 미회수 곡만 볼 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.songs.collect_filter.label" : {
+      "comment" : "ヘルプ「楽曲を探す」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回収済 / 未回収で絞り込み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "회수함 / 미회수로 필터"
+          }
+        }
+      }
+    },
+    "help.category.songs.history.detail" : {
+      "comment" : "ヘルプ「楽曲を探す」の項目の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲詳細から「どのライブで何回歌われたか」を一覧表示。担当曲の披露頻度がわかります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 상세에서 “어느 라이브에서 몇 번 불렸는지”를 목록으로 보여 줘요. 담당 곡의 공연 빈도를 알 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.songs.history.label" : {
+      "comment" : "ヘルプ「楽曲を探す」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌唱履歴で深掘り"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가창 기록으로 자세히 보기"
+          }
+        }
+      }
+    },
+    "help.category.songs.original_members.detail" : {
+      "comment" : "ヘルプ「楽曲を探す」の項目の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲のアイコン群はオリジナル歌唱メンバー (ライブ歌唱者ではなく)。ユニット曲はユニット名で表示されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡의 아이콘들은 오리지널 가창 멤버예요 (라이브 가창자가 아니에요). 유닛 곡은 유닛 이름으로 표시돼요."
+          }
+        }
+      }
+    },
+    "help.category.songs.original_members.label" : {
+      "comment" : "ヘルプ「楽曲を探す」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オリジナルメンバーを表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오리지널 멤버 표시"
+          }
+        }
+      }
+    },
+    "help.category.songs.summary" : {
+      "comment" : "ヘルプの機能カテゴリ「楽曲を探す」の一行説明 (一覧の行の見出しの下と詳細画面の先頭) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2300曲以上を曲名・アルバム・シリーズで探索できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "2300곡 이상을 곡명·앨범·시리즈로 찾아볼 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.songs.title" : {
+      "comment" : "ヘルプの機能カテゴリ「楽曲を探す」の名前 (一覧の行の見出しと詳細画面のタイトル) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲を探す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 찾기"
+          }
+        }
+      }
+    },
+    "help.category.songs.view_modes.detail" : {
+      "comment" : "ヘルプ「楽曲を探す」の項目の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲一覧 / アルバムグリッド / シリーズグリッド を絞り込みパネルから切り替え可能。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 목록 / 앨범 그리드 / 시리즈 그리드를 필터 패널에서 바꿀 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.songs.view_modes.label" : {
+      "comment" : "ヘルプ「楽曲を探す」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 つの表示モード"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "3가지 표시 모드"
+          }
+        }
+      }
+    },
+    "help.category.sync.cloudkit.detail" : {
+      "comment" : "ヘルプ「同期とアカウント」の項目の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新しいライブやセトリは CloudKit から差分配信されます。アプリ更新を待たずに最新化されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "새 라이브나 세트리스트는 CloudKit에서 변경분만 받아 와요. 앱 업데이트를 기다리지 않아도 최신 상태가 돼요."
+          }
+        }
+      }
+    },
+    "help.category.sync.cloudkit.label" : {
+      "comment" : "ヘルプ「同期とアカウント」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスタデータは CloudKit で自動同期"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마스터 데이터는 CloudKit으로 자동 동기화"
+          }
+        }
+      }
+    },
+    "help.category.sync.delete_account.detail" : {
+      "comment" : "ヘルプ「同期とアカウント」の項目の説明。「アカウントを削除」はマイページのボタンの文言 (ko はそちらの訳に合わせる) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイページ → アカウントを削除 で、サーバー上の編集履歴とユーザー情報をすべて削除します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이페이지 → 계정 삭제에서 서버의 편집 기록과 사용자 정보를 모두 삭제해요."
+          }
+        }
+      }
+    },
+    "help.category.sync.delete_account.label" : {
+      "comment" : "ヘルプ「同期とアカウント」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アカウント削除も可能"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "계정 삭제도 가능"
+          }
+        }
+      }
+    },
+    "help.category.sync.login.detail" : {
+      "comment" : "ヘルプ「同期とアカウント」の項目の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "閲覧機能には不要。データを編集したい時だけログインしてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "보기만 할 때는 필요 없어요. 데이터를 편집하고 싶을 때만 로그인해 주세요."
+          }
+        }
+      }
+    },
+    "help.category.sync.login.label" : {
+      "comment" : "ヘルプ「同期とアカウント」の項目の見出し。iOS の文言 (Android はログインの手段が違うので label_android)。ko は Apple の公式表記『Apple로 로그인』(ボタンの表示と同じ) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in with Apple は編集用"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“Apple로 로그인”은 편집용"
+          }
+        }
+      }
+    },
+    "help.category.sync.summary" : {
+      "comment" : "ヘルプの機能カテゴリ「同期とアカウント」の一行説明 (一覧の行の見出しの下と詳細画面の先頭)。Android でも ja は Sign in with Apple のまま (文面の見直しはオーナーが別 PR で)。ko は Apple の公式表記『Apple로 로그인』(ボタンの表示と同じ) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CloudKit で常に最新のデータ、 Sign in with Apple で編集に参加。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "CloudKit으로 늘 최신 데이터를 받고, Apple로 로그인해서 편집에 참여해요."
+          }
+        }
+      }
+    },
+    "help.category.sync.title" : {
+      "comment" : "ヘルプの機能カテゴリ「同期とアカウント」の名前 (一覧の行の見出しと詳細画面のタイトル) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同期とアカウント"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "동기화와 계정"
+          }
+        }
+      }
+    },
+    "help.category.tags.attach.detail" : {
+      "comment" : "ヘルプ「タグ」の項目の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲詳細から既存のタグを付けたり、新しいタグを作って付けたりできます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 상세에서 기존 태그를 달거나 새 태그를 만들어 달 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.tags.attach.label" : {
+      "comment" : "ヘルプ「タグ」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲にタグを付ける"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡에 태그 달기"
+          }
+        }
+      }
+    },
+    "help.category.tags.browse.detail" : {
+      "comment" : "ヘルプ「タグ」の項目の説明。「夏曲」「バラード」「神曲」はタグの例 (例も訳す) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ一覧 → タグ詳細から、そのタグが付いた曲を一覧表示。「夏曲」「バラード」「神曲」など好きな切り口で検索可能。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 목록 → 태그 상세에서 그 태그가 달린 곡을 목록으로 보여 줘요. “여름 노래”, “발라드”, “명곡” 등 원하는 관점으로 검색할 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.tags.browse.label" : {
+      "comment" : "ヘルプ「タグ」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグから曲を辿る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그로 곡 찾아가기"
+          }
+        }
+      }
+    },
+    "help.category.tags.description.detail" : {
+      "comment" : "ヘルプ「タグ」の項目の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "誰でもタグの説明を書き加えられます。Wikipedia のような共同編集スタイル。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "누구나 태그 설명을 덧붙일 수 있어요. Wikipedia 같은 공동 편집 방식이에요."
+          }
+        }
+      }
+    },
+    "help.category.tags.description.label" : {
+      "comment" : "ヘルプ「タグ」の項目の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグの説明文を編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 설명 편집"
+          }
+        }
+      }
+    },
+    "help.category.tags.summary" : {
+      "comment" : "ヘルプの機能カテゴリ「タグ」の一行説明 (一覧の行の見出しの下と詳細画面の先頭) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユーザー投稿のタグで曲を自由に分類できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "사용자가 게시한 태그로 곡을 자유롭게 분류할 수 있어요."
+          }
+        }
+      }
+    },
+    "help.category.tags.title" : {
+      "comment" : "ヘルプの機能カテゴリ「タグ」の名前 (一覧の行の見出しと詳細画面のタイトル) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그"
+          }
+        }
+      }
+    },
+    "help.detail.features.header" : {
+      "comment" : "カテゴリの詳細画面の節の見出し。下に「こんなことができる」の項目が並ぶ (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "できること"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "할 수 있는 것"
+          }
+        }
+      }
+    },
+    "help.top.action.close" : {
+      "comment" : "ヘルプ (シート) を閉じるボタン。右上のツールバー (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "閉じる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "닫기"
+          }
+        }
+      }
+    },
+    "help.top.categories.header" : {
+      "comment" : "ヘルプのトップの節の見出し。下に機能ごとのカテゴリ (ライブを探す・楽曲を探す…) が並ぶ (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "機能カテゴリ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "기능 카테고리"
+          }
+        }
+      }
+    },
+    "help.top.featured.header" : {
+      "comment" : "ヘルプのトップの節の見出し。下に「担当ウィジェットの使い方」への導線 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "特集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "특집"
+          }
+        }
+      }
+    },
+    "help.top.footer" : {
+      "comment" : "ヘルプのトップのいちばん下の注記。GitHub Issue はサービス名なので訳さない (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使い方は今後さらに増えていく予定です。データの間違いに気づいたらログインしてその場で直せます。要望や不具合は GitHub Issue からお寄せください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "사용법은 앞으로 더 늘려 갈 예정이에요. 데이터가 틀린 걸 발견하면 로그인해서 바로 고칠 수 있어요. 요청이나 오류는 GitHub Issue로 보내 주세요."
+          }
+        }
+      }
+    },
+    "help.top.heading" : {
+      "comment" : "ヘルプの先頭の見出し。アプリ名 (system.app.display_name) の ko 表記はオーナー確定待ち。それまでは ko の画面に仮名を出さないよう「아이돌 라이브 DB」と訳しておき、確定したら「<ko のアプリ名> 사용법」に合わせる (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドルライブDB の使い方"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 라이브 DB 사용법"
+          }
+        }
+      }
+    },
+    "help.top.intro" : {
+      "comment" : "ヘルプの先頭の見出しの下の説明 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "各カテゴリで「こんなことができる」を一覧で紹介しています。気になる項目から覗いてみてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "카테고리별로 “이런 걸 할 수 있어요”를 목록으로 소개해요. 궁금한 항목부터 살펴보세요."
+          }
+        }
+      }
+    },
+    "help.top.title" : {
+      "comment" : "ヘルプ画面のナビゲーションタイトル (iOS。Android は top.title_android) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルプ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "도움말"
+          }
+        }
+      }
+    },
+    "help.top.widget_howto.summary" : {
+      "comment" : "「特集」の「担当ウィジェットの使い方」の行の説明 (2 行まで)。推し = 最も好きなアイドル。画像付き = 手順の画面にイラストが付いている (ユーザーの画像のことではない) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "推しの画像をホーム画面に。画像付きで手順を案内します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최애 이미지를 홈 화면에. 그림과 함께 방법을 단계별로 안내해요."
+          }
+        }
+      }
+    },
+    "help.widget_howto.edit_art.label" : {
+      "comment" : "担当ウィジェットの使い方の画面の手順 4 のイラスト。ウィジェットの設定を開くボタンの絵に書く語 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "편집"
+          }
+        }
+      }
+    },
+    "help.widget_howto.header.caption" : {
+      "comment" : "担当ウィジェットの使い方の画面の先頭の見出しの下の説明。版権画像 = 権利元の公式画像 (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分でアプリに入れた画像だけを表示します。版権画像は使いません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "직접 앱에 넣은 이미지만 보여 줘요. 저작권이 있는 공식 이미지는 쓰지 않아요."
+          }
+        }
+      }
+    },
+    "help.widget_howto.header.title" : {
+      "comment" : "担当ウィジェットの使い方の画面の先頭のイラストの下の見出し。推し = 最も好きなアイドル (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "推しの画像をホーム画面に"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최애 이미지를 홈 화면에"
+          }
+        }
+      }
+    },
+    "help.widget_howto.search_art.query" : {
+      "comment" : "担当ウィジェットの使い方の画面の手順 3 のイラスト。ウィジェットの検索欄に打ち込んだ語 (手順 3 の「担当」と同じにする) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당"
+          }
+        }
+      }
+    },
+    "help.widget_howto.step1.detail" : {
+      "comment" : "担当ウィジェットの使い方の画面の手順 1 の説明。「ギャラリー」「追加」はアイドル詳細の画面の文言 (ko はそちらの訳に合わせる) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル詳細 → プロフィール下の「ギャラリー」→「追加」から、好きな画像を何枚でも入れられます。先頭の1枚がアイコンになります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 상세 → 프로필 아래 “갤러리” → “추가”에서 원하는 이미지를 몇 장이든 넣을 수 있어요. 맨 앞의 1장이 아이콘이 돼요."
+          }
+        }
+      }
+    },
+    "help.widget_howto.step1.title" : {
+      "comment" : "担当ウィジェットの使い方の画面の手順 1 の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリで担当に画像を追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "앱에서 담당에게 이미지 추가"
+          }
+        }
+      }
+    },
+    "help.widget_howto.step2.detail" : {
+      "comment" : "担当ウィジェットの使い方の画面の手順 2 の説明 (iOS のホーム画面の操作) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホーム画面の何もない所を長押し → 左上の「＋」をタップ。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "홈 화면의 빈 곳을 길게 눌러 → 왼쪽 위의 “+”를 탭하세요."
+          }
+        }
+      }
+    },
+    "help.widget_howto.step2.title" : {
+      "comment" : "担当ウィジェットの使い方の画面の手順 2 の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホーム画面にウィジェットを追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "홈 화면에 위젯 추가"
+          }
+        }
+      }
+    },
+    "help.widget_howto.step3.detail" : {
+      "comment" : "担当ウィジェットの使い方の画面の手順 3 の説明。「」の中はウィジェットの名前 (ImasLiveDBWidget の configurationDisplayName。ko は widget.oshi_image.name / widget.oshi_launcher.name の訳に合わせる) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ウィジェット一覧で「担当」と検索。「担当の画像（タップで切替）」と「（タップでアプリ）」の2種類があります。好きな方を追加。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "위젯 목록에서 “담당”을 검색하세요. “담당 이미지 (탭으로 전환)”와 “(탭으로 앱 열기)” 2종류가 있어요. 원하는 쪽을 추가하세요."
+          }
+        }
+      }
+    },
+    "help.widget_howto.step3.title" : {
+      "comment" : "担当ウィジェットの使い方の画面の手順 3 の見出し。検索する語は widget_howto.search_art.query と同じにする (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「担当」で検索して選ぶ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“담당”으로 검색해서 고르기"
+          }
+        }
+      }
+    },
+    "help.widget_howto.step4.detail" : {
+      "comment" : "担当ウィジェットの使い方の画面の手順 4 の説明。「ウィジェットを編集」は iOS の長押しメニューの項目 (ko は iOS の表記「위젯 편집」) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "置いたウィジェットを長押し →「ウィジェットを編集」→ アイドルを選択。画像を入れた担当が候補に出ます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "추가한 위젯을 길게 눌러 → “위젯 편집” → 아이돌을 선택하세요. 이미지를 넣은 담당이 후보로 나와요."
+          }
+        }
+      }
+    },
+    "help.widget_howto.step4.title" : {
+      "comment" : "担当ウィジェットの使い方の画面の手順 4 の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "どのアイドルを出すか選ぶ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "어떤 아이돌을 표시할지 고르기"
+          }
+        }
+      }
+    },
+    "help.widget_howto.step5.detail" : {
+      "comment" : "担当ウィジェットの使い方の画面の手順 5 の説明。「タップで切替」「タップでアプリ」はウィジェットの名前の括弧の中 (手順 3 と同じ訳にする) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「タップで切替」版はタップするたびに次の画像にローテーション。放っておいても30分ごとに自動で切り替わります。「タップでアプリ」版はタップでアプリが開きます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“탭으로 전환” 버전은 탭할 때마다 다음 이미지로 바뀌어요. 그냥 두어도 30분마다 자동으로 바뀌어요. “탭으로 앱 열기” 버전은 탭하면 앱이 열려요."
+          }
+        }
+      }
+    },
+    "help.widget_howto.step5.title" : {
+      "comment" : "担当ウィジェットの使い方の画面の手順 5 の見出し (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タップで次の画像へ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "탭하면 다음 이미지로"
+          }
+        }
+      }
+    },
+    "help.widget_howto.tips.lock_screen" : {
+      "comment" : "担当ウィジェットの使い方の画面の最後の注意書き (ロック画面のアイコン付き) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ロック画面ウィジェットは仕様上フルカラー写真を出せません（ホーム画面向けの機能です）。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "잠금 화면 위젯은 사양상 풀컬러 사진을 표시할 수 없어요 (홈 화면용 기능이에요)."
+          }
+        }
+      }
+    },
+    "help.widget_howto.tips.refresh" : {
+      "comment" : "担当ウィジェットの使い方の画面の最後の注意書き (更新のアイコン付き) (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像を足した・消した時は、アプリを一度開くとウィジェットも更新されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이미지를 추가하거나 지웠을 때는 앱을 한 번 열면 위젯도 업데이트돼요."
+          }
+        }
+      }
+    },
+    "help.widget_howto.title" : {
+      "comment" : "担当画像ウィジェットの使い方の画面のタイトル。ヘルプのトップの「特集」の行の見出しにも使う (i18n/catalog/help.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当ウィジェットの使い方"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 위젯 사용법"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

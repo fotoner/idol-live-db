@@ -50,179 +50,197 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 
 /**
  * ヘルプ (使い方カタログ)。iOS `Views/Help/HelpView.swift` の移植。
  *
- * 文面は iOS の `HelpCatalog.sections` から**機械的に変換**したもので、書き起こしていない。
- * 両 OS で説明が食い違うと「アプリによって出来ることが違う」と読めてしまうため、
- * 文言を片方だけ直さないこと (直すときは両方)。
+ * 文面は i18n/catalog/help.json (kind: content) にあり、iOS の `HelpCatalog.sections` と同じ項目は
+ * **同じキー**を引く。両 OS で説明が食い違うと「アプリによって出来ることが違う」と読めてしまうため、
+ * 文言を片方だけ直さないこと (直すときはカタログの 1 か所で両方が変わる)。
  *
  * **ただし、実際に出来ることが違う項目はこちらの実装に合わせて書き換える。**
  * 機械変換した初版は「Apple Music に契約していればフル再生 OK」「Sign in with Apple」
  * 「マイページ → 画像インポート」のように、Android に無い機能や違う場所を案内していた。
- * 揃えるべきは文言ではなく「読んだ人が実際にたどり着けること」。
+ * 揃えるべきは文言ではなく「読んだ人が実際にたどり着けること」。そういう項目はカタログで
+ * `*_android` のキー (または Android だけの項目) にしてある。
  *
  * アイコンだけは SF Symbol → Material Icons の対応を人が決めている。
  * 色 (tint) は iOS と同じ hex を渡し、`ImasTheme.derive` で両 OS 同じトークンに導出する。
  */
 data class HelpSection(
+    /** 一覧の key (カタログの help.category.<id>)。LazyColumn の key は Bundle に入る型にする。 */
+    val id: String,
     val icon: ImageVector,
     /** カテゴリ識別用の装飾テーマ seed (hex)。iOS と同じ値。 */
     val tint: String,
-    val title: String,
-    val summary: String,
+    val title: DisplayText,
+    val summary: DisplayText,
     val body: List<HelpItem>
 )
 
-data class HelpItem(val label: String, val detail: String)
+data class HelpItem(val label: DisplayText, val detail: DisplayText)
 
 object HelpCatalog {
     val sections: List<HelpSection> = listOf(
     HelpSection(
+        id = "events",
         icon = Icons.Filled.Mic,
         tint = "#FF2D55",
-        title = "ライブを探す",
-        summary = "全ブランドのライブ・公演・セットリストを年別に閲覧できます。",
+        title = L10n.Help.categoryEventsTitle,
+        summary = L10n.Help.categoryEventsSummary,
         body = listOf(
-            HelpItem("年別リストで時系列に追える", "1000公演以上を年で分けて表示。新しい順なので、最新のライブから過去まで一気に俯瞰できます。"),
-            HelpItem("ブランドでフィルタ", "右上の絞り込みボタンから、765AS / シンデレラ / ミリオン / SideM / シャニ / 学マス / ヴイアラ など特定ブランドだけに絞れます。"),
-            HelpItem("種別 (live / stream / event / other) で絞れる", "本ライブ・配信・イベント・その他を切り替え可能。配信中心の活動だけ追いたい時に便利。"),
-            HelpItem("詳細でセトリ・出演者・チケット情報を確認", "ライブをタップすると、公演日ごとのセトリ、出演アイドル、参考動画、チケット情報まで確認できます。"),
-            HelpItem("参加したライブを記録", "詳細画面から「参加した」をオンにすると、マイページの参加カウントに加算されます。"),
+            HelpItem(L10n.Help.categoryEventsYearListLabel, L10n.Help.categoryEventsYearListDetail),
+            HelpItem(L10n.Help.categoryEventsBrandFilterLabel, L10n.Help.categoryEventsBrandFilterDetail),
+            HelpItem(L10n.Help.categoryEventsKindFilterLabel, L10n.Help.categoryEventsKindFilterDetail),
+            HelpItem(L10n.Help.categoryEventsEventDetailLabel, L10n.Help.categoryEventsEventDetailDetail),
+            HelpItem(L10n.Help.categoryEventsAttendedLabel, L10n.Help.categoryEventsAttendedDetail),
         )
     ),
     HelpSection(
+        id = "songs",
         icon = Icons.Filled.QueueMusic,
         tint = "#5856D6",
-        title = "楽曲を探す",
-        summary = "2300曲以上を曲名・アルバム・シリーズで探索できます。",
+        title = L10n.Help.categorySongsTitle,
+        summary = L10n.Help.categorySongsSummary,
         body = listOf(
-            HelpItem("3 つの表示モード", "曲一覧 / アルバムグリッド / シリーズグリッド を絞り込みパネルから切り替え可能。"),
-            HelpItem("試聴とジャケ写", "配信のある曲は 30 秒のプレビューを再生できます。ジャケ写も自動取得。"),
-            HelpItem("歌唱履歴で深掘り", "曲詳細から「どのライブで何回歌われたか」を一覧表示。担当曲の披露頻度がわかります。"),
-            HelpItem("オリジナルメンバーを表示", "曲のアイコン群はオリジナル歌唱メンバー (ライブ歌唱者ではなく)。ユニット曲はユニット名で表示されます。"),
-            HelpItem("回収済 / 未回収で絞り込み", "マイマークで「回収済」を付けた曲だけ、または未回収だけを表示できます。"),
+            HelpItem(L10n.Help.categorySongsViewModesLabel, L10n.Help.categorySongsViewModesDetail),
+            HelpItem(L10n.Help.categorySongsPreviewLabel, L10n.Help.categorySongsPreviewDetail),
+            HelpItem(L10n.Help.categorySongsHistoryLabel, L10n.Help.categorySongsHistoryDetail),
+            HelpItem(L10n.Help.categorySongsOriginalMembersLabel, L10n.Help.categorySongsOriginalMembersDetail),
+            HelpItem(L10n.Help.categorySongsCollectFilterLabel, L10n.Help.categorySongsCollectFilterDetail),
         )
     ),
     HelpSection(
+        id = "idols",
         icon = Icons.Filled.Groups,
         tint = "#FF9500",
-        title = "アイドル・CVを探す",
-        summary = "全ブランドのアイドルを名前・CV名・属性で横断検索できます。",
+        title = L10n.Help.categoryIdolsTitle,
+        summary = L10n.Help.categoryIdolsSummary,
         body = listOf(
-            HelpItem("リスト / グリッド 切り替え", "上部の切り替えボタンで、密な一覧 (リスト) と画像中心のグリッドを切り替えられます。"),
-            HelpItem("アイドル名 ↔ CV 名 で表示切替", "絞り込みパネルから「CV名で表示」に切り替えると、 声優名で一覧化されます。"),
-            HelpItem("属性で絞り込み", "キュート/クール/パッション (CG)、 Fairy/Angel/Princess (ML)、 1年/3年 (学マス) などブランドごとの属性で絞れます。"),
-            HelpItem("アイドル詳細で担当曲・出演ライブを確認", "アイドルをタップすると、担当曲リスト・出演ライブ・誕生日・カラーが見られます。"),
-            HelpItem("別名 (aliases) も検索対象", "ロコ ↔ 伴田路子 のような別名表記も内部で同一アイドルとして紐づいています。"),
+            HelpItem(L10n.Help.categoryIdolsLayoutLabel, L10n.Help.categoryIdolsLayoutDetail),
+            HelpItem(L10n.Help.categoryIdolsCvNamesLabel, L10n.Help.categoryIdolsCvNamesDetail),
+            HelpItem(L10n.Help.categoryIdolsAttributesLabel, L10n.Help.categoryIdolsAttributesDetail),
+            HelpItem(L10n.Help.categoryIdolsIdolDetailLabel, L10n.Help.categoryIdolsIdolDetailDetail),
+            HelpItem(L10n.Help.categoryIdolsAliasesLabel, L10n.Help.categoryIdolsAliasesDetail),
         )
     ),
     HelpSection(
+        id = "marks",
         icon = Icons.Filled.Bookmark,
         tint = "#FF3B30",
-        title = "マイマーク（記録）",
-        summary = "担当アイドル・回収済楽曲・参加ライブを記録できます。",
+        title = L10n.Help.categoryMarksTitle,
+        summary = L10n.Help.categoryMarksSummary,
         body = listOf(
-            HelpItem("担当アイドル", "アイドル詳細から「担当」を付けると、マイページに集約されて確認できます。"),
-            HelpItem("回収済 (持ってる) 楽曲", "曲詳細から「回収済」を付けると、自分のコレクション管理ができます。楽曲一覧で「回収済のみ」表示も可能。"),
-            HelpItem("参加ライブ", "ライブ詳細から「参加した」を付けると、マイページに参加履歴が積み上がります。"),
-            HelpItem("マイマークは端末に保存", "ローカル保存されるので、ログインなしで使えます。機種変更のときは 設定 → バックアップ の引き継ぎコードで移せます。"),
+            HelpItem(L10n.Help.categoryMarksOshiLabel, L10n.Help.categoryMarksOshiDetail),
+            HelpItem(L10n.Help.categoryMarksCollectedLabel, L10n.Help.categoryMarksCollectedDetail),
+            HelpItem(L10n.Help.categoryMarksAttendedLabel, L10n.Help.categoryMarksAttendedDetail),
+            HelpItem(L10n.Help.categoryMarksLocalLabel, L10n.Help.categoryMarksLocalDetailAndroid),
         )
     ),
     HelpSection(
+        id = "edit",
         icon = Icons.Filled.Edit,
         tint = "#007AFF",
-        title = "みんなで編集",
-        summary = "ログインすればセトリ・楽曲・ライブ情報を直接編集でき、その場で全員に反映されます。",
+        title = L10n.Help.categoryEditTitle,
+        summary = L10n.Help.categoryEditSummary,
         body = listOf(
-            HelpItem("直接編集して、すぐ反映", "承認待ちはありません。ログインユーザーがセトリ・新曲・新イベント・参考動画などを直接追加・修正でき、CloudKit 経由ですぐ全員の端末に届きます。Wikipedia のような共同編集スタイルです。"),
-            HelpItem("編集には Google ログイン", "閲覧はログイン不要。編集に参加したい時だけ設定からログインしてください。各画面の「+」や鉛筆アイコンから編集できます。"),
-            HelpItem("すべての編集に履歴が残る", "誰がいつ何を変えたかが変更前後つきで記録されます。各データの編集履歴や、プロデュースタブの「最近の編集」フィードからたどれます。"),
-            HelpItem("「良かった」で感謝を伝える", "他の人の編集に「良かった」を付けられます。人気・感謝の指標で、付けた数・もらった数がマイページに表示されます。"),
-            HelpItem("間違いはすぐ戻せる", "自分の編集はいつでも取り消せます。誤りや荒らしはワンタップで元に戻され、悪質な場合はアカウントが利用停止になります。安心して編集してください。"),
-            HelpItem("貢献が積み上がる", "編集した数と「良かった」をもらった数で貢献度が積み上がり、マイページに称号バッジとして表示されます。"),
+            HelpItem(L10n.Help.categoryEditDirectLabel, L10n.Help.categoryEditDirectDetail),
+            HelpItem(L10n.Help.categoryEditLoginLabelAndroid, L10n.Help.categoryEditLoginDetailAndroid),
+            HelpItem(L10n.Help.categoryEditHistoryLabel, L10n.Help.categoryEditHistoryDetail),
+            HelpItem(L10n.Help.categoryEditLikesLabel, L10n.Help.categoryEditLikesDetail),
+            HelpItem(L10n.Help.categoryEditRevertLabel, L10n.Help.categoryEditRevertDetail),
+            HelpItem(L10n.Help.categoryEditContributionLabel, L10n.Help.categoryEditContributionDetail),
         )
     ),
     HelpSection(
+        id = "tags",
         icon = Icons.Filled.Sell,
         tint = "#30B0C7",
-        title = "タグ",
-        summary = "ユーザー投稿のタグで曲を自由に分類できます。",
+        title = L10n.Help.categoryTagsTitle,
+        summary = L10n.Help.categoryTagsSummary,
         body = listOf(
-            HelpItem("曲にタグを付ける", "曲詳細から既存のタグを付けたり、新しいタグを作って付けたりできます。"),
-            HelpItem("タグから曲を辿る", "タグ一覧 → タグ詳細から、そのタグが付いた曲を一覧表示。「夏曲」「バラード」「神曲」など好きな切り口で検索可能。"),
-            HelpItem("タグの説明文を編集", "誰でもタグの説明を書き加えられます。Wikipedia のような共同編集スタイル。"),
+            HelpItem(L10n.Help.categoryTagsAttachLabel, L10n.Help.categoryTagsAttachDetail),
+            HelpItem(L10n.Help.categoryTagsBrowseLabel, L10n.Help.categoryTagsBrowseDetail),
+            HelpItem(L10n.Help.categoryTagsDescriptionLabel, L10n.Help.categoryTagsDescriptionDetail),
         )
     ),
     HelpSection(
+        id = "penlight",
         icon = Icons.Filled.Palette,
         tint = "#AF52DE",
-        title = "ペンライト投票",
-        summary = "曲ごとの「振る色」をみんなで投票して可視化。",
+        title = L10n.Help.categoryPenlightTitle,
+        summary = L10n.Help.categoryPenlightSummary,
         body = listOf(
-            HelpItem("曲詳細から好きな色セットを投票", "公式パレットの中から、その曲で振りたい色 (単色 / 複数色) を選んで投票できます。"),
-            HelpItem("集計結果を確認", "投票結果は色セット別の票数で表示。ライブ前の「色合わせ」用にどうぞ。"),
-            HelpItem("1 端末 1 票で差し替え可能", "同じ曲に複数回投票しても、最新の選択で上書きされます (端末単位)。"),
+            HelpItem(L10n.Help.categoryPenlightVoteLabel, L10n.Help.categoryPenlightVoteDetail),
+            HelpItem(L10n.Help.categoryPenlightResultsLabel, L10n.Help.categoryPenlightResultsDetail),
+            HelpItem(L10n.Help.categoryPenlightOneVoteLabel, L10n.Help.categoryPenlightOneVoteDetail),
         )
     ),
     HelpSection(
+        id = "intro",
         icon = Icons.Filled.Headphones,
         tint = "#FF2D55",
-        title = "イントロドン",
-        summary = "曲のイントロを聴いて曲名を当てるクイズ。",
+        title = L10n.Help.categoryIntroTitle,
+        summary = L10n.Help.categoryIntroSummary,
         body = listOf(
-            HelpItem("配信のある曲で遊べる", "出題は 30 秒のプレビュー再生です。配信のある曲だけが出題対象になります。"),
-            HelpItem("ブランド・難易度を選択", "ブランド絞り込みや、再生秒数で難易度調整できます。"),
-            HelpItem("4 択で回答", "曲名の 4 択から選びます。パーティ対戦なら 1 台を 2 人で分けて早押しできます。"),
-            HelpItem("ベストスコアを記録", "ブランドごとに自己ベストが残ります。"),
+            HelpItem(L10n.Help.categoryIntroStreamableLabel, L10n.Help.categoryIntroStreamableDetail),
+            HelpItem(L10n.Help.categoryIntroDifficultyLabel, L10n.Help.categoryIntroDifficultyDetail),
+            HelpItem(L10n.Help.categoryIntroChoicesLabel, L10n.Help.categoryIntroChoicesDetail),
+            HelpItem(L10n.Help.categoryIntroBestLabel, L10n.Help.categoryIntroBestDetail),
         )
     ),
     HelpSection(
+        id = "search",
         icon = Icons.Filled.Search,
         tint = "#8E8E93",
-        title = "検索",
-        summary = "「このタブを絞り込む」検索と、「全体を横断する」検索の 2 種類があります。",
+        title = L10n.Help.categorySearchTitle,
+        summary = L10n.Help.categorySearchSummary,
         body = listOf(
-            HelpItem("タブ内検索 = この一覧を絞り込む", "ライブ / 楽曲 / アイドル 各タブの検索バーは、いま表示中の一覧 (適用中の絞り込みも含む) をその場で絞り込みます。"),
-            HelpItem("全体検索 = 横断して探す", "右上の虫眼鏡から、楽曲・アイドル・ライブをまとめて横断検索できます。タブをまたいで一気に目的の項目へ飛べます。"),
-            HelpItem("見つからなければ全体検索へ", "タブ内検索で結果が無いときは「全体から検索」ボタンが出ます。同じ語句のまま 1 タップで横断検索に切り替えられます。"),
-            HelpItem("アイドル別名にも対応", "「ロコ」と検索しても「伴田路子」がヒット。シャニやミリの別名表記も内部で名寄せ済み。"),
+            HelpItem(L10n.Help.categorySearchInTabLabel, L10n.Help.categorySearchInTabDetail),
+            HelpItem(L10n.Help.categorySearchGlobalLabel, L10n.Help.categorySearchGlobalDetailAndroid),
+            HelpItem(L10n.Help.categorySearchFallbackLabel, L10n.Help.categorySearchFallbackDetail),
+            HelpItem(L10n.Help.categorySearchAliasesLabel, L10n.Help.categorySearchAliasesDetail),
         )
     ),
     HelpSection(
+        id = "calendar",
         icon = Icons.Filled.CalendarMonth,
         tint = "#34C759",
-        title = "カレンダー",
-        summary = "ライブ・CD リリース・アイドル誕生日を月別に表示。",
+        title = L10n.Help.categoryCalendarTitle,
+        summary = L10n.Help.categoryCalendarSummary,
         body = listOf(
-            HelpItem("スケジュールタブ", "月単位で全アイマスイベントを俯瞰。"),
-            HelpItem("ライブ・リリース・誕生日を色分け", "それぞれ別色で表示。タップで詳細にジャンプ。"),
+            HelpItem(L10n.Help.categoryCalendarOpenLabelAndroid, L10n.Help.categoryCalendarOpenDetail),
+            HelpItem(L10n.Help.categoryCalendarColorsLabel, L10n.Help.categoryCalendarColorsDetail),
         )
     ),
     HelpSection(
+        id = "image_import",
         icon = Icons.Filled.PhotoLibrary,
         tint = "#00C7BE",
-        title = "画像インポート",
-        summary = "アイドル・ブランドのアイコン画像を一括取り込み。",
+        title = L10n.Help.categoryImageImportTitle,
+        summary = L10n.Help.categoryImageImportSummary,
         body = listOf(
-            HelpItem("設定 → キャラクター画像", "JSON で {アイドル名: 画像URL} の形式を渡せば、まとめてダウンロード+保存できます。"),
-            HelpItem("型紙 JSON をダウンロード", "アプリ内から型紙 (全アイドル/全ブランド名がキーになった JSON) を書き出せます。それに画像URLを書き足すだけ。"),
-            HelpItem("アイドル別名にも対応", "型紙には別名表記も含まれているので、 ロコ でも 伴田路子 でも好きな表記の URL を書けます。"),
-            HelpItem("全画像リセット可能", "失敗したり差し替えたい時は「カスタム画像を全削除」でリセットできます。"),
+            HelpItem(L10n.Help.categoryImageImportOpenLabelAndroid, L10n.Help.categoryImageImportOpenDetail),
+            HelpItem(L10n.Help.categoryImageImportTemplateLabel, L10n.Help.categoryImageImportTemplateDetail),
+            HelpItem(L10n.Help.categoryImageImportAliasesLabel, L10n.Help.categoryImageImportAliasesDetail),
+            HelpItem(L10n.Help.categoryImageImportResetLabel, L10n.Help.categoryImageImportResetDetail),
         )
     ),
     HelpSection(
+        id = "sync",
         icon = Icons.Filled.CloudSync,
         tint = "#32ADE6",
-        title = "同期とアカウント",
-        summary = "CloudKit で常に最新のデータ、 Sign in with Apple で編集に参加。",
+        title = L10n.Help.categorySyncTitle,
+        summary = L10n.Help.categorySyncSummary,
         body = listOf(
-            HelpItem("マスタデータは CloudKit で自動同期", "新しいライブやセトリは CloudKit から差分配信されます。アプリ更新を待たずに最新化されます。"),
-            HelpItem("Google ログインは編集用", "閲覧機能には不要。データを編集したい時だけログインしてください。"),
-            HelpItem("アカウント削除も可能", "マイページ → アカウントを削除 で、サーバー上の編集履歴とユーザー情報をすべて削除します。"),
+            HelpItem(L10n.Help.categorySyncCloudkitLabel, L10n.Help.categorySyncCloudkitDetail),
+            HelpItem(L10n.Help.categorySyncLoginLabelAndroid, L10n.Help.categorySyncLoginDetail),
+            HelpItem(L10n.Help.categorySyncDeleteAccountLabel, L10n.Help.categorySyncDeleteAccountDetail),
         )
     ),
     )
@@ -235,10 +253,10 @@ fun HelpScreen(onBack: () -> Unit) {
         containerColor = DS.bg,
         topBar = {
             TopAppBar(
-                title = { Text("使い方", fontWeight = FontWeight.Bold) },
+                title = { Text(L10n.Help.topTitleAndroid.resolve(), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -254,14 +272,14 @@ fun HelpScreen(onBack: () -> Unit) {
         ) {
             item {
                 Column(modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)) {
-                    Text("アイドルライブDB の使い方", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+                    Text(L10n.Help.topHeading.resolve(), fontSize = 20.sp, fontWeight = FontWeight.Bold, color = DS.ink)
                     Text(
-                        "各カテゴリで「こんなことができる」を一覧で紹介しています。気になる項目から覗いてみてください。",
+                        L10n.Help.topIntro.resolve(),
                         fontSize = 13.sp, color = DS.ink2, modifier = Modifier.padding(top = 4.dp)
                     )
                 }
             }
-            items(HelpCatalog.sections, key = { it.title }) { section -> HelpSectionCard(section) }
+            items(HelpCatalog.sections, key = { it.id }) { section -> HelpSectionCard(section) }
         }
     }
 }
@@ -286,8 +304,8 @@ private fun HelpSectionCard(section: HelpSection) {
                 modifier = Modifier.size(36.dp).clip(CircleShape).background(theme.bar.copy(alpha = 0.18f)).padding(7.dp)
             )
             Column(modifier = Modifier.weight(1f)) {
-                Text(section.title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DS.ink)
-                Text(section.summary, fontSize = 12.sp, color = DS.ink2)
+                Text(section.title.resolve(), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+                Text(section.summary.resolve(), fontSize = 12.sp, color = DS.ink2)
             }
             Icon(
                 if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
@@ -298,8 +316,8 @@ private fun HelpSectionCard(section: HelpSection) {
             Column(modifier = Modifier.padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 section.body.forEach { item ->
                     Column {
-                        Text(item.label, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
-                        Text(item.detail, fontSize = 12.sp, color = DS.ink2, modifier = Modifier.padding(top = 2.dp))
+                        Text(item.label.resolve(), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
+                        Text(item.detail.resolve(), fontSize = 12.sp, color = DS.ink2, modifier = Modifier.padding(top = 2.dp))
                     }
                 }
             }

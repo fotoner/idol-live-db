@@ -12,32 +12,32 @@ struct WidgetHowToView: View {
                 header
 
                 StepCard(number: 1, tint: pink,
-                         title: "アプリで担当に画像を追加",
-                         detail: "アイドル詳細 → プロフィール下の「ギャラリー」→「追加」から、好きな画像を何枚でも入れられます。先頭の1枚がアイコンになります。") {
+                         title: L10n.Help.widgetHowtoStep1Title,
+                         detail: L10n.Help.widgetHowtoStep1Detail) {
                     addImageArt
                 }
 
                 StepCard(number: 2, tint: purple,
-                         title: "ホーム画面にウィジェットを追加",
-                         detail: "ホーム画面の何もない所を長押し → 左上の「＋」をタップ。") {
+                         title: L10n.Help.widgetHowtoStep2Title,
+                         detail: L10n.Help.widgetHowtoStep2Detail) {
                     homeAddArt
                 }
 
                 StepCard(number: 3, tint: pink,
-                         title: "「担当」で検索して選ぶ",
-                         detail: "ウィジェット一覧で「担当」と検索。「担当の画像（タップで切替）」と「（タップでアプリ）」の2種類があります。好きな方を追加。") {
+                         title: L10n.Help.widgetHowtoStep3Title,
+                         detail: L10n.Help.widgetHowtoStep3Detail) {
                     searchArt
                 }
 
                 StepCard(number: 4, tint: purple,
-                         title: "どのアイドルを出すか選ぶ",
-                         detail: "置いたウィジェットを長押し →「ウィジェットを編集」→ アイドルを選択。画像を入れた担当が候補に出ます。") {
+                         title: L10n.Help.widgetHowtoStep4Title,
+                         detail: L10n.Help.widgetHowtoStep4Detail) {
                     editArt
                 }
 
                 StepCard(number: 5, tint: pink,
-                         title: "タップで次の画像へ",
-                         detail: "「タップで切替」版はタップするたびに次の画像にローテーション。放っておいても30分ごとに自動で切り替わります。「タップでアプリ」版はタップでアプリが開きます。") {
+                         title: L10n.Help.widgetHowtoStep5Title,
+                         detail: L10n.Help.widgetHowtoStep5Detail) {
                     tapArt
                 }
 
@@ -47,7 +47,7 @@ struct WidgetHowToView: View {
         }
         .scrollContentBackground(.hidden)
         .background(DS.bg)
-        .navigationTitle("担当ウィジェットの使い方")
+        .navigationTitle(L10n.Help.widgetHowtoTitle)
         .navigationBarTitleDisplayMode(.inline)
         .trackScreen("widget_how_to")
     }
@@ -60,9 +60,9 @@ struct WidgetHowToView: View {
                 imageFill
             }
             .frame(width: 120, height: 120)
-            Text("推しの画像をホーム画面に")
+            Text(L10n.Help.widgetHowtoHeaderTitle)
                 .font(.imasTitle3)
-            Text("自分でアプリに入れた画像だけを表示します。版権画像は使いません。")
+            Text(L10n.Help.widgetHowtoHeaderCaption)
                 .font(.imasCaption)
                 .foregroundStyle(DS.ink2)
                 .multilineTextAlignment(.center)
@@ -73,8 +73,8 @@ struct WidgetHowToView: View {
 
     private var tips: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
-            Label("画像を足した・消した時は、アプリを一度開くとウィジェットも更新されます。", systemImage: "arrow.triangle.2.circlepath")
-            Label("ロック画面ウィジェットは仕様上フルカラー写真を出せません（ホーム画面向けの機能です）。", systemImage: "lock.iphone")
+            Label(L10n.Help.widgetHowtoTipsRefresh, systemImage: "arrow.triangle.2.circlepath")
+            Label(L10n.Help.widgetHowtoTipsLockScreen, systemImage: "lock.iphone")
         }
         .font(.imasCaption)
         .foregroundStyle(DS.ink2)
@@ -139,7 +139,7 @@ struct WidgetHowToView: View {
         VStack(spacing: 10) {
             HStack(spacing: 6) {
                 Image(systemName: "magnifyingglass").foregroundStyle(DS.ink2)
-                Text("担当").font(.imasSubhead).foregroundStyle(DS.ink)
+                Text(L10n.Help.widgetHowtoSearchArtQuery).font(.imasSubhead).foregroundStyle(DS.ink)
                 Spacer()
             }
             .padding(.horizontal, DS.sp4).padding(.vertical, DS.sp3)
@@ -155,7 +155,7 @@ struct WidgetHowToView: View {
             Image(systemName: "arrow.right").foregroundStyle(DS.ink3)
             HStack(spacing: 6) {
                 Image(systemName: "slider.horizontal.3")
-                Text("編集").font(.imasCaption.bold())
+                Text(L10n.Help.widgetHowtoEditArtLabel).font(.imasCaption.bold())
             }
             .padding(.horizontal, DS.sp4).padding(.vertical, DS.sp3)
             .background(DS.fill, in: Capsule())
@@ -185,8 +185,8 @@ struct WidgetHowToView: View {
 private struct StepCard<Art: View>: View {
     let number: Int
     let tint: Color
-    let title: String
-    let detail: String
+    let title: LocalizedStringResource
+    let detail: LocalizedStringResource
     @ViewBuilder let art: () -> Art
 
     var body: some View {
