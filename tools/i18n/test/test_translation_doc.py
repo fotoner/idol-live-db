@@ -60,6 +60,8 @@ class ContentTest(unittest.TestCase):
     def test_review_states_and_promotion(self):
         self.assertIn("## 検収 (レビュー) の流れ", self.doc)
         self.assertIn("stamp ko --reviewer <名前> --ns songs", self.doc)
+        # planned の言語は画面で見られない (dev に上げてから確かめる)
+        self.assertIn("planned の言語 (上の「言語」の表で channel が planned のもの) はビルドに入らない", self.doc)
         for state in ("欠落 (missing)", "未検収 (unreviewed)", "確定 (reviewed)", "| stale |", "| edited |"):
             self.assertIn(state, self.doc)
         self.assertIn("## 言語を上げる条件 (channel)", self.doc)
