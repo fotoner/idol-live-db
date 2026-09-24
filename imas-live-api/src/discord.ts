@@ -55,9 +55,11 @@ export async function exchangeDiscordCode(env: Env, code: string, redirectUri: s
       client_secret: env.DISCORD_CLIENT_SECRET!,
     }),
   });
-  if (!res.ok) return null;
-  const body = (await res.json()) as { access_token?: unknown };
-  return typeof body.access_token === "string" ? body.access_token : null;
+  // GitHub は失敗も 200 + { error } で返す (シークレット違いは incorrect_client_credentials)。
+  const body = res.ok ? ((await res.json().catch(() => ({}))) as { access_token?: unknown; error?: unknown }) : {};
+  if (typeof body.access_token === "string") return body.access_token;
+  console.warn(JSON.stringify({ event: "github_oauth_failed", step: "token", status: res.status, error: body.error ?? null }));
+  return null;
 }
 
 export async function fetchDiscordUserId(accessToken: string): Promise<string | null> {
@@ -108,7 +110,7 @@ const GITHUB_HEADERS = { Accept: "application/vnd.github+json", "User-Agent": "i
 export async function exchangeGithubCode(env: Env, code: string, redirectUri: string): Promise<string | null> {
   const res = await fetch("https://github.com/login/oauth/access_token", {
     method: "POST",
-    headers: { Accept: "application/json", "Content-Type": "application/x-www-form-urlencoded" },
+    headers: { ...GITHUB_HEADERS, Accept: "application/json", "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       client_id: env.GITHUB_OAUTH_CLIENT_ID!,
       client_secret: env.GITHUB_OAUTH_CLIENT_SECRET!,
@@ -116,16 +118,21 @@ export async function exchangeGithubCode(env: Env, code: string, redirectUri: st
       redirect_uri: redirectUri,
     }),
   });
-  if (!res.ok) return null;
-  const body = (await res.json()) as { access_token?: unknown };
-  return typeof body.access_token === "string" ? body.access_token : null;
+  // GitHub は失敗も 200 + { error } で返す (シークレット違いは incorrect_client_credentials)。
+  const body = res.ok ? ((await res.json().catch(() => ({}))) as { access_token?: unknown; error?: unknown }) : {};
+  if (typeof body.access_token === "string") return body.access_token;
+  console.warn(JSON.stringify({ event: "github_oauth_failed", step: "token", status: res.status, error: body.error ?? null }));
+  return null;
 }
 
 export async function fetchGithubLogin(accessToken: string): Promise<string | null> {
   const res = await fetch("https://api.github.com/user", {
     headers: { ...GITHUB_HEADERS, Authorization: `Bearer ${accessToken}` },
   });
-  if (!res.ok) return null;
+  if (!res.ok) {
+    console.warn(JSON.stringify({ event: "github_oauth_failed", step: "user", status: res.status }));
+    return null;
+  }
   const body = (await res.json()) as { login?: unknown };
   return typeof body.login === "string" ? body.login : null;
 }
@@ -141,7 +148,10 @@ export async function countMergedPullRequests(
   const res = await fetch(`https://api.github.com/search/issues?per_page=1&q=${encodeURIComponent(q)}`, {
     headers: { ...GITHUB_HEADERS, Authorization: `Bearer ${accessToken}` },
   });
-  if (!res.ok) return null;
+  if (!res.ok) {
+    console.warn(JSON.stringify({ event: "github_oauth_failed", step: "search", status: res.status }));
+    return null;
+  }
   const body = (await res.json()) as { total_count?: unknown };
   return typeof body.total_count === "number" ? body.total_count : null;
 }

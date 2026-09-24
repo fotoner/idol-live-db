@@ -305,9 +305,11 @@ async function githubCallback(ctx: RouteContext): Promise<Response> {
   const login = accessToken ? await fetchGithubLogin(accessToken) : null;
   const merged = accessToken && login ? await countMergedPullRequests(env, accessToken, login) : null;
   if (!login || merged === null) {
+    // どこで止まったかを小さく出す (Workers Logs を見なくても切り分けられるように)。
+    const step = !accessToken ? "token" : !login ? "user" : "search";
     return renderResultPage({
       heading: "GitHub で確認できませんでした",
-      message: "時間をおいて、Discord でもう一度 /申請 を使ってください。",
+      message: `時間をおいて、Discord でもう一度 /申請 を使ってください。(${step})`,
       status: 502,
     });
   }
