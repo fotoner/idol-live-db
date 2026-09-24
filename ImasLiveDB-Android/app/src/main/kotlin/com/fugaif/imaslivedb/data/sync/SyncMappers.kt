@@ -357,7 +357,9 @@ object SyncMappers {
                 jointBrandIds = row.jointBrandIds.emptyToNull(),
                 isCollab = row.isCollab,
                 // 同じ理由。落とすと KAMISABI 収録済みの曲が同期のたびに未収録へ戻る。
-                hasKamisabiCard = row.hasKamisabiCard
+                hasKamisabiCard = row.hasKamisabiCard,
+                // 同じ理由。落とすと同期のたびに曲の補足が消える。
+                note = row.note.emptyToNull()
             )
         }
 
