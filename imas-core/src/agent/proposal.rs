@@ -171,15 +171,15 @@ pub fn proposal_catalog() -> Vec<ToolSpec> {
                     "release_date": { "type": "string", "description": "YYYY-MM-DD (任意)" },
                     "unit_id": { "type": "string", "description": "歌唱ユニットの id (任意)" },
                     "unit_name": { "type": "string", "description": "ユニット表記名 (任意)" },
-                    "composer": { "type": "string" },
-                    "lyricist": { "type": "string" },
-                    "arranger": { "type": "string" },
+                    "composer": { "type": "string", "description": "作曲者。複数人は「、」区切り (任意)" },
+                    "lyricist": { "type": "string", "description": "作詞者。複数人は「、」区切り (任意)" },
+                    "arranger": { "type": "string", "description": "編曲者。複数人は「、」区切り (任意)" },
                     "apple_music_id": {
                         "type": "string",
                         "description": "入れる場合は artwork_url も一緒に入れること \
                             (一覧のジャケ写は artwork_url を直参照するため)。",
                     },
-                    "artwork_url": { "type": "string" },
+                    "artwork_url": { "type": "string", "description": "ジャケット画像の URL (Apple Music の mzstatic 等・任意)" },
                     "original_singers": {
                         "type": "array",
                         "items": { "type": "string" },
@@ -274,6 +274,7 @@ pub fn proposal_catalog() -> Vec<ToolSpec> {
                     "songs": {
                         "type": "array",
                         "minItems": 1,
+                        "description": "公演の曲を 1 曲 1 要素で。曲は song_id か title のどちらかで指す。",
                         "items": {
                             "type": "object",
                             "properties": {
@@ -318,10 +319,10 @@ pub fn proposal_catalog() -> Vec<ToolSpec> {
                     "name": { "type": "string" },
                     "name_kana": { "type": "string" },
                     "birthday": { "type": "string", "description": "MM-DD" },
-                    "blood_type": { "type": "string" },
+                    "blood_type": { "type": "string", "description": "A / B / O / AB (任意)" },
                     "height": { "description": "cm (任意)" },
                     "birth_place": { "type": "string" },
-                    "constellation": { "type": "string" },
+                    "constellation": { "type": "string", "description": "例: 獅子座 (任意)" },
                     "description": { "type": "string" },
                     "brands": {
                         "type": "array",
@@ -358,7 +359,7 @@ pub fn proposal_catalog() -> Vec<ToolSpec> {
                 .to_string(),
             input_schema: tool_schema(
                 json!({
-                    "table": { "type": "string", "enum": FIX_TABLES },
+                    "table": { "type": "string", "enum": FIX_TABLES, "description": "修正するレコードの表" },
                     "id": { "type": "string", "description": "対象レコードの id" },
                     "fields": {
                         "type": "object",
@@ -382,9 +383,8 @@ pub fn proposal_catalog() -> Vec<ToolSpec> {
             name: "check_proposals".to_string(),
             description: "いま data/ にある未反映のドラフトを tools/apply_data.py --check で \
                 検証し直す。file (ファイル名。パスではない) を渡すとそのファイル 1 件だけに \
-                絞る。省略時は data/ 配下の各ファイルを 1 件ずつ個別に検証する \
-                (--only を付けずに一括で回すと、無関係な保留中ファイルの問題まで巻き込んで \
-                LLM が誤認するため、常に --only 付きで回す)。何も書き込まない読み取り専用ツール。"
+                絞る。省略時は data/ 配下の各ファイルを 1 件ずつ個別に検証し、ファイルごとの結果を返す。\
+                何も書き込まない読み取り専用ツール。"
                 .to_string(),
             input_schema: tool_schema(
                 json!({

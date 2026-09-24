@@ -80,7 +80,7 @@ pub fn catalog() -> Vec<ToolSpec> {
             super::tool_schema(
                 json!({
                     "query": { "type": "string", "description": "検索語" },
-                    "limit": { "type": "integer", "description": "種別ごとの件数。既定 10・上限 50 (実際の上限は 20)" },
+                    "limit": { "type": "integer", "description": "種別ごとの件数。既定 10・最大 20。それを超えた分は *_total と *_truncated で分かる" },
                 }),
                 &["query"],
             ),
@@ -112,7 +112,8 @@ pub fn catalog() -> Vec<ToolSpec> {
         spec(
             "vocabulary",
             "この DB の語彙と規模 (ブランド一覧・song_type と event kind の取りうる値・\
-             各表の件数・データ版・収録しているライブの日付範囲)。引数なし。最初に 1 度引くとよい。",
+             各表の件数・データ版・収録しているライブの日付範囲)。引数なし。\
+             ブランド id・song_type・event kind の取りうる値や、収録範囲が分からないときに引く。",
             super::tool_schema(json!({}), &[]),
         ),
     ]
