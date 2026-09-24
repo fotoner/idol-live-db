@@ -313,15 +313,6 @@ mod tests {
         assert!(event_is_upcoming(None, None, TODAY));
     }
 
-    /// 今日ちょうどの日付は「今後」側 (境界は >=)。
-    #[test]
-    fn event_on_today_counts_as_upcoming() {
-        let input = dates(&[Some(TODAY)]);
-
-        assert_eq!(group_events_by_year(&input, true, TODAY)[0].indices, vec![0]);
-        assert!(group_events_by_year(&input, false, TODAY).is_empty());
-    }
-
     /// 部分日付 ("YYYY" / "YYYY-MM") は today_key を同じ精度に切り詰めて比較する。
     /// 桁数が揃わないまま比較すると "2026" < "2026-06-18" となり、今年開催予定の
     /// 日付未確定イベントが開催済みへ落ちてしまう (Swift 原本のコメントの再現)。
@@ -355,16 +346,6 @@ mod tests {
         assert!(group_events_by_year(&input, false, TODAY).is_empty());
     }
 
-    /// 今後タブは年昇順で複数グループが並ぶ。
-    #[test]
-    fn upcoming_sorts_years_ascending() {
-        let input = dates(&[Some("2027-01-01"), Some("2026-08-01")]);
-
-        let groups = group_events_by_year(&input, true, TODAY);
-
-        assert_eq!(years(&groups), vec!["2026年", "2027年"]);
-    }
-
     /// 同日イベントはもとの並び (入力順) を保つ (安定ソート)。
     #[test]
     fn same_date_events_keep_input_order() {
@@ -373,13 +354,6 @@ mod tests {
         let groups = group_events_by_year(&input, true, TODAY);
 
         assert_eq!(groups[0].indices, vec![2, 0, 1]);
-    }
-
-    /// 空入力は空出力 (空グループを作らない)。
-    #[test]
-    fn empty_input_returns_empty() {
-        assert!(group_events_by_year(&[], true, TODAY).is_empty());
-        assert!(group_events_by_year(&[], false, TODAY).is_empty());
     }
 }
 

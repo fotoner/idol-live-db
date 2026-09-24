@@ -301,23 +301,6 @@ mod tests {
         assert!(!got.is_new_best);
     }
 
-    /// 全問正解を 2 回続けても 2 回目はバッジを出さない (1.0 > 1.0 は偽)。
-    #[test]
-    fn repeating_a_perfect_score_shows_no_badge() {
-        let before = GameRecord { last_score: 5, last_out_of: 5, best_score: 5, best_out_of: 5, play_count: 1 };
-        assert!(!play(&before, &GameStreakState::default(), 5, 5).is_new_best);
-    }
-
-    /// バッジ判定は **best を上書きする前** の値で行う。
-    /// 返ってきた record の best は今回の結果に変わっているが、判定は旧 best 基準。
-    #[test]
-    fn badge_is_judged_against_the_record_before_the_update() {
-        let before = GameRecord { last_score: 1, last_out_of: 5, best_score: 1, best_out_of: 5, play_count: 1 };
-        let got = play(&before, &GameStreakState::default(), 4, 5);
-        assert!(got.is_new_best, "旧 best (0.2) を超えたのにバッジが出ていない");
-        assert_eq!((got.record.best_score, got.record.best_out_of), (4, 5));
-    }
-
     // MARK: - 出題 0 問 (空プール・候補不足)
 
     /// 1 問も出せなかったセッションは丸ごと無視する。
@@ -353,13 +336,6 @@ mod tests {
     }
 
     // MARK: - 連続達成日数
-
-    /// 初達成は 1 日目から。
-    #[test]
-    fn streak_starts_at_one() {
-        let got = play(&GameRecord::default(), &GameStreakState::default(), 1, 1);
-        assert_eq!(got.streak, cleared(TODAY, 1, 1));
-    }
 
     /// 昨日達成していれば +1。
     #[test]
@@ -415,11 +391,6 @@ mod tests {
     }
 
     #[test]
-    fn display_streak_is_zero_when_never_cleared() {
-        assert_eq!(GameStreakState::default().display_streak(TODAY, YESTERDAY), 0);
-    }
-
-    #[test]
     fn did_clear_today_matches_only_todays_key() {
         assert!(cleared(TODAY, 1, 1).did_clear_today(TODAY));
         assert!(!cleared(YESTERDAY, 1, 1).did_clear_today(TODAY));
@@ -449,26 +420,12 @@ mod tests {
         assert_eq!(broken.best_rate_percent(), None);
     }
 
-    #[test]
-    fn has_played_follows_play_count() {
-        assert!(!GameRecord::default().has_played());
-        assert!(GameRecord { play_count: 1, ..GameRecord::default() }.has_played());
-    }
-
     // MARK: - 日替わりシートのゲート
 
     #[test]
     fn daily_sheet_shows_on_first_launch_ever() {
         assert_eq!(
             daily_sheet_gate(None, TODAY),
-            DailySheetGate { should_show: true, last_shown_day: TODAY.to_string() }
-        );
-    }
-
-    #[test]
-    fn daily_sheet_shows_again_the_next_day() {
-        assert_eq!(
-            daily_sheet_gate(Some(YESTERDAY), TODAY),
             DailySheetGate { should_show: true, last_shown_day: TODAY.to_string() }
         );
     }

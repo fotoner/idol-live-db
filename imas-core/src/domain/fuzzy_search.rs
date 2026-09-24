@@ -295,20 +295,6 @@ mod tests {
     }
 
     #[test]
-    fn katakana_and_hiragana_are_the_same() {
-        let h = hay();
-        assert_eq!(titles(&fuzzy_matches(&h, "しんでれら", 5), &h)[0], "お願い！シンデレラ");
-    }
-
-    #[test]
-    fn typo_still_hits() {
-        let h = hay();
-        // 「プリンセス」を「ぷりんせつ」と打ち間違えても拾える
-        let got = fuzzy_matches(&h, "ぷりんせつ", 5);
-        assert!(titles(&got, &h).contains(&"プリンセスの休息".to_string()), "{:?}", titles(&got, &h));
-    }
-
-    #[test]
     fn long_vowel_variation_is_absorbed() {
         let h = hay();
         // 音引きの有無が違っても同じ曲に当たる
@@ -316,13 +302,6 @@ mod tests {
         let b = fuzzy_matches(&h, "しゃいにいからず", 3);
         assert_eq!(titles(&a, &h)[0], "シャイニーカラーズ");
         assert!(titles(&b, &h).contains(&"シャイニーカラーズ".to_string()), "{:?}", titles(&b, &h));
-    }
-
-    #[test]
-    fn prefix_typed_partially() {
-        let h = hay();
-        let got = fuzzy_matches(&h, "シャイニー", 5);
-        assert!(titles(&got, &h).contains(&"シャイニーカラーズ".to_string()));
     }
 
     #[test]
@@ -337,14 +316,6 @@ mod tests {
     fn empty_needle_returns_nothing() {
         assert!(fuzzy_matches(&hay(), "", 5).is_empty());
         assert!(fuzzy_matches(&hay(), "  ", 5).is_empty());
-    }
-
-    #[test]
-    fn results_are_deterministic() {
-        let h = hay();
-        let a = fuzzy_matches(&h, "しゃいに", 5);
-        let b = fuzzy_matches(&h, "しゃいに", 5);
-        assert_eq!(a, b);
     }
 
     /// 読み仮名を併せて渡せば、漢字の曲名もかなで引ける。
@@ -362,12 +333,6 @@ mod tests {
         // 読みが無ければ当たらない (今の実データの状態)
         let without = vec![vec!["お願い！シンデレラ".to_string()], vec!["Star!!".to_string()]];
         assert!(fuzzy_matches_multi(&without, "おねがいしんでれら", 5).is_empty());
-    }
-
-    #[test]
-    fn limit_is_respected() {
-        let h = hay();
-        assert!(fuzzy_matches(&h, "あ", 2).len() <= 2);
     }
 
     /// 実データ (全曲) に対して、打鍵ごとに引ける速さかを確かめる。

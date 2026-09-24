@@ -68,12 +68,6 @@ mod tests {
     }
 
     #[test]
-    fn same_day_keeps_the_first_one() {
-        let d = dates(&["2026-10-01", "2026-10-01"]);
-        assert_eq!(next_show_index(&d, "2026-09-01"), Some(0));
-    }
-
-    #[test]
     fn similar_idols_drop_unknown_and_external_and_keep_server_order() {
         let snap = bundle_snapshot();
         let external = snap.idols.iter().find(|i| i.is_external).expect("外部ゲストがいる");

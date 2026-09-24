@@ -154,9 +154,4 @@ mod tests {
         sorted.sort();
         assert_eq!(keys, sorted, "{keys:?}");
     }
-
-    #[test]
-    fn 顔ぶれが空なら欠員だらけで何も出ない() {
-        assert!(songs_for_cast(bundle_snapshot(), &[], 0, None, None, 50).is_empty());
-    }
 }

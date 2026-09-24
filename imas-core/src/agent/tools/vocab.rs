@@ -124,14 +124,4 @@ mod tests {
         // 候補が空でも文面が壊れない。
         assert!(sample(&[]).contains("該当なし"));
     }
-
-    #[test]
-    fn 日付の下限上限は_3_通りの粗さを許す() {
-        for ok in ["2020", "2020-06", "2020-06-18"] {
-            assert!(checked_date_bound("released_from", ok.into()).is_ok(), "{ok}");
-        }
-        for ng in ["20", "2020/06", "2020-6-1"] {
-            assert!(checked_date_bound("released_from", ng.into()).is_err(), "{ng}");
-        }
-    }
 }

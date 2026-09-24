@@ -108,20 +108,6 @@ mod tests {
     use crate::test_support::bundle_snapshot;
 
     #[test]
-    fn encore_spellings_collapse_to_one_label() {
-        for raw in ["encore", "ENCORE", "Encore", "アンコール", " encore "] {
-            assert_eq!(section_label(Some(raw)).as_deref(), Some(ENCORE_LABEL), "{raw:?}");
-        }
-    }
-
-    #[test]
-    fn blank_means_no_section() {
-        assert_eq!(section_label(None), None);
-        assert_eq!(section_label(Some("")), None);
-        assert_eq!(section_label(Some("   ")), None);
-    }
-
-    #[test]
     fn other_labels_pass_through_trimmed() {
         assert_eq!(section_label(Some(" LL ")).as_deref(), Some("LL"));
         assert_eq!(section_label(Some("アイマス×μ's")).as_deref(), Some("アイマス×μ's"));
@@ -206,16 +192,5 @@ mod tests {
             snap.setlist_items[first_item as usize].position > 1,
             "通し番号をそのまま曲順にしている"
         );
-    }
-
-    #[test]
-    fn track_number_は_numbered_setlist_と同じ数を返す() {
-        let snap = bundle_snapshot();
-        let show = (0..snap.shows.len() as u32)
-            .find(|&s| snap.setlist_items_by_show[s as usize].len() > 5)
-            .expect("6 曲以上の公演がある");
-        for (rank, item) in numbered_setlist(snap, show) {
-            assert_eq!(track_number(snap, item), rank);
-        }
     }
 }

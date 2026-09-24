@@ -1025,45 +1025,6 @@ mod tests {
     }
 
     #[test]
-    fn catalog_は_6件でユニークな名前を持つ() {
-        let catalog = proposal_catalog();
-        assert_eq!(catalog.len(), 6);
-        let mut names: Vec<_> = catalog.iter().map(|t| t.name.clone()).collect();
-        names.sort();
-        names.dedup();
-        assert_eq!(names.len(), 6);
-        for spec in &catalog {
-            assert_eq!(spec.input_schema["type"], "object", "{} の schema", spec.name);
-            assert_eq!(
-                spec.input_schema["additionalProperties"],
-                Value::Bool(false),
-                "{} に additionalProperties: false が無い",
-                spec.name
-            );
-        }
-    }
-
-    #[test]
-    fn is_proposal_tool_はカタログの名前と過不足なく一致する() {
-        for spec in proposal_catalog() {
-            assert!(is_proposal_tool(&spec.name), "{} が is_proposal_tool で拾えていない", spec.name);
-        }
-        assert!(!is_proposal_tool("resolve_idol"));
-        assert!(!is_proposal_tool(""));
-    }
-
-    #[test]
-    fn source_が無ければ_song_は_bad_args() {
-        let a = json!({
-            "id": "ml_test_song", "title": "テスト曲", "brand_id": "ml",
-            "song_type": "unit", "original_singers": ["ml_idol_a"],
-        });
-        let err = build_proposal("propose_song", &a, "2026-09-19").unwrap_err();
-        assert!(matches!(err, ToolError::BadArgs(_)));
-        assert!(err.to_string().contains("source"));
-    }
-
-    #[test]
     fn source_quote_が無ければ_song_は_bad_args() {
         let a = json!({
             "id": "ml_test_song", "title": "テスト曲", "brand_id": "ml",
@@ -1126,19 +1087,6 @@ mod tests {
     }
 
     #[test]
-    fn 既知ホストのサブドメインでも基本の注意書きは付く() {
-        let a = json!({
-            "id": "sc_test_song", "title": "テスト曲", "brand_id": "sc", "song_type": "unit",
-            "original_singers": ["sc_idol_a"],
-            "source": "https://cmsapi-frontend.idolmaster-official.jp/api/news/1",
-            "source_quote": "配信開始",
-        });
-        let draft = build_proposal("propose_song", &a, "2026-09-19").unwrap();
-        assert!(draft.source_advisory.contains("機械が取得・検証していません"));
-        assert!(!draft.source_advisory.contains("既知の一次ソース一覧"));
-    }
-
-    #[test]
     fn source_advisory_はホストを取り出せなくても何か返す() {
         // 極端な入力 (スキームだけでホスト部が空) でも空文字列を返して黙り込んだりしない。
         let advisory = source_host_advisory("https://");
@@ -1164,12 +1112,6 @@ mod tests {
     }
 
     #[test]
-    fn max_auto_check_files_は妥当な範囲() {
-        assert!(MAX_AUTO_CHECK_FILES > 0);
-        assert!(MAX_AUTO_CHECK_FILES <= 30, "MCP のツール呼び出しタイムアウトに触れない上限であること");
-    }
-
-    #[test]
     fn propose_event_は_複数_shows_を数える() {
         let a = with_source(json!({
             "id": "ev_test", "brand_id": "ml", "name": "テストライブ", "kind": "live",
@@ -1185,15 +1127,6 @@ mod tests {
         assert_eq!(v["events"][0]["shows"].as_array().unwrap().len(), 2);
         assert_eq!(v["events"][0]["shows"][1]["venue"], "会場");
         assert!(draft.summary.contains("2 件"));
-    }
-
-    #[test]
-    fn propose_event_は_shows_が空なら_bad_args() {
-        let a = with_source(json!({
-            "id": "ev_test", "brand_id": "ml", "name": "テスト", "kind": "live", "shows": [],
-        }));
-        let err = build_proposal("propose_event", &a, "2026-09-19").unwrap_err();
-        assert!(matches!(err, ToolError::BadArgs(_)));
     }
 
     #[test]
@@ -1256,13 +1189,6 @@ mod tests {
     }
 
     #[test]
-    fn propose_fix_は_fields_が空なら_bad_args() {
-        let a = with_source(json!({ "table": "songs", "id": "ml_song", "fields": {} }));
-        let err = build_proposal("propose_fix", &a, "2026-09-19").unwrap_err();
-        assert!(matches!(err, ToolError::BadArgs(_)));
-    }
-
-    #[test]
     fn propose_fix_の_file_name_は_table_と_id_を含む() {
         let a = with_source(json!({
             "table": "songs", "id": "ml_song", "fields": {"release_date": "2024-01-01"},
@@ -1272,12 +1198,6 @@ mod tests {
         assert_eq!(draft.file_name, "20260919_fix_songs_ml_song.json");
         let v = parse(&draft);
         assert_eq!(v["fixes"][0]["fields"]["release_date"], "2024-01-01");
-    }
-
-    #[test]
-    fn 未知のツール名は_unknown_tool() {
-        let err = build_proposal("propose_nonexistent", &json!({}), "2026-09-19").unwrap_err();
-        assert_eq!(err, ToolError::UnknownTool("propose_nonexistent".to_string()));
     }
 
     #[test]

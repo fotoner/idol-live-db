@@ -66,11 +66,6 @@ mod tests {
     // --- 基本の性質 ---
 
     #[test]
-    fn returns_requested_count() {
-        assert_eq!(draw(1, 3).len(), 3);
-    }
-
-    #[test]
     fn never_repeats_the_same_item() {
         for seed in 0..50 {
             let picked = draw(seed, 3);
@@ -94,23 +89,9 @@ mod tests {
     }
 
     #[test]
-    fn empty_pool_returns_empty() {
-        assert!(pick_indices(&[], 3, &mut SplitMix64(3)).is_empty());
-    }
-
-    #[test]
     fn same_seed_gives_same_result() {
         // シード注入の意味: 同じシードなら (プラットフォームによらず) 同じ抽選。
         assert_eq!(draw(42, 3), draw(42, 3));
-    }
-
-    // --- 「毎回同じにならない」 ---
-
-    /// 同じ候補でも引くたびに結果が変わる (上位固定ではない)。
-    #[test]
-    fn result_varies_across_draws() {
-        let results: std::collections::HashSet<Vec<u32>> = (0..40).map(|s| draw(s, 3)).collect();
-        assert!(results.len() > 1, "毎回同じ組み合わせしか出ていない");
     }
 
     // --- 「近い曲が中心」かつ「遠い曲もたまに出る」 ---

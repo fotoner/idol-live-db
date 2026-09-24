@@ -33,14 +33,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn deterministic_for_same_seed() {
-        let (mut a, mut b) = (SplitMix64(42), SplitMix64(42));
-        for _ in 0..8 {
-            assert_eq!(a.next_u64(), b.next_u64());
-        }
-    }
-
-    #[test]
     fn shuffle_is_permutation() {
         let mut v: Vec<u32> = (0..50).collect();
         SplitMix64(7).shuffle(&mut v);

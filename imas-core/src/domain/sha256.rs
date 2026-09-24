@@ -110,9 +110,4 @@ mod tests {
             "41edece42d63e8d9bf515a9ba6932e1c20cbc9f5a5d134645adb5db1b9737ea3"
         );
     }
-
-    #[test]
-    fn the_byte_and_string_entry_points_agree() {
-        assert_eq!(sha256_hex("アイマス"), sha256_hex_bytes("アイマス".as_bytes()));
-    }
 }

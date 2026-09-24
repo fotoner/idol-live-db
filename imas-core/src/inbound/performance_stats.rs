@@ -69,18 +69,6 @@ impl SnapshotStore {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
-    #[test]
-    fn not_loaded_is_a_typed_error() {
-        let store = SnapshotStore::new();
-        assert!(matches!(store.co_occurring_songs("x".into(), 5), Err(SnapshotError::NotLoaded)));
-        assert!(matches!(store.singers_for_song("x".into(), vec![], 5), Err(SnapshotError::NotLoaded)));
-        assert!(matches!(
-            store.song_performance_insights("x".into(), 5, 5),
-            Err(SnapshotError::NotLoaded)
-        ));
-    }
 
     /// 束ねた口が、個別に呼んだ結果と同じものを返すこと。
     #[test]

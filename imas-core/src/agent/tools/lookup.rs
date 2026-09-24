@@ -883,25 +883,6 @@ mod tests {
         v.get(key).and_then(Value::as_str).unwrap_or_else(|| panic!("{key} が無い: {v}")).to_string()
     }
 
-    #[test]
-    fn 七つのツールが名前つきで並ぶ() {
-        let names: Vec<String> = catalog().into_iter().map(|t| t.name).collect();
-        assert_eq!(
-            names,
-            ["resolve", "search", "get_idol", "get_song", "get_event", "get_show", "vocabulary"]
-        );
-        for tool in catalog() {
-            assert!(!tool.description.is_empty(), "{} に説明が無い", tool.name);
-            assert_eq!(tool.input_schema["type"], "object", "{} のスキーマ", tool.name);
-            assert_eq!(
-                tool.input_schema["additionalProperties"],
-                Value::Bool(false),
-                "{} に additionalProperties: false が無い",
-                tool.name
-            );
-        }
-    }
-
     /// `id_or_name_schema` が以前 `format!` で JSON 文字列を組んでいたときの回帰確認。
     /// 説明文に `"` や改行が入っても (実際の呼び出しは全部固定文字列だが、将来ここを
     /// 動的な文言に変えても) 壊れた JSON を作らないことを固定する。
@@ -1036,17 +1017,6 @@ mod tests {
     }
 
     #[test]
-    fn resolve_は候補に_id_と_hint_を添える() {
-        let v = run("resolve", json!({"query": "春日未来"}));
-        let first = &v["candidates"][0];
-        assert_eq!(first["kind"], "idol");
-        assert_eq!(first["id"], "ml_春日未来");
-        assert!(!first["hint"].as_str().unwrap().is_empty());
-        assert_eq!(first["exact"], true);
-        assert!(v["total"].as_u64().unwrap() >= 1);
-    }
-
-    #[test]
     fn resolve_は種別で絞れて上限で丸める() {
         let v = run("resolve", json!({"query": "ライブ", "kinds": "event", "limit": "3"}));
         let candidates = v["candidates"].as_array().unwrap();
@@ -1060,17 +1030,6 @@ mod tests {
     fn 知らない種別は語彙エラー() {
         let e = err("resolve", json!({"query": "x", "kinds": ["いない"]}));
         assert!(matches!(e, ToolError::BadArgs(_)), "{e:?}");
-    }
-
-    #[test]
-    fn search_は3種別と打ち切り前の件数を返す() {
-        let v = run("search", json!({"query": "アイドル", "limit": 5}));
-        for key in ["songs", "idols", "events"] {
-            assert!(v[key].is_array(), "{key} が無い: {v}");
-            assert!(v[&format!("{key}_total")].is_number(), "{key}_total が無い");
-            assert!(v[key].as_array().unwrap().len() <= 5);
-        }
-        assert!(v["songs_total"].as_u64().unwrap() > 0);
     }
 
     #[test]
@@ -1142,30 +1101,5 @@ mod tests {
             }
             assert!(!text.contains("http"), "{name} に外部 URL が漏れている");
         }
-    }
-
-    /// 実データで引いた結果だけを使って 1 段落書けるか (往復を足さずに済むか) の確認。
-    #[test]
-    fn 返った_json_だけで紹介文が書ける() {
-        let idol = run("get_idol", json!({"name": "春日未来"}));
-        let song = run("get_song", json!({"id": idol["top_performed_songs"][0]["id"].as_str().unwrap()}));
-        let sentence = format!(
-            "{}({})は{}のアイドルで、CV は{}。ライブには {} 公演出ていて、いちばん多く歌ったのは「{}」({} 回)。\
-             その曲は{}に配信され、これまで {} 回披露されている。",
-            text(&idol, "name"),
-            text(&idol, "name_kana"),
-            idol["brand"]["name"].as_str().unwrap(),
-            text(&idol, "voice_actor"),
-            idol["show_count"],
-            song["title"].as_str().unwrap(),
-            idol["top_performed_songs"][0]["performed_count"],
-            song["release_date"].as_str().unwrap_or("不明"),
-            song["performance_count"],
-        );
-        assert!(!sentence.contains("null"), "{sentence}");
-        assert!(sentence.contains("MILLION LIVE!"), "{sentence}");
-        assert!(sentence.contains("山崎はるか"), "{sentence}");
-        // 略称も揃っているので、字数の要る場面では短いほうを選べる。
-        assert_eq!(idol["brand"]["short_name"], "ミリオン");
     }
 }

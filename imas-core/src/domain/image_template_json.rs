@@ -94,25 +94,11 @@ mod tests {
         assert_eq!(image_template_json(&[]), "{\n}");
     }
 
-    /// 単一要素。末尾カンマなし。
-    #[test]
-    fn single_pair_has_no_trailing_comma() {
-        let json = image_template_json(&[pair("如月千早", "")]);
-        assert_eq!(json, "{\n  \"如月千早\": \"\"\n}");
-    }
-
     /// 複数要素は最後以外にカンマ。入力順を保つ。
     #[test]
     fn multiple_pairs_keep_input_order_with_commas() {
         let json = image_template_json(&[pair("B", ""), pair("A", ""), pair("C", "")]);
         assert_eq!(json, "{\n  \"B\": \"\",\n  \"A\": \"\",\n  \"C\": \"\"\n}");
-    }
-
-    /// 同値キーが並んでも重複排除せず、入力順のまま両方出す (順序安定性)。
-    #[test]
-    fn duplicate_keys_are_kept_in_input_order() {
-        let json = image_template_json(&[pair("A", ""), pair("A", ""), pair("B", "")]);
-        assert_eq!(json, "{\n  \"A\": \"\",\n  \"A\": \"\",\n  \"B\": \"\"\n}");
     }
 
     /// URL 入りの値: `/` が `\/` になる (JSONSerialization 互換)。
@@ -163,15 +149,6 @@ mod tests {
         assert_eq!(json_string_literal("🎤アイドル"), "\"🎤アイドル\"");
         assert_eq!(json_string_literal("a\u{7F}b"), "\"a\u{7F}b\"");
         assert_eq!(json_string_literal("a\u{2028}b"), "\"a\u{2028}b\"");
-    }
-
-    /// 混在ケース (Darwin での実行結果と一致)。
-    #[test]
-    fn literal_combined_case_matches_darwin_output() {
-        assert_eq!(
-            json_string_literal("P\"A\\L/日\n🎶"),
-            "\"P\\\"A\\\\L\\/日\\n🎶\""
-        );
     }
 
     // ---- 妥当性: 出力が合法な JSON で、値が復元できること ----

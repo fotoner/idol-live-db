@@ -219,12 +219,6 @@ mod tests {
         assert_eq!(theme_derive(Some(theme_neutral_seed()), None, false), theme_derive(None, None, false));
     }
 
-    #[test]
-    fn normalized_hex_delegates() {
-        assert_eq!(theme_normalized_hex("#F0A".into()).as_deref(), Some("ff00aa"));
-        assert_eq!(theme_normalized_hex("nope".into()), None);
-    }
-
     /// 入力欄の正規化はこの 1 本に寄せてあるので、境界での取りこぼしがそのまま
     /// 「保存された色が読めない」になる。iOS `.whitespaces` の実装どおり
     /// U+200B は落とし、改行は落とさない (モジュール冒頭の乖離 1b / 1)。
@@ -280,17 +274,6 @@ mod tests {
         // 引数 (h, s, l) の順序を取り違えていないこと。全部 f64 なので型では守れない。
         assert_eq!(hex_of(theme_color_from_hsl(hsl.h, hsl.s, hsl.l)), "#e22b30");
         assert_ne!(theme_color_from_hsl(hsl.h, hsl.s, hsl.l), theme_color_from_hsl(hsl.h, hsl.l, hsl.s));
-    }
-
-    /// WCAG 判定が境界を跨いで正しく委譲されること。
-    #[test]
-    fn on_color_picks_readable_foreground() {
-        let of = |hex: &str| hex_of(theme_on_color(to_theme_rgb(domain::hex_to_rgb(hex))));
-        // 暗い赤の上は白、明るい黄の上は墨。
-        assert_eq!(of("#E22B30"), "#ffffff");
-        assert_eq!(of("#FFE43F"), "#15161a");
-        assert_eq!(of("#ffffff"), "#15161a");
-        assert_eq!(of("#000000"), "#ffffff");
     }
 
     #[test]

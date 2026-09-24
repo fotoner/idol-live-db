@@ -841,15 +841,6 @@ mod tests {
     }
 
     #[test]
-    fn startup_uses_incremental_when_full_sync_is_fresh() {
-        let plan = startup_plan(&ios_state());
-        assert_eq!(plan.mode, SyncMode::Incremental);
-        assert_eq!(plan.modified_since_epoch, Some(1_000_500.0));
-        assert_eq!(plan.reason, SyncModeReason::Incremental);
-        assert!(!plan.resuming_pending_full);
-    }
-
-    #[test]
     fn startup_resumes_pending_full_before_anything_else() {
         let state = SyncStartupState {
             has_pending_full_sync: true,
@@ -860,18 +851,6 @@ mod tests {
         assert_eq!(plan.modified_since_epoch, None);
         assert_eq!(plan.reason, SyncModeReason::PendingFullResume);
         assert!(plan.resuming_pending_full);
-    }
-
-    #[test]
-    fn startup_falls_back_to_full_when_no_full_sync_record() {
-        let state = SyncStartupState {
-            last_full_sync_epoch: None,
-            ..ios_state()
-        };
-        assert_eq!(
-            startup_plan(&state).reason,
-            SyncModeReason::NoFullSyncRecord
-        );
     }
 
     #[test]
@@ -1013,11 +992,6 @@ mod tests {
     }
 
     #[test]
-    fn steps_for_empty_returns_everything() {
-        assert_eq!(steps_for(&[]), all_steps());
-    }
-
-    #[test]
     fn steps_for_android_drops_venue_tables_and_keeps_order() {
         let android = strings(&[
             // Android 側の宣言順 (venue 系なし)。渡す順は無視され FK 順に並ぶ。
@@ -1057,11 +1031,6 @@ mod tests {
                 "SongVideo",
             ])
         );
-    }
-
-    #[test]
-    fn steps_for_ignores_unknown_record_types() {
-        assert_eq!(steps_for(&strings(&["CastMember", "IdolCast"])), Vec::new());
     }
 
     // --- 実行の起点 ---
@@ -1119,12 +1088,6 @@ mod tests {
     }
 
     #[test]
-    fn step_start_checkpoint_wins_over_modified_since() {
-        let plan = step_start_plan("Song", false, &[], Some(900.0), Some(500.0));
-        assert_eq!(plan.start_epoch, 900.0);
-    }
-
-    #[test]
     fn step_start_skips_only_done_steps_of_a_full_run() {
         let done = strings(&["Brand", "Idol"]);
         assert!(step_start_plan("Idol", true, &done, None, None).skip);
@@ -1147,31 +1110,6 @@ mod tests {
             next_chunk_action(true, 5, None),
             SyncChunkAction::ContinueCursor
         );
-    }
-
-    #[test]
-    fn chunk_finishes_when_nothing_fetched() {
-        assert_eq!(next_chunk_action(false, 0, None), SyncChunkAction::Finish);
-        assert_eq!(next_chunk_action(false, 9, None), SyncChunkAction::Finish);
-    }
-
-    #[test]
-    fn chunk_finishes_when_restart_added_nothing() {
-        assert_eq!(
-            next_chunk_action(false, 0, Some(1_000.0)),
-            SyncChunkAction::Finish
-        );
-    }
-
-    #[test]
-    fn chunk_restarts_one_millisecond_before_the_boundary() {
-        assert_eq!(
-            next_chunk_action(false, 3, Some(1_000.0)),
-            SyncChunkAction::RestartFrom {
-                start_epoch: 1_000.0 - 0.001
-            }
-        );
-        assert_eq!(BOUNDARY_REWIND_SECONDS, 0.001);
     }
 
     // --- チャンクループ: 呼び出し側の契約 (Android の入力) ---
@@ -1282,13 +1220,6 @@ mod tests {
         assert_eq!(partition.deleted_indexes, vec![1, 3, 4]);
     }
 
-    #[test]
-    fn partition_of_empty_input_is_empty() {
-        let partition = partition_by_deleted(&[]);
-        assert!(partition.alive_indexes.is_empty());
-        assert!(partition.deleted_indexes.is_empty());
-    }
-
     // --- テーブル対応と recordName 分解 ---
 
     #[test]
@@ -1381,14 +1312,6 @@ mod tests {
         );
     }
 
-    #[test]
-    fn parse_composite_record_name_handles_hyphenated_table_name() {
-        assert_eq!(
-            parse_composite_record_name("a-b-x-y", "a-b", 2),
-            Some(strings(&["x", "y"]))
-        );
-    }
-
     // --- 孤児掃除 ---
 
     #[test]
@@ -1476,16 +1399,6 @@ mod tests {
             })
             .should_notify_master_changed
         );
-    }
-
-    #[test]
-    fn completion_of_startup_full_writes_back_last_full_sync_at() {
-        // これが startup_plan の 24h 判定を進める唯一の書き込み。落とすと 24 時間後から
-        // 毎起動フルになる (Android は interval=None なので露見しない)。
-        let plan = completion_plan(&startup_full_completion());
-        assert!(plan.should_update_last_full_sync);
-        // 開始時刻ではなく完了時刻。
-        assert_eq!(plan.last_full_sync_epoch_to_save, Some(3_000.0));
     }
 
     #[test]

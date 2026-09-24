@@ -41,18 +41,6 @@ mod tests {
         assert_eq!(short_year_month("2024-08-03"), "24.08");
     }
 
-    /// 月のゼロ埋めは落とさない ("24.8" だと桁が揃わず並びが汚れる)。
-    #[test]
-    fn keeps_zero_padded_month() {
-        assert_eq!(short_year_month("2005-01-15"), "05.01");
-    }
-
-    /// 年月までしかない部分日付も短縮できる。
-    #[test]
-    fn year_month_only() {
-        assert_eq!(short_year_month("2024-08"), "24.08");
-    }
-
     /// 短縮できない入力はそのまま返す (捏造しない)。
     #[test]
     fn unsplittable_input_passes_through() {

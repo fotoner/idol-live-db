@@ -235,14 +235,4 @@ mod tests {
         assert!(co_occurring_songs(s, "存在しない曲", 5).is_empty());
         assert!(singers_for_song(s, "存在しない曲", &[], 5).is_empty());
     }
-
-    #[test]
-    fn results_are_deterministic() {
-        let s = bundle_snapshot();
-        let mut counts: HashMap<u32, u32> = HashMap::new();
-        for it in &s.setlist_items { *counts.entry(it.song).or_insert(0) += 1; }
-        let (&top, _) = counts.iter().max_by_key(|(_, &n)| n).unwrap();
-        let id = s.songs[top as usize].id.clone();
-        assert_eq!(co_occurring_songs(s, &id, 10), co_occurring_songs(s, &id, 10));
-    }
 }

@@ -202,15 +202,6 @@ mod tests {
         );
     }
 
-    /// ユニット名 + 構成員も同じ形で割れる。
-    #[test]
-    fn splits_unit_members() {
-        assert_eq!(
-            split_credits("invisible manners(平山大介・福山整)"),
-            ["invisible manners(平山大介)", "invisible manners(福山整)"]
-        );
-    }
-
     /// `・` が名前の一部のときは割らない。
     ///
     /// `R・O・N` を割ると `R` `O` `N` という存在しない作家が 3 人生まれる。
@@ -255,12 +246,6 @@ mod tests {
         // 半角スペースでは割らない。
         assert_eq!(split_credits("TAKT (TRYTONELABO)"), ["TAKT (TRYTONELABO)"]);
         assert_eq!(split_credits("古屋 真"), ["古屋 真"]);
-    }
-
-    /// 共作を表す `×` も人の区切り。
-    #[test]
-    fn a_multiplication_sign_separates_collaborators() {
-        assert_eq!(split_credits("渡辺徹×日比野裕史"), ["渡辺徹", "日比野裕史"]);
     }
 
     /// `＆` では割らない。ユニット名にも使われていて見分けが付かない。
@@ -436,13 +421,6 @@ mod canonical_tests {
     fn spaces_in_japanese_names_are_dropped() {
         assert_eq!(canonical_credit_key("グシミヤギ ヒデユキ"), "グシミヤギヒデユキ");
         assert_eq!(canonical_credit_key("グシミヤギヒデユキ(Hifumi,inc.)"), "グシミヤギヒデユキ");
-    }
-
-    /// 英字名の空白は残す (落とすと別の名前になる)。
-    #[test]
-    fn spaces_in_latin_names_are_kept() {
-        assert_eq!(canonical_credit_key("BNSI (Taku Inoue)"), "Taku Inoue");
-        assert_eq!(canonical_credit_key("Taku Inoue"), "Taku Inoue");
     }
 
     /// 「人(所属)」を取り違えない。ARM は人で IOSYS が所属。

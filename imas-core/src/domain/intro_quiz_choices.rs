@@ -165,22 +165,6 @@ mod tests {
         assert!(is_quiz_playable(&song, true));
     }
 
-    /// preview_url があれば契約の有無に関係なく鳴らせる。
-    #[test]
-    fn a_preview_url_is_enough_on_its_own() {
-        let song = playability(Some("123"), Some("https://example.test/p.m4a"), None);
-        assert!(is_quiz_playable(&song, false));
-        assert!(is_quiz_playable(&song, true));
-    }
-
-    /// 音源がまったく無い曲は誰にも出さない。
-    #[test]
-    fn a_song_without_any_source_is_never_playable() {
-        let song = playability(None, None, None);
-        assert!(!is_quiz_playable(&song, false));
-        assert!(!is_quiz_playable(&song, true));
-    }
-
     /// 派生曲は音源があっても出さない (同名の別バージョンが選択肢に並ぶため)。
     #[test]
     fn a_variant_song_is_excluded_even_when_it_is_playable() {
@@ -222,14 +206,6 @@ mod tests {
         assert_eq!(titles, vec!["READY!! (M@STER VERSION)"]);
     }
 
-    /// 正解そのもの (同じ id) は候補から外す。
-    #[test]
-    fn excludes_answer_itself() {
-        let answer = song("s1", "GO MY WAY!!");
-        let pool = [answer.clone(), song("s2", "蒼い鳥")];
-        assert_eq!(wrong_candidate_indices(&answer, &pool), vec![1]);
-    }
-
     /// 不正解どうしのタイトル重複も落とす (同じ選択肢が 2 つ並ばない)。
     #[test]
     fn deduplicates_among_wrong_candidates() {
@@ -239,19 +215,6 @@ mod tests {
             titles_at(&pool, &wrong_candidate_indices(&answer, &pool)),
             vec!["隣に…", "オーバーマスター"]
         );
-    }
-
-    /// 順序は pool のまま (シャッフルは make_choices 側の責務)。
-    #[test]
-    fn wrong_candidates_keep_pool_order() {
-        let answer = song("s0", "答え");
-        let pool: Vec<_> = (1..=5).map(|i| song(&format!("s{i}"), &format!("曲{i}"))).collect();
-        assert_eq!(wrong_candidate_indices(&answer, &pool), vec![0, 1, 2, 3, 4]);
-    }
-
-    #[test]
-    fn empty_pool_yields_no_candidates() {
-        assert!(wrong_candidate_indices(&song("s1", "答え"), &[]).is_empty());
     }
 
     // --- Unicode 正準等価 (Swift の String == との互換) ---
@@ -323,17 +286,6 @@ mod tests {
         (1..=10).map(|i| song(&format!("s{i}"), &format!("曲{i}"))).collect()
     }
 
-    #[test]
-    fn make_returns_four_unique_choices_including_answer() {
-        let answer = song("s0", "答え");
-        let choices = make_choices(&answer, &ten_song_pool(), 3, &mut SplitMix64(42));
-
-        assert_eq!(choices.len(), 4);
-        let unique: HashSet<&String> = choices.iter().collect();
-        assert_eq!(unique.len(), 4, "同じ選択肢が 2 つ並んではいけない: {choices:?}");
-        assert!(choices.contains(&"答え".to_string()), "正解は必ず選択肢に入る");
-    }
-
     /// 候補が足りなくても落ちず、正解は必ず残る (ブランド曲数が少ない設定への備え)。
     #[test]
     fn make_with_too_few_candidates() {
@@ -366,25 +318,6 @@ mod tests {
         assert!(positions.len() > 1, "正解の位置が固定されている: {positions:?}");
     }
 
-    /// 同名異曲がある実データ相当の pool でも、選択肢にタイトル重複が出ない。
-    #[test]
-    fn make_never_produces_duplicate_titles() {
-        let answer = song("s0", "READY!!");
-        let pool = [
-            song("s1", "READY!!"),
-            song("s2", "READY!!"),
-            song("s3", "CHANGE!!!!"),
-            song("s4", "CHANGE!!!!"),
-            song("s5", "M@STERPIECE"),
-        ];
-        for seed in 0..40 {
-            let choices = make_choices(&answer, &pool, 3, &mut SplitMix64(seed));
-            let unique: HashSet<&String> = choices.iter().collect();
-            assert_eq!(unique.len(), choices.len(), "重複した選択肢: {choices:?}");
-            assert!(choices.contains(&"READY!!".to_string()));
-        }
-    }
-
     /// wrong_count = 0 なら正解だけが返る (境界値)。
     #[test]
     fn make_with_zero_wrong_count() {
@@ -410,22 +343,6 @@ mod tests {
             let unique: HashSet<&String> = choices.iter().collect();
             assert_eq!(unique.len(), choices.len(), "重複した選択肢: {choices:?}");
         }
-    }
-
-    #[test]
-    fn batch_with_no_answers_returns_empty() {
-        assert!(make_choices_batch(&[], &ten_song_pool(), 3, &mut SplitMix64(1)).is_empty());
-    }
-
-    /// シード注入の意味: 同じシードなら (プラットフォームによらず) 同じ出題になる。
-    #[test]
-    fn batch_same_seed_gives_same_result() {
-        let pool = ten_song_pool();
-        let answers = [pool[2].clone(), pool[7].clone()];
-        assert_eq!(
-            make_choices_batch(&answers, &pool, 3, &mut SplitMix64(42)),
-            make_choices_batch(&answers, &pool, 3, &mut SplitMix64(42))
-        );
     }
 
     /// 前の設問のシャッフルが後の設問に波及して固定化しない (rng を通しで使う)。

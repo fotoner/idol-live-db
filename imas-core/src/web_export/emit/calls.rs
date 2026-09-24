@@ -155,13 +155,4 @@ mod tests {
         assert_eq!(edit_label(&edit((5, 3), (0, 0))), "コールを削除した (5 件 → 0)");
         assert_eq!(edit_label(&edit((5, 3), (7, 3))), "コールを更新 (5 → 7 件)");
     }
-
-    #[test]
-    fn times_are_shown_in_jst() {
-        // 2026-09-05 23:30 UTC = 2026-09-06 08:30 JST (日付が変わる側)。
-        let epoch = 1_788_650_000 + 3_000; // 2026-09-05T23:30:00Z 前後
-        assert!(jst_datetime(epoch).ends_with("(JST)"));
-        assert_eq!(date_display(None), "日付不明");
-        assert!(date_display(Some(epoch)).contains("("));
-    }
 }

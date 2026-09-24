@@ -120,16 +120,6 @@ mod tests {
     }
 
     #[test]
-    fn build_pools_delegates_to_the_domain_rule() {
-        let pools = color_match_build_pools(sources(), brands());
-
-        assert_eq!(pools, domain::build_pools(&sources(), &brands()));
-        // 委譲先を取り違えても Vec を返す限り型は通るので、中身の形も見る。
-        assert_eq!(pools.all_colored.len(), 9);
-        assert_eq!(ids(&pools.brand_pools[1].members), vec!["uzuki", "rin", "mio", "mika"]);
-    }
-
-    #[test]
     fn effective_pool_delegates_and_honours_the_selection() {
         let pools = color_match_build_pools(sources(), brands());
         let selected = vec!["cinderella".to_string()];

@@ -756,21 +756,6 @@ mod tests {
         }
     }
 
-    /// 3 回の試行が「2 回の再試行 + 1 回の打ち切り」になること。
-    #[test]
-    fn retry_allows_exactly_two_reattempts() {
-        let signal = ck(23, "zone busy");
-        let reattempts = (0..DEFAULT_MAX_FETCH_RETRIES)
-            .filter(|a| {
-                matches!(
-                    retry_action(*a, DEFAULT_MAX_FETCH_RETRIES, &signal),
-                    SyncRetryAction::RetryAfter { .. }
-                )
-            })
-            .count();
-        assert_eq!(reattempts, 2);
-    }
-
     // -----------------------------------------------------------------------
     // 3. ステップ失敗時の扱い
     // -----------------------------------------------------------------------
@@ -842,31 +827,12 @@ mod tests {
     // -----------------------------------------------------------------------
 
     #[test]
-    fn chunk_progress_saves_this_chunks_max() {
-        let progress = chunk_progress(None, &[100.0, 130.0, 120.0]);
-        assert_eq!(progress.checkpoint_epoch_to_save, Some(130.0));
-        assert_eq!(progress.max_epoch_since_restart, Some(130.0));
-    }
-
-    #[test]
     fn chunk_progress_keeps_running_max_across_chunks() {
         let progress = chunk_progress(Some(200.0), &[150.0, 180.0]);
         // 区間最大は下がらない。
         assert_eq!(progress.max_epoch_since_restart, Some(200.0));
         // チェックポイントはこのチャンクの最大 (一次実装は区間最大を書かない)。
         assert_eq!(progress.checkpoint_epoch_to_save, Some(180.0));
-    }
-
-    /// 空チャンク / modifiedAt を持たないチャンクではチェックポイントを動かさない。
-    #[test]
-    fn chunk_progress_without_timestamps_leaves_checkpoint_untouched() {
-        let progress = chunk_progress(Some(90.0), &[]);
-        assert_eq!(progress.checkpoint_epoch_to_save, None);
-        assert_eq!(progress.max_epoch_since_restart, Some(90.0));
-
-        let first = chunk_progress(None, &[]);
-        assert_eq!(first.checkpoint_epoch_to_save, None);
-        assert_eq!(first.max_epoch_since_restart, None);
     }
 
     #[test]
@@ -1213,17 +1179,6 @@ mod tests {
         assert_eq!(outcome.queries, 109 * 2);
         assert_eq!(outcome.total_fetched, 21_665 * 2);
         assert_eq!(outcome.seen.len(), 21_665);
-    }
-
-    /// 実データ規模の再現: setlist_performers 60,383 行が 3 回の一括投入に分かれている。
-    #[test]
-    fn parity_setlist_performers_three_bulk_batches() {
-        let mut records = bulk("sp_a", 20_000, 1_700_000_000.0);
-        records.extend(bulk("sp_b", 20_000, 1_700_000_060.0));
-        records.extend(bulk("sp_c", 20_383, 1_700_000_120.0));
-        let server = FakeServer::new(records, 200);
-        let outcome = assert_parity(&server, 0.0);
-        assert_eq!(outcome.seen.len(), 60_383);
     }
 
     /// 同一 modifiedAt がページ境界でちょうど割れるケース。

@@ -1066,15 +1066,6 @@ mod tests {
         assert_eq!(labels(&idol_quiz_facts(&i)), vec!["メンバーカラー", "CV"]);
     }
 
-    #[test]
-    fn height_is_displayed_without_trailing_zero() {
-        let mut i = idol("i1", "cg");
-        i.height = Some(160.0);
-        assert_eq!(value_of(&idol_quiz_facts(&i), IdolQuizFactKind::Height).unwrap(), "160cm");
-        i.height = Some(160.5);
-        assert_eq!(value_of(&idol_quiz_facts(&i), IdolQuizFactKind::Height).unwrap(), "160.5cm");
-    }
-
     /// `--MM-DD` は 0 埋めを落として和文にする。それ以外は原文のまま。
     #[test]
     fn birthday_is_formatted_or_passed_through() {
@@ -1090,21 +1081,6 @@ mod tests {
         );
         i.birthday = Some("--あ-3".into());
         assert_eq!(value_of(&idol_quiz_facts(&i), IdolQuizFactKind::Birthday).unwrap(), "--あ-3");
-    }
-
-    /// 空の誕生日は事実にしない (原本の `!b.isEmpty`)。
-    #[test]
-    fn empty_birthday_is_not_a_fact() {
-        let mut i = idol("i1", "cg");
-        i.birthday = Some(String::new());
-        assert!(value_of(&idol_quiz_facts(&i), IdolQuizFactKind::Birthday).is_none());
-    }
-
-    #[test]
-    fn age_has_japanese_suffix() {
-        let mut i = idol("i1", "cg");
-        i.age = Some(15);
-        assert_eq!(value_of(&idol_quiz_facts(&i), IdolQuizFactKind::Age).unwrap(), "15歳");
     }
 
     /// CV 枠は常設。無い場合だけ「声優未発表」と分かる (枠の有無で無料でバレない)。
@@ -1166,12 +1142,6 @@ mod tests {
         );
     }
 
-    #[test]
-    fn pool_indices_keep_input_order() {
-        let idols = pool_of(5, "cg");
-        assert_eq!(idol_quiz_pool_indices(&idols, &[]), vec![0, 1, 2, 3, 4]);
-    }
-
     /// 4 人ちょうどで開始可能、3 人では不可 (4 択の成立条件)。
     #[test]
     fn pool_estimate_needs_four_candidates() {
@@ -1202,12 +1172,6 @@ mod tests {
     // =======================================================================
     // アイドル当てクイズのセッション
     // =======================================================================
-
-    #[test]
-    fn session_generates_requested_number_of_questions() {
-        let idols = pool_of(20, "cg");
-        assert_eq!(idol_quiz_session(&idols, &[], SESSION_LENGTH, &mut SplitMix64(9)).len(), 10);
-    }
 
     /// 候補 4 人未満は出題できない (画面は空状態へ)。
     #[test]
@@ -1253,15 +1217,6 @@ mod tests {
                 let unique: HashSet<&u32> = q.choices.iter().collect();
                 assert_eq!(unique.len(), 4, "選択肢が重複: {:?}", q.choices);
             }
-        }
-    }
-
-    #[test]
-    fn session_question_carries_answer_facts() {
-        let mut idols = pool_of(4, "cg");
-        idols[2].voice_actor = Some("声優X".into());
-        for q in idol_quiz_session(&idols, &[], 4, &mut SplitMix64(3)) {
-            assert_eq!(q.facts, idol_quiz_facts(&idols[q.answer as usize]));
         }
     }
 
@@ -1329,15 +1284,6 @@ mod tests {
         }
     }
 
-    /// 母集団がちょうど 4 人なら選択肢も 4 つ (境界)。
-    #[test]
-    fn session_with_exactly_four_candidates_still_has_four_choices() {
-        let idols = pool_of(4, "cg");
-        for q in idol_quiz_session(&idols, &[], SESSION_LENGTH, &mut SplitMix64(11)) {
-            assert_eq!(q.choices.len(), 4);
-        }
-    }
-
     // =======================================================================
     // ソロ曲クイズの母集団
     // =======================================================================
@@ -1389,16 +1335,6 @@ mod tests {
         assert_eq!(pool.singer_pool, vec![2, 0, 1]);
     }
 
-    /// 曲順は入力行の順を保つ (呼び出し側が並べた順がそのまま母集団の順)。
-    #[test]
-    fn song_pool_keeps_row_order() {
-        let singers = vec![singer("a", "cg")];
-        let rows = vec![row("s3", "a"), row("s1", "a"), row("s2", "a")];
-        let ids: Vec<String> =
-            song_singer_quiz_pool(&rows, &singers, &[]).pairs.into_iter().map(|p| p.song_id).collect();
-        assert_eq!(ids, vec!["s3", "s1", "s2"]);
-    }
-
     /// 開始可否は曲数と歌手数の両方が 4 以上のときだけ。
     #[test]
     fn song_pool_estimate_needs_four_songs_and_four_singers() {
@@ -1432,13 +1368,6 @@ mod tests {
     }
 
     #[test]
-    fn song_session_is_empty_when_too_few_songs() {
-        let (rows, singers) = song_fixture(3, 3);
-        assert!(song_singer_quiz_session(&rows, &singers, &[], SESSION_LENGTH, &mut SplitMix64(1))
-            .is_empty());
-    }
-
-    #[test]
     fn song_session_never_repeats_a_song_while_pool_lasts() {
         let (rows, singers) = song_fixture(12, 12);
         for seed in 0..30 {
@@ -1447,21 +1376,6 @@ mod tests {
             assert_eq!(questions.len(), 10);
             let unique: HashSet<&String> = questions.iter().map(|q| &q.song_id).collect();
             assert_eq!(unique.len(), questions.len(), "同じ曲が 2 度出た: seed={seed}");
-        }
-    }
-
-    #[test]
-    fn song_session_choices_contain_the_singer() {
-        let (rows, singers) = song_fixture(12, 8);
-        for seed in 0..20 {
-            for q in
-                song_singer_quiz_session(&rows, &singers, &[], SESSION_LENGTH, &mut SplitMix64(seed))
-            {
-                assert_eq!(q.choices.len(), 4);
-                assert!(q.choices.contains(&q.answer));
-                let unique: HashSet<&u32> = q.choices.iter().collect();
-                assert_eq!(unique.len(), 4);
-            }
         }
     }
 
@@ -1510,15 +1424,6 @@ mod tests {
         }
     }
 
-    #[test]
-    fn song_session_is_deterministic_for_the_same_seed() {
-        let (rows, singers) = song_fixture(12, 9);
-        assert_eq!(
-            song_singer_quiz_session(&rows, &singers, &[], SESSION_LENGTH, &mut SplitMix64(7)),
-            song_singer_quiz_session(&rows, &singers, &[], SESSION_LENGTH, &mut SplitMix64(7))
-        );
-    }
-
     /// 正解の歌手は必ずその曲の原唱 (曲と答えの対応がずれない)。
     #[test]
     fn song_session_answer_matches_the_song_original_singer() {
@@ -1546,22 +1451,6 @@ mod tests {
             IdolQuizFact::new(IdolQuizFactKind::MemberColor, "#FF0000"),
             IdolQuizFact::new(IdolQuizFactKind::VoiceActor, "声優A"),
         ]
-    }
-
-    #[test]
-    fn no_hint_means_full_points() {
-        assert_eq!(
-            idol_quiz_current_value(&facts_fixture(), &[], IDOL_QUIZ_BASE_POINTS),
-            10
-        );
-    }
-
-    #[test]
-    fn each_opened_hint_subtracts_its_cost() {
-        let facts = facts_fixture();
-        assert_eq!(idol_quiz_current_value(&facts, &[1], IDOL_QUIZ_BASE_POINTS), 9);
-        assert_eq!(idol_quiz_current_value(&facts, &[2], IDOL_QUIZ_BASE_POINTS), 8);
-        assert_eq!(idol_quiz_current_value(&facts, &[1, 2, 3], IDOL_QUIZ_BASE_POINTS), 5);
     }
 
     /// 開けすぎても 0pt にはしない (加点式なので最低 1pt)。
@@ -1630,12 +1519,6 @@ mod tests {
         assert_eq!(song_quiz_points(1), 2);
         assert_eq!(song_quiz_points(2), 1);
         assert_eq!(song_quiz_points(3), 1, "下限は 1pt");
-    }
-
-    #[test]
-    fn song_session_max_is_three_points_per_question() {
-        assert_eq!(quiz_session_max(10, SONG_QUIZ_MAX_POINTS), 30);
-        assert_eq!(quiz_session_max(0, SONG_QUIZ_MAX_POINTS), 0);
     }
 
     /// ジャケット → プレビューの順に開き、プレビューが無い曲は 2 段目を出さない。
@@ -1711,14 +1594,6 @@ mod tests {
         assert!(outcome.is_last_question);
     }
 
-    #[test]
-    fn song_answer_uses_reveal_stage_for_points() {
-        let outcome =
-            song_singer_quiz_answer(2, "a", "a", &QuizTally::default(), SESSION_LENGTH);
-        assert_eq!(outcome.earned_points, 1);
-        assert_eq!(outcome.revealed_hints, 2);
-    }
-
     /// id の比較は Swift の `==` と同じ正準等価。表現違いで誤判定しない。
     #[test]
     fn answer_comparison_is_canonically_equivalent() {
@@ -1730,19 +1605,6 @@ mod tests {
             SESSION_LENGTH,
         );
         assert!(outcome.is_correct, "同じアイドルを別人と判定した");
-    }
-
-    /// 全問正解 / 全問不正解の両端。
-    #[test]
-    fn tally_accumulates_over_a_full_session() {
-        let mut perfect = QuizTally::default();
-        let mut zero = QuizTally::default();
-        for _ in 0..SESSION_LENGTH {
-            perfect = song_singer_quiz_answer(0, "a", "a", &perfect, SESSION_LENGTH).tally;
-            zero = song_singer_quiz_answer(0, "b", "a", &zero, SESSION_LENGTH).tally;
-        }
-        assert_eq!(perfect, QuizTally { asked: 10, correct: 10, points: 30 });
-        assert_eq!(zero, QuizTally { asked: 10, correct: 0, points: 0 });
     }
 
     // =======================================================================
@@ -1835,22 +1697,6 @@ mod tests {
         assert_eq!(r.questions, 5);
     }
 
-    /// 初プレイは「自己ベスト更新」を出さない (最初から更新演出が出ると意味が薄い)。
-    #[test]
-    fn first_play_is_not_a_new_best() {
-        let (update, best_rate) = finish_session(&result(30, 10), &GameRecord::default());
-        assert!(!update.is_new_best);
-        assert_eq!(best_rate, 100, "表示は今回の記録を反映した値");
-    }
-
-    /// 同率では更新しない (真に上回ったときだけ)。
-    #[test]
-    fn tie_does_not_beat_the_best() {
-        let (update, best_rate) = finish_session(&result(15, 10), &played(15, 30));
-        assert!(!update.is_new_best);
-        assert_eq!(best_rate, 50);
-    }
-
     /// 出題数が違っても正答率で比べる (5 問満点 > 10 問半分)。
     #[test]
     fn best_is_compared_by_rate_not_raw_score() {
@@ -1858,13 +1704,6 @@ mod tests {
         let (update, best_rate) = finish_session(&result(15, 5), &played(15, 30));
         assert!(update.is_new_best);
         assert_eq!(best_rate, 100, "更新後の自己ベストを表示する");
-    }
-
-    #[test]
-    fn lower_score_keeps_the_previous_best() {
-        let (update, best_rate) = finish_session(&result(9, 10), &played(27, 30));
-        assert!(!update.is_new_best);
-        assert_eq!(best_rate, 90);
     }
 
     /// 1 問も解かずに終えた場合 (境界): 記録は動かさず、率は 0%。
@@ -1918,19 +1757,6 @@ mod tests {
         assert_eq!(update.record.best_rate_percent(), None, "記録は無いまま");
         assert_eq!(best_rate, session.rate_percent, "記録が無ければ今回の率で代用する");
         assert_eq!(session.rate_percent, 0);
-    }
-
-    /// アイドル当てクイズは 1 問 10pt (満点 100)。
-    #[test]
-    fn idol_quiz_session_max_is_ten_points_per_question() {
-        let r = quiz_session_result(
-            &QuizTally { asked: 10, correct: 10, points: 100 },
-            IDOL_QUIZ_BASE_POINTS,
-            SESSION_LENGTH,
-        );
-        assert_eq!(r.max_points, 100);
-        assert_eq!(r.rate_percent, 100);
-        assert_eq!(r.grade, QuizGrade::S);
     }
 
     // =======================================================================

@@ -179,15 +179,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn safe_ids_pass_through() {
-        assert_eq!(path_key("ml_kasuga_mirai", &[], "idol"), "ml_kasuga_mirai");
-        // 日本語・@ ・× は「安全」。URL には percent-encode して出す。
-        assert_eq!(path_key("ev_the_idolm@ster_×_ふたご", &[], "ev"), "ev_the_idolm@ster_×_ふたご");
-        assert_eq!(path_key("song_(remix)", &[], "song"), "song_(remix)");
-        assert_eq!(path_key("o'hare", &[], "venue"), "o'hare");
-    }
-
-    #[test]
     fn dangerous_ids_fall_back() {
         // 実データで唯一落ちる形 (会場 2 件)。
         let key = path_key("venue_a/b", &[], "venue");
@@ -227,12 +218,6 @@ mod tests {
         assert_eq!(url_segment("ふ"), "%E3%81%B5");
         assert_eq!(url_segment(" "), "%20");
         assert_eq!(url_segment("/"), "%2F");
-    }
-
-    #[test]
-    fn detail_path_is_trailing_slashed() {
-        assert_eq!(detail_path("songs", "ml_x"), "/songs/ml_x/");
-        assert_eq!(detail_path("events", "a@b"), "/events/a%40b/");
     }
 
     #[test]

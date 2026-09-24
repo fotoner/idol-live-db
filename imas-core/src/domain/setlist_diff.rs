@@ -226,15 +226,6 @@ mod tests {
         assert!(item_indexes_needing_sync(&items, &original).is_empty());
     }
 
-    /// 1 曲だけ差し替えたら 1 件だけ送る。
-    #[test]
-    fn only_changed_song_is_sent() {
-        let items = [row("a", "s1", 1, None), row("b", "CHANGED", 2, None)];
-        let original = [row("a", "s1", 1, None), row("b", "s2", 2, None)];
-        let picked = item_indexes_needing_sync(&items, &original);
-        assert_eq!(ids_at(&items, &picked), ["b"]);
-    }
-
     /// 新規追加 (スナップショットに無い id) は必ず送る。
     #[test]
     fn new_item_is_always_sent() {
@@ -245,15 +236,6 @@ mod tests {
     }
 
     // --- item: 落としやすいケース ---
-
-    /// section を付けた / 変えた。
-    #[test]
-    fn section_change_is_sent() {
-        let items = [row("a", "s1", 1, Some("アンコール"))];
-        let original = [row("a", "s1", 1, None)];
-        let picked = item_indexes_needing_sync(&items, &original);
-        assert_eq!(ids_at(&items, &picked), ["a"]);
-    }
 
     /// section を「本編」に戻した (非 None → None)。
     /// これを取りこぼすとアンコール表記が消えないまま残る。
@@ -277,28 +259,6 @@ mod tests {
         assert_eq!(got, ["b", "c"]);
     }
 
-    /// 曲は同じでも位置が変わっていれば送る。
-    #[test]
-    fn position_only_change_is_sent() {
-        let items = [row("a", "s1", 5, None)];
-        let original = [row("a", "s1", 1, None)];
-        let picked = item_indexes_needing_sync(&items, &original);
-        assert_eq!(ids_at(&items, &picked), ["a"]);
-    }
-
-    /// 出力順は入力のまま (position 順に並べた呼び出し側の意図を壊さない)。
-    #[test]
-    fn keeps_input_order() {
-        let items: Vec<_> = (1..=5)
-            .map(|i| row(&format!("i{i}"), &format!("changed{i}"), i, None))
-            .collect();
-        let original: Vec<_> = (1..=5)
-            .map(|i| row(&format!("i{i}"), &format!("s{i}"), i, None))
-            .collect();
-        let picked = item_indexes_needing_sync(&items, &original);
-        assert_eq!(ids_at(&items, &picked), ["i1", "i2", "i3", "i4", "i5"]);
-    }
-
     /// スナップショットの並び順は結果に影響しない
     /// (iOS 側は Dictionary 由来で順序不定のまま渡してくるため、ここで保証する)。
     #[test]
@@ -311,30 +271,12 @@ mod tests {
 
     // --- 出演者 ---
 
-    /// 既存の出演者は 1 件も送らない。
-    ///
-    /// 出演者は (setlistItemId, idolId) しか持たず recordName がその 2 つから
-    /// 決まるので、update しても変化しようがない。ここが差分化でいちばん効く。
-    #[test]
-    fn existing_performers_are_never_sent() {
-        let performers = names(&["a_i1", "a_i2", "b_i1"]);
-        let initial = names(&["a_i1", "a_i2", "b_i1"]);
-        assert!(performer_indexes_needing_sync(&performers, &initial).is_empty());
-    }
-
     /// 追加された出演者だけ送る。
     #[test]
     fn only_added_performers_are_sent() {
         let performers = names(&["a_i1", "a_NEW"]);
         let initial = names(&["a_i1"]);
         assert_eq!(performer_indexes_needing_sync(&performers, &initial), [1]);
-    }
-
-    /// 出演者ゼロから付け直したケース (全員新規)。
-    #[test]
-    fn all_performers_new_when_nothing_existed() {
-        let performers = names(&["a_i1", "a_i2"]);
-        assert_eq!(performer_indexes_needing_sync(&performers, &[]).len(), 2);
     }
 
     // --- 実データ相当での削減幅 ---

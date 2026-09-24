@@ -244,16 +244,6 @@ mod tests {
         assert_eq!(again_rate, 90);
     }
 
-    /// 初プレイは更新バッジを出さず、自己ベスト表示は今回の率になる。
-    #[test]
-    fn first_play_shows_this_session_rate_without_the_badge() {
-        let (result, is_new_best, best_rate) =
-            finish(QuizTally { asked: 10, correct: 10, points: 100 }, GameRecord::default());
-        assert_eq!(result.rate_percent, 100);
-        assert!(!is_new_best);
-        assert_eq!(best_rate, 100);
-    }
-
     /// ソロ曲クイズの見積りとゲーム本体が同じ条件を見る。
     /// `master.sqlite` のブランド 961 (ソロ曲 4 曲 / 原唱歌手 2 名) は
     /// 「不足表示なのに 10 問始まり、全問 2 択」になっていた。

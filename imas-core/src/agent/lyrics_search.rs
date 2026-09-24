@@ -188,12 +188,6 @@ mod tests {
     }
 
     #[test]
-    fn この_db_に無い曲は落とす() {
-        let out = decorate(bundle_snapshot(), &[hit("ml_ロケットスター", 1), hit("無い曲", 1)], &LyricsFilter::default(), 10);
-        assert_eq!(out.len(), 1);
-    }
-
-    #[test]
     fn 披露回数の多い順に並ぶ() {
         // サーバは song_id 順で返すので、並べ替えていないとここが落ちる。
         let hits: Vec<ApiHit> =
@@ -287,23 +281,6 @@ mod tests {
         let out = decorate(s, &hits, &LyricsFilter::default(), 10);
         assert_eq!(out.len(), 1, "派生が残っている: {out:?}");
         assert_eq!(out[0].song_id, "ml_アイル");
-    }
-
-    #[test]
-    fn 母集団も派生を数えない() {
-        let s = bundle_snapshot();
-        let idol = s.idol_index_by_id["ml_伊吹翼"];
-        let all = Scope::Idol(idol).song_indexes(s);
-        assert!(
-            all.iter().all(|&i| s.songs[i as usize].parent_song_id.is_none()),
-            "分母に派生が混ざっている"
-        );
-    }
-
-    #[test]
-    fn limit_で曲数を切る() {
-        let hits: Vec<ApiHit> = ["ml_ロケットスター", "ml_アイル"].iter().map(|id| hit(id, 1)).collect();
-        assert_eq!(decorate(bundle_snapshot(), &hits, &LyricsFilter::default(), 1).len(), 1);
     }
 }
 

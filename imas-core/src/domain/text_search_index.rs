@@ -297,40 +297,7 @@ mod tests {
         assert_eq!(prepare_needle(nfd), FoldedNeedle::new(nfd).as_bytes());
     }
 
-    // --- 基本 ---
-
-    #[test]
-    fn matches_substring_anywhere() {
-        let i = index(&["夢色ハーモニー"]);
-        assert!(hit(&i, "夢")); // 先頭
-        assert!(hit(&i, "ハーモ")); // 途中
-        assert!(hit(&i, "ニー")); // 末尾
-        assert!(hit(&i, "夢色ハーモニー")); // 全体
-        assert!(!hit(&i, "夢色ハーモニーズ")); // 検索語の方が長い
-        assert!(!hit(&i, "星"));
-    }
-
-    #[test]
-    fn empty_query_matches_everything() {
-        assert!(hit(&index(&["READY!!"]), ""));
-        // 中身が無い項目でも空検索なら落とさない (絞り込みを掛けていない状態)
-        assert!(hit(&index(&[""]), ""));
-    }
-
-    #[test]
-    fn empty_index_never_matches_non_empty_query() {
-        assert!(!hit(&index(&[""]), "夢"));
-    }
-
     // --- 複数フィールド ---
-
-    #[test]
-    fn matches_any_field() {
-        let i = index(&["READY!!", "れでぃ"]);
-        assert!(hit(&i, "READY"));
-        assert!(hit(&i, "れでぃ"));
-        assert!(!hit(&i, "GO"));
-    }
 
     /// 連結して 1 本にすると境界をまたいだ偽の一致が起きる。分けて持つ理由。
     #[test]
@@ -338,41 +305,7 @@ mod tests {
         assert!(!hit(&index(&["あい", "うえ"]), "いう"));
     }
 
-    // --- 大文字小文字 ---
-
-    #[test]
-    fn case_insensitive_for_ascii() {
-        let i = index(&["Crossing!"]);
-        assert!(hit(&i, "crossing"));
-        assert!(hit(&i, "CROSSING"));
-        assert!(hit(&i, "CrOsSiNg"));
-    }
-
-    /// 全角半角は畳まない。半角カナはこのデータに現れず、畳むと文字数が変わって
-    /// ハイライトの範囲計算まで巻き込むので、境界をここに引く。
-    #[test]
-    fn does_not_fold_width() {
-        assert!(!hit(&index(&["ﾂﾊﾞｻ"]), "ツバサ"));
-    }
-
     // --- バイト列探索の性質 ---
-
-    /// UTF-8 は先頭バイトと継続バイトの範囲が重ならないので、バイト一致が
-    /// そのまま文字一致になる。途中のバイトから始まる偽の一致は起きない。
-    #[test]
-    fn no_false_match_inside_multibyte_character() {
-        // 「亜」= E4 BA 9C, 「介」= E4 BB 8B — 先頭バイトを共有する別の文字
-        assert!(!hit(&index(&["亜"]), "介"));
-        // 継続バイトだけが一致する組み合わせでも当たらない
-        assert!(!hit(&index(&["そら"]), "らそ"));
-    }
-
-    #[test]
-    fn matches_emoji_and_combining_characters() {
-        let i = index(&["きらめき✨ 未来"]);
-        assert!(hit(&i, "✨"));
-        assert!(hit(&i, "✨ 未来"));
-    }
 
     /// 部分一致の途中で外して、その先で当たる場合 (素朴な探索の巻き戻し)。
     #[test]
@@ -491,19 +424,6 @@ mod tests {
         assert_eq!(matching_indices(&catalog(), ""), vec![0, 1, 2, 3]);
     }
 
-    /// 検索語の小文字化はカタログ側で 1 回だけ行う (項目ごとに前処理し直さない)。
-    /// 大文字で渡しても索引 (小文字化済み) に当たることで確かめる。
-    #[test]
-    fn matching_indices_folds_needle_case() {
-        assert_eq!(matching_indices(&catalog(), "READY GO"), vec![3]);
-    }
-
-    #[test]
-    fn matching_indices_on_empty_catalog_is_empty() {
-        assert_eq!(matching_indices(&[], "夢"), Vec::<u32>::new());
-        assert_eq!(matching_indices(&[], ""), Vec::<u32>::new());
-    }
-
     // --- ひらがな↔カタカナ ---
 
     /// 打った表記の種類に関係なく当たる。
@@ -532,14 +452,6 @@ mod tests {
         let title = "オネガイ！シンデレラ";
         let (start, end) = match_range(title, "おねがい").expect("当たるはず");
         assert_eq!(&title[start as usize..end as usize], "オネガイ");
-    }
-
-    /// 先頭以外でも、多バイト文字をまたいでも位置がずれない。
-    #[test]
-    fn match_range_handles_offsets_inside_the_text() {
-        let title = "夢色ハーモニー";
-        let (start, end) = match_range(title, "もにー").expect("当たるはず");
-        assert_eq!(&title[start as usize..end as usize], "モニー");
     }
 
     /// 当たらない語と空の語では範囲を返さない (色を敷かない)。

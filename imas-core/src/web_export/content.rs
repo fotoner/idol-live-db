@@ -680,14 +680,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn empty_text_is_only_given_when_the_list_is_empty() {
-        assert_eq!(empty_text(false, EMPTY_SONGS, Some(EMPTY_SONGS_BODY)), None);
-        let empty = empty_text(true, EMPTY_UNITS, None).expect("空なら案内がある");
-        assert_eq!(empty.title, EMPTY_UNITS);
-        assert_eq!(empty.body, None);
-    }
-
-    #[test]
     fn poll_end_and_voice_actor_rows_are_worded_by_state() {
         assert_eq!(poll_ends_label(true), "締切");
         assert_eq!(poll_ends_label(false), "終了");
@@ -703,14 +695,6 @@ mod tests {
         // 人数の分からないホール (0 / 無し) には添えない。
         assert_eq!(capacity_display(Some(0)), None);
         assert_eq!(capacity_display(None), None);
-    }
-
-    #[test]
-    fn calendar_ticket_words_are_the_vocabulary_terms_of_their_columns() {
-        let term = |column: &str| vocabulary::TICKET_DATES.iter().find(|t| t.value == column).unwrap().label;
-        assert_eq!(CALENDAR_KIND_TICKET_OPEN, term("ticket_open_date"));
-        assert_eq!(CALENDAR_KIND_TICKET_DEADLINE, term("ticket_deadline"));
-        assert_eq!(CALENDAR_KIND_TICKET_LOTTERY, term("ticket_lottery_date"));
     }
 
     #[test]

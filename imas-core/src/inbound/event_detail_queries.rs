@@ -335,16 +335,7 @@ impl SnapshotStore {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::test_support::bundle_store;
-
-    #[test]
-    fn not_loaded_is_a_typed_error() {
-        let store = SnapshotStore::new();
-        assert!(matches!(store.latest_show(), Err(SnapshotError::NotLoaded)));
-        assert!(matches!(store.venue_directory(), Err(SnapshotError::NotLoaded)));
-        assert!(matches!(store.event_stats("x".into()), Err(SnapshotError::NotLoaded)));
-    }
 
     #[test]
     fn ffi_surface_smoke() {

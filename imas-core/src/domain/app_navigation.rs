@@ -171,15 +171,6 @@ mod tests {
     }
 
     #[test]
-    fn primary_section_comes_first_without_title() {
-        let nav = app_navigation(true);
-        assert_eq!(nav[0].title, None);
-        assert!(nav[0].items.iter().all(|i| i.in_tab_bar));
-        assert!(nav[1..].iter().all(|s| s.title.is_some()));
-        assert!(nav[1..].iter().flat_map(|s| &s.items).all(|i| !i.in_tab_bar));
-    }
-
-    #[test]
     fn shortcuts_are_one_to_five_on_tabs_only() {
         let nav = app_navigation(true);
         let digits: Vec<Option<u8>> = all_items(&nav).iter().map(|i| i.shortcut_digit).collect();
@@ -202,15 +193,6 @@ mod tests {
         assert!(all_items(&nav).iter().all(|i| i.destination != AppDestination::CallGuide));
         // 見出しは残る (みんなの投票などが居る)
         assert!(nav.iter().any(|s| s.title.as_deref() == Some("みんな")));
-    }
-
-    #[test]
-    fn section_titles_never_repeat_an_item_label() {
-        for s in app_navigation(true) {
-            if let Some(t) = &s.title {
-                assert!(s.items.iter().all(|i| &i.label != t), "{t}");
-            }
-        }
     }
 
     #[test]

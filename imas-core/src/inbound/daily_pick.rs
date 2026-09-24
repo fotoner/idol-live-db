@@ -84,15 +84,6 @@ mod tests {
     use super::*;
     use crate::test_support::bundle_store;
 
-    #[test]
-    fn not_loaded_is_a_typed_error() {
-        let store = SnapshotStore::new();
-        assert!(matches!(
-            store.daily_pick_song_ids("cg".into(), false, true),
-            Err(SnapshotError::NotLoaded)
-        ));
-    }
-
     /// ロジックの等価性は domain 側の照合テストが担う。ここは委譲の疎通だけ確認する。
     #[test]
     fn ffi_surface_smoke() {

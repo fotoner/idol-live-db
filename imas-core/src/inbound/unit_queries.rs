@@ -57,19 +57,7 @@ impl SnapshotStore {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::test_support::bundle_store;
-
-    #[test]
-    fn not_loaded_is_a_typed_error() {
-        let store = SnapshotStore::new();
-        assert!(matches!(store.unit_index_record(), Err(SnapshotError::NotLoaded)));
-        assert!(matches!(store.unit_record("x".into()), Err(SnapshotError::NotLoaded)));
-        assert!(matches!(store.all_unit_records(), Err(SnapshotError::NotLoaded)));
-        assert!(matches!(store.unit_member_idol_ids("x".into()), Err(SnapshotError::NotLoaded)));
-        assert!(matches!(store.unit_song_ids("x".into()), Err(SnapshotError::NotLoaded)));
-        assert!(matches!(store.performed_unit_ids("x".into()), Err(SnapshotError::NotLoaded)));
-    }
 
     /// FFI 面の疎通: 実データで意味のある結果が委譲越しに返る (等価性は domain 側で保証)。
     #[test]

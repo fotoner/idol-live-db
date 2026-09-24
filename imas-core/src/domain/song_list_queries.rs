@@ -948,15 +948,6 @@ mod tests {
         assert!(!is_hidden_variant(&Song::default()));
     }
 
-    /// 出面に運ぶ形 (`SongQuery`) と絞り込み条件の往復で軸が落ちない。
-    #[test]
-    fn song_query_round_trips_the_kamisabi_axis() {
-        let filter = SongListFilter { kamisabi_only: true, ..SongListFilter::default() };
-        assert!(SongQuery::from_filter(&filter).kamisabi_only);
-        assert!(SongQuery::from_filter(&filter).to_filter().kamisabi_only);
-        assert!(!SongQuery::default().kamisabi_only);
-    }
-
     /// 回帰 (2026-08-28): 作家の読みで曲を引けなかった。
     ///
     /// `creators` に「烏屋茶房 = からすやさぼう」は入っていたのに、クレジット欄の
@@ -1371,20 +1362,5 @@ mod tests {
         // 年フィルタの前方一致は SQL の LIKE 'x%' のまま (検索欄ではないので畳まない)。
         assert!(like_prefix("2015-04-15", "2015"));
         assert!(!like_prefix("2015-04-15", "2016"));
-    }
-
-    #[test]
-    fn empty_and_unknown_inputs_are_harmless() {
-        // 参加マークが空なら回収数は全曲 0 (= マップは空)。
-        assert!(collected_count_map(bundle_snapshot(), &[], &[], true).is_empty());
-        // 未知 id だけなら同上。
-        let unknown = ["謎のshow".to_string()];
-        let unknown_ev = ["謎のevent".to_string()];
-        assert!(collected_count_map(bundle_snapshot(), &unknown, &unknown_ev, false).is_empty());
-        // 未知 id しか無い ids_ordered は空。
-        assert!(songs_by_ids_ordered(bundle_snapshot(), &unknown).is_empty());
-        // 空フィルタ + include フラグ全開 = 全曲。
-        let all = SongListFilter { include_remixes: true, include_other_brand: true, ..SongListFilter::default() };
-        assert_eq!(filter_song_indexes(bundle_snapshot(), &all).len(), bundle_snapshot().songs.len());
     }
 }

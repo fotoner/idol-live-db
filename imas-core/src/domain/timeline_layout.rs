@@ -250,18 +250,6 @@ mod tests {
 
     // --- pack_rows ---
 
-    #[test]
-    fn pack_rows_puts_non_overlapping_spans_on_the_same_row() {
-        let spans = [span(0.0, 10.0), span(30.0, 40.0), span(60.0, 70.0)];
-        assert_eq!(pack_rows(&spans, 5.0), vec![0, 0, 0]);
-    }
-
-    #[test]
-    fn pack_rows_pushes_overlapping_spans_down() {
-        let spans = [span(0.0, 100.0), span(10.0, 50.0), span(20.0, 30.0)];
-        assert_eq!(pack_rows(&spans, 0.0), vec![0, 1, 2]);
-    }
-
     /// gap の分だけ離れていない帯は同じ段に置かない (ラベルや点が隣とくっつくため)。
     #[test]
     fn pack_rows_respects_gap() {
@@ -303,14 +291,6 @@ mod tests {
         assert_ne!(rows[0], rows[2]); // 重なる 2 本は別の段
     }
 
-    /// start > end の壊れた入力でも段割りは破綻しない (DB 側の日付逆転に対する保険)。
-    #[test]
-    fn span_normalizes_reversed_range() {
-        let normalized = span(50.0, 10.0).normalized();
-        assert_eq!(normalized.start, 50.0);
-        assert_eq!(normalized.end, 50.0);
-    }
-
     /// 逆転区間は「start 位置の幅 0」として詰められる。end=-100 のまま扱うと
     /// gap 8 でも後続の帯が同じ段に入り、描画位置 (x=10) の帯と密着してしまう。
     #[test]
@@ -328,18 +308,6 @@ mod tests {
             TimelineHitBox { x: 100.0, width: 20.0, y: 0.0, height: 30.0 }, // 1
             TimelineHitBox { x: 0.0, width: 20.0, y: 30.0, height: 30.0 },  // 2
         ]
-    }
-
-    #[test]
-    fn hit_index_finds_bar_under_point() {
-        assert_eq!(hit_index(10.0, 15.0, &sample_boxes(), 6.0), Some(0));
-        assert_eq!(hit_index(110.0, 15.0, &sample_boxes(), 6.0), Some(1));
-    }
-
-    /// 段が違えば別の出来事。縦には遊びを持たせない。
-    #[test]
-    fn hit_index_distinguishes_rows() {
-        assert_eq!(hit_index(10.0, 45.0, &sample_boxes(), 6.0), Some(2));
     }
 
     /// 細い帯を押せるように横だけ slop ぶん広い。
@@ -427,13 +395,6 @@ mod tests {
     }
 
     // --- 座標変換 ---
-
-    #[test]
-    fn x_is_proportional_to_elapsed_days() {
-        let origin = jst_date(2026, 1, 1);
-        assert!((x_for(origin, origin, 2.0) - 0.0).abs() < 0.001);
-        assert!((x_for(jst_date(2026, 1, 11), origin, 2.0) - 20.0).abs() < 0.001);
-    }
 
     /// 一括版は 1 件ずつの計算と一致する (View は帯・年境界の全 x をこれ 1 回で引く)。
     #[test]

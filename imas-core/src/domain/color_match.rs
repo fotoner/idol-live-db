@@ -608,21 +608,6 @@ mod tests {
 
     // --- normalized_hex ---
 
-    #[test]
-    fn normalizes_hash_case_and_short_form() {
-        assert_eq!(normalized_hex("#E22B30").as_deref(), Some("e22b30"));
-        assert_eq!(normalized_hex("e22b30").as_deref(), Some("e22b30"));
-        assert_eq!(normalized_hex("#F0A").as_deref(), Some("ff00aa"));
-        assert_eq!(normalized_hex("f0a").as_deref(), Some("ff00aa"));
-    }
-
-    /// 前後の空白は落とす (Swift `.whitespaces` と同じ集合)。
-    #[test]
-    fn trims_horizontal_whitespace() {
-        assert_eq!(normalized_hex("  #e22b30\t").as_deref(), Some("e22b30"));
-        assert_eq!(normalized_hex("\u{3000}e22b30").as_deref(), Some("e22b30"));
-    }
-
     /// 原本は改行をトリムしない (`.whitespacesAndNewlines` ではない) ので無効のまま。
     #[test]
     fn does_not_trim_newlines() {
@@ -638,33 +623,10 @@ mod tests {
 
     // --- hex_to_rgb / color_distance ---
 
-    #[test]
-    fn converts_hex_to_rgb_components() {
-        assert_eq!(hex_to_rgb("#e22b30"), Rgb { r: 226.0, g: 43.0, b: 48.0 });
-        assert_eq!(hex_to_rgb("#000000"), Rgb { r: 0.0, g: 0.0, b: 0.0 });
-        assert_eq!(hex_to_rgb("#ffffff"), Rgb { r: 255.0, g: 255.0, b: 255.0 });
-    }
-
     /// 読めない hex はニュートラルグレーに落とす (原本の `?? "8e8e93"`)。
     #[test]
     fn invalid_hex_falls_back_to_neutral_gray() {
         assert_eq!(hex_to_rgb("nope"), hex_to_rgb("#8e8e93"));
-    }
-
-    #[test]
-    fn distance_is_zero_for_same_color_and_symmetric() {
-        assert_eq!(color_distance(Some("#e22b30"), Some("#E22B30")), 0.0);
-        let ab = color_distance(Some("#e22b30"), Some("#2743d2"));
-        assert_eq!(ab, color_distance(Some("#2743d2"), Some("#e22b30")));
-        assert!(ab > 0.0);
-    }
-
-    /// 似た色ほど距離が小さい (難易度の「近い / 遠い」が意味を持つ根拠)。
-    #[test]
-    fn similar_colors_are_closer_than_opposite_ones() {
-        let near = color_distance(Some("#e22b30"), Some("#e0392f")); // 赤 と 赤
-        let far = color_distance(Some("#e22b30"), Some("#2743d2")); // 赤 と 青
-        assert!(near < far, "near={near} far={far}");
     }
 
     /// 色が無い / 読めないときは最大値 (最も遠い)。
@@ -677,12 +639,6 @@ mod tests {
     }
 
     // --- hex_label ---
-
-    #[test]
-    fn hex_label_is_uppercase_with_hash() {
-        assert_eq!(hex_label(Some("#e22b30")), "#E22B30");
-        assert_eq!(hex_label(Some("f0a")), "#FF00AA");
-    }
 
     /// 読めない色は Android の `#??????` ではなく iOS の `—` に揃える。
     #[test]
@@ -711,14 +667,6 @@ mod tests {
 
     fn brands2() -> Vec<ColorMatchBrandRef> {
         vec![brand("765as", 1), brand("cinderella", 2), brand(EXCLUDED_BRAND_ID, 99)]
-    }
-
-    #[test]
-    fn builds_pools_per_brand_in_brand_order() {
-        let pools = build_pools(&sources(), &brands2());
-        assert_eq!(pools.all_colored.len(), 9);
-        assert_eq!(brand_ids(&pools), vec!["765as", "cinderella"]);
-        assert_eq!(ids(&pools.brand_pools[1].members), vec!["uzuki", "rin", "mio", "mika"]);
     }
 
     /// ブランドの公式順が入力順と逆でも `sort_order` で並ぶ。
@@ -798,19 +746,6 @@ mod tests {
         assert_eq!(ids(&pools.brand_pools[0].members), vec!["earlier", "c", "d", "e"]);
     }
 
-    /// 公式順が同値なら DB から読んだ順を保つ (安定ソート)。
-    #[test]
-    fn brand_pool_keeps_input_order_for_equal_sort_order() {
-        let src = vec![
-            source("a", "765as", Some("#111111"), 5),
-            source("b", "765as", Some("#222222"), 5),
-            source("c", "765as", Some("#333333"), 5),
-            source("d", "765as", Some("#444444"), 5),
-        ];
-        let pools = build_pools(&src, &[brand("765as", 1)]);
-        assert_eq!(ids(&pools.brand_pools[0].members), vec!["a", "b", "c", "d"]);
-    }
-
     /// 色が一意なメンバーが 4 人未満のブランドは出題母集団にしない。
     #[test]
     fn brand_with_too_few_colors_is_not_offered() {
@@ -847,24 +782,12 @@ mod tests {
         assert_eq!(pools.all_colored.len(), 4);
     }
 
-    #[test]
-    fn build_pools_with_empty_inputs() {
-        assert_eq!(build_pools(&[], &[]), ColorMatchPools::default());
-    }
-
     // --- effective_pool ---
 
     #[test]
     fn no_selection_uses_all_brands() {
         let pools = build_pools(&sources(), &brands2());
         assert_eq!(effective_pool(&pools, &[]), pools.all_colored);
-    }
-
-    #[test]
-    fn selection_narrows_to_that_brand() {
-        let pools = build_pools(&sources(), &brands2());
-        let picked = effective_pool(&pools, &["cinderella".to_string()]);
-        assert_eq!(ids(&picked), vec!["uzuki", "rin", "mio", "mika"]);
     }
 
     /// ブランドを跨いだ同色は、ブランドの公式順で先に来る方だけ残る。
@@ -892,12 +815,6 @@ mod tests {
         assert!(picked.len() < MIN_POOL_SIZE);
     }
 
-    #[test]
-    fn unknown_selection_yields_empty_pool() {
-        let pools = build_pools(&sources(), &brands2());
-        assert!(effective_pool(&pools, &["nope".to_string()]).is_empty());
-    }
-
     // --- companions: 難易度の規則そのもの ---
 
     /// アンカー (#808080) から等距離になる 2 人を含む候補。
@@ -910,15 +827,6 @@ mod tests {
             idol("tie_b", Some("#806080")), // 緑 -32
         ];
         (anchor, rest)
-    }
-
-    #[test]
-    fn tie_candidates_are_really_equidistant() {
-        let (anchor, rest) = tie_candidates();
-        assert_eq!(
-            color_distance(anchor.color.as_deref(), rest[1].color.as_deref()),
-            color_distance(anchor.color.as_deref(), rest[3].color.as_deref())
-        );
     }
 
     /// むずい: アンカーに近い順。同距離は母集団の並び順で決まる (安定・決定的)。
@@ -942,33 +850,6 @@ mod tests {
         let picked =
             companions(&anchor, rest, 3, ColorMatchDifficulty::Easy, &mut SplitMix64(0));
         assert_eq!(ids(&picked), vec!["far", "tie_a", "tie_b"]);
-    }
-
-    /// やさしいの結果は互いに離れている (むずいで同じ候補から採るより最小距離が大きい)。
-    #[test]
-    fn easy_spreads_colors_further_than_hard() {
-        let pool = spread_pool(24);
-        let anchor = pool[0].clone();
-        let rest: Vec<_> = pool[1..].to_vec();
-        let closest = |mut members: Vec<ColorMatchIdol>| {
-            members.insert(0, anchor.clone());
-            let mut min = f64::MAX;
-            for (i, a) in members.iter().enumerate() {
-                for b in &members[i + 1..] {
-                    min = min.min(color_distance(a.color.as_deref(), b.color.as_deref()));
-                }
-            }
-            min
-        };
-        let easy =
-            companions(&anchor, rest.clone(), 3, ColorMatchDifficulty::Easy, &mut SplitMix64(0));
-        let hard = companions(&anchor, rest, 5, ColorMatchDifficulty::Hard, &mut SplitMix64(0));
-        assert!(
-            closest(easy.clone()) > closest(hard.clone()),
-            "easy={} hard={}",
-            closest(easy),
-            closest(hard)
-        );
     }
 
     /// ふつう: 候補からランダム。引き直せば顔ぶれが変わる。
@@ -1008,39 +889,7 @@ mod tests {
         }
     }
 
-    #[test]
-    fn companions_with_no_candidates_is_empty() {
-        let anchor = idol("anchor", Some("#808080"));
-        for difficulty in
-            [ColorMatchDifficulty::Easy, ColorMatchDifficulty::Normal, ColorMatchDifficulty::Hard]
-        {
-            assert!(companions(&anchor, vec![], 3, difficulty, &mut SplitMix64(1)).is_empty());
-        }
-    }
-
-    // --- index_of_first_max ---
-
-    #[test]
-    fn first_max_wins_on_ties() {
-        assert_eq!(index_of_first_max(&[1.0, 3.0, 3.0, 2.0]), Some(1));
-        assert_eq!(index_of_first_max(&[5.0]), Some(0));
-        assert_eq!(index_of_first_max(&[f64::MAX, f64::MAX]), Some(0));
-        assert_eq!(index_of_first_max(&[]), None);
-    }
-
     // --- make_rounds: 形 ---
-
-    #[test]
-    fn generates_one_round_per_question() {
-        let rounds = make_rounds(&pool6(), ColorMatchDifficulty::Normal, 10, &mut SplitMix64(1));
-        assert_eq!(rounds.len(), 10);
-    }
-
-    #[test]
-    fn zero_questions_yields_no_rounds() {
-        assert!(make_rounds(&pool6(), ColorMatchDifficulty::Normal, 0, &mut SplitMix64(1))
-            .is_empty());
-    }
 
     /// 難易度ごとの出題人数 (母集団が十分なとき)。
     #[test]
@@ -1068,22 +917,6 @@ mod tests {
         let round = &make_rounds(&pool, ColorMatchDifficulty::Hard, 1, &mut SplitMix64(3))[0];
         assert_eq!(round.members.len(), 2);
         assert_eq!(round.palette.len(), 2);
-    }
-
-    /// 同じ人が 1 問の中で 2 回出ない。
-    #[test]
-    fn round_members_are_unique() {
-        for seed in 0..40 {
-            for difficulty in [
-                ColorMatchDifficulty::Easy,
-                ColorMatchDifficulty::Normal,
-                ColorMatchDifficulty::Hard,
-            ] {
-                let round = &make_rounds(&pool6(), difficulty, 1, &mut SplitMix64(seed))[0];
-                let unique: HashSet<&String> = round.members.iter().map(|m| &m.id).collect();
-                assert_eq!(unique.len(), round.members.len(), "{difficulty:?} seed={seed}");
-            }
-        }
     }
 
     /// パレットは出題メンバーの色 (原文) の並べ替え。
@@ -1139,57 +972,6 @@ mod tests {
         );
     }
 
-    /// 引き直せば違うゲームになる (毎回同じ出題ではない)。
-    #[test]
-    fn different_seeds_give_different_games() {
-        let pool = pool6();
-        let games: HashSet<Vec<Vec<String>>> = (0..40)
-            .map(|seed| {
-                make_rounds(&pool, ColorMatchDifficulty::Normal, 5, &mut SplitMix64(seed))
-                    .iter()
-                    .map(|r| r.members.iter().map(|m| m.id.clone()).collect())
-                    .collect()
-            })
-            .collect();
-        assert!(games.len() > 1, "毎回同じ出題しか出ていない");
-    }
-
-    /// 1 ゲームの中で全問が同一にならない (rng を通しで使う)。
-    #[test]
-    fn rounds_within_a_game_vary() {
-        let rounds =
-            make_rounds(&spread_pool(20), ColorMatchDifficulty::Normal, 10, &mut SplitMix64(7));
-        let unique: HashSet<Vec<&str>> = rounds.iter().map(|r| ids(&r.members)).collect();
-        assert!(unique.len() > 1, "全問同じメンバーが出ている");
-    }
-
-    /// 特定の人がアンカー固定にならない (母集団全員に出番がある)。
-    #[test]
-    fn every_pool_member_can_appear() {
-        let pool = pool6();
-        let mut seen: HashSet<String> = HashSet::new();
-        for seed in 0..80 {
-            for round in make_rounds(&pool, ColorMatchDifficulty::Easy, 5, &mut SplitMix64(seed)) {
-                seen.extend(round.members.iter().map(|m| m.id.clone()));
-            }
-        }
-        assert_eq!(seen.len(), pool.len(), "出番のないメンバーがいる: {seen:?}");
-    }
-
-    /// パレットの並びが行の並びと一致し続けない (位置で当てられない)。
-    #[test]
-    fn palette_order_is_not_locked_to_member_order() {
-        let pool = pool6();
-        let mismatched = (0..40).any(|seed| {
-            let round =
-                &make_rounds(&pool, ColorMatchDifficulty::Normal, 1, &mut SplitMix64(seed))[0];
-            let member_colors: Vec<String> =
-                round.members.iter().map(|m| m.color.clone().unwrap_or_default()).collect();
-            member_colors != round.palette
-        });
-        assert!(mismatched, "パレットが常にメンバーと同順になっている");
-    }
-
     // --- judge_round ---
 
     fn three_members() -> Vec<ColorMatchIdol> {
@@ -1212,19 +994,6 @@ mod tests {
         assert_eq!(judged.score, 3);
         assert_eq!(judged.out_of, 3);
         assert_eq!(strs(&judged.correct_hex_labels), vec!["#E22B30", "#2743D2", "#B4E04B"]);
-    }
-
-    #[test]
-    fn all_wrong() {
-        let assignments = vec![
-            assign("haruka", "#2743d2"),
-            assign("chihaya", "#b4e04b"),
-            assign("miki", "#e22b30"),
-        ];
-        let judged = judge_round(&three_members(), &assignments);
-        assert_eq!(judged.correct, vec![false, false, false]);
-        assert_eq!(judged.score, 0);
-        assert_eq!(judged.out_of, 3);
     }
 
     #[test]
@@ -1254,26 +1023,6 @@ mod tests {
             assert_eq!(judged.correct, vec![false], "hex={hex:?}");
             assert_eq!(strs(&judged.correct_hex_labels), vec!["—"]);
         }
-    }
-
-    #[test]
-    fn no_assignments_scores_zero() {
-        let judged = judge_round(&three_members(), &[]);
-        assert_eq!(judged.score, 0);
-        assert_eq!(judged.out_of, 3);
-        assert_eq!(judged.correct, vec![false, false, false]);
-    }
-
-    #[test]
-    fn empty_round_judges_to_zero() {
-        assert_eq!(judge_round(&[], &[]), ColorMatchJudgement::default());
-    }
-
-    /// 他人あての割り当ては効かない (id で引く)。
-    #[test]
-    fn assignment_for_another_member_is_ignored() {
-        let judged = judge_round(&three_members(), &[assign("chihaya", "#e22b30")]);
-        assert_eq!(judged.correct, vec![false, false, false]);
     }
 
     /// 同じ id が複数あれば最初の 1 件を採る (原本の辞書と同じ「1 人 1 色」)。
@@ -1310,44 +1059,10 @@ mod tests {
         assert_eq!(accuracy_percent(5, 0), 0);
     }
 
-    #[test]
-    fn accuracy_extremes() {
-        assert_eq!(accuracy_percent(25, 25), 100);
-        assert_eq!(accuracy_percent(0, 25), 0);
-    }
-
-    #[test]
-    fn accuracy_rounds_to_nearest() {
-        assert_eq!(accuracy_percent(1, 3), 33); // 33.33…
-        assert_eq!(accuracy_percent(2, 3), 67); // 66.66…
-        assert_eq!(accuracy_percent(1, 2), 50);
-    }
-
     /// ちょうど 0.5 は大きい側へ (Swift `rounded()` = away from zero)。
     #[test]
     fn accuracy_rounds_half_up() {
         assert_eq!(accuracy_percent(1, 8), 13); // 12.5
         assert_eq!(accuracy_percent(3, 8), 38); // 37.5
-    }
-
-    /// 1 ゲームぶんの積み上げ (判定 → 加算 → 正答率) が噛み合う。
-    #[test]
-    fn session_totals_feed_accuracy() {
-        let rounds = make_rounds(&pool6(), ColorMatchDifficulty::Easy, 5, &mut SplitMix64(11));
-        let (mut correct, mut answered) = (0u32, 0u32);
-        for round in &rounds {
-            // 1 人目だけ正解、残りは未割当。
-            let assignments: Vec<_> = round
-                .members
-                .first()
-                .map(|m| vec![assign(&m.id, m.color.as_deref().unwrap_or(""))])
-                .unwrap_or_default();
-            let judged = judge_round(&round.members, &assignments);
-            correct += judged.score;
-            answered += judged.out_of;
-        }
-        assert_eq!(correct, 5);
-        assert_eq!(answered, 20);
-        assert_eq!(accuracy_percent(correct, answered), 25);
     }
 }

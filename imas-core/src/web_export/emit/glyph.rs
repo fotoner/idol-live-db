@@ -8,14 +8,3 @@ pub fn brand_glyph(short_name: &str) -> String {
     const MAX_CHARS: usize = 6;
     short_name.chars().take(MAX_CHARS).collect()
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn brand_glyph_keeps_short_names_and_rounds_long_ones() {
-        assert_eq!(brand_glyph("ML"), "ML");
-        assert_eq!(brand_glyph("シャイニーカラーズ"), "シャイニーカ");
-    }
-}

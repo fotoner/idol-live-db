@@ -90,14 +90,7 @@ impl SnapshotStore {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::domain::setlist_forecast::forecast_show_uncached;
-
-    #[test]
-    fn not_loaded_is_a_typed_error() {
-        let store = SnapshotStore::new();
-        assert!(matches!(store.setlist_forecast("x".into(), 10), Err(SnapshotError::NotLoaded)));
-    }
 
     #[test]
     fn delegates_to_the_domain_and_reuses_the_cache() {

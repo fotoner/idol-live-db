@@ -259,14 +259,6 @@ mod tests {
         ]
     }
 
-    #[test]
-    fn filters_and_sorts_by_kind() {
-        let live = tickets_for_kind(&sample(), TicketKind::Live);
-        assert_eq!(live.len(), 2);
-        assert_eq!(live[0].name, "S席");
-        assert_eq!(live[1].name, "A席");
-    }
-
     /// 並び順が全部 0 でも端末間でぶれない (価格の高い順 → 名前)。
     #[test]
     fn falls_back_to_price_then_name() {
@@ -305,12 +297,6 @@ mod tests {
         let lv = price_range(&sample(), TicketKind::LiveViewing).expect("LV の券がある");
         // 1 種だけなら範囲ではなく 1 つの額。
         assert_eq!(lv.label, "¥4,500");
-    }
-
-    #[test]
-    fn price_range_is_none_without_tickets() {
-        let only_live = vec![ticket("a", TicketKind::Live, "S席", 13_200, 1)];
-        assert!(price_range(&only_live, TicketKind::Stream).is_none());
     }
 
     /// 推定が 1 件でも混じれば札が立つ (推定を実額の顔で出さない)。

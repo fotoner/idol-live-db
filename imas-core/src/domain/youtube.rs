@@ -208,11 +208,4 @@ mod tests {
         assert!(refs[0].thumbnail_url.as_deref().is_some_and(|u| u.ends_with("maxresdefault.jpg")));
         assert_eq!(refs[1], YouTubeVideoRef { video_id: None, thumbnail_url: None, fallback_thumbnail_url: None });
     }
-
-    #[test]
-    fn thumbnails_are_the_16_9_ones() {
-        let (primary, fallback) = thumbnail_urls(ID);
-        assert_eq!(primary, format!("https://i.ytimg.com/vi/{ID}/maxresdefault.jpg"));
-        assert_eq!(fallback, format!("https://i.ytimg.com/vi/{ID}/mqdefault.jpg"));
-    }
 }

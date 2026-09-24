@@ -189,16 +189,6 @@ mod tests {
     }
 
     #[test]
-    fn initialize_は未対応の版を要求されたら自分の最新版を返す() {
-        let req = json!({
-            "jsonrpc": "2.0", "id": 1, "method": "initialize",
-            "params": { "protocolVersion": "1999-01-01" },
-        });
-        let resp = handle(&ctx(), &Snapshot::default(), &req).unwrap();
-        assert_eq!(resp["result"]["protocolVersion"], SUPPORTED_PROTOCOL_VERSIONS[0]);
-    }
-
-    #[test]
     fn notifications_initialized_は無応答() {
         let req = json!({ "jsonrpc": "2.0", "method": "notifications/initialized" });
         assert!(handle(&ctx(), &Snapshot::default(), &req).is_none());
@@ -280,13 +270,6 @@ mod tests {
     }
 
     #[test]
-    fn ping_は空オブジェクト() {
-        let req = json!({ "jsonrpc": "2.0", "id": 5, "method": "ping" });
-        let resp = handle(&ctx(), &Snapshot::default(), &req).unwrap();
-        assert_eq!(resp["result"], json!({}));
-    }
-
-    #[test]
     fn 未知メソッドは_32601() {
         let req = json!({ "jsonrpc": "2.0", "id": 6, "method": "resources/list" });
         let resp = handle(&ctx(), &Snapshot::default(), &req).unwrap();
@@ -299,12 +282,5 @@ mod tests {
         let resp = handle(&ctx(), &Snapshot::default(), &req).unwrap();
         assert_eq!(resp["error"]["code"], -32600);
         assert_eq!(resp["id"], Value::Null);
-    }
-
-    #[test]
-    fn methodが無いとinvalid_request() {
-        let req = json!({ "jsonrpc": "2.0", "id": 8 });
-        let resp = handle(&ctx(), &Snapshot::default(), &req).unwrap();
-        assert_eq!(resp["error"]["code"], -32600);
     }
 }

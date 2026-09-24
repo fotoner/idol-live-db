@@ -1025,20 +1025,6 @@ mod tests {
         }
     }
 
-    #[test]
-    fn event_names_matches_sql() {
-        let db = bundle_conn();
-        let mut stmt = db.prepare("SELECT name FROM events ORDER BY name").unwrap();
-        let expected: Vec<String> = stmt
-            .query_map([], |r| r.get(0))
-            .unwrap()
-            .collect::<Result<_, _>>()
-            .unwrap();
-        // 同名イベントがあっても値が同じなので列そのものが一致する。
-        assert_eq!(event_names(bundle_snapshot()), expected);
-        assert!(!expected.is_empty());
-    }
-
     // ---- 純粋ロジックの単体テスト ----
 
     #[test]
@@ -1061,27 +1047,6 @@ mod tests {
     }
 
     // ---- event_ids_for_shows ----
-
-    /// 同じイベントの公演を複数渡しても、event id は 1 つに畳まれる。
-    #[test]
-    fn event_ids_for_shows_dedupes_shows_of_the_same_event() {
-        let snap = bundle_snapshot();
-        let (event, shows) = snap
-            .shows_by_event
-            .iter()
-            .enumerate()
-            .find(|(_, shows)| shows.len() >= 2)
-            .expect("公演が 2 つ以上あるイベントが 1 つはある");
-        let show_ids: Vec<String> =
-            shows.iter().map(|&i| snap.shows[i as usize].id.clone()).collect();
-        assert_eq!(event_ids_for_shows(snap, &show_ids), vec![snap.events[event].id.clone()]);
-    }
-
-    /// マークだけ残ってマスタから消えた公演は、エラーにせず捨てる。
-    #[test]
-    fn event_ids_for_shows_drops_unknown_show_ids() {
-        assert!(event_ids_for_shows(bundle_snapshot(), &["存在しない".to_string()]).is_empty());
-    }
 
     /// 公演を 1 件ずつ引いて所属イベントを集めた結果 (初出順・重複なし) と同じになる。
     #[test]

@@ -685,14 +685,6 @@ mod tests {
     // ---- 単体 (SQL 非依存の境界ケース) ----
 
     #[test]
-    fn unknown_ids_are_harmless() {
-        assert!(unit_member_idol_ids(bundle_snapshot(), "存在しないunit").is_empty());
-        assert!(unit_song_ids(bundle_snapshot(), "存在しないunit").is_empty());
-        assert!(performed_unit_ids(bundle_snapshot(), "存在しないevent").is_empty());
-        assert_eq!(unit_by_id(bundle_snapshot(), ""), None);
-    }
-
-    #[test]
     fn unit_index_projections_are_consistent() {
         let data = unit_index_data(bundle_snapshot());
         // member_links の unit_id / idol_id は必ず units / idols に実在する

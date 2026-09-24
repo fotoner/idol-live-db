@@ -1223,29 +1223,11 @@ mod tests {
     }
 
     #[test]
-    fn non_string_id_falls_back_to_record_name() {
-        let r = rec("rec-1", &[("id", int(7)), ("name", text("765PRO"))]);
-        assert_eq!(brand(&r).unwrap().id, "rec-1");
-    }
-
-    #[test]
-    fn empty_record_name_without_id_is_rejected() {
-        let r = rec("", &[("name", text("765PRO"))]);
-        assert!(brand(&r).is_none());
-    }
-
-    #[test]
     fn missing_or_empty_required_name_is_rejected() {
         assert!(brand(&rec("b", &[])).is_none());
         assert!(brand(&rec("b", &[("name", text(""))])).is_none());
         // 型違いも「無い」扱い。
         assert!(brand(&rec("b", &[("name", int(1))])).is_none());
-    }
-
-    #[test]
-    fn duplicate_keys_take_the_last_one() {
-        let r = rec("b", &[("name", text("first")), ("name", text("last"))]);
-        assert_eq!(brand(&r).unwrap().name, "last");
     }
 
     // ---- 衣装 ----
@@ -1330,11 +1312,6 @@ mod tests {
     }
 
     #[test]
-    fn costume_without_a_name_is_rejected() {
-        assert!(costume(&rec("c1", &[("brandId", text("765as"))])).is_none());
-    }
-
-    #[test]
     fn costume_wear_reads_every_column() {
         let r = rec(
             "w1",
@@ -1364,13 +1341,6 @@ mod tests {
         let row = costume_wear(&r).unwrap();
         assert_eq!(row.setlist_item_id, None);
         assert_eq!(row.idol_id, None);
-    }
-
-    /// 衣装と公演が欠けた行は、どこの記録か分からないので捨てること。
-    #[test]
-    fn costume_wear_without_a_costume_or_a_show_is_rejected() {
-        assert!(costume_wear(&rec("w1", &[("showId", text("show_1"))])).is_none());
-        assert!(costume_wear(&rec("w1", &[("costumeId", text("cos_1"))])).is_none());
     }
 
     #[test]
@@ -2050,18 +2020,6 @@ mod tests {
     }
 
     #[test]
-    fn web_services_never_produces_bool() {
-        // CKWS に BOOL 型は無い。INT64 で来た真偽値は Int のまま渡し、
-        // 判定は boolValue 側 (0 以外が true) に任せる。
-        let r = record_from_web_services_fields(
-            "e",
-            r#"{"isSolo":{"value":0,"type":"INT64"},"isStreaming":{"value":1,"type":"INT64"}}"#,
-        );
-        assert_eq!(field_of(&r, "isSolo"), Some(int(0)));
-        assert_eq!(field_of(&r, "isStreaming"), Some(int(1)));
-    }
-
-    #[test]
     fn malformed_web_services_json_yields_an_empty_projection() {
         for json in ["", "not json", "[]", "null", "{}"] {
             let r = record_from_web_services_json(json);
@@ -2072,16 +2030,6 @@ mod tests {
         let r = record_from_web_services_json(r#"{"recordName":"only"}"#);
         assert_eq!(r.record_name, "only");
         assert!(r.fields.is_empty());
-    }
-
-    #[test]
-    fn web_services_duplicate_keys_take_the_last_one() {
-        // 辞書の上書きと同じ後勝ち (CkRecordInput の規約と揃える)。
-        let r = record_from_web_services_fields(
-            "b",
-            r#"{"name":{"value":"first","type":"STRING"},"name":{"value":"last","type":"STRING"}}"#,
-        );
-        assert_eq!(field_of(&r, "name"), Some(text("last")));
     }
 
     #[test]

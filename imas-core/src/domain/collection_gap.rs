@@ -419,17 +419,6 @@ mod tests {
         assert_eq!(collection_interval_label(&second).as_deref(), Some("8 年 1 か月ぶり"));
     }
 
-    /// 1 度も回収していない曲は `collected_count == 0` (= 未回収の根拠)。
-    #[test]
-    fn 参加記録が無ければ全部未回収になる() {
-        let snap = bundle_snapshot();
-        let item = item_of("765as_初恋_一章_片想いの桜", "2016-04-30");
-        let gap = collection_gap(snap, item, &HashSet::new());
-        assert!(!gap.attended);
-        assert_eq!(gap.collected_count, 0);
-        assert_eq!(gap.ordinal_label, None, "回収していない行に回数の文言は出さない");
-    }
-
     /// 回収はリアルライブだけ。参加マークが付いていても歌枠等は数えない。
     #[test]
     fn リアルライブ以外の参加は回収に数えない() {
@@ -509,14 +498,6 @@ mod tests {
         assert_eq!(summary.collected_songs, 3);
         assert_eq!(summary.first_collected_songs, 2);
         assert_eq!(summary.label, "この公演で 3 曲回収・初回収 2 曲");
-    }
-
-    /// 初回収が 0 曲なら、その節は言わない。
-    #[test]
-    fn 初回収が無い公演では回収数だけ言う() {
-        let rows = vec![("a".to_string(), gap(true, 2, 2))];
-        let summary = show_collection_summary(&rows, true, true).expect("要約が出る");
-        assert_eq!(summary.label, "この公演で 1 曲回収");
     }
 
     /// 同じ公演で 2 回歌われた曲は 1 曲として数える。

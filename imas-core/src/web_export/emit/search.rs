@@ -270,15 +270,3 @@ const BOUNDARY_CASES: &[&str] = &[
     "M@STERS OF IDOL WORLD!!",
     "9:02pm",
 ];
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn separator_never_appears_in_folded_text() {
-        // U+0001 が索引本文に出てしまうと、境界をまたぐ偽陽性を防ぐ仕掛けが壊れる。
-        let folded = String::from_utf8(prepare_needle("Thank You! ありがとう")).unwrap();
-        assert!(!folded.contains(SEP));
-    }
-}

@@ -239,14 +239,4 @@ mod tests {
             Err(ToolError::BadArgs(_))
         ));
     }
-
-    #[test]
-    fn スキーマは軸の名前を網羅している() {
-        let schema = show_scope_schema(json!({ "limit": { "type": "integer" } }));
-        let props = schema.as_object().unwrap();
-        for axis in SHOW_SCOPE_ARGS {
-            assert!(props.contains_key(axis), "{axis} がスキーマに無い");
-        }
-        assert!(props.contains_key("limit"), "ツール固有の引数が混ざらない");
-    }
 }

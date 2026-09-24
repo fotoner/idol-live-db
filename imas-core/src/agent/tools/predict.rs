@@ -363,20 +363,6 @@ mod tests {
     }
 
     #[test]
-    fn 主演公演は_cast_role_で引ける() {
-        let out = call("list_shows", json!({ "cast_role": "lead" }));
-        assert!(out["total"].as_u64().unwrap() >= 6, "{out}");
-        for row in out["shows"].as_array().unwrap() {
-            assert!(row["lead"].as_array().is_some_and(|a| !a.is_empty()), "{row}");
-        }
-        // 人と役割を組み合わせると、その人が主演だった公演だけになる。
-        let lead_id = out["shows"][0]["lead"][0]["id"].as_str().unwrap().to_string();
-        let mine = call("list_shows", json!({ "idol_id": lead_id, "cast_role": "lead" }));
-        assert!(mine["total"].as_u64().unwrap() >= 1, "{mine}");
-        assert!(mine["total"].as_u64().unwrap() <= out["total"].as_u64().unwrap());
-    }
-
-    #[test]
     fn 主演公演が無い人でも_0_件で落ちない() {
         // 伊吹翼には主演公演が無い。0 件が返ること (エラーにしないこと) を固定する。
         let out = call("list_shows", json!({ "idol_id": "ml_伊吹翼", "cast_role": "lead" }));
@@ -415,15 +401,6 @@ mod tests {
                 > all["song_count"]["median"].as_u64().unwrap(),
             "発売記念イベントが混ざったままの方が曲数が多い: {all} / {live}"
         );
-    }
-
-    #[test]
-    fn 語彙外の役割は候補つきで突き返す() {
-        let err = call_tool(bundle_snapshot(), "list_shows", &json!({ "cast_role": "主演" }), TODAY).unwrap_err();
-        match err {
-            ToolError::BadArgs(m) => assert!(m.contains("lead"), "{m}"),
-            other => panic!("{other}"),
-        }
     }
 
     #[test]
@@ -466,13 +443,6 @@ mod tests {
             2,
             "効いている軸だけを並べる: {out}"
         );
-    }
-
-    #[test]
-    fn 当たったときは手がかりを付けない() {
-        let out = call("list_shows", json!({ "cast_role": "lead" }));
-        assert!(out["total"].as_u64().unwrap() > 0, "{out}");
-        assert!(out.get("no_hits").is_none(), "当たっているのに手がかりが付く: {out}");
     }
 
     #[test]

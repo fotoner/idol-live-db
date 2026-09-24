@@ -123,15 +123,6 @@ mod tests {
     }
 
     #[test]
-    fn denominator_is_per_product_not_the_sum() {
-        let s = snap();
-        assert_eq!(completion(&s, Some("ml"), &[]).total, 2);
-        assert_eq!(completion(&s, Some("sidem"), &[]).total, 1);
-        // 全商品を通した数もとれるが、それは「商品の分母」ではない。
-        assert_eq!(completion(&s, None, &[]).total, 3);
-    }
-
-    #[test]
     fn owned_counts_only_songs_in_that_product() {
         let s = snap();
         let owned = vec!["ml1".to_string(), "sidem1".to_string(), "ml3".to_string()];

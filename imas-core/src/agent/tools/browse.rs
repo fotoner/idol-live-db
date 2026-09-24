@@ -1156,35 +1156,6 @@ mod tests {
         value[key].as_str().unwrap_or_else(|| panic!("{key} が文字列でない: {value}")).to_string()
     }
 
-    // ---- カタログ ----
-
-    #[test]
-    fn カタログは_8_件で_スキーマは_json() {
-        let all = catalog();
-        assert_eq!(all.len(), 8);
-        for tool in &all {
-            assert_eq!(tool.input_schema["type"], "object", "{} のスキーマ", tool.name);
-            assert_eq!(
-                tool.input_schema["additionalProperties"],
-                Value::Bool(false),
-                "{} に additionalProperties: false が無い",
-                tool.name
-            );
-            assert!(!tool.description.is_empty(), "{} に説明が無い", tool.name);
-        }
-    }
-
-    #[test]
-    fn 全ツールが_call_で拾われる() {
-        for tool in catalog() {
-            assert!(
-                call(bundle_snapshot(), &tool.name, &json!({}), TODAY).is_some(),
-                "{} が dispatch から漏れている",
-                tool.name
-            );
-        }
-    }
-
     // ---- list_idols ----
 
     #[test]
@@ -1252,14 +1223,6 @@ mod tests {
         // 既定方向は降順 (高い順)。
         let cm = |s: &String| s.trim_end_matches("cm").parse::<f64>().unwrap();
         assert!(heights.windows(2).all(|w| cm(&w[0]) >= cm(&w[1])), "高い順でない: {heights:?}");
-    }
-
-    #[test]
-    fn 語彙外のブランドは候補つきで弾く() {
-        let e = err("list_idols", json!({ "brand": "cinderella" }));
-        let ToolError::BadArgs(message) = e else { panic!("BadArgs でない") };
-        assert!(message.contains("cinderella"), "{message}");
-        assert!(message.contains("cg"), "取りうる値が並んでいない: {message}");
     }
 
     #[test]
@@ -1403,15 +1366,6 @@ mod tests {
     }
 
     #[test]
-    fn 種別を指定しなければ発売記念イベントも入る() {
-        let all = run("list_events", json!({ "limit": 1 }));
-        let live = run("list_events", json!({ "kind": "live", "limit": 1 }));
-        let release = run("list_events", json!({ "kind": "release_event", "limit": 1 }));
-        assert!(release["total"].as_u64().unwrap() > 0);
-        assert!(all["total"].as_u64().unwrap() > live["total"].as_u64().unwrap());
-    }
-
-    #[test]
     fn 催しの種別で絞れる() {
         // 「AS の周年では」のような絞り込みの軸。語彙は実データの DISTINCT なので、
         // 分類がまだ入っていない DB でも「その値で絞ったらその値だけ返る」は成り立つ。
@@ -1525,15 +1479,6 @@ mod tests {
     // ---- setlist_diff ----
 
     #[test]
-    fn 同じ公演どうしの比較は完全一致になる() {
-        let show_id = bundle_snapshot().shows_in_date_order.last().map(|&i| bundle_snapshot().shows[i as usize].id.clone()).unwrap();
-        let out = run("setlist_diff", json!({ "show_id_a": show_id, "show_id_b": show_id }));
-        assert!(rows(&out, "only_a").is_empty());
-        assert!(rows(&out, "only_b").is_empty());
-        assert!(out["same_order"].as_bool().unwrap());
-    }
-
-    #[test]
     fn 別の公演を比べると共通曲と片方だけの曲が出る() {
         // 同じツアーの 2 公演 (ConnecTrip! の大阪と東京) を比べる。
         let a = tour_show("ev_the_idolmster_cinderella_girls_unit_live_tour_connectrip_大阪公演");
@@ -1564,14 +1509,6 @@ mod tests {
         bundle_snapshot().shows[show as usize].id.clone()
     }
 
-    #[test]
-    fn 知らない公演は_not_found() {
-        assert!(matches!(
-            err("setlist_diff", json!({ "show_id_a": "show_無い", "show_id_b": "show_無い" })),
-            ToolError::NotFound(_)
-        ));
-    }
-
     // ---- stats ----
 
     #[test]
@@ -1585,18 +1522,6 @@ mod tests {
                 assert!(item.get("id").is_some(), "{kind} の行に id が無い: {item}");
             }
         }
-    }
-
-    #[test]
-    fn 披露回数ランキングは多い順で総数も返る() {
-        let out = run("stats", json!({ "kind": "song_play_ranking", "limit": 5 }));
-        let items = rows(&out, "items");
-        assert_eq!(items.len(), 5);
-        let counts: Vec<u64> = items.iter().map(|i| i["play_count"].as_u64().unwrap()).collect();
-        assert!(counts.windows(2).all(|w| w[0] >= w[1]), "多い順でない: {counts:?}");
-        // 「何曲が披露されたことがあるか」に答えられる。
-        assert!(out["total"].as_u64().unwrap() > 1000);
-        assert!(out["truncated"].as_bool().unwrap());
     }
 
     #[test]

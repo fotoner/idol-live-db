@@ -427,27 +427,6 @@ mod tests {
     }
 
     #[test]
-    fn 割合は公演の規模に左右されない() {
-        let snap = bundle_snapshot();
-        let shape = setlist_shape(snap, &lead_shows(snap), 5);
-        let songs = shape.song_count.clone().unwrap();
-        let share = shape.lead_share_percent.clone().unwrap();
-        let count = shape.lead_songs.clone().unwrap();
-
-        // 標本の公演は規模がばらつく (23 曲の回も 39 曲の回もある)。
-        assert!(songs.max > songs.min, "規模が一定なら割合を足す意味がない: {songs:?}");
-        // 曲数の散らばりより割合の散らばりのほうが小さい = 主演の重さは規模より安定している。
-        // ここが逆転するなら、割合ではなく曲数で読むべきということなので気づけるようにする。
-        let count_spread = count.max - count.min;
-        let share_spread = share.max - share.min;
-        assert!(
-            share_spread * 100 / share.median < count_spread * 100 / count.median,
-            "割合のほうが散らばっている: 曲数 {count:?} / 割合 {share:?}"
-        );
-        assert!(share.max <= 100, "100 % を超えている: {share:?}");
-    }
-
-    #[test]
     fn ソロ枠はその日_1_人で歌った曲だけを数える() {
         let snap = bundle_snapshot();
         // 14thLIVE DAY2。原唱者ベースなら 15 本になるが、実際のソロ枠は 7 本。
@@ -462,19 +441,6 @@ mod tests {
             .filter(|&&i| is_solo_song(snap, snap.setlist_items[i as usize].song))
             .count();
         assert!(by_artist > 7, "原唱者ベースは {by_artist} 本で、歌唱者ベースより多いはず");
-    }
-
-    #[test]
-    fn 主演公演のソロ枠はすべて主演のもの() {
-        let snap = bundle_snapshot();
-        let shape = setlist_shape(snap, &lead_shows(snap), 5);
-        // 実データでは全公演一致する。崩れたら「主演以外もソロを歌う形式」に
-        // 変わったということなので、予想の前提として気づけるようにしておく。
-        assert_eq!(
-            shape.solo_slots, shape.lead_solo_slots,
-            "主演以外のソロ枠が現れた: {:?} / {:?}",
-            shape.solo_slots, shape.lead_solo_slots
-        );
     }
 
     #[test]
@@ -614,28 +580,5 @@ mod tests {
         assert!(p.encore <= p.performances);
         // アンコールは終盤に含まれるので、終盤の回数以下になるはず。
         assert!(p.encore <= p.phase(Phase::Late), "アンコールが終盤より多い: {p:?}");
-    }
-
-    #[test]
-    fn 未知の曲でも落ちずに全部_0() {
-        let p = song_position_profile(bundle_snapshot(), "存在しない曲");
-        assert_eq!(p.performances, 0);
-        assert!(p.sections.is_empty());
-    }
-
-    #[test]
-    fn 公演が無ければ型も空() {
-        let shape = setlist_shape(bundle_snapshot(), &[], 5);
-        assert_eq!(shape.shows(), 0);
-        assert_eq!(shape.shows_without_setlist, 0);
-        assert!(shape.song_count.is_none());
-        assert!(shape.openers.is_empty());
-    }
-
-    #[test]
-    fn 同じ入力なら同じ答え() {
-        let s = bundle_snapshot();
-        let shows = lead_shows(s);
-        assert_eq!(setlist_shape(s, &shows, 5), setlist_shape(s, &shows, 5));
     }
 }

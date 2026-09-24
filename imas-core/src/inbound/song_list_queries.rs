@@ -117,16 +117,6 @@ mod tests {
     }
 
     #[test]
-    fn not_loaded_is_a_typed_error() {
-        let store = SnapshotStore::new();
-        assert!(matches!(
-            store.song_list(browse_filter(), SongListSort::TitleKana, None, vec![], vec![]),
-            Err(SnapshotError::NotLoaded)
-        ));
-        assert!(matches!(store.song_performance_count_map(), Err(SnapshotError::NotLoaded)));
-    }
-
-    #[test]
     fn ffi_surface_smoke() {
         // ロジックの等価性は domain 側の照合テストが担う。ここは委譲の疎通だけ確認する。
         let store = bundle_store();

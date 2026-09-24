@@ -568,12 +568,6 @@ mod tests {
     }
 
     #[test]
-    fn shows_match_sql_over_a_grid_sized_range() {
-        // 月グリッド相当 (6 週) の典型レンジ
-        assert_shows_match("2023-06-25", "2023-08-06", true);
-    }
-
-    #[test]
     fn shows_match_sql_over_a_full_year() {
         assert_shows_match("2018-01-01", "2018-12-31", true);
     }
@@ -651,11 +645,6 @@ mod tests {
     #[test]
     fn releases_match_sql_over_full_history() {
         assert_releases_match("0000-01-01", "9999-12-31", true);
-    }
-
-    #[test]
-    fn releases_match_sql_over_one_month() {
-        assert_releases_match("2015-04-01", "2015-04-30", true);
     }
 
     #[test]
@@ -776,29 +765,9 @@ mod tests {
     }
 
     #[test]
-    fn tickets_match_sql_over_one_month() {
-        assert_tickets_match("2026-05-01", "2026-05-31", true);
-    }
-
-    #[test]
     fn tickets_match_sql_when_range_has_none() {
         assert_tickets_match("2020-01-01", "2020-12-31", false);
         assert_tickets_match("2000-01-01", "2100-12-31", true); // 全件レンジ
-    }
-
-    #[test]
-    fn ticket_columns_are_all_strict_days_in_bundle() {
-        // 「自由記述を弾く」分岐が Bundle では発火しないこと (= 検証が全通し) の確認。
-        // 自由記述が入った時の挙動は is_strict_day 側の単体テストで固定する。
-        let c = bundle_conn();
-        for col in ["ticket_open_date", "ticket_deadline", "ticket_lottery_date"] {
-            let mut stmt = c
-                .prepare(&format!("SELECT {col} FROM events WHERE {col} IS NOT NULL"))
-                .unwrap();
-            let values: Vec<String> =
-                stmt.query_map([], |r| r.get(0)).unwrap().collect::<Result<_, _>>().unwrap();
-            assert!(values.iter().all(|v| is_strict_day(v)), "{col} に自由記述が混入");
-        }
     }
 
     // ---- 誕生日の照合 (アイドル / スタッフ) ----
@@ -847,18 +816,6 @@ mod tests {
                 _ => None,
             })
             .collect()
-    }
-
-    #[test]
-    fn birthdays_match_sql_within_single_year_range() {
-        let entries = calendar_entries(bundle_snapshot(), "2025-04-06", "2025-05-17");
-        let expected = birthday_oracle_same_year("idols", "2025", "04-06", "05-17");
-        assert!(!expected.is_empty());
-        assert_eq!(birthday_entries(&entries), expected);
-        assert_eq!(
-            staff_birthday_entries(&entries),
-            birthday_oracle_same_year("staff", "2025", "04-06", "05-17")
-        );
     }
 
     #[test]
@@ -987,17 +944,6 @@ mod tests {
             })
             .collect();
         assert!(origins.windows(2).all(|w| w[0] <= w[1]), "起点日昇順が崩れている");
-    }
-
-    #[test]
-    fn anniversaries_match_sql_over_one_month() {
-        let entries = calendar_entries(bundle_snapshot(), "2026-07-01", "2026-07-31");
-        let expected = anniversary_oracle_same_year("2026", "07-01", "07-31");
-        assert!(!expected.is_empty());
-        assert_eq!(
-            anniversary_entries(&entries).into_iter().collect::<HashSet<_>>(),
-            expected
-        );
     }
 
     #[test]

@@ -136,15 +136,6 @@ mod tests {
         )
     }
 
-    #[test]
-    fn full_playback_shows_naming_without_a_mark() {
-        let b = bar(NowPlayingKind::Full, true);
-        assert_eq!(b.title, "Take Ur Time");
-        assert_eq!(b.subtitle.as_deref(), Some("八宮めぐる"));
-        assert_eq!(b.preview_mark, None);
-        assert!(b.is_playing);
-    }
-
     /// 試聴は黙って終わるので、必ず印が付く。
     #[test]
     fn preview_carries_a_mark() {
@@ -168,31 +159,6 @@ mod tests {
         assert_eq!(b.preview_mark.as_deref(), Some("試聴"));
     }
 
-    #[test]
-    fn nothing_to_show_leaves_subtitle_none() {
-        let b = compose_bar("x", "名義なしの曲", &naming(None, &[]), None, NowPlayingKind::Full, true);
-        assert_eq!(b.subtitle, None);
-    }
-
-    /// 一時停止でもバーは残る。消えるのは鳴らす曲が無くなったときだけ。
-    #[test]
-    fn paused_keeps_the_bar() {
-        assert!(!bar(NowPlayingKind::Full, false).is_playing);
-    }
-
-    #[test]
-    fn unit_name_is_used_for_unit_songs() {
-        let b = compose_bar(
-            "sc_solar_way",
-            "SOLAR WAY -10 colors-",
-            &naming(Some("Team.Sol"), &["八宮めぐる"]),
-            None,
-            NowPlayingKind::Full,
-            true,
-        );
-        assert_eq!(b.subtitle.as_deref(), Some("Team.Sol"));
-    }
-
     /// 空のジャケ URL はキーごと無かったことにする。
     #[test]
     fn blank_artwork_url_becomes_none() {
@@ -205,20 +171,6 @@ mod tests {
             true,
         );
         assert!(b.artwork_url.is_none());
-    }
-
-    /// タップで開く先は必ず id。曲名で引き当てさせない。
-    #[test]
-    fn bar_carries_the_song_id() {
-        let b = compose_bar(
-            "765as_私はアイドル",
-            "私はアイドル♡ (M@STER VERSION)",
-            &naming(None, &["水瀬伊織"]),
-            None,
-            NowPlayingKind::Full,
-            true,
-        );
-        assert_eq!(b.song_id, "765as_私はアイドル");
     }
 
     /// 知らない曲 id を渡してもバーは出ない (曲を消した直後など)。

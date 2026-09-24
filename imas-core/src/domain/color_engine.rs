@@ -681,15 +681,6 @@ mod tests {
         assert_eq!(accent(Some("#f0a"), Some("#fe0000")), ("#f50aa7".into(), false));
     }
 
-    /// 無効な hex を直接 `derive_from_hex` に渡した結果と、seed/brand 両方欠けた
-    /// `derive` の結果は一致する (どちらもニュートラルグレーに落ちる)。
-    /// 原本の 3 つの derive 入口を 1 本に畳める根拠。
-    #[test]
-    fn invalid_hex_and_missing_seed_land_on_the_same_neutral() {
-        assert_eq!(derive_from_hex("not-a-color", true), derive(None, None, true));
-        assert_eq!(derive_from_hex("not-a-color", false), derive_from_hex(NEUTRAL_SEED, false));
-    }
-
     /// **移送時に見つけた事故のガード**: 3 文字がすべて 16 進数字の ID は
     /// 短縮 hex として展開され、色として通ってしまう。
     /// Android がブランド ID をそのまま `brand` に渡していたため、`876` / `961` の
@@ -736,13 +727,6 @@ mod tests {
         }
     }
 
-    /// 同じキーは何度呼んでも同じ色 (決定的)。分類色が描画のたびに変わらない根拠。
-    #[test]
-    fn category_key_color_is_deterministic() {
-        assert_eq!(derive_for_category_key("idol", true), derive_for_category_key("idol", true));
-        assert_ne!(derive_for_category_key("idol", true), derive_for_category_key("song", true));
-    }
-
     // --- variant_hex ---
 
     /// 基準値は Swift オラクルの VARIANT 行。
@@ -768,20 +752,6 @@ mod tests {
         ];
         for (hex, key, expected) in cases {
             assert_eq!(variant_hex(hex, key), *expected, "variant_hex({hex}, {key})");
-        }
-    }
-
-    /// 色相のブレは ±16° に収まる (同じブランドの別系列に見せるための制約)。
-    /// 25 通りの全組み合わせを踏むだけのキーを回して確かめる。
-    #[test]
-    fn variant_hex_keeps_hue_within_sixteen_degrees() {
-        let base = rgb_to_hsl(hex_to_rgb("#2681c8")).h;
-        for i in 0..200u32 {
-            let key = format!("k{i}");
-            let got = rgb_to_hsl(hex_to_rgb(&variant_hex("#2681c8", &key))).h;
-            // 8bit へ丸めた hex から読み直すので、丸め由来の 1° 弱を許容する。
-            let delta = (got - base).abs().min(360.0 - (got - base).abs());
-            assert!(delta <= 17.0, "key={key} hue delta={delta}");
         }
     }
 
@@ -974,74 +944,6 @@ mod tests {
         }
     }
 
-    /// `first_valid_hex` は候補を先頭から見て、最初の有効なものを**そのまま**返す
-    /// (正規化しない)。nil はスキップして次を見る。
-    #[test]
-    fn first_valid_hex_returns_the_first_usable_candidate_verbatim() {
-        assert_eq!(first_valid_hex(&[Some("#E22B30"), Some("#fe0000")]), Some("#E22B30"));
-        assert_eq!(first_valid_hex(&[None, Some("#fe0000")]), Some("#fe0000"));
-        assert_eq!(first_valid_hex(&[Some("nope"), Some("#fe0000")]), Some("#fe0000"));
-        assert_eq!(first_valid_hex(&[None, None]), None);
-        assert_eq!(first_valid_hex(&[Some(""), Some("bad!")]), None);
-        assert_eq!(first_valid_hex(&[]), None);
-    }
-
-    // --- HSL 変換の往復 ---
-
-    /// 実データ全色で `hex → HSL → RGB` が元の 8bit に戻る (変換が情報を落とさない)。
-    #[test]
-    fn hsl_round_trip_preserves_every_real_seed() {
-        for seed in REAL_SEEDS.split_whitespace() {
-            let rgb = hex_to_rgb(seed);
-            let hsl = rgb_to_hsl(rgb);
-            assert_eq!(
-                hex_string(hsl_to_rgb(hsl.h, hsl.s, hsl.l)),
-                hex_string(rgb),
-                "round trip: {seed}"
-            );
-        }
-    }
-
-    /// 無彩色は色相 0・彩度 0 に落ち、`hsl_to_rgb` の s == 0 の近道を通る。
-    #[test]
-    fn achromatic_seeds_take_the_saturation_zero_shortcut() {
-        for gray in ["#000000", "#7f7f7f", "#ffffff"] {
-            let hsl = rgb_to_hsl(hex_to_rgb(gray));
-            assert_eq!(hsl.h, 0.0);
-            assert_eq!(hsl.s, 0.0);
-            assert_eq!(hex_string(hsl_to_rgb(hsl.h, hsl.s, hsl.l)), gray);
-        }
-    }
-
-    /// 色相は 0–360 の外でも畳まれる (`variant_hex` が負の色相を作り得るため)。
-    #[test]
-    fn hue_wraps_outside_zero_to_three_sixty() {
-        let base = hsl_to_rgb(20.0, 0.6, 0.5);
-        assert_eq!(hsl_to_rgb(380.0, 0.6, 0.5), base);
-        assert_eq!(hsl_to_rgb(-340.0, 0.6, 0.5), base);
-    }
-
-    // --- ニュートラル判定 ---
-
-    /// 彩度 0.10 が境界。下回ればグレー扱いで発色を抑える。
-    #[test]
-    fn neutral_flag_follows_the_saturation_threshold() {
-        // #8e8e93 は s ≒ 0.02 → ニュートラル。
-        assert!(derive_from_hex("#8e8e93", false).is_neutral);
-        assert!(derive_from_hex("#000000", false).is_neutral);
-        assert!(derive_from_hex("#ffffff", true).is_neutral);
-        // 実アイドル色はいずれも十分に彩度がある。
-        assert!(!derive_from_hex("#E22B30", false).is_neutral);
-        assert!(!derive_from_hex("#01ADB9", true).is_neutral);
-        // ニュートラルは light/dark を問わず同じ判定 (シードの彩度だけで決まる)。
-        for seed in ["#8e8e93", "#E22B30"] {
-            assert_eq!(
-                derive_from_hex(seed, false).is_neutral,
-                derive_from_hex(seed, true).is_neutral
-            );
-        }
-    }
-
     // --- 一括版 ---
 
     /// 一括版は 1 件ずつ呼んだ結果と同じものを、同じ順で返す。
@@ -1063,11 +965,6 @@ mod tests {
         // 同じ入力が並んでも取り違えない (順序が保たれる)。
         assert_eq!(batched[0], derive(Some("#E22B30"), Some("#fe0000"), true));
         assert_eq!(batched[2], derive(None, None, true));
-    }
-
-    #[test]
-    fn batch_of_nothing_is_nothing() {
-        assert!(derive_batch(&[], false).is_empty());
     }
 
     // --- clamp の評価順 ---

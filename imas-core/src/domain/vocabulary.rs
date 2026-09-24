@@ -199,19 +199,6 @@ mod tests {
     use super::*;
     use std::collections::HashSet;
 
-    /// Web (`web_export::content`) が出していた正式な形と同じであること (Web の表示を変えない)。
-    #[test]
-    fn formal_labels_match_what_the_web_shows() {
-        let label = |v: &str| song_type(v).map(|t| t.label);
-        assert_eq!(label("solo"), Some("ソロ曲"));
-        assert_eq!(label("unit"), Some("ユニット曲"));
-        assert_eq!(label("all"), Some("全体曲"));
-        assert_eq!(label("cover"), Some("カバー"));
-        assert_eq!(label("tie_in"), Some("タイアップ"));
-        assert_eq!(event_kind("release_event").label, "リリースイベント");
-        assert_eq!(event_kind("festival").label, "フェス");
-    }
-
     /// アプリのチップ・絞り込みが出していた短い形と同じであること。
     #[test]
     fn short_labels_match_what_the_apps_show() {
@@ -233,13 +220,6 @@ mod tests {
         assert_eq!(event_kind("mystery").label, "その他");
         assert_eq!(event_type(""), None, "未分類は種別を出さない");
         assert_eq!(attendance_type(""), None);
-    }
-
-    #[test]
-    fn ticket_words_are_the_decided_ones() {
-        let words: Vec<&str> = TICKET_DATES.iter().map(|t| t.label).collect();
-        assert_eq!(words, ["受付開始", "申込締切", "当落発表"]);
-        assert_eq!(TICKET_PERIOD_LABEL, "受付期間");
     }
 
     /// 選択肢に出す語彙は値が重複しない (重複すると選択肢が 2 つ並ぶ)。

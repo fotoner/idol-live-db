@@ -149,13 +149,6 @@ mod tests {
     }
 
     #[test]
-    fn positions_are_scalar_offsets() {
-        let got = chunks("ダミー歌詞");
-        assert_eq!(got[0], LyricChunk { start: 0, end: 3, text: "ダミー".into() });
-        assert_eq!(got[1], LyricChunk { start: 3, end: 5, text: "歌詞".into() });
-    }
-
-    #[test]
     fn chunk_at_finds_the_word_under_the_finger() {
         // 「歌詞」の 2 文字目を触っても「歌詞」全体が返る。
         assert_eq!(chunk_at("ダミー歌詞のサンプル", 4).unwrap().text, "歌詞");

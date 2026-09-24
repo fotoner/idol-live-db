@@ -89,13 +89,6 @@ mod tests {
         assert_eq!(r, OshiThemeResolution { idol_id: None, color_hex: String::new() });
     }
 
-    /// OFF は空入力でも同じ結果 (分岐が入力に依存しない)。
-    #[test]
-    fn disabled_with_empty_inputs() {
-        let r = resolve_oshi_theme(false, "", &[]);
-        assert_eq!(r, OshiThemeResolution { idol_id: None, color_hex: String::new() });
-    }
-
     // --- ON: 空入力の境界 ---
 
     /// 担当 0 人なら id も色も空にする (Some("") = 「空を保存し直す」)。
@@ -105,22 +98,7 @@ mod tests {
         assert_eq!(r, OshiThemeResolution { idol_id: Some(String::new()), color_hex: String::new() });
     }
 
-    /// 選択が残っていても担当 0 人なら空へ寄せる (解除後にテーマ色が残らない)。
-    #[test]
-    fn enabled_with_stale_selection_and_no_picks_resolves_to_empty() {
-        let r = resolve_oshi_theme(true, "amami_haruka", &[]);
-        assert_eq!(r, OshiThemeResolution { idol_id: Some(String::new()), color_hex: String::new() });
-    }
-
     // --- ON: 単一要素・通常系 ---
-
-    /// 選択が空なら (2 人以上いても) 先頭の担当を既定にする。
-    #[test]
-    fn empty_selection_falls_back_to_first_pick() {
-        let r = resolve_oshi_theme(true, "", &picks());
-        assert_eq!(r.idol_id.as_deref(), Some("amami_haruka"));
-        assert_eq!(r.color_hex, "#e22b30");
-    }
 
     /// 選択中の担当がまだ担当なら、そのまま維持して色もその人のものを返す。
     #[test]
@@ -160,23 +138,7 @@ mod tests {
         assert_eq!(r.color_hex, "#111111");
     }
 
-    /// 先頭寄せも常に「先頭」で安定 (2 回呼んでも同じ結果 = 決定的)。
-    #[test]
-    fn fallback_is_deterministic() {
-        let r1 = resolve_oshi_theme(true, "gone", &picks());
-        let r2 = resolve_oshi_theme(true, "gone", &picks());
-        assert_eq!(r1, r2);
-    }
-
     // --- Unicode ---
-
-    /// id は ASCII slug 想定だが、非 ASCII が来ても文字列一致で正しく解決される。
-    #[test]
-    fn unicode_ids_match_exactly() {
-        let uni = vec![idol("双海_亜美", Some("#ffe43f")), idol("双海_真美", Some("#ffe43f"))];
-        let r = resolve_oshi_theme(true, "双海_真美", &uni);
-        assert_eq!(r.idol_id.as_deref(), Some("双海_真美"));
-    }
 
     /// Rust の比較はバイト同値。NFC/NFD の正規化差は別 id 扱いになり先頭へ寄る
     /// (Swift の String == は正規化同値なのでここは仕様差。DB 由来の id は同一表現

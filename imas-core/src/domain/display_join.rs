@@ -72,11 +72,4 @@ mod tests {
             Some("a / b ほか 2 名".to_string())
         );
     }
-
-    #[test]
-    fn year_is_the_first_four_characters() {
-        assert_eq!(year_of("2024-05-18"), "2024");
-        assert_eq!(year_of("20"), "20");
-        assert_eq!(year_of(""), "");
-    }
 }

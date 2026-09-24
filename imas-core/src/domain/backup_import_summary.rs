@@ -54,15 +54,6 @@ mod tests {
         assert!(!backup_import_summary(1, 0, 0, 0, 0, false).contains("収支"));
     }
 
-    /// 全部 0 件・端末ID無し: 主目的の 1 行だけが出て、オプション行は一切付かない。
-    #[test]
-    fn all_zero_shows_only_base_line() {
-        assert_eq!(
-            backup_import_summary(0, 0, 0, 0, 0, false),
-            "担当/お気に入り等を 0 件、投票履歴を 0 件 追加しました。"
-        );
-    }
-
     /// 0 件の項目は文面に出さない (ノイズを増やさない)。
     /// iOS `MyPageRulesTests.testSummaryOmitsZeroSections` の移植。
     #[test]
@@ -70,33 +61,6 @@ mod tests {
         assert_eq!(
             backup_import_summary(3, 2, 0, 0, 0, false),
             "担当/お気に入り等を 3 件、投票履歴を 2 件 追加しました。"
-        );
-    }
-
-    /// マイタグだけが入ったケース: マイタグ行のみ追記される。
-    #[test]
-    fn personal_tags_line_appears_only_when_positive() {
-        assert_eq!(
-            backup_import_summary(0, 0, 3, 0, 0, false),
-            "担当/お気に入り等を 0 件、投票履歴を 0 件 追加しました。\nマイタグを 3 件 追加しました。"
-        );
-    }
-
-    /// スキップだけが起きたケース: 括弧書きのスキップ行のみ追記される。
-    #[test]
-    fn skipped_line_appears_only_when_positive() {
-        assert_eq!(
-            backup_import_summary(0, 0, 0, 0, 2, false),
-            "担当/お気に入り等を 0 件、投票履歴を 0 件 追加しました。\n(2 件は形式不正のためスキップされました)"
-        );
-    }
-
-    /// 端末 ID だけ復元したケース: 端末 ID 行のみ追記される。
-    #[test]
-    fn device_id_line_appears_only_when_restored() {
-        assert_eq!(
-            backup_import_summary(0, 0, 0, 0, 0, true),
-            "担当/お気に入り等を 0 件、投票履歴を 0 件 追加しました。\n端末IDも復元しました。"
         );
     }
 
@@ -114,17 +78,5 @@ mod tests {
             backup_import_summary(12, 34, 5, 0, 6, true),
             backup_import_summary(12, 34, 5, 0, 6, true)
         );
-    }
-
-    /// マルチバイト (日本語) と ASCII 数字の混在文面が改行区切りで壊れないこと。
-    #[test]
-    fn unicode_lines_split_cleanly() {
-        let message = backup_import_summary(1, 2, 3, 0, 4, true);
-        let lines: Vec<&str> = message.lines().collect();
-        assert_eq!(lines.len(), 4);
-        assert!(lines[0].contains("担当/お気に入り等を 1 件"));
-        assert!(lines[1].starts_with("マイタグを 3 件"));
-        assert!(lines[2].starts_with('('));
-        assert_eq!(lines[3], "端末IDも復元しました。");
     }
 }

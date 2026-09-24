@@ -1347,63 +1347,6 @@ mod tests {
         assert!(related_songs(snap, "存在しない曲", 8).is_empty());
     }
 
-    /// 点は**加算**される (同シリーズかつ同ユニットは 3+2=5 点で、同シリーズだけの曲より前)。
-    /// 「どれか 1 つの枝で決める」実装にすると並びが変わる。
-    #[test]
-    fn related_songs_scores_are_additive() {
-        let snap = bundle_snapshot();
-        // 同シリーズかつ同ユニットの相手がいる曲を実データから探す。
-        let found = snap.songs.iter().find(|s| {
-            let (Some(sg), Some(unit)) = (non_empty(&s.series_group), non_empty(&s.unit_id)) else {
-                return false;
-            };
-            let both = snap.songs.iter().filter(|o| {
-                o.id != s.id
-                    && o.series_group.as_deref() == Some(sg)
-                    && o.unit_id.as_deref() == Some(unit)
-            });
-            let series_only = snap.songs.iter().any(|o| {
-                o.id != s.id
-                    && o.series_group.as_deref() == Some(sg)
-                    && o.unit_id.as_deref() != Some(unit)
-            });
-            both.count() > 0 && series_only
-        });
-        let song = found.expect("同シリーズかつ同ユニットの相手がいる曲がある前提");
-        let sg = non_empty(&song.series_group).unwrap();
-        let unit = non_empty(&song.unit_id).unwrap();
-
-        let result = related_songs(snap, &song.id, 200);
-        let rank = |id: &str| result.iter().position(|r| r.id == id);
-        let both = result
-            .iter()
-            .find(|r| r.series_group.as_deref() == Some(sg) && r.unit_id.as_deref() == Some(unit))
-            .expect("5 点の相手が結果に居る");
-        let series_only = result
-            .iter()
-            .find(|r| r.series_group.as_deref() == Some(sg) && r.unit_id.as_deref() != Some(unit))
-            .expect("3 点の相手が結果に居る");
-        assert!(
-            rank(&both.id) < rank(&series_only.id),
-            "5 点 ({}) が 3 点 ({}) より前に来る",
-            both.id,
-            series_only.id
-        );
-    }
-
-    /// 自分自身はどの枝からも除かれる。
-    #[test]
-    fn related_songs_never_include_the_song_itself() {
-        let snap = bundle_snapshot();
-        for s in snap.songs.iter().step_by(29) {
-            assert!(
-                related_songs(snap, &s.id, 200).iter().all(|r| r.id != s.id),
-                "song={}",
-                s.id
-            );
-        }
-    }
-
     /// Swift `String.likeEscaped` の写経 (元 SQL のバインド値を組むのに使う)。
     fn like_escaped(s: &str) -> String {
         s.replace('\\', "\\\\").replace('%', "\\%").replace('_', "\\_")

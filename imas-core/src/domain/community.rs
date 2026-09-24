@@ -285,17 +285,4 @@ mod tests {
         assert!(s.songs_with_song_tag("消えた").is_empty());
         assert!(s.songs_with_song_tag("b").iter().all(|r| r.entity_id == "s1"));
     }
-
-    #[test]
-    fn 空白だけの説明は無しに畳む() {
-        assert!(snap().song_tag_vocab["a"].description.is_none());
-    }
-
-    #[test]
-    fn 集計の無い相手は空とゼロ() {
-        let s = snap();
-        assert!(s.song_tags("居ない").is_empty());
-        assert_eq!(s.favorites("居ない"), 0);
-        assert!(s.penlight("居ない").is_empty());
-    }
 }

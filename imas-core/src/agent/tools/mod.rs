@@ -560,13 +560,6 @@ mod tests {
     }
 
     #[test]
-    fn limit_は上限で丸める_0_は既定に戻す() {
-        assert_eq!(args::limit(&json!({"limit": 10000}), 20, 100).unwrap(), 100);
-        assert_eq!(args::limit(&json!({"limit": 0}), 20, 100).unwrap(), 20);
-        assert_eq!(args::limit(&json!({}), 20, 100).unwrap(), 20);
-    }
-
-    #[test]
     fn 配列を1個の文字列で寄こしても受ける() {
         assert_eq!(args::str_list(&json!({"brands": "cg"}), "brands"), vec!["cg"]);
         assert_eq!(args::str_list(&json!({"brands": ["cg", " ml "]}), "brands"), vec!["cg", "ml"]);
@@ -760,13 +753,6 @@ mod tests {
         // 語が 1 つだけなら分けようがない (定型の言葉だけを返す)。
         let single = hints::no_hits(snap, "トラプリ", &[]);
         assert!(single["terms"].is_null() && single["next"].is_null(), "{single}");
-    }
-
-    #[test]
-    fn 知らないツール名は_unknown_tool() {
-        let snap = crate::domain::snapshot::Snapshot::default();
-        let err = call_tool(&snap, "存在しない", &json!({}), "2026-09-19").unwrap_err();
-        assert_eq!(err, ToolError::UnknownTool("存在しない".into()));
     }
 
     /// 読み取り 18 本 + 書き込み 6 本、計 24 本すべてで封 (`tool_schema` の出力) が

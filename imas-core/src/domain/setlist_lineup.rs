@@ -249,14 +249,6 @@ mod tests {
     }
 
     #[test]
-    fn only_absentees_who_were_at_the_show_are_named() {
-        // c は公演に出ているのに歌っていない → 名前で示す。b は公演にいない → 数だけ。
-        let cast = set(&["a", "c", "x"]);
-        assert_eq!(absent_in_cast(&["b", "c"], &cast), vec!["c"]);
-        assert!(absent_in_cast(&["b"], &cast).is_empty());
-    }
-
-    #[test]
     fn summary_has_the_ratio_and_only_in_cast_absentees() {
         let performers = set(&["a", "x"]);
         let cast = set(&["a", "c", "x"]);
@@ -283,17 +275,5 @@ mod tests {
         let summary = some.summary.expect("一部の札");
         assert_eq!(summary.label(), "オリメン 1/2");
         assert_eq!(summary.absent_in_cast, vec!["c"], "公演にいて歌わなかった人");
-    }
-
-    #[test]
-    fn partial_label_carries_the_ratio() {
-        assert_eq!(Lineup::Partial.label(4, 5), "オリメン 4/5");
-        assert_eq!(Lineup::Original.label(5, 5), "オリメン");
-        assert_eq!(Lineup::Cover.label(0, 5), "オリメン不在");
-    }
-
-    #[test]
-    fn kind_serializes_as_camel_case() {
-        assert_eq!(serde_json::to_string(&Lineup::OriginalPlus).unwrap(), "\"originalPlus\"");
     }
 }

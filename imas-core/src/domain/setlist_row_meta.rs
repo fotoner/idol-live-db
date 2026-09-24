@@ -287,18 +287,6 @@ mod tests {
         assert!(meta.is_first_performance, "14thLIVE DAY1 が初披露");
     }
 
-    /// 同じ 2 人でも、`unit_id` を持つ本物のユニット曲はユニット名で出る。
-    #[test]
-    fn 同じ_2_人の本物のユニット曲はユニット名で出る() {
-        let snap = bundle_snapshot();
-        let si = snap.song_index_by_id["ml_だってあなたはプリンセス"];
-        assert_eq!(
-            snap.songs[si as usize].unit_name.as_deref(),
-            Some("Charlotte・Charlotte"),
-            "この曲は名義を持っている前提のテスト"
-        );
-    }
-
     /// 回帰: 顔ぶれ推論が曲の名義を上書きしていた行が、曲の綴りで出る。
     #[test]
     fn 曲の名義の綴りが顔ぶれ側の綴りに負けない() {

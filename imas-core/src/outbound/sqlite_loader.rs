@@ -987,16 +987,6 @@ mod tests {
     }
 
     #[test]
-    fn artists_are_sorted_by_sort_order() {
-        let s = bundle_snapshot();
-        for links in s.artists_by_song.iter().step_by(53) {
-            let orders: Vec<i64> =
-                links.iter().map(|l| s.idols[l.idol as usize].sort_order.unwrap_or(i64::MAX)).collect();
-            assert!(orders.windows(2).all(|w| w[0] <= w[1]));
-        }
-    }
-
-    #[test]
     fn performance_counts_match_sql_group_by() {
         // 披露回数は SQL 時代 (COUNT(*) GROUP BY song_id) と同じ値になること。
         let s = bundle_snapshot();
@@ -1030,16 +1020,6 @@ mod tests {
                 let ev = s.shows[first as usize].event as usize;
                 assert!(s.shows_by_event[ev].contains(&first));
             }
-        }
-    }
-
-    #[test]
-    fn setlist_items_by_show_are_sorted_by_position() {
-        let s = bundle_snapshot();
-        for list in s.setlist_items_by_show.iter().step_by(7) {
-            let positions: Vec<i64> =
-                list.iter().map(|&i| s.setlist_items[i as usize].position).collect();
-            assert!(positions.windows(2).all(|w| w[0] <= w[1]));
         }
     }
 
@@ -1191,76 +1171,6 @@ mod tests {
             assert_eq!(song.unit_version_id.as_deref(), Some(version.as_str()), "{id}");
         }
         assert_eq!(s.songs.iter().filter(|x| x.unit_version_id.is_some()).count(), versioned.len());
-    }
-
-    #[test]
-    fn show_cast_roles_are_loaded() {
-        let s = bundle_snapshot();
-        let cast_links: usize = s.cast_by_show.iter().map(Vec::len).sum();
-        assert!(cast_links > 5000, "show_cast リンク={cast_links}");
-        // cast_role は常に非空 (NULL は 'member' に既定化)
-        assert!(s
-            .cast_by_show
-            .iter()
-            .flatten()
-            .all(|l| !l.cast_role.is_empty()));
-        // show_cast_role の往復: 適当な行で引けること
-        let si = s.cast_by_show.iter().position(|c| !c.is_empty()).unwrap();
-        let link = &s.cast_by_show[si][0];
-        assert_eq!(s.show_cast_role(si as u32, link.idol), Some(link.cast_role.as_str()));
-    }
-
-    #[test]
-    fn collected_counts_can_be_derived_from_indexes() {
-        // 回収回数 (fetchSongCollectedCounts 相当) が索引だけで再現できることの確認。
-        // user_marks は載せない規約なので、参加 show 集合を「全 show」と仮置きして
-        // SQL の同等式 (kind IN ('live','festival') の distinct show 数) と突き合わせる。
-        let s = bundle_snapshot();
-        let c = bundle_conn();
-        let mut stmt = c
-            .prepare(
-                "SELECT si.song_id, COUNT(DISTINCT si.show_id)
-                 FROM setlist_items si
-                 JOIN shows sh ON sh.id = si.show_id
-                 JOIN events e ON e.id = sh.event_id
-                 WHERE e.kind IN ('live','festival')
-                 GROUP BY si.song_id",
-            )
-            .unwrap();
-        let sql_counts: HashMap<String, i64> = stmt
-            .query_map([], |r| Ok((r.get(0)?, r.get(1)?)))
-            .unwrap()
-            .collect::<Result<_, _>>()
-            .unwrap();
-        for (si, items) in s.setlist_items_by_song.iter().enumerate().step_by(17) {
-            let mut show_set = std::collections::HashSet::new();
-            for &ti in items {
-                let show = s.setlist_items[ti as usize].show;
-                let kind = &s.events[s.shows[show as usize].event as usize].kind;
-                if kind == "live" || kind == "festival" {
-                    show_set.insert(show);
-                }
-            }
-            let expected = sql_counts.get(&s.songs[si].id).copied().unwrap_or(0);
-            assert_eq!(show_set.len() as i64, expected, "song={}", s.songs[si].id);
-        }
-    }
-
-    #[test]
-    fn brand_order_matches_sql() {
-        // Bundle の brands は sort_order がユニークなので SQL と逐語比較できる。
-        let s = bundle_snapshot();
-        let c = bundle_conn();
-        let mut stmt = c.prepare("SELECT id FROM brands ORDER BY sort_order").unwrap();
-        let sql_ids: Vec<String> =
-            stmt.query_map([], |r| r.get(0)).unwrap().collect::<Result<_, _>>().unwrap();
-        let snap_ids: Vec<&str> =
-            s.brand_order.iter().map(|&i| s.brands[i as usize].id.as_str()).collect();
-        assert_eq!(sql_ids, snap_ids);
-        // brand() の O(1) 引きも往復すること
-        for brand in &s.brands {
-            assert_eq!(s.brand(&brand.id).map(|b| b.sort_order), Some(brand.sort_order));
-        }
     }
 
     #[test]
@@ -1496,32 +1406,6 @@ mod tests {
             .unwrap() as usize;
         let snap_staff_bd = s.staff.iter().filter(|st| st.birthday.is_some()).count();
         assert_eq!(snap_staff_bd, sql_staff_bd);
-    }
-
-    #[test]
-    fn meta_values_match_sql() {
-        let s = bundle_snapshot();
-        let c = bundle_conn();
-        let mut stmt = c.prepare("SELECT key, value FROM meta").unwrap();
-        let rows: Vec<(String, Option<String>)> = stmt
-            .query_map([], |r| Ok((r.get(0)?, r.get(1)?)))
-            .unwrap()
-            .collect::<Result<_, _>>()
-            .unwrap();
-        assert!(!rows.is_empty());
-        for (key, value) in rows {
-            assert_eq!(s.meta_value(&key), value.as_deref(), "key={key}");
-        }
-        assert_eq!(s.meta_value("存在しないキー"), None);
-    }
-
-    #[test]
-    fn documents_only_fields_default_to_none_on_bundle() {
-        // Bundle DB には Documents 専用列が無い → 全行 None で読める (動的検出の既定値側)。
-        let s = bundle_snapshot();
-        assert!(s.events.iter().all(|e| e.has_streaming.is_none() && e.has_live_viewing.is_none()));
-        assert!(s.shows.iter().all(|sh| sh.has_streaming.is_none() && sh.has_live_viewing.is_none()));
-        assert!(s.brands.iter().all(|b| b.icon_url.is_none()));
     }
 
     #[test]

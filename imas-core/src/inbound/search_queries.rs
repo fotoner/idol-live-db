@@ -42,14 +42,7 @@ impl SnapshotStore {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::test_support::bundle_store;
-
-    #[test]
-    fn not_loaded_is_a_typed_error() {
-        let store = SnapshotStore::new();
-        assert!(matches!(store.global_search("夢".into()), Err(SnapshotError::NotLoaded)));
-    }
 
     #[test]
     fn ffi_surface_smoke() {

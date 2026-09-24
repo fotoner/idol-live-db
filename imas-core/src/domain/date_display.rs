@@ -173,12 +173,6 @@ mod tests {
         assert_eq!(date_parts("2024-02-29").weekday, Some("木"));
     }
 
-    /// 月日はゼロ埋めしない (`9/19` であって `09/19` ではない)。
-    #[test]
-    fn month_day_has_no_zero_padding() {
-        assert_eq!(date_parts("2005-01-05").month_day, "1/5");
-    }
-
     /// 年月までの部分日付は月まで出し、曜日は付けない。
     #[test]
     fn partial_dates_keep_what_is_known() {

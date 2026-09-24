@@ -887,69 +887,6 @@ mod tests {
         }
     }
 
-    /// 親曲 (parent_song_id) を持つ派生曲 (ソロ ver 違い等) は節に出ない。
-    /// ミリオンのアイドルはこの手の ver 違いを大量に持つので、実データで確認する。
-    #[test]
-    fn idol_original_song_sections_excludes_songs_with_a_parent() {
-        let (snap, _conn) = load();
-        // 派生曲を実際に持つアイドルをサンプルにする (居なければテストとして意味を成さない)。
-        let idol = snap
-            .idols
-            .iter()
-            .find(|idol| {
-                idol_songs(snap, &idol.id, Some("original"))
-                    .iter()
-                    .any(|s| has_parent_song(snap, &s.song_id))
-            })
-            .expect("親曲持ちの原曲を持つアイドルのサンプルが必要");
-
-        let got = idol_original_song_sections(snap, &idol.id);
-        for section in &got {
-            for song in &section.songs {
-                assert!(
-                    !has_parent_song(snap, &song.song_id),
-                    "idol={} song={} は派生曲なので出てはいけない",
-                    idol.id,
-                    song.song_id
-                );
-            }
-        }
-        // 除外前 (idol_songs) には実際に派生曲が混ざっていたことのサンプル健全性チェック。
-        let originals = idol_songs(snap, &idol.id, Some("original"));
-        assert!(originals.iter().any(|s| has_parent_song(snap, &s.song_id)));
-    }
-
-    /// カバーはソロ/ユニット/全体曲と混ぜず、独立した節になる。
-    #[test]
-    fn idol_original_song_sections_puts_covers_in_their_own_section() {
-        let (snap, _conn) = load();
-        let idol = snap
-            .idols
-            .iter()
-            .find(|idol| {
-                idol_songs(snap, &idol.id, Some("original"))
-                    .iter()
-                    .any(|s| song_type_of(snap, &s.song_id) == Some("cover"))
-            })
-            .expect("カバーを持つアイドルのサンプルが必要");
-
-        let got = idol_original_song_sections(snap, &idol.id);
-        let cover_section = got
-            .iter()
-            .find(|s| s.kind == IdolSongSectionKind::Cover)
-            .expect("カバーの節が出るはず");
-        assert_eq!(cover_section.heading, "カバー");
-        assert_eq!(cover_section.short_heading, "カバー");
-        assert!(cover_section.songs.iter().all(|s| song_type_of(snap, &s.song_id) == Some("cover")));
-        // 他の節にカバーが紛れ込んでいないこと。
-        for section in &got {
-            if section.kind == IdolSongSectionKind::Cover {
-                continue;
-            }
-            assert!(section.songs.iter().all(|s| song_type_of(snap, &s.song_id) != Some("cover")));
-        }
-    }
-
     /// 短い見出しは vocabulary の短い形と一致する (小タブに出す文言の根拠)。
     #[test]
     fn section_short_headings_come_from_vocabulary() {

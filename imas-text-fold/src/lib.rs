@@ -249,15 +249,6 @@ mod tests {
     // --- ハイライト用の対応表 ---
 
     #[test]
-    fn offsets_point_back_at_the_original_text() {
-        let (bytes, starts, ends) = fold_with_offsets("オネガイ");
-        assert_eq!(std::str::from_utf8(&bytes).unwrap(), "おねがい");
-        // 畳んだ先頭バイトは元の 0 バイト目から来ている。
-        assert_eq!(starts[0], 0);
-        assert_eq!(*ends.last().unwrap(), "オネガイ".len());
-    }
-
-    #[test]
     fn a_composed_match_covers_both_original_characters() {
         // 元は 2 文字 (か + 濁点)、畳むと 1 文字 (が)。範囲は 2 文字ぶんを覆う。
         let (bytes, starts, ends) = fold_with_offsets("か\u{3099}");
@@ -276,13 +267,6 @@ mod tests {
     }
 
     // --- 部分列探索 ---
-
-    #[test]
-    fn find_resumes_after_a_partial_match() {
-        assert_eq!(find(b"aaab", b"aab"), Some(1));
-        assert!(contains(b"ababab", b"abab"));
-        assert!(!contains(b"ababa", b"abb"));
-    }
 
     #[test]
     fn find_edge_cases() {

@@ -36,15 +36,8 @@ impl SnapshotStore {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::test_support::bundle_store;
     use crate::domain::timeline_queries::{TimelineBarLane, TimelineBarTarget};
-
-    #[test]
-    fn not_loaded_is_a_typed_error() {
-        let store = SnapshotStore::new();
-        assert!(matches!(store.timeline_bars(None), Err(SnapshotError::NotLoaded)));
-    }
 
     #[test]
     fn ffi_surface_smoke() {

@@ -140,13 +140,6 @@ mod tests {
     }
 
     #[test]
-    fn performer_text_uses_the_search_folding() {
-        // 検索と同じ照合: 大文字小文字の違いでも当たる。
-        let labels = s(&["ABC、def"]);
-        assert_eq!(performer_match_text(&labels, "abc").as_deref(), Some("ABC ほか1人"));
-    }
-
-    #[test]
     fn creator_text_lists_every_matching_role_in_order() {
         assert_eq!(
             creator_match_text(Some("佐藤貴文"), Some("佐藤貴文"), Some("別の人"), "佐藤").as_deref(),

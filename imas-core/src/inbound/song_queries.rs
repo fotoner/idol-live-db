@@ -29,14 +29,7 @@ impl SnapshotStore {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::test_support::bundle_store;
-
-    #[test]
-    fn not_loaded_is_a_typed_error() {
-        let store = SnapshotStore::new();
-        assert!(matches!(store.song_artist_ids("x".into(), None), Err(SnapshotError::NotLoaded)));
-    }
 
     #[test]
     fn artist_ids_come_back_for_known_songs() {

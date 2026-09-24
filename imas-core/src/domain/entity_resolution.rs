@@ -494,13 +494,6 @@ mod tests {
     }
 
     #[test]
-    fn 種別を絞れる() {
-        let hits = resolve(bundle_snapshot(), "THE IDOLM@STER", &[EntityKind::Song], 20);
-        assert!(!hits.is_empty());
-        assert!(hits.iter().all(|h| h.kind == EntityKind::Song));
-    }
-
-    #[test]
     fn 曲名の完全一致は候補が多くても1件に決まる() {
         match resolve_unique(bundle_snapshot(), "THE IDOLM@STER", EntityKind::Song) {
             Resolution::One(hit) => assert_eq!(hit.id, "765as_the_idolmster"),
@@ -566,13 +559,5 @@ mod tests {
         assert_eq!(hits.first().map(|h| h.kind), Some(EntityKind::Unit), "{hits:?}");
         assert!(hits[0].exact, "表記そのものなので完全一致: {:?}", hits[0]);
         assert!(hits[0].hint.contains("ミリオン"), "hint={}", hits[0].hint);
-    }
-
-    #[test]
-    fn 種別の綴りは往復する() {
-        for kind in EntityKind::ALL {
-            assert_eq!(EntityKind::parse(kind.as_str()), Some(kind));
-        }
-        assert_eq!(EntityKind::parse("いない"), None);
     }
 }

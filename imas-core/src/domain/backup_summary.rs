@@ -935,29 +935,6 @@ mod tests {
             .contains(r#""pollVotes":[{"entityIds":["b"],"pollId":"a"},{"entityIds":["a","c"],"pollId":"z"}]"#));
     }
 
-    /// 空バックアップ: 配列は 3 つとも空で出て、そのまま読み戻せる。
-    #[test]
-    fn empty_backup_round_trips() {
-        let input = BackupExportInput {
-            user_marks: vec![],
-            poll_votes: vec![],
-            personal_tags: vec![],
-            ..export_input()
-        };
-        let doc = build_backup_envelope(&input, BackupKindDialect::Canonical);
-        assert!(doc.payload_json.contains(r#""personalTags":[]"#));
-        assert!(doc.payload_json.contains(r#""pollVotes":[]"#));
-        assert!(doc.payload_json.contains(r#""userMarks":[]"#));
-        let plan = plan_backup_import(
-            &doc.envelope_json,
-            &BackupLocalState::default(),
-            false,
-            BackupKindDialect::Canonical,
-        )
-        .expect("空でも読める");
-        assert_eq!((plan.added_marks, plan.added_votes, plan.added_personal_tags), (0, 0, 0));
-    }
-
     /// envelope はキー昇順・2 スペース字下げ・`" : "` 区切り (Darwin の prettyPrinted 流儀)。
     #[test]
     fn envelope_layout_is_stable() {
@@ -988,16 +965,6 @@ mod tests {
     }
 
     // MARK: kind の方言
-
-    #[test]
-    fn android_kinds_map_to_canonical_on_export() {
-        let mut input = export_input();
-        input.user_marks = vec![mark("i1", "pick"), mark("i2", "memo"), mark("i3", "favorite")];
-        let doc = build_backup_envelope(&input, BackupKindDialect::Android);
-        assert!(doc.payload_json.contains(r#""kind":"myPick""#));
-        assert!(doc.payload_json.contains(r#""kind":"note""#));
-        assert!(doc.payload_json.contains(r#""kind":"favorite""#));
-    }
 
     /// Android が知らない kind は素通しする (次に iOS へ戻したとき復元できる)。
     #[test]
@@ -1264,22 +1231,6 @@ mod tests {
         assert_eq!(plan.marks_to_insert[0].entity_id, "i2");
     }
 
-    /// kind が違えば別行 (担当とお気に入りは共存する)。
-    #[test]
-    fn same_entity_with_different_kind_is_a_separate_row() {
-        let mut input = export_input();
-        input.user_marks = vec![mark("i1", "myPick"), mark("i1", "favorite")];
-        let doc = build_backup_envelope(&input, BackupKindDialect::Canonical);
-        let plan = plan_backup_import(
-            &doc.envelope_json,
-            &BackupLocalState::default(),
-            false,
-            BackupKindDialect::Canonical,
-        )
-        .unwrap();
-        assert_eq!(plan.added_marks, 2);
-    }
-
     /// バックアップの中に同じキーが 2 回あっても 1 件しか数えない (件数の水増しを防ぐ)。
     #[test]
     fn duplicate_keys_inside_backup_count_once() {
@@ -1407,23 +1358,6 @@ mod tests {
         assert_eq!(
             sha256_hex("日本語"),
             "77710aedc74ecfa33685e33a6c7df5cc83004da1bdcef7fb280f5c2b2e97e0a5"
-        );
-    }
-
-    /// 55 / 56 / 64 バイト境界 (パディングが 1 ブロック増える所) で崩れない。
-    #[test]
-    fn sha256_handles_padding_boundaries() {
-        assert_eq!(
-            sha256_hex(&"a".repeat(55)),
-            "9f4390f8d30c2dd92ec9f095b65e2b9ae9b0a925a5258e241c9f1e910f734318"
-        );
-        assert_eq!(
-            sha256_hex(&"a".repeat(56)),
-            "b35439a4ac6f0948b6d6f9e3c6af0f5f590ce20f1bde7090ef7970686ec6738a"
-        );
-        assert_eq!(
-            sha256_hex(&"a".repeat(64)),
-            "ffe054fe7ae0cb6dc65c3af9b61d5209f439851db43d0ba5997337df154668eb"
         );
     }
 

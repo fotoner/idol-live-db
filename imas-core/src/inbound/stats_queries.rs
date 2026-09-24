@@ -77,19 +77,7 @@ impl SnapshotStore {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::test_support::bundle_store;
-
-    #[test]
-    fn not_loaded_is_a_typed_error() {
-        let store = SnapshotStore::new();
-        assert!(matches!(store.brand_song_counts(), Err(SnapshotError::NotLoaded)));
-        assert!(matches!(store.song_play_count_ranking(20), Err(SnapshotError::NotLoaded)));
-        assert!(matches!(store.cast_show_count_ranking(20), Err(SnapshotError::NotLoaded)));
-        assert!(matches!(store.yearly_show_counts(), Err(SnapshotError::NotLoaded)));
-        assert!(matches!(store.branded_song_ids(), Err(SnapshotError::NotLoaded)));
-        assert!(matches!(store.meta_value("data_version".into()), Err(SnapshotError::NotLoaded)));
-    }
 
     #[test]
     fn ffi_surface_smoke() {

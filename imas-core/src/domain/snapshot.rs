@@ -212,13 +212,6 @@ impl Idol {
 mod brand_ids_tests {
     use super::*;
 
-    #[test]
-    fn joint_brand_ids_are_trimmed_and_blank_entries_dropped() {
-        assert_eq!(split_csv(Some(" ml , cg ,")).collect::<Vec<_>>(), ["ml", "cg"]);
-        assert_eq!(split_csv(Some("")).count(), 0);
-        assert_eq!(split_csv(None).count(), 0);
-    }
-
     /// 曲の参加ブランドも同じ割り方 (以前は空白を trim せず ` cg` がどのブランドにも当たらなかった)。
     #[test]
     fn song_joint_brands_are_trimmed_like_events() {

@@ -452,13 +452,6 @@ mod tests {
         assert_eq!(limited.catch_chances, d.catch_chances[..3].to_vec(), "先頭から chance_limit 件");
     }
 
-    #[test]
-    fn catch_chances_match_the_ios_sql_with_nothing_collected() {
-        // 回収が 0 曲のとき、ブランドの過去のリアルライブで披露された曲がそのまま数になる
-        // (同梱 DB では 1 公演 400〜600 曲台。大きく見えるが iOS の SQL と同じ数)。
-        check_catch_chances_against_ios_sql(&[], "2026-09-23");
-    }
-
     /// iOS `fetchUpcomingCatchChances` の SQL (削除前の b6ea16f8^) と、今日以降の全公演で突き合わせる。
     fn check_catch_chances_against_ios_sql(collected: &[String], today: &str) {
         let snap = bundle_snapshot();

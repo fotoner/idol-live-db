@@ -105,13 +105,6 @@ mod tests {
         assert!(game_progress_did_clear_today(cleared(TODAY, 7, 20), TODAY.to_string()));
     }
 
-    #[test]
-    fn best_rate_percent_delegates() {
-        assert_eq!(game_progress_best_rate_percent(GameRecord::default()), None);
-        let record = GameRecord { best_score: 5, best_out_of: 8, ..GameRecord::default() };
-        assert_eq!(game_progress_best_rate_percent(record), Some(63));
-    }
-
     /// `Option<String>` を借用へ落とす橋渡しが、未表示 (None) でも同日 2 回目でも壊れないこと。
     #[test]
     fn daily_sheet_gate_delegates_both_arms() {

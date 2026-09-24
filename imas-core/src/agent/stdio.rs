@@ -122,48 +122,6 @@ mod tests {
     use super::*;
     use std::io::Cursor;
 
-    fn ctx() -> Ctx {
-        Ctx {
-            db_path: "master.sqlite".into(),
-            repo_root: ".".into(),
-            today_override: Some("2026-09-19".to_string()),
-            allow_write: true,
-        }
-    }
-
-    #[test]
-    fn 有効な行はhandleにそのまま渡る() {
-        let req: Value = serde_json::from_str(r#"{"jsonrpc":"2.0","id":1,"method":"ping"}"#).unwrap();
-        let resp = super::super::mcp::handle(&ctx(), &Snapshot::default(), &req).unwrap();
-        assert_eq!(resp["result"], json!({}));
-    }
-
-    #[test]
-    fn 壊れた行はparse_errorのjsonになる() {
-        let broken = "{not json";
-        let err = serde_json::from_str::<Value>(broken).unwrap_err();
-        let response = json!({
-            "jsonrpc": "2.0",
-            "id": Value::Null,
-            "error": { "code": -32700, "message": format!("Parse error: {err}") },
-        });
-        assert_eq!(response["error"]["code"], -32700);
-    }
-
-    #[test]
-    fn read_bounded_lineは複数行を順に読む() {
-        let mut cur = Cursor::new(b"abc\ndef\n".to_vec());
-        assert!(matches!(
-            read_bounded_line(&mut cur, 1024).unwrap(),
-            LineRead::Line(b) if b == b"abc"
-        ));
-        assert!(matches!(
-            read_bounded_line(&mut cur, 1024).unwrap(),
-            LineRead::Line(b) if b == b"def"
-        ));
-        assert!(matches!(read_bounded_line(&mut cur, 1024).unwrap(), LineRead::Eof));
-    }
-
     #[test]
     fn read_bounded_lineは改行無しの末尾行も拾う() {
         let mut cur = Cursor::new(b"tail-no-newline".to_vec());

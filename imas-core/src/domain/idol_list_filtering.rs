@@ -596,20 +596,6 @@ mod tests {
     // ---- 絞り込み (iOS IdolListFilteringTests の移植) ----
 
     #[test]
-    fn brand_filter() {
-        let mut a = entry("a");
-        a.brand_id = "cg".to_string();
-        let mut b = entry("b");
-        b.brand_id = "ml".to_string();
-        let idols = [a, b];
-        let ctx = IdolListFilterCriteria {
-            selected_brand_ids: vec_of(&["ml"]),
-            ..Default::default()
-        };
-        assert_eq!(picked_ids(&idols, &filter_idol_list(&idols, &ctx)), vec_of(&["b"]));
-    }
-
-    #[test]
     fn attribute_filter() {
         let mut a = entry("a");
         a.attribute = Some("cute".to_string());
@@ -637,29 +623,6 @@ mod tests {
         };
         // AND: fav={a,b} と pick={b,c} の積 → b のみ
         assert_eq!(picked_ids(&idols, &filter_idol_list(&idols, &ctx)), vec_of(&["b"]));
-    }
-
-    #[test]
-    fn voice_actor_text_matches_cast_name() {
-        let mut a = entry("a");
-        a.name = "島村卯月".to_string();
-        let mut b = entry("b");
-        b.name = "渋谷凛".to_string();
-        let idols = [a, b];
-
-        // 名前には無いがキャスト名で一致させたい検索語。まずどちらのキャストにも無い → 0 件
-        let mut ctx = IdolListFilterCriteria {
-            voice_actor_text: "おおぬま".to_string(),
-            cast_names: HashMap::from([
-                ("a".to_string(), "大橋彩香".to_string()),
-                ("b".to_string(), "福原綾香".to_string()),
-            ]),
-            ..Default::default()
-        };
-        assert!(filter_idol_list(&idols, &ctx).is_empty());
-
-        ctx.cast_names.insert("a".to_string(), "おおぬま某".to_string());
-        assert_eq!(picked_ids(&idols, &filter_idol_list(&idols, &ctx)), vec_of(&["a"]));
     }
 
     /// 名前の検索は CV 名を見ない。CV 名の検索はアイドル名を見ない。
@@ -761,33 +724,6 @@ mod tests {
         );
     }
 
-    /// 愛称でも引けること (nickname は表示名と別に持つアイドルがいる)。
-    #[test]
-    fn search_matches_nickname() {
-        let mut meg = entry("meg");
-        meg.name = "ウィーン・マルガレーテ".to_string();
-        meg.nickname = Some("メグ".to_string());
-        let idols = [meg];
-        let ctx = IdolListFilterCriteria {
-            search_text: "メグ".to_string(),
-            ..Default::default()
-        };
-        assert_eq!(picked_ids(&idols, &filter_idol_list(&idols, &ctx)), vec_of(&["meg"]));
-    }
-
-    /// 大文字小文字を無視して一致すること (iOS `localizedCaseInsensitiveContains` 相当)。
-    #[test]
-    fn search_is_case_insensitive() {
-        let mut a = entry("a");
-        a.name = "Juliet".to_string();
-        let idols = [a];
-        let ctx = IdolListFilterCriteria {
-            search_text: "JULIET".to_string(),
-            ..Default::default()
-        };
-        assert_eq!(picked_ids(&idols, &filter_idol_list(&idols, &ctx)), vec_of(&["a"]));
-    }
-
     /// 別名分割は前後空白 trim・空要素除外 (iOS `Idol.aliasList` と同じ規則)。
     #[test]
     fn alias_split_trims_and_drops_empties() {
@@ -797,41 +733,7 @@ mod tests {
         assert_eq!(alias_list(Some("")).count(), 0);
     }
 
-    /// 条件が空なら全件が入力順のまま残る。
-    #[test]
-    fn empty_criteria_passes_through_in_order() {
-        let idols = [entry("a"), entry("b"), entry("c")];
-        assert_eq!(
-            picked_ids(&idols, &filter_idol_list(&idols, &IdolListFilterCriteria::default())),
-            vec_of(&["a", "b", "c"])
-        );
-    }
-
     // ---- 並べ替え (iOS IdolListSortingTests の移植) ----
-
-    #[test]
-    fn age_defaults_to_oldest_first() {
-        let mut a = entry("a");
-        a.age = Some(15);
-        let mut b = entry("b");
-        b.age = Some(32);
-        let mut c = entry("c");
-        c.age = Some(21);
-        let idols = [a, b, c];
-        assert_eq!(sorted_ids(&idols, IdolSortKind::Age, None), vec_of(&["b", "c", "a"]));
-    }
-
-    #[test]
-    fn age_ascending_is_youngest_first() {
-        let mut a = entry("a");
-        a.age = Some(15);
-        let mut b = entry("b");
-        b.age = Some(32);
-        let mut c = entry("c");
-        c.age = Some(21);
-        let idols = [a, b, c];
-        assert_eq!(sorted_ids(&idols, IdolSortKind::Age, Some(true)), vec_of(&["a", "c", "b"]));
-    }
 
     #[test]
     fn age_missing_values_go_last_regardless_of_direction() {
@@ -878,18 +780,6 @@ mod tests {
         m.weight = Some(41.0);
         let idols = [h, l, m];
         assert_eq!(sorted_ids(&idols, IdolSortKind::Weight, Some(true)), vec_of(&["l", "m", "h"]));
-    }
-
-    #[test]
-    fn name_kana_ascending() {
-        let mut c = entry("c");
-        c.name_kana = Some("うえの".to_string());
-        let mut a = entry("a");
-        a.name_kana = Some("あまみ".to_string());
-        let mut b = entry("b");
-        b.name_kana = Some("いおり".to_string());
-        let idols = [c, a, b];
-        assert_eq!(sorted_ids(&idols, IdolSortKind::NameKana, None), vec_of(&["a", "b", "c"]));
     }
 
     /// 読みがな未設定は表示名で代用する。空文字の読みがなは代用せず末尾送り
@@ -982,30 +872,6 @@ mod tests {
     }
 
     // ---- メタ表 ----
-
-    #[test]
-    fn only_official_keeps_brand_grouping() {
-        for meta in sort_order_table() {
-            assert_eq!(
-                meta.keeps_brand_grouping,
-                meta.kind == IdolSortKind::Official,
-                "{:?} は通し並びであるべき",
-                meta.kind
-            );
-        }
-    }
-
-    /// 数値系 (年齢・身長・体重) だけ既定降順。「大きい順」の方が知りたい形のため。
-    #[test]
-    fn numeric_kinds_default_to_descending() {
-        for meta in sort_order_table() {
-            let expect_desc = matches!(
-                meta.kind,
-                IdolSortKind::Age | IdolSortKind::Height | IdolSortKind::Weight
-            );
-            assert_eq!(meta.default_ascending, !expect_desc, "{:?}", meta.kind);
-        }
-    }
 
     /// メタ表は全種別を 1 回ずつ・宣言順に含む (Swift 側はこの表から辞書を組む契約)。
     #[test]

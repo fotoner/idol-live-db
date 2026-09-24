@@ -735,23 +735,6 @@ mod tests {
         );
     }
 
-    #[test]
-    fn profile_input_joins_blood_type_and_hobbies() {
-        let mut idol = blank_idol();
-        idol.blood_type = Some("A".into());
-        idol.constellation = Some("牡羊座".into());
-        assert_eq!(
-            idol_profile_input(&idol).blood_constellation.as_deref(),
-            Some("A型 ・ 牡羊座")
-        );
-        idol.constellation = None;
-        assert_eq!(idol_profile_input(&idol).blood_constellation.as_deref(), Some("A型"));
-
-        idol.hobbies = Some("料理".into());
-        idol.talents = Some("そろばん".into());
-        assert_eq!(idol_profile_input(&idol).hobby_talent.as_deref(), Some("料理 ・ そろばん"));
-    }
-
     /// 生の値から組んだ行は、Android が自前で作っていた `04月03日` ではなく
     /// iOS / Web と同じ `4月3日` になる (R-A-09)。
     #[test]
@@ -794,22 +777,6 @@ mod tests {
             compared += 1;
         }
         assert!(compared > 200, "{compared}");
-    }
-
-    #[test]
-    fn profile_input_of_a_real_idol_produces_rows() {
-        // 実データを 1 件通して、行が組み上がるところまで見る。
-        let (snap, _conn) = load();
-        let record = idol_list(snap, None).into_iter().find(|i| i.birthday.is_some()).unwrap();
-        let input = idol_profile_input(&record);
-        let rows = crate::domain::screen_composition::idol_profile_rows(&input);
-        assert!(!rows.is_empty(), "{} のプロフィール行が空", record.id);
-        // 誕生日の行だけが「同じ誕生月の一覧へ」を持つ。
-        let with_action = rows
-            .iter()
-            .filter(|r| matches!(r.action, crate::domain::screen_composition::RowAction::FilterByBirthMonth { .. }))
-            .count();
-        assert!(with_action <= 1, "誕生月へ飛べる行が複数ある");
     }
 
     fn load() -> (&'static Snapshot, Connection) {

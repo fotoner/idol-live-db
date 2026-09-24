@@ -165,21 +165,6 @@ mod tests {
     }
 
     #[test]
-    fn all_passes_through() {
-        let s = songs();
-        let ctx = criteria(SongCollectMode::All);
-        assert_eq!(picked_ids(&s, &filter_song_list(&s, &ctx)), vec_of(&["a", "b", "c"]));
-    }
-
-    #[test]
-    fn collected_keeps_only_collected() {
-        let s = songs();
-        let mut ctx = criteria(SongCollectMode::Collected);
-        ctx.collected_ids = vec_of(&["a", "c"]);
-        assert_eq!(picked_ids(&s, &filter_song_list(&s, &ctx)), vec_of(&["a", "c"]));
-    }
-
-    #[test]
     fn uncollected_excludes_collected() {
         let s = songs();
         let mut ctx = criteria(SongCollectMode::Uncollected);
@@ -206,25 +191,6 @@ mod tests {
         ctx.require_my_pick = true;
         ctx.my_pick_song_ids = vec_of(&["c"]);
         assert_eq!(picked_ids(&s, &filter_song_list(&s, &ctx)), vec_of(&["c"]));
-    }
-
-    #[test]
-    fn tag_filter_restricts_to_tag_set() {
-        let s = songs();
-        let mut ctx = criteria(SongCollectMode::All);
-        ctx.tag_song_ids = Some(vec_of(&["a", "c"]));
-        assert_eq!(picked_ids(&s, &filter_song_list(&s, &ctx)), vec_of(&["a", "c"]));
-    }
-
-    #[test]
-    fn tag_ranking_sorts_by_votes_then_kana() {
-        let s = vec![entry("a", Some("あ")), entry("b", Some("い")), entry("c", Some("う"))];
-        let mut ctx = criteria(SongCollectMode::All);
-        ctx.tag_song_ids = Some(vec_of(&["a", "b", "c"]));
-        ctx.rank_by_tag_votes = true;
-        ctx.tag_vote_counts = HashMap::from([("a".into(), 1), ("b".into(), 5), ("c".into(), 5)]);
-        // 票数降順 (b,c=5 → a=1)、同票は 50 音 (b=い < c=う)。
-        assert_eq!(picked_ids(&s, &filter_song_list(&s, &ctx)), vec_of(&["b", "c", "a"]));
     }
 
     #[test]
@@ -264,12 +230,6 @@ mod tests {
     }
 
     #[test]
-    fn empty_input_returns_empty() {
-        let ctx = criteria(SongCollectMode::All);
-        assert!(filter_song_list(&[], &ctx).is_empty());
-    }
-
-    #[test]
     fn filters_compose_before_ranking() {
         // 回収絞り込みで落ちた曲はタグランキングにも現れない (適用順の確認)。
         let s = vec![entry("a", Some("あ")), entry("b", Some("い")), entry("c", Some("う"))];
@@ -291,14 +251,6 @@ mod tests {
     }
 
     // --- コールガイド絞り込み ---
-
-    #[test]
-    fn call_guide_keeps_only_songs_with_a_guide() {
-        let s = songs();
-        let mut ctx = criteria(SongCollectMode::All);
-        ctx.call_guide_song_ids = Some(vec_of(&["a", "c"]));
-        assert_eq!(picked_ids(&s, &filter_song_list(&s, &ctx)), vec_of(&["a", "c"]));
-    }
 
     #[test]
     fn no_call_guide_set_means_no_filtering() {

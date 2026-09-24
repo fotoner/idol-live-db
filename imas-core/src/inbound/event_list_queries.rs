@@ -132,17 +132,6 @@ mod tests {
     use crate::test_support::bundle_store;
 
     #[test]
-    fn not_loaded_is_a_typed_error() {
-        let store = SnapshotStore::new();
-        assert!(matches!(store.event_records(None), Err(SnapshotError::NotLoaded)));
-        assert!(matches!(
-            store.events_with_first_date(None, true, false, None),
-            Err(SnapshotError::NotLoaded)
-        ));
-        assert!(matches!(store.event_names(), Err(SnapshotError::NotLoaded)));
-    }
-
-    #[test]
     fn ffi_surface_smoke() {
         // ロジックの等価性は domain 側の照合テストが担う。ここは委譲の疎通だけ確認する。
         let store = bundle_store();

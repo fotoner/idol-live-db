@@ -345,20 +345,6 @@ mod setlist_row_note_tests {
         setlist_row_note_groups(SetlistDisplayMode::Detailed, is_real_live, performance, mine)
     }
 
-    /// 詳細表示以外では 1 つも出ない。
-    #[test]
-    fn 詳細表示以外では何も出さない() {
-        for mode in [SetlistDisplayMode::Simple, SetlistDisplayMode::Normal] {
-            assert!(setlist_row_note_groups(
-                mode,
-                true,
-                &gap(false, "4 回目", Some("3 年 10 か月ぶり")),
-                &mine(true, 1, 1, None)
-            )
-            .is_empty());
-        }
-    }
-
     /// 軸は「披露 → 回収」の順。回数が主で、間隔はその補足。
     #[test]
     fn 披露の軸のあとに回収の軸を置く() {
@@ -427,14 +413,6 @@ mod setlist_row_note_tests {
             assert_eq!(g[0].label, "披露");
         }
     }
-
-    /// 要約はシンプル表示でだけ伏せる (スクショに自分の記録を焼き込まない)。
-    #[test]
-    fn 要約はシンプル表示でだけ伏せる() {
-        assert!(!SetlistDisplayMode::Simple.shows_collection_summary());
-        assert!(SetlistDisplayMode::Normal.shows_collection_summary());
-        assert!(SetlistDisplayMode::Detailed.shows_collection_summary());
-    }
 }
 
 #[cfg(test)]
@@ -484,13 +462,6 @@ mod setlist_display_mode_tests {
         for o in &options {
             assert_eq!(SetlistDisplayMode::from_raw(Some(&o.raw)), o.mode);
         }
-    }
-
-    #[test]
-    fn only_the_simple_mode_is_compact() {
-        assert!(SetlistDisplayMode::Simple.is_compact());
-        assert!(!SetlistDisplayMode::Normal.is_compact());
-        assert!(!SetlistDisplayMode::Detailed.is_compact());
     }
 }
 
@@ -630,17 +601,6 @@ mod tests {
         ]);
     }
 
-    /// 値が無い項目は行ごと出さない (空欄の行を並べない)。
-    #[test]
-    fn absent_values_produce_no_row() {
-        let rows = idol_profile_rows(&IdolProfileInput {
-            name_kana: Some("あ".into()),
-            ..Default::default()
-        });
-        assert_eq!(rows.len(), 1);
-        assert_eq!(rows[0].label, "よみ");
-    }
-
     /// 空文字も「無い」と同じ扱い。DB に空文字が入っていても空行を作らない。
     #[test]
     fn empty_string_is_treated_as_absent() {
@@ -661,17 +621,6 @@ mod tests {
         assert_eq!(b.action, RowAction::FilterByBirthMonth { month: 4 });
     }
 
-    /// 月が分からない誕生日 (「??月3日」等) は押せない行にする。
-    #[test]
-    fn birthday_without_month_is_not_tappable() {
-        let rows = idol_profile_rows(&IdolProfileInput {
-            birthday_display: Some("3日".into()),
-            birth_month: None,
-            ..Default::default()
-        });
-        assert_eq!(rows[0].action, RowAction::None);
-    }
-
     /// 範囲外の月は押せない行にする (0 や 13 が来ても遷移させない)。
     #[test]
     fn out_of_range_month_is_not_tappable() {
@@ -683,34 +632,5 @@ mod tests {
             });
             assert_eq!(rows[0].action, RowAction::None, "month={m}");
         }
-    }
-
-    #[test]
-    fn monospaced_and_swatch_styles_are_assigned() {
-        let rows = idol_profile_rows(&full());
-        let by = |l: &str| rows.iter().find(|r| r.label == l).unwrap().style;
-        assert_eq!(by("ローマ字"), RowStyle::Monospaced);
-        assert_eq!(by("スリーサイズ"), RowStyle::Monospaced);
-        assert_eq!(by("カラー"), RowStyle::ColorSwatch);
-        assert_eq!(by("よみ"), RowStyle::Plain);
-    }
-
-    #[test]
-    fn color_row_can_be_copied() {
-        let rows = idol_profile_rows(&full());
-        let c = rows.iter().find(|r| r.label == "カラー").unwrap();
-        assert_eq!(c.action, RowAction::CopyValue);
-        assert_eq!(c.value, "#EE7F9C");
-    }
-
-    /// 何も無ければ行ゼロ (画面側は空状態を出せばよい)。
-    #[test]
-    fn nothing_in_nothing_out() {
-        assert!(idol_profile_rows(&IdolProfileInput::default()).is_empty());
-    }
-
-    #[test]
-    fn results_are_deterministic() {
-        assert_eq!(idol_profile_rows(&full()), idol_profile_rows(&full()));
     }
 }

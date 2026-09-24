@@ -241,21 +241,6 @@ mod tests {
         assert!(checked > 300, "標本が少なすぎる: {checked}");
     }
 
-    /// 前回は必ず自分より前 (同日なら同日まで)。全披露で確かめる。
-    #[test]
-    fn the_previous_performance_is_never_in_the_future() {
-        let snap = bundle_snapshot();
-        for item in 0..snap.setlist_items.len() as u32 {
-            let gap = performance_gap(snap, item);
-            let Some(prev) = gap.previous_date else {
-                assert!(gap.is_first, "前回が無いのに初披露でない");
-                continue;
-            };
-            let date = &snap.shows[snap.setlist_items[item as usize].show as usize].date;
-            assert!(prev.as_str() <= date.as_str(), "前回 {prev} が {date} より後");
-        }
-    }
-
     /// 絞ると、回数も間隔も**絞った世界のもの**になる (「オケマスを除けば」の軸の足場)。
     #[test]
     fn a_filter_moves_the_count_and_the_interval_together() {

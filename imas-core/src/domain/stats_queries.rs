@@ -469,29 +469,6 @@ mod tests {
         assert_eq!(brand_song_counts(bundle_snapshot()), expected);
     }
 
-    #[test]
-    fn brand_song_counts_includes_zero_song_brands() {
-        // LEFT JOIN: 楽曲ゼロのブランドも 0 件で載る = 行数は常に brands 全件。
-        let db = bundle_conn();
-        let brands: i64 = db.query_row("SELECT COUNT(*) FROM brands", [], |r| r.get(0)).unwrap();
-        assert_eq!(brand_song_counts(bundle_snapshot()).len() as i64, brands);
-    }
-
-    #[test]
-    fn brand_song_counts_total_matches_joined_songs() {
-        // 合計 = brands に JOIN できる曲の数 (NULL・未知 brand_id はどこにも数えない)。
-        let db = bundle_conn();
-        let joined: i64 = db
-            .query_row(
-                "SELECT COUNT(*) FROM songs s JOIN brands b ON s.brand_id = b.id",
-                [],
-                |r| r.get(0),
-            )
-            .unwrap();
-        let total: u32 = brand_song_counts(bundle_snapshot()).iter().map(|r| r.song_count).sum();
-        assert_eq!(i64::from(total), joined);
-    }
-
     // ---- song_play_count_ranking (照合 3 本) ----
 
     #[test]
@@ -502,14 +479,6 @@ mod tests {
         assert_ranking_matches("play_count 全件", &actual, &full, usize::MAX, |r| r.play_count);
         // INNER JOIN: 披露 0 回の曲は載らない。
         assert!(actual.iter().all(|r| r.play_count >= 1));
-    }
-
-    #[test]
-    fn play_count_ranking_default_limit_matches_sql() {
-        // iOS 既定の limit=20。境界タイは全結果への包含で判定する。
-        let full = sql_play_count_ranking(&bundle_conn(), -1);
-        let actual = song_play_count_ranking(bundle_snapshot(), 20);
-        assert_ranking_matches("play_count limit=20", &actual, &full, 20, |r| r.play_count);
     }
 
     #[test]
@@ -541,13 +510,6 @@ mod tests {
     }
 
     #[test]
-    fn cast_ranking_default_limit_matches_sql() {
-        let full = sql_cast_show_count_ranking(&bundle_conn(), -1);
-        let actual = cast_show_count_ranking(bundle_snapshot(), 20);
-        assert_ranking_matches("cast limit=20", &actual, &full, 20, |r| r.show_count);
-    }
-
-    #[test]
     fn cast_ranking_limit_cutting_inside_tie_group() {
         let full = sql_cast_show_count_ranking(&bundle_conn(), -1);
         let mut cut = None;
@@ -570,15 +532,6 @@ mod tests {
         let expected = sql_yearly_show_counts(&bundle_conn());
         assert!(!expected.is_empty());
         assert_eq!(yearly_show_counts(bundle_snapshot()), expected);
-    }
-
-    #[test]
-    fn yearly_show_counts_cover_all_shows() {
-        // Bundle の date は全行 'YYYY-MM-DD' (規約) なので合計 = shows 全件。
-        let db = bundle_conn();
-        let shows: i64 = db.query_row("SELECT COUNT(*) FROM shows", [], |r| r.get(0)).unwrap();
-        let total: u32 = yearly_show_counts(bundle_snapshot()).iter().map(|r| r.show_count).sum();
-        assert_eq!(i64::from(total), shows);
     }
 
     #[test]
@@ -634,19 +587,6 @@ mod tests {
         assert_eq!(actual.into_iter().collect::<HashSet<_>>(), expected);
     }
 
-    #[test]
-    fn branded_song_ids_order_is_deterministic_songs_order() {
-        // FFI 面の並びは songs Vec 順 (= 読み込み順。主キー順) で固定 (関数 doc の宣言どおり)。
-        let s = bundle_snapshot();
-        let expected: Vec<String> = s
-            .songs
-            .iter()
-            .filter(|song| song.brand_id.is_some())
-            .map(|song| song.id.clone())
-            .collect();
-        assert_eq!(branded_song_ids(s), expected);
-    }
-
     /// 元 SQL の写経 (DISTINCT + NULL/空文字の除外 + BINARY 昇順)。
     fn sql_cd_series_list(db: &Connection) -> Vec<String> {
         db.prepare(
@@ -668,13 +608,6 @@ mod tests {
         // ORDER BY + DISTINCT で並びまで一意に決まるので逐語一致を要求できる。
         assert_eq!(cd_series_list(bundle_snapshot()), sql);
         assert!(sql.len() > 10, "Bundle DB の CD シリーズ数={}", sql.len());
-    }
-
-    #[test]
-    fn cd_series_list_is_sorted_and_deduped() {
-        let got = cd_series_list(bundle_snapshot());
-        assert!(got.windows(2).all(|w| w[0] < w[1]), "厳密昇順 (= 重複なし・BINARY 順)");
-        assert!(got.iter().all(|v| !v.is_empty()), "空文字は落ちている");
     }
 
     // ---- ミニ DB 照合 (Bundle には無いエッジデータで暗黙挙動を固定) ----

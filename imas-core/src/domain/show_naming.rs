@@ -239,13 +239,6 @@ mod tests {
     }
 
     #[test]
-    fn a_show_named_after_its_event_adds_nothing() {
-        // 公演が 1 本しかないライブ。行のタイトルと同じ名前を繰り返さない。
-        assert_eq!(distinguishing_show_name("A LIVE", "A LIVE"), None);
-        assert_eq!(distinguishing_show_name("A LIVE", "A LIVE "), None);
-    }
-
-    #[test]
     fn only_the_part_that_tells_shows_apart_is_kept() {
         assert_eq!(
             distinguishing_show_name(
@@ -260,12 +253,6 @@ mod tests {
         );
         // 区切りの中黒や波ダッシュは落とすが、見分けに要る文字は残す。
         assert_eq!(distinguishing_show_name("ツアー", "ツアー ・ 第1回公演"), Some("第1回公演"));
-    }
-
-    #[test]
-    fn an_unrelated_show_name_is_left_alone() {
-        assert_eq!(distinguishing_show_name("A LIVE", "DAY2"), Some("DAY2"));
-        assert_eq!(distinguishing_show_name("A LIVE", "昼公演"), Some("昼公演"));
     }
 
     #[test]

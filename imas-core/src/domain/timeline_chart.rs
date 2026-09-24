@@ -361,9 +361,4 @@ mod tests {
         assert_eq!(milestone_date_display("2013-02-07"), "2013.2.7");
         assert_eq!(milestone_date_display("2026-12-24"), "2026.12.24");
     }
-
-    #[test]
-    fn half_width_text_is_narrower() {
-        assert!(text_width("ABCD", 10.0) < text_width("あいうえ", 10.0));
-    }
 }

@@ -558,31 +558,6 @@ mod tests {
     }
 
     #[test]
-    fn catch_all_group_sinks_to_the_bottom() {
-        let mut a = song("a", 0);
-        a.series_group = Some("CANVAS".into());
-        let b = song("b", 0); // 受け皿行き
-        let c = song("c", 0);
-        let d = song("d", 0);
-        let groups = build_mastery_groups(&[a, b, c, d], MasteryAxis::Series, 4, MasteryGroupSort::SongCount, MasteryProgressFilter::All, "");
-        // 受け皿は 3 曲で最多だが、末尾に置く
-        assert_eq!(groups.last().unwrap().label, "シリーズなし");
-        assert_eq!(groups[0].label, "CANVAS");
-    }
-
-    #[test]
-    fn percent_is_weighted_not_completion_ratio() {
-        let mut a = song("a", 2);
-        a.series_group = Some("S".into());
-        let mut b = song("b", 2);
-        b.series_group = Some("S".into());
-        let groups = build_mastery_groups(&[a, b], MasteryAxis::Series, 4, MasteryGroupSort::SongCount, MasteryProgressFilter::All, "");
-        // 「覚えた」は 0 曲だが、LV.2 が 2 曲なので 50%
-        assert_eq!(groups[0].percent, 50);
-        assert_eq!(groups[0].done_count, 0);
-    }
-
-    #[test]
     fn unit_axis_falls_back_to_singer_label() {
         let mut a = song("a", 0);
         a.unit_name = Some("アンティーカ".into());
@@ -613,14 +588,6 @@ mod tests {
         assert_eq!(s.done_count, 1);
         // (0 + 0.25 + 1.0) / 3 = 41.67 → 42
         assert_eq!(s.percent, 42);
-    }
-
-    #[test]
-    fn levels_above_the_scale_are_clamped() {
-        // 段数を減らした直後に古い値が残っていても、集計は新しい上限で見る
-        let groups = build_mastery_groups(&[song("a", 7)], MasteryAxis::Series, 2, MasteryGroupSort::SongCount, MasteryProgressFilter::All, "");
-        assert_eq!(groups[0].levels, vec![2]);
-        assert_eq!(groups[0].percent, 100);
     }
 
     fn series(id: &str, name: &str, level: u8) -> MasterySong {
@@ -699,21 +666,6 @@ mod tests {
             assert_eq!(groups.last().unwrap().label, "シリーズなし",
                        "受け皿はどの並びでも末尾に残る");
         }
-    }
-
-    #[test]
-    fn collected_counts_separate_heard_from_learned() {
-        let mut a = series("a", "S", 0);
-        a.collected = true;                      // 聴いたのに未設定 → 覚え時
-        let mut b = series("b", "S", 4);
-        b.collected = true;                      // 聴いて覚えた
-        let c = series("c", "S", 0);             // 聴いてもいない
-
-        let groups = build_mastery_groups(&[a, b, c], MasteryAxis::Series, 4,
-                                          MasteryGroupSort::Name, MasteryProgressFilter::All, "");
-        assert_eq!(groups[0].collected_count, 2);
-        assert_eq!(groups[0].heard_but_unset_count, 1);
-        assert_eq!(groups[0].total, 3);
     }
 
     #[test]

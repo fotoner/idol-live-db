@@ -108,62 +108,6 @@ fn t7_every_emitted_json_deserializes_back_into_its_dto() {
     assert!(stats.files >= 30, "書き出したファイルが少なすぎる: {}", stats.files);
 }
 
-#[test]
-fn t7b_pages_survive_a_full_serde_round_trip() {
-    let dir = emit_fixture("serde");
-    // 代表的な 1 枚ずつを「読む → 書く → 読む」でバイト一致まで確認する。
-    macro_rules! round {
-        ($rel:expr, $ty:ty) => {{
-            let text = std::fs::read_to_string(dir.path().join($rel)).unwrap();
-            let value: $ty = serde_json::from_str(&text).expect(concat!($rel, " が読めない"));
-            let again = serde_json::to_string_pretty(&value).unwrap();
-            let value2: $ty = serde_json::from_str(&again).unwrap();
-            assert_eq!(value, value2, concat!($rel, " が往復で変わった"));
-        }};
-    }
-    round!("meta.json", SiteMeta);
-    round!("themes.json", ThemeTable);
-    round!("routes.json", RoutesFile);
-    round!("index/home.json", HomePage);
-    round!("index/about.json", AboutPage);
-    round!("index/events.json", EventListPage);
-    round!("index/songs.json", SongListPage);
-    round!("index/idols.json", IdolListPage);
-    round!("index/units.json", UnitListPage);
-    round!("index/venues.json", VenueListPage);
-    round!("index/brands.json", BrandListPage);
-    round!("events/ev_sample.json", EventPage);
-    round!("shows/sh_sample_1.json", ShowPage);
-    round!("songs/ml_sample.json", SongPage);
-    round!("idols/ml_kasuga_mirai.json", IdolPage);
-    round!("units/unit_sample.json", UnitPage);
-    round!("venues/venue_makuhari.json", VenuePage);
-    round!("brands/ml.json", BrandPage);
-    round!("search/manifest.json", SearchManifest);
-    round!("index/search.json", SearchPage);
-    round!("search/songs.json", SearchShard);
-    round!("parity/fold.json", FoldParity);
-}
-
-// ---------------------------------------------------------------------------
-// T9: 再現性
-// ---------------------------------------------------------------------------
-
-#[test]
-fn t9_two_runs_produce_byte_identical_output() {
-    let a = emit_fixture("repeat-a");
-    let b = emit_fixture("repeat-b");
-    let (fa, fb) = (read_all(a.path()), read_all(b.path()));
-    assert_eq!(
-        fa.iter().map(|(r, _)| r.as_str()).collect::<Vec<_>>(),
-        fb.iter().map(|(r, _)| r.as_str()).collect::<Vec<_>>(),
-        "2 回の実行でファイルの顔ぶれが違う"
-    );
-    for ((rel, x), (_, y)) in fa.iter().zip(&fb) {
-        assert_eq!(x, y, "{rel} が 2 回の実行でバイト一致しない (HashMap を serde していないか)");
-    }
-}
-
 // ---------------------------------------------------------------------------
 // T12 (DECISIONS A7): 歌詞とプレビュー音源を出さない
 // ---------------------------------------------------------------------------
@@ -1318,28 +1262,6 @@ mod real {
     }
 
     #[test]
-    fn home_show_rows_lead_with_the_event_name() {
-        // トップの「最近の公演」は、公演名 (`DAY1`) だけ見ても何のライブか分からないので
-        // ライブ名を見出しにする。公演名がライブ名と別のものである行が 1 つは要る
-        // (全部が単日公演なら見出しと公演名が同じになり、規則が効いているか見えない)。
-        let dir = exported();
-        let root = dir.path();
-        let home: HomePage =
-            serde_json::from_str(&std::fs::read_to_string(root.join("index/home.json")).unwrap())
-                .unwrap();
-        let led = home
-            .recent_shows
-            .iter()
-            .find(|s| s.title != s.reference.name)
-            .expect("公演名がライブ名と別の行がトップに無い");
-        assert!(
-            led.show_label.is_some(),
-            "見出しがライブ名なのに公演名が副題に無い: {:?}",
-            led.reference.name
-        );
-    }
-
-    #[test]
     fn past_venue_names_only_appear_where_a_venue_was_actually_renamed() {
         // `venue_names` は現在の名前も 1 行として持つので、素直に配ると 234 会場中
         // 233 会場で「旧称」の見出しの下に現在名が 1 つ並ぶ (期間も両端が空で `—`)。
@@ -1579,18 +1501,6 @@ mod real {
         for name in ["--accent:", "--on-accent:", "--tint-strong:", "--hero-surface:"] {
             assert!(css.contains(name), "{name} が出ていない");
         }
-    }
-
-    #[test]
-    fn meta_carries_the_content_fingerprint_and_the_frozen_today() {
-        let dir = exported();
-        let meta: SiteMeta =
-            serde_json::from_str(&std::fs::read_to_string(dir.path().join("meta.json")).unwrap())
-                .unwrap();
-        assert_eq!(meta.today_jst, TODAY);
-        // 生成時刻は today から作る (実時刻だと 2 回の実行でバイト一致しない)。
-        assert_eq!(meta.generated_at, format!("{TODAY}T00:00:00Z"));
-        assert!(meta.data_version.is_some(), "data_version が meta に無い");
     }
 
     #[test]

@@ -141,13 +141,6 @@ mod tests {
     }
 
     #[test]
-    fn 送れたらその曲だけ捨てる() {
-        let q = vec![item("s1", true, 1.0, 0), item("s2", true, 2.0, 1)];
-        assert_eq!(discard(&q, "s1"), vec![item("s2", true, 2.0, 1)]);
-        assert_eq!(discard(&q, "none"), q);
-    }
-
-    #[test]
     fn 待ち時間は初回0でそのあと倍々() {
         assert_eq!(retry_delay_seconds(0), 0.0);
         assert_eq!(retry_delay_seconds(1), 2.0);

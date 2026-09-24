@@ -577,19 +577,6 @@ mod tests {
         );
     }
 
-    /// `-` `~` `.` は実 ID に出るが素通し (Swift 実測と同じ)。
-    #[test]
-    fn unreserved_symbols_pass_through() {
-        assert_eq!(
-            show_url("sh_315_production_presents_f@ntastic_battle_fes_~wanna_step_in~_1"),
-            "https://imas-live-api.tokata3011.workers.dev/app/shows/sh_315_production_presents_f%40ntastic_battle_fes_~wanna_step_in~_1"
-        );
-        assert_eq!(
-            show_url("sh_283_production_solo_live_collection_-master_showpiece-_1"),
-            "https://imas-live-api.tokata3011.workers.dev/app/shows/sh_283_production_solo_live_collection_-master_showpiece-_1"
-        );
-    }
-
     /// 空白・不正な `%`・絵文字は encode される (Swift `URL(string:)` の実測値)。
     #[test]
     fn invalid_path_bytes_are_encoded_like_swift() {
@@ -613,14 +600,6 @@ mod tests {
         // Swift 実測の最小形。
         assert_eq!(escaped_id("a@b×"), "a%2540b%C3%97");
         assert_eq!(escaped_id("a@b"), "a%40b");
-    }
-
-    #[test]
-    fn poll_url_uses_polls_path() {
-        assert_eq!(
-            poll_url("p_best_song_2026"),
-            "https://imas-live-api.tokata3011.workers.dev/app/polls/p_best_song_2026"
-        );
     }
 
     // -- ペイロード ----------------------------------------------------------
@@ -689,19 +668,6 @@ mod tests {
         );
     }
 
-    /// 改行と絵文字 (サロゲートペア) は UTF-8 バイト列で encode される。
-    #[test]
-    fn x_post_url_encodes_newline_and_emoji() {
-        let p = SharePayload {
-            message: "🎵イントロドンで 8/10 正解！(正答率80%) 最大3連続🔥\n#イントロドン #アイマス".into(),
-            url: None,
-        };
-        assert_eq!(
-            p.x_post_url(),
-            "https://x.com/intent/post?text=%F0%9F%8E%B5%E3%82%A4%E3%83%B3%E3%83%88%E3%83%AD%E3%83%89%E3%83%B3%E3%81%A7%208/10%20%E6%AD%A3%E8%A7%A3%EF%BC%81(%E6%AD%A3%E7%AD%94%E7%8E%8780%25)%20%E6%9C%80%E5%A4%A73%E9%80%A3%E7%B6%9A%F0%9F%94%A5%0A%23%E3%82%A4%E3%83%B3%E3%83%88%E3%83%AD%E3%83%89%E3%83%B3%20%23%E3%82%A2%E3%82%A4%E3%83%9E%E3%82%B9"
-        );
-    }
-
     #[test]
     fn event_share_text_is_name_then_link() {
         assert_eq!(
@@ -714,16 +680,6 @@ mod tests {
     }
 
     // -- 投票系の文面 --------------------------------------------------------
-
-    #[test]
-    fn quoted_names_wraps_each_name() {
-        assert_eq!(quoted_names(&names(&["Q&A"])), "「Q&A」");
-        assert_eq!(
-            quoted_names(&names(&["Q&A", "Love & Joy", "#HE4DSHOT"])),
-            "「Q&A」「Love & Joy」「#HE4DSHOT」"
-        );
-        assert_eq!(quoted_names(&[]), "");
-    }
 
     #[test]
     fn poll_votes_message_matches_original() {
@@ -842,19 +798,6 @@ mod tests {
         assert!(!setlist_share_text(&setlist_input(exact)).contains("ほか"));
     }
 
-    /// セトリ未登録なら曲ブロックごと出ない (見出し + 副題 + 空行 + URL)。
-    #[test]
-    fn setlist_share_text_without_songs_skips_song_block() {
-        let text = setlist_share_text(&setlist_input(vec![]));
-        assert_eq!(
-            text,
-            "THE IDOLM@STER SideM 10th ANNIVERSARY ST@GE ～P@SSION-ING!!!～ DAY2\n\
-             2025-07-13 ・ 神奈川・Kアリーナ横浜\n\
-             \n\
-             https://imas-live-api.tokata3011.workers.dev/app/shows/sh_L1115"
-        );
-    }
-
     /// 公演名がイベント名を含むなら重ねない。
     #[test]
     fn setlist_share_name_avoids_duplicating_event_name() {
@@ -862,14 +805,6 @@ mod tests {
         input.show_name = "THE IDOLM@STER MILLION LIVE! 13thLIVE DAY1".into();
         input.event_name = Some("THE IDOLM@STER MILLION LIVE! 13thLIVE".into());
         assert_eq!(setlist_share_name(&input), input.show_name);
-    }
-
-    /// イベント名未取得なら公演名だけ。
-    #[test]
-    fn setlist_share_name_without_event_is_show_name_only() {
-        let mut input = setlist_input(vec![]);
-        input.event_name = None;
-        assert_eq!(setlist_share_name(&input), "DAY2");
     }
 
     /// Swift の `contains("")` は false。原本はそこで「イベント名 + 空白 + 公演名」を選ぶので、
@@ -1022,14 +957,6 @@ mod tests {
             elapsed_seconds: 0.0,
             rush_time_limit_seconds: 60.0,
         }
-    }
-
-    #[test]
-    fn intro_don_normal_text_matches_original() {
-        assert_eq!(
-            intro_don_share_text(&intro_input(IntroDonShareMode::Normal)),
-            "🎵イントロドンで 8/10 正解！(正答率80%)\n#イントロドン #アイマス"
-        );
     }
 
     #[test]

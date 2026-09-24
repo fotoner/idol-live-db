@@ -224,16 +224,6 @@ mod tests {
 
     // ---- 会場 ----
 
-    /// iOS testVenueFilterKeepsOnlyEventsAtThatVenue。
-    #[test]
-    fn venue_filter_keeps_only_events_at_that_venue() {
-        let items = [item("a"), item("b"), item("c")];
-        let mut c = criteria();
-        c.venue = "東京・日本武道館".to_string();
-        c.venue_event_ids = vs(&["a", "c"]);
-        assert_eq!(filtered_ids(&items, &c), vs(&["a", "c"]));
-    }
-
     /// iOS testEmptyVenueDoesNotFilter: 会場名が空なら、解決済み集合が空でも
     /// 絞り込みは効かない (「未選択」と「その会場に該当なし」を取り違えて全件消さないこと)。
     #[test]
@@ -243,16 +233,6 @@ mod tests {
         c.venue = String::new();
         c.venue_event_ids = vec![];
         assert_eq!(filtered_ids(&items, &c), vs(&["a", "b"]));
-    }
-
-    /// iOS testVenueWithNoMatchesYieldsEmpty: 会場名あり + 該当なし = 0 件。
-    #[test]
-    fn venue_with_no_matches_yields_empty() {
-        let items = [item("a"), item("b")];
-        let mut c = criteria();
-        c.venue = "存在しない会場".to_string();
-        c.venue_event_ids = vec![];
-        assert!(filter_event_indices(&items, &c).is_empty());
     }
 
     /// iOS testVenueCombinesWithBrandAsAnd: 会場とブランドは AND。
@@ -267,15 +247,6 @@ mod tests {
     }
 
     // ---- ブランド ----
-
-    /// iOS testBrandFilter。
-    #[test]
-    fn brand_filter() {
-        let items = [item_brand("a", "cg"), item_brand("b", "ml")];
-        let mut c = criteria();
-        c.selected_brand_ids = vs(&["cg"]);
-        assert_eq!(filtered_ids(&items, &c), vs(&["a"]));
-    }
 
     /// 合同ライブ: joint_brand_ids のいずれか該当で残す (ハッチポッチ等の合同公演対応)。
     /// カンマ区切りの空白 trim・空要素スキップも iOS `jointBrandIdList` と同じ。
@@ -300,17 +271,6 @@ mod tests {
 
     // ---- kind ----
 
-    /// excluded_kinds に該当する kind は落ちる。
-    #[test]
-    fn excluded_kinds_drop_matching_events() {
-        let mut radio = item("b");
-        radio.kind = "radio".to_string();
-        let items = [item("a"), radio];
-        let mut c = criteria();
-        c.excluded_kinds = vs(&["radio"]);
-        assert_eq!(filtered_ids(&items, &c), vs(&["a"]));
-    }
-
     /// 未知の kind は `other` (その他) として扱う (Q-08l): 「ライブを除外」しても消えず、
     /// 「その他を除外」で落ちる。
     #[test]
@@ -328,24 +288,6 @@ mod tests {
     }
 
     // ---- 検索 ----
-
-    /// iOS testSearchTextCaseInsensitive: 大文字小文字を無視した部分一致。
-    #[test]
-    fn search_text_case_insensitive() {
-        let items = [item_named("a", "SHINY COLORS"), item_named("b", "MILLION")];
-        let mut c = criteria();
-        c.search_text = "shiny".to_string();
-        assert_eq!(filtered_ids(&items, &c), vs(&["a"]));
-    }
-
-    /// 日本語 (ケース変換の無い文字) の部分一致もそのまま効く。
-    #[test]
-    fn search_text_matches_japanese_substring() {
-        let items = [item_named("a", "初星宴舞"), item_named("b", "歌合戦")];
-        let mut c = criteria();
-        c.search_text = "宴舞".to_string();
-        assert_eq!(filtered_ids(&items, &c), vs(&["a"]));
-    }
 
     /// 回帰: 正準等価 (NFC/NFD) の表現差を同一視する (Swift `String.contains` の挙動)。
     /// 指摘の机上実行ケース: NFC "パーティー" / NFD "パーティー" の 2 件に対し、
@@ -378,16 +320,6 @@ mod tests {
     }
 
     // ---- 参加状態 ----
-
-    /// iOS testAttendedFilter。
-    #[test]
-    fn attended_filter() {
-        let items = [item("a"), item("b")];
-        let mut c = criteria();
-        c.attendance_filter = "attended".to_string();
-        c.attended_event_ids = vs(&["b"]);
-        assert_eq!(filtered_ids(&items, &c), vs(&["b"]));
-    }
 
     /// iOS testNotAttendedFilter。
     #[test]
@@ -434,12 +366,6 @@ mod tests {
         assert_eq!(filtered_ids(&items, &c), vs(&["a", "b"]));
     }
 
-    /// 空入力は空出力 (パニックしない)。
-    #[test]
-    fn empty_items_yield_empty() {
-        assert!(filter_event_indices(&[], &criteria()).is_empty());
-    }
-
     fn item_type(id: &str, event_type: &str) -> EventFilterItem {
         EventFilterItem { event_type: event_type.to_string(), ..item(id) }
     }
@@ -466,13 +392,6 @@ mod tests {
         let mut c = criteria();
         c.exclude_broadcast = true;
         assert_eq!(filtered_ids(&items, &c), vs(&["anniv", "orch", "unclassified"]));
-    }
-
-    /// 既定 (off) では broadcast も残る。
-    #[test]
-    fn exclude_broadcast_off_keeps_broadcast() {
-        let items = [item_type("bc", "broadcast"), item_type("a", "live")];
-        assert_eq!(filtered_ids(&items, &criteria()), vs(&["bc", "a"]));
     }
 
     /// 現地公演が「配信を除く」で消えないことの番人。

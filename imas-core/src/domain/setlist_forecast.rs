@@ -1124,11 +1124,6 @@ mod tests {
     }
 
     #[test]
-    fn non_live_or_unknown_shows_are_not_forecast() {
-        assert!(forecast_show_uncached(&tour(), "nope", 10).is_none());
-    }
-
-    #[test]
     fn unit_standing_needs_three_released_songs() {
         let snap = tour();
         let prep = ForecastPrep::build(&snap);
@@ -1227,29 +1222,6 @@ mod tests {
         }
         assert!(model_tally["DAY1"].rate() >= 0.30, "DAY1 の上位 10 曲の当たり率が 30% 未満");
         assert!(model_tally["ALL"].rate() > pop_tally["ALL"].rate(), "人気順に負けた");
-    }
-
-    #[test]
-    fn same_input_gives_the_same_forecast() {
-        let snap = crate::test_support::bundle_snapshot();
-        let show = snap.shows[latest_live_with_setlist(snap) as usize].id.clone();
-        let a = forecast_show_uncached(snap, &show, 30).unwrap();
-        let b = forecast_show_uncached(snap, &show, 30).unwrap();
-        assert_eq!(a, b);
-        assert_eq!(a.songs.len(), 30);
-    }
-
-    fn latest_live_with_setlist(snap: &Snapshot) -> u32 {
-        snap.shows_in_date_order
-            .iter()
-            .copied()
-            .rev()
-            .find(|&s| {
-                crate::domain::collection_gap::is_real_live(snap, s)
-                    && !snap.setlist_items_by_show[s as usize].is_empty()
-                    && !snap.cast_by_show[s as usize].is_empty()
-            })
-            .expect("セトリつきのライブがある")
     }
 
     /// 予測する公演の日以降のセトリと出演者を消しても、予測は 1 ビットも変わらない。

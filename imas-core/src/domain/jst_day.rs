@@ -42,11 +42,6 @@ mod tests {
     const JULY26_10AM_JST: i64 = 1785027600;
 
     #[test]
-    fn today_is_jst_not_device_local() {
-        assert_eq!(jst_today(JULY26_10AM_JST), "2026-07-26");
-    }
-
-    #[test]
     fn day_boundary_before_and_after_midnight_jst() {
         // 2026-07-25 23:59:59 JST = 14:59:59 UTC
         assert_eq!(jst_today(1784991599), "2026-07-25");

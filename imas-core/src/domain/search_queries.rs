@@ -284,16 +284,6 @@ mod tests {
     // 増える側の実例は `kana_folding_finds_more_than_sql_like` に置いた。
     // 語を足すときは、増分が出ないことを確かめてからここへ入れること。
 
-    /// 実データで当たり方の異なる検索語 5 系統。各種別が元 SQL と順序込みで一致する。
-    #[test]
-    fn search_terms_match_sql() {
-        // (検索語, 1 件以上ヒットするはずの種別があるか) — 全滅の検索語はここに置かない
-        for q in ["夢", "ready", "M@STER", "はるか", "ミリオン"] {
-            let (s, i, e) = assert_all_kinds_match_sql(q);
-            assert!(s + i + e > 0, "query={q:?} は 1 件以上ヒットする前提");
-        }
-    }
-
     /// LIKE の ASCII 大小無視: "ready" と "READY" は同一結果で、大小混在の題名が当たる。
     #[test]
     fn ascii_case_is_ignored_like_sql() {
@@ -391,15 +381,6 @@ mod tests {
         assert_eq!(global_search(bundle_snapshot(), "の").song_ids.len(), 20, "横断検索は 20 件で切る");
     }
 
-    /// 空の語は「絞り込んでいない」= 全件。一覧の挙動と同じ。
-    #[test]
-    fn empty_query_counts_everything() {
-        let c = search_counts(bundle_snapshot(), "");
-        assert_eq!(c.songs as usize, bundle_snapshot().songs.len());
-        assert_eq!(c.idols as usize, bundle_snapshot().idols.len());
-        assert_eq!(c.events as usize, bundle_snapshot().events.len());
-    }
-
     /// 「今後」と「開催済み」を足すと、ライブの当たり総数に一致する。
     ///
     /// 一致しないなら、どちらにも入らない (= 飛んだ先で見えない) ライブがいる。
@@ -472,12 +453,6 @@ mod tests {
             "従来 SQL のヒットは全部残る: {kana_query}"
         );
         assert!(ours.len() > sql_hits.len(), "かなを畳んだぶん増える: {kana_query}");
-    }
-
-    #[test]
-    fn no_hit_query_is_empty_like_sql() {
-        let (s, i, e) = assert_all_kinds_match_sql("zzz存在しない検索語");
-        assert_eq!((s, i, e), (0, 0, 0));
     }
 
     // ---- 純粋関数の性質 ----

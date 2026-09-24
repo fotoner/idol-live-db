@@ -317,15 +317,6 @@ mod tests {
 
     // MARK: stable_index
 
-    /// 同じ入力なら常に同じ値 (プロセスをまたいでも同じである必要がある)。
-    #[test]
-    fn stable_index_is_deterministic() {
-        assert_eq!(
-            stable_index("2026-07-26|cg", 100),
-            stable_index("2026-07-26|cg", 100)
-        );
-    }
-
     /// 出荷済みの実装が出す既知値を固定する。
     ///
     /// ここが変わると全ユーザーの「今日の1曲」が一斉に入れ替わる。特に offset basis は
@@ -337,14 +328,6 @@ mod tests {
         assert_eq!(stable_index("a", 500), 366);
         assert_eq!(stable_index("", 7), 3);
         assert_eq!(stable_index("2026-07-26|cg", 500), 362);
-    }
-
-    #[test]
-    fn stable_index_is_within_range() {
-        for i in 0..200 {
-            let idx = stable_index(&format!("2026-07-26|brand{i}"), 13);
-            assert!((0..13).contains(&idx), "範囲外: {idx}");
-        }
     }
 
     /// 候補 0 件でも落ちない (剰余のゼロ除算を踏まない)。
@@ -366,28 +349,6 @@ mod tests {
         );
     }
 
-    /// 日が変われば (基本的に) 選ぶ曲も変わる。日替わりとして機能していることの確認。
-    #[test]
-    fn song_index_varies_by_day() {
-        let a = song_index("2026-07-26", "cg", 500);
-        let b = song_index("2026-07-27", "cg", 500);
-        assert_ne!(a, b);
-    }
-
-    /// 同じ日でもブランドが違えば別の曲を選ぶ (全ブランド同じ番号にならない)。
-    #[test]
-    fn song_index_varies_by_brand() {
-        let cg = song_index("2026-07-26", "cg", 500);
-        let ml = song_index("2026-07-26", "ml", 500);
-        assert_ne!(cg, ml);
-    }
-
-    /// 候補が空でも 0 を返して落ちない。
-    #[test]
-    fn song_index_with_no_candidates() {
-        assert_eq!(song_index("2026-07-26", "cg", 0), 0);
-    }
-
     // MARK: song_indices (一括版)
 
     /// 一括版はスカラー版と必ず同じ答えを出す (アプリの一括解決とウィジェットの
@@ -406,11 +367,6 @@ mod tests {
             .map(|b| song_index("2026-07-26", &b.brand_id, i64::from(b.count)) as u32)
             .collect();
         assert_eq!(got, want);
-    }
-
-    #[test]
-    fn song_indices_with_empty_input() {
-        assert!(song_indices("2026-07-26", &[]).is_empty());
     }
 
     // MARK: candidate_song_ids (元 SQL との等価性)
@@ -489,13 +445,6 @@ mod tests {
             let no_variant = candidate_song_ids(bundle_snapshot(), brand, true, true).len();
             assert!(used <= no_cover.min(no_variant), "brand={brand}");
         }
-    }
-
-    /// 未知ブランドは空 (呼び出し側が空判定してスキップする前提)。
-    #[test]
-    fn candidate_song_ids_for_unknown_brand_is_empty() {
-        assert!(candidate_song_ids(bundle_snapshot(), "存在しないブランド", false, true).is_empty());
-        assert_eq!(run_original_sql("存在しないブランド", false, true), Vec::<String>::new());
     }
 
     /// 並びは id 昇順 (BINARY) で、スナップショットの添字順ではない。

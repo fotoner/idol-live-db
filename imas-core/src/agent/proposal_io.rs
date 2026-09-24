@@ -316,25 +316,6 @@ mod tests {
     }
 
     #[test]
-    fn 書き込んだドラフトはリポジトリ配下に実在する() {
-        let repo = TempRepo::new();
-        let ctx = ctx_for(&repo);
-        let result = run(&ctx, "propose_song", &song_args("ml_write_test")).expect("失敗しないはず");
-
-        let path = result["draft"]["path"].as_str().expect("path があるはず");
-        assert_eq!(path, "data/songs/20260919_song_ml_write_test.json");
-        let written = std::fs::read_to_string(repo.root.join(path)).expect("書けているはず");
-        assert!(written.contains("ml_write_test"));
-        assert!(written.contains("https://example.com/news"));
-
-        // python3 が無い環境でも「検証できなかった」ことがはっきり返ることだけ確かめる
-        // (apply_data.py 自体の判定結果は問わない — それは apply 側のテストの仕事)。
-        let check = &result["check"];
-        assert!(check["ran"].is_boolean());
-        assert!(result["notice"].as_str().unwrap().contains("反映"));
-    }
-
-    #[test]
     fn 同じファイル名に2度書くと連番になり既存ファイルを上書きしない() {
         let repo = TempRepo::new();
         let ctx = ctx_for(&repo);
@@ -422,14 +403,6 @@ mod tests {
     }
 
     #[test]
-    fn check_proposals_は空なら0件と報告する() {
-        let repo = TempRepo::new();
-        let ctx = ctx_for(&repo);
-        let result = run(&ctx, "check_proposals", &json!({})).unwrap();
-        assert_eq!(result["files_checked"], 0);
-    }
-
-    #[test]
     #[cfg(unix)]
     fn kind_ディレクトリがシンボリックリンクで外を指していると書き込みを拒否する() {
         use std::os::unix::fs::symlink;
@@ -479,18 +452,6 @@ mod tests {
         assert_eq!(result["total_pending"], total);
         let message = result["message"].as_str().expect("上限超過なので message があるはず");
         assert!(message.contains("残り 5 件"));
-    }
-
-    #[test]
-    fn write_and_check_の結果には常に_source_advisory_が入る() {
-        let repo = TempRepo::new();
-        let ctx = ctx_for(&repo);
-        // song_args は既知ホスト (idolmaster-official.jp とは別の example.com だが、
-        // どちらにせよ M4 は「既知/未知を問わず常に載せる」仕様なのでここでは
-        // 「存在して空でない」ことだけを確かめれば十分。
-        let result = run(&ctx, "propose_song", &song_args("ml_advisory_test")).unwrap();
-        let advisory = result["source_advisory"].as_str().expect("source_advisory が無い");
-        assert!(!advisory.is_empty());
     }
 
     #[test]

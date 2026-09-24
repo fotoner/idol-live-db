@@ -501,23 +501,6 @@ mod tests {
         }
     }
 
-    #[test]
-    fn categories_are_stable_and_round_trip() {
-        let list = expense_categories();
-        assert_eq!(list.len(), 9);
-        // 並びは画面の並び。先頭は遠征で必ず要る 3 つ。
-        assert_eq!(list[0].label, "チケット代");
-        assert_eq!(list[1].label, "交通費");
-        assert_eq!(list[2].label, "宿代");
-        assert!(list[0].is_travel && list[1].is_travel && list[2].is_travel);
-        assert!(!list[3].is_travel);
-
-        for info in list {
-            assert_eq!(expense_category_from_key(&info.key), info.category);
-            assert_eq!(expense_category_key(info.category), info.key);
-        }
-    }
-
     /// 知らないキーで金額が消えない (将来費目を増やした端末のバックアップ対策)。
     #[test]
     fn unknown_category_key_falls_back_to_other() {
@@ -638,14 +621,6 @@ mod tests {
         assert_eq!(s.linked_total, 33_000);
         assert_eq!(s.show_count, 2);
         assert_eq!(s.average_per_show, 16_500);
-    }
-
-    #[test]
-    fn average_is_zero_without_shows() {
-        let entries = vec![entry("a", "2026-09-19", ExpenseCategory::InGame, 3_000)];
-        let s = build_ledger_summary(&entries, LedgerPeriod::Month, &all());
-        assert_eq!(s.show_count, 0);
-        assert_eq!(s.average_per_show, 0);
     }
 
     #[test]

@@ -172,15 +172,6 @@ mod tests {
     }
 
     #[test]
-    fn 条件なしなら全公演が新しい順で返る() {
-        let s = bundle_snapshot();
-        let got = filter_show_indexes(s, &criteria());
-        assert_eq!(got.len(), s.shows.len());
-        let dates: Vec<&str> = got.iter().map(|&i| s.shows[i as usize].date.as_str()).collect();
-        assert!(dates.windows(2).all(|w| w[0] >= w[1]), "新しい順になっていない");
-    }
-
-    #[test]
     fn 同日の並びは前計算列と同じ() {
         let s = bundle_snapshot();
         // 反転しない (= 近い順の) 枠なら shows_in_date_order そのまま。

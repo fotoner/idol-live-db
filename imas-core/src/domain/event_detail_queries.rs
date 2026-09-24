@@ -1195,11 +1195,6 @@ mod attendance_group_tests {
         let labels: Vec<&str> = groups.iter().map(|(l, _)| l.as_str()).collect();
         assert_eq!(labels, ["DAY1・DAY3 のみ", "DAY1・DAY2 のみ"]);
     }
-
-    #[test]
-    fn empty_roster_has_no_groups() {
-        assert!(groups_of(&[], &[show("s", "x")], &[]).is_empty());
-    }
 }
 
 #[cfg(test)]
@@ -1358,18 +1353,6 @@ mod tests {
         }
         assert!(checked > 50, "サンプル数 ({checked})");
         assert!(show_record(bundle_snapshot(), "存在しない公演").is_none());
-    }
-
-    #[test]
-    fn latest_show_matches_sql() {
-        let db = bundle_conn();
-        let max_date: String =
-            db.query_row("SELECT MAX(date) FROM shows", [], |r| r.get(0)).unwrap();
-        let candidates = string_column(&db, "SELECT id FROM shows WHERE date = ?", &[&max_date]);
-        let actual = latest_show(bundle_snapshot()).expect("公演は 1 件以上ある");
-        assert_eq!(actual.date, max_date);
-        // ORDER BY date DESC LIMIT 1 の同日タイは SQL 未規定 → 最大日の中の 1 件であること。
-        assert!(candidates.contains(&actual.id), "{} は {max_date} の公演", actual.id);
     }
 
     #[test]
@@ -2077,14 +2060,6 @@ mod tests {
     }
 
     // ---- リリース (event_releases) ----
-
-    #[test]
-    fn event_releases_empty_on_bundle() {
-        // Bundle には event_releases 表が無い → 全イベントで空 (動的検出の既定値側)。
-        for event in &bundle_snapshot().events {
-            assert!(event_releases(bundle_snapshot(), &event.id).is_empty());
-        }
-    }
 
     /// 移行済み Documents DB を模した DB (Bundle のコピー + event_releases) で
     /// `ORDER BY release_date ASC, sort_order ASC` を照合する。

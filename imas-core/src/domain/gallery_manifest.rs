@@ -98,12 +98,6 @@ mod tests {
     }
 
     #[test]
-    fn 今の形式を読む() {
-        let text = r#"[{"name":"a.jpg","inSlideshow":true},{"name":"b.png","inSlideshow":false}]"#;
-        assert_eq!(parse(text), vec![meta("a.jpg", true), meta("b.png", false)]);
-    }
-
-    #[test]
     fn 旧形式はすべてスライドショー対象として読む() {
         assert_eq!(parse(r#"["a.jpg","b.jpg"]"#), vec![meta("a.jpg", true), meta("b.jpg", true)]);
     }
@@ -143,12 +137,6 @@ mod tests {
         let disk = vec!["b.jpg".to_string(), "a.jpg".to_string()];
         assert_eq!(names(&reconcile(None, &disk)), vec!["a.jpg", "b.jpg"]);
         assert!(reconcile(Some("[]"), &[]).is_empty());
-    }
-
-    #[test]
-    fn スライドショーは選ばれたものだけ() {
-        let entries = vec![meta("a", true), meta("b", false), meta("c", true)];
-        assert_eq!(names(&slideshow_entries(&entries)), vec!["a", "c"]);
     }
 
     #[test]

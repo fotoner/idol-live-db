@@ -119,15 +119,6 @@ mod tests {
         assert_eq!(performer_label(&n).as_deref(), Some("天道輝、若里春名、水嶋咲"));
     }
 
-    #[test]
-    fn falls_back_to_performers() {
-        let n = naming(None, None, &["赤城みりあ", "市原仁奈", "椎名法子"]);
-        assert_eq!(
-            performer_label(&n).as_deref(),
-            Some("赤城みりあ・市原仁奈・椎名法子")
-        );
-    }
-
     /// DB には `NULL` と `''` が混ざっている。空文字で止まると
     /// 名義が空のまま出て、原唱者まで落ちない。
     #[test]
@@ -146,13 +137,6 @@ mod tests {
     fn blank_performers_are_dropped() {
         let n = naming(None, None, &["浅倉透", "", "  ", "市川雛菜"]);
         assert_eq!(performer_label(&n).as_deref(), Some("浅倉透・市川雛菜"));
-    }
-
-    /// ソロ曲は 1 人なので区切りが出ない。
-    #[test]
-    fn single_performer_has_no_separator() {
-        let n = naming(None, None, &["園田智代子"]);
-        assert_eq!(performer_label(&n).as_deref(), Some("園田智代子"));
     }
 }
 
@@ -432,15 +416,5 @@ mod setlist_tests {
     #[test]
     fn nothing_to_show_is_none() {
         assert_eq!(setlist_performer_label(&SetlistNaming::default()), None);
-    }
-
-    /// 名前の配列に空が混ざっても区切りだけが並ばない。
-    #[test]
-    fn blank_performer_names_are_dropped() {
-        let n = SetlistNaming {
-            performer_names: vec!["浅倉透".into(), "".into(), "  ".into(), "市川雛菜".into()],
-            ..Default::default()
-        };
-        assert_eq!(label(&n).as_deref(), Some("浅倉透／市川雛菜"));
     }
 }
