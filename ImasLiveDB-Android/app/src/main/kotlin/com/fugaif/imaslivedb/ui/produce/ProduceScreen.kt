@@ -42,6 +42,9 @@ import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material.icons.filled.WorkspacePremium
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -49,8 +52,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,6 +64,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -69,6 +77,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.model.EventWithDateRange
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.Song
+import com.fugaif.imaslivedb.di.AppModule
 import com.fugaif.imaslivedb.ui.components.ImasLeadBar
 import com.fugaif.imaslivedb.ui.components.ImasSectionHeader
 import com.fugaif.imaslivedb.ui.components.ImasStatTile
@@ -106,6 +115,15 @@ fun ProduceScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     // 他タブで見た曲・付けたマークがそのまま数字に効くので、前面に来るたび読み直す。
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refresh() }
+    val context = LocalContext.current
+    val authState by AppModule.from(context).authService.state.collectAsState()
+    val uriHandler = LocalUriHandler.current
+    // 発行できた Discord 認可 URL はブラウザへ渡して消す (1 回限りなので開き直さない)。
+    LaunchedEffect(state.discordLinkUrl) {
+        val url = state.discordLinkUrl ?: return@LaunchedEffect
+        viewModel.consumeDiscordLinkUrl()
+        runCatching { uriHandler.openUri(url) }
+    }
 
     Scaffold(
         topBar = {
@@ -181,9 +199,9 @@ fun ProduceScreen(
             HorizontalDivider(color = DS.sep)
             // 年表は担当アイドルのブランドから開く (見たい歴史はたいてい担当の歴史)。
             // 担当がいなければブランド指定なしで開き、年表側が先頭ブランドを選ぶ。
-            HubRow(Icons.Filled.Timeline, "年表", "ライブ・楽曲シリーズ・節目を1枚で俯瞰する", DS.ink2, null) {
+            HubRow(Icons.Filled.Timeline, "年表", "ライブ・楽曲シリーズ・節目を1枚で俯瞰する", DS.ink2, null, onClick = {
                 onNavigateToTimeline(state.pickedIdols.firstOrNull()?.brandId)
-            }
+            })
             HorizontalDivider(color = DS.sep)
             HubRow(Icons.Filled.HowToVote, "投票・予想", "タグ・ペンライト・ポール", DS.ink2, null, onNavigateToPolls)
             HorizontalDivider(color = DS.sep)
@@ -197,6 +215,17 @@ fun ProduceScreen(
             HorizontalDivider(color = DS.sep)
             HubRow(Icons.Filled.History, "みんなの編集履歴", "", DS.ink2, null, onNavigateToEditHistory)
             HorizontalDivider(color = DS.sep)
+            // 編集の協力者に Discord のロールを渡す入口。セッションで本人を確かめるので
+            // ログイン中だけ出す (未ログインで押しても 401 になるだけ)。
+            if (authState.isSignedIn) {
+                HubRow(
+                    Icons.Filled.WorkspacePremium, "Discordでロールを受け取る",
+                    "アプリで10件以上編集すると「データ協力」ロールが付きます", DS.ink2, null,
+                    onClick = viewModel::requestDiscordLink,
+                    loading = state.isLinkingDiscord
+                )
+                HorizontalDivider(color = DS.sep)
+            }
             HubRow(Icons.Filled.SportsEsports, "ゲーム", "クイズ・イントロ当てクイズ", DS.ink2, null, onNavigateToGamesHub)
             HorizontalDivider(color = DS.sep)
             HubRow(Icons.Filled.BarChart, "統計", "ブランド別・年別・ランキング", DS.ink2, null, onNavigateToStats)
@@ -204,6 +233,15 @@ fun ProduceScreen(
             HubRow(Icons.Filled.Settings, "設定・マイ", "", DS.ink2, null, onNavigateToSettings)
             Spacer(Modifier.height(24.dp))
         }
+    }
+
+    state.discordErrorMessage?.let { message ->
+        AlertDialog(
+            onDismissRequest = { viewModel.clearDiscordError() },
+            confirmButton = { TextButton(onClick = { viewModel.clearDiscordError() }) { Text("OK") } },
+            title = { Text("エラー") },
+            text = { Text(message) }
+        )
     }
 }
 
@@ -479,10 +517,12 @@ private fun HubRow(
     subtitle: String,
     accent: Color,
     count: Int?,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    /** true なら右端の矢印をくるくるに替えて押せなくする (押してから外へ飛ぶまでの待ち)。 */
+    loading: Boolean = false
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 14.dp),
+        modifier = Modifier.fillMaxWidth().clickable(enabled = !loading, onClick = onClick).padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(icon, contentDescription = null, tint = accent, modifier = Modifier.size(22.dp))
@@ -498,6 +538,10 @@ private fun HubRow(
                 modifier = Modifier.padding(end = 6.dp)
             )
         }
-        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = DS.ink3, modifier = Modifier.size(18.dp))
+        if (loading) {
+            CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = DS.ink3)
+        } else {
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = DS.ink3, modifier = Modifier.size(18.dp))
+        }
     }
 }

@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.fugaif.imaslivedb.data.community.CommunityApi
+import com.fugaif.imaslivedb.data.community.DiscordLinkService
 import com.fugaif.imaslivedb.data.model.EventWithDateRange
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.Song
@@ -48,7 +49,12 @@ data class ProduceUiState(
     val featuredPoll: FeaturedPoll? = null,
     /** 収支 (家計簿) の合計。金額の表記はコア (`formatYen`) 一本。 */
     val ledgerTotalLabel: String = formatYen(0),
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    /** Discord ロール受け取り: 認可 URL を発行してもらっている間 true (二度押し防止 + くるくる)。 */
+    val isLinkingDiscord: Boolean = false,
+    /** 発行できた認可 URL。画面がブラウザで開いたら [ProduceViewModel.consumeDiscordLinkUrl] で消す。 */
+    val discordLinkUrl: String? = null,
+    val discordErrorMessage: String? = null
 ) {
     val attendedCount: Int get() = attendedEvents.size
 
@@ -105,6 +111,31 @@ class ProduceViewModel(app: Application) : AndroidViewModel(app) {
             )
         }
         viewModelScope.launch { loadFeaturedPoll() }
+    }
+
+    /**
+     * Worker から 1 回限りの Discord 認可 URL をもらう。開くのは画面 (ブラウザへ渡す)。
+     * ロール付与の結果は Worker のページが出すので、ここは URL を渡すところまで。
+     */
+    fun requestDiscordLink() {
+        if (_uiState.value.isLinkingDiscord) return
+        _uiState.value = _uiState.value.copy(isLinkingDiscord = true, discordErrorMessage = null)
+        viewModelScope.launch {
+            _uiState.value = try {
+                val url = module.discordLinkService.authorizeUrl()
+                _uiState.value.copy(isLinkingDiscord = false, discordLinkUrl = url)
+            } catch (e: DiscordLinkService.LinkException) {
+                _uiState.value.copy(isLinkingDiscord = false, discordErrorMessage = e.message)
+            }
+        }
+    }
+
+    fun consumeDiscordLinkUrl() {
+        _uiState.value = _uiState.value.copy(discordLinkUrl = null)
+    }
+
+    fun clearDiscordError() {
+        _uiState.value = _uiState.value.copy(discordErrorMessage = null)
     }
 
     /** 保存されているのは id だけなので、表示のたびにローカルのカタログで名前を引く。 */
