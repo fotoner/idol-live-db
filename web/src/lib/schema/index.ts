@@ -31,6 +31,7 @@ export type { CallGuidePage } from "./CallGuidePage";
 export type { CallGuideSongRow } from "./CallGuideSongRow";
 export type { CallGuideVocabulary } from "./CallGuideVocabulary";
 export type { CoOccurRow } from "./CoOccurRow";
+export type { Countdown } from "./Countdown";
 export type { Counts } from "./Counts";
 export type { CreditGroup } from "./CreditGroup";
 export type { Crumb } from "./Crumb";
