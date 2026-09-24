@@ -1,5 +1,5 @@
 {
- "title": "補足の残り 4 曲 (Crossing! / Spread the Wings!! / シャニアニ OP 2 曲)",
+ "title": "補足の残り 6 曲 (Welcome!! / Dreaming! / Crossing! / Spread the Wings!! / シャニアニ OP 2 曲)",
  "fixes": [
   {
    "table": "songs",
@@ -36,6 +36,24 @@
    },
    "source": "https://shinycolors.lantis.jp/releaseinfo/lacm-24580/",
    "note": "Lantis: アニメ『アイドルマスター シャイニーカラーズ 2nd season』オープニング主題歌「プリズムフレア」"
+  },
+  {
+   "table": "songs",
+   "id": "ml_welcome",
+   "fields": {
+    "note": "ミリマス 1 周年記念楽曲"
+   },
+   "source": "オーナー (fuga) が示した周年曲の一覧 (2026-09-24、プロジェクトのスレッド)。公式ページには「テーマソング」とだけある",
+   "note": "オーナーの判断で表の文言どおりに入れる"
+  },
+  {
+   "table": "songs",
+   "id": "ml_dreaming",
+   "fields": {
+    "note": "ミリマス 2 周年記念楽曲"
+   },
+   "source": "オーナー (fuga) が示した周年曲の一覧 (2026-09-24、プロジェクトのスレッド)。公式ページには「テーマソング」とだけある",
+   "note": "オーナーの判断で表の文言どおりに入れる"
   }
  ]
 }
