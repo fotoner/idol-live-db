@@ -282,6 +282,22 @@ def _term_forms(v):
     return []
 
 
+_LATIN_HEAD = re.compile(r"[a-z0-9]")
+
+
+def term_in(text, form):
+    """訳 text (casefold 済み) に用語集の候補 form があるか。
+
+    英字・数字で始まる候補は語の頭から探す (call の中の all、deliver の中の live、subtitle の中の title は
+    数えない)。語尾は問わない (songs・edited・performance は song・edit・perform に合う)。
+    仮名・漢字・ハングルで始まる候補は語の区切りが無いので、どこにあってもよい。
+    """
+    f = form.casefold()
+    if _LATIN_HEAD.match(f):
+        return re.search(r"(?<![a-z0-9])" + re.escape(f), text) is not None
+    return f in text
+
+
 def glossary_forms(term, lang):
     """用語集の語 term を lang で書くときの候補。keep: true なら ja の語そのものが先頭に入る。"""
     forms = _term_forms(term.get(lang))
@@ -335,7 +351,7 @@ def _quality(catalog, ns, e, terms, out):
         if t["ja"] not in masked:
             continue
         # 訳のある言語 (基準言語以外) のそれぞれで、用語集のその言語の語 (候補のどれか) があるか。
-        # 英字は大文字小文字を区別しない (文頭の Sentence case)
+        # 英字は大文字小文字を区別せず (文頭の Sentence case)、語の頭から探す (term_in)
         for lang in e.values:
             if lang == src:
                 continue
@@ -343,7 +359,7 @@ def _quality(catalog, ns, e, terms, out):
             if not wants:
                 continue
             lits = [_literal(e, lang, c).casefold() for c in e.forms(lang)]
-            if any(w.casefold() in lit for w in wants for lit in lits):
+            if any(term_in(lit, w) for w in wants for lit in lits):
                 continue
             if t.get("keep") is True and wants == [t["ja"]]:
                 out.append(warning(ns.path, e.key, "用語集では %s は訳さない (%s の値に %s が無い)" % (t["ja"], lang, t["ja"])))
