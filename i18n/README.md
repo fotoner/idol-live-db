@@ -260,7 +260,8 @@ Android では同じ名前の `L10n.Songs.listSortTitle` (DS 部品にはその�
 - xcstrings は全項目 `extractionState: manual`。`Localizable` の表は作らない (まだ移していない
   `Text("日本語")` は表に無いので、今までどおりキー = 日本語がそのまま出る)。
 - リテラルの `%`: 引数のある項目は両方 `%%`。引数の無い項目は iOS では 1 つのまま、Android は `formatted="false"`。
-- 生成物は `.gitattributes` の `linguist-generated` で PR の diff では畳まれる。レビューで見るのはカタログと呼び出し側。
+- 生成物は `.gitattributes` の `linguist-generated` で PR の diff では畳まれる (`i18n/TRANSLATION.md` だけは畳まない。
+  用語集・文体の変更を文章の差分として読むため)。レビューで見るのはカタログと呼び出し側。
 - マージで生成物がぶつかったら、カタログだけ解決して `generate` し直す (生成物を手でマージしない)。
 
 ## CI
