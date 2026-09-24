@@ -19,11 +19,11 @@ struct SongInfoTab: View {
             performanceStats
             songInfoSection
             if !vm.originalArtists.isEmpty {
-                IdolGridSection(title: String(localized: L10n.Songs.infoSingersHeader), idols: vm.originalArtists,
+                IdolGridSection(title: .key(L10n.Songs.infoSingersHeader), idols: vm.originalArtists,
                                 navigate: navigate)
             }
             if !vm.performerArtists.isEmpty {
-                IdolGridSection(title: String(localized: L10n.Songs.infoLiveSingersHeader), idols: vm.performerArtists,
+                IdolGridSection(title: .key(L10n.Songs.infoLiveSingersHeader), idols: vm.performerArtists,
                                 navigate: navigate)
             }
             if !vm.variantSongs.isEmpty { variantSongsSection }
