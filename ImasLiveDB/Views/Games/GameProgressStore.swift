@@ -19,13 +19,18 @@ enum GameKind: String, CaseIterable, Codable, Sendable {
     case songSingerQuiz
     case colorMatch
 
-    /// 表示名 (リザルト・シェア文言で使う)。
+    /// シェア文言 (imas-core の `shareQuizResultText` が日本語で組む) に埋め込むゲーム名。
+    /// 文の型がコアの日本語なので、名前だけ訳すと 1 文に言語が混ざる。シェア文言ごとコア段階で
+    /// 言語を渡すまでは日本語のまま渡す。画面に出すゲーム名は `L10n.Games.name*` を使う。
+    /// 設計 §8.6 (表示名を DisplayText にする) はこのためコアのシェア文言の段階まで見送っている。
+    /// そのとき「カラーマッチ」は `name.color_match` (「メンバーカラー合わせ」) と文言が違うので、
+    /// 流用せず別キーを足す (ja を変えないため)。
     var displayName: String {
         switch self {
-        case .introDon:       return "イントロドン"
-        case .idolQuiz:       return "アイドル当てクイズ"
-        case .songSingerQuiz: return "ソロ曲クイズ"
-        case .colorMatch:     return "カラーマッチ"
+        case .introDon:       return "イントロドン"  // i18n-ignore(core): コアのシェア文言 (日本語) に埋め込む名前
+        case .idolQuiz:       return "アイドル当てクイズ"  // i18n-ignore(core): コアのシェア文言 (日本語) に埋め込む名前
+        case .songSingerQuiz: return "ソロ曲クイズ"  // i18n-ignore(core): コアのシェア文言 (日本語) に埋め込む名前
+        case .colorMatch:     return "カラーマッチ"  // i18n-ignore(core): コアのシェア文言 (日本語) に埋め込む名前
         }
     }
 

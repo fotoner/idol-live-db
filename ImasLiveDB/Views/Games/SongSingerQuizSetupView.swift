@@ -41,7 +41,7 @@ struct SongSingerQuizSetupView: View {
         }
         .background(DS.bg.ignoresSafeArea())
         .scrollContentBackground(.hidden)
-        .navigationTitle("ソロ曲クイズ")
+        .navigationTitle(L10n.Games.nameSongQuiz)
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: $navigateToGame) {
             SongSingerQuizView(selectedBrandIds: selectedBrandIds)
@@ -68,9 +68,9 @@ struct SongSingerQuizSetupView: View {
                 .frame(width: 52, height: 52)
                 .background(DS.fill, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
             VStack(alignment: .leading, spacing: DS.sp2) {
-                Text("ソロ曲クイズ")
+                Text(L10n.Games.nameSongQuiz)
                     .font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
-                Text("ソロ曲を聴いてその歌手を 4 択で当てよう")
+                Text(L10n.Games.songQuizSetupSubtitle)
                     .font(.imasCaption).foregroundStyle(DS.ink3)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -86,8 +86,8 @@ struct SongSingerQuizSetupView: View {
         VStack(alignment: .leading, spacing: DS.sp3) {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: DS.sp1) {
-                    Text("出題ブランド").font(.imasSubhead.weight(.bold)).foregroundStyle(DS.ink)
-                    Text("複数選択可 · 空=全ブランド対象")
+                    Text(L10n.Games.brandFilterHeader).font(.imasSubhead.weight(.bold)).foregroundStyle(DS.ink)
+                    Text(L10n.Games.quizSetupBrandsCaption)
                         .font(.imasCaption).foregroundStyle(DS.ink3)
                 }
                 Spacer(minLength: 0)
@@ -95,7 +95,7 @@ struct SongSingerQuizSetupView: View {
                     Button {
                         withAnimation(.easeInOut(duration: 0.15)) { selectedBrandIds = [] }
                     } label: {
-                        Text("全てに戻す")
+                        Text(L10n.Games.quizSetupResetBrands)
                             .font(.imasCaption.weight(.semibold)).foregroundStyle(DS.sys)
                     }
                     .buttonStyle(.plain)
@@ -111,7 +111,8 @@ struct SongSingerQuizSetupView: View {
         let columns = [GridItem(.adaptive(minimum: 56, maximum: 80), spacing: 10)]
         return LazyVGrid(columns: columns, alignment: .center, spacing: 10) {
             BrandIconCell(
-                brandId: nil, label: "全て", iconText: "全", color: nil,
+                brandId: nil, label: String(localized: L10n.Games.brandFilterAll),
+                iconText: String(localized: L10n.Games.brandFilterAllIcon), color: nil,
                 isSelected: selectedBrandIds.isEmpty
             ) {
                 withAnimation(.easeInOut(duration: 0.15)) { selectedBrandIds = [] }
@@ -140,12 +141,12 @@ struct SongSingerQuizSetupView: View {
                 .font(.imasScaled(15, weight: .semibold)).foregroundStyle(DS.sys)
             if isEstimating {
                 ProgressView().tint(DS.sys).scaleEffect(0.8)
-                Text("候補を計算中…").font(.imasSubhead).foregroundStyle(DS.ink3)
+                Text(L10n.Games.quizSetupEstimating).font(.imasSubhead).foregroundStyle(DS.ink3)
             } else {
                 VStack(alignment: .leading, spacing: DS.sp1) {
-                    Text("出題候補: \(estimatedSongs) 曲 / \(estimatedSingers) 歌手")
+                    Text(L10n.Games.songQuizSetupCandidates(songs: estimatedSongs, singers: estimatedSingers))
                         .font(.imasSubhead.weight(.semibold)).foregroundStyle(DS.ink)
-                    Text("4択の選択肢は歌手数が基準です")
+                    Text(L10n.Games.songQuizSetupCandidatesNote)
                         .font(.imasCaption).foregroundStyle(DS.ink3)
                 }
             }
@@ -162,7 +163,7 @@ struct SongSingerQuizSetupView: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundStyle(DS.warning)
                 .font(.imasSubhead)
-            Text("4 択を出すには原唱歌手が最低 4 名必要です。ブランドの選択を増やしてください。")
+            Text(L10n.Games.songQuizSetupInsufficient)
                 .font(.imasCaption).foregroundStyle(DS.ink)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -179,7 +180,7 @@ struct SongSingerQuizSetupView: View {
             AppAnalytics.tap("song_singer_quiz_setup.start")
             navigateToGame = true
         } label: {
-            Label("スタート", systemImage: "play.fill")
+            Label(L10n.Games.quizSetupStart, systemImage: "play.fill")
                 .font(.imasHeadline.weight(.semibold))
                 .foregroundStyle(DS.onSys)
                 .frame(maxWidth: .infinity)

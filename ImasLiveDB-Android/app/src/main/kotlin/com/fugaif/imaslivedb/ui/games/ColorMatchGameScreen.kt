@@ -50,6 +50,9 @@ import com.fugaif.imaslivedb.data.games.GameKind
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
 import com.fugaif.imaslivedb.ui.theme.DS
@@ -83,7 +86,9 @@ import uniffi.imas_core.colorMatchStartGame
 // ここに残すのは Compose の描画とシードの調達、id → Idol の解決だけ。
 // =============================================================================
 
-private val LEVEL_LABELS = listOf("やさしい", "ふつう", "むずい")
+/** 難易度の表示名 (並びはセグメントの index = [ColorMatchUiState.difficulty])。描くときに resolve() する。 */
+private val LEVEL_LABELS: List<DisplayText>
+    get() = listOf(L10n.Games.colorMatchDifficultyEasy, L10n.Games.colorMatchDifficultyNormal, L10n.Games.colorMatchDifficultyHard)
 private val QUESTION_COUNT_OPTIONS = listOf(5, 10)
 
 /**
@@ -268,9 +273,9 @@ fun ColorMatchGameScreen(onBack: () -> Unit, viewModel: ColorMatchViewModel = vi
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("メンバーカラー合わせ", fontWeight = FontWeight.Bold) },
+                title = { Text(L10n.Games.nameColorMatch.resolve(), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "戻る") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, L10n.Common.actionBack.resolve()) }
                 }
             )
         }
@@ -294,30 +299,32 @@ fun ColorMatchGameScreen(onBack: () -> Unit, viewModel: ColorMatchViewModel = vi
 @Composable
 private fun ColorMatchSetup(state: ColorMatchUiState, viewModel: ColorMatchViewModel) {
     Text(
-        "出題ブランドを選んで、似た色のメンバーの色を当てよう。",
+        L10n.Games.colorMatchSetupLead.resolve(),
         fontSize = 13.sp, color = DS.ink2
     )
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("難易度", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
-        ImasSegmented(labels = LEVEL_LABELS, selection = state.difficulty, onSelect = { viewModel.setDifficulty(it) })
+        Text(L10n.Games.colorMatchSetupDifficulty.resolve(), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
+        ImasSegmented(labels = LEVEL_LABELS.map { it.resolve() }, selection = state.difficulty, onSelect = { viewModel.setDifficulty(it) })
     }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("問題数", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
+        Text(L10n.Games.colorMatchSetupQuestionCount.resolve(), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
         val idx = QUESTION_COUNT_OPTIONS.indexOf(state.questionCount).coerceAtLeast(0)
         ImasSegmented(
-            labels = QUESTION_COUNT_OPTIONS.map { "${it}問" }, selection = idx,
+            labels = QUESTION_COUNT_OPTIONS.map { L10n.Games.colorMatchSetupQuestionCountOption(count = it).resolve() }, selection = idx,
             onSelect = { viewModel.setQuestionCount(QUESTION_COUNT_OPTIONS[it]) }
         )
     }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("出題ブランド", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
-        Text("未選択なら全ブランドから出題", fontSize = 12.sp, color = DS.ink3)
+        Text(L10n.Games.brandFilterHeader.resolve(), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
+        Text(L10n.Games.colorMatchSetupBrandsCaption.resolve(), fontSize = 12.sp, color = DS.ink3)
         GameBrandFilterGrid(
             brands = state.brands, selectedBrandIds = state.selectedBrandIds,
             onToggle = { viewModel.toggleBrand(it) }, onClearAll = { viewModel.clearBrands() }
         )
     }
-    QuizPrimaryButton(title = "はじめる（全${state.questionCount}問）") { if (state.canStart) viewModel.startSession() }
+    QuizPrimaryButton(title = L10n.Games.colorMatchSetupStart(count = state.questionCount).resolve()) {
+        if (state.canStart) viewModel.startSession()
+    }
 }
 
 @Composable
@@ -326,16 +333,18 @@ private fun ColorMatchPlay(state: ColorMatchUiState, viewModel: ColorMatchViewMo
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(
-                    if (state.judged) "答え合わせ" else "色をタップして選択、メンバーをタップで割当",
+                    (if (state.judged) L10n.Games.colorMatchPlayJudged else L10n.Games.colorMatchPlayInstructionAndroid).resolve(),
                     fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink
                 )
                 Text(
-                    "第${state.roundIndex + 1}問 / 全${state.questionCount}問 ・ ${LEVEL_LABELS[state.difficulty]}",
+                    L10n.Games.colorMatchPlayProgress(
+                        current = state.roundIndex + 1, total = state.questionCount, level = LEVEL_LABELS[state.difficulty]
+                    ).resolve(),
                     fontSize = 12.sp, color = DS.ink3
                 )
             }
             Text(
-                "やめる", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2,
+                L10n.Games.colorMatchPlayQuit.resolve(), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2,
                 modifier = Modifier.clickable { viewModel.resetToSetup() }
             )
         }
@@ -347,9 +356,15 @@ private fun ColorMatchPlay(state: ColorMatchUiState, viewModel: ColorMatchViewMo
     val judgement = state.judgement
     if (judgement != null) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            Text("${judgement.score} / ${judgement.outOf} 正解", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+            Text(
+                L10n.Games.colorMatchPlayScore(score = judgement.score.toInt(), total = judgement.outOf.toInt()).resolve(),
+                fontSize = 22.sp, fontWeight = FontWeight.Bold, color = DS.ink
+            )
             QuizPrimaryButton(
-                title = if (state.roundIndex + 1 < state.questionCount) "次へ（第${state.roundIndex + 2}問）" else "結果を見る"
+                title = (
+                    if (state.roundIndex + 1 < state.questionCount) L10n.Games.colorMatchPlayNext(number = state.roundIndex + 2)
+                    else L10n.Games.quizActionShowResult
+                ).resolve()
             ) { viewModel.advance() }
         }
     } else {
@@ -364,7 +379,10 @@ private fun ColorMatchPlay(state: ColorMatchUiState, viewModel: ColorMatchViewMo
                 .padding(vertical = 15.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text("判定する", fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = if (ready) accent.onAccent else DS.ink3)
+            Text(
+                L10n.Games.colorMatchPlayJudge.resolve(), fontSize = 17.sp, fontWeight = FontWeight.SemiBold,
+                color = if (ready) accent.onAccent else DS.ink3
+            )
         }
     }
 }
@@ -434,7 +452,10 @@ private fun ColorMatchMemberRow(member: ColorMatchIdol, position: Int, state: Co
             }
             if (correctHexLabel != null) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                    Text(if (correct) "メンバーカラー" else "正解", fontSize = 12.sp, color = DS.ink3)
+                    Text(
+                        (if (correct) L10n.Games.colorMatchPlayMemberColor else L10n.Games.colorMatchPlayAnswerLabel).resolve(),
+                        fontSize = 12.sp, color = DS.ink3
+                    )
                     Box(Modifier.size(12.dp).clip(CircleShape).background(hexToColor(member.color ?: "")).border(0.5.dp, DS.sep, CircleShape))
                     Text(correctHexLabel, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
                 }
@@ -465,15 +486,20 @@ private fun ColorMatchResult(state: ColorMatchUiState, onReplay: () -> Unit, onC
             null, tint = if (rate >= 80) DS.favorite else com.fugaif.imaslivedb.ui.theme.ImasTheme.derive(null, null, dark = true).accent,
             modifier = Modifier.size(52.dp)
         )
-        Text("正答率 $rate%", fontSize = 34.sp, fontWeight = FontWeight.Bold, color = DS.ink)
-        Text("${state.totalCorrect} / ${state.totalAnswered} 正解（全${state.questionCount}問）", fontSize = 15.sp, color = DS.ink2)
+        Text(L10n.Games.colorMatchResultRate(rate = rate).resolve(), fontSize = 34.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+        Text(
+            L10n.Games.colorMatchResultSummary(
+                correct = state.totalCorrect, answered = state.totalAnswered, count = state.questionCount
+            ).resolve(),
+            fontSize = 15.sp, color = DS.ink2
+        )
         Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-            QuizPrimaryButton(title = "もう一度", onClick = onReplay)
+            QuizPrimaryButton(title = L10n.Games.actionReplay.resolve(), onClick = onReplay)
             Box(
                 modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(DS.fill)
                     .clickable(onClick = onChangeSetup).padding(vertical = 15.dp),
                 contentAlignment = Alignment.Center
-            ) { Text("設定を変える", fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = DS.ink) }
+            ) { Text(L10n.Games.colorMatchResultChangeSettings.resolve(), fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = DS.ink) }
         }
     }
 }

@@ -30,6 +30,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -126,8 +128,10 @@ fun SongSingerQuizSetupScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("ソロ曲クイズ", fontWeight = FontWeight.Bold) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "戻る") } }
+                title = { Text(L10n.Games.nameSongQuiz.resolve(), fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, L10n.Common.actionBack.resolve()) }
+                }
             )
         }
     ) { padding ->
@@ -136,8 +140,8 @@ fun SongSingerQuizSetupScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             QuizSetupHeaderCard(
-                icon = Icons.Filled.MusicNote, title = "ソロ曲クイズ",
-                subtitle = "ソロ曲を聴いてその歌手を 4 択で当てよう"
+                icon = Icons.Filled.MusicNote, title = L10n.Games.nameSongQuiz.resolve(),
+                subtitle = L10n.Games.songQuizSetupSubtitle.resolve()
             )
             QuizSetupBrandSection(
                 brands = state.brands, selectedBrandIds = state.selectedBrandIds,
@@ -146,16 +150,16 @@ fun SongSingerQuizSetupScreen(
             QuizSetupCountRow(isEstimating = state.isEstimating) {
                 Column {
                     Text(
-                        "出題候補: ${state.estimatedSongs} 曲 / ${state.estimatedSingers} 歌手",
+                        L10n.Games.songQuizSetupCandidates(songs = state.estimatedSongs, singers = state.estimatedSingers).resolve(),
                         fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink
                     )
-                    Text("4択の選択肢は歌手数が基準です", fontSize = 12.sp, color = DS.ink3)
+                    Text(L10n.Games.songQuizSetupCandidatesNote.resolve(), fontSize = 12.sp, color = DS.ink3)
                 }
             }
             if (!state.isEstimating && !state.canStart) {
-                QuizSetupInsufficientBanner("4 択を出すには原唱歌手が最低 4 名必要です。ブランドの選択を増やしてください。")
+                QuizSetupInsufficientBanner(L10n.Games.songQuizSetupInsufficient.resolve())
             }
-            QuizPrimaryButton(title = "スタート") { if (state.canStart) onStart(state.selectedBrandIds) }
+            QuizPrimaryButton(title = L10n.Games.quizSetupStart.resolve()) { if (state.canStart) onStart(state.selectedBrandIds) }
         }
     }
 }

@@ -23,7 +23,10 @@ struct ColorMatchGameView: View {
     /// セグメントの index はコアの `ColorMatchDifficulty` の並びにそのまま対応する。
     @State private var difficulty = 1
     @State private var questionCount = 5
-    private let levelLabels = ["やさしい", "ふつう", "むずい"]
+    /// 難易度の表示名 (並びはセグメントの index = `difficulty`)。文言は作った時点の言語を抱えるので computed。
+    private var levelLabels: [LocalizedStringResource] {
+        [L10n.Games.colorMatchDifficultyEasy, L10n.Games.colorMatchDifficultyNormal, L10n.Games.colorMatchDifficultyHard]
+    }
     private let questionCountOptions = [5, 10]
     /// 「合わせる」が成立する最低人数。コアの `MIN_POOL_SIZE` (=2) と同値だが、
     /// 開始ボタンを塞ぐ判定は呼び出し側の責務なので定数だけここに置く。
@@ -76,7 +79,7 @@ struct ColorMatchGameView: View {
         }
         .background(DS.bg.ignoresSafeArea())
         .scrollContentBackground(.hidden)
-        .navigationTitle("メンバーカラー合わせ")
+        .navigationTitle(L10n.Games.nameColorMatch)
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
         // 母集団の引き直しはブランドを切り替えたときだけ (描画のたびには呼ばない)。
@@ -88,31 +91,31 @@ struct ColorMatchGameView: View {
 
     private var setup: some View {
         VStack(alignment: .leading, spacing: DS.sp5) {
-            Text("出題ブランドを選んで、似た色のメンバーの色を当てよう。")
+            Text(L10n.Games.colorMatchSetupLead)
                 .font(.imasFootnote).foregroundStyle(DS.ink2)
 
             VStack(alignment: .leading, spacing: DS.sp2) {
-                ImasSectionHeader(title: "難易度", tight: true)
-                ImasSegmented(labels: levelLabels, selection: $difficulty)
+                ImasSectionHeader(title: .key(L10n.Games.colorMatchSetupDifficulty), tight: true)
+                ImasSegmented(labels: levelLabels.map { String(localized: $0) }, selection: $difficulty)
             }
 
             VStack(alignment: .leading, spacing: DS.sp2) {
-                ImasSectionHeader(title: "問題数", tight: true)
-                ImasSegmented(labels: questionCountOptions.map { "\($0)問" },
+                ImasSectionHeader(title: .key(L10n.Games.colorMatchSetupQuestionCount), tight: true)
+                ImasSegmented(labels: questionCountOptions.map { String(localized: L10n.Games.colorMatchSetupQuestionCountOption(count: $0)) },
                               selection: Binding(
                                 get: { questionCountOptions.firstIndex(of: questionCount) ?? 0 },
                                 set: { questionCount = questionCountOptions[$0] }))
             }
 
             VStack(alignment: .leading, spacing: DS.sp3) {
-                ImasSectionHeader(title: "出題ブランド", tight: true)
-                Text("未選択なら全ブランドから出題")
+                ImasSectionHeader(title: .key(L10n.Games.brandFilterHeader), tight: true)
+                Text(L10n.Games.colorMatchSetupBrandsCaption)
                     .font(.imasCaption).foregroundStyle(DS.ink3)
                 brandGrid
             }
 
             let canStart = pool.count >= minimumPool
-            primaryButton("はじめる（全\(questionCount)問）") { AppAnalytics.tap("color_match_game.start"); startSession() }
+            primaryButton(L10n.Games.colorMatchSetupStart(count: questionCount)) { AppAnalytics.tap("color_match_game.start"); startSession() }
                 .disabled(!canStart)
                 .opacity(canStart ? 1 : 0.5)
         }
@@ -125,7 +128,8 @@ struct ColorMatchGameView: View {
         let columns = [GridItem(.adaptive(minimum: 56, maximum: 80), spacing: 10)]
         return LazyVGrid(columns: columns, alignment: .center, spacing: 10) {
             BrandIconCell(
-                brandId: nil, label: "全て", iconText: "全", color: nil,
+                brandId: nil, label: String(localized: L10n.Games.brandFilterAll),
+                iconText: String(localized: L10n.Games.brandFilterAllIcon), color: nil,
                 isSelected: selectedBrandIds.isEmpty
             ) {
                 withAnimation(.easeInOut(duration: 0.15)) { selectedBrandIds = [] }
@@ -151,14 +155,15 @@ struct ColorMatchGameView: View {
     private var instruction: some View {
         HStack {
             VStack(alignment: .leading, spacing: 1) {
-                Text(judged ? "答え合わせ" : "色をドラッグ、またはタップで割当")
+                Text(judged ? L10n.Games.colorMatchPlayJudged : L10n.Games.colorMatchPlayInstructionIos)
                     .font(.imasHeadline.weight(.bold)).foregroundStyle(DS.ink)
-                Text("第\(roundIndex + 1)問 / 全\(questionCount)問 ・ \(levelLabels[difficulty])")
+                Text(L10n.Games.colorMatchPlayProgress(current: roundIndex + 1, total: questionCount,
+                                                       level: levelLabels[difficulty]))
                     .font(.imasCaption).foregroundStyle(DS.ink3)
             }
             Spacer()
             Button { resetToSetup() } label: {
-                Text("やめる").font(.imasFootnote.weight(.semibold)).foregroundStyle(DS.ink2)
+                Text(L10n.Games.colorMatchPlayQuit).font(.imasFootnote.weight(.semibold)).foregroundStyle(DS.ink2)
             }.buttonStyle(.plain)
         }
     }
@@ -212,7 +217,8 @@ struct ColorMatchGameView: View {
                 if let judgement, judgement.correctHexLabels.indices.contains(position) {
                     // 答え合わせでは本人のメンバーカラーを色見本 + HEX コードで明示する。
                     HStack(spacing: 5) {
-                        Text(correct ? "メンバーカラー" : "正解").font(.imasCaption).foregroundStyle(DS.ink3)
+                        Text(correct ? L10n.Games.colorMatchPlayMemberColor : L10n.Games.colorMatchPlayAnswerLabel)
+                            .font(.imasCaption).foregroundStyle(DS.ink3)
                         Circle().fill(Color(hexString: member.color)).frame(width: 12, height: 12)
                             .overlay(Circle().strokeBorder(DS.sep, lineWidth: 0.5))
                         Text(judgement.correctHexLabels[position]).font(.imasDisplay(11, weight: .semibold)).foregroundStyle(DS.ink2)
@@ -254,9 +260,11 @@ struct ColorMatchGameView: View {
     private var footer: some View {
         if let judgement {
             VStack(spacing: DS.sp3) {
-                Text("\(judgement.score) / \(judgement.outOf) 正解")
+                Text(L10n.Games.colorMatchPlayScore(score: Int(judgement.score), total: Int(judgement.outOf)))
                     .font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
-                primaryButton(roundIndex + 1 < questionCount ? "次へ（第\(roundIndex + 2)問）" : "結果を見る") {
+                primaryButton(roundIndex + 1 < questionCount
+                              ? L10n.Games.colorMatchPlayNext(number: roundIndex + 2)
+                              : L10n.Games.quizActionShowResult) {
                     advance()
                 }
             }
@@ -264,7 +272,7 @@ struct ColorMatchGameView: View {
         } else {
             let ready = assignments.count == round.members.count
             Button { AppAnalytics.tap("color_match_game.judge"); judge() } label: {
-                Text("判定する")
+                Text(L10n.Games.colorMatchPlayJudge)
                     .font(.imasHeadline.weight(.semibold))
                     .foregroundStyle(ready ? DS.onSys : DS.ink3)
                     .frame(maxWidth: .infinity).padding(.vertical, 15)
@@ -284,15 +292,15 @@ struct ColorMatchGameView: View {
             Image(systemName: accuracyPercent >= 80 ? "trophy.fill" : "checkmark.seal.fill")
                 .font(.imasScaled( 52, weight: .semibold))
                 .foregroundStyle(accuracyPercent >= 80 ? DS.favorite : DS.sys)
-            Text("正答率 \(accuracyPercent)%")
+            Text(L10n.Games.colorMatchResultRate(rate: accuracyPercent))
                 .font(.imasDisplay(34, weight: .bold)).foregroundStyle(DS.ink)
-            Text("\(totalCorrect) / \(totalAnswered) 正解（全\(questionCount)問）")
+            Text(L10n.Games.colorMatchResultSummary(correct: totalCorrect, answered: totalAnswered, count: questionCount))
                 .font(.imasSubhead).foregroundStyle(DS.ink2)
 
             VStack(spacing: DS.sp3) {
-                primaryButton("もう一度") { startSession() }
+                primaryButton(L10n.Games.actionReplay) { startSession() }
                 Button { resetToSetup() } label: {
-                    Text("設定を変える").font(.imasHeadline.weight(.semibold)).foregroundStyle(DS.ink)
+                    Text(L10n.Games.colorMatchResultChangeSettings).font(.imasHeadline.weight(.semibold)).foregroundStyle(DS.ink)
                         .frame(maxWidth: .infinity).padding(.vertical, 15)
                         .background(DS.fill, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
                 }.buttonStyle(.plain)
@@ -302,7 +310,7 @@ struct ColorMatchGameView: View {
         .frame(maxWidth: .infinity)
     }
 
-    private func primaryButton(_ title: String, action: @escaping () -> Void) -> some View {
+    private func primaryButton(_ title: LocalizedStringResource, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title).font(.imasHeadline.weight(.semibold)).foregroundStyle(DS.onSys)
                 .frame(maxWidth: .infinity).padding(.vertical, 15)

@@ -68,14 +68,14 @@ struct SongSingerQuizView: View {
                         QuizNextButton(isLastQuestion: isLastQuestion, onNext: nextQuestion, onFinish: finish)
                     }
                 } else {
-                    ImasEmptyState(systemImage: "music.note", title: "出題できるソロ曲が不足しています")
+                    ImasEmptyState(systemImage: "music.note", title: String(localized: L10n.Games.songQuizEmpty))
                 }
             }
             .padding(DS.sp5)
         }
         .background(DS.bg.ignoresSafeArea())
         .scrollContentBackground(.hidden)
-        .navigationTitle("ソロ曲クイズ")
+        .navigationTitle(L10n.Games.nameSongQuiz)
         .navigationBarTitleDisplayMode(.inline)
         .onDisappear { MusicKitService.shared.stop() }
         .task { await load() }
@@ -90,7 +90,7 @@ struct SongSingerQuizView: View {
         // ジャケットは「ヒント1以降」または解答後にだけ出す。プレビューは「ヒント2以降」。
         return VStack(spacing: DS.sp4) {
             HStack {
-                Text("このソロ曲を歌うのは？").font(.imasHeadline.weight(.bold)).foregroundStyle(DS.ink)
+                Text(L10n.Games.songQuizPrompt).font(.imasHeadline.weight(.bold)).foregroundStyle(DS.ink)
                 Spacer(minLength: 0)
                 if !answered { QuizValueBadge(value: Int(hint.currentValue)) }
             }
@@ -117,7 +117,7 @@ struct SongSingerQuizView: View {
             if answered {
                 HStack(spacing: DS.sp3) {
                     IdolAvatarView(idol: answer, size: 28)
-                    Text("正解: \(answer.name)").font(.imasSubhead.weight(.semibold)).foregroundStyle(DS.ink)
+                    Text(L10n.Games.songQuizAnswer(name: answer.name)).font(.imasSubhead.weight(.semibold)).foregroundStyle(DS.ink)
                 }
             }
         }
@@ -135,7 +135,7 @@ struct SongSingerQuizView: View {
         if let next = hint.nextHint {
             switch next.kind {
             case .artwork:
-                QuizHintButton(systemImage: "photo.fill", title: "ヒント: ジャケットを見る",
+                QuizHintButton(systemImage: "photo.fill", title: L10n.Games.songQuizHintArtwork,
                                nextValue: Int(next.nextValue)) {
                     AppAnalytics.tap("song_singer_quiz.hint_artwork")
                     withAnimation(.easeInOut(duration: 0.2)) {
@@ -144,7 +144,7 @@ struct SongSingerQuizView: View {
                     }
                 }
             case .preview:
-                QuizHintButton(systemImage: "play.circle.fill", title: "ヒント: プレビューを再生する",
+                QuizHintButton(systemImage: "play.circle.fill", title: L10n.Games.songQuizHintPreview,
                                nextValue: Int(next.nextValue)) {
                     AppAnalytics.tap("song_singer_quiz.hint_preview")
                     withAnimation(.easeInOut(duration: 0.2)) {
@@ -181,7 +181,7 @@ struct SongSingerQuizView: View {
         history.append(QuizHistoryItem(
             id: "\(tally.asked)-\(song.id)",
             index: Int(tally.asked),
-            subjectTitle: song.title,
+            subjectTitle: .verbatim(song.title),
             subjectSubtitle: song.cdTitle,
             answer: answer,
             picked: idol,

@@ -40,7 +40,7 @@ struct IdolQuizSetupView: View {
         }
         .background(DS.bg.ignoresSafeArea())
         .scrollContentBackground(.hidden)
-        .navigationTitle("アイドル当てクイズ")
+        .navigationTitle(L10n.Games.nameIdolQuiz)
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: $navigateToGame) {
             IdolQuizView(selectedBrandIds: selectedBrandIds)
@@ -69,9 +69,9 @@ struct IdolQuizSetupView: View {
                 .frame(width: 52, height: 52)
                 .background(DS.fill, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
             VStack(alignment: .leading, spacing: DS.sp2) {
-                Text("アイドル当てクイズ")
+                Text(L10n.Games.nameIdolQuiz)
                     .font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
-                Text("プロフィールのヒントを手がかりに誰かを 4 択で当てよう")
+                Text(L10n.Games.idolQuizSetupSubtitle)
                     .font(.imasCaption).foregroundStyle(DS.ink3)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -87,8 +87,8 @@ struct IdolQuizSetupView: View {
         VStack(alignment: .leading, spacing: DS.sp3) {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: DS.sp1) {
-                    Text("出題ブランド").font(.imasSubhead.weight(.bold)).foregroundStyle(DS.ink)
-                    Text("複数選択可 · 空=全ブランド対象")
+                    Text(L10n.Games.brandFilterHeader).font(.imasSubhead.weight(.bold)).foregroundStyle(DS.ink)
+                    Text(L10n.Games.quizSetupBrandsCaption)
                         .font(.imasCaption).foregroundStyle(DS.ink3)
                 }
                 Spacer(minLength: 0)
@@ -97,7 +97,7 @@ struct IdolQuizSetupView: View {
                     Button {
                         withAnimation(.easeInOut(duration: 0.15)) { selectedBrandIds = [] }
                     } label: {
-                        Text("全てに戻す")
+                        Text(L10n.Games.quizSetupResetBrands)
                             .font(.imasCaption.weight(.semibold)).foregroundStyle(DS.sys)
                     }
                     .buttonStyle(.plain)
@@ -113,7 +113,8 @@ struct IdolQuizSetupView: View {
         let columns = [GridItem(.adaptive(minimum: 56, maximum: 80), spacing: 10)]
         return LazyVGrid(columns: columns, alignment: .center, spacing: 10) {
             BrandIconCell(
-                brandId: nil, label: "全て", iconText: "全", color: nil,
+                brandId: nil, label: String(localized: L10n.Games.brandFilterAll),
+                iconText: String(localized: L10n.Games.brandFilterAllIcon), color: nil,
                 isSelected: selectedBrandIds.isEmpty
             ) {
                 withAnimation(.easeInOut(duration: 0.15)) { selectedBrandIds = [] }
@@ -142,9 +143,9 @@ struct IdolQuizSetupView: View {
                 .font(.imasScaled(15, weight: .semibold)).foregroundStyle(DS.sys)
             if isEstimating {
                 ProgressView().tint(DS.sys).scaleEffect(0.8)
-                Text("候補を計算中…").font(.imasSubhead).foregroundStyle(DS.ink3)
+                Text(L10n.Games.quizSetupEstimating).font(.imasSubhead).foregroundStyle(DS.ink3)
             } else {
-                Text("出題候補: \(estimatedCount) 名")
+                Text(L10n.Games.idolQuizSetupCandidates(count: estimatedCount))
                     .font(.imasSubhead.weight(.semibold)).foregroundStyle(DS.ink)
             }
             Spacer(minLength: 0)
@@ -160,7 +161,7 @@ struct IdolQuizSetupView: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundStyle(DS.warning)
                 .font(.imasSubhead)
-            Text("4 択を出すにはアイドルが最低 4 名必要です。ブランドの選択を増やしてください。")
+            Text(L10n.Games.idolQuizSetupInsufficient)
                 .font(.imasCaption).foregroundStyle(DS.ink)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -177,7 +178,7 @@ struct IdolQuizSetupView: View {
             AppAnalytics.tap("idol_quiz_setup.start")
             navigateToGame = true
         } label: {
-            Label("スタート", systemImage: "play.fill")
+            Label(L10n.Games.quizSetupStart, systemImage: "play.fill")
                 .font(.imasHeadline.weight(.semibold))
                 .foregroundStyle(DS.onSys)
                 .frame(maxWidth: .infinity)

@@ -40,6 +40,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -137,8 +139,10 @@ fun IdolQuizSetupScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("アイドル当てクイズ", fontWeight = FontWeight.Bold) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "戻る") } }
+                title = { Text(L10n.Games.nameIdolQuiz.resolve(), fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, L10n.Common.actionBack.resolve()) }
+                }
             )
         }
     ) { padding ->
@@ -147,20 +151,23 @@ fun IdolQuizSetupScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             QuizSetupHeaderCard(
-                icon = Icons.Filled.PersonSearch, title = "アイドル当てクイズ",
-                subtitle = "プロフィールのヒントを手がかりに誰かを 4 択で当てよう"
+                icon = Icons.Filled.PersonSearch, title = L10n.Games.nameIdolQuiz.resolve(),
+                subtitle = L10n.Games.idolQuizSetupSubtitle.resolve()
             )
             QuizSetupBrandSection(
                 brands = state.brands, selectedBrandIds = state.selectedBrandIds,
                 onToggle = { viewModel.toggleBrand(it) }, onClearAll = { viewModel.clearBrands() }
             )
             QuizSetupCountRow(isEstimating = state.isEstimating) {
-                Text("出題候補: ${state.estimatedCount} 名", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
+                Text(
+                    L10n.Games.idolQuizSetupCandidates(count = state.estimatedCount).resolve(),
+                    fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink
+                )
             }
             if (!state.isEstimating && !state.isSufficient) {
-                QuizSetupInsufficientBanner("4 択を出すにはアイドルが最低 4 名必要です。ブランドの選択を増やしてください。")
+                QuizSetupInsufficientBanner(L10n.Games.idolQuizSetupInsufficient.resolve())
             }
-            QuizPrimaryButton(title = "スタート") { if (state.canStart) onStart(state.selectedBrandIds) }
+            QuizPrimaryButton(title = L10n.Games.quizSetupStart.resolve()) { if (state.canStart) onStart(state.selectedBrandIds) }
         }
     }
 }
@@ -198,12 +205,12 @@ fun QuizSetupBrandSection(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text("出題ブランド", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DS.ink)
-                Text("複数選択可 · 空=全ブランド対象", fontSize = 12.sp, color = DS.ink3)
+                Text(L10n.Games.brandFilterHeader.resolve(), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+                Text(L10n.Games.quizSetupBrandsCaption.resolve(), fontSize = 12.sp, color = DS.ink3)
             }
             if (selectedBrandIds.isNotEmpty()) {
                 Text(
-                    "全てに戻す", fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                    L10n.Games.quizSetupResetBrands.resolve(), fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
                     color = com.fugaif.imaslivedb.ui.theme.ImasTheme.derive(null, null, dark = true).accent,
                     modifier = Modifier.clickable(onClick = onClearAll)
                 )
@@ -222,7 +229,7 @@ fun QuizSetupCountRow(isEstimating: Boolean, content: @Composable () -> Unit) {
     ) {
         if (isEstimating) {
             CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-            Text("候補を計算中…", fontSize = 15.sp, color = DS.ink3)
+            Text(L10n.Games.quizSetupEstimating.resolve(), fontSize = 15.sp, color = DS.ink3)
         } else {
             content()
         }

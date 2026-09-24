@@ -64,14 +64,14 @@ struct IdolQuizView: View {
                         QuizNextButton(isLastQuestion: isLastQuestion, onNext: nextQuestion, onFinish: finish)
                     }
                 } else {
-                    ImasEmptyState(systemImage: "person.fill.questionmark", title: "出題できる候補が不足しています")
+                    ImasEmptyState(systemImage: "person.fill.questionmark", title: String(localized: L10n.Games.idolQuizEmpty))
                 }
             }
             .padding(DS.sp5)
         }
         .background(DS.bg.ignoresSafeArea())
         .scrollContentBackground(.hidden)
-        .navigationTitle("アイドル当てクイズ")
+        .navigationTitle(L10n.Games.nameIdolQuiz)
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
         .trackScreen("idol_quiz")
@@ -86,7 +86,7 @@ struct IdolQuizView: View {
             HStack(spacing: DS.sp4) {
                 silhouette(answer, revealed: answered)
                 VStack(alignment: .leading, spacing: DS.sp2) {
-                    Text("このプロフィールは誰？").font(.imasHeadline.weight(.bold)).foregroundStyle(DS.ink)
+                    Text(L10n.Games.idolQuizPrompt).font(.imasHeadline.weight(.bold)).foregroundStyle(DS.ink)
                     if answered {
                         Text(answer.name).font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
                     } else {
@@ -192,7 +192,7 @@ struct IdolQuizView: View {
         history.append(QuizHistoryItem(
             id: "\(tally.asked)-\(answer.id)",
             index: Int(tally.asked),
-            subjectTitle: "プロフィール問題",
+            subjectTitle: .key(L10n.Games.idolQuizHistorySubject),
             subjectSubtitle: q.facts.first.map { "\($0.label): \($0.value)" },
             answer: answer,
             picked: idol,
@@ -272,8 +272,9 @@ private struct IdolHintRow: View {
                     .frame(width: 34, height: 34)
                     .background(DS.warning.opacity(0.14), in: RoundedRectangle(cornerRadius: DS.rSM, style: .continuous))
                 VStack(alignment: .leading, spacing: 1) {
-                    Text("ヒント: \(label)を見る").font(.imasSubhead.weight(.semibold)).foregroundStyle(DS.ink)
-                    Text("開いた後は正解で +\(nextValue)pt").font(.imasCaption).foregroundStyle(DS.ink3)
+                    // label はコアが作った項目名 (日本語)。コア段階で言語を渡すまでは core 引数で差し込む。
+                    Text(L10n.Games.idolQuizHintTitle(label: label)).font(.imasSubhead.weight(.semibold)).foregroundStyle(DS.ink)
+                    Text(L10n.Games.quizHintNextValue(points: nextValue)).font(.imasCaption).foregroundStyle(DS.ink3)
                 }
                 Spacer(minLength: 0)
                 Image(systemName: "chevron.down").font(.imasScaled( 13, weight: .semibold)).foregroundStyle(DS.ink3)

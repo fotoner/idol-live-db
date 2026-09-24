@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/games.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources>
+    <string name="games_action_replay">다시 하기</string>
+    <string name="games_brand_filter_all">전체</string>
+    <string name="games_brand_filter_header">출제 브랜드</string>
+    <string name="games_color_match_difficulty_easy">쉬움</string>
+    <string name="games_color_match_difficulty_hard">어려움</string>
+    <string name="games_color_match_difficulty_normal">보통</string>
+    <string name="games_color_match_play_answer_label">정답</string>
+    <string name="games_color_match_play_instruction_android">색을 탭해서 고르고, 멤버를 탭해서 지정해요</string>
+    <string name="games_color_match_play_judge">채점하기</string>
+    <string name="games_color_match_play_judged">정답 확인</string>
+    <string name="games_color_match_play_member_color">멤버 컬러</string>
+    <string name="games_color_match_play_next">다음 (%1$d번 문제)</string>
+    <plurals name="games_color_match_play_progress">
+        <item quantity="other">%1$d번 문제 / 총 %2$,d문제 · %3$s</item>
+    </plurals>
+    <string name="games_color_match_play_quit">그만하기</string>
+    <string name="games_color_match_play_score">%1$d / %2$d 정답</string>
+    <string name="games_color_match_result_change_settings">설정 바꾸기</string>
+    <string name="games_color_match_result_rate">정답률 %1$d%%</string>
+    <plurals name="games_color_match_result_summary">
+        <item quantity="other">%1$d / %2$d 정답 (총 %3$,d문제)</item>
+    </plurals>
+    <string name="games_color_match_setup_brands_caption">선택하지 않으면 모든 브랜드에서 출제해요</string>
+    <string name="games_color_match_setup_difficulty">난이도</string>
+    <string name="games_color_match_setup_lead">출제할 브랜드를 고르고, 비슷한 색을 가진 멤버의 색을 맞혀 봐요.</string>
+    <string name="games_color_match_setup_question_count">문제 수</string>
+    <plurals name="games_color_match_setup_question_count_option">
+        <item quantity="other">%1$,d문제</item>
+    </plurals>
+    <plurals name="games_color_match_setup_start">
+        <item quantity="other">시작 (총 %1$,d문제)</item>
+    </plurals>
+    <string name="games_daily_pick_action_close">닫기</string>
+    <string name="games_daily_pick_lead_idol">브랜드마다 오늘의 아이돌을 골랐어요. 성격이든 헤어스타일이든 말버릇이든, 떠오르는 태그를 달아 투표해 봐요 (여러 개 가능·같은 태그는 투표한 사람 수가 합산돼요).</string>
+    <string name="games_daily_pick_lead_song">브랜드마다 오늘의 1곡을 골랐어요. 재킷을 탭하면 미리 듣기를 할 수 있어요. 마음에 드는 곡에 태그를 달아 투표해 봐요 (여러 개 가능·같은 태그는 투표한 사람 수가 합산돼요).</string>
+    <string name="games_daily_pick_tag">태그</string>
+    <string name="games_daily_pick_title_idol">오늘의 아이돌</string>
+    <string name="games_daily_pick_title_song">오늘의 1곡</string>
+    <string name="games_daily_pick_voted">투표 완료</string>
+    <string name="games_hub_best_percent">최고 %1$d%%</string>
+    <plurals name="games_hub_best_points">
+        <item quantity="other">최고 %1$,dpt</item>
+    </plurals>
+    <string name="games_hub_entry_color_match_blurb">비슷한 색의 멤버를 올바른 컬러와 연결해요</string>
+    <string name="games_hub_entry_idol_quiz_blurb">프로필을 보고 누구인지 4지선다로 맞혀요</string>
+    <string name="games_hub_entry_intro_don_blurb">인트로를 듣고 곡명을 맞혀요</string>
+    <string name="games_hub_entry_song_quiz_blurb">솔로곡을 부른 아이돌을 4지선다로 맞혀요</string>
+    <string name="games_hub_header">게임</string>
+    <string name="games_hub_not_played">플레이 기록 없음</string>
+    <plurals name="games_hub_play_count">
+        <item quantity="other">%1$,d회</item>
+    </plurals>
+    <string name="games_hub_title">퀴즈·게임</string>
+    <string name="games_idol_quiz_empty">출제할 수 있는 후보가 부족해요</string>
+    <string name="games_idol_quiz_hint_title">힌트: %1$s 보기</string>
+    <string name="games_idol_quiz_history_subject">프로필 문제</string>
+    <string name="games_idol_quiz_prompt">이 프로필의 아이돌은 누구일까요?</string>
+    <plurals name="games_idol_quiz_setup_candidates">
+        <item quantity="other">출제 후보: %1$,d명</item>
+    </plurals>
+    <string name="games_idol_quiz_setup_insufficient">4지선다를 내려면 아이돌이 최소 4명 필요해요. 브랜드를 더 골라 주세요.</string>
+    <string name="games_idol_quiz_setup_subtitle">프로필 힌트를 단서로 누구인지 4지선다로 맞혀 봐요</string>
+    <string name="games_name_color_match">멤버 컬러 맞추기</string>
+    <string name="games_name_idol_quiz">아이돌 맞히기 퀴즈</string>
+    <string name="games_name_intro_don">인트로돈</string>
+    <string name="games_name_song_quiz">솔로곡 퀴즈</string>
+    <string name="games_quiz_action_next">다음 문제</string>
+    <string name="games_quiz_action_show_result">결과 보기</string>
+    <plurals name="games_quiz_hint_next_value">
+        <item quantity="other">열고 나서 정답을 맞히면 +%1$,dpt</item>
+    </plurals>
+    <string name="games_quiz_history_answer">정답</string>
+    <string name="games_quiz_history_header">출제된 문제 돌아보기</string>
+    <plurals name="games_quiz_history_hints">
+        <item quantity="other">힌트 %1$,d개</item>
+    </plurals>
+    <string name="games_quiz_history_picked">선택</string>
+    <string name="games_quiz_progress">문제 %1$d / %2$d</string>
+    <string name="games_quiz_result_new_best">최고 기록 경신!</string>
+    <string name="games_quiz_result_share">결과 공유</string>
+    <string name="games_quiz_result_stat_best">최고 기록</string>
+    <string name="games_quiz_result_stat_correct">정답</string>
+    <string name="games_quiz_result_stat_rate">정답률</string>
+    <string name="games_quiz_setup_brands_caption">여러 개 선택 가능 · 비우면 모든 브랜드</string>
+    <string name="games_quiz_setup_estimating">후보 계산 중…</string>
+    <string name="games_quiz_setup_reset_brands">전체로 되돌리기</string>
+    <string name="games_quiz_setup_start">시작</string>
+    <plurals name="games_quiz_value_badge">
+        <item quantity="other">정답 시 +%1$,dpt</item>
+    </plurals>
+    <string name="games_song_quiz_answer">정답: %1$s</string>
+    <string name="games_song_quiz_empty">출제할 수 있는 솔로곡이 부족해요</string>
+    <string name="games_song_quiz_hint_artwork">힌트: 재킷 보기</string>
+    <string name="games_song_quiz_hint_preview">힌트: 미리 듣기</string>
+    <plurals name="games_song_quiz_setup_candidates">
+        <item quantity="other">출제 후보: %1$,d곡 / 가수 %2$d명</item>
+    </plurals>
+    <string name="games_song_quiz_setup_candidates_note">4지선다 보기는 가수 수를 기준으로 해요</string>
+    <string name="games_song_quiz_setup_insufficient">4지선다를 내려면 원곡 가수가 최소 4명 필요해요. 브랜드를 더 골라 주세요.</string>
+    <string name="games_song_quiz_setup_subtitle">솔로곡을 듣고 부른 사람을 4지선다로 맞혀 봐요</string>
+</resources>

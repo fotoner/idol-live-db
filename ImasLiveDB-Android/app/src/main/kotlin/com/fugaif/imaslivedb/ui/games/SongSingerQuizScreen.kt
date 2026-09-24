@@ -47,6 +47,9 @@ import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.SoloOriginalSingerRow
 import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.player.AudioPreviewManager
 import com.fugaif.imaslivedb.ui.components.ArtworkImage
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
@@ -191,7 +194,7 @@ class SongSingerQuizViewModel(app: Application, private val selectedBrandIds: Se
         val history = s.history + QuizHistoryItem(
             id = "${outcome.tally.asked}-${q.song.id}",
             index = outcome.tally.asked.toInt(),
-            subjectTitle = q.song.title, subjectSubtitle = q.song.cdTitle,
+            subjectTitle = DisplayText.Verbatim(q.song.title), subjectSubtitle = q.song.cdTitle,
             answer = q.answer, picked = idol,
             earnedPoints = outcome.earnedPoints.toInt(),
             revealedHints = outcome.revealedHints.toInt()
@@ -263,8 +266,10 @@ fun SongSingerQuizScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("ソロ曲クイズ", fontWeight = FontWeight.Bold) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "戻る") } }
+                title = { Text(L10n.Games.nameSongQuiz.resolve(), fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, L10n.Common.actionBack.resolve()) }
+                }
             )
         }
     ) { padding ->
@@ -293,7 +298,7 @@ fun SongSingerQuizScreen(
                         QuizNextButton(isLastQuestion = state.isLastQuestion, onNext = { viewModel.nextQuestion() }, onFinish = { viewModel.finish() })
                     }
                 }
-                else -> ImasEmptyState(icon = Icons.Filled.MusicNote, title = "出題できるソロ曲が不足しています")
+                else -> ImasEmptyState(icon = Icons.Filled.MusicNote, title = L10n.Games.songQuizEmpty.resolve())
             }
         }
     }
@@ -324,7 +329,10 @@ private fun SongCard(q: SongQuestion, hintState: SongSingerQuizHintState, answer
         if (answered) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ImasAvatar(label = q.answer.name, seed = q.answer.color, brand = q.answer.brandId, size = 28.dp)
-                Text("正解: ${q.answer.name}", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
+                Text(
+                    L10n.Games.songQuizAnswer(name = q.answer.name).resolve(),
+                    fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink
+                )
             }
         }
     }
@@ -336,10 +344,10 @@ private fun SongHintArea(hintState: SongSingerQuizHintState, viewModel: SongSing
     val hint = hintState.nextHint ?: return
     when (hint.kind) {
         SongQuizHintKind.ARTWORK -> QuizHintButton(
-            icon = Icons.Filled.Photo, title = "ヒント: ジャケットを見る", nextValue = hint.nextValue.toInt()
+            icon = Icons.Filled.Photo, title = L10n.Games.songQuizHintArtwork.resolve(), nextValue = hint.nextValue.toInt()
         ) { viewModel.revealArtwork() }
         SongQuizHintKind.PREVIEW -> QuizHintButton(
-            icon = Icons.Filled.PlayCircle, title = "ヒント: プレビューを再生する", nextValue = hint.nextValue.toInt()
+            icon = Icons.Filled.PlayCircle, title = L10n.Games.songQuizHintPreview.resolve(), nextValue = hint.nextValue.toInt()
         ) { viewModel.revealPreview() }
     }
 }

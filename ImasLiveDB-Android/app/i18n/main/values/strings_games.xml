@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/games.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- games.action.replay: 結果画面で同じ設定のままもう 1 回遊ぶボタン (メンバーカラー合わせ・アイドル当て・ソロ曲クイズ) -->
+    <string name="games_action_replay">もう一度</string>
+    <!-- games.brand_filter.all: 出題ブランドの選択で「全ブランド」を表す項目 (iOS は丸アイコンの下のラベル、Android はチップ) -->
+    <string name="games_brand_filter_all">全て</string>
+    <!-- games.brand_filter.header: 出題するブランドを選ぶ節の見出し (メンバーカラー合わせ・アイドル当てクイズ・ソロ曲クイズの設定) -->
+    <string name="games_brand_filter_header">出題ブランド</string>
+    <!-- games.color_match.difficulty.easy: 難易度 (色がばらけて見分けやすい)。設定のセグメントと、ゲーム中の進捗の行に出る -->
+    <string name="games_color_match_difficulty_easy">やさしい</string>
+    <!-- games.color_match.difficulty.hard: 難易度 (いちばん近い色・人数が多い)。くだけた言い方。設定のセグメントと、ゲーム中の進捗の行に出る -->
+    <string name="games_color_match_difficulty_hard">むずい</string>
+    <!-- games.color_match.difficulty.normal: 難易度 (ランダム)。設定のセグメントと、ゲーム中の進捗の行に出る -->
+    <string name="games_color_match_difficulty_normal">ふつう</string>
+    <!-- games.color_match.play.answer_label: 答え合わせのあと、間違えた行に出す正しい色のラベル (右に色と HEX) -->
+    <string name="games_color_match_play_answer_label">正解</string>
+    <!-- games.color_match.play.instruction_android: ゲーム中の見出し (まだ答え合わせしていないとき)。Android はドラッグが無くタップだけ。iOS の color_match.play.instruction_ios と ja が違う -->
+    <string name="games_color_match_play_instruction_android">色をタップして選択、メンバーをタップで割当</string>
+    <!-- games.color_match.play.judge: 全員に色を割り当てたあとに押す答え合わせのボタン -->
+    <string name="games_color_match_play_judge">判定する</string>
+    <!-- games.color_match.play.judged: ゲーム中の見出し (答え合わせのあと) -->
+    <string name="games_color_match_play_judged">答え合わせ</string>
+    <!-- games.color_match.play.member_color: 答え合わせのあと、正しく割り当てた行に出す色見本のラベル (右に色と HEX) -->
+    <string name="games_color_match_play_member_color">メンバーカラー</string>
+    <!-- games.color_match.play.next: 答え合わせのあとに次の問へ進むボタン。number は次が何問目か -->
+    <string name="games_color_match_play_next">次へ（第%1$d問）</string>
+    <!-- games.color_match.play.progress: ゲーム中の見出しの下。current は何問目か、total は全問数、level は難易度 (color_match.difficulty.*) -->
+    <plurals name="games_color_match_play_progress">
+        <item quantity="other">第%1$d問 / 全%2$,d問 ・ %3$s</item>
+    </plurals>
+    <!-- games.color_match.play.quit: ゲーム中の右上のボタン。設定画面に戻る -->
+    <string name="games_color_match_play_quit">やめる</string>
+    <!-- games.color_match.play.score: 答え合わせのあとの、この問の正解数 / 人数 -->
+    <string name="games_color_match_play_score">%1$d / %2$d 正解</string>
+    <!-- games.color_match.result.change_settings: 結果画面のボタン。設定画面に戻る -->
+    <string name="games_color_match_result_change_settings">設定を変える</string>
+    <!-- games.color_match.result.rate: メンバーカラー合わせの結果の大きな数字。rate は 0–100 の整数 -->
+    <string name="games_color_match_result_rate">正答率 %1$d%%</string>
+    <!-- games.color_match.result.summary: 結果の正答率の下。correct は正解した人数の合計、answered は答えた人数の合計、count は問題数 -->
+    <plurals name="games_color_match_result_summary">
+        <item quantity="other">%1$d / %2$d 正解（全%3$,d問）</item>
+    </plurals>
+    <!-- games.color_match.setup.brands_caption: 出題ブランドの見出しの下の説明 -->
+    <string name="games_color_match_setup_brands_caption">未選択なら全ブランドから出題</string>
+    <!-- games.color_match.setup.difficulty: メンバーカラー合わせの設定。難易度を選ぶ節の見出し -->
+    <string name="games_color_match_setup_difficulty">難易度</string>
+    <!-- games.color_match.setup.lead: メンバーカラー合わせの設定画面の先頭の説明 -->
+    <string name="games_color_match_setup_lead">出題ブランドを選んで、似た色のメンバーの色を当てよう。</string>
+    <!-- games.color_match.setup.question_count: メンバーカラー合わせの設定。問題数を選ぶ節の見出し -->
+    <string name="games_color_match_setup_question_count">問題数</string>
+    <!-- games.color_match.setup.question_count_option: 問題数のセグメントの選択肢 (5問 / 10問) -->
+    <plurals name="games_color_match_setup_question_count_option">
+        <item quantity="other">%1$,d問</item>
+    </plurals>
+    <!-- games.color_match.setup.start: ゲームを始めるボタン。count は選んだ問題数 -->
+    <plurals name="games_color_match_setup_start">
+        <item quantity="other">はじめる（全%1$,d問）</item>
+    </plurals>
+    <!-- games.daily_pick.action.close: 日替わりピックを閉じるボタン (iOS は文字のボタン、Android は × の読み上げ) -->
+    <string name="games_daily_pick_action_close">閉じる</string>
+    <!-- games.daily_pick.lead.idol: 日替わりピック (アイドルの日) の先頭の説明 -->
+    <string name="games_daily_pick_lead_idol">各ブランドから今日のアイドルをピックしました。性格でも髪型でも口ぐせでも、思いついたタグを付けて投票しよう（複数OK・同じタグは人数が貯まります）。</string>
+    <!-- games.daily_pick.lead.song: 日替わりピック (曲の日) の先頭の説明 -->
+    <string name="games_daily_pick_lead_song">各ブランドから今日の1曲をピックしました。ジャケットをタップで試聴、気になる曲にタグを付けて投票しよう（複数OK・同じタグは人数が貯まります）。</string>
+    <!-- games.daily_pick.tag: カードの右のボタン。タグを付けて投票するピッカーを開く -->
+    <string name="games_daily_pick_tag">タグ</string>
+    <!-- games.daily_pick.title.idol: 起動時に出る日替わりピックの画面タイトル (アイドルの日)。カレンダーのツールバーのボタンの読み上げにも使う -->
+    <string name="games_daily_pick_title_idol">今日のアイドル</string>
+    <!-- games.daily_pick.title.song: 起動時に出る日替わりピックの画面タイトル (曲の日)。カレンダーのツールバーのボタンの読み上げにも使う -->
+    <string name="games_daily_pick_title_song">今日の1曲</string>
+    <!-- games.daily_pick.voted: カードの右。この曲・アイドルにタグを付けて投票したあと -->
+    <string name="games_daily_pick_voted">投票済</string>
+    <!-- games.hub.best.percent: ハブのカードの自己ベスト (正答率で記録するゲーム = メンバーカラー合わせ)。rate は 0–100 の整数 -->
+    <string name="games_hub_best_percent">最高 %1$d%%</string>
+    <!-- games.hub.best.points: ハブのカードの自己ベスト (獲得ポイントで記録するクイズ)。1 回の満点は 100pt 程度なので桁区切りは出ない -->
+    <plurals name="games_hub_best_points">
+        <item quantity="other">最高 %1$,dpt</item>
+    </plurals>
+    <!-- games.hub.entry.color_match.blurb: ハブのカードの説明 (メンバーカラー合わせ) -->
+    <string name="games_hub_entry_color_match_blurb">似た色のメンバーを正しいカラーに紐づける</string>
+    <!-- games.hub.entry.idol_quiz.blurb: ハブのカードの説明 (アイドル当てクイズ) -->
+    <string name="games_hub_entry_idol_quiz_blurb">プロフィールから4択で誰かを当てる</string>
+    <!-- games.hub.entry.intro_don.blurb: ハブのカードの説明 (イントロドン) -->
+    <string name="games_hub_entry_intro_don_blurb">イントロを聴いて曲名を当てる</string>
+    <!-- games.hub.entry.song_quiz.blurb: ハブのカードの説明 (ソロ曲クイズ) -->
+    <string name="games_hub_entry_song_quiz_blurb">ソロ曲を歌うアイドルを4択で当てる</string>
+    <!-- games.hub.header: ハブのゲーム一覧の節の見出し (右にゲームの数) -->
+    <string name="games_hub_header">ゲーム</string>
+    <!-- games.hub.not_played: ハブのカード。まだ 1 度も遊んでいないゲーム -->
+    <string name="games_hub_not_played">未プレイ</string>
+    <!-- games.hub.play_count: ハブのカードの右下に出すプレイ回数。1000 以上は桁区切りが付く (1,000回) -->
+    <plurals name="games_hub_play_count">
+        <item quantity="other">%1$,d回</item>
+    </plurals>
+    <!-- games.hub.title: クイズ・ゲームのハブ (プロデュースから開く) の画面タイトル -->
+    <string name="games_hub_title">クイズ・ゲーム</string>
+    <!-- games.idol_quiz.empty: 出題画面で問題を 1 つも作れなかったときの空状態の見出し -->
+    <string name="games_idol_quiz_empty">出題できる候補が不足しています</string>
+    <!-- games.idol_quiz.hint.title: まだ開いていないプロフィールの項目を開くボタン。label は項目名 (血液型・誕生日など。imas-core が作る日本語) -->
+    <string name="games_idol_quiz_hint_title">ヒント: %1$sを見る</string>
+    <!-- games.idol_quiz.history_subject: 結果画面の振り返りの行の題 (アイドル当てはシルエット出題なので題材名の代わりに出す) -->
+    <string name="games_idol_quiz_history_subject">プロフィール問題</string>
+    <!-- games.idol_quiz.prompt: 出題カードの問いかけ -->
+    <string name="games_idol_quiz_prompt">このプロフィールは誰？</string>
+    <!-- games.idol_quiz.setup.candidates: 選んだブランドで出題できるアイドルの数 -->
+    <plurals name="games_idol_quiz_setup_candidates">
+        <item quantity="other">出題候補: %1$,d 名</item>
+    </plurals>
+    <!-- games.idol_quiz.setup.insufficient: 候補が足りず始められないときの注意 -->
+    <string name="games_idol_quiz_setup_insufficient">4 択を出すにはアイドルが最低 4 名必要です。ブランドの選択を増やしてください。</string>
+    <!-- games.idol_quiz.setup.subtitle: アイドル当てクイズの設定画面の見出しカードの説明 -->
+    <string name="games_idol_quiz_setup_subtitle">プロフィールのヒントを手がかりに誰かを 4 択で当てよう</string>
+    <!-- games.name.color_match: ゲーム名 (似た色のメンバーにメンバーカラーを割り当てる)。ハブのカードとゲーム画面のタイトル -->
+    <string name="games_name_color_match">メンバーカラー合わせ</string>
+    <!-- games.name.idol_quiz: ゲーム名 (プロフィールから誰かを 4 択で当てる)。ハブのカード・出題設定と出題画面のタイトル・設定画面の見出しカード -->
+    <string name="games_name_idol_quiz">アイドル当てクイズ</string>
+    <!-- games.name.intro_don: ゲーム名 (イントロを聴いて曲を当てるゲーム)。クイズ・ゲームのハブのカードの見出し -->
+    <string name="games_name_intro_don">イントロドン</string>
+    <!-- games.name.song_quiz: ゲーム名 (ソロ曲を歌うアイドルを 4 択で当てる)。ハブのカード・出題設定と出題画面のタイトル・設定画面の見出しカード -->
+    <string name="games_name_song_quiz">ソロ曲クイズ</string>
+    <!-- games.quiz.action.next: 解答したあとに次の問へ進むボタン -->
+    <string name="games_quiz_action_next">次の問題</string>
+    <!-- games.quiz.action.show_result: 最後の問を解答したあとに結果画面へ進むボタン (メンバーカラー合わせの最後の問でも使う) -->
+    <string name="games_quiz_action_show_result">結果を見る</string>
+    <!-- games.quiz.hint.next_value: ヒントを開くボタンの副題。そのヒントを開いたあとに正解すると入る点 (開くほど下がる) -->
+    <plurals name="games_quiz_hint_next_value">
+        <item quantity="other">開いた後は正解で +%1$,dpt</item>
+    </plurals>
+    <!-- games.quiz.history.answer: 振り返りの行の、正解のアイドルに付けるチップのラベル (右にアイドル名) -->
+    <string name="games_quiz_history_answer">正解</string>
+    <!-- games.quiz.history.header: 結果画面の、各問で何が出て何を選んだかの一覧の見出し -->
+    <string name="games_quiz_history_header">出題の振り返り</string>
+    <!-- games.quiz.history.hints: 振り返りの行。その問で開いたヒントの数 -->
+    <plurals name="games_quiz_history_hints">
+        <item quantity="other">ヒント%1$,d</item>
+    </plurals>
+    <!-- games.quiz.history.picked: 振り返りの行の、間違えたときに自分が選んだアイドルに付けるチップのラベル (右にアイドル名) -->
+    <string name="games_quiz_history_picked">選択</string>
+    <!-- games.quiz.progress: クイズの上の進捗。current は何問目か、total は全問数 -->
+    <string name="games_quiz_progress">第 %1$d / %2$d 問</string>
+    <!-- games.quiz.result.new_best: 結果画面のバッジ。今回が自己ベストを更新したとき -->
+    <string name="games_quiz_result_new_best">自己ベスト更新！</string>
+    <!-- games.quiz.result.share: 結果画面のボタン。結果の文をシェアシートで送る -->
+    <string name="games_quiz_result_share">結果をシェア</string>
+    <!-- games.quiz.result.stat.best: 結果画面の小さな統計のラベル (上に これまでの最高の正答率%) -->
+    <string name="games_quiz_result_stat_best">自己ベスト</string>
+    <!-- games.quiz.result.stat.correct: 結果画面の小さな統計のラベル (上に 正解数/問題数) -->
+    <string name="games_quiz_result_stat_correct">正解</string>
+    <!-- games.quiz.result.stat.rate: 結果画面の小さな統計のラベル (上に 今回の正答率%) -->
+    <string name="games_quiz_result_stat_rate">正答率</string>
+    <!-- games.quiz.setup.brands_caption: 出題ブランドの見出しの下の説明。何も選ばなければ全ブランドから出す -->
+    <string name="games_quiz_setup_brands_caption">複数選択可 · 空=全ブランド対象</string>
+    <!-- games.quiz.setup.estimating: 出題できる候補の数を数えている間の表示 -->
+    <string name="games_quiz_setup_estimating">候補を計算中…</string>
+    <!-- games.quiz.setup.reset_brands: 出題ブランドの見出しの右のボタン。選択を外して全ブランドに戻す -->
+    <string name="games_quiz_setup_reset_brands">全てに戻す</string>
+    <!-- games.quiz.setup.start: 出題設定画面の、クイズを始めるボタン -->
+    <string name="games_quiz_setup_start">スタート</string>
+    <!-- games.quiz.value_badge: 出題カードのバッジ。いまの開示のまま正解したときに入る点 (最大 10pt 程度) -->
+    <plurals name="games_quiz_value_badge">
+        <item quantity="other">正解で +%1$,dpt</item>
+    </plurals>
+    <!-- games.song_quiz.answer: 解答したあとに出す正解のアイドル名。name はアイドル名 (データ) -->
+    <string name="games_song_quiz_answer">正解: %1$s</string>
+    <!-- games.song_quiz.empty: 出題画面で問題を 1 つも作れなかったときの空状態の見出し -->
+    <string name="games_song_quiz_empty">出題できるソロ曲が不足しています</string>
+    <!-- games.song_quiz.hint.artwork: ヒント 1 段目のボタン。伏せていたジャケットを見せる -->
+    <string name="games_song_quiz_hint_artwork">ヒント: ジャケットを見る</string>
+    <!-- games.song_quiz.hint.preview: ヒント 2 段目のボタン。曲の試聴を流す -->
+    <string name="games_song_quiz_hint_preview">ヒント: プレビューを再生する</string>
+    <!-- games.song_quiz.setup.candidates: 選んだブランドで出題できるソロ曲の数と、その歌手の数。songs は曲数 (count。全ブランドだと 1000 曲を超え、1000 以上は桁区切りが付く: 1,488 曲。format_change: grouping。iOS は元から桁区切りあり、Android は以前 1488 曲)、singers は人数 (int。キーに count は 1 つまでなので桁区切りなし) -->
+    <plurals name="games_song_quiz_setup_candidates">
+        <item quantity="other">出題候補: %1$,d 曲 / %2$d 歌手</item>
+    </plurals>
+    <!-- games.song_quiz.setup.candidates_note: 候補数の下の補足。選択肢を作れるかは歌手の数で決まる -->
+    <string name="games_song_quiz_setup_candidates_note">4択の選択肢は歌手数が基準です</string>
+    <!-- games.song_quiz.setup.insufficient: 候補が足りず始められないときの注意。原唱歌手 = その曲をもともと歌ったアイドル -->
+    <string name="games_song_quiz_setup_insufficient">4 択を出すには原唱歌手が最低 4 名必要です。ブランドの選択を増やしてください。</string>
+    <!-- games.song_quiz.setup.subtitle: ソロ曲クイズの設定画面の見出しカードの説明 -->
+    <string name="games_song_quiz_setup_subtitle">ソロ曲を聴いてその歌手を 4 択で当てよう</string>
+</resources>

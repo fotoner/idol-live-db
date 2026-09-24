@@ -14,12 +14,21 @@ import uniffi.imas_core.gameProgressDailySheetGate
 import uniffi.imas_core.gameProgressDidClearToday
 import uniffi.imas_core.gameProgressDisplayStreak
 
-/** ハブが束ねるゲームの識別子。name は永続キー兼用なので変更しない。iOS GameKind の移植。 */
+/**
+ * ハブが束ねるゲームの識別子。name は永続キー兼用なので変更しない。iOS GameKind の移植。
+ *
+ * [displayName] はシェア文言 (imas-core の `shareQuizResultText` が日本語で組む) に埋め込むゲーム名。
+ * 文の型がコアの日本語なので、名前だけ訳すと 1 文に言語が混ざる。シェア文言ごとコア段階で言語を
+ * 渡すまでは日本語のまま渡す。画面に出すゲーム名は `L10n.Games.name*` を使う。
+ * 設計 §8.6 (表示名を DisplayText にする) はこのためコアのシェア文言の段階まで見送っている。
+ * そのとき「カラーマッチ」は `name.color_match` (「メンバーカラー合わせ」) と文言が違うので、
+ * 流用せず別キーを足す (ja を変えないため)。
+ */
 enum class GameKind(val displayName: String, val scoreIsPercent: Boolean) {
-    introDon("イントロドン", false),
-    idolQuiz("アイドル当てクイズ", false),
-    songSingerQuiz("ソロ曲クイズ", false),
-    colorMatch("カラーマッチ", true)
+    introDon("イントロドン", false), // i18n-ignore(core): コアのシェア文言 (日本語) に埋め込む名前
+    idolQuiz("アイドル当てクイズ", false), // i18n-ignore(core): コアのシェア文言 (日本語) に埋め込む名前
+    songSingerQuiz("ソロ曲クイズ", false), // i18n-ignore(core): コアのシェア文言 (日本語) に埋め込む名前
+    colorMatch("カラーマッチ", true) // i18n-ignore(core): コアのシェア文言 (日本語) に埋め込む名前
 }
 
 /**

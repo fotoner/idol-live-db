@@ -46,6 +46,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.games.GameKind
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.theme.DS
@@ -172,7 +174,7 @@ class IdolQuizViewModel(app: Application, private val selectedBrandIds: Set<Stri
         val history = s.history + QuizHistoryItem(
             id = "${outcome.tally.asked}-${q.answer.id}",
             index = outcome.tally.asked.toInt(),
-            subjectTitle = "プロフィール問題",
+            subjectTitle = L10n.Games.idolQuizHistorySubject,
             subjectSubtitle = q.facts.firstOrNull()?.let { "${it.label}: ${it.value}" },
             answer = q.answer, picked = idol,
             earnedPoints = outcome.earnedPoints.toInt(),
@@ -246,8 +248,10 @@ fun IdolQuizScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("アイドル当てクイズ", fontWeight = FontWeight.Bold) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "戻る") } }
+                title = { Text(L10n.Games.nameIdolQuiz.resolve(), fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, L10n.Common.actionBack.resolve()) }
+                }
             )
         }
     ) { padding ->
@@ -282,7 +286,7 @@ fun IdolQuizScreen(
                         QuizNextButton(isLastQuestion = state.isLastQuestion, onNext = { viewModel.nextQuestion() }, onFinish = { viewModel.finish() })
                     }
                 }
-                else -> ImasEmptyState(icon = Icons.Filled.PersonSearch, title = "出題できる候補が不足しています")
+                else -> ImasEmptyState(icon = Icons.Filled.PersonSearch, title = L10n.Games.idolQuizEmpty.resolve())
             }
         }
     }
@@ -309,7 +313,7 @@ private fun IdolPromptCard(
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             IdolSilhouette(q.answer, revealed = answered)
             Column {
-                Text("このプロフィールは誰？", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+                Text(L10n.Games.idolQuizPrompt.resolve(), fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink)
                 if (answered) {
                     Text(q.answer.name, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = DS.ink)
                 } else {
@@ -353,7 +357,7 @@ private fun IdolValueBadge(points: Int) {
         horizontalArrangement = Arrangement.spacedBy(5.dp),
         modifier = Modifier.clip(CircleShape).background(DS.success.copy(alpha = 0.14f)).padding(horizontal = 11.dp, vertical = 6.dp)
     ) {
-        Text("正解で +${points}pt", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DS.success)
+        Text(L10n.Games.quizValueBadge(points = points).resolve(), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DS.success)
     }
 }
 
@@ -396,8 +400,12 @@ private fun IdolHintList(
                     contentAlignment = Alignment.Center
                 ) { Icon(Icons.Filled.Lightbulb, null, tint = DS.warning, modifier = Modifier.size(16.dp)) }
                 Column(Modifier.weight(1f)) {
-                    Text("ヒント: ${hint.label}を見る", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
-                    Text("開いた後は正解で +${hint.nextValue}pt", fontSize = 12.sp, color = DS.ink3)
+                    // label はコアが作った項目名 (日本語)。コア段階で言語を渡すまでは core 引数で差し込む。
+                    Text(
+                        L10n.Games.idolQuizHintTitle(label = hint.label).resolve(),
+                        fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink
+                    )
+                    Text(L10n.Games.quizHintNextValue(points = hint.nextValue.toInt()).resolve(), fontSize = 12.sp, color = DS.ink3)
                 }
                 Icon(Icons.Filled.ExpandMore, null, tint = DS.ink3, modifier = Modifier.size(13.dp))
             }

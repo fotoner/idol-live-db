@@ -76,7 +76,7 @@ struct DailyPickSheet: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("閉じる") { dismiss() }
+                    Button { dismiss() } label: { Text(L10n.Games.dailyPickActionClose) }
                         .font(.imasSubhead.weight(.semibold))
                         .tint(DS.sys)
                 }
@@ -100,8 +100,9 @@ struct DailyPickSheet: View {
     }
 
     /// 画面名。カレンダーの導線 (ツールバー) もこれを読んでラベルを揃える。
+    /// 呼ばれた時点の言語で文字列にする (String を受ける呼び出し側をそのまま使えるように)。
     static func title(for kind: DailyPickKind) -> String {
-        kind == .song ? "今日の1曲" : "今日のアイドル"
+        String(localized: kind == .song ? L10n.Games.dailyPickTitleSong : L10n.Games.dailyPickTitleIdol)
     }
 
     /// ツールバーの SF Symbol。タップ前にその日どちらが出るか分かるようにする。
@@ -109,12 +110,12 @@ struct DailyPickSheet: View {
         kind == .song ? "music.note.house.fill" : "person.crop.circle.badge.checkmark"
     }
 
-    private var lead: String {
+    private var lead: LocalizedStringResource {
         switch kind {
         case .song:
-            return "各ブランドから今日の1曲をピックしました。ジャケットをタップで試聴、気になる曲にタグを付けて投票しよう（複数OK・同じタグは人数が貯まります）。"
+            return L10n.Games.dailyPickLeadSong
         case .idol:
-            return "各ブランドから今日のアイドルをピックしました。性格でも髪型でも口ぐせでも、思いついたタグを付けて投票しよう（複数OK・同じタグは人数が貯まります）。"
+            return L10n.Games.dailyPickLeadIdol
         }
     }
 
@@ -183,7 +184,7 @@ struct DailyPickSheet: View {
                     Spacer(minLength: DS.sp2)
                     HStack(spacing: DS.sp2) {
                         Image(systemName: tagged ? "checkmark.circle.fill" : "tag")
-                        Text(tagged ? "投票済" : "タグ").font(.imasFootnote.weight(.semibold))
+                        Text(tagged ? L10n.Games.dailyPickVoted : L10n.Games.dailyPickTag).font(.imasFootnote.weight(.semibold))
                     }
                     .foregroundStyle(tagged ? DS.success : ImasTheme.derive(seed: seed, scheme: .light).accent)
                 }

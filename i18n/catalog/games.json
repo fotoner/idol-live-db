@@ -1,0 +1,572 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "games",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/data/games/",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/games/"
+    ],
+    "ios": [
+      "ImasLiveDB/Views/Games/"
+    ]
+  },
+  "strings": {
+    "action.replay": {
+      "ja": "もう一度",
+      "ko": "다시 하기",
+      "note": "結果画面で同じ設定のままもう 1 回遊ぶボタン (メンバーカラー合わせ・アイドル当て・ソロ曲クイズ)"
+    },
+    "brand_filter.all": {
+      "ja": "全て",
+      "ko": "전체",
+      "note": "出題ブランドの選択で「全ブランド」を表す項目 (iOS は丸アイコンの下のラベル、Android はチップ)"
+    },
+    "brand_filter.all_icon": {
+      "ja": "全",
+      "ko": "전체",
+      "max_len": 2,
+      "note": "「全て」の丸アイコンの中に出す短い文字 (ブランドの略称の代わり)。2 文字まで",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "brand_filter.header": {
+      "ja": "出題ブランド",
+      "ko": "출제 브랜드",
+      "note": "出題するブランドを選ぶ節の見出し (メンバーカラー合わせ・アイドル当てクイズ・ソロ曲クイズの設定)"
+    },
+    "color_match.difficulty.easy": {
+      "ja": "やさしい",
+      "ko": "쉬움",
+      "note": "難易度 (色がばらけて見分けやすい)。設定のセグメントと、ゲーム中の進捗の行に出る"
+    },
+    "color_match.difficulty.hard": {
+      "ja": "むずい",
+      "ko": "어려움",
+      "note": "難易度 (いちばん近い色・人数が多い)。くだけた言い方。設定のセグメントと、ゲーム中の進捗の行に出る"
+    },
+    "color_match.difficulty.normal": {
+      "ja": "ふつう",
+      "ko": "보통",
+      "note": "難易度 (ランダム)。設定のセグメントと、ゲーム中の進捗の行に出る"
+    },
+    "color_match.play.answer_label": {
+      "ja": "正解",
+      "ko": "정답",
+      "note": "答え合わせのあと、間違えた行に出す正しい色のラベル (右に色と HEX)"
+    },
+    "color_match.play.instruction_android": {
+      "ja": "色をタップして選択、メンバーをタップで割当",
+      "ko": "색을 탭해서 고르고, 멤버를 탭해서 지정해요",
+      "note": "ゲーム中の見出し (まだ答え合わせしていないとき)。Android はドラッグが無くタップだけ。iOS の color_match.play.instruction_ios と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "color_match.play.instruction_ios": {
+      "ja": "色をドラッグ、またはタップで割当",
+      "ko": "색을 드래그하거나 탭해서 지정해요",
+      "note": "ゲーム中の見出し (まだ答え合わせしていないとき)。色チップをメンバーの行へドラッグ、またはタップで割り当てる。iOS の文言 (Android はドラッグが無く color_match.play.instruction_android)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "color_match.play.judge": {
+      "ja": "判定する",
+      "ko": "채점하기",
+      "note": "全員に色を割り当てたあとに押す答え合わせのボタン"
+    },
+    "color_match.play.judged": {
+      "ja": "答え合わせ",
+      "ko": "정답 확인",
+      "note": "ゲーム中の見出し (答え合わせのあと)"
+    },
+    "color_match.play.member_color": {
+      "ja": "メンバーカラー",
+      "ko": "멤버 컬러",
+      "note": "答え合わせのあと、正しく割り当てた行に出す色見本のラベル (右に色と HEX)"
+    },
+    "color_match.play.next": {
+      "args": [
+        {
+          "name": "number",
+          "type": "int"
+        }
+      ],
+      "ja": "次へ（第{number}問）",
+      "ko": "다음 ({number}번 문제)",
+      "note": "答え合わせのあとに次の問へ進むボタン。number は次が何問目か"
+    },
+    "color_match.play.progress": {
+      "args": [
+        {
+          "name": "current",
+          "type": "int"
+        },
+        {
+          "name": "total",
+          "type": "count"
+        },
+        {
+          "name": "level",
+          "type": "text"
+        }
+      ],
+      "ja": "第{current}問 / 全{total}問 ・ {level}",
+      "ko": "{current}번 문제 / 총 {total}문제 · {level}",
+      "note": "ゲーム中の見出しの下。current は何問目か、total は全問数、level は難易度 (color_match.difficulty.*)"
+    },
+    "color_match.play.quit": {
+      "ja": "やめる",
+      "ko": "그만하기",
+      "note": "ゲーム中の右上のボタン。設定画面に戻る"
+    },
+    "color_match.play.score": {
+      "args": [
+        {
+          "name": "score",
+          "type": "int"
+        },
+        {
+          "name": "total",
+          "type": "int"
+        }
+      ],
+      "ja": "{score} / {total} 正解",
+      "ko": "{score} / {total} 정답",
+      "note": "答え合わせのあとの、この問の正解数 / 人数"
+    },
+    "color_match.result.change_settings": {
+      "ja": "設定を変える",
+      "ko": "설정 바꾸기",
+      "note": "結果画面のボタン。設定画面に戻る"
+    },
+    "color_match.result.rate": {
+      "args": [
+        {
+          "name": "rate",
+          "type": "int"
+        }
+      ],
+      "ja": "正答率 {rate}%",
+      "ko": "정답률 {rate}%",
+      "note": "メンバーカラー合わせの結果の大きな数字。rate は 0–100 の整数"
+    },
+    "color_match.result.summary": {
+      "args": [
+        {
+          "name": "correct",
+          "type": "int"
+        },
+        {
+          "name": "answered",
+          "type": "int"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{correct} / {answered} 正解（全{count}問）",
+      "ko": "{correct} / {answered} 정답 (총 {count}문제)",
+      "note": "結果の正答率の下。correct は正解した人数の合計、answered は答えた人数の合計、count は問題数"
+    },
+    "color_match.setup.brands_caption": {
+      "ja": "未選択なら全ブランドから出題",
+      "ko": "선택하지 않으면 모든 브랜드에서 출제해요",
+      "note": "出題ブランドの見出しの下の説明"
+    },
+    "color_match.setup.difficulty": {
+      "ja": "難易度",
+      "ko": "난이도",
+      "note": "メンバーカラー合わせの設定。難易度を選ぶ節の見出し"
+    },
+    "color_match.setup.lead": {
+      "ja": "出題ブランドを選んで、似た色のメンバーの色を当てよう。",
+      "ko": "출제할 브랜드를 고르고, 비슷한 색을 가진 멤버의 색을 맞혀 봐요.",
+      "note": "メンバーカラー合わせの設定画面の先頭の説明"
+    },
+    "color_match.setup.question_count": {
+      "ja": "問題数",
+      "ko": "문제 수",
+      "note": "メンバーカラー合わせの設定。問題数を選ぶ節の見出し"
+    },
+    "color_match.setup.question_count_option": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}問",
+      "ko": "{count}문제",
+      "note": "問題数のセグメントの選択肢 (5問 / 10問)"
+    },
+    "color_match.setup.start": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "はじめる（全{count}問）",
+      "ko": "시작 (총 {count}문제)",
+      "note": "ゲームを始めるボタン。count は選んだ問題数"
+    },
+    "daily_pick.action.close": {
+      "ja": "閉じる",
+      "ko": "닫기",
+      "note": "日替わりピックを閉じるボタン (iOS は文字のボタン、Android は × の読み上げ)"
+    },
+    "daily_pick.lead.idol": {
+      "ja": "各ブランドから今日のアイドルをピックしました。性格でも髪型でも口ぐせでも、思いついたタグを付けて投票しよう（複数OK・同じタグは人数が貯まります）。",
+      "ko": "브랜드마다 오늘의 아이돌을 골랐어요. 성격이든 헤어스타일이든 말버릇이든, 떠오르는 태그를 달아 투표해 봐요 (여러 개 가능·같은 태그는 투표한 사람 수가 합산돼요).",
+      "note": "日替わりピック (アイドルの日) の先頭の説明"
+    },
+    "daily_pick.lead.song": {
+      "ja": "各ブランドから今日の1曲をピックしました。ジャケットをタップで試聴、気になる曲にタグを付けて投票しよう（複数OK・同じタグは人数が貯まります）。",
+      "ko": "브랜드마다 오늘의 1곡을 골랐어요. 재킷을 탭하면 미리 듣기를 할 수 있어요. 마음에 드는 곡에 태그를 달아 투표해 봐요 (여러 개 가능·같은 태그는 투표한 사람 수가 합산돼요).",
+      "note": "日替わりピック (曲の日) の先頭の説明"
+    },
+    "daily_pick.tag": {
+      "ja": "タグ",
+      "ko": "태그",
+      "note": "カードの右のボタン。タグを付けて投票するピッカーを開く"
+    },
+    "daily_pick.title.idol": {
+      "ja": "今日のアイドル",
+      "ko": "오늘의 아이돌",
+      "note": "起動時に出る日替わりピックの画面タイトル (アイドルの日)。カレンダーのツールバーのボタンの読み上げにも使う"
+    },
+    "daily_pick.title.song": {
+      "ja": "今日の1曲",
+      "ko": "오늘의 1곡",
+      "note": "起動時に出る日替わりピックの画面タイトル (曲の日)。カレンダーのツールバーのボタンの読み上げにも使う"
+    },
+    "daily_pick.voted": {
+      "ja": "投票済",
+      "ko": "투표 완료",
+      "note": "カードの右。この曲・アイドルにタグを付けて投票したあと"
+    },
+    "hub.best.percent": {
+      "args": [
+        {
+          "name": "rate",
+          "type": "int"
+        }
+      ],
+      "ja": "最高 {rate}%",
+      "ko": "최고 {rate}%",
+      "note": "ハブのカードの自己ベスト (正答率で記録するゲーム = メンバーカラー合わせ)。rate は 0–100 の整数"
+    },
+    "hub.best.points": {
+      "args": [
+        {
+          "name": "points",
+          "type": "count"
+        }
+      ],
+      "ja": "最高 {points}pt",
+      "ko": "최고 {points}pt",
+      "note": "ハブのカードの自己ベスト (獲得ポイントで記録するクイズ)。1 回の満点は 100pt 程度なので桁区切りは出ない"
+    },
+    "hub.entry.color_match.blurb": {
+      "ja": "似た色のメンバーを正しいカラーに紐づける",
+      "ko": "비슷한 색의 멤버를 올바른 컬러와 연결해요",
+      "note": "ハブのカードの説明 (メンバーカラー合わせ)"
+    },
+    "hub.entry.idol_quiz.blurb": {
+      "ja": "プロフィールから4択で誰かを当てる",
+      "ko": "프로필을 보고 누구인지 4지선다로 맞혀요",
+      "note": "ハブのカードの説明 (アイドル当てクイズ)"
+    },
+    "hub.entry.intro_don.blurb": {
+      "ja": "イントロを聴いて曲名を当てる",
+      "ko": "인트로를 듣고 곡명을 맞혀요",
+      "note": "ハブのカードの説明 (イントロドン)"
+    },
+    "hub.entry.song_quiz.blurb": {
+      "ja": "ソロ曲を歌うアイドルを4択で当てる",
+      "ko": "솔로곡을 부른 아이돌을 4지선다로 맞혀요",
+      "note": "ハブのカードの説明 (ソロ曲クイズ)"
+    },
+    "hub.header": {
+      "ja": "ゲーム",
+      "ko": "게임",
+      "note": "ハブのゲーム一覧の節の見出し (右にゲームの数)"
+    },
+    "hub.not_played": {
+      "ja": "未プレイ",
+      "ko": "플레이 기록 없음",
+      "note": "ハブのカード。まだ 1 度も遊んでいないゲーム"
+    },
+    "hub.play_count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}回",
+      "ko": "{count}회",
+      "note": "ハブのカードの右下に出すプレイ回数。1000 以上は桁区切りが付く (1,000回)"
+    },
+    "hub.title": {
+      "ja": "クイズ・ゲーム",
+      "ko": "퀴즈·게임",
+      "note": "クイズ・ゲームのハブ (プロデュースから開く) の画面タイトル"
+    },
+    "idol_quiz.empty": {
+      "ja": "出題できる候補が不足しています",
+      "ko": "출제할 수 있는 후보가 부족해요",
+      "note": "出題画面で問題を 1 つも作れなかったときの空状態の見出し"
+    },
+    "idol_quiz.hint.title": {
+      "args": [
+        {
+          "name": "label",
+          "type": "core"
+        }
+      ],
+      "ja": "ヒント: {label}を見る",
+      "ko": "힌트: {label} 보기",
+      "note": "まだ開いていないプロフィールの項目を開くボタン。label は項目名 (血液型・誕生日など。imas-core が作る日本語)"
+    },
+    "idol_quiz.history_subject": {
+      "ja": "プロフィール問題",
+      "ko": "프로필 문제",
+      "note": "結果画面の振り返りの行の題 (アイドル当てはシルエット出題なので題材名の代わりに出す)"
+    },
+    "idol_quiz.prompt": {
+      "ja": "このプロフィールは誰？",
+      "ko": "이 프로필의 아이돌은 누구일까요?",
+      "note": "出題カードの問いかけ"
+    },
+    "idol_quiz.setup.candidates": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "出題候補: {count} 名",
+      "ko": "출제 후보: {count}명",
+      "note": "選んだブランドで出題できるアイドルの数"
+    },
+    "idol_quiz.setup.insufficient": {
+      "ja": "4 択を出すにはアイドルが最低 4 名必要です。ブランドの選択を増やしてください。",
+      "ko": "4지선다를 내려면 아이돌이 최소 4명 필요해요. 브랜드를 더 골라 주세요.",
+      "note": "候補が足りず始められないときの注意"
+    },
+    "idol_quiz.setup.subtitle": {
+      "ja": "プロフィールのヒントを手がかりに誰かを 4 択で当てよう",
+      "ko": "프로필 힌트를 단서로 누구인지 4지선다로 맞혀 봐요",
+      "note": "アイドル当てクイズの設定画面の見出しカードの説明"
+    },
+    "name.color_match": {
+      "ja": "メンバーカラー合わせ",
+      "ko": "멤버 컬러 맞추기",
+      "note": "ゲーム名 (似た色のメンバーにメンバーカラーを割り当てる)。ハブのカードとゲーム画面のタイトル"
+    },
+    "name.idol_quiz": {
+      "ja": "アイドル当てクイズ",
+      "ko": "아이돌 맞히기 퀴즈",
+      "note": "ゲーム名 (プロフィールから誰かを 4 択で当てる)。ハブのカード・出題設定と出題画面のタイトル・設定画面の見出しカード"
+    },
+    "name.intro_don": {
+      "ja": "イントロドン",
+      "ko": "인트로돈",
+      "note": "ゲーム名 (イントロを聴いて曲を当てるゲーム)。クイズ・ゲームのハブのカードの見出し"
+    },
+    "name.song_quiz": {
+      "ja": "ソロ曲クイズ",
+      "ko": "솔로곡 퀴즈",
+      "note": "ゲーム名 (ソロ曲を歌うアイドルを 4 択で当てる)。ハブのカード・出題設定と出題画面のタイトル・設定画面の見出しカード"
+    },
+    "quiz.action.next": {
+      "ja": "次の問題",
+      "ko": "다음 문제",
+      "note": "解答したあとに次の問へ進むボタン"
+    },
+    "quiz.action.show_result": {
+      "ja": "結果を見る",
+      "ko": "결과 보기",
+      "note": "最後の問を解答したあとに結果画面へ進むボタン (メンバーカラー合わせの最後の問でも使う)"
+    },
+    "quiz.hint.next_value": {
+      "args": [
+        {
+          "name": "points",
+          "type": "count"
+        }
+      ],
+      "ja": "開いた後は正解で +{points}pt",
+      "ko": "열고 나서 정답을 맞히면 +{points}pt",
+      "note": "ヒントを開くボタンの副題。そのヒントを開いたあとに正解すると入る点 (開くほど下がる)"
+    },
+    "quiz.history.answer": {
+      "ja": "正解",
+      "ko": "정답",
+      "note": "振り返りの行の、正解のアイドルに付けるチップのラベル (右にアイドル名)"
+    },
+    "quiz.history.header": {
+      "ja": "出題の振り返り",
+      "ko": "출제된 문제 돌아보기",
+      "note": "結果画面の、各問で何が出て何を選んだかの一覧の見出し"
+    },
+    "quiz.history.hints": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "ヒント{count}",
+      "ko": "힌트 {count}개",
+      "note": "振り返りの行。その問で開いたヒントの数"
+    },
+    "quiz.history.picked": {
+      "ja": "選択",
+      "ko": "선택",
+      "note": "振り返りの行の、間違えたときに自分が選んだアイドルに付けるチップのラベル (右にアイドル名)"
+    },
+    "quiz.progress": {
+      "args": [
+        {
+          "name": "current",
+          "type": "int"
+        },
+        {
+          "name": "total",
+          "type": "int"
+        }
+      ],
+      "ja": "第 {current} / {total} 問",
+      "ko": "문제 {current} / {total}",
+      "note": "クイズの上の進捗。current は何問目か、total は全問数"
+    },
+    "quiz.result.new_best": {
+      "ja": "自己ベスト更新！",
+      "ko": "최고 기록 경신!",
+      "note": "結果画面のバッジ。今回が自己ベストを更新したとき"
+    },
+    "quiz.result.share": {
+      "ja": "結果をシェア",
+      "ko": "결과 공유",
+      "note": "結果画面のボタン。結果の文をシェアシートで送る"
+    },
+    "quiz.result.stat.best": {
+      "ja": "自己ベスト",
+      "ko": "최고 기록",
+      "note": "結果画面の小さな統計のラベル (上に これまでの最高の正答率%)"
+    },
+    "quiz.result.stat.correct": {
+      "ja": "正解",
+      "ko": "정답",
+      "note": "結果画面の小さな統計のラベル (上に 正解数/問題数)"
+    },
+    "quiz.result.stat.rate": {
+      "ja": "正答率",
+      "ko": "정답률",
+      "note": "結果画面の小さな統計のラベル (上に 今回の正答率%)"
+    },
+    "quiz.setup.brands_caption": {
+      "ja": "複数選択可 · 空=全ブランド対象",
+      "ko": "여러 개 선택 가능 · 비우면 모든 브랜드",
+      "note": "出題ブランドの見出しの下の説明。何も選ばなければ全ブランドから出す"
+    },
+    "quiz.setup.estimating": {
+      "ja": "候補を計算中…",
+      "ko": "후보 계산 중…",
+      "note": "出題できる候補の数を数えている間の表示"
+    },
+    "quiz.setup.reset_brands": {
+      "ja": "全てに戻す",
+      "ko": "전체로 되돌리기",
+      "note": "出題ブランドの見出しの右のボタン。選択を外して全ブランドに戻す"
+    },
+    "quiz.setup.start": {
+      "ja": "スタート",
+      "ko": "시작",
+      "note": "出題設定画面の、クイズを始めるボタン"
+    },
+    "quiz.value_badge": {
+      "args": [
+        {
+          "name": "points",
+          "type": "count"
+        }
+      ],
+      "ja": "正解で +{points}pt",
+      "ko": "정답 시 +{points}pt",
+      "note": "出題カードのバッジ。いまの開示のまま正解したときに入る点 (最大 10pt 程度)"
+    },
+    "song_quiz.answer": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "ja": "正解: {name}",
+      "ko": "정답: {name}",
+      "note": "解答したあとに出す正解のアイドル名。name はアイドル名 (データ)"
+    },
+    "song_quiz.empty": {
+      "ja": "出題できるソロ曲が不足しています",
+      "ko": "출제할 수 있는 솔로곡이 부족해요",
+      "note": "出題画面で問題を 1 つも作れなかったときの空状態の見出し"
+    },
+    "song_quiz.hint.artwork": {
+      "ja": "ヒント: ジャケットを見る",
+      "ko": "힌트: 재킷 보기",
+      "note": "ヒント 1 段目のボタン。伏せていたジャケットを見せる"
+    },
+    "song_quiz.hint.preview": {
+      "ja": "ヒント: プレビューを再生する",
+      "ko": "힌트: 미리 듣기",
+      "note": "ヒント 2 段目のボタン。曲の試聴を流す"
+    },
+    "song_quiz.prompt": {
+      "ja": "このソロ曲を歌うのは？",
+      "ko": "이 솔로곡을 부른 사람은 누구일까요?",
+      "note": "出題カードの問いかけ (iOS だけ。Android のカードには無い)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "song_quiz.setup.candidates": {
+      "args": [
+        {
+          "name": "songs",
+          "type": "count"
+        },
+        {
+          "name": "singers",
+          "type": "int"
+        }
+      ],
+      "ja": "出題候補: {songs} 曲 / {singers} 歌手",
+      "ko": "출제 후보: {songs}곡 / 가수 {singers}명",
+      "note": "選んだブランドで出題できるソロ曲の数と、その歌手の数。songs は曲数 (count。全ブランドだと 1000 曲を超え、1000 以上は桁区切りが付く: 1,488 曲。format_change: grouping。iOS は元から桁区切りあり、Android は以前 1488 曲)、singers は人数 (int。キーに count は 1 つまでなので桁区切りなし)"
+    },
+    "song_quiz.setup.candidates_note": {
+      "ja": "4択の選択肢は歌手数が基準です",
+      "ko": "4지선다 보기는 가수 수를 기준으로 해요",
+      "note": "候補数の下の補足。選択肢を作れるかは歌手の数で決まる"
+    },
+    "song_quiz.setup.insufficient": {
+      "ja": "4 択を出すには原唱歌手が最低 4 名必要です。ブランドの選択を増やしてください。",
+      "ko": "4지선다를 내려면 원곡 가수가 최소 4명 필요해요. 브랜드를 더 골라 주세요.",
+      "note": "候補が足りず始められないときの注意。原唱歌手 = その曲をもともと歌ったアイドル"
+    },
+    "song_quiz.setup.subtitle": {
+      "ja": "ソロ曲を聴いてその歌手を 4 択で当てよう",
+      "ko": "솔로곡을 듣고 부른 사람을 4지선다로 맞혀 봐요",
+      "note": "ソロ曲クイズの設定画面の見出しカードの説明"
+    }
+  }
+}

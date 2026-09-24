@@ -1,0 +1,1798 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "games.action.replay" : {
+      "comment" : "結果画面で同じ設定のままもう 1 回遊ぶボタン (メンバーカラー合わせ・アイドル当て・ソロ曲クイズ) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もう一度"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다시 하기"
+          }
+        }
+      }
+    },
+    "games.brand_filter.all" : {
+      "comment" : "出題ブランドの選択で「全ブランド」を表す項目 (iOS は丸アイコンの下のラベル、Android はチップ) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全て"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "games.brand_filter.all_icon" : {
+      "comment" : "「全て」の丸アイコンの中に出す短い文字 (ブランドの略称の代わり)。2 文字まで (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "games.brand_filter.header" : {
+      "comment" : "出題するブランドを選ぶ節の見出し (メンバーカラー合わせ・アイドル当てクイズ・ソロ曲クイズの設定) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出題ブランド"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출제 브랜드"
+          }
+        }
+      }
+    },
+    "games.color_match.difficulty.easy" : {
+      "comment" : "難易度 (色がばらけて見分けやすい)。設定のセグメントと、ゲーム中の進捗の行に出る (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "やさしい"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "쉬움"
+          }
+        }
+      }
+    },
+    "games.color_match.difficulty.hard" : {
+      "comment" : "難易度 (いちばん近い色・人数が多い)。くだけた言い方。設定のセグメントと、ゲーム中の進捗の行に出る (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "むずい"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "어려움"
+          }
+        }
+      }
+    },
+    "games.color_match.difficulty.normal" : {
+      "comment" : "難易度 (ランダム)。設定のセグメントと、ゲーム中の進捗の行に出る (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ふつう"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "보통"
+          }
+        }
+      }
+    },
+    "games.color_match.play.answer_label" : {
+      "comment" : "答え合わせのあと、間違えた行に出す正しい色のラベル (右に色と HEX) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正解"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정답"
+          }
+        }
+      }
+    },
+    "games.color_match.play.instruction_ios" : {
+      "comment" : "ゲーム中の見出し (まだ答え合わせしていないとき)。色チップをメンバーの行へドラッグ、またはタップで割り当てる。iOS の文言 (Android はドラッグが無く color_match.play.instruction_android) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "色をドラッグ、またはタップで割当"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "색을 드래그하거나 탭해서 지정해요"
+          }
+        }
+      }
+    },
+    "games.color_match.play.judge" : {
+      "comment" : "全員に色を割り当てたあとに押す答え合わせのボタン (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "判定する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "채점하기"
+          }
+        }
+      }
+    },
+    "games.color_match.play.judged" : {
+      "comment" : "ゲーム中の見出し (答え合わせのあと) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "答え合わせ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정답 확인"
+          }
+        }
+      }
+    },
+    "games.color_match.play.member_color" : {
+      "comment" : "答え合わせのあと、正しく割り当てた行に出す色見本のラベル (右に色と HEX) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メンバーカラー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "멤버 컬러"
+          }
+        }
+      }
+    },
+    "games.color_match.play.next" : {
+      "comment" : "答え合わせのあとに次の問へ進むボタン。number は次が何問目か (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次へ（第%1$@問）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다음 (%1$@번 문제)"
+          }
+        }
+      }
+    },
+    "games.color_match.play.progress" : {
+      "comment" : "ゲーム中の見出しの下。current は何問目か、total は全問数、level は難易度 (color_match.difficulty.*) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@total@"
+          },
+          "substitutions" : {
+            "total" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "第%1$@問 / 全%arg問 ・ %3$@"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@total@"
+          },
+          "substitutions" : {
+            "total" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%1$@번 문제 / 총 %arg문제 · %3$@"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "games.color_match.play.quit" : {
+      "comment" : "ゲーム中の右上のボタン。設定画面に戻る (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "やめる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "그만하기"
+          }
+        }
+      }
+    },
+    "games.color_match.play.score" : {
+      "comment" : "答え合わせのあとの、この問の正解数 / 人数 (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ / %2$@ 正解"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ / %2$@ 정답"
+          }
+        }
+      }
+    },
+    "games.color_match.result.change_settings" : {
+      "comment" : "結果画面のボタン。設定画面に戻る (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定を変える"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "설정 바꾸기"
+          }
+        }
+      }
+    },
+    "games.color_match.result.rate" : {
+      "comment" : "メンバーカラー合わせの結果の大きな数字。rate は 0–100 の整数 (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正答率 %1$@%%"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정답률 %1$@%%"
+          }
+        }
+      }
+    },
+    "games.color_match.result.summary" : {
+      "comment" : "結果の正答率の下。correct は正解した人数の合計、answered は答えた人数の合計、count は問題数 (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 3,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%1$@ / %2$@ 正解（全%arg問）"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 3,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%1$@ / %2$@ 정답 (총 %arg문제)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "games.color_match.setup.brands_caption" : {
+      "comment" : "出題ブランドの見出しの下の説明 (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未選択なら全ブランドから出題"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "선택하지 않으면 모든 브랜드에서 출제해요"
+          }
+        }
+      }
+    },
+    "games.color_match.setup.difficulty" : {
+      "comment" : "メンバーカラー合わせの設定。難易度を選ぶ節の見出し (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "難易度"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "난이도"
+          }
+        }
+      }
+    },
+    "games.color_match.setup.lead" : {
+      "comment" : "メンバーカラー合わせの設定画面の先頭の説明 (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出題ブランドを選んで、似た色のメンバーの色を当てよう。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출제할 브랜드를 고르고, 비슷한 색을 가진 멤버의 색을 맞혀 봐요."
+          }
+        }
+      }
+    },
+    "games.color_match.setup.question_count" : {
+      "comment" : "メンバーカラー合わせの設定。問題数を選ぶ節の見出し (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "問題数"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "문제 수"
+          }
+        }
+      }
+    },
+    "games.color_match.setup.question_count_option" : {
+      "comment" : "問題数のセグメントの選択肢 (5問 / 10問) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg問"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg문제"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "games.color_match.setup.start" : {
+      "comment" : "ゲームを始めるボタン。count は選んだ問題数 (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "はじめる（全%arg問）"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "시작 (총 %arg문제)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "games.daily_pick.action.close" : {
+      "comment" : "日替わりピックを閉じるボタン (iOS は文字のボタン、Android は × の読み上げ) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "閉じる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "닫기"
+          }
+        }
+      }
+    },
+    "games.daily_pick.lead.idol" : {
+      "comment" : "日替わりピック (アイドルの日) の先頭の説明 (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "各ブランドから今日のアイドルをピックしました。性格でも髪型でも口ぐせでも、思いついたタグを付けて投票しよう（複数OK・同じタグは人数が貯まります）。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드마다 오늘의 아이돌을 골랐어요. 성격이든 헤어스타일이든 말버릇이든, 떠오르는 태그를 달아 투표해 봐요 (여러 개 가능·같은 태그는 투표한 사람 수가 합산돼요)."
+          }
+        }
+      }
+    },
+    "games.daily_pick.lead.song" : {
+      "comment" : "日替わりピック (曲の日) の先頭の説明 (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "各ブランドから今日の1曲をピックしました。ジャケットをタップで試聴、気になる曲にタグを付けて投票しよう（複数OK・同じタグは人数が貯まります）。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드마다 오늘의 1곡을 골랐어요. 재킷을 탭하면 미리 듣기를 할 수 있어요. 마음에 드는 곡에 태그를 달아 투표해 봐요 (여러 개 가능·같은 태그는 투표한 사람 수가 합산돼요)."
+          }
+        }
+      }
+    },
+    "games.daily_pick.tag" : {
+      "comment" : "カードの右のボタン。タグを付けて投票するピッカーを開く (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그"
+          }
+        }
+      }
+    },
+    "games.daily_pick.title.idol" : {
+      "comment" : "起動時に出る日替わりピックの画面タイトル (アイドルの日)。カレンダーのツールバーのボタンの読み上げにも使う (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日のアイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오늘의 아이돌"
+          }
+        }
+      }
+    },
+    "games.daily_pick.title.song" : {
+      "comment" : "起動時に出る日替わりピックの画面タイトル (曲の日)。カレンダーのツールバーのボタンの読み上げにも使う (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日の1曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오늘의 1곡"
+          }
+        }
+      }
+    },
+    "games.daily_pick.voted" : {
+      "comment" : "カードの右。この曲・アイドルにタグを付けて投票したあと (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票済"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표 완료"
+          }
+        }
+      }
+    },
+    "games.hub.best.percent" : {
+      "comment" : "ハブのカードの自己ベスト (正答率で記録するゲーム = メンバーカラー合わせ)。rate は 0–100 の整数 (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最高 %1$@%%"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최고 %1$@%%"
+          }
+        }
+      }
+    },
+    "games.hub.best.points" : {
+      "comment" : "ハブのカードの自己ベスト (獲得ポイントで記録するクイズ)。1 回の満点は 100pt 程度なので桁区切りは出ない (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@points@"
+          },
+          "substitutions" : {
+            "points" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "最高 %argpt"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@points@"
+          },
+          "substitutions" : {
+            "points" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "최고 %argpt"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "games.hub.entry.color_match.blurb" : {
+      "comment" : "ハブのカードの説明 (メンバーカラー合わせ) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "似た色のメンバーを正しいカラーに紐づける"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "비슷한 색의 멤버를 올바른 컬러와 연결해요"
+          }
+        }
+      }
+    },
+    "games.hub.entry.idol_quiz.blurb" : {
+      "comment" : "ハブのカードの説明 (アイドル当てクイズ) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロフィールから4択で誰かを当てる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "프로필을 보고 누구인지 4지선다로 맞혀요"
+          }
+        }
+      }
+    },
+    "games.hub.entry.intro_don.blurb" : {
+      "comment" : "ハブのカードの説明 (イントロドン) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イントロを聴いて曲名を当てる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "인트로를 듣고 곡명을 맞혀요"
+          }
+        }
+      }
+    },
+    "games.hub.entry.song_quiz.blurb" : {
+      "comment" : "ハブのカードの説明 (ソロ曲クイズ) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ソロ曲を歌うアイドルを4択で当てる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "솔로곡을 부른 아이돌을 4지선다로 맞혀요"
+          }
+        }
+      }
+    },
+    "games.hub.header" : {
+      "comment" : "ハブのゲーム一覧の節の見出し (右にゲームの数) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゲーム"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "게임"
+          }
+        }
+      }
+    },
+    "games.hub.not_played" : {
+      "comment" : "ハブのカード。まだ 1 度も遊んでいないゲーム (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未プレイ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "플레이 기록 없음"
+          }
+        }
+      }
+    },
+    "games.hub.play_count" : {
+      "comment" : "ハブのカードの右下に出すプレイ回数。1000 以上は桁区切りが付く (1,000回) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg回"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg회"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "games.hub.title" : {
+      "comment" : "クイズ・ゲームのハブ (プロデュースから開く) の画面タイトル (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クイズ・ゲーム"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "퀴즈·게임"
+          }
+        }
+      }
+    },
+    "games.idol_quiz.empty" : {
+      "comment" : "出題画面で問題を 1 つも作れなかったときの空状態の見出し (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出題できる候補が不足しています"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출제할 수 있는 후보가 부족해요"
+          }
+        }
+      }
+    },
+    "games.idol_quiz.hint.title" : {
+      "comment" : "まだ開いていないプロフィールの項目を開くボタン。label は項目名 (血液型・誕生日など。imas-core が作る日本語) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヒント: %1$@を見る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "힌트: %1$@ 보기"
+          }
+        }
+      }
+    },
+    "games.idol_quiz.history_subject" : {
+      "comment" : "結果画面の振り返りの行の題 (アイドル当てはシルエット出題なので題材名の代わりに出す) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロフィール問題"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "프로필 문제"
+          }
+        }
+      }
+    },
+    "games.idol_quiz.prompt" : {
+      "comment" : "出題カードの問いかけ (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このプロフィールは誰？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 프로필의 아이돌은 누구일까요?"
+          }
+        }
+      }
+    },
+    "games.idol_quiz.setup.candidates" : {
+      "comment" : "選んだブランドで出題できるアイドルの数 (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "出題候補: %arg 名"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "출제 후보: %arg명"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "games.idol_quiz.setup.insufficient" : {
+      "comment" : "候補が足りず始められないときの注意 (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4 択を出すにはアイドルが最低 4 名必要です。ブランドの選択を増やしてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "4지선다를 내려면 아이돌이 최소 4명 필요해요. 브랜드를 더 골라 주세요."
+          }
+        }
+      }
+    },
+    "games.idol_quiz.setup.subtitle" : {
+      "comment" : "アイドル当てクイズの設定画面の見出しカードの説明 (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロフィールのヒントを手がかりに誰かを 4 択で当てよう"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "프로필 힌트를 단서로 누구인지 4지선다로 맞혀 봐요"
+          }
+        }
+      }
+    },
+    "games.name.color_match" : {
+      "comment" : "ゲーム名 (似た色のメンバーにメンバーカラーを割り当てる)。ハブのカードとゲーム画面のタイトル (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メンバーカラー合わせ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "멤버 컬러 맞추기"
+          }
+        }
+      }
+    },
+    "games.name.idol_quiz" : {
+      "comment" : "ゲーム名 (プロフィールから誰かを 4 択で当てる)。ハブのカード・出題設定と出題画面のタイトル・設定画面の見出しカード (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル当てクイズ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 맞히기 퀴즈"
+          }
+        }
+      }
+    },
+    "games.name.intro_don" : {
+      "comment" : "ゲーム名 (イントロを聴いて曲を当てるゲーム)。クイズ・ゲームのハブのカードの見出し (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イントロドン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "인트로돈"
+          }
+        }
+      }
+    },
+    "games.name.song_quiz" : {
+      "comment" : "ゲーム名 (ソロ曲を歌うアイドルを 4 択で当てる)。ハブのカード・出題設定と出題画面のタイトル・設定画面の見出しカード (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ソロ曲クイズ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "솔로곡 퀴즈"
+          }
+        }
+      }
+    },
+    "games.quiz.action.next" : {
+      "comment" : "解答したあとに次の問へ進むボタン (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次の問題"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다음 문제"
+          }
+        }
+      }
+    },
+    "games.quiz.action.show_result" : {
+      "comment" : "最後の問を解答したあとに結果画面へ進むボタン (メンバーカラー合わせの最後の問でも使う) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "結果を見る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "결과 보기"
+          }
+        }
+      }
+    },
+    "games.quiz.hint.next_value" : {
+      "comment" : "ヒントを開くボタンの副題。そのヒントを開いたあとに正解すると入る点 (開くほど下がる) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@points@"
+          },
+          "substitutions" : {
+            "points" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "開いた後は正解で +%argpt"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@points@"
+          },
+          "substitutions" : {
+            "points" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "열고 나서 정답을 맞히면 +%argpt"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "games.quiz.history.answer" : {
+      "comment" : "振り返りの行の、正解のアイドルに付けるチップのラベル (右にアイドル名) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正解"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정답"
+          }
+        }
+      }
+    },
+    "games.quiz.history.header" : {
+      "comment" : "結果画面の、各問で何が出て何を選んだかの一覧の見出し (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出題の振り返り"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출제된 문제 돌아보기"
+          }
+        }
+      }
+    },
+    "games.quiz.history.hints" : {
+      "comment" : "振り返りの行。その問で開いたヒントの数 (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "ヒント%arg"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "힌트 %arg개"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "games.quiz.history.picked" : {
+      "comment" : "振り返りの行の、間違えたときに自分が選んだアイドルに付けるチップのラベル (右にアイドル名) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "선택"
+          }
+        }
+      }
+    },
+    "games.quiz.progress" : {
+      "comment" : "クイズの上の進捗。current は何問目か、total は全問数 (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "第 %1$@ / %2$@ 問"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "문제 %1$@ / %2$@"
+          }
+        }
+      }
+    },
+    "games.quiz.result.new_best" : {
+      "comment" : "結果画面のバッジ。今回が自己ベストを更新したとき (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自己ベスト更新！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최고 기록 경신!"
+          }
+        }
+      }
+    },
+    "games.quiz.result.share" : {
+      "comment" : "結果画面のボタン。結果の文をシェアシートで送る (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "結果をシェア"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "결과 공유"
+          }
+        }
+      }
+    },
+    "games.quiz.result.stat.best" : {
+      "comment" : "結果画面の小さな統計のラベル (上に これまでの最高の正答率%) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自己ベスト"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최고 기록"
+          }
+        }
+      }
+    },
+    "games.quiz.result.stat.correct" : {
+      "comment" : "結果画面の小さな統計のラベル (上に 正解数/問題数) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正解"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정답"
+          }
+        }
+      }
+    },
+    "games.quiz.result.stat.rate" : {
+      "comment" : "結果画面の小さな統計のラベル (上に 今回の正答率%) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正答率"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정답률"
+          }
+        }
+      }
+    },
+    "games.quiz.setup.brands_caption" : {
+      "comment" : "出題ブランドの見出しの下の説明。何も選ばなければ全ブランドから出す (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "複数選択可 · 空=全ブランド対象"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "여러 개 선택 가능 · 비우면 모든 브랜드"
+          }
+        }
+      }
+    },
+    "games.quiz.setup.estimating" : {
+      "comment" : "出題できる候補の数を数えている間の表示 (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "候補を計算中…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "후보 계산 중…"
+          }
+        }
+      }
+    },
+    "games.quiz.setup.reset_brands" : {
+      "comment" : "出題ブランドの見出しの右のボタン。選択を外して全ブランドに戻す (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全てに戻す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체로 되돌리기"
+          }
+        }
+      }
+    },
+    "games.quiz.setup.start" : {
+      "comment" : "出題設定画面の、クイズを始めるボタン (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スタート"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "시작"
+          }
+        }
+      }
+    },
+    "games.quiz.value_badge" : {
+      "comment" : "出題カードのバッジ。いまの開示のまま正解したときに入る点 (最大 10pt 程度) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@points@"
+          },
+          "substitutions" : {
+            "points" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "正解で +%argpt"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@points@"
+          },
+          "substitutions" : {
+            "points" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "정답 시 +%argpt"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "games.song_quiz.answer" : {
+      "comment" : "解答したあとに出す正解のアイドル名。name はアイドル名 (データ) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正解: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정답: %1$@"
+          }
+        }
+      }
+    },
+    "games.song_quiz.empty" : {
+      "comment" : "出題画面で問題を 1 つも作れなかったときの空状態の見出し (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出題できるソロ曲が不足しています"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출제할 수 있는 솔로곡이 부족해요"
+          }
+        }
+      }
+    },
+    "games.song_quiz.hint.artwork" : {
+      "comment" : "ヒント 1 段目のボタン。伏せていたジャケットを見せる (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヒント: ジャケットを見る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "힌트: 재킷 보기"
+          }
+        }
+      }
+    },
+    "games.song_quiz.hint.preview" : {
+      "comment" : "ヒント 2 段目のボタン。曲の試聴を流す (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヒント: プレビューを再生する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "힌트: 미리 듣기"
+          }
+        }
+      }
+    },
+    "games.song_quiz.prompt" : {
+      "comment" : "出題カードの問いかけ (iOS だけ。Android のカードには無い) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このソロ曲を歌うのは？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 솔로곡을 부른 사람은 누구일까요?"
+          }
+        }
+      }
+    },
+    "games.song_quiz.setup.candidates" : {
+      "comment" : "選んだブランドで出題できるソロ曲の数と、その歌手の数。songs は曲数 (count。全ブランドだと 1000 曲を超え、1000 以上は桁区切りが付く: 1,488 曲。format_change: grouping。iOS は元から桁区切りあり、Android は以前 1488 曲)、singers は人数 (int。キーに count は 1 つまでなので桁区切りなし) (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@songs@"
+          },
+          "substitutions" : {
+            "songs" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "出題候補: %arg 曲 / %2$@ 歌手"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@songs@"
+          },
+          "substitutions" : {
+            "songs" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "출제 후보: %arg곡 / 가수 %2$@명"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "games.song_quiz.setup.candidates_note" : {
+      "comment" : "候補数の下の補足。選択肢を作れるかは歌手の数で決まる (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4択の選択肢は歌手数が基準です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "4지선다 보기는 가수 수를 기준으로 해요"
+          }
+        }
+      }
+    },
+    "games.song_quiz.setup.insufficient" : {
+      "comment" : "候補が足りず始められないときの注意。原唱歌手 = その曲をもともと歌ったアイドル (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4 択を出すには原唱歌手が最低 4 名必要です。ブランドの選択を増やしてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "4지선다를 내려면 원곡 가수가 최소 4명 필요해요. 브랜드를 더 골라 주세요."
+          }
+        }
+      }
+    },
+    "games.song_quiz.setup.subtitle" : {
+      "comment" : "ソロ曲クイズの設定画面の見出しカードの説明 (i18n/catalog/games.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ソロ曲を聴いてその歌手を 4 択で当てよう"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "솔로곡을 듣고 부른 사람을 4지선다로 맞혀 봐요"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

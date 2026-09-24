@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.fugaif.imaslivedb.data.model.Brand
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasFilterChip
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import com.fugaif.imaslivedb.ui.theme.brandColor
@@ -32,7 +34,7 @@ fun GameBrandFilterGrid(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         ImasFilterChip(
-            label = "全て",
+            label = L10n.Games.brandFilterAll.resolve(),
             selected = selectedBrandIds.isEmpty(),
             onClick = onClearAll,
             tintColor = neutralAccent

@@ -41,6 +41,8 @@ import com.fugaif.imaslivedb.data.model.DailyPick
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ArtworkImage
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
 import com.fugaif.imaslivedb.ui.components.ImasLeadBar
@@ -128,14 +130,14 @@ fun DailyPickSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (kind == DailyPickKind.SONG) "今日の1曲" else "今日のアイドル",
+                    text = (if (kind == DailyPickKind.SONG) L10n.Games.dailyPickTitleSong else L10n.Games.dailyPickTitleIdol).resolve(),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = DS.ink,
                     modifier = Modifier.weight(1f)
                 )
                 IconButton(onClick = onDismiss) {
-                    Icon(Icons.Default.Close, contentDescription = "閉じる", tint = DS.ink2)
+                    Icon(Icons.Default.Close, contentDescription = L10n.Games.dailyPickActionClose.resolve(), tint = DS.ink2)
                 }
             }
 
@@ -152,9 +154,9 @@ fun DailyPickSheet(
                     item {
                         Text(
                             text = if (kind == DailyPickKind.SONG) {
-                                "各ブランドから今日の1曲をピックしました。ジャケットをタップで試聴、気になる曲にタグを付けて投票しよう（複数OK・同じタグは人数が貯まります）。"
+                                L10n.Games.dailyPickLeadSong.resolve()
                             } else {
-                                "各ブランドから今日のアイドルをピックしました。性格でも髪型でも口ぐせでも、思いついたタグを付けて投票しよう（複数OK・同じタグは人数が貯まります）。"
+                                L10n.Games.dailyPickLeadIdol.resolve()
                             },
                             fontSize = 13.sp, color = DS.ink2,
                             modifier = Modifier.padding(vertical = 8.dp)
@@ -258,7 +260,7 @@ private fun PickCard(
                 Icon(Icons.Default.Check, contentDescription = null, tint = DS.success, modifier = Modifier.size(18.dp))
             }
             Text(
-                if (tagged) "投票済" else "タグ",
+                (if (tagged) L10n.Games.dailyPickVoted else L10n.Games.dailyPickTag).resolve(),
                 fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
                 color = if (tagged) DS.success else accent
             )

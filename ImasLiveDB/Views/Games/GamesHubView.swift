@@ -10,20 +10,23 @@ struct GamesHubView: View {
     private struct GameEntry {
         let kind: GameKind
         let systemImage: String
-        let title: String
-        let blurb: String
+        let title: LocalizedStringResource
+        let blurb: LocalizedStringResource
     }
 
-    private let entries: [GameEntry] = [
-        .init(kind: .introDon, systemImage: "music.note.list", title: "イントロドン",
-              blurb: "イントロを聴いて曲名を当てる"),
-        .init(kind: .idolQuiz, systemImage: "person.fill.questionmark", title: "アイドル当てクイズ",
-              blurb: "プロフィールから4択で誰かを当てる"),
-        .init(kind: .songSingerQuiz, systemImage: "music.microphone", title: "ソロ曲クイズ",
-              blurb: "ソロ曲を歌うアイドルを4択で当てる"),
-        .init(kind: .colorMatch, systemImage: "paintpalette.fill", title: "メンバーカラー合わせ",
-              blurb: "似た色のメンバーを正しいカラーに紐づける"),
-    ]
+    /// 文言は作った時点の言語を抱えるので、保存せず読むたびに作る (computed)。
+    private var entries: [GameEntry] {
+        [
+            .init(kind: .introDon, systemImage: "music.note.list", title: L10n.Games.nameIntroDon,
+                  blurb: L10n.Games.hubEntryIntroDonBlurb),
+            .init(kind: .idolQuiz, systemImage: "person.fill.questionmark", title: L10n.Games.nameIdolQuiz,
+                  blurb: L10n.Games.hubEntryIdolQuizBlurb),
+            .init(kind: .songSingerQuiz, systemImage: "music.microphone", title: L10n.Games.nameSongQuiz,
+                  blurb: L10n.Games.hubEntrySongQuizBlurb),
+            .init(kind: .colorMatch, systemImage: "paintpalette.fill", title: L10n.Games.nameColorMatch,
+                  blurb: L10n.Games.hubEntryColorMatchBlurb),
+        ]
+    }
 
     var body: some View {
         ScrollView {
@@ -34,7 +37,7 @@ struct GamesHubView: View {
         }
         .background(DS.bg.ignoresSafeArea())
         .scrollContentBackground(.hidden)
-        .navigationTitle("クイズ・ゲーム")
+        .navigationTitle(L10n.Games.hubTitle)
         .navigationBarTitleDisplayMode(.large)
         .trackScreen("games_hub")
     }
@@ -43,7 +46,7 @@ struct GamesHubView: View {
 
     private var gameGrid: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
-            ImasSectionHeader(title: "ゲーム", count: "\(entries.count)")
+            ImasSectionHeader(title: .key(L10n.Games.hubHeader), count: .verbatim("\(entries.count)"))
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: DS.sp3), count: 2), spacing: DS.sp3) {
                 ForEach(entries, id: \.kind) { entry in
                     NavigationLink {
@@ -83,25 +86,25 @@ struct GamesHubView: View {
         if rec.hasPlayed {
             HStack(spacing: 5) {
                 Image(systemName: "star.fill").font(.imasScaled( 10)).foregroundStyle(DS.favorite)
-                Text(bestLabel(kind, rec)).font(.imasCaption.weight(.semibold)).foregroundStyle(DS.ink2)
+                Text(display: bestLabel(kind, rec)).font(.imasCaption.weight(.semibold)).foregroundStyle(DS.ink2)
                 Spacer(minLength: 0)
-                Text("\(rec.playCount)回").font(.imasCaption).foregroundStyle(DS.ink3)
+                Text(L10n.Games.hubPlayCount(count: Int(rec.playCount))).font(.imasCaption).foregroundStyle(DS.ink3)
             }
         } else {
-            Text("未プレイ").font(.imasCaption.weight(.semibold)).foregroundStyle(DS.ink3)
+            Text(L10n.Games.hubNotPlayed).font(.imasCaption.weight(.semibold)).foregroundStyle(DS.ink3)
         }
     }
 
     /// 最高記録の表示文字列。色合わせは正答率%、クイズ系は獲得ポイント。
     /// 正答率は保存値から引く計算なのでコア (game_progress) に委譲する
     /// (記録が無ければ nil が返るので「—」を出す)。
-    private func bestLabel(_ kind: GameKind, _ rec: GameRecord) -> String {
+    private func bestLabel(_ kind: GameKind, _ rec: GameRecord) -> DisplayText {
         if kind.scoreIsPercent {
-            guard let pct = progress.bestRatePercent(for: kind) else { return "—" }
-            return "最高 \(pct)%"
+            guard let pct = progress.bestRatePercent(for: kind) else { return .verbatim("—") }
+            return .key(L10n.Games.hubBestPercent(rate: pct))
         }
-        guard rec.bestOutOf > 0 else { return "—" }
-        return "最高 \(rec.bestScore)pt"
+        guard rec.bestOutOf > 0 else { return .verbatim("—") }
+        return .key(L10n.Games.hubBestPoints(points: Int(rec.bestScore)))
     }
 
     // MARK: - 遷移先

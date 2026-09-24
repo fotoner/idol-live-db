@@ -55,6 +55,10 @@ import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.core.SnapshotStoreProvider
 import com.fugaif.imaslivedb.data.games.GameKind
 import com.fugaif.imaslivedb.data.model.Idol
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.coreText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
@@ -147,7 +151,10 @@ fun hasVoiceActorData(refs: List<IdolQuizIdolRef>): Boolean =
 fun QuizProgressHeader(current: Int, total: Int, points: Int) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("第 $current / $total 問", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
+            Text(
+                L10n.Games.quizProgress(current = current, total = total).resolve(),
+                fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2
+            )
             Box(Modifier.weight(1f))
             Icon(Icons.Filled.Star, null, tint = DS.favorite, modifier = Modifier.size(14.dp))
             Text("$points pt", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DS.ink, modifier = Modifier.padding(start = 4.dp))
@@ -172,7 +179,7 @@ fun QuizValueBadge(points: Int) {
         modifier = Modifier.clip(CircleShape).background(DS.success.copy(alpha = 0.14f)).padding(horizontal = 11.dp, vertical = 6.dp)
     ) {
         Icon(Icons.Filled.AddCircle, null, tint = DS.success, modifier = Modifier.size(11.dp))
-        Text("正解で +${points}pt", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DS.success)
+        Text(L10n.Games.quizValueBadge(points = points).resolve(), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DS.success)
     }
 }
 
@@ -196,7 +203,7 @@ fun QuizHintButton(icon: ImageVector, title: String, nextValue: Int, onClick: ()
         ) { Icon(icon, null, tint = DS.warning, modifier = Modifier.size(16.dp)) }
         Column(Modifier.weight(1f)) {
             Text(title, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
-            Text("開いた後は正解で +${nextValue}pt", fontSize = 12.sp, color = DS.ink3)
+            Text(L10n.Games.quizHintNextValue(points = nextValue).resolve(), fontSize = 12.sp, color = DS.ink3)
         }
         Icon(Icons.Filled.ExpandMore, null, tint = DS.ink3, modifier = Modifier.size(13.dp))
     }
@@ -222,7 +229,7 @@ fun QuizPrimaryButton(title: String, onClick: () -> Unit) {
 /** 解答後に出す「次の問題 / 結果を見る」ボタン。最終問なら結果へ、それ以外は次問へ進む。 */
 @Composable
 fun QuizNextButton(isLastQuestion: Boolean, onNext: () -> Unit, onFinish: () -> Unit) {
-    QuizPrimaryButton(title = if (isLastQuestion) "結果を見る" else "次の問題") {
+    QuizPrimaryButton(title = (if (isLastQuestion) L10n.Games.quizActionShowResult else L10n.Games.quizActionNext).resolve()) {
         if (isLastQuestion) onFinish() else onNext()
     }
 }
@@ -294,7 +301,8 @@ fun IdolChoiceGrid(choices: List<Idol>, answer: Idol, selectedId: String?, onPic
 data class QuizHistoryItem(
     val id: String,
     val index: Int,
-    val subjectTitle: String,
+    /** 題材の表示名。アイドル当ては文言 (プロフィール問題)、ソロ曲は曲名のデータ (Verbatim)。 */
+    val subjectTitle: DisplayText,
     val subjectSubtitle: String?,
     val answer: Idol,
     val picked: Idol?,
@@ -368,7 +376,7 @@ fun QuizResultView(
                 modifier = Modifier.clip(CircleShape).background(DS.favorite.copy(alpha = 0.16f)).padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Icon(Icons.Filled.WorkspacePremium, null, tint = DS.favorite, modifier = Modifier.size(12.dp))
-                Text("自己ベスト更新！", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DS.favorite)
+                Text(L10n.Games.quizResultNewBest.resolve(), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DS.favorite)
             }
         }
 
@@ -378,19 +386,19 @@ fun QuizResultView(
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-            ResultStat(value = "$correct/$questions", label = "正解", modifier = Modifier.weight(1f))
-            ResultStat(value = "$rate%", label = "正答率", modifier = Modifier.weight(1f))
-            ResultStat(value = "$bestRate%", label = "自己ベスト", modifier = Modifier.weight(1f))
+            ResultStat(value = "$correct/$questions", label = L10n.Games.quizResultStatCorrect.resolve(), modifier = Modifier.weight(1f))
+            ResultStat(value = "$rate%", label = L10n.Games.quizResultStatRate.resolve(), modifier = Modifier.weight(1f))
+            ResultStat(value = "$bestRate%", label = L10n.Games.quizResultStatBest.resolve(), modifier = Modifier.weight(1f))
         }
 
-        Text(comment, fontSize = 13.sp, color = DS.ink3, modifier = Modifier.padding(top = 2.dp))
+        Text(coreText(comment), fontSize = 13.sp, color = DS.ink3, modifier = Modifier.padding(top = 2.dp))
 
         if (history.isNotEmpty()) {
             QuizHistoryList(items = history)
         }
 
         Column(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            QuizPrimaryButton(title = "もう一度", onClick = onReplay)
+            QuizPrimaryButton(title = L10n.Games.actionReplay.resolve(), onClick = onReplay)
             val shareText = shareQuizResultText(
                 kind.displayName, result.points, result.maxPoints, grade, result.correct, result.questions
             )
@@ -412,7 +420,7 @@ fun QuizResultView(
             ) {
                 Icon(Icons.Filled.Share, null, tint = ImasTheme.derive(null, null, dark = true).accent, modifier = Modifier.size(14.dp))
                 Text(
-                    "結果をシェア", fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
+                    L10n.Games.quizResultShare.resolve(), fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
                     color = ImasTheme.derive(null, null, dark = true).accent, modifier = Modifier.padding(start = 6.dp)
                 )
             }
@@ -439,7 +447,7 @@ private fun QuizHistoryList(items: List<QuizHistoryItem>) {
     Column(modifier = Modifier.fillMaxWidth().padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             Icon(Icons.AutoMirrored.Filled.ViewList, null, tint = DS.ink2, modifier = Modifier.size(13.dp))
-            Text("出題の振り返り", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+            Text(L10n.Games.quizHistoryHeader.resolve(), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DS.ink)
         }
         items.forEach { QuizHistoryRow(it) }
     }
@@ -459,14 +467,17 @@ private fun QuizHistoryRow(item: QuizHistoryItem) {
             )
         }
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text(item.subjectTitle, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(
+                item.subjectTitle.resolve(), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink,
+                maxLines = 2, overflow = TextOverflow.Ellipsis
+            )
             item.subjectSubtitle?.takeIf { it.isNotEmpty() }?.let {
                 Text(it, fontSize = 12.sp, color = DS.ink3, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                AnswerChip(label = "正解", idol = item.answer, tone = DS.success)
+                AnswerChip(label = L10n.Games.quizHistoryAnswer.resolve(), idol = item.answer, tone = DS.success)
                 if (!item.isCorrect) {
-                    item.picked?.let { AnswerChip(label = "選択", idol = it, tone = DS.danger) }
+                    item.picked?.let { AnswerChip(label = L10n.Games.quizHistoryPicked.resolve(), idol = it, tone = DS.danger) }
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -480,7 +491,10 @@ private fun QuizHistoryRow(item: QuizHistoryItem) {
                 if (item.revealedHints > 0) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                         Icon(Icons.Filled.Lightbulb, null, tint = DS.warning, modifier = Modifier.size(11.dp))
-                        Text("ヒント${item.revealedHints}", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.warning)
+                        Text(
+                            L10n.Games.quizHistoryHints(count = item.revealedHints).resolve(),
+                            fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.warning
+                        )
                     }
                 }
             }

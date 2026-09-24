@@ -68,7 +68,7 @@ struct QuizProgressHeader: View {
     var body: some View {
         VStack(spacing: DS.sp3) {
             HStack {
-                Text("第 \(current) / \(total) 問").font(.imasFootnote.weight(.semibold)).foregroundStyle(DS.ink2)
+                Text(L10n.Games.quizProgress(current: current, total: total)).font(.imasFootnote.weight(.semibold)).foregroundStyle(DS.ink2)
                 Spacer()
                 HStack(spacing: DS.sp2) {
                     Image(systemName: "star.fill").font(.imasCaption).foregroundStyle(DS.favorite)
@@ -100,7 +100,7 @@ struct QuizValueBadge: View {
     var body: some View {
         HStack(spacing: 5) {
             Image(systemName: "plus.circle.fill").font(.imasScaled( 11, weight: .bold))
-            Text("正解で +\(value)pt").font(.imasCaption.weight(.bold))
+            Text(L10n.Games.quizValueBadge(points: value)).font(.imasCaption.weight(.bold))
         }
         .foregroundStyle(DS.success)
         .padding(.horizontal, 11).padding(.vertical, 6)
@@ -111,7 +111,7 @@ struct QuizValueBadge: View {
 /// 段階ヒントを開くボタン。開くと「以降の上限点が下がる」ことを副題で明示する。
 struct QuizHintButton: View {
     let systemImage: String
-    let title: String
+    let title: LocalizedStringResource
     let nextValue: Int
     let action: () -> Void
 
@@ -124,7 +124,7 @@ struct QuizHintButton: View {
                     .background(DS.warning.opacity(0.14), in: RoundedRectangle(cornerRadius: DS.rSM, style: .continuous))
                 VStack(alignment: .leading, spacing: 1) {
                     Text(title).font(.imasSubhead.weight(.semibold)).foregroundStyle(DS.ink)
-                    Text("開いた後は正解で +\(nextValue)pt").font(.imasCaption).foregroundStyle(DS.ink3)
+                    Text(L10n.Games.quizHintNextValue(points: nextValue)).font(.imasCaption).foregroundStyle(DS.ink3)
                 }
                 Spacer(minLength: 0)
                 Image(systemName: "chevron.down").font(.imasScaled( 13, weight: .semibold)).foregroundStyle(DS.ink3)
@@ -185,7 +185,7 @@ struct QuizChoiceButton: View {
 
 /// クイズ共通の主ボタン (次の問題 / 結果を見る)。
 struct QuizPrimaryButton: View {
-    let title: String
+    let title: LocalizedStringResource
     let action: () -> Void
     var body: some View {
         Button(action: action) {
@@ -208,7 +208,7 @@ struct QuizNextButton: View {
     let onFinish: () -> Void
 
     var body: some View {
-        QuizPrimaryButton(title: isLastQuestion ? "結果を見る" : "次の問題") {
+        QuizPrimaryButton(title: isLastQuestion ? L10n.Games.quizActionShowResult : L10n.Games.quizActionNext) {
             if isLastQuestion { onFinish() } else { onNext() }
         }
     }
@@ -245,7 +245,7 @@ struct IdolChoiceGrid: View {
 struct QuizHistoryItem: Identifiable, Hashable {
     let id: String                  // 一意キー (出題順 + 題材ID で衝突を防ぐ)
     let index: Int                  // 1始まりの問題番号
-    let subjectTitle: String        // 題材の表示名 (アイドル当て=「プロフィール」/ソロ曲=曲名)
+    let subjectTitle: DisplayText   // 題材の表示名 (アイドル当て=文言「プロフィール問題」/ソロ曲=曲名のデータ)
     let subjectSubtitle: String?    // 補助情報 (CD名等、無ければnil)
     let answer: Idol                // 正解
     let picked: Idol?               // ユーザが選んだ選択肢 (未解答なら nil)
@@ -253,6 +253,9 @@ struct QuizHistoryItem: Identifiable, Hashable {
     let revealedHints: Int          // 開いたヒント数
 
     var isCorrect: Bool { picked?.id == answer.id }
+
+    /// DisplayText は Hashable ではないので、一意キーの id だけで hash する (== は全項目の比較のまま)。
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }
 
 /// クイズのグレード (正答率ベース)。リザルトの主役。
@@ -334,7 +337,7 @@ struct QuizResultView: View {
             if isNewBest {
                 HStack(spacing: 5) {
                     Image(systemName: "crown.fill").font(.imasScaled(12, weight: .bold))
-                    Text("自己ベスト更新！").font(.imasFootnote.weight(.bold))
+                    Text(L10n.Games.quizResultNewBest).font(.imasFootnote.weight(.bold))
                 }
                 .foregroundStyle(DS.favorite)
                 .padding(.horizontal, DS.sp4).padding(.vertical, 6)
@@ -348,11 +351,11 @@ struct QuizResultView: View {
             }
 
             HStack(spacing: DS.sp3) {
-                resultStat(value: "\(correct)/\(questions)", label: "正解")
-                resultStat(value: "\(rate)%", label: "正答率")
-                resultStat(value: "\(bestRate)%", label: "自己ベスト")
+                resultStat(value: "\(correct)/\(questions)", label: L10n.Games.quizResultStatCorrect)
+                resultStat(value: "\(rate)%", label: L10n.Games.quizResultStatRate)
+                resultStat(value: "\(bestRate)%", label: L10n.Games.quizResultStatBest)
             }
-            Text(comment)
+            Text(core: comment)
                 .font(.imasFootnote).foregroundStyle(DS.ink3)
                 .multilineTextAlignment(.center).padding(.top, DS.sp1)
 
@@ -361,11 +364,11 @@ struct QuizResultView: View {
             }
 
             VStack(spacing: DS.sp3) {
-                QuizPrimaryButton(title: "もう一度", action: onReplay)
+                QuizPrimaryButton(title: L10n.Games.actionReplay, action: onReplay)
                 ShareLink(item: shareText) {
                     HStack(spacing: 6) {
                         Image(systemName: "square.and.arrow.up").font(.imasScaled(14, weight: .semibold))
-                        Text("結果をシェア").font(.imasSubhead.weight(.semibold))
+                        Text(L10n.Games.quizResultShare).font(.imasSubhead.weight(.semibold))
                     }
                     .foregroundStyle(DS.sys)
                     .frame(maxWidth: .infinity).padding(.vertical, DS.sp4)
@@ -379,9 +382,9 @@ struct QuizResultView: View {
         .onAppear { appeared = true }
     }
 
-    private func resultStat(value: String, label: String) -> some View {
+    private func resultStat(value: String, label: LocalizedStringResource) -> some View {
         VStack(spacing: DS.sp1) {
-            Text(value).font(.imasDisplay(20, weight: .bold)).foregroundStyle(DS.ink)
+            Text(verbatim: value).font(.imasDisplay(20, weight: .bold)).foregroundStyle(DS.ink)
             Text(label).font(.imasCaption).foregroundStyle(DS.ink2)
         }
         .frame(maxWidth: .infinity)
@@ -401,7 +404,7 @@ struct QuizHistoryList: View {
             HStack(spacing: 6) {
                 Image(systemName: "list.bullet.rectangle.portrait")
                     .font(.imasScaled(13, weight: .semibold)).foregroundStyle(DS.ink2)
-                Text("出題の振り返り").font(.imasSubhead.weight(.bold)).foregroundStyle(DS.ink)
+                Text(L10n.Games.quizHistoryHeader).font(.imasSubhead.weight(.bold)).foregroundStyle(DS.ink)
                 Spacer(minLength: 0)
             }
             VStack(spacing: DS.sp2) {
@@ -427,7 +430,7 @@ private struct QuizHistoryRow: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 // 題材 (アイドル当て=「プロフィール」、ソロ曲=曲名)
-                Text(item.subjectTitle)
+                Text(display: item.subjectTitle)
                     .font(.imasSubhead.weight(.semibold)).foregroundStyle(DS.ink)
                     .lineLimit(2)
                 if let sub = item.subjectSubtitle, !sub.isEmpty {
@@ -435,9 +438,9 @@ private struct QuizHistoryRow: View {
                 }
                 // 正解と (誤答時のみ) 自分の選択
                 HStack(spacing: DS.sp2) {
-                    answerChip(label: "正解", idol: item.answer, tone: DS.success)
+                    answerChip(label: L10n.Games.quizHistoryAnswer, idol: item.answer, tone: DS.success)
                     if !item.isCorrect, let picked = item.picked {
-                        answerChip(label: "選択", idol: picked, tone: DS.danger)
+                        answerChip(label: L10n.Games.quizHistoryPicked, idol: picked, tone: DS.danger)
                     }
                 }
                 // ヒント数と獲得点
@@ -446,7 +449,7 @@ private struct QuizHistoryRow: View {
                         .font(.imasCaption.weight(.semibold).monospacedDigit())
                         .foregroundStyle(item.earnedPoints > 0 ? DS.success : DS.ink3)
                     if item.revealedHints > 0 {
-                        Label("ヒント\(item.revealedHints)", systemImage: "lightbulb.fill")
+                        Label(L10n.Games.quizHistoryHints(count: item.revealedHints), systemImage: "lightbulb.fill")
                             .font(.imasCaption.weight(.semibold))
                             .foregroundStyle(DS.warning)
                     }
@@ -459,7 +462,7 @@ private struct QuizHistoryRow: View {
         .background(DS.surface, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
     }
 
-    private func answerChip(label: String, idol: Idol, tone: Color) -> some View {
+    private func answerChip(label: LocalizedStringResource, idol: Idol, tone: Color) -> some View {
         HStack(spacing: 6) {
             IdolAvatarView(idol: idol, size: 20)
             Text(label).font(.imasCaption.weight(.bold)).foregroundStyle(tone)

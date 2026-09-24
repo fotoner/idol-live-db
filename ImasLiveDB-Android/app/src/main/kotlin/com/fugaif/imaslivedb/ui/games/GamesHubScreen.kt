@@ -45,6 +45,9 @@ import com.fugaif.imaslivedb.data.games.GameKind
 import com.fugaif.imaslivedb.data.games.emptyGameRecord
 import com.fugaif.imaslivedb.data.games.hasPlayed
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import uniffi.imas_core.GameRecord
 import uniffi.imas_core.gameProgressBestRatePercent
@@ -56,15 +59,16 @@ import uniffi.imas_core.gameProgressBestRatePercent
 private data class GameEntry(
     val kind: GameKind,
     val icon: ImageVector,
-    val title: String,
-    val blurb: String
+    val title: DisplayText,
+    val blurb: DisplayText
 )
 
+/** 文言は値 (DisplayText) で持ち、描くときに resolve() する (言語を切り替えても旧言語が残らない)。 */
 private val entries = listOf(
-    GameEntry(GameKind.introDon, Icons.Filled.MusicNote, "イントロドン", "イントロを聴いて曲名を当てる"),
-    GameEntry(GameKind.idolQuiz, Icons.Filled.PersonSearch, "アイドル当てクイズ", "プロフィールから4択で誰かを当てる"),
-    GameEntry(GameKind.songSingerQuiz, Icons.Filled.MusicNote, "ソロ曲クイズ", "ソロ曲を歌うアイドルを4択で当てる"),
-    GameEntry(GameKind.colorMatch, Icons.Filled.Palette, "メンバーカラー合わせ", "似た色のメンバーを正しいカラーに紐づける")
+    GameEntry(GameKind.introDon, Icons.Filled.MusicNote, L10n.Games.nameIntroDon, L10n.Games.hubEntryIntroDonBlurb),
+    GameEntry(GameKind.idolQuiz, Icons.Filled.PersonSearch, L10n.Games.nameIdolQuiz, L10n.Games.hubEntryIdolQuizBlurb),
+    GameEntry(GameKind.songSingerQuiz, Icons.Filled.MusicNote, L10n.Games.nameSongQuiz, L10n.Games.hubEntrySongQuizBlurb),
+    GameEntry(GameKind.colorMatch, Icons.Filled.Palette, L10n.Games.nameColorMatch, L10n.Games.hubEntryColorMatchBlurb)
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,10 +87,10 @@ fun GamesHubScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("クイズ・ゲーム", fontWeight = FontWeight.Bold) },
+                title = { Text(L10n.Games.hubTitle.resolve(), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 }
             )
@@ -94,7 +98,7 @@ fun GamesHubScreen(
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding).background(DS.bg)) {
             Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-                Text("ゲーム", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+                Text(L10n.Games.hubHeader.resolve(), fontSize = 20.sp, fontWeight = FontWeight.Bold, color = DS.ink)
                 Text(
                     "${entries.size}", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3,
                     modifier = Modifier.padding(start = 8.dp)
@@ -141,10 +145,10 @@ private fun GameCard(entry: GameEntry, record: GameRecord, onClick: () -> Unit) 
         ) { Icon(entry.icon, null, tint = DS.ink, modifier = Modifier.size(22.dp)) }
         Column {
             Text(
-                entry.title, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DS.ink,
+                entry.title.resolve(), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DS.ink,
                 maxLines = 1, overflow = TextOverflow.Ellipsis
             )
-            Text(entry.blurb, fontSize = 12.sp, color = DS.ink3, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(entry.blurb.resolve(), fontSize = 12.sp, color = DS.ink3, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
         Spacer(Modifier.weight(1f))
         ScoreLine(entry.kind, record)
@@ -157,13 +161,13 @@ private fun ScoreLine(kind: GameKind, rec: GameRecord) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Filled.Star, null, tint = DS.favorite, modifier = Modifier.size(10.dp))
             Text(
-                bestLabel(kind, rec), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2,
+                bestLabel(kind, rec).resolve(), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2,
                 modifier = Modifier.padding(start = 5.dp).weight(1f)
             )
-            Text("${rec.playCount}回", fontSize = 12.sp, color = DS.ink3)
+            Text(L10n.Games.hubPlayCount(count = rec.playCount).resolve(), fontSize = 12.sp, color = DS.ink3)
         }
     } else {
-        Text("未プレイ", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3)
+        Text(L10n.Games.hubNotPlayed.resolve(), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3)
     }
 }
 
@@ -171,7 +175,11 @@ private fun ScoreLine(kind: GameKind, rec: GameRecord) {
  * 最高記録の表示文字列。色合わせは正答率%、クイズ系は獲得ポイント。
  * 正答率の算出 (と「まだ記録が無い」の判定) はコアが持つので、ここでは文言に落とすだけ。
  */
-private fun bestLabel(kind: GameKind, rec: GameRecord): String {
-    val bestRate = gameProgressBestRatePercent(rec) ?: return "—"
-    return if (kind.scoreIsPercent) "最高 ${bestRate}%" else "最高 ${rec.bestScore}pt"
+private fun bestLabel(kind: GameKind, rec: GameRecord): DisplayText {
+    val bestRate = gameProgressBestRatePercent(rec) ?: return DisplayText.Verbatim("—")
+    return if (kind.scoreIsPercent) {
+        L10n.Games.hubBestPercent(rate = bestRate.toInt())
+    } else {
+        L10n.Games.hubBestPoints(points = rec.bestScore)
+    }
 }

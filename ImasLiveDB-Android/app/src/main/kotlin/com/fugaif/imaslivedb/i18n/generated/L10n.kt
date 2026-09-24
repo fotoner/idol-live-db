@@ -13,6 +13,7 @@ object L10n {
     val Edit: L10nEdit get() = L10nEdit
     val Events: L10nEvents get() = L10nEvents
     val Filtered: L10nFiltered get() = L10nFiltered
+    val Games: L10nGames get() = L10nGames
     val Help: L10nHelp get() = L10nHelp
     val I18n: L10nI18n get() = L10nI18n
     val Idols: L10nIdols get() = L10nIdols
