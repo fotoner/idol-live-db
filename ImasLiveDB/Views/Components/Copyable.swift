@@ -79,9 +79,10 @@ extension View {
     /// 長押しでコピーできるようにする。
     /// - Parameters:
     ///   - text: コピーする原文 (表示が省略されていても全文を渡す)。空なら何もしない。
-    ///   - label: メニュー文言。既定は「コピー」。対象が分かる文言を推奨。
+    ///   - label: メニュー文言。既定は「コピー」(common.copy.default)。対象が分かる文言を推奨。
     ///   - key: 分析用の安定キー。
-    func imasCopyable(_ text: String?, label: String = "コピー", key: String = "text") -> some View {
+    func imasCopyable(_ text: String?, label: String = String(localized: L10n.Common.copyDefault),
+                      key: String = "text") -> some View {
         modifier(ImasCopyableModifier(items: [CopyItem(label, text, key: key)]))
     }
 

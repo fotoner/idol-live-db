@@ -338,7 +338,7 @@ fun ImasStatBar(label: String, value: String, percent: Double, seed: String? = n
 /** ランキング行 (順位 + lead(ジャケ/アバター) + タイトル + サブ + メトリクス)。 */
 @Composable
 fun ImasRankingRow(
-    rank: Int, title: String, metric: String, unit: String = "回",
+    rank: Int, title: String, metric: String, unit: String = L10n.Common.rankingRowUnitDefault.resolve(),
     sub: String? = null, seed: String? = null, brand: String? = null,
     onClick: (() -> Unit)? = null, lead: @Composable () -> Unit
 ) {
@@ -432,7 +432,7 @@ fun ImasLabeledRow(
     if (copyable) {
         // 省略表示 (Ellipsis) されていても原文 (value) を渡すので全文がコピーできる。
         Copyable(
-            items = listOf(CopyItem("${key}をコピー", value)),
+            items = listOf(CopyItem(L10n.Common.copyLabeled(label = key).resolve(), value)),
             modifier = Modifier.fillMaxWidth(),
             onClick = onClick,
             content = row
@@ -549,7 +549,7 @@ fun ImasTagChip(text: String, seed: String? = null, brand: String? = null, outli
 @Composable
 fun ImasAwardChip(title: String, rank: Int) {
     val isWinner = rank == 1
-    val rankLabel = if (isWinner) "優勝" else "第${rank}位"
+    val rankLabel = if (isWinner) L10n.Common.awardChipWinner.resolve() else L10n.Common.awardChipRank(rank = rank).resolve()
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -589,7 +589,8 @@ fun IdolGridSection(
     badge: Map<String, Int>? = null
 ) {
     Column {
-        ImasSectionHeader(title, count = "${idols.size}")
+        // 見出しは呼び出し側が文字列にして渡す (文言でもデータでもそのまま出す)
+        ImasSectionHeader(DisplayText.Verbatim(title), count = DisplayText.Verbatim("${idols.size}"))
         FlowRow(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -607,7 +608,7 @@ fun IdolGridSection(
                         modifier = Modifier.padding(top = 6.dp))
                     val b = badge?.get(idol.id)
                     if (b != null) {
-                        Text("タグ${b}個一致", fontSize = 10.sp, color = DS.ink3,
+                        Text(L10n.Common.idolGridSharedTags(count = b).resolve(), fontSize = 10.sp, color = DS.ink3,
                             textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }

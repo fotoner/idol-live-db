@@ -1,0 +1,201 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "share",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/share/CollectionShareCard.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/share/SetlistCommentShareCard.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/share/ShareCardRenderer.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/share/ShareCardScaffold.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/share/SocialShare.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/share/TagShareCard.kt"
+    ],
+    "ios": [
+      "ImasLiveDB/Views/Share/"
+    ]
+  },
+  "strings": {
+    "action.preparing": {
+      "ja": "画像を準備中…",
+      "ko": "이미지 준비 중…",
+      "note": "シェアボタン。カードに焼くジャケ写を読み込んでいる間 (押せない)"
+    },
+    "action.save": {
+      "ja": "保存",
+      "ko": "저장",
+      "note": "シェアカードの下のボタン (端末の写真に保存する)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "action.share": {
+      "ja": "シェアする",
+      "ko": "공유하기",
+      "note": "シェアカードの下のボタン (OS の共有シートを開く)"
+    },
+    "collection.badge": {
+      "ja": "楽曲回収率",
+      "ko": "곡 회수율",
+      "note": "回収率カードの左上の種別ラベル"
+    },
+    "collection.idol_count": {
+      "args": [
+        {
+          "name": "collected",
+          "type": "string"
+        },
+        {
+          "name": "total",
+          "type": "count"
+        }
+      ],
+      "ja": "{collected}/{total}曲",
+      "ko": "{collected}/{total}곡",
+      "note": "回収率カードの担当アイドルごとの行の右。collected は回収した曲数 (桁区切り済みの文字列)、total はその担当のオリジナル曲数。1000 以上は桁区切りが付く"
+    },
+    "collection.lead": {
+      "ja": "ライブで聴けた曲",
+      "ko": "라이브에서 들은 곡",
+      "note": "回収率カードの大きな % の上の見出し"
+    },
+    "collection.sheet_title": {
+      "ja": "回収率をシェア",
+      "ko": "회수율 공유",
+      "note": "回収率カードのシートの見出し"
+    },
+    "collection.summary": {
+      "args": [
+        {
+          "name": "collected",
+          "type": "string"
+        },
+        {
+          "name": "total",
+          "type": "count"
+        }
+      ],
+      "ja": "{collected} / {total} 曲を回収",
+      "ko": "{collected} / {total}곡 회수",
+      "note": "回収率カードの大きな % の下。collected は回収した曲数 (桁区切り済みの文字列)、total は全曲数。どちらも 1000 以上は桁区切りが付く (iOS は従来どおり、Android は今回から)"
+    },
+    "comment.badge": {
+      "ja": "セトリの感想",
+      "ko": "세트리스트 감상",
+      "note": "感想カードの左上の種別ラベル"
+    },
+    "comment.field_label": {
+      "ja": "この曲の感想",
+      "ko": "이 곡의 감상",
+      "note": "感想の入力欄の上の見出し"
+    },
+    "comment.field_placeholder": {
+      "ja": "最高だった！ 泣いた…など",
+      "ko": "최고였어! 울었어… 등",
+      "note": "感想の入力欄のプレースホルダ。書き方の例も訳す"
+    },
+    "comment.placeholder_card": {
+      "ja": "ここに感想が入ります",
+      "ko": "여기에 감상이 들어가요",
+      "note": "感想カードのプレビュー。感想をまだ書いていないときに出す見本の文"
+    },
+    "comment.sheet_title": {
+      "ja": "感想カードを作る",
+      "ko": "감상 카드 만들기",
+      "note": "感想カードのシートの見出し"
+    },
+    "footer.hashtag": {
+      "ja": "#アイドルライブDB",
+      "ko": "#アイドルライブDB",
+      "note": "全カード共通のフッターのハッシュタグ (SNS からの流入導線)。SNS で検索される識別子なので、どの言語でも訳さずそのまま出し、シェアが 1 つのタグに集まるようにする。言語ごとに別のタグにするかはオーナーが決める (変えるならここの訳を上書きする)",
+      "verbatim_ok": true
+    },
+    "ratio.portrait": {
+      "ja": "縦長",
+      "ko": "세로형",
+      "note": "カードの縦横比の補助ラベル (4:5)"
+    },
+    "ratio.square": {
+      "ja": "正方形",
+      "ko": "정사각형",
+      "note": "カードの縦横比の補助ラベル (1:1)"
+    },
+    "ratio.story": {
+      "ja": "ストーリーズ",
+      "ko": "스토리",
+      "note": "カードの縦横比の補助ラベル (9:16、SNS のストーリーズ向け)"
+    },
+    "render_error.message": {
+      "ja": "もう一度試すか、アプリを再起動してください。",
+      "ko": "다시 시도하거나 앱을 다시 시작해 주세요.",
+      "note": "カードを画像にできなかったときのアラートの本文",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "render_error.title": {
+      "ja": "シェア画像の生成に失敗しました",
+      "ko": "공유 이미지를 만들지 못했어요",
+      "note": "カードを画像にできなかったとき。iOS はアラートの見出し、Android はトースト"
+    },
+    "save.done": {
+      "ja": "画像を保存しました",
+      "ko": "이미지를 저장했어요",
+      "note": "保存先を選んで画像を保存できたときのトースト (Android 9 以下)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "save.done_pictures": {
+      "ja": "ピクチャに保存しました",
+      "ko": "사진 폴더에 저장했어요",
+      "note": "画像を端末のピクチャ (Pictures フォルダ) に保存できたときのトースト",
+      "platforms": [
+        "android"
+      ]
+    },
+    "save.failed": {
+      "ja": "保存に失敗しました",
+      "ko": "저장하지 못했어요",
+      "note": "画像を保存できなかったときのトースト",
+      "platforms": [
+        "android"
+      ]
+    },
+    "social.other": {
+      "ja": "その他でシェア",
+      "ko": "다른 앱으로 공유",
+      "note": "テキストシェアのメニュー項目 (OS の共有シートを開く)"
+    },
+    "social.post_x": {
+      "ja": "X にポスト",
+      "ko": "X에 게시",
+      "note": "テキストシェアのメニュー項目 (X の投稿画面を開く)"
+    },
+    "social.share.a11y": {
+      "ja": "シェア",
+      "ko": "공유",
+      "note": "シェアのアイコンボタンの読み上げの既定",
+      "platforms": [
+        "android"
+      ]
+    },
+    "tag.badge": {
+      "ja": "タグを追加しました！",
+      "ko": "태그를 추가했어요!",
+      "note": "タグ付与カードの左上の種別ラベル"
+    },
+    "tag.done.message": {
+      "ja": "せっかくなのでカードでシェアしませんか？",
+      "ko": "이왕이면 카드로 공유해 볼까요?",
+      "note": "タグを付け終えたあとの完了画面の誘い文句 (カードでのシェア)"
+    },
+    "tag.done.title": {
+      "ja": "タグを付けました！",
+      "ko": "태그를 달았어요!",
+      "note": "タグを付け終えたあとの完了画面の見出し"
+    }
+  }
+}

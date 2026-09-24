@@ -13,6 +13,7 @@ import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.di.AppModule
 import com.fugaif.imaslivedb.i18n.DisplayText
 import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -106,8 +107,9 @@ class UnitDetailViewModel(app: Application, private val unitId: String) : Androi
     /** 個人用タグを追加。サーバーには送信しない。足せたときだけ [onAdded] (入力欄を空にする)。 */
     fun addPersonalTag(name: String, onAdded: () -> Unit) {
         viewModelScope.launch {
-            localWrite("マイタグの追加") { personalTagRepo.addTag(PersonalTag.UNIT, unitId, name) }
-                ?: return@launch
+            localWrite(L10n.Units.detailLocalWriteAddTag.resolve(getApplication<Application>())) {
+                personalTagRepo.addTag(PersonalTag.UNIT, unitId, name)
+            } ?: return@launch
             onAdded()
             loadPersonalTags()
         }
@@ -116,7 +118,9 @@ class UnitDetailViewModel(app: Application, private val unitId: String) : Androi
     /** 個人用タグを削除。 */
     fun removePersonalTag(name: String) {
         viewModelScope.launch {
-            localWrite("マイタグの削除") { personalTagRepo.removeTag(PersonalTag.UNIT, unitId, name) }
+            localWrite(L10n.Units.detailLocalWriteRemoveTag.resolve(getApplication<Application>())) {
+                personalTagRepo.removeTag(PersonalTag.UNIT, unitId, name)
+            }
             loadPersonalTags()
         }
     }

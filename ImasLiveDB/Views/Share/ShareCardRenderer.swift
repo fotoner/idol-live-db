@@ -200,9 +200,9 @@ struct ShareCardActionPane<Card: View>: View {
                         ProgressView()
                             .controlSize(.small)
                             .tint(.white)
-                        Text("画像を準備中…")
+                        Text(L10n.Share.actionPreparing)
                     } else {
-                        Label("シェアする", systemImage: "square.and.arrow.up")
+                        Label(L10n.Share.actionShare, systemImage: "square.and.arrow.up")
                     }
                 }
                 .font(.imasHeadline)
@@ -212,10 +212,10 @@ struct ShareCardActionPane<Card: View>: View {
             .buttonStyle(.borderedProminent)
             .disabled(isPreparingCard)
         }
-        .alert("シェア画像の生成に失敗しました", isPresented: $showRenderError) {
-            Button("OK") {}
+        .alert(L10n.Share.renderErrorTitle, isPresented: $showRenderError) {
+            Button(L10n.Common.actionOk) {}
         } message: {
-            Text("もう一度試すか、アプリを再起動してください。")
+            Text(L10n.Share.renderErrorMessage)
         }
     }
 
@@ -245,7 +245,7 @@ struct ShareCardSheet<Content: View>: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("閉じる") { dismiss() }
+                    Button(L10n.Common.actionClose) { dismiss() }
                 }
             }
             .trackScreen(screenName)

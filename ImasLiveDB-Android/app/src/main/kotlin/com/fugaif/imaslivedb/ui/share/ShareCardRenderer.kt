@@ -47,6 +47,8 @@ import coil3.request.SuccessResult
 import coil3.request.allowHardware
 import coil3.size.Size
 import coil3.toBitmap
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -97,15 +99,15 @@ const val SHARE_CARD_SCALE = 2f
  * シェアシートで選べるアスペクト比。iOS `ShareCard.Ratio` の移植で、論理サイズも同じ。
  * 長辺基準を揃えてあり、X / Instagram フィード / ストーリーズに最適化している。
  */
-enum class ShareCardRatio(val label: String, val caption: String, val size: ShareCardSize) {
+enum class ShareCardRatio(val label: String, val caption: DisplayText, val size: ShareCardSize) {
     /** 1:1 正方形 (1080×1080px)。Instagram フィードの基本形。 */
-    SQUARE("1:1", "正方形", ShareCardSize(540, 540)),
+    SQUARE("1:1", L10n.Share.ratioSquare, ShareCardSize(540, 540)),
 
     /** 4:5 縦長 (1080×1350px)。既定。X タイムラインで存在感が出る。 */
-    PORTRAIT("4:5", "縦長", ShareCardSize(540, 675)),
+    PORTRAIT("4:5", L10n.Share.ratioPortrait, ShareCardSize(540, 675)),
 
     /** 9:16 縦長 (1080×1920px)。ストーリーズ / リール向け。 */
-    STORY("9:16", "ストーリーズ", ShareCardSize(540, 960));
+    STORY("9:16", L10n.Share.ratioStory, ShareCardSize(540, 960));
 
     companion object {
         /** 既定の比率。デザインの主役は 4:5。 */
@@ -213,6 +215,7 @@ object ShareCardFiles {
     private const val CACHE_DIR = "share_cards"
 
     /** ギャラリーのアルバム名 (Pictures/<ここ>)。 */
+    // i18n-ignore(path): 保存先のフォルダ名。言語で変えると保存先が分かれるので訳さない
     private const val ALBUM = "アイドルライブDB"
 
     private val stamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)

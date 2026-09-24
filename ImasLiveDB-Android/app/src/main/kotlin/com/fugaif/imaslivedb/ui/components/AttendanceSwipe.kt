@@ -37,6 +37,8 @@ import com.fugaif.imaslivedb.data.model.AttendanceType
 import com.fugaif.imaslivedb.data.model.Show
 import com.fugaif.imaslivedb.data.model.UserMark
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.events.EventAttendanceSheet
 import com.fugaif.imaslivedb.ui.mastery.MasterySwipeRow
 import com.fugaif.imaslivedb.ui.theme.DS
@@ -75,7 +77,9 @@ fun AttendanceSwipeRow(
 
     MasterySwipeRow(
         onStart = { showSheet = true },
-        startLabel = current?.let { "${it.label}で参加中" } ?: "参加を登録",
+        // 形態の語 (現地・配信・LV) はコアの語彙
+        startLabel = current?.let { L10n.Common.attendanceSwipeAttending(type = it.label).resolve() }
+            ?: L10n.Common.attendanceSwipeRegister.resolve(),
         startColor = DS.success,
     ) {
         content()
@@ -88,7 +92,9 @@ fun AttendanceSwipeRow(
             onSelect = { type ->
                 showSheet = false
                 scope.launch {
-                    localWrite("参加の記録") { marks.setAttendance(UserMark.SHOW, showId, type) } ?: return@launch
+                    localWrite(L10n.Common.localWriteRecordAttendance.resolve(context)) {
+                        marks.setAttendance(UserMark.SHOW, showId, type)
+                    } ?: return@launch
                     current = type
                     onChange()
                 }
@@ -127,7 +133,7 @@ fun EventAttendanceSwipeRow(
                 showSheet = true
             }
         },
-        startLabel = "参加を登録",
+        startLabel = L10n.Common.attendanceSwipeRegister.resolve(),
         startColor = DS.success,
     ) {
         content()
@@ -162,11 +168,11 @@ private fun AttendancePickerSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = DS.bg) {
         Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
             Text(
-                showName ?: "この公演への参加",
+                showName ?: L10n.Common.attendancePickerTitleFallback.resolve(),
                 fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink, maxLines = 2
             )
             Spacer(Modifier.height(4.dp))
-            Text("参加形態を選ぶ", fontSize = 12.sp, color = DS.ink2)
+            Text(L10n.Common.attendancePickerSubtitle.resolve(), fontSize = 12.sp, color = DS.ink2)
             Spacer(Modifier.height(8.dp))
             AttendanceType.options().forEach { type ->
                 val on = current == type
@@ -183,7 +189,7 @@ private fun AttendancePickerSheet(
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
-                        "${type.label}で参加",
+                        L10n.Common.attendancePickerOption(type = type.label).resolve(),
                         fontSize = 15.sp,
                         fontWeight = if (on) FontWeight.Bold else FontWeight.Normal,
                         color = DS.ink
@@ -198,7 +204,7 @@ private fun AttendancePickerSheet(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Icon(Icons.Filled.Cancel, contentDescription = null, tint = DS.danger, modifier = Modifier.size(20.dp))
-                    Text("参加を取り消す", fontSize = 15.sp, color = DS.danger)
+                    Text(L10n.Common.attendancePickerCancel.resolve(), fontSize = 15.sp, color = DS.danger)
                 }
             }
         }

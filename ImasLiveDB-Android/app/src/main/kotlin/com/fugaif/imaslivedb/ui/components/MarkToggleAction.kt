@@ -15,6 +15,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import com.fugaif.imaslivedb.data.local.localWrite
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import kotlinx.coroutines.launch
 
 /**
@@ -40,8 +42,9 @@ fun MarkToggleAction(
     }
     IconButton(onClick = {
         scope.launch {
-            localWrite("マークの切り替え") { AppModule.from(ctx).userMarkRepository.toggle(entityType, entityId, kind) }
-                ?.let { on = it }
+            localWrite(L10n.Common.localWriteToggleMark.resolve(ctx)) {
+                AppModule.from(ctx).userMarkRepository.toggle(entityType, entityId, kind)
+            }?.let { on = it }
         }
     }) {
         Icon(

@@ -11,6 +11,7 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.LocalContext
 import androidx.glance.action.Action
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionStartActivity
@@ -30,6 +31,8 @@ import androidx.glance.layout.ContentScale
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.fugaif.imaslivedb.MainActivity
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -126,11 +129,15 @@ private suspend fun loadOshiImage(context: Context, id: GlanceId): Bitmap? {
 
 @Composable
 private fun OshiWidgetContent(bitmap: Bitmap?, onClick: Action) {
+    val context = LocalContext.current
     if (bitmap == null) {
         // 画像が無いときだけ文言を出す。ここもタップは効かせておく
         // (「どうすれば出るのか」を探してタップする人が多いので、アプリ/設定に繋ぐ)。
         Box(modifier = GlanceModifier.fillMaxSize().clickable(onClick)) {
-            WidgetPlaceholder("アプリで画像を追加", "アイドル詳細から取り込めます")
+            WidgetPlaceholder(
+                L10n.Widget.oshiPlaceholderAddImage.resolve(context),
+                L10n.Widget.oshiPlaceholderAddImageHint.resolve(context)
+            )
         }
         return
     }

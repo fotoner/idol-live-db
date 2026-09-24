@@ -23,6 +23,11 @@
         "android"
       ]
     },
+    "action.close": {
+      "ja": "閉じる",
+      "ko": "닫기",
+      "note": "シートや完了画面を閉じるボタン (シェアカードのシート・タグ付与の完了画面)"
+    },
     "action.collapse": {
       "ja": "折りたたむ",
       "ko": "접기",
@@ -47,6 +52,14 @@
         "ios"
       ]
     },
+    "action.ok": {
+      "ja": "OK",
+      "ko": "확인",
+      "note": "アラートの了解ボタン (シェア画像の生成に失敗したとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
     "action.retry": {
       "ja": "再試行",
       "ko": "다시 시도",
@@ -56,6 +69,775 @@
       "ja": "すべて見る",
       "ko": "모두 보기",
       "note": "セクション見出し右の導線"
+    },
+    "artwork.preview.play.a11y": {
+      "ja": "プレビュー再生",
+      "ko": "미리 듣기",
+      "note": "ジャケ写に重ねた再生ボタンの読み上げ (曲の試聴を始める)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "artwork.preview.stop.a11y": {
+      "ja": "停止",
+      "ko": "정지",
+      "note": "ジャケ写に重ねた停止ボタンの読み上げ (試聴中)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "attendance_picker.cancel": {
+      "ja": "参加を取り消す",
+      "ko": "참가 취소",
+      "note": "参加形態を選ぶシートの一番下の、参加の記録を取り消す行",
+      "platforms": [
+        "android"
+      ]
+    },
+    "attendance_picker.option": {
+      "args": [
+        {
+          "name": "type",
+          "type": "core"
+        }
+      ],
+      "ja": "{type}で参加",
+      "ko": "{type} 참가",
+      "note": "参加形態を選ぶシートの選択肢。type は形態 (現地・配信・LV。コアの語彙)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "attendance_picker.subtitle": {
+      "ja": "参加形態を選ぶ",
+      "ko": "참가 형태 고르기",
+      "note": "参加形態を選ぶシートの見出しの下の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "attendance_picker.title_fallback": {
+      "ja": "この公演への参加",
+      "ko": "이 공연 참가",
+      "note": "参加形態を選ぶシートの見出し (公演名が無いときの代わり)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "attendance_swipe.attending": {
+      "args": [
+        {
+          "name": "type",
+          "type": "core"
+        }
+      ],
+      "ja": "{type}で参加中",
+      "ko": "{type} 참가 중",
+      "note": "公演の行のスワイプに出る、今の参加形態。type は形態 (現地・配信・LV。コアの語彙)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "attendance_swipe.cancel": {
+      "ja": "取消",
+      "ko": "취소",
+      "note": "公演の行のスワイプに出る、参加の記録を取り消すボタン (幅が狭いので短い形)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "attendance_swipe.register": {
+      "ja": "参加を登録",
+      "ko": "참가 등록",
+      "note": "公演・ライブの行をスワイプすると出る参加登録のボタン"
+    },
+    "award_chip.rank": {
+      "args": [
+        {
+          "name": "rank",
+          "type": "int"
+        }
+      ],
+      "ja": "第{rank}位",
+      "ko": "{rank}위",
+      "note": "みんなの投票の終了お題での順位バッジ (2〜3 位)。お題名の後ろに付く。rank は順位"
+    },
+    "award_chip.rank.a11y": {
+      "args": [
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "rank",
+          "type": "int"
+        }
+      ],
+      "ja": "{title} で第{rank}位",
+      "ko": "{title}에서 {rank}위",
+      "note": "順位バッジの読み上げ (2〜3 位)。title はお題名、rank は順位",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "award_chip.winner": {
+      "ja": "優勝",
+      "ko": "우승",
+      "note": "みんなの投票の終了お題で 1 位になったことを示すバッジ (お題名の後ろに付く)"
+    },
+    "award_chip.winner.a11y": {
+      "args": [
+        {
+          "name": "title",
+          "type": "string"
+        }
+      ],
+      "ja": "{title} で優勝",
+      "ko": "{title}에서 우승",
+      "note": "順位バッジの読み上げ (1 位)。title はお題名",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "brand_filter.all": {
+      "ja": "全て",
+      "ko": "전체",
+      "note": "ブランドの絞り込みの「全ブランド」の選択肢 (選ぶとブランドの絞り込みを外す)"
+    },
+    "brand_filter.all_icon": {
+      "ja": "全",
+      "ko": "전체",
+      "max_len": 2,
+      "note": "ブランドの絞り込みの「全て」の丸アイコンの中の字。短いほど大きい字で出る (2 文字までが最大)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "brand_section.count_people": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}人",
+      "ko": "{count}명",
+      "note": "ブランドの区切り見出しの右の人数 (アイドル一覧・ピッカー)。1000 以上は桁区切りが付く (従来どおり)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "color_dot.a11y": {
+      "args": [
+        {
+          "name": "color",
+          "type": "core"
+        }
+      ],
+      "ja": "カラー: {color}",
+      "ko": "색상: {color}",
+      "note": "イメージカラーの点の読み上げ。color は色の名前 (コアが hex から作る)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "copy.default": {
+      "ja": "コピー",
+      "ko": "복사",
+      "note": "長押しメニューのコピー項目の既定の文言 (何をコピーするかを渡さないとき)"
+    },
+    "copy.event_name": {
+      "ja": "ライブ名をコピー",
+      "ko": "라이브 이름 복사",
+      "note": "ライブの行の長押しメニュー",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "copy.idol_name": {
+      "ja": "アイドル名をコピー",
+      "ko": "아이돌 이름 복사",
+      "note": "アイドルの行の長押しメニュー",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "copy.kana": {
+      "ja": "よみをコピー",
+      "ko": "읽는 법 복사",
+      "note": "アイドル・楽曲の行の長押しメニュー。よみ = 名前・曲名のかな読み",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "copy.labeled": {
+      "args": [
+        {
+          "name": "label",
+          "type": "string"
+        }
+      ],
+      "ja": "{label}をコピー",
+      "ko": "{label} 복사",
+      "note": "「よみ」「CV」などの行の長押しメニュー。label は行の見出し (よみ・CV・会場…)"
+    },
+    "copy.singers": {
+      "ja": "歌唱者をコピー",
+      "ko": "가창자 복사",
+      "note": "楽曲の行の長押しメニュー (歌っている人の並び)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "copy.song_title": {
+      "ja": "曲名をコピー",
+      "ko": "곡명 복사",
+      "note": "楽曲の行の長押しメニュー",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.action.apply": {
+      "ja": "適用",
+      "ko": "적용",
+      "note": "絞り込みシート右上の、条件を一覧に反映して閉じるボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.action.reset": {
+      "ja": "リセット",
+      "ko": "초기화",
+      "note": "絞り込みシート左上の、条件をすべて外すボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.attendance.all": {
+      "ja": "すべて",
+      "ko": "전체",
+      "note": "参加状態の選択肢 (絞り込まない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.attendance.attended": {
+      "ja": "参加済み",
+      "ko": "참가함",
+      "note": "参加状態の選択肢 (参加を記録したライブだけ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.attendance.header": {
+      "ja": "参加状態",
+      "ko": "참가 상태",
+      "note": "ライブの絞り込みシートの参加状態の節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.attendance.not_attended": {
+      "ja": "未参加",
+      "ko": "미참가",
+      "note": "参加状態の選択肢 (参加を記録していないライブだけ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.attribute.all": {
+      "ja": "全て",
+      "ko": "전체",
+      "note": "属性の選択肢 (属性で絞り込まない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.attribute.angel": {
+      "ja": "エンジェル",
+      "ko": "엔젤",
+      "note": "ミリオンライブ・765AS の属性名 (公式の名前)。ko は音訳。表記はオーナー確定待ち",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.attribute.cool": {
+      "ja": "クール",
+      "ko": "쿨",
+      "note": "シンデレラガールズの属性名 (公式の名前)。ko は音訳。表記はオーナー確定待ち",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.attribute.cute": {
+      "ja": "キュート",
+      "ko": "큐트",
+      "note": "シンデレラガールズの属性名 (公式の名前)。ko は音訳。表記はオーナー確定待ち",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.attribute.fairy": {
+      "ja": "フェアリー",
+      "ko": "페어리",
+      "note": "ミリオンライブ・765AS の属性名 (公式の名前)。ko は音訳。表記はオーナー確定待ち",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.attribute.header": {
+      "ja": "属性",
+      "ko": "속성",
+      "note": "アイドルの絞り込みシートの属性の節の見出し (ブランドを 1 つだけ選んだときに出る)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.attribute.intelli": {
+      "ja": "インテリ",
+      "ko": "인텔리",
+      "note": "SideM の属性名 (公式の名前)。ko は音訳。表記はオーナー確定待ち",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.attribute.mental": {
+      "ja": "メンタル",
+      "ko": "멘탈",
+      "note": "SideM の属性名 (公式の名前)。ko は音訳。表記はオーナー確定待ち",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.attribute.passion": {
+      "ja": "パッション",
+      "ko": "패션",
+      "note": "シンデレラガールズの属性名 (公式の名前)。ko は音訳。表記はオーナー確定待ち",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.attribute.physical": {
+      "ja": "フィジカル",
+      "ko": "피지컬",
+      "note": "SideM の属性名 (公式の名前)。ko は音訳。表記はオーナー確定待ち",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.attribute.princess": {
+      "ja": "プリンセス",
+      "ko": "프린세스",
+      "note": "ミリオンライブ・765AS の属性名 (公式の名前)。ko は音訳。表記はオーナー確定待ち",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.brand.footer": {
+      "ja": "複数選択可能",
+      "ko": "여러 개 선택 가능",
+      "note": "ブランドの節の下の補足 (いくつでも選べる)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.brand.header": {
+      "ja": "ブランド",
+      "ko": "브랜드",
+      "note": "絞り込みシートのブランドの節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.category.header": {
+      "ja": "カテゴリ",
+      "ko": "카테고리",
+      "note": "タグの絞り込みシートのカテゴリの節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.display.header": {
+      "ja": "表示設定",
+      "ko": "표시 설정",
+      "note": "ライブの絞り込みシートの表示設定の節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.display.show_empty_events": {
+      "ja": "セトリ情報がないイベントも表示",
+      "ko": "세트리스트 정보가 없는 이벤트도 표시",
+      "note": "表示設定の節のスイッチ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.display_mode.cv_name": {
+      "ja": "CV名",
+      "ko": "CV 이름",
+      "note": "表示形式の選択肢 (一覧の見出しを声優名にする)。保存値 (rawValue) は変えず、表示だけこの文言にする",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.display_mode.header": {
+      "ja": "表示形式",
+      "ko": "표시 형식",
+      "note": "アイドルの絞り込みシートの表示形式の節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.display_mode.idol_name": {
+      "ja": "アイドル名",
+      "ko": "아이돌 이름",
+      "note": "表示形式の選択肢 (一覧の見出しをアイドル名にする)。保存値 (rawValue) は変えず、表示だけこの文言にする",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.idol_sort.age": {
+      "ja": "年齢",
+      "ko": "나이",
+      "note": "アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.idol_sort.birthday": {
+      "ja": "誕生日",
+      "ko": "생일",
+      "note": "アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.idol_sort.debut": {
+      "ja": "デビュー日",
+      "ko": "데뷔일",
+      "note": "アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.idol_sort.height": {
+      "ja": "身長",
+      "ko": "키",
+      "note": "アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.idol_sort.name_kana": {
+      "ja": "五十音順",
+      "ko": "50음순",
+      "note": "アイドルの並び順の選択肢 (名前のかな読みの五十音順)。保存値は変えず、表示だけこの文言にする",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.idol_sort.official": {
+      "ja": "公式順",
+      "ko": "공식순",
+      "note": "アイドルの並び順の選択肢。保存値 (rawValue) は変えず、表示だけこの文言にする",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.idol_sort.weight": {
+      "ja": "体重",
+      "ko": "몸무게",
+      "note": "アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.kind.all_shown": {
+      "ja": "全て表示中",
+      "ko": "모두 표시 중",
+      "note": "種別の節の下。除外している種別が無いとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.kind.excluded": {
+      "args": [
+        {
+          "name": "kinds",
+          "type": "core"
+        }
+      ],
+      "ja": "除外: {kinds}",
+      "ko": "제외: {kinds}",
+      "note": "種別の節の下。除外している種別の並び。kinds は種別名 (コアの語彙) を「 / 」でつないだもの",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.kind.header": {
+      "ja": "種別",
+      "ko": "종류",
+      "note": "ライブの絞り込みシートの種別 (ライブ・フェス・リリイベ…) の節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.kind_chip.excluded.a11y": {
+      "args": [
+        {
+          "name": "kind",
+          "type": "core"
+        }
+      ],
+      "ja": "{kind} 除外",
+      "ko": "{kind} 제외",
+      "note": "種別チップの読み上げ (その種別を外している状態)。kind は種別名 (コアの語彙)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.kind_chip.shown.a11y": {
+      "args": [
+        {
+          "name": "kind",
+          "type": "core"
+        }
+      ],
+      "ja": "{kind} 表示",
+      "ko": "{kind} 표시",
+      "note": "種別チップの読み上げ (その種別を出している状態)。kind は種別名 (コアの語彙)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.my_mark.event_note_only": {
+      "ja": "メモがあるイベントのみ",
+      "ko": "메모가 있는 이벤트만",
+      "note": "ライブの絞り込みのマイマークの節のスイッチ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.my_mark.favorite_only": {
+      "ja": "お気に入りのみ",
+      "ko": "즐겨찾기만",
+      "note": "マイマークの節のスイッチ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.my_mark.header": {
+      "ja": "マイマーク",
+      "ko": "마이 마크",
+      "note": "絞り込みシートのマイマーク (お気に入り・メモ・担当) の節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.my_mark.idol_note_only": {
+      "ja": "メモがあるアイドルのみ",
+      "ko": "메모가 있는 아이돌만",
+      "note": "アイドルの絞り込みのマイマークの節のスイッチ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.my_mark.my_pick_only": {
+      "ja": "担当のみ",
+      "ko": "담당만",
+      "note": "アイドルの絞り込みのマイマークの節のスイッチ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.show_cv": {
+      "ja": "CV名を併記",
+      "ko": "CV 이름 함께 표시",
+      "note": "表示形式の節のスイッチ (アイドル名の下に声優名も出す)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.sort.direction": {
+      "ja": "方向",
+      "ko": "방향",
+      "note": "並び順の向き (昇順・降順) を選ぶ切り替えの名前",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.sort.header": {
+      "ja": "並び順",
+      "ko": "정렬 순서",
+      "note": "絞り込みシートの並び順の節の見出しと、並び順のメニューの名前",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.sort.ungrouped_footer": {
+      "ja": "ブランドの区切りを外して通しで並べます",
+      "ko": "브랜드 구분 없이 이어서 정렬해요",
+      "note": "並び順の節の下の説明 (ブランドごとに分けない並び順を選んだとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.title": {
+      "ja": "フィルタ",
+      "ko": "필터",
+      "note": "絞り込みシートのナビゲーションタイトル",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.venue.footer": {
+      "ja": "その会場で公演があったライブに絞ります",
+      "ko": "그 공연장에서 공연이 있었던 라이브만 보여 줘요",
+      "note": "会場の節の下の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.venue.header": {
+      "ja": "会場",
+      "ko": "공연장",
+      "note": "ライブの絞り込みシートの会場の節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter_sheet.venue.none": {
+      "ja": "選択なし",
+      "ko": "선택 안 함",
+      "note": "会場がまだ選ばれていないときの行の表示",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "grid.empty.title": {
+      "ja": "アイテムが見つかりません",
+      "ko": "항목을 찾을 수 없어요",
+      "note": "ジャケットの格子一覧 (シリーズ・アルバム) が空のときの既定の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "idol_grid.shared_tags": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "タグ{count}個一致",
+      "ko": "태그 {count}개 일치",
+      "note": "アイドルの格子 (タグが似ているアイドル) の名前の下に出す、共通するタグの数。1000 以上は桁区切りが付く (実際には出ない値)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.middot": {
+      "ja": "・",
+      "ko": "·",
+      "note": "名前を並べるときの区切り (シェアカードの原唱者名「A・B・C」)。前後に空白は入れない",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list_picker.empty.message": {
+      "args": [
+        {
+          "name": "query",
+          "type": "string"
+        }
+      ],
+      "ja": "「{query}」に一致する項目がありません",
+      "ko": "“{query}”에 해당하는 항목이 없어요",
+      "note": "候補ピッカーで検索語に合う候補が無いときの説明。query は利用者が打った語",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list_picker.empty.title": {
+      "ja": "見つかりません",
+      "ko": "찾을 수 없어요",
+      "note": "候補ピッカーで検索語に合う候補が無いときの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list_picker.none": {
+      "ja": "選択なし",
+      "ko": "선택 안 함",
+      "note": "候補から 1 つ選ぶピッカー (シリーズ・ライブ名など) の先頭の行。選ぶと絞り込みを外す",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list_picker.search_prompt": {
+      "args": [
+        {
+          "name": "title",
+          "type": "string"
+        }
+      ],
+      "ja": "{title}を検索",
+      "ko": "{title} 검색",
+      "note": "候補ピッカーの検索欄のプレースホルダ。title はピッカーの名前 (シリーズ・ライブ名など。呼び出し側の文言)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list_toolbar.more.a11y": {
+      "ja": "その他の操作",
+      "ko": "기타 작업",
+      "note": "一覧のツールバー右の「…」メニューの読み上げ (追加・表示切替などをまとめたもの)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "local_write.record_attendance": {
+      "ja": "参加の記録",
+      "ko": "참가 기록",
+      "note": "端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (公演の行のスワイプで参加を登録・取り消す)"
+    },
+    "local_write.toggle_mark": {
+      "ja": "マークの切り替え",
+      "ko": "마크 전환",
+      "note": "端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (画面上部のボタンで担当・お気に入りなどを付け外しする)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "local_write.toggle_my_pick": {
+      "ja": "担当の切り替え",
+      "ko": "담당 전환",
+      "note": "端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (一覧の行のハートで担当を付け外しする)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "my_pick_toggle.add.a11y": {
+      "ja": "担当に追加",
+      "ko": "담당에 추가",
+      "note": "一覧の行のハートボタンの読み上げ (まだ担当でないとき。押すと担当になる)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "my_pick_toggle.remove.a11y": {
+      "ja": "担当解除",
+      "ko": "담당 해제",
+      "note": "一覧の行のハートボタンの読み上げ (担当のとき。押すと担当を外す)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "name_filter.clear.a11y": {
+      "ja": "絞り込みを解除",
+      "ko": "필터 해제",
+      "note": "名前の絞り込み欄の右の × ボタンの読み上げ (入力を消す)"
     },
     "personal_tags.add.a11y": {
       "ja": "マイタグを追加",
@@ -101,6 +883,39 @@
       "ja": "長押しで削除",
       "ko": "길게 눌러 삭제",
       "note": "共通部品 PersonalTagsSection (アイドル・ユニット詳細のコミュニティ)。チップの下の操作の案内",
+      "platforms": [
+        "android"
+      ]
+    },
+    "ranking_row.unit_default": {
+      "ja": "回",
+      "ko": "회",
+      "note": "ランキング行 (ImasRankingRow) の数値の後ろに付く単位の既定 (回数)。呼び出し側が単位を渡さないときに出る"
+    },
+    "removable_chip.remove.a11y": {
+      "args": [
+        {
+          "name": "label",
+          "type": "string"
+        }
+      ],
+      "ja": "{label} を解除",
+      "ko": "{label} 해제",
+      "note": "適用中の絞り込みを表すチップ (ImasRemovableChip) の読み上げ。label はチップの文言",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "removable_chip.remove.a11y_android": {
+      "args": [
+        {
+          "name": "label",
+          "type": "string"
+        }
+      ],
+      "ja": "{label}を解除",
+      "ko": "{label} 해제",
+      "note": "Android の文言。iOS の removable_chip.remove.a11y と ja が違う (空白の有無。統一はオーナーが別 PR で)。× ボタンの読み上げ。label はチップの文言",
       "platforms": [
         "android"
       ]

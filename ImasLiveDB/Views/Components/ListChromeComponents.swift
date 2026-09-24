@@ -33,7 +33,7 @@ struct NameFilterField: View {
                     .foregroundStyle(DS.ink3)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("絞り込みを解除")
+            .accessibilityLabel(L10n.Common.nameFilterClearA11y)
             .opacity(text.isEmpty ? 0 : 1)
             .disabled(text.isEmpty)
             .accessibilityHidden(text.isEmpty)
@@ -98,7 +98,7 @@ struct ListSearchField<Leading: View>: View {
                     .foregroundStyle(DS.ink3)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("絞り込みを解除")
+            .accessibilityLabel(L10n.Common.nameFilterClearA11y)
             .opacity(text.isEmpty ? 0 : 1)
             .disabled(text.isEmpty)
             .accessibilityHidden(text.isEmpty)
@@ -194,7 +194,7 @@ func standardListToolbar<SearchField: View>(
             } label: {
                 Image(systemName: filterBadge > 0 ? "ellipsis.circle.fill" : "ellipsis.circle")
             }
-            .accessibilityLabel("その他の操作")
+            .accessibilityLabel(L10n.Common.listToolbarMoreA11y)
         }
     }
 }

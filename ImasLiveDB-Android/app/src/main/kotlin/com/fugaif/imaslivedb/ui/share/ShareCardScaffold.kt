@@ -57,6 +57,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import kotlinx.coroutines.launch
@@ -137,7 +139,7 @@ fun ShareCardFooter(ink: Color, rule: Color) {
         ) {
             Icon(Icons.Filled.Mic, contentDescription = null, tint = ink, modifier = Modifier.size(12.dp))
             Spacer(Modifier.width(7.dp))
-            Text("#アイドルライブDB", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = ink)
+            Text(L10n.Share.footerHashtag.resolve(), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = ink)
             Spacer(Modifier.weight(1f))
             Text(
                 "IDOL LIVE DATABASE",
@@ -340,7 +342,7 @@ fun ShareCardActionPane(
         if (uri == null || bitmap == null) return@rememberLauncherForActivityResult
         scope.launch {
             val ok = ShareCardFiles.writeTo(context, uri, bitmap)
-            Toast.makeText(context, if (ok) "画像を保存しました" else "保存に失敗しました", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, (if (ok) L10n.Share.saveDone else L10n.Share.saveFailed).resolve(context), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -359,7 +361,7 @@ fun ShareCardActionPane(
 
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
             ShareCardButton(
-                label = if (isPreparingCard) "画像を準備中…" else "シェアする",
+                label = if (isPreparingCard) L10n.Share.actionPreparing.resolve() else L10n.Share.actionShare.resolve(),
                 icon = Icons.Filled.Share,
                 filled = true,
                 enabled = !isPreparingCard && !isBusy,
@@ -371,7 +373,7 @@ fun ShareCardActionPane(
                     val bitmap = capture.toBitmap()
                     isBusy = false
                     if (bitmap == null) {
-                        Toast.makeText(context, "シェア画像の生成に失敗しました", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, L10n.Share.renderErrorTitle.resolve(context), Toast.LENGTH_SHORT).show()
                         return@launch
                     }
                     ShareCardFiles.share(context, bitmap, fileNamePrefix, shareText)
@@ -379,7 +381,7 @@ fun ShareCardActionPane(
             }
 
             ShareCardButton(
-                label = "保存",
+                label = L10n.Share.actionSave.resolve(),
                 icon = Icons.Filled.Download,
                 filled = false,
                 enabled = !isPreparingCard && !isBusy,
@@ -391,18 +393,18 @@ fun ShareCardActionPane(
                     val bitmap = capture.toBitmap()
                     isBusy = false
                     if (bitmap == null) {
-                        Toast.makeText(context, "シェア画像の生成に失敗しました", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, L10n.Share.renderErrorTitle.resolve(context), Toast.LENGTH_SHORT).show()
                         return@launch
                     }
                     when (ShareCardFiles.saveToPictures(context, bitmap, fileNamePrefix)) {
                         ShareCardSaveResult.Saved ->
-                            Toast.makeText(context, "ピクチャに保存しました", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, L10n.Share.saveDonePictures.resolve(context), Toast.LENGTH_SHORT).show()
                         ShareCardSaveResult.NeedsDocumentPicker -> {
                             pendingSave = bitmap
                             documentPicker.launch(ShareCardFiles.fileName(fileNamePrefix))
                         }
                         ShareCardSaveResult.Failed ->
-                            Toast.makeText(context, "保存に失敗しました", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, L10n.Share.saveFailed.resolve(context), Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -442,7 +444,7 @@ private fun RatioSwitcher(
                     fontWeight = if (on) FontWeight.Bold else FontWeight.Medium,
                     color = if (on) DS.ink else DS.ink2
                 )
-                Text(item.caption, fontSize = 10.sp, color = DS.ink3)
+                Text(item.caption.resolve(), fontSize = 10.sp, color = DS.ink3)
             }
         }
     }
@@ -511,7 +513,7 @@ fun ShareCardSheet(
                 Text(title, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DS.ink)
                 Spacer(Modifier.weight(1f))
                 Text(
-                    "閉じる",
+                    L10n.Common.actionClose.resolve(),
                     fontSize = 15.sp,
                     color = DS.ink2,
                     modifier = Modifier.clickable(onClick = onDismiss).padding(4.dp)

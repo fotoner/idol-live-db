@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/share.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- share.action.preparing: シェアボタン。カードに焼くジャケ写を読み込んでいる間 (押せない) -->
+    <string name="share_action_preparing">画像を準備中…</string>
+    <!-- share.action.save: シェアカードの下のボタン (端末の写真に保存する) -->
+    <string name="share_action_save">保存</string>
+    <!-- share.action.share: シェアカードの下のボタン (OS の共有シートを開く) -->
+    <string name="share_action_share">シェアする</string>
+    <!-- share.collection.badge: 回収率カードの左上の種別ラベル -->
+    <string name="share_collection_badge">楽曲回収率</string>
+    <!-- share.collection.idol_count: 回収率カードの担当アイドルごとの行の右。collected は回収した曲数 (桁区切り済みの文字列)、total はその担当のオリジナル曲数。1000 以上は桁区切りが付く -->
+    <plurals name="share_collection_idol_count">
+        <item quantity="other">%1$s/%2$,d曲</item>
+    </plurals>
+    <!-- share.collection.lead: 回収率カードの大きな % の上の見出し -->
+    <string name="share_collection_lead">ライブで聴けた曲</string>
+    <!-- share.collection.sheet_title: 回収率カードのシートの見出し -->
+    <string name="share_collection_sheet_title">回収率をシェア</string>
+    <!-- share.collection.summary: 回収率カードの大きな % の下。collected は回収した曲数 (桁区切り済みの文字列)、total は全曲数。どちらも 1000 以上は桁区切りが付く (iOS は従来どおり、Android は今回から) -->
+    <plurals name="share_collection_summary">
+        <item quantity="other">%1$s / %2$,d 曲を回収</item>
+    </plurals>
+    <!-- share.comment.badge: 感想カードの左上の種別ラベル -->
+    <string name="share_comment_badge">セトリの感想</string>
+    <!-- share.comment.field_label: 感想の入力欄の上の見出し -->
+    <string name="share_comment_field_label">この曲の感想</string>
+    <!-- share.comment.field_placeholder: 感想の入力欄のプレースホルダ。書き方の例も訳す -->
+    <string name="share_comment_field_placeholder">最高だった！ 泣いた…など</string>
+    <!-- share.comment.placeholder_card: 感想カードのプレビュー。感想をまだ書いていないときに出す見本の文 -->
+    <string name="share_comment_placeholder_card">ここに感想が入ります</string>
+    <!-- share.comment.sheet_title: 感想カードのシートの見出し -->
+    <string name="share_comment_sheet_title">感想カードを作る</string>
+    <!-- share.footer.hashtag: 全カード共通のフッターのハッシュタグ (SNS からの流入導線)。SNS で検索される識別子なので、どの言語でも訳さずそのまま出し、シェアが 1 つのタグに集まるようにする。言語ごとに別のタグにするかはオーナーが決める (変えるならここの訳を上書きする) -->
+    <string name="share_footer_hashtag">#アイドルライブDB</string>
+    <!-- share.ratio.portrait: カードの縦横比の補助ラベル (4:5) -->
+    <string name="share_ratio_portrait">縦長</string>
+    <!-- share.ratio.square: カードの縦横比の補助ラベル (1:1) -->
+    <string name="share_ratio_square">正方形</string>
+    <!-- share.ratio.story: カードの縦横比の補助ラベル (9:16、SNS のストーリーズ向け) -->
+    <string name="share_ratio_story">ストーリーズ</string>
+    <!-- share.render_error.title: カードを画像にできなかったとき。iOS はアラートの見出し、Android はトースト -->
+    <string name="share_render_error_title">シェア画像の生成に失敗しました</string>
+    <!-- share.save.done: 保存先を選んで画像を保存できたときのトースト (Android 9 以下) -->
+    <string name="share_save_done">画像を保存しました</string>
+    <!-- share.save.done_pictures: 画像を端末のピクチャ (Pictures フォルダ) に保存できたときのトースト -->
+    <string name="share_save_done_pictures">ピクチャに保存しました</string>
+    <!-- share.save.failed: 画像を保存できなかったときのトースト -->
+    <string name="share_save_failed">保存に失敗しました</string>
+    <!-- share.social.other: テキストシェアのメニュー項目 (OS の共有シートを開く) -->
+    <string name="share_social_other">その他でシェア</string>
+    <!-- share.social.post_x: テキストシェアのメニュー項目 (X の投稿画面を開く) -->
+    <string name="share_social_post_x">X にポスト</string>
+    <!-- share.social.share.a11y: シェアのアイコンボタンの読み上げの既定 -->
+    <string name="share_social_share_a11y">シェア</string>
+    <!-- share.tag.badge: タグ付与カードの左上の種別ラベル -->
+    <string name="share_tag_badge">タグを追加しました！</string>
+    <!-- share.tag.done.message: タグを付け終えたあとの完了画面の誘い文句 (カードでのシェア) -->
+    <string name="share_tag_done_message">せっかくなのでカードでシェアしませんか？</string>
+    <!-- share.tag.done.title: タグを付け終えたあとの完了画面の見出し -->
+    <string name="share_tag_done_title">タグを付けました！</string>
+</resources>

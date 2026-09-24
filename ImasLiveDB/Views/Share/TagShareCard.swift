@@ -34,7 +34,7 @@ struct TagShareCard: View {
         let palette = self.palette
         PhotoShareScaffold(artwork: artwork, palette: palette, size: size) {
             VStack(alignment: .leading, spacing: 0) {
-                ShareEyebrow(text: "タグを追加しました！", accent: palette.accent, ink: .white.opacity(0.82))
+                ShareEyebrow(text: String(localized: L10n.Share.tagBadge), accent: palette.accent, ink: .white.opacity(0.82))
 
                 // 曲名を主役に (明朝で上品・編集的)。
                 Text(context.songTitle)
@@ -97,10 +97,10 @@ struct TagShareCompletionView: View {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.imasScaled( 40))
                         .foregroundStyle(DS.success)
-                    Text("タグを付けました！")
+                    Text(L10n.Share.tagDoneTitle)
                         .font(.imasHeadline)
                         .foregroundStyle(DS.ink)
-                    Text("せっかくなのでカードでシェアしませんか？")
+                    Text(L10n.Share.tagDoneMessage)
                         .font(.imasFootnote)
                         .foregroundStyle(DS.ink2)
                 }
@@ -113,7 +113,7 @@ struct TagShareCompletionView: View {
                     isPreparingCard: artwork.isPreparing(urlString: context.artworkUrl)
                 )
 
-                Button("閉じる", action: onClose)
+                Button(L10n.Common.actionClose, action: onClose)
                     .font(.imasSubhead)
                     .foregroundStyle(DS.ink2)
                     .padding(.bottom, DS.sp4)

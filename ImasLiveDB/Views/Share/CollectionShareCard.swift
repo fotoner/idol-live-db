@@ -24,6 +24,13 @@ struct CollectionShareStats {
 
     var overallRatio: Double { overallTotal > 0 ? Double(overallCollected) / Double(overallTotal) : 0 }
     var overallPercentText: String { String(format: "%.1f", overallRatio * 100) }
+    /// 回収した曲数 (桁区切り)。文言の曲数 (count 型) と同じ書き方にそろえる
+    /// (1 つの文言に count は 1 つまでなので、もう片方はここで書いて string で渡す)。
+    var overallCollectedText: String { Self.grouped(overallCollected) }
+
+    static func grouped(_ n: Int) -> String {
+        n.formatted(.number.locale(DisplayLocale.current.formattingLocale))
+    }
     /// メンバーカラー seed: 先頭の担当カラー → なければニュートラル。
     var seed: String? { idolLines.first?.color }
 
@@ -74,11 +81,11 @@ struct CollectionShareCard: View {
 
     var body: some View {
         let palette = self.palette
-        SoloShareScaffold(palette: palette, size: size, badge: "楽曲回収率") {
+        SoloShareScaffold(palette: palette, size: size, badge: String(localized: L10n.Share.collectionBadge)) {
             VStack(alignment: .leading, spacing: 0) {
                 Spacer(minLength: 16)
 
-                Text("ライブで聴けた曲")
+                Text(L10n.Share.collectionLead)
                     .font(.imasScaled( 18, weight: .semibold))
                     .tracking(1.0)
                     .foregroundStyle(ink2)
@@ -96,7 +103,7 @@ struct CollectionShareCard: View {
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
 
-                Text("\(stats.overallCollected) / \(stats.overallTotal) 曲を回収")
+                Text(L10n.Share.collectionSummary(collected: stats.overallCollectedText, total: stats.overallTotal))
                     .font(.imasScaled( 17, weight: .medium).monospacedDigit())
                     .foregroundStyle(ink2)
                     .padding(.top, DS.sp2)
@@ -131,7 +138,7 @@ struct CollectionShareCard: View {
                     .foregroundStyle(ink)
                     .lineLimit(1)
                 Spacer()
-                Text("\(line.collected)/\(line.total)曲")
+                Text(L10n.Share.collectionIdolCount(collected: CollectionShareStats.grouped(line.collected), total: line.total))
                     .font(.imasScaled( 15, weight: .medium).monospacedDigit())
                     .foregroundStyle(ink2)
             }
@@ -158,7 +165,7 @@ struct CollectionShareSheet: View {
     @State private var stats: CollectionShareStats?
 
     var body: some View {
-        ShareCardSheet(title: "回収率をシェア", screenName: "collection_share") {
+        ShareCardSheet(title: String(localized: L10n.Share.collectionSheetTitle), screenName: "collection_share") {
             if let stats {
                 ShareCardActionPane { size in
                     CollectionShareCard(stats: stats, size: size)

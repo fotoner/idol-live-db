@@ -29,8 +29,8 @@ struct IdolNameRow: View {
             }
         }
         .contentShape(Rectangle())
-        .imasCopyable([CopyItem("アイドル名をコピー", idol.name, key: "idol_name"),
-                       CopyItem("よみをコピー", idol.nameKana, key: "kana")])
+        .imasCopyable([CopyItem(String(localized: L10n.Common.copyIdolName), idol.name, key: "idol_name"),
+                       CopyItem(String(localized: L10n.Common.copyKana), idol.nameKana, key: "kana")])
     }
 }
 
@@ -63,9 +63,9 @@ struct SongTitleRow: View {
             }
         }
         .contentShape(Rectangle())
-        .imasCopyable([CopyItem("曲名をコピー", song.title, key: "song_title"),
-                       CopyItem("よみをコピー", song.titleKana, key: "kana"),
-                       CopyItem("歌唱者をコピー", song.singerLabel, key: "artists")])
+        .imasCopyable([CopyItem(String(localized: L10n.Common.copySongTitle), song.title, key: "song_title"),
+                       CopyItem(String(localized: L10n.Common.copyKana), song.titleKana, key: "kana"),
+                       CopyItem(String(localized: L10n.Common.copySingers), song.singerLabel, key: "artists")])
     }
 
     private var songArtwork: some View {
@@ -139,6 +139,6 @@ struct EventNameRow: View {
             }
         }
         .contentShape(Rectangle())
-        .imasCopyable(event.name, label: "ライブ名をコピー", key: "event_name")
+        .imasCopyable(event.name, label: String(localized: L10n.Common.copyEventName), key: "event_name")
     }
 }

@@ -27,6 +27,7 @@ object L10n {
     val Schedule: L10nSchedule get() = L10nSchedule
     val Search: L10nSearch get() = L10nSearch
     val Settings: L10nSettings get() = L10nSettings
+    val Share: L10nShare get() = L10nShare
     val Songs: L10nSongs get() = L10nSongs
     val Stats: L10nStats get() = L10nStats
     val System: L10nSystem get() = L10nSystem

@@ -33,7 +33,7 @@ object L10nCatalogKeys {
 
     /** 全キー × 見本 */
     val all: List<L10nCatalogSample>
-        get() = about0() + announcements0() + app0() + common0() + edit0() + edit1() + events0() + events1() + filtered0() + help0() + help1() + i18n0() + idols0() + idols1() + introdon0() + ledger0() + legal0() + mastery0() + model0() + mypage0() + nav0() + produce0() + schedule0() + search0() + settings0() + settings1() + songs0() + songs1() + stats0() + system0() + tags0() + tags1() + timeline0() + units0() + widget0()
+        get() = about0() + announcements0() + app0() + common0() + edit0() + edit1() + events0() + events1() + filtered0() + help0() + help1() + i18n0() + idols0() + idols1() + introdon0() + ledger0() + legal0() + mastery0() + model0() + mypage0() + nav0() + produce0() + schedule0() + search0() + settings0() + settings1() + share0() + songs0() + songs1() + stats0() + system0() + tags0() + tags1() + timeline0() + units0() + widget0()
 
     private fun about0(): List<L10nCatalogSample> = listOf(
         L10nCatalogSample("about.oss.core.license", "about_oss_core_license", listOf("ja", "ko"), "", { L10n.About.ossCoreLicense }, mapOf("ja" to "iOS 版と共有する自作のコアライブラリです。外部ライセンスはありません。", "ko" to "iOS 버전과 공유하는 자체 제작 코어 라이브러리예요. 외부 라이선스는 없어요.")),
@@ -154,16 +154,39 @@ object L10nCatalogKeys {
 
     private fun common0(): List<L10nCatalogSample> = listOf(
         L10nCatalogSample("common.action.back", "common_action_back", listOf("ja", "ko"), "", { L10n.Common.actionBack }, mapOf("ja" to "戻る", "ko" to "뒤로")),
+        L10nCatalogSample("common.action.close", "common_action_close", listOf("ja", "ko"), "", { L10n.Common.actionClose }, mapOf("ja" to "閉じる", "ko" to "닫기")),
         L10nCatalogSample("common.action.collapse", "common_action_collapse", listOf("ja", "ko"), "", { L10n.Common.actionCollapse }, mapOf("ja" to "折りたたむ", "ko" to "접기")),
         L10nCatalogSample("common.action.expand", "common_action_expand", listOf("ja", "ko"), "", { L10n.Common.actionExpand }, mapOf("ja" to "展開", "ko" to "펼치기")),
         L10nCatalogSample("common.action.retry", "common_action_retry", listOf("ja", "ko"), "", { L10n.Common.actionRetry }, mapOf("ja" to "再試行", "ko" to "다시 시도")),
         L10nCatalogSample("common.action.see_all", "common_action_see_all", listOf("ja", "ko"), "", { L10n.Common.actionSeeAll }, mapOf("ja" to "すべて見る", "ko" to "모두 보기")),
+        L10nCatalogSample("common.artwork.preview.play.a11y", "common_artwork_preview_play_a11y", listOf("ja", "ko"), "", { L10n.Common.artworkPreviewPlayA11y }, mapOf("ja" to "プレビュー再生", "ko" to "미리 듣기")),
+        L10nCatalogSample("common.artwork.preview.stop.a11y", "common_artwork_preview_stop_a11y", listOf("ja", "ko"), "", { L10n.Common.artworkPreviewStopA11y }, mapOf("ja" to "停止", "ko" to "정지")),
+        L10nCatalogSample("common.attendance_picker.cancel", "common_attendance_picker_cancel", listOf("ja", "ko"), "", { L10n.Common.attendancePickerCancel }, mapOf("ja" to "参加を取り消す", "ko" to "참가 취소")),
+        L10nCatalogSample("common.attendance_picker.option", "common_attendance_picker_option", listOf("ja", "ko"), "type=かな カナ1", { L10n.Common.attendancePickerOption(type = "かな カナ1") }, mapOf("ja" to "かな カナ1で参加", "ko" to "かな カナ1 참가")),
+        L10nCatalogSample("common.attendance_picker.subtitle", "common_attendance_picker_subtitle", listOf("ja", "ko"), "", { L10n.Common.attendancePickerSubtitle }, mapOf("ja" to "参加形態を選ぶ", "ko" to "참가 형태 고르기")),
+        L10nCatalogSample("common.attendance_picker.title_fallback", "common_attendance_picker_title_fallback", listOf("ja", "ko"), "", { L10n.Common.attendancePickerTitleFallback }, mapOf("ja" to "この公演への参加", "ko" to "이 공연 참가")),
+        L10nCatalogSample("common.attendance_swipe.attending", "common_attendance_swipe_attending", listOf("ja", "ko"), "type=かな カナ1", { L10n.Common.attendanceSwipeAttending(type = "かな カナ1") }, mapOf("ja" to "かな カナ1で参加中", "ko" to "かな カナ1 참가 중")),
+        L10nCatalogSample("common.attendance_swipe.register", "common_attendance_swipe_register", listOf("ja", "ko"), "", { L10n.Common.attendanceSwipeRegister }, mapOf("ja" to "参加を登録", "ko" to "참가 등록")),
+        L10nCatalogSample("common.award_chip.rank", "common_award_chip_rank", listOf("ja", "ko"), "rank=2026", { L10n.Common.awardChipRank(rank = 2026) }, mapOf("ja" to "第2026位", "ko" to "2026위")),
+        L10nCatalogSample("common.award_chip.winner", "common_award_chip_winner", listOf("ja", "ko"), "", { L10n.Common.awardChipWinner }, mapOf("ja" to "優勝", "ko" to "우승")),
+        L10nCatalogSample("common.brand_filter.all", "common_brand_filter_all", listOf("ja", "ko"), "", { L10n.Common.brandFilterAll }, mapOf("ja" to "全て", "ko" to "전체")),
+        L10nCatalogSample("common.copy.default", "common_copy_default", listOf("ja", "ko"), "", { L10n.Common.copyDefault }, mapOf("ja" to "コピー", "ko" to "복사")),
+        L10nCatalogSample("common.copy.labeled", "common_copy_labeled", listOf("ja", "ko"), "label=かな カナ1", { L10n.Common.copyLabeled(label = "かな カナ1") }, mapOf("ja" to "かな カナ1をコピー", "ko" to "かな カナ1 복사")),
+        L10nCatalogSample("common.idol_grid.shared_tags", "common_idol_grid_shared_tags", listOf("ja", "ko"), "count=1", { L10n.Common.idolGridSharedTags(count = 1) }, mapOf("ja" to "タグ1個一致", "ko" to "태그 1개 일치")),
+        L10nCatalogSample("common.idol_grid.shared_tags", "common_idol_grid_shared_tags", listOf("ja", "ko"), "count=3", { L10n.Common.idolGridSharedTags(count = 3) }, mapOf("ja" to "タグ3個一致", "ko" to "태그 3개 일치")),
+        L10nCatalogSample("common.idol_grid.shared_tags", "common_idol_grid_shared_tags", listOf("ja", "ko"), "count=1234", { L10n.Common.idolGridSharedTags(count = 1234) }, mapOf("ja" to "タグ1,234個一致", "ko" to "태그 1,234개 일치")),
+        L10nCatalogSample("common.list.middot", "common_list_middot", listOf("ja", "ko"), "", { L10n.Common.listMiddot }, mapOf("ja" to "・", "ko" to "·")),
+        L10nCatalogSample("common.local_write.record_attendance", "common_local_write_record_attendance", listOf("ja", "ko"), "", { L10n.Common.localWriteRecordAttendance }, mapOf("ja" to "参加の記録", "ko" to "참가 기록")),
+        L10nCatalogSample("common.local_write.toggle_mark", "common_local_write_toggle_mark", listOf("ja", "ko"), "", { L10n.Common.localWriteToggleMark }, mapOf("ja" to "マークの切り替え", "ko" to "마크 전환")),
+        L10nCatalogSample("common.name_filter.clear.a11y", "common_name_filter_clear_a11y", listOf("ja", "ko"), "", { L10n.Common.nameFilterClearA11y }, mapOf("ja" to "絞り込みを解除", "ko" to "필터 해제")),
         L10nCatalogSample("common.personal_tags.add.a11y", "common_personal_tags_add_a11y", listOf("ja", "ko"), "", { L10n.Common.personalTagsAddA11y }, mapOf("ja" to "マイタグを追加", "ko" to "마이 태그 추가")),
         L10nCatalogSample("common.personal_tags.empty", "common_personal_tags_empty", listOf("ja", "ko"), "", { L10n.Common.personalTagsEmpty }, mapOf("ja" to "マイタグはまだありません", "ko" to "아직 마이 태그가 없어요")),
         L10nCatalogSample("common.personal_tags.header", "common_personal_tags_header", listOf("ja", "ko"), "", { L10n.Common.personalTagsHeader }, mapOf("ja" to "マイタグ(自分だけに表示)", "ko" to "마이 태그 (나에게만 보여요)")),
         L10nCatalogSample("common.personal_tags.placeholder", "common_personal_tags_placeholder", listOf("ja", "ko"), "", { L10n.Common.personalTagsPlaceholder }, mapOf("ja" to "例: 聞いた", "ko" to "예: 들었음")),
         L10nCatalogSample("common.personal_tags.remove.a11y", "common_personal_tags_remove_a11y", listOf("ja", "ko"), "", { L10n.Common.personalTagsRemoveA11y }, mapOf("ja" to "削除", "ko" to "삭제")),
         L10nCatalogSample("common.personal_tags.remove.hint", "common_personal_tags_remove_hint", listOf("ja", "ko"), "", { L10n.Common.personalTagsRemoveHint }, mapOf("ja" to "長押しで削除", "ko" to "길게 눌러 삭제")),
+        L10nCatalogSample("common.ranking_row.unit_default", "common_ranking_row_unit_default", listOf("ja", "ko"), "", { L10n.Common.rankingRowUnitDefault }, mapOf("ja" to "回", "ko" to "회")),
+        L10nCatalogSample("common.removable_chip.remove.a11y_android", "common_removable_chip_remove_a11y_android", listOf("ja", "ko"), "label=かな カナ1", { L10n.Common.removableChipRemoveA11yAndroid(label = "かな カナ1") }, mapOf("ja" to "かな カナ1を解除", "ko" to "かな カナ1 해제")),
     )
 
     private fun edit0(): List<L10nCatalogSample> = listOf(
@@ -1348,6 +1371,40 @@ object L10nCatalogKeys {
         L10nCatalogSample("settings.theme.use_oshi_color", "settings_theme_use_oshi_color", listOf("ja", "ko"), "", { L10n.Settings.themeUseOshiColor }, mapOf("ja" to "担当の色をテーマに使う", "ko" to "담당 색을 테마로 사용")),
     )
 
+    private fun share0(): List<L10nCatalogSample> = listOf(
+        L10nCatalogSample("share.action.preparing", "share_action_preparing", listOf("ja", "ko"), "", { L10n.Share.actionPreparing }, mapOf("ja" to "画像を準備中…", "ko" to "이미지 준비 중…")),
+        L10nCatalogSample("share.action.save", "share_action_save", listOf("ja", "ko"), "", { L10n.Share.actionSave }, mapOf("ja" to "保存", "ko" to "저장")),
+        L10nCatalogSample("share.action.share", "share_action_share", listOf("ja", "ko"), "", { L10n.Share.actionShare }, mapOf("ja" to "シェアする", "ko" to "공유하기")),
+        L10nCatalogSample("share.collection.badge", "share_collection_badge", listOf("ja", "ko"), "", { L10n.Share.collectionBadge }, mapOf("ja" to "楽曲回収率", "ko" to "곡 회수율")),
+        L10nCatalogSample("share.collection.idol_count", "share_collection_idol_count", listOf("ja", "ko"), "collected=かな カナ1, total=1", { L10n.Share.collectionIdolCount(collected = "かな カナ1", total = 1) }, mapOf("ja" to "かな カナ1/1曲", "ko" to "かな カナ1/1곡")),
+        L10nCatalogSample("share.collection.idol_count", "share_collection_idol_count", listOf("ja", "ko"), "collected=かな カナ1, total=3", { L10n.Share.collectionIdolCount(collected = "かな カナ1", total = 3) }, mapOf("ja" to "かな カナ1/3曲", "ko" to "かな カナ1/3곡")),
+        L10nCatalogSample("share.collection.idol_count", "share_collection_idol_count", listOf("ja", "ko"), "collected=かな カナ1, total=1234", { L10n.Share.collectionIdolCount(collected = "かな カナ1", total = 1234) }, mapOf("ja" to "かな カナ1/1,234曲", "ko" to "かな カナ1/1,234곡")),
+        L10nCatalogSample("share.collection.lead", "share_collection_lead", listOf("ja", "ko"), "", { L10n.Share.collectionLead }, mapOf("ja" to "ライブで聴けた曲", "ko" to "라이브에서 들은 곡")),
+        L10nCatalogSample("share.collection.sheet_title", "share_collection_sheet_title", listOf("ja", "ko"), "", { L10n.Share.collectionSheetTitle }, mapOf("ja" to "回収率をシェア", "ko" to "회수율 공유")),
+        L10nCatalogSample("share.collection.summary", "share_collection_summary", listOf("ja", "ko"), "collected=かな カナ1, total=1", { L10n.Share.collectionSummary(collected = "かな カナ1", total = 1) }, mapOf("ja" to "かな カナ1 / 1 曲を回収", "ko" to "かな カナ1 / 1곡 회수")),
+        L10nCatalogSample("share.collection.summary", "share_collection_summary", listOf("ja", "ko"), "collected=かな カナ1, total=3", { L10n.Share.collectionSummary(collected = "かな カナ1", total = 3) }, mapOf("ja" to "かな カナ1 / 3 曲を回収", "ko" to "かな カナ1 / 3곡 회수")),
+        L10nCatalogSample("share.collection.summary", "share_collection_summary", listOf("ja", "ko"), "collected=かな カナ1, total=1234", { L10n.Share.collectionSummary(collected = "かな カナ1", total = 1234) }, mapOf("ja" to "かな カナ1 / 1,234 曲を回収", "ko" to "かな カナ1 / 1,234곡 회수")),
+        L10nCatalogSample("share.comment.badge", "share_comment_badge", listOf("ja", "ko"), "", { L10n.Share.commentBadge }, mapOf("ja" to "セトリの感想", "ko" to "세트리스트 감상")),
+        L10nCatalogSample("share.comment.field_label", "share_comment_field_label", listOf("ja", "ko"), "", { L10n.Share.commentFieldLabel }, mapOf("ja" to "この曲の感想", "ko" to "이 곡의 감상")),
+        L10nCatalogSample("share.comment.field_placeholder", "share_comment_field_placeholder", listOf("ja", "ko"), "", { L10n.Share.commentFieldPlaceholder }, mapOf("ja" to "最高だった！ 泣いた…など", "ko" to "최고였어! 울었어… 등")),
+        L10nCatalogSample("share.comment.placeholder_card", "share_comment_placeholder_card", listOf("ja", "ko"), "", { L10n.Share.commentPlaceholderCard }, mapOf("ja" to "ここに感想が入ります", "ko" to "여기에 감상이 들어가요")),
+        L10nCatalogSample("share.comment.sheet_title", "share_comment_sheet_title", listOf("ja", "ko"), "", { L10n.Share.commentSheetTitle }, mapOf("ja" to "感想カードを作る", "ko" to "감상 카드 만들기")),
+        L10nCatalogSample("share.footer.hashtag", "share_footer_hashtag", listOf("ja", "ko"), "", { L10n.Share.footerHashtag }, mapOf("ja" to "#アイドルライブDB", "ko" to "#アイドルライブDB")),
+        L10nCatalogSample("share.ratio.portrait", "share_ratio_portrait", listOf("ja", "ko"), "", { L10n.Share.ratioPortrait }, mapOf("ja" to "縦長", "ko" to "세로형")),
+        L10nCatalogSample("share.ratio.square", "share_ratio_square", listOf("ja", "ko"), "", { L10n.Share.ratioSquare }, mapOf("ja" to "正方形", "ko" to "정사각형")),
+        L10nCatalogSample("share.ratio.story", "share_ratio_story", listOf("ja", "ko"), "", { L10n.Share.ratioStory }, mapOf("ja" to "ストーリーズ", "ko" to "스토리")),
+        L10nCatalogSample("share.render_error.title", "share_render_error_title", listOf("ja", "ko"), "", { L10n.Share.renderErrorTitle }, mapOf("ja" to "シェア画像の生成に失敗しました", "ko" to "공유 이미지를 만들지 못했어요")),
+        L10nCatalogSample("share.save.done", "share_save_done", listOf("ja", "ko"), "", { L10n.Share.saveDone }, mapOf("ja" to "画像を保存しました", "ko" to "이미지를 저장했어요")),
+        L10nCatalogSample("share.save.done_pictures", "share_save_done_pictures", listOf("ja", "ko"), "", { L10n.Share.saveDonePictures }, mapOf("ja" to "ピクチャに保存しました", "ko" to "사진 폴더에 저장했어요")),
+        L10nCatalogSample("share.save.failed", "share_save_failed", listOf("ja", "ko"), "", { L10n.Share.saveFailed }, mapOf("ja" to "保存に失敗しました", "ko" to "저장하지 못했어요")),
+        L10nCatalogSample("share.social.other", "share_social_other", listOf("ja", "ko"), "", { L10n.Share.socialOther }, mapOf("ja" to "その他でシェア", "ko" to "다른 앱으로 공유")),
+        L10nCatalogSample("share.social.post_x", "share_social_post_x", listOf("ja", "ko"), "", { L10n.Share.socialPostX }, mapOf("ja" to "X にポスト", "ko" to "X에 게시")),
+        L10nCatalogSample("share.social.share.a11y", "share_social_share_a11y", listOf("ja", "ko"), "", { L10n.Share.socialShareA11y }, mapOf("ja" to "シェア", "ko" to "공유")),
+        L10nCatalogSample("share.tag.badge", "share_tag_badge", listOf("ja", "ko"), "", { L10n.Share.tagBadge }, mapOf("ja" to "タグを追加しました！", "ko" to "태그를 추가했어요!")),
+        L10nCatalogSample("share.tag.done.message", "share_tag_done_message", listOf("ja", "ko"), "", { L10n.Share.tagDoneMessage }, mapOf("ja" to "せっかくなのでカードでシェアしませんか？", "ko" to "이왕이면 카드로 공유해 볼까요?")),
+        L10nCatalogSample("share.tag.done.title", "share_tag_done_title", listOf("ja", "ko"), "", { L10n.Share.tagDoneTitle }, mapOf("ja" to "タグを付けました！", "ko" to "태그를 달았어요!")),
+    )
+
     private fun songs0(): List<L10nCatalogSample> = listOf(
         L10nCatalogSample("songs.community.penlight.empty.message", "songs_community_penlight_empty_message", listOf("ja", "ko"), "", { L10n.Songs.communityPenlightEmptyMessage }, mapOf("ja" to "あなたが思うこの曲のペンライト色を投票しませんか？", "ko" to "이 곡에 어울리는 펜라이트 색에 투표해 볼까요?")),
         L10nCatalogSample("songs.community.penlight.empty.title", "songs_community_penlight_empty_title", listOf("ja", "ko"), "", { L10n.Songs.communityPenlightEmptyTitle }, mapOf("ja" to "まだ投票がありません", "ko" to "아직 투표가 없어요")),
@@ -1741,6 +1798,8 @@ object L10nCatalogKeys {
         L10nCatalogSample("units.detail.community.login_prompt", "units_detail_community_login_prompt", listOf("ja", "ko"), "", { L10n.Units.detailCommunityLoginPrompt }, mapOf("ja" to "タグ付け・投票にはログインが必要です", "ko" to "태그를 달거나 투표하려면 로그인해야 해요")),
         L10nCatalogSample("units.detail.load_error.message", "units_detail_load_error_message", listOf("ja", "ko"), "", { L10n.Units.detailLoadErrorMessage }, mapOf("ja" to "読み込みに失敗しました。通信状況を確認してもう一度お試しください。", "ko" to "불러오지 못했어요. 통신 상태를 확인하고 다시 시도해 주세요.")),
         L10nCatalogSample("units.detail.load_error.title", "units_detail_load_error_title", listOf("ja", "ko"), "", { L10n.Units.detailLoadErrorTitle }, mapOf("ja" to "読み込みに失敗しました", "ko" to "불러오지 못했어요")),
+        L10nCatalogSample("units.detail.local_write.add_tag", "units_detail_local_write_add_tag", listOf("ja", "ko"), "", { L10n.Units.detailLocalWriteAddTag }, mapOf("ja" to "マイタグの追加", "ko" to "마이 태그 추가")),
+        L10nCatalogSample("units.detail.local_write.remove_tag", "units_detail_local_write_remove_tag", listOf("ja", "ko"), "", { L10n.Units.detailLocalWriteRemoveTag }, mapOf("ja" to "マイタグの削除", "ko" to "마이 태그 삭제")),
         L10nCatalogSample("units.detail.members.empty.title_android", "units_detail_members_empty_title_android", listOf("ja", "ko"), "", { L10n.Units.detailMembersEmptyTitleAndroid }, mapOf("ja" to "メンバー情報がありません", "ko" to "멤버 정보가 없어요")),
         L10nCatalogSample("units.detail.members.header", "units_detail_members_header", listOf("ja", "ko"), "", { L10n.Units.detailMembersHeader }, mapOf("ja" to "メンバー", "ko" to "멤버")),
         L10nCatalogSample("units.detail.not_found.message", "units_detail_not_found_message", listOf("ja", "ko"), "", { L10n.Units.detailNotFoundMessage }, mapOf("ja" to "ユニットが見つかりませんでした。", "ko" to "유닛을 찾지 못했어요.")),
@@ -1764,16 +1823,33 @@ object L10nCatalogKeys {
     )
 
     private fun widget0(): List<L10nCatalogSample> = listOf(
+        L10nCatalogSample("widget.configure.description", "widget_configure_description", listOf("ja", "ko"), "", { L10n.Widget.configureDescription }, mapOf("ja" to "ウィジェットに出すアイドルを選びます。画像を取り込んであるアイドルが並びます。", "ko" to "위젯에 표시할 아이돌을 골라요. 이미지를 가져온 아이돌이 나와요.")),
+        L10nCatalogSample("widget.configure.empty", "widget_configure_empty", listOf("ja", "ko"), "", { L10n.Widget.configureEmpty }, mapOf("ja" to "表示できるアイドルがいません。\nアプリのアイドル詳細から画像を取り込むと、ここに並びます。", "ko" to "표시할 수 있는 아이돌이 없어요.\n앱의 아이돌 상세에서 이미지를 가져오면 여기에 나와요.")),
+        L10nCatalogSample("widget.configure.search_prompt", "widget_configure_search_prompt", listOf("ja", "ko"), "", { L10n.Widget.configureSearchPrompt }, mapOf("ja" to "名前・ブランドで絞り込む", "ko" to "이름·브랜드로 찾기")),
+        L10nCatalogSample("widget.configure.selected.a11y", "widget_configure_selected_a11y", listOf("ja", "ko"), "", { L10n.Widget.configureSelectedA11y }, mapOf("ja" to "選択中", "ko" to "선택됨")),
+        L10nCatalogSample("widget.next_live.days_left", "widget_next_live_days_left", listOf("ja", "ko"), "days=1", { L10n.Widget.nextLiveDaysLeft(days = 1) }, mapOf("ja" to "あと1日", "ko" to "1일 남음")),
+        L10nCatalogSample("widget.next_live.days_left", "widget_next_live_days_left", listOf("ja", "ko"), "days=3", { L10n.Widget.nextLiveDaysLeft(days = 3) }, mapOf("ja" to "あと3日", "ko" to "3일 남음")),
+        L10nCatalogSample("widget.next_live.days_left", "widget_next_live_days_left", listOf("ja", "ko"), "days=1234", { L10n.Widget.nextLiveDaysLeft(days = 1234) }, mapOf("ja" to "あと1,234日", "ko" to "1,234일 남음")),
         L10nCatalogSample("widget.next_live.description", "widget_next_live_description", listOf("ja", "ko"), "", { L10n.Widget.nextLiveDescription }, mapOf("ja" to "次のライブまでの日数を表示します。", "ko" to "다음 라이브까지 남은 날을 보여 줘요.")),
+        L10nCatalogSample("widget.next_live.empty", "widget_next_live_empty", listOf("ja", "ko"), "", { L10n.Widget.nextLiveEmpty }, mapOf("ja" to "次のライブ情報なし", "ko" to "다음 라이브 정보 없음")),
+        L10nCatalogSample("widget.next_live.header", "widget_next_live_header", listOf("ja", "ko"), "", { L10n.Widget.nextLiveHeader }, mapOf("ja" to "次のライブ", "ko" to "다음 라이브")),
         L10nCatalogSample("widget.next_live.name", "widget_next_live_name", listOf("ja", "ko"), "", { L10n.Widget.nextLiveName }, mapOf("ja" to "次のライブ", "ko" to "다음 라이브")),
+        L10nCatalogSample("widget.next_live.today_android", "widget_next_live_today_android", listOf("ja", "ko"), "", { L10n.Widget.nextLiveTodayAndroid }, mapOf("ja" to "今日", "ko" to "오늘")),
+        L10nCatalogSample("widget.oshi.placeholder.add_image", "widget_oshi_placeholder_add_image", listOf("ja", "ko"), "", { L10n.Widget.oshiPlaceholderAddImage }, mapOf("ja" to "アプリで画像を追加", "ko" to "앱에서 이미지 추가")),
+        L10nCatalogSample("widget.oshi.placeholder.add_image_hint", "widget_oshi_placeholder_add_image_hint", listOf("ja", "ko"), "", { L10n.Widget.oshiPlaceholderAddImageHint }, mapOf("ja" to "アイドル詳細から取り込めます", "ko" to "아이돌 상세에서 가져올 수 있어요")),
         L10nCatalogSample("widget.oshi_image.description", "widget_oshi_image_description", listOf("ja", "ko"), "", { L10n.Widget.oshiImageDescription }, mapOf("ja" to "担当アイドルの取り込んだ画像をホーム画面に出します。タップで次の画像に切り替わります。", "ko" to "가져온 담당 아이돌 이미지를 홈 화면에 보여 줘요. 탭하면 다음 이미지로 바뀌어요.")),
         L10nCatalogSample("widget.oshi_image.name", "widget_oshi_image_name", listOf("ja", "ko"), "", { L10n.Widget.oshiImageName }, mapOf("ja" to "担当の画像（タップで切替）", "ko" to "담당 이미지 (탭으로 전환)")),
         L10nCatalogSample("widget.oshi_launcher.description", "widget_oshi_launcher_description", listOf("ja", "ko"), "", { L10n.Widget.oshiLauncherDescription }, mapOf("ja" to "担当アイドルの取り込んだ画像をホーム画面に出します。タップするとアプリが開きます。", "ko" to "가져온 담당 아이돌 이미지를 홈 화면에 보여 줘요. 탭하면 앱이 열려요.")),
         L10nCatalogSample("widget.oshi_launcher.name", "widget_oshi_launcher_name", listOf("ja", "ko"), "", { L10n.Widget.oshiLauncherName }, mapOf("ja" to "担当の画像（タップでアプリ）", "ko" to "담당 이미지 (탭으로 앱 열기)")),
         L10nCatalogSample("widget.select_oshi.title", "widget_select_oshi_title", listOf("ja", "ko"), "", { L10n.Widget.selectOshiTitle }, mapOf("ja" to "担当を選ぶ", "ko" to "담당 고르기")),
         L10nCatalogSample("widget.ticket_deadline.description", "widget_ticket_deadline_description", listOf("ja", "ko"), "", { L10n.Widget.ticketDeadlineDescription }, mapOf("ja" to "締切が近いチケットの先行受付を表示します。", "ko" to "마감이 가까운 티켓 선행 접수를 보여 줘요.")),
+        L10nCatalogSample("widget.ticket_deadline.empty", "widget_ticket_deadline_empty", listOf("ja", "ko"), "", { L10n.Widget.ticketDeadlineEmpty }, mapOf("ja" to "締切近いチケットなし", "ko" to "마감이 가까운 티켓 없음")),
+        L10nCatalogSample("widget.ticket_deadline.header", "widget_ticket_deadline_header", listOf("ja", "ko"), "", { L10n.Widget.ticketDeadlineHeader }, mapOf("ja" to "チケット締切", "ko" to "티켓 마감")),
         L10nCatalogSample("widget.ticket_deadline.name", "widget_ticket_deadline_name", listOf("ja", "ko"), "", { L10n.Widget.ticketDeadlineName }, mapOf("ja" to "チケット締切", "ko" to "티켓 마감")),
         L10nCatalogSample("widget.today_song.description", "widget_today_song_description", listOf("ja", "ko"), "", { L10n.Widget.todaySongDescription }, mapOf("ja" to "日替わりで1曲をジャケット付きで表示します。", "ko" to "날마다 한 곡을 재킷과 함께 보여 줘요.")),
+        L10nCatalogSample("widget.today_song.empty", "widget_today_song_empty", listOf("ja", "ko"), "", { L10n.Widget.todaySongEmpty }, mapOf("ja" to "今日の1曲を準備中", "ko" to "오늘의 한 곡 준비 중")),
+        L10nCatalogSample("widget.today_song.empty_hint", "widget_today_song_empty_hint", listOf("ja", "ko"), "", { L10n.Widget.todaySongEmptyHint }, mapOf("ja" to "データの取得が終わると出ます", "ko" to "데이터를 다 받으면 나와요")),
+        L10nCatalogSample("widget.today_song.header", "widget_today_song_header", listOf("ja", "ko"), "", { L10n.Widget.todaySongHeader }, mapOf("ja" to "今日の1曲", "ko" to "오늘의 한 곡")),
         L10nCatalogSample("widget.today_song.name", "widget_today_song_name", listOf("ja", "ko"), "", { L10n.Widget.todaySongName }, mapOf("ja" to "今日の1曲", "ko" to "오늘의 한 곡")),
     )
 }

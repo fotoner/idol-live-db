@@ -10,6 +10,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.brandColor
 
 /**
@@ -48,7 +50,7 @@ fun BrandFilterChips(
     ) {
         // "全て" chip
         ImasFilterChip(
-            label = "全て",
+            label = L10n.Common.brandFilterAll.resolve(),
             selected = selectedBrandId == null,
             onClick = { onBrandSelected(null) },
         )

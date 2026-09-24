@@ -27,7 +27,7 @@ struct SetlistCommentShareCard: View {
         let palette = self.palette
         PhotoShareScaffold(artwork: artwork, palette: palette, size: size) {
             VStack(alignment: .leading, spacing: 0) {
-                ShareEyebrow(text: "セトリの感想", accent: palette.accent, ink: .white.opacity(0.82))
+                ShareEyebrow(text: String(localized: L10n.Share.commentBadge), accent: palette.accent, ink: .white.opacity(0.82))
 
                 // 感想を短い引用として (明朝・大きめ、編集的)。
                 Text(comment)
@@ -93,7 +93,7 @@ struct SetlistCommentComposeSheet: View {
 
     /// プレビュー/カードに流す文言。未入力時はプレースホルダで完成形を見せる。
     private var displayComment: String {
-        trimmedComment.isEmpty ? "ここに感想が入ります" : trimmedComment
+        trimmedComment.isEmpty ? String(localized: L10n.Share.commentPlaceholderCard) : trimmedComment
     }
 
     private func card(size: ShareCard.Size) -> SetlistCommentShareCard {
@@ -109,13 +109,13 @@ struct SetlistCommentComposeSheet: View {
     }
 
     var body: some View {
-        ShareCardSheet(title: "感想カードを作る", screenName: "setlist_comment_share") {
+        ShareCardSheet(title: String(localized: L10n.Share.commentSheetTitle), screenName: "setlist_comment_share") {
             VStack(alignment: .leading, spacing: DS.sp5) {
                     VStack(alignment: .leading, spacing: DS.sp3) {
-                        Text("この曲の感想")
+                        Text(L10n.Share.commentFieldLabel)
                             .font(.imasFootnote.weight(.semibold))
                             .foregroundStyle(DS.ink3)
-                        TextField("最高だった！ 泣いた…など", text: $comment, axis: .vertical)
+                        TextField(String(localized: L10n.Share.commentFieldPlaceholder), text: $comment, axis: .vertical)
                             .lineLimit(3...6)
                             .font(.imasBody)
                             .focused($commentFocused)

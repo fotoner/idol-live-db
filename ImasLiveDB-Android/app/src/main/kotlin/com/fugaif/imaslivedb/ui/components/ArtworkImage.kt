@@ -22,6 +22,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.player.AudioPreviewManager
 import com.fugaif.imaslivedb.ui.theme.DS
 
@@ -89,7 +91,11 @@ fun ArtworkImage(
             }
             Icon(
                 imageVector = if (isCurrentlyPlaying) Icons.Filled.Stop else Icons.Filled.PlayArrow,
-                contentDescription = if (isCurrentlyPlaying) "停止" else "プレビュー再生",
+                contentDescription = if (isCurrentlyPlaying) {
+                    L10n.Common.artworkPreviewStopA11y.resolve()
+                } else {
+                    L10n.Common.artworkPreviewPlayA11y.resolve()
+                },
                 tint = Color.White,
                 modifier = Modifier.size(size * 0.3f)
             )

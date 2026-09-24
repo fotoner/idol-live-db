@@ -39,11 +39,11 @@ struct SocialShareMenuItems: View {
             AppAnalytics.tap("\(analyticsKey).x")
             if let url = URL(string: sharePayloadXPostUrl(payload: payload)) { openURL(url) }
         } label: {
-            Label("X にポスト", systemImage: "paperplane")
+            Label(L10n.Share.socialPostX, systemImage: "paperplane")
         }
 
         ShareLink(item: sharePayloadPlainText(payload: payload)) {
-            Label("その他でシェア", systemImage: "square.and.arrow.up")
+            Label(L10n.Share.socialOther, systemImage: "square.and.arrow.up")
         }
     }
 }

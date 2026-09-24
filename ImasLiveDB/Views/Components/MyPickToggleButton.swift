@@ -18,7 +18,7 @@ struct MyPickToggleButton: View {
             do {
                 try UserMarkService.shared.toggle(.myPick, entity: .idol, id: id)
             } catch {
-                LocalWriteFailure.report(error, action: "担当の切り替え")
+                LocalWriteFailure.report(error, action: String(localized: L10n.Common.localWriteToggleMyPick))
             }
             refresh.toggle()
         } label: {
@@ -30,6 +30,6 @@ struct MyPickToggleButton: View {
         }
         .buttonStyle(.borderless)
         .id(refresh)
-        .accessibilityLabel(isMyPick ? "担当解除" : "担当に追加")
+        .accessibilityLabel(isMyPick ? L10n.Common.myPickToggleRemoveA11y : L10n.Common.myPickToggleAddA11y)
     }
 }

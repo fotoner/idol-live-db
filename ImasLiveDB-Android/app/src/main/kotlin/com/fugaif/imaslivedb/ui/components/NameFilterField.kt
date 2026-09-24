@@ -17,6 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 
 /**
@@ -50,7 +52,7 @@ fun NameFilterField(
                 enabled = hasText,
                 modifier = Modifier.alpha(if (hasText) 1f else 0f)
             ) {
-                Icon(Icons.Filled.Clear, contentDescription = "絞り込みを解除", tint = DS.ink3)
+                Icon(Icons.Filled.Clear, contentDescription = L10n.Common.nameFilterClearA11y.resolve(), tint = DS.ink3)
             }
         },
         singleLine = true,

@@ -28,13 +28,13 @@ struct ListPickerView: View {
     var body: some View {
         List {
             // 「選択なし」= 絞り込み解除
-            row(label: "選択なし", value: nil, muted: true)
+            row(label: String(localized: L10n.Common.listPickerNone), value: nil, muted: true)
 
             if filteredItems.isEmpty {
                 ImasEmptyState(
                     systemImage: "magnifyingglass",
-                    title: "見つかりません",
-                    message: "「\(searchText)」に一致する項目がありません"
+                    title: String(localized: L10n.Common.listPickerEmptyTitle),
+                    message: String(localized: L10n.Common.listPickerEmptyMessage(query: searchText))
                 )
                 .listRowBackground(Color.clear)
             } else {
@@ -46,7 +46,7 @@ struct ListPickerView: View {
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .background(DS.bg)
-        .searchable(text: $searchText, prompt: "\(title)を検索")
+        .searchable(text: $searchText, prompt: Text(L10n.Common.listPickerSearchPrompt(title: title)))
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
         .task { catalog = TextSearchCatalog(fieldsPerItem: items.map { [$0] }) }

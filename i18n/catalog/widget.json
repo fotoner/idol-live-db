@@ -14,93 +14,280 @@
     ]
   },
   "strings": {
-    "next_live.description": {
-      "ja": "次のライブまでの日数を表示します。",
-      "ko": "다음 라이브까지 남은 날을 보여 줘요.",
-      "note": "ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)。iOS の説明 (InfoWidgets.swift) とは ja が違うので iOS を移すときは別のキーにする",
+    "configure.description": {
+      "ja": "ウィジェットに出すアイドルを選びます。画像を取り込んであるアイドルが並びます。",
+      "ko": "위젯에 표시할 아이돌을 골라요. 이미지를 가져온 아이돌이 나와요.",
+      "note": "担当画像ウィジェットの設定画面の見出しの下の説明",
       "platforms": [
         "android"
       ]
     },
+    "configure.empty": {
+      "ja": "表示できるアイドルがいません。\nアプリのアイドル詳細から画像を取り込むと、ここに並びます。",
+      "ko": "표시할 수 있는 아이돌이 없어요.\n앱의 아이돌 상세에서 이미지를 가져오면 여기에 나와요.",
+      "note": "担当画像ウィジェットの設定画面。画像を取り込んだアイドルが 1 人もいないとき (2 行)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "configure.search_prompt": {
+      "ja": "名前・ブランドで絞り込む",
+      "ko": "이름·브랜드로 찾기",
+      "note": "担当画像ウィジェットの設定画面の絞り込み欄のプレースホルダ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "configure.selected.a11y": {
+      "ja": "選択中",
+      "ko": "선택됨",
+      "note": "担当画像ウィジェットの設定画面。今選ばれているアイドルの行のチェックの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "next_live.days_left": {
+      "args": [
+        {
+          "name": "days",
+          "type": "count"
+        }
+      ],
+      "ja": "あと{days}日",
+      "ko": "{days}일 남음",
+      "note": "「次のライブ」ウィジェットのカウントダウン。days は初日までの日数。1000 以上は桁区切りが付く (実際には出ない値)"
+    },
+    "next_live.description": {
+      "ja": "次のライブまでの日数を表示します。",
+      "ko": "다음 라이브까지 남은 날을 보여 줘요.",
+      "note": "ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)。iOS の説明は ja が違うので別のキー (next_live.description_ios)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "next_live.description_ios": {
+      "ja": "直近のライブまでのカウントダウンを表示します。",
+      "ko": "가장 가까운 라이브까지 카운트다운을 보여 줘요.",
+      "note": "iOS のウィジェット選択に出る説明 (configurationDisplayName の下)。Android の next_live.description と ja が違う (統一はオーナーが別 PR で)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "next_live.empty": {
+      "ja": "次のライブ情報なし",
+      "ko": "다음 라이브 정보 없음",
+      "note": "「次のライブ」ウィジェット。予定しているライブが無いとき"
+    },
+    "next_live.header": {
+      "ja": "次のライブ",
+      "ko": "다음 라이브",
+      "note": "「次のライブ」ウィジェットの左上の小さな見出し"
+    },
     "next_live.name": {
       "ja": "次のライブ",
       "ko": "다음 라이브",
-      "note": "ホーム画面のウィジェット選択に出る名前 (Android の receiver の android:label)",
+      "note": "ホーム画面のウィジェット選択に出る名前 (iOS の configurationDisplayName / Android の receiver の android:label)"
+    },
+    "next_live.today": {
+      "ja": "今日！",
+      "ko": "오늘!",
+      "note": "「次のライブ」ウィジェットのカウントダウン (当日)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "next_live.today_android": {
+      "ja": "今日",
+      "ko": "오늘",
+      "note": "Android の文言。iOS の next_live.today と ja が違う (！の有無。統一はオーナーが別 PR で)。「次のライブ」ウィジェットのカウントダウン (当日)",
       "platforms": [
         "android"
+      ]
+    },
+    "next_oshi_image.title": {
+      "ios": {
+        "intent_metadata": true
+      },
+      "ja": "次の画像",
+      "ko": "다음 이미지",
+      "note": "担当画像ウィジェットをタップしたときに動く AppIntent の名前 (ショートカットなどに出る)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "oshi.placeholder.add_image": {
+      "ja": "アプリで画像を追加",
+      "ko": "앱에서 이미지 추가",
+      "note": "担当画像ウィジェット。画像を取り込んだアイドルがまだいない (出せる画像が無い) ときの案内"
+    },
+    "oshi.placeholder.add_image_hint": {
+      "ja": "アイドル詳細から取り込めます",
+      "ko": "아이돌 상세에서 가져올 수 있어요",
+      "note": "担当画像ウィジェットの「アプリで画像を追加」の下の補足",
+      "platforms": [
+        "android"
+      ]
+    },
+    "oshi.placeholder.select": {
+      "ja": "担当を選択",
+      "ko": "담당 선택",
+      "note": "担当画像ウィジェット。表示するアイドルは決まっているが画像を出せないときの案内 (ウィジェットの編集で担当を選び直す)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "oshi_entity.type_name": {
+      "ios": {
+        "intent_metadata": true
+      },
+      "ja": "アイドル",
+      "ko": "아이돌",
+      "note": "ウィジェットの編集で選ぶ候補の種類の名前 (AppEntity の typeDisplayRepresentation)",
+      "platforms": [
+        "ios"
       ]
     },
     "oshi_image.description": {
       "ja": "担当アイドルの取り込んだ画像をホーム画面に出します。タップで次の画像に切り替わります。",
       "ko": "가져온 담당 아이돌 이미지를 홈 화면에 보여 줘요. 탭하면 다음 이미지로 바뀌어요.",
-      "note": "ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)",
+      "note": "ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)。iOS の説明は ja が違うので別のキー (oshi_image.description_ios)",
       "platforms": [
         "android"
+      ]
+    },
+    "oshi_image.description_ios": {
+      "ja": "選んだアイドルの画像を表示。タップで次の画像に切り替わります。",
+      "ko": "고른 아이돌의 이미지를 보여 줘요. 탭하면 다음 이미지로 바뀌어요.",
+      "note": "iOS のウィジェット選択に出る説明 (タップで次の画像へ送る版)。Android の oshi_image.description と ja が違う (統一はオーナーが別 PR で)",
+      "platforms": [
+        "ios"
       ]
     },
     "oshi_image.name": {
       "ja": "担当の画像（タップで切替）",
       "ko": "담당 이미지 (탭으로 전환)",
-      "note": "ホーム画面のウィジェット選択に出る名前 (Android の receiver の android:label)。タップで次の画像へ送る版",
-      "platforms": [
-        "android"
-      ]
+      "note": "ホーム画面のウィジェット選択に出る名前 (iOS の configurationDisplayName / Android の receiver の android:label)。タップで次の画像へ送る版"
     },
     "oshi_launcher.description": {
       "ja": "担当アイドルの取り込んだ画像をホーム画面に出します。タップするとアプリが開きます。",
       "ko": "가져온 담당 아이돌 이미지를 홈 화면에 보여 줘요. 탭하면 앱이 열려요.",
-      "note": "ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)",
+      "note": "ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)。iOS の説明は ja が違うので別のキー (oshi_launcher.description_ios)",
       "platforms": [
         "android"
+      ]
+    },
+    "oshi_launcher.description_ios": {
+      "ja": "選んだアイドルの画像を表示。タップでアプリを開きます。",
+      "ko": "고른 아이돌의 이미지를 보여 줘요. 탭하면 앱이 열려요.",
+      "note": "iOS のウィジェット選択に出る説明 (タップでアプリを開く版)。Android の oshi_launcher.description と ja が違う (統一はオーナーが別 PR で)",
+      "platforms": [
+        "ios"
       ]
     },
     "oshi_launcher.name": {
       "ja": "担当の画像（タップでアプリ）",
       "ko": "담당 이미지 (탭으로 앱 열기)",
-      "note": "ホーム画面のウィジェット選択に出る名前 (Android の receiver の android:label)。タップでアプリを開く版 (絵は oshi_image と同じ)",
+      "note": "ホーム画面のウィジェット選択に出る名前 (iOS の configurationDisplayName / Android の receiver の android:label)。タップでアプリを開く版 (絵は oshi_image と同じ)"
+    },
+    "select_oshi.description_ios": {
+      "ios": {
+        "intent_metadata": true
+      },
+      "ja": "ウィジェットに表示するアイドルを選びます。",
+      "ko": "위젯에 표시할 아이돌을 골라요.",
+      "note": "ウィジェットの編集で出る AppIntent (SelectOshiIntent) の説明。Android の設定画面の説明 (configure.description) とは ja が違う",
       "platforms": [
-        "android"
+        "ios"
+      ]
+    },
+    "select_oshi.param_idol": {
+      "ios": {
+        "intent_metadata": true
+      },
+      "ja": "アイドル",
+      "ko": "아이돌",
+      "note": "ウィジェットの編集で出る、表示するアイドルを選ぶ項目の名前 (AppIntent のパラメータ)",
+      "platforms": [
+        "ios"
       ]
     },
     "select_oshi.title": {
+      "ios": {
+        "intent_metadata": true
+      },
       "ja": "担当を選ぶ",
       "ko": "담당 고르기",
-      "note": "担当画像ウィジェットの設定画面の名前 (Android の設定 Activity の android:label)。iOS の AppIntent (SelectOshiIntent.title) を移すときに両方で使う",
-      "platforms": [
-        "android"
-      ]
+      "note": "担当画像ウィジェットの設定の名前。iOS はウィジェットの編集で出る AppIntent (SelectOshiIntent) の名前、Android は設定 Activity の android:label と画面の見出し"
     },
     "ticket_deadline.description": {
       "ja": "締切が近いチケットの先行受付を表示します。",
       "ko": "마감이 가까운 티켓 선행 접수를 보여 줘요.",
-      "note": "ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)",
+      "note": "ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)。iOS の説明は ja が違うので別のキー (ticket_deadline.description_ios)",
       "platforms": [
         "android"
       ]
+    },
+    "ticket_deadline.description_ios": {
+      "ja": "チケット締切が近いイベントを最大3件表示します。",
+      "ko": "티켓 마감이 가까운 이벤트를 최대 3건 보여 줘요.",
+      "note": "iOS のウィジェット選択に出る説明。Android の ticket_deadline.description と ja が違う (統一はオーナーが別 PR で)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "ticket_deadline.empty": {
+      "ja": "締切近いチケットなし",
+      "ko": "마감이 가까운 티켓 없음",
+      "note": "「チケット締切」ウィジェット。締切が近い先行受付が無いとき"
+    },
+    "ticket_deadline.header": {
+      "ja": "チケット締切",
+      "ko": "티켓 마감",
+      "note": "「チケット締切」ウィジェットの小さな見出し"
     },
     "ticket_deadline.name": {
       "ja": "チケット締切",
       "ko": "티켓 마감",
-      "note": "ホーム画面のウィジェット選択に出る名前 (Android の receiver の android:label)",
-      "platforms": [
-        "android"
-      ]
+      "note": "ホーム画面のウィジェット選択に出る名前 (iOS の configurationDisplayName / Android の receiver の android:label)"
     },
     "today_song.description": {
       "ja": "日替わりで1曲をジャケット付きで表示します。",
       "ko": "날마다 한 곡을 재킷과 함께 보여 줘요.",
-      "note": "ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)",
+      "note": "ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)。iOS の説明は ja が違うので別のキー (today_song.description_ios)",
       "platforms": [
         "android"
       ]
     },
-    "today_song.name": {
-      "ja": "今日の1曲",
-      "ko": "오늘의 한 곡",
-      "note": "ホーム画面のウィジェット選択に出る名前 (Android の receiver の android:label)",
+    "today_song.description_ios": {
+      "ja": "日替わりで1曲をピックして表示します。",
+      "ko": "날마다 한 곡을 골라 보여 줘요.",
+      "note": "iOS のウィジェット選択に出る説明。Android の today_song.description と ja が違う (統一はオーナーが別 PR で)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "today_song.empty": {
+      "ja": "今日の1曲を準備中",
+      "ko": "오늘의 한 곡 준비 중",
+      "note": "「今日の1曲」ウィジェット。今日の曲のデータがまだ無いとき"
+    },
+    "today_song.empty_hint": {
+      "ja": "データの取得が終わると出ます",
+      "ko": "데이터를 다 받으면 나와요",
+      "note": "「今日の1曲」ウィジェットの準備中の下の補足",
       "platforms": [
         "android"
       ]
+    },
+    "today_song.header": {
+      "ja": "今日の1曲",
+      "ko": "오늘의 한 곡",
+      "note": "「今日の1曲」ウィジェットの小さな見出し"
+    },
+    "today_song.name": {
+      "ja": "今日の1曲",
+      "ko": "오늘의 한 곡",
+      "note": "ホーム画面のウィジェット選択に出る名前 (iOS の configurationDisplayName / Android の receiver の android:label)"
     }
   }
 }

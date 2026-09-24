@@ -19,8 +19,8 @@ struct BrandGridPicker: View {
             if includeAllOption {
                 BrandIconCell(
                     brandId: nil,
-                    label: "全て",
-                    iconText: "全",
+                    label: String(localized: L10n.Common.brandFilterAll),
+                    iconText: String(localized: L10n.Common.brandFilterAllIcon),
                     color: nil,
                     isSelected: selectedBrandIds.isEmpty
                 ) { selectedBrandIds = [] }
@@ -53,9 +53,9 @@ struct BrandFilterSection: View {
             BrandGridPicker(brands: brands, selectedBrandIds: $selectedBrandIds, includeAllOption: true)
                 .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
         } header: {
-            Text("ブランド")
+            Text(L10n.Common.filterSheetBrandHeader)
         } footer: {
-            Text("複数選択可能").font(.imasCaption2).foregroundStyle(DS.ink3)
+            Text(L10n.Common.filterSheetBrandFooter).font(.imasCaption2).foregroundStyle(DS.ink3)
         }
     }
 }
@@ -187,9 +187,9 @@ struct EventFilterSheet: View {
                             .foregroundStyle(localVenue == nil ? DS.ink2 : DS.ink)
                     }
                 } header: {
-                    Text("会場")
+                    Text(L10n.Common.filterSheetVenueHeader)
                 } footer: {
-                    Text("その会場で公演があったライブに絞ります")
+                    Text(L10n.Common.filterSheetVenueFooter)
                 }
 
                 BrandFilterSection(brands: brands, selectedBrandIds: $localBrandIds)
@@ -211,39 +211,41 @@ struct EventFilterSheet: View {
                     }
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                 } header: {
-                    Text("種別")
+                    Text(L10n.Common.filterSheetKindHeader)
                 } footer: {
                     if localExcluded.isEmpty {
-                        Text("全て表示中")
+                        Text(L10n.Common.filterSheetKindAllShown)
                     } else {
-                        Text("除外: \(localExcluded.map(\.displayLabel).sorted().joined(separator: " / "))")
+                        // 種別名はコアの語彙。並びの区切り「 / 」はそのまま
+                        Text(L10n.Common.filterSheetKindExcluded(
+                            kinds: localExcluded.map(\.displayLabel).sorted().joined(separator: " / ")))
                     }
                 }
 
-                Section("参加状態") {
+                Section(L10n.Common.filterSheetAttendanceHeader) {
                     ImasSegmented(options: ["all", "attended", "not_attended"], selection: $localAttendance) {
                         switch $0 {
-                        case "attended": "参加済み"
-                        case "not_attended": "未参加"
-                        default: "すべて"
+                        case "attended": String(localized: L10n.Common.filterSheetAttendanceAttended)
+                        case "not_attended": String(localized: L10n.Common.filterSheetAttendanceNotAttended)
+                        default: String(localized: L10n.Common.filterSheetAttendanceAll)
                         }
                     }
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                 }
 
-                Section("マイマーク") {
+                Section(L10n.Common.filterSheetMyMarkHeader) {
                     Toggle(isOn: $localFavorite) {
-                        Label("お気に入りのみ", systemImage: "star.fill")
+                        Label(L10n.Common.filterSheetMyMarkFavoriteOnly, systemImage: "star.fill")
                             .foregroundStyle(DS.favorite)
                     }
                     Toggle(isOn: $localNote) {
-                        Label("メモがあるイベントのみ", systemImage: "note.text")
+                        Label(L10n.Common.filterSheetMyMarkEventNoteOnly, systemImage: "note.text")
                             .foregroundStyle(DS.warning)
                     }
                 }
 
-                Section("表示設定") {
-                    Toggle("セトリ情報がないイベントも表示", isOn: $localShowEmpty)
+                Section(L10n.Common.filterSheetDisplayHeader) {
+                    Toggle(L10n.Common.filterSheetDisplayShowEmptyEvents, isOn: $localShowEmpty)
                         .tint(DS.success)
                 }
 
@@ -281,7 +283,9 @@ struct EventFilterSheet: View {
 
     /// 選択中の会場ラベル。ID から現行名 + 都道府県を引く。
     private var selectedVenueLabel: String {
-        guard let localVenue, let v = venueDirectory.venue(id: localVenue) else { return "選択なし" }
+        guard let localVenue, let v = venueDirectory.venue(id: localVenue) else {
+            return String(localized: L10n.Common.filterSheetVenueNone)
+        }
         return v.displayNameWithArea
     }
 
@@ -327,7 +331,9 @@ struct EventKindChip: View {
             fillsWidth: true,
             action: action
         )
-        .accessibilityLabel("\(kind.displayLabel) \(isOn ? "表示" : "除外")")
+        .accessibilityLabel(isOn
+                            ? L10n.Common.filterSheetKindChipShownA11y(kind: kind.displayLabel)
+                            : L10n.Common.filterSheetKindChipExcludedA11y(kind: kind.displayLabel))
     }
 }
 
@@ -335,13 +341,55 @@ struct EventKindChip: View {
 
 /// ブランドごとのサブカテゴリ属性 (idols.attribute) 定義。
 /// (内部値, 表示ラベル) のペア。順序が UI 表示順。
-private let brandAttributes: [String: [(value: String, label: String)]] = [
-    "cg":    [("cute", "キュート"), ("cool", "クール"), ("passion", "パッション")],
-    "ml":    [("princess", "プリンセス"), ("fairy", "フェアリー"), ("angel", "エンジェル")],
-    "765as": [("princess", "プリンセス"), ("fairy", "フェアリー"), ("angel", "エンジェル")],
-    "sidem": [("intelli", "インテリ"), ("physical", "フィジカル"), ("mental", "メンタル")],
-    "sc":    [("sol", "Sol"), ("luna", "Luna"), ("stella", "Stella")],
-]
+/// ラベルは描くたびに引く (定数に置くと作った時点の言語で固まる)。英字の属性名 (シャイニーカラーズ) は訳さない。
+private var brandAttributes: [String: [(value: String, label: DisplayText)]] {
+    let princess: [(value: String, label: DisplayText)] = [
+        ("princess", .key(L10n.Common.filterSheetAttributePrincess)),
+        ("fairy", .key(L10n.Common.filterSheetAttributeFairy)),
+        ("angel", .key(L10n.Common.filterSheetAttributeAngel)),
+    ]
+    let cinderella: [(value: String, label: DisplayText)] = [
+        ("cute", .key(L10n.Common.filterSheetAttributeCute)),
+        ("cool", .key(L10n.Common.filterSheetAttributeCool)),
+        ("passion", .key(L10n.Common.filterSheetAttributePassion)),
+    ]
+    let sidem: [(value: String, label: DisplayText)] = [
+        ("intelli", .key(L10n.Common.filterSheetAttributeIntelli)),
+        ("physical", .key(L10n.Common.filterSheetAttributePhysical)),
+        ("mental", .key(L10n.Common.filterSheetAttributeMental)),
+    ]
+    let shiny: [(value: String, label: DisplayText)] = [
+        ("sol", .verbatim("Sol")), ("luna", .verbatim("Luna")), ("stella", .verbatim("Stella")),
+    ]
+    return ["cg": cinderella, "ml": princess, "765as": princess, "sidem": sidem, "sc": shiny]
+}
+
+/// 表示形式の選択肢の文言。rawValue (「アイドル名」「CV名」) は @AppStorage に入る保存値なので変えず、
+/// 表示だけカタログを引く。
+private extension IdolDisplayMode {
+    var filterSheetLabel: LocalizedStringResource {
+        switch self {
+        case .idolName: L10n.Common.filterSheetDisplayModeIdolName
+        case .cvName: L10n.Common.filterSheetDisplayModeCvName
+        }
+    }
+}
+
+/// 並び順の選択肢の文言。rawValue (「公式順」など) は @AppStorage に入る保存値なので変えず、
+/// 表示だけカタログを引く。
+private extension IdolSortOrder {
+    var filterSheetLabel: LocalizedStringResource {
+        switch self {
+        case .official: L10n.Common.filterSheetIdolSortOfficial
+        case .nameKana: L10n.Common.filterSheetIdolSortNameKana
+        case .age: L10n.Common.filterSheetIdolSortAge
+        case .height: L10n.Common.filterSheetIdolSortHeight
+        case .weight: L10n.Common.filterSheetIdolSortWeight
+        case .birthday: L10n.Common.filterSheetIdolSortBirthday
+        case .debut: L10n.Common.filterSheetIdolSortDebut
+        }
+    }
+}
 
 struct IdolFilterSheet: View {
     @Environment(AppDatabase.self) private var database
@@ -375,7 +423,7 @@ struct IdolFilterSheet: View {
 
     /// 属性チップは「単一ブランドが選択されている」場合のみ表示。
     /// 0 件 or 複数ブランドではブランド共通のサブ属性が無いので空。
-    private var attributesForBrand: [(value: String, label: String)] {
+    private var attributesForBrand: [(value: String, label: DisplayText)] {
         guard localBrandIds.count == 1, let bid = localBrandIds.first else { return [] }
         return brandAttributes[bid] ?? []
     }
@@ -383,25 +431,27 @@ struct IdolFilterSheet: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("表示形式") {
-                    ImasSegmented(options: IdolDisplayMode.allCases, selection: $localDisplayMode) { $0.rawValue }
+                Section(L10n.Common.filterSheetDisplayModeHeader) {
+                    ImasSegmented(options: IdolDisplayMode.allCases, selection: $localDisplayMode) {
+                        String(localized: $0.filterSheetLabel)
+                    }
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
 
                     // アイドル名表示のとき、CV 名を別行で併記するか。CV 名表示中は CV がタイトルなので無効。
-                    Toggle("CV名を併記", isOn: $localShowCV)
+                    Toggle(L10n.Common.filterSheetShowCv, isOn: $localShowCV)
                         .disabled(localDisplayMode == .cvName)
                 }
 
                 Section {
-                    Picker("並び順", selection: $localSortOrder) {
+                    Picker(L10n.Common.filterSheetSortHeader, selection: $localSortOrder) {
                         ForEach(IdolSortOrder.allCases, id: \.rawValue) { order in
-                            Text(order.rawValue).tag(order)
+                            Text(order.filterSheetLabel).tag(order)
                         }
                     }
                     .pickerStyle(.menu)
 
                     // 方向 toggle (nil なら並び順ごとの既定を表示値にする)
-                    Picker("方向", selection: Binding(
+                    Picker(L10n.Common.filterSheetSortDirection, selection: Binding(
                         get: { localSortAscending ?? localSortOrder.defaultAscending },
                         set: { localSortAscending = $0 }
                     )) {
@@ -410,10 +460,10 @@ struct IdolFilterSheet: View {
                     }
                     .pickerStyle(.segmented)
                 } header: {
-                    Text("並び順")
+                    Text(L10n.Common.filterSheetSortHeader)
                 } footer: {
                     if !localSortOrder.keepsBrandGrouping {
-                        Text("ブランドの区切りを外して通しで並べます")
+                        Text(L10n.Common.filterSheetSortUngroupedFooter)
                     }
                 }
 
@@ -427,29 +477,29 @@ struct IdolFilterSheet: View {
                     }
 
                 if !attributesForBrand.isEmpty {
-                    Section("属性") {
+                    Section(L10n.Common.filterSheetAttributeHeader) {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 6) {
-                                attributeChip(value: nil, label: "全て")
+                                attributeChip(value: nil, label: String(localized: L10n.Common.filterSheetAttributeAll))
                                 ForEach(attributesForBrand, id: \.value) { item in
-                                    attributeChip(value: item.value, label: item.label)
+                                    attributeChip(value: item.value, label: item.label.resolved)
                                 }
                             }
                         }
                     }
                 }
 
-                Section("マイマーク") {
+                Section(L10n.Common.filterSheetMyMarkHeader) {
                     Toggle(isOn: $localMyPick) {
-                        Label("担当のみ", systemImage: "heart.fill")
+                        Label(L10n.Common.filterSheetMyMarkMyPickOnly, systemImage: "heart.fill")
                             .foregroundStyle(DS.pick)
                     }
                     Toggle(isOn: $localFavorite) {
-                        Label("お気に入りのみ", systemImage: "star.fill")
+                        Label(L10n.Common.filterSheetMyMarkFavoriteOnly, systemImage: "star.fill")
                             .foregroundStyle(DS.favorite)
                     }
                     Toggle(isOn: $localNote) {
-                        Label("メモがあるアイドルのみ", systemImage: "note.text")
+                        Label(L10n.Common.filterSheetMyMarkIdolNoteOnly, systemImage: "note.text")
                             .foregroundStyle(DS.warning)
                     }
                 }
@@ -544,7 +594,7 @@ struct TagFilterSheet: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("カテゴリ") {
+                Section(L10n.Common.filterSheetCategoryHeader) {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: DS.sp3) {
                             ForEach(categories, id: \.value) { cat in
@@ -555,7 +605,7 @@ struct TagFilterSheet: View {
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                 }
 
-                Section("並び順") {
+                Section(L10n.Common.filterSheetSortHeader) {
                     ImasSegmented(options: sortOptions.map(\.value), selection: $localSort) { value in
                         sortOptions.first { $0.value == value }?.label ?? value
                     }

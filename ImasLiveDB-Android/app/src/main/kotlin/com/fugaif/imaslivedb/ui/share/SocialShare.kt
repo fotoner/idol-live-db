@@ -31,6 +31,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import uniffi.imas_core.SharePayload
 import uniffi.imas_core.sharePayloadPlainText
@@ -99,7 +101,7 @@ fun SocialShareMenu(
         trigger { expanded = true }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
-                text = { Text("X にポスト") },
+                text = { Text(L10n.Share.socialPostX.resolve()) },
                 leadingIcon = { Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null) },
                 onClick = {
                     expanded = false
@@ -107,7 +109,7 @@ fun SocialShareMenu(
                 }
             )
             DropdownMenuItem(
-                text = { Text("その他でシェア") },
+                text = { Text(L10n.Share.socialOther.resolve()) },
                 leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
                 onClick = {
                     expanded = false
@@ -122,7 +124,7 @@ fun SocialShareMenu(
 @Composable
 fun SocialShareIconButton(
     payload: SharePayload,
-    contentDescription: String = "シェア",
+    contentDescription: String = L10n.Share.socialShareA11y.resolve(),
     tint: Color = DS.ink2
 ) {
     SocialShareMenu(payload) { onClick ->

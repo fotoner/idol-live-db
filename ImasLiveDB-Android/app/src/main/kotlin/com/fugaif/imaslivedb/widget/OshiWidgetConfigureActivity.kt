@@ -40,6 +40,8 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.lifecycleScope
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasLiveDBTheme
@@ -147,14 +149,14 @@ private fun OshiConfigureScreen(
     Surface(modifier = Modifier.fillMaxSize(), color = DS.bg) {
         Column(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
             Text(
-                text = "担当を選ぶ",
+                text = L10n.Widget.selectOshiTitle.resolve(),
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
                 color = DS.ink,
                 modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp)
             )
             Text(
-                text = "ウィジェットに出すアイドルを選びます。画像を取り込んであるアイドルが並びます。",
+                text = L10n.Widget.configureDescription.resolve(),
                 fontSize = 13.sp,
                 color = DS.ink2,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
@@ -170,7 +172,7 @@ private fun OshiConfigureScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "表示できるアイドルがいません。\nアプリのアイドル詳細から画像を取り込むと、ここに並びます。",
+                        text = L10n.Widget.configureEmpty.resolve(),
                         fontSize = 14.sp,
                         color = DS.ink2
                     )
@@ -181,7 +183,7 @@ private fun OshiConfigureScreen(
                         value = query,
                         onValueChange = { query = it },
                         singleLine = true,
-                        placeholder = { Text("名前・ブランドで絞り込む", fontSize = 14.sp) },
+                        placeholder = { Text(L10n.Widget.configureSearchPrompt.resolve(), fontSize = 14.sp) },
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp)
                     )
                     OshiCandidateList(
@@ -258,7 +260,7 @@ private fun OshiRow(candidate: OshiCandidate, selected: Boolean, onPick: () -> U
         if (selected) {
             Icon(
                 imageVector = Icons.Default.Check,
-                contentDescription = "選択中",
+                contentDescription = L10n.Widget.configureSelectedA11y.resolve(),
                 tint = DS.sys,
                 modifier = Modifier.size(20.dp).padding(end = 4.dp)
             )

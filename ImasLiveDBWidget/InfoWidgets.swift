@@ -7,16 +7,16 @@ import SwiftUI
 private func parseDate(_ s: String) -> Date? {
     let f = DateFormatter()
     f.dateFormat = "yyyy-MM-dd"
-    f.locale = Locale(identifier: "ja_JP")
+    f.locale = Locale(identifier: "ja_JP") // i18n-ignore(data): 固定書式の日付を読むためのロケール。表示には使わない
     return f.date(from: s)
 }
 
-/// "YYYY-MM-DD" → "M/d" 表示形式。
+/// "YYYY-MM-DD" → "M/d" 表示形式。書式は数字だけなので、ロケールは画面の言語 (DisplayLocale) に合わせるだけ。
 private func shortDate(_ s: String) -> String {
     guard let d = parseDate(s) else { return s }
     let f = DateFormatter()
     f.dateFormat = "M/d"
-    f.locale = Locale(identifier: "ja_JP")
+    f.locale = DisplayLocale.current.formattingLocale
     return f.string(from: d)
 }
 
@@ -42,6 +42,7 @@ struct NextLiveEntry: TimelineEntry {
 struct NextLiveProvider: TimelineProvider {
     func placeholder(in context: Context) -> NextLiveEntry {
         NextLiveEntry(date: Date(), info: NextShowInfo(
+            // i18n-ignore(sample): ウィジェット選択画面のプレビュー用の見本のイベント名 (データの見本なので訳さない)
             eventId: "", eventName: "アイマス サマーライブ 2026",
             firstDate: "2026-08-01", brandColorHex: "#FF6699"
         ))
@@ -78,7 +79,7 @@ struct NextLiveWidgetView: View {
                     startPoint: .topLeading, endPoint: .bottomTrailing
                 )
                 VStack(alignment: .leading, spacing: 4) {
-                    Label("次のライブ", systemImage: "music.mic")
+                    Label(L10n.Widget.nextLiveHeader, systemImage: "music.mic")
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(.white.opacity(0.8))
                     Spacer(minLength: 0)
@@ -88,7 +89,7 @@ struct NextLiveWidgetView: View {
                         .lineLimit(family == .systemSmall ? 2 : 3)
                     HStack(spacing: 4) {
                         if let d = days {
-                            Text(d == 0 ? "今日！" : "あと\(d)日")
+                            Text(d == 0 ? L10n.Widget.nextLiveToday : L10n.Widget.nextLiveDaysLeft(days: d))
                                 .font(.system(size: 12, weight: .black))
                                 .foregroundStyle(.white)
                         }
@@ -116,7 +117,7 @@ struct NextLivePlaceholder: View {
             VStack(spacing: 6) {
                 Image(systemName: "music.mic")
                     .font(.title2)
-                Text("次のライブ情報なし")
+                Text(L10n.Widget.nextLiveEmpty)
                     .font(.caption2)
                     .multilineTextAlignment(.center)
             }
@@ -134,8 +135,8 @@ struct NextLiveWidget: Widget {
                 .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
-        .configurationDisplayName("次のライブ")
-        .description("直近のライブまでのカウントダウンを表示します。")
+        .configurationDisplayName(L10n.Widget.nextLiveName)
+        .description(L10n.Widget.nextLiveDescriptionIos)
         .supportedFamilies([.systemSmall, .systemMedium])
         .contentMarginsDisabled()
     }
@@ -209,7 +210,7 @@ struct TodaySongWidgetView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Label("今日の1曲", systemImage: "music.quarternote.3")
+                    Label(L10n.Widget.todaySongHeader, systemImage: "music.quarternote.3")
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(accent)
                     Text(info.title)
@@ -241,7 +242,7 @@ struct TodaySongPlaceholder: View {
             VStack(spacing: 6) {
                 Image(systemName: "music.quarternote.3")
                     .font(.title2)
-                Text("今日の1曲を準備中")
+                Text(L10n.Widget.todaySongEmpty)
                     .font(.caption2)
                     .multilineTextAlignment(.center)
             }
@@ -258,8 +259,8 @@ struct TodaySongWidget: Widget {
                 .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
-        .configurationDisplayName("今日の1曲")
-        .description("日替わりで1曲をピックして表示します。")
+        .configurationDisplayName(L10n.Widget.todaySongName)
+        .description(L10n.Widget.todaySongDescriptionIos)
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
@@ -274,8 +275,9 @@ struct TicketDeadlineEntry: TimelineEntry {
 struct TicketDeadlineProvider: TimelineProvider {
     func placeholder(in context: Context) -> TicketDeadlineEntry {
         TicketDeadlineEntry(date: Date(), deadlines: [
+            // i18n-ignore(sample): ウィジェット選択画面のプレビュー用の見本のイベント名 (データの見本なので訳さない)
             TicketDeadlineInfo(eventId: "", eventName: "アイマス サマーライブ 2026", deadline: "2026-07-15"),
-            TicketDeadlineInfo(eventId: "", eventName: "ミリオン 10th アニバーサリー", deadline: "2026-07-20"),
+            TicketDeadlineInfo(eventId: "", eventName: "ミリオン 10th アニバーサリー", deadline: "2026-07-20"), // i18n-ignore(sample): 同上
         ])
     }
 
@@ -303,7 +305,7 @@ struct TicketDeadlineWidgetView: View {
             TicketDeadlinePlaceholder()
         } else {
             VStack(alignment: .leading, spacing: 6) {
-                Label("チケット締切", systemImage: "ticket")
+                Label(L10n.Widget.ticketDeadlineHeader, systemImage: "ticket")
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(.orange)
                 ForEach(entry.deadlines.prefix(3), id: \.eventId) { item in
@@ -333,7 +335,7 @@ struct TicketDeadlinePlaceholder: View {
             VStack(spacing: 6) {
                 Image(systemName: "ticket")
                     .font(.title2)
-                Text("締切近いチケットなし")
+                Text(L10n.Widget.ticketDeadlineEmpty)
                     .font(.caption2)
                     .multilineTextAlignment(.center)
             }
@@ -350,8 +352,8 @@ struct TicketDeadlineWidget: Widget {
                 .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
-        .configurationDisplayName("チケット締切")
-        .description("チケット締切が近いイベントを最大3件表示します。")
+        .configurationDisplayName(L10n.Widget.ticketDeadlineName)
+        .description(L10n.Widget.ticketDeadlineDescriptionIos)
         .supportedFamilies([.systemMedium])
     }
 }

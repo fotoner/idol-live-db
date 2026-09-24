@@ -1,26 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 生成物: i18n/catalog/widget.json → python3 tools/i18n/i18n.py generate。手で直さない -->
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
-    <!-- widget.next_live.description: ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)。iOS の説明 (InfoWidgets.swift) とは ja が違うので iOS を移すときは別のキーにする -->
+    <!-- widget.configure.description: 担当画像ウィジェットの設定画面の見出しの下の説明 -->
+    <string name="widget_configure_description">ウィジェットに出すアイドルを選びます。画像を取り込んであるアイドルが並びます。</string>
+    <!-- widget.configure.empty: 担当画像ウィジェットの設定画面。画像を取り込んだアイドルが 1 人もいないとき (2 行) -->
+    <string name="widget_configure_empty">表示できるアイドルがいません。\nアプリのアイドル詳細から画像を取り込むと、ここに並びます。</string>
+    <!-- widget.configure.search_prompt: 担当画像ウィジェットの設定画面の絞り込み欄のプレースホルダ -->
+    <string name="widget_configure_search_prompt">名前・ブランドで絞り込む</string>
+    <!-- widget.configure.selected.a11y: 担当画像ウィジェットの設定画面。今選ばれているアイドルの行のチェックの読み上げ -->
+    <string name="widget_configure_selected_a11y">選択中</string>
+    <!-- widget.next_live.days_left: 「次のライブ」ウィジェットのカウントダウン。days は初日までの日数。1000 以上は桁区切りが付く (実際には出ない値) -->
+    <plurals name="widget_next_live_days_left">
+        <item quantity="other">あと%1$,d日</item>
+    </plurals>
+    <!-- widget.next_live.description: ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)。iOS の説明は ja が違うので別のキー (next_live.description_ios) -->
     <string name="widget_next_live_description">次のライブまでの日数を表示します。</string>
-    <!-- widget.next_live.name: ホーム画面のウィジェット選択に出る名前 (Android の receiver の android:label) -->
+    <!-- widget.next_live.empty: 「次のライブ」ウィジェット。予定しているライブが無いとき -->
+    <string name="widget_next_live_empty">次のライブ情報なし</string>
+    <!-- widget.next_live.header: 「次のライブ」ウィジェットの左上の小さな見出し -->
+    <string name="widget_next_live_header">次のライブ</string>
+    <!-- widget.next_live.name: ホーム画面のウィジェット選択に出る名前 (iOS の configurationDisplayName / Android の receiver の android:label) -->
     <string name="widget_next_live_name">次のライブ</string>
-    <!-- widget.oshi_image.description: ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description) -->
+    <!-- widget.next_live.today_android: Android の文言。iOS の next_live.today と ja が違う (！の有無。統一はオーナーが別 PR で)。「次のライブ」ウィジェットのカウントダウン (当日) -->
+    <string name="widget_next_live_today_android">今日</string>
+    <!-- widget.oshi.placeholder.add_image: 担当画像ウィジェット。画像を取り込んだアイドルがまだいない (出せる画像が無い) ときの案内 -->
+    <string name="widget_oshi_placeholder_add_image">アプリで画像を追加</string>
+    <!-- widget.oshi.placeholder.add_image_hint: 担当画像ウィジェットの「アプリで画像を追加」の下の補足 -->
+    <string name="widget_oshi_placeholder_add_image_hint">アイドル詳細から取り込めます</string>
+    <!-- widget.oshi_image.description: ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)。iOS の説明は ja が違うので別のキー (oshi_image.description_ios) -->
     <string name="widget_oshi_image_description">担当アイドルの取り込んだ画像をホーム画面に出します。タップで次の画像に切り替わります。</string>
-    <!-- widget.oshi_image.name: ホーム画面のウィジェット選択に出る名前 (Android の receiver の android:label)。タップで次の画像へ送る版 -->
+    <!-- widget.oshi_image.name: ホーム画面のウィジェット選択に出る名前 (iOS の configurationDisplayName / Android の receiver の android:label)。タップで次の画像へ送る版 -->
     <string name="widget_oshi_image_name">担当の画像（タップで切替）</string>
-    <!-- widget.oshi_launcher.description: ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description) -->
+    <!-- widget.oshi_launcher.description: ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)。iOS の説明は ja が違うので別のキー (oshi_launcher.description_ios) -->
     <string name="widget_oshi_launcher_description">担当アイドルの取り込んだ画像をホーム画面に出します。タップするとアプリが開きます。</string>
-    <!-- widget.oshi_launcher.name: ホーム画面のウィジェット選択に出る名前 (Android の receiver の android:label)。タップでアプリを開く版 (絵は oshi_image と同じ) -->
+    <!-- widget.oshi_launcher.name: ホーム画面のウィジェット選択に出る名前 (iOS の configurationDisplayName / Android の receiver の android:label)。タップでアプリを開く版 (絵は oshi_image と同じ) -->
     <string name="widget_oshi_launcher_name">担当の画像（タップでアプリ）</string>
-    <!-- widget.select_oshi.title: 担当画像ウィジェットの設定画面の名前 (Android の設定 Activity の android:label)。iOS の AppIntent (SelectOshiIntent.title) を移すときに両方で使う -->
+    <!-- widget.select_oshi.title: 担当画像ウィジェットの設定の名前。iOS はウィジェットの編集で出る AppIntent (SelectOshiIntent) の名前、Android は設定 Activity の android:label と画面の見出し -->
     <string name="widget_select_oshi_title">担当を選ぶ</string>
-    <!-- widget.ticket_deadline.description: ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description) -->
+    <!-- widget.ticket_deadline.description: ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)。iOS の説明は ja が違うので別のキー (ticket_deadline.description_ios) -->
     <string name="widget_ticket_deadline_description">締切が近いチケットの先行受付を表示します。</string>
-    <!-- widget.ticket_deadline.name: ホーム画面のウィジェット選択に出る名前 (Android の receiver の android:label) -->
+    <!-- widget.ticket_deadline.empty: 「チケット締切」ウィジェット。締切が近い先行受付が無いとき -->
+    <string name="widget_ticket_deadline_empty">締切近いチケットなし</string>
+    <!-- widget.ticket_deadline.header: 「チケット締切」ウィジェットの小さな見出し -->
+    <string name="widget_ticket_deadline_header">チケット締切</string>
+    <!-- widget.ticket_deadline.name: ホーム画面のウィジェット選択に出る名前 (iOS の configurationDisplayName / Android の receiver の android:label) -->
     <string name="widget_ticket_deadline_name">チケット締切</string>
-    <!-- widget.today_song.description: ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description) -->
+    <!-- widget.today_song.description: ウィジェット選択に出る説明 (Android の res/xml/*_widget_info.xml の android:description)。iOS の説明は ja が違うので別のキー (today_song.description_ios) -->
     <string name="widget_today_song_description">日替わりで1曲をジャケット付きで表示します。</string>
-    <!-- widget.today_song.name: ホーム画面のウィジェット選択に出る名前 (Android の receiver の android:label) -->
+    <!-- widget.today_song.empty: 「今日の1曲」ウィジェット。今日の曲のデータがまだ無いとき -->
+    <string name="widget_today_song_empty">今日の1曲を準備中</string>
+    <!-- widget.today_song.empty_hint: 「今日の1曲」ウィジェットの準備中の下の補足 -->
+    <string name="widget_today_song_empty_hint">データの取得が終わると出ます</string>
+    <!-- widget.today_song.header: 「今日の1曲」ウィジェットの小さな見出し -->
+    <string name="widget_today_song_header">今日の1曲</string>
+    <!-- widget.today_song.name: ホーム画面のウィジェット選択に出る名前 (iOS の configurationDisplayName / Android の receiver の android:label) -->
     <string name="widget_today_song_name">今日の1曲</string>
 </resources>

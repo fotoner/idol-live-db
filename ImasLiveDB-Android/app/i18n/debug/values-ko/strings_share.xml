@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/share.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources>
+    <string name="share_action_preparing">이미지 준비 중…</string>
+    <string name="share_action_save">저장</string>
+    <string name="share_action_share">공유하기</string>
+    <string name="share_collection_badge">곡 회수율</string>
+    <plurals name="share_collection_idol_count">
+        <item quantity="other">%1$s/%2$,d곡</item>
+    </plurals>
+    <string name="share_collection_lead">라이브에서 들은 곡</string>
+    <string name="share_collection_sheet_title">회수율 공유</string>
+    <plurals name="share_collection_summary">
+        <item quantity="other">%1$s / %2$,d곡 회수</item>
+    </plurals>
+    <string name="share_comment_badge">세트리스트 감상</string>
+    <string name="share_comment_field_label">이 곡의 감상</string>
+    <string name="share_comment_field_placeholder">최고였어! 울었어… 등</string>
+    <string name="share_comment_placeholder_card">여기에 감상이 들어가요</string>
+    <string name="share_comment_sheet_title">감상 카드 만들기</string>
+    <string name="share_footer_hashtag">#アイドルライブDB</string>
+    <string name="share_ratio_portrait">세로형</string>
+    <string name="share_ratio_square">정사각형</string>
+    <string name="share_ratio_story">스토리</string>
+    <string name="share_render_error_title">공유 이미지를 만들지 못했어요</string>
+    <string name="share_save_done">이미지를 저장했어요</string>
+    <string name="share_save_done_pictures">사진 폴더에 저장했어요</string>
+    <string name="share_save_failed">저장하지 못했어요</string>
+    <string name="share_social_other">다른 앱으로 공유</string>
+    <string name="share_social_post_x">X에 게시</string>
+    <string name="share_social_share_a11y">공유</string>
+    <string name="share_tag_badge">태그를 추가했어요!</string>
+    <string name="share_tag_done_message">이왕이면 카드로 공유해 볼까요?</string>
+    <string name="share_tag_done_title">태그를 달았어요!</string>
+</resources>

@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 
 /** コピーする項目。label はメニュー文言、text は実際にコピーされる原文。 */
@@ -99,7 +101,7 @@ fun Copyable(
 @Composable
 fun Copyable(
     text: String?,
-    label: String = "コピー",
+    label: String = L10n.Common.copyDefault.resolve(),
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit

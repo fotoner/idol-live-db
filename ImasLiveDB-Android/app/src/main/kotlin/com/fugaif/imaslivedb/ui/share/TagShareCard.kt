@@ -43,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.BrandColors
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.hexToColor
@@ -78,7 +80,7 @@ fun TagShareCard(context: TagShareContext, artwork: ImageBitmap?, size: ShareCar
 
     PhotoShareScaffold(artwork = artwork, palette = palette, size = size) {
         ShareEyebrow(
-            text = "タグを追加しました！",
+            text = L10n.Share.tagBadge.resolve(),
             accent = palette.accent,
             ink = ShareInk.ink.copy(alpha = 0.82f)
         )
@@ -169,7 +171,7 @@ fun TagShareCompletionPane(
             .getOrDefault(emptyList())
         shareContext = TagShareContext(
             songTitle = song?.title ?: "",
-            artistNames = artists.take(4).joinToString("・") { it.name }.ifEmpty { null },
+            artistNames = artists.take(4).joinToString(L10n.Common.listMiddot.resolve(ctx)) { it.name }.ifEmpty { null },
             tags = appliedTags,
             // 曲のブランドカラーを第一シードに。無ければ先頭タグの色へ落ちる。
             seed = BrandColors.hex(song?.brandId) ?: appliedTags.firstOrNull()?.color,
@@ -190,8 +192,8 @@ fun TagShareCompletionPane(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = DS.success, modifier = Modifier.size(40.dp))
-        Text("タグを付けました！", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink)
-        Text("せっかくなのでカードでシェアしませんか？", fontSize = 13.sp, color = DS.ink2)
+        Text(L10n.Share.tagDoneTitle.resolve(), fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+        Text(L10n.Share.tagDoneMessage.resolve(), fontSize = 13.sp, color = DS.ink2)
 
         if (current != null) {
             ShareCardActionPane(
@@ -207,7 +209,7 @@ fun TagShareCompletionPane(
         }
 
         Text(
-            "閉じる",
+            L10n.Common.actionClose.resolve(),
             fontSize = 15.sp,
             color = DS.ink2,
             modifier = Modifier.clickable(onClick = onClose).padding(8.dp)

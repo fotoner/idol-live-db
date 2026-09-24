@@ -124,6 +124,10 @@ extension L10n {
         static var detailTagsHeader: LocalizedStringResource {
             LocalizedStringResource("units.detail.tags.header", defaultValue: "タグ", table: "Units", bundle: L10n.bundle)
         }
+        /// {count}組 — ユニット一覧のブランドの区切り見出しの右のユニット数。1000 以上は桁区切りが付く (従来どおり) — 引数: count (count)
+        static func listBrandCount(count: Int) -> LocalizedStringResource {
+            LocalizedStringResource("units.list.brand_count", defaultValue: "\(count)組", table: "Units", bundle: L10n.bundle)
+        }
         /// 登録されているユニットがまだありません。 — ユニットが 1 件も無いときの空状態の説明
         static var listEmptyMessage: LocalizedStringResource {
             LocalizedStringResource("units.list.empty.message", defaultValue: "登録されているユニットがまだありません。", table: "Units", bundle: L10n.bundle)

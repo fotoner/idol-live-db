@@ -24,7 +24,7 @@ struct GenericGridView<Item: GridCardItem>: View {
     init(
         items: [Item],
         isLoading: Bool = false,
-        emptyTitle: String = "アイテムが見つかりません",
+        emptyTitle: String = String(localized: L10n.Common.gridEmptyTitle),
         emptySystemImage: String = "square.grid.2x2",
         onSelect: @escaping (Item) -> Void
     ) {

@@ -261,7 +261,7 @@ struct ImasRemovableChip: View {
             .background(accent.opacity(0.14), in: Capsule())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(text) を解除")
+        .accessibilityLabel(L10n.Common.removableChipRemoveA11y(label: text))
     }
 }
 
@@ -383,13 +383,15 @@ struct ImasAwardChip: View {
     let rank: Int
 
     private var isWinner: Bool { rank == 1 }
-    private var rankLabel: String { isWinner ? "優勝" : "第\(rank)位" }
+    private var rankLabel: String {
+        String(localized: isWinner ? L10n.Common.awardChipWinner : L10n.Common.awardChipRank(rank: rank))
+    }
 
     var body: some View {
         HStack(spacing: 5) {
             Image(systemName: isWinner ? "crown.fill" : "rosette")
                 .font(.imasScaled(12, weight: .semibold))
-            Text("\(title) \(rankLabel)")
+            Text(verbatim: "\(title) \(rankLabel)")
                 .font(.imasScaled(13.5, weight: .semibold))
                 .lineLimit(1)
         }
@@ -399,7 +401,9 @@ struct ImasAwardChip: View {
             isWinner ? AnyShapeStyle(DS.warning) : AnyShapeStyle(DS.warning.opacity(0.14)),
             in: Capsule()
         )
-        .accessibilityLabel("\(title) で\(rankLabel)")
+        .accessibilityLabel(isWinner
+                            ? L10n.Common.awardChipWinnerA11y(title: title)
+                            : L10n.Common.awardChipRankA11y(title: title, rank: rank))
     }
 }
 
@@ -594,7 +598,7 @@ struct ImasRankingRow: View {
     let title: String
     var sub: String? = nil
     let metric: String
-    var unit: String = "回"
+    var unit: String = String(localized: L10n.Common.rankingRowUnitDefault)
     var seed: String? = nil
     var brand: String? = nil
     @Environment(\.colorScheme) private var scheme
@@ -780,7 +784,7 @@ struct ImasLabeledRow: View {
 
         // 省略されている値も原文 (`value`) を渡すので、全文がコピーできる。
         let copyableRow = row.imasCopyable(
-            copyable ? [CopyItem("\(key)をコピー", value, key: "labeled_row")] : [])
+            copyable ? [CopyItem(String(localized: L10n.Common.copyLabeled(label: key)), value, key: "labeled_row")] : [])
 
         if showsToggle {
             copyableRow.onTapGesture { withAnimation(.easeInOut(duration: 0.2)) { expanded.toggle() } }

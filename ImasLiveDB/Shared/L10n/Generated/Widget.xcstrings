@@ -1,0 +1,488 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "widget.next_live.days_left" : {
+      "comment" : "「次のライブ」ウィジェットのカウントダウン。days は初日までの日数。1000 以上は桁区切りが付く (実際には出ない値) (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@days@"
+          },
+          "substitutions" : {
+            "days" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "あと%arg日"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@days@"
+          },
+          "substitutions" : {
+            "days" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg일 남음"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "widget.next_live.description_ios" : {
+      "comment" : "iOS のウィジェット選択に出る説明 (configurationDisplayName の下)。Android の next_live.description と ja が違う (統一はオーナーが別 PR で) (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直近のライブまでのカウントダウンを表示します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가장 가까운 라이브까지 카운트다운을 보여 줘요."
+          }
+        }
+      }
+    },
+    "widget.next_live.empty" : {
+      "comment" : "「次のライブ」ウィジェット。予定しているライブが無いとき (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次のライブ情報なし"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다음 라이브 정보 없음"
+          }
+        }
+      }
+    },
+    "widget.next_live.header" : {
+      "comment" : "「次のライブ」ウィジェットの左上の小さな見出し (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次のライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다음 라이브"
+          }
+        }
+      }
+    },
+    "widget.next_live.name" : {
+      "comment" : "ホーム画面のウィジェット選択に出る名前 (iOS の configurationDisplayName / Android の receiver の android:label) (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次のライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다음 라이브"
+          }
+        }
+      }
+    },
+    "widget.next_live.today" : {
+      "comment" : "「次のライブ」ウィジェットのカウントダウン (当日) (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오늘!"
+          }
+        }
+      }
+    },
+    "widget.next_oshi_image.title" : {
+      "comment" : "担当画像ウィジェットをタップしたときに動く AppIntent の名前 (ショートカットなどに出る) (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次の画像"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다음 이미지"
+          }
+        }
+      }
+    },
+    "widget.oshi.placeholder.add_image" : {
+      "comment" : "担当画像ウィジェット。画像を取り込んだアイドルがまだいない (出せる画像が無い) ときの案内 (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリで画像を追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "앱에서 이미지 추가"
+          }
+        }
+      }
+    },
+    "widget.oshi.placeholder.select" : {
+      "comment" : "担当画像ウィジェット。表示するアイドルは決まっているが画像を出せないときの案内 (ウィジェットの編集で担当を選び直す) (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当を選択"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 선택"
+          }
+        }
+      }
+    },
+    "widget.oshi_entity.type_name" : {
+      "comment" : "ウィジェットの編集で選ぶ候補の種類の名前 (AppEntity の typeDisplayRepresentation) (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌"
+          }
+        }
+      }
+    },
+    "widget.oshi_image.description_ios" : {
+      "comment" : "iOS のウィジェット選択に出る説明 (タップで次の画像へ送る版)。Android の oshi_image.description と ja が違う (統一はオーナーが別 PR で) (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選んだアイドルの画像を表示。タップで次の画像に切り替わります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "고른 아이돌의 이미지를 보여 줘요. 탭하면 다음 이미지로 바뀌어요."
+          }
+        }
+      }
+    },
+    "widget.oshi_image.name" : {
+      "comment" : "ホーム画面のウィジェット選択に出る名前 (iOS の configurationDisplayName / Android の receiver の android:label)。タップで次の画像へ送る版 (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当の画像（タップで切替）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 이미지 (탭으로 전환)"
+          }
+        }
+      }
+    },
+    "widget.oshi_launcher.description_ios" : {
+      "comment" : "iOS のウィジェット選択に出る説明 (タップでアプリを開く版)。Android の oshi_launcher.description と ja が違う (統一はオーナーが別 PR で) (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選んだアイドルの画像を表示。タップでアプリを開きます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "고른 아이돌의 이미지를 보여 줘요. 탭하면 앱이 열려요."
+          }
+        }
+      }
+    },
+    "widget.oshi_launcher.name" : {
+      "comment" : "ホーム画面のウィジェット選択に出る名前 (iOS の configurationDisplayName / Android の receiver の android:label)。タップでアプリを開く版 (絵は oshi_image と同じ) (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当の画像（タップでアプリ）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 이미지 (탭으로 앱 열기)"
+          }
+        }
+      }
+    },
+    "widget.select_oshi.description_ios" : {
+      "comment" : "ウィジェットの編集で出る AppIntent (SelectOshiIntent) の説明。Android の設定画面の説明 (configure.description) とは ja が違う (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ウィジェットに表示するアイドルを選びます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "위젯에 표시할 아이돌을 골라요."
+          }
+        }
+      }
+    },
+    "widget.select_oshi.param_idol" : {
+      "comment" : "ウィジェットの編集で出る、表示するアイドルを選ぶ項目の名前 (AppIntent のパラメータ) (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌"
+          }
+        }
+      }
+    },
+    "widget.select_oshi.title" : {
+      "comment" : "担当画像ウィジェットの設定の名前。iOS はウィジェットの編集で出る AppIntent (SelectOshiIntent) の名前、Android は設定 Activity の android:label と画面の見出し (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当を選ぶ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 고르기"
+          }
+        }
+      }
+    },
+    "widget.ticket_deadline.description_ios" : {
+      "comment" : "iOS のウィジェット選択に出る説明。Android の ticket_deadline.description と ja が違う (統一はオーナーが別 PR で) (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チケット締切が近いイベントを最大3件表示します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "티켓 마감이 가까운 이벤트를 최대 3건 보여 줘요."
+          }
+        }
+      }
+    },
+    "widget.ticket_deadline.empty" : {
+      "comment" : "「チケット締切」ウィジェット。締切が近い先行受付が無いとき (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "締切近いチケットなし"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마감이 가까운 티켓 없음"
+          }
+        }
+      }
+    },
+    "widget.ticket_deadline.header" : {
+      "comment" : "「チケット締切」ウィジェットの小さな見出し (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チケット締切"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "티켓 마감"
+          }
+        }
+      }
+    },
+    "widget.ticket_deadline.name" : {
+      "comment" : "ホーム画面のウィジェット選択に出る名前 (iOS の configurationDisplayName / Android の receiver の android:label) (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チケット締切"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "티켓 마감"
+          }
+        }
+      }
+    },
+    "widget.today_song.description_ios" : {
+      "comment" : "iOS のウィジェット選択に出る説明。Android の today_song.description と ja が違う (統一はオーナーが別 PR で) (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日替わりで1曲をピックして表示します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "날마다 한 곡을 골라 보여 줘요."
+          }
+        }
+      }
+    },
+    "widget.today_song.empty" : {
+      "comment" : "「今日の1曲」ウィジェット。今日の曲のデータがまだ無いとき (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日の1曲を準備中"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오늘의 한 곡 준비 중"
+          }
+        }
+      }
+    },
+    "widget.today_song.header" : {
+      "comment" : "「今日の1曲」ウィジェットの小さな見出し (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日の1曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오늘의 한 곡"
+          }
+        }
+      }
+    },
+    "widget.today_song.name" : {
+      "comment" : "ホーム画面のウィジェット選択に出る名前 (iOS の configurationDisplayName / Android の receiver の android:label) (i18n/catalog/widget.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日の1曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오늘의 한 곡"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

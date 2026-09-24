@@ -1,6 +1,24 @@
 {
   "sourceLanguage" : "ja",
   "strings" : {
+    "common.action.close" : {
+      "comment" : "シートや完了画面を閉じるボタン (シェアカードのシート・タグ付与の完了画面) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "閉じる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "닫기"
+          }
+        }
+      }
+    },
     "common.action.login" : {
       "comment" : "未ログインの人に出すインライン導線 (InlineLoginPrompt) のボタン。Android は同じ部品を持たずダイアログで案内する (i18n/catalog/common.json)",
       "extractionState" : "manual",
@@ -15,6 +33,24 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "로그인"
+          }
+        }
+      }
+    },
+    "common.action.ok" : {
+      "comment" : "アラートの了解ボタン (シェア画像の生成に失敗したとき) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "확인"
           }
         }
       }
@@ -51,6 +87,1478 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "모두 보기"
+          }
+        }
+      }
+    },
+    "common.attendance_swipe.cancel" : {
+      "comment" : "公演の行のスワイプに出る、参加の記録を取り消すボタン (幅が狭いので短い形) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "취소"
+          }
+        }
+      }
+    },
+    "common.attendance_swipe.register" : {
+      "comment" : "公演・ライブの行をスワイプすると出る参加登録のボタン (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加を登録"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가 등록"
+          }
+        }
+      }
+    },
+    "common.award_chip.rank" : {
+      "comment" : "みんなの投票の終了お題での順位バッジ (2〜3 位)。お題名の後ろに付く。rank は順位 (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "第%1$@位"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@위"
+          }
+        }
+      }
+    },
+    "common.award_chip.rank.a11y" : {
+      "comment" : "順位バッジの読み上げ (2〜3 位)。title はお題名、rank は順位 (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ で第%2$@位"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@에서 %2$@위"
+          }
+        }
+      }
+    },
+    "common.award_chip.winner" : {
+      "comment" : "みんなの投票の終了お題で 1 位になったことを示すバッジ (お題名の後ろに付く) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "優勝"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "우승"
+          }
+        }
+      }
+    },
+    "common.award_chip.winner.a11y" : {
+      "comment" : "順位バッジの読み上げ (1 位)。title はお題名 (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ で優勝"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@에서 우승"
+          }
+        }
+      }
+    },
+    "common.brand_filter.all" : {
+      "comment" : "ブランドの絞り込みの「全ブランド」の選択肢 (選ぶとブランドの絞り込みを外す) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全て"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "common.brand_filter.all_icon" : {
+      "comment" : "ブランドの絞り込みの「全て」の丸アイコンの中の字。短いほど大きい字で出る (2 文字までが最大) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "common.brand_section.count_people" : {
+      "comment" : "ブランドの区切り見出しの右の人数 (アイドル一覧・ピッカー)。1000 以上は桁区切りが付く (従来どおり) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg人"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg명"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "common.color_dot.a11y" : {
+      "comment" : "イメージカラーの点の読み上げ。color は色の名前 (コアが hex から作る) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カラー: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "색상: %1$@"
+          }
+        }
+      }
+    },
+    "common.copy.default" : {
+      "comment" : "長押しメニューのコピー項目の既定の文言 (何をコピーするかを渡さないとき) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "복사"
+          }
+        }
+      }
+    },
+    "common.copy.event_name" : {
+      "comment" : "ライブの行の長押しメニュー (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ名をコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브 이름 복사"
+          }
+        }
+      }
+    },
+    "common.copy.idol_name" : {
+      "comment" : "アイドルの行の長押しメニュー (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル名をコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 이름 복사"
+          }
+        }
+      }
+    },
+    "common.copy.kana" : {
+      "comment" : "アイドル・楽曲の行の長押しメニュー。よみ = 名前・曲名のかな読み (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "よみをコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "읽는 법 복사"
+          }
+        }
+      }
+    },
+    "common.copy.labeled" : {
+      "comment" : "「よみ」「CV」などの行の長押しメニュー。label は行の見出し (よみ・CV・会場…) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@をコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 복사"
+          }
+        }
+      }
+    },
+    "common.copy.singers" : {
+      "comment" : "楽曲の行の長押しメニュー (歌っている人の並び) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌唱者をコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가창자 복사"
+          }
+        }
+      }
+    },
+    "common.copy.song_title" : {
+      "comment" : "楽曲の行の長押しメニュー (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲名をコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡명 복사"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.action.apply" : {
+      "comment" : "絞り込みシート右上の、条件を一覧に反映して閉じるボタン (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "適用"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "적용"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.action.reset" : {
+      "comment" : "絞り込みシート左上の、条件をすべて外すボタン (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リセット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "초기화"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.attendance.all" : {
+      "comment" : "参加状態の選択肢 (絞り込まない) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.attendance.attended" : {
+      "comment" : "参加状態の選択肢 (参加を記録したライブだけ) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加済み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가함"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.attendance.header" : {
+      "comment" : "ライブの絞り込みシートの参加状態の節の見出し (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加状態"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가 상태"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.attendance.not_attended" : {
+      "comment" : "参加状態の選択肢 (参加を記録していないライブだけ) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未参加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "미참가"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.attribute.all" : {
+      "comment" : "属性の選択肢 (属性で絞り込まない) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全て"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.attribute.angel" : {
+      "comment" : "ミリオンライブ・765AS の属性名 (公式の名前)。ko は音訳。表記はオーナー確定待ち (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エンジェル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "엔젤"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.attribute.cool" : {
+      "comment" : "シンデレラガールズの属性名 (公式の名前)。ko は音訳。表記はオーナー確定待ち (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クール"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "쿨"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.attribute.cute" : {
+      "comment" : "シンデレラガールズの属性名 (公式の名前)。ko は音訳。表記はオーナー確定待ち (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キュート"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "큐트"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.attribute.fairy" : {
+      "comment" : "ミリオンライブ・765AS の属性名 (公式の名前)。ko は音訳。表記はオーナー確定待ち (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フェアリー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "페어리"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.attribute.header" : {
+      "comment" : "アイドルの絞り込みシートの属性の節の見出し (ブランドを 1 つだけ選んだときに出る) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "属性"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "속성"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.attribute.intelli" : {
+      "comment" : "SideM の属性名 (公式の名前)。ko は音訳。表記はオーナー確定待ち (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インテリ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "인텔리"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.attribute.mental" : {
+      "comment" : "SideM の属性名 (公式の名前)。ko は音訳。表記はオーナー確定待ち (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メンタル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "멘탈"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.attribute.passion" : {
+      "comment" : "シンデレラガールズの属性名 (公式の名前)。ko は音訳。表記はオーナー確定待ち (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パッション"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "패션"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.attribute.physical" : {
+      "comment" : "SideM の属性名 (公式の名前)。ko は音訳。表記はオーナー確定待ち (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フィジカル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "피지컬"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.attribute.princess" : {
+      "comment" : "ミリオンライブ・765AS の属性名 (公式の名前)。ko は音訳。表記はオーナー確定待ち (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プリンセス"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "프린세스"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.brand.footer" : {
+      "comment" : "ブランドの節の下の補足 (いくつでも選べる) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "複数選択可能"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "여러 개 선택 가능"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.brand.header" : {
+      "comment" : "絞り込みシートのブランドの節の見出し (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランド"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.category.header" : {
+      "comment" : "タグの絞り込みシートのカテゴリの節の見出し (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カテゴリ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "카테고리"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.display.header" : {
+      "comment" : "ライブの絞り込みシートの表示設定の節の見出し (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "表示設定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "표시 설정"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.display.show_empty_events" : {
+      "comment" : "表示設定の節のスイッチ (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリ情報がないイベントも表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 정보가 없는 이벤트도 표시"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.display_mode.cv_name" : {
+      "comment" : "表示形式の選択肢 (一覧の見出しを声優名にする)。保存値 (rawValue) は変えず、表示だけこの文言にする (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CV名"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "CV 이름"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.display_mode.header" : {
+      "comment" : "アイドルの絞り込みシートの表示形式の節の見出し (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "表示形式"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "표시 형식"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.display_mode.idol_name" : {
+      "comment" : "表示形式の選択肢 (一覧の見出しをアイドル名にする)。保存値 (rawValue) は変えず、表示だけこの文言にする (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル名"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 이름"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.idol_sort.age" : {
+      "comment" : "アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "年齢"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "나이"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.idol_sort.birthday" : {
+      "comment" : "アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "誕生日"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "생일"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.idol_sort.debut" : {
+      "comment" : "アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "デビュー日"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "데뷔일"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.idol_sort.height" : {
+      "comment" : "アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "身長"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "키"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.idol_sort.name_kana" : {
+      "comment" : "アイドルの並び順の選択肢 (名前のかな読みの五十音順)。保存値は変えず、表示だけこの文言にする (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "五十音順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "50음순"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.idol_sort.official" : {
+      "comment" : "アイドルの並び順の選択肢。保存値 (rawValue) は変えず、表示だけこの文言にする (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公式順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공식순"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.idol_sort.weight" : {
+      "comment" : "アイドルの並び順の選択肢。保存値は変えず、表示だけこの文言にする (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "体重"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "몸무게"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.kind.all_shown" : {
+      "comment" : "種別の節の下。除外している種別が無いとき (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全て表示中"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모두 표시 중"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.kind.excluded" : {
+      "comment" : "種別の節の下。除外している種別の並び。kinds は種別名 (コアの語彙) を「 / 」でつないだもの (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "除外: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "제외: %1$@"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.kind.header" : {
+      "comment" : "ライブの絞り込みシートの種別 (ライブ・フェス・リリイベ…) の節の見出し (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "種別"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "종류"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.kind_chip.excluded.a11y" : {
+      "comment" : "種別チップの読み上げ (その種別を外している状態)。kind は種別名 (コアの語彙) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ 除外"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 제외"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.kind_chip.shown.a11y" : {
+      "comment" : "種別チップの読み上げ (その種別を出している状態)。kind は種別名 (コアの語彙) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ 表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 표시"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.my_mark.event_note_only" : {
+      "comment" : "ライブの絞り込みのマイマークの節のスイッチ (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メモがあるイベントのみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "메모가 있는 이벤트만"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.my_mark.favorite_only" : {
+      "comment" : "マイマークの節のスイッチ (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入りのみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기만"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.my_mark.header" : {
+      "comment" : "絞り込みシートのマイマーク (お気に入り・メモ・担当) の節の見出し (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイマーク"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이 마크"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.my_mark.idol_note_only" : {
+      "comment" : "アイドルの絞り込みのマイマークの節のスイッチ (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メモがあるアイドルのみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "메모가 있는 아이돌만"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.my_mark.my_pick_only" : {
+      "comment" : "アイドルの絞り込みのマイマークの節のスイッチ (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当のみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당만"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.show_cv" : {
+      "comment" : "表示形式の節のスイッチ (アイドル名の下に声優名も出す) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CV名を併記"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "CV 이름 함께 표시"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.sort.direction" : {
+      "comment" : "並び順の向き (昇順・降順) を選ぶ切り替えの名前 (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "方向"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "방향"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.sort.header" : {
+      "comment" : "絞り込みシートの並び順の節の見出しと、並び順のメニューの名前 (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "並び順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정렬 순서"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.sort.ungrouped_footer" : {
+      "comment" : "並び順の節の下の説明 (ブランドごとに分けない並び順を選んだとき) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランドの区切りを外して通しで並べます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드 구분 없이 이어서 정렬해요"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.title" : {
+      "comment" : "絞り込みシートのナビゲーションタイトル (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フィルタ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.venue.footer" : {
+      "comment" : "会場の節の下の説明 (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "その会場で公演があったライブに絞ります"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "그 공연장에서 공연이 있었던 라이브만 보여 줘요"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.venue.header" : {
+      "comment" : "ライブの絞り込みシートの会場の節の見出し (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会場"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연장"
+          }
+        }
+      }
+    },
+    "common.filter_sheet.venue.none" : {
+      "comment" : "会場がまだ選ばれていないときの行の表示 (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択なし"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "선택 안 함"
+          }
+        }
+      }
+    },
+    "common.grid.empty.title" : {
+      "comment" : "ジャケットの格子一覧 (シリーズ・アルバム) が空のときの既定の見出し (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイテムが見つかりません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "항목을 찾을 수 없어요"
+          }
+        }
+      }
+    },
+    "common.list_picker.empty.message" : {
+      "comment" : "候補ピッカーで検索語に合う候補が無いときの説明。query は利用者が打った語 (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」に一致する項目がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@”에 해당하는 항목이 없어요"
+          }
+        }
+      }
+    },
+    "common.list_picker.empty.title" : {
+      "comment" : "候補ピッカーで検索語に合う候補が無いときの見出し (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "見つかりません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "찾을 수 없어요"
+          }
+        }
+      }
+    },
+    "common.list_picker.none" : {
+      "comment" : "候補から 1 つ選ぶピッカー (シリーズ・ライブ名など) の先頭の行。選ぶと絞り込みを外す (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択なし"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "선택 안 함"
+          }
+        }
+      }
+    },
+    "common.list_picker.search_prompt" : {
+      "comment" : "候補ピッカーの検索欄のプレースホルダ。title はピッカーの名前 (シリーズ・ライブ名など。呼び出し側の文言) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@を検索"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 검색"
+          }
+        }
+      }
+    },
+    "common.list_toolbar.more.a11y" : {
+      "comment" : "一覧のツールバー右の「…」メニューの読み上げ (追加・表示切替などをまとめたもの) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "その他の操作"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "기타 작업"
+          }
+        }
+      }
+    },
+    "common.local_write.record_attendance" : {
+      "comment" : "端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (公演の行のスワイプで参加を登録・取り消す) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加の記録"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가 기록"
+          }
+        }
+      }
+    },
+    "common.local_write.toggle_my_pick" : {
+      "comment" : "端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (一覧の行のハートで担当を付け外しする) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当の切り替え"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 전환"
+          }
+        }
+      }
+    },
+    "common.my_pick_toggle.add.a11y" : {
+      "comment" : "一覧の行のハートボタンの読み上げ (まだ担当でないとき。押すと担当になる) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当に追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당에 추가"
+          }
+        }
+      }
+    },
+    "common.my_pick_toggle.remove.a11y" : {
+      "comment" : "一覧の行のハートボタンの読み上げ (担当のとき。押すと担当を外す) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当解除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 해제"
+          }
+        }
+      }
+    },
+    "common.name_filter.clear.a11y" : {
+      "comment" : "名前の絞り込み欄の右の × ボタンの読み上げ (入力を消す) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "絞り込みを解除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터 해제"
+          }
+        }
+      }
+    },
+    "common.ranking_row.unit_default" : {
+      "comment" : "ランキング行 (ImasRankingRow) の数値の後ろに付く単位の既定 (回数)。呼び出し側が単位を渡さないときに出る (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "회"
+          }
+        }
+      }
+    },
+    "common.removable_chip.remove.a11y" : {
+      "comment" : "適用中の絞り込みを表すチップ (ImasRemovableChip) の読み上げ。label はチップの文言 (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ を解除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 해제"
           }
         }
       }

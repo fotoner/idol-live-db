@@ -37,6 +37,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayLocale
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.hexToColor
 import java.util.Locale
 
@@ -105,11 +108,11 @@ data class CollectionShareStats(
 fun CollectionShareCard(stats: CollectionShareStats, size: ShareCardSize) {
     val palette = rememberShareCardPalette(stats.seed)
 
-    SoloShareScaffold(palette = palette, size = size, badge = "楽曲回収率") {
+    SoloShareScaffold(palette = palette, size = size, badge = L10n.Share.collectionBadge.resolve()) {
         Spacer(Modifier.height(16.dp))
 
         Text(
-            "ライブで聴けた曲",
+            L10n.Share.collectionLead.resolve(),
             fontSize = 18.sp,
             fontWeight = FontWeight.SemiBold,
             letterSpacing = 1.0.sp,
@@ -140,7 +143,10 @@ fun CollectionShareCard(stats: CollectionShareStats, size: ShareCardSize) {
 
         Spacer(Modifier.height(4.dp))
         Text(
-            "${stats.overallCollected} / ${stats.overallTotal} 曲を回収",
+            L10n.Share.collectionSummary(
+                collected = groupedCount(stats.overallCollected),
+                total = stats.overallTotal
+            ).resolve(),
             fontSize = 17.sp,
             fontWeight = FontWeight.Medium,
             color = ShareInk.ink2
@@ -178,7 +184,7 @@ private fun IdolRow(line: CollectionShareStats.IdolLine, palette: ShareCardPalet
             )
             Spacer(Modifier.width(8.dp))
             Text(
-                "${line.collected}/${line.total}曲",
+                L10n.Share.collectionIdolCount(collected = groupedCount(line.collected), total = line.total).resolve(),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
                 color = ShareInk.ink2
@@ -187,6 +193,14 @@ private fun IdolRow(line: CollectionShareStats.IdolLine, palette: ShareCardPalet
         ShareProgressBar(ratio = line.ratio, height = 5.dp, fill = fill)
     }
 }
+
+/**
+ * 曲数を桁区切りで書く。文言の曲数 (count 型) と同じ書き方にそろえるため
+ * (1 つの文言に count は 1 つまでなので、もう片方はここで書いて string で渡す)。
+ */
+@Composable
+private fun groupedCount(n: Int): String =
+    String.format(DisplayLocale.of(LocalContext.current).formattingLocale, "%,d", n)
 
 /** プログレスバー。塗りはメンバーカラー (差し色)、地は白の薄塗り。 */
 @Composable
@@ -216,7 +230,7 @@ fun CollectionShareSheet(collected: Int, total: Int, onDismiss: () -> Unit) {
         stats = CollectionShareStats.load(context, collected, total)
     }
 
-    ShareCardSheet(title = "回収率をシェア", onDismiss = onDismiss) {
+    ShareCardSheet(title = L10n.Share.collectionSheetTitle.resolve(), onDismiss = onDismiss) {
         val current = stats
         if (current == null) {
             Box(Modifier.fillMaxWidth().padding(vertical = 40.dp), contentAlignment = Alignment.Center) {

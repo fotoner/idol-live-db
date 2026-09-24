@@ -56,11 +56,11 @@ enum ShareCard {
         }
 
         /// 用途が伝わる補助ラベル (VoiceOver / 補足表示用)。
-        var caption: String {
+        var caption: LocalizedStringResource {
             switch self {
-            case .square:   return "正方形"
-            case .portrait: return "縦長"
-            case .story:    return "ストーリーズ"
+            case .square:   return L10n.Share.ratioSquare
+            case .portrait: return L10n.Share.ratioPortrait
+            case .story:    return L10n.Share.ratioStory
             }
         }
 
@@ -131,7 +131,7 @@ struct ShareCardFooter: View {
         HStack(spacing: 7) {
             Image(systemName: "music.mic")
                 .font(.imasScaled( 12, weight: .semibold))
-            Text("#アイドルライブDB")
+            Text(L10n.Share.footerHashtag)
                 .font(.imasScaled( 14, weight: .bold))
             Spacer()
             Text("IDOL LIVE DATABASE")

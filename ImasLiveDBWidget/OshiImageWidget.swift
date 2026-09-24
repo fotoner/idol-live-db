@@ -12,7 +12,8 @@ struct OshiEntity: AppEntity {
     /// ブランド名 (副題に出して同名・大量候補の判別を助ける)。
     let brandName: String?
 
-    static let typeDisplayRepresentation: TypeDisplayRepresentation = "アイドル"
+    // AppIntents のメタデータはビルド時に抽出されるので、生成アクセサではなくキーを宣言に直書きする (i18n/README.md)
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: LocalizedStringResource("widget.oshi_entity.type_name", defaultValue: "アイドル", table: "Widget"))
     var displayRepresentation: DisplayRepresentation {
         if let brandName, !brandName.isEmpty {
             DisplayRepresentation(title: "\(name)", subtitle: "\(brandName)")
@@ -60,16 +61,17 @@ struct OshiEntityQuery: EntityQuery, EntityStringQuery {
 }
 
 struct SelectOshiIntent: WidgetConfigurationIntent {
-    static let title: LocalizedStringResource = "担当を選ぶ"
-    static let description = IntentDescription("ウィジェットに表示するアイドルを選びます。")
+    // AppIntents のメタデータはビルド時に抽出されるので、生成アクセサではなくキーを宣言に直書きする (i18n/README.md)
+    static let title = LocalizedStringResource("widget.select_oshi.title", defaultValue: "担当を選ぶ", table: "Widget")
+    static let description = IntentDescription(LocalizedStringResource("widget.select_oshi.description_ios", defaultValue: "ウィジェットに表示するアイドルを選びます。", table: "Widget"))
 
-    @Parameter(title: "アイドル")
+    @Parameter(title: LocalizedStringResource("widget.select_oshi.param_idol", defaultValue: "アイドル", table: "Widget"))
     var oshi: OshiEntity?
 }
 
 /// ウィジェットをタップすると次の画像へ進めるインタラクティブ Intent。
 struct NextOshiImageIntent: AppIntent {
-    static let title: LocalizedStringResource = "次の画像"
+    static let title = LocalizedStringResource("widget.next_oshi_image.title", defaultValue: "次の画像", table: "Widget")
 
     @Parameter(title: "idolId")
     var idolId: String
@@ -189,7 +191,7 @@ struct OshiPlaceholder: View {
             VStack(spacing: 6) {
                 Image(systemName: "photo.on.rectangle.angled")
                     .font(.title2)
-                Text(name == nil ? "アプリで画像を追加" : "担当を選択")
+                Text(name == nil ? L10n.Widget.oshiPlaceholderAddImage : L10n.Widget.oshiPlaceholderSelect)
                     .font(.caption2)
                     .multilineTextAlignment(.center)
             }
@@ -209,8 +211,8 @@ struct OshiImageWidget: Widget {
                 .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
-        .configurationDisplayName("担当の画像（タップで切替）")
-        .description("選んだアイドルの画像を表示。タップで次の画像に切り替わります。")
+        .configurationDisplayName(L10n.Widget.oshiImageName)
+        .description(L10n.Widget.oshiImageDescriptionIos)
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
         .contentMarginsDisabled()
     }
@@ -223,8 +225,8 @@ struct OshiLauncherWidget: Widget {
                 .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
-        .configurationDisplayName("担当の画像（タップでアプリ）")
-        .description("選んだアイドルの画像を表示。タップでアプリを開きます。")
+        .configurationDisplayName(L10n.Widget.oshiLauncherName)
+        .description(L10n.Widget.oshiLauncherDescriptionIos)
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
         .contentMarginsDisabled()
     }

@@ -9,6 +9,7 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
@@ -32,6 +33,9 @@ import androidx.glance.layout.width
 import androidx.glance.text.Text
 import com.fugaif.imaslivedb.MainActivity
 import com.fugaif.imaslivedb.data.model.JstDay
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -61,11 +65,14 @@ private fun daysUntil(date: String): Long? {
     return ChronoUnit.DAYS.between(JstDay.date(), target)
 }
 
-/** カウントダウンの文言。アプリ内 (イベント詳細の参加予定バッジ) と同じ言い回しに揃える。 */
-private fun countdownLabel(days: Long?): String? = when {
+/**
+ * カウントダウンの文言。アプリ内 (イベント詳細の参加予定バッジ) と同じ言い回しに揃える。
+ * 文字列にするのは描く側 (Glance の LocalContext の言語で resolve する)。
+ */
+private fun countdownLabel(days: Long?): DisplayText? = when {
     days == null -> null
-    days <= 0L -> "今日"
-    else -> "あと${days}日"
+    days <= 0L -> L10n.Widget.nextLiveTodayAndroid
+    else -> L10n.Widget.nextLiveDaysLeft(days = days.toInt())
 }
 
 /** 小サイズ (1 列ぶんの幅) か。文字量とレイアウトを切り替える境目。 */
@@ -88,8 +95,9 @@ object NextLiveWidget : GlanceAppWidget() {
 
 @Composable
 private fun NextLiveContent(info: NextShowInfo?) {
+    val context = LocalContext.current
     if (info == null) {
-        WidgetPlaceholder("次のライブ情報なし")
+        WidgetPlaceholder(L10n.Widget.nextLiveEmpty.resolve(context))
         return
     }
     val accent = WidgetTheme.brandAccent(info.brandColorHex)
@@ -107,7 +115,7 @@ private fun NextLiveContent(info: NextShowInfo?) {
             ) {}
             Spacer(GlanceModifier.width(10.dp))
             Column(modifier = GlanceModifier.fillMaxSize()) {
-                Text(text = "次のライブ", style = WidgetTheme.caption(accent.accent), maxLines = 1)
+                Text(text = L10n.Widget.nextLiveHeader.resolve(context), style = WidgetTheme.caption(accent.accent), maxLines = 1)
                 Spacer(GlanceModifier.defaultWeight())
                 Text(
                     text = info.eventName,
@@ -117,7 +125,7 @@ private fun NextLiveContent(info: NextShowInfo?) {
                 Spacer(GlanceModifier.height(4.dp))
                 Row(verticalAlignment = Alignment.Vertical.CenterVertically) {
                     countdownLabel(daysUntil(info.firstDate))?.let { label ->
-                        Text(text = label, style = WidgetTheme.body(accent.accent, bold = true), maxLines = 1)
+                        Text(text = label.resolve(context), style = WidgetTheme.body(accent.accent, bold = true), maxLines = 1)
                         Spacer(GlanceModifier.width(6.dp))
                     }
                     Text(text = shortDate(info.firstDate), style = WidgetTheme.body(), maxLines = 1)
@@ -143,8 +151,9 @@ object TodaySongWidget : GlanceAppWidget() {
 
 @Composable
 private fun TodaySongContent(info: TodaySongInfo?, artwork: Bitmap?) {
+    val context = LocalContext.current
     if (info == null) {
-        WidgetPlaceholder("今日の1曲を準備中", "データの取得が終わると出ます")
+        WidgetPlaceholder(L10n.Widget.todaySongEmpty.resolve(context), L10n.Widget.todaySongEmptyHint.resolve(context))
         return
     }
     val accent = WidgetTheme.brandAccent(info.brandColorHex)
@@ -175,7 +184,7 @@ private fun TodaySongContent(info: TodaySongInfo?, artwork: Bitmap?) {
             }
             Spacer(GlanceModifier.width(10.dp))
             Column(modifier = GlanceModifier.defaultWeight()) {
-                Text(text = "今日の1曲", style = WidgetTheme.caption(accent.accent), maxLines = 1)
+                Text(text = L10n.Widget.todaySongHeader.resolve(context), style = WidgetTheme.caption(accent.accent), maxLines = 1)
                 Spacer(GlanceModifier.height(2.dp))
                 Text(text = info.title, style = WidgetTheme.title(small = small), maxLines = 2)
                 if (!info.artistLabel.isNullOrEmpty()) {
@@ -204,13 +213,14 @@ object TicketDeadlineWidget : GlanceAppWidget() {
 
 @Composable
 private fun TicketDeadlineContent(deadlines: List<TicketDeadlineInfo>) {
+    val context = LocalContext.current
     if (deadlines.isEmpty()) {
-        WidgetPlaceholder("締切近いチケットなし")
+        WidgetPlaceholder(L10n.Widget.ticketDeadlineEmpty.resolve(context))
         return
     }
     WidgetSurface {
         Column(modifier = GlanceModifier.fillMaxSize().clickable(actionStartActivity<MainActivity>())) {
-            Text(text = "チケット締切", style = WidgetTheme.caption(WidgetTheme.warning), maxLines = 1)
+            Text(text = L10n.Widget.ticketDeadlineHeader.resolve(context), style = WidgetTheme.caption(WidgetTheme.warning), maxLines = 1)
             Spacer(GlanceModifier.height(6.dp))
             deadlines.forEach { item ->
                 Row(

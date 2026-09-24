@@ -1,0 +1,484 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "share.action.preparing" : {
+      "comment" : "シェアボタン。カードに焼くジャケ写を読み込んでいる間 (押せない) (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像を準備中…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이미지 준비 중…"
+          }
+        }
+      }
+    },
+    "share.action.share" : {
+      "comment" : "シェアカードの下のボタン (OS の共有シートを開く) (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シェアする"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공유하기"
+          }
+        }
+      }
+    },
+    "share.collection.badge" : {
+      "comment" : "回収率カードの左上の種別ラベル (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲回収率"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 회수율"
+          }
+        }
+      }
+    },
+    "share.collection.idol_count" : {
+      "comment" : "回収率カードの担当アイドルごとの行の右。collected は回収した曲数 (桁区切り済みの文字列)、total はその担当のオリジナル曲数。1000 以上は桁区切りが付く (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@total@"
+          },
+          "substitutions" : {
+            "total" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%1$@/%arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@total@"
+          },
+          "substitutions" : {
+            "total" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%1$@/%arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "share.collection.lead" : {
+      "comment" : "回収率カードの大きな % の上の見出し (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブで聴けた曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브에서 들은 곡"
+          }
+        }
+      }
+    },
+    "share.collection.sheet_title" : {
+      "comment" : "回収率カードのシートの見出し (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回収率をシェア"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "회수율 공유"
+          }
+        }
+      }
+    },
+    "share.collection.summary" : {
+      "comment" : "回収率カードの大きな % の下。collected は回収した曲数 (桁区切り済みの文字列)、total は全曲数。どちらも 1000 以上は桁区切りが付く (iOS は従来どおり、Android は今回から) (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@total@"
+          },
+          "substitutions" : {
+            "total" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%1$@ / %arg 曲を回収"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@total@"
+          },
+          "substitutions" : {
+            "total" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%1$@ / %arg곡 회수"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "share.comment.badge" : {
+      "comment" : "感想カードの左上の種別ラベル (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリの感想"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 감상"
+          }
+        }
+      }
+    },
+    "share.comment.field_label" : {
+      "comment" : "感想の入力欄の上の見出し (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この曲の感想"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 곡의 감상"
+          }
+        }
+      }
+    },
+    "share.comment.field_placeholder" : {
+      "comment" : "感想の入力欄のプレースホルダ。書き方の例も訳す (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最高だった！ 泣いた…など"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최고였어! 울었어… 등"
+          }
+        }
+      }
+    },
+    "share.comment.placeholder_card" : {
+      "comment" : "感想カードのプレビュー。感想をまだ書いていないときに出す見本の文 (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ここに感想が入ります"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "여기에 감상이 들어가요"
+          }
+        }
+      }
+    },
+    "share.comment.sheet_title" : {
+      "comment" : "感想カードのシートの見出し (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "感想カードを作る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "감상 카드 만들기"
+          }
+        }
+      }
+    },
+    "share.footer.hashtag" : {
+      "comment" : "全カード共通のフッターのハッシュタグ (SNS からの流入導線)。SNS で検索される識別子なので、どの言語でも訳さずそのまま出し、シェアが 1 つのタグに集まるようにする。言語ごとに別のタグにするかはオーナーが決める (変えるならここの訳を上書きする) (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "#アイドルライブDB"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "#アイドルライブDB"
+          }
+        }
+      }
+    },
+    "share.ratio.portrait" : {
+      "comment" : "カードの縦横比の補助ラベル (4:5) (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "縦長"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세로형"
+          }
+        }
+      }
+    },
+    "share.ratio.square" : {
+      "comment" : "カードの縦横比の補助ラベル (1:1) (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正方形"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정사각형"
+          }
+        }
+      }
+    },
+    "share.ratio.story" : {
+      "comment" : "カードの縦横比の補助ラベル (9:16、SNS のストーリーズ向け) (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ストーリーズ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "스토리"
+          }
+        }
+      }
+    },
+    "share.render_error.message" : {
+      "comment" : "カードを画像にできなかったときのアラートの本文 (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もう一度試すか、アプリを再起動してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다시 시도하거나 앱을 다시 시작해 주세요."
+          }
+        }
+      }
+    },
+    "share.render_error.title" : {
+      "comment" : "カードを画像にできなかったとき。iOS はアラートの見出し、Android はトースト (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シェア画像の生成に失敗しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공유 이미지를 만들지 못했어요"
+          }
+        }
+      }
+    },
+    "share.social.other" : {
+      "comment" : "テキストシェアのメニュー項目 (OS の共有シートを開く) (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "その他でシェア"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다른 앱으로 공유"
+          }
+        }
+      }
+    },
+    "share.social.post_x" : {
+      "comment" : "テキストシェアのメニュー項目 (X の投稿画面を開く) (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "X にポスト"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "X에 게시"
+          }
+        }
+      }
+    },
+    "share.tag.badge" : {
+      "comment" : "タグ付与カードの左上の種別ラベル (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグを追加しました！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그를 추가했어요!"
+          }
+        }
+      }
+    },
+    "share.tag.done.message" : {
+      "comment" : "タグを付け終えたあとの完了画面の誘い文句 (カードでのシェア) (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "せっかくなのでカードでシェアしませんか？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이왕이면 카드로 공유해 볼까요?"
+          }
+        }
+      }
+    },
+    "share.tag.done.title" : {
+      "comment" : "タグを付け終えたあとの完了画面の見出し (i18n/catalog/share.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグを付けました！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그를 달았어요!"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

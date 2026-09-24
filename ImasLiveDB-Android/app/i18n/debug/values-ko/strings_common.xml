@@ -2,14 +2,37 @@
 <!-- 生成物: i18n/catalog/common.json → python3 tools/i18n/i18n.py generate。手で直さない -->
 <resources>
     <string name="common_action_back">뒤로</string>
+    <string name="common_action_close">닫기</string>
     <string name="common_action_collapse">접기</string>
     <string name="common_action_expand">펼치기</string>
     <string name="common_action_retry">다시 시도</string>
     <string name="common_action_see_all">모두 보기</string>
+    <string name="common_artwork_preview_play_a11y">미리 듣기</string>
+    <string name="common_artwork_preview_stop_a11y">정지</string>
+    <string name="common_attendance_picker_cancel">참가 취소</string>
+    <string name="common_attendance_picker_option">%1$s 참가</string>
+    <string name="common_attendance_picker_subtitle">참가 형태 고르기</string>
+    <string name="common_attendance_picker_title_fallback">이 공연 참가</string>
+    <string name="common_attendance_swipe_attending">%1$s 참가 중</string>
+    <string name="common_attendance_swipe_register">참가 등록</string>
+    <string name="common_award_chip_rank">%1$d위</string>
+    <string name="common_award_chip_winner">우승</string>
+    <string name="common_brand_filter_all">전체</string>
+    <string name="common_copy_default">복사</string>
+    <string name="common_copy_labeled">%1$s 복사</string>
+    <plurals name="common_idol_grid_shared_tags">
+        <item quantity="other">태그 %1$,d개 일치</item>
+    </plurals>
+    <string name="common_list_middot">·</string>
+    <string name="common_local_write_record_attendance">참가 기록</string>
+    <string name="common_local_write_toggle_mark">마크 전환</string>
+    <string name="common_name_filter_clear_a11y">필터 해제</string>
     <string name="common_personal_tags_add_a11y">마이 태그 추가</string>
     <string name="common_personal_tags_empty">아직 마이 태그가 없어요</string>
     <string name="common_personal_tags_header">마이 태그 (나에게만 보여요)</string>
     <string name="common_personal_tags_placeholder">예: 들었음</string>
     <string name="common_personal_tags_remove_a11y">삭제</string>
     <string name="common_personal_tags_remove_hint">길게 눌러 삭제</string>
+    <string name="common_ranking_row_unit_default">회</string>
+    <string name="common_removable_chip_remove_a11y_android">%1$s 해제</string>
 </resources>

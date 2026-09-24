@@ -38,7 +38,7 @@ struct AttendanceSwipeActions: ViewModifier {
                         AppAnalytics.tap("attendance_swipe.cancel")
                         set(nil)
                     } label: {
-                        Text("取消")
+                        Text(L10n.Common.attendanceSwipeCancel)
                     }
                 }
             }
@@ -48,7 +48,7 @@ struct AttendanceSwipeActions: ViewModifier {
         do {
             try marks.setAttendance(entity: .show, id: show.id, type: type)
         } catch {
-            LocalWriteFailure.report(error, action: "参加の記録")
+            LocalWriteFailure.report(error, action: String(localized: L10n.Common.localWriteRecordAttendance))
         }
         onChange()
     }
@@ -85,7 +85,7 @@ struct EventAttendanceSwipeActions: ViewModifier {
                         showSheet = true
                     }
                 } label: {
-                    Label("参加を登録", systemImage: UserMarkKind.attended.icon)
+                    Label(L10n.Common.attendanceSwipeRegister, systemImage: UserMarkKind.attended.icon)
                 }
                 .tint(UserMarkKind.attended.tint)
             }

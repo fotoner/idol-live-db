@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 
 /**
@@ -82,7 +84,7 @@ fun ImasRemovableChip(
             Text(text = text, style = MaterialTheme.typography.labelMedium, color = DS.ink)
             Icon(
                 imageVector = Icons.Filled.Close,
-                contentDescription = "${text}を解除",
+                contentDescription = L10n.Common.removableChipRemoveA11yAndroid(label = text).resolve(),
                 tint = DS.ink2,
                 modifier = Modifier
                     .size(16.dp)

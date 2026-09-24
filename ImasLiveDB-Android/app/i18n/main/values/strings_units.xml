@@ -9,6 +9,10 @@
     <string name="units_detail_load_error_message">読み込みに失敗しました。通信状況を確認してもう一度お試しください。</string>
     <!-- units.detail.load_error.title: 詳細の読み込みに失敗したときの空状態の見出し -->
     <string name="units_detail_load_error_title">読み込みに失敗しました</string>
+    <!-- units.detail.local_write.add_tag: 端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (ユニット詳細のマイタグを足す) -->
+    <string name="units_detail_local_write_add_tag">マイタグの追加</string>
+    <!-- units.detail.local_write.remove_tag: 端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (ユニット詳細のマイタグを消す) -->
+    <string name="units_detail_local_write_remove_tag">マイタグの削除</string>
     <!-- units.detail.members.empty.title_android: Android の文言。iOS の detail.members.empty.title と ja が違う (統一はオーナーが別 PR で) -->
     <string name="units_detail_members_empty_title_android">メンバー情報がありません</string>
     <!-- units.detail.members.header: メンバーの節の見出し (右に人数) -->

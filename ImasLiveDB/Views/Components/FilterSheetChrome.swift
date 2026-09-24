@@ -19,7 +19,7 @@ extension View {
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(DS.bg)
-            .navigationTitle("フィルタ")
+            .navigationTitle(L10n.Common.filterSheetTitle)
             .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -37,14 +37,14 @@ func filterSheetToolbar(
     onApply: @escaping @MainActor () -> Void
 ) -> some ToolbarContent {
     ToolbarItem(placement: .topBarLeading) {
-        Button("リセット") {
+        Button(L10n.Common.filterSheetActionReset) {
             AppAnalytics.tap("\(analyticsPrefix).reset")
             onReset()
         }
         .disabled(!canReset)
     }
     ToolbarItem(placement: .topBarTrailing) {
-        Button("適用") {
+        Button(L10n.Common.filterSheetActionApply) {
             AppAnalytics.tap("\(analyticsPrefix).apply")
             onApply()
         }

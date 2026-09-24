@@ -20,6 +20,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 
 // =============================================================================
@@ -48,7 +50,7 @@ fun SetlistCommentShareCard(
     val meta = listOfNotNull(showName, showDate).filter { it.isNotEmpty() }.joinToString("  ·  ")
 
     PhotoShareScaffold(artwork = artwork, palette = palette, size = size) {
-        ShareEyebrow(text = "セトリの感想", accent = palette.accent, ink = ShareInk.ink.copy(alpha = 0.82f))
+        ShareEyebrow(text = L10n.Share.commentBadge.resolve(), accent = palette.accent, ink = ShareInk.ink.copy(alpha = 0.82f))
 
         // 感想を短い引用として (明朝・大きめ、編集的)。
         Text(
@@ -117,14 +119,15 @@ fun SetlistCommentComposeSheet(
     val artwork = rememberShareArtwork(artworkUrl)
 
     // 未入力時はプレースホルダで完成形を見せる (空のカードを見せない)。
-    val displayComment = comment.trim().ifEmpty { "ここに感想が入ります" }
+    val placeholderComment = L10n.Share.commentPlaceholderCard.resolve()
+    val displayComment = comment.trim().ifEmpty { placeholderComment }
 
-    ShareCardSheet(title = "感想カードを作る", onDismiss = onDismiss) {
-        Text("この曲の感想", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3)
+    ShareCardSheet(title = L10n.Share.commentSheetTitle.resolve(), onDismiss = onDismiss) {
+        Text(L10n.Share.commentFieldLabel.resolve(), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3)
         OutlinedTextField(
             value = comment,
             onValueChange = { comment = it },
-            placeholder = { Text("最高だった！ 泣いた…など") },
+            placeholder = { Text(L10n.Share.commentFieldPlaceholder.resolve()) },
             minLines = 3,
             maxLines = 6,
             modifier = Modifier.fillMaxWidth()

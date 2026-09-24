@@ -573,6 +573,56 @@
         }
       }
     },
+    "units.list.brand_count" : {
+      "comment" : "ユニット一覧のブランドの区切り見出しの右のユニット数。1000 以上は桁区切りが付く (従来どおり) (i18n/catalog/units.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg組"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg팀"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "units.list.empty.message" : {
       "comment" : "ユニットが 1 件も無いときの空状態の説明 (i18n/catalog/units.json)",
       "extractionState" : "manual",

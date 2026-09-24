@@ -219,7 +219,8 @@ struct UnitDetailView: View {
     @ViewBuilder
     private var membersBody: some View {
         VStack(spacing: DS.sp6) {
-            GallerySectionView(kind: .unit, entityId: unit.id, entityLabel: "アイコン")
+            // 画像の呼び名は GallerySectionView の既定 (アイコン) と同じなので渡さない (文言は部品側が持つ)
+            GallerySectionView(kind: .unit, entityId: unit.id)
                 .padding(.top, DS.sp2)
 
             if vm.isLoading {

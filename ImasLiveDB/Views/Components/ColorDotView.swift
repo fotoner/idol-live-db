@@ -45,7 +45,7 @@ private struct ColorDotAccessibility: ViewModifier {
         if isDecorative {
             content.accessibilityHidden(true)
         } else {
-            content.accessibilityLabel("カラー: \(label)")
+            content.accessibilityLabel(L10n.Common.colorDotA11y(color: label))
         }
     }
 }

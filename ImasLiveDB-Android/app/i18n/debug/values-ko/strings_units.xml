@@ -5,6 +5,8 @@
     <string name="units_detail_community_login_prompt">태그를 달거나 투표하려면 로그인해야 해요</string>
     <string name="units_detail_load_error_message">불러오지 못했어요. 통신 상태를 확인하고 다시 시도해 주세요.</string>
     <string name="units_detail_load_error_title">불러오지 못했어요</string>
+    <string name="units_detail_local_write_add_tag">마이 태그 추가</string>
+    <string name="units_detail_local_write_remove_tag">마이 태그 삭제</string>
     <string name="units_detail_members_empty_title_android">멤버 정보가 없어요</string>
     <string name="units_detail_members_header">멤버</string>
     <string name="units_detail_not_found_message">유닛을 찾지 못했어요.</string>

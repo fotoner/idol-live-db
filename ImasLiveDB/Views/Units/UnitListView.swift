@@ -140,7 +140,7 @@ struct UnitListContent: View {
             toggleBrand(brand.id)
         } label: {
             HStack(spacing: DS.sp3) {
-                BrandSectionHeader(brand: brand, count: count, unit: "組")
+                BrandSectionHeader(brand: brand, countLabel: .key(L10n.Units.listBrandCount(count: count)))
                 Image(systemName: vm.collapsedBrands.contains(brand.id) ? "chevron.right" : "chevron.down")
                     .font(.imasScaled( 12, weight: .semibold))
                     .foregroundStyle(DS.ink3)
@@ -169,7 +169,8 @@ struct UnitListContent: View {
             LazyVStack(alignment: .leading, spacing: DS.sp6) {
                 ForEach(vm.visibleBrands) { brand in
                     VStack(alignment: .leading, spacing: DS.sp4) {
-                        BrandSectionHeader(brand: brand, count: (vm.groupedByBrand[brand.id] ?? []).count, unit: "組")
+                        BrandSectionHeader(brand: brand,
+                                           countLabel: .key(L10n.Units.listBrandCount(count: (vm.groupedByBrand[brand.id] ?? []).count)))
                             .padding(.horizontal, DS.sp5)
 
                         LazyVGrid(columns: gridColumns, spacing: DS.sp5) {
