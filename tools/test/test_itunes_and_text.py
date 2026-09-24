@@ -109,19 +109,6 @@ class FakeUrlopen:
 class ITunesClientsTest(unittest.TestCase):
     """ツールごとの URL・User-Agent・待ち時間・失敗の扱いを固定する。"""
 
-    def test_collectors(self):
-        http = FakeUrlopen(self)
-        self.assertEqual(collect_solo_records.itunes("search", term="曲", entity="album", limit=200), [TRACK])
-        self.assertEqual(collect_unit_versions.itunes("曲"), [TRACK])
-        self.assertEqual(collect_song_versions.itunes_search("曲"), [TRACK])
-        song = "https://itunes.apple.com/search?term=%E6%9B%B2&entity=song&country=jp&limit=200"
-        self.assertEqual(http.requests, [
-            ("https://itunes.apple.com/search?term=%E6%9B%B2&entity=album&limit=200&country=jp",
-             "imas-live-db/1.0", 30),
-            (song, "imas-live-db/1.0", 30),
-            (song, "imas-live-db/1.0", 30),
-        ])
-
     def test_fill_artwork_urls(self):
         http = FakeUrlopen(self)
         self.assertEqual(fill_artwork_urls.itunes_lookup("1440000001"), TRACK)

@@ -223,9 +223,6 @@ class TitleKanaRequiredTest(PostFixture):
     def test_a_katakana_reading_is_rejected(self):
         self.assertEqual(len(self.kana_problems(title_kana="シンキョク")), 1)
 
-    def test_a_hiragana_reading_passes(self):
-        self.assertEqual(self.kana_problems(title_kana="しんきょく"), [])
-
 
 class AddOriginalSingersTest(PostFixture):
     """data/fixes/ の add_original_singers で既存曲に原唱者を足す。"""

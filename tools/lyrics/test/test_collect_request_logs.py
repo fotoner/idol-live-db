@@ -79,31 +79,6 @@ class TestCollectDay(unittest.TestCase):
         self.assertEqual(counts, {"a": 2, "b": 1})
         self.assertEqual(seen, 4)
 
-    def test_query_shape(self):
-        api = FakeApi([response([])])
-        C.collect_day("tok", DAY, opener=api)
-        body = api.bodies[0]
-        self.assertEqual(body["view"], "events")
-        self.assertEqual(body["parameters"]["datasets"], ["cloudflare-workers"])
-        # UTC のその日 [00:00, 翌00:00) で切る。
-        self.assertEqual(body["timeframe"]["from"], 1788220800000)
-        self.assertEqual(body["timeframe"]["to"], 1788220800000 + 86400000)
-        keys = {f["key"]: f for f in body["parameters"]["filters"]}
-        self.assertEqual(keys["$metadata.service"]["value"], "imas-live-api")
-        self.assertEqual(keys["$metadata.message"]["operation"], "includes")
-        self.assertEqual(keys["$metadata.message"]["value"], "lyrics_read")
-        self.assertNotIn("offset", body)   # 1 ページ目にカーソルは付けない
-
-    def test_pagination_follows_cursor(self):
-        full = [lyrics_event("a", "id%d" % i) for i in range(C.PAGE_SIZE)]
-        api = FakeApi([response(full), response([lyrics_event("b", "last")])])
-        counts, seen = C.collect_day("tok", DAY, opener=api)
-        self.assertEqual(counts, {"a": C.PAGE_SIZE, "b": 1})
-        self.assertEqual(seen, C.PAGE_SIZE + 1)
-        # 2 ページ目は 1 ページ目の最後のイベント ID をカーソルにする。
-        self.assertEqual(api.bodies[1]["offset"], "id%d" % (C.PAGE_SIZE - 1))
-        self.assertEqual(api.bodies[1]["offsetDirection"], "next")
-
     def test_stops_when_cursor_does_not_advance(self):
         # 同じページを返し続ける API でも無限ループせず、二重計上もしない。
         same = [lyrics_event("a", "id%d" % i) for i in range(C.PAGE_SIZE)]

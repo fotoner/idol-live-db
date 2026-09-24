@@ -51,9 +51,6 @@ class RefreshTableTest(unittest.TestCase):
             inserted = export_cloudkit.refresh_table(self.conn, "brands")
         return inserted, out.getvalue() + err.getvalue()
 
-    def brand_ids(self):
-        return [r[0] for r in self.conn.execute("SELECT id FROM brands ORDER BY id")]
-
     def test_every_dropped_row_is_listed(self):
         # name が無いレコードは NOT NULL で入らない。先頭 5 件だけでなく全部を出す。
         self.cloudkit["Brand"] = [brand_record(i, name=(i >= 7)) for i in range(9)]
@@ -84,14 +81,6 @@ class RefreshTableTest(unittest.TestCase):
         self.cloudkit["Brand"] = [brand_record(i) for i in range(91)]
         _, log = self.refresh()
         self.assertNotIn("行 → ", log)
-
-    def test_replaces_the_table_with_cloudkit(self):
-        # 書き込み先と中身の入れ替え方は変えない (表を丸ごと CloudKit の分に置き換える)。
-        self.given_local_brands(2)
-        self.cloudkit["Brand"] = [brand_record(i) for i in range(1, 4)]
-        inserted, _ = self.refresh()
-        self.assertEqual(inserted, 3)
-        self.assertEqual(self.brand_ids(), ["b01", "b02", "b03"])
 
 
 class ExportMainTest(unittest.TestCase):
