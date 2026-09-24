@@ -593,6 +593,12 @@ pub const CALL_GUIDE_WANTED_LEDE: &str =
     "「コール曲」タグが付いているのに、まだコールガイドが書かれていない曲 (票の多い順)。";
 
 /// お題の一覧の説明。
+/// ランキングの見出しの下。アプリの「調べる」と同じ数え方だと言っておく。
+pub const RANKING_LEDE: &str = "記録されたセットリストと出演者から数えています。自分の回収率や、まだ生で聴けていない曲はアプリの「調べる」で。";
+/// 年ごとの公演数の注記 (今年以降は、発表済みの予定を含む)。
+pub fn ranking_years_note(year: &str) -> String {
+    format!("{year}年以降は発表済みの予定を含みます。")
+}
 pub const POLL_LIST_LEDE: &str = "アプリの利用者が出し合ったお題と、記録した時点の得票です。投票はアプリから。";
 /// お題の締切の日付に添える語。締切前か過ぎたかで言い分ける。
 pub fn poll_ends_label(is_open: bool) -> &'static str {

@@ -280,6 +280,7 @@ fn fixture_covers_the_boundary_cases_the_web_needs() {
                 | RouteKind::IdolListBrand
                 | RouteKind::IdolListBirthMonth
                 | RouteKind::UnitListBrand
+                | RouteKind::RankingBrand
                 | RouteKind::VenueListPref
                 | RouteKind::Tag
                 | RouteKind::CalendarMonth

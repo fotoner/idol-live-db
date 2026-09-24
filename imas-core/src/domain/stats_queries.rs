@@ -126,8 +126,20 @@ pub fn brand_song_counts(snap: &Snapshot) -> Vec<BrandSongCountRecord> {
 /// INNER JOIN なので披露 0 回の曲は行が生まれない。回数は performance_counts
 /// (= setlist_items_by_song の各長さ) を再集計せず使う (二重集計防止の既存規約)。
 pub fn song_play_count_ranking(snap: &Snapshot, limit: u32) -> Vec<SongPlayCountRecord> {
+    song_play_count_ranking_in(snap, None, limit)
+}
+
+/// [`song_play_count_ranking`] をブランドで絞ったもの (Web のランキングのブランド別ページ)。
+/// 合同曲は参加ブランドどれでも数える (曲一覧の [`crate::domain::snapshot::Song::belongs_to_brand`] と同じ)。
+/// 回数は絞らない: その曲が**どのライブで**歌われたかは問わず、全披露回数。
+pub fn song_play_count_ranking_in(
+    snap: &Snapshot,
+    brand_id: Option<&str>,
+    limit: u32,
+) -> Vec<SongPlayCountRecord> {
     let mut ranked: Vec<u32> = (0..snap.songs.len() as u32)
         .filter(|&i| snap.performance_counts[i as usize] > 0)
+        .filter(|&i| brand_id.is_none_or(|b| snap.songs[i as usize].belongs_to_brand(b)))
         .collect();
     // DESC の同数タイは SQL 未規定 → 添字を最終キーに固定。
     ranked.sort_by_key(|&i| (Reverse(snap.performance_counts[i as usize]), i));
@@ -158,11 +170,22 @@ pub fn song_play_count_ranking(snap: &Snapshot, limit: u32) -> Vec<SongPlayCount
 /// INNER JOIN なので出演記録の無いアイドルは行が生まれない。COUNT(DISTINCT) の
 /// とおり、同一公演に複数行 (role 違い等) あっても 1 公演と数える。
 pub fn cast_show_count_ranking(snap: &Snapshot, limit: u32) -> Vec<CastShowCountRecord> {
+    cast_show_count_ranking_in(snap, None, limit)
+}
+
+/// [`cast_show_count_ranking`] をアイドルの主ブランドで絞ったもの。公演数は絞らない
+/// (他ブランドの合同ライブへの出演も 1 公演)。
+pub fn cast_show_count_ranking_in(
+    snap: &Snapshot,
+    brand_id: Option<&str>,
+    limit: u32,
+) -> Vec<CastShowCountRecord> {
     let mut ranked: Vec<(u32, u32)> = snap
         .cast_shows_by_idol
         .iter()
         .enumerate()
         .filter(|(_, shows)| !shows.is_empty())
+        .filter(|(ii, _)| brand_id.is_none_or(|b| snap.idols[*ii].brand_id.as_deref() == Some(b)))
         .map(|(ii, shows)| {
             let distinct = shows.iter().collect::<HashSet<_>>().len() as u32;
             (ii as u32, distinct)
@@ -202,8 +225,19 @@ pub fn monthly_show_counts(snap: &Snapshot) -> BTreeMap<String, u32> {
 }
 
 pub fn yearly_show_counts(snap: &Snapshot) -> Vec<YearlyShowCountRecord> {
+    yearly_show_counts_in(snap, None)
+}
+
+/// [`yearly_show_counts`] をブランドで絞ったもの。合同ライブは参加ブランドどれでも数える
+/// (ライブ一覧のブランド別ページと同じ)。
+pub fn yearly_show_counts_in(snap: &Snapshot, brand_id: Option<&str>) -> Vec<YearlyShowCountRecord> {
     let mut by_year: BTreeMap<&str, u32> = BTreeMap::new();
     for show in &snap.shows {
+        if let Some(b) = brand_id {
+            if !snap.events[show.event as usize].brand_ids().any(|x| x == b) {
+                continue;
+            }
+        }
         if let Some(year) = strftime_year(&show.date) {
             *by_year.entry(year).or_insert(0) += 1;
         }
@@ -212,6 +246,15 @@ pub fn yearly_show_counts(snap: &Snapshot) -> Vec<YearlyShowCountRecord> {
         .into_iter()
         .map(|(year, show_count)| YearlyShowCountRecord { year: year.to_string(), show_count })
         .collect()
+}
+
+/// 棒グラフの長さ: 最大値に対する千分率 (切り捨て)。最大値が 0 なら 0。
+/// 0 より大きい値は最低 1 にする (棒が見えないと「0 件」と読まれる)。
+pub fn share_permille(value: u32, max: u32) -> u32 {
+    if max == 0 || value == 0 {
+        return 0;
+    }
+    ((u64::from(value) * 1000 / u64::from(max)) as u32).max(1)
 }
 
 /// brand_id が設定されている曲 id (回収率集計の母集合)。iOS `fetchBrandedSongIdsQuery` 相当:

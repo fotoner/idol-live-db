@@ -30,6 +30,8 @@
   --footer-ink2: #cfcbd6;
   --footer-line: #4a4750;
   --footer-plate: #ffffff;
+  /* グラフの棒 (過ぎた年など、目立たせない側)。 */
+  --chart-bar: #c9c3b8;
   /* ink3 はコントラストを満たさないので **文字には使わない** (シェブロン・区切りなど装飾専用)。 */
   --ds-ink3: rgb(24 23 28 / 0.3);
 
@@ -141,6 +143,7 @@
     --ds-ink2: #b3afba;
     --ds-line: #34333a;
     --footer-bg: #0b0a0d;
+    --chart-bar: #4a4750;
     --ds-ink3: rgb(244 242 237 / 0.3);
 
     --ds-success: #34d364;

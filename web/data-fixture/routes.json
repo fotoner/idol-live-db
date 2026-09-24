@@ -218,6 +218,22 @@
       "inSitemap": true
     },
     {
+      "path": "/ranking/",
+      "kind": "ranking",
+      "key": null,
+      "id": null,
+      "data": "index/ranking.json",
+      "inSitemap": true
+    },
+    {
+      "path": "/ranking/brand/ml/",
+      "kind": "rankingBrand",
+      "key": "ml",
+      "id": null,
+      "data": "index/ranking-brand-ml.json",
+      "inSitemap": true
+    },
+    {
       "path": "/events/ev_sample/",
       "kind": "event",
       "key": "ev_sample",

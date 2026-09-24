@@ -366,6 +366,65 @@ web_dto! {
     }
 }
 
+// ---------------------------------------------------------------------------
+// ランキング
+// ---------------------------------------------------------------------------
+
+web_dto! {
+    /// ランキング (`/ranking/` と `/ranking/brand/<brandId>/`)。
+    ///
+    /// アプリの「調べる」のうち、個人の記録に依らない集計だけ。数え方は
+    /// `domain::stats_queries` (アプリと同じ関数) で、Web 側で数え直さない。
+    pub struct RankingPage {
+        pub schema_version: u32,
+        pub path: String,
+        pub title: String,
+        pub lede: String,
+        /// すべて / ブランドごと の切替。
+        pub scope: FilterAxis,
+        /// よく披露される曲。
+        pub songs: Vec<RankRow>,
+        /// 出演公演が多いアイドル。
+        pub idols: Vec<RankRow>,
+        /// ブランド別の楽曲数。ブランドのページでは空 (1 本だけの棒は何も言わない)。
+        pub brand_songs: Vec<RankRow>,
+        /// 年ごとの公演数 (古い年から)。
+        pub years: Vec<YearBar>,
+        /// 年の棒に添える注記 (今年以降は予定を含む)。
+        pub years_note: Option<String>,
+        pub seo: SeoBlock,
+    }
+}
+
+web_dto! {
+    /// ランキングの 1 行。棒の長さは 1 位 (ブランド別は最大値) に対する千分率。
+    pub struct RankRow {
+        /// 1 始まりの通し番号。順位を振らない表 (ブランド別) では None。
+        pub rank: Option<u32>,
+        #[serde(rename = "ref")]
+        pub reference: Ref,
+        pub value: u32,
+        /// 数の単位 (「回」「公演」「曲」)。
+        pub unit: String,
+        pub share_permille: u32,
+    }
+}
+
+web_dto! {
+    /// 年ごとの公演数の棒 1 本。
+    pub struct YearBar {
+        /// `2026`。
+        pub year: String,
+        /// 棒の下に置く短い年 (`26`)。
+        pub short: String,
+        pub value: u32,
+        /// 最大の年に対する千分率。
+        pub share_permille: u32,
+        /// 今年か、それより先の年 (予定を含む)。
+        pub is_planned: bool,
+    }
+}
+
 web_dto! {
     /// アイドル一覧の切り口。
     #[derive(Copy, Eq)]
@@ -743,6 +802,10 @@ web_dto! {
         BrandList,
         /// `/polls/`
         PollList,
+        /// `/ranking/`
+        Ranking,
+        /// `/ranking/brand/[brandId]/` — `key` = ブランド id
+        RankingBrand,
         /// `/calls/` — コールガイドの進捗
         CallGuide,
 

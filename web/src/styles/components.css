@@ -1250,6 +1250,169 @@ a.ranking-row:hover {
   color: var(--ds-ink2);
 }
 
+/* --- ランキング (RankingView / RankBar) ----------------------------------- */
+.rank-grid {
+  display: grid;
+  gap: var(--sp8);
+  align-items: start;
+}
+@media (min-width: 62rem) {
+  .rank-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .rank-grid--chart {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  }
+}
+.rank-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* 順位 | 印 | 名前 | 棒 | 数。狭い幅では棒を名前の下に回す。 */
+.rank-row {
+  display: grid;
+  grid-template-columns: 1.75rem auto minmax(0, 1fr) 4.5rem;
+  grid-template-areas:
+    "rank lead name value"
+    "rank lead bar  value";
+  align-items: center;
+  column-gap: var(--sp4);
+  row-gap: 6px;
+  padding: 10px var(--sp5);
+  background: var(--ds-surface);
+}
+.rank-list--plain .rank-row {
+  grid-template-columns: auto minmax(0, 1fr) 4.5rem;
+  grid-template-areas:
+    "lead name value"
+    "lead bar  value";
+}
+@container (min-width: 34rem) {
+  .rank-row {
+    grid-template-columns: 1.75rem auto minmax(0, 1fr) minmax(4rem, 8rem) 4.5rem;
+    grid-template-areas: "rank lead name bar value";
+  }
+  .rank-list--plain .rank-row {
+    grid-template-columns: auto 7rem minmax(0, 1fr) 4.5rem;
+    grid-template-areas: "lead name bar value";
+  }
+}
+a.rank-row:hover {
+  background: var(--ds-surface2);
+}
+.rank-row__rank {
+  grid-area: rank;
+  text-align: end;
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-title3);
+  font-weight: 700;
+  color: var(--ds-ink2);
+}
+.rank-row--top .rank-row__rank {
+  color: var(--accent-ink);
+}
+.rank-row__lead {
+  grid-area: lead;
+  display: flex;
+  align-items: center;
+}
+.rank-row__name {
+  grid-area: name;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.rank-row__title {
+  font-size: var(--fs-subhead);
+  font-weight: 700;
+}
+.rank-row__sub {
+  font-size: var(--fs-caption);
+  color: var(--ds-ink2);
+}
+.rank-row__bar {
+  grid-area: bar;
+  display: block;
+  inline-size: 100%;
+  block-size: 8px;
+  border-radius: 3px;
+}
+.rank-row__track {
+  fill: var(--ds-fill);
+}
+.rank-row__fill {
+  fill: var(--accent);
+}
+.rank-row__value {
+  grid-area: value;
+  text-align: end;
+  font-size: var(--fs-caption);
+  color: var(--ds-ink2);
+  white-space: nowrap;
+}
+.rank-row__value b {
+  margin-inline-end: 2px;
+  font-family: var(--font-display);
+  font-size: var(--fs-title3);
+  font-weight: 700;
+  color: var(--ds-ink);
+}
+
+/* 年ごとの公演数 (縦の棒)。年が多いと狭い画面では横に流す。 */
+.year-chart {
+  margin: 0;
+  padding: var(--sp7) var(--sp6) var(--sp5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp4);
+}
+.card.year-chart > * + * {
+  border-top: 0;
+}
+.year-chart__cols {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  align-items: stretch;
+  gap: 3px;
+  block-size: 15rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.year-chart__col {
+  flex: 1 0 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.year-chart__bar {
+  flex: 1;
+  inline-size: 100%;
+  min-block-size: 0;
+}
+.year-chart__bar rect {
+  fill: var(--chart-bar);
+}
+.year-chart__col--planned .year-chart__bar rect {
+  fill: var(--ds-ink);
+}
+.year-chart__value,
+.year-chart__year {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--ds-ink2);
+  line-height: 1;
+}
+.year-chart figcaption {
+  font-size: var(--fs-footnote);
+}
+
 /* --- LabeledRow (ImasLabeledRow) ------------------------------------------ */
 .labeled-row {
   display: flex;

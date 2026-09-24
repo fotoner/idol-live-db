@@ -74,7 +74,7 @@ pub use index::{
     KanaSection, NotFoundPage, RouteEntry, RouteKind, RoutesFile, SiteEntry, SongListItem, SongListKind, SongListPage,
     TagListItem, TagListPage, TagPage, TagSongRow,
     UnitListItem, UnitListPage, VenueListItem, VenueListPage, YearGroup,
-    PollEntryDto, PollListPage, PollSummaryDto,
+    PollEntryDto, PollListPage, PollSummaryDto, RankRow, RankingPage, YearBar,
 };
 pub use search::{FoldCase, FoldParity, SearchManifest, SearchPage, SearchRow, SearchShard, SearchShardMeta};
 pub use show::{

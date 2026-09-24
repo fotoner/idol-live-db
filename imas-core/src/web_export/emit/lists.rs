@@ -168,7 +168,7 @@ pub fn list_crumbs(root: SiteList, title: &str, path: &str) -> Vec<Crumb> {
 }
 
 /// ブランド切替のリンク。**作っていない一覧は並べない** (判断は `Ctx::brand_list_path`)。
-fn brand_links(ctx: &Ctx, collection: &str, current: &str, all_label: &str, all_count: u32) -> Vec<NavLink> {
+pub(crate) fn brand_links(ctx: &Ctx, collection: &str, current: &str, all_label: &str, all_count: u32) -> Vec<NavLink> {
     let mut links = vec![NavLink::new(all_label, format!("/{collection}/")).with_count(all_count)];
     links.extend(ctx.snap.brand_order.iter().filter_map(|&i| {
         let brand = &ctx.snap.brands[i as usize];
@@ -1423,12 +1423,12 @@ fn site_stat_tiles(counts: Counts, with_links: bool, with_setlist_items: bool) -
     tiles
 }
 
-/// 一覧以外の入口 (検索・お題・このサイトについて)。フッタとスマホのメニューが描く。
+/// 一覧以外の入口 (検索・ランキング・お題・このサイトについて)。フッタとスマホのメニューが描く。
 ///
 /// お題はヘッダの 1 段に入れない (項目が 9 つになると 1440px でも詰まる)。
 /// 焼き込んだ集計が無ければページごと出ないので、リンクの有無もここで決める。
 pub fn utility_nav(with_polls: bool) -> Vec<NavLink> {
-    let mut nav = vec![NavLink::new("検索", "/search/")];
+    let mut nav = vec![NavLink::new("検索", "/search/"), NavLink::new("ランキング", super::ranking::PATH)];
     if with_polls {
         nav.push(NavLink::new("お題", "/polls/"));
     }
@@ -1580,7 +1580,7 @@ pub fn about(ctx: &Ctx, counts: Counts) -> AboutPage {
     }
 }
 
-fn collection_json_ld(name: &str, path: &str) -> serde_json::Value {
+pub(crate) fn collection_json_ld(name: &str, path: &str) -> serde_json::Value {
     simple_json_ld("CollectionPage", name, path)
 }
 

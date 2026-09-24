@@ -1451,6 +1451,47 @@ fn brand_list_page() -> BrandListPage {
     }
 }
 
+fn rank_row(rank: Option<u32>, reference: Ref, value: u32, unit: &str, share_permille: u32) -> RankRow {
+    RankRow { rank, reference, value, unit: unit.to_string(), share_permille }
+}
+
+fn year_bar(year: &str, value: u32, share_permille: u32, is_planned: bool) -> YearBar {
+    YearBar { year: year.to_string(), short: year[2..].to_string(), value, share_permille, is_planned }
+}
+
+/// ランキング。`brand` があればそのブランドのページ (ブランド別の楽曲数は空)。
+fn ranking_page(path: &str, title: &str, brand: bool) -> RankingPage {
+    RankingPage {
+        schema_version: SCHEMA_VERSION,
+        path: path.to_string(),
+        title: title.to_string(),
+        lede: content::RANKING_LEDE.to_string(),
+        scope: FilterAxis::new(
+            content::FILTER_AXIS_BRAND,
+            vec![
+                nav("すべて", "/ranking/", !brand, None, None),
+                nav("ミリオンライブ!", "/ranking/brand/ml/", brand, Some("brand:ml"), None),
+            ],
+        ),
+        songs: vec![
+            rank_row(Some(1), song_sample(), 42, "回", 1000),
+            rank_row(Some(2), song_no_artwork(), 3, "回", 71),
+        ],
+        idols: vec![
+            rank_row(Some(1), idol_mirai(), 120, "公演", 1000),
+            rank_row(Some(2), idol_shizuka(), 118, "公演", 983),
+        ],
+        brand_songs: if brand {
+            Vec::new()
+        } else {
+            vec![rank_row(None, brand_ml(), 600, "曲", 1000), rank_row(None, brand_cg(), 450, "曲", 750)]
+        },
+        years: vec![year_bar("2025", 40, 1000, false), year_bar("2026", 12, 300, true)],
+        years_note: Some(content::ranking_years_note("2026")),
+        seo: seo(title, "ランキング。", path, Robots::IndexFollow, &[("ホーム", "/")]),
+    }
+}
+
 fn home_page() -> HomePage {
     HomePage {
         schema_version: SCHEMA_VERSION,
@@ -1633,6 +1674,8 @@ pub fn emit(dir: &Path, pretty: bool) -> Result<Stats> {
         )?;
     }
     w.write_json("index/brands.json", &brand_list_page())?;
+    w.write_json("index/ranking.json", &ranking_page("/ranking/", "ランキング", false))?;
+    w.write_json("index/ranking-brand-ml.json", &ranking_page("/ranking/brand/ml/", "ミリオンライブ!のランキング", true))?;
 
     // --- 検索 ---
     let shards = [
@@ -1749,6 +1792,8 @@ fn routes(broken_key: &str) -> RoutesFile {
         param_listing(RouteKind::Tag, &tag_kawaii_path(), "tag_kawaii", "index/tags-tag_kawaii.json", true),
         listing(RouteKind::VenueListIndex, "/venues/", "index/venues.json", true),
         listing(RouteKind::BrandList, "/brands/", "index/brands.json", true),
+        listing(RouteKind::Ranking, "/ranking/", "index/ranking.json", true),
+        param_listing(RouteKind::RankingBrand, "/ranking/brand/ml/", "ml", "index/ranking-brand-ml.json", true),
         detail(RouteKind::Event, "events", "ev_sample", "ev_sample", true),
         detail(RouteKind::Event, "events", "ev_the_idolm@ster_×_ふたご", "ev_the_idolm@ster_×_ふたご", true),
         detail(RouteKind::Event, "events", "ev_empty", "ev_empty", true),

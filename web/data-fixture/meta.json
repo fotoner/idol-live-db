@@ -102,6 +102,13 @@
       "count": null
     },
     {
+      "label": "ランキング",
+      "path": "/ranking/",
+      "current": false,
+      "themeKey": null,
+      "count": null
+    },
+    {
       "label": "このサイトについて",
       "path": "/about/",
       "current": false,

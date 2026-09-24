@@ -12,6 +12,7 @@ pub mod glyph;
 pub mod idols;
 pub mod lists;
 pub mod places;
+pub mod ranking;
 pub mod search;
 pub mod songs;
 
@@ -340,6 +341,9 @@ fn write_all(
     write_lists!(tag_pages);
     // カレンダー (月ごと + 今月の写し)。
     write_lists!(calendar::calendar_pages(ctx));
+
+    // ランキング (全体とブランドごと)。
+    write_lists!(ranking::ranking_pages(ctx));
 
     let brands = lists::brand_list(ctx);
     w.write_json("index/brands.json", &brands)?;
