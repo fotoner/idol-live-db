@@ -3,11 +3,17 @@
     "ratchet": "report"
   },
   "languages": {
+    "en": {
+      "channel": "planned"
+    },
     "ja": {
       "channel": "release"
     },
     "ko": {
       "channel": "dev"
+    },
+    "zh-Hans": {
+      "channel": "planned"
     }
   },
   "source_language": "ja"
