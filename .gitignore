@@ -110,6 +110,10 @@ tools/lyrics/out/
 # 共有 target へのシンボリックリンクにしていることがあるので、末尾スラッシュを付けない
 # (付けるとディレクトリにしか一致せず、リンクが ?? で出る)
 imas-core/target
+# Android のビルド出力も共有置き場へのリンクにする (tools/link_shared_build_dirs.sh)。
+# build/ は末尾スラッシュでリンクに一致しないので、名指しで無視する
+ImasLiveDB-Android/build
+ImasLiveDB-Android/app/build
 # imas-text-fold (畳み込み規則の crate) のビルド生成物
 imas-text-fold/target/
 # tools/ の Python スクリプトを import/実行したときに出るバイトコード
