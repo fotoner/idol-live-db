@@ -110,7 +110,8 @@
   /* 吸着する年見出しのオフセット = 上部バーの高さ。2 段に折り返す幅で base.css が上書きする。 */
   --header-h: 72px;
   --page-max: 1200px;
-  --page-wide: 1320px;
+  /* 表や 2 段組の広い版面も、ヘッダ・本文と同じ左端に揃える (紙面の版面は 1 つ)。 */
+  --page-wide: 1200px;
 
   /* --- エンティティ色の既定 (= neutral)。themes.css が [data-theme] で上書きする --- */
   --accent: #1c1c1e;

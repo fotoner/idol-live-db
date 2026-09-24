@@ -62,6 +62,20 @@ web_dto! {
     pub struct YearGroup {
         pub year: String,
         pub events: Vec<EventListItem>,
+        /// `events` を月で区切った区間 (並び順どおり)。各区間の件数を足すと `events` の数。
+        pub months: Vec<MonthSpan>,
+    }
+}
+
+web_dto! {
+    /// 年の束の中の 1 か月ぶん (`events` の先頭から `count` 件ずつ)。
+    #[derive(Eq)]
+    pub struct MonthSpan {
+        /// 柱に大きく置く数 (`"9"`)。月が読めない区間では空。
+        pub number: String,
+        /// 数に添える字 (`"月"`)。月が読めない区間では `"日程未定"`。
+        pub unit: String,
+        pub count: u32,
     }
 }
 

@@ -70,7 +70,7 @@ pub use event::{
 pub use idol::{IdolPage, IdolPerformedRow, IdolShowRow, IdolSongRow, ProfileRow, VoiceActorRow};
 pub use index::{
     AboutLink, AboutPage, AboutSection, BrandListItem, BrandListPage, EventListItem,
-    EventListKind, EventListPage, HomePage, Countdown, IdolColumn, IdolListItem, IdolListKind, IdolListPage,
+    EventListKind, EventListPage, HomePage, Countdown, MonthSpan, IdolColumn, IdolListItem, IdolListKind, IdolListPage,
     KanaSection, NotFoundPage, RouteEntry, RouteKind, RoutesFile, SiteEntry, SongListItem, SongListKind, SongListPage,
     TagListItem, TagListPage, TagPage, TagSongRow,
     UnitListItem, UnitListPage, VenueListItem, VenueListPage, YearGroup,

@@ -150,6 +150,7 @@
     "attribute": null,
     "birthMonth": null,
     "searchText": "",
+    "voiceActor": "",
     "sort": "",
     "ascending": null
   },

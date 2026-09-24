@@ -72,14 +72,36 @@ fn year_groups(
                 .first()
                 .and_then(|&i| year_key(dates[i as usize].as_deref()))
                 .unwrap_or_else(|| "undated".to_string()),
-            group: YearGroup {
-                year: g.year,
-                events: g
+            group: {
+                // 行にならなかったもの (filter_map で落ちたもの) は月の区間にも数えない。
+                let kept: Vec<usize> = g
                     .indices
                     .iter()
-                    .filter_map(|&i| event_list_item(ctx, &records[i as usize], with_brand))
-                    .collect(),
+                    .map(|&i| i as usize)
+                    .filter(|&i| event_list_item(ctx, &records[i], with_brand).is_some())
+                    .collect();
+                let month_dates: Vec<Option<&str>> =
+                    kept.iter().map(|&i| dates[i].as_deref()).collect();
+                YearGroup {
+                    year: g.year,
+                    events: kept
+                        .iter()
+                        .filter_map(|&i| event_list_item(ctx, &records[i], with_brand))
+                        .collect(),
+                    months: month_spans(&month_dates),
+                }
             },
+        })
+        .collect()
+}
+
+/// 年の束を月の柱に区切る (区切り方は `event_grouping::month_runs`)。
+pub(crate) fn month_spans(dates: &[Option<&str>]) -> Vec<MonthSpan> {
+    crate::domain::event_grouping::month_runs(dates)
+        .into_iter()
+        .map(|(m, count)| match m {
+            Some(m) => MonthSpan { number: m.to_string(), unit: "月".to_string(), count },
+            None => MonthSpan { number: String::new(), unit: "日程未定".to_string(), count },
         })
         .collect()
 }

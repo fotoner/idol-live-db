@@ -66,6 +66,7 @@ export type { LineupNote } from "./LineupNote";
 export type { LinkedNote } from "./LinkedNote";
 export type { LyricsBlock } from "./LyricsBlock";
 export type { MissingOriginals } from "./MissingOriginals";
+export type { MonthSpan } from "./MonthSpan";
 export type { NavLink } from "./NavLink";
 export type { NotFoundPage } from "./NotFoundPage";
 export type { PenlightSetDto } from "./PenlightSetDto";

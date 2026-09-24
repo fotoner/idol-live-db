@@ -925,10 +925,12 @@ fn event_list_page(path: &str, title: &str, kind: EventListKind, empty: bool) ->
                 YearGroup {
                     year: "2026年".to_string(),
                     events: vec![event_list_item(&event_sample(), "live")],
+                    months: vec![MonthSpan { number: "9".to_string(), unit: "月".to_string(), count: 1 }],
                 },
                 YearGroup {
                     year: "2025年".to_string(),
                     events: vec![event_list_item(&event_weird_id(), "festival")],
+                    months: vec![MonthSpan { number: "9".to_string(), unit: "月".to_string(), count: 1 }],
                 },
             ]
         },
@@ -936,6 +938,7 @@ fn event_list_page(path: &str, title: &str, kind: EventListKind, empty: bool) ->
         recent_past: (path == "/events/").then(|| YearGroup {
             year: "2025年".to_string(),
             events: vec![event_list_item(&event_weird_id(), "festival")],
+            months: vec![MonthSpan { number: "9".to_string(), unit: "月".to_string(), count: 1 }],
         }),
         recent_past_title: (path == "/events/").then(|| "開催済み (2025年)".to_string()),
         next: (path == "/events/")

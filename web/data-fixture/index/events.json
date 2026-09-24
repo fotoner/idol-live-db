@@ -39,6 +39,13 @@
           "kind": "live",
           "kindLabel": null
         }
+      ],
+      "months": [
+        {
+          "number": "9",
+          "unit": "月",
+          "count": 1
+        }
       ]
     },
     {
@@ -75,6 +82,13 @@
           "showCountDisplay": "2 公演",
           "kind": "festival",
           "kindLabel": "フェス"
+        }
+      ],
+      "months": [
+        {
+          "number": "9",
+          "unit": "月",
+          "count": 1
         }
       ]
     }
@@ -113,6 +127,13 @@
         "showCountDisplay": "2 公演",
         "kind": "festival",
         "kindLabel": "フェス"
+      }
+    ],
+    "months": [
+      {
+        "number": "9",
+        "unit": "月",
+        "count": 1
       }
     ]
   },

@@ -2128,7 +2128,6 @@ a.labeled-row .labeled-row__value {
   overscroll-behavior: contain;
   border-radius: var(--r-md);
   background: var(--ds-surface);
-  box-shadow: var(--ds-shadow1);
 }
 .dtable {
   border-collapse: collapse;
@@ -2138,7 +2137,7 @@ a.labeled-row .labeled-row__value {
 }
 .dtable th,
 .dtable td {
-  padding: 8px 12px;
+  padding: 10px 12px;
   text-align: start;
   border-block-end: 1px solid var(--ds-sep);
 }
@@ -2155,6 +2154,10 @@ a.labeled-row .labeled-row__value {
   font-weight: 600;
   color: var(--ds-ink2);
   background: var(--ds-surface2);
+}
+/* 並べ替えの無い見出しも、ボタンのある見出しと同じ位置に字を置く。 */
+.dtable thead th:not(:has(.dtable__sort)) {
+  padding: 8px 12px;
 }
 /* 見出しの下の線。border は sticky だと一緒に流れて消えるので影で描く。 */
 .dtable thead tr :is(th, td) {
@@ -2225,6 +2228,17 @@ a.labeled-row .labeled-row__value {
 }
 .dtable tbody .dtable__name {
   background: var(--ds-surface);
+  /* 貼り付く列には border-collapse の線が描かれないので、影で引く。 */
+  box-shadow: inset 0 -1px 0 var(--ds-sep);
+}
+.dtable tbody tr:last-child .dtable__name {
+  box-shadow: none;
+}
+/* 長い値 (出身の注記など) で列が伸びきらないよう、1 列の幅に上限。全文は title ではなく詳細ページで。 */
+.dtable td {
+  max-inline-size: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .dtable tbody tr:hover .dtable__name {
   background: var(--ds-fill);
@@ -2244,7 +2258,38 @@ a.labeled-row .labeled-row__value {
 .year-group {
   display: flex;
   flex-direction: column;
-  gap: var(--sp3);
+  gap: var(--sp5);
+}
+/* 月の柱: 広い画面では左に大きな月、右に行のカード。狭い画面では月が上に乗る。 */
+.month-group {
+  display: grid;
+  gap: var(--sp3) var(--sp6);
+  align-items: start;
+}
+@media (min-width: 44rem) {
+  .month-group {
+    grid-template-columns: 80px minmax(0, 1fr);
+  }
+  .month-group__title {
+    position: sticky;
+    top: calc(var(--header-h) + var(--sp4));
+    padding-top: var(--sp3);
+  }
+}
+.month-group__title {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  font-family: var(--font-body);
+}
+.month-group__num {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.month-group__unit {
+  font-size: var(--fs-subhead);
+  font-weight: 700;
 }
 /* 年は紙面の柱: 細身の数字を大きく。吸着はしない (大きな字が行に被さる)。 */
 .year-group__title {
@@ -2381,6 +2426,14 @@ a.labeled-row .labeled-row__value {
 .song-filter[data-state="loading"] {
   opacity: 0.6;
 }
+/* 開く前は面を持たない 1 行 (ボタンと件数)。開いてから操作面のカードになる。 */
+.song-filter[data-state="idle"] {
+  flex-direction: row;
+  align-items: center;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
 .song-filter__controls {
   display: flex;
   flex-direction: column;
@@ -2420,11 +2473,12 @@ a.labeled-row .labeled-row__value {
 .song-filter__reset {
   font: inherit;
   font-size: var(--fs-footnote);
-  font-weight: 600;
-  color: var(--ds-ink2);
-  background: var(--ds-fill);
+  font-weight: 700;
+  color: var(--ds-ink);
+  background: var(--ds-surface);
   border: 0;
-  border-radius: var(--r-sm);
+  box-shadow: inset 0 0 0 1px var(--ds-line);
+  border-radius: var(--r-pill);
   padding: var(--sp3) var(--sp4);
   cursor: pointer;
   flex: none;

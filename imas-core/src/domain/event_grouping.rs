@@ -49,6 +49,26 @@ pub fn year_key(date: Option<&str>) -> Option<String> {
     year_date_key(date).map(|d| char_prefix(d, 4).to_string())
 }
 
+/// 年の束の中を月で区切る (紙面の「9 月」の柱)。
+///
+/// `dates` は束の中の並び順どおりの初日。**並びは変えず**、同じ月が続く区間ごとに
+/// `(月, 件数)` を返す。月が読めない日付 (年だけ・日程未定) は `None` の区間になる。
+/// 並びが月をまたいで戻ること (同じ月が 2 区間に割れること) も、そのまま 2 区間で返す。
+pub fn month_runs(dates: &[Option<&str>]) -> Vec<(Option<u32>, u32)> {
+    let mut runs: Vec<(Option<u32>, u32)> = Vec::new();
+    for date in dates {
+        let month = date
+            .and_then(|d| d.get(5..7))
+            .and_then(|m| m.parse::<u32>().ok())
+            .filter(|m| (1..=12).contains(m));
+        match runs.last_mut() {
+            Some((m, n)) if *m == month => *n += 1,
+            _ => runs.push((month, 1)),
+        }
+    }
+    runs
+}
+
 /// 先頭 `n` 文字 (バイトでなく文字数)。Swift `String.prefix` と同じ挙動。
 fn char_prefix(s: &str, n: usize) -> &str {
     match s.char_indices().nth(n) {
@@ -385,5 +405,16 @@ mod timeframe_tests {
 
         // 語彙の綴りは parse と揃っている。
         assert!(Timeframe::KEYS.iter().all(|k| Timeframe::parse(Some(k)).is_some()));
+    }
+}
+
+#[cfg(test)]
+mod month_runs_tests {
+    use super::month_runs;
+
+    #[test]
+    fn splits_consecutive_months_and_keeps_order() {
+        let d = [Some("2026-09-26"), Some("2026-09-19"), Some("2026-08-01"), Some("2026"), None];
+        assert_eq!(month_runs(&d), vec![(Some(9), 2), (Some(8), 1), (None, 2)]);
     }
 }
