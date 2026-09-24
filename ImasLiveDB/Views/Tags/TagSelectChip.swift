@@ -41,6 +41,7 @@ struct TagSelectChip: View {
             action: action
         )
         .accessibilityLabel(tag.name)
-        .accessibilityHint(isApplied ? "追加済み" : (isSelected ? "選択中" : "タップで追加"))
+        .accessibilityHint(isApplied ? L10n.Tags.chipAppliedA11yHint
+                           : (isSelected ? L10n.Tags.chipSelectedA11yHint : L10n.Tags.chipUnselectedA11yHint))
     }
 }

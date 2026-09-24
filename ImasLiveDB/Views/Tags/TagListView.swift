@@ -15,12 +15,24 @@ struct TagListView: View {
     /// 一覧の名前絞り込み。タグは全件 (limit 1000) を取得済みなのでクライアント側で絞る。
     @State private var nameFilter = ""
 
-    private let categories: [(value: String, label: String)] = [
-        ("", "全て"), ("mood", "ムード"), ("scene", "シーン"), ("special", "特別"), ("free", "フリー")
-    ]
-    private let sortOptions: [(value: String, label: String)] = [
-        ("popular", "人気"), ("recent", "新着"), ("name", "名前")
-    ]
+    /// 絞り込みシート (TagFilterSheet) は解決済みの String を受けるので、描くたびに今の言語で引く
+    /// (let に置くと作った時点の言語で固まる)。
+    private var categories: [(value: String, label: String)] {
+        [
+            ("", String(localized: L10n.Tags.listCategoryAll)),
+            ("mood", String(localized: L10n.Tags.listCategoryMood)),
+            ("scene", String(localized: L10n.Tags.listCategoryScene)),
+            ("special", String(localized: L10n.Tags.listCategorySpecial)),
+            ("free", String(localized: L10n.Tags.listCategoryFree)),
+        ]
+    }
+    private var sortOptions: [(value: String, label: String)] {
+        [
+            ("popular", String(localized: L10n.Tags.listSortPopular)),
+            ("recent", String(localized: L10n.Tags.listSortRecent)),
+            ("name", String(localized: L10n.Tags.listSortName)),
+        ]
+    }
 
     private var activeFilterCount: Int {
         (selectedCategory.isEmpty ? 0 : 1) + (nameFilter.isEmpty ? 0 : 1)
@@ -44,7 +56,7 @@ struct TagListView: View {
         NavigationStack(path: $navPath) {
             List {
                 Section {
-                    NameFilterField(prompt: "タグ名で絞り込み", text: $nameFilter)
+                    NameFilterField(prompt: String(localized: L10n.Tags.listNameFilterPrompt), text: $nameFilter)
                         .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 8, trailing: 16))
                 }
                 .listRowBackground(Color.clear)
@@ -55,8 +67,8 @@ struct TagListView: View {
                 } else if filteredTags.isEmpty {
                     ImasEmptyState(
                         systemImage: nameFilter.isEmpty ? "tag" : "line.3.horizontal.decrease",
-                        title: nameFilter.isEmpty ? "タグはまだありません" : "絞り込み結果がありません",
-                        message: nameFilter.isEmpty ? nil : "「\(nameFilter)」に一致するタグがありません"
+                        title: String(localized: nameFilter.isEmpty ? L10n.Tags.listEmptyTitle : L10n.Tags.listFilterEmptyTitle),
+                        message: nameFilter.isEmpty ? nil : String(localized: L10n.Tags.listFilterEmptyMessage(query: nameFilter))
                     )
                     .listRowBackground(Color.clear)
                 } else {
@@ -73,7 +85,7 @@ struct TagListView: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .background(DS.bg)
-            .navigationTitle("タグ")
+            .navigationTitle(L10n.Tags.listTitle)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     HStack(spacing: DS.sp3) {
@@ -94,7 +106,7 @@ struct TagListView: View {
                     }
                 }
                 ToolbarItem(placement: .topBarLeading) {
-                    Picker("並び順", selection: $selectedSort) {
+                    Picker(L10n.Tags.listSortLabel, selection: $selectedSort) {
                         ForEach(sortOptions, id: \.value) { opt in
                             Text(opt.label).tag(opt.value)
                         }
@@ -155,9 +167,9 @@ struct TagRowView: View {
                 }
                 Text(tag.name)
                     .font(.imasSubhead.weight(.semibold))
-                    .accessibilityLabel("タグ: \(tag.name)")
+                    .accessibilityLabel(L10n.Tags.listRowA11y(name: tag.name))
                 if let cat = tag.category {
-                    Text(cat.rawValue)
+                    Text(cat.rowLabel)
                         .font(.imasCaption2)
                         .foregroundStyle(DS.ink2)
                         .padding(.horizontal, 6)
@@ -167,7 +179,7 @@ struct TagRowView: View {
                 }
                 Spacer()
                 if let uses = tag.totalUses, uses > 0 {
-                    Text("\(uses)曲")
+                    Text(L10n.Tags.listRowSongs(count: uses))
                         .font(.imasCaption)
                         .foregroundStyle(DS.ink2)
                 }
@@ -180,6 +192,19 @@ struct TagRowView: View {
             }
         }
         .padding(.vertical, DS.sp1)
+    }
+}
+
+private extension TagCategory {
+    /// 一覧の行のバッジに出す語。保存値 (rawValue) は変えず、表示だけカタログを引く。
+    /// ja は今まで出していた rawValue (英字) のまま (list.row.category.* の note を参照)。
+    var rowLabel: LocalizedStringResource {
+        switch self {
+        case .mood: L10n.Tags.listRowCategoryMood
+        case .scene: L10n.Tags.listRowCategoryScene
+        case .special: L10n.Tags.listRowCategorySpecial
+        case .free: L10n.Tags.listRowCategoryFree
+        }
     }
 }
 
@@ -198,7 +223,7 @@ struct TagRankBadge: View {
             .padding(.vertical, DS.sp1)
             .padding(.horizontal, 5)
             .background(bgColor, in: Capsule())
-            .accessibilityLabel("\(rank)位")
+            .accessibilityLabel(L10n.Tags.rankBadgeA11y(rank: rank))
     }
 
     private var medalColor: Color? {

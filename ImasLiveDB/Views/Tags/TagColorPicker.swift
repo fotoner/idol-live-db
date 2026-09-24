@@ -39,19 +39,19 @@ struct TagColorPicker: View {
                     swatch(fill: nil, selected: selectedHex.isEmpty)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("色なし")
+                .accessibilityLabel(L10n.Tags.colorPickerNoneA11y)
 
                 ForEach(Self.presets, id: \.self) { hex in
                     Button { selectedHex = hex } label: {
                         swatch(fill: Color(hexString: hex), selected: isSelected(hex))
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("色 \(hex)")
+                    .accessibilityLabel(L10n.Tags.colorPickerSwatchA11y(hex: hex))
                 }
             }
 
             ColorPicker(selection: $customColor, supportsOpacity: false) {
-                Text("カスタム色を選ぶ")
+                Text(L10n.Tags.colorPickerCustom)
                     .font(.imasSubhead)
             }
             .onChange(of: customColor) { _, newColor in

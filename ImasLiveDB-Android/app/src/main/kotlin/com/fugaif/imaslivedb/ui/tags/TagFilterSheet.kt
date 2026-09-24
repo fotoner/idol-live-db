@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 
 /**
@@ -72,19 +74,19 @@ fun TagFilterSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(modifier = Modifier.fillMaxWidth().heightIn(min = 320.dp, max = 560.dp).padding(bottom = 16.dp)) {
             Text(
-                "タグで絞り込み", fontSize = 20.sp, color = DS.ink,
+                L10n.Tags.filterTitle.resolve(), fontSize = 20.sp, color = DS.ink,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                label = { Text("タグ名で検索") },
+                label = { Text(L10n.Tags.filterSearchPrompt.resolve()) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
             )
             if (selected.isNotEmpty()) {
                 Text(
-                    "選択中 (${selected.size}) — すべてを含む曲に絞り込み",
+                    L10n.Tags.filterSelectedHeader(count = selected.size).resolve(),
                     fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
@@ -98,7 +100,7 @@ fun TagFilterSheet(
             when {
                 isLoading -> Box(Modifier.fillMaxWidth().padding(32.dp)) { CircularProgressIndicator() }
                 tags.isEmpty() -> Text(
-                    "タグがありません", color = DS.ink2,
+                    L10n.Tags.filterEmpty.resolve(), color = DS.ink2,
                     modifier = Modifier.fillMaxWidth().padding(32.dp)
                 )
                 else -> LazyColumn(modifier = Modifier.weight(1f, fill = false)) {
@@ -114,7 +116,7 @@ fun TagFilterSheet(
                             if (rank != null) TagRankBadge(rank)
                             TagColorDot(tag.color)
                             Text(tag.name, fontSize = 15.sp, color = DS.ink, modifier = Modifier.weight(1f))
-                            if (tag.totalUses > 0) Text("${tag.totalUses}曲", fontSize = 12.sp, color = DS.ink2)
+                            if (tag.totalUses > 0) Text(L10n.Tags.filterRowSongs(count = tag.totalUses).resolve(), fontSize = 12.sp, color = DS.ink2)
                             if (isSelected) {
                                 Icon(Icons.Filled.Check, contentDescription = null, tint = DS.pick)
                             }
@@ -126,8 +128,10 @@ fun TagFilterSheet(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("キャンセル") }
-                Button(onClick = { onDone(selected); onDismiss() }, modifier = Modifier.weight(1f)) { Text("完了") }
+                TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text(L10n.Tags.actionCancel.resolve()) }
+                Button(onClick = { onDone(selected); onDismiss() }, modifier = Modifier.weight(1f)) {
+                    Text(L10n.Tags.filterActionDone.resolve())
+                }
             }
         }
     }

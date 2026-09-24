@@ -1,0 +1,2270 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "tags.action.cancel" : {
+      "comment" : "タグ画面群の取り消しボタン (作成・編集・絞り込み・追加のシート、通報の確認) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャンセル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "취소"
+          }
+        }
+      }
+    },
+    "tags.action.ok" : {
+      "comment" : "通報の結果・エラー、タグ追加の失敗のアラートを閉じるボタン (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "확인"
+          }
+        }
+      }
+    },
+    "tags.activity.empty.message" : {
+      "comment" : "タグの動きがどのセグメントにも無いときの空状態の説明 (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグを付けると、ここに反映されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그를 달면 여기에 반영돼요."
+          }
+        }
+      }
+    },
+    "tags.activity.empty.message_idols" : {
+      "comment" : "「アイドル」のセグメントにタグの動きが無いときの説明 (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドルにタグを付けると、ここに反映されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌에게 태그를 달면 여기에 반영돼요."
+          }
+        }
+      }
+    },
+    "tags.activity.empty.message_songs" : {
+      "comment" : "「曲」のセグメントにタグの動きが無いときの説明 (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲にタグを付けると、ここに反映されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡에 태그를 달면 여기에 반영돼요."
+          }
+        }
+      }
+    },
+    "tags.activity.empty.title" : {
+      "comment" : "タグの動きが 1 件も無いときの空状態の見出し (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだ動きがありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 활동이 없어요"
+          }
+        }
+      }
+    },
+    "tags.activity.loading.idol" : {
+      "comment" : "タグの動きの行で、アイドルの情報をまだ手元のデータから読めていないとき (名前の代わり) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドルを読み込み中"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 불러오는 중"
+          }
+        }
+      }
+    },
+    "tags.activity.loading.song" : {
+      "comment" : "タグの動きの行で、曲の情報をまだ手元のデータから読めていないとき (曲名の代わり) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲を読み込み中"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 불러오는 중"
+          }
+        }
+      }
+    },
+    "tags.activity.recent.header" : {
+      "comment" : "タグの動きの節の見出し (新しく付けられたタグの一覧) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最近つけられたタグ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최근 달린 태그"
+          }
+        }
+      }
+    },
+    "tags.activity.recent.tagged" : {
+      "comment" : "最近つけられたタグの行の説明。name はタグ名 (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」タグが付きました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@” 태그가 달렸어요"
+          }
+        }
+      }
+    },
+    "tags.activity.rising.count" : {
+      "comment" : "タグが急増中の行の右、直近に付けられた回数。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg件"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg건"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "tags.activity.rising.header" : {
+      "comment" : "タグの動きの節の見出し (直近でタグが急に増えている曲・アイドル) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグが急増中"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 급증 중"
+          }
+        }
+      }
+    },
+    "tags.activity.rising.tag" : {
+      "comment" : "タグが急増中の行の、増えているタグの名前をかぎ括弧で囲んだもの。name はタグ名 (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@”"
+          }
+        }
+      }
+    },
+    "tags.activity.tab.idols" : {
+      "comment" : "タグの動きの画面のセグメント (アイドルのタグ) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌"
+          }
+        }
+      }
+    },
+    "tags.activity.tab.songs" : {
+      "comment" : "タグの動きの画面のセグメント (曲のタグ) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡"
+          }
+        }
+      }
+    },
+    "tags.activity.title" : {
+      "comment" : "タグ付けの盛り上がり (最近付いたタグ・伸びているタグ) の画面の見出し (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグの動き"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 동향"
+          }
+        }
+      }
+    },
+    "tags.activity.trending.header" : {
+      "comment" : "タグの動きの節の見出し (直近でよく付けられているタグ) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "伸びてるタグ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "뜨는 태그"
+          }
+        }
+      }
+    },
+    "tags.activity.trending.recent" : {
+      "comment" : "伸びてるタグの行の右、直近 (7 日) に付けられた回数。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "直近%arg件"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "최근 %arg건"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "tags.activity.trending.total" : {
+      "comment" : "伸びてるタグの行の右、これまでに付けられた回数の合計。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "累計%arg"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "누적 %arg"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "tags.chip.applied.a11y_hint" : {
+      "comment" : "タグを付けるシートのタグのチップの読み上げの補足 (もう付けてある) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "追加済み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "추가됨"
+          }
+        }
+      }
+    },
+    "tags.chip.selected.a11y_hint" : {
+      "comment" : "タグを付けるシートのタグのチップの読み上げの補足 (選んでいて、まだ付けていない) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択中"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "선택됨"
+          }
+        }
+      }
+    },
+    "tags.chip.unselected.a11y_hint" : {
+      "comment" : "タグを付けるシートのタグのチップの読み上げの補足 (まだ選んでいない) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タップで追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "탭하여 추가"
+          }
+        }
+      }
+    },
+    "tags.color_picker.custom" : {
+      "comment" : "タグの色の選択で、システムの色選択を開く行 (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カスタム色を選ぶ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "사용자 지정 색 고르기"
+          }
+        }
+      }
+    },
+    "tags.color_picker.none.a11y" : {
+      "comment" : "タグの色の選択で「色を付けない」スウォッチの読み上げ (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "色なし"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "색 없음"
+          }
+        }
+      }
+    },
+    "tags.color_picker.swatch.a11y" : {
+      "comment" : "タグの色の選択のスウォッチの読み上げ。hex は #RRGGBB の色の値 (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "色 %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "색 %1$@"
+          }
+        }
+      }
+    },
+    "tags.create.action.create" : {
+      "comment" : "新規タグ作成シートの確定ボタン (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作成"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "만들기"
+          }
+        }
+      }
+    },
+    "tags.create.category.header" : {
+      "comment" : "新規タグ作成シートのカテゴリの見出し (選ばなくてよい) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カテゴリ（任意）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "카테고리 (선택)"
+          }
+        }
+      }
+    },
+    "tags.create.color.header" : {
+      "comment" : "新規タグ作成シートの色の見出し (選ばなくてよい) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "色（任意）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "색 (선택)"
+          }
+        }
+      }
+    },
+    "tags.create.description.header" : {
+      "comment" : "新規タグ作成シートの説明文の欄の見出し (入れなくてよい) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "説明文（任意）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "설명 (선택)"
+          }
+        }
+      }
+    },
+    "tags.create.description.placeholder" : {
+      "comment" : "新規タグ作成シートの説明文の欄のプレースホルダ (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "どんな時に使うタグか（任意）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "어떤 때 쓰는 태그인지 (선택)"
+          }
+        }
+      }
+    },
+    "tags.create.error.failed" : {
+      "comment" : "タグを作れず、サーバから説明が来なかったとき (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作成に失敗しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "만들지 못했어요"
+          }
+        }
+      }
+    },
+    "tags.create.error.failed_detail" : {
+      "comment" : "タグを作れなかったとき (通信の失敗など)。detail は OS・通信層の説明 (訳さない) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作成に失敗しました: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "만들지 못했어요: %1$@"
+          }
+        }
+      }
+    },
+    "tags.create.error.rate_limited" : {
+      "comment" : "タグの作成が 1 日の上限 (10 件) に達したとき (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1日10件まで作成できます。明日試してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "하루에 10건까지 만들 수 있어요. 내일 다시 시도해 주세요"
+          }
+        }
+      }
+    },
+    "tags.create.name.header" : {
+      "comment" : "新規タグ作成シートの名前の欄の見出し (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ名"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 이름"
+          }
+        }
+      }
+    },
+    "tags.create.name.placeholder" : {
+      "comment" : "新規タグ作成シートの名前の欄のプレースホルダ。例の語も訳す (エモい = 胸にくる・エモーショナル) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "例: エモい"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "예: 감성적"
+          }
+        }
+      }
+    },
+    "tags.create.title" : {
+      "comment" : "新規タグ作成シートの見出し (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新規タグ作成"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "새 태그 만들기"
+          }
+        }
+      }
+    },
+    "tags.detail.action.edit_description" : {
+      "comment" : "タグ詳細の説明の下のボタン (説明文・カテゴリ・色の編集シートを開く) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "説明を編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "설명 편집"
+          }
+        }
+      }
+    },
+    "tags.detail.action.history" : {
+      "comment" : "タグ詳細の説明の下のボタン (説明文の編集履歴を開く) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編集履歴"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "편집 기록"
+          }
+        }
+      }
+    },
+    "tags.detail.action.report" : {
+      "comment" : "タグ詳細の右上のメニューの項目 (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不適切なタグを通報"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "부적절한 태그 신고"
+          }
+        }
+      }
+    },
+    "tags.detail.category.a11y" : {
+      "comment" : "タグ詳細のカテゴリのバッジの読み上げ。category はコアの語彙の名前 (ムード・性格など) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カテゴリ: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "카테고리: %1$@"
+          }
+        }
+      }
+    },
+    "tags.detail.color.a11y" : {
+      "comment" : "タグ詳細の色の四角の読み上げ。hex は #RRGGBB の色の値 (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグカラー: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 색: %1$@"
+          }
+        }
+      }
+    },
+    "tags.detail.idols.empty" : {
+      "comment" : "アイドルのタグ詳細で、付いたアイドルが 1 人もいないとき (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだこのタグが付いたアイドルはいません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 이 태그가 달린 아이돌이 없어요"
+          }
+        }
+      }
+    },
+    "tags.detail.idols.header" : {
+      "comment" : "タグ詳細のランキングの見出し。name はタグ名、「◯◯な」は「そのタグらしい」の意味。このタグが付いたアイドルを票の多い順に並べる。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "「%1$@」なアイドルランキング（%arg人）"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "“%1$@” 아이돌 랭킹 (%arg명)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "tags.detail.no_description" : {
+      "comment" : "タグ詳細で、タグに説明文が無いとき (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "説明なし"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "설명 없음"
+          }
+        }
+      }
+    },
+    "tags.detail.report.confirm.action" : {
+      "comment" : "タグの通報の確認ダイアログの実行ボタン (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通報する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "신고"
+          }
+        }
+      }
+    },
+    "tags.detail.report.confirm.message" : {
+      "comment" : "タグの通報の確認ダイアログの本文 (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不適切なコンテンツとして通報します"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "부적절한 콘텐츠로 신고할게요"
+          }
+        }
+      }
+    },
+    "tags.detail.report.confirm.title" : {
+      "comment" : "タグの通報の確認ダイアログの見出し (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグを通報"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 신고"
+          }
+        }
+      }
+    },
+    "tags.detail.report.done.message" : {
+      "comment" : "タグの通報を受け付けたときのダイアログの本文 (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ご報告ありがとうございます。内容を確認します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "신고해 주셔서 감사해요. 내용을 확인할게요."
+          }
+        }
+      }
+    },
+    "tags.detail.report.done.title" : {
+      "comment" : "タグの通報を受け付けたときのダイアログの見出し (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通報しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "신고했어요"
+          }
+        }
+      }
+    },
+    "tags.detail.report.error.fallback" : {
+      "comment" : "タグの通報に失敗し、サーバから説明が来なかったとき (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エラーが発生しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오류가 발생했어요"
+          }
+        }
+      }
+    },
+    "tags.detail.report.error.rate_limited" : {
+      "comment" : "タグの通報が 1 日の上限に達したとき (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本日通報上限です。明日また試してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오늘은 더 신고할 수 없어요. 내일 다시 시도해 주세요."
+          }
+        }
+      }
+    },
+    "tags.detail.report.error.title" : {
+      "comment" : "タグの通報に失敗したときのダイアログの見出し (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通報エラー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "신고 오류"
+          }
+        }
+      }
+    },
+    "tags.detail.songs.empty" : {
+      "comment" : "曲のタグ詳細で、付いた曲が 1 曲も無いとき (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだこのタグが付いた曲はありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 이 태그가 달린 곡이 없어요"
+          }
+        }
+      }
+    },
+    "tags.detail.songs.header" : {
+      "comment" : "タグ詳細のランキングの見出し。name はタグ名、「◯◯な」は「そのタグらしい」の意味。このタグが付いた曲を票の多い順に並べる。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "「%1$@」な曲ランキング（%arg曲）"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "“%1$@” 곡 랭킹 (%arg곡)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "tags.detail.units.empty" : {
+      "comment" : "ユニットのタグ詳細で、付いたユニットが 1 つも無いとき (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだこのタグが付いたユニットはいません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 이 태그가 달린 유닛이 없어요"
+          }
+        }
+      }
+    },
+    "tags.detail.units.header" : {
+      "comment" : "タグ詳細のランキングの見出し。name はタグ名、「◯◯な」は「そのタグらしい」の意味。このタグが付いたユニットを票の多い順に並べる。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "「%1$@」なユニットランキング（%arg組）"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "“%1$@” 유닛 랭킹 (%arg팀)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "tags.detail.votes" : {
+      "comment" : "タグ詳細のランキングの行の右端、このタグへの票の数。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg票"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg표"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "tags.edit.action.save" : {
+      "comment" : "タグの編集シートの確定ボタン (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "저장"
+          }
+        }
+      }
+    },
+    "tags.edit.category.header" : {
+      "comment" : "タグの編集シートのカテゴリの見出し (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カテゴリ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "카테고리"
+          }
+        }
+      }
+    },
+    "tags.edit.color.header" : {
+      "comment" : "タグの編集シートの色の見出し (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "色"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "색"
+          }
+        }
+      }
+    },
+    "tags.edit.description.header" : {
+      "comment" : "タグの編集シートの説明文の欄の見出し (Android は欄のラベル) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "説明文"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "설명"
+          }
+        }
+      }
+    },
+    "tags.edit.description.placeholder" : {
+      "comment" : "タグの編集シートの説明文の欄のプレースホルダ (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "どんな時に使うタグか"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "어떤 때 쓰는 태그인지"
+          }
+        }
+      }
+    },
+    "tags.edit.error.failed" : {
+      "comment" : "タグの編集を保存できず、サーバから説明が来なかったとき (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存に失敗しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "저장하지 못했어요"
+          }
+        }
+      }
+    },
+    "tags.edit.error.failed_detail" : {
+      "comment" : "タグの編集を保存できなかったとき (通信の失敗など)。detail は OS・通信層の説明 (訳さない) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存に失敗しました: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "저장하지 못했어요: %1$@"
+          }
+        }
+      }
+    },
+    "tags.edit.title" : {
+      "comment" : "タグの編集シートの見出し。name はタグ名 (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」を編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@” 편집"
+          }
+        }
+      }
+    },
+    "tags.filter.action.done" : {
+      "comment" : "タグで絞り込むシートの確定ボタン (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完了"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "완료"
+          }
+        }
+      }
+    },
+    "tags.filter.empty" : {
+      "comment" : "タグで絞り込むシートで候補が 1 つも無いとき (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグがありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그가 없어요"
+          }
+        }
+      }
+    },
+    "tags.filter.row.songs" : {
+      "comment" : "タグで絞り込むシートの行の右端、このタグが付いた曲の数。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "tags.filter.search.prompt" : {
+      "comment" : "タグで絞り込むシートの検索欄のプレースホルダ (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ名で検索"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 이름으로 검색"
+          }
+        }
+      }
+    },
+    "tags.filter.section.popular" : {
+      "comment" : "タグで絞り込むシートの候補の見出し (検索していないとき。人気順) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "人気タグランキング"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "인기 태그 랭킹"
+          }
+        }
+      }
+    },
+    "tags.filter.section.results" : {
+      "comment" : "タグで絞り込むシートの候補の見出し (検索中) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "検索結果"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "검색 결과"
+          }
+        }
+      }
+    },
+    "tags.filter.selected.header" : {
+      "comment" : "タグで絞り込むシートの選んだタグの見出し。count は選んだタグの数。選んだタグを全部持つ曲だけに絞る (AND)。ko の「곡만 보기」は文中の動詞としての「絞り込み」なので、用語集の 필터 / 찾기 (機能名・ボタン名) は使わない。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "選択中 (%arg) — すべてを含む曲に絞り込み"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "선택됨 (%arg) — 모든 태그가 달린 곡만 보기"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "tags.filter.title" : {
+      "comment" : "曲一覧をタグで絞り込むシートの見出し (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグで絞り込み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 필터"
+          }
+        }
+      }
+    },
+    "tags.history.empty" : {
+      "comment" : "タグの説明文の編集履歴が 1 件も無いとき (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編集履歴はありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "편집 기록이 없어요"
+          }
+        }
+      }
+    },
+    "tags.history.no_description" : {
+      "comment" : "編集履歴の行で、その版の説明文が空のとき (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "（説明なし）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "(설명 없음)"
+          }
+        }
+      }
+    },
+    "tags.history.title" : {
+      "comment" : "タグの説明文の編集履歴の画面の見出し (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編集履歴"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "편집 기록"
+          }
+        }
+      }
+    },
+    "tags.list.category.all" : {
+      "comment" : "タグ一覧の絞り込みシートのカテゴリの選択肢 (カテゴリで絞らない) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全て"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "tags.list.category.free" : {
+      "comment" : "タグ一覧の絞り込みシートのカテゴリの選択肢 (分類の無い自由なタグ) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フリー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "자유"
+          }
+        }
+      }
+    },
+    "tags.list.category.mood" : {
+      "comment" : "タグ一覧の絞り込みシートのカテゴリの選択肢 (曲の雰囲気のタグ) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ムード"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "무드"
+          }
+        }
+      }
+    },
+    "tags.list.category.scene" : {
+      "comment" : "タグ一覧の絞り込みシートのカテゴリの選択肢 (聴く場面のタグ) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シーン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "상황"
+          }
+        }
+      }
+    },
+    "tags.list.category.special" : {
+      "comment" : "タグ一覧の絞り込みシートのカテゴリの選択肢 (特別なタグ) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "特別"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "특별"
+          }
+        }
+      }
+    },
+    "tags.list.empty.title" : {
+      "comment" : "タグ一覧にタグが 1 つも無いとき (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグはまだありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 태그가 없어요"
+          }
+        }
+      }
+    },
+    "tags.list.filter_empty.message" : {
+      "comment" : "名前で絞り込んで 0 件のときの説明。query は入力した語 (Android はこれ 1 行だけを出す) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」に一致するタグがありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@”에 해당하는 태그가 없어요"
+          }
+        }
+      }
+    },
+    "tags.list.filter_empty.title" : {
+      "comment" : "名前で絞り込んで 0 件のときの空状態の見出し (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "絞り込み結果がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터 결과가 없어요"
+          }
+        }
+      }
+    },
+    "tags.list.name_filter.prompt" : {
+      "comment" : "タグ一覧の上の名前の絞り込み欄のプレースホルダ (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ名で絞り込み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 이름으로 찾기"
+          }
+        }
+      }
+    },
+    "tags.list.row.a11y" : {
+      "comment" : "タグ一覧の行のタグ名の読み上げ。name はタグ名 (利用者が付けた名前) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그: %1$@"
+          }
+        }
+      }
+    },
+    "tags.list.row.category.free" : {
+      "comment" : "タグ一覧の行のカテゴリのバッジ。今は内部の値 (英字) をそのまま出しているので ja も英字のまま (ムード等の表記に揃えるかはオーナーが別 PR で)。分類の無い自由なタグ (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "free"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "자유"
+          }
+        }
+      }
+    },
+    "tags.list.row.category.mood" : {
+      "comment" : "タグ一覧の行のカテゴリのバッジ。今は内部の値 (英字) をそのまま出しているので ja も英字のまま (ムード等の表記に揃えるかはオーナーが別 PR で)。曲の雰囲気のタグ (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mood"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "무드"
+          }
+        }
+      }
+    },
+    "tags.list.row.category.scene" : {
+      "comment" : "タグ一覧の行のカテゴリのバッジ。今は内部の値 (英字) をそのまま出しているので ja も英字のまま (ムード等の表記に揃えるかはオーナーが別 PR で)。聴く場面のタグ (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "scene"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "상황"
+          }
+        }
+      }
+    },
+    "tags.list.row.category.special" : {
+      "comment" : "タグ一覧の行のカテゴリのバッジ。今は内部の値 (英字) をそのまま出しているので ja も英字のまま (ムード等の表記に揃えるかはオーナーが別 PR で)。特別なタグ (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "special"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "특별"
+          }
+        }
+      }
+    },
+    "tags.list.row.songs" : {
+      "comment" : "タグ一覧の行の右端、このタグが付いた曲の数。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "tags.list.sort.label" : {
+      "comment" : "タグ一覧の並び順メニュー (iOS は Picker のラベル、Android は並び替えアイコンの読み上げ) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "並び順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정렬"
+          }
+        }
+      }
+    },
+    "tags.list.sort.name" : {
+      "comment" : "タグ一覧の並び順の選択肢 (名前順) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이름"
+          }
+        }
+      }
+    },
+    "tags.list.sort.popular" : {
+      "comment" : "タグ一覧の並び順の選択肢 (人気順) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "人気"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "인기"
+          }
+        }
+      }
+    },
+    "tags.list.sort.recent" : {
+      "comment" : "タグ一覧の並び順の選択肢 (新しく作られた順) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新着"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최신"
+          }
+        }
+      }
+    },
+    "tags.list.title" : {
+      "comment" : "タグ一覧の画面タイトル (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그"
+          }
+        }
+      }
+    },
+    "tags.picker.action.add" : {
+      "comment" : "タグを付けるシートの確定ボタン (選んだタグをまとめて付ける) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "추가"
+          }
+        }
+      }
+    },
+    "tags.picker.action.close" : {
+      "comment" : "曲にタグを付けたあとの完了・シェアの画面の右上のボタン (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "閉じる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "닫기"
+          }
+        }
+      }
+    },
+    "tags.picker.create_from_search" : {
+      "comment" : "検索語と同じ名前のタグが無いときの、その名前で新しく作るボタン。query は入力した語 (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」を作成"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@” 만들기"
+          }
+        }
+      }
+    },
+    "tags.picker.create_full" : {
+      "comment" : "タグを付けるシートの下のボタン (新規タグ作成シートを開く) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "色やカテゴリを付けて新規作成"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "색이나 카테고리를 정해 새로 만들기"
+          }
+        }
+      }
+    },
+    "tags.picker.empty" : {
+      "comment" : "タグを付けるシートで候補が 1 つも無いとき (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグが見つかりません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그를 찾을 수 없어요"
+          }
+        }
+      }
+    },
+    "tags.picker.error.apply_failed" : {
+      "comment" : "選んだタグを付けられなかったとき (iOS はアラートの見出し、Android はシートの中の文) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグの追加に失敗しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그를 추가하지 못했어요"
+          }
+        }
+      }
+    },
+    "tags.picker.search.prompt" : {
+      "comment" : "タグを付けるシートの検索欄のプレースホルダ (無ければその語で新しく作れる) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグを検索 / 新規作成"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 검색 / 새로 만들기"
+          }
+        }
+      }
+    },
+    "tags.picker.section.candidates" : {
+      "comment" : "タグを付けるシートの候補の見出し (検索中) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "候補"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "후보"
+          }
+        }
+      }
+    },
+    "tags.picker.section.popular" : {
+      "comment" : "タグを付けるシートの候補の見出し (検索していないとき) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "よく使われるタグ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "자주 쓰이는 태그"
+          }
+        }
+      }
+    },
+    "tags.picker.share.song_fallback" : {
+      "comment" : "タグ付けのシェアカードに出す曲名の代わり (曲の情報を読めなかったとき) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 곡"
+          }
+        }
+      }
+    },
+    "tags.picker.title" : {
+      "comment" : "曲・アイドル・ユニットにタグを付けるシートの見出し (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグを追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 추가"
+          }
+        }
+      }
+    },
+    "tags.rank_badge.a11y" : {
+      "comment" : "人気ランキングの順位バッジの読み上げ (タグ一覧・曲一覧のタグ絞り込み・タグ詳細)。rank は順位 (桁区切りなし) (i18n/catalog/tags.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@位"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@위"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

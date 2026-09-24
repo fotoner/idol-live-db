@@ -31,11 +31,11 @@ struct SongTagPicker: View {
         NavigationStack {
             if let share = appliedShare {
                 TagShareCompletionView(context: share, onClose: { dismiss() })
-                    .navigationTitle("タグを追加")
+                    .navigationTitle(L10n.Tags.pickerTitle)
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
-                            Button("閉じる") { dismiss() }
+                            Button(L10n.Tags.pickerActionClose) { dismiss() }
                         }
                     }
             } else {
@@ -62,7 +62,7 @@ struct SongTagPicker: View {
                         } label: {
                             HStack(spacing: DS.sp2) {
                                 Image(systemName: "plus.circle.fill").font(.imasScaled( 18, weight: .semibold))
-                                Text("「\(trimmedSearch)」を作成").font(.imasSubhead.weight(.semibold))
+                                Text(L10n.Tags.pickerCreateFromSearch(query: trimmedSearch)).font(.imasSubhead.weight(.semibold))
                                 Spacer()
                             }
                             .foregroundStyle(DS.sys)
@@ -74,13 +74,13 @@ struct SongTagPicker: View {
                     }
 
                     VStack(alignment: .leading, spacing: DS.sp3) {
-                        Text(trimmedSearch.isEmpty ? "よく使われるタグ" : "候補")
+                        Text(trimmedSearch.isEmpty ? L10n.Tags.pickerSectionPopular : L10n.Tags.pickerSectionCandidates)
                             .font(.imasFootnote.weight(.semibold))
                             .foregroundStyle(DS.ink3)
                         if vm.isLoading {
                             ImasInlineLoading()
                         } else if vm.tags.isEmpty {
-                            Text("タグが見つかりません").font(.imasFootnote).foregroundStyle(DS.ink3)
+                            Text(L10n.Tags.pickerEmpty).font(.imasFootnote).foregroundStyle(DS.ink3)
                         } else {
                             FlowLayout(spacing: DS.sp2) {
                                 ForEach(vm.tags) { tag in tagChip(tag) }
@@ -95,7 +95,7 @@ struct SongTagPicker: View {
                     } label: {
                         HStack(spacing: DS.sp2) {
                             Image(systemName: "plus").font(.imasScaled( 14, weight: .semibold))
-                            Text("色やカテゴリを付けて新規作成").font(.imasFootnote.weight(.semibold))
+                            Text(L10n.Tags.pickerCreateFull).font(.imasFootnote.weight(.semibold))
                         }
                         .foregroundStyle(DS.ink2)
                     }
@@ -104,16 +104,16 @@ struct SongTagPicker: View {
                 .padding(DS.sp5)
             }
             .background(DS.bg)
-            .navigationTitle("タグを追加")
+            .navigationTitle(L10n.Tags.pickerTitle)
             .navigationBarTitleDisplayMode(.inline)
             .trackScreen("song_tag_picker")
-            .searchable(text: $searchText, prompt: "タグを検索 / 新規作成")
+            .searchable(text: $searchText, prompt: Text(L10n.Tags.pickerSearchPrompt))
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("キャンセル") { dismiss() }
+                    Button(L10n.Tags.actionCancel) { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("追加") {
+                    Button(L10n.Tags.pickerActionAdd) {
                         // タップ直後に同期的にガードを立てる。Task 起動〜isApplying=true までの
                         // 間隙での連打による二重送信を防ぐ (サーバは冪等だが UI 上のフラッシュ防止)。
                         guard !vm.isApplying else { return }
@@ -137,8 +137,8 @@ struct SongTagPicker: View {
                     selectedTagsById[newTag.id] = newTag
                 }, initialName: trimmedSearch)
             }
-            .alert("タグの追加に失敗しました", isPresented: Binding(get: { vm.applyError != nil }, set: { if !$0 { vm.applyError = nil } })) {
-                Button("OK") { vm.applyError = nil }
+            .alert(L10n.Tags.pickerErrorApplyFailed, isPresented: Binding(get: { vm.applyError != nil }, set: { if !$0 { vm.applyError = nil } })) {
+                Button(L10n.Tags.actionOk) { vm.applyError = nil }
             } message: {
                 Text(vm.applyError ?? "")
             }

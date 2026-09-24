@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +20,8 @@ data class TagDetailUiState(
     val tag: CommunityApi.CommunityTag? = null,
     val songs: List<TagSongRankRow> = emptyList(),
     val reportSubmitted: Boolean = false,
-    val reportError: String? = null
+    /** 通報の失敗の文。解決済みの String ではなく文言の値で持ち、画面で resolve() する。 */
+    val reportError: DisplayText? = null
 )
 
 /** タグ詳細。iOS TagDetailView の移植 (説明 + 付いた曲ランキング + 編集/履歴/通報)。 */
@@ -67,7 +70,7 @@ class TagDetailViewModel : ViewModel() {
             _uiState.value = if (ok) {
                 _uiState.value.copy(reportSubmitted = true, reportError = null)
             } else {
-                _uiState.value.copy(reportError = "通報に失敗しました。しばらくしてからお試しください。")
+                _uiState.value.copy(reportError = L10n.Tags.detailReportErrorFailed)
             }
         }
     }

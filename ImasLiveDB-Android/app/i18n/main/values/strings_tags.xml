@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/tags.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- tags.action.cancel: タグ画面群の取り消しボタン (作成・編集・絞り込み・追加のシート、通報の確認) -->
+    <string name="tags_action_cancel">キャンセル</string>
+    <!-- tags.action.ok: 通報の結果・エラー、タグ追加の失敗のアラートを閉じるボタン -->
+    <string name="tags_action_ok">OK</string>
+    <!-- tags.activity.empty.message_idols: 「アイドル」のセグメントにタグの動きが無いときの説明 -->
+    <string name="tags_activity_empty_message_idols">アイドルにタグを付けると、ここに反映されます。</string>
+    <!-- tags.activity.empty.message_songs: 「曲」のセグメントにタグの動きが無いときの説明 -->
+    <string name="tags_activity_empty_message_songs">曲にタグを付けると、ここに反映されます。</string>
+    <!-- tags.activity.empty.title: タグの動きが 1 件も無いときの空状態の見出し -->
+    <string name="tags_activity_empty_title">まだ動きがありません</string>
+    <!-- tags.activity.loading.idol: タグの動きの行で、アイドルの情報をまだ手元のデータから読めていないとき (名前の代わり) -->
+    <string name="tags_activity_loading_idol">アイドルを読み込み中</string>
+    <!-- tags.activity.loading.song: タグの動きの行で、曲の情報をまだ手元のデータから読めていないとき (曲名の代わり) -->
+    <string name="tags_activity_loading_song">曲を読み込み中</string>
+    <!-- tags.activity.recent.header: タグの動きの節の見出し (新しく付けられたタグの一覧) -->
+    <string name="tags_activity_recent_header">最近つけられたタグ</string>
+    <!-- tags.activity.recent.tagged: 最近つけられたタグの行の説明。name はタグ名 -->
+    <string name="tags_activity_recent_tagged">「%1$s」タグが付きました</string>
+    <!-- tags.activity.rising.count: タグが急増中の行の右、直近に付けられた回数。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) -->
+    <plurals name="tags_activity_rising_count">
+        <item quantity="other">%1$,d件</item>
+    </plurals>
+    <!-- tags.activity.rising.header: タグの動きの節の見出し (直近でタグが急に増えている曲・アイドル) -->
+    <string name="tags_activity_rising_header">タグが急増中</string>
+    <!-- tags.activity.rising.tag: タグが急増中の行の、増えているタグの名前をかぎ括弧で囲んだもの。name はタグ名 -->
+    <string name="tags_activity_rising_tag">「%1$s」</string>
+    <!-- tags.activity.tab.idols: タグの動きの画面のセグメント (アイドルのタグ) -->
+    <string name="tags_activity_tab_idols">アイドル</string>
+    <!-- tags.activity.tab.songs: タグの動きの画面のセグメント (曲のタグ) -->
+    <string name="tags_activity_tab_songs">曲</string>
+    <!-- tags.activity.title: タグ付けの盛り上がり (最近付いたタグ・伸びているタグ) の画面の見出し -->
+    <string name="tags_activity_title">タグの動き</string>
+    <!-- tags.activity.trending.header: タグの動きの節の見出し (直近でよく付けられているタグ) -->
+    <string name="tags_activity_trending_header">伸びてるタグ</string>
+    <!-- tags.activity.trending.recent: 伸びてるタグの行の右、直近 (7 日) に付けられた回数。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) -->
+    <plurals name="tags_activity_trending_recent">
+        <item quantity="other">直近%1$,d件</item>
+    </plurals>
+    <!-- tags.activity.trending.total: 伸びてるタグの行の右、これまでに付けられた回数の合計。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) -->
+    <plurals name="tags_activity_trending_total">
+        <item quantity="other">累計%1$,d</item>
+    </plurals>
+    <!-- tags.color_picker.none.a11y: タグの色の選択で「色を付けない」スウォッチの読み上げ -->
+    <string name="tags_color_picker_none_a11y">色なし</string>
+    <!-- tags.create.action.create: 新規タグ作成シートの確定ボタン -->
+    <string name="tags_create_action_create">作成</string>
+    <!-- tags.create.category.header_android: Android の文言。iOS の create.category.header と括弧が違う (統一はオーナーが別 PR で) -->
+    <string name="tags_create_category_header_android">カテゴリ(任意)</string>
+    <!-- tags.create.color.header_android: Android の文言。iOS の create.color.header と括弧が違う (統一はオーナーが別 PR で) -->
+    <string name="tags_create_color_header_android">色(任意)</string>
+    <!-- tags.create.description.label_android: Android の文言。iOS の create.description.header と括弧が違う (統一はオーナーが別 PR で) -->
+    <string name="tags_create_description_label_android">説明文(任意)</string>
+    <!-- tags.create.error.failed: タグを作れず、サーバから説明が来なかったとき -->
+    <string name="tags_create_error_failed">作成に失敗しました</string>
+    <!-- tags.create.error.login_required: 未ログインでタグを作ろうとしたとき (シートの中の文) -->
+    <string name="tags_create_error_login_required">タグの作成にはサインインが必要です(設定画面からサインインしてください)</string>
+    <!-- tags.create.error.rate_limited: タグの作成が 1 日の上限 (10 件) に達したとき -->
+    <string name="tags_create_error_rate_limited">1日10件まで作成できます。明日試してください</string>
+    <!-- tags.create.name.counter_android: 新規タグ作成シートの名前の欄の下の文字数 (Android)。length は今の文字数、max は上限 (30 前後。桁区切りは出ない) -->
+    <plurals name="tags_create_name_counter_android">
+        <item quantity="other">%1$d / %2$,d文字</item>
+    </plurals>
+    <!-- tags.create.name.label_android: 新規タグ作成シートの名前の欄のラベル (Android)。max は文字数の上限 (30 前後。桁区切りは出ない) -->
+    <plurals name="tags_create_name_label_android">
+        <item quantity="other">タグ名(1〜%1$,d文字)</item>
+    </plurals>
+    <!-- tags.create.title: 新規タグ作成シートの見出し -->
+    <string name="tags_create_title">新規タグ作成</string>
+    <!-- tags.detail.action.edit_description: タグ詳細の説明の下のボタン (説明文・カテゴリ・色の編集シートを開く) -->
+    <string name="tags_detail_action_edit_description">説明を編集</string>
+    <!-- tags.detail.action.history: タグ詳細の説明の下のボタン (説明文の編集履歴を開く) -->
+    <string name="tags_detail_action_history">編集履歴</string>
+    <!-- tags.detail.action.report: タグ詳細の右上のメニューの項目 -->
+    <string name="tags_detail_action_report">不適切なタグを通報</string>
+    <!-- tags.detail.idols.empty: アイドルのタグ詳細で、付いたアイドルが 1 人もいないとき -->
+    <string name="tags_detail_idols_empty">まだこのタグが付いたアイドルはいません</string>
+    <!-- tags.detail.idols.header_android: Android の文言。iOS の detail.idols.header と括弧が違う (統一はオーナーが別 PR で)。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) -->
+    <plurals name="tags_detail_idols_header_android">
+        <item quantity="other">「%1$s」なアイドルランキング (%2$,d人)</item>
+    </plurals>
+    <!-- tags.detail.menu.a11y: タグ詳細の右上の ︙ アイコンの読み上げ -->
+    <string name="tags_detail_menu_a11y">メニュー</string>
+    <!-- tags.detail.no_description: タグ詳細で、タグに説明文が無いとき -->
+    <string name="tags_detail_no_description">説明なし</string>
+    <!-- tags.detail.report.confirm.action: タグの通報の確認ダイアログの実行ボタン -->
+    <string name="tags_detail_report_confirm_action">通報する</string>
+    <!-- tags.detail.report.confirm.message: タグの通報の確認ダイアログの本文 -->
+    <string name="tags_detail_report_confirm_message">不適切なコンテンツとして通報します</string>
+    <!-- tags.detail.report.confirm.title: タグの通報の確認ダイアログの見出し -->
+    <string name="tags_detail_report_confirm_title">タグを通報</string>
+    <!-- tags.detail.report.done.message: タグの通報を受け付けたときのダイアログの本文 -->
+    <string name="tags_detail_report_done_message">ご報告ありがとうございます。内容を確認します。</string>
+    <!-- tags.detail.report.done.title: タグの通報を受け付けたときのダイアログの見出し -->
+    <string name="tags_detail_report_done_title">通報しました</string>
+    <!-- tags.detail.report.error.failed: タグの通報に失敗したとき (Android。理由は区別しない) -->
+    <string name="tags_detail_report_error_failed">通報に失敗しました。しばらくしてからお試しください。</string>
+    <!-- tags.detail.report.error.title: タグの通報に失敗したときのダイアログの見出し -->
+    <string name="tags_detail_report_error_title">通報エラー</string>
+    <!-- tags.detail.songs.empty: 曲のタグ詳細で、付いた曲が 1 曲も無いとき -->
+    <string name="tags_detail_songs_empty">まだこのタグが付いた曲はありません</string>
+    <!-- tags.detail.songs.header_android: Android の文言。iOS の detail.songs.header と括弧が違う (統一はオーナーが別 PR で)。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) -->
+    <plurals name="tags_detail_songs_header_android">
+        <item quantity="other">「%1$s」な曲ランキング (%2$,d曲)</item>
+    </plurals>
+    <!-- tags.detail.units.empty: ユニットのタグ詳細で、付いたユニットが 1 つも無いとき -->
+    <string name="tags_detail_units_empty">まだこのタグが付いたユニットはいません</string>
+    <!-- tags.detail.units.header_android: Android の文言。iOS の detail.units.header と括弧が違う (統一はオーナーが別 PR で)。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) -->
+    <plurals name="tags_detail_units_header_android">
+        <item quantity="other">「%1$s」なユニットランキング (%2$,d組)</item>
+    </plurals>
+    <!-- tags.detail.votes: タグ詳細のランキングの行の右端、このタグへの票の数。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) -->
+    <plurals name="tags_detail_votes">
+        <item quantity="other">%1$,d票</item>
+    </plurals>
+    <!-- tags.edit.action.save: タグの編集シートの確定ボタン -->
+    <string name="tags_edit_action_save">保存</string>
+    <!-- tags.edit.category.header: タグの編集シートのカテゴリの見出し -->
+    <string name="tags_edit_category_header">カテゴリ</string>
+    <!-- tags.edit.color.header: タグの編集シートの色の見出し -->
+    <string name="tags_edit_color_header">色</string>
+    <!-- tags.edit.description.header: タグの編集シートの説明文の欄の見出し (Android は欄のラベル) -->
+    <string name="tags_edit_description_header">説明文</string>
+    <!-- tags.edit.error.failed: タグの編集を保存できず、サーバから説明が来なかったとき -->
+    <string name="tags_edit_error_failed">保存に失敗しました</string>
+    <!-- tags.edit.error.login_required: 未ログインでタグを編集しようとしたとき (シートの中の文) -->
+    <string name="tags_edit_error_login_required">タグの編集にはサインインが必要です(設定画面からサインインしてください)</string>
+    <!-- tags.edit.title: タグの編集シートの見出し。name はタグ名 -->
+    <string name="tags_edit_title">「%1$s」を編集</string>
+    <!-- tags.filter.action.done: タグで絞り込むシートの確定ボタン -->
+    <string name="tags_filter_action_done">完了</string>
+    <!-- tags.filter.empty: タグで絞り込むシートで候補が 1 つも無いとき -->
+    <string name="tags_filter_empty">タグがありません</string>
+    <!-- tags.filter.row.songs: タグで絞り込むシートの行の右端、このタグが付いた曲の数。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) -->
+    <plurals name="tags_filter_row_songs">
+        <item quantity="other">%1$,d曲</item>
+    </plurals>
+    <!-- tags.filter.search.prompt: タグで絞り込むシートの検索欄のプレースホルダ -->
+    <string name="tags_filter_search_prompt">タグ名で検索</string>
+    <!-- tags.filter.selected.header: タグで絞り込むシートの選んだタグの見出し。count は選んだタグの数。選んだタグを全部持つ曲だけに絞る (AND)。ko の「곡만 보기」は文中の動詞としての「絞り込み」なので、用語集の 필터 / 찾기 (機能名・ボタン名) は使わない。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) -->
+    <plurals name="tags_filter_selected_header">
+        <item quantity="other">選択中 (%1$,d) — すべてを含む曲に絞り込み</item>
+    </plurals>
+    <!-- tags.filter.title: 曲一覧をタグで絞り込むシートの見出し -->
+    <string name="tags_filter_title">タグで絞り込み</string>
+    <!-- tags.form.category.none: 新規タグ作成・編集シートのカテゴリの選択肢の先頭 (カテゴリを付けない)。iOS はコアの語彙の語を出している -->
+    <string name="tags_form_category_none">なし</string>
+    <!-- tags.form.error.restricted: 利用が制限されたアカウントでタグを作成・編集しようとしたとき (シートの中の文) -->
+    <string name="tags_form_error_restricted">この操作は制限されています。</string>
+    <!-- tags.history.empty: タグの説明文の編集履歴が 1 件も無いとき -->
+    <string name="tags_history_empty">編集履歴はありません</string>
+    <!-- tags.history.no_description_android: Android の文言。iOS の history.no_description と括弧が違う (統一はオーナーが別 PR で) -->
+    <string name="tags_history_no_description_android">(説明なし)</string>
+    <!-- tags.history.title: タグの説明文の編集履歴の画面の見出し -->
+    <string name="tags_history_title">編集履歴</string>
+    <!-- tags.list.create.a11y: タグ一覧の右上の ＋ アイコンの読み上げ -->
+    <string name="tags_list_create_a11y">新規タグ作成</string>
+    <!-- tags.list.empty.title: タグ一覧にタグが 1 つも無いとき -->
+    <string name="tags_list_empty_title">タグはまだありません</string>
+    <!-- tags.list.filter.a11y: タグ一覧の右上の絞り込みアイコンの読み上げ (押すとカテゴリのメニュー) -->
+    <string name="tags_list_filter_a11y">カテゴリで絞り込み</string>
+    <!-- tags.list.filter_empty.message: 名前で絞り込んで 0 件のときの説明。query は入力した語 (Android はこれ 1 行だけを出す) -->
+    <string name="tags_list_filter_empty_message">「%1$s」に一致するタグがありません</string>
+    <!-- tags.list.name_filter.prompt: タグ一覧の上の名前の絞り込み欄のプレースホルダ -->
+    <string name="tags_list_name_filter_prompt">タグ名で絞り込み</string>
+    <!-- tags.list.row.songs: タグ一覧の行の右端、このタグが付いた曲の数。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた) -->
+    <plurals name="tags_list_row_songs">
+        <item quantity="other">%1$,d曲</item>
+    </plurals>
+    <!-- tags.list.sort.label: タグ一覧の並び順メニュー (iOS は Picker のラベル、Android は並び替えアイコンの読み上げ) -->
+    <string name="tags_list_sort_label">並び順</string>
+    <!-- tags.list.sort.name: タグ一覧の並び順の選択肢 (名前順) -->
+    <string name="tags_list_sort_name">名前</string>
+    <!-- tags.list.sort.popular: タグ一覧の並び順の選択肢 (人気順) -->
+    <string name="tags_list_sort_popular">人気</string>
+    <!-- tags.list.sort.recent: タグ一覧の並び順の選択肢 (新しく作られた順) -->
+    <string name="tags_list_sort_recent">新着</string>
+    <!-- tags.list.title: タグ一覧の画面タイトル -->
+    <string name="tags_list_title">タグ</string>
+    <!-- tags.picker.action.add: タグを付けるシートの確定ボタン (選んだタグをまとめて付ける) -->
+    <string name="tags_picker_action_add">追加</string>
+    <!-- tags.picker.create_from_search: 検索語と同じ名前のタグが無いときの、その名前で新しく作るボタン。query は入力した語 -->
+    <string name="tags_picker_create_from_search">「%1$s」を作成</string>
+    <!-- tags.picker.create_full: タグを付けるシートの下のボタン (新規タグ作成シートを開く) -->
+    <string name="tags_picker_create_full">色やカテゴリを付けて新規作成</string>
+    <!-- tags.picker.empty: タグを付けるシートで候補が 1 つも無いとき -->
+    <string name="tags_picker_empty">タグが見つかりません</string>
+    <!-- tags.picker.error.apply_failed: 選んだタグを付けられなかったとき (iOS はアラートの見出し、Android はシートの中の文) -->
+    <string name="tags_picker_error_apply_failed">タグの追加に失敗しました</string>
+    <!-- tags.picker.error.login_required: 未ログインでタグを付けようとしたとき (シートの中の文) -->
+    <string name="tags_picker_error_login_required">タグの追加にはサインインが必要です(設定画面からサインインしてください)</string>
+    <!-- tags.picker.search.prompt: タグを付けるシートの検索欄のプレースホルダ (無ければその語で新しく作れる) -->
+    <string name="tags_picker_search_prompt">タグを検索 / 新規作成</string>
+    <!-- tags.picker.section.candidates: タグを付けるシートの候補の見出し (検索中) -->
+    <string name="tags_picker_section_candidates">候補</string>
+    <!-- tags.picker.section.popular: タグを付けるシートの候補の見出し (検索していないとき) -->
+    <string name="tags_picker_section_popular">よく使われるタグ</string>
+    <!-- tags.picker.title: 曲・アイドル・ユニットにタグを付けるシートの見出し -->
+    <string name="tags_picker_title">タグを追加</string>
+</resources>

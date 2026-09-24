@@ -13,7 +13,7 @@ struct TagHistoryView: View {
                 ImasInlineLoading()
                     .listRowBackground(Color.clear)
             } else if history.isEmpty {
-                Text("編集履歴はありません")
+                Text(L10n.Tags.historyEmpty)
                     .foregroundStyle(DS.ink2)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .listRowBackground(Color.clear)
@@ -34,7 +34,7 @@ struct TagHistoryView: View {
                                 .font(.imasBody)
                                 .foregroundStyle(DS.ink)
                         } else {
-                            Text("（説明なし）")
+                            Text(L10n.Tags.historyNoDescription)
                                 .font(.imasBody)
                                 .foregroundStyle(DS.ink3)
                                 .italic()
@@ -49,7 +49,7 @@ struct TagHistoryView: View {
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .background(DS.bg)
-        .navigationTitle("編集履歴")
+        .navigationTitle(L10n.Tags.historyTitle)
         .navigationBarTitleDisplayMode(.inline)
         .task { await loadHistory() }
         .trackScreen("tag_history")

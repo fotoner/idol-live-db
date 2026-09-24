@@ -38,6 +38,9 @@ import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.auth.startCommunityEdit
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import kotlinx.coroutines.launch
 import uniffi.imas_core.InputField
@@ -68,7 +71,8 @@ fun TagCreateSheet(
     var category by remember { mutableStateOf("") }
     var color by remember { mutableStateOf("") }
     var isSaving by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    // シートの中に出す失敗の文。サーバの説明はデータ (Verbatim)、ほかはカタログの文言。
+    var errorMessage by remember { mutableStateOf<DisplayText?>(null) }
 
     val trimmedName = name.trim()
     // 上限・数え方 (サーバと同じ UTF-16 の単位)・空の可否はコアが決める。
@@ -84,32 +88,38 @@ fun TagCreateSheet(
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("新規タグ作成", fontSize = 20.sp, color = DS.ink)
+            Text(L10n.Tags.createTitle.resolve(), fontSize = 20.sp, color = DS.ink)
 
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = inputClamp(InputField.TAG_NAME, it) },
-                    label = { Text("タグ名(1〜${nameLimit}文字)") },
+                    label = { Text(L10n.Tags.createNameLabelAndroid(max = nameLimit.toInt()).resolve()) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     isError = name.isNotEmpty() && !isValid
                 )
-                Text("${inputLength(InputField.TAG_NAME, name)} / ${nameLimit}文字", fontSize = 12.sp, color = if (isValid) DS.ink2 else DS.danger)
+                Text(
+                    L10n.Tags.createNameCounterAndroid(
+                        length = inputLength(InputField.TAG_NAME, name).toInt(),
+                        max = nameLimit.toInt()
+                    ).resolve(),
+                    fontSize = 12.sp, color = if (isValid) DS.ink2 else DS.danger
+                )
             }
 
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = inputClamp(InputField.TAG_DESCRIPTION, it) },
-                label = { Text("説明文(任意)") },
+                label = { Text(L10n.Tags.createDescriptionLabelAndroid.resolve()) },
                 minLines = 3,
                 modifier = Modifier.fillMaxWidth()
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("カテゴリ(任意)", fontSize = 13.sp, color = DS.ink2)
+                Text(L10n.Tags.createCategoryHeaderAndroid.resolve(), fontSize = 13.sp, color = DS.ink2)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    CategoryChip(label = "なし", selected = category.isEmpty()) { category = "" }
+                    CategoryChip(label = L10n.Tags.formCategoryNone.resolve(), selected = category.isEmpty()) { category = "" }
                     tagCategoryOptions(domain).filter { it.first.isNotEmpty() }.forEach { (value, label) ->
                         CategoryChip(label = label, selected = category == value) { category = value }
                     }
@@ -117,16 +127,16 @@ fun TagCreateSheet(
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("色(任意)", fontSize = 13.sp, color = DS.ink2)
+                Text(L10n.Tags.createColorHeaderAndroid.resolve(), fontSize = 13.sp, color = DS.ink2)
                 TagColorPicker(selectedHex = color, onSelect = { color = it })
             }
 
             if (errorMessage != null) {
-                Text(errorMessage!!, color = DS.danger, fontSize = 13.sp)
+                Text(errorMessage!!.resolve(), color = DS.danger, fontSize = 13.sp)
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("キャンセル") }
+                TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text(L10n.Tags.actionCancel.resolve()) }
                 Button(
                     onClick = {
                         errorMessage = null
@@ -136,9 +146,9 @@ fun TagCreateSheet(
                         // 導線を隠しきれないので、無反応にすると原因が分からない。
                         module.authService.state.value.startCommunityEdit(
                             promptLogin = {
-                                errorMessage = "タグの作成にはサインインが必要です(設定画面からサインインしてください)"
+                                errorMessage = L10n.Tags.createErrorLoginRequired
                             },
-                            onBanned = { errorMessage = "この操作は制限されています。" }
+                            onBanned = { errorMessage = L10n.Tags.formErrorRestricted }
                         ) {
                             isSaving = true
                             scope.launch {
@@ -171,11 +181,11 @@ fun TagCreateSheet(
                                     }
                                     is CommunityApi.TagCreateResult.RateLimited -> {
                                         isSaving = false
-                                        errorMessage = "1日10件まで作成できます。明日試してください"
+                                        errorMessage = L10n.Tags.createErrorRateLimited
                                     }
                                     is CommunityApi.TagCreateResult.Error -> {
                                         isSaving = false
-                                        errorMessage = result.message ?: "作成に失敗しました"
+                                        errorMessage = result.message?.let { DisplayText.Verbatim(it) } ?: L10n.Tags.createErrorFailed
                                     }
                                 }
                             }
@@ -187,7 +197,7 @@ fun TagCreateSheet(
                     if (isSaving) {
                         CircularProgressIndicator(modifier = Modifier.size(18.dp), color = DS.ink)
                     } else {
-                        Text("作成")
+                        Text(L10n.Tags.createActionCreate.resolve())
                     }
                 }
             }

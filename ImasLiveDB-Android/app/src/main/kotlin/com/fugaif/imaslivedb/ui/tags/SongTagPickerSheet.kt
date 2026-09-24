@@ -43,6 +43,9 @@ import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.auth.startCommunityEdit
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.share.TagShareCompletionPane
 import com.fugaif.imaslivedb.ui.theme.DS
 import kotlinx.coroutines.launch
@@ -69,7 +72,7 @@ fun SongTagPickerSheet(
     var isLoading by remember { mutableStateOf(true) }
     var isApplying by remember { mutableStateOf(false) }
     var showCreateSheet by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var errorMessage by remember { mutableStateOf<DisplayText?>(null) }
     // 適用に成功したタグ。非 null になるとシート内容が「完了 + カードでシェア」へ切り替わる。
     // シートを重ねずに中身を差し替えるのは、シートが 2 枚積み上がるのを避けるため (iOS も同じ形)。
     var appliedTags by remember { mutableStateOf<List<CommunityApi.CommunityTag>?>(null) }
@@ -96,12 +99,12 @@ fun SongTagPickerSheet(
                 .padding(horizontal = 16.dp).padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text("タグを追加", fontSize = 20.sp, color = DS.ink)
+            Text(L10n.Tags.pickerTitle.resolve(), fontSize = 20.sp, color = DS.ink)
 
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                label = { Text("タグを検索 / 新規作成") },
+                label = { Text(L10n.Tags.pickerSearchPrompt.resolve()) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -109,18 +112,18 @@ fun SongTagPickerSheet(
             if (trimmedQuery.isNotEmpty() && !exactMatchExists) {
                 TextButton(onClick = { showCreateSheet = true }) {
                     Icon(Icons.Filled.Add, contentDescription = null)
-                    Text("「$trimmedQuery」を作成")
+                    Text(L10n.Tags.pickerCreateFromSearch(query = trimmedQuery).resolve())
                 }
             }
 
             Text(
-                if (trimmedQuery.isEmpty()) "よく使われるタグ" else "候補",
+                (if (trimmedQuery.isEmpty()) L10n.Tags.pickerSectionPopular else L10n.Tags.pickerSectionCandidates).resolve(),
                 fontSize = 12.sp, color = DS.ink2
             )
 
             when {
                 isLoading -> Box(Modifier.fillMaxWidth().padding(16.dp)) { CircularProgressIndicator() }
-                tags.isEmpty() -> Text("タグが見つかりません", fontSize = 13.sp, color = DS.ink3)
+                tags.isEmpty() -> Text(L10n.Tags.pickerEmpty.resolve(), fontSize = 13.sp, color = DS.ink3)
                 else -> FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     tags.forEach { tag ->
                         val applied = alreadyAppliedTagIds.contains(tag.id)
@@ -134,15 +137,15 @@ fun SongTagPickerSheet(
 
             TextButton(onClick = { showCreateSheet = true }) {
                 Icon(Icons.Filled.Add, contentDescription = null)
-                Text("色やカテゴリを付けて新規作成")
+                Text(L10n.Tags.pickerCreateFull.resolve())
             }
 
             if (errorMessage != null) {
-                Text(errorMessage!!, color = DS.danger, fontSize = 13.sp)
+                Text(errorMessage!!.resolve(), color = DS.danger, fontSize = 13.sp)
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("キャンセル") }
+                TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text(L10n.Tags.actionCancel.resolve()) }
                 Button(
                     onClick = {
                         errorMessage = null
@@ -151,7 +154,7 @@ fun SongTagPickerSheet(
                         // BAN 済みは何も起きない (押せる導線自体が出ていない)。
                         module.authService.state.value.startCommunityEdit(
                             promptLogin = {
-                                errorMessage = "タグの追加にはサインインが必要です(設定画面からサインインしてください)"
+                                errorMessage = L10n.Tags.pickerErrorLoginRequired
                             }
                         ) {
                             isApplying = true
@@ -163,7 +166,7 @@ fun SongTagPickerSheet(
                                     onApplied()
                                     appliedTags = tags.filter { it.id in selected }
                                 } else {
-                                    errorMessage = "タグの追加に失敗しました"
+                                    errorMessage = L10n.Tags.pickerErrorApplyFailed
                                 }
                             }
                         }
@@ -174,7 +177,7 @@ fun SongTagPickerSheet(
                     if (isApplying) {
                         CircularProgressIndicator(modifier = Modifier.padding(2.dp))
                     } else {
-                        Text("追加")
+                        Text(L10n.Tags.pickerActionAdd.resolve())
                     }
                 }
             }

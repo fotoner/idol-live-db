@@ -31,6 +31,9 @@ import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.auth.startCommunityEdit
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import kotlinx.coroutines.launch
 import uniffi.imas_core.InputField
@@ -53,7 +56,8 @@ fun TagEditSheet(
     var category by remember { mutableStateOf(tag.category ?: "") }
     var color by remember { mutableStateOf(tag.color ?: "") }
     var isSaving by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    // シートの中に出す失敗の文 (カタログの文言)。
+    var errorMessage by remember { mutableStateOf<DisplayText?>(null) }
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(
@@ -64,20 +68,20 @@ fun TagEditSheet(
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("「${tag.name}」を編集", fontSize = 20.sp, color = DS.ink)
+            Text(L10n.Tags.editTitle(name = tag.name).resolve(), fontSize = 20.sp, color = DS.ink)
 
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = inputClamp(InputField.TAG_DESCRIPTION, it) },
-                label = { Text("説明文") },
+                label = { Text(L10n.Tags.editDescriptionHeader.resolve()) },
                 minLines = 4,
                 modifier = Modifier.fillMaxWidth()
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("カテゴリ", fontSize = 13.sp, color = DS.ink2)
+                Text(L10n.Tags.editCategoryHeader.resolve(), fontSize = 13.sp, color = DS.ink2)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    CategoryChip(label = "なし", selected = category.isEmpty()) { category = "" }
+                    CategoryChip(label = L10n.Tags.formCategoryNone.resolve(), selected = category.isEmpty()) { category = "" }
                     tagCategoryOptions(domain).filter { it.first.isNotEmpty() }.forEach { (value, label) ->
                         CategoryChip(label = label, selected = category == value) { category = value }
                     }
@@ -85,16 +89,16 @@ fun TagEditSheet(
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("色", fontSize = 13.sp, color = DS.ink2)
+                Text(L10n.Tags.editColorHeader.resolve(), fontSize = 13.sp, color = DS.ink2)
                 TagColorPicker(selectedHex = color, onSelect = { color = it })
             }
 
             if (errorMessage != null) {
-                Text(errorMessage!!, color = DS.danger, fontSize = 13.sp)
+                Text(errorMessage!!.resolve(), color = DS.danger, fontSize = 13.sp)
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("キャンセル") }
+                TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text(L10n.Tags.actionCancel.resolve()) }
                 Button(
                     onClick = {
                         errorMessage = null
@@ -104,9 +108,9 @@ fun TagEditSheet(
                         // 導線を隠しきれないので、無反応にすると原因が分からない。
                         module.authService.state.value.startCommunityEdit(
                             promptLogin = {
-                                errorMessage = "タグの編集にはサインインが必要です(設定画面からサインインしてください)"
+                                errorMessage = L10n.Tags.editErrorLoginRequired
                             },
-                            onBanned = { errorMessage = "この操作は制限されています。" }
+                            onBanned = { errorMessage = L10n.Tags.formErrorRestricted }
                         ) {
                             isSaving = true
                             scope.launch {
@@ -121,7 +125,7 @@ fun TagEditSheet(
                                     onSaved(updated)
                                     onDismiss()
                                 } else {
-                                    errorMessage = "保存に失敗しました"
+                                    errorMessage = L10n.Tags.editErrorFailed
                                 }
                             }
                         }
@@ -132,7 +136,7 @@ fun TagEditSheet(
                     if (isSaving) {
                         CircularProgressIndicator(modifier = Modifier.size(18.dp), color = DS.ink)
                     } else {
-                        Text("保存")
+                        Text(L10n.Tags.editActionSave.resolve())
                     }
                 }
             }

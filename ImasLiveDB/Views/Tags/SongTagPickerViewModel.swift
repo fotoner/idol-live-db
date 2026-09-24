@@ -99,7 +99,7 @@ final class SongTagPickerViewModel {
             brandColor = (try? await brandReading.brands())?.first { $0.id == bid }?.color
         }
         return TagShareContext(
-            songTitle: resolvedSong?.title ?? "この曲",
+            songTitle: resolvedSong?.title ?? String(localized: L10n.Tags.pickerShareSongFallback),
             artistNames: song?.artistNames ?? resolvedSong?.singerLabel,
             tags: applied,
             seed: ColorMath.firstValidHex(brandColor, applied.first?.color?.rawValue),

@@ -9,7 +9,8 @@ struct TagEditSheet: View {
     @State private var selectedCategory: String
     @State private var selectedColor: String
     @State private var isSaving = false
-    @State private var errorMessage: String?
+    /// 画面に出す失敗の文。サーバ・通信層の説明はデータ (.verbatim)、ほかはカタログの文言。
+    @State private var errorMessage: DisplayText?
 
     init(tag: CommunityTag, domain: TagDomain = .song) {
         self.tag = tag
@@ -24,9 +25,9 @@ struct TagEditSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: DS.sp6) {
                     VStack(alignment: .leading, spacing: DS.sp3) {
-                        ImasSectionHeader(title: "説明文", tight: true)
+                        ImasSectionHeader(title: .key(L10n.Tags.editDescriptionHeader), tight: true)
                         ImasListContainer {
-                            TextField("どんな時に使うタグか", text: $description, axis: .vertical)
+                            TextField(L10n.Tags.editDescriptionPlaceholder, text: $description, axis: .vertical)
                                 .font(.imasSubhead)
                                 .foregroundStyle(DS.ink)
                                 .lineLimit(3...6)
@@ -40,7 +41,7 @@ struct TagEditSheet: View {
                     }
 
                     VStack(alignment: .leading, spacing: DS.sp3) {
-                        ImasSectionHeader(title: "カテゴリ", tight: true)
+                        ImasSectionHeader(title: .key(L10n.Tags.editCategoryHeader), tight: true)
                         FlowLayout(spacing: DS.sp2) {
                             categoryChip(value: "", label: Vocab.table.tagCategoryNoneLabel)
                             ForEach(TagCategoryOptions.options(for: domain), id: \.value) { cat in
@@ -50,7 +51,7 @@ struct TagEditSheet: View {
                     }
 
                     VStack(alignment: .leading, spacing: DS.sp3) {
-                        ImasSectionHeader(title: "色", tight: true)
+                        ImasSectionHeader(title: .key(L10n.Tags.editColorHeader), tight: true)
                         ImasListContainer {
                             TagColorPicker(selectedHex: $selectedColor)
                                 .padding(.horizontal, DS.sp4)
@@ -59,7 +60,11 @@ struct TagEditSheet: View {
                     }
 
                     if let errorMessage {
-                        Label(errorMessage, systemImage: "exclamationmark.triangle.fill")
+                        Label {
+                            Text(display: errorMessage)
+                        } icon: {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                        }
                             .font(.imasFootnote)
                             .foregroundStyle(DS.danger)
                             .fixedSize(horizontal: false, vertical: true)
@@ -71,15 +76,15 @@ struct TagEditSheet: View {
             }
             .background(DS.bg.ignoresSafeArea())
             .scrollContentBackground(.hidden)
-            .navigationTitle("「\(tag.name)」を編集")
+            .navigationTitle(L10n.Tags.editTitle(name: tag.name))
             .navigationBarTitleDisplayMode(.inline)
             .trackScreen("tag_edit")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("キャンセル") { dismiss() }
+                    Button(L10n.Tags.actionCancel) { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("保存") {
+                    Button(L10n.Tags.editActionSave) {
                         AppAnalytics.tap("tag_edit.save")
                         Task { await save() }
                     }
@@ -114,9 +119,9 @@ struct TagEditSheet: View {
             }
             dismiss()
         } catch let error as CommunityAPIError {
-            errorMessage = error.errorDescription ?? "保存に失敗しました"
+            errorMessage = error.errorDescription.map(DisplayText.verbatim) ?? .key(L10n.Tags.editErrorFailed)
         } catch {
-            errorMessage = "保存に失敗しました: \(error.localizedDescription)"
+            errorMessage = .key(L10n.Tags.editErrorFailedDetail(detail: error.localizedDescription))
         }
     }
 }

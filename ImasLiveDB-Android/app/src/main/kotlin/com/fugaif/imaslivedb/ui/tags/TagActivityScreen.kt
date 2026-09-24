@@ -44,6 +44,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.Song
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasArtwork
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
@@ -52,8 +55,8 @@ import com.fugaif.imaslivedb.ui.components.ImasSegmented
 import com.fugaif.imaslivedb.ui.theme.DS
 import uniffi.imas_core.relativeTimes
 
-private enum class ActivityTab(val label: String) {
-    SONG("曲"), IDOL("アイドル")
+private enum class ActivityTab(val label: DisplayText) {
+    SONG(L10n.Tags.activityTabSongs), IDOL(L10n.Tags.activityTabIdols)
 }
 
 /** タグ付けの盛り上がり。「伸びてるタグ」「タグが急増中」「最近つけられたタグ」を
@@ -83,10 +86,10 @@ fun TagActivityScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("タグの動き", fontWeight = FontWeight.Bold) },
+                title = { Text(L10n.Tags.activityTitle.resolve(), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 }
             )
@@ -102,7 +105,7 @@ fun TagActivityScreen(
                 }
                 activity == null || (activity.trendingTags.isEmpty() && activity.risingEntities.isEmpty() && activity.recent.isEmpty()) -> {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        ImasEmptyState(icon = Icons.Filled.LocalFireDepartment, title = "まだ動きがありません")
+                        ImasEmptyState(icon = Icons.Filled.LocalFireDepartment, title = L10n.Tags.activityEmptyTitle.resolve())
                     }
                 }
                 else -> {
@@ -115,7 +118,7 @@ fun TagActivityScreen(
                     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
                         item {
                             ImasSegmented(
-                                labels = tabs.map { it.label },
+                                labels = tabs.map { it.label.resolve() },
                                 selection = tabIndex,
                                 onSelect = { tabIndex = it },
                                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)
@@ -126,17 +129,17 @@ fun TagActivityScreen(
                             item {
                                 ImasEmptyState(
                                     icon = Icons.Filled.LocalFireDepartment,
-                                    title = "まだ動きがありません",
+                                    title = L10n.Tags.activityEmptyTitle.resolve(),
                                     message = if (selectedDomain == CommunityApi.TagActivityDomain.SONG) {
-                                        "曲にタグを付けると、ここに反映されます。"
+                                        L10n.Tags.activityEmptyMessageSongs.resolve()
                                     } else {
-                                        "アイドルにタグを付けると、ここに反映されます。"
+                                        L10n.Tags.activityEmptyMessageIdols.resolve()
                                     }
                                 )
                             }
                         } else {
                             if (trends.isNotEmpty()) {
-                                item { ImasSectionHeader(title = "伸びてるタグ", tight = true) }
+                                item { ImasSectionHeader(title = L10n.Tags.activityTrendingHeader, tight = true) }
                                 itemsIndexedWithDivider(trends) { idx, trend ->
                                     TrendRow(trend, rank = idx + 1) {
                                         if (selectedDomain == CommunityApi.TagActivityDomain.SONG) {
@@ -148,7 +151,7 @@ fun TagActivityScreen(
                                 }
                             }
                             if (rises.isNotEmpty()) {
-                                item { ImasSectionHeader(title = "タグが急増中", tight = true) }
+                                item { ImasSectionHeader(title = L10n.Tags.activityRisingHeader, tight = true) }
                                 itemsIndexedWithDivider(rises) { _, rise ->
                                     RiseRow(
                                         rise = rise,
@@ -162,7 +165,7 @@ fun TagActivityScreen(
                                 }
                             }
                             if (events.isNotEmpty()) {
-                                item { ImasSectionHeader(title = "最近つけられたタグ", tight = true) }
+                                item { ImasSectionHeader(title = L10n.Tags.activityRecentHeader, tight = true) }
                                 itemsIndexedWithDivider(events) { index, event ->
                                     RecentRow(
                                         event = event,
@@ -216,8 +219,8 @@ private fun TrendRow(trend: CommunityApi.TagActivityTrend, rank: Int, onClick: (
             modifier = Modifier.weight(1f)
         )
         Column(horizontalAlignment = Alignment.End) {
-            Text("直近${trend.recentCount}件", style = androidx.compose.material3.MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = DS.ink)
-            Text("累計${trend.totalCount}", style = androidx.compose.material3.MaterialTheme.typography.labelSmall, color = DS.ink3)
+            Text(L10n.Tags.activityTrendingRecent(count = trend.recentCount).resolve(), style = androidx.compose.material3.MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = DS.ink)
+            Text(L10n.Tags.activityTrendingTotal(count = trend.totalCount).resolve(), style = androidx.compose.material3.MaterialTheme.typography.labelSmall, color = DS.ink3)
         }
         Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = DS.ink3, modifier = Modifier.height(16.dp))
     }
@@ -241,7 +244,7 @@ private fun RiseRow(
         EntityLead(domain = rise.domain, song = song, idol = idol)
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                entityName(rise.domain, song, idol),
+                entityName(rise.domain, song, idol).resolve(),
                 style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = DS.ink,
@@ -249,7 +252,7 @@ private fun RiseRow(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                "「${rise.tagName}」",
+                L10n.Tags.activityRisingTag(name = rise.tagName).resolve(),
                 style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
                 color = DS.ink2,
                 maxLines = 1,
@@ -258,7 +261,7 @@ private fun RiseRow(
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
             Icon(Icons.Filled.ArrowUpward, contentDescription = null, tint = DS.favorite, modifier = Modifier.height(14.dp))
-            Text("${rise.recentCount}件", style = androidx.compose.material3.MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = DS.favorite)
+            Text(L10n.Tags.activityRisingCount(count = rise.recentCount).resolve(), style = androidx.compose.material3.MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = DS.favorite)
         }
         Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = DS.ink3, modifier = Modifier.height(16.dp))
     }
@@ -283,7 +286,7 @@ private fun RecentRow(
         EntityLead(domain = event.domain, song = song, idol = idol)
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                entityName(event.domain, song, idol),
+                entityName(event.domain, song, idol).resolve(),
                 style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = DS.ink,
@@ -291,7 +294,7 @@ private fun RecentRow(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                "「${event.tagName}」タグが付きました",
+                L10n.Tags.activityRecentTagged(name = event.tagName).resolve(),
                 style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
                 color = DS.ink2,
                 maxLines = 1,
@@ -312,7 +315,8 @@ private fun EntityLead(domain: CommunityApi.TagActivityDomain, song: Song?, idol
     }
 }
 
-private fun entityName(domain: CommunityApi.TagActivityDomain, song: Song?, idol: Idol?): String = when (domain) {
-    CommunityApi.TagActivityDomain.SONG -> song?.title ?: "曲を読み込み中"
-    CommunityApi.TagActivityDomain.IDOL -> idol?.name ?: "アイドルを読み込み中"
+/** 曲名・アイドル名はデータ。手元の DB からまだ引けていない間だけ「読み込み中」の文言を出す。 */
+private fun entityName(domain: CommunityApi.TagActivityDomain, song: Song?, idol: Idol?): DisplayText = when (domain) {
+    CommunityApi.TagActivityDomain.SONG -> song?.title?.let { DisplayText.Verbatim(it) } ?: L10n.Tags.activityLoadingSong
+    CommunityApi.TagActivityDomain.IDOL -> idol?.name?.let { DisplayText.Verbatim(it) } ?: L10n.Tags.activityLoadingIdol
 }

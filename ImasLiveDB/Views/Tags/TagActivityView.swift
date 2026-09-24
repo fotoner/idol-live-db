@@ -28,8 +28,9 @@ struct TagActivityView: View {
                     if trends.isEmpty && rises.isEmpty && events.isEmpty {
                         ImasEmptyState(
                             systemImage: "tag",
-                            title: "まだ動きがありません",
-                            message: selectedDomain == .song ? "曲にタグを付けると、ここに反映されます。" : "アイドルにタグを付けると、ここに反映されます。"
+                            title: String(localized: L10n.Tags.activityEmptyTitle),
+                            message: String(localized: selectedDomain == .song
+                                ? L10n.Tags.activityEmptyMessageSongs : L10n.Tags.activityEmptyMessageIdols)
                         )
                         .padding(.top, DS.sp6)
                     } else {
@@ -40,8 +41,8 @@ struct TagActivityView: View {
                 } else {
                     ImasEmptyState(
                         systemImage: "tag",
-                        title: "まだ動きがありません",
-                        message: "タグを付けると、ここに反映されます。"
+                        title: String(localized: L10n.Tags.activityEmptyTitle),
+                        message: String(localized: L10n.Tags.activityEmptyMessage)
                     )
                     .padding(.top, DS.sp6)
                 }
@@ -51,7 +52,7 @@ struct TagActivityView: View {
             .padding(.bottom, DS.sp7)
         }
         .background(DS.bg.ignoresSafeArea())
-        .navigationTitle("タグの動き")
+        .navigationTitle(L10n.Tags.activityTitle)
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $nextDestination) { dest in
             DetailSheetView(destination: dest)
@@ -63,7 +64,8 @@ struct TagActivityView: View {
     }
 
     private var domainPicker: some View {
-        ImasSegmented(labels: ["曲", "アイドル"], selection: $domainTab)
+        ImasSegmented(labels: [String(localized: L10n.Tags.activityTabSongs), String(localized: L10n.Tags.activityTabIdols)],
+                      selection: $domainTab)
     }
 
     // MARK: - 伸びてるタグ
@@ -72,7 +74,7 @@ struct TagActivityView: View {
         Group {
             if !trends.isEmpty {
                 VStack(alignment: .leading, spacing: DS.sp3) {
-                    ImasSectionHeader(title: "伸びてるタグ", tight: true)
+                    ImasSectionHeader(title: .key(L10n.Tags.activityTrendingHeader), tight: true)
                     ImasListContainer {
                         ForEach(Array(trends.enumerated()), id: \.element.id) { idx, trend in
                             if idx > 0 { ImasRowDivider(inset: DS.sp4) }
@@ -99,10 +101,10 @@ struct TagActivityView: View {
                     .lineLimit(1)
                 Spacer(minLength: 0)
                 VStack(alignment: .trailing, spacing: 1) {
-                    Text("直近\(trend.recentCount)件")
+                    Text(L10n.Tags.activityTrendingRecent(count: trend.recentCount))
                         .font(.imasFootnote.weight(.semibold))
                         .foregroundStyle(DS.ink)
-                    Text("累計\(trend.totalCount)")
+                    Text(L10n.Tags.activityTrendingTotal(count: trend.totalCount))
                         .font(.imasCaption)
                         .foregroundStyle(DS.ink3)
                 }
@@ -121,7 +123,7 @@ struct TagActivityView: View {
         Group {
             if !rises.isEmpty {
                 VStack(alignment: .leading, spacing: DS.sp3) {
-                    ImasSectionHeader(title: "タグが急増中", tight: true)
+                    ImasSectionHeader(title: .key(L10n.Tags.activityRisingHeader), tight: true)
                     ImasListContainer {
                         ForEach(Array(rises.enumerated()), id: \.element.id) { idx, rise in
                             if idx > 0 { ImasRowDivider(inset: DS.sp4) }
@@ -140,12 +142,12 @@ struct TagActivityView: View {
             HStack(spacing: DS.sp3) {
                 entityLead(domain: rise.domain, entityId: rise.entityId)
                 VStack(alignment: .leading, spacing: DS.sp1) {
-                    Text(entityName(domain: rise.domain, entityId: rise.entityId))
+                    Text(display: entityName(domain: rise.domain, entityId: rise.entityId))
                         .font(.imasBody.weight(.semibold))
                         .foregroundStyle(DS.ink)
                         .lineLimit(1)
                     HStack(spacing: DS.sp2) {
-                        Text("「\(rise.tagName)」")
+                        Text(L10n.Tags.activityRisingTag(name: rise.tagName))
                             .font(.imasFootnote)
                             .foregroundStyle(DS.ink2)
                             .lineLimit(1)
@@ -155,7 +157,7 @@ struct TagActivityView: View {
                 HStack(spacing: 3) {
                     Image(systemName: "arrow.up.right")
                         .font(.imasScaled(11, weight: .bold))
-                    Text("\(rise.recentCount)件")
+                    Text(L10n.Tags.activityRisingCount(count: rise.recentCount))
                         .font(.imasFootnote.weight(.bold))
                 }
                 .foregroundStyle(DS.favorite)
@@ -175,7 +177,7 @@ struct TagActivityView: View {
         Group {
             if !events.isEmpty {
                 VStack(alignment: .leading, spacing: DS.sp3) {
-                    ImasSectionHeader(title: "最近つけられたタグ", tight: true)
+                    ImasSectionHeader(title: .key(L10n.Tags.activityRecentHeader), tight: true)
                     let times = EditFeedFormat.relativeTimes(events.map { ($0.id, $0.createdAt) })
                     ImasListContainer {
                         ForEach(Array(events.enumerated()), id: \.element.id) { idx, event in
@@ -195,11 +197,11 @@ struct TagActivityView: View {
             HStack(spacing: DS.sp3) {
                 entityLead(domain: event.domain, entityId: event.entityId)
                 VStack(alignment: .leading, spacing: DS.sp1) {
-                    Text(entityName(domain: event.domain, entityId: event.entityId))
+                    Text(display: entityName(domain: event.domain, entityId: event.entityId))
                         .font(.imasBody.weight(.semibold))
                         .foregroundStyle(DS.ink)
                         .lineLimit(1)
-                    Text("「\(event.tagName)」タグが付きました")
+                    Text(L10n.Tags.activityRecentTagged(name: event.tagName))
                         .font(.imasFootnote)
                         .foregroundStyle(DS.ink2)
                         .lineLimit(1)
@@ -237,10 +239,11 @@ struct TagActivityView: View {
         }
     }
 
-    private func entityName(domain: TagActivityDomain, entityId: String) -> String {
+    /// 曲名・アイドル名はデータ。手元の DB からまだ引けていない間だけ「読み込み中」の文言を出す。
+    private func entityName(domain: TagActivityDomain, entityId: String) -> DisplayText {
         switch domain {
-        case .song: return songCache[entityId]?.title ?? "曲を読み込み中"
-        case .idol: return idolCache[entityId]?.name ?? "アイドルを読み込み中"
+        case .song: return songCache[entityId].map { .verbatim($0.title) } ?? .key(L10n.Tags.activityLoadingSong)
+        case .idol: return idolCache[entityId].map { .verbatim($0.name) } ?? .key(L10n.Tags.activityLoadingIdol)
         }
     }
 

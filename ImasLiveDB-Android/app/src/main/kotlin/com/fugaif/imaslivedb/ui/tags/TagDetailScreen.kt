@@ -42,6 +42,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.SongRow
 import com.fugaif.imaslivedb.ui.theme.DS
 
@@ -70,17 +72,17 @@ fun TagDetailScreen(
                 title = { Text(uiState.tag?.name ?: "", maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 },
                 actions = {
                     Box {
                         IconButton(onClick = { showMenu = true }) {
-                            Icon(Icons.Filled.MoreVert, contentDescription = "メニュー")
+                            Icon(Icons.Filled.MoreVert, contentDescription = L10n.Tags.detailMenuA11y.resolve())
                         }
                         DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
                             DropdownMenuItem(
-                                text = { Text("不適切なタグを通報") },
+                                text = { Text(L10n.Tags.detailActionReport.resolve()) },
                                 leadingIcon = { Icon(Icons.Filled.Flag, contentDescription = null) },
                                 onClick = { showMenu = false; showReportConfirm = true }
                             )
@@ -111,7 +113,7 @@ fun TagDetailScreen(
                                     }
                                 }
                                 Text(
-                                    tag.description?.ifEmpty { null } ?: "説明なし",
+                                    tag.description?.ifEmpty { null } ?: L10n.Tags.detailNoDescription.resolve(),
                                     fontSize = 15.sp,
                                     color = if (tag.description.isNullOrEmpty()) DS.ink3 else DS.ink,
                                     modifier = Modifier.padding(top = 8.dp)
@@ -120,10 +122,10 @@ fun TagDetailScreen(
                                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                                     modifier = Modifier.padding(top = 10.dp)
                                 ) {
-                                    TextButton(onClick = { showEditSheet = true }) { Text("説明を編集") }
+                                    TextButton(onClick = { showEditSheet = true }) { Text(L10n.Tags.detailActionEditDescription.resolve()) }
                                     TextButton(onClick = { showHistorySheet = true }) {
                                         Icon(Icons.Filled.History, contentDescription = null, modifier = Modifier.padding(end = 4.dp))
-                                        Text("編集履歴")
+                                        Text(L10n.Tags.detailActionHistory.resolve())
                                     }
                                 }
                             }
@@ -131,7 +133,7 @@ fun TagDetailScreen(
                         }
                         item {
                             Text(
-                                "「${tag.name}」な曲ランキング (${uiState.songs.size}曲)",
+                                L10n.Tags.detailSongsHeaderAndroid(name = tag.name, count = uiState.songs.size).resolve(),
                                 fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2,
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
                             )
@@ -140,7 +142,7 @@ fun TagDetailScreen(
                     if (uiState.songs.isEmpty()) {
                         item {
                             Text(
-                                "まだこのタグが付いた曲はありません", color = DS.ink2, fontSize = 13.sp,
+                                L10n.Tags.detailSongsEmpty.resolve(), color = DS.ink2, fontSize = 13.sp,
                                 modifier = Modifier.fillMaxWidth().padding(16.dp)
                             )
                         }
@@ -168,7 +170,7 @@ fun TagDetailScreen(
                                 } else {
                                     Text(row.songId, fontSize = 13.sp, color = DS.ink2, modifier = Modifier.weight(1f))
                                 }
-                                Text("${row.voteCount}票", fontSize = 12.sp, color = DS.ink2)
+                                Text(L10n.Tags.detailVotes(count = row.voteCount).resolve(), fontSize = 12.sp, color = DS.ink2)
                             }
                             HorizontalDivider(color = DS.sep, modifier = Modifier.padding(start = 16.dp))
                         }
@@ -191,30 +193,32 @@ fun TagDetailScreen(
     if (showReportConfirm) {
         AlertDialog(
             onDismissRequest = { showReportConfirm = false },
-            title = { Text("タグを通報") },
-            text = { Text("不適切なコンテンツとして通報します") },
+            title = { Text(L10n.Tags.detailReportConfirmTitle.resolve()) },
+            text = { Text(L10n.Tags.detailReportConfirmMessage.resolve()) },
             confirmButton = {
-                TextButton(onClick = { showReportConfirm = false; viewModel.reportTag() }) { Text("通報する") }
+                TextButton(onClick = { showReportConfirm = false; viewModel.reportTag() }) {
+                    Text(L10n.Tags.detailReportConfirmAction.resolve())
+                }
             },
             dismissButton = {
-                TextButton(onClick = { showReportConfirm = false }) { Text("キャンセル") }
+                TextButton(onClick = { showReportConfirm = false }) { Text(L10n.Tags.actionCancel.resolve()) }
             }
         )
     }
     if (uiState.reportSubmitted) {
         AlertDialog(
             onDismissRequest = { viewModel.clearReportState() },
-            title = { Text("通報しました") },
-            text = { Text("ご報告ありがとうございます。内容を確認します。") },
-            confirmButton = { TextButton(onClick = { viewModel.clearReportState() }) { Text("OK") } }
+            title = { Text(L10n.Tags.detailReportDoneTitle.resolve()) },
+            text = { Text(L10n.Tags.detailReportDoneMessage.resolve()) },
+            confirmButton = { TextButton(onClick = { viewModel.clearReportState() }) { Text(L10n.Tags.actionOk.resolve()) } }
         )
     }
     if (uiState.reportError != null) {
         AlertDialog(
             onDismissRequest = { viewModel.clearReportState() },
-            title = { Text("通報エラー") },
-            text = { Text(uiState.reportError ?: "") },
-            confirmButton = { TextButton(onClick = { viewModel.clearReportState() }) { Text("OK") } }
+            title = { Text(L10n.Tags.detailReportErrorTitle.resolve()) },
+            text = { Text(uiState.reportError?.resolve() ?: "") },
+            confirmButton = { TextButton(onClick = { viewModel.clearReportState() }) { Text(L10n.Tags.actionOk.resolve()) } }
         )
     }
 }

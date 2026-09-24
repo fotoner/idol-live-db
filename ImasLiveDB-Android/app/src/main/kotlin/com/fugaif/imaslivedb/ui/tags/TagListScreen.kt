@@ -43,10 +43,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.community.CommunityApi
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.NameFilterField
 import com.fugaif.imaslivedb.ui.theme.DS
 
-private val SORT_OPTIONS = listOf("popular" to "人気", "recent" to "新着", "name" to "名前")
+/** 並び順の選択肢 (値 → 表示の文言)。文言は表示するときに resolve() する。 */
+private val SORT_OPTIONS: List<Pair<String, DisplayText>> = listOf(
+    "popular" to L10n.Tags.listSortPopular,
+    "recent" to L10n.Tags.listSortRecent,
+    "name" to L10n.Tags.listSortName
+)
 
 /** タグ一覧。iOS TagListView の移植 (人気/新着/名前順 + カテゴリ絞り込み + 新規作成)。 */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,20 +76,20 @@ fun TagListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("タグ") },
+                title = { Text(L10n.Tags.listTitle.resolve()) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 },
                 actions = {
                     Box {
                         IconButton(onClick = { showSortMenu = true }) {
-                            Icon(Icons.Filled.Sort, contentDescription = "並び順")
+                            Icon(Icons.Filled.Sort, contentDescription = L10n.Tags.listSortLabel.resolve())
                         }
                         DropdownMenu(expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
                             SORT_OPTIONS.forEach { (value, label) ->
-                                DropdownMenuItem(text = { Text(label) }, onClick = {
+                                DropdownMenuItem(text = { Text(label.resolve()) }, onClick = {
                                     viewModel.setSort(value)
                                     showSortMenu = false
                                 })
@@ -93,7 +101,7 @@ fun TagListScreen(
                             if (uiState.activeFilterCount > 0) Badge { Text("${uiState.activeFilterCount}") }
                         }) {
                             IconButton(onClick = { showCategoryMenu = true }) {
-                                Icon(Icons.Filled.FilterList, contentDescription = "カテゴリで絞り込み")
+                                Icon(Icons.Filled.FilterList, contentDescription = L10n.Tags.listFilterA11y.resolve())
                             }
                         }
                         DropdownMenu(expanded = showCategoryMenu, onDismissRequest = { showCategoryMenu = false }) {
@@ -106,7 +114,7 @@ fun TagListScreen(
                         }
                     }
                     IconButton(onClick = { showCreateSheet = true }) {
-                        Icon(Icons.Filled.Add, contentDescription = "新規タグ作成")
+                        Icon(Icons.Filled.Add, contentDescription = L10n.Tags.listCreateA11y.resolve())
                     }
                 }
             )
@@ -114,7 +122,7 @@ fun TagListScreen(
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             NameFilterField(
-                prompt = "タグ名で絞り込み",
+                prompt = L10n.Tags.listNameFilterPrompt.resolve(),
                 value = uiState.nameFilter,
                 onValueChange = { viewModel.setNameFilter(it) }
             )
@@ -125,9 +133,9 @@ fun TagListScreen(
                     tags.isEmpty() -> Text(
                         // 「まだ 1 つも無い」と「絞り込んで 0 件」を言い分ける。
                         if (uiState.nameFilter.isEmpty()) {
-                            "タグはまだありません"
+                            L10n.Tags.listEmptyTitle.resolve()
                         } else {
-                            "「${uiState.nameFilter}」に一致するタグがありません"
+                            L10n.Tags.listFilterEmptyMessage(query = uiState.nameFilter).resolve()
                         },
                         color = DS.ink2,
                         modifier = Modifier.align(Alignment.Center)
@@ -171,7 +179,7 @@ private fun TagListRow(tag: CommunityApi.CommunityTag, rank: Int?, modifier: Mod
             }
             Box(Modifier.weight(1f))
             if (tag.totalUses > 0) {
-                Text("${tag.totalUses}曲", fontSize = 12.sp, color = DS.ink2)
+                Text(L10n.Tags.listRowSongs(count = tag.totalUses).resolve(), fontSize = 12.sp, color = DS.ink2)
             }
         }
         if (!tag.description.isNullOrEmpty()) {

@@ -28,6 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -57,7 +59,7 @@ fun TagHistorySheet(tagId: String, domain: TagDomain = TagDomain.SONG, onDismiss
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(modifier = Modifier.fillMaxWidth().heightIn(min = 200.dp).padding(bottom = 24.dp)) {
             Text(
-                "編集履歴", fontSize = 20.sp, color = DS.ink,
+                L10n.Tags.historyTitle.resolve(), fontSize = 20.sp, color = DS.ink,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
             when {
@@ -65,7 +67,7 @@ fun TagHistorySheet(tagId: String, domain: TagDomain = TagDomain.SONG, onDismiss
                     CircularProgressIndicator()
                 }
                 history.isEmpty() -> Text(
-                    "編集履歴はありません", color = DS.ink2, fontSize = 14.sp,
+                    L10n.Tags.historyEmpty.resolve(), color = DS.ink2, fontSize = 14.sp,
                     modifier = Modifier.fillMaxWidth().padding(32.dp)
                 )
                 else -> LazyColumn {
@@ -76,7 +78,7 @@ fun TagHistorySheet(tagId: String, domain: TagDomain = TagDomain.SONG, onDismiss
                                 Text(entry.editedBy.take(8) + "...", fontSize = 11.sp, color = DS.ink3)
                             }
                             Text(
-                                entry.descriptionAfter?.ifEmpty { null } ?: "(説明なし)",
+                                entry.descriptionAfter?.ifEmpty { null } ?: L10n.Tags.historyNoDescriptionAndroid.resolve(),
                                 fontSize = 15.sp,
                                 color = if (entry.descriptionAfter.isNullOrEmpty()) DS.ink3 else DS.ink,
                                 modifier = Modifier.padding(top = 4.dp)

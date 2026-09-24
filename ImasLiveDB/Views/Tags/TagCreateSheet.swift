@@ -41,7 +41,8 @@ struct TagCreateSheet: View {
     @State private var selectedCategory = ""
     @State private var selectedColor = ""
     @State private var isCreating = false
-    @State private var errorMessage: String?
+    /// 画面に出す失敗の文。サーバ・通信層の説明はデータ (.verbatim)、ほかはカタログの文言。
+    @State private var errorMessage: DisplayText?
 
     private var isNameValid: Bool { InputLimits.isAcceptable(.tagName, name) }
 
@@ -49,8 +50,9 @@ struct TagCreateSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: DS.sp6) {
-                    fieldSection(header: "タグ名", counter: InputLimits.counter(.tagName, name), counterIsError: !isNameValid && !name.isEmpty) {
-                        TextField("例: エモい", text: $name)
+                    fieldSection(header: L10n.Tags.createNameHeader, counter: InputLimits.counter(.tagName, name), counterIsError: !isNameValid && !name.isEmpty) {
+                        // LocalizedStringResource を受ける TextField(_:text:) は iOS 26 からなので、prompt: 付きの版 (iOS 16) を使う
+                        TextField(L10n.Tags.createNamePlaceholder, text: $name, prompt: nil)
                             .font(.imasSubhead)
                             .foregroundStyle(DS.ink)
                             .autocorrectionDisabled()
@@ -61,8 +63,8 @@ struct TagCreateSheet: View {
                             }
                     }
 
-                    fieldSection(header: "説明文（任意）", counter: InputLimits.counter(.tagDescription, description), counterIsError: false) {
-                        TextField("どんな時に使うタグか（任意）", text: $description, axis: .vertical)
+                    fieldSection(header: L10n.Tags.createDescriptionHeader, counter: InputLimits.counter(.tagDescription, description), counterIsError: false) {
+                        TextField(L10n.Tags.createDescriptionPlaceholder, text: $description, axis: .vertical)
                             .font(.imasSubhead)
                             .foregroundStyle(DS.ink)
                             .lineLimit(2...5)
@@ -73,7 +75,7 @@ struct TagCreateSheet: View {
                     }
 
                     VStack(alignment: .leading, spacing: DS.sp3) {
-                        ImasSectionHeader(title: "カテゴリ（任意）", tight: true)
+                        ImasSectionHeader(title: .key(L10n.Tags.createCategoryHeader), tight: true)
                         FlowLayout(spacing: DS.sp2) {
                             categoryChip(value: "", label: Vocab.table.tagCategoryNoneLabel)
                             ForEach(TagCategoryOptions.options(for: domain), id: \.value) { cat in
@@ -83,7 +85,7 @@ struct TagCreateSheet: View {
                     }
 
                     VStack(alignment: .leading, spacing: DS.sp3) {
-                        ImasSectionHeader(title: "色（任意）", tight: true)
+                        ImasSectionHeader(title: .key(L10n.Tags.createColorHeader), tight: true)
                         ImasListContainer {
                             TagColorPicker(selectedHex: $selectedColor)
                                 .padding(.horizontal, DS.sp4)
@@ -92,7 +94,11 @@ struct TagCreateSheet: View {
                     }
 
                     if let errorMessage {
-                        Label(errorMessage, systemImage: "exclamationmark.triangle.fill")
+                        Label {
+                            Text(display: errorMessage)
+                        } icon: {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                        }
                             .font(.imasFootnote)
                             .foregroundStyle(DS.danger)
                             .fixedSize(horizontal: false, vertical: true)
@@ -104,15 +110,15 @@ struct TagCreateSheet: View {
             }
             .background(DS.bg.ignoresSafeArea())
             .scrollContentBackground(.hidden)
-            .navigationTitle("新規タグ作成")
+            .navigationTitle(L10n.Tags.createTitle)
             .navigationBarTitleDisplayMode(.inline)
             .trackScreen("tag_create")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("キャンセル") { dismiss() }
+                    Button(L10n.Tags.actionCancel) { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("作成") {
+                    Button(L10n.Tags.createActionCreate) {
                         // タップ直後に同期的にガードを立てる (SongTagPicker.apply と同じ理由)。
                         guard !isCreating else { return }
                         AppAnalytics.tap("tag_create.submit")
@@ -130,10 +136,10 @@ struct TagCreateSheet: View {
 
     @ViewBuilder
     private func fieldSection<Content: View>(
-        header: String, counter: String?, counterIsError: Bool = false, @ViewBuilder content: () -> Content
+        header: LocalizedStringResource, counter: String?, counterIsError: Bool = false, @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
-            ImasSectionHeader(title: header, tight: true)
+            ImasSectionHeader(title: .key(header), tight: true)
             ImasListContainer {
                 content()
                     .padding(.horizontal, DS.sp4)
@@ -177,12 +183,12 @@ struct TagCreateSheet: View {
             dismiss()
         } catch let error as CommunityAPIError {
             if case .rateLimited = error {
-                errorMessage = "1日10件まで作成できます。明日試してください"
+                errorMessage = .key(L10n.Tags.createErrorRateLimited)
             } else {
-                errorMessage = error.errorDescription ?? "作成に失敗しました"
+                errorMessage = error.errorDescription.map(DisplayText.verbatim) ?? .key(L10n.Tags.createErrorFailed)
             }
         } catch {
-            errorMessage = "作成に失敗しました: \(error.localizedDescription)"
+            errorMessage = .key(L10n.Tags.createErrorFailedDetail(detail: error.localizedDescription))
         }
     }
 }

@@ -37,7 +37,7 @@ struct TagFilterPicker: View {
                             .font(.imasCaption)
                             .foregroundStyle(DS.ink2)
                     } header: {
-                        Text("選択中 (\(selected.count)) — すべてを含む曲に絞り込み")
+                        Text(L10n.Tags.filterSelectedHeader(count: selected.count))
                     }
                     .listRowBackground(DS.surface)
                     .listRowSeparatorTint(DS.sep)
@@ -47,7 +47,7 @@ struct TagFilterPicker: View {
                         ImasInlineLoading()
                             .listRowBackground(Color.clear)
                     } else if tags.isEmpty {
-                        Text("タグがありません").foregroundStyle(DS.ink2)
+                        Text(L10n.Tags.filterEmpty).foregroundStyle(DS.ink2)
                             .listRowBackground(DS.surface)
                     } else {
                         ForEach(Array(tags.enumerated()), id: \.element.id) { idx, tag in
@@ -68,7 +68,7 @@ struct TagFilterPicker: View {
                                     Text(tag.name).foregroundStyle(DS.ink)
                                     Spacer()
                                     if let uses = tag.totalUses, uses > 0 {
-                                        Text("\(uses)曲").font(.imasCaption).foregroundStyle(DS.ink2)
+                                        Text(L10n.Tags.filterRowSongs(count: uses)).font(.imasCaption).foregroundStyle(DS.ink2)
                                     }
                                     if isSelected(tag) {
                                         ImasSelectionMark(isSelected: true, color: tag.color.map { Color(hexColor: $0) })
@@ -80,21 +80,21 @@ struct TagFilterPicker: View {
                         }
                     }
                 } header: {
-                    Text(query.isEmpty ? "人気タグランキング" : "検索結果")
+                    Text(query.isEmpty ? L10n.Tags.filterSectionPopular : L10n.Tags.filterSectionResults)
                 }
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .background(DS.bg)
-            .searchable(text: $query, prompt: "タグ名で検索")
-            .navigationTitle("タグで絞り込み")
+            .searchable(text: $query, prompt: Text(L10n.Tags.filterSearchPrompt))
+            .navigationTitle(L10n.Tags.filterTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("キャンセル") { dismiss() }
+                    Button(L10n.Tags.actionCancel) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("完了") {
+                    Button(L10n.Tags.filterActionDone) {
                         AppAnalytics.tap("tag_filter.done")
                         onDone(selected)
                         dismiss()

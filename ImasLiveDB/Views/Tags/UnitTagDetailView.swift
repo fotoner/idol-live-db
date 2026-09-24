@@ -31,20 +31,20 @@ struct UnitTagDetailView: View {
                                 RoundedRectangle(cornerRadius: 4)
                                     .fill(Color(hexColor: hexColor))
                                     .frame(width: 16, height: 16)
-                                    .accessibilityLabel("タグカラー: \(hexColor.rawValue)")
+                                    .accessibilityLabel(L10n.Tags.detailColorA11y(hex: hexColor.rawValue))
                             }
                             Text(detail.tag.name)
                                 .font(.imasTitle2.bold())
                             Spacer()
                             if let cat = detail.tag.category {
-                                Text(categoryLabel(cat.rawValue))
+                                Text(core: categoryLabel(cat.rawValue))
                                     .font(.imasCaption)
                                     .padding(.horizontal, DS.sp3)
                                     .padding(.vertical, 3)
                                     .background(categoryColor(cat.rawValue).opacity(0.2))
                                     .foregroundStyle(categoryColor(cat.rawValue))
                                     .clipShape(Capsule())
-                                    .accessibilityLabel("カテゴリ: \(categoryLabel(cat.rawValue))")
+                                    .accessibilityLabel(L10n.Tags.detailCategoryA11y(category: categoryLabel(cat.rawValue)))
                             }
                         }
                         if let desc = detail.tag.description, !desc.isEmpty {
@@ -53,7 +53,7 @@ struct UnitTagDetailView: View {
                                 .foregroundStyle(DS.ink)
                                 .imasSelectableText()
                         } else {
-                            Text("説明なし")
+                            Text(L10n.Tags.detailNoDescription)
                                 .font(.imasBody)
                                 .foregroundStyle(DS.ink3)
                                 .italic()
@@ -64,13 +64,13 @@ struct UnitTagDetailView: View {
                     .listRowSeparatorTint(DS.sep)
                 } footer: {
                     HStack {
-                        Button("説明を編集") {
+                        Button(L10n.Tags.detailActionEditDescription) {
                             AppAnalytics.tap("unit_tag_detail.edit")
                             showEditSheet = true
                         }
                             .font(.imasCaption)
                         Spacer()
-                        Button("編集履歴") {
+                        Button(L10n.Tags.detailActionHistory) {
                             AppAnalytics.tap("unit_tag_detail.history")
                             showHistoryView = true
                         }
@@ -79,7 +79,7 @@ struct UnitTagDetailView: View {
                 }
 
                 if !detail.units.isEmpty {
-                    Section("「\(detail.tag.name)」なユニットランキング（\(detail.units.count)組）") {
+                    Section(L10n.Tags.detailUnitsHeader(name: detail.tag.name, count: detail.units.count)) {
                         ForEach(Array(detail.units.enumerated()), id: \.element.id) { idx, entry in
                             if let unit = unitCache[entry.unitId] {
                                 Button { nextDestination = .unit(unit) } label: {
@@ -88,7 +88,7 @@ struct UnitTagDetailView: View {
                                         UnitAvatarView(unit: unit, size: 32)
                                         Text(unit.displayName).font(.imasSubhead.weight(.semibold)).foregroundStyle(DS.ink)
                                         Spacer(minLength: 4)
-                                        Text("\(entry.voteCount)票")
+                                        Text(L10n.Tags.detailVotes(count: entry.voteCount))
                                             .font(.imasCaption.monospacedDigit())
                                             .foregroundStyle(DS.ink2)
                                         ImasRowChevron()
@@ -102,7 +102,7 @@ struct UnitTagDetailView: View {
                                         .font(.imasCaption)
                                         .foregroundStyle(DS.ink2)
                                     Spacer()
-                                    Text("\(entry.voteCount)票")
+                                    Text(L10n.Tags.detailVotes(count: entry.voteCount))
                                         .font(.imasCaption)
                                         .foregroundStyle(DS.ink2)
                                 }
@@ -113,7 +113,7 @@ struct UnitTagDetailView: View {
                     }
                 } else {
                     Section {
-                        ImasEmptyState(systemImage: "tag", title: "まだこのタグが付いたユニットはいません")
+                        ImasEmptyState(systemImage: "tag", title: String(localized: L10n.Tags.detailUnitsEmpty))
                             .listRowBackground(DS.surface)
                             .listRowSeparatorTint(DS.sep)
                     }
@@ -132,7 +132,7 @@ struct UnitTagDetailView: View {
                         AppAnalytics.tap("unit_tag_detail.report")
                         showReportAlert = true
                     } label: {
-                        Label("不適切なタグを通報", systemImage: "flag")
+                        Label(L10n.Tags.detailActionReport, systemImage: "flag")
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
@@ -152,30 +152,31 @@ struct UnitTagDetailView: View {
             DetailSheetView(destination: dest)
                 .environment(database)
         }
-        .alert("タグを通報", isPresented: $showReportAlert) {
-            Button("通報する", role: .destructive) {
+        .alert(L10n.Tags.detailReportConfirmTitle, isPresented: $showReportAlert) {
+            Button(L10n.Tags.detailReportConfirmAction, role: .destructive) {
                 Task { await reportTag() }
             }
-            Button("キャンセル", role: .cancel) {}
+            Button(L10n.Tags.actionCancel, role: .cancel) {}
         } message: {
-            Text("不適切なコンテンツとして通報します")
+            Text(L10n.Tags.detailReportConfirmMessage)
         }
-        .alert("通報しました", isPresented: $reportSuccessAlert) {
-            Button("OK") {}
+        .alert(L10n.Tags.detailReportDoneTitle, isPresented: $reportSuccessAlert) {
+            Button(L10n.Tags.actionOk) {}
         } message: {
-            Text("ご報告ありがとうございます。内容を確認します。")
+            Text(L10n.Tags.detailReportDoneMessage)
         }
-        .alert("通報エラー", isPresented: Binding(
+        .alert(L10n.Tags.detailReportErrorTitle, isPresented: Binding(
             get: { alertError != nil },
             set: { if !$0 { alertError = nil } }
         )) {
-            Button("OK") { alertError = nil }
+            Button(L10n.Tags.actionOk) { alertError = nil }
         } message: {
             if let err = alertError {
                 if case .rateLimited = err {
-                    Text("本日通報上限です。明日また試してください。")
+                    Text(L10n.Tags.detailReportErrorRateLimited)
                 } else {
-                    Text(err.errorDescription ?? "エラーが発生しました")
+                    // サーバ・通信層の説明はそのまま出す (無いときだけカタログの文言)
+                    Text(err.errorDescription ?? String(localized: L10n.Tags.detailReportErrorFallback))
                 }
             }
         }

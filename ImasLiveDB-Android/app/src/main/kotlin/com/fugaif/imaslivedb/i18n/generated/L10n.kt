@@ -16,6 +16,7 @@ object L10n {
     val Settings: L10nSettings get() = L10nSettings
     val Songs: L10nSongs get() = L10nSongs
     val System: L10nSystem get() = L10nSystem
+    val Tags: L10nTags get() = L10nTags
     val Units: L10nUnits get() = L10nUnits
     val Widget: L10nWidget get() = L10nWidget
 }

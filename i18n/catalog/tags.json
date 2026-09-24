@@ -1,0 +1,1009 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "tags",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/tags/"
+    ],
+    "ios": [
+      "ImasLiveDB/Services/PersonalTagService.swift",
+      "ImasLiveDB/Views/Tags/"
+    ]
+  },
+  "strings": {
+    "action.cancel": {
+      "ja": "キャンセル",
+      "ko": "취소",
+      "note": "タグ画面群の取り消しボタン (作成・編集・絞り込み・追加のシート、通報の確認)"
+    },
+    "action.ok": {
+      "ja": "OK",
+      "ko": "확인",
+      "note": "通報の結果・エラー、タグ追加の失敗のアラートを閉じるボタン"
+    },
+    "activity.empty.message": {
+      "ja": "タグを付けると、ここに反映されます。",
+      "ko": "태그를 달면 여기에 반영돼요.",
+      "note": "タグの動きがどのセグメントにも無いときの空状態の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "activity.empty.message_idols": {
+      "ja": "アイドルにタグを付けると、ここに反映されます。",
+      "ko": "아이돌에게 태그를 달면 여기에 반영돼요.",
+      "note": "「アイドル」のセグメントにタグの動きが無いときの説明"
+    },
+    "activity.empty.message_songs": {
+      "ja": "曲にタグを付けると、ここに反映されます。",
+      "ko": "곡에 태그를 달면 여기에 반영돼요.",
+      "note": "「曲」のセグメントにタグの動きが無いときの説明"
+    },
+    "activity.empty.title": {
+      "ja": "まだ動きがありません",
+      "ko": "아직 활동이 없어요",
+      "note": "タグの動きが 1 件も無いときの空状態の見出し"
+    },
+    "activity.loading.idol": {
+      "ja": "アイドルを読み込み中",
+      "ko": "아이돌 불러오는 중",
+      "note": "タグの動きの行で、アイドルの情報をまだ手元のデータから読めていないとき (名前の代わり)"
+    },
+    "activity.loading.song": {
+      "ja": "曲を読み込み中",
+      "ko": "곡 불러오는 중",
+      "note": "タグの動きの行で、曲の情報をまだ手元のデータから読めていないとき (曲名の代わり)"
+    },
+    "activity.recent.header": {
+      "ja": "最近つけられたタグ",
+      "ko": "최근 달린 태그",
+      "note": "タグの動きの節の見出し (新しく付けられたタグの一覧)"
+    },
+    "activity.recent.tagged": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "ja": "「{name}」タグが付きました",
+      "ko": "“{name}” 태그가 달렸어요",
+      "note": "最近つけられたタグの行の説明。name はタグ名"
+    },
+    "activity.rising.count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}件",
+      "ko": "{count}건",
+      "note": "タグが急増中の行の右、直近に付けられた回数。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた)"
+    },
+    "activity.rising.header": {
+      "ja": "タグが急増中",
+      "ko": "태그 급증 중",
+      "note": "タグの動きの節の見出し (直近でタグが急に増えている曲・アイドル)"
+    },
+    "activity.rising.tag": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "ja": "「{name}」",
+      "ko": "“{name}”",
+      "note": "タグが急増中の行の、増えているタグの名前をかぎ括弧で囲んだもの。name はタグ名"
+    },
+    "activity.tab.idols": {
+      "ja": "アイドル",
+      "ko": "아이돌",
+      "note": "タグの動きの画面のセグメント (アイドルのタグ)"
+    },
+    "activity.tab.songs": {
+      "ja": "曲",
+      "ko": "곡",
+      "note": "タグの動きの画面のセグメント (曲のタグ)"
+    },
+    "activity.title": {
+      "ja": "タグの動き",
+      "ko": "태그 동향",
+      "note": "タグ付けの盛り上がり (最近付いたタグ・伸びているタグ) の画面の見出し"
+    },
+    "activity.trending.header": {
+      "ja": "伸びてるタグ",
+      "ko": "뜨는 태그",
+      "note": "タグの動きの節の見出し (直近でよく付けられているタグ)"
+    },
+    "activity.trending.recent": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "直近{count}件",
+      "ko": "최근 {count}건",
+      "note": "伸びてるタグの行の右、直近 (7 日) に付けられた回数。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた)"
+    },
+    "activity.trending.total": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "累計{count}",
+      "ko": "누적 {count}",
+      "note": "伸びてるタグの行の右、これまでに付けられた回数の合計。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた)"
+    },
+    "chip.applied.a11y_hint": {
+      "ja": "追加済み",
+      "ko": "추가됨",
+      "note": "タグを付けるシートのタグのチップの読み上げの補足 (もう付けてある)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "chip.selected.a11y_hint": {
+      "ja": "選択中",
+      "ko": "선택됨",
+      "note": "タグを付けるシートのタグのチップの読み上げの補足 (選んでいて、まだ付けていない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "chip.unselected.a11y_hint": {
+      "ja": "タップで追加",
+      "ko": "탭하여 추가",
+      "note": "タグを付けるシートのタグのチップの読み上げの補足 (まだ選んでいない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "color_picker.custom": {
+      "ja": "カスタム色を選ぶ",
+      "ko": "사용자 지정 색 고르기",
+      "note": "タグの色の選択で、システムの色選択を開く行",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "color_picker.none.a11y": {
+      "ja": "色なし",
+      "ko": "색 없음",
+      "note": "タグの色の選択で「色を付けない」スウォッチの読み上げ"
+    },
+    "color_picker.swatch.a11y": {
+      "args": [
+        {
+          "name": "hex",
+          "type": "string"
+        }
+      ],
+      "ja": "色 {hex}",
+      "ko": "색 {hex}",
+      "note": "タグの色の選択のスウォッチの読み上げ。hex は #RRGGBB の色の値",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "create.action.create": {
+      "ja": "作成",
+      "ko": "만들기",
+      "note": "新規タグ作成シートの確定ボタン"
+    },
+    "create.category.header": {
+      "ja": "カテゴリ（任意）",
+      "ko": "카테고리 (선택)",
+      "note": "新規タグ作成シートのカテゴリの見出し (選ばなくてよい)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "create.category.header_android": {
+      "ja": "カテゴリ(任意)",
+      "ko": "카테고리 (선택)",
+      "note": "Android の文言。iOS の create.category.header と括弧が違う (統一はオーナーが別 PR で)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "create.color.header": {
+      "ja": "色（任意）",
+      "ko": "색 (선택)",
+      "note": "新規タグ作成シートの色の見出し (選ばなくてよい)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "create.color.header_android": {
+      "ja": "色(任意)",
+      "ko": "색 (선택)",
+      "note": "Android の文言。iOS の create.color.header と括弧が違う (統一はオーナーが別 PR で)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "create.description.header": {
+      "ja": "説明文（任意）",
+      "ko": "설명 (선택)",
+      "note": "新規タグ作成シートの説明文の欄の見出し (入れなくてよい)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "create.description.label_android": {
+      "ja": "説明文(任意)",
+      "ko": "설명 (선택)",
+      "note": "Android の文言。iOS の create.description.header と括弧が違う (統一はオーナーが別 PR で)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "create.description.placeholder": {
+      "ja": "どんな時に使うタグか（任意）",
+      "ko": "어떤 때 쓰는 태그인지 (선택)",
+      "note": "新規タグ作成シートの説明文の欄のプレースホルダ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "create.error.failed": {
+      "ja": "作成に失敗しました",
+      "ko": "만들지 못했어요",
+      "note": "タグを作れず、サーバから説明が来なかったとき"
+    },
+    "create.error.failed_detail": {
+      "args": [
+        {
+          "name": "detail",
+          "type": "string"
+        }
+      ],
+      "ja": "作成に失敗しました: {detail}",
+      "ko": "만들지 못했어요: {detail}",
+      "note": "タグを作れなかったとき (通信の失敗など)。detail は OS・通信層の説明 (訳さない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "create.error.login_required": {
+      "ja": "タグの作成にはサインインが必要です(設定画面からサインインしてください)",
+      "ko": "태그를 만들려면 로그인해야 해요 (설정 화면에서 로그인해 주세요)",
+      "note": "未ログインでタグを作ろうとしたとき (シートの中の文)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "create.error.rate_limited": {
+      "ja": "1日10件まで作成できます。明日試してください",
+      "ko": "하루에 10건까지 만들 수 있어요. 내일 다시 시도해 주세요",
+      "note": "タグの作成が 1 日の上限 (10 件) に達したとき"
+    },
+    "create.name.counter_android": {
+      "args": [
+        {
+          "name": "length",
+          "type": "int"
+        },
+        {
+          "name": "max",
+          "type": "count"
+        }
+      ],
+      "ja": "{length} / {max}文字",
+      "ko": "{length} / {max}자",
+      "note": "新規タグ作成シートの名前の欄の下の文字数 (Android)。length は今の文字数、max は上限 (30 前後。桁区切りは出ない)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "create.name.header": {
+      "ja": "タグ名",
+      "ko": "태그 이름",
+      "note": "新規タグ作成シートの名前の欄の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "create.name.label_android": {
+      "args": [
+        {
+          "name": "max",
+          "type": "count"
+        }
+      ],
+      "ja": "タグ名(1〜{max}文字)",
+      "ko": "태그 이름 (1~{max}자)",
+      "note": "新規タグ作成シートの名前の欄のラベル (Android)。max は文字数の上限 (30 前後。桁区切りは出ない)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "create.name.placeholder": {
+      "ja": "例: エモい",
+      "ko": "예: 감성적",
+      "note": "新規タグ作成シートの名前の欄のプレースホルダ。例の語も訳す (エモい = 胸にくる・エモーショナル)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "create.title": {
+      "ja": "新規タグ作成",
+      "ko": "새 태그 만들기",
+      "note": "新規タグ作成シートの見出し"
+    },
+    "detail.action.edit_description": {
+      "ja": "説明を編集",
+      "ko": "설명 편집",
+      "note": "タグ詳細の説明の下のボタン (説明文・カテゴリ・色の編集シートを開く)"
+    },
+    "detail.action.history": {
+      "ja": "編集履歴",
+      "ko": "편집 기록",
+      "note": "タグ詳細の説明の下のボタン (説明文の編集履歴を開く)"
+    },
+    "detail.action.report": {
+      "ja": "不適切なタグを通報",
+      "ko": "부적절한 태그 신고",
+      "note": "タグ詳細の右上のメニューの項目"
+    },
+    "detail.category.a11y": {
+      "args": [
+        {
+          "name": "category",
+          "type": "core"
+        }
+      ],
+      "ja": "カテゴリ: {category}",
+      "ko": "카테고리: {category}",
+      "note": "タグ詳細のカテゴリのバッジの読み上げ。category はコアの語彙の名前 (ムード・性格など)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.color.a11y": {
+      "args": [
+        {
+          "name": "hex",
+          "type": "string"
+        }
+      ],
+      "ja": "タグカラー: {hex}",
+      "ko": "태그 색: {hex}",
+      "note": "タグ詳細の色の四角の読み上げ。hex は #RRGGBB の色の値",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.idols.empty": {
+      "ja": "まだこのタグが付いたアイドルはいません",
+      "ko": "아직 이 태그가 달린 아이돌이 없어요",
+      "note": "アイドルのタグ詳細で、付いたアイドルが 1 人もいないとき"
+    },
+    "detail.idols.header": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "「{name}」なアイドルランキング（{count}人）",
+      "ko": "“{name}” 아이돌 랭킹 ({count}명)",
+      "note": "タグ詳細のランキングの見出し。name はタグ名、「◯◯な」は「そのタグらしい」の意味。このタグが付いたアイドルを票の多い順に並べる。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.idols.header_android": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "「{name}」なアイドルランキング ({count}人)",
+      "ko": "“{name}” 아이돌 랭킹 ({count}명)",
+      "note": "Android の文言。iOS の detail.idols.header と括弧が違う (統一はオーナーが別 PR で)。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.menu.a11y": {
+      "ja": "メニュー",
+      "ko": "메뉴",
+      "note": "タグ詳細の右上の ︙ アイコンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.no_description": {
+      "ja": "説明なし",
+      "ko": "설명 없음",
+      "note": "タグ詳細で、タグに説明文が無いとき"
+    },
+    "detail.report.confirm.action": {
+      "ja": "通報する",
+      "ko": "신고",
+      "note": "タグの通報の確認ダイアログの実行ボタン"
+    },
+    "detail.report.confirm.message": {
+      "ja": "不適切なコンテンツとして通報します",
+      "ko": "부적절한 콘텐츠로 신고할게요",
+      "note": "タグの通報の確認ダイアログの本文"
+    },
+    "detail.report.confirm.title": {
+      "ja": "タグを通報",
+      "ko": "태그 신고",
+      "note": "タグの通報の確認ダイアログの見出し"
+    },
+    "detail.report.done.message": {
+      "ja": "ご報告ありがとうございます。内容を確認します。",
+      "ko": "신고해 주셔서 감사해요. 내용을 확인할게요.",
+      "note": "タグの通報を受け付けたときのダイアログの本文"
+    },
+    "detail.report.done.title": {
+      "ja": "通報しました",
+      "ko": "신고했어요",
+      "note": "タグの通報を受け付けたときのダイアログの見出し"
+    },
+    "detail.report.error.failed": {
+      "ja": "通報に失敗しました。しばらくしてからお試しください。",
+      "ko": "신고하지 못했어요. 잠시 후 다시 시도해 주세요.",
+      "note": "タグの通報に失敗したとき (Android。理由は区別しない)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.report.error.fallback": {
+      "ja": "エラーが発生しました",
+      "ko": "오류가 발생했어요",
+      "note": "タグの通報に失敗し、サーバから説明が来なかったとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.report.error.rate_limited": {
+      "ja": "本日通報上限です。明日また試してください。",
+      "ko": "오늘은 더 신고할 수 없어요. 내일 다시 시도해 주세요.",
+      "note": "タグの通報が 1 日の上限に達したとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.report.error.title": {
+      "ja": "通報エラー",
+      "ko": "신고 오류",
+      "note": "タグの通報に失敗したときのダイアログの見出し"
+    },
+    "detail.songs.empty": {
+      "ja": "まだこのタグが付いた曲はありません",
+      "ko": "아직 이 태그가 달린 곡이 없어요",
+      "note": "曲のタグ詳細で、付いた曲が 1 曲も無いとき"
+    },
+    "detail.songs.header": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "「{name}」な曲ランキング（{count}曲）",
+      "ko": "“{name}” 곡 랭킹 ({count}곡)",
+      "note": "タグ詳細のランキングの見出し。name はタグ名、「◯◯な」は「そのタグらしい」の意味。このタグが付いた曲を票の多い順に並べる。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.songs.header_android": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "「{name}」な曲ランキング ({count}曲)",
+      "ko": "“{name}” 곡 랭킹 ({count}곡)",
+      "note": "Android の文言。iOS の detail.songs.header と括弧が違う (統一はオーナーが別 PR で)。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.units.empty": {
+      "ja": "まだこのタグが付いたユニットはいません",
+      "ko": "아직 이 태그가 달린 유닛이 없어요",
+      "note": "ユニットのタグ詳細で、付いたユニットが 1 つも無いとき"
+    },
+    "detail.units.header": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "「{name}」なユニットランキング（{count}組）",
+      "ko": "“{name}” 유닛 랭킹 ({count}팀)",
+      "note": "タグ詳細のランキングの見出し。name はタグ名、「◯◯な」は「そのタグらしい」の意味。このタグが付いたユニットを票の多い順に並べる。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.units.header_android": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "「{name}」なユニットランキング ({count}組)",
+      "ko": "“{name}” 유닛 랭킹 ({count}팀)",
+      "note": "Android の文言。iOS の detail.units.header と括弧が違う (統一はオーナーが別 PR で)。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.votes": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}票",
+      "ko": "{count}표",
+      "note": "タグ詳細のランキングの行の右端、このタグへの票の数。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた)"
+    },
+    "edit.action.save": {
+      "ja": "保存",
+      "ko": "저장",
+      "note": "タグの編集シートの確定ボタン"
+    },
+    "edit.category.header": {
+      "ja": "カテゴリ",
+      "ko": "카테고리",
+      "note": "タグの編集シートのカテゴリの見出し"
+    },
+    "edit.color.header": {
+      "ja": "色",
+      "ko": "색",
+      "note": "タグの編集シートの色の見出し"
+    },
+    "edit.description.header": {
+      "ja": "説明文",
+      "ko": "설명",
+      "note": "タグの編集シートの説明文の欄の見出し (Android は欄のラベル)"
+    },
+    "edit.description.placeholder": {
+      "ja": "どんな時に使うタグか",
+      "ko": "어떤 때 쓰는 태그인지",
+      "note": "タグの編集シートの説明文の欄のプレースホルダ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "edit.error.failed": {
+      "ja": "保存に失敗しました",
+      "ko": "저장하지 못했어요",
+      "note": "タグの編集を保存できず、サーバから説明が来なかったとき"
+    },
+    "edit.error.failed_detail": {
+      "args": [
+        {
+          "name": "detail",
+          "type": "string"
+        }
+      ],
+      "ja": "保存に失敗しました: {detail}",
+      "ko": "저장하지 못했어요: {detail}",
+      "note": "タグの編集を保存できなかったとき (通信の失敗など)。detail は OS・通信層の説明 (訳さない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "edit.error.login_required": {
+      "ja": "タグの編集にはサインインが必要です(設定画面からサインインしてください)",
+      "ko": "태그를 편집하려면 로그인해야 해요 (설정 화면에서 로그인해 주세요)",
+      "note": "未ログインでタグを編集しようとしたとき (シートの中の文)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "edit.title": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "ja": "「{name}」を編集",
+      "ko": "“{name}” 편집",
+      "note": "タグの編集シートの見出し。name はタグ名"
+    },
+    "filter.action.done": {
+      "ja": "完了",
+      "ko": "완료",
+      "note": "タグで絞り込むシートの確定ボタン"
+    },
+    "filter.empty": {
+      "ja": "タグがありません",
+      "ko": "태그가 없어요",
+      "note": "タグで絞り込むシートで候補が 1 つも無いとき"
+    },
+    "filter.row.songs": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}曲",
+      "ko": "{count}곡",
+      "note": "タグで絞り込むシートの行の右端、このタグが付いた曲の数。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた)"
+    },
+    "filter.search.prompt": {
+      "ja": "タグ名で検索",
+      "ko": "태그 이름으로 검색",
+      "note": "タグで絞り込むシートの検索欄のプレースホルダ"
+    },
+    "filter.section.popular": {
+      "ja": "人気タグランキング",
+      "ko": "인기 태그 랭킹",
+      "note": "タグで絞り込むシートの候補の見出し (検索していないとき。人気順)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter.section.results": {
+      "ja": "検索結果",
+      "ko": "검색 결과",
+      "note": "タグで絞り込むシートの候補の見出し (検索中)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter.selected.header": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "選択中 ({count}) — すべてを含む曲に絞り込み",
+      "ko": "선택됨 ({count}) — 모든 태그가 달린 곡만 보기",
+      "note": "タグで絞り込むシートの選んだタグの見出し。count は選んだタグの数。選んだタグを全部持つ曲だけに絞る (AND)。ko の「곡만 보기」は文中の動詞としての「絞り込み」なので、用語集の 필터 / 찾기 (機能名・ボタン名) は使わない。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた)"
+    },
+    "filter.title": {
+      "ja": "タグで絞り込み",
+      "ko": "태그 필터",
+      "note": "曲一覧をタグで絞り込むシートの見出し"
+    },
+    "form.category.none": {
+      "ja": "なし",
+      "ko": "없음",
+      "note": "新規タグ作成・編集シートのカテゴリの選択肢の先頭 (カテゴリを付けない)。iOS はコアの語彙の語を出している",
+      "platforms": [
+        "android"
+      ]
+    },
+    "form.error.restricted": {
+      "ja": "この操作は制限されています。",
+      "ko": "이 작업은 제한되어 있어요.",
+      "note": "利用が制限されたアカウントでタグを作成・編集しようとしたとき (シートの中の文)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "history.empty": {
+      "ja": "編集履歴はありません",
+      "ko": "편집 기록이 없어요",
+      "note": "タグの説明文の編集履歴が 1 件も無いとき"
+    },
+    "history.no_description": {
+      "ja": "（説明なし）",
+      "ko": "(설명 없음)",
+      "note": "編集履歴の行で、その版の説明文が空のとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.no_description_android": {
+      "ja": "(説明なし)",
+      "ko": "(설명 없음)",
+      "note": "Android の文言。iOS の history.no_description と括弧が違う (統一はオーナーが別 PR で)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "history.title": {
+      "ja": "編集履歴",
+      "ko": "편집 기록",
+      "note": "タグの説明文の編集履歴の画面の見出し"
+    },
+    "list.category.all": {
+      "ja": "全て",
+      "ko": "전체",
+      "note": "タグ一覧の絞り込みシートのカテゴリの選択肢 (カテゴリで絞らない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.category.free": {
+      "ja": "フリー",
+      "ko": "자유",
+      "note": "タグ一覧の絞り込みシートのカテゴリの選択肢 (分類の無い自由なタグ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.category.mood": {
+      "ja": "ムード",
+      "ko": "무드",
+      "note": "タグ一覧の絞り込みシートのカテゴリの選択肢 (曲の雰囲気のタグ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.category.scene": {
+      "ja": "シーン",
+      "ko": "상황",
+      "note": "タグ一覧の絞り込みシートのカテゴリの選択肢 (聴く場面のタグ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.category.special": {
+      "ja": "特別",
+      "ko": "특별",
+      "note": "タグ一覧の絞り込みシートのカテゴリの選択肢 (特別なタグ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.create.a11y": {
+      "ja": "新規タグ作成",
+      "ko": "새 태그 만들기",
+      "note": "タグ一覧の右上の ＋ アイコンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.empty.title": {
+      "ja": "タグはまだありません",
+      "ko": "아직 태그가 없어요",
+      "note": "タグ一覧にタグが 1 つも無いとき"
+    },
+    "list.filter.a11y": {
+      "ja": "カテゴリで絞り込み",
+      "ko": "카테고리 필터",
+      "note": "タグ一覧の右上の絞り込みアイコンの読み上げ (押すとカテゴリのメニュー)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.filter_empty.message": {
+      "args": [
+        {
+          "name": "query",
+          "type": "string"
+        }
+      ],
+      "ja": "「{query}」に一致するタグがありません",
+      "ko": "“{query}”에 해당하는 태그가 없어요",
+      "note": "名前で絞り込んで 0 件のときの説明。query は入力した語 (Android はこれ 1 行だけを出す)"
+    },
+    "list.filter_empty.title": {
+      "ja": "絞り込み結果がありません",
+      "ko": "필터 결과가 없어요",
+      "note": "名前で絞り込んで 0 件のときの空状態の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.name_filter.prompt": {
+      "ja": "タグ名で絞り込み",
+      "ko": "태그 이름으로 찾기",
+      "note": "タグ一覧の上の名前の絞り込み欄のプレースホルダ"
+    },
+    "list.row.a11y": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "ja": "タグ: {name}",
+      "ko": "태그: {name}",
+      "note": "タグ一覧の行のタグ名の読み上げ。name はタグ名 (利用者が付けた名前)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.row.category.free": {
+      "ja": "free",
+      "ko": "자유",
+      "note": "タグ一覧の行のカテゴリのバッジ。今は内部の値 (英字) をそのまま出しているので ja も英字のまま (ムード等の表記に揃えるかはオーナーが別 PR で)。分類の無い自由なタグ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.row.category.mood": {
+      "ja": "mood",
+      "ko": "무드",
+      "note": "タグ一覧の行のカテゴリのバッジ。今は内部の値 (英字) をそのまま出しているので ja も英字のまま (ムード等の表記に揃えるかはオーナーが別 PR で)。曲の雰囲気のタグ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.row.category.scene": {
+      "ja": "scene",
+      "ko": "상황",
+      "note": "タグ一覧の行のカテゴリのバッジ。今は内部の値 (英字) をそのまま出しているので ja も英字のまま (ムード等の表記に揃えるかはオーナーが別 PR で)。聴く場面のタグ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.row.category.special": {
+      "ja": "special",
+      "ko": "특별",
+      "note": "タグ一覧の行のカテゴリのバッジ。今は内部の値 (英字) をそのまま出しているので ja も英字のまま (ムード等の表記に揃えるかはオーナーが別 PR で)。特別なタグ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.row.songs": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}曲",
+      "ko": "{count}곡",
+      "note": "タグ一覧の行の右端、このタグが付いた曲の数。1000 以上は桁区切りが付く (Android は従来区切りなしの文字列だったので 1,000 のように変わる。iOS は Text の補間で従来も区切りが付いていた)"
+    },
+    "list.sort.label": {
+      "ja": "並び順",
+      "ko": "정렬",
+      "note": "タグ一覧の並び順メニュー (iOS は Picker のラベル、Android は並び替えアイコンの読み上げ)"
+    },
+    "list.sort.name": {
+      "ja": "名前",
+      "ko": "이름",
+      "note": "タグ一覧の並び順の選択肢 (名前順)"
+    },
+    "list.sort.popular": {
+      "ja": "人気",
+      "ko": "인기",
+      "note": "タグ一覧の並び順の選択肢 (人気順)"
+    },
+    "list.sort.recent": {
+      "ja": "新着",
+      "ko": "최신",
+      "note": "タグ一覧の並び順の選択肢 (新しく作られた順)"
+    },
+    "list.title": {
+      "ja": "タグ",
+      "ko": "태그",
+      "note": "タグ一覧の画面タイトル"
+    },
+    "picker.action.add": {
+      "ja": "追加",
+      "ko": "추가",
+      "note": "タグを付けるシートの確定ボタン (選んだタグをまとめて付ける)"
+    },
+    "picker.action.close": {
+      "ja": "閉じる",
+      "ko": "닫기",
+      "note": "曲にタグを付けたあとの完了・シェアの画面の右上のボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "picker.create_from_search": {
+      "args": [
+        {
+          "name": "query",
+          "type": "string"
+        }
+      ],
+      "ja": "「{query}」を作成",
+      "ko": "“{query}” 만들기",
+      "note": "検索語と同じ名前のタグが無いときの、その名前で新しく作るボタン。query は入力した語"
+    },
+    "picker.create_full": {
+      "ja": "色やカテゴリを付けて新規作成",
+      "ko": "색이나 카테고리를 정해 새로 만들기",
+      "note": "タグを付けるシートの下のボタン (新規タグ作成シートを開く)"
+    },
+    "picker.empty": {
+      "ja": "タグが見つかりません",
+      "ko": "태그를 찾을 수 없어요",
+      "note": "タグを付けるシートで候補が 1 つも無いとき"
+    },
+    "picker.error.apply_failed": {
+      "ja": "タグの追加に失敗しました",
+      "ko": "태그를 추가하지 못했어요",
+      "note": "選んだタグを付けられなかったとき (iOS はアラートの見出し、Android はシートの中の文)"
+    },
+    "picker.error.login_required": {
+      "ja": "タグの追加にはサインインが必要です(設定画面からサインインしてください)",
+      "ko": "태그를 추가하려면 로그인해야 해요 (설정 화면에서 로그인해 주세요)",
+      "note": "未ログインでタグを付けようとしたとき (シートの中の文)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.search.prompt": {
+      "ja": "タグを検索 / 新規作成",
+      "ko": "태그 검색 / 새로 만들기",
+      "note": "タグを付けるシートの検索欄のプレースホルダ (無ければその語で新しく作れる)"
+    },
+    "picker.section.candidates": {
+      "ja": "候補",
+      "ko": "후보",
+      "note": "タグを付けるシートの候補の見出し (検索中)"
+    },
+    "picker.section.popular": {
+      "ja": "よく使われるタグ",
+      "ko": "자주 쓰이는 태그",
+      "note": "タグを付けるシートの候補の見出し (検索していないとき)"
+    },
+    "picker.share.song_fallback": {
+      "ja": "この曲",
+      "ko": "이 곡",
+      "note": "タグ付けのシェアカードに出す曲名の代わり (曲の情報を読めなかったとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "picker.title": {
+      "ja": "タグを追加",
+      "ko": "태그 추가",
+      "note": "曲・アイドル・ユニットにタグを付けるシートの見出し"
+    },
+    "rank_badge.a11y": {
+      "args": [
+        {
+          "name": "rank",
+          "type": "int"
+        }
+      ],
+      "ja": "{rank}位",
+      "ko": "{rank}위",
+      "note": "人気ランキングの順位バッジの読み上げ (タグ一覧・曲一覧のタグ絞り込み・タグ詳細)。rank は順位 (桁区切りなし)",
+      "platforms": [
+        "ios"
+      ]
+    }
+  }
+}
