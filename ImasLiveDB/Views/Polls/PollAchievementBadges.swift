@@ -35,7 +35,7 @@ struct PollAchievementBadges: View {
                     .environment(database)
                     .toolbar {
                         ToolbarItem(placement: .topBarLeading) {
-                            Button("閉じる") { openPoll = nil }
+                            Button { openPoll = nil } label: { Text(L10n.Polls.achievementsSheetClose) }
                         }
                     }
             }

@@ -11,7 +11,8 @@ final class PollListViewModel {
     private(set) var activePolls: [Poll] = []
     private(set) var pastPolls: [Poll] = []
     private(set) var isLoading = false
-    private(set) var loadError: String?
+    /// 直近の取得の失敗メッセージ。解決済みの String ではなく文言の値で持ち、画面で文字列にする。
+    private(set) var loadError: DisplayText?
 
     nonisolated init(voting: any CommunityVoting) {
         self.voting = voting
@@ -27,7 +28,9 @@ final class PollListViewModel {
             loadError = nil
             if active { activePolls = result } else { pastPolls = result }
         } catch {
-            loadError = (error as? APIClientError)?.errorDescription ?? "通信エラー"
+            // APIClientError の説明は Services 側で作った文字列なのでそのまま出す (verbatim)
+            loadError = (error as? APIClientError)?.errorDescription.map(DisplayText.verbatim)
+                ?? .key(L10n.Polls.errorNetwork)
         }
     }
 

@@ -5,6 +5,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,8 +26,11 @@ data class PollsUiState(
     val isLoading: Boolean = true,
     /** 表示中のセグメント。true=開催中 / false=終了。 */
     val showActive: Boolean = true,
-    /** 直近の取得に失敗した時の文言。既に一覧が出ている時は消さず、空の時だけ画面に出す。 */
-    val loadError: String? = null
+    /**
+     * 直近の取得に失敗した時の文言。既に一覧が出ている時は消さず、空の時だけ画面に出す。
+     * 解決済みの String ではなく文言の値で持ち、画面で resolve() する。
+     */
+    val loadError: DisplayText? = null
 )
 
 /**
@@ -83,7 +88,7 @@ class PollsViewModel internal constructor(
             val stillCurrent = { _uiState.value.showActive == active }
             if (polls == null) {
                 // 取得失敗。表示中の一覧はそのまま残す (一度の通信エラーで全消えにしない)。
-                if (stillCurrent()) _uiState.value = _uiState.value.copy(isLoading = false, loadError = "通信エラー")
+                if (stillCurrent()) _uiState.value = _uiState.value.copy(isLoading = false, loadError = L10n.Polls.errorNetwork)
                 return@launch
             }
             val cards = polls.map { buildCard(it) }

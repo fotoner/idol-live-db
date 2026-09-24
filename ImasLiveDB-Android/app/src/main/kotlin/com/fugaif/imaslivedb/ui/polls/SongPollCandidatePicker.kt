@@ -56,6 +56,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.data.model.SongWithArtists
 import com.fugaif.imaslivedb.data.model.Vocab
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.BrandFilterChips
 import com.fugaif.imaslivedb.ui.components.BrandFilterItem
 import com.fugaif.imaslivedb.ui.components.ImasArtwork
@@ -131,19 +133,24 @@ fun SongPollCandidatePicker(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "楽曲を選択 (${selection.size})",
+                    L10n.Polls.pickerSongTitle(count = selection.size).resolve(),
                     fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink,
                     modifier = Modifier.weight(1f)
                 )
                 IconButton(onClick = { showAdvanced = !showAdvanced }) {
-                    Icon(Icons.Filled.FilterList, contentDescription = "詳細検索", tint = if (showAdvanced) DS.pick else DS.ink2)
+                    Icon(
+                        Icons.Filled.FilterList, contentDescription = L10n.Polls.pickerSongAdvancedA11y.resolve(),
+                        tint = if (showAdvanced) DS.pick else DS.ink2
+                    )
                 }
                 IconButton(onClick = {
                     displayMode = if (displayMode == SongPickerDisplayMode.GRID) SongPickerDisplayMode.LIST else SongPickerDisplayMode.GRID
                 }) {
                     Icon(
                         if (displayMode == SongPickerDisplayMode.GRID) Icons.Filled.ViewList else Icons.Filled.GridView,
-                        contentDescription = if (displayMode == SongPickerDisplayMode.GRID) "リスト表示" else "グリッド表示"
+                        contentDescription = (
+                            if (displayMode == SongPickerDisplayMode.GRID) L10n.Polls.pickerViewModeListA11y else L10n.Polls.pickerViewModeGridA11y
+                        ).resolve()
                     )
                 }
             }
@@ -159,11 +166,13 @@ fun SongPollCandidatePicker(
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                placeholder = { Text("曲名で検索") },
+                placeholder = { Text(L10n.Polls.pickerSongSearchPrompt.resolve()) },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 trailingIcon = {
                     if (query.isNotEmpty()) {
-                        IconButton(onClick = { query = "" }) { Icon(Icons.Filled.Clear, contentDescription = "クリア") }
+                        IconButton(onClick = { query = "" }) {
+                            Icon(Icons.Filled.Clear, contentDescription = L10n.Polls.pickerSearchClearA11y.resolve())
+                        }
                     }
                 },
                 singleLine = true,
@@ -174,7 +183,7 @@ fun SongPollCandidatePicker(
                 OutlinedTextField(
                     value = songwriter,
                     onValueChange = { songwriter = it },
-                    placeholder = { Text("作詞・作曲・編曲者で検索") },
+                    placeholder = { Text(L10n.Polls.pickerSongSongwriterPrompt.resolve()) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)
                 )
@@ -194,7 +203,8 @@ fun SongPollCandidatePicker(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     ImasFilterChip(
-                        label = if (selectedTags.isEmpty()) "タグで絞り込み" else selectedTags.joinToString(" ＋ ") { it.name },
+                        label = if (selectedTags.isEmpty()) L10n.Polls.pickerSongTagFilter.resolve()
+                        else selectedTags.joinToString(L10n.Polls.pickerSongTagSeparator.resolve()) { it.name },
                         selected = selectedTags.isNotEmpty(),
                         onClick = { showTagFilter = true }
                     )
@@ -203,7 +213,7 @@ fun SongPollCandidatePicker(
 
             if (overRemaining) {
                 Text(
-                    "残り${remaining}曲まで選べます (現在+${newlyAddedCount}曲)",
+                    L10n.Polls.pickerSongOverLimit(remaining = remaining, added = newlyAddedCount).resolve(),
                     fontSize = 12.sp, color = DS.danger,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
                 )
@@ -213,7 +223,7 @@ fun SongPollCandidatePicker(
                 Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
             } else if (filtered.isEmpty()) {
                 Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
-                    Text("該当する曲がありません", fontSize = 13.sp, color = DS.ink3)
+                    Text(L10n.Polls.pickerSongEmpty.resolve(), fontSize = 13.sp, color = DS.ink3)
                 }
             } else if (displayMode == SongPickerDisplayMode.GRID) {
                 LazyVerticalGrid(
@@ -255,7 +265,7 @@ fun SongPollCandidatePicker(
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Button(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("キャンセル") }
+                Button(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text(L10n.Polls.actionCancel.resolve()) }
                 Button(
                     onClick = {
                         // 選択は選択肢の表示順 (ブランド順 → 一覧の並び) で返す。
@@ -268,7 +278,7 @@ fun SongPollCandidatePicker(
                     },
                     enabled = (selection - alreadySelected).isNotEmpty(),
                     modifier = Modifier.weight(1f)
-                ) { Text("決定") }
+                ) { Text(L10n.Polls.pickerConfirm.resolve()) }
             }
         }
     }

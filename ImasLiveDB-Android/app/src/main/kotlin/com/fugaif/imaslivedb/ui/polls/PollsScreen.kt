@@ -39,6 +39,8 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
 import com.fugaif.imaslivedb.ui.share.ShareMessage
@@ -73,18 +75,18 @@ fun PollsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("投票・予想", fontWeight = FontWeight.Bold) },
+                title = { Text(L10n.Polls.listTitleAndroid.resolve(), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "戻る") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, L10n.Common.actionBack.resolve()) }
                 },
                 actions = {
                     IconButton(onClick = onHallOfFameClick) {
-                        Icon(Icons.Filled.EmojiEvents, contentDescription = "殿堂を見る", tint = DS.warning)
+                        Icon(Icons.Filled.EmojiEvents, contentDescription = L10n.Polls.listHallOfFameA11y.resolve(), tint = DS.warning)
                     }
                     // 作成はログイン必須 (サーバが 401 を返す)。未ログインでは押せるボタンを出さない。
                     if (authState.isSignedIn) {
                         IconButton(onClick = { showCreateSheet = true }) {
-                            Icon(Icons.Filled.Add, contentDescription = "お題を作成")
+                            Icon(Icons.Filled.Add, contentDescription = L10n.Polls.listCreateA11y.resolve())
                         }
                     }
                 }
@@ -93,7 +95,7 @@ fun PollsScreen(
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             ImasSegmented(
-                labels = listOf("開催中", "終了"),
+                labels = listOf(L10n.Polls.listSegmentActive.resolve(), L10n.Polls.listSegmentEnded.resolve()),
                 selection = if (state.showActive) 0 else 1,
                 onSelect = { viewModel.setShowActive(it == 0) },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
@@ -105,13 +107,13 @@ fun PollsScreen(
                     // 一覧が出せない理由は「まだ無い」と「取れなかった」で違うので出し分ける。
                     if (state.loadError != null) {
                         ImasEmptyState(
-                            Icons.Filled.ErrorOutline, "読み込みに失敗しました", state.loadError
+                            Icons.Filled.ErrorOutline, L10n.Polls.loadErrorTitle.resolve(), state.loadError?.resolve()
                         )
                     } else {
                         ImasEmptyState(
                             Icons.Filled.HowToVote,
-                            if (state.showActive) "開催中のお題がありません" else "終了したお題がありません",
-                            if (state.showActive) "右上の「＋」から新しいお題を投稿できます。" else null
+                            (if (state.showActive) L10n.Polls.listEmptyActiveTitle else L10n.Polls.listEmptyEndedTitle).resolve(),
+                            if (state.showActive) L10n.Polls.listEmptyActiveMessage.resolve() else null
                         )
                     }
                 }
@@ -152,17 +154,20 @@ private fun PollRow(card: PollCard, onClick: () -> Unit) {
             Text(poll.title, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink)
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
                 Text(
-                    poll.statusLabel, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                    pollStatusText(poll.isActive, poll.endsAtMs).resolve(), fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
                     color = if (poll.isActive) DS.pick else DS.ink3
                 )
                 if (poll.totalVotes > 0) {
-                    Text("計${poll.totalVotes}票", fontSize = 12.sp, color = DS.ink3, modifier = Modifier.padding(start = 8.dp))
+                    Text(
+                        L10n.Polls.listRowTotalVotes(count = poll.totalVotes).resolve(), fontSize = 12.sp, color = DS.ink3,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
                 }
                 ScopeBadge(poll)
             }
             card.topEntityName?.let { name ->
                 Text(
-                    "1位 $name", fontSize = 13.sp, color = DS.ink2, maxLines = 1,
+                    L10n.Polls.listRowTopEntity(name = name).resolve(), fontSize = 13.sp, color = DS.ink2, maxLines = 1,
                     overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp)
                 )
             }
@@ -170,7 +175,7 @@ private fun PollRow(card: PollCard, onClick: () -> Unit) {
         // 一覧から直接お題を拡散できるように (詳細を開かずに誘える)。
         SocialShareIconButton(
             payload = ShareMessage.pollInvitePayload(poll.id, poll.title, poll.endsAtMs, poll.isActive),
-            contentDescription = "このお題をシェア"
+            contentDescription = L10n.Polls.sharePollA11y.resolve()
         )
     }
 }

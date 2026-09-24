@@ -21,7 +21,9 @@ struct PollListView: View {
         // 親 (ProduceTabView) の NavigationStack 内に push される前提。
         // 自前 NavigationStack を持つとネストして、詳細 push 時に空画面がフラッシュするため持たない。
         VStack(spacing: 0) {
-                ImasSegmented(labels: ["開催中", "終了"], selection: $segmentIndex)
+                ImasSegmented(labels: [String(localized: L10n.Polls.listSegmentActive),
+                                       String(localized: L10n.Polls.listSegmentEnded)],
+                              selection: $segmentIndex)
                     .padding(.horizontal, DS.sp5)
                     .padding(.vertical, DS.sp3)
 
@@ -35,22 +37,22 @@ struct PollListView: View {
                     Spacer()
                     ImasEmptyState(
                         systemImage: "exclamationmark.triangle",
-                        title: "読み込みに失敗しました",
-                        message: loadError
+                        title: String(localized: L10n.Polls.loadErrorTitle),
+                        message: loadError.resolved
                     )
                     Spacer()
                 } else {
                     Spacer()
                     ImasEmptyState(
                         systemImage: "chart.bar.doc.horizontal",
-                        title: segmentIndex == 0 ? "開催中のお題がありません" : "終了したお題がありません",
-                        message: segmentIndex == 0 ? "右上の「＋」から新しいお題を投稿できます。" : nil
+                        title: String(localized: segmentIndex == 0 ? L10n.Polls.listEmptyActiveTitle : L10n.Polls.listEmptyEndedTitle),
+                        message: segmentIndex == 0 ? String(localized: L10n.Polls.listEmptyActiveMessage) : nil
                     )
                     Spacer()
                 }
             }
             .background(DS.bg.ignoresSafeArea())
-            .navigationTitle("みんなの投票")
+            .navigationTitle(L10n.Polls.listTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -58,7 +60,7 @@ struct PollListView: View {
                         Image(systemName: "crown.fill")
                             .foregroundStyle(DS.warning)
                     }
-                    .accessibilityLabel("殿堂を見る")
+                    .accessibilityLabel(L10n.Polls.listHallOfFameA11y)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     if AuthService.shared.isSignedIn {
@@ -68,7 +70,7 @@ struct PollListView: View {
                         } label: {
                             Image(systemName: "plus")
                         }
-                        .accessibilityLabel("お題を作成")
+                        .accessibilityLabel(L10n.Polls.listCreateA11y)
                     } else {
                         EmptyView()
                     }
@@ -139,7 +141,8 @@ private struct PollRowView: View {
     @ViewBuilder
     private var scopeBadge: some View {
         if let label = poll.scopeShortLabel, let icon = poll.scopeShortIcon {
-            ImasChip(text: label, systemImage: icon)
+            // ImasChip はまだ String を受ける (DS の入力契約は未移行) ので、ここで解決して渡す
+            ImasChip(text: String(localized: label), systemImage: icon)
         }
     }
 
@@ -186,7 +189,7 @@ private struct PollRowView: View {
                         .font(.imasCaption)
                         .foregroundStyle(poll.isActive ? DS.success : DS.ink3)
                     if let totalVotes = poll.totalVotes, totalVotes > 0 {
-                        Text("計\(totalVotes)票")
+                        Text(L10n.Polls.listRowTotalVotes(count: totalVotes))
                             .font(.imasCaption)
                             .foregroundStyle(DS.ink3)
                     }
@@ -221,24 +224,25 @@ extension Poll {
         status == "active" && endsAt > Date()
     }
 
-    var statusLabel: String {
-        if !isActive { return "終了" }
+    /// 状態の札 (終了 / 本日締切 / 残りN日)。文言の値で返し、表示するところで解決する。
+    var statusLabel: LocalizedStringResource {
+        if !isActive { return L10n.Polls.statusEnded }
         let days = Calendar.current.dateComponents([.day], from: Date(), to: endsAt).day ?? 0
-        if days == 0 { return "本日締切" }
-        return "残り\(days)日"
+        if days == 0 { return L10n.Polls.statusClosesToday }
+        return L10n.Polls.statusDaysLeft(days: days)
     }
 
     /// 一覧・ヘッダで使う、スコープを一目で示すバッジ用ラベル。 `.all` は nil。
-    var scopeShortLabel: String? {
+    var scopeShortLabel: LocalizedStringResource? {
         switch scope {
         case .all:
             return nil
         case .brand:
             let count = scopeBrandIds?.count ?? 0
-            return count <= 1 ? "ブランド限定" : "ブランド限定×\(count)"
+            return count <= 1 ? L10n.Polls.scopeBadgeBrand : L10n.Polls.scopeBadgeBrandMulti(count: count)
         case .manual:
             let count = scopeEntityIds?.count ?? 0
-            return "指定候補\(count)件"
+            return L10n.Polls.scopeBadgeManual(count: count)
         }
     }
 
@@ -248,6 +252,19 @@ extension Poll {
         case .all: return nil
         case .brand: return "tag.fill"
         case .manual: return "list.bullet"
+        }
+    }
+}
+
+extension PollTargetType {
+    /// 投票対象の種類の表示名 (曲 / アイドル / ユニット)。詳細のチップ・作成シートの対象カード・
+    /// 「全{target}から…」の差し込みに使う。モデルの `label` (Models/CommunityModels.swift) は
+    /// 日本語の String のままなので、投票の画面はこちらを引く (rawValue は API の値なので変えない)。
+    var candidateNoun: LocalizedStringResource {
+        switch self {
+        case .song: return L10n.Polls.targetSong
+        case .idol: return L10n.Polls.targetIdol
+        case .unit: return L10n.Polls.targetUnit
         }
     }
 }

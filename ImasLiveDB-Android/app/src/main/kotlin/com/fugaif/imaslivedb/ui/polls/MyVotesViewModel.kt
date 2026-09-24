@@ -5,13 +5,18 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-/** 1つの選択肢 (自分が投票した曲/アイドル) の表示用。 */
-data class MyVoteChoice(val entityId: String, val label: String)
+/**
+ * 1つの選択肢 (自分が投票した曲/アイドル) の表示用。label は曲名・アイドル名・ユニット名 (データ) か、
+ * 消えた候補の「(削除済み)」(文言)。画面で resolve() する。
+ */
+data class MyVoteChoice(val entityId: String, val label: DisplayText)
 
 /** 1お題ぶんの表示行。 */
 data class MyVoteEntry(val poll: CommunityApi.PollDetail, val choices: List<MyVoteChoice>)
@@ -46,12 +51,12 @@ class MyVotesViewModel(app: Application) : AndroidViewModel(app) {
             val entries = log.mapNotNull { (pollId, entityIds) ->
                 val detail = runCatching { api.pollDetail(pollId) }.getOrNull() ?: return@mapNotNull null
                 val choices = entityIds.sorted().map { id ->
-                    val label = when (detail.targetType) {
-                        "idol" -> idolRepo.fetchIdol(id)?.name ?: "(削除済み)"
-                        "unit" -> unitRepo.fetchUnit(id)?.displayName ?: "(削除済み)"
-                        else -> songRepo.fetchSong(id)?.title ?: "(削除済み)"
+                    val name = when (detail.targetType) {
+                        "idol" -> idolRepo.fetchIdol(id)?.name
+                        "unit" -> unitRepo.fetchUnit(id)?.displayName
+                        else -> songRepo.fetchSong(id)?.title
                     }
-                    MyVoteChoice(id, label)
+                    MyVoteChoice(id, name?.let { DisplayText.Verbatim(it) } ?: L10n.Polls.myVotesDeletedChoice)
                 }
                 MyVoteEntry(detail, choices)
             }

@@ -5,6 +5,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,7 +30,8 @@ data class HallOfFameRow(
 data class PollHallOfFameUiState(
     val rows: List<HallOfFameRow> = emptyList(),
     val isLoading: Boolean = true,
-    val loadError: String? = null
+    /** 取得の失敗メッセージ。解決済みの String ではなく文言の値で持ち、画面で resolve() する。 */
+    val loadError: DisplayText? = null
 )
 
 /**
@@ -53,7 +56,7 @@ class PollHallOfFameViewModel(app: Application) : AndroidViewModel(app) {
             _uiState.value = _uiState.value.copy(isLoading = true)
             val results = runCatching { api.pollResults() }.getOrNull()
             if (results == null) {
-                _uiState.value = PollHallOfFameUiState(isLoading = false, loadError = "通信エラー")
+                _uiState.value = PollHallOfFameUiState(isLoading = false, loadError = L10n.Polls.errorNetwork)
                 return@launch
             }
             _uiState.value = PollHallOfFameUiState(rows = results.map { resolve(it) }, isLoading = false)

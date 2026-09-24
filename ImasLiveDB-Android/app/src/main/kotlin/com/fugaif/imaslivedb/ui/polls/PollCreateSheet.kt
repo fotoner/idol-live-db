@@ -34,6 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.community.CommunityApi
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasFilterChip
 import com.fugaif.imaslivedb.ui.components.ImasRemovableChip
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
@@ -48,7 +50,8 @@ import uniffi.imas_core.voteLimitPerTarget
 
 /** 投票対象。index はセグメントの並びと 1:1 (曲 / アイドル / ユニット)。 */
 private val TARGET_TYPES = listOf("song", "idol", "unit")
-private val TARGET_LABELS = listOf("曲", "アイドル", "ユニット")
+// 表示名はカタログの文言 (iOS PollTargetType.candidateNoun と同じキー)。表示するところで resolve() する
+private val TARGET_LABELS = listOf(L10n.Polls.targetSong, L10n.Polls.targetIdol, L10n.Polls.targetUnit)
 private val DAY_OPTIONS = listOf(7, 14, 30)
 private val SCOPES = listOf(
     CommunityApi.PollCandidateScope.ALL,
@@ -103,9 +106,9 @@ fun PollCreateSheet(
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("お題を投稿", fontSize = 20.sp, color = DS.ink)
+            Text(L10n.Polls.createTitle.resolve(), fontSize = 20.sp, color = DS.ink)
             Text(
-                "お題を作って、みんなに推しを投票してもらおう。期間中は誰でも${voteLimitPerTarget()}票まで投票できます。",
+                L10n.Polls.createIntro(limit = voteLimitPerTarget().toInt()).resolve(),
                 fontSize = 13.sp, color = DS.ink2
             )
 
@@ -114,32 +117,44 @@ fun PollCreateSheet(
                     value = title,
                     // 上限と数え方 (サーバと同じ UTF-16 の単位) はコア。超えた入力は切って、送信してから弾かれるのを防ぐ。
                     onValueChange = { title = inputClamp(InputField.POLL_TITLE, it) },
-                    label = { Text("タイトル") },
-                    placeholder = { Text("例: 夏に聴きたい曲は？") },
+                    label = { Text(L10n.Polls.createTitleFieldHeader.resolve()) },
+                    placeholder = { Text(L10n.Polls.createTitleFieldPlaceholder.resolve()) },
                     minLines = 1,
                     maxLines = 3,
                     modifier = Modifier.fillMaxWidth()
                 )
-                Text("${inputLength(InputField.POLL_TITLE, title)} / ${inputLimitMax(InputField.POLL_TITLE)}文字", fontSize = 12.sp, color = DS.ink2)
+                Text(
+                    L10n.Polls.createCharCounter(
+                        length = inputLength(InputField.POLL_TITLE, title).toInt(),
+                        max = inputLimitMax(InputField.POLL_TITLE).toInt()
+                    ).resolve(),
+                    fontSize = 12.sp, color = DS.ink2
+                )
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = inputClamp(InputField.POLL_DESCRIPTION, it) },
-                    label = { Text("説明(任意)") },
-                    placeholder = { Text("補足やルールがあれば") },
+                    label = { Text(L10n.Polls.createDescriptionFieldHeaderAndroid.resolve()) },
+                    placeholder = { Text(L10n.Polls.createDescriptionFieldPlaceholderAndroid.resolve()) },
                     minLines = 2,
                     maxLines = 5,
                     modifier = Modifier.fillMaxWidth()
                 )
-                Text("${inputLength(InputField.POLL_DESCRIPTION, description)} / ${inputLimitMax(InputField.POLL_DESCRIPTION)}文字", fontSize = 12.sp, color = DS.ink2)
+                Text(
+                    L10n.Polls.createCharCounter(
+                        length = inputLength(InputField.POLL_DESCRIPTION, description).toInt(),
+                        max = inputLimitMax(InputField.POLL_DESCRIPTION).toInt()
+                    ).resolve(),
+                    fontSize = 12.sp, color = DS.ink2
+                )
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("投票対象", fontSize = 13.sp, color = DS.ink2)
+                Text(L10n.Polls.createTargetHeader.resolve(), fontSize = 13.sp, color = DS.ink2)
                 ImasSegmented(
-                    labels = TARGET_LABELS,
+                    labels = TARGET_LABELS.map { it.resolve() },
                     selection = targetIndex,
                     onSelect = {
                         targetIndex = it
@@ -151,20 +166,24 @@ fun PollCreateSheet(
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("投票候補", fontSize = 13.sp, color = DS.ink2)
+                Text(L10n.Polls.createScopeHeader.resolve(), fontSize = 13.sp, color = DS.ink2)
                 ImasSegmented(
-                    labels = listOf("全て", "ブランド限定", "候補指定"),
+                    labels = listOf(
+                        L10n.Polls.createScopeAll.resolve(),
+                        L10n.Polls.createScopeBrand.resolve(),
+                        L10n.Polls.createScopeManual.resolve()
+                    ),
                     selection = scopeIndex,
                     onSelect = { scopeIndex = it },
                     modifier = Modifier.fillMaxWidth()
                 )
                 when (scope) {
                     CommunityApi.PollCandidateScope.ALL ->
-                        Text("全${targetNoun}から自由に投票できます。", fontSize = 12.sp, color = DS.ink3)
+                        Text(L10n.Polls.createScopeAllHint(target = targetNoun).resolve(), fontSize = 12.sp, color = DS.ink3)
 
                     CommunityApi.PollCandidateScope.BRAND -> {
                         Text(
-                            "選んだブランドの${targetNoun}だけが候補になります。複数選択可。",
+                            L10n.Polls.createScopeBrandHintAndroid(target = targetNoun).resolve(),
                             fontSize = 12.sp, color = DS.ink3
                         )
                         FlowRow(
@@ -187,15 +206,15 @@ fun PollCreateSheet(
                             }
                         }
                         if (selectedBrandIds.isEmpty()) {
-                            Text("1つ以上選択してください", fontSize = 12.sp, color = DS.danger)
+                            Text(L10n.Polls.createScopeBrandRequired.resolve(), fontSize = 12.sp, color = DS.danger)
                         }
                     }
 
                     CommunityApi.PollCandidateScope.MANUAL -> {
                         Row(modifier = Modifier.fillMaxWidth()) {
-                            Text("候補は2件以上必要です。", fontSize = 12.sp, color = DS.ink3, modifier = Modifier.weight(1f))
+                            Text(L10n.Polls.createScopeManualMin.resolve(), fontSize = 12.sp, color = DS.ink3, modifier = Modifier.weight(1f))
                             Text(
-                                "${state.candidates.size}件選択中",
+                                L10n.Polls.createScopeManualSelected(count = state.candidates.size).resolve(),
                                 fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
                                 color = if (state.candidates.size >= 2) DS.ink2 else DS.danger
                             )
@@ -218,7 +237,7 @@ fun PollCreateSheet(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Icon(Icons.Filled.AddCircle, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Text("候補を追加", fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
+                            Text(L10n.Polls.createScopeAddCandidate.resolve(), fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
                                 modifier = Modifier.padding(start = 6.dp))
                         }
                     }
@@ -226,21 +245,21 @@ fun PollCreateSheet(
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("募集期間", fontSize = 13.sp, color = DS.ink2)
+                Text(L10n.Polls.createDurationHeader.resolve(), fontSize = 13.sp, color = DS.ink2)
                 ImasSegmented(
-                    labels = DAY_OPTIONS.map { "${it}日間" },
+                    labels = DAY_OPTIONS.map { L10n.Polls.createDurationDays(days = it).resolve() },
                     selection = dayIndex,
                     onSelect = { dayIndex = it },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
 
-            if (state.errorMessage != null) {
-                Text(state.errorMessage!!, color = DS.danger, fontSize = 13.sp)
+            state.errorMessage?.let { message ->
+                Text(message.resolve(), color = DS.danger, fontSize = 13.sp)
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("キャンセル") }
+                TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text(L10n.Polls.actionCancel.resolve()) }
                 Button(
                     onClick = {
                         viewModel.submit(
@@ -259,7 +278,7 @@ fun PollCreateSheet(
                     if (state.isSubmitting) {
                         CircularProgressIndicator(modifier = Modifier.size(18.dp), color = DS.ink)
                     } else {
-                        Text("作成")
+                        Text(L10n.Polls.createSubmit.resolve())
                     }
                 }
             }

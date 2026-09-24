@@ -37,11 +37,11 @@ struct PollDetailView: View {
             } else if let detail = vm.detail {
                 contentView(detail: detail)
             } else {
-                ImasEmptyState(systemImage: "exclamationmark.triangle", title: "読み込みに失敗しました")
+                ImasEmptyState(systemImage: "exclamationmark.triangle", title: String(localized: L10n.Polls.loadErrorTitle))
             }
         }
         .background(DS.bg.ignoresSafeArea())
-        .navigationTitle(poll?.title ?? "お題")
+        .navigationTitle(poll?.title ?? String(localized: L10n.Polls.detailTitleFallback))
         .navigationBarTitleDisplayMode(.inline)
         .task { await loadDetail() }
         .trackScreen("poll_detail")
@@ -60,7 +60,7 @@ struct PollDetailView: View {
                     SocialShareMenu(payload: .pollInvite(poll: poll), analyticsKey: "poll_detail.share_poll") {
                         Image(systemName: "square.and.arrow.up")
                     }
-                    .accessibilityLabel("このお題をシェア")
+                    .accessibilityLabel(L10n.Polls.sharePollA11y)
                 }
             }
             if let poll, canDelete(poll: poll) {
@@ -71,23 +71,25 @@ struct PollDetailView: View {
         }
         // 自分の票が変わるたびに表示名を解決し直す (シェア文面の候補名に使う)。
         .task(id: myVotedEntityIds) { await loadMyVoteNames() }
-        .alert("エラー", isPresented: Binding(
+        .alert(L10n.Polls.detailDeleteErrorTitle, isPresented: Binding(
             get: { vm.deleteErrorMessage != nil },
             set: { if !$0 { vm.deleteErrorMessage = nil } }
         )) {
-            Button("OK") { vm.deleteErrorMessage = nil }
+            Button(L10n.Polls.actionOk) { vm.deleteErrorMessage = nil }
         } message: {
-            Text(vm.deleteErrorMessage ?? "")
+            if let message = vm.deleteErrorMessage {
+                Text(display: message)
+            }
         }
         .confirmationDialog(
-            "このお題を削除しますか？",
+            L10n.Polls.detailDeleteConfirmTitle,
             isPresented: $showDeleteConfirm,
             titleVisibility: .visible
         ) {
-            Button("削除", role: .destructive) { performDelete() }
-            Button("キャンセル", role: .cancel) {}
+            Button(L10n.Polls.detailDeleteConfirmAction, role: .destructive) { performDelete() }
+            Button(L10n.Polls.actionCancel, role: .cancel) {}
         } message: {
-            Text("ランキング・投票データも一緒に削除され、元に戻せません。")
+            Text(L10n.Polls.detailDeleteConfirmMessage)
         }
     }
 
@@ -125,8 +127,9 @@ struct PollDetailView: View {
             }
 
             HStack(spacing: DS.sp2) {
-                ImasChip(text: poll.targetType.label)
-                ImasChip(text: poll.statusLabel)
+                // ImasChip はまだ String を受ける (DS の入力契約は未移行) ので、ここで解決して渡す
+                ImasChip(text: String(localized: poll.targetType.candidateNoun))
+                ImasChip(text: String(localized: poll.statusLabel))
             }
 
             scopeChips(poll: poll)
@@ -166,7 +169,7 @@ struct PollDetailView: View {
                 Image(systemName: "list.bullet")
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink3)
-                ImasChip(text: "候補\(count)件から選択")
+                ImasChip(text: String(localized: L10n.Polls.detailScopeManual(count: count)))
             }
             .padding(.top, DS.sp1)
         }
@@ -189,14 +192,14 @@ struct PollDetailView: View {
     private func myVoteShareBar(poll: Poll) -> some View {
         if let payload = myVotePayload(poll: poll) {
             HStack(spacing: DS.sp2) {
-                Text("あなたの投票 \(myVoteNames.count)/\(CommunityVoteLimit.perTarget)")
+                Text(L10n.Polls.detailMyVotesProgress(count: myVoteNames.count, limit: CommunityVoteLimit.perTarget))
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink3)
                 Spacer(minLength: 8)
                 SocialShareMenu(payload: payload, analyticsKey: "poll_detail.share_votes") {
-                    SocialShareChipLabel(title: "投票をシェア")
+                    SocialShareChipLabel(title: String(localized: L10n.Polls.detailShareVotesButton))
                 }
-                .accessibilityLabel("自分の投票をシェア")
+                .accessibilityLabel(L10n.Polls.detailShareVotesA11y)
             }
         }
     }
@@ -231,12 +234,13 @@ struct PollDetailView: View {
     private func rankingSection(detail: PollDetail) -> some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
             ImasSectionHeader(
-                title: "ランキング",
-                count: detail.entries.isEmpty ? nil : "\(detail.entries.count)\(entryCountUnit(for: detail.poll.targetType))"
+                title: .key(L10n.Polls.detailRankingHeader),
+                count: detail.entries.isEmpty ? nil : DisplayText.key(entryCountLabel(detail.entries.count, for: detail.poll.targetType))
             )
 
             if detail.entries.isEmpty {
-                ImasEmptyState(systemImage: "chart.bar", title: "まだ票がありません", message: "最初の一票を入れましょう！")
+                ImasEmptyState(systemImage: "chart.bar", title: String(localized: L10n.Polls.detailRankingEmptyTitle),
+                               message: String(localized: L10n.Polls.detailRankingEmptyMessage))
             } else {
                 ImasListContainer {
                     ForEach(Array(detail.entries.enumerated()), id: \.element.id) { index, entry in
@@ -265,19 +269,19 @@ struct PollDetailView: View {
     @ViewBuilder
     private func voteSection(detail: PollDetail) -> some View {
         if !AuthService.shared.isSignedIn {
-            InlineLoginPrompt(message: "投票にはログインが必要です")
+            InlineLoginPrompt(message: String(localized: L10n.Polls.loginPromptMessage))
         } else if detail.poll.isActive {
             let remaining = vm.remaining
             let scope = detail.poll.scope
             VStack(spacing: DS.sp3) {
                 if let msg = vm.errorMessage {
-                    Text(msg)
+                    Text(display: msg)
                         .font(.imasFootnote)
                         .foregroundStyle(DS.danger)
                 }
 
                 // ランキングの各行で直接投票できるので、このボタンは「新しい候補を追加」専用。
-                Text("👍 上のランキングをタップで投票/取消（残り\(remaining)/\(CommunityVoteLimit.perTarget)）")
+                Text(L10n.Polls.detailVoteHint(remaining: remaining, limit: CommunityVoteLimit.perTarget))
                     .font(.imasFootnote)
                     .foregroundStyle(DS.ink2)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -291,8 +295,8 @@ struct PollDetailView: View {
                         HStack {
                             Image(systemName: "plus.circle.fill")
                             Text(remaining > 0
-                                 ? "候補を追加して投票（残り\(remaining)/\(CommunityVoteLimit.perTarget)）"
-                                 : "投票済み（\(CommunityVoteLimit.perTarget)/\(CommunityVoteLimit.perTarget)）")
+                                 ? L10n.Polls.detailAddVoteButton(remaining: remaining, limit: CommunityVoteLimit.perTarget)
+                                 : L10n.Polls.detailAddVoteDone(voted: CommunityVoteLimit.perTarget, limit: CommunityVoteLimit.perTarget))
                                 .font(.imasSubhead.weight(.semibold))
                         }
                         .frame(maxWidth: .infinity)
@@ -335,7 +339,7 @@ struct PollDetailView: View {
                 return allIdols
             }()
             IdolPickerView(
-                title: "投票する",
+                title: String(localized: L10n.Polls.detailIdolPickerTitle),
                 idols: pickIdols,
                 selected: Set(detail.entries.filter(\.hasUserVoted).map(\.entityId))
             ) { selectedIds in
@@ -361,12 +365,12 @@ struct PollDetailView: View {
     }
 
 
-    /// ランキング件数表示の単位。お題の対象種別で数え方の助数詞が変わる (曲/人/組)。
-    private func entryCountUnit(for targetType: PollTargetType) -> String {
+    /// ランキング件数の表示。お題の対象種別で数え方の助数詞が変わる (曲/人/組)。
+    private func entryCountLabel(_ count: Int, for targetType: PollTargetType) -> LocalizedStringResource {
         switch targetType {
-        case .song: return "曲"
-        case .idol: return "人"
-        case .unit: return "組"
+        case .song: return L10n.Polls.detailRankingCountSong(count: count)
+        case .idol: return L10n.Polls.detailRankingCountIdol(count: count)
+        case .unit: return L10n.Polls.detailRankingCountUnit(count: count)
         }
     }
 
@@ -389,7 +393,7 @@ struct PollDetailView: View {
             }
         }
         .disabled(vm.isDeleting)
-        .accessibilityLabel("このお題を削除")
+        .accessibilityLabel(L10n.Polls.detailDeleteA11y)
     }
 
     private func performDelete() {
@@ -475,7 +479,7 @@ private struct PollEntryRow: View {
             Spacer(minLength: 8)
 
             HStack(spacing: DS.sp2) {
-                Text("\(entry.voteCount)票")
+                Text(L10n.Polls.detailEntryVotes(count: entry.voteCount))
                     .font(.imasCaption.monospacedDigit())
                     .foregroundStyle(DS.ink2)
 
@@ -497,7 +501,7 @@ private struct PollEntryRow: View {
                     }
                     .buttonStyle(.plain)
                     .disabled(voteDisabled || lockedByOther)
-                    .accessibilityLabel(entry.hasUserVoted ? "投票を取消" : "投票")
+                    .accessibilityLabel(entry.hasUserVoted ? L10n.Polls.detailEntryUnvoteA11y : L10n.Polls.detailEntryVoteA11y)
                 } else if entry.hasUserVoted {
                     Image(systemName: "hand.thumbsup.fill")
                         .foregroundStyle(DS.ink3)

@@ -23,7 +23,8 @@ struct PollCreateSheet: View {
     @State private var showIdolPicker = false
     @State private var showUnitPicker = false
     @State private var isSubmitting = false
-    @State private var errorMessage: String?
+    /// 作成の失敗メッセージ。文言の値で持ち、表示するところで解決する。
+    @State private var errorMessage: DisplayText?
 
     private let dayOptions = [7, 14, 30]
     private var days: Int { dayOptions[dayIndex] }
@@ -45,7 +46,7 @@ struct PollCreateSheet: View {
         }
     }
 
-    private var targetLabel: String { targetType.label }
+    private var targetLabel: LocalizedStringResource { targetType.candidateNoun }
 
     private var canSubmit: Bool {
         guard InputLimits.isAcceptable(.pollTitle, title), !isSubmitting else { return false }
@@ -60,13 +61,14 @@ struct PollCreateSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: DS.sp6) {
-                    Text("お題を作って、みんなに推しを投票してもらおう。期間中は誰でも\(CommunityVoteLimit.perTarget)票まで投票できます。")
+                    Text(L10n.Polls.createIntro(limit: CommunityVoteLimit.perTarget))
                         .font(.imasFootnote)
                         .foregroundStyle(DS.ink2)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    fieldSection(header: "タイトル", counter: InputLimits.counter(.pollTitle, title, separator: "/", unit: "")) {
-                        TextField("例: 夏に聴きたい曲は？", text: $title, axis: .vertical)
+                    fieldSection(header: L10n.Polls.createTitleFieldHeader,
+                                 counter: InputLimits.counter(.pollTitle, title, separator: "/", unit: "")) {
+                        TextField(L10n.Polls.createTitleFieldPlaceholder, text: $title, axis: .vertical)
                             .font(.imasSubhead)
                             .foregroundStyle(DS.ink)
                             .lineLimit(1...3)
@@ -76,8 +78,9 @@ struct PollCreateSheet: View {
                             }
                     }
 
-                    fieldSection(header: "説明（任意）", counter: InputLimits.counter(.pollDescription, description, separator: "/", unit: "")) {
-                        TextField("補足やルールがあれば（任意）", text: $description, axis: .vertical)
+                    fieldSection(header: L10n.Polls.createDescriptionFieldHeader,
+                                 counter: InputLimits.counter(.pollDescription, description, separator: "/", unit: "")) {
+                        TextField(L10n.Polls.createDescriptionFieldPlaceholder, text: $description, axis: .vertical)
                             .font(.imasSubhead)
                             .foregroundStyle(DS.ink)
                             .lineLimit(2...5)
@@ -88,26 +91,31 @@ struct PollCreateSheet: View {
                     }
 
                     VStack(alignment: .leading, spacing: DS.sp3) {
-                        ImasSectionHeader(title: "投票対象", tight: true)
+                        ImasSectionHeader(title: .key(L10n.Polls.createTargetHeader), tight: true)
                         HStack(spacing: DS.sp3) {
-                            targetCard(.song, icon: "music.note", label: "曲")
-                            targetCard(.idol, icon: "person.fill", label: "アイドル")
-                            targetCard(.unit, icon: "person.3.fill", label: "ユニット")
+                            targetCard(.song, icon: "music.note")
+                            targetCard(.idol, icon: "person.fill")
+                            targetCard(.unit, icon: "person.3.fill")
                         }
                     }
 
                     scopeSection
 
                     VStack(alignment: .leading, spacing: DS.sp3) {
-                        ImasSectionHeader(title: "募集期間", tight: true)
-                        ImasSegmented(labels: dayOptions.map { "\($0)日間" }, selection: $dayIndex)
+                        ImasSectionHeader(title: .key(L10n.Polls.createDurationHeader), tight: true)
+                        ImasSegmented(labels: dayOptions.map { String(localized: L10n.Polls.createDurationDays(days: $0)) },
+                                      selection: $dayIndex)
                     }
 
                     if let msg = errorMessage {
-                        Label(msg, systemImage: "exclamationmark.triangle.fill")
-                            .font(.imasFootnote)
-                            .foregroundStyle(DS.danger)
-                            .fixedSize(horizontal: false, vertical: true)
+                        Label {
+                            Text(display: msg)
+                        } icon: {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                        }
+                        .font(.imasFootnote)
+                        .foregroundStyle(DS.danger)
+                        .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 .padding(.horizontal, DS.sp5)
@@ -116,15 +124,15 @@ struct PollCreateSheet: View {
             }
             .background(DS.bg.ignoresSafeArea())
             .scrollContentBackground(.hidden)
-            .navigationTitle("お題を投稿")
+            .navigationTitle(L10n.Polls.createTitle)
             .navigationBarTitleDisplayMode(.inline)
             .trackScreen("poll_create")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("キャンセル") { dismiss() }
+                    Button(L10n.Polls.actionCancel) { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("作成") {
+                    Button(L10n.Polls.createSubmit) {
                         AppAnalytics.tap("poll_create.submit")
                         Task { await submit() }
                     }
@@ -167,10 +175,10 @@ struct PollCreateSheet: View {
 
     @ViewBuilder
     private func fieldSection<Content: View>(
-        header: String, counter: String, @ViewBuilder content: () -> Content
+        header: LocalizedStringResource, counter: String, @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
-            ImasSectionHeader(title: header, tight: true)
+            ImasSectionHeader(title: .key(header), tight: true)
             ImasListContainer {
                 content()
                     .padding(.horizontal, DS.sp4)
@@ -183,12 +191,12 @@ struct PollCreateSheet: View {
         }
     }
 
-    private func targetCard(_ type: PollTargetType, icon: String, label: String) -> some View {
+    private func targetCard(_ type: PollTargetType, icon: String) -> some View {
         let on = targetType == type
         return Button { targetType = type } label: {
             VStack(spacing: DS.sp2) {
                 Image(systemName: icon).font(.imasScaled( 22, weight: .semibold))
-                Text(label).font(.imasSubhead.weight(.semibold))
+                Text(type.candidateNoun).font(.imasSubhead.weight(.semibold))
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, DS.sp4)
@@ -209,12 +217,15 @@ struct PollCreateSheet: View {
 
     private var scopeSection: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
-            ImasSectionHeader(title: "投票候補", tight: true)
-            ImasSegmented(labels: ["全て", "ブランド限定", "候補指定"], selection: $scopeIndex)
+            ImasSectionHeader(title: .key(L10n.Polls.createScopeHeader), tight: true)
+            ImasSegmented(labels: [String(localized: L10n.Polls.createScopeAll),
+                                   String(localized: L10n.Polls.createScopeBrand),
+                                   String(localized: L10n.Polls.createScopeManual)],
+                          selection: $scopeIndex)
 
             switch scope {
             case .all:
-                Text("全\(targetLabel)から自由に投票できます。")
+                Text(L10n.Polls.createScopeAllHint(target: targetLabel))
                     .font(.imasFootnote)
                     .foregroundStyle(DS.ink3)
             case .brand:
@@ -227,7 +238,7 @@ struct PollCreateSheet: View {
 
     private var brandScopePicker: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
-            Text("チェックしたブランドの\(targetLabel)だけが候補になります。複数選択可。")
+            Text(L10n.Polls.createScopeBrandHint(target: targetLabel))
                 .font(.imasFootnote)
                 .foregroundStyle(DS.ink3)
 
@@ -241,7 +252,7 @@ struct PollCreateSheet: View {
                 )
 
             if selectedBrandIds.isEmpty {
-                Label("1つ以上選択してください", systemImage: "info.circle")
+                Label(L10n.Polls.createScopeBrandRequired, systemImage: "info.circle")
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink3)
             }
@@ -251,11 +262,11 @@ struct PollCreateSheet: View {
     private var manualScopePicker: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
             HStack {
-                Text("候補は2件以上必要です。")
+                Text(L10n.Polls.createScopeManualMin)
                     .font(.imasFootnote)
                     .foregroundStyle(DS.ink3)
                 Spacer()
-                Text("\(manualCount)件選択中")
+                Text(L10n.Polls.createScopeManualSelected(count: manualCount))
                     .font(.imasCaption.weight(.semibold))
                     .foregroundStyle(manualCount >= 2 ? DS.ink2 : DS.danger)
             }
@@ -287,7 +298,7 @@ struct PollCreateSheet: View {
                     }
 
                     if manualCount == 0 {
-                        Text("「候補を追加」から選んでください")
+                        Text(L10n.Polls.createScopeManualEmpty)
                             .font(.imasFootnote)
                             .foregroundStyle(DS.ink3)
                             .frame(maxWidth: .infinity)
@@ -304,7 +315,7 @@ struct PollCreateSheet: View {
                 case .unit: showUnitPicker = true
                 }
             } label: {
-                Label("候補を追加", systemImage: "plus.circle.fill")
+                Label(L10n.Polls.createScopeAddCandidate, systemImage: "plus.circle.fill")
                     .font(.imasSubhead.weight(.semibold))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, DS.sp3)
@@ -340,7 +351,7 @@ struct PollCreateSheet: View {
 
     private var idolPickerSheet: some View {
         IdolPickerView(
-            title: "候補アイドル",
+            title: String(localized: L10n.Polls.createIdolPickerTitle),
             idols: allIdolsForPicker,
             selected: Set(selectedIdols.map(\.id))
         ) { newIds in
@@ -406,9 +417,9 @@ struct PollCreateSheet: View {
             onCreate(poll)
             dismiss()
         } catch {
-            // APIClientError の説明 (認証エラー/上限到達等) をそのまま見せる
-            errorMessage = (error as? APIClientError)?.errorDescription
-                ?? "作成に失敗しました。時間をおいて再試行してください。"
+            // APIClientError の説明 (認証エラー/上限到達等) をそのまま見せる (Services 側で作った文字列なので verbatim)
+            errorMessage = (error as? APIClientError)?.errorDescription.map(DisplayText.verbatim)
+                ?? .key(L10n.Polls.createErrorFailed)
         }
     }
 }

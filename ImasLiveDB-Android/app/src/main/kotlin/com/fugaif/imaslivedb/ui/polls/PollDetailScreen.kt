@@ -43,6 +43,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.share.ShareMessage
 import com.fugaif.imaslivedb.ui.share.SocialShareChip
 import com.fugaif.imaslivedb.ui.share.SocialShareIconButton
@@ -81,7 +83,7 @@ fun PollDetailScreen(
             TopAppBar(
                 title = { Text(detail?.title ?: "", maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "戻る") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, L10n.Common.actionBack.resolve()) }
                 },
                 actions = {
                     // お題そのもののシェア (「このお題に投票しよう！」)。投票有無に関係なく常に出す。
@@ -90,7 +92,7 @@ fun PollDetailScreen(
                             payload = ShareMessage.pollInvitePayload(
                                 detail.id, detail.title, detail.endsAtMs, detail.isActive
                             ),
-                            contentDescription = "このお題をシェア"
+                            contentDescription = L10n.Polls.sharePollA11y.resolve()
                         )
                     }
                     if (canDelete) {
@@ -98,7 +100,7 @@ fun PollDetailScreen(
                             if (state.isDeleting) {
                                 CircularProgressIndicator(modifier = Modifier.size(18.dp), color = DS.ink2)
                             } else {
-                                Icon(Icons.Filled.Delete, contentDescription = "このお題を削除", tint = DS.danger)
+                                Icon(Icons.Filled.Delete, contentDescription = L10n.Polls.detailDeleteA11y.resolve(), tint = DS.danger)
                             }
                         }
                     }
@@ -123,7 +125,10 @@ fun PollDetailScreen(
                     if (!detail.description.isNullOrEmpty()) {
                         Text(detail.description, fontSize = 14.sp, color = DS.ink2, modifier = Modifier.padding(top = 8.dp))
                     }
-                    Text("${detail.totalVotes}票 ・ ${detail.entries.size}件の候補", fontSize = 12.sp, color = DS.ink3, modifier = Modifier.padding(top = 6.dp))
+                    Text(
+                        L10n.Polls.detailSummary(votes = detail.totalVotes, candidates = detail.entries.size).resolve(),
+                        fontSize = 12.sp, color = DS.ink3, modifier = Modifier.padding(top = 6.dp)
+                    )
                 }
                 HorizontalDivider(color = DS.sep)
 
@@ -134,7 +139,10 @@ fun PollDetailScreen(
                     PollEntriesList(detail.entries, state.entityNames, detail.totalVotes, authState.isSignedIn, viewModel::toggleVote)
 
                     if (authState.isSignedIn && detail.isActive) {
-                        Text("タップで投票/取消 (残り${remaining}/${limit})", fontSize = 11.sp, color = DS.ink3, modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 6.dp))
+                        Text(
+                            L10n.Polls.detailVoteHintAndroid(remaining = remaining, limit = limit).resolve(),
+                            fontSize = 11.sp, color = DS.ink3, modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 6.dp)
+                        )
                     }
 
                     if (authState.isSignedIn && detail.isActive && detail.candidateScope != CommunityApi.PollCandidateScope.MANUAL) {
@@ -145,7 +153,8 @@ fun PollDetailScreen(
                         ) {
                             Icon(Icons.Filled.AddCircle, contentDescription = null, modifier = Modifier.size(18.dp))
                             Text(
-                                if (remaining > 0) "候補を追加して投票 (残り${remaining}/${limit})" else "投票済み (${limit}/${limit})",
+                                (if (remaining > 0) L10n.Polls.detailAddVoteButtonAndroid(remaining = remaining, limit = limit)
+                                else L10n.Polls.detailAddVoteDoneAndroid(voted = limit, limit = limit)).resolve(),
                                 fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
                                 modifier = Modifier.padding(start = 6.dp)
                             )
@@ -161,10 +170,13 @@ fun PollDetailScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
                         ) {
-                            Text("あなたの投票 ${myVoteNames.size}/${voteLimitPerTarget()}", fontSize = 12.sp, color = DS.ink3)
+                            Text(
+                                L10n.Polls.detailMyVotesProgress(count = myVoteNames.size, limit = voteLimitPerTarget().toInt()).resolve(),
+                                fontSize = 12.sp, color = DS.ink3
+                            )
                             Spacer(Modifier.weight(1f))
                             SocialShareChip(
-                                title = "投票をシェア",
+                                title = L10n.Polls.detailShareVotesButton.resolve(),
                                 payload = ShareMessage.pollVotesPayload(detail.id, detail.title, myVoteNames)
                             )
                         }
@@ -205,17 +217,17 @@ fun PollDetailScreen(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("このお題を削除しますか？") },
-            text = { Text("ランキング・投票データも一緒に削除され、元に戻せません。") },
+            title = { Text(L10n.Polls.detailDeleteConfirmTitle.resolve()) },
+            text = { Text(L10n.Polls.detailDeleteConfirmMessage.resolve()) },
             confirmButton = {
                 TextButton(onClick = {
                     showDeleteConfirm = false
                     // 削除できた時だけ戻る。一覧は再表示時の再ロードでこのお題が消える。
                     viewModel.delete(onDeleted = onBack)
-                }) { Text("削除", color = DS.danger) }
+                }) { Text(L10n.Polls.detailDeleteConfirmAction.resolve(), color = DS.danger) }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) { Text("キャンセル") }
+                TextButton(onClick = { showDeleteConfirm = false }) { Text(L10n.Polls.actionCancel.resolve()) }
             }
         )
     }
@@ -223,9 +235,9 @@ fun PollDetailScreen(
     if (state.deleteError != null) {
         AlertDialog(
             onDismissRequest = { viewModel.clearDeleteError() },
-            title = { Text("エラー") },
-            text = { Text(state.deleteError ?: "") },
-            confirmButton = { TextButton(onClick = { viewModel.clearDeleteError() }) { Text("OK") } }
+            title = { Text(L10n.Polls.detailDeleteErrorTitle.resolve()) },
+            text = { Text(state.deleteError?.resolve() ?: "") },
+            confirmButton = { TextButton(onClick = { viewModel.clearDeleteError() }) { Text(L10n.Polls.actionOk.resolve()) } }
         )
     }
 }
@@ -233,7 +245,7 @@ fun PollDetailScreen(
 @Composable
 private fun StatusLabel(detail: CommunityApi.PollDetail) {
     Text(
-        detail.statusLabel, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+        pollStatusText(detail.isActive, detail.endsAtMs).resolve(), fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
         color = if (detail.isActive) DS.pick else DS.ink3
     )
 }

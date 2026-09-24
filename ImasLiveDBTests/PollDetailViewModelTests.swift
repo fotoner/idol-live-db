@@ -128,6 +128,38 @@ final class PollDetailViewModelTests: XCTestCase {
         await vm.vote(entityId: "s1")
 
         XCTAssertNotNil(vm.errorMessage)
+        XCTAssertEqual(vm.errorMessage, .key(L10n.Polls.detailErrorVoteFailed))
+    }
+
+    func testUnvoteErrorSetsMessage() async {
+        let fake = FakeCommunityVoting()
+        fake.detailToReturn = PollDetail(
+            poll: makePoll(),
+            entries: [PollEntry(entityId: "s1", voteCount: 1, hasUserVoted: true)],
+            myVoteCount: 1)
+        let vm = PollDetailViewModel(pollId: "p1", voting: fake)
+        await vm.load()
+
+        fake.shouldThrow = true
+        await vm.unvote(entityId: "s1")
+
+        XCTAssertEqual(vm.errorMessage, .key(L10n.Polls.detailErrorUnvoteFailed))
+    }
+
+    /// 削除の失敗は、APIClientError の説明が無ければカタログの文言になる (投票のエラーとは別の欄)。
+    func testDeleteErrorFallsBackToCatalogMessage() async {
+        let fake = FakeCommunityVoting()
+        fake.detailToReturn = PollDetail(poll: makePoll(), entries: [], myVoteCount: 0)
+        let vm = PollDetailViewModel(pollId: "p1", voting: fake)
+        await vm.load()
+
+        fake.shouldThrow = true
+        let deleted = await vm.delete()
+
+        XCTAssertFalse(deleted)
+        XCTAssertFalse(vm.isDeleting)
+        XCTAssertEqual(vm.deleteErrorMessage, .key(L10n.Polls.detailErrorDeleteFailed))
+        XCTAssertNil(vm.errorMessage)
     }
 
     func testUnvoteRemovesEntryWhenZero() async {

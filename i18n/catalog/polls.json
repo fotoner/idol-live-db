@@ -1,0 +1,982 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "polls",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/polls/"
+    ],
+    "ios": [
+      "ImasLiveDB/Views/Polls/"
+    ]
+  },
+  "strings": {
+    "achievements.sheet.close": {
+      "ja": "閉じる",
+      "ko": "닫기",
+      "note": "曲・アイドル・ユニット詳細の実績バッジから開いたお題詳細のシートを閉じるボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "action.cancel": {
+      "ja": "キャンセル",
+      "ko": "취소",
+      "note": "投票の画面のキャンセルボタン (iOS: お題作成のツールバー・削除の確認。Android: お題作成・候補ピッカー・削除の確認ダイアログ)"
+    },
+    "action.ok": {
+      "ja": "OK",
+      "ko": "확인",
+      "note": "お題の削除に失敗したときのアラートを閉じるボタン"
+    },
+    "create.char_counter": {
+      "args": [
+        {
+          "name": "length",
+          "type": "int"
+        },
+        {
+          "name": "max",
+          "type": "int"
+        }
+      ],
+      "ja": "{length} / {max}文字",
+      "ko": "{length} / {max}자",
+      "note": "お題作成シートの入力欄の下の文字数 (Android。iOS は数字だけ)。length は今の文字数、max は上限",
+      "platforms": [
+        "android"
+      ]
+    },
+    "create.description_field.header": {
+      "ja": "説明（任意）",
+      "ko": "설명 (선택)",
+      "note": "お題作成シートの説明の欄の見出し。任意 = 書かなくてよい",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "create.description_field.header_android": {
+      "ja": "説明(任意)",
+      "ko": "설명 (선택)",
+      "note": "Android の文言。iOS の create.description_field.header と ja が違う (括弧が半角)。任意 = 書かなくてよい",
+      "platforms": [
+        "android"
+      ]
+    },
+    "create.description_field.placeholder": {
+      "ja": "補足やルールがあれば（任意）",
+      "ko": "보충 설명이나 규칙이 있다면 (선택)",
+      "note": "お題作成シートの説明の欄のプレースホルダ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "create.description_field.placeholder_android": {
+      "ja": "補足やルールがあれば",
+      "ko": "보충 설명이나 규칙이 있다면",
+      "note": "Android の文言。iOS の create.description_field.placeholder と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "create.duration.days": {
+      "args": [
+        {
+          "name": "days",
+          "type": "count"
+        }
+      ],
+      "ja": "{days}日間",
+      "ko": "{days}일간",
+      "note": "募集期間の選択肢 (7 / 14 / 30 日間)"
+    },
+    "create.duration.header": {
+      "ja": "募集期間",
+      "ko": "모집 기간",
+      "note": "お題作成シートの投票を受け付ける期間の節の見出し"
+    },
+    "create.error.failed": {
+      "ja": "作成に失敗しました。時間をおいて再試行してください。",
+      "ko": "만들지 못했어요. 잠시 후 다시 시도해 주세요.",
+      "note": "お題の作成に失敗したとき (サーバからの説明が無いとき)"
+    },
+    "create.error.rate_limited": {
+      "ja": "本日のお題作成上限に達しました。明日また試してください。",
+      "ko": "오늘 만들 수 있는 주제 수의 한도에 도달했어요. 내일 다시 시도해 주세요.",
+      "note": "1 日に作れるお題の数の上限に達したとき (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "create.idol_picker.title": {
+      "ja": "候補アイドル",
+      "ko": "후보 아이돌",
+      "note": "候補指定でアイドルを選ぶピッカーのナビゲーションタイトル (短く)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "create.intro": {
+      "args": [
+        {
+          "name": "limit",
+          "type": "count"
+        }
+      ],
+      "ja": "お題を作って、みんなに推しを投票してもらおう。期間中は誰でも{limit}票まで投票できます。",
+      "ko": "주제를 만들어 모두의 최애를 투표로 뽑아 보세요. 기간 동안 누구나 {limit}표까지 투표할 수 있어요.",
+      "note": "お題作成シートの先頭の説明。推し = 好きなアイドル・曲。limit は 1 人が入れられる票の数 (今は 3)"
+    },
+    "create.scope.add_candidate": {
+      "ja": "候補を追加",
+      "ko": "후보 추가",
+      "note": "候補指定で候補を選ぶピッカーを開くボタン"
+    },
+    "create.scope.all": {
+      "ja": "全て",
+      "ko": "전체",
+      "note": "候補の範囲の切り替え: すべての曲・アイドル・ユニットが候補"
+    },
+    "create.scope.all_hint": {
+      "args": [
+        {
+          "name": "target",
+          "type": "text"
+        }
+      ],
+      "ja": "全{target}から自由に投票できます。",
+      "ko": "모든 {target} 중에서 자유롭게 투표할 수 있어요.",
+      "note": "候補の範囲が「全て」のときの説明。target は投票対象の種類 (target.song / target.idol / target.unit)"
+    },
+    "create.scope.brand": {
+      "ja": "ブランド限定",
+      "ko": "브랜드 한정",
+      "note": "候補の範囲の切り替え: 選んだブランドのものだけが候補"
+    },
+    "create.scope.brand_hint": {
+      "args": [
+        {
+          "name": "target",
+          "type": "text"
+        }
+      ],
+      "ja": "チェックしたブランドの{target}だけが候補になります。複数選択可。",
+      "ko": "체크한 브랜드의 {target}만 후보가 돼요. 여러 개 선택할 수 있어요.",
+      "note": "候補の範囲が「ブランド限定」のときの説明。target は投票対象の種類 (target.*)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "create.scope.brand_hint_android": {
+      "args": [
+        {
+          "name": "target",
+          "type": "text"
+        }
+      ],
+      "ja": "選んだブランドの{target}だけが候補になります。複数選択可。",
+      "ko": "선택한 브랜드의 {target}만 후보가 돼요. 여러 개 선택할 수 있어요.",
+      "note": "Android の文言。iOS の create.scope.brand_hint と ja が違う。target は投票対象の種類 (target.*)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "create.scope.brand_required": {
+      "ja": "1つ以上選択してください",
+      "ko": "하나 이상 선택해 주세요",
+      "note": "ブランド限定でブランドを 1 つも選んでいないときの案内"
+    },
+    "create.scope.header": {
+      "ja": "投票候補",
+      "ko": "투표 후보",
+      "note": "お題作成シートの候補の範囲を選ぶ節の見出し"
+    },
+    "create.scope.manual": {
+      "ja": "候補指定",
+      "ko": "후보 지정",
+      "note": "候補の範囲の切り替え: 作成者が選んだものだけが候補"
+    },
+    "create.scope.manual_empty": {
+      "ja": "「候補を追加」から選んでください",
+      "ko": "“후보 추가”에서 골라 주세요",
+      "note": "候補指定で候補を 1 つも選んでいないときの案内。「候補を追加」は下のボタン (create.scope.add_candidate)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "create.scope.manual_min": {
+      "ja": "候補は2件以上必要です。",
+      "ko": "후보가 2건 이상 필요해요.",
+      "note": "候補指定のときの条件の説明"
+    },
+    "create.scope.manual_selected": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}件選択中",
+      "ko": "{count}건 선택됨",
+      "note": "候補指定で今選んでいる候補の数 (上限 500 なので桁区切りは付かない)"
+    },
+    "create.submit": {
+      "ja": "作成",
+      "ko": "만들기",
+      "note": "お題作成シートの送信ボタン"
+    },
+    "create.target.header": {
+      "ja": "投票対象",
+      "ko": "투표 대상",
+      "note": "お題作成シートの対象 (曲 / アイドル / ユニット) を選ぶ節の見出し"
+    },
+    "create.title": {
+      "ja": "お題を投稿",
+      "ko": "주제 올리기",
+      "note": "お題作成シートの見出し"
+    },
+    "create.title_field.header": {
+      "ja": "タイトル",
+      "ko": "제목",
+      "note": "お題作成シートの題名の欄の見出し (Android は入力欄のラベル)"
+    },
+    "create.title_field.placeholder": {
+      "ja": "例: 夏に聴きたい曲は？",
+      "ko": "예: 여름에 듣고 싶은 곡은?",
+      "note": "お題作成シートの題名の欄のプレースホルダ。例の文も訳す"
+    },
+    "detail.add_vote.button": {
+      "args": [
+        {
+          "name": "remaining",
+          "type": "int"
+        },
+        {
+          "name": "limit",
+          "type": "int"
+        }
+      ],
+      "ja": "候補を追加して投票（残り{remaining}/{limit}）",
+      "ko": "후보를 추가해서 투표 (남은 표 {remaining}/{limit})",
+      "note": "ランキングに無い候補を選んで投票するボタン。remaining は残りの票、limit は 1 人が入れられる票の数",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.add_vote.button_android": {
+      "args": [
+        {
+          "name": "remaining",
+          "type": "int"
+        },
+        {
+          "name": "limit",
+          "type": "int"
+        }
+      ],
+      "ja": "候補を追加して投票 (残り{remaining}/{limit})",
+      "ko": "후보를 추가해서 투표 (남은 표 {remaining}/{limit})",
+      "note": "Android の文言。iOS の detail.add_vote.button と ja が違う (括弧が半角)。remaining は残りの票、limit は 1 人が入れられる票の数",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.add_vote.done": {
+      "args": [
+        {
+          "name": "voted",
+          "type": "int"
+        },
+        {
+          "name": "limit",
+          "type": "int"
+        }
+      ],
+      "ja": "投票済み（{voted}/{limit}）",
+      "ko": "투표 완료 ({voted}/{limit})",
+      "note": "票を使い切ったときの、候補を追加するボタン (押せない)。voted と limit はどちらも 1 人が入れられる票の数",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.add_vote.done_android": {
+      "args": [
+        {
+          "name": "voted",
+          "type": "int"
+        },
+        {
+          "name": "limit",
+          "type": "int"
+        }
+      ],
+      "ja": "投票済み ({voted}/{limit})",
+      "ko": "투표 완료 ({voted}/{limit})",
+      "note": "Android の文言。iOS の detail.add_vote.done と ja が違う (括弧が半角)。voted と limit はどちらも 1 人が入れられる票の数",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.delete.a11y": {
+      "ja": "このお題を削除",
+      "ko": "이 주제 삭제",
+      "note": "詳細のツールバーのゴミ箱ボタンの読み上げ (作成者・管理者だけに出る)"
+    },
+    "detail.delete_confirm.action": {
+      "ja": "削除",
+      "ko": "삭제",
+      "note": "お題を削除する前の確認の実行ボタン"
+    },
+    "detail.delete_confirm.message": {
+      "ja": "ランキング・投票データも一緒に削除され、元に戻せません。",
+      "ko": "랭킹·투표 데이터도 함께 삭제되며 되돌릴 수 없어요.",
+      "note": "お題を削除する前の確認の本文"
+    },
+    "detail.delete_confirm.title": {
+      "ja": "このお題を削除しますか？",
+      "ko": "이 주제를 삭제할까요?",
+      "note": "お題を削除する前の確認の見出し"
+    },
+    "detail.delete_error.title": {
+      "ja": "エラー",
+      "ko": "오류",
+      "note": "お題の削除に失敗したときのアラートの見出し"
+    },
+    "detail.entry.unvote.a11y": {
+      "ja": "投票を取消",
+      "ko": "투표 취소",
+      "note": "ランキングの行の投票ボタンの読み上げ (投票済みの候補。押すと取り消す)"
+    },
+    "detail.entry.vote.a11y": {
+      "ja": "投票",
+      "ko": "투표",
+      "note": "ランキングの行の投票ボタンの読み上げ (まだ投票していない候補)"
+    },
+    "detail.entry.votes": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}票",
+      "ko": "{count}표",
+      "note": "ランキングの行の票の数。1000 以上は桁区切りが付く",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.error.delete_failed": {
+      "ja": "削除に失敗しました。時間をおいて再試行してください。",
+      "ko": "삭제하지 못했어요. 잠시 후 다시 시도해 주세요.",
+      "note": "お題の削除に失敗したときの本文 (サーバからの説明が無いとき)"
+    },
+    "detail.error.unvote_failed": {
+      "ja": "取消できませんでした",
+      "ko": "투표를 취소하지 못했어요",
+      "note": "投票の取り消しに失敗したときに詳細に出す赤い文",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.error.vote_failed": {
+      "ja": "投票できませんでした",
+      "ko": "투표하지 못했어요",
+      "note": "投票に失敗したときに詳細に出す赤い文",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.idol_picker.title": {
+      "ja": "投票する",
+      "ko": "투표하기",
+      "note": "アイドルのお題で候補を選ぶピッカーのナビゲーションタイトル (短く)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.my_votes.progress": {
+      "args": [
+        {
+          "name": "count",
+          "type": "int"
+        },
+        {
+          "name": "limit",
+          "type": "int"
+        }
+      ],
+      "ja": "あなたの投票 {count}/{limit}",
+      "ko": "내 투표 {count}/{limit}",
+      "note": "自分の投票のシェアの横に出す、入れた票の数 / 1 人が入れられる票の数"
+    },
+    "detail.ranking.count.idol": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}人",
+      "ko": "{count}명",
+      "note": "ランキングの見出しの右に出す候補の数 (アイドルのお題)。1000 以上は桁区切りが付く (もとは桁区切りなし)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.ranking.count.song": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}曲",
+      "ko": "{count}곡",
+      "note": "ランキングの見出しの右に出す候補の数 (曲のお題)。1000 以上は桁区切りが付く (もとは桁区切りなし)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.ranking.count.unit": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}組",
+      "ko": "{count}팀",
+      "note": "ランキングの見出しの右に出す候補の数 (ユニットのお題)。1000 以上は桁区切りが付く (もとは桁区切りなし)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.ranking.empty.message": {
+      "ja": "最初の一票を入れましょう！",
+      "ko": "첫 표를 던져 보세요!",
+      "note": "ランキングに 1 票も無いときの空状態の誘い文句",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.ranking.empty.title": {
+      "ja": "まだ票がありません",
+      "ko": "아직 표가 없어요",
+      "note": "ランキングに 1 票も無いときの空状態の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.ranking.header": {
+      "ja": "ランキング",
+      "ko": "랭킹",
+      "note": "詳細の票数の順位の節の見出し (右に候補の数)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.scope.manual": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "候補{count}件から選択",
+      "ko": "후보 {count}건 중에서 선택",
+      "note": "詳細の見出しの下のチップ。作成者が候補を指定したお題で、その候補の数 (上限 500 なので桁区切りは付かない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.share_votes.a11y": {
+      "ja": "自分の投票をシェア",
+      "ko": "내 투표 공유",
+      "note": "自分が投票した候補をシェアするボタンの読み上げ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.share_votes.button": {
+      "ja": "投票をシェア",
+      "ko": "투표 공유",
+      "note": "自分が投票した候補をシェアするボタン"
+    },
+    "detail.summary": {
+      "args": [
+        {
+          "name": "votes",
+          "type": "count"
+        },
+        {
+          "name": "candidates",
+          "type": "int"
+        }
+      ],
+      "ja": "{votes}票 ・ {candidates}件の候補",
+      "ko": "{votes}표 · 후보 {candidates}건",
+      "note": "Android の詳細の見出しの下の要約 (iOS には無い)。votes は票の合計 (1000 以上は桁区切りが付く。もとは桁区切りなし)、candidates は候補の数",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.title_fallback": {
+      "ja": "お題",
+      "ko": "주제",
+      "note": "お題詳細のナビゲーションタイトル。お題を読み込む前・失敗したときだけ出る (読めたらお題の題名)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.vote_hint": {
+      "args": [
+        {
+          "name": "remaining",
+          "type": "int"
+        },
+        {
+          "name": "limit",
+          "type": "int"
+        }
+      ],
+      "ja": "👍 上のランキングをタップで投票/取消（残り{remaining}/{limit}）",
+      "ko": "👍 위 랭킹을 탭해서 투표/취소 (남은 표 {remaining}/{limit})",
+      "note": "開催中のお題で、ランキングの行を押すと投票・取り消しができることの案内。remaining は残りの票、limit は 1 人が入れられる票の数",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.vote_hint_android": {
+      "args": [
+        {
+          "name": "remaining",
+          "type": "int"
+        },
+        {
+          "name": "limit",
+          "type": "int"
+        }
+      ],
+      "ja": "タップで投票/取消 (残り{remaining}/{limit})",
+      "ko": "탭해서 투표/취소 (남은 표 {remaining}/{limit})",
+      "note": "Android の文言。iOS の detail.vote_hint と ja が違う (統一はオーナーが別 PR で)。remaining は残りの票、limit は 1 人が入れられる票の数",
+      "platforms": [
+        "android"
+      ]
+    },
+    "error.network": {
+      "ja": "通信エラー",
+      "ko": "통신 오류",
+      "note": "お題の一覧・殿堂の読み込みに失敗し、サーバからの説明も無いときの説明"
+    },
+    "hall_of_fame.empty.message": {
+      "ja": "お題が終了すると、ここに優勝した曲やアイドルが並びます。",
+      "ko": "주제가 종료되면 여기에 우승한 곡과 아이돌이 표시돼요.",
+      "note": "殿堂に 1 件も無いときの空状態の説明"
+    },
+    "hall_of_fame.empty.title": {
+      "ja": "まだ優勝者がいません",
+      "ko": "아직 우승자가 없어요",
+      "note": "殿堂に 1 件も無いときの空状態の見出し"
+    },
+    "hall_of_fame.row.votes": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}票",
+      "ko": "{count}표",
+      "note": "殿堂の行の優勝者の票の数。1000 以上は桁区切りが付く (Android はもとは桁区切りなし)"
+    },
+    "hall_of_fame.row.winner": {
+      "ja": "優勝",
+      "ko": "우승",
+      "note": "殿堂の行の右に出す札 (そのお題で 1 位)"
+    },
+    "hall_of_fame.title": {
+      "ja": "殿堂",
+      "ko": "명예의 전당",
+      "note": "終了したお題の優勝者を並べる画面のタイトル"
+    },
+    "list.create.a11y": {
+      "ja": "お題を作成",
+      "ko": "주제 만들기",
+      "note": "一覧の右上の ＋ ボタンの読み上げ"
+    },
+    "list.empty.active.message": {
+      "ja": "右上の「＋」から新しいお題を投稿できます。",
+      "ko": "오른쪽 위의 “+”를 눌러 새 주제를 올릴 수 있어요.",
+      "note": "開催中のお題が 1 件も無いときの空状態の説明。＋ は右上の作成ボタン"
+    },
+    "list.empty.active.title": {
+      "ja": "開催中のお題がありません",
+      "ko": "진행 중인 주제가 없어요",
+      "note": "開催中のお題が 1 件も無いときの空状態の見出し"
+    },
+    "list.empty.ended.title": {
+      "ja": "終了したお題がありません",
+      "ko": "종료된 주제가 없어요",
+      "note": "終了したお題が 1 件も無いときの空状態の見出し"
+    },
+    "list.hall_of_fame.a11y": {
+      "ja": "殿堂を見る",
+      "ko": "명예의 전당 보기",
+      "note": "一覧の左上の王冠ボタンの読み上げ (終了したお題の優勝者の一覧へ)"
+    },
+    "list.row.top_entity": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "ja": "1位 {name}",
+      "ko": "1위 {name}",
+      "note": "一覧の行に出す、いま 1 位の候補 (Android)。name は曲名・アイドル名・ユニット名",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.row.total_votes": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "計{count}票",
+      "ko": "총 {count}표",
+      "note": "一覧の行に出す、お題の票の合計。1000 以上は桁区切りが付く (1,234票。Android はもとは桁区切りなし)"
+    },
+    "list.segment.active": {
+      "ja": "開催中",
+      "ko": "진행 중",
+      "note": "お題一覧の切り替え (開催中 / 終了)"
+    },
+    "list.segment.ended": {
+      "ja": "終了",
+      "ko": "종료",
+      "note": "お題一覧の切り替え (開催中 / 終了)"
+    },
+    "list.title": {
+      "ja": "みんなの投票",
+      "ko": "모두의 투표",
+      "note": "お題一覧のナビゲーションタイトル (機能の名前)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.title_android": {
+      "ja": "投票・予想",
+      "ko": "투표·예상",
+      "note": "Android のお題一覧の見出し。iOS の list.title と ja が違う (統一はオーナーが別 PR で)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "load_error.title": {
+      "ja": "読み込みに失敗しました",
+      "ko": "불러오지 못했어요",
+      "note": "お題の一覧・詳細・殿堂の読み込みに失敗したときの空状態の見出し"
+    },
+    "login_prompt.google_sign_in": {
+      "ja": "Googleでログイン",
+      "ko": "Google로 로그인",
+      "note": "ログインの案内のバナーのボタン (Android)。Google は社名なので訳さない",
+      "platforms": [
+        "android"
+      ]
+    },
+    "login_prompt.message": {
+      "ja": "投票にはログインが必要です",
+      "ko": "투표하려면 로그인해야 해요",
+      "note": "未ログインの人に出す案内 (iOS: 詳細のインラインのログイン導線。Android: 一覧・詳細のバナー)"
+    },
+    "my_votes.deleted_choice": {
+      "ja": "(削除済み)",
+      "ko": "(삭제됨)",
+      "note": "投票した候補の曲・アイドル・ユニットがデータから消えていて名前を出せないとき"
+    },
+    "my_votes.empty.message": {
+      "ja": "みんなの投票でお題に投票すると、ここに履歴が残ります",
+      "ko": "모두의 투표에서 주제에 투표하면 여기에 기록이 남아요",
+      "note": "投票の履歴が 1 件も無いときの空状態の説明。みんなの投票 = 機能の名前 (list.title)"
+    },
+    "my_votes.empty.title": {
+      "ja": "まだ投票していません",
+      "ko": "아직 투표하지 않았어요",
+      "note": "投票の履歴が 1 件も無いときの空状態の見出し"
+    },
+    "my_votes.title": {
+      "ja": "マイ投票",
+      "ko": "내 투표",
+      "note": "自分が投票したお題の履歴の画面のタイトル"
+    },
+    "picker.confirm": {
+      "ja": "決定",
+      "ko": "완료",
+      "note": "候補ピッカーの確定ボタン",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.idol.over_limit": {
+      "args": [
+        {
+          "name": "remaining",
+          "type": "count"
+        },
+        {
+          "name": "added",
+          "type": "int"
+        }
+      ],
+      "ja": "残り{remaining}人まで選べます (現在+{added}人)",
+      "ko": "{remaining}명까지 더 고를 수 있어요 (현재 +{added}명)",
+      "note": "アイドルの候補を選びすぎたときの注意。remaining は追加できる残りの人数、added は今回新しく選んだ人数",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.idol.search_prompt": {
+      "ja": "アイドル名 / CV名で検索",
+      "ko": "아이돌 이름 / CV 이름으로 검색",
+      "note": "アイドルの候補を選ぶピッカーの検索欄のプレースホルダ。CV = 声優",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.idol.title": {
+      "args": [
+        {
+          "name": "count",
+          "type": "int"
+        }
+      ],
+      "ja": "出演者を選択 ({count})",
+      "ko": "출연자 선택 ({count})",
+      "note": "アイドルの候補を選ぶピッカーの見出し。count は今選んでいる人数",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.search.clear.a11y": {
+      "ja": "クリア",
+      "ko": "지우기",
+      "note": "候補ピッカーの検索欄の × ボタンの読み上げ (入力を消す)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.song.advanced.a11y": {
+      "ja": "詳細検索",
+      "ko": "상세 검색",
+      "note": "曲の候補を選ぶピッカーの詳細検索を開くボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.song.empty": {
+      "ja": "該当する曲がありません",
+      "ko": "해당하는 곡이 없어요",
+      "note": "曲の候補を選ぶピッカーで検索に一致する曲が無いとき",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.song.over_limit": {
+      "args": [
+        {
+          "name": "remaining",
+          "type": "count"
+        },
+        {
+          "name": "added",
+          "type": "int"
+        }
+      ],
+      "ja": "残り{remaining}曲まで選べます (現在+{added}曲)",
+      "ko": "{remaining}곡까지 더 고를 수 있어요 (현재 +{added}곡)",
+      "note": "曲の候補を選びすぎたときの注意。remaining は追加できる残りの曲数、added は今回新しく選んだ曲数",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.song.search_prompt": {
+      "ja": "曲名で検索",
+      "ko": "곡명으로 검색",
+      "note": "曲の候補を選ぶピッカーの検索欄のプレースホルダ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.song.songwriter_prompt": {
+      "ja": "作詞・作曲・編曲者で検索",
+      "ko": "작사·작곡·편곡자로 검색",
+      "note": "曲の候補を選ぶピッカーの詳細検索の欄のプレースホルダ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.song.tag_filter": {
+      "ja": "タグで絞り込み",
+      "ko": "태그로 필터",
+      "note": "曲の候補を選ぶピッカーのタグ絞り込みのチップ (タグを選ぶとタグ名に変わる)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.song.tag_separator": {
+      "ja": " ＋ ",
+      "keep_whitespace": true,
+      "ko": " + ",
+      "note": "曲ピッカーのタグ絞り込みチップで、選んだタグ名をつなぐ記号 (「タグA ＋ タグB」)。前後の空白も含む",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.song.title": {
+      "args": [
+        {
+          "name": "count",
+          "type": "int"
+        }
+      ],
+      "ja": "楽曲を選択 ({count})",
+      "ko": "곡 선택 ({count})",
+      "note": "曲の候補を選ぶピッカーの見出し。count は今選んでいる曲数",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.unit.over_limit": {
+      "args": [
+        {
+          "name": "remaining",
+          "type": "count"
+        },
+        {
+          "name": "added",
+          "type": "int"
+        }
+      ],
+      "ja": "残り{remaining}件まで選べます (現在+{added}件)",
+      "ko": "{remaining}건까지 더 고를 수 있어요 (현재 +{added}건)",
+      "note": "ユニットの候補を選びすぎたときの注意。remaining は追加できる残りの数、added は今回新しく選んだ数",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.unit.search_prompt": {
+      "ja": "ユニット名で検索",
+      "ko": "유닛 이름으로 검색",
+      "note": "ユニットの候補を選ぶピッカーの検索欄のプレースホルダ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.unit.title": {
+      "args": [
+        {
+          "name": "count",
+          "type": "int"
+        }
+      ],
+      "ja": "ユニットを選択 ({count})",
+      "ko": "유닛 선택 ({count})",
+      "note": "ユニットの候補を選ぶピッカーの見出し。count は今選んでいる数",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.view_mode.grid.a11y": {
+      "ja": "グリッド表示",
+      "ko": "그리드로 보기",
+      "note": "候補ピッカーの表示切り替えボタンの読み上げ (今はリストで、押すとグリッドになる)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "picker.view_mode.list.a11y": {
+      "ja": "リスト表示",
+      "ko": "목록으로 보기",
+      "note": "候補ピッカーの表示切り替えボタンの読み上げ (今はグリッドで、押すとリストになる)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "scope.badge.brand": {
+      "ja": "ブランド限定",
+      "ko": "브랜드 한정",
+      "note": "お題の候補の範囲を示す小さなバッジ。1 つのブランドの曲・アイドル・ユニットだけが候補"
+    },
+    "scope.badge.brand_multi": {
+      "args": [
+        {
+          "name": "count",
+          "type": "int"
+        }
+      ],
+      "ja": "ブランド限定×{count}",
+      "ko": "브랜드 한정×{count}",
+      "note": "お題の候補の範囲を示す小さなバッジ。count は候補に選ばれたブランドの数 (2 以上)。助数詞が無いので int"
+    },
+    "scope.badge.manual": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "指定候補{count}件",
+      "ko": "지정 후보 {count}건",
+      "note": "お題の候補の範囲を示す小さなバッジ。作成者が指定した候補の数 (上限 500 なので桁区切りは付かない)"
+    },
+    "share_poll.a11y": {
+      "ja": "このお題をシェア",
+      "ko": "이 주제 공유",
+      "note": "お題そのものをシェアするボタンの読み上げ (iOS: 詳細のツールバー。Android: 一覧の行と詳細のツールバー)"
+    },
+    "status.closes_today": {
+      "ja": "本日締切",
+      "ko": "오늘 마감",
+      "note": "お題の状態の札。今日が締切の開催中のお題"
+    },
+    "status.days_left": {
+      "args": [
+        {
+          "name": "days",
+          "type": "count"
+        }
+      ],
+      "ja": "残り{days}日",
+      "ko": "{days}일 남음",
+      "note": "お題の状態の札。締切までの日数。ふつうは最長 30 日で桁区切りは付かない。Android で締切が不明 (endsAtMs = Long.MAX_VALUE) のときだけ Int.MAX_VALUE に頭打ちになり 2,147,483,647 と桁区切り付きで出る (もとは Long のままの日数で 1067 億あまり、桁区切りなし)"
+    },
+    "status.ended": {
+      "ja": "終了",
+      "ko": "종료",
+      "note": "お題の状態の札。締切を過ぎた (または止められた) お題"
+    },
+    "target.idol": {
+      "ja": "アイドル",
+      "ko": "아이돌",
+      "note": "お題の投票対象の種類 (アイドル)。作成シートの対象の選択肢・詳細の種類のチップ・create.scope.*_hint の target に入る"
+    },
+    "target.song": {
+      "ja": "曲",
+      "ko": "곡",
+      "note": "お題の投票対象の種類 (曲)。作成シートの対象の選択肢・詳細の種類のチップ・create.scope.*_hint の target に入る"
+    },
+    "target.unit": {
+      "ja": "ユニット",
+      "ko": "유닛",
+      "note": "お題の投票対象の種類 (ユニット)。作成シートの対象の選択肢・詳細の種類のチップ・create.scope.*_hint の target に入る"
+    }
+  }
+}

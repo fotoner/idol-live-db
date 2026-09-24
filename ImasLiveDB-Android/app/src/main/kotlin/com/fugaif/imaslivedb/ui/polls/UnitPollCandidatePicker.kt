@@ -57,6 +57,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.ImasUnit
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.BrandFilterChips
 import com.fugaif.imaslivedb.ui.components.BrandFilterItem
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
@@ -145,7 +147,7 @@ fun UnitPollCandidatePicker(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "ユニットを選択 (${selection.size})",
+                    L10n.Polls.pickerUnitTitle(count = selection.size).resolve(),
                     fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink,
                     modifier = Modifier.weight(1f)
                 )
@@ -154,7 +156,9 @@ fun UnitPollCandidatePicker(
                 }) {
                     Icon(
                         if (displayMode == UnitPickerDisplayMode.GRID) Icons.Filled.ViewList else Icons.Filled.GridView,
-                        contentDescription = if (displayMode == UnitPickerDisplayMode.GRID) "リスト表示" else "グリッド表示"
+                        contentDescription = (
+                            if (displayMode == UnitPickerDisplayMode.GRID) L10n.Polls.pickerViewModeListA11y else L10n.Polls.pickerViewModeGridA11y
+                        ).resolve()
                     )
                 }
             }
@@ -168,11 +172,13 @@ fun UnitPollCandidatePicker(
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                placeholder = { Text("ユニット名で検索") },
+                placeholder = { Text(L10n.Polls.pickerUnitSearchPrompt.resolve()) },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 trailingIcon = {
                     if (query.isNotEmpty()) {
-                        IconButton(onClick = { query = "" }) { Icon(Icons.Filled.Clear, contentDescription = "クリア") }
+                        IconButton(onClick = { query = "" }) {
+                            Icon(Icons.Filled.Clear, contentDescription = L10n.Polls.pickerSearchClearA11y.resolve())
+                        }
                     }
                 },
                 singleLine = true,
@@ -181,7 +187,7 @@ fun UnitPollCandidatePicker(
 
             if (overRemaining) {
                 Text(
-                    "残り${remaining}件まで選べます (現在+${newlyAddedCount}件)",
+                    L10n.Polls.pickerUnitOverLimit(remaining = remaining, added = newlyAddedCount).resolve(),
                     fontSize = 12.sp, color = DS.danger,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
                 )
@@ -229,7 +235,7 @@ fun UnitPollCandidatePicker(
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Button(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("キャンセル") }
+                Button(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text(L10n.Polls.actionCancel.resolve()) }
                 Button(
                     onClick = {
                         // 選択は選択肢の表示順 (ブランド順 → 一覧の並び) で返す。
@@ -242,7 +248,7 @@ fun UnitPollCandidatePicker(
                     },
                     enabled = selection != alreadySelected,
                     modifier = Modifier.weight(1f)
-                ) { Text("決定") }
+                ) { Text(L10n.Polls.pickerConfirm.resolve()) }
             }
         }
     }

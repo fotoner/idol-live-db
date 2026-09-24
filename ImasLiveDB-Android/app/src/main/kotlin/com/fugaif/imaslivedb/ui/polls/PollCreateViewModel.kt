@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +21,8 @@ data class PollCreateUiState(
     /** 候補指定スコープで選んだ候補。対象種別を切り替えたら混在させないため空にする。 */
     val candidates: List<PollCandidate> = emptyList(),
     val isSubmitting: Boolean = false,
-    val errorMessage: String? = null
+    /** 作成の失敗メッセージ。解決済みの String ではなく文言の値で持ち、画面で resolve() する。 */
+    val errorMessage: DisplayText? = null
 )
 
 /**
@@ -99,11 +102,12 @@ class PollCreateViewModel(app: Application) : AndroidViewModel(app) {
                 }
                 is CommunityApi.PollCreateResult.RateLimited -> _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
-                    errorMessage = "本日のお題作成上限に達しました。明日また試してください。"
+                    errorMessage = L10n.Polls.createErrorRateLimited
                 )
                 is CommunityApi.PollCreateResult.Error -> _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
-                    errorMessage = result.message ?: "作成に失敗しました。時間をおいて再試行してください。"
+                    // CommunityApi (data 層) が作った説明 (401/403 の案内) は文字列のまま受け取るので、そのまま出す
+                    errorMessage = result.message?.let { DisplayText.Verbatim(it) } ?: L10n.Polls.createErrorFailed
                 )
             }
         }

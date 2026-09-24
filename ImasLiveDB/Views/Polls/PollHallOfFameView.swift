@@ -15,14 +15,14 @@ struct PollHallOfFameView: View {
             } else if let loadError = vm.loadError {
                 ImasEmptyState(
                     systemImage: "exclamationmark.triangle",
-                    title: "読み込みに失敗しました",
-                    message: loadError
+                    title: String(localized: L10n.Polls.loadErrorTitle),
+                    message: loadError.resolved
                 )
             } else if vm.results.isEmpty {
                 ImasEmptyState(
                     systemImage: "crown",
-                    title: "まだ優勝者がいません",
-                    message: "お題が終了すると、ここに優勝した曲やアイドルが並びます。"
+                    title: String(localized: L10n.Polls.hallOfFameEmptyTitle),
+                    message: String(localized: L10n.Polls.hallOfFameEmptyMessage)
                 )
             } else {
                 List {
@@ -49,7 +49,7 @@ struct PollHallOfFameView: View {
             }
         }
         .background(DS.bg.ignoresSafeArea())
-        .navigationTitle("殿堂")
+        .navigationTitle(L10n.Polls.hallOfFameTitle)
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $destination) { dest in
             DetailSheetView(destination: dest)
@@ -108,10 +108,10 @@ private struct HallOfFameRow: View {
             Spacer(minLength: 8)
 
             VStack(alignment: .trailing, spacing: DS.sp2) {
-                Text("優勝")
+                Text(L10n.Polls.hallOfFameRowWinner)
                     .font(.imasCaption.weight(.bold))
                     .foregroundStyle(DS.warning)
-                Text("\(result.voteCount)票")
+                Text(L10n.Polls.hallOfFameRowVotes(count: result.voteCount))
                     .font(.imasCaption.monospacedDigit())
                     .foregroundStyle(DS.ink3)
             }

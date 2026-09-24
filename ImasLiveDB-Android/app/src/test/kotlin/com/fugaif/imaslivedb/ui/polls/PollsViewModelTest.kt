@@ -5,6 +5,8 @@ import android.os.Looper
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.data.net.WorkerHttpClient
 import com.fugaif.imaslivedb.data.net.WorkerResponse
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.testing.FakeWorkerTransport
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -44,6 +46,26 @@ class PollsViewModelTest {
         assertEquals(listOf("song:s1", null), cards.map { it.topEntityName })
         assertEquals(CommunityApi.PollCandidateScope.BRAND, cards[0].poll.candidateScope)
         assertEquals(listOf("765as", "cg"), cards[0].poll.scopeBrandIds)
+    }
+
+    /** 取れなかったときの文言はカタログの値で持ち、画面で解決する (ja は今までどおり「通信エラー」)。 */
+    @Test
+    fun loadFailureKeepsCatalogMessage() {
+        val transport = FakeWorkerTransport { null }   // 通信そのものの失敗
+        val api = CommunityApi(WorkerHttpClient(app, { null }, transport))
+        val viewModel = PollsViewModel(app, api) { type, id -> "$type:$id" }
+
+        viewModel.refresh()
+        val deadline = System.currentTimeMillis() + 10_000
+        while (viewModel.uiState.value.isLoading && System.currentTimeMillis() < deadline) {
+            shadowOf(Looper.getMainLooper()).idle()
+            Thread.sleep(10)
+        }
+
+        val state = viewModel.uiState.value
+        assertEquals(emptyList<PollCard>(), state.cards)
+        assertEquals(L10n.Polls.errorNetwork, state.loadError)
+        assertEquals("通信エラー", state.loadError?.resolve(app))
     }
 
     private companion object {

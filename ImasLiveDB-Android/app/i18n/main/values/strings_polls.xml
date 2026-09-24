@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/polls.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- polls.action.cancel: 投票の画面のキャンセルボタン (iOS: お題作成のツールバー・削除の確認。Android: お題作成・候補ピッカー・削除の確認ダイアログ) -->
+    <string name="polls_action_cancel">キャンセル</string>
+    <!-- polls.action.ok: お題の削除に失敗したときのアラートを閉じるボタン -->
+    <string name="polls_action_ok">OK</string>
+    <!-- polls.create.char_counter: お題作成シートの入力欄の下の文字数 (Android。iOS は数字だけ)。length は今の文字数、max は上限 -->
+    <string name="polls_create_char_counter">%1$d / %2$d文字</string>
+    <!-- polls.create.description_field.header_android: Android の文言。iOS の create.description_field.header と ja が違う (括弧が半角)。任意 = 書かなくてよい -->
+    <string name="polls_create_description_field_header_android">説明(任意)</string>
+    <!-- polls.create.description_field.placeholder_android: Android の文言。iOS の create.description_field.placeholder と ja が違う -->
+    <string name="polls_create_description_field_placeholder_android">補足やルールがあれば</string>
+    <!-- polls.create.duration.days: 募集期間の選択肢 (7 / 14 / 30 日間) -->
+    <plurals name="polls_create_duration_days">
+        <item quantity="other">%1$,d日間</item>
+    </plurals>
+    <!-- polls.create.duration.header: お題作成シートの投票を受け付ける期間の節の見出し -->
+    <string name="polls_create_duration_header">募集期間</string>
+    <!-- polls.create.error.failed: お題の作成に失敗したとき (サーバからの説明が無いとき) -->
+    <string name="polls_create_error_failed">作成に失敗しました。時間をおいて再試行してください。</string>
+    <!-- polls.create.error.rate_limited: 1 日に作れるお題の数の上限に達したとき (Android) -->
+    <string name="polls_create_error_rate_limited">本日のお題作成上限に達しました。明日また試してください。</string>
+    <!-- polls.create.intro: お題作成シートの先頭の説明。推し = 好きなアイドル・曲。limit は 1 人が入れられる票の数 (今は 3) -->
+    <plurals name="polls_create_intro">
+        <item quantity="other">お題を作って、みんなに推しを投票してもらおう。期間中は誰でも%1$,d票まで投票できます。</item>
+    </plurals>
+    <!-- polls.create.scope.add_candidate: 候補指定で候補を選ぶピッカーを開くボタン -->
+    <string name="polls_create_scope_add_candidate">候補を追加</string>
+    <!-- polls.create.scope.all: 候補の範囲の切り替え: すべての曲・アイドル・ユニットが候補 -->
+    <string name="polls_create_scope_all">全て</string>
+    <!-- polls.create.scope.all_hint: 候補の範囲が「全て」のときの説明。target は投票対象の種類 (target.song / target.idol / target.unit) -->
+    <string name="polls_create_scope_all_hint">全%1$sから自由に投票できます。</string>
+    <!-- polls.create.scope.brand: 候補の範囲の切り替え: 選んだブランドのものだけが候補 -->
+    <string name="polls_create_scope_brand">ブランド限定</string>
+    <!-- polls.create.scope.brand_hint_android: Android の文言。iOS の create.scope.brand_hint と ja が違う。target は投票対象の種類 (target.*) -->
+    <string name="polls_create_scope_brand_hint_android">選んだブランドの%1$sだけが候補になります。複数選択可。</string>
+    <!-- polls.create.scope.brand_required: ブランド限定でブランドを 1 つも選んでいないときの案内 -->
+    <string name="polls_create_scope_brand_required">1つ以上選択してください</string>
+    <!-- polls.create.scope.header: お題作成シートの候補の範囲を選ぶ節の見出し -->
+    <string name="polls_create_scope_header">投票候補</string>
+    <!-- polls.create.scope.manual: 候補の範囲の切り替え: 作成者が選んだものだけが候補 -->
+    <string name="polls_create_scope_manual">候補指定</string>
+    <!-- polls.create.scope.manual_min: 候補指定のときの条件の説明 -->
+    <string name="polls_create_scope_manual_min">候補は2件以上必要です。</string>
+    <!-- polls.create.scope.manual_selected: 候補指定で今選んでいる候補の数 (上限 500 なので桁区切りは付かない) -->
+    <plurals name="polls_create_scope_manual_selected">
+        <item quantity="other">%1$,d件選択中</item>
+    </plurals>
+    <!-- polls.create.submit: お題作成シートの送信ボタン -->
+    <string name="polls_create_submit">作成</string>
+    <!-- polls.create.target.header: お題作成シートの対象 (曲 / アイドル / ユニット) を選ぶ節の見出し -->
+    <string name="polls_create_target_header">投票対象</string>
+    <!-- polls.create.title: お題作成シートの見出し -->
+    <string name="polls_create_title">お題を投稿</string>
+    <!-- polls.create.title_field.header: お題作成シートの題名の欄の見出し (Android は入力欄のラベル) -->
+    <string name="polls_create_title_field_header">タイトル</string>
+    <!-- polls.create.title_field.placeholder: お題作成シートの題名の欄のプレースホルダ。例の文も訳す -->
+    <string name="polls_create_title_field_placeholder">例: 夏に聴きたい曲は？</string>
+    <!-- polls.detail.add_vote.button_android: Android の文言。iOS の detail.add_vote.button と ja が違う (括弧が半角)。remaining は残りの票、limit は 1 人が入れられる票の数 -->
+    <string name="polls_detail_add_vote_button_android">候補を追加して投票 (残り%1$d/%2$d)</string>
+    <!-- polls.detail.add_vote.done_android: Android の文言。iOS の detail.add_vote.done と ja が違う (括弧が半角)。voted と limit はどちらも 1 人が入れられる票の数 -->
+    <string name="polls_detail_add_vote_done_android">投票済み (%1$d/%2$d)</string>
+    <!-- polls.detail.delete.a11y: 詳細のツールバーのゴミ箱ボタンの読み上げ (作成者・管理者だけに出る) -->
+    <string name="polls_detail_delete_a11y">このお題を削除</string>
+    <!-- polls.detail.delete_confirm.action: お題を削除する前の確認の実行ボタン -->
+    <string name="polls_detail_delete_confirm_action">削除</string>
+    <!-- polls.detail.delete_confirm.message: お題を削除する前の確認の本文 -->
+    <string name="polls_detail_delete_confirm_message">ランキング・投票データも一緒に削除され、元に戻せません。</string>
+    <!-- polls.detail.delete_confirm.title: お題を削除する前の確認の見出し -->
+    <string name="polls_detail_delete_confirm_title">このお題を削除しますか？</string>
+    <!-- polls.detail.delete_error.title: お題の削除に失敗したときのアラートの見出し -->
+    <string name="polls_detail_delete_error_title">エラー</string>
+    <!-- polls.detail.entry.unvote.a11y: ランキングの行の投票ボタンの読み上げ (投票済みの候補。押すと取り消す) -->
+    <string name="polls_detail_entry_unvote_a11y">投票を取消</string>
+    <!-- polls.detail.entry.vote.a11y: ランキングの行の投票ボタンの読み上げ (まだ投票していない候補) -->
+    <string name="polls_detail_entry_vote_a11y">投票</string>
+    <!-- polls.detail.error.delete_failed: お題の削除に失敗したときの本文 (サーバからの説明が無いとき) -->
+    <string name="polls_detail_error_delete_failed">削除に失敗しました。時間をおいて再試行してください。</string>
+    <!-- polls.detail.my_votes.progress: 自分の投票のシェアの横に出す、入れた票の数 / 1 人が入れられる票の数 -->
+    <string name="polls_detail_my_votes_progress">あなたの投票 %1$d/%2$d</string>
+    <!-- polls.detail.share_votes.button: 自分が投票した候補をシェアするボタン -->
+    <string name="polls_detail_share_votes_button">投票をシェア</string>
+    <!-- polls.detail.summary: Android の詳細の見出しの下の要約 (iOS には無い)。votes は票の合計 (1000 以上は桁区切りが付く。もとは桁区切りなし)、candidates は候補の数 -->
+    <plurals name="polls_detail_summary">
+        <item quantity="other">%1$,d票 ・ %2$d件の候補</item>
+    </plurals>
+    <!-- polls.detail.vote_hint_android: Android の文言。iOS の detail.vote_hint と ja が違う (統一はオーナーが別 PR で)。remaining は残りの票、limit は 1 人が入れられる票の数 -->
+    <string name="polls_detail_vote_hint_android">タップで投票/取消 (残り%1$d/%2$d)</string>
+    <!-- polls.error.network: お題の一覧・殿堂の読み込みに失敗し、サーバからの説明も無いときの説明 -->
+    <string name="polls_error_network">通信エラー</string>
+    <!-- polls.hall_of_fame.empty.message: 殿堂に 1 件も無いときの空状態の説明 -->
+    <string name="polls_hall_of_fame_empty_message">お題が終了すると、ここに優勝した曲やアイドルが並びます。</string>
+    <!-- polls.hall_of_fame.empty.title: 殿堂に 1 件も無いときの空状態の見出し -->
+    <string name="polls_hall_of_fame_empty_title">まだ優勝者がいません</string>
+    <!-- polls.hall_of_fame.row.votes: 殿堂の行の優勝者の票の数。1000 以上は桁区切りが付く (Android はもとは桁区切りなし) -->
+    <plurals name="polls_hall_of_fame_row_votes">
+        <item quantity="other">%1$,d票</item>
+    </plurals>
+    <!-- polls.hall_of_fame.row.winner: 殿堂の行の右に出す札 (そのお題で 1 位) -->
+    <string name="polls_hall_of_fame_row_winner">優勝</string>
+    <!-- polls.hall_of_fame.title: 終了したお題の優勝者を並べる画面のタイトル -->
+    <string name="polls_hall_of_fame_title">殿堂</string>
+    <!-- polls.list.create.a11y: 一覧の右上の ＋ ボタンの読み上げ -->
+    <string name="polls_list_create_a11y">お題を作成</string>
+    <!-- polls.list.empty.active.message: 開催中のお題が 1 件も無いときの空状態の説明。＋ は右上の作成ボタン -->
+    <string name="polls_list_empty_active_message">右上の「＋」から新しいお題を投稿できます。</string>
+    <!-- polls.list.empty.active.title: 開催中のお題が 1 件も無いときの空状態の見出し -->
+    <string name="polls_list_empty_active_title">開催中のお題がありません</string>
+    <!-- polls.list.empty.ended.title: 終了したお題が 1 件も無いときの空状態の見出し -->
+    <string name="polls_list_empty_ended_title">終了したお題がありません</string>
+    <!-- polls.list.hall_of_fame.a11y: 一覧の左上の王冠ボタンの読み上げ (終了したお題の優勝者の一覧へ) -->
+    <string name="polls_list_hall_of_fame_a11y">殿堂を見る</string>
+    <!-- polls.list.row.top_entity: 一覧の行に出す、いま 1 位の候補 (Android)。name は曲名・アイドル名・ユニット名 -->
+    <string name="polls_list_row_top_entity">1位 %1$s</string>
+    <!-- polls.list.row.total_votes: 一覧の行に出す、お題の票の合計。1000 以上は桁区切りが付く (1,234票。Android はもとは桁区切りなし) -->
+    <plurals name="polls_list_row_total_votes">
+        <item quantity="other">計%1$,d票</item>
+    </plurals>
+    <!-- polls.list.segment.active: お題一覧の切り替え (開催中 / 終了) -->
+    <string name="polls_list_segment_active">開催中</string>
+    <!-- polls.list.segment.ended: お題一覧の切り替え (開催中 / 終了) -->
+    <string name="polls_list_segment_ended">終了</string>
+    <!-- polls.list.title_android: Android のお題一覧の見出し。iOS の list.title と ja が違う (統一はオーナーが別 PR で) -->
+    <string name="polls_list_title_android">投票・予想</string>
+    <!-- polls.load_error.title: お題の一覧・詳細・殿堂の読み込みに失敗したときの空状態の見出し -->
+    <string name="polls_load_error_title">読み込みに失敗しました</string>
+    <!-- polls.login_prompt.google_sign_in: ログインの案内のバナーのボタン (Android)。Google は社名なので訳さない -->
+    <string name="polls_login_prompt_google_sign_in">Googleでログイン</string>
+    <!-- polls.login_prompt.message: 未ログインの人に出す案内 (iOS: 詳細のインラインのログイン導線。Android: 一覧・詳細のバナー) -->
+    <string name="polls_login_prompt_message">投票にはログインが必要です</string>
+    <!-- polls.my_votes.deleted_choice: 投票した候補の曲・アイドル・ユニットがデータから消えていて名前を出せないとき -->
+    <string name="polls_my_votes_deleted_choice">(削除済み)</string>
+    <!-- polls.my_votes.empty.message: 投票の履歴が 1 件も無いときの空状態の説明。みんなの投票 = 機能の名前 (list.title) -->
+    <string name="polls_my_votes_empty_message">みんなの投票でお題に投票すると、ここに履歴が残ります</string>
+    <!-- polls.my_votes.empty.title: 投票の履歴が 1 件も無いときの空状態の見出し -->
+    <string name="polls_my_votes_empty_title">まだ投票していません</string>
+    <!-- polls.my_votes.title: 自分が投票したお題の履歴の画面のタイトル -->
+    <string name="polls_my_votes_title">マイ投票</string>
+    <!-- polls.picker.confirm: 候補ピッカーの確定ボタン -->
+    <string name="polls_picker_confirm">決定</string>
+    <!-- polls.picker.idol.over_limit: アイドルの候補を選びすぎたときの注意。remaining は追加できる残りの人数、added は今回新しく選んだ人数 -->
+    <plurals name="polls_picker_idol_over_limit">
+        <item quantity="other">残り%1$,d人まで選べます (現在+%2$d人)</item>
+    </plurals>
+    <!-- polls.picker.idol.search_prompt: アイドルの候補を選ぶピッカーの検索欄のプレースホルダ。CV = 声優 -->
+    <string name="polls_picker_idol_search_prompt">アイドル名 / CV名で検索</string>
+    <!-- polls.picker.idol.title: アイドルの候補を選ぶピッカーの見出し。count は今選んでいる人数 -->
+    <string name="polls_picker_idol_title">出演者を選択 (%1$d)</string>
+    <!-- polls.picker.search.clear.a11y: 候補ピッカーの検索欄の × ボタンの読み上げ (入力を消す) -->
+    <string name="polls_picker_search_clear_a11y">クリア</string>
+    <!-- polls.picker.song.advanced.a11y: 曲の候補を選ぶピッカーの詳細検索を開くボタンの読み上げ -->
+    <string name="polls_picker_song_advanced_a11y">詳細検索</string>
+    <!-- polls.picker.song.empty: 曲の候補を選ぶピッカーで検索に一致する曲が無いとき -->
+    <string name="polls_picker_song_empty">該当する曲がありません</string>
+    <!-- polls.picker.song.over_limit: 曲の候補を選びすぎたときの注意。remaining は追加できる残りの曲数、added は今回新しく選んだ曲数 -->
+    <plurals name="polls_picker_song_over_limit">
+        <item quantity="other">残り%1$,d曲まで選べます (現在+%2$d曲)</item>
+    </plurals>
+    <!-- polls.picker.song.search_prompt: 曲の候補を選ぶピッカーの検索欄のプレースホルダ -->
+    <string name="polls_picker_song_search_prompt">曲名で検索</string>
+    <!-- polls.picker.song.songwriter_prompt: 曲の候補を選ぶピッカーの詳細検索の欄のプレースホルダ -->
+    <string name="polls_picker_song_songwriter_prompt">作詞・作曲・編曲者で検索</string>
+    <!-- polls.picker.song.tag_filter: 曲の候補を選ぶピッカーのタグ絞り込みのチップ (タグを選ぶとタグ名に変わる) -->
+    <string name="polls_picker_song_tag_filter">タグで絞り込み</string>
+    <!-- polls.picker.song.tag_separator: 曲ピッカーのタグ絞り込みチップで、選んだタグ名をつなぐ記号 (「タグA ＋ タグB」)。前後の空白も含む -->
+    <string name="polls_picker_song_tag_separator">" ＋ "</string>
+    <!-- polls.picker.song.title: 曲の候補を選ぶピッカーの見出し。count は今選んでいる曲数 -->
+    <string name="polls_picker_song_title">楽曲を選択 (%1$d)</string>
+    <!-- polls.picker.unit.over_limit: ユニットの候補を選びすぎたときの注意。remaining は追加できる残りの数、added は今回新しく選んだ数 -->
+    <plurals name="polls_picker_unit_over_limit">
+        <item quantity="other">残り%1$,d件まで選べます (現在+%2$d件)</item>
+    </plurals>
+    <!-- polls.picker.unit.search_prompt: ユニットの候補を選ぶピッカーの検索欄のプレースホルダ -->
+    <string name="polls_picker_unit_search_prompt">ユニット名で検索</string>
+    <!-- polls.picker.unit.title: ユニットの候補を選ぶピッカーの見出し。count は今選んでいる数 -->
+    <string name="polls_picker_unit_title">ユニットを選択 (%1$d)</string>
+    <!-- polls.picker.view_mode.grid.a11y: 候補ピッカーの表示切り替えボタンの読み上げ (今はリストで、押すとグリッドになる) -->
+    <string name="polls_picker_view_mode_grid_a11y">グリッド表示</string>
+    <!-- polls.picker.view_mode.list.a11y: 候補ピッカーの表示切り替えボタンの読み上げ (今はグリッドで、押すとリストになる) -->
+    <string name="polls_picker_view_mode_list_a11y">リスト表示</string>
+    <!-- polls.scope.badge.brand: お題の候補の範囲を示す小さなバッジ。1 つのブランドの曲・アイドル・ユニットだけが候補 -->
+    <string name="polls_scope_badge_brand">ブランド限定</string>
+    <!-- polls.scope.badge.brand_multi: お題の候補の範囲を示す小さなバッジ。count は候補に選ばれたブランドの数 (2 以上)。助数詞が無いので int -->
+    <string name="polls_scope_badge_brand_multi">ブランド限定×%1$d</string>
+    <!-- polls.scope.badge.manual: お題の候補の範囲を示す小さなバッジ。作成者が指定した候補の数 (上限 500 なので桁区切りは付かない) -->
+    <plurals name="polls_scope_badge_manual">
+        <item quantity="other">指定候補%1$,d件</item>
+    </plurals>
+    <!-- polls.share_poll.a11y: お題そのものをシェアするボタンの読み上げ (iOS: 詳細のツールバー。Android: 一覧の行と詳細のツールバー) -->
+    <string name="polls_share_poll_a11y">このお題をシェア</string>
+    <!-- polls.status.closes_today: お題の状態の札。今日が締切の開催中のお題 -->
+    <string name="polls_status_closes_today">本日締切</string>
+    <!-- polls.status.days_left: お題の状態の札。締切までの日数。ふつうは最長 30 日で桁区切りは付かない。Android で締切が不明 (endsAtMs = Long.MAX_VALUE) のときだけ Int.MAX_VALUE に頭打ちになり 2,147,483,647 と桁区切り付きで出る (もとは Long のままの日数で 1067 億あまり、桁区切りなし) -->
+    <plurals name="polls_status_days_left">
+        <item quantity="other">残り%1$,d日</item>
+    </plurals>
+    <!-- polls.status.ended: お題の状態の札。締切を過ぎた (または止められた) お題 -->
+    <string name="polls_status_ended">終了</string>
+    <!-- polls.target.idol: お題の投票対象の種類 (アイドル)。作成シートの対象の選択肢・詳細の種類のチップ・create.scope.*_hint の target に入る -->
+    <string name="polls_target_idol">アイドル</string>
+    <!-- polls.target.song: お題の投票対象の種類 (曲)。作成シートの対象の選択肢・詳細の種類のチップ・create.scope.*_hint の target に入る -->
+    <string name="polls_target_song">曲</string>
+    <!-- polls.target.unit: お題の投票対象の種類 (ユニット)。作成シートの対象の選択肢・詳細の種類のチップ・create.scope.*_hint の target に入る -->
+    <string name="polls_target_unit">ユニット</string>
+</resources>

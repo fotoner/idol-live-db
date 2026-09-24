@@ -21,7 +21,8 @@ struct MyVotesView: View {
 
     private struct Choice: Identifiable {
         let entityId: String
-        let label: String
+        /// 曲名・アイドル名・ユニット名 (データ) か、消えた候補の「(削除済み)」(文言)。
+        let label: DisplayText
         let destination: DetailDestination?
         var id: String { entityId }
     }
@@ -33,8 +34,8 @@ struct MyVotesView: View {
             } else if entries.isEmpty {
                 ImasEmptyState(
                     systemImage: "chart.bar.doc.horizontal",
-                    title: "まだ投票していません",
-                    message: "みんなの投票でお題に投票すると、ここに履歴が残ります"
+                    title: String(localized: L10n.Polls.myVotesEmptyTitle),
+                    message: String(localized: L10n.Polls.myVotesEmptyMessage)
                 )
             } else {
                 List {
@@ -47,7 +48,7 @@ struct MyVotesView: View {
                                     HStack(spacing: DS.sp2) {
                                         Image(systemName: "checkmark.circle.fill")
                                             .foregroundStyle(DS.success)
-                                        Text(choice.label)
+                                        Text(display: choice.label)
                                             .font(.imasSubhead.weight(.semibold))
                                             .foregroundStyle(DS.ink)
                                             .lineLimit(2)
@@ -73,7 +74,7 @@ struct MyVotesView: View {
                 }
             }
         }
-        .navigationTitle("マイ投票")
+        .navigationTitle(L10n.Polls.myVotesTitle)
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $sheetDestination) { dest in
             DetailSheetView(destination: dest).environment(database)
@@ -116,19 +117,19 @@ struct MyVotesView: View {
                 switch poll.targetType {
                 case .song:
                     if let s = songById[entityId] {
-                        return Choice(entityId: entityId, label: s.title, destination: .song(s))
+                        return Choice(entityId: entityId, label: .verbatim(s.title), destination: .song(s))
                     }
-                    return Choice(entityId: entityId, label: "(削除済み)", destination: nil)
+                    return Choice(entityId: entityId, label: .key(L10n.Polls.myVotesDeletedChoice), destination: nil)
                 case .idol:
                     if let i = idolById[entityId] {
-                        return Choice(entityId: entityId, label: i.name, destination: .idol(i))
+                        return Choice(entityId: entityId, label: .verbatim(i.name), destination: .idol(i))
                     }
-                    return Choice(entityId: entityId, label: "(削除済み)", destination: nil)
+                    return Choice(entityId: entityId, label: .key(L10n.Polls.myVotesDeletedChoice), destination: nil)
                 case .unit:
                     if let u = unitById[entityId] {
-                        return Choice(entityId: entityId, label: u.displayName, destination: .unit(u))
+                        return Choice(entityId: entityId, label: .verbatim(u.displayName), destination: .unit(u))
                     }
-                    return Choice(entityId: entityId, label: "(削除済み)", destination: nil)
+                    return Choice(entityId: entityId, label: .key(L10n.Polls.myVotesDeletedChoice), destination: nil)
                 }
             }
             return Entry(poll: poll, myChoices: choices)

@@ -16,11 +16,12 @@ final class PollDetailViewModel {
     private(set) var isLoading = true
     /// いずれかの投票/取消が進行中。連打・複数候補同時タップを直列化するガード。
     private(set) var isVoting = false
-    var errorMessage: String?
+    /// 投票/取消の失敗メッセージ。解決済みの String ではなく文言の値で持ち、画面で文字列にする。
+    var errorMessage: DisplayText?
     /// お題削除の進行中フラグ (連打防止)。投票の連打ガード (isVoting) とは独立に扱う。
     private(set) var isDeleting = false
     /// 削除失敗時のエラーメッセージ。投票エラー (errorMessage) とは表示箇所が異なるため分離する。
-    var deleteErrorMessage: String?
+    var deleteErrorMessage: DisplayText?
 
     /// View の init (nonisolated) から生成できるよう init も nonisolated にする。
     nonisolated init(pollId: String, voting: any CommunityVoting) {
@@ -41,7 +42,7 @@ final class PollDetailViewModel {
 
     /// 既存候補へワンタップ投票。
     func vote(entityId: String) async {
-        await mutate(errorText: "投票できませんでした") {
+        await mutate(errorText: L10n.Polls.detailErrorVoteFailed) {
             let result = try await self.voting.votePoll(pollId: self.pollId, entityId: entityId)
             self.applyVote(entityId: entityId, voteCount: result.voteCount, hasUserVoted: true, myVoteCount: result.myVoteCount)
             LocalPollVoteLog.shared.recordVote(pollId: self.pollId, entityId: entityId)
@@ -50,7 +51,7 @@ final class PollDetailViewModel {
 
     /// 自分の票を取り消す。
     func unvote(entityId: String) async {
-        await mutate(errorText: "取消できませんでした") {
+        await mutate(errorText: L10n.Polls.detailErrorUnvoteFailed) {
             let result = try await self.voting.unvotePoll(pollId: self.pollId, entityId: entityId)
             self.applyVote(entityId: entityId, voteCount: result.voteCount, hasUserVoted: false, myVoteCount: result.myVoteCount)
             LocalPollVoteLog.shared.removeVote(pollId: self.pollId, entityId: entityId)
@@ -59,7 +60,7 @@ final class PollDetailViewModel {
 
     /// ピッカーから新規候補へまとめて投票 (曲/アイドル共通の entityId 配列)。
     func voteForEntities(_ entityIds: [String]) async {
-        await mutate(errorText: "投票できませんでした") {
+        await mutate(errorText: L10n.Polls.detailErrorVoteFailed) {
             for id in entityIds {
                 let result = try await self.voting.votePoll(pollId: self.pollId, entityId: id)
                 self.applyVote(entityId: id, voteCount: result.voteCount, hasUserVoted: true, myVoteCount: result.myVoteCount)
@@ -70,7 +71,7 @@ final class PollDetailViewModel {
 
     /// ピッカーで選択解除された既投票の候補をまとめて取り消す (曲/アイドル共通の entityId 配列)。
     func unvoteForEntities(_ entityIds: [String]) async {
-        await mutate(errorText: "取消できませんでした") {
+        await mutate(errorText: L10n.Polls.detailErrorUnvoteFailed) {
             for id in entityIds {
                 let result = try await self.voting.unvotePoll(pollId: self.pollId, entityId: id)
                 self.applyVote(entityId: id, voteCount: result.voteCount, hasUserVoted: false, myVoteCount: result.myVoteCount)
@@ -108,7 +109,9 @@ final class PollDetailViewModel {
             AppAnalytics.event("poll_delete")
             return true
         } catch {
-            deleteErrorMessage = (error as? APIClientError)?.errorDescription ?? "削除に失敗しました。時間をおいて再試行してください。"
+            // APIClientError の説明は Services 側で作った文字列なのでそのまま出す (verbatim)
+            deleteErrorMessage = (error as? APIClientError)?.errorDescription.map(DisplayText.verbatim)
+                ?? .key(L10n.Polls.detailErrorDeleteFailed)
             AppAnalytics.event("poll_delete_failed")
             return false
         }
@@ -117,7 +120,7 @@ final class PollDetailViewModel {
     // MARK: - Private
 
     /// 投票系の共通ガード。多重実行を弾き、エラー時にメッセージを立てる。
-    private func mutate(errorText: String, _ body: () async throws -> Void) async {
+    private func mutate(errorText: LocalizedStringResource, _ body: () async throws -> Void) async {
         guard !isVoting else { return }
         isVoting = true
         defer { isVoting = false }
@@ -126,7 +129,7 @@ final class PollDetailViewModel {
             try await body()
             AppAnalytics.event("poll_vote")
         } catch {
-            errorMessage = errorText
+            errorMessage = .key(errorText)
             AppAnalytics.event("poll_vote_failed")
         }
     }

@@ -24,6 +24,7 @@ object L10n {
     val Model: L10nModel get() = L10nModel
     val Mypage: L10nMypage get() = L10nMypage
     val Nav: L10nNav get() = L10nNav
+    val Polls: L10nPolls get() = L10nPolls
     val Produce: L10nProduce get() = L10nProduce
     val Schedule: L10nSchedule get() = L10nSchedule
     val Search: L10nSearch get() = L10nSearch

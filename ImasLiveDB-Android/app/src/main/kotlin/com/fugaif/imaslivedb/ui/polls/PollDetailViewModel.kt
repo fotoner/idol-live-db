@@ -5,6 +5,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +18,8 @@ data class PollDetailUiState(
     val detail: CommunityApi.PollDetail? = null,
     val entityNames: Map<String, String> = emptyMap(),
     val isDeleting: Boolean = false,
-    val deleteError: String? = null
+    /** 削除の失敗メッセージ。解決済みの String ではなく文言の値で持ち、画面で resolve() する。 */
+    val deleteError: DisplayText? = null
 )
 
 /** お題詳細。iOS PollDetailView の移植 (単体お題の投票・候補追加)。 */
@@ -69,7 +72,7 @@ class PollDetailViewModel(app: Application) : AndroidViewModel(app) {
             val ok = runCatching { api.deletePoll(id) }.getOrDefault(false)
             _uiState.value = _uiState.value.copy(
                 isDeleting = false,
-                deleteError = if (ok) null else "削除に失敗しました。時間をおいて再試行してください。"
+                deleteError = if (ok) null else L10n.Polls.detailErrorDeleteFailed
             )
             if (ok) onDeleted()
         }

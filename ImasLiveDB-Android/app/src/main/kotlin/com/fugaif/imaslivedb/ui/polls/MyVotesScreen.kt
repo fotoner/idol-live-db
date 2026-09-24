@@ -35,6 +35,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.theme.DS
 
@@ -54,9 +56,9 @@ fun MyVotesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("マイ投票", fontWeight = FontWeight.Bold) },
+                title = { Text(L10n.Polls.myVotesTitle.resolve(), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "戻る") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, L10n.Common.actionBack.resolve()) }
                 }
             )
         }
@@ -69,8 +71,8 @@ fun MyVotesScreen(
                 Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                     ImasEmptyState(
                         Icons.Filled.HowToVote,
-                        "まだ投票していません",
-                        "みんなの投票でお題に投票すると、ここに履歴が残ります"
+                        L10n.Polls.myVotesEmptyTitle.resolve(),
+                        L10n.Polls.myVotesEmptyMessage.resolve()
                     )
                 }
             }
@@ -102,14 +104,17 @@ private fun MyVoteEntryCard(entry: MyVoteEntry) {
                 entry.poll.title, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink,
                 maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f)
             )
-            Text(entry.poll.statusLabel, fontSize = 12.sp, color = if (entry.poll.isActive) DS.success else DS.ink3)
+            Text(
+                pollStatusText(entry.poll.isActive, entry.poll.endsAtMs).resolve(), fontSize = 12.sp,
+                color = if (entry.poll.isActive) DS.success else DS.ink3
+            )
         }
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             entry.choices.forEach { choice ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = DS.success, modifier = Modifier.size(18.dp))
                     Text(
-                        choice.label, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = DS.ink,
+                        choice.label.resolve(), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = DS.ink,
                         maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 8.dp)
                     )
                 }

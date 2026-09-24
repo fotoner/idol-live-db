@@ -29,6 +29,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.community.CommunityApi
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 
@@ -39,11 +42,24 @@ fun LoginPromptBanner(onSignIn: () -> Unit) {
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
             .clip(RoundedCornerShape(10.dp)).background(DS.surface).padding(16.dp)
     ) {
-        Text("投票にはログインが必要です", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
+        Text(L10n.Polls.loginPromptMessage.resolve(), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
         Button(onClick = onSignIn, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-            Text("Googleでログイン")
+            Text(L10n.Polls.loginPromptGoogleSignIn.resolve())
         }
     }
+}
+
+/**
+ * お題の状態の札 (終了 / 本日締切 / 残りN日)。iOS Poll.statusLabel と同じ文言をカタログから引く。
+ * data 層の `CommunityApi.PollSummary/PollDetail.statusLabel` (日本語の String) はプロデュースタブも
+ * 使っているので残し、投票の画面はこちらを使う。日数の数え方は CommunityApi の pollStatusLabel と同じ
+ * (締切が不明で Long.MAX_VALUE のときだけ、Int に収まるよう頭打ちにする)。
+ */
+fun pollStatusText(isActive: Boolean, endsAtMs: Long): DisplayText {
+    if (!isActive) return L10n.Polls.statusEnded
+    val days = (endsAtMs - System.currentTimeMillis()) / 86_400_000L
+    return if (days <= 0) L10n.Polls.statusClosesToday
+    else L10n.Polls.statusDaysLeft(days = days.coerceAtMost(Int.MAX_VALUE.toLong()).toInt())
 }
 
 /** お題の候補スコープ (ブランド限定 / 指定候補) を示す小さなチップ。 `all` の時は何も出さない。 */
@@ -60,10 +76,11 @@ fun ScopeBadge(poll: CommunityApi.PollSummary) =
 private fun ScopeBadge(scope: CommunityApi.PollCandidateScope, brandCount: Int, entityCount: Int) {
     val (icon, label) = when (scope) {
         CommunityApi.PollCandidateScope.ALL -> return
-        CommunityApi.PollCandidateScope.BRAND ->
-            Icons.Filled.Sell to if (brandCount <= 1) "ブランド限定" else "ブランド限定×$brandCount"
+        CommunityApi.PollCandidateScope.BRAND -> Icons.Filled.Sell to (
+            if (brandCount <= 1) L10n.Polls.scopeBadgeBrand else L10n.Polls.scopeBadgeBrandMulti(count = brandCount)
+        )
         CommunityApi.PollCandidateScope.MANUAL ->
-            Icons.AutoMirrored.Filled.List to "指定候補${entityCount}件"
+            Icons.AutoMirrored.Filled.List to L10n.Polls.scopeBadgeManual(count = entityCount)
     }
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -74,7 +91,7 @@ private fun ScopeBadge(scope: CommunityApi.PollCandidateScope, brandCount: Int, 
             .padding(horizontal = 8.dp, vertical = 3.dp)
     ) {
         Icon(icon, contentDescription = null, tint = DS.ink2, modifier = Modifier.size(12.dp))
-        Text(label, fontSize = 11.sp, color = DS.ink2, modifier = Modifier.padding(start = 4.dp))
+        Text(label.resolve(), fontSize = 11.sp, color = DS.ink2, modifier = Modifier.padding(start = 4.dp))
     }
 }
 
@@ -100,7 +117,7 @@ fun PollEntriesList(
                 .then(
                     if (isSignedIn) {
                         Modifier.clickable(
-                            onClickLabel = if (entry.mine) "投票を取消" else "投票",
+                            onClickLabel = (if (entry.mine) L10n.Polls.detailEntryUnvoteA11y else L10n.Polls.detailEntryVoteA11y).resolve(),
                             role = Role.Button
                         ) { onToggleVote(entry.entityId, entry.mine) }
                     } else Modifier

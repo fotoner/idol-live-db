@@ -1,0 +1,1884 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "polls.achievements.sheet.close" : {
+      "comment" : "曲・アイドル・ユニット詳細の実績バッジから開いたお題詳細のシートを閉じるボタン (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "閉じる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "닫기"
+          }
+        }
+      }
+    },
+    "polls.action.cancel" : {
+      "comment" : "投票の画面のキャンセルボタン (iOS: お題作成のツールバー・削除の確認。Android: お題作成・候補ピッカー・削除の確認ダイアログ) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャンセル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "취소"
+          }
+        }
+      }
+    },
+    "polls.action.ok" : {
+      "comment" : "お題の削除に失敗したときのアラートを閉じるボタン (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "확인"
+          }
+        }
+      }
+    },
+    "polls.create.description_field.header" : {
+      "comment" : "お題作成シートの説明の欄の見出し。任意 = 書かなくてよい (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "説明（任意）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "설명 (선택)"
+          }
+        }
+      }
+    },
+    "polls.create.description_field.placeholder" : {
+      "comment" : "お題作成シートの説明の欄のプレースホルダ (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "補足やルールがあれば（任意）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "보충 설명이나 규칙이 있다면 (선택)"
+          }
+        }
+      }
+    },
+    "polls.create.duration.days" : {
+      "comment" : "募集期間の選択肢 (7 / 14 / 30 日間) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@days@"
+          },
+          "substitutions" : {
+            "days" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg日間"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@days@"
+          },
+          "substitutions" : {
+            "days" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg일간"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "polls.create.duration.header" : {
+      "comment" : "お題作成シートの投票を受け付ける期間の節の見出し (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "募集期間"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모집 기간"
+          }
+        }
+      }
+    },
+    "polls.create.error.failed" : {
+      "comment" : "お題の作成に失敗したとき (サーバからの説明が無いとき) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作成に失敗しました。時間をおいて再試行してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "만들지 못했어요. 잠시 후 다시 시도해 주세요."
+          }
+        }
+      }
+    },
+    "polls.create.idol_picker.title" : {
+      "comment" : "候補指定でアイドルを選ぶピッカーのナビゲーションタイトル (短く) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "候補アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "후보 아이돌"
+          }
+        }
+      }
+    },
+    "polls.create.intro" : {
+      "comment" : "お題作成シートの先頭の説明。推し = 好きなアイドル・曲。limit は 1 人が入れられる票の数 (今は 3) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@limit@"
+          },
+          "substitutions" : {
+            "limit" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "お題を作って、みんなに推しを投票してもらおう。期間中は誰でも%arg票まで投票できます。"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@limit@"
+          },
+          "substitutions" : {
+            "limit" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "주제를 만들어 모두의 최애를 투표로 뽑아 보세요. 기간 동안 누구나 %arg표까지 투표할 수 있어요."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "polls.create.scope.add_candidate" : {
+      "comment" : "候補指定で候補を選ぶピッカーを開くボタン (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "候補を追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "후보 추가"
+          }
+        }
+      }
+    },
+    "polls.create.scope.all" : {
+      "comment" : "候補の範囲の切り替え: すべての曲・アイドル・ユニットが候補 (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全て"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "polls.create.scope.all_hint" : {
+      "comment" : "候補の範囲が「全て」のときの説明。target は投票対象の種類 (target.song / target.idol / target.unit) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全%1$@から自由に投票できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모든 %1$@ 중에서 자유롭게 투표할 수 있어요."
+          }
+        }
+      }
+    },
+    "polls.create.scope.brand" : {
+      "comment" : "候補の範囲の切り替え: 選んだブランドのものだけが候補 (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランド限定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드 한정"
+          }
+        }
+      }
+    },
+    "polls.create.scope.brand_hint" : {
+      "comment" : "候補の範囲が「ブランド限定」のときの説明。target は投票対象の種類 (target.*) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チェックしたブランドの%1$@だけが候補になります。複数選択可。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "체크한 브랜드의 %1$@만 후보가 돼요. 여러 개 선택할 수 있어요."
+          }
+        }
+      }
+    },
+    "polls.create.scope.brand_required" : {
+      "comment" : "ブランド限定でブランドを 1 つも選んでいないときの案内 (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1つ以上選択してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "하나 이상 선택해 주세요"
+          }
+        }
+      }
+    },
+    "polls.create.scope.header" : {
+      "comment" : "お題作成シートの候補の範囲を選ぶ節の見出し (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票候補"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표 후보"
+          }
+        }
+      }
+    },
+    "polls.create.scope.manual" : {
+      "comment" : "候補の範囲の切り替え: 作成者が選んだものだけが候補 (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "候補指定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "후보 지정"
+          }
+        }
+      }
+    },
+    "polls.create.scope.manual_empty" : {
+      "comment" : "候補指定で候補を 1 つも選んでいないときの案内。「候補を追加」は下のボタン (create.scope.add_candidate) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「候補を追加」から選んでください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“후보 추가”에서 골라 주세요"
+          }
+        }
+      }
+    },
+    "polls.create.scope.manual_min" : {
+      "comment" : "候補指定のときの条件の説明 (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "候補は2件以上必要です。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "후보가 2건 이상 필요해요."
+          }
+        }
+      }
+    },
+    "polls.create.scope.manual_selected" : {
+      "comment" : "候補指定で今選んでいる候補の数 (上限 500 なので桁区切りは付かない) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg件選択中"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg건 선택됨"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "polls.create.submit" : {
+      "comment" : "お題作成シートの送信ボタン (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作成"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "만들기"
+          }
+        }
+      }
+    },
+    "polls.create.target.header" : {
+      "comment" : "お題作成シートの対象 (曲 / アイドル / ユニット) を選ぶ節の見出し (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票対象"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표 대상"
+          }
+        }
+      }
+    },
+    "polls.create.title" : {
+      "comment" : "お題作成シートの見出し (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お題を投稿"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "주제 올리기"
+          }
+        }
+      }
+    },
+    "polls.create.title_field.header" : {
+      "comment" : "お題作成シートの題名の欄の見出し (Android は入力欄のラベル) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイトル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "제목"
+          }
+        }
+      }
+    },
+    "polls.create.title_field.placeholder" : {
+      "comment" : "お題作成シートの題名の欄のプレースホルダ。例の文も訳す (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "例: 夏に聴きたい曲は？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "예: 여름에 듣고 싶은 곡은?"
+          }
+        }
+      }
+    },
+    "polls.detail.add_vote.button" : {
+      "comment" : "ランキングに無い候補を選んで投票するボタン。remaining は残りの票、limit は 1 人が入れられる票の数 (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "候補を追加して投票（残り%1$@/%2$@）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "후보를 추가해서 투표 (남은 표 %1$@/%2$@)"
+          }
+        }
+      }
+    },
+    "polls.detail.add_vote.done" : {
+      "comment" : "票を使い切ったときの、候補を追加するボタン (押せない)。voted と limit はどちらも 1 人が入れられる票の数 (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票済み（%1$@/%2$@）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표 완료 (%1$@/%2$@)"
+          }
+        }
+      }
+    },
+    "polls.detail.delete.a11y" : {
+      "comment" : "詳細のツールバーのゴミ箱ボタンの読み上げ (作成者・管理者だけに出る) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このお題を削除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 주제 삭제"
+          }
+        }
+      }
+    },
+    "polls.detail.delete_confirm.action" : {
+      "comment" : "お題を削除する前の確認の実行ボタン (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "삭제"
+          }
+        }
+      }
+    },
+    "polls.detail.delete_confirm.message" : {
+      "comment" : "お題を削除する前の確認の本文 (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ランキング・投票データも一緒に削除され、元に戻せません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "랭킹·투표 데이터도 함께 삭제되며 되돌릴 수 없어요."
+          }
+        }
+      }
+    },
+    "polls.detail.delete_confirm.title" : {
+      "comment" : "お題を削除する前の確認の見出し (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このお題を削除しますか？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 주제를 삭제할까요?"
+          }
+        }
+      }
+    },
+    "polls.detail.delete_error.title" : {
+      "comment" : "お題の削除に失敗したときのアラートの見出し (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エラー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오류"
+          }
+        }
+      }
+    },
+    "polls.detail.entry.unvote.a11y" : {
+      "comment" : "ランキングの行の投票ボタンの読み上げ (投票済みの候補。押すと取り消す) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票を取消"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표 취소"
+          }
+        }
+      }
+    },
+    "polls.detail.entry.vote.a11y" : {
+      "comment" : "ランキングの行の投票ボタンの読み上げ (まだ投票していない候補) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표"
+          }
+        }
+      }
+    },
+    "polls.detail.entry.votes" : {
+      "comment" : "ランキングの行の票の数。1000 以上は桁区切りが付く (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg票"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg표"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "polls.detail.error.delete_failed" : {
+      "comment" : "お題の削除に失敗したときの本文 (サーバからの説明が無いとき) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除に失敗しました。時間をおいて再試行してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "삭제하지 못했어요. 잠시 후 다시 시도해 주세요."
+          }
+        }
+      }
+    },
+    "polls.detail.error.unvote_failed" : {
+      "comment" : "投票の取り消しに失敗したときに詳細に出す赤い文 (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消できませんでした"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표를 취소하지 못했어요"
+          }
+        }
+      }
+    },
+    "polls.detail.error.vote_failed" : {
+      "comment" : "投票に失敗したときに詳細に出す赤い文 (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票できませんでした"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표하지 못했어요"
+          }
+        }
+      }
+    },
+    "polls.detail.idol_picker.title" : {
+      "comment" : "アイドルのお題で候補を選ぶピッカーのナビゲーションタイトル (短く) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표하기"
+          }
+        }
+      }
+    },
+    "polls.detail.my_votes.progress" : {
+      "comment" : "自分の投票のシェアの横に出す、入れた票の数 / 1 人が入れられる票の数 (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あなたの投票 %1$@/%2$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "내 투표 %1$@/%2$@"
+          }
+        }
+      }
+    },
+    "polls.detail.ranking.count.idol" : {
+      "comment" : "ランキングの見出しの右に出す候補の数 (アイドルのお題)。1000 以上は桁区切りが付く (もとは桁区切りなし) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg人"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg명"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "polls.detail.ranking.count.song" : {
+      "comment" : "ランキングの見出しの右に出す候補の数 (曲のお題)。1000 以上は桁区切りが付く (もとは桁区切りなし) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "polls.detail.ranking.count.unit" : {
+      "comment" : "ランキングの見出しの右に出す候補の数 (ユニットのお題)。1000 以上は桁区切りが付く (もとは桁区切りなし) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg組"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg팀"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "polls.detail.ranking.empty.message" : {
+      "comment" : "ランキングに 1 票も無いときの空状態の誘い文句 (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最初の一票を入れましょう！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "첫 표를 던져 보세요!"
+          }
+        }
+      }
+    },
+    "polls.detail.ranking.empty.title" : {
+      "comment" : "ランキングに 1 票も無いときの空状態の見出し (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだ票がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 표가 없어요"
+          }
+        }
+      }
+    },
+    "polls.detail.ranking.header" : {
+      "comment" : "詳細の票数の順位の節の見出し (右に候補の数) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ランキング"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "랭킹"
+          }
+        }
+      }
+    },
+    "polls.detail.scope.manual" : {
+      "comment" : "詳細の見出しの下のチップ。作成者が候補を指定したお題で、その候補の数 (上限 500 なので桁区切りは付かない) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "候補%arg件から選択"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "후보 %arg건 중에서 선택"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "polls.detail.share_votes.a11y" : {
+      "comment" : "自分が投票した候補をシェアするボタンの読み上げ (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分の投票をシェア"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "내 투표 공유"
+          }
+        }
+      }
+    },
+    "polls.detail.share_votes.button" : {
+      "comment" : "自分が投票した候補をシェアするボタン (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票をシェア"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표 공유"
+          }
+        }
+      }
+    },
+    "polls.detail.title_fallback" : {
+      "comment" : "お題詳細のナビゲーションタイトル。お題を読み込む前・失敗したときだけ出る (読めたらお題の題名) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お題"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "주제"
+          }
+        }
+      }
+    },
+    "polls.detail.vote_hint" : {
+      "comment" : "開催中のお題で、ランキングの行を押すと投票・取り消しができることの案内。remaining は残りの票、limit は 1 人が入れられる票の数 (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "👍 上のランキングをタップで投票/取消（残り%1$@/%2$@）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "👍 위 랭킹을 탭해서 투표/취소 (남은 표 %1$@/%2$@)"
+          }
+        }
+      }
+    },
+    "polls.error.network" : {
+      "comment" : "お題の一覧・殿堂の読み込みに失敗し、サーバからの説明も無いときの説明 (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通信エラー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "통신 오류"
+          }
+        }
+      }
+    },
+    "polls.hall_of_fame.empty.message" : {
+      "comment" : "殿堂に 1 件も無いときの空状態の説明 (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お題が終了すると、ここに優勝した曲やアイドルが並びます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "주제가 종료되면 여기에 우승한 곡과 아이돌이 표시돼요."
+          }
+        }
+      }
+    },
+    "polls.hall_of_fame.empty.title" : {
+      "comment" : "殿堂に 1 件も無いときの空状態の見出し (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだ優勝者がいません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 우승자가 없어요"
+          }
+        }
+      }
+    },
+    "polls.hall_of_fame.row.votes" : {
+      "comment" : "殿堂の行の優勝者の票の数。1000 以上は桁区切りが付く (Android はもとは桁区切りなし) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg票"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg표"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "polls.hall_of_fame.row.winner" : {
+      "comment" : "殿堂の行の右に出す札 (そのお題で 1 位) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "優勝"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "우승"
+          }
+        }
+      }
+    },
+    "polls.hall_of_fame.title" : {
+      "comment" : "終了したお題の優勝者を並べる画面のタイトル (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "殿堂"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "명예의 전당"
+          }
+        }
+      }
+    },
+    "polls.list.create.a11y" : {
+      "comment" : "一覧の右上の ＋ ボタンの読み上げ (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お題を作成"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "주제 만들기"
+          }
+        }
+      }
+    },
+    "polls.list.empty.active.message" : {
+      "comment" : "開催中のお題が 1 件も無いときの空状態の説明。＋ は右上の作成ボタン (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "右上の「＋」から新しいお題を投稿できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오른쪽 위의 “+”를 눌러 새 주제를 올릴 수 있어요."
+          }
+        }
+      }
+    },
+    "polls.list.empty.active.title" : {
+      "comment" : "開催中のお題が 1 件も無いときの空状態の見出し (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開催中のお題がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "진행 중인 주제가 없어요"
+          }
+        }
+      }
+    },
+    "polls.list.empty.ended.title" : {
+      "comment" : "終了したお題が 1 件も無いときの空状態の見出し (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終了したお題がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "종료된 주제가 없어요"
+          }
+        }
+      }
+    },
+    "polls.list.hall_of_fame.a11y" : {
+      "comment" : "一覧の左上の王冠ボタンの読み上げ (終了したお題の優勝者の一覧へ) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "殿堂を見る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "명예의 전당 보기"
+          }
+        }
+      }
+    },
+    "polls.list.row.total_votes" : {
+      "comment" : "一覧の行に出す、お題の票の合計。1000 以上は桁区切りが付く (1,234票。Android はもとは桁区切りなし) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "計%arg票"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "총 %arg표"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "polls.list.segment.active" : {
+      "comment" : "お題一覧の切り替え (開催中 / 終了) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開催中"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "진행 중"
+          }
+        }
+      }
+    },
+    "polls.list.segment.ended" : {
+      "comment" : "お題一覧の切り替え (開催中 / 終了) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終了"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "종료"
+          }
+        }
+      }
+    },
+    "polls.list.title" : {
+      "comment" : "お題一覧のナビゲーションタイトル (機能の名前) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "みんなの投票"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모두의 투표"
+          }
+        }
+      }
+    },
+    "polls.load_error.title" : {
+      "comment" : "お題の一覧・詳細・殿堂の読み込みに失敗したときの空状態の見出し (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "読み込みに失敗しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "불러오지 못했어요"
+          }
+        }
+      }
+    },
+    "polls.login_prompt.message" : {
+      "comment" : "未ログインの人に出す案内 (iOS: 詳細のインラインのログイン導線。Android: 一覧・詳細のバナー) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票にはログインが必要です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표하려면 로그인해야 해요"
+          }
+        }
+      }
+    },
+    "polls.my_votes.deleted_choice" : {
+      "comment" : "投票した候補の曲・アイドル・ユニットがデータから消えていて名前を出せないとき (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(削除済み)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "(삭제됨)"
+          }
+        }
+      }
+    },
+    "polls.my_votes.empty.message" : {
+      "comment" : "投票の履歴が 1 件も無いときの空状態の説明。みんなの投票 = 機能の名前 (list.title) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "みんなの投票でお題に投票すると、ここに履歴が残ります"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모두의 투표에서 주제에 투표하면 여기에 기록이 남아요"
+          }
+        }
+      }
+    },
+    "polls.my_votes.empty.title" : {
+      "comment" : "投票の履歴が 1 件も無いときの空状態の見出し (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだ投票していません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 투표하지 않았어요"
+          }
+        }
+      }
+    },
+    "polls.my_votes.title" : {
+      "comment" : "自分が投票したお題の履歴の画面のタイトル (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイ投票"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "내 투표"
+          }
+        }
+      }
+    },
+    "polls.scope.badge.brand" : {
+      "comment" : "お題の候補の範囲を示す小さなバッジ。1 つのブランドの曲・アイドル・ユニットだけが候補 (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランド限定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드 한정"
+          }
+        }
+      }
+    },
+    "polls.scope.badge.brand_multi" : {
+      "comment" : "お題の候補の範囲を示す小さなバッジ。count は候補に選ばれたブランドの数 (2 以上)。助数詞が無いので int (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランド限定×%1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드 한정×%1$@"
+          }
+        }
+      }
+    },
+    "polls.scope.badge.manual" : {
+      "comment" : "お題の候補の範囲を示す小さなバッジ。作成者が指定した候補の数 (上限 500 なので桁区切りは付かない) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "指定候補%arg件"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "지정 후보 %arg건"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "polls.share_poll.a11y" : {
+      "comment" : "お題そのものをシェアするボタンの読み上げ (iOS: 詳細のツールバー。Android: 一覧の行と詳細のツールバー) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このお題をシェア"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 주제 공유"
+          }
+        }
+      }
+    },
+    "polls.status.closes_today" : {
+      "comment" : "お題の状態の札。今日が締切の開催中のお題 (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本日締切"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오늘 마감"
+          }
+        }
+      }
+    },
+    "polls.status.days_left" : {
+      "comment" : "お題の状態の札。締切までの日数。ふつうは最長 30 日で桁区切りは付かない。Android で締切が不明 (endsAtMs = Long.MAX_VALUE) のときだけ Int.MAX_VALUE に頭打ちになり 2,147,483,647 と桁区切り付きで出る (もとは Long のままの日数で 1067 億あまり、桁区切りなし) (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@days@"
+          },
+          "substitutions" : {
+            "days" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "残り%arg日"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@days@"
+          },
+          "substitutions" : {
+            "days" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg일 남음"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "polls.status.ended" : {
+      "comment" : "お題の状態の札。締切を過ぎた (または止められた) お題 (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終了"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "종료"
+          }
+        }
+      }
+    },
+    "polls.target.idol" : {
+      "comment" : "お題の投票対象の種類 (アイドル)。作成シートの対象の選択肢・詳細の種類のチップ・create.scope.*_hint の target に入る (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌"
+          }
+        }
+      }
+    },
+    "polls.target.song" : {
+      "comment" : "お題の投票対象の種類 (曲)。作成シートの対象の選択肢・詳細の種類のチップ・create.scope.*_hint の target に入る (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡"
+          }
+        }
+      }
+    },
+    "polls.target.unit" : {
+      "comment" : "お題の投票対象の種類 (ユニット)。作成シートの対象の選択肢・詳細の種類のチップ・create.scope.*_hint の target に入る (i18n/catalog/polls.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

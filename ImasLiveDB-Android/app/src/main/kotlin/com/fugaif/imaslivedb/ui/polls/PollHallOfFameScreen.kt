@@ -34,6 +34,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasArtwork
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
@@ -57,9 +59,9 @@ fun PollHallOfFameScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("殿堂", fontWeight = FontWeight.Bold) },
+                title = { Text(L10n.Polls.hallOfFameTitle.resolve(), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "戻る") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, L10n.Common.actionBack.resolve()) }
                 }
             )
         }
@@ -70,15 +72,15 @@ fun PollHallOfFameScreen(
                 state.isLoading -> CircularProgressIndicator()
                 state.loadError != null -> ImasEmptyState(
                     icon = Icons.Filled.ErrorOutline,
-                    title = "読み込みに失敗しました",
-                    message = state.loadError,
-                    actionTitle = "再試行",
+                    title = L10n.Polls.loadErrorTitle.resolve(),
+                    message = state.loadError?.resolve(),
+                    actionTitle = L10n.Common.actionRetry.resolve(),
                     onAction = { viewModel.load() }
                 )
                 state.rows.isEmpty() -> ImasEmptyState(
                     icon = Icons.Filled.EmojiEvents,
-                    title = "まだ優勝者がいません",
-                    message = "お題が終了すると、ここに優勝した曲やアイドルが並びます。"
+                    title = L10n.Polls.hallOfFameEmptyTitle.resolve(),
+                    message = L10n.Polls.hallOfFameEmptyMessage.resolve()
                 )
                 else -> LazyColumn(Modifier.fillMaxSize()) {
                     // 同じ対象が複数のお題で優勝しうるので、キーは entityId ではなく pollId。
@@ -131,11 +133,11 @@ private fun HallOfFameRowView(row: HallOfFameRow, onClick: () -> Unit) {
                     tint = DS.warning, modifier = Modifier.size(14.dp)
                 )
                 Text(
-                    "優勝", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DS.warning,
+                    L10n.Polls.hallOfFameRowWinner.resolve(), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DS.warning,
                     modifier = Modifier.padding(start = 3.dp)
                 )
             }
-            Text("${row.result.voteCount}票", fontSize = 12.sp, color = DS.ink3)
+            Text(L10n.Polls.hallOfFameRowVotes(count = row.result.voteCount).resolve(), fontSize = 12.sp, color = DS.ink3)
         }
         Icon(
             Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null,

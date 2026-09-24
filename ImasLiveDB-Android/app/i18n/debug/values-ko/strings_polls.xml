@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/polls.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources>
+    <string name="polls_action_cancel">취소</string>
+    <string name="polls_action_ok">확인</string>
+    <string name="polls_create_char_counter">%1$d / %2$d자</string>
+    <string name="polls_create_description_field_header_android">설명 (선택)</string>
+    <string name="polls_create_description_field_placeholder_android">보충 설명이나 규칙이 있다면</string>
+    <plurals name="polls_create_duration_days">
+        <item quantity="other">%1$,d일간</item>
+    </plurals>
+    <string name="polls_create_duration_header">모집 기간</string>
+    <string name="polls_create_error_failed">만들지 못했어요. 잠시 후 다시 시도해 주세요.</string>
+    <string name="polls_create_error_rate_limited">오늘 만들 수 있는 주제 수의 한도에 도달했어요. 내일 다시 시도해 주세요.</string>
+    <plurals name="polls_create_intro">
+        <item quantity="other">주제를 만들어 모두의 최애를 투표로 뽑아 보세요. 기간 동안 누구나 %1$,d표까지 투표할 수 있어요.</item>
+    </plurals>
+    <string name="polls_create_scope_add_candidate">후보 추가</string>
+    <string name="polls_create_scope_all">전체</string>
+    <string name="polls_create_scope_all_hint">모든 %1$s 중에서 자유롭게 투표할 수 있어요.</string>
+    <string name="polls_create_scope_brand">브랜드 한정</string>
+    <string name="polls_create_scope_brand_hint_android">선택한 브랜드의 %1$s만 후보가 돼요. 여러 개 선택할 수 있어요.</string>
+    <string name="polls_create_scope_brand_required">하나 이상 선택해 주세요</string>
+    <string name="polls_create_scope_header">투표 후보</string>
+    <string name="polls_create_scope_manual">후보 지정</string>
+    <string name="polls_create_scope_manual_min">후보가 2건 이상 필요해요.</string>
+    <plurals name="polls_create_scope_manual_selected">
+        <item quantity="other">%1$,d건 선택됨</item>
+    </plurals>
+    <string name="polls_create_submit">만들기</string>
+    <string name="polls_create_target_header">투표 대상</string>
+    <string name="polls_create_title">주제 올리기</string>
+    <string name="polls_create_title_field_header">제목</string>
+    <string name="polls_create_title_field_placeholder">예: 여름에 듣고 싶은 곡은?</string>
+    <string name="polls_detail_add_vote_button_android">후보를 추가해서 투표 (남은 표 %1$d/%2$d)</string>
+    <string name="polls_detail_add_vote_done_android">투표 완료 (%1$d/%2$d)</string>
+    <string name="polls_detail_delete_a11y">이 주제 삭제</string>
+    <string name="polls_detail_delete_confirm_action">삭제</string>
+    <string name="polls_detail_delete_confirm_message">랭킹·투표 데이터도 함께 삭제되며 되돌릴 수 없어요.</string>
+    <string name="polls_detail_delete_confirm_title">이 주제를 삭제할까요?</string>
+    <string name="polls_detail_delete_error_title">오류</string>
+    <string name="polls_detail_entry_unvote_a11y">투표 취소</string>
+    <string name="polls_detail_entry_vote_a11y">투표</string>
+    <string name="polls_detail_error_delete_failed">삭제하지 못했어요. 잠시 후 다시 시도해 주세요.</string>
+    <string name="polls_detail_my_votes_progress">내 투표 %1$d/%2$d</string>
+    <string name="polls_detail_share_votes_button">투표 공유</string>
+    <plurals name="polls_detail_summary">
+        <item quantity="other">%1$,d표 · 후보 %2$d건</item>
+    </plurals>
+    <string name="polls_detail_vote_hint_android">탭해서 투표/취소 (남은 표 %1$d/%2$d)</string>
+    <string name="polls_error_network">통신 오류</string>
+    <string name="polls_hall_of_fame_empty_message">주제가 종료되면 여기에 우승한 곡과 아이돌이 표시돼요.</string>
+    <string name="polls_hall_of_fame_empty_title">아직 우승자가 없어요</string>
+    <plurals name="polls_hall_of_fame_row_votes">
+        <item quantity="other">%1$,d표</item>
+    </plurals>
+    <string name="polls_hall_of_fame_row_winner">우승</string>
+    <string name="polls_hall_of_fame_title">명예의 전당</string>
+    <string name="polls_list_create_a11y">주제 만들기</string>
+    <string name="polls_list_empty_active_message">오른쪽 위의 “+”를 눌러 새 주제를 올릴 수 있어요.</string>
+    <string name="polls_list_empty_active_title">진행 중인 주제가 없어요</string>
+    <string name="polls_list_empty_ended_title">종료된 주제가 없어요</string>
+    <string name="polls_list_hall_of_fame_a11y">명예의 전당 보기</string>
+    <string name="polls_list_row_top_entity">1위 %1$s</string>
+    <plurals name="polls_list_row_total_votes">
+        <item quantity="other">총 %1$,d표</item>
+    </plurals>
+    <string name="polls_list_segment_active">진행 중</string>
+    <string name="polls_list_segment_ended">종료</string>
+    <string name="polls_list_title_android">투표·예상</string>
+    <string name="polls_load_error_title">불러오지 못했어요</string>
+    <string name="polls_login_prompt_google_sign_in">Google로 로그인</string>
+    <string name="polls_login_prompt_message">투표하려면 로그인해야 해요</string>
+    <string name="polls_my_votes_deleted_choice">(삭제됨)</string>
+    <string name="polls_my_votes_empty_message">모두의 투표에서 주제에 투표하면 여기에 기록이 남아요</string>
+    <string name="polls_my_votes_empty_title">아직 투표하지 않았어요</string>
+    <string name="polls_my_votes_title">내 투표</string>
+    <string name="polls_picker_confirm">완료</string>
+    <plurals name="polls_picker_idol_over_limit">
+        <item quantity="other">%1$,d명까지 더 고를 수 있어요 (현재 +%2$d명)</item>
+    </plurals>
+    <string name="polls_picker_idol_search_prompt">아이돌 이름 / CV 이름으로 검색</string>
+    <string name="polls_picker_idol_title">출연자 선택 (%1$d)</string>
+    <string name="polls_picker_search_clear_a11y">지우기</string>
+    <string name="polls_picker_song_advanced_a11y">상세 검색</string>
+    <string name="polls_picker_song_empty">해당하는 곡이 없어요</string>
+    <plurals name="polls_picker_song_over_limit">
+        <item quantity="other">%1$,d곡까지 더 고를 수 있어요 (현재 +%2$d곡)</item>
+    </plurals>
+    <string name="polls_picker_song_search_prompt">곡명으로 검색</string>
+    <string name="polls_picker_song_songwriter_prompt">작사·작곡·편곡자로 검색</string>
+    <string name="polls_picker_song_tag_filter">태그로 필터</string>
+    <string name="polls_picker_song_tag_separator">" + "</string>
+    <string name="polls_picker_song_title">곡 선택 (%1$d)</string>
+    <plurals name="polls_picker_unit_over_limit">
+        <item quantity="other">%1$,d건까지 더 고를 수 있어요 (현재 +%2$d건)</item>
+    </plurals>
+    <string name="polls_picker_unit_search_prompt">유닛 이름으로 검색</string>
+    <string name="polls_picker_unit_title">유닛 선택 (%1$d)</string>
+    <string name="polls_picker_view_mode_grid_a11y">그리드로 보기</string>
+    <string name="polls_picker_view_mode_list_a11y">목록으로 보기</string>
+    <string name="polls_scope_badge_brand">브랜드 한정</string>
+    <string name="polls_scope_badge_brand_multi">브랜드 한정×%1$d</string>
+    <plurals name="polls_scope_badge_manual">
+        <item quantity="other">지정 후보 %1$,d건</item>
+    </plurals>
+    <string name="polls_share_poll_a11y">이 주제 공유</string>
+    <string name="polls_status_closes_today">오늘 마감</string>
+    <plurals name="polls_status_days_left">
+        <item quantity="other">%1$,d일 남음</item>
+    </plurals>
+    <string name="polls_status_ended">종료</string>
+    <string name="polls_target_idol">아이돌</string>
+    <string name="polls_target_song">곡</string>
+    <string name="polls_target_unit">유닛</string>
+</resources>
