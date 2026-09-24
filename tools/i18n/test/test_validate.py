@@ -375,6 +375,18 @@ class GlossaryTest(unittest.TestCase):
         # 英字は大文字小文字を区別しない (sentence case の文頭)
         self.assertEqual(self.problems({"ja": "担当", "en": "My idol"}), [])
 
+    def test_latin_forms_match_from_the_start_of_a_word(self):
+        g = {"terms": [{"ja": "一覧", "en": ["list", "all"]}, {"ja": "ライブ", "en": "live", "zh-Hans": "Live"},
+                       {"ja": "楽曲", "en": "song"}]}
+        # call の中の all、deliver の中の live は数えない
+        warned = self.problems({"ja": "コールガイドの一覧", "en": "Call guide"}, g)
+        self.assertEqual([w.split(": x: ")[1] for w in warned], ["用語集では 一覧 → list / all (en の値に無い)"])
+        warned = self.problems({"ja": "ライブを届ける", "en": "We deliver it"}, g)
+        self.assertEqual([w.split(": x: ")[1] for w in warned], ["用語集では ライブ → live (en の値に無い)"])
+        # 語の頭にあれば、大文字でも語尾が付いていてもよい。漢字のすぐあとの英字も語の頭
+        self.assertEqual(self.problems({"ja": "楽曲一覧", "en": "All songs"}, g), [])
+        self.assertEqual(self.problems({"ja": "ライブ", "en": "Lives", "zh-Hans": "联合Live"}, g), [])
+
     def test_only_languages_present_on_the_entry(self):
         self.assertEqual(self.problems({"ja": "担当を選ぶ", "en": "Choose your idol"}), [])
 
