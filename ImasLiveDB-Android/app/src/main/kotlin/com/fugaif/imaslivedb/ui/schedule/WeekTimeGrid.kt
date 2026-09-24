@@ -47,6 +47,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.model.CalendarEntry
+import com.fugaif.imaslivedb.i18n.DisplayFormat
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import kotlinx.coroutines.delay
@@ -84,7 +87,6 @@ private object WeekMetric {
 }
 
 private val WeekSwipeThreshold = 50.dp
-private val WeekdaySymbols = listOf("日", "月", "火", "水", "木", "金", "土")
 
 /** 時間グリッドに置く 1 ブロック。 */
 private data class TimedBlock(
@@ -162,10 +164,13 @@ private fun WeekHeader(weekDays: List<LocalDate>, onWeekDelta: (Long) -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = { onWeekDelta(-1) }) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "前の週", tint = DS.ink2)
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = L10n.Schedule.weekPrevA11y.resolve(), tint = DS.ink2)
         }
         Text(
-            "${start.monthValue}/${start.dayOfMonth} 〜 ${end.monthValue}/${end.dayOfMonth}",
+            L10n.Schedule.weekRange(
+                start = "${start.monthValue}/${start.dayOfMonth}",
+                end = "${end.monthValue}/${end.dayOfMonth}"
+            ).resolve(),
             modifier = Modifier.weight(1f),
             textAlign = TextAlign.Center,
             fontSize = 15.sp,
@@ -173,7 +178,7 @@ private fun WeekHeader(weekDays: List<LocalDate>, onWeekDelta: (Long) -> Unit) {
             color = DS.ink
         )
         IconButton(onClick = { onWeekDelta(1) }) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "次の週", tint = DS.ink2)
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = L10n.Schedule.weekNextA11y.resolve(), tint = DS.ink2)
         }
     }
 }
@@ -185,9 +190,11 @@ private fun DayHeaderRow(
     dayWidth: Dp,
     onSelectDate: (LocalDate) -> Unit
 ) {
+    // 曜日の見出しは画面に出ている言語で書く (ja: 日 月 火 … / ko: 일 월 화 …)
+    val locale = rememberFormattingLocale()
     Row(modifier = Modifier.fillMaxWidth()) {
         Box(modifier = Modifier.width(WeekMetric.gutter))
-        weekDays.forEachIndexed { index, date ->
+        weekDays.forEach { date ->
             val isToday = date == state.today
             val isSelected = date == state.selectedDate
             Column(
@@ -199,7 +206,7 @@ private fun DayHeaderRow(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
-                    WeekdaySymbols[index],
+                    DisplayFormat.weekdayNarrow(date.dayOfWeek, locale),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = if (isToday) DS.ink else DS.ink3
@@ -271,7 +278,7 @@ private fun PeriodBandLane(
                 contentAlignment = Alignment.CenterStart
             ) {
                 Text(
-                    "受付 ${band.name}",
+                    L10n.Schedule.bandTicketPeriod(event = band.name).resolve(),
                     color = ImasTheme.onColor(accent),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -295,7 +302,7 @@ private fun AllDayLane(
     val laneHeight = WeekMetric.allDayBarHeight * WeekMetric.MAX_ALL_DAY_BANDS + 2.dp + 13.dp
     Row(modifier = Modifier.fillMaxWidth().height(laneHeight)) {
         Text(
-            "終日",
+            L10n.Schedule.weekAllDay.resolve(),
             modifier = Modifier.width(WeekMetric.gutter),
             fontSize = 9.sp,
             fontWeight = FontWeight.SemiBold,
@@ -436,7 +443,7 @@ private fun DayBlocks(
                 .padding(4.dp)
         ) {
             Text(
-                block.entry.barLabel(),
+                block.entry.barLabel().resolve(),
                 color = block.entry.accentInk(),
                 fontSize = 10.sp,
                 fontWeight = FontWeight.SemiBold,

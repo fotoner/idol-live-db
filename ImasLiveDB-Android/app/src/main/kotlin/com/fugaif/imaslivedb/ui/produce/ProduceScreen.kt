@@ -69,6 +69,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.model.EventWithDateRange
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.Song
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasLeadBar
 import com.fugaif.imaslivedb.ui.components.ImasSectionHeader
 import com.fugaif.imaslivedb.ui.components.ImasStatTile
@@ -110,9 +113,11 @@ fun ProduceScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("プロデュース", fontWeight = FontWeight.Bold) },
+                title = { Text(L10n.Produce.title.resolve(), fontWeight = FontWeight.Bold) },
                 actions = {
-                    IconButton(onClick = onNavigateToSettings) { Icon(Icons.Filled.Settings, "設定・マイ") }
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(Icons.Filled.Settings, L10n.Nav.settingsButtonA11y.resolve())
+                    }
                 }
             )
         }
@@ -122,13 +127,13 @@ fun ProduceScreen(
         ) {
             if (state.pickedIdols.isEmpty() && state.favoriteIdols.isEmpty() && state.favoriteSongs.isEmpty()) {
                 Text(
-                    "アイドルや楽曲の詳細画面で ♥ を押すと、担当・お気に入りがここに並びます",
+                    L10n.Produce.hubEmptyHint.resolve(),
                     modifier = Modifier.fillMaxWidth().padding(24.dp),
                     color = DS.ink3,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-            IdolSection("担当", state.pickedIdols, DS.pick, onNavigateToIdol)
+            IdolSection(L10n.Produce.oshiHeaderAndroid, state.pickedIdols, DS.pick, onNavigateToIdol)
 
             state.featuredPoll?.let { poll ->
                 FeaturedPollCard(poll = poll, onClick = { onNavigateToPollDetail(poll.id) })
@@ -159,49 +164,67 @@ fun ProduceScreen(
                 onSeeAll = onNavigateToAttendedEvents
             )
 
-            IdolSection("お気に入りアイドル", state.favoriteIdols, DS.favorite, onNavigateToIdol)
+            IdolSection(L10n.Produce.favoritesIdols, state.favoriteIdols, DS.favorite, onNavigateToIdol)
             if (state.favoriteSongs.isNotEmpty()) {
-                SectionTitle("お気に入り曲")
+                SectionTitle(L10n.Produce.favoritesSongs)
                 state.favoriteSongs.forEach { song ->
                     SongLine(song) { onNavigateToSong(song.id) }
                 }
             }
 
             HorizontalDivider(color = DS.sep, modifier = Modifier.padding(top = 8.dp))
-            HubRow(Icons.Filled.Favorite, "お気に入り一覧", "曲・アイドル・ライブ", DS.ink2, state.favoriteCount, onNavigateToFavorites)
+            HubRow(
+                Icons.Filled.Favorite, L10n.Produce.hubFavoritesTitle, L10n.Produce.hubFavoritesSubtitle,
+                DS.ink2, state.favoriteCount, onNavigateToFavorites
+            )
             HorizontalDivider(color = DS.sep)
-            HubRow(Icons.Filled.EventAvailable, "参加したライブ", "", DS.ink2, state.attendedCount, onNavigateToAttendedEvents)
+            HubRow(Icons.Filled.EventAvailable, L10n.Produce.hubAttendedTitle, null, DS.ink2, state.attendedCount, onNavigateToAttendedEvents)
             HorizontalDivider(color = DS.sep)
-            HubRow(Icons.Filled.MusicNote, "回収した楽曲", "現地で聴けた曲だけの一覧", DS.ink2, state.collectedCount, onNavigateToCollectedSongs)
+            HubRow(
+                Icons.Filled.MusicNote, L10n.Produce.hubCollectedTitle, L10n.Produce.hubCollectedSubtitle,
+                DS.ink2, state.collectedCount, onNavigateToCollectedSongs
+            )
             HorizontalDivider(color = DS.sep)
-            HubRow(Icons.Filled.BarChart, "習熟度", "どこまで覚えたかをシリーズ・ユニット別に", DS.ink2, state.masteryCount, onNavigateToMastery)
+            HubRow(
+                Icons.Filled.BarChart, L10n.Produce.hubMasteryTitle, L10n.Produce.hubMasterySubtitle,
+                DS.ink2, state.masteryCount, onNavigateToMastery
+            )
             HorizontalDivider(color = DS.sep)
-            // 件数ではなく金額を出す — 「いくら使ったか」は件数では読めない。
-            HubRow(Icons.Filled.AttachMoney, "収支", "使った額 ${state.ledgerTotalLabel}", DS.ink2, null, onNavigateToLedger)
+            // 件数ではなく金額を出す — 「いくら使ったか」は件数では読めない。金額の表記はコア。
+            HubRow(
+                Icons.Filled.AttachMoney, L10n.Produce.hubLedgerTitle,
+                L10n.Produce.hubLedgerSubtitle(amount = state.ledgerTotalLabel), DS.ink2, null, onNavigateToLedger
+            )
             HorizontalDivider(color = DS.sep)
             // 年表は担当アイドルのブランドから開く (見たい歴史はたいてい担当の歴史)。
             // 担当がいなければブランド指定なしで開き、年表側が先頭ブランドを選ぶ。
-            HubRow(Icons.Filled.Timeline, "年表", "ライブ・楽曲シリーズ・節目を1枚で俯瞰する", DS.ink2, null) {
+            HubRow(Icons.Filled.Timeline, L10n.Produce.entryTimelineTitle, L10n.Produce.entryTimelinePreview, DS.ink2, null) {
                 onNavigateToTimeline(state.pickedIdols.firstOrNull()?.brandId)
             }
             HorizontalDivider(color = DS.sep)
-            HubRow(Icons.Filled.HowToVote, "投票・予想", "タグ・ペンライト・ポール", DS.ink2, null, onNavigateToPolls)
+            HubRow(Icons.Filled.HowToVote, L10n.Produce.hubPollsTitle, L10n.Produce.hubPollsSubtitle, DS.ink2, null, onNavigateToPolls)
             HorizontalDivider(color = DS.sep)
-            HubRow(Icons.Filled.Sell, "みんなのタグ", "楽曲タグの作成・閲覧", DS.ink2, null, onNavigateToTagList)
+            HubRow(Icons.Filled.Sell, L10n.Produce.hubTagsTitle, L10n.Produce.hubTagsSubtitle, DS.ink2, null, onNavigateToTagList)
             HorizontalDivider(color = DS.sep)
-            HubRow(Icons.Filled.LocalFireDepartment, "タグの動き", "伸びてるタグ・急上昇の曲やアイドルをチェック", DS.ink2, null, onNavigateToTagActivity)
+            HubRow(
+                Icons.Filled.LocalFireDepartment, L10n.Produce.entryTagActivityTitle, L10n.Produce.entryTagActivityPreview,
+                DS.ink2, null, onNavigateToTagActivity
+            )
             HorizontalDivider(color = DS.sep)
-            HubRow(Icons.AutoMirrored.Filled.ListAlt, "マイ投稿・編集履歴", "", DS.ink2, state.contributionCount, onNavigateToMyContributions)
+            HubRow(
+                Icons.AutoMirrored.Filled.ListAlt, L10n.Produce.hubContributionsTitle, null,
+                DS.ink2, state.contributionCount, onNavigateToMyContributions
+            )
             HorizontalDivider(color = DS.sep)
-            HubRow(Icons.Filled.HowToVote, "投票履歴", "", DS.ink2, state.voteCount, onNavigateToMyVotes)
+            HubRow(Icons.Filled.HowToVote, L10n.Produce.hubVotesTitle, null, DS.ink2, state.voteCount, onNavigateToMyVotes)
             HorizontalDivider(color = DS.sep)
-            HubRow(Icons.Filled.History, "みんなの編集履歴", "", DS.ink2, null, onNavigateToEditHistory)
+            HubRow(Icons.Filled.History, L10n.Produce.hubEditHistoryTitle, null, DS.ink2, null, onNavigateToEditHistory)
             HorizontalDivider(color = DS.sep)
-            HubRow(Icons.Filled.SportsEsports, "ゲーム", "クイズ・イントロ当てクイズ", DS.ink2, null, onNavigateToGamesHub)
+            HubRow(Icons.Filled.SportsEsports, L10n.Produce.hubGamesTitle, L10n.Produce.hubGamesSubtitle, DS.ink2, null, onNavigateToGamesHub)
             HorizontalDivider(color = DS.sep)
-            HubRow(Icons.Filled.BarChart, "統計", "ブランド別・年別・ランキング", DS.ink2, null, onNavigateToStats)
+            HubRow(Icons.Filled.BarChart, L10n.Produce.hubStatsTitle, L10n.Produce.hubStatsSubtitle, DS.ink2, null, onNavigateToStats)
             HorizontalDivider(color = DS.sep)
-            HubRow(Icons.Filled.Settings, "設定・マイ", "", DS.ink2, null, onNavigateToSettings)
+            HubRow(Icons.Filled.Settings, L10n.Produce.hubSettingsTitle, null, DS.ink2, null, onNavigateToSettings)
             Spacer(Modifier.height(24.dp))
         }
     }
@@ -233,7 +256,7 @@ private fun FeaturedPollCard(poll: FeaturedPoll, onClick: () -> Unit) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Filled.HowToVote, null, tint = Color.White, modifier = Modifier.size(15.dp))
             Text(
-                "投票受付中", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White,
+                L10n.Produce.pollBadge.resolve(), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White,
                 modifier = Modifier.padding(start = 6.dp)
             )
             Spacer(Modifier.weight(1f))
@@ -244,10 +267,10 @@ private fun FeaturedPollCard(poll: FeaturedPoll, onClick: () -> Unit) {
             maxLines = 2, overflow = TextOverflow.Ellipsis
         )
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            PollMeta(Icons.Filled.ThumbUp, "${poll.totalVotes}票")
-            PollMeta(Icons.Filled.FormatListNumbered, "${poll.entryCount}候補")
+            PollMeta(Icons.Filled.ThumbUp, L10n.Produce.pollVotes(count = poll.totalVotes).resolve())
+            PollMeta(Icons.Filled.FormatListNumbered, L10n.Produce.pollEntries(count = poll.entryCount).resolve())
             Spacer(Modifier.weight(1f))
-            Text("投票する", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Text(L10n.Produce.pollAction.resolve(), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
             Icon(
                 Icons.AutoMirrored.Filled.ArrowForward, null, tint = Color.White,
                 modifier = Modifier.size(15.dp).padding(start = 4.dp)
@@ -280,14 +303,14 @@ private fun ActivitySection(
     onCollectedClick: () -> Unit
 ) {
     val tiles = listOf(
-        ActivityTile(Icons.Filled.Mic, state.attendedCount, "参加ライブ", onAttendedClick),
-        ActivityTile(Icons.Filled.Star, state.favoriteCount, "お気に入り", onFavoritesClick),
-        ActivityTile(Icons.AutoMirrored.Filled.ListAlt, state.contributionCount, "投稿", onContributionsClick),
-        ActivityTile(Icons.Filled.HowToVote, state.voteCount, "投票", onVotesClick),
-        ActivityTile(Icons.Filled.MusicNote, state.collectedCount, "回収", onCollectedClick)
+        ActivityTile(Icons.Filled.Mic, state.attendedCount, L10n.Produce.activityAttended, onAttendedClick),
+        ActivityTile(Icons.Filled.Star, state.favoriteCount, L10n.Produce.activityFavorites, onFavoritesClick),
+        ActivityTile(Icons.AutoMirrored.Filled.ListAlt, state.contributionCount, L10n.Produce.activityContributions, onContributionsClick),
+        ActivityTile(Icons.Filled.HowToVote, state.voteCount, L10n.Produce.activityVotes, onVotesClick),
+        ActivityTile(Icons.Filled.MusicNote, state.collectedCount, L10n.Produce.activityCollected, onCollectedClick)
     )
     Column {
-        ImasSectionHeader("あなたの活動", tight = true)
+        ImasSectionHeader(L10n.Produce.activityHeader, tight = true)
         // LazyVerticalGrid は縦スクロールの中に入れられない (高さが決まらない) ので、
         // 3 個ずつの Row に割って並べる。件数が固定なので行数も決まる。
         tiles.chunked(3).forEach { row ->
@@ -299,7 +322,7 @@ private fun ActivitySection(
                     ImasStatTile(
                         icon = tile.icon,
                         value = tile.value.toString(),
-                        label = tile.label,
+                        label = tile.label.resolve(),
                         seed = state.pickSeed,
                         tappable = true,
                         onClick = tile.onClick,
@@ -316,7 +339,7 @@ private fun ActivitySection(
 private data class ActivityTile(
     val icon: ImageVector,
     val value: Int,
-    val label: String,
+    val label: DisplayText,
     val onClick: () -> Unit
 )
 
@@ -325,7 +348,7 @@ private data class ActivityTile(
 private fun RecentsSection(recents: List<RecentChip>, onClick: (RecentChip) -> Unit) {
     if (recents.isEmpty()) return
     Column {
-        ImasSectionHeader("最近見た", tight = true)
+        ImasSectionHeader(L10n.Produce.recentsHeader, tight = true)
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -370,8 +393,8 @@ private fun AttendedSection(
     if (events.isEmpty()) return
     Column {
         ImasSectionHeader(
-            "参加したライブ",
-            count = "${events.size}",
+            L10n.Produce.attendedHeader,
+            count = DisplayText.Verbatim("${events.size}"),
             onSeeAll = if (events.size > ATTENDED_INLINE_LIMIT) onSeeAll else null
         )
         events.take(ATTENDED_INLINE_LIMIT).forEach { ew ->
@@ -401,7 +424,7 @@ private fun AttendedSection(
         }
         if (events.size > ATTENDED_INLINE_LIMIT) {
             Text(
-                "全て見る (${events.size}件)",
+                L10n.Produce.attendedSeeAll(count = events.size).resolve(),
                 fontSize = 14.sp, fontWeight = FontWeight.Medium, color = DS.sys,
                 modifier = Modifier.clickable(onClick = onSeeAll).padding(horizontal = 16.dp, vertical = 8.dp)
             )
@@ -410,7 +433,7 @@ private fun AttendedSection(
 }
 
 @Composable
-private fun IdolSection(title: String, idols: List<Idol>, accent: Color, onClick: (String) -> Unit) {
+private fun IdolSection(title: DisplayText, idols: List<Idol>, accent: Color, onClick: (String) -> Unit) {
     if (idols.isEmpty()) return
     SectionTitle(title)
     LazyRow(
@@ -457,9 +480,9 @@ private fun SongLine(song: Song, onClick: () -> Unit) {
 }
 
 @Composable
-private fun SectionTitle(title: String) {
+private fun SectionTitle(title: DisplayText) {
     Text(
-        title,
+        title.resolve(),
         modifier = Modifier.fillMaxWidth().padding(start = 16.dp, top = 16.dp, bottom = 6.dp),
         style = MaterialTheme.typography.labelLarge,
         fontWeight = FontWeight.Bold,
@@ -474,8 +497,9 @@ private fun SectionTitle(title: String) {
 @Composable
 private fun HubRow(
     icon: ImageVector,
-    title: String,
-    subtitle: String,
+    title: DisplayText,
+    /** 説明の行。無い行は null。 */
+    subtitle: DisplayText?,
     accent: Color,
     count: Int?,
     onClick: () -> Unit
@@ -486,9 +510,9 @@ private fun HubRow(
     ) {
         Icon(icon, contentDescription = null, tint = accent, modifier = Modifier.size(22.dp))
         Column(modifier = Modifier.weight(1f).padding(start = 14.dp)) {
-            Text(title, style = MaterialTheme.typography.bodyLarge, color = DS.ink)
-            if (subtitle.isNotEmpty()) {
-                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = DS.ink3)
+            Text(title.resolve(), style = MaterialTheme.typography.bodyLarge, color = DS.ink)
+            if (subtitle != null) {
+                Text(subtitle.resolve(), style = MaterialTheme.typography.bodySmall, color = DS.ink3)
             }
         }
         if (count != null) {

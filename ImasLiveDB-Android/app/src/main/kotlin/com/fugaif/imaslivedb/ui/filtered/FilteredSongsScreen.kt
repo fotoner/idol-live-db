@@ -30,6 +30,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.SongRow
 import com.fugaif.imaslivedb.ui.theme.DS
 
@@ -60,10 +62,10 @@ fun FilteredSongsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(state.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                title = { Text(state.title.resolve(), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 }
             )
@@ -72,9 +74,9 @@ fun FilteredSongsScreen(
         Box(Modifier.fillMaxSize().padding(padding)) {
             when {
                 state.isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                state.songs.isEmpty() -> FilteredEmptyState(Icons.Filled.MusicNote, "楽曲が見つかりません")
+                state.songs.isEmpty() -> FilteredEmptyState(Icons.Filled.MusicNote, L10n.Filtered.songsEmpty.resolve())
                 else -> LazyColumn(Modifier.fillMaxSize()) {
-                    item(key = "count") { FilteredCountHeader("${state.songs.size}曲") }
+                    item(key = "count") { FilteredCountHeader(L10n.Filtered.songsCount(count = state.songs.size).resolve()) }
                     items(state.songs, key = { it.song.id }) { item ->
                         val song = item.song
                         Column {

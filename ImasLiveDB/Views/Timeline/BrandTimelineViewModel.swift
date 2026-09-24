@@ -43,9 +43,9 @@ final class BrandTimelineViewModel {
 
     /// 画面タイトル下に出すサマリ ("1,338公演 ・ 2,685曲" のような密度表示ではなく、
     /// 「いつからいつまでを見ているか」を示す)。
-    var periodLabel: String? {
+    var periodLabel: LocalizedStringResource? {
         guard let range = TimelineLayout.yearRange(of: bars) else { return nil }
-        return "\(range.lowerBound)年 〜 \(range.upperBound)年"
+        return L10n.Timeline.period(from: range.lowerBound, to: range.upperBound)
     }
 
     func loadIfNeeded() async {

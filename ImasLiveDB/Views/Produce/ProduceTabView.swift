@@ -61,7 +61,7 @@ struct ProduceTabView: View {
             }
             .background(DS.bg.ignoresSafeArea())
             .scrollContentBackground(.hidden)
-            .navigationTitle("プロデュース")
+            .navigationTitle(L10n.Produce.title)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     SettingsToolbarButton()
@@ -74,7 +74,9 @@ struct ProduceTabView: View {
                         Image(systemName: inboxStore.unreadCount > 0 ? "bell.badge.fill" : "bell")
                             .symbolRenderingMode(inboxStore.unreadCount > 0 ? .multicolor : .monochrome)
                     }
-                    .accessibilityLabel(inboxStore.unreadCount > 0 ? "お知らせ (未読\(inboxStore.unreadCount)件)" : "お知らせ")
+                    .accessibilityLabel(inboxStore.unreadCount > 0
+                        ? Text(L10n.Produce.inboxUnreadA11y(count: inboxStore.unreadCount))
+                        : Text(L10n.Produce.inboxA11y))
                 }
             }
             .sheet(isPresented: $showInbox) {
@@ -130,7 +132,7 @@ struct ProduceTabView: View {
                 VStack(alignment: .leading, spacing: DS.sp3) {
                     HStack(spacing: 6) {
                         Image(systemName: "chart.bar.doc.horizontal.fill")
-                        Text("投票受付中").font(.imasCaption.bold())
+                        Text(L10n.Produce.pollBadge).font(.imasCaption.bold())
                         Spacer()
                         Text(pollRemainingLabel(poll.endsAt)).font(.imasCaption)
                     }
@@ -143,10 +145,10 @@ struct ProduceTabView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                     HStack(spacing: DS.sp4) {
-                        Label("\(poll.totalVotes ?? 0)票", systemImage: "hand.thumbsup.fill")
-                        Label("\(poll.entryCount ?? 0)候補", systemImage: "list.number")
+                        Label(L10n.Produce.pollVotes(count: poll.totalVotes ?? 0), systemImage: "hand.thumbsup.fill")
+                        Label(L10n.Produce.pollEntries(count: poll.entryCount ?? 0), systemImage: "list.number")
                         Spacer()
-                        Text("投票する").font(.imasSubhead.bold())
+                        Text(L10n.Produce.pollAction).font(.imasSubhead.bold())
                         Image(systemName: "arrow.right")
                     }
                     .font(.imasCaption)
@@ -165,29 +167,30 @@ struct ProduceTabView: View {
     }
 
     /// お題の残り時間ラベル。
-    private func pollRemainingLabel(_ endsAt: Date) -> String {
+    private func pollRemainingLabel(_ endsAt: Date) -> LocalizedStringResource {
         let secs = endsAt.timeIntervalSinceNow
-        if secs <= 0 { return "まもなく終了" }
+        if secs <= 0 { return L10n.Produce.pollRemainingSoon }
         let days = Int(secs / 86400)
-        if days >= 1 { return "あと\(days)日" }
+        if days >= 1 { return L10n.Produce.pollRemainingDays(days: days) }
         let hours = Int(secs / 3600)
-        return hours >= 1 ? "あと\(hours)時間" : "まもなく終了"
+        return hours >= 1 ? L10n.Produce.pollRemainingHours(hours: hours) : L10n.Produce.pollRemainingSoon
     }
 
     @ViewBuilder
     private var oshiSection: some View {
         if pickIdols.isEmpty {
             VStack(alignment: .leading, spacing: DS.sp3) {
-                ImasSectionHeader(title: "担当アイドル", tight: true)
+                ImasSectionHeader(title: .key(L10n.Produce.oshiHeader), tight: true)
                 ImasEmptyState(
                     systemImage: "heart",
-                    title: "担当アイドルがいません",
-                    message: "アイドル詳細の「担当」マークを付けると、ここに大きく表示されます。"
+                    title: String(localized: L10n.Produce.oshiEmptyTitle),
+                    message: String(localized: L10n.Produce.oshiEmptyMessage)
                 )
             }
         } else {
             VStack(alignment: .leading, spacing: DS.sp3) {
-                ImasSectionHeader(title: "担当アイドル", count: "\(pickIdols.count)人", tight: true)
+                ImasSectionHeader(title: .key(L10n.Produce.oshiHeader),
+                                  count: .key(L10n.Produce.oshiCount(count: pickIdols.count)), tight: true)
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: DS.sp3) {
                         ForEach(pickIdols) { idol in
@@ -205,31 +208,31 @@ struct ProduceTabView: View {
 
     private var activitySection: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
-            ImasSectionHeader(title: "あなたの活動", tight: true)
+            ImasSectionHeader(title: .key(L10n.Produce.activityHeader), tight: true)
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: DS.sp3), count: 3), spacing: DS.sp3) {
                 statTileLink(route: .attendedEvents) {
-                    ImasStatTile(systemImage: "music.mic", value: numberString(attendedCount), label: "参加ライブ", brand: pickBrandSeed, tappable: true)
+                    ImasStatTile(systemImage: "music.mic", value: numberString(attendedCount), label: String(localized: L10n.Produce.activityAttended), brand: pickBrandSeed, tappable: true)
                 }
                 statTileLink(route: .myPredictions) {
-                    ImasStatTile(systemImage: "sparkles", value: numberString(predictionCount), label: "予想", brand: pickBrandSeed, tappable: true)
+                    ImasStatTile(systemImage: "sparkles", value: numberString(predictionCount), label: String(localized: L10n.Produce.activityPredictions), brand: pickBrandSeed, tappable: true)
                 }
                 statTileLink(route: .favorites) {
-                    ImasStatTile(systemImage: "star.fill", value: numberString(favoriteCount), label: "お気に入り", brand: pickBrandSeed, tappable: true)
+                    ImasStatTile(systemImage: "star.fill", value: numberString(favoriteCount), label: String(localized: L10n.Produce.activityFavorites), brand: pickBrandSeed, tappable: true)
                 }
                 statTileLink(route: .myContributions) {
-                    ImasStatTile(systemImage: "square.and.pencil", value: numberString(contributionLog.total), label: "投稿", brand: pickBrandSeed, tappable: true)
+                    ImasStatTile(systemImage: "square.and.pencil", value: numberString(contributionLog.total), label: String(localized: L10n.Produce.activityContributions), brand: pickBrandSeed, tappable: true)
                 }
                 statTileLink(route: .myVotes) {
-                    ImasStatTile(systemImage: "chart.bar.doc.horizontal", value: numberString(voteLog.votedPollCount), label: "投票", brand: pickBrandSeed, tappable: true)
+                    ImasStatTile(systemImage: "chart.bar.doc.horizontal", value: numberString(voteLog.votedPollCount), label: String(localized: L10n.Produce.activityVotes), brand: pickBrandSeed, tappable: true)
                 }
                 statTileLink(route: .collectedSongs) {
-                    ImasStatTile(systemImage: "music.note", value: numberString(collectedCount), label: "回収", brand: pickBrandSeed, tappable: true)
+                    ImasStatTile(systemImage: "music.note", value: numberString(collectedCount), label: String(localized: L10n.Produce.activityCollected), brand: pickBrandSeed, tappable: true)
                 }
                 statTileLink(route: .mastery) {
-                    ImasStatTile(systemImage: "chart.bar.fill", value: numberString(masteryCount), label: "習熟度", brand: pickBrandSeed, tappable: true)
+                    ImasStatTile(systemImage: "chart.bar.fill", value: numberString(masteryCount), label: String(localized: L10n.Produce.activityMastery), brand: pickBrandSeed, tappable: true)
                 }
                 statTileLink(route: .ledger) {
-                    ImasStatTile(systemImage: "yensign.circle.fill", value: formatYen(amount: ledgerTotal), label: "収支", brand: pickBrandSeed, tappable: true)
+                    ImasStatTile(systemImage: "yensign.circle.fill", value: formatYen(amount: ledgerTotal), label: String(localized: L10n.Produce.activityLedger), brand: pickBrandSeed, tappable: true)
                 }
             }
         }
@@ -248,7 +251,8 @@ struct ProduceTabView: View {
         case .favorites: FavoritesListView().environment(database)
         case .myVotes: MyVotesView().environment(database)
         case .myContributions: MyContributionsView()
-        case .collectedSongs: songListDestination(ids: collectedSongIds, title: "回収した楽曲")
+        // タイトルは経路の値 (SongFilterCriterion.songIds) に入るので、ここで画面の言語の文字列にして渡す
+        case .collectedSongs: songListDestination(ids: collectedSongIds, title: String(localized: L10n.Produce.collectedTitle))
         case .mastery: MasteryView().environment(database)
         case .ledger: LedgerView().environment(database)
         }
@@ -283,7 +287,7 @@ struct ProduceTabView: View {
         let recents = RecentsService.shared.items
         if !recents.isEmpty {
             VStack(alignment: .leading, spacing: DS.sp3) {
-                ImasSectionHeader(title: "最近見た", tight: true)
+                ImasSectionHeader(title: .key(L10n.Produce.recentsHeader), tight: true)
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: DS.sp2) {
                         ForEach(recents) { item in
@@ -303,7 +307,7 @@ struct ProduceTabView: View {
     private var attendedSection: some View {
         if !attendedEvents.isEmpty {
             VStack(alignment: .leading, spacing: DS.sp3) {
-                ImasSectionHeader(title: "参加したライブ", count: "\(attendedEvents.count)")
+                ImasSectionHeader(title: .key(L10n.Produce.attendedHeader), count: .verbatim("\(attendedEvents.count)"))
                 ImasListContainer {
                     ForEach(Array(attendedEvents.prefix(5).enumerated()), id: \.element.id) { index, ew in
                         if index > 0 {
@@ -323,7 +327,7 @@ struct ProduceTabView: View {
                     NavigationLink {
                         AttendedEventsListView(events: attendedEvents)
                     } label: {
-                        Text("全て見る (\(attendedEvents.count)件)")
+                        Text(L10n.Produce.attendedSeeAll(count: attendedEvents.count))
                             .font(.imasSubhead.weight(.medium))
                             .foregroundStyle(DS.sys)
                             .padding(.horizontal, DS.sp2)
@@ -342,7 +346,7 @@ struct ProduceTabView: View {
             } label: {
                 ImasEntryCard(
                     systemImage: "chart.bar.xaxis",
-                    title: "調べる",
+                    title: String(localized: L10n.Produce.entryStatsTitle),
                     preview: statsEntryPreview,
                     brand: pickBrandSeed
                 )
@@ -354,8 +358,8 @@ struct ProduceTabView: View {
             } label: {
                 ImasEntryCard(
                     systemImage: "chart.bar.xaxis",
-                    title: "年表",
-                    preview: "ライブ・楽曲シリーズ・節目を1枚で俯瞰する",
+                    title: String(localized: L10n.Produce.entryTimelineTitle),
+                    preview: String(localized: L10n.Produce.entryTimelinePreview),
                     brand: pickBrandSeed
                 )
             }
@@ -366,8 +370,8 @@ struct ProduceTabView: View {
             } label: {
                 ImasEntryCard(
                     systemImage: "person.2.fill",
-                    title: "みんなの動き",
-                    preview: "参考動画・セトリ編集など最近のコミュニティ投稿",
+                    title: String(localized: L10n.Produce.entryRecentEditsTitle),
+                    preview: String(localized: L10n.Produce.entryRecentEditsPreview),
                     brand: secondaryBrandSeed
                 )
             }
@@ -378,8 +382,8 @@ struct ProduceTabView: View {
             } label: {
                 ImasEntryCard(
                     systemImage: "gamecontroller.fill",
-                    title: "クイズ・ゲーム",
-                    preview: "イントロドン・アイドル当て・カラー合わせ",
+                    title: String(localized: L10n.Produce.entryGamesTitle),
+                    preview: String(localized: L10n.Produce.entryGamesPreview),
                     brand: pickBrandSeed
                 )
             }
@@ -390,8 +394,10 @@ struct ProduceTabView: View {
             } label: {
                 ImasEntryCard(
                     systemImage: "checklist",
-                    title: "マイ予想",
-                    preview: predictionCount > 0 ? "投票した予想 \(predictionCount)件" : "セトリを予想して的中を狙おう"
+                    title: String(localized: L10n.Produce.entryPredictionsTitle),
+                    preview: String(localized: predictionCount > 0
+                        ? L10n.Produce.entryPredictionsPreviewCount(count: predictionCount)
+                        : L10n.Produce.entryPredictionsPreview)
                 )
             }
             .buttonStyle(.plain)
@@ -403,8 +409,8 @@ struct ProduceTabView: View {
             NavigationLink(value: PollRoute.list) {
                 ImasEntryCard(
                     systemImage: "chart.bar.doc.horizontal",
-                    title: "みんなの投票",
-                    preview: "お題に推しを投票・ランキング",
+                    title: String(localized: L10n.Produce.entryPollsTitle),
+                    preview: String(localized: L10n.Produce.entryPollsPreview),
                     brand: pickBrandSeed
                 )
             }
@@ -418,8 +424,8 @@ struct ProduceTabView: View {
                 } label: {
                     ImasEntryCard(
                         systemImage: "hands.clap.fill",
-                        title: "コールガイド",
-                        preview: "歌詞行ごとのコールガイド。書かれている曲・最近の編集・書き手募集中の曲",
+                        title: String(localized: L10n.Produce.entryCallGuideTitle),
+                        preview: String(localized: L10n.Produce.entryCallGuidePreview),
                         brand: secondaryBrandSeed
                     )
                 }
@@ -431,8 +437,8 @@ struct ProduceTabView: View {
             } label: {
                 ImasEntryCard(
                     systemImage: "flame.fill",
-                    title: "タグの動き",
-                    preview: "伸びてるタグ・急上昇の曲やアイドルをチェック",
+                    title: String(localized: L10n.Produce.entryTagActivityTitle),
+                    preview: String(localized: L10n.Produce.entryTagActivityPreview),
                     brand: secondaryBrandSeed
                 )
             }
@@ -451,9 +457,9 @@ struct ProduceTabView: View {
 
     private var statsEntryPreview: String {
         if let show = latestShow {
-            return "最新公演 \(show.name) ほか"
+            return String(localized: L10n.Produce.entryStatsPreviewLatest(show: show.name))
         }
-        return "披露回数・お気に入り・出演ランキング…"
+        return String(localized: L10n.Produce.entryStatsPreview)
     }
 
     // MARK: - Helpers
@@ -584,7 +590,8 @@ private struct HeroIdolCard: View {
                         .font(.imasFootnote)
                         .foregroundStyle(DS.ink2)
                         .lineLimit(1)
-                    ImasChip(text: "担当", systemImage: "heart.fill", style: .themed, seed: idol.color, brand: brandColor)
+                    ImasChip(text: String(localized: L10n.Produce.oshiHeroChip), systemImage: "heart.fill", style: .themed,
+                             seed: idol.color, brand: brandColor)
                         .padding(.top, DS.sp1)
                 }
                 Spacer(minLength: 0)
@@ -592,7 +599,7 @@ private struct HeroIdolCard: View {
 
             HStack(spacing: DS.sp2) {
                 NavigationLink(value: idol) {
-                    Text("詳細")
+                    Text(L10n.Produce.oshiHeroDetail)
                         .font(.imasSubhead.weight(.semibold))
                         .foregroundStyle(t.onAccent)
                         .frame(maxWidth: .infinity)
@@ -602,7 +609,7 @@ private struct HeroIdolCard: View {
                 .buttonStyle(.plain)
 
                 NavigationLink(value: idol) {
-                    Label("出演ライブ", systemImage: "music.mic")
+                    Label(L10n.Produce.oshiHeroLives, systemImage: "music.mic")
                         .font(.imasSubhead.weight(.semibold))
                         .foregroundStyle(t.chipText)
                         .frame(maxWidth: .infinity)
@@ -622,10 +629,13 @@ private struct HeroIdolCard: View {
     }
 
     private var metaLine: String {
-        var parts: [String] = []
-        if !brandName.isEmpty { parts.append(brandName) }
-        if let cv = VoiceActorDirectory.shared.current(for: idol.id), !cv.isEmpty { parts.append("CV \(cv)") }
-        return parts.joined(separator: " ・ ")
+        let cv = VoiceActorDirectory.shared.current(for: idol.id).flatMap { $0.isEmpty ? nil : $0 }
+        switch (brandName.isEmpty, cv) {
+        case (false, let cv?): return String(localized: L10n.Produce.oshiHeroMeta(brand: brandName, cv: cv))
+        case (true, let cv?): return "CV \(cv)"
+        case (false, nil): return brandName
+        case (true, nil): return ""
+        }
     }
 }
 

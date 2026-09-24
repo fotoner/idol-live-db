@@ -35,6 +35,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.model.CalendarEntry
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.AttendanceSwipeRow
 import com.fugaif.imaslivedb.ui.theme.DS
 import java.time.LocalDate
@@ -71,7 +73,7 @@ fun DayDetailSheet(
         HorizontalDivider(color = DS.sep)
         if (entries.isEmpty()) {
             Text(
-                "この日はライブ・リリース・誕生日の記録がありません",
+                L10n.Schedule.dayEmptyMessage.resolve(),
                 modifier = Modifier.fillMaxWidth().padding(32.dp),
                 color = DS.ink3,
                 fontSize = 14.sp
@@ -105,7 +107,7 @@ fun DayDetailSheet(
                                         }) {
                                             Icon(
                                                 Icons.Filled.EditCalendar,
-                                                contentDescription = "カレンダーに追加",
+                                                contentDescription = L10n.Schedule.exportAction.resolve(),
                                                 tint = DS.success,
                                                 modifier = Modifier.size(20.dp)
                                             )
@@ -113,7 +115,7 @@ fun DayDetailSheet(
                                         IconButton(onClick = { onNavigateToShow(entry.row.showId) }) {
                                             Icon(
                                                 Icons.Filled.QueueMusic,
-                                                contentDescription = "セトリ",
+                                                contentDescription = L10n.Schedule.rowSetlist.resolve(),
                                                 tint = DS.ink2,
                                                 modifier = Modifier.size(20.dp)
                                             )
@@ -148,13 +150,13 @@ private fun DayHeader(date: LocalDate, entries: List<CalendarEntry>) {
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                "${date.year}年${date.monthValue}月${date.dayOfMonth}日",
+                L10n.Schedule.daySheetDate(year = date.year, month = date.monthValue, day = date.dayOfMonth).resolve(),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = DS.ink
             )
             if (entries.isNotEmpty()) {
-                Text("${entries.size}件のイベント", fontSize = 12.sp, color = DS.ink2)
+                Text(L10n.Schedule.daySheetEventCount(count = entries.size).resolve(), fontSize = 12.sp, color = DS.ink2)
             }
         }
         SummaryBadges(entries)

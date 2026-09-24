@@ -49,6 +49,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.model.CalendarEntry
+import com.fugaif.imaslivedb.i18n.DisplayFormat
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.AttendanceSwipeRow
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
 import com.fugaif.imaslivedb.ui.theme.DS
@@ -94,10 +98,10 @@ fun CalendarScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("スケジュール", fontWeight = FontWeight.Bold) },
+                title = { Text(L10n.Schedule.title.resolve(), fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Filled.Settings, contentDescription = "設定・マイ")
+                        Icon(Icons.Filled.Settings, contentDescription = L10n.Nav.settingsButtonA11y.resolve())
                     }
                 }
             )
@@ -119,7 +123,7 @@ fun CalendarScreen(
                 )
             } else {
                 MonthNavRow(
-                    title = "${ym.year}年 ${ym.monthValue}月",
+                    title = L10n.Schedule.monthTitle(year = ym.year, month = ym.monthValue).resolve(),
                     onPrev = { viewModel.goToMonth(-1) },
                     onNext = { viewModel.goToMonth(1) }
                 )
@@ -183,15 +187,17 @@ private fun FilterBar(state: CalendarUiState, viewModel: CalendarViewModel) {
             modifier = Modifier.weight(1f).horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            CalFilterChip("公演", ShowColor, state.showShows) { viewModel.toggleShows() }
-            CalFilterChip("リリース", ReleaseColor, state.showReleases) { viewModel.toggleReleases() }
-            CalFilterChip("誕生日", BirthdayColor, state.showBirthdays) { viewModel.toggleBirthdays() }
-            CalFilterChip("事務員", StaffColor, state.showStaffBirthdays) { viewModel.toggleStaffBirthdays() }
-            CalFilterChip("記念日", AnniversaryColor, state.showAnniversaries) { viewModel.toggleAnniversaries() }
-            CalFilterChip("チケット", TicketColor, state.showTickets) { viewModel.toggleTickets() }
+            CalFilterChip(L10n.Schedule.filterShows, ShowColor, state.showShows) { viewModel.toggleShows() }
+            CalFilterChip(L10n.Schedule.filterReleases, ReleaseColor, state.showReleases) { viewModel.toggleReleases() }
+            CalFilterChip(L10n.Schedule.filterBirthdays, BirthdayColor, state.showBirthdays) { viewModel.toggleBirthdays() }
+            CalFilterChip(L10n.Schedule.filterStaff, StaffColor, state.showStaffBirthdays) { viewModel.toggleStaffBirthdays() }
+            CalFilterChip(L10n.Schedule.filterAnniversaries, AnniversaryColor, state.showAnniversaries) {
+                viewModel.toggleAnniversaries()
+            }
+            CalFilterChip(L10n.Schedule.filterTickets, TicketColor, state.showTickets) { viewModel.toggleTickets() }
         }
         ImasSegmented(
-            labels = listOf("月", "週"),
+            labels = listOf(L10n.Schedule.modeMonth.resolve(), L10n.Schedule.modeWeek.resolve()),
             selection = if (state.weekMode) 1 else 0,
             onSelect = { index -> if ((index == 1) != state.weekMode) viewModel.toggleWeekMode() },
             // 高さは中身に任せる (固定するとアプリ内の文字サイズ倍率でラベルが切れる)。
@@ -207,7 +213,7 @@ private fun MonthNavRow(title: String, onPrev: () -> Unit, onNext: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = onPrev) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "前の月")
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = L10n.Schedule.monthPrevA11y.resolve())
         }
         Text(
             title,
@@ -217,17 +223,19 @@ private fun MonthNavRow(title: String, onPrev: () -> Unit, onNext: () -> Unit) {
             fontWeight = FontWeight.Bold
         )
         IconButton(onClick = onNext) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "次の月")
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = L10n.Schedule.monthNextA11y.resolve())
         }
     }
 }
 
 @Composable
 private fun WeekdayHeader() {
+    // 曜日の見出しは画面に出ている言語で書く (ja: 日 月 火 … / ko: 일 월 화 …)
+    val locale = rememberFormattingLocale()
     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
-        listOf("日", "月", "火", "水", "木", "金", "土").forEachIndexed { i, d ->
+        SundayFirstWeek.forEachIndexed { i, day ->
             Text(
-                d,
+                DisplayFormat.weekdayNarrow(day, locale),
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.labelSmall,
@@ -300,7 +308,7 @@ private fun MonthPane(
                 if (selectedDate != null && entries.isEmpty()) {
                     item {
                         Text(
-                            "この日の記録はありません",
+                            L10n.Schedule.selectedDayEmpty.resolve(),
                             modifier = Modifier.fillMaxWidth().padding(24.dp),
                             textAlign = TextAlign.Center,
                             color = DS.ink3,
@@ -324,17 +332,17 @@ private fun DaySectionHeader(date: LocalDate, count: Int, onOpenSheet: () -> Uni
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            "${date.monthValue}月${date.dayOfMonth}日",
+            L10n.Schedule.selectedDayDate(month = date.monthValue, day = date.dayOfMonth).resolve(),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
             color = DS.ink2,
             modifier = Modifier.weight(1f)
         )
         if (count > 0) {
-            Text("$count 件", fontSize = 12.sp, color = DS.ink3)
+            Text(L10n.Schedule.selectedDayCount(count = count).resolve(), fontSize = 12.sp, color = DS.ink3)
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = "この日の詳細",
+                contentDescription = L10n.Schedule.selectedDayDetailA11y.resolve(),
                 tint = DS.ink3,
                 modifier = Modifier.size(18.dp)
             )
@@ -345,7 +353,7 @@ private fun DaySectionHeader(date: LocalDate, count: Int, onOpenSheet: () -> Uni
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CalFilterChip(
-    label: String,
+    label: DisplayText,
     color: androidx.compose.ui.graphics.Color,
     selected: Boolean,
     onClick: () -> Unit
@@ -353,7 +361,7 @@ private fun CalFilterChip(
     FilterChip(
         selected = selected,
         onClick = onClick,
-        label = { Text(label, style = MaterialTheme.typography.labelMedium) },
+        label = { Text(label.resolve(), style = MaterialTheme.typography.labelMedium) },
         leadingIcon = {
             Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(color))
         },

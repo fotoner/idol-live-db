@@ -1,0 +1,652 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "produce",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/produce/"
+    ],
+    "ios": [
+      "ImasLiveDB/Views/Produce/"
+    ]
+  },
+  "strings": {
+    "activity.attended": {
+      "ja": "参加ライブ",
+      "ko": "참가 라이브",
+      "note": "件数タイルのラベル (参加したライブの数)"
+    },
+    "activity.collected": {
+      "ja": "回収",
+      "ko": "회수",
+      "note": "件数タイルのラベル (ライブで生で聴いた曲の数)"
+    },
+    "activity.contributions": {
+      "ja": "投稿",
+      "ko": "게시물",
+      "note": "件数タイルのラベル (自分の投稿・編集の数)"
+    },
+    "activity.favorites": {
+      "ja": "お気に入り",
+      "ko": "즐겨찾기",
+      "note": "件数タイルのラベル (お気に入りの数)"
+    },
+    "activity.header": {
+      "ja": "あなたの活動",
+      "ko": "나의 활동",
+      "note": "件数タイルの節の見出し"
+    },
+    "activity.ledger": {
+      "ja": "収支",
+      "ko": "가계부",
+      "note": "件数タイルのラベル (家計簿の合計金額)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "activity.mastery": {
+      "ja": "習熟度",
+      "ko": "숙련도",
+      "note": "件数タイルのラベル (習熟度を付けた曲の数)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "activity.predictions": {
+      "ja": "予想",
+      "ko": "예상",
+      "note": "件数タイルのラベル (セトリ予想の数)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "activity.votes": {
+      "ja": "投票",
+      "ko": "투표",
+      "note": "件数タイルのラベル (投票したお題の数)"
+    },
+    "attended.header": {
+      "ja": "参加したライブ",
+      "ko": "참가한 라이브",
+      "note": "参加したライブの節の見出し (右に件数)"
+    },
+    "attended.see_all": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "全て見る ({count}件)",
+      "ko": "모두 보기 ({count}건)",
+      "note": "参加したライブの節の下の導線 (6 件以上のとき)。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった"
+    },
+    "collected.count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}曲",
+      "ko": "{count}곡",
+      "note": "回収した楽曲の一覧の先頭の曲数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった (count 型の規則に合わせた)。",
+      "platforms": [
+        "android"
+      ]
+    },
+    "collected.empty.message": {
+      "ja": "ライブに「参加」を付けると、そのセトリの曲がここに集まります。",
+      "ko": "라이브에 “참가”를 달면 그 세트리스트의 곡이 여기에 모여요.",
+      "note": "回収した楽曲が 1 曲も無いときの空状態の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "collected.empty.title": {
+      "ja": "まだ回収した楽曲がありません",
+      "ko": "아직 회수한 곡이 없어요",
+      "note": "回収した楽曲が 1 曲も無いときの空状態の見出し",
+      "platforms": [
+        "android"
+      ]
+    },
+    "collected.title": {
+      "ja": "回収した楽曲",
+      "ko": "회수한 곡",
+      "note": "回収した楽曲 (参加したライブで聴いた曲) の一覧の画面タイトル"
+    },
+    "entry.call_guide.preview": {
+      "ja": "歌詞行ごとのコールガイド。書かれている曲・最近の編集・書き手募集中の曲",
+      "ko": "가사 줄마다 붙는 콜 가이드. 작성된 곡·최근 편집·작성자를 찾는 곡",
+      "note": "コールガイドの入口カードの説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "entry.call_guide.title": {
+      "ja": "コールガイド",
+      "ko": "콜 가이드",
+      "note": "入口カードのタイトル (コールガイドのまとめへ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "entry.games.preview": {
+      "ja": "イントロドン・アイドル当て・カラー合わせ",
+      "ko": "인트로돈·아이돌 맞히기·컬러 맞추기",
+      "note": "クイズ・ゲームの入口カードの説明 (ゲームの名前を並べる)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "entry.games.title": {
+      "ja": "クイズ・ゲーム",
+      "ko": "퀴즈·게임",
+      "note": "入口カードのタイトル (ゲームの一覧へ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "entry.polls.preview": {
+      "ja": "お題に推しを投票・ランキング",
+      "ko": "주제별 최애 투표·랭킹",
+      "note": "みんなの投票の入口カードの説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "entry.polls.title": {
+      "ja": "みんなの投票",
+      "ko": "모두의 투표",
+      "note": "入口カードのタイトル (お題の一覧へ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "entry.predictions.preview": {
+      "ja": "セトリを予想して的中を狙おう",
+      "ko": "세트리스트를 예상해서 적중을 노려 봐요",
+      "note": "マイ予想の入口カードの説明 (予想がまだ無いとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "entry.predictions.preview_count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "投票した予想 {count}件",
+      "ko": "투표한 예상 {count}건",
+      "note": "マイ予想の入口カードの説明 (予想が 1 件以上あるとき)。1000 以上は桁区切りが付く (1,234)。iOS も以前は付かなかった (String で組んでいた)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "entry.predictions.title": {
+      "ja": "マイ予想",
+      "ko": "내 예상",
+      "note": "入口カードのタイトル (自分のセトリ予想へ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "entry.recent_edits.preview": {
+      "ja": "参考動画・セトリ編集など最近のコミュニティ投稿",
+      "ko": "참고 영상·세트리스트 편집 등 최근 커뮤니티 게시물",
+      "note": "みんなの動きの入口カードの説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "entry.recent_edits.title": {
+      "ja": "みんなの動き",
+      "ko": "모두의 활동",
+      "note": "入口カードのタイトル (最近のコミュニティの編集へ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "entry.stats.preview": {
+      "ja": "披露回数・お気に入り・出演ランキング…",
+      "ko": "공연 횟수·즐겨찾기·출연 랭킹…",
+      "note": "統計の入口カードの説明 (公演がまだ無いとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "entry.stats.preview_latest": {
+      "args": [
+        {
+          "name": "show",
+          "type": "string"
+        }
+      ],
+      "ja": "最新公演 {show} ほか",
+      "ko": "최신 공연 {show} 외",
+      "note": "統計の入口カードの説明。show は一番新しい公演の名前 (データ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "entry.stats.title": {
+      "ja": "調べる",
+      "ko": "찾아보기",
+      "note": "入口カードのタイトル (統計の画面へ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "entry.tag_activity.preview": {
+      "ja": "伸びてるタグ・急上昇の曲やアイドルをチェック",
+      "ko": "뜨는 태그·급상승 곡과 아이돌을 확인해요",
+      "note": "タグの動きの入口の説明。iOS は入口カード、Android はハブの行"
+    },
+    "entry.tag_activity.title": {
+      "ja": "タグの動き",
+      "ko": "태그 동향",
+      "note": "タグの動き (伸びているタグ) の入口。iOS は入口カード、Android はハブの行"
+    },
+    "entry.timeline.preview": {
+      "ja": "ライブ・楽曲シリーズ・節目を1枚で俯瞰する",
+      "ko": "라이브·곡 시리즈·이정표를 한눈에 봐요",
+      "note": "年表の入口の説明。iOS は入口カード、Android はハブの行"
+    },
+    "entry.timeline.title": {
+      "ja": "年表",
+      "ko": "연표",
+      "note": "年表 (ブランドの歴史) の入口。iOS は入口カード、Android はハブの行"
+    },
+    "favorites.idols": {
+      "ja": "お気に入りアイドル",
+      "ko": "즐겨찾기 아이돌",
+      "note": "お気に入りのアイドルの横並びの節の見出し (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "favorites.songs": {
+      "ja": "お気に入り曲",
+      "ko": "즐겨찾기 곡",
+      "note": "お気に入りの曲の節の見出し (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.attended.title": {
+      "ja": "参加したライブ",
+      "ko": "참가한 라이브",
+      "note": "ハブの行 (参加したライブの一覧へ)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.collected.subtitle": {
+      "ja": "現地で聴けた曲だけの一覧",
+      "ko": "현장에서 들은 곡만 모은 목록",
+      "note": "ハブの行「回収した楽曲」の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.collected.title": {
+      "ja": "回収した楽曲",
+      "ko": "회수한 곡",
+      "note": "ハブの行 (回収した楽曲の一覧へ)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.contributions.title": {
+      "ja": "マイ投稿・編集履歴",
+      "ko": "내 게시물·편집 기록",
+      "note": "ハブの行 (自分の投稿・編集の一覧へ)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.edit_history.title": {
+      "ja": "みんなの編集履歴",
+      "ko": "모두의 편집 기록",
+      "note": "ハブの行 (最近のコミュニティの編集へ)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.empty_hint": {
+      "ja": "アイドルや楽曲の詳細画面で ♥ を押すと、担当・お気に入りがここに並びます",
+      "ko": "아이돌이나 곡 상세 화면에서 ♥를 누르면 담당·즐겨찾기가 여기에 모여요",
+      "note": "担当もお気に入りも無いときの案内 (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.favorites.subtitle": {
+      "ja": "曲・アイドル・ライブ",
+      "ko": "곡·아이돌·라이브",
+      "note": "ハブの行「お気に入り一覧」の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.favorites.title": {
+      "ja": "お気に入り一覧",
+      "ko": "즐겨찾기 목록",
+      "note": "ハブの行 (お気に入りの一覧へ)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.games.subtitle": {
+      "ja": "クイズ・イントロ当てクイズ",
+      "ko": "퀴즈·인트로 맞히기 퀴즈",
+      "note": "ハブの行「ゲーム」の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.games.title": {
+      "ja": "ゲーム",
+      "ko": "게임",
+      "note": "ハブの行 (ゲームの一覧へ)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.ledger.subtitle": {
+      "args": [
+        {
+          "name": "amount",
+          "type": "core"
+        }
+      ],
+      "ja": "使った額 {amount}",
+      "ko": "쓴 금액 {amount}",
+      "note": "ハブの行「収支」の説明。amount はコアが書式した金額 (¥12,000 など)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.ledger.title": {
+      "ja": "収支",
+      "ko": "가계부",
+      "note": "ハブの行 (家計簿へ)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.mastery.subtitle": {
+      "ja": "どこまで覚えたかをシリーズ・ユニット別に",
+      "ko": "얼마나 외웠는지 시리즈·유닛별로",
+      "note": "ハブの行「習熟度」の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.mastery.title": {
+      "ja": "習熟度",
+      "ko": "숙련도",
+      "note": "ハブの行 (習熟度の画面へ)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.polls.subtitle": {
+      "ja": "タグ・ペンライト・ポール",
+      "ko": "태그·펜라이트·주제 투표",
+      "note": "ハブの行「投票・予想」の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.polls.title": {
+      "ja": "投票・予想",
+      "ko": "투표·예상",
+      "note": "ハブの行 (投票の画面へ)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.settings.title": {
+      "ja": "設定・マイ",
+      "ko": "설정·마이페이지",
+      "note": "ハブの行 (設定・マイページへ)。右上の歯車の読み上げは nav.settings_button.a11y",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.stats.subtitle": {
+      "ja": "ブランド別・年別・ランキング",
+      "ko": "브랜드별·연도별·랭킹",
+      "note": "ハブの行「統計」の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.stats.title": {
+      "ja": "統計",
+      "ko": "통계",
+      "note": "ハブの行 (統計の画面へ)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.tags.subtitle": {
+      "ja": "楽曲タグの作成・閲覧",
+      "ko": "곡 태그 만들기·보기",
+      "note": "ハブの行「みんなのタグ」の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.tags.title": {
+      "ja": "みんなのタグ",
+      "ko": "모두의 태그",
+      "note": "ハブの行 (タグの一覧へ)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "hub.votes.title": {
+      "ja": "投票履歴",
+      "ko": "투표 기록",
+      "note": "ハブの行 (自分の投票の一覧へ)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "inbox.a11y": {
+      "ja": "お知らせ",
+      "ko": "공지",
+      "note": "右上のベル (運営からのお知らせを開く) の読み上げ。未読が無いとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "inbox.unread.a11y": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "お知らせ (未読{count}件)",
+      "ko": "공지 (읽지 않음 {count}건)",
+      "note": "右上のベルの読み上げ。未読があるとき。1000 以上は桁区切りが付く (1,234)。",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "oshi.count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}人",
+      "ko": "{count}명",
+      "note": "担当アイドルの節の見出しの人数 (小さい見出しでは出ない)。1000 以上は桁区切りが付く (1,234)。iOS も以前は付かなかった (String で組んでいた)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "oshi.empty.message": {
+      "ja": "アイドル詳細の「担当」マークを付けると、ここに大きく表示されます。",
+      "ko": "아이돌 상세에서 “담당” 마크를 달면 여기에 크게 보여요.",
+      "note": "担当アイドルが 1 人もいないときの空状態の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "oshi.empty.title": {
+      "ja": "担当アイドルがいません",
+      "ko": "담당 아이돌이 없어요",
+      "note": "担当アイドルが 1 人もいないときの空状態の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "oshi.header": {
+      "ja": "担当アイドル",
+      "ko": "담당 아이돌",
+      "note": "担当アイドル (推し) のカードの節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "oshi.header_android": {
+      "ja": "担当",
+      "ko": "담당",
+      "note": "担当アイドルの横並びの節の見出し。Android の文言で、iOS の oshi.header と ja が違う (統一はオーナーが別 PR で)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "oshi.hero.chip": {
+      "ja": "担当",
+      "ko": "담당",
+      "note": "担当アイドルのカードの名前の下のチップ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "oshi.hero.detail": {
+      "ja": "詳細",
+      "ko": "자세히 보기",
+      "note": "担当アイドルのカードのボタン (アイドル詳細へ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "oshi.hero.lives": {
+      "ja": "出演ライブ",
+      "ko": "출연 라이브",
+      "note": "担当アイドルのカードのボタン (出演したライブへ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "oshi.hero.meta": {
+      "args": [
+        {
+          "name": "brand",
+          "type": "string"
+        },
+        {
+          "name": "cv",
+          "type": "string"
+        }
+      ],
+      "ja": "{brand} ・ CV {cv}",
+      "ko": "{brand} · CV {cv}",
+      "note": "担当アイドルのカードの名前の下の行。brand はブランドの略称、cv は声優名 (どちらもデータ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "poll.action": {
+      "ja": "投票する",
+      "ko": "투표하기",
+      "note": "「開催中のお題」カードの右下の導線"
+    },
+    "poll.badge": {
+      "ja": "投票受付中",
+      "ko": "투표 접수 중",
+      "note": "先頭の「開催中のお題」カードの左上のラベル"
+    },
+    "poll.entries": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}候補",
+      "ko": "후보 {count}개",
+      "note": "「開催中のお題」カードの候補の数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった"
+    },
+    "poll.remaining.days": {
+      "args": [
+        {
+          "name": "days",
+          "type": "count"
+        }
+      ],
+      "ja": "あと{days}日",
+      "ko": "{days}일 남음",
+      "note": "「開催中のお題」カードの残り時間 (1 日以上)。1000 以上は桁区切りが付く (1,234)。iOS も以前は付かなかった (String で組んでいた)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "poll.remaining.hours": {
+      "args": [
+        {
+          "name": "hours",
+          "type": "count"
+        }
+      ],
+      "ja": "あと{hours}時間",
+      "ko": "{hours}시간 남음",
+      "note": "「開催中のお題」カードの残り時間 (1 日未満)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "poll.remaining.soon": {
+      "ja": "まもなく終了",
+      "ko": "곧 종료",
+      "note": "「開催中のお題」カードの残り時間 (1 時間を切った・締切を過ぎた)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "poll.votes": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}票",
+      "ko": "{count}표",
+      "note": "「開催中のお題」カードの票数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった"
+    },
+    "recents.header": {
+      "ja": "最近見た",
+      "ko": "최근 본 항목",
+      "note": "最近開いたライブ・曲・アイドルのチップ列の見出し"
+    },
+    "title": {
+      "ja": "プロデュース",
+      "ko": "프로듀스",
+      "note": "プロデュースタブ (担当・活動のまとめ) の画面タイトル。iOS はナビゲーションタイトル、Android は TopAppBar"
+    }
+  }
+}

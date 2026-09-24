@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.fugaif.imaslivedb.data.model.Show
 import com.fugaif.imaslivedb.data.model.VenueDirectory
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +20,8 @@ import uniffi.imas_core.groupIndicesByYearDesc
 data class FilteredShowRowUi(
     val showId: String,
     val title: String,
-    val subtitle: String,
+    /** 副題の部品 (月日・公演名・会場 or ホール)。区切りは画面の言語で入れる (FilteredShowsScreen)。 */
+    val subtitleParts: List<String>,
     val brandId: String?,
     /** 合同ライブ (複数ブランド) の行。1 ブランドの色を出すと嘘になるのでリードバーを虹色にする。 */
     val rainbow: Boolean
@@ -29,7 +32,8 @@ data class FilteredShowRowUi(
 data class FilteredShowYearGroup(val label: String, val rows: List<FilteredShowRowUi>)
 
 data class FilteredShowsUiState(
-    val title: String = "",
+    /** 画面タイトル。文言の値で持ち、画面で resolve() する (言語を切り替えても旧言語が残らない)。 */
+    val title: DisplayText = DisplayText.Verbatim(""),
     val groups: List<FilteredShowYearGroup> = emptyList(),
     val showCount: Int = 0,
     val isLoading: Boolean = true
@@ -50,7 +54,7 @@ class FilteredShowsViewModel(
 
     private val events = AppModule.from(app).eventRepository
 
-    private val _uiState = MutableStateFlow(FilteredShowsUiState(title = value))
+    private val _uiState = MutableStateFlow(FilteredShowsUiState(title = DisplayText.Verbatim(value)))
     val uiState: StateFlow<FilteredShowsUiState> = _uiState.asStateFlow()
 
     init {
@@ -87,7 +91,7 @@ class FilteredShowsViewModel(
                         FilteredShowRowUi(
                             showId = show.id,
                             title = event?.name?.let { AppPreferences.eventDisplayName(it) } ?: show.name,
-                            subtitle = subtitle(show, directory, showsVenueInRow),
+                            subtitleParts = subtitleParts(show, directory, showsVenueInRow),
                             brandId = event?.brandId,
                             rainbow = eventWithDate?.isJoint == true
                         )
@@ -108,14 +112,14 @@ class FilteredShowsViewModel(
      * (解決前だと "venue_京王アリーナtokyo での公演" のような ID がそのまま見えてしまう)。
      * 一覧の代表には現在名を使う — 行ごとの「当時の名前」は各行が別に解決する。
      */
-    private fun resolveTitle(directory: VenueDirectory): String = when (kind) {
-        ShowFilterKind.VENUE -> "${directory.venue(value)?.name ?: value}での公演"
-        ShowFilterKind.DATE -> "${value}の公演"
-        else -> value
+    private fun resolveTitle(directory: VenueDirectory): DisplayText = when (kind) {
+        ShowFilterKind.VENUE -> L10n.Filtered.showsTitleVenue(venue = directory.venue(value)?.name ?: value)
+        ShowFilterKind.DATE -> L10n.Filtered.showsTitleDate(date = value)
+        else -> DisplayText.Verbatim(value)
     }
 
-    /** 「07/25 ・ DAY2 ・ メインアリーナ」。年は見出しにあるので月日だけ出す。 */
-    private fun subtitle(show: Show, directory: VenueDirectory, showsVenueInRow: Boolean): String {
+    /** 「07/25 ・ DAY2 ・ メインアリーナ」の部品。年は見出しにあるので月日だけ出す。 */
+    private fun subtitleParts(show: Show, directory: VenueDirectory, showsVenueInRow: Boolean): List<String> {
         val parts = mutableListOf<String>()
         val ymd = show.date.split("-")
         parts.add(if (ymd.size >= 3) "${ymd[1]}/${ymd[2]}" else show.date)
@@ -127,7 +131,7 @@ class FilteredShowsViewModel(
             // 同じ会場でもホールが違えば別物なので、会場名を省く代わりにホールは出す。
             show.hall?.takeIf { it.isNotEmpty() }?.let { parts.add(it) }
         }
-        return parts.joinToString(" ・ ")
+        return parts
     }
 
     class Factory(

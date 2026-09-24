@@ -6,13 +6,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 data class FilteredIdolsUiState(
-    val title: String = "",
+    /** 画面タイトル。文言の値で持ち、画面で resolve() する (言語を切り替えても旧言語が残らない)。 */
+    val title: DisplayText = DisplayText.Verbatim(""),
     val idols: List<Idol> = emptyList(),
     val isLoading: Boolean = true
 )
@@ -32,7 +35,7 @@ class FilteredIdolsViewModel(
 
     private val idols = AppModule.from(app).idolRepository
 
-    private val _uiState = MutableStateFlow(FilteredIdolsUiState(title = value))
+    private val _uiState = MutableStateFlow(FilteredIdolsUiState(title = DisplayText.Verbatim(value)))
     val uiState: StateFlow<FilteredIdolsUiState> = _uiState.asStateFlow()
 
     init {
@@ -44,19 +47,20 @@ class FilteredIdolsViewModel(
             IdolFilterKind.BRAND -> {
                 // 表示名が引けないブランド (同期前・未知 id) でも一覧そのものは出す。
                 val label = idols.fetchBrand(value)?.shortName ?: value
-                emit("${label}のアイドル", idols.fetchIdolsForList(value))
+                emit(L10n.Filtered.idolsTitleBrand(brand = label), idols.fetchIdolsForList(value))
             }
+            // 星座・出身地・血液型の値はデータ (訳さない)。文の形だけカタログから引く。
             IdolFilterKind.CONSTELLATION ->
-                emit("${value}のアイドル", idols.fetchIdolsByConstellation(value))
+                emit(L10n.Filtered.idolsTitleConstellation(constellation = value), idols.fetchIdolsByConstellation(value))
             IdolFilterKind.BIRTH_PLACE ->
-                emit("${value}出身のアイドル", idols.fetchIdolsByBirthPlace(value))
+                emit(L10n.Filtered.idolsTitleBirthPlace(place = value), idols.fetchIdolsByBirthPlace(value))
             IdolFilterKind.BLOOD_TYPE ->
-                emit("${value}型のアイドル", idols.fetchIdolsByBloodType(value))
-            else -> emit(value, emptyList())
+                emit(L10n.Filtered.idolsTitleBloodType(bloodType = value), idols.fetchIdolsByBloodType(value))
+            else -> emit(DisplayText.Verbatim(value), emptyList())
         }
     }
 
-    private fun emit(title: String, idols: List<Idol>) {
+    private fun emit(title: DisplayText, idols: List<Idol>) {
         _uiState.value = FilteredIdolsUiState(title = title, idols = idols, isLoading = false)
     }
 

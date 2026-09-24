@@ -17,7 +17,7 @@ struct FilteredEventsView: View {
             } else if eventsWithDate.isEmpty {
                 ImasEmptyState(
                     systemImage: "music.mic",
-                    title: "ライブが見つかりません"
+                    title: String(localized: L10n.Filtered.eventsEmpty)
                 )
             } else {
                 List {
@@ -38,7 +38,7 @@ struct FilteredEventsView: View {
                             .listRowSeparatorTint(DS.sep)
                         }
                     } header: {
-                        Text("\(eventsWithDate.count)件")
+                        Text(L10n.Filtered.eventsCount(count: eventsWithDate.count))
                             .font(.imasCaption)
                             .foregroundStyle(DS.ink2)
                     }
@@ -48,10 +48,19 @@ struct FilteredEventsView: View {
                 .background(DS.bg)
             }
         }
-        .navigationTitle(criterion.navigationTitle)
+        .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
         .task { await loadEvents() }
         .trackScreen("filtered_events")
+    }
+
+    /// 画面タイトル。`criterion.navigationTitle` は遷移先の識別子 (DetailSheet の id) にも使うので、
+    /// 表示だけここでカタログの文言に写す。
+    private var title: LocalizedStringResource {
+        switch criterion {
+        case .brand(_, let label): return L10n.Filtered.eventsTitleBrand(brand: label)
+        case .year(let year): return L10n.Filtered.eventsTitleYear(year: year)
+        }
     }
 
     private func loadEvents() async {

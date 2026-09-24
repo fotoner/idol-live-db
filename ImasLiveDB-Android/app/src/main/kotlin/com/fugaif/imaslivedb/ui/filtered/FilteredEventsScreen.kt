@@ -26,6 +26,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 
 /**
@@ -53,10 +55,10 @@ fun FilteredEventsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(state.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                title = { Text(state.title.resolve(), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 }
             )
@@ -65,9 +67,9 @@ fun FilteredEventsScreen(
         Box(Modifier.fillMaxSize().padding(padding)) {
             when {
                 state.isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                state.events.isEmpty() -> FilteredEmptyState(Icons.Filled.Mic, "ライブが見つかりません")
+                state.events.isEmpty() -> FilteredEmptyState(Icons.Filled.Mic, L10n.Filtered.eventsEmpty.resolve())
                 else -> LazyColumn(Modifier.fillMaxSize()) {
-                    item(key = "count") { FilteredCountHeader("${state.events.size}件") }
+                    item(key = "count") { FilteredCountHeader(L10n.Filtered.eventsCount(count = state.events.size).resolve()) }
                     items(state.events, key = { it.event.id }) { item ->
                         FilteredEventRow(item) { onEventClick(item.event.id) }
                         HorizontalDivider(color = DS.sep, modifier = Modifier.padding(start = 16.dp))

@@ -20,7 +20,8 @@ struct WeekTimeGridView: View {
 
     private let cal = Calendar.current
     private let today = Calendar.current.startOfDay(for: Date())
-    private let weekdaySymbols = ["日", "月", "火", "水", "木", "金", "土"]
+    /// 曜日の見出し (日曜始まり)。画面に出ている言語で引く (ja: 日 月 火 … / ko: 일 월 화 …)。
+    private var weekdaySymbols: [String] { DisplayFormat.weekdaySymbols() }
 
     // MARK: - レイアウト定数
 
@@ -62,9 +63,10 @@ struct WeekTimeGridView: View {
         (0..<7).compactMap { cal.date(byAdding: .day, value: $0, to: weekStart) }
     }
 
-    private var weekRangeTitle: String {
+    private var weekRangeTitle: LocalizedStringResource {
         let end = cal.date(byAdding: .day, value: 6, to: weekStart) ?? weekStart
-        return "\(weekStart.formatted(.dateTime.month().day())) 〜 \(end.formatted(.dateTime.month().day()))"
+        return L10n.Schedule.weekRange(start: weekStart.formatted(.dateTime.month().day()),
+                                       end: end.formatted(.dateTime.month().day()))
     }
 
     // MARK: - Body
@@ -135,13 +137,14 @@ struct WeekTimeGridView: View {
     // MARK: - 曜日 + 日付ヘッダ
 
     private func dayHeaderRow(dayWidth: CGFloat) -> some View {
-        HStack(spacing: 0) {
+        let symbols = weekdaySymbols
+        return HStack(spacing: 0) {
             Color.clear.frame(width: Metric.gutterWidth, height: 1)
             ForEach(Array(weekDays.enumerated()), id: \.offset) { idx, date in
                 let isToday = cal.isDate(date, inSameDayAs: today)
                 let isSelected = cal.isDate(date, inSameDayAs: selectedDate)
                 VStack(spacing: DS.sp1) {
-                    Text(weekdaySymbols[idx])
+                    Text(symbols[idx])
                         .font(.imasScaled( 10, weight: .semibold))
                         .foregroundStyle(isToday ? DS.ink : DS.ink3)
                     ZStack {
@@ -190,7 +193,7 @@ struct WeekTimeGridView: View {
                 Button {
                     onSelectEntry(band.entry)
                 } label: {
-                    Text("受付 \(band.name)")
+                    Text(L10n.Schedule.bandTicketPeriod(event: band.name))
                         .font(.imasScaled( 10, weight: .semibold))
                         .foregroundStyle(ColorMath.onColor(ticketAccent))
                         .lineLimit(1)
@@ -224,7 +227,7 @@ struct WeekTimeGridView: View {
 
     private func allDayLane(dayWidth: CGFloat) -> some View {
         HStack(alignment: .top, spacing: 0) {
-            Text("終日")
+            Text(L10n.Schedule.weekAllDay)
                 .font(.imasScaled( 9, weight: .semibold))
                 .foregroundStyle(DS.ink3)
                 .frame(width: Metric.gutterWidth)
@@ -408,13 +411,13 @@ struct WeekTimeGridView: View {
     private func blockTitle(_ entry: CalendarEntry) -> String {
         switch entry {
         case .show(let row): return row.eventName
-        case .release(_, let songs): return songs.first?.title ?? "リリース"
+        case .release(_, let songs): return songs.first?.title ?? String(localized: L10n.Schedule.barReleaseFallback)
         case .birthday(let idol, _): return idol.name
         case .staffBirthday(let staff, _): return staff.name
         case .anniversary(let ann, _): return ann.label
         case .personal(let event): return event.title
-        case .ticket(let row): return "\(row.kind.label)・\(row.eventName)"
-        case .ticketPeriod(let row): return "受付・\(row.eventName)"
+        case .ticket(let row): return String(localized: L10n.Schedule.barTicket(kind: row.kind.label, event: row.eventName))
+        case .ticketPeriod(let row): return String(localized: L10n.Schedule.barTicketPeriod(event: row.eventName))
         }
     }
 

@@ -8,6 +8,8 @@ import com.fugaif.imaslivedb.data.model.SongSearchFilter
 import com.fugaif.imaslivedb.data.model.SongWithArtists
 import com.fugaif.imaslivedb.data.repository.SongWithRoles
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import com.fugaif.imaslivedb.ui.songs.songTypeLabel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +17,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 data class FilteredSongsUiState(
-    val title: String = "",
+    /** 画面タイトル。文言の値で持ち、画面で resolve() する (言語を切り替えても旧言語が残らない)。 */
+    val title: DisplayText = DisplayText.Verbatim(""),
     val songs: List<SongWithArtists> = emptyList(),
     /**
      * クリエイター絞り込みのときだけ埋まる「その曲での役割」。song_id → "作曲・編曲"。
@@ -53,7 +56,7 @@ class FilteredSongsViewModel(
             SongFilterKind.CREATOR -> {
                 val withRoles = songs.fetchSongsByCreator(value)
                 emit(
-                    title = "${value}が関わった楽曲",
+                    title = L10n.Filtered.songsTitleCreator(name = value),
                     songs = withRoles.map { SongWithArtists(it.song, it.song.singerLabel ?: "") },
                     roles = withRoles.associate { it.song.id to it.rolesLabel }
                 )
@@ -61,18 +64,20 @@ class FilteredSongsViewModel(
             SongFilterKind.BRAND -> {
                 // 表示名が引けないブランド (同期前・未知 id) でも一覧そのものは出す。
                 val label = idols.fetchBrand(value)?.shortName ?: value
-                emit(title = "${label}の楽曲", songs = songs.fetchSongs(brandCriterionFilter()))
+                emit(title = L10n.Filtered.songsTitleBrand(brand = label), songs = songs.fetchSongs(brandCriterionFilter()))
             }
             SongFilterKind.SONG_TYPE -> {
                 emit(
-                    title = "${songTypeLabel(value)}の楽曲",
+                    title = L10n.Filtered.songsTitleSongType(songType = songTypeLabel(value)),
                     songs = songs.fetchSongs(SongSearchFilter(songType = value, excludeLiveOnly = false))
                 )
             }
-            SongFilterKind.CD_SERIES -> emit(title = value, songs = songs.fetchSongsByCdSeries(value))
-            SongFilterKind.SERIES_GROUP -> emit(title = value, songs = songs.fetchSongsBySeriesGroup(value))
+            // CD シリーズ名・シリーズ名はデータ (訳さない)
+            SongFilterKind.CD_SERIES -> emit(title = DisplayText.Verbatim(value), songs = songs.fetchSongsByCdSeries(value))
+            SongFilterKind.SERIES_GROUP ->
+                emit(title = DisplayText.Verbatim(value), songs = songs.fetchSongsBySeriesGroup(value))
             SongFilterKind.RELEASE_YEAR ->
-                emit(title = "${value}年リリースの楽曲", songs = songs.fetchSongsByReleaseYear(value))
+                emit(title = L10n.Filtered.songsTitleReleaseYear(year = value), songs = songs.fetchSongsByReleaseYear(value))
             // 未知の kind は空一覧。落とさないのは、ルートを増やした側の取りこぼしが
             // クラッシュではなく「0曲」として見えた方が直しやすいため。
             else -> emit(title = fallbackTitle(), songs = emptyList())
@@ -86,14 +91,14 @@ class FilteredSongsViewModel(
      */
     private fun brandCriterionFilter() = SongSearchFilter(brandIds = setOf(value), excludeLiveOnly = false)
 
-    private fun emit(title: String, songs: List<SongWithArtists>, roles: Map<String, String> = emptyMap()) {
+    private fun emit(title: DisplayText, songs: List<SongWithArtists>, roles: Map<String, String> = emptyMap()) {
         _uiState.value = FilteredSongsUiState(
             title = title, songs = songs, rolesBySongId = roles, isLoading = false
         )
     }
 
     /** 取得前・未知 kind のタイトル。値そのものは必ず意味のある文字列なのでそれを出す。 */
-    private fun fallbackTitle(): String = value
+    private fun fallbackTitle(): DisplayText = DisplayText.Verbatim(value)
 
     class Factory(
         private val app: Application,

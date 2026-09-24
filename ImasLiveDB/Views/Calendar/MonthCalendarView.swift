@@ -17,7 +17,8 @@ struct MonthCalendarView: View {
     private static let ticketSeed = "#5856D6"
 
     private let today = Calendar.current.startOfDay(for: Date())
-    private let weekdaySymbols = ["日", "月", "火", "水", "木", "金", "土"]
+    /// 曜日の見出し (日曜始まり)。画面に出ている言語で引く (ja: 日 月 火 … / ko: 일 월 화 …)。
+    private var weekdaySymbols: [String] { DisplayFormat.weekdaySymbols() }
 
     private enum Layout {
         static let rowSpacing: CGFloat = DS.sp1
@@ -131,7 +132,7 @@ struct MonthCalendarView: View {
             ForEach(bands) { band in
                 let x = CGFloat(band.startCol) * (cellW + colSpacing)
                 let w = CGFloat(band.endCol - band.startCol) * (cellW + colSpacing) + cellW
-                Text(band.roundLeading ? "受付 \(band.name)" : " ")
+                Text(band.roundLeading ? String(localized: L10n.Schedule.bandTicketPeriod(event: band.name)) : " ")
                     .font(.imasScaled( 8, weight: .semibold))
                     .foregroundStyle(ColorMath.onColor(ticketAccent))
                     .lineLimit(1)
@@ -179,7 +180,7 @@ struct MonthCalendarView: View {
 
     private var weekdayHeader: some View {
         HStack(spacing: Layout.columnSpacing) {
-            ForEach(weekdaySymbols, id: \.self) { day in
+            ForEach(Array(weekdaySymbols.enumerated()), id: \.offset) { _, day in
                 Text(day)
                     .font(.imasScaled( 11, weight: .semibold))
                     .foregroundStyle(DS.ink3)
@@ -188,11 +189,11 @@ struct MonthCalendarView: View {
         }
     }
 
-    private var monthTitle: String {
+    private var monthTitle: LocalizedStringResource {
         let cal = Calendar.current
         let year = cal.component(.year, from: visibleMonth)
         let month = cal.component(.month, from: visibleMonth)
-        return "\(year)年 \(month)月"
+        return L10n.Schedule.monthTitle(year: year, month: month)
     }
 
     private var gridDays: [Date] {
@@ -353,7 +354,7 @@ struct CalendarEntryBar: View {
         switch entry {
         case .show(let row): return row.eventName
         case .release(_, let songs):
-            return songs.first.map { $0.title } ?? "リリース"
+            return songs.first.map { $0.title } ?? String(localized: L10n.Schedule.barReleaseFallback)
         case .birthday(let idol, _):
             return idol.name
         case .staffBirthday(let staff, _):
@@ -364,9 +365,9 @@ struct CalendarEntryBar: View {
         case .personal(let event):
             return event.title
         case .ticket(let row):
-            return "\(row.kind.label)・\(row.eventName)"
+            return String(localized: L10n.Schedule.barTicket(kind: row.kind.label, event: row.eventName))
         case .ticketPeriod(let row):
-            return "受付・\(row.eventName)"
+            return String(localized: L10n.Schedule.barTicketPeriod(event: row.eventName))
         }
     }
 

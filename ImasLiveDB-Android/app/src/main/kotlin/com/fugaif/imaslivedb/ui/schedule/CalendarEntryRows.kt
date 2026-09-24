@@ -36,6 +36,8 @@ import com.fugaif.imaslivedb.data.model.TicketDateKind
 import com.fugaif.imaslivedb.data.model.TicketPeriodRow
 import com.fugaif.imaslivedb.data.model.Vocab
 import com.fugaif.imaslivedb.data.repository.CalendarShowDetail
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.AppPreferences
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.brandColor
@@ -67,7 +69,7 @@ internal fun CalendarEntryRow(
                 entry.row.showName.takeIf { it.isNotBlank() },
                 showDetail?.startTime,
                 showDetail?.venue
-            ).joinToString(" ・ ").ifEmpty { entry.row.eventName },
+            ).joinToString(L10n.Schedule.rowSeparator.resolve()).ifEmpty { entry.row.eventName },
             brand = brandColor(entry.row.brandId),
             trailing = trailing,
             onClick = { onNavigateToShow(entry.row.showId) }
@@ -75,7 +77,7 @@ internal fun CalendarEntryRow(
 
         is CalendarEntry.Birthday -> EntryRow(
             accent = BirthdayColor,
-            label = "誕生日",
+            label = L10n.Schedule.rowBirthdayLabel.resolve(),
             title = entry.row.name,
             brand = brandColor(entry.row.brandId),
             trailing = trailing,
@@ -87,7 +89,7 @@ internal fun CalendarEntryRow(
         is CalendarEntry.StaffBirthday -> IconEntryRow(
             accent = StaffColor,
             icon = Icons.Filled.Person,
-            label = "${entry.row.name} 誕生日",
+            label = L10n.Schedule.rowBirthdayTitle(name = entry.row.name).resolve(),
             sub = entry.row.role ?: "",
             brand = brandColor(entry.row.brandId),
             trailing = trailing
@@ -96,8 +98,12 @@ internal fun CalendarEntryRow(
         is CalendarEntry.Anniversary -> IconEntryRow(
             accent = AnniversaryColor,
             icon = Icons.Filled.AutoAwesome,
-            label = if (entry.years == 0) "${entry.row.label} (初日)" else "${entry.years}周年 ・ ${entry.row.label}",
-            sub = "${entry.row.date.take(4)} 起点",
+            label = if (entry.years == 0) {
+                L10n.Schedule.rowAnniversaryFirstDay(label = entry.row.label).resolve()
+            } else {
+                L10n.Schedule.rowAnniversaryYears(years = entry.years, label = entry.row.label).resolve()
+            },
+            sub = L10n.Schedule.rowAnniversarySince(year = entry.row.date.take(4)).resolve(),
             brand = brandColor(entry.row.brandId),
             trailing = trailing
         )
@@ -120,8 +126,13 @@ private fun TicketRow(row: TicketCalendarRow, trailing: (@Composable () -> Unit)
         } else {
             Icons.Filled.MailOutline
         },
-        label = "${row.kind.label} ・ ${AppPreferences.eventDisplayName(row.eventName)}",
-        sub = if (row.kind == TicketDateKind.DEADLINE) "チケット申込の締切" else "チケット当落発表",
+        label = L10n.Schedule.rowTicketTitle(kind = row.kind.label, event = AppPreferences.eventDisplayName(row.eventName))
+            .resolve(),
+        sub = (if (row.kind == TicketDateKind.DEADLINE) {
+            L10n.Schedule.rowTicketDeadlineSubtitle
+        } else {
+            L10n.Schedule.rowTicketLotterySubtitle
+        }).resolve(),
         // コアが JOIN 済みの brand の color hex をそのまま使う (brand_id は返らない)。
         brand = row.brandColor?.let(::hexToColor) ?: Color.Gray,
         trailing = trailing,
@@ -136,12 +147,22 @@ private fun TicketPeriodRowView(
     trailing: (@Composable () -> Unit)?,
     onClick: () -> Unit
 ) {
-    val range = listOfNotNull(monthDay(row.start), monthDay(row.end)).joinToString(" 〜 ")
+    // 両端が読めれば「6/13 〜 6/20」、片方だけならその日付だけ、どちらも読めなければ語だけ。
+    val days = listOfNotNull(monthDay(row.start), monthDay(row.end))
+    val range = if (days.size == 2) {
+        L10n.Schedule.rowTicketPeriodRange(start = days[0], end = days[1]).resolve()
+    } else {
+        days.firstOrNull()
+    }
     IconEntryRow(
         accent = TicketColor,
         icon = Icons.Filled.DateRange,
-        label = "${Vocab.table.ticketPeriodLabel} ・ ${AppPreferences.eventDisplayName(row.eventName)}",
-        sub = if (range.isEmpty()) "チケット受付期間" else "チケット受付  $range",
+        label = L10n.Schedule.rowTicketPeriodTitle(
+            label = Vocab.table.ticketPeriodLabel,
+            event = AppPreferences.eventDisplayName(row.eventName)
+        ).resolve(),
+        sub = range?.let { L10n.Schedule.rowTicketPeriodSubtitleRange(range = it).resolve() }
+            ?: L10n.Schedule.rowTicketPeriodSubtitle.resolve(),
         brand = row.brandColor?.let(::hexToColor) ?: Color.Gray,
         trailing = trailing,
         onClick = onClick
@@ -208,7 +229,7 @@ private fun ReleaseRows(rows: List<CalReleaseRow>, onSong: (String) -> Unit) {
         rows.forEach { song ->
             EntryRow(
                 accent = ReleaseColor,
-                label = "リリース",
+                label = L10n.Schedule.rowReleaseLabel.resolve(),
                 title = song.title,
                 brand = brandColor(song.brandId),
                 onClick = { onSong(song.id) }

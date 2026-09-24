@@ -25,9 +25,12 @@ struct FilteredShowsView: View {
         return true
     }
 
-    private var resolvedTitle: String {
-        if case .venue = criterion, let venueName { return "\(venueName)での公演" }
-        return criterion.navigationTitle
+    /// 画面タイトル。会場は名前が引けるまで ID のまま出す (`criterion.navigationTitle` と同じ並び)。
+    private var resolvedTitle: LocalizedStringResource {
+        switch criterion {
+        case .venue(let venueId): return L10n.Filtered.showsTitleVenue(venue: venueName ?? venueId)
+        case .date(let date): return L10n.Filtered.showsTitleDate(date: date)
+        }
     }
 
     /// 年ごとの塊 (新しい年が先・年が読めない公演は末尾の「日程未定」)。
@@ -43,7 +46,7 @@ struct FilteredShowsView: View {
             if isLoading {
                 ImasLoadingState()
             } else if shows.isEmpty {
-                ImasEmptyState(systemImage: "ticket", title: "公演が見つかりません")
+                ImasEmptyState(systemImage: "ticket", title: String(localized: L10n.Filtered.showsEmpty))
             } else {
                 content
             }
@@ -61,7 +64,7 @@ struct FilteredShowsView: View {
     private var content: some View {
         List {
             ForEach(Array(groupedByYear.enumerated()), id: \.element.year) { index, group in
-                ImasSectionHeader(title: group.year, tight: true)
+                ImasSectionHeader(title: .core(group.year), tight: true)
                     .padding(.top, index == 0 ? 8 : 18)
                     .plainRow(background: DS.bg)
 
@@ -109,8 +112,8 @@ struct FilteredShowsView: View {
             rainbow: !(event?.jointBrandIdList.isEmpty ?? true)
         )
         .imasCopyable([
-            CopyItem("ライブ名をコピー", event?.name, key: "event_name"),
-            CopyItem("公演名をコピー", show.name, key: "show_name"),
+            CopyItem(String(localized: L10n.Filtered.showsCopyEventName), event?.name, key: "event_name"),
+            CopyItem(String(localized: L10n.Filtered.showsCopyShowName), show.name, key: "show_name"),
         ])
     }
 

@@ -1,0 +1,294 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "timeline.bar.a11y_range" : {
+      "comment" : "帯の読み上げの期間 (VoiceOver)。from / to は書式済みの年月 (2026年9月) (i18n/catalog/timeline.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@〜%2$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@부터 %2$@까지"
+          }
+        }
+      }
+    },
+    "timeline.brand.all" : {
+      "comment" : "ブランドを切り替えるチップの先頭 (全ブランドを重ねて出す) (i18n/catalog/timeline.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全ブランド"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체 브랜드"
+          }
+        }
+      }
+    },
+    "timeline.empty.message" : {
+      "comment" : "帯が 1 本も無いときの空状態の説明 (i18n/catalog/timeline.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このブランドにはまだライブ・楽曲の日付が登録されていません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 브랜드에는 아직 라이브·곡 날짜가 등록되지 않았어요."
+          }
+        }
+      }
+    },
+    "timeline.empty.title" : {
+      "comment" : "帯が 1 本も無いときの空状態の見出し (i18n/catalog/timeline.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "年表を描けるデータがありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "연표를 그릴 데이터가 없어요"
+          }
+        }
+      }
+    },
+    "timeline.lane.live" : {
+      "comment" : "左に貼り付くレーン名 (ライブ・フェス)。幅が狭い (54pt) ので短く (i18n/catalog/timeline.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브"
+          }
+        }
+      }
+    },
+    "timeline.lane.milestone" : {
+      "comment" : "左に貼り付くレーン名 (サービス開始・アニメ放映などの節目)。幅が狭い (54pt) ので短く (i18n/catalog/timeline.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "節目"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이정표"
+          }
+        }
+      }
+    },
+    "timeline.lane.music" : {
+      "comment" : "左に貼り付くレーン名 (CD シリーズ)。幅が狭い (54pt) ので短く (i18n/catalog/timeline.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡"
+          }
+        }
+      }
+    },
+    "timeline.lane.other" : {
+      "comment" : "左に貼り付くレーン名 (リリイベ・ラジオ・配信など)。幅が狭い (54pt) ので短く (i18n/catalog/timeline.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "その他"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "기타"
+          }
+        }
+      }
+    },
+    "timeline.period" : {
+      "comment" : "表示中の帯の年の範囲 (BrandTimelineViewModel.periodLabel。今は画面に出していない) (i18n/catalog/timeline.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@年 〜 %2$@年"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@년 ~ %2$@년"
+          }
+        }
+      }
+    },
+    "timeline.title" : {
+      "comment" : "年表 (ブランドの歴史) の画面タイトル。全ブランドを出しているとき (i18n/catalog/timeline.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "年表"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "연표"
+          }
+        }
+      }
+    },
+    "timeline.title_brand" : {
+      "comment" : "年表の画面タイトル。brand はブランドの略称 (データ) (i18n/catalog/timeline.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@の年表"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 연표"
+          }
+        }
+      }
+    },
+    "timeline.zoom.a11y" : {
+      "comment" : "右上の表示倍率メニューのボタンの読み上げ (i18n/catalog/timeline.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "表示倍率"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "표시 배율"
+          }
+        }
+      }
+    },
+    "timeline.zoom.default" : {
+      "comment" : "表示倍率メニューの項目 (既定の倍率に戻す) (i18n/catalog/timeline.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "標準"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "기본"
+          }
+        }
+      }
+    },
+    "timeline.zoom.fit" : {
+      "comment" : "表示倍率メニューの項目 (全期間が画面に収まる倍率にする) (i18n/catalog/timeline.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全体を表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체 보기"
+          }
+        }
+      }
+    },
+    "timeline.zoom.in" : {
+      "comment" : "表示倍率メニューの項目 (大きく拡大する) (i18n/catalog/timeline.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拡大"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "확대"
+          }
+        }
+      }
+    },
+    "timeline.zoom.now" : {
+      "comment" : "表示倍率メニューの項目 (今日の位置へ移る) (i18n/catalog/timeline.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今へ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오늘로 이동"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

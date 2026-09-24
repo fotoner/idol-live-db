@@ -35,6 +35,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.SongRow
 import com.fugaif.imaslivedb.ui.theme.DS
@@ -67,10 +69,10 @@ fun CollectedSongsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("回収した楽曲", fontWeight = FontWeight.Bold) },
+                title = { Text(L10n.Produce.collectedTitle.resolve(), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 }
             )
@@ -81,13 +83,13 @@ fun CollectedSongsScreen(
                 state.isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
                 state.songs.isEmpty() -> ImasEmptyState(
                     icon = Icons.Filled.MusicNote,
-                    title = "まだ回収した楽曲がありません",
-                    message = "ライブに「参加」を付けると、そのセトリの曲がここに集まります。"
+                    title = L10n.Produce.collectedEmptyTitle.resolve(),
+                    message = L10n.Produce.collectedEmptyMessage.resolve()
                 )
                 else -> LazyColumn(Modifier.fillMaxSize()) {
                     item(key = "count") {
                         Text(
-                            "${state.songs.size}曲",
+                            L10n.Produce.collectedCount(count = state.songs.size).resolve(),
                             fontSize = 13.sp, color = DS.ink2,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
                         )

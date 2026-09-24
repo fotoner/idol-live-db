@@ -1,0 +1,263 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "filtered",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/filtered/"
+    ],
+    "ios": [
+      "ImasLiveDB/Views/Filtered/"
+    ]
+  },
+  "strings": {
+    "events.count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}件",
+      "ko": "{count}건",
+      "note": "絞り込んだライブ一覧の先頭の件数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった"
+    },
+    "events.empty": {
+      "ja": "ライブが見つかりません",
+      "ko": "라이브를 찾을 수 없어요",
+      "note": "絞り込んだライブが 1 件も無いとき"
+    },
+    "events.title.brand": {
+      "args": [
+        {
+          "name": "brand",
+          "type": "string"
+        }
+      ],
+      "ja": "{brand}のライブ",
+      "ko": "{brand} 라이브",
+      "note": "絞り込んだライブ一覧のタイトル (ブランドで)。brand はブランドの略称 (データ)"
+    },
+    "events.title.year": {
+      "args": [
+        {
+          "name": "year",
+          "type": "int"
+        }
+      ],
+      "ja": "{year}年のライブ",
+      "ko": "{year}년 라이브",
+      "note": "絞り込んだライブ一覧のタイトル (開催年で)"
+    },
+    "idols.count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}人",
+      "ko": "{count}명",
+      "note": "絞り込んだアイドル一覧の先頭の人数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった"
+    },
+    "idols.empty": {
+      "ja": "アイドルが見つかりません",
+      "ko": "아이돌을 찾을 수 없어요",
+      "note": "絞り込んだアイドルが 1 人もいないとき"
+    },
+    "idols.title.birth_month": {
+      "args": [
+        {
+          "name": "month",
+          "type": "int"
+        }
+      ],
+      "ja": "{month}月生まれのアイドル",
+      "ko": "{month}월생 아이돌",
+      "note": "絞り込んだアイドル一覧のタイトル (誕生月で。Android は別の画面)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "idols.title.birth_place": {
+      "args": [
+        {
+          "name": "place",
+          "type": "string"
+        }
+      ],
+      "ja": "{place}出身のアイドル",
+      "ko": "{place} 출신 아이돌",
+      "note": "絞り込んだアイドル一覧のタイトル (出身地で)。place はデータの地名"
+    },
+    "idols.title.blood_type": {
+      "args": [
+        {
+          "name": "blood_type",
+          "type": "string"
+        }
+      ],
+      "ja": "{blood_type}型のアイドル",
+      "ko": "{blood_type}형 아이돌",
+      "note": "絞り込んだアイドル一覧のタイトル (血液型で)。blood_type は A / B / O / AB"
+    },
+    "idols.title.brand": {
+      "args": [
+        {
+          "name": "brand",
+          "type": "string"
+        }
+      ],
+      "ja": "{brand}のアイドル",
+      "ko": "{brand} 아이돌",
+      "note": "絞り込んだアイドル一覧のタイトル (ブランドで)。brand はブランドの略称 (データ)"
+    },
+    "idols.title.constellation": {
+      "args": [
+        {
+          "name": "constellation",
+          "type": "string"
+        }
+      ],
+      "ja": "{constellation}のアイドル",
+      "ko": "{constellation} 아이돌",
+      "note": "絞り込んだアイドル一覧のタイトル (星座で)。constellation はデータの星座名 (おひつじ座 など。訳さない)"
+    },
+    "row.favorite.a11y": {
+      "ja": "お気に入り",
+      "ko": "즐겨찾기",
+      "note": "ライブの行の右の ☆ (お気に入り) ボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "shows.copy.event_name": {
+      "ja": "ライブ名をコピー",
+      "ko": "라이브 이름 복사",
+      "note": "公演の行の長押しメニュー",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "shows.copy.show_name": {
+      "ja": "公演名をコピー",
+      "ko": "공연 이름 복사",
+      "note": "公演の行の長押しメニュー",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "shows.count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}公演",
+      "ko": "공연 {count}회",
+      "note": "絞り込んだ公演一覧の先頭の公演数 (Android)。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった (count 型の規則に合わせた)。",
+      "platforms": [
+        "android"
+      ]
+    },
+    "shows.empty": {
+      "ja": "公演が見つかりません",
+      "ko": "공연을 찾을 수 없어요",
+      "note": "絞り込んだ公演が 1 件も無いとき"
+    },
+    "shows.row.separator": {
+      "ja": " ・ ",
+      "keep_whitespace": true,
+      "ko": " · ",
+      "note": "公演の行の副題で、月日・公演名・会場を並べるときの区切り (前後の空白込み。Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "shows.title.date": {
+      "args": [
+        {
+          "name": "date",
+          "type": "string"
+        }
+      ],
+      "ja": "{date}の公演",
+      "ko": "{date} 공연",
+      "note": "日付で絞り込んだ公演一覧のタイトル。date は YYYY-MM-DD の文字列"
+    },
+    "shows.title.venue": {
+      "args": [
+        {
+          "name": "venue",
+          "type": "string"
+        }
+      ],
+      "ja": "{venue}での公演",
+      "ko": "{venue} 공연",
+      "note": "会場で絞り込んだ公演一覧のタイトル。venue は会場名 (引けなければ会場 ID)"
+    },
+    "songs.count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}曲",
+      "ko": "{count}곡",
+      "note": "絞り込んだ楽曲一覧の先頭の曲数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった"
+    },
+    "songs.empty": {
+      "ja": "楽曲が見つかりません",
+      "ko": "곡을 찾을 수 없어요",
+      "note": "絞り込んだ楽曲が 1 曲も無いとき"
+    },
+    "songs.title.brand": {
+      "args": [
+        {
+          "name": "brand",
+          "type": "string"
+        }
+      ],
+      "ja": "{brand}の楽曲",
+      "ko": "{brand} 곡",
+      "note": "絞り込んだ楽曲一覧のタイトル (ブランドで)。brand はブランドの略称 (データ)"
+    },
+    "songs.title.creator": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "ja": "{name}が関わった楽曲",
+      "ko": "{name} 참여 곡",
+      "note": "絞り込んだ楽曲一覧のタイトル (作詞・作曲・編曲のクレジットで)。name はクリエイター名 (データ)"
+    },
+    "songs.title.release_year": {
+      "args": [
+        {
+          "name": "year",
+          "type": "string"
+        }
+      ],
+      "ja": "{year}年リリースの楽曲",
+      "ko": "{year}년 발매 곡",
+      "note": "絞り込んだ楽曲一覧のタイトル (リリース年で)。year は経路に載った YYYY の文字列をそのまま渡す"
+    },
+    "songs.title.song_type": {
+      "args": [
+        {
+          "name": "song_type",
+          "type": "core"
+        }
+      ],
+      "ja": "{song_type}の楽曲",
+      "ko": "{song_type} 곡",
+      "note": "絞り込んだ楽曲一覧のタイトル (曲の種類で)。song_type は曲の種類。Android は imas-core の Vocab の表示名 (shortLabel)、iOS は DB の生の値をそのまま渡す"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/timeline.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- timeline.brand.all: ブランドを切り替えるチップの先頭 (全ブランドを重ねて出す) -->
+    <string name="timeline_brand_all">全ブランド</string>
+    <!-- timeline.empty.message: 帯が 1 本も無いときの空状態の説明 -->
+    <string name="timeline_empty_message">このブランドにはまだライブ・楽曲の日付が登録されていません。</string>
+    <!-- timeline.empty.title: 帯が 1 本も無いときの空状態の見出し -->
+    <string name="timeline_empty_title">年表を描けるデータがありません</string>
+    <!-- timeline.lane.live: 左に貼り付くレーン名 (ライブ・フェス)。幅が狭い (54pt) ので短く -->
+    <string name="timeline_lane_live">ライブ</string>
+    <!-- timeline.lane.milestone: 左に貼り付くレーン名 (サービス開始・アニメ放映などの節目)。幅が狭い (54pt) ので短く -->
+    <string name="timeline_lane_milestone">節目</string>
+    <!-- timeline.lane.music: 左に貼り付くレーン名 (CD シリーズ)。幅が狭い (54pt) ので短く -->
+    <string name="timeline_lane_music">楽曲</string>
+    <!-- timeline.lane.other: 左に貼り付くレーン名 (リリイベ・ラジオ・配信など)。幅が狭い (54pt) ので短く -->
+    <string name="timeline_lane_other">その他</string>
+    <!-- timeline.title: 年表 (ブランドの歴史) の画面タイトル。全ブランドを出しているとき -->
+    <string name="timeline_title">年表</string>
+    <!-- timeline.title_brand: 年表の画面タイトル。brand はブランドの略称 (データ) -->
+    <string name="timeline_title_brand">%1$sの年表</string>
+    <!-- timeline.zoom.a11y: 右上の表示倍率メニューのボタンの読み上げ -->
+    <string name="timeline_zoom_a11y">表示倍率</string>
+    <!-- timeline.zoom.default: 表示倍率メニューの項目 (既定の倍率に戻す) -->
+    <string name="timeline_zoom_default">標準</string>
+    <!-- timeline.zoom.fit: 表示倍率メニューの項目 (全期間が画面に収まる倍率にする) -->
+    <string name="timeline_zoom_fit">全体を表示</string>
+    <!-- timeline.zoom.in: 表示倍率メニューの項目 (大きく拡大する) -->
+    <string name="timeline_zoom_in">拡大</string>
+    <!-- timeline.zoom.now: 表示倍率メニューの項目 (今日の位置へ移る) -->
+    <string name="timeline_zoom_now">今へ</string>
+</resources>

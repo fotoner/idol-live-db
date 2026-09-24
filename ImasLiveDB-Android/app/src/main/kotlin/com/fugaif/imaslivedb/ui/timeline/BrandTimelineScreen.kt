@@ -58,11 +58,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.model.Brand
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasChip
 import com.fugaif.imaslivedb.ui.components.ImasChipStyle
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.filtered.SongFilterKind
 import com.fugaif.imaslivedb.ui.theme.DS
+import uniffi.imas_core.TimelineBarLane
 import uniffi.imas_core.TimelineBarTarget
 import uniffi.imas_core.TimelineHitBox
 import uniffi.imas_core.timelineEpochAtX
@@ -119,6 +122,9 @@ fun BrandTimelineScreen(
     // 対して座標を計算し続けてしまう。
     val planState = remember { derivedStateOf { buildTimelinePlan(state.bars, pointsPerDay) } }
     val plan by planState
+    // レールのレーン名は DrawScope (Composable の外) で描くので、ここで画面の言語の文字列にしておく。
+    // レーンを足したときに名前が空のまま描かれないよう、列挙を手で並べずに全レーンから作る。
+    val laneTitles = TimelineBarLane.entries.associateWith { it.title.resolve() }
 
     fun clampX(value: Float, canvasWidth: Float): Float =
         value.coerceIn(0f, maxOf(canvasWidth - plot.width, 0f))
@@ -179,29 +185,40 @@ fun BrandTimelineScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(state.selectedBrand?.let { "${it.shortName}の年表" } ?: "年表") },
+                title = {
+                    Text(
+                        (state.selectedBrand?.let { L10n.Timeline.titleBrand(brand = it.shortName) } ?: L10n.Timeline.title)
+                            .resolve()
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 },
                 actions = {
                     IconButton(onClick = { zoomMenuOpen = true }) {
-                        Icon(Icons.Filled.ZoomOutMap, contentDescription = "表示倍率")
+                        Icon(Icons.Filled.ZoomOutMap, contentDescription = L10n.Timeline.zoomA11y.resolve())
                     }
                     DropdownMenu(expanded = zoomMenuOpen, onDismissRequest = { zoomMenuOpen = false }) {
-                        DropdownMenuItem(text = { Text("今へ") }, onClick = { zoomMenuOpen = false; jumpToNow() })
-                        HorizontalDivider(color = DS.sep)
-                        DropdownMenuItem(text = { Text("全体を表示") }, onClick = { zoomMenuOpen = false; zoomToFit() })
                         DropdownMenuItem(
-                            text = { Text("標準") },
+                            text = { Text(L10n.Timeline.zoomNow.resolve()) },
+                            onClick = { zoomMenuOpen = false; jumpToNow() }
+                        )
+                        HorizontalDivider(color = DS.sep)
+                        DropdownMenuItem(
+                            text = { Text(L10n.Timeline.zoomFit.resolve()) },
+                            onClick = { zoomMenuOpen = false; zoomToFit() }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(L10n.Timeline.zoomDefault.resolve()) },
                             onClick = {
                                 zoomMenuOpen = false
                                 setPointsPerDay(TimelineMetrics.DEFAULT_POINTS_PER_YEAR / TimelineMetrics.DAYS_PER_YEAR)
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("拡大") },
+                            text = { Text(L10n.Timeline.zoomIn.resolve()) },
                             onClick = { zoomMenuOpen = false; setPointsPerDay(560.0 / TimelineMetrics.DAYS_PER_YEAR) }
                         )
                     }
@@ -226,8 +243,8 @@ fun BrandTimelineScreen(
                         CircularProgressIndicator(Modifier.align(Alignment.Center))
                     !hasPlan -> ImasEmptyState(
                         icon = Icons.Filled.BarChart,
-                        title = "年表を描けるデータがありません",
-                        message = "このブランドにはまだライブ・楽曲の日付が登録されていません。"
+                        title = L10n.Timeline.emptyTitle.resolve(),
+                        message = L10n.Timeline.emptyMessage.resolve()
                     )
                     else -> Canvas(
                         modifier = Modifier
@@ -266,7 +283,7 @@ fun BrandTimelineScreen(
                             }
                     ) {
                         val p = planState.value ?: return@Canvas
-                        drawTimeline(p, panX, panY, density, textMeasurer)
+                        drawTimeline(p, panX, panY, density, textMeasurer, laneTitles)
                     }
                 }
             }
@@ -290,7 +307,7 @@ private fun BrandBar(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         ImasChip(
-            text = "全ブランド",
+            text = L10n.Timeline.brandAll.resolve(),
             style = if (selectedBrandId == null) ImasChipStyle.SELECTED else ImasChipStyle.NEUTRAL,
             onClick = { onSelect(null) }
         )
@@ -333,7 +350,8 @@ private fun DrawScope.drawTimeline(
     panX: Float,
     panY: Float,
     density: Float,
-    textMeasurer: TextMeasurer
+    textMeasurer: TextMeasurer,
+    laneTitles: Map<TimelineBarLane, String>
 ) {
     val rail = TimelineMetrics.RAIL_WIDTH * density
     val ruler = TimelineMetrics.RULER_HEIGHT * density
@@ -361,7 +379,7 @@ private fun DrawScope.drawTimeline(
     drawRect(DS.surface, topLeft = Offset(0f, ruler), size = Size(rail, size.height - ruler))
     clipRect(left = 0f, top = ruler, right = rail, bottom = size.height) {
         translate(left = 0f, top = ruler - panY * density) {
-            drawRail(plan, density, textMeasurer)
+            drawRail(plan, density, textMeasurer, laneTitles)
         }
     }
     drawRect(DS.sep, topLeft = Offset(rail - density, ruler), size = Size(density, size.height - ruler))
@@ -495,10 +513,15 @@ private fun DrawScope.drawRuler(plan: TimelinePlan, density: Float, textMeasurer
  * 左のレーン名。アイコンは置かず名前だけ (Canvas にベクタアイコンを流し込む口が無く、
  * ここだけ Composable を重ねると貼り付きの計算が 2 系統に割れるため)。
  */
-private fun DrawScope.drawRail(plan: TimelinePlan, density: Float, textMeasurer: TextMeasurer) {
+private fun DrawScope.drawRail(
+    plan: TimelinePlan,
+    density: Float,
+    textMeasurer: TextMeasurer,
+    laneTitles: Map<TimelineBarLane, String>
+) {
     plan.lanes.forEach { lane ->
         val layout = textMeasurer.measure(
-            text = lane.lane.title,
+            text = laneTitles[lane.lane].orEmpty(),
             style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
         )
         drawText(

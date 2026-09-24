@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.model.CalendarEntry
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import java.time.LocalDate
@@ -206,7 +208,7 @@ private fun PeriodBandView(
         // ラベルは受付開始の週にだけ出す。続きの週にも出すと同じ文字列が毎週並んでうるさい。
         if (band.roundLeading) {
             Text(
-                "受付 ${band.name}",
+                L10n.Schedule.bandTicketPeriod(event = band.name).resolve(),
                 color = ImasTheme.onColor(accent),
                 fontSize = fontSize,
                 fontWeight = FontWeight.SemiBold,

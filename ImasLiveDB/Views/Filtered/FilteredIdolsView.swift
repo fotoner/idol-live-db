@@ -16,7 +16,7 @@ struct FilteredIdolsView: View {
             } else if idols.isEmpty {
                 ImasEmptyState(
                     systemImage: "person.2",
-                    title: "アイドルが見つかりません"
+                    title: String(localized: L10n.Filtered.idolsEmpty)
                 )
             } else {
                 List {
@@ -28,17 +28,29 @@ struct FilteredIdolsView: View {
                             .buttonStyle(.plain)
                         }
                     } header: {
-                        Text("\(idols.count)人")
+                        Text(L10n.Filtered.idolsCount(count: idols.count))
                             .font(.imasCaption)
                     }
                 }
                 .listStyle(.plain)
             }
         }
-        .navigationTitle(criterion.navigationTitle)
+        .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
         .task { await loadIdols() }
         .trackScreen("filtered_idols")
+    }
+
+    /// 画面タイトル。`criterion.navigationTitle` は遷移先の識別子 (DetailSheet の id) にも使うので、
+    /// 表示だけここでカタログの文言に写す。星座・出身地・血液型の値はデータ (訳さない)。
+    private var title: LocalizedStringResource {
+        switch criterion {
+        case .brand(_, let label): return L10n.Filtered.idolsTitleBrand(brand: label)
+        case .birthMonth(let month): return L10n.Filtered.idolsTitleBirthMonth(month: month)
+        case .constellation(let value): return L10n.Filtered.idolsTitleConstellation(constellation: value)
+        case .birthPlace(let value): return L10n.Filtered.idolsTitleBirthPlace(place: value)
+        case .bloodType(let value): return L10n.Filtered.idolsTitleBloodType(bloodType: value)
+        }
     }
 
     private func loadIdols() async {

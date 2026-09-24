@@ -124,7 +124,7 @@ struct CalendarView: View {
                 }
             }
             .background(DS.bg)
-            .navigationTitle("スケジュール")
+            .navigationTitle(L10n.Schedule.title)
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -139,7 +139,7 @@ struct CalendarView: View {
                         Image(systemName: DailyPickSheet.symbol(for: DailyPickSheet.defaultKind()))
                     }
                     .accessibilityLabel(DailyPickSheet.title(for: DailyPickSheet.defaultKind()))
-                    .accessibilityHint("各ブランドの日替わりピックにタグを付けて投票します")
+                    .accessibilityHint(Text(L10n.Schedule.toolbarDailyPickA11yHint))
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                 }
@@ -203,19 +203,23 @@ struct CalendarView: View {
                 }
             }
             // マイ予定: 権限拒否 → 設定アプリ誘導
-            .alert("カレンダーへのアクセスが必要です", isPresented: $showPersonalPermissionAlert) {
-                Button("設定を開く") {
+            .alert(Text(L10n.Schedule.personalPermissionTitle), isPresented: $showPersonalPermissionAlert) {
+                Button {
                     if let url = CalendarImportService.shared.settingsURL {
                         UIApplication.shared.open(url)
                     }
+                } label: {
+                    Text(L10n.Schedule.actionOpenSettings)
                 }
-                Button("キャンセル", role: .cancel) {}
+                Button(role: .cancel) {} label: {
+                    Text(L10n.Schedule.actionCancel)
+                }
             } message: {
-                Text("マイ予定を重ねて表示するには、設定アプリでカレンダーへの「フルアクセス」を許可してください。")
+                Text(L10n.Schedule.personalPermissionMessage)
             }
             // マイ予定: 権限リクエスト等のエラー表示
             .alert(
-                "マイ予定を読み込めませんでした",
+                Text(L10n.Schedule.personalLoadErrorTitle),
                 isPresented: Binding(
                     get: { personalErrorMessage != nil },
                     set: { if !$0 { personalErrorMessage = nil } }
@@ -279,7 +283,8 @@ struct CalendarView: View {
             chipScroller
             Spacer(minLength: DS.sp2)
             // 月/週 切替
-            ImasSegmented(labels: ["月", "週"], selection: $displayMode)
+            ImasSegmented(labels: [String(localized: L10n.Schedule.modeMonth), String(localized: L10n.Schedule.modeWeek)],
+                          selection: $displayMode)
                 .frame(width: 80)
         }
         .padding(.horizontal, DS.sp5)
@@ -292,13 +297,13 @@ struct CalendarView: View {
     private var chipScroller: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: DS.sp3) {
-                CalendarFilterChip(label: "公演", systemImage: "music.mic", color: Color(hexString: "#3E6DD6"), isOn: $showShows)
-                CalendarFilterChip(label: "リリース", systemImage: "opticaldisc", color: DS.warning, isOn: $showReleases)
-                CalendarFilterChip(label: "誕生日", systemImage: "gift", color: DS.pick, isOn: $showBirthdays)
-                CalendarFilterChip(label: "事務員", systemImage: "person.text.rectangle", color: DS.pick, isOn: $showStaffBirthdays)
-                CalendarFilterChip(label: "記念日", systemImage: "sparkles", color: DS.sys, isOn: $showAnniversaries)
-                CalendarFilterChip(label: "チケット", systemImage: "ticket", color: DS.danger, isOn: $showTickets)
-                CalendarFilterChip(label: "マイ予定", systemImage: "person.crop.circle", color: DS.sys, isOn: $showPersonal)
+                CalendarFilterChip(label: L10n.Schedule.filterShows, systemImage: "music.mic", color: Color(hexString: "#3E6DD6"), isOn: $showShows)
+                CalendarFilterChip(label: L10n.Schedule.filterReleases, systemImage: "opticaldisc", color: DS.warning, isOn: $showReleases)
+                CalendarFilterChip(label: L10n.Schedule.filterBirthdays, systemImage: "gift", color: DS.pick, isOn: $showBirthdays)
+                CalendarFilterChip(label: L10n.Schedule.filterStaff, systemImage: "person.text.rectangle", color: DS.pick, isOn: $showStaffBirthdays)
+                CalendarFilterChip(label: L10n.Schedule.filterAnniversaries, systemImage: "sparkles", color: DS.sys, isOn: $showAnniversaries)
+                CalendarFilterChip(label: L10n.Schedule.filterTickets, systemImage: "ticket", color: DS.danger, isOn: $showTickets)
+                CalendarFilterChip(label: L10n.Schedule.filterPersonal, systemImage: "person.crop.circle", color: DS.sys, isOn: $showPersonal)
             }
             .onGeometryChange(for: CGRect.self) { proxy in
                 proxy.frame(in: .named(ChipScroll.coordinateSpace))
@@ -429,9 +434,11 @@ struct CalendarView: View {
     private var selectedDayHeader: some View {
         let isToday = calendar.isDate(selectedDate, inSameDayAs: today)
         let dateText = selectedDate.formatted(.dateTime.month().day().weekday(.short))
-        let suffix = isToday ? " ・ 今日" : ""
-        let countText = "\(selectedDayEntries.count)件"
-        return ImasSectionHeader(title: "\(dateText)\(suffix) ・ \(countText)", tight: true)
+        let count = selectedDayEntries.count
+        let title = isToday
+            ? L10n.Schedule.selectedDayHeaderToday(date: dateText, count: count)
+            : L10n.Schedule.selectedDayHeader(date: dateText, count: count)
+        return ImasSectionHeader(title: .key(title), tight: true)
     }
 
     // MARK: - 選択日のリスト（内部スクロールのみ）
@@ -443,8 +450,8 @@ struct CalendarView: View {
             VStack {
                 ImasEmptyState(
                     systemImage: "calendar",
-                    title: "予定なし",
-                    message: "この日はライブ・リリース・誕生日の記録がありません"
+                    title: String(localized: L10n.Schedule.dayEmptyTitle),
+                    message: String(localized: L10n.Schedule.dayEmptyMessage)
                 )
                 Spacer(minLength: 0)
             }
@@ -589,19 +596,20 @@ private struct DaySheet: Identifiable {
 // MARK: - CalendarFilterChip
 
 private struct CalendarFilterChip: View {
-    let label: String
+    let label: LocalizedStringResource
     let systemImage: String
     let color: Color
     @Binding var isOn: Bool
 
     var body: some View {
+        // ImasFilterChip はまだ String を受ける (DS の入力契約は未移行) ので、ここで解決して渡す
         ImasFilterChip(
-            text: label,
+            text: String(localized: label),
             systemImage: systemImage,
             isSelected: isOn,
             color: color
         ) { isOn.toggle() }
-        .accessibilityLabel(label)
-        .accessibilityValue(isOn ? "表示" : "非表示")
+        .accessibilityLabel(Text(label))
+        .accessibilityValue(isOn ? Text(L10n.Schedule.filterShownA11y) : Text(L10n.Schedule.filterHiddenA11y))
     }
 }

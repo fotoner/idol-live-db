@@ -6,13 +6,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.fugaif.imaslivedb.data.model.EventWithDateRange
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 data class FilteredEventsUiState(
-    val title: String = "",
+    /** 画面タイトル。文言の値で持ち、画面で resolve() する (言語を切り替えても旧言語が残らない)。 */
+    val title: DisplayText = DisplayText.Verbatim(""),
     val events: List<EventWithDateRange> = emptyList(),
     val isLoading: Boolean = true
 )
@@ -31,7 +34,7 @@ class FilteredEventsViewModel(
 
     private val events = AppModule.from(app).eventRepository
 
-    private val _uiState = MutableStateFlow(FilteredEventsUiState(title = value))
+    private val _uiState = MutableStateFlow(FilteredEventsUiState(title = DisplayText.Verbatim(value)))
     val uiState: StateFlow<FilteredEventsUiState> = _uiState.asStateFlow()
 
     init {
@@ -43,18 +46,18 @@ class FilteredEventsViewModel(
             EventFilterKind.BRAND -> {
                 // 表示名が引けないブランド (同期前・未知 id) でも一覧そのものは出す。
                 val label = events.fetchBrand(value)?.shortName ?: value
-                emit("${label}のライブ", events.fetchEventsWithDateByBrand(value))
+                emit(L10n.Filtered.eventsTitleBrand(brand = label), events.fetchEventsWithDateByBrand(value))
             }
             EventFilterKind.YEAR -> {
                 val year = value.toIntOrNull()
-                if (year == null) emit(value, emptyList())
-                else emit("${year}年のライブ", events.fetchEventsWithDateByYear(year))
+                if (year == null) emit(DisplayText.Verbatim(value), emptyList())
+                else emit(L10n.Filtered.eventsTitleYear(year = year), events.fetchEventsWithDateByYear(year))
             }
-            else -> emit(value, emptyList())
+            else -> emit(DisplayText.Verbatim(value), emptyList())
         }
     }
 
-    private fun emit(title: String, events: List<EventWithDateRange>) {
+    private fun emit(title: DisplayText, events: List<EventWithDateRange>) {
         _uiState.value = FilteredEventsUiState(title = title, events = events, isLoading = false)
     }
 

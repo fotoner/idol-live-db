@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/produce.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- produce.activity.attended: 件数タイルのラベル (参加したライブの数) -->
+    <string name="produce_activity_attended">参加ライブ</string>
+    <!-- produce.activity.collected: 件数タイルのラベル (ライブで生で聴いた曲の数) -->
+    <string name="produce_activity_collected">回収</string>
+    <!-- produce.activity.contributions: 件数タイルのラベル (自分の投稿・編集の数) -->
+    <string name="produce_activity_contributions">投稿</string>
+    <!-- produce.activity.favorites: 件数タイルのラベル (お気に入りの数) -->
+    <string name="produce_activity_favorites">お気に入り</string>
+    <!-- produce.activity.header: 件数タイルの節の見出し -->
+    <string name="produce_activity_header">あなたの活動</string>
+    <!-- produce.activity.votes: 件数タイルのラベル (投票したお題の数) -->
+    <string name="produce_activity_votes">投票</string>
+    <!-- produce.attended.header: 参加したライブの節の見出し (右に件数) -->
+    <string name="produce_attended_header">参加したライブ</string>
+    <!-- produce.attended.see_all: 参加したライブの節の下の導線 (6 件以上のとき)。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった -->
+    <plurals name="produce_attended_see_all">
+        <item quantity="other">全て見る (%1$,d件)</item>
+    </plurals>
+    <!-- produce.collected.count: 回収した楽曲の一覧の先頭の曲数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった (count 型の規則に合わせた)。 -->
+    <plurals name="produce_collected_count">
+        <item quantity="other">%1$,d曲</item>
+    </plurals>
+    <!-- produce.collected.empty.message: 回収した楽曲が 1 曲も無いときの空状態の説明 -->
+    <string name="produce_collected_empty_message">ライブに「参加」を付けると、そのセトリの曲がここに集まります。</string>
+    <!-- produce.collected.empty.title: 回収した楽曲が 1 曲も無いときの空状態の見出し -->
+    <string name="produce_collected_empty_title">まだ回収した楽曲がありません</string>
+    <!-- produce.collected.title: 回収した楽曲 (参加したライブで聴いた曲) の一覧の画面タイトル -->
+    <string name="produce_collected_title">回収した楽曲</string>
+    <!-- produce.entry.tag_activity.preview: タグの動きの入口の説明。iOS は入口カード、Android はハブの行 -->
+    <string name="produce_entry_tag_activity_preview">伸びてるタグ・急上昇の曲やアイドルをチェック</string>
+    <!-- produce.entry.tag_activity.title: タグの動き (伸びているタグ) の入口。iOS は入口カード、Android はハブの行 -->
+    <string name="produce_entry_tag_activity_title">タグの動き</string>
+    <!-- produce.entry.timeline.preview: 年表の入口の説明。iOS は入口カード、Android はハブの行 -->
+    <string name="produce_entry_timeline_preview">ライブ・楽曲シリーズ・節目を1枚で俯瞰する</string>
+    <!-- produce.entry.timeline.title: 年表 (ブランドの歴史) の入口。iOS は入口カード、Android はハブの行 -->
+    <string name="produce_entry_timeline_title">年表</string>
+    <!-- produce.favorites.idols: お気に入りのアイドルの横並びの節の見出し (Android) -->
+    <string name="produce_favorites_idols">お気に入りアイドル</string>
+    <!-- produce.favorites.songs: お気に入りの曲の節の見出し (Android) -->
+    <string name="produce_favorites_songs">お気に入り曲</string>
+    <!-- produce.hub.attended.title: ハブの行 (参加したライブの一覧へ) -->
+    <string name="produce_hub_attended_title">参加したライブ</string>
+    <!-- produce.hub.collected.subtitle: ハブの行「回収した楽曲」の説明 -->
+    <string name="produce_hub_collected_subtitle">現地で聴けた曲だけの一覧</string>
+    <!-- produce.hub.collected.title: ハブの行 (回収した楽曲の一覧へ) -->
+    <string name="produce_hub_collected_title">回収した楽曲</string>
+    <!-- produce.hub.contributions.title: ハブの行 (自分の投稿・編集の一覧へ) -->
+    <string name="produce_hub_contributions_title">マイ投稿・編集履歴</string>
+    <!-- produce.hub.edit_history.title: ハブの行 (最近のコミュニティの編集へ) -->
+    <string name="produce_hub_edit_history_title">みんなの編集履歴</string>
+    <!-- produce.hub.empty_hint: 担当もお気に入りも無いときの案内 (Android) -->
+    <string name="produce_hub_empty_hint">アイドルや楽曲の詳細画面で ♥ を押すと、担当・お気に入りがここに並びます</string>
+    <!-- produce.hub.favorites.subtitle: ハブの行「お気に入り一覧」の説明 -->
+    <string name="produce_hub_favorites_subtitle">曲・アイドル・ライブ</string>
+    <!-- produce.hub.favorites.title: ハブの行 (お気に入りの一覧へ) -->
+    <string name="produce_hub_favorites_title">お気に入り一覧</string>
+    <!-- produce.hub.games.subtitle: ハブの行「ゲーム」の説明 -->
+    <string name="produce_hub_games_subtitle">クイズ・イントロ当てクイズ</string>
+    <!-- produce.hub.games.title: ハブの行 (ゲームの一覧へ) -->
+    <string name="produce_hub_games_title">ゲーム</string>
+    <!-- produce.hub.ledger.subtitle: ハブの行「収支」の説明。amount はコアが書式した金額 (¥12,000 など) -->
+    <string name="produce_hub_ledger_subtitle">使った額 %1$s</string>
+    <!-- produce.hub.ledger.title: ハブの行 (家計簿へ) -->
+    <string name="produce_hub_ledger_title">収支</string>
+    <!-- produce.hub.mastery.subtitle: ハブの行「習熟度」の説明 -->
+    <string name="produce_hub_mastery_subtitle">どこまで覚えたかをシリーズ・ユニット別に</string>
+    <!-- produce.hub.mastery.title: ハブの行 (習熟度の画面へ) -->
+    <string name="produce_hub_mastery_title">習熟度</string>
+    <!-- produce.hub.polls.subtitle: ハブの行「投票・予想」の説明 -->
+    <string name="produce_hub_polls_subtitle">タグ・ペンライト・ポール</string>
+    <!-- produce.hub.polls.title: ハブの行 (投票の画面へ) -->
+    <string name="produce_hub_polls_title">投票・予想</string>
+    <!-- produce.hub.settings.title: ハブの行 (設定・マイページへ)。右上の歯車の読み上げは nav.settings_button.a11y -->
+    <string name="produce_hub_settings_title">設定・マイ</string>
+    <!-- produce.hub.stats.subtitle: ハブの行「統計」の説明 -->
+    <string name="produce_hub_stats_subtitle">ブランド別・年別・ランキング</string>
+    <!-- produce.hub.stats.title: ハブの行 (統計の画面へ) -->
+    <string name="produce_hub_stats_title">統計</string>
+    <!-- produce.hub.tags.subtitle: ハブの行「みんなのタグ」の説明 -->
+    <string name="produce_hub_tags_subtitle">楽曲タグの作成・閲覧</string>
+    <!-- produce.hub.tags.title: ハブの行 (タグの一覧へ) -->
+    <string name="produce_hub_tags_title">みんなのタグ</string>
+    <!-- produce.hub.votes.title: ハブの行 (自分の投票の一覧へ) -->
+    <string name="produce_hub_votes_title">投票履歴</string>
+    <!-- produce.oshi.header_android: 担当アイドルの横並びの節の見出し。Android の文言で、iOS の oshi.header と ja が違う (統一はオーナーが別 PR で) -->
+    <string name="produce_oshi_header_android">担当</string>
+    <!-- produce.poll.action: 「開催中のお題」カードの右下の導線 -->
+    <string name="produce_poll_action">投票する</string>
+    <!-- produce.poll.badge: 先頭の「開催中のお題」カードの左上のラベル -->
+    <string name="produce_poll_badge">投票受付中</string>
+    <!-- produce.poll.entries: 「開催中のお題」カードの候補の数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった -->
+    <plurals name="produce_poll_entries">
+        <item quantity="other">%1$,d候補</item>
+    </plurals>
+    <!-- produce.poll.votes: 「開催中のお題」カードの票数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった -->
+    <plurals name="produce_poll_votes">
+        <item quantity="other">%1$,d票</item>
+    </plurals>
+    <!-- produce.recents.header: 最近開いたライブ・曲・アイドルのチップ列の見出し -->
+    <string name="produce_recents_header">最近見た</string>
+    <!-- produce.title: プロデュースタブ (担当・活動のまとめ) の画面タイトル。iOS はナビゲーションタイトル、Android は TopAppBar -->
+    <string name="produce_title">プロデュース</string>
+</resources>

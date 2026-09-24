@@ -88,7 +88,7 @@ struct BrandTimelineView: View {
             chartArea
         }
         .background(DS.bg.ignoresSafeArea())
-        .navigationTitle(viewModel.selectedBrand?.shortName.appending("の年表") ?? "年表")
+        .navigationTitle(navigationTitleText)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) { zoomMenu }
@@ -106,12 +106,18 @@ struct BrandTimelineView: View {
         .trackScreen("brand_timeline")
     }
 
+    /// 画面タイトル。1 ブランドなら「◯◯の年表」、全ブランドなら「年表」。
+    private var navigationTitleText: LocalizedStringResource {
+        guard let brand = viewModel.selectedBrand else { return L10n.Timeline.title }
+        return L10n.Timeline.titleBrand(brand: brand.shortName)
+    }
+
     // MARK: - ブランド切替
 
     private var brandBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: DS.sp2) {
-                ImasFilterChip(text: "全ブランド", isSelected: viewModel.selectedBrandId == nil) {
+                ImasFilterChip(text: String(localized: L10n.Timeline.brandAll), isSelected: viewModel.selectedBrandId == nil) {
                     Task { await select(nil) }
                 }
                 ForEach(viewModel.brands) { brand in
@@ -139,15 +145,17 @@ struct BrandTimelineView: View {
 
     private var zoomMenu: some View {
         Menu {
-            Button("今へ", systemImage: "location") { jumpToNow() }
+            Button { jumpToNow() } label: { Label(L10n.Timeline.zoomNow, systemImage: "location") }
             Divider()
-            Button("全体を表示", systemImage: "arrow.left.and.right") { zoomToFit() }
-            Button("標準", systemImage: "1.magnifyingglass") { setPointsPerYear(Metrics.defaultPointsPerYear) }
-            Button("拡大", systemImage: "plus.magnifyingglass") { setPointsPerYear(560) }
+            Button { zoomToFit() } label: { Label(L10n.Timeline.zoomFit, systemImage: "arrow.left.and.right") }
+            Button { setPointsPerYear(Metrics.defaultPointsPerYear) } label: {
+                Label(L10n.Timeline.zoomDefault, systemImage: "1.magnifyingglass")
+            }
+            Button { setPointsPerYear(560) } label: { Label(L10n.Timeline.zoomIn, systemImage: "plus.magnifyingglass") }
         } label: {
             Image(systemName: "arrow.up.left.and.down.right.magnifyingglass")
         }
-        .accessibilityLabel("表示倍率")
+        .accessibilityLabel(L10n.Timeline.zoomA11y)
     }
 
     private func setPointsPerYear(_ value: Double) {
@@ -274,8 +282,8 @@ struct BrandTimelineView: View {
         } else {
             ImasEmptyState(
                 systemImage: "chart.bar.xaxis",
-                title: "年表を描けるデータがありません",
-                message: "このブランドにはまだライブ・楽曲の日付が登録されていません。"
+                title: String(localized: L10n.Timeline.emptyTitle),
+                message: String(localized: L10n.Timeline.emptyMessage)
             )
         }
     }
@@ -457,7 +465,7 @@ struct BrandTimelineView: View {
                 VStack(spacing: 3) {
                     Image(systemName: lane.lane.systemImage)
                         .font(.imasScaled(12, weight: .semibold))
-                    Text(lane.lane.title)
+                    Text(Self.laneTitle(lane.lane))
                         .font(.imasCaption2.weight(.semibold))
                         .lineLimit(1)
                 }
@@ -465,6 +473,16 @@ struct BrandTimelineView: View {
                 .frame(width: Metrics.railWidth, height: min(lane.height, 56), alignment: .top)
                 .offset(y: lane.y + Metrics.lanePadding)
             }
+        }
+    }
+
+    /// レーン名。`TimelineLane.title` (Domain) は日本語の固定値なので、表示はここでカタログの文言に写す。
+    private static func laneTitle(_ lane: TimelineLane) -> LocalizedStringResource {
+        switch lane {
+        case .milestone: return L10n.Timeline.laneMilestone
+        case .live: return L10n.Timeline.laneLive
+        case .music: return L10n.Timeline.laneMusic
+        case .other: return L10n.Timeline.laneOther
         }
     }
 
@@ -770,13 +788,10 @@ private struct TimelineBarView: View {
     }
 
     private var accessibilityLabel: String {
-        let formatter = DateFormatter()
-        formatter.calendar = TimelineDateParser.calendar
-        formatter.timeZone = TimelineDateParser.calendar.timeZone
-        formatter.dateFormat = "yyyy年M月"
-        let from = formatter.string(from: placed.bar.start)
-        let to = formatter.string(from: placed.bar.end)
-        let period = from == to ? from : "\(from)〜\(to)"
+        // 年月は画面に出ている言語で書く (ja: 2026年9月 / ko: 2026년 9월。JST・グレゴリオ暦)
+        let from = DisplayFormat.yearMonth(placed.bar.start)
+        let to = DisplayFormat.yearMonth(placed.bar.end)
+        let period = from == to ? from : String(localized: L10n.Timeline.barA11yRange(from: from, to: to))
         return "\(placed.bar.title) \(period)\(placed.bar.badge.map { " \($0)" } ?? "")"
     }
 }

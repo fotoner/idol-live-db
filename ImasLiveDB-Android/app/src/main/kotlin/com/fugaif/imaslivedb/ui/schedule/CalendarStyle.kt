@@ -8,10 +8,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -19,10 +22,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.model.CalendarEntry
 import com.fugaif.imaslivedb.data.model.TicketDateKind
+import com.fugaif.imaslivedb.i18n.DisplayLocale
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.AppPreferences
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import com.fugaif.imaslivedb.ui.theme.brandColor
+import java.time.DayOfWeek
+import java.util.Locale
 
 // =============================================================================
 // カレンダーの色とラベル (iOS `CalendarEntry+Display.swift` に対応)。
@@ -69,16 +78,34 @@ fun CalendarEntry.accentInk(): Color = ImasTheme.onColor(accentColor())
 /**
  * 帯 1 本に載せる短いラベル。狭いので修飾は最小限にする。
  * ライブ名は「省略表示」設定に従う (フルネームだと帯の幅では作品名しか読めない)。
+ * 文言の値で返し、描く側 (Composable) で resolve() する。
  */
-fun CalendarEntry.barLabel(): String = when (this) {
-    is CalendarEntry.Show -> AppPreferences.eventDisplayName(row.eventName)
-    is CalendarEntry.Release -> songs.firstOrNull()?.title ?: "リリース"
-    is CalendarEntry.Birthday -> row.name
-    is CalendarEntry.StaffBirthday -> row.name
+fun CalendarEntry.barLabel(): DisplayText = when (this) {
+    is CalendarEntry.Show -> DisplayText.Verbatim(AppPreferences.eventDisplayName(row.eventName))
+    is CalendarEntry.Release ->
+        songs.firstOrNull()?.title?.let { DisplayText.Verbatim(it) } ?: L10n.Schedule.barReleaseFallback
+    is CalendarEntry.Birthday -> DisplayText.Verbatim(row.name)
+    is CalendarEntry.StaffBirthday -> DisplayText.Verbatim(row.name)
     // 月セルは狭いので「ラベル」だけ。N周年は日詳細で見せる。
-    is CalendarEntry.Anniversary -> row.label
-    is CalendarEntry.Ticket -> "${row.kind.label}・${AppPreferences.eventDisplayName(row.eventName)}"
-    is CalendarEntry.TicketPeriod -> "受付・${AppPreferences.eventDisplayName(row.eventName)}"
+    is CalendarEntry.Anniversary -> DisplayText.Verbatim(row.label)
+    is CalendarEntry.Ticket ->
+        L10n.Schedule.barTicket(kind = row.kind.label, event = AppPreferences.eventDisplayName(row.eventName))
+    is CalendarEntry.TicketPeriod ->
+        L10n.Schedule.barTicketPeriod(event = AppPreferences.eventDisplayName(row.eventName))
+}
+
+/** 曜日の並び (日曜始まり。月グリッドの列と同じ)。見出しの文字は DisplayFormat.weekdayNarrow で引く。 */
+internal val SundayFirstWeek: List<DayOfWeek> = listOf(
+    DayOfWeek.SUNDAY, DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
+    DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY
+)
+
+/** 日付・曜日の書式に使うロケール (画面に出ている言語)。構成が変わったら引き直す。 */
+@Composable
+internal fun rememberFormattingLocale(): Locale {
+    val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+    return remember(configuration) { DisplayLocale.of(context).formattingLocale }
 }
 
 /**
@@ -102,7 +129,7 @@ fun CalendarEntryBar(
         contentAlignment = Alignment.CenterStart
     ) {
         Text(
-            entry.barLabel(),
+            entry.barLabel().resolve(),
             color = entry.accentInk(),
             fontSize = fontSize,
             fontWeight = FontWeight.SemiBold,

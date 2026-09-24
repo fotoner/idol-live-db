@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/schedule.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources>
+    <string name="schedule_band_ticket_period">접수 %1$s</string>
+    <string name="schedule_bar_release_fallback">발매</string>
+    <string name="schedule_bar_ticket">%1$s·%2$s</string>
+    <string name="schedule_bar_ticket_period">접수·%1$s</string>
+    <string name="schedule_day_empty_message">이날은 라이브·발매·생일 기록이 없어요</string>
+    <string name="schedule_day_sheet_date">%1$d년 %2$d월 %3$d일</string>
+    <plurals name="schedule_day_sheet_event_count">
+        <item quantity="other">이벤트 %1$,d건</item>
+    </plurals>
+    <string name="schedule_export_action">캘린더에 추가</string>
+    <string name="schedule_filter_anniversaries">기념일</string>
+    <string name="schedule_filter_birthdays">생일</string>
+    <string name="schedule_filter_releases">발매</string>
+    <string name="schedule_filter_shows">공연</string>
+    <string name="schedule_filter_staff">사무원</string>
+    <string name="schedule_filter_tickets">티켓</string>
+    <string name="schedule_mode_month">월</string>
+    <string name="schedule_mode_week">주</string>
+    <string name="schedule_month_next_a11y">다음 달</string>
+    <string name="schedule_month_prev_a11y">이전 달</string>
+    <string name="schedule_month_title">%1$d년 %2$d월</string>
+    <string name="schedule_row_anniversary_first_day">%1$s (첫날)</string>
+    <string name="schedule_row_anniversary_since">%1$s년 기점</string>
+    <string name="schedule_row_anniversary_years">%1$d주년 · %2$s</string>
+    <string name="schedule_row_birthday_label">생일</string>
+    <string name="schedule_row_birthday_title">%1$s 생일</string>
+    <string name="schedule_row_release_label">발매</string>
+    <string name="schedule_row_separator">" · "</string>
+    <string name="schedule_row_setlist">세트리스트</string>
+    <string name="schedule_row_ticket_deadline_subtitle">티켓 신청 마감</string>
+    <string name="schedule_row_ticket_lottery_subtitle">티켓 추첨 결과 발표</string>
+    <string name="schedule_row_ticket_title">%1$s · %2$s</string>
+    <string name="schedule_row_ticket_period_range">%1$s ~ %2$s</string>
+    <string name="schedule_row_ticket_period_subtitle">티켓 접수 기간</string>
+    <string name="schedule_row_ticket_period_subtitle_range">"티켓 접수  %1$s"</string>
+    <string name="schedule_row_ticket_period_title">%1$s · %2$s</string>
+    <plurals name="schedule_selected_day_count">
+        <item quantity="other">%1$,d건</item>
+    </plurals>
+    <string name="schedule_selected_day_date">%1$d월 %2$d일</string>
+    <string name="schedule_selected_day_detail_a11y">이날 상세 보기</string>
+    <string name="schedule_selected_day_empty">이날의 기록이 없어요</string>
+    <string name="schedule_title">스케줄</string>
+    <string name="schedule_week_all_day">종일</string>
+    <string name="schedule_week_next_a11y">다음 주</string>
+    <string name="schedule_week_prev_a11y">이전 주</string>
+    <string name="schedule_week_range">%1$s ~ %2$s</string>
+</resources>

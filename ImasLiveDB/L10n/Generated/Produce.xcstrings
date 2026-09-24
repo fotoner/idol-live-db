@@ -1,0 +1,1144 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "produce.activity.attended" : {
+      "comment" : "件数タイルのラベル (参加したライブの数) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加ライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가 라이브"
+          }
+        }
+      }
+    },
+    "produce.activity.collected" : {
+      "comment" : "件数タイルのラベル (ライブで生で聴いた曲の数) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回収"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "회수"
+          }
+        }
+      }
+    },
+    "produce.activity.contributions" : {
+      "comment" : "件数タイルのラベル (自分の投稿・編集の数) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投稿"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "게시물"
+          }
+        }
+      }
+    },
+    "produce.activity.favorites" : {
+      "comment" : "件数タイルのラベル (お気に入りの数) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入り"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기"
+          }
+        }
+      }
+    },
+    "produce.activity.header" : {
+      "comment" : "件数タイルの節の見出し (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あなたの活動"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "나의 활동"
+          }
+        }
+      }
+    },
+    "produce.activity.ledger" : {
+      "comment" : "件数タイルのラベル (家計簿の合計金額) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "収支"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가계부"
+          }
+        }
+      }
+    },
+    "produce.activity.mastery" : {
+      "comment" : "件数タイルのラベル (習熟度を付けた曲の数) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "習熟度"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "숙련도"
+          }
+        }
+      }
+    },
+    "produce.activity.predictions" : {
+      "comment" : "件数タイルのラベル (セトリ予想の数) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "予想"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "예상"
+          }
+        }
+      }
+    },
+    "produce.activity.votes" : {
+      "comment" : "件数タイルのラベル (投票したお題の数) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표"
+          }
+        }
+      }
+    },
+    "produce.attended.header" : {
+      "comment" : "参加したライブの節の見出し (右に件数) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加したライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가한 라이브"
+          }
+        }
+      }
+    },
+    "produce.attended.see_all" : {
+      "comment" : "参加したライブの節の下の導線 (6 件以上のとき)。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "全て見る (%arg件)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "모두 보기 (%arg건)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "produce.collected.title" : {
+      "comment" : "回収した楽曲 (参加したライブで聴いた曲) の一覧の画面タイトル (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回収した楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "회수한 곡"
+          }
+        }
+      }
+    },
+    "produce.entry.call_guide.preview" : {
+      "comment" : "コールガイドの入口カードの説明 (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌詞行ごとのコールガイド。書かれている曲・最近の編集・書き手募集中の曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가사 줄마다 붙는 콜 가이드. 작성된 곡·최근 편집·작성자를 찾는 곡"
+          }
+        }
+      }
+    },
+    "produce.entry.call_guide.title" : {
+      "comment" : "入口カードのタイトル (コールガイドのまとめへ) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コールガイド"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜 가이드"
+          }
+        }
+      }
+    },
+    "produce.entry.games.preview" : {
+      "comment" : "クイズ・ゲームの入口カードの説明 (ゲームの名前を並べる) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イントロドン・アイドル当て・カラー合わせ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "인트로돈·아이돌 맞히기·컬러 맞추기"
+          }
+        }
+      }
+    },
+    "produce.entry.games.title" : {
+      "comment" : "入口カードのタイトル (ゲームの一覧へ) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クイズ・ゲーム"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "퀴즈·게임"
+          }
+        }
+      }
+    },
+    "produce.entry.polls.preview" : {
+      "comment" : "みんなの投票の入口カードの説明 (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お題に推しを投票・ランキング"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "주제별 최애 투표·랭킹"
+          }
+        }
+      }
+    },
+    "produce.entry.polls.title" : {
+      "comment" : "入口カードのタイトル (お題の一覧へ) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "みんなの投票"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모두의 투표"
+          }
+        }
+      }
+    },
+    "produce.entry.predictions.preview" : {
+      "comment" : "マイ予想の入口カードの説明 (予想がまだ無いとき) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリを予想して的中を狙おう"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트를 예상해서 적중을 노려 봐요"
+          }
+        }
+      }
+    },
+    "produce.entry.predictions.preview_count" : {
+      "comment" : "マイ予想の入口カードの説明 (予想が 1 件以上あるとき)。1000 以上は桁区切りが付く (1,234)。iOS も以前は付かなかった (String で組んでいた) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "投票した予想 %arg件"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "투표한 예상 %arg건"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "produce.entry.predictions.title" : {
+      "comment" : "入口カードのタイトル (自分のセトリ予想へ) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイ予想"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "내 예상"
+          }
+        }
+      }
+    },
+    "produce.entry.recent_edits.preview" : {
+      "comment" : "みんなの動きの入口カードの説明 (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参考動画・セトリ編集など最近のコミュニティ投稿"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참고 영상·세트리스트 편집 등 최근 커뮤니티 게시물"
+          }
+        }
+      }
+    },
+    "produce.entry.recent_edits.title" : {
+      "comment" : "入口カードのタイトル (最近のコミュニティの編集へ) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "みんなの動き"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모두의 활동"
+          }
+        }
+      }
+    },
+    "produce.entry.stats.preview" : {
+      "comment" : "統計の入口カードの説明 (公演がまだ無いとき) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "披露回数・お気に入り・出演ランキング…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 횟수·즐겨찾기·출연 랭킹…"
+          }
+        }
+      }
+    },
+    "produce.entry.stats.preview_latest" : {
+      "comment" : "統計の入口カードの説明。show は一番新しい公演の名前 (データ) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最新公演 %1$@ ほか"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최신 공연 %1$@ 외"
+          }
+        }
+      }
+    },
+    "produce.entry.stats.title" : {
+      "comment" : "入口カードのタイトル (統計の画面へ) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "調べる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "찾아보기"
+          }
+        }
+      }
+    },
+    "produce.entry.tag_activity.preview" : {
+      "comment" : "タグの動きの入口の説明。iOS は入口カード、Android はハブの行 (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "伸びてるタグ・急上昇の曲やアイドルをチェック"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "뜨는 태그·급상승 곡과 아이돌을 확인해요"
+          }
+        }
+      }
+    },
+    "produce.entry.tag_activity.title" : {
+      "comment" : "タグの動き (伸びているタグ) の入口。iOS は入口カード、Android はハブの行 (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグの動き"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 동향"
+          }
+        }
+      }
+    },
+    "produce.entry.timeline.preview" : {
+      "comment" : "年表の入口の説明。iOS は入口カード、Android はハブの行 (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ・楽曲シリーズ・節目を1枚で俯瞰する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브·곡 시리즈·이정표를 한눈에 봐요"
+          }
+        }
+      }
+    },
+    "produce.entry.timeline.title" : {
+      "comment" : "年表 (ブランドの歴史) の入口。iOS は入口カード、Android はハブの行 (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "年表"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "연표"
+          }
+        }
+      }
+    },
+    "produce.inbox.a11y" : {
+      "comment" : "右上のベル (運営からのお知らせを開く) の読み上げ。未読が無いとき (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お知らせ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공지"
+          }
+        }
+      }
+    },
+    "produce.inbox.unread.a11y" : {
+      "comment" : "右上のベルの読み上げ。未読があるとき。1000 以上は桁区切りが付く (1,234)。 (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "お知らせ (未読%arg件)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "공지 (읽지 않음 %arg건)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "produce.oshi.count" : {
+      "comment" : "担当アイドルの節の見出しの人数 (小さい見出しでは出ない)。1000 以上は桁区切りが付く (1,234)。iOS も以前は付かなかった (String で組んでいた) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg人"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg명"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "produce.oshi.empty.message" : {
+      "comment" : "担当アイドルが 1 人もいないときの空状態の説明 (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル詳細の「担当」マークを付けると、ここに大きく表示されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 상세에서 “담당” 마크를 달면 여기에 크게 보여요."
+          }
+        }
+      }
+    },
+    "produce.oshi.empty.title" : {
+      "comment" : "担当アイドルが 1 人もいないときの空状態の見出し (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当アイドルがいません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 아이돌이 없어요"
+          }
+        }
+      }
+    },
+    "produce.oshi.header" : {
+      "comment" : "担当アイドル (推し) のカードの節の見出し (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 아이돌"
+          }
+        }
+      }
+    },
+    "produce.oshi.hero.chip" : {
+      "comment" : "担当アイドルのカードの名前の下のチップ (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당"
+          }
+        }
+      }
+    },
+    "produce.oshi.hero.detail" : {
+      "comment" : "担当アイドルのカードのボタン (アイドル詳細へ) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "자세히 보기"
+          }
+        }
+      }
+    },
+    "produce.oshi.hero.lives" : {
+      "comment" : "担当アイドルのカードのボタン (出演したライブへ) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出演ライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출연 라이브"
+          }
+        }
+      }
+    },
+    "produce.oshi.hero.meta" : {
+      "comment" : "担当アイドルのカードの名前の下の行。brand はブランドの略称、cv は声優名 (どちらもデータ) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ ・ CV %2$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ · CV %2$@"
+          }
+        }
+      }
+    },
+    "produce.poll.action" : {
+      "comment" : "「開催中のお題」カードの右下の導線 (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표하기"
+          }
+        }
+      }
+    },
+    "produce.poll.badge" : {
+      "comment" : "先頭の「開催中のお題」カードの左上のラベル (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票受付中"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표 접수 중"
+          }
+        }
+      }
+    },
+    "produce.poll.entries" : {
+      "comment" : "「開催中のお題」カードの候補の数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg候補"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "후보 %arg개"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "produce.poll.remaining.days" : {
+      "comment" : "「開催中のお題」カードの残り時間 (1 日以上)。1000 以上は桁区切りが付く (1,234)。iOS も以前は付かなかった (String で組んでいた) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@days@"
+          },
+          "substitutions" : {
+            "days" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "あと%arg日"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@days@"
+          },
+          "substitutions" : {
+            "days" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg일 남음"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "produce.poll.remaining.hours" : {
+      "comment" : "「開催中のお題」カードの残り時間 (1 日未満) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@hours@"
+          },
+          "substitutions" : {
+            "hours" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "あと%arg時間"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@hours@"
+          },
+          "substitutions" : {
+            "hours" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg시간 남음"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "produce.poll.remaining.soon" : {
+      "comment" : "「開催中のお題」カードの残り時間 (1 時間を切った・締切を過ぎた) (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まもなく終了"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곧 종료"
+          }
+        }
+      }
+    },
+    "produce.poll.votes" : {
+      "comment" : "「開催中のお題」カードの票数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg票"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg표"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "produce.recents.header" : {
+      "comment" : "最近開いたライブ・曲・アイドルのチップ列の見出し (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最近見た"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최근 본 항목"
+          }
+        }
+      }
+    },
+    "produce.title" : {
+      "comment" : "プロデュースタブ (担当・活動のまとめ) の画面タイトル。iOS はナビゲーションタイトル、Android は TopAppBar (i18n/catalog/produce.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロデュース"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "프로듀스"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

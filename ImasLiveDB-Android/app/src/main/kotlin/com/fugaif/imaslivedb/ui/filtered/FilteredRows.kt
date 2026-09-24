@@ -28,6 +28,8 @@ import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.model.EventWithDateRange
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.UserMark
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.ImasLeadBar
@@ -99,7 +101,7 @@ fun FilteredEventRow(item: EventWithDateRange, onClick: () -> Unit) {
             activeIcon = Icons.Filled.Star,
             inactiveIcon = Icons.Filled.StarBorder,
             activeTint = DS.favorite,
-            contentDescription = "お気に入り"
+            contentDescription = L10n.Filtered.rowFavoriteA11y.resolve()
         )
     }
 }

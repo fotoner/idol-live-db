@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/produce.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources>
+    <string name="produce_activity_attended">참가 라이브</string>
+    <string name="produce_activity_collected">회수</string>
+    <string name="produce_activity_contributions">게시물</string>
+    <string name="produce_activity_favorites">즐겨찾기</string>
+    <string name="produce_activity_header">나의 활동</string>
+    <string name="produce_activity_votes">투표</string>
+    <string name="produce_attended_header">참가한 라이브</string>
+    <plurals name="produce_attended_see_all">
+        <item quantity="other">모두 보기 (%1$,d건)</item>
+    </plurals>
+    <plurals name="produce_collected_count">
+        <item quantity="other">%1$,d곡</item>
+    </plurals>
+    <string name="produce_collected_empty_message">라이브에 “참가”를 달면 그 세트리스트의 곡이 여기에 모여요.</string>
+    <string name="produce_collected_empty_title">아직 회수한 곡이 없어요</string>
+    <string name="produce_collected_title">회수한 곡</string>
+    <string name="produce_entry_tag_activity_preview">뜨는 태그·급상승 곡과 아이돌을 확인해요</string>
+    <string name="produce_entry_tag_activity_title">태그 동향</string>
+    <string name="produce_entry_timeline_preview">라이브·곡 시리즈·이정표를 한눈에 봐요</string>
+    <string name="produce_entry_timeline_title">연표</string>
+    <string name="produce_favorites_idols">즐겨찾기 아이돌</string>
+    <string name="produce_favorites_songs">즐겨찾기 곡</string>
+    <string name="produce_hub_attended_title">참가한 라이브</string>
+    <string name="produce_hub_collected_subtitle">현장에서 들은 곡만 모은 목록</string>
+    <string name="produce_hub_collected_title">회수한 곡</string>
+    <string name="produce_hub_contributions_title">내 게시물·편집 기록</string>
+    <string name="produce_hub_edit_history_title">모두의 편집 기록</string>
+    <string name="produce_hub_empty_hint">아이돌이나 곡 상세 화면에서 ♥를 누르면 담당·즐겨찾기가 여기에 모여요</string>
+    <string name="produce_hub_favorites_subtitle">곡·아이돌·라이브</string>
+    <string name="produce_hub_favorites_title">즐겨찾기 목록</string>
+    <string name="produce_hub_games_subtitle">퀴즈·인트로 맞히기 퀴즈</string>
+    <string name="produce_hub_games_title">게임</string>
+    <string name="produce_hub_ledger_subtitle">쓴 금액 %1$s</string>
+    <string name="produce_hub_ledger_title">가계부</string>
+    <string name="produce_hub_mastery_subtitle">얼마나 외웠는지 시리즈·유닛별로</string>
+    <string name="produce_hub_mastery_title">숙련도</string>
+    <string name="produce_hub_polls_subtitle">태그·펜라이트·주제 투표</string>
+    <string name="produce_hub_polls_title">투표·예상</string>
+    <string name="produce_hub_settings_title">설정·마이페이지</string>
+    <string name="produce_hub_stats_subtitle">브랜드별·연도별·랭킹</string>
+    <string name="produce_hub_stats_title">통계</string>
+    <string name="produce_hub_tags_subtitle">곡 태그 만들기·보기</string>
+    <string name="produce_hub_tags_title">모두의 태그</string>
+    <string name="produce_hub_votes_title">투표 기록</string>
+    <string name="produce_oshi_header_android">담당</string>
+    <string name="produce_poll_action">투표하기</string>
+    <string name="produce_poll_badge">투표 접수 중</string>
+    <plurals name="produce_poll_entries">
+        <item quantity="other">후보 %1$,d개</item>
+    </plurals>
+    <plurals name="produce_poll_votes">
+        <item quantity="other">%1$,d표</item>
+    </plurals>
+    <string name="produce_recents_header">최근 본 항목</string>
+    <string name="produce_title">프로듀스</string>
+</resources>

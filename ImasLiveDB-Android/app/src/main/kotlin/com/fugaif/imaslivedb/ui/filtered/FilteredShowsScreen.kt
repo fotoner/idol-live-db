@@ -26,6 +26,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.AttendanceSwipeRow
 import com.fugaif.imaslivedb.ui.components.ImasSectionHeader
 import com.fugaif.imaslivedb.ui.theme.DS
@@ -55,10 +58,10 @@ fun FilteredShowsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(state.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                title = { Text(state.title.resolve(), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 }
             )
@@ -67,19 +70,20 @@ fun FilteredShowsScreen(
         Box(Modifier.fillMaxSize().padding(padding)) {
             when {
                 state.isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                state.groups.isEmpty() -> FilteredEmptyState(Icons.Filled.ConfirmationNumber, "公演が見つかりません")
+                state.groups.isEmpty() -> FilteredEmptyState(Icons.Filled.ConfirmationNumber, L10n.Filtered.showsEmpty.resolve())
                 else -> LazyColumn(Modifier.fillMaxSize()) {
-                    item(key = "count") { FilteredCountHeader("${state.showCount}公演") }
+                    item(key = "count") { FilteredCountHeader(L10n.Filtered.showsCount(count = state.showCount).resolve()) }
                     state.groups.forEach { group ->
                         item(key = "year_${group.label}") {
-                            ImasSectionHeader(title = group.label, tight = true)
+                            // 年の見出し (2026年 / 日程未定) はコアが付ける
+                            ImasSectionHeader(title = DisplayText.Core(group.label), tight = true)
                         }
                         items(group.rows, key = { it.showId }) { row ->
                             // 行の右スワイプで参加登録 (ライブ一覧・イベント詳細の公演一覧と同じ規則)。
                             AttendanceSwipeRow(showId = row.showId, showName = row.title) {
                                 FilteredShowRow(
                                     title = row.title,
-                                    subtitle = row.subtitle,
+                                    subtitle = row.subtitleParts.joinToString(L10n.Filtered.showsRowSeparator.resolve()),
                                     brandId = row.brandId,
                                     rainbow = row.rainbow
                                 ) { onShowClick(row.showId) }

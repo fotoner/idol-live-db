@@ -131,10 +131,11 @@ final class CalendarExportService: Sendable {
         showDisplayTitle(eventName: event.name, showName: show.name, date: show.date)
     }
 
+    /// 予定のメモ欄。端末のカレンダーに残る文字列なので、書き出したときの表示言語で書く。
     private func buildNotes(show: Show, event: Event) -> String {
         var parts: [String] = []
-        if let venue = show.venue, !venue.isEmpty { parts.append("会場: \(venue)") }
-        if let city = show.venueCity, !city.isEmpty { parts.append("都市: \(city)") }
+        if let venue = show.venue, !venue.isEmpty { parts.append(String(localized: L10n.Schedule.exportNotesVenue(venue: venue))) }
+        if let city = show.venueCity, !city.isEmpty { parts.append(String(localized: L10n.Schedule.exportNotesCity(city: city))) }
         return parts.joined(separator: "\n")
     }
 
@@ -145,7 +146,7 @@ final class CalendarExportService: Sendable {
         let dateStr = show.date
         let timeStr = show.startTime
 
-        // JST で日付を解析
+        // JST で日付を解析 (解析用の固定ロケール。表示には使わない)
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ja_JP")
         formatter.timeZone = TimeZone(identifier: "Asia/Tokyo")!
@@ -190,9 +191,9 @@ enum CalendarExportError: LocalizedError, Sendable {
     var errorDescription: String? {
         switch self {
         case .noDefaultCalendar:
-            return "デフォルトカレンダーが見つかりませんでした。設定でカレンダーへのアクセスを許可してください。"
+            return String(localized: L10n.Schedule.exportErrorNoDefaultCalendar)
         case .invalidDate(let str):
-            return "日付の解析に失敗しました: \(str)"
+            return String(localized: L10n.Schedule.exportErrorInvalidDate(date: str))
         }
     }
 }

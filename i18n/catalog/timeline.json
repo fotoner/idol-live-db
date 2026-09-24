@@ -1,0 +1,129 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "timeline",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/timeline/"
+    ],
+    "ios": [
+      "ImasLiveDB/Views/Timeline/"
+    ]
+  },
+  "strings": {
+    "bar.a11y_range": {
+      "args": [
+        {
+          "name": "from",
+          "type": "string"
+        },
+        {
+          "name": "to",
+          "type": "string"
+        }
+      ],
+      "ja": "{from}〜{to}",
+      "ko": "{from}부터 {to}까지",
+      "note": "帯の読み上げの期間 (VoiceOver)。from / to は書式済みの年月 (2026年9月)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "brand.all": {
+      "ja": "全ブランド",
+      "ko": "전체 브랜드",
+      "note": "ブランドを切り替えるチップの先頭 (全ブランドを重ねて出す)"
+    },
+    "empty.message": {
+      "ja": "このブランドにはまだライブ・楽曲の日付が登録されていません。",
+      "ko": "이 브랜드에는 아직 라이브·곡 날짜가 등록되지 않았어요.",
+      "note": "帯が 1 本も無いときの空状態の説明"
+    },
+    "empty.title": {
+      "ja": "年表を描けるデータがありません",
+      "ko": "연표를 그릴 데이터가 없어요",
+      "note": "帯が 1 本も無いときの空状態の見出し"
+    },
+    "lane.live": {
+      "ja": "ライブ",
+      "ko": "라이브",
+      "note": "左に貼り付くレーン名 (ライブ・フェス)。幅が狭い (54pt) ので短く"
+    },
+    "lane.milestone": {
+      "ja": "節目",
+      "ko": "이정표",
+      "note": "左に貼り付くレーン名 (サービス開始・アニメ放映などの節目)。幅が狭い (54pt) ので短く"
+    },
+    "lane.music": {
+      "ja": "楽曲",
+      "ko": "곡",
+      "note": "左に貼り付くレーン名 (CD シリーズ)。幅が狭い (54pt) ので短く"
+    },
+    "lane.other": {
+      "ja": "その他",
+      "ko": "기타",
+      "note": "左に貼り付くレーン名 (リリイベ・ラジオ・配信など)。幅が狭い (54pt) ので短く"
+    },
+    "period": {
+      "args": [
+        {
+          "name": "from",
+          "type": "int"
+        },
+        {
+          "name": "to",
+          "type": "int"
+        }
+      ],
+      "ja": "{from}年 〜 {to}年",
+      "ko": "{from}년 ~ {to}년",
+      "note": "表示中の帯の年の範囲 (BrandTimelineViewModel.periodLabel。今は画面に出していない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "title": {
+      "ja": "年表",
+      "ko": "연표",
+      "note": "年表 (ブランドの歴史) の画面タイトル。全ブランドを出しているとき"
+    },
+    "title_brand": {
+      "args": [
+        {
+          "name": "brand",
+          "type": "string"
+        }
+      ],
+      "ja": "{brand}の年表",
+      "ko": "{brand} 연표",
+      "note": "年表の画面タイトル。brand はブランドの略称 (データ)"
+    },
+    "zoom.a11y": {
+      "ja": "表示倍率",
+      "ko": "표시 배율",
+      "note": "右上の表示倍率メニューのボタンの読み上げ"
+    },
+    "zoom.default": {
+      "ja": "標準",
+      "ko": "기본",
+      "note": "表示倍率メニューの項目 (既定の倍率に戻す)"
+    },
+    "zoom.fit": {
+      "ja": "全体を表示",
+      "ko": "전체 보기",
+      "note": "表示倍率メニューの項目 (全期間が画面に収まる倍率にする)"
+    },
+    "zoom.in": {
+      "ja": "拡大",
+      "ko": "확대",
+      "note": "表示倍率メニューの項目 (大きく拡大する)"
+    },
+    "zoom.now": {
+      "ja": "今へ",
+      "ko": "오늘로 이동",
+      "note": "表示倍率メニューの項目 (今日の位置へ移る)"
+    }
+  }
+}

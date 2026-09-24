@@ -1,0 +1,902 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "schedule",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/schedule/"
+    ],
+    "ios": [
+      "ImasLiveDB/Services/CalendarExportService.swift",
+      "ImasLiveDB/Services/CalendarImportService.swift",
+      "ImasLiveDB/Views/Calendar/"
+    ]
+  },
+  "strings": {
+    "action.cancel": {
+      "ja": "キャンセル",
+      "ko": "취소",
+      "note": "スケジュール画面の確認シート・アラートのキャンセルボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "action.close": {
+      "ja": "閉じる",
+      "ko": "닫기",
+      "note": "スケジュール画面のアラートの閉じるボタンと、マイ予定の詳細シートの × の読み上げ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "action.open_settings": {
+      "ja": "設定を開く",
+      "ko": "설정 열기",
+      "note": "権限が無いときのアラートの、設定アプリを開くボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "band.ticket_period": {
+      "args": [
+        {
+          "name": "event",
+          "type": "string"
+        }
+      ],
+      "ja": "受付 {event}",
+      "ko": "접수 {event}",
+      "note": "チケットの受付期間を表す横帯のラベル。event はライブ名"
+    },
+    "bar.release_fallback": {
+      "ja": "リリース",
+      "ko": "발매",
+      "note": "月のセル・週の段の色帯。リリースの曲名が引けなかったときの代わりの文字"
+    },
+    "bar.ticket": {
+      "args": [
+        {
+          "name": "kind",
+          "type": "core"
+        },
+        {
+          "name": "event",
+          "type": "string"
+        }
+      ],
+      "ja": "{kind}・{event}",
+      "ko": "{kind}·{event}",
+      "note": "月のセル・週の段の色帯 (チケットの申込締切 / 当落発表)。kind はコアの語彙 (申込締切 など)、event はライブ名"
+    },
+    "bar.ticket_period": {
+      "args": [
+        {
+          "name": "event",
+          "type": "string"
+        }
+      ],
+      "ja": "受付・{event}",
+      "ko": "접수·{event}",
+      "note": "週の時間グリッドのブロック (チケットの受付期間)。event はライブ名"
+    },
+    "day.empty.message": {
+      "ja": "この日はライブ・リリース・誕生日の記録がありません",
+      "ko": "이날은 라이브·발매·생일 기록이 없어요",
+      "note": "選んだ日・日の詳細シートで、予定が 1 件も無いときの説明"
+    },
+    "day.empty.title": {
+      "ja": "予定なし",
+      "ko": "일정 없음",
+      "note": "選んだ日に予定が 1 件も無いときの空状態の見出し (iOS の月表示)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "day_sheet.date": {
+      "args": [
+        {
+          "name": "year",
+          "type": "int"
+        },
+        {
+          "name": "month",
+          "type": "int"
+        },
+        {
+          "name": "day",
+          "type": "int"
+        }
+      ],
+      "ja": "{year}年{month}月{day}日",
+      "ko": "{year}년 {month}월 {day}일",
+      "note": "日の詳細シートの見出しの日付 (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "day_sheet.empty.title": {
+      "ja": "イベントなし",
+      "ko": "이벤트 없음",
+      "note": "日の詳細シートで予定が 1 件も無いときの空状態の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "day_sheet.event_count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}件のイベント",
+      "ko": "이벤트 {count}건",
+      "note": "日の詳細シートの見出しの下の件数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった"
+    },
+    "export.action": {
+      "ja": "カレンダーに追加",
+      "ko": "캘린더에 추가",
+      "note": "公演を端末のカレンダーに追加する操作。iOS は確認シートのタイトル、Android はボタンの読み上げ"
+    },
+    "export.added.message": {
+      "args": [
+        {
+          "name": "event",
+          "type": "string"
+        }
+      ],
+      "ja": "「{event}」をカレンダーに追加しました。",
+      "ko": "캘린더에 “{event}” 일정을 추가했어요.",
+      "note": "カレンダーに追加できたときのアラートの説明。event はライブ名",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "export.added.title": {
+      "ja": "追加しました",
+      "ko": "추가했어요",
+      "note": "カレンダーに追加できたときのアラートの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "export.already.message": {
+      "args": [
+        {
+          "name": "event",
+          "type": "string"
+        }
+      ],
+      "ja": "「{event}」はすでにカレンダーに追加されています。",
+      "ko": "“{event}” 일정은 이미 캘린더에 추가되어 있어요.",
+      "note": "もう追加してあった公演のときのアラートの説明。event はライブ名",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "export.already.title": {
+      "ja": "追加済み",
+      "ko": "이미 추가됨",
+      "note": "もう追加してあった公演のときのアラートの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "export.confirm.add": {
+      "args": [
+        {
+          "name": "event",
+          "type": "string"
+        }
+      ],
+      "ja": "「{event}」を追加する",
+      "ko": "“{event}” 추가",
+      "note": "カレンダーに追加の確認シートのボタン。event はライブ名",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "export.confirm.message": {
+      "args": [
+        {
+          "name": "event",
+          "type": "string"
+        }
+      ],
+      "ja": "「{event}」をデバイスのカレンダーに追加します。",
+      "ko": "기기 캘린더에 “{event}” 일정을 추가해요.",
+      "note": "カレンダーに追加の確認シートの説明。event はライブ名",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "export.denied.message": {
+      "ja": "ライブの予定をカレンダーに追加するには、設定アプリでカレンダーへのアクセスを許可してください。",
+      "ko": "라이브 일정을 캘린더에 추가하려면 설정 앱에서 캘린더 접근을 허용해 주세요.",
+      "note": "カレンダーの権限が無くて追加できなかったときのアラートの説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "export.denied.title": {
+      "ja": "カレンダーへのアクセスが拒否されています",
+      "ko": "캘린더 접근이 거부되어 있어요",
+      "note": "カレンダーの権限が無くて追加できなかったときのアラートの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "export.error.event_not_found": {
+      "ja": "イベント情報の取得に失敗しました。",
+      "ko": "이벤트 정보를 가져오지 못했어요.",
+      "note": "カレンダーへ追加しようとしたライブの情報が読めなかったとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "export.error.invalid_date": {
+      "args": [
+        {
+          "name": "date",
+          "type": "string"
+        }
+      ],
+      "ja": "日付の解析に失敗しました: {date}",
+      "ko": "날짜를 해석하지 못했어요: {date}",
+      "note": "公演の日付が読めずに書き出せなかったときのエラー (アラートの説明に出る)。date はデータの日付の文字列",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "export.error.no_default_calendar": {
+      "ja": "デフォルトカレンダーが見つかりませんでした。設定でカレンダーへのアクセスを許可してください。",
+      "ko": "기본 캘린더를 찾지 못했어요. 설정에서 캘린더 접근을 허용해 주세요.",
+      "note": "書き出し先の既定のカレンダーが無いときのエラー (アラートの説明に出る)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "export.error.title": {
+      "ja": "エラー",
+      "ko": "오류",
+      "note": "カレンダーへの追加に失敗したときのアラートの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "export.notes.city": {
+      "args": [
+        {
+          "name": "city",
+          "type": "string"
+        }
+      ],
+      "ja": "都市: {city}",
+      "ko": "도시: {city}",
+      "note": "端末のカレンダーに書き出す予定のメモ欄の 1 行。city は会場のある都市 (データ)。書き出したときの言語で残る",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "export.notes.venue": {
+      "args": [
+        {
+          "name": "venue",
+          "type": "string"
+        }
+      ],
+      "ja": "会場: {venue}",
+      "ko": "공연장: {venue}",
+      "note": "端末のカレンダーに書き出す予定のメモ欄の 1 行。venue は会場名 (データ)。書き出したときの言語で残る",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "export.readd": {
+      "ja": "もう一度追加",
+      "ko": "다시 추가",
+      "note": "追加済みのアラートのボタン (記録を消してもう一度追加する)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "export.swipe": {
+      "ja": "カレンダー",
+      "ko": "캘린더",
+      "note": "公演の行を右へスワイプしたときのボタン (端末のカレンダーに追加)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter.anniversaries": {
+      "ja": "記念日",
+      "ko": "기념일",
+      "note": "上のカテゴリチップ。ブランドの記念日 (サービス開始など) の表示を切り替える"
+    },
+    "filter.birthdays": {
+      "ja": "誕生日",
+      "ko": "생일",
+      "note": "上のカテゴリチップ。アイドルの誕生日の表示を切り替える"
+    },
+    "filter.hidden.a11y": {
+      "ja": "非表示",
+      "ko": "숨김",
+      "note": "カテゴリチップの状態の読み上げ (accessibilityValue)。オフのとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter.personal": {
+      "ja": "マイ予定",
+      "ko": "내 일정",
+      "note": "上のカテゴリチップ。端末のカレンダーの予定 (マイ予定) を重ねて出す",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter.releases": {
+      "ja": "リリース",
+      "ko": "발매",
+      "note": "上のカテゴリチップ。CD・配信のリリース日の表示を切り替える"
+    },
+    "filter.shown.a11y": {
+      "ja": "表示",
+      "ko": "표시",
+      "note": "カテゴリチップの状態の読み上げ (accessibilityValue)。オンのとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter.shows": {
+      "ja": "公演",
+      "ko": "공연",
+      "note": "上のカテゴリチップ。公演 (ライブの各日) の表示を切り替える"
+    },
+    "filter.staff": {
+      "ja": "事務員",
+      "ko": "사무원",
+      "note": "上のカテゴリチップ。事務員 (音無小鳥・千川ちひろなど、アイドルでない関係者) の誕生日の表示を切り替える"
+    },
+    "filter.tickets": {
+      "ja": "チケット",
+      "ko": "티켓",
+      "note": "上のカテゴリチップ。チケットの受付期間・締切・当落発表の表示を切り替える"
+    },
+    "mode.month": {
+      "ja": "月",
+      "ko": "월",
+      "note": "月表示と週表示の切り替え (セグメント) の「月」"
+    },
+    "mode.week": {
+      "ja": "週",
+      "ko": "주",
+      "note": "月表示と週表示の切り替え (セグメント) の「週」"
+    },
+    "month.next.a11y": {
+      "ja": "次の月",
+      "ko": "다음 달",
+      "note": "月見出しの右の > ボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "month.prev.a11y": {
+      "ja": "前の月",
+      "ko": "이전 달",
+      "note": "月見出しの左の < ボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "month.title": {
+      "args": [
+        {
+          "name": "year",
+          "type": "int"
+        },
+        {
+          "name": "month",
+          "type": "int"
+        }
+      ],
+      "ja": "{year}年 {month}月",
+      "ko": "{year}년 {month}월",
+      "note": "月表示のグリッドの上の見出し。年と月の間に空白がある (今の表示のまま)"
+    },
+    "personal.calendar_fallback": {
+      "ja": "カレンダー",
+      "ko": "캘린더",
+      "note": "マイ予定の所属カレンダーの名前が引けないときの代わりの表示",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "personal.detail.all_day": {
+      "args": [
+        {
+          "name": "date",
+          "type": "string"
+        }
+      ],
+      "ja": "{date} 終日",
+      "ko": "{date} 종일",
+      "note": "マイ予定の詳細の日時 (1 日だけの終日の予定)。date は書式済みの日付",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "personal.detail.all_day_range": {
+      "args": [
+        {
+          "name": "start",
+          "type": "string"
+        },
+        {
+          "name": "end",
+          "type": "string"
+        }
+      ],
+      "ja": "{start} 〜 {end} 終日",
+      "ko": "{start} ~ {end} 종일",
+      "note": "マイ予定の詳細の日時 (何日かにまたがる終日の予定)。start / end は書式済みの月日",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "personal.detail.calendar": {
+      "ja": "カレンダー",
+      "ko": "캘린더",
+      "note": "マイ予定の詳細シートの行の見出し (所属カレンダー)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "personal.detail.date": {
+      "ja": "日時",
+      "ko": "일시",
+      "note": "マイ予定の詳細シートの行の見出し (日時)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "personal.detail.location": {
+      "ja": "場所",
+      "ko": "장소",
+      "note": "マイ予定の詳細シートの行の見出し (場所)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "personal.detail.range": {
+      "args": [
+        {
+          "name": "start",
+          "type": "string"
+        },
+        {
+          "name": "end",
+          "type": "string"
+        }
+      ],
+      "ja": "{start} 〜 {end}",
+      "ko": "{start} ~ {end}",
+      "note": "マイ予定の詳細の日時 (日をまたぐ時刻付きの予定)。start / end は書式済みの日時",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "personal.detail.subtitle": {
+      "ja": "マイ予定",
+      "ko": "내 일정",
+      "note": "マイ予定の詳細シートのタイトルの下の種別",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "personal.detail.time_range": {
+      "args": [
+        {
+          "name": "day",
+          "type": "string"
+        },
+        {
+          "name": "start",
+          "type": "string"
+        },
+        {
+          "name": "end",
+          "type": "string"
+        }
+      ],
+      "ja": "{day} {start} 〜 {end}",
+      "ko": "{day} {start} ~ {end}",
+      "note": "マイ予定の詳細の日時 (1 日の中の時刻付きの予定)。day は書式済みの日付、start / end は時刻",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "personal.load_error.title": {
+      "ja": "マイ予定を読み込めませんでした",
+      "ko": "내 일정을 불러오지 못했어요",
+      "note": "マイ予定の取り込みに失敗したときのアラートの見出し (説明は OS のエラー文)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "personal.permission.message": {
+      "ja": "マイ予定を重ねて表示するには、設定アプリでカレンダーへの「フルアクセス」を許可してください。",
+      "ko": "내 일정을 겹쳐 보려면 설정 앱에서 캘린더 “전체 접근”을 허용해 주세요.",
+      "note": "マイ予定をオンにしたが権限が無いときのアラートの説明。「フルアクセス」は iOS の設定の項目名",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "personal.permission.title": {
+      "ja": "カレンダーへのアクセスが必要です",
+      "ko": "캘린더 접근 권한이 필요해요",
+      "note": "マイ予定をオンにしたが権限が無いときのアラートの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "personal.untitled": {
+      "ja": "(タイトルなし)",
+      "ko": "(제목 없음)",
+      "note": "タイトルの無いマイ予定の代わりの表示",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "row.anniversary.first_day": {
+      "args": [
+        {
+          "name": "label",
+          "type": "string"
+        }
+      ],
+      "ja": "{label} (初日)",
+      "ko": "{label} (첫날)",
+      "note": "記念日の行のタイトル。起点の年 (0 周年) の当日。label は記念日の名前 (データ)"
+    },
+    "row.anniversary.since": {
+      "args": [
+        {
+          "name": "year",
+          "type": "string"
+        }
+      ],
+      "ja": "{year} 起点",
+      "ko": "{year}년 기점",
+      "note": "記念日の行の副題。year は起点の年 (日付の先頭 4 文字をそのまま渡す)"
+    },
+    "row.anniversary.years": {
+      "args": [
+        {
+          "name": "years",
+          "type": "int"
+        },
+        {
+          "name": "label",
+          "type": "string"
+        }
+      ],
+      "ja": "{years}周年 ・ {label}",
+      "ko": "{years}주년 · {label}",
+      "note": "記念日の行のタイトル (例: 21周年 ・ アーケード版稼働)。years は何周年か、label は記念日の名前 (データ)"
+    },
+    "row.birthday.label": {
+      "ja": "誕生日",
+      "ko": "생일",
+      "note": "アイドルの誕生日の行の、名前の上の種別ラベル (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "row.birthday.title": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "ja": "{name} 誕生日",
+      "ko": "{name} 생일",
+      "note": "誕生日の行のタイトル。name はアイドル名 / 事務員名 (Android は事務員の行だけ)"
+    },
+    "row.personal.all_day": {
+      "ja": "終日",
+      "ko": "종일",
+      "note": "マイ予定 (端末のカレンダーの予定) の行の時刻の欄。終日の予定",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "row.personal.subtitle": {
+      "args": [
+        {
+          "name": "time",
+          "type": "string"
+        },
+        {
+          "name": "calendar",
+          "type": "string"
+        }
+      ],
+      "ja": "{time} ・ {calendar}",
+      "ko": "{time} · {calendar}",
+      "note": "マイ予定の行の副題。time は時刻の欄 (終日 / 10:00 〜 12:00)、calendar は端末のカレンダーの名前",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "row.personal.time_range": {
+      "args": [
+        {
+          "name": "start",
+          "type": "string"
+        },
+        {
+          "name": "end",
+          "type": "string"
+        }
+      ],
+      "ja": "{start} 〜 {end}",
+      "ko": "{start} ~ {end}",
+      "note": "マイ予定の行の時刻の欄。start / end は書式済みの時刻",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "row.release.label": {
+      "ja": "リリース",
+      "ko": "발매",
+      "note": "リリースの行の、曲名の上の種別ラベル (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "row.release.multi": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        },
+        {
+          "name": "title",
+          "type": "string"
+        }
+      ],
+      "ja": "{count}曲リリース: {title} 他",
+      "ko": "{count}곡 발매: {title} 외",
+      "note": "同じ日に複数の曲がリリースされる日の行のタイトル。title は 1 曲目の曲名。1000 以上は桁区切りが付く (1,234)。iOS も以前は付かなかった (String で組んでいた)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "row.release.subtitle": {
+      "ja": "CDリリース",
+      "ko": "CD 발매",
+      "note": "リリースの行の副題",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "row.separator": {
+      "ja": " ・ ",
+      "keep_whitespace": true,
+      "ko": " · ",
+      "note": "予定の行の副題で、公演名・開始時刻・会場などを並べるときの区切り (前後の空白込み)"
+    },
+    "row.setlist": {
+      "ja": "セトリ",
+      "ko": "세트리스트",
+      "note": "公演の行からセトリ (公演詳細) へ飛ぶ操作。iOS は行のスワイプボタン、Android はボタンの読み上げ"
+    },
+    "row.ticket.deadline_subtitle": {
+      "ja": "チケット申込の締切",
+      "ko": "티켓 신청 마감",
+      "note": "チケットの申込締切の行の副題"
+    },
+    "row.ticket.lottery_subtitle": {
+      "ja": "チケット当落発表",
+      "ko": "티켓 추첨 결과 발표",
+      "note": "チケットの当落発表の行の副題"
+    },
+    "row.ticket.title": {
+      "args": [
+        {
+          "name": "kind",
+          "type": "core"
+        },
+        {
+          "name": "event",
+          "type": "string"
+        }
+      ],
+      "ja": "{kind} ・ {event}",
+      "ko": "{kind} · {event}",
+      "note": "チケットの申込締切 / 当落発表の行のタイトル。kind はコアの語彙、event はライブ名"
+    },
+    "row.ticket_period.range": {
+      "args": [
+        {
+          "name": "start",
+          "type": "string"
+        },
+        {
+          "name": "end",
+          "type": "string"
+        }
+      ],
+      "ja": "{start} 〜 {end}",
+      "ko": "{start} ~ {end}",
+      "note": "チケットの受付期間 (受付開始 〜 申込締切)。start / end は 6/13 のような月日"
+    },
+    "row.ticket_period.subtitle": {
+      "ja": "チケット受付期間",
+      "ko": "티켓 접수 기간",
+      "note": "チケットの受付期間の行の副題 (日付が読めないとき)"
+    },
+    "row.ticket_period.subtitle_range": {
+      "args": [
+        {
+          "name": "range",
+          "type": "string"
+        }
+      ],
+      "ja": "チケット受付  {range}",
+      "ko": "티켓 접수  {range}",
+      "note": "チケットの受付期間の行の副題。range は期間 (row.ticket_period.range) か片方の日付 (6/13)。語と期間の間は空白 2 つ"
+    },
+    "row.ticket_period.title": {
+      "args": [
+        {
+          "name": "label",
+          "type": "core"
+        },
+        {
+          "name": "event",
+          "type": "string"
+        }
+      ],
+      "ja": "{label} ・ {event}",
+      "ko": "{label} · {event}",
+      "note": "チケットの受付期間の行のタイトル。label はコアの語彙 (受付期間)、event はライブ名"
+    },
+    "selected_day.count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count} 件",
+      "ko": "{count}건",
+      "note": "月表示で選んだ日の小見出しの右の件数 (Android)。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった (count 型の規則に合わせた)。",
+      "platforms": [
+        "android"
+      ]
+    },
+    "selected_day.date": {
+      "args": [
+        {
+          "name": "month",
+          "type": "int"
+        },
+        {
+          "name": "day",
+          "type": "int"
+        }
+      ],
+      "ja": "{month}月{day}日",
+      "ko": "{month}월 {day}일",
+      "note": "月表示で選んだ日の小見出し (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "selected_day.detail.a11y": {
+      "ja": "この日の詳細",
+      "ko": "이날 상세 보기",
+      "note": "選んだ日の小見出しの右の > (日の詳細シートを開く) の読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "selected_day.empty": {
+      "ja": "この日の記録はありません",
+      "ko": "이날의 기록이 없어요",
+      "note": "選んだ日に予定が 1 件も無いときの案内 (Android の月表示)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "selected_day.header": {
+      "args": [
+        {
+          "name": "date",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{date} ・ {count}件",
+      "ko": "{date} · {count}건",
+      "note": "月表示で選んだ日の小見出し。date は書式済みの日付 (例: 9月24日(木))、count はその日の予定の数。1000 以上は桁区切りが付く (1,234)。iOS も以前は付かなかった (String で組んでいた)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "selected_day.header_today": {
+      "args": [
+        {
+          "name": "date",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{date} ・ 今日 ・ {count}件",
+      "ko": "{date} · 오늘 · {count}건",
+      "note": "月表示で選んだ日が今日のときの小見出し。date は書式済みの日付、count はその日の予定の数。1000 以上は桁区切りが付く (1,234)。iOS も以前は付かなかった (String で組んでいた)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "title": {
+      "ja": "スケジュール",
+      "ko": "스케줄",
+      "note": "スケジュールタブ (カレンダー) の画面タイトル。iOS はナビゲーションタイトル、Android は TopAppBar"
+    },
+    "toolbar.daily_pick.a11y_hint": {
+      "ja": "各ブランドの日替わりピックにタグを付けて投票します",
+      "ko": "브랜드별 오늘의 픽에 태그를 달아 투표해요",
+      "note": "右上の「今日の1曲/今日のアイドル」ボタンの読み上げのヒント (VoiceOver)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "week.all_day": {
+      "ja": "終日",
+      "ko": "종일",
+      "note": "週表示の、時刻の無い予定を並べる段の左のラベル"
+    },
+    "week.next.a11y": {
+      "ja": "次の週",
+      "ko": "다음 주",
+      "note": "週見出しの右の > ボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "week.prev.a11y": {
+      "ja": "前の週",
+      "ko": "이전 주",
+      "note": "週見出しの左の < ボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "week.range": {
+      "args": [
+        {
+          "name": "start",
+          "type": "string"
+        },
+        {
+          "name": "end",
+          "type": "string"
+        }
+      ],
+      "ja": "{start} 〜 {end}",
+      "ko": "{start} ~ {end}",
+      "note": "週表示の上の見出し (その週の最初の日と最後の日)。start / end は書式済みの月日"
+    }
+  }
+}

@@ -1,0 +1,498 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "filtered.events.count" : {
+      "comment" : "絞り込んだライブ一覧の先頭の件数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg件"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg건"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "filtered.events.empty" : {
+      "comment" : "絞り込んだライブが 1 件も無いとき (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブが見つかりません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브를 찾을 수 없어요"
+          }
+        }
+      }
+    },
+    "filtered.events.title.brand" : {
+      "comment" : "絞り込んだライブ一覧のタイトル (ブランドで)。brand はブランドの略称 (データ) (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@のライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 라이브"
+          }
+        }
+      }
+    },
+    "filtered.events.title.year" : {
+      "comment" : "絞り込んだライブ一覧のタイトル (開催年で) (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@年のライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@년 라이브"
+          }
+        }
+      }
+    },
+    "filtered.idols.count" : {
+      "comment" : "絞り込んだアイドル一覧の先頭の人数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg人"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg명"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "filtered.idols.empty" : {
+      "comment" : "絞り込んだアイドルが 1 人もいないとき (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドルが見つかりません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌을 찾을 수 없어요"
+          }
+        }
+      }
+    },
+    "filtered.idols.title.birth_month" : {
+      "comment" : "絞り込んだアイドル一覧のタイトル (誕生月で。Android は別の画面) (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@月生まれのアイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@월생 아이돌"
+          }
+        }
+      }
+    },
+    "filtered.idols.title.birth_place" : {
+      "comment" : "絞り込んだアイドル一覧のタイトル (出身地で)。place はデータの地名 (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@出身のアイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 출신 아이돌"
+          }
+        }
+      }
+    },
+    "filtered.idols.title.blood_type" : {
+      "comment" : "絞り込んだアイドル一覧のタイトル (血液型で)。blood_type は A / B / O / AB (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@型のアイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@형 아이돌"
+          }
+        }
+      }
+    },
+    "filtered.idols.title.brand" : {
+      "comment" : "絞り込んだアイドル一覧のタイトル (ブランドで)。brand はブランドの略称 (データ) (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@のアイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 아이돌"
+          }
+        }
+      }
+    },
+    "filtered.idols.title.constellation" : {
+      "comment" : "絞り込んだアイドル一覧のタイトル (星座で)。constellation はデータの星座名 (おひつじ座 など。訳さない) (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@のアイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 아이돌"
+          }
+        }
+      }
+    },
+    "filtered.shows.copy.event_name" : {
+      "comment" : "公演の行の長押しメニュー (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ名をコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브 이름 복사"
+          }
+        }
+      }
+    },
+    "filtered.shows.copy.show_name" : {
+      "comment" : "公演の行の長押しメニュー (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演名をコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 이름 복사"
+          }
+        }
+      }
+    },
+    "filtered.shows.empty" : {
+      "comment" : "絞り込んだ公演が 1 件も無いとき (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演が見つかりません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연을 찾을 수 없어요"
+          }
+        }
+      }
+    },
+    "filtered.shows.title.date" : {
+      "comment" : "日付で絞り込んだ公演一覧のタイトル。date は YYYY-MM-DD の文字列 (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@の公演"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 공연"
+          }
+        }
+      }
+    },
+    "filtered.shows.title.venue" : {
+      "comment" : "会場で絞り込んだ公演一覧のタイトル。venue は会場名 (引けなければ会場 ID) (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@での公演"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 공연"
+          }
+        }
+      }
+    },
+    "filtered.songs.count" : {
+      "comment" : "絞り込んだ楽曲一覧の先頭の曲数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "filtered.songs.empty" : {
+      "comment" : "絞り込んだ楽曲が 1 曲も無いとき (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲が見つかりません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡을 찾을 수 없어요"
+          }
+        }
+      }
+    },
+    "filtered.songs.title.brand" : {
+      "comment" : "絞り込んだ楽曲一覧のタイトル (ブランドで)。brand はブランドの略称 (データ) (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@の楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 곡"
+          }
+        }
+      }
+    },
+    "filtered.songs.title.creator" : {
+      "comment" : "絞り込んだ楽曲一覧のタイトル (作詞・作曲・編曲のクレジットで)。name はクリエイター名 (データ) (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@が関わった楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 참여 곡"
+          }
+        }
+      }
+    },
+    "filtered.songs.title.release_year" : {
+      "comment" : "絞り込んだ楽曲一覧のタイトル (リリース年で)。year は経路に載った YYYY の文字列をそのまま渡す (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@年リリースの楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@년 발매 곡"
+          }
+        }
+      }
+    },
+    "filtered.songs.title.song_type" : {
+      "comment" : "絞り込んだ楽曲一覧のタイトル (曲の種類で)。song_type は曲の種類。Android は imas-core の Vocab の表示名 (shortLabel)、iOS は DB の生の値をそのまま渡す (i18n/catalog/filtered.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@の楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 곡"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

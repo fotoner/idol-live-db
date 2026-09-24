@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/schedule.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- schedule.band.ticket_period: チケットの受付期間を表す横帯のラベル。event はライブ名 -->
+    <string name="schedule_band_ticket_period">受付 %1$s</string>
+    <!-- schedule.bar.release_fallback: 月のセル・週の段の色帯。リリースの曲名が引けなかったときの代わりの文字 -->
+    <string name="schedule_bar_release_fallback">リリース</string>
+    <!-- schedule.bar.ticket: 月のセル・週の段の色帯 (チケットの申込締切 / 当落発表)。kind はコアの語彙 (申込締切 など)、event はライブ名 -->
+    <string name="schedule_bar_ticket">%1$s・%2$s</string>
+    <!-- schedule.bar.ticket_period: 週の時間グリッドのブロック (チケットの受付期間)。event はライブ名 -->
+    <string name="schedule_bar_ticket_period">受付・%1$s</string>
+    <!-- schedule.day.empty.message: 選んだ日・日の詳細シートで、予定が 1 件も無いときの説明 -->
+    <string name="schedule_day_empty_message">この日はライブ・リリース・誕生日の記録がありません</string>
+    <!-- schedule.day_sheet.date: 日の詳細シートの見出しの日付 (Android) -->
+    <string name="schedule_day_sheet_date">%1$d年%2$d月%3$d日</string>
+    <!-- schedule.day_sheet.event_count: 日の詳細シートの見出しの下の件数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった -->
+    <plurals name="schedule_day_sheet_event_count">
+        <item quantity="other">%1$,d件のイベント</item>
+    </plurals>
+    <!-- schedule.export.action: 公演を端末のカレンダーに追加する操作。iOS は確認シートのタイトル、Android はボタンの読み上げ -->
+    <string name="schedule_export_action">カレンダーに追加</string>
+    <!-- schedule.filter.anniversaries: 上のカテゴリチップ。ブランドの記念日 (サービス開始など) の表示を切り替える -->
+    <string name="schedule_filter_anniversaries">記念日</string>
+    <!-- schedule.filter.birthdays: 上のカテゴリチップ。アイドルの誕生日の表示を切り替える -->
+    <string name="schedule_filter_birthdays">誕生日</string>
+    <!-- schedule.filter.releases: 上のカテゴリチップ。CD・配信のリリース日の表示を切り替える -->
+    <string name="schedule_filter_releases">リリース</string>
+    <!-- schedule.filter.shows: 上のカテゴリチップ。公演 (ライブの各日) の表示を切り替える -->
+    <string name="schedule_filter_shows">公演</string>
+    <!-- schedule.filter.staff: 上のカテゴリチップ。事務員 (音無小鳥・千川ちひろなど、アイドルでない関係者) の誕生日の表示を切り替える -->
+    <string name="schedule_filter_staff">事務員</string>
+    <!-- schedule.filter.tickets: 上のカテゴリチップ。チケットの受付期間・締切・当落発表の表示を切り替える -->
+    <string name="schedule_filter_tickets">チケット</string>
+    <!-- schedule.mode.month: 月表示と週表示の切り替え (セグメント) の「月」 -->
+    <string name="schedule_mode_month">月</string>
+    <!-- schedule.mode.week: 月表示と週表示の切り替え (セグメント) の「週」 -->
+    <string name="schedule_mode_week">週</string>
+    <!-- schedule.month.next.a11y: 月見出しの右の > ボタンの読み上げ -->
+    <string name="schedule_month_next_a11y">次の月</string>
+    <!-- schedule.month.prev.a11y: 月見出しの左の < ボタンの読み上げ -->
+    <string name="schedule_month_prev_a11y">前の月</string>
+    <!-- schedule.month.title: 月表示のグリッドの上の見出し。年と月の間に空白がある (今の表示のまま) -->
+    <string name="schedule_month_title">%1$d年 %2$d月</string>
+    <!-- schedule.row.anniversary.first_day: 記念日の行のタイトル。起点の年 (0 周年) の当日。label は記念日の名前 (データ) -->
+    <string name="schedule_row_anniversary_first_day">%1$s (初日)</string>
+    <!-- schedule.row.anniversary.since: 記念日の行の副題。year は起点の年 (日付の先頭 4 文字をそのまま渡す) -->
+    <string name="schedule_row_anniversary_since">%1$s 起点</string>
+    <!-- schedule.row.anniversary.years: 記念日の行のタイトル (例: 21周年 ・ アーケード版稼働)。years は何周年か、label は記念日の名前 (データ) -->
+    <string name="schedule_row_anniversary_years">%1$d周年 ・ %2$s</string>
+    <!-- schedule.row.birthday.label: アイドルの誕生日の行の、名前の上の種別ラベル (Android) -->
+    <string name="schedule_row_birthday_label">誕生日</string>
+    <!-- schedule.row.birthday.title: 誕生日の行のタイトル。name はアイドル名 / 事務員名 (Android は事務員の行だけ) -->
+    <string name="schedule_row_birthday_title">%1$s 誕生日</string>
+    <!-- schedule.row.release.label: リリースの行の、曲名の上の種別ラベル (Android) -->
+    <string name="schedule_row_release_label">リリース</string>
+    <!-- schedule.row.separator: 予定の行の副題で、公演名・開始時刻・会場などを並べるときの区切り (前後の空白込み) -->
+    <string name="schedule_row_separator">" ・ "</string>
+    <!-- schedule.row.setlist: 公演の行からセトリ (公演詳細) へ飛ぶ操作。iOS は行のスワイプボタン、Android はボタンの読み上げ -->
+    <string name="schedule_row_setlist">セトリ</string>
+    <!-- schedule.row.ticket.deadline_subtitle: チケットの申込締切の行の副題 -->
+    <string name="schedule_row_ticket_deadline_subtitle">チケット申込の締切</string>
+    <!-- schedule.row.ticket.lottery_subtitle: チケットの当落発表の行の副題 -->
+    <string name="schedule_row_ticket_lottery_subtitle">チケット当落発表</string>
+    <!-- schedule.row.ticket.title: チケットの申込締切 / 当落発表の行のタイトル。kind はコアの語彙、event はライブ名 -->
+    <string name="schedule_row_ticket_title">%1$s ・ %2$s</string>
+    <!-- schedule.row.ticket_period.range: チケットの受付期間 (受付開始 〜 申込締切)。start / end は 6/13 のような月日 -->
+    <string name="schedule_row_ticket_period_range">%1$s 〜 %2$s</string>
+    <!-- schedule.row.ticket_period.subtitle: チケットの受付期間の行の副題 (日付が読めないとき) -->
+    <string name="schedule_row_ticket_period_subtitle">チケット受付期間</string>
+    <!-- schedule.row.ticket_period.subtitle_range: チケットの受付期間の行の副題。range は期間 (row.ticket_period.range) か片方の日付 (6/13)。語と期間の間は空白 2 つ -->
+    <string name="schedule_row_ticket_period_subtitle_range">"チケット受付  %1$s"</string>
+    <!-- schedule.row.ticket_period.title: チケットの受付期間の行のタイトル。label はコアの語彙 (受付期間)、event はライブ名 -->
+    <string name="schedule_row_ticket_period_title">%1$s ・ %2$s</string>
+    <!-- schedule.selected_day.count: 月表示で選んだ日の小見出しの右の件数 (Android)。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった (count 型の規則に合わせた)。 -->
+    <plurals name="schedule_selected_day_count">
+        <item quantity="other">%1$,d 件</item>
+    </plurals>
+    <!-- schedule.selected_day.date: 月表示で選んだ日の小見出し (Android) -->
+    <string name="schedule_selected_day_date">%1$d月%2$d日</string>
+    <!-- schedule.selected_day.detail.a11y: 選んだ日の小見出しの右の > (日の詳細シートを開く) の読み上げ -->
+    <string name="schedule_selected_day_detail_a11y">この日の詳細</string>
+    <!-- schedule.selected_day.empty: 選んだ日に予定が 1 件も無いときの案内 (Android の月表示) -->
+    <string name="schedule_selected_day_empty">この日の記録はありません</string>
+    <!-- schedule.title: スケジュールタブ (カレンダー) の画面タイトル。iOS はナビゲーションタイトル、Android は TopAppBar -->
+    <string name="schedule_title">スケジュール</string>
+    <!-- schedule.week.all_day: 週表示の、時刻の無い予定を並べる段の左のラベル -->
+    <string name="schedule_week_all_day">終日</string>
+    <!-- schedule.week.next.a11y: 週見出しの右の > ボタンの読み上げ -->
+    <string name="schedule_week_next_a11y">次の週</string>
+    <!-- schedule.week.prev.a11y: 週見出しの左の < ボタンの読み上げ -->
+    <string name="schedule_week_prev_a11y">前の週</string>
+    <!-- schedule.week.range: 週表示の上の見出し (その週の最初の日と最後の日)。start / end は書式済みの月日 -->
+    <string name="schedule_week_range">%1$s 〜 %2$s</string>
+</resources>

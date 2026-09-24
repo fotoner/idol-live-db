@@ -29,7 +29,7 @@ struct PersonalEventDetailView: View {
                     .font(.imasTitle3.weight(.bold))
                     .foregroundStyle(DS.ink)
                     .lineLimit(3)
-                Text("マイ予定")
+                Text(L10n.Schedule.personalDetailSubtitle)
                     .font(.imasFootnote)
                     .foregroundStyle(DS.ink2)
             }
@@ -40,7 +40,7 @@ struct PersonalEventDetailView: View {
                     .foregroundStyle(DS.ink2)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("閉じる")
+            .accessibilityLabel(L10n.Schedule.actionClose)
         }
         .padding(.horizontal, DS.sp6)
         .padding(.top, DS.sp6)
@@ -52,12 +52,12 @@ struct PersonalEventDetailView: View {
 
     private var infoRows: some View {
         VStack(alignment: .leading, spacing: 0) {
-            infoRow(systemImage: "clock", title: "日時", value: dateRangeText)
+            infoRow(systemImage: "clock", title: L10n.Schedule.personalDetailDate, value: dateRangeText)
             ImasRowDivider(inset: 48)
-            infoRow(systemImage: "calendar", title: "カレンダー", value: event.calendarTitle)
+            infoRow(systemImage: "calendar", title: L10n.Schedule.personalDetailCalendar, value: event.calendarTitle)
             if let location = event.location {
                 ImasRowDivider(inset: 48)
-                infoRow(systemImage: "mappin.and.ellipse", title: "場所", value: location)
+                infoRow(systemImage: "mappin.and.ellipse", title: L10n.Schedule.personalDetailLocation, value: location)
             }
         }
         .padding(.vertical, DS.sp2)
@@ -66,7 +66,7 @@ struct PersonalEventDetailView: View {
         .padding(.top, DS.sp4)
     }
 
-    private func infoRow(systemImage: String, title: String, value: String) -> some View {
+    private func infoRow(systemImage: String, title: LocalizedStringResource, value: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: DS.sp3) {
             Image(systemName: systemImage)
                 .font(.imasScaled( 15, weight: .semibold))
@@ -94,18 +94,21 @@ struct PersonalEventDetailView: View {
             // EKEvent の終日予定は end が翌日 0:00 になることがあるため 1 秒戻して最終日を求める
             let lastDay = max(event.start, event.end.addingTimeInterval(-1))
             if cal.isDate(event.start, inSameDayAs: lastDay) {
-                return "\(event.start.formatted(.dateTime.year().month().day().weekday(.short))) 終日"
+                return String(localized: L10n.Schedule.personalDetailAllDay(
+                    date: event.start.formatted(.dateTime.year().month().day().weekday(.short))))
             }
-            return "\(event.start.formatted(.dateTime.month().day())) 〜 \(lastDay.formatted(.dateTime.month().day())) 終日"
+            return String(localized: L10n.Schedule.personalDetailAllDayRange(
+                start: event.start.formatted(.dateTime.month().day()),
+                end: lastDay.formatted(.dateTime.month().day())))
         }
         if cal.isDate(event.start, inSameDayAs: event.end) {
             let day = event.start.formatted(.dateTime.year().month().day().weekday(.short))
             let startTime = event.start.formatted(date: .omitted, time: .shortened)
             let endTime = event.end.formatted(date: .omitted, time: .shortened)
-            return "\(day) \(startTime) 〜 \(endTime)"
+            return String(localized: L10n.Schedule.personalDetailTimeRange(day: day, start: startTime, end: endTime))
         }
         let startText = event.start.formatted(.dateTime.month().day().hour().minute())
         let endText = event.end.formatted(.dateTime.month().day().hour().minute())
-        return "\(startText) 〜 \(endText)"
+        return String(localized: L10n.Schedule.personalDetailRange(start: startText, end: endText))
     }
 }

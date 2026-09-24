@@ -26,6 +26,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 
 /**
@@ -54,10 +56,10 @@ fun FilteredIdolsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(state.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                title = { Text(state.title.resolve(), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 }
             )
@@ -66,9 +68,9 @@ fun FilteredIdolsScreen(
         Box(Modifier.fillMaxSize().padding(padding)) {
             when {
                 state.isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                state.idols.isEmpty() -> FilteredEmptyState(Icons.Filled.Person, "アイドルが見つかりません")
+                state.idols.isEmpty() -> FilteredEmptyState(Icons.Filled.Person, L10n.Filtered.idolsEmpty.resolve())
                 else -> LazyColumn(Modifier.fillMaxSize()) {
-                    item(key = "count") { FilteredCountHeader("${state.idols.size}人") }
+                    item(key = "count") { FilteredCountHeader(L10n.Filtered.idolsCount(count = state.idols.size).resolve()) }
                     items(state.idols, key = { it.id }) { idol ->
                         FilteredIdolRow(idol) { onIdolClick(idol.id) }
                         HorizontalDivider(color = DS.sep, modifier = Modifier.padding(start = 16.dp))

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/filtered.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- filtered.events.count: 絞り込んだライブ一覧の先頭の件数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった -->
+    <plurals name="filtered_events_count">
+        <item quantity="other">%1$,d件</item>
+    </plurals>
+    <!-- filtered.events.empty: 絞り込んだライブが 1 件も無いとき -->
+    <string name="filtered_events_empty">ライブが見つかりません</string>
+    <!-- filtered.events.title.brand: 絞り込んだライブ一覧のタイトル (ブランドで)。brand はブランドの略称 (データ) -->
+    <string name="filtered_events_title_brand">%1$sのライブ</string>
+    <!-- filtered.events.title.year: 絞り込んだライブ一覧のタイトル (開催年で) -->
+    <string name="filtered_events_title_year">%1$d年のライブ</string>
+    <!-- filtered.idols.count: 絞り込んだアイドル一覧の先頭の人数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった -->
+    <plurals name="filtered_idols_count">
+        <item quantity="other">%1$,d人</item>
+    </plurals>
+    <!-- filtered.idols.empty: 絞り込んだアイドルが 1 人もいないとき -->
+    <string name="filtered_idols_empty">アイドルが見つかりません</string>
+    <!-- filtered.idols.title.birth_place: 絞り込んだアイドル一覧のタイトル (出身地で)。place はデータの地名 -->
+    <string name="filtered_idols_title_birth_place">%1$s出身のアイドル</string>
+    <!-- filtered.idols.title.blood_type: 絞り込んだアイドル一覧のタイトル (血液型で)。blood_type は A / B / O / AB -->
+    <string name="filtered_idols_title_blood_type">%1$s型のアイドル</string>
+    <!-- filtered.idols.title.brand: 絞り込んだアイドル一覧のタイトル (ブランドで)。brand はブランドの略称 (データ) -->
+    <string name="filtered_idols_title_brand">%1$sのアイドル</string>
+    <!-- filtered.idols.title.constellation: 絞り込んだアイドル一覧のタイトル (星座で)。constellation はデータの星座名 (おひつじ座 など。訳さない) -->
+    <string name="filtered_idols_title_constellation">%1$sのアイドル</string>
+    <!-- filtered.row.favorite.a11y: ライブの行の右の ☆ (お気に入り) ボタンの読み上げ -->
+    <string name="filtered_row_favorite_a11y">お気に入り</string>
+    <!-- filtered.shows.count: 絞り込んだ公演一覧の先頭の公演数 (Android)。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった (count 型の規則に合わせた)。 -->
+    <plurals name="filtered_shows_count">
+        <item quantity="other">%1$,d公演</item>
+    </plurals>
+    <!-- filtered.shows.empty: 絞り込んだ公演が 1 件も無いとき -->
+    <string name="filtered_shows_empty">公演が見つかりません</string>
+    <!-- filtered.shows.row.separator: 公演の行の副題で、月日・公演名・会場を並べるときの区切り (前後の空白込み。Android) -->
+    <string name="filtered_shows_row_separator">" ・ "</string>
+    <!-- filtered.shows.title.date: 日付で絞り込んだ公演一覧のタイトル。date は YYYY-MM-DD の文字列 -->
+    <string name="filtered_shows_title_date">%1$sの公演</string>
+    <!-- filtered.shows.title.venue: 会場で絞り込んだ公演一覧のタイトル。venue は会場名 (引けなければ会場 ID) -->
+    <string name="filtered_shows_title_venue">%1$sでの公演</string>
+    <!-- filtered.songs.count: 絞り込んだ楽曲一覧の先頭の曲数。1000 以上は桁区切りが付く (1,234)。Android は以前は付かなかった -->
+    <plurals name="filtered_songs_count">
+        <item quantity="other">%1$,d曲</item>
+    </plurals>
+    <!-- filtered.songs.empty: 絞り込んだ楽曲が 1 曲も無いとき -->
+    <string name="filtered_songs_empty">楽曲が見つかりません</string>
+    <!-- filtered.songs.title.brand: 絞り込んだ楽曲一覧のタイトル (ブランドで)。brand はブランドの略称 (データ) -->
+    <string name="filtered_songs_title_brand">%1$sの楽曲</string>
+    <!-- filtered.songs.title.creator: 絞り込んだ楽曲一覧のタイトル (作詞・作曲・編曲のクレジットで)。name はクリエイター名 (データ) -->
+    <string name="filtered_songs_title_creator">%1$sが関わった楽曲</string>
+    <!-- filtered.songs.title.release_year: 絞り込んだ楽曲一覧のタイトル (リリース年で)。year は経路に載った YYYY の文字列をそのまま渡す -->
+    <string name="filtered_songs_title_release_year">%1$s年リリースの楽曲</string>
+    <!-- filtered.songs.title.song_type: 絞り込んだ楽曲一覧のタイトル (曲の種類で)。song_type は曲の種類。Android は imas-core の Vocab の表示名 (shortLabel)、iOS は DB の生の値をそのまま渡す -->
+    <string name="filtered_songs_title_song_type">%1$sの楽曲</string>
+</resources>

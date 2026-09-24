@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/timeline.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources>
+    <string name="timeline_brand_all">전체 브랜드</string>
+    <string name="timeline_empty_message">이 브랜드에는 아직 라이브·곡 날짜가 등록되지 않았어요.</string>
+    <string name="timeline_empty_title">연표를 그릴 데이터가 없어요</string>
+    <string name="timeline_lane_live">라이브</string>
+    <string name="timeline_lane_milestone">이정표</string>
+    <string name="timeline_lane_music">곡</string>
+    <string name="timeline_lane_other">기타</string>
+    <string name="timeline_title">연표</string>
+    <string name="timeline_title_brand">%1$s 연표</string>
+    <string name="timeline_zoom_a11y">표시 배율</string>
+    <string name="timeline_zoom_default">기본</string>
+    <string name="timeline_zoom_fit">전체 보기</string>
+    <string name="timeline_zoom_in">확대</string>
+    <string name="timeline_zoom_now">오늘로 이동</string>
+</resources>

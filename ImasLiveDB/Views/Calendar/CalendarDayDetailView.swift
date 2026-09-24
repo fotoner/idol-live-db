@@ -39,7 +39,7 @@ struct DayEntryRow: View {
                         }
                     }
                 } label: {
-                    Label("セトリ", systemImage: "music.note.list")
+                    Label(L10n.Schedule.rowSetlist, systemImage: "music.note.list")
                 }
                 .tint(DS.sys)
             }
@@ -134,7 +134,7 @@ struct DayEntryRow: View {
         let sub = [row.show.name, row.show.startTime, row.show.venue]
             .compactMap { $0 }
             .filter { !$0.isEmpty }
-            .joined(separator: " ・ ")
+            .joined(separator: String(localized: L10n.Schedule.rowSeparator))
         return rowShell(
             seed: row.brandColor,
             title: row.eventName,
@@ -147,11 +147,11 @@ struct DayEntryRow: View {
     private func releaseRow(songs: [Song]) -> some View {
         let title = songs.count == 1
             ? songs[0].title
-            : "\(songs.count)曲リリース: \(songs[0].title) 他"
+            : String(localized: L10n.Schedule.rowReleaseMulti(count: songs.count, title: songs[0].title))
         return rowShell(
             seed: nil,
             title: title,
-            subtitle: "CDリリース",
+            subtitle: String(localized: L10n.Schedule.rowReleaseSubtitle),
             leading: { ReleaseIconAvatar() },
             trailing: { chevron }
         )
@@ -160,7 +160,7 @@ struct DayEntryRow: View {
     private func birthdayRow(idol: Idol) -> some View {
         rowShell(
             seed: idol.color,
-            title: "\(idol.name) 誕生日",
+            title: String(localized: L10n.Schedule.rowBirthdayTitle(name: idol.name)),
             subtitle: idol.birthdayDisplay,
             leading: { IdolAvatarView(idol: idol, size: 36) },
             trailing: { BirthdayGiftChip(seed: idol.color) }
@@ -171,7 +171,7 @@ struct DayEntryRow: View {
     private func staffBirthdayRow(staff: Staff) -> some View {
         rowShell(
             seed: nil,
-            title: "\(staff.name) 誕生日",
+            title: String(localized: L10n.Schedule.rowBirthdayTitle(name: staff.name)),
             subtitle: staff.role,
             leading: {
                 let t = ImasTheme.derive(seed: CalendarEntry.ThemeSeed.staffBirthday, scheme: scheme)
@@ -196,11 +196,13 @@ struct DayEntryRow: View {
         // 表示: 「21周年・アーケード版稼働」 (起点年=0周年は「初日」と表示)
         let title: String
         if let years {
-            title = years == 0 ? "\(ann.label) (初日)" : "\(years)周年 ・ \(ann.label)"
+            title = years == 0
+                ? String(localized: L10n.Schedule.rowAnniversaryFirstDay(label: ann.label))
+                : String(localized: L10n.Schedule.rowAnniversaryYears(years: years, label: ann.label))
         } else {
             title = ann.label
         }
-        let subtitle = "\(ann.date.prefix(4)) 起点"
+        let subtitle = String(localized: L10n.Schedule.rowAnniversarySince(year: String(ann.date.prefix(4))))
         return rowShell(
             seed: nil,
             title: title,
@@ -219,11 +221,16 @@ struct DayEntryRow: View {
 
     /// チケット受付期間行 (受付開始〜申込締切)。タップで親イベント詳細へ。
     private func ticketPeriodRow(_ row: TicketPeriodRow) -> some View {
-        let range = [Self.md(row.start), Self.md(row.end)].compactMap { $0 }.joined(separator: " 〜 ")
+        // 両端が読めれば「6/13 〜 6/20」、片方だけならその日付だけ、どちらも読めなければ語だけ。
+        let days = [Self.md(row.start), Self.md(row.end)].compactMap { $0 }
+        let range: String? = days.count == 2
+            ? String(localized: L10n.Schedule.rowTicketPeriodRange(start: days[0], end: days[1]))
+            : days.first
         return rowShell(
             seed: nil,
-            title: "\(Vocab.table.ticketPeriodLabel) ・ \(row.eventName)",
-            subtitle: range.isEmpty ? "チケット受付期間" : "チケット受付  \(range)",
+            title: String(localized: L10n.Schedule.rowTicketPeriodTitle(label: Vocab.table.ticketPeriodLabel, event: row.eventName)),
+            subtitle: range.map { String(localized: L10n.Schedule.rowTicketPeriodSubtitleRange(range: $0)) }
+                ?? String(localized: L10n.Schedule.rowTicketPeriodSubtitle),
             leading: { TicketIconAvatar(systemImage: "calendar.badge.clock", color: ImasTheme.derive(seed: CalendarEntry.ThemeSeed.ticket, scheme: scheme).accent) },
             trailing: { chevron }
         )
@@ -241,8 +248,9 @@ struct DayEntryRow: View {
         let color: Color = row.kind == .deadline ? DS.danger : ImasTheme.derive(seed: CalendarEntry.ThemeSeed.ticket, scheme: scheme).accent
         return rowShell(
             seed: nil,
-            title: "\(row.kind.label) ・ \(row.eventName)",
-            subtitle: row.kind == .deadline ? "チケット申込の締切" : "チケット当落発表",
+            title: String(localized: L10n.Schedule.rowTicketTitle(kind: row.kind.label, event: row.eventName)),
+            subtitle: String(localized: row.kind == .deadline
+                ? L10n.Schedule.rowTicketDeadlineSubtitle : L10n.Schedule.rowTicketLotterySubtitle),
             leading: { TicketIconAvatar(systemImage: row.kind.icon, color: color) },
             trailing: { chevron }
         )
@@ -251,8 +259,10 @@ struct DayEntryRow: View {
     /// 端末カレンダー由来のマイ予定行。リードバーはカレンダー色をそのまま使う。
     private func personalRow(event: PersonalCalendarEvent) -> some View {
         let timeText = event.isAllDay
-            ? "終日"
-            : "\(event.start.formatted(date: .omitted, time: .shortened)) 〜 \(event.end.formatted(date: .omitted, time: .shortened))"
+            ? String(localized: L10n.Schedule.rowPersonalAllDay)
+            : String(localized: L10n.Schedule.rowPersonalTimeRange(
+                start: event.start.formatted(date: .omitted, time: .shortened),
+                end: event.end.formatted(date: .omitted, time: .shortened)))
         return HStack(spacing: DS.sp3) {
             RoundedRectangle(cornerRadius: 2, style: .continuous)
                 .fill(event.color)
@@ -267,7 +277,7 @@ struct DayEntryRow: View {
                     .font(.imasSubhead.weight(.semibold))
                     .foregroundStyle(DS.ink)
                     .lineLimit(2)
-                Text("\(timeText) ・ \(event.calendarTitle)")
+                Text(L10n.Schedule.rowPersonalSubtitle(time: timeText, calendar: event.calendarTitle))
                     .font(.imasFootnote)
                     .foregroundStyle(DS.ink2)
                     .lineLimit(1)
@@ -311,8 +321,8 @@ struct CalendarDayDetailView: View {
             if entries.isEmpty {
                 ImasEmptyState(
                     systemImage: "calendar",
-                    title: "イベントなし",
-                    message: "この日はライブ・リリース・誕生日の記録がありません"
+                    title: String(localized: L10n.Schedule.daySheetEmptyTitle),
+                    message: String(localized: L10n.Schedule.dayEmptyMessage)
                 )
                 Spacer(minLength: 0)
             } else {
@@ -331,7 +341,7 @@ struct CalendarDayDetailView: View {
         .trackScreen("calendar_day")
         // カレンダーに追加 確認シート（presenting オーバーロードでレース回避）
         .confirmationDialog(
-            "カレンダーに追加",
+            Text(L10n.Schedule.exportAction),
             isPresented: Binding(
                 get: { exportTarget != nil },
                 set: { if !$0 { exportTarget = nil } }
@@ -339,45 +349,53 @@ struct CalendarDayDetailView: View {
             titleVisibility: .visible,
             presenting: exportTarget
         ) { target in
-            Button("「\(target.showRow.eventName)」を追加する") {
+            Button {
                 exportTarget = nil
                 Task { await performExport(target) }
+            } label: {
+                Text(L10n.Schedule.exportConfirmAdd(event: target.showRow.eventName))
             }
-            Button("キャンセル", role: .cancel) {
+            Button(role: .cancel) {
                 exportTarget = nil
+            } label: {
+                Text(L10n.Schedule.actionCancel)
             }
         } message: { target in
-            Text("「\(target.showRow.eventName)」をデバイスのカレンダーに追加します。")
+            Text(L10n.Schedule.exportConfirmMessage(event: target.showRow.eventName))
         }
         // 追加結果アラート
         .alert(item: $exportResult) { result in
             if result.kind == .alreadyAdded, let target = result.target {
                 return Alert(
                     title: Text(result.title),
-                    message: Text(result.message),
-                    primaryButton: .default(Text("もう一度追加")) {
+                    message: Text(display: result.message),
+                    primaryButton: .default(Text(L10n.Schedule.exportReadd)) {
                         CalendarExportService.shared.removeAddedRecord(for: target.showRow.show.id)
                         Task { await performExport(target) }
                     },
-                    secondaryButton: .cancel(Text("閉じる"))
+                    secondaryButton: .cancel(Text(L10n.Schedule.actionClose))
                 )
             }
             return Alert(
                 title: Text(result.title),
-                message: Text(result.message),
+                message: Text(display: result.message),
                 dismissButton: .default(Text("OK"))
             )
         }
         // 権限拒否 → 設定アプリへ誘導
-        .alert("カレンダーへのアクセスが拒否されています", isPresented: $showPermissionAlert) {
-            Button("設定を開く") {
+        .alert(Text(L10n.Schedule.exportDeniedTitle), isPresented: $showPermissionAlert) {
+            Button {
                 if let url = CalendarExportService.shared.settingsURL {
                     UIApplication.shared.open(url)
                 }
+            } label: {
+                Text(L10n.Schedule.actionOpenSettings)
             }
-            Button("キャンセル", role: .cancel) {}
+            Button(role: .cancel) {} label: {
+                Text(L10n.Schedule.actionCancel)
+            }
         } message: {
-            Text("ライブの予定をカレンダーに追加するには、設定アプリでカレンダーへのアクセスを許可してください。")
+            Text(L10n.Schedule.exportDeniedMessage)
         }
     }
 
@@ -406,7 +424,7 @@ struct CalendarDayDetailView: View {
                     AppAnalytics.tap("calendar_day.calendar_add")
                     exportTarget = CalendarShowEntry(showRow: row)
                 } label: {
-                    Label("カレンダー", systemImage: "calendar.badge.plus")
+                    Label(L10n.Schedule.exportSwipe, systemImage: "calendar.badge.plus")
                 }
                 .tint(DS.success)
             }
@@ -420,8 +438,8 @@ struct CalendarDayDetailView: View {
             guard let event = try await AppContainer.shared.eventReading.event(id: target.showRow.show.eventId) else {
                 exportResult = ExportResultAlert(
                     kind: .error,
-                    title: "エラー",
-                    message: "イベント情報の取得に失敗しました。",
+                    title: L10n.Schedule.exportErrorTitle,
+                    message: .key(L10n.Schedule.exportErrorEventNotFound),
                     target: target
                 )
                 return
@@ -432,15 +450,15 @@ struct CalendarDayDetailView: View {
             case .added:
                 exportResult = ExportResultAlert(
                     kind: .added,
-                    title: "追加しました",
-                    message: "「\(target.showRow.eventName)」をカレンダーに追加しました。",
+                    title: L10n.Schedule.exportAddedTitle,
+                    message: .key(L10n.Schedule.exportAddedMessage(event: target.showRow.eventName)),
                     target: target
                 )
             case .alreadyAdded:
                 exportResult = ExportResultAlert(
                     kind: .alreadyAdded,
-                    title: "追加済み",
-                    message: "「\(target.showRow.eventName)」はすでにカレンダーに追加されています。",
+                    title: L10n.Schedule.exportAlreadyTitle,
+                    message: .key(L10n.Schedule.exportAlreadyMessage(event: target.showRow.eventName)),
                     target: target
                 )
             case .permissionDenied:
@@ -449,8 +467,9 @@ struct CalendarDayDetailView: View {
         } catch {
             exportResult = ExportResultAlert(
                 kind: .error,
-                title: "エラー",
-                message: error.localizedDescription,
+                title: L10n.Schedule.exportErrorTitle,
+                // CalendarExportError はカタログの文言、EventKit のエラーは OS が訳した文 (どちらも解決済み)
+                message: .verbatim(error.localizedDescription),
                 target: target
             )
         }
@@ -465,7 +484,7 @@ struct CalendarDayDetailView: View {
                     .font(.imasTitle3.weight(.bold))
                     .foregroundStyle(DS.ink)
                 if !entries.isEmpty {
-                    Text("\(entries.count)件のイベント")
+                    Text(L10n.Schedule.daySheetEventCount(count: entries.count))
                         .font(.imasFootnote)
                         .foregroundStyle(DS.ink2)
                 }
@@ -539,8 +558,9 @@ private enum ExportResultKind: Equatable {
 private struct ExportResultAlert: Identifiable {
     let id = UUID()
     let kind: ExportResultKind
-    let title: String
-    let message: String
+    /// 解決済みの String ではなく文言の値で持ち、アラートを出すときに引く。
+    let title: LocalizedStringResource
+    let message: DisplayText
     let target: CalendarShowEntry?
 }
 

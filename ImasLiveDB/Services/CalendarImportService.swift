@@ -102,8 +102,8 @@ final class CalendarImportService {
         let cgColor = event.calendar?.cgColor
         return PersonalCalendarEvent(
             id: "\(identifier)_\(start.timeIntervalSince1970)",
-            title: event.title?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "(タイトルなし)",
-            calendarTitle: event.calendar?.title ?? "カレンダー",
+            title: event.title?.trimmingCharacters(in: .whitespacesAndNewlines) ?? String(localized: L10n.Schedule.personalUntitled),
+            calendarTitle: event.calendar?.title ?? String(localized: L10n.Schedule.personalCalendarFallback),
             start: start,
             end: event.endDate ?? start,
             isAllDay: event.isAllDay,

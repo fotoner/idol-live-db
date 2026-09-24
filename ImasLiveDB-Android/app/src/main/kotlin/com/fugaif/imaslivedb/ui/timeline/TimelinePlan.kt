@@ -1,6 +1,8 @@
 package com.fugaif.imaslivedb.ui.timeline
 
 import androidx.compose.ui.graphics.Color
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import uniffi.imas_core.TimelineBarLane
 import uniffi.imas_core.TimelineBarPeriod
@@ -130,13 +132,13 @@ object TimelineMetrics {
         value.coerceIn(MIN_POINTS_PER_YEAR / DAYS_PER_YEAR, MAX_POINTS_PER_YEAR / DAYS_PER_YEAR)
 }
 
-/** レーンの表示名 (左のレールに出す)。 */
-val TimelineBarLane.title: String
+/** レーンの表示名 (左のレールに出す)。文言の値で返し、描く側が画面の言語で resolve() する。 */
+val TimelineBarLane.title: DisplayText
     get() = when (this) {
-        TimelineBarLane.MILESTONE -> "節目"
-        TimelineBarLane.LIVE -> "ライブ"
-        TimelineBarLane.MUSIC -> "楽曲"
-        TimelineBarLane.OTHER -> "その他"
+        TimelineBarLane.MILESTONE -> L10n.Timeline.laneMilestone
+        TimelineBarLane.LIVE -> L10n.Timeline.laneLive
+        TimelineBarLane.MUSIC -> L10n.Timeline.laneMusic
+        TimelineBarLane.OTHER -> L10n.Timeline.laneOther
     }
 
 private const val SECONDS_PER_DAY = 86_400.0

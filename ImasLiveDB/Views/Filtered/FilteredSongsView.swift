@@ -18,20 +18,20 @@ struct FilteredSongsView: View {
                 switch criterion {
                 case .creator:
                     if songsWithRoles.isEmpty {
-                        ImasEmptyState(systemImage: "music.note.list", title: "楽曲が見つかりません")
+                        ImasEmptyState(systemImage: "music.note.list", title: String(localized: L10n.Filtered.songsEmpty))
                     } else {
                         creatorList
                     }
                 default:
                     if songs.isEmpty {
-                        ImasEmptyState(systemImage: "music.note.list", title: "楽曲が見つかりません")
+                        ImasEmptyState(systemImage: "music.note.list", title: String(localized: L10n.Filtered.songsEmpty))
                     } else {
                         standardList
                     }
                 }
             }
         }
-        .navigationTitle(criterion.navigationTitle)
+        .navigationTitle(Text(display: title))
         .navigationBarTitleDisplayMode(.inline)
         .task { await loadSongs() }
         .trackScreen("filtered_songs")
@@ -49,7 +49,7 @@ struct FilteredSongsView: View {
                     .buttonStyle(.plain)
                 }
             } header: {
-                Text("\(songs.count)曲")
+                Text(L10n.Filtered.songsCount(count: songs.count))
                     .font(.imasCaption)
             }
         }
@@ -74,11 +74,25 @@ struct FilteredSongsView: View {
                     .buttonStyle(.plain)
                 }
             } header: {
-                Text("\(songsWithRoles.count)曲")
+                Text(L10n.Filtered.songsCount(count: songsWithRoles.count))
                     .font(.imasCaption)
             }
         }
         .listStyle(.plain)
+    }
+
+    /// 画面タイトル。`criterion.navigationTitle` は遷移先の識別子 (DetailSheet の id) にも使うので、
+    /// 表示だけここで写す。CD シリーズ名などのデータと、呼び出し側が引いて渡したタイトルはそのまま。
+    private var title: DisplayText {
+        switch criterion {
+        case .brand(_, let label): return .key(L10n.Filtered.songsTitleBrand(brand: label))
+        case .cdSeries(let name): return .verbatim(name)
+        case .seriesGroup(let name): return .verbatim(name)
+        case .songType(let type): return .key(L10n.Filtered.songsTitleSongType(songType: type))
+        case .releaseYear(let year): return .key(L10n.Filtered.songsTitleReleaseYear(year: year))
+        case .creator(let name): return .key(L10n.Filtered.songsTitleCreator(name: name))
+        case .songIds(_, let title): return .verbatim(title)
+        }
     }
 
     private func loadSongs() async {
