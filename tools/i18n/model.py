@@ -181,7 +181,13 @@ def ja_hash(text):
 
 
 def value_hash(value):
-    """lock に書く訳のハッシュ。文字列はそのまま (ja_hash と同じ)、複数形は範疇を整列した JSON。"""
+    """lock に書く訳のハッシュ。文字列はそのまま (ja_hash と同じ)、複数形は範疇を整列した JSON。
+
+    other だけの複数形 {"other": s} は文字列 s と同じ訳 (生成物も同じ) なので、s として数える
+    (書き方を変えただけで edited にしない)。
+    """
+    if isinstance(value, dict) and set(value) == {"other"}:
+        value = value["other"]
     if isinstance(value, str):
         return ja_hash(value)
     return ja_hash(json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":")))

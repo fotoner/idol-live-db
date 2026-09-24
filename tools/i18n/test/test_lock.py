@@ -77,8 +77,20 @@ class StatusTest(unittest.TestCase):
                           catalog(plural={"one": "one song", "other": "{count} songs"})["songs"])
             self.assertEqual(self.status(fx, "songs.n", "en"), "edited")
 
+    def test_other_only_plural_is_same_as_string(self):
+        # ko の count キーは文字列でも {"other": …} でも書ける (生成物も同じ)。書き方を変えても edited にしない
+        def cat(ko):
+            return {"songs": ns({"n": {"args": COUNT, "ja": "{count}曲", "ko": ko}})}
+        with Fixture(cat("{count}곡"), LANGS) as fx:
+            self.assertEqual(fx.run("stamp", "ko", "--reviewer", "hana")[0], 0)
+            fx.write_json("i18n/catalog/songs.json", cat({"other": "{count}곡"})["songs"])
+            self.assertEqual(self.status(fx, "songs.n", "ko"), "reviewed")
+            fx.write_json("i18n/catalog/songs.json", cat({"other": "{count}개 곡"})["songs"])
+            self.assertEqual(self.status(fx, "songs.n", "ko"), "edited")
+
     def test_value_hash(self):
         self.assertEqual(model.value_hash("곡"), model.ja_hash("곡"))
+        self.assertEqual(model.value_hash({"other": "곡"}), model.value_hash("곡"))
         self.assertEqual(model.value_hash({"one": "a", "other": "b"}), model.value_hash({"other": "b", "one": "a"}))
         self.assertNotEqual(model.value_hash({"one": "a", "other": "b"}), model.value_hash({"one": "b", "other": "a"}))
 
