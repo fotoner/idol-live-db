@@ -253,6 +253,18 @@ ImasLiveDB/
   ダッシュボード画面・曲一覧フィルタ・**内蔵お知らせも iOS のみ**。Android へ歌詞機能を移植する
   ときに、この節ごと持っていくこと。
 
+### 進捗 (2026-09-24) — 歌詞クイズ
+- **クイズ・ゲームに「歌詞クイズ」を追加** (iOS)。形式は 2 つ: 曲名当て (歌詞 1 行 → 曲名 4 択) と
+  続きはどれ (曲名 + 歌詞 1 行 → 次の行 4 択、誤答は同じ曲の別の行)。採点はソロ曲クイズと同じ 3/2/1pt。
+- 規則は `imas-core/src/domain/lyrics_quiz.rs` (出題順・曲名当ての 4 択・歌詞のどこを出すか・
+  続きはどれの 4 択・50:50・ヒント・採点)。FFI は `inbound/lyrics_quiz.rs`。
+- 母集団は Worker の `GET /lyrics/published` (公開中の song_id だけ。本文を含まないのでエッジキャッシュ可)。
+  歌詞本文は出題のたびに `GET /songs/:id/lyrics` で 1 曲ずつ取る (先読みは次の 1 問まで)。
+  ポート `LyricsQuizReading` (`extension LyricsAPI: LyricsQuizReading`)、**ポート総数 27**。
+  振り返り・リザルト・シェアは曲名だけで組み、歌詞を載せない。
+- **Android は対象外** (上の「コールガイド ダッシュボード」と同じ理由: Android に歌詞機能が無い)。
+  コアは共有済みなので、Android へ歌詞の取得経路と JASRAC 掲示を移植するときに画面だけ足せばよい。
+
 ### 進捗 (2026-09-07) — アイドルの短縮名をコアへ
 - **短縮名の規則 (nickname > given_name > name) を `imas-core` 1 本に**: `domain/snapshot.rs` の
   `idol_short_name` が正で、FFI へは `inbound/idol_queries.rs` の `idol_short_name` として出す

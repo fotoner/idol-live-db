@@ -31,6 +31,7 @@ pub mod ck_record_mapping;
 pub mod sync_planning;
 pub mod backup_summary;
 pub mod quiz_generation;
+pub mod lyrics_quiz;
 pub mod color_match;
 pub mod game_progress;
 pub mod backup_import_summary;

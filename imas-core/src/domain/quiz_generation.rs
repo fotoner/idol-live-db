@@ -68,7 +68,7 @@ pub const MINIMUM_POOL: u32 = 4;
 ///
 /// 出題設定画面の見積りとゲーム本体は**必ずこの判定を共有する**。別条件にすると
 /// 「設定画面は不足と言うのにゲームは始まり、しかも選択肢が 4 つ未満」になる。
-fn has_enough_candidates(count: usize) -> bool {
+pub(crate) fn has_enough_candidates(count: usize) -> bool {
     count >= MINIMUM_POOL as usize
 }
 
@@ -90,7 +90,7 @@ const VOICE_ACTOR_UNANNOUNCED: &str = "声優未発表";
 ///
 /// `domain::intro_quiz_choices` にも同じ private ヘルパがあるが、あちらは今回の担当外
 /// ファイルなので共有化はせず同じ流儀で持つ (将来どちらかへ集約する)。
-fn canonical(s: &str) -> Cow<'_, str> {
+pub(crate) fn canonical(s: &str) -> Cow<'_, str> {
     match is_nfc_quick(s.chars()) {
         IsNormalized::Yes => Cow::Borrowed(s),
         IsNormalized::No | IsNormalized::Maybe => Cow::Owned(s.nfc().collect()),
@@ -98,16 +98,16 @@ fn canonical(s: &str) -> Cow<'_, str> {
 }
 
 /// 出題ブランド絞り込み。空 = 全ブランド対象 (両 OS とも「空集合 = 全て」)。
-struct BrandFilter {
+pub(crate) struct BrandFilter {
     keys: HashSet<String>,
 }
 
 impl BrandFilter {
-    fn new(selected_brand_ids: &[String]) -> Self {
+    pub(crate) fn new(selected_brand_ids: &[String]) -> Self {
         Self { keys: selected_brand_ids.iter().map(|b| canonical(b).into_owned()).collect() }
     }
 
-    fn matches(&self, brand_id: &str) -> bool {
+    pub(crate) fn matches(&self, brand_id: &str) -> bool {
         self.keys.is_empty() || self.keys.contains(canonical(brand_id).as_ref())
     }
 }
@@ -342,18 +342,18 @@ pub fn idol_quiz_pool_estimate(
 
 /// 「既出を除いて 1 件引く。尽きたら一巡してリセット」の抽選器 (原本 `makeQuestion` の規則)。
 /// セッションが母集団より長いときだけ 2 周目に入るので、短いセッション中の重複は起きない。
-struct SequentialDraw {
+pub(crate) struct SequentialDraw {
     seen: Vec<bool>,
     remaining: usize,
 }
 
 impl SequentialDraw {
-    fn new(total: usize) -> Self {
+    pub(crate) fn new(total: usize) -> Self {
         Self { seen: vec![false; total], remaining: total }
     }
 
     /// 未出のうち 1 件を一様に選び、既出に印を付ける。母集団が空なら `None`。
-    fn next(&mut self, rng: &mut SplitMix64) -> Option<usize> {
+    pub(crate) fn next(&mut self, rng: &mut SplitMix64) -> Option<usize> {
         if self.seen.is_empty() {
             return None;
         }
@@ -792,7 +792,7 @@ pub struct QuizAnswerOutcome {
 }
 
 /// 正誤判定 + 加点 + 集計。加点式なので不正解でも減点しない。
-fn quiz_answer(
+pub(crate) fn quiz_answer(
     value_if_correct: u32,
     revealed_hints: u32,
     picked_idol_id: &str,

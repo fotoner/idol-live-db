@@ -290,6 +290,9 @@ struct QuizResultView: View {
     var isNewBest: Bool = false
     /// 各問の振り返り (空なら履歴セクション非表示)。
     var history: [QuizHistoryItem] = []
+    /// `QuizHistoryItem` に載らない振り返り (歌詞クイズは正解がアイドルではなく曲)。
+    /// 渡すと `history` の代わりに同じ位置へ出す。
+    var customHistory: AnyView? = nil
     let onReplay: () -> Void
 
     @State private var appeared = false
@@ -356,7 +359,9 @@ struct QuizResultView: View {
                 .font(.imasFootnote).foregroundStyle(DS.ink3)
                 .multilineTextAlignment(.center).padding(.top, DS.sp1)
 
-            if !history.isEmpty {
+            if let customHistory {
+                customHistory.padding(.top, DS.sp4)
+            } else if !history.isEmpty {
                 QuizHistoryList(items: history).padding(.top, DS.sp4)
             }
 
