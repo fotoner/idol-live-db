@@ -562,6 +562,21 @@ fn show_page() -> ShowPage {
                 where_label: "公演のどこか".to_string(),
             },
         ],
+        // 本物は開催前でセトリが無い公演にだけ付く。器の描画を確かめるためにここへ置く。
+        forecast: Some(ShowForecast {
+            title: content::FORECAST_TITLE.to_string(),
+            lede: content::forecast_lede(1200),
+            songs: vec![
+                ForecastRow {
+                    rank: 1,
+                    song: song_sample(),
+                    percent: 83,
+                    reasons: vec!["オリメン全員出演".to_string(), "全体曲の定番".to_string()],
+                },
+                ForecastRow { rank: 2, song: song_no_artwork(), percent: 4, reasons: vec![] },
+            ],
+            notes: vec!["出演者未発表のため精度が低い".to_string()],
+        }),
         cast: vec![idol_mirai(), idol_shizuka()],
         sibling_nav: super::emit::events::sibling_nav(1),
         sibling_shows: vec![show_sample()],

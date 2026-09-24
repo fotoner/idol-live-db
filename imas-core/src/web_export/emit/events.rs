@@ -294,6 +294,30 @@ pub fn show_page(ctx: &Ctx, show_id: &str) -> Option<ShowPage> {
 
     let siblings = sibling_shows(ctx, &show.event_id, &event.name);
 
+    // 開催前でセトリが無い公演だけ (予測は Ctx が 1 度だけ作ってある)。
+    let forecast = ctx
+        .forecasts
+        .get(show_id)
+        .filter(|_| setlist_count == 0 && is_upcoming(ctx, Some(&show.date)))
+        .map(|f| ShowForecast {
+            title: content::FORECAST_TITLE.to_string(),
+            lede: content::forecast_lede(f.training_show_count),
+            songs: f
+                .songs
+                .iter()
+                .filter_map(|s| {
+                    Some(ForecastRow {
+                        rank: s.rank,
+                        song: ctx.song_ref(&s.song_id)?,
+                        percent: (s.score * 100.0).round().clamp(0.0, 100.0) as u32,
+                        reasons: s.reasons.iter().map(|r| r.label.clone()).collect(),
+                    })
+                })
+                .collect(),
+            notes: f.flags.iter().map(|fl| fl.label.clone()).collect(),
+        })
+        .filter(|f| !f.songs.is_empty());
+
     Some(ShowPage {
         schema_version: SCHEMA_VERSION,
         is_character_live: detail::is_character_live(show.performer_type.as_deref()),
@@ -310,6 +334,7 @@ pub fn show_page(ctx: &Ctx, show_id: &str) -> Option<ShowPage> {
         setlist_sections,
         setlist_empty: content::empty_text(setlist_count == 0, content::EMPTY_SETLIST, Some(content::EMPTY_SETLIST_BODY)),
         costumes,
+        forecast,
         cast: cast_ids.iter().filter_map(|id| ctx.idol_ref(id)).collect(),
         sibling_nav: sibling_nav(siblings.len()),
         sibling_shows: siblings,

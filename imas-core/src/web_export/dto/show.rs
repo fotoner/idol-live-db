@@ -45,12 +45,38 @@ web_dto! {
         pub cast: Vec<Ref>,
         /// この公演で着られた衣装 (進行順)。記録が無ければ空。
         pub costumes: Vec<ShowCostume>,
+        /// 開催前でセトリが無い公演だけ: 過去のセトリから推定した「歌われそうな曲」。
+        pub forecast: Option<ShowForecast>,
         /// 同一ライブ内の他公演 (前後移動用。自分自身も含む)。
         pub sibling_shows: Vec<Ref>,
         /// 同じライブの公演をどう行き来させるか (本数で決まる)。
         pub sibling_nav: SiblingNav,
         pub app: AppOpen,
         pub seo: SeoBlock,
+    }
+}
+
+web_dto! {
+    /// セトリの機械予測 (`domain::setlist_forecast`。アプリの予想と同じモデル)。
+    pub struct ShowForecast {
+        pub title: String,
+        /// 何をどう並べたかの一言 (機械的な目安であること)。
+        pub lede: String,
+        pub songs: Vec<ForecastRow>,
+        /// 精度についての注記 (出演者未発表など)。
+        pub notes: Vec<String>,
+    }
+}
+
+web_dto! {
+    /// 予測の 1 曲。
+    pub struct ForecastRow {
+        pub rank: u32,
+        pub song: Ref,
+        /// セトリに入る推定確率 (0〜100 の整数)。
+        pub percent: u32,
+        /// 理由 (「オリメン全員出演」など)。表示の優先順。
+        pub reasons: Vec<String>,
     }
 }
 

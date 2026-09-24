@@ -36,6 +36,9 @@ pub struct ThemeInputs {
 }
 
 /// 出力全体で共有する読み取り専用の文脈。
+/// セトリ予想で出す曲数 (アプリの予想画面と同じくらい)。
+pub const FORECAST_LIMIT: u32 = 15;
+
 pub struct Ctx<'a> {
     pub snap: &'a Snapshot,
     /// コミュニティ集計 (タグ・お気に入り・ペンライト・お題)。
@@ -63,6 +66,8 @@ pub struct Ctx<'a> {
     pub event_dates: Vec<(Option<String>, Option<String>)>,
     /// 「一緒に来る曲」の前計算。全 3,153 曲ぶん出すので 1 度だけ作って使い回す。
     pub co_occur: CoOccurIndex,
+    /// 開催前でセトリが無い公演のセトリ予想 (公演 id → 予測)。学習が重いので 1 度だけ。
+    pub forecasts: HashMap<String, crate::domain::setlist_forecast::SetlistForecastRecord>,
     /// 曲に付いたタグの順位 (タグ一覧・タグごとの曲一覧・楽曲一覧の入口が同じ 1 本を見る)。
     /// 空ならタグの一覧は作らない。
     pub tag_ranking: Vec<TagRanking<'a>>,
@@ -133,6 +138,11 @@ impl<'a> Ctx<'a> {
             })
             .collect();
 
+        let forecasts = crate::domain::setlist_forecast::forecast_upcoming_shows(snap, &today, FORECAST_LIMIT)
+            .into_iter()
+            .map(|f| (f.show_id.clone(), f))
+            .collect();
+
         Self {
             snap,
             community,
@@ -148,6 +158,7 @@ impl<'a> Ctx<'a> {
             idol_brand_color,
             event_dates,
             co_occur: CoOccurIndex::build(snap),
+            forecasts,
             tag_ranking: song_tag_ranking(community, snap),
             brand_counts: super::places::brand_counts_table(snap),
         }

@@ -7,6 +7,7 @@ import type { Ref } from "./Ref";
 import type { SeoBlock } from "./SeoBlock";
 import type { SetlistSection } from "./SetlistSection";
 import type { ShowCostume } from "./ShowCostume";
+import type { ShowForecast } from "./ShowForecast";
 import type { SiblingNav } from "./SiblingNav";
 import type { StatTile } from "./StatTile";
 
@@ -68,6 +69,10 @@ cast: Array<Ref>,
  * この公演で着られた衣装 (進行順)。記録が無ければ空。
  */
 costumes: Array<ShowCostume>, 
+/**
+ * 開催前でセトリが無い公演だけ: 過去のセトリから推定した「歌われそうな曲」。
+ */
+forecast: ShowForecast | null, 
 /**
  * 同一ライブ内の他公演 (前後移動用。自分自身も含む)。
  */

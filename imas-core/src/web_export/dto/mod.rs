@@ -78,8 +78,8 @@ pub use index::{
 };
 pub use search::{FoldCase, FoldParity, SearchManifest, SearchPage, SearchRow, SearchShard, SearchShardMeta};
 pub use show::{
-    LineupNote, MissingOriginals, PerformerRef, SetlistCostume, SetlistRow, SetlistSection,
-    ShowCostume, ShowPage, SiblingNav,
+    ForecastRow, LineupNote, MissingOriginals, PerformerRef, SetlistCostume, SetlistRow, SetlistSection,
+    ShowCostume, ShowForecast, ShowPage, SiblingNav,
 };
 pub use song::{CoOccurRow, CreditGroup, PerformanceRow, SingerRow, SongPage};
 pub use unit::UnitPage;

@@ -1361,6 +1361,35 @@ a.rank-row:hover {
   color: var(--ds-ink);
 }
 
+/* セトリ予想 (ForecastList)。行は rank-row を使い、理由の札だけ足す。 */
+.forecast__lede {
+  max-inline-size: 48em;
+  font-size: var(--fs-footnote);
+}
+.forecast__note {
+  align-self: flex-start;
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  background: var(--ds-fill);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.forecast__reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-block-start: 4px;
+}
+.forecast__reason {
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  background: var(--tint);
+  color: var(--chip-text);
+  font-size: var(--fs-caption2);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 /* 年ごとの公演数 (縦の棒)。年が多いと狭い画面では横に流す。 */
 .year-chart {
   margin: 0;

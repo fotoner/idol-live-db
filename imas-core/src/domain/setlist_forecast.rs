@@ -901,6 +901,30 @@ pub fn forecast_show_uncached(snap: &Snapshot, show_id: &str, limit: u32) -> Opt
 }
 
 
+/// 開催前 (`today` 以降) でセトリがまだ無い公演をまとめて予測する (Web の出面用)。
+///
+/// 下ごしらえは 1 回、重みは学習の区切りごとに 1 回だけ作る (未来の公演はほぼ同じ区切りになる)。
+/// 予測できない公演 (リアルライブでない・日付が読めない) は入らない。公演の添字順。
+pub fn forecast_upcoming_shows(snap: &Snapshot, today: &str, limit: u32) -> Vec<SetlistForecastRecord> {
+    let targets: Vec<u32> = (0..snap.shows.len() as u32)
+        .filter(|&s| snap.shows[s as usize].date.as_str() >= today)
+        .filter(|&s| snap.setlist_items_by_show[s as usize].is_empty())
+        .collect();
+    if targets.is_empty() {
+        return Vec::new();
+    }
+    let prep = ForecastPrep::build(snap);
+    let mut models: HashMap<usize, ForecastModel> = HashMap::new();
+    targets
+        .into_iter()
+        .filter_map(|show| {
+            let prefix = prep.training_prefix(snap, show)?;
+            let model = models.entry(prefix).or_insert_with(|| prep.train(prefix));
+            forecast_show(snap, &prep, model, show, limit)
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

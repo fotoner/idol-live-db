@@ -13,6 +13,7 @@ import StatStrip from "../../components/StatStrip.astro";
 import Count from "../../components/Count.astro";
 import EmptyState from "../../components/EmptyState.astro";
 import Pager from "../../components/Pager.astro";
+import ForecastList from "../../components/ForecastList.astro";
 import { page, pathsFor } from "../../lib/data";
 import type { ShowPage } from "../../lib/schema/ShowPage";
 
@@ -125,6 +126,14 @@ const setlistCount = show.setlistSections.reduce((n, section) => n + section.row
       )
     }
   </Section>
+
+  {
+    show.forecast && (
+      <Section id="show-forecast" title={show.forecast.title}>
+        <ForecastList forecast={show.forecast} />
+      </Section>
+    )
+  }
 
   {
     show.cast.length > 0 && (
