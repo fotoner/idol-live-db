@@ -1,5 +1,6 @@
 package com.fugaif.imaslivedb.ui.events
 
+import com.fugaif.imaslivedb.ui.components.ReadableWidth
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -210,24 +211,27 @@ fun EventListScreen(
                     }
                 )
             } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    uiState.groupedByYear.forEach { group ->
-                        stickyHeader(key = group.year) {
-                            YearSectionHeader(year = group.year)
-                        }
-                        items(group.events, key = { it.event.id }) { ew ->
-                            // 行の右スワイプで参加登録 (イベントは公演を複数束ねるので、
-                            // 既存の EventAttendanceSheet をそのまま開く)。
-                            EventAttendanceSwipeRow(
-                                eventId = ew.event.id,
-                                brand = ew.event.brandId
-                            ) {
-                                EventRow(
-                                    eventWithDate = ew,
-                                    onClick = { onEventClick(ew.event.id) }
-                                )
+                // 広い画面では本文幅を抑える (iOS の readableContentMargins と対)。
+                ReadableWidth { readable ->
+                    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = readable) {
+                        uiState.groupedByYear.forEach { group ->
+                            stickyHeader(key = group.year) {
+                                YearSectionHeader(year = group.year)
                             }
-                            HorizontalDivider(modifier = Modifier.padding(start = 72.dp))
+                            items(group.events, key = { it.event.id }) { ew ->
+                                // 行の右スワイプで参加登録 (イベントは公演を複数束ねるので、
+                                // 既存の EventAttendanceSheet をそのまま開く)。
+                                EventAttendanceSwipeRow(
+                                    eventId = ew.event.id,
+                                    brand = ew.event.brandId
+                                ) {
+                                    EventRow(
+                                        eventWithDate = ew,
+                                        onClick = { onEventClick(ew.event.id) }
+                                    )
+                                }
+                                HorizontalDivider(modifier = Modifier.padding(start = 72.dp))
+                            }
                         }
                     }
                 }

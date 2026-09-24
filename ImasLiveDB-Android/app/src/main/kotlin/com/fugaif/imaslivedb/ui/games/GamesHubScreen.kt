@@ -70,7 +70,7 @@ private val entries = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GamesHubScreen(
-    onBack: () -> Unit,
+    onBack: (() -> Unit)?,
     onNavigateToIntroDon: () -> Unit,
     onNavigateToColorMatch: () -> Unit,
     onNavigateToIdolQuizSetup: () -> Unit,
@@ -85,8 +85,11 @@ fun GamesHubScreen(
             TopAppBar(
                 title = { Text("クイズ・ゲーム", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                    // サイドバーの根として開いたときは戻る先が無いので出さない。
+                    onBack?.let { back ->
+                        IconButton(onClick = back) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        }
                     }
                 }
             )

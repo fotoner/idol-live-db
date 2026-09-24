@@ -61,7 +61,7 @@ private enum class ActivityTab(val label: String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TagActivityScreen(
-    onBack: () -> Unit,
+    onBack: (() -> Unit)?,
     onSongTagClick: (String) -> Unit,
     onIdolTagClick: (String) -> Unit,
     onSongClick: (String) -> Unit,
@@ -85,8 +85,11 @@ fun TagActivityScreen(
             TopAppBar(
                 title = { Text("タグの動き", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                    // サイドバーの根として開いたときは戻る先が無いので出さない。
+                    onBack?.let { back ->
+                        IconButton(onClick = back) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        }
                     }
                 }
             )

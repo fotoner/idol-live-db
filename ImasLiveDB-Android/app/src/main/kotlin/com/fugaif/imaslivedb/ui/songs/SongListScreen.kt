@@ -1,5 +1,9 @@
 package com.fugaif.imaslivedb.ui.songs
 
+import com.fugaif.imaslivedb.ui.components.ReadableWidth
+import com.fugaif.imaslivedb.ui.components.ReadableContentWidth
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -196,6 +200,10 @@ fun SongListScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    // 下の一覧 (ReadableWidth) と左右を揃える。
+                    .wrapContentWidth(Alignment.CenterHorizontally)
+                    .widthIn(max = ReadableContentWidth)
+                    .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -246,20 +254,23 @@ fun SongListScreen(
                 val matchDetails = remember(uiState.songs, uiState.fuzzySongs, uiState.searchText, uiState.searchMode) {
                     searchMatchDetails(uiState.songs + uiState.fuzzySongs, uiState.searchText, uiState.searchMode)
                 }
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(uiState.songs, key = { it.song.id }) { item ->
-                        SongListRow(item, uiState, matchDetails[item.song.id], viewModel, onSongClick, onEditMastery = { masteryTarget = it })
-                    }
-                    if (uiState.fuzzySongs.isNotEmpty()) {
-                        item {
-                            // 打った通りではない候補なので、区切って理由を書く。黙って下に足すと
-                            // 「なぜこの曲が出ているのか」が読めず、一致の精度を疑わせる。
-                            ImasSectionHeader(title = "もしかして", tight = true)
-                        }
-                        // key を分けるのは、同じ曲が両方に出た時に LazyColumn が落ちないため
-                        // (VM 側で重複は除いているが、key の衝突は例外になるので保険をかける)。
-                        items(uiState.fuzzySongs, key = { "fuzzy_${it.song.id}" }) { item ->
+                // 広い画面では本文幅を抑える (iOS の readableContentMargins と対)。
+                ReadableWidth { readable ->
+                    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = readable) {
+                        items(uiState.songs, key = { it.song.id }) { item ->
                             SongListRow(item, uiState, matchDetails[item.song.id], viewModel, onSongClick, onEditMastery = { masteryTarget = it })
+                        }
+                        if (uiState.fuzzySongs.isNotEmpty()) {
+                            item {
+                                // 打った通りではない候補なので、区切って理由を書く。黙って下に足すと
+                                // 「なぜこの曲が出ているのか」が読めず、一致の精度を疑わせる。
+                                ImasSectionHeader(title = "もしかして", tight = true)
+                            }
+                            // key を分けるのは、同じ曲が両方に出た時に LazyColumn が落ちないため
+                            // (VM 側で重複は除いているが、key の衝突は例外になるので保険をかける)。
+                            items(uiState.fuzzySongs, key = { "fuzzy_${it.song.id}" }) { item ->
+                                SongListRow(item, uiState, matchDetails[item.song.id], viewModel, onSongClick, onEditMastery = { masteryTarget = it })
+                            }
                         }
                     }
                 }

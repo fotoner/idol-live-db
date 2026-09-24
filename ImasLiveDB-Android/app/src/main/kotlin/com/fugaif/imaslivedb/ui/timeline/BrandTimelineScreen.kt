@@ -89,7 +89,7 @@ import uniffi.imas_core.timelineX
 @Composable
 fun BrandTimelineScreen(
     initialBrandId: String?,
-    onBack: () -> Unit,
+    onBack: (() -> Unit)?,
     onEventClick: (String) -> Unit,
     onFilteredSongsClick: (String, String) -> Unit
 ) {
@@ -181,8 +181,11 @@ fun BrandTimelineScreen(
             TopAppBar(
                 title = { Text(state.selectedBrand?.let { "${it.shortName}の年表" } ?: "年表") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                    // サイドバーの根として開いたときは戻る先が無いので出さない。
+                    onBack?.let { back ->
+                        IconButton(onClick = back) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        }
                     }
                 },
                 actions = {
