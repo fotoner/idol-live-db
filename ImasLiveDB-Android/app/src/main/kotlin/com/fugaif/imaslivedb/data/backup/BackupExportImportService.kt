@@ -12,6 +12,9 @@ import com.fugaif.imaslivedb.data.model.UserMark
 import com.fugaif.imaslivedb.data.repository.ExpenseRepository
 import com.fugaif.imaslivedb.data.repository.PersonalTagRepository
 import com.fugaif.imaslivedb.data.repository.UserMarkRepository
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.UserFacing
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import uniffi.imas_core.BackupExpenseRecord
 import uniffi.imas_core.BackupExportInput
 import uniffi.imas_core.BackupImportException
@@ -27,8 +30,22 @@ import uniffi.imas_core.buildBackupEnvelope
 import uniffi.imas_core.planBackupImport
 import java.time.Instant
 
-/** バックアップ (引き継ぎコード/ファイルエクスポート) で壊れた・改ざんされたデータを検出したときに投げる。 */
-class BackupFormatException(message: String) : Exception(message)
+/**
+ * バックアップ (引き継ぎコード/ファイルエクスポート) で壊れた・改ざんされたデータを検出したときに投げる。
+ * 理由 ([reason]) だけを持ち、利用者に見せる文言は [userMessage] で決める。
+ */
+class BackupFormatException(val reason: Reason) : Exception(reason.name), UserFacing {
+
+    enum class Reason { MALFORMED_FILE, CHECKSUM_MISMATCH, UNSUPPORTED_SCHEMA_VERSION, UNREADABLE_FILE }
+
+    override val userMessage: DisplayText
+        get() = when (reason) {
+            Reason.MALFORMED_FILE -> L10n.Settings.backupErrorMalformedAndroid
+            Reason.CHECKSUM_MISMATCH -> L10n.Settings.backupErrorChecksumAndroid
+            Reason.UNSUPPORTED_SCHEMA_VERSION -> L10n.Settings.backupErrorUnsupportedSchemaAndroid
+            Reason.UNREADABLE_FILE -> L10n.Settings.backupFileUnreadable
+        }
+}
 
 data class BackupImportResult(
     val addedMarks: Int,
@@ -120,9 +137,8 @@ object BackupExportImportService {
         val plan = try {
             planBackupImport(json, local, restoreDeviceId, BackupKindDialect.ANDROID)
         } catch (e: BackupImportException) {
-            // コアの例外は列挙値だけを運ぶので、ユーザーに出す文面はここで当てる
-            // (SettingsScreen が e.message をそのまま表示する)。
-            throw BackupFormatException(userMessage(e))
+            // コアの例外は列挙値だけを運ぶので、理由に写す (文言は BackupFormatException.userMessage)。
+            throw BackupFormatException(reasonOf(e))
         }
 
         // 追加すべき行はコアが絞り込み済み。repository 側の restoreIfAbsent は
@@ -161,10 +177,10 @@ object BackupExportImportService {
         )
     }
 
-    private fun userMessage(e: BackupImportException): String = when (e) {
-        is BackupImportException.MalformedFile -> "壊れたファイルです"
-        is BackupImportException.ChecksumMismatch -> "データが破損しているか改ざんされている可能性があります"
-        is BackupImportException.UnsupportedSchemaVersion -> "新しいバージョンのアプリで作成されたファイルです"
+    private fun reasonOf(e: BackupImportException): BackupFormatException.Reason = when (e) {
+        is BackupImportException.MalformedFile -> BackupFormatException.Reason.MALFORMED_FILE
+        is BackupImportException.ChecksumMismatch -> BackupFormatException.Reason.CHECKSUM_MISMATCH
+        is BackupImportException.UnsupportedSchemaVersion -> BackupFormatException.Reason.UNSUPPORTED_SCHEMA_VERSION
     }
 
     private fun appVersion(context: Context): String = try {

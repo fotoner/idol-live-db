@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/settings.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- settings.account.delete.button: アカウントを削除するボタン (確認ダイアログが出る) -->
+    <string name="settings_account_delete_button">アカウントを削除</string>
+    <!-- settings.account.delete.confirm: アカウント削除の確認ダイアログの実行ボタン (赤) -->
+    <string name="settings_account_delete_confirm">削除する</string>
+    <!-- settings.account.delete.confirm_message_android: Android の文言。iOS の account.delete.confirm_message と ja が違う (予想 / 投票。統一はオーナーが別 PR で) -->
+    <string name="settings_account_delete_confirm_message_android">サーバー上のあなたの編集・Good・投票・ユーザー情報がすべて削除され、サインアウトされます。この操作は取り消せません。</string>
+    <!-- settings.account.delete.confirm_title: アカウント削除の確認ダイアログの見出し -->
+    <string name="settings_account_delete_confirm_title">アカウントを削除しますか?</string>
+    <!-- settings.account.delete.deleting: アカウントを削除している間のボタンの表示 -->
+    <string name="settings_account_delete_deleting">削除中...</string>
+    <!-- settings.account.delete.error_message: アカウントを削除できなかったときのダイアログの本文 -->
+    <string name="settings_account_delete_error_message">削除に失敗しました</string>
+    <!-- settings.account.delete.error_title: アカウントを削除できなかったときのダイアログの見出し -->
+    <string name="settings_account_delete_error_title">削除に失敗しました</string>
+    <!-- settings.account.edit_name.a11y: 名前の右の鉛筆ボタンの読み上げ -->
+    <string name="settings_account_edit_name_a11y">表示名を変更</string>
+    <!-- settings.account.edit_name.error_message: 表示名を保存できなかったときのダイアログの本文 -->
+    <string name="settings_account_edit_name_error_message">表示名の保存に失敗しました</string>
+    <!-- settings.account.edit_name.error_title: 表示名を保存できなかったときのダイアログの見出し -->
+    <string name="settings_account_edit_name_error_title">表示名の保存に失敗</string>
+    <!-- settings.account.edit_name.message: 表示名の変更ダイアログの説明。max = 上限の文字数 (コアが決める。今は 40 なので桁区切りは付かない) -->
+    <plurals name="settings_account_edit_name_message">
+        <item quantity="other">コミュニティ投稿で表示される名前です (%1$,d文字以内)</item>
+    </plurals>
+    <!-- settings.account.edit_name.title: 表示名の変更ダイアログの見出し -->
+    <string name="settings_account_edit_name_title">表示名を変更</string>
+    <!-- settings.account.google_sign_in: Google アカウントでログインするボタン -->
+    <string name="settings_account_google_sign_in">Googleでログイン</string>
+    <!-- settings.account.header: 設定のアカウントの節の見出し -->
+    <string name="settings_account_header">アカウント</string>
+    <!-- settings.account.sign_in_prompt_android: Android の文言。未ログインのときのアカウントの節の案内。iOS の account.sign_in_prompt と ja が違う -->
+    <string name="settings_account_sign_in_prompt_android">投票 (お題) にはログインが必要です</string>
+    <!-- settings.account.sign_out: ログアウトボタン -->
+    <string name="settings_account_sign_out">ログアウト</string>
+    <!-- settings.account.signed_in_fallback: 表示名がまだ無いときに名前の代わりに出す語 -->
+    <string name="settings_account_signed_in_fallback">ログイン済み</string>
+    <!-- settings.action.cancel: 設定画面のダイアログを閉じるボタン (表示名の変更・画像の取り込み・削除の確認など) -->
+    <string name="settings_action_cancel">キャンセル</string>
+    <!-- settings.action.import: 画像の一括取り込みダイアログの実行ボタン -->
+    <string name="settings_action_import">インポート</string>
+    <!-- settings.action.save: 表示名の変更ダイアログの保存ボタン -->
+    <string name="settings_action_save">保存</string>
+    <!-- settings.app_info.donate: 開発者への寄付 (Ko-fi) を開く行 -->
+    <string name="settings_app_info_donate">開発をサポートする</string>
+    <!-- settings.app_info.header: アプリについて・規約などの節の見出し -->
+    <string name="settings_app_info_header">アプリ情報</string>
+    <!-- settings.app_info.help: 使い方 (ヘルプ) の画面を開く行 -->
+    <string name="settings_app_info_help">使い方</string>
+    <!-- settings.app_info.inbox: お知らせ (アプリの更新情報) の一覧を開く行 -->
+    <string name="settings_app_info_inbox">お知らせ</string>
+    <!-- settings.app_info.licenses: 使っているオープンソースのライセンス一覧を開く行 -->
+    <string name="settings_app_info_licenses">オープンソースライセンス</string>
+    <!-- settings.app_info.privacy: プライバシーポリシーの画面へ進む行 -->
+    <string name="settings_app_info_privacy">プライバシーポリシー</string>
+    <!-- settings.app_info.rate: ストアのアプリのページを開いて評価してもらう行 -->
+    <string name="settings_app_info_rate">アプリを評価する</string>
+    <!-- settings.app_info.support: サポート (問い合わせ) の画面へ進む行 -->
+    <string name="settings_app_info_support">サポート</string>
+    <!-- settings.app_info.terms: 利用規約の画面へ進む行 -->
+    <string name="settings_app_info_terms">利用規約</string>
+    <!-- settings.backup.code.error_message: 引き継ぎコードを発行できなかったときのダイアログの本文 (理由が分からないとき) -->
+    <string name="settings_backup_code_error_message">発行に失敗しました</string>
+    <!-- settings.backup.code.error_title_android: Android の文言。引き継ぎコードを発行できなかったときのダイアログの見出し。iOS の backup.code.error_title と ja が違う -->
+    <string name="settings_backup_code_error_title_android">発行に失敗しました</string>
+    <!-- settings.backup.code.field: 引き継ぎコードの入力欄のプレースホルダ・ラベル -->
+    <string name="settings_backup_code_field">引き継ぎコード</string>
+    <!-- settings.backup.code.hint: 発行した引き継ぎコードの下の説明 -->
+    <string name="settings_backup_code_hint">長押しでコピー・24時間有効・1回のみ使用可能です</string>
+    <!-- settings.backup.code.issue: 引き継ぎコード (機種変更用のワンタイムコード) を発行するボタン -->
+    <string name="settings_backup_code_issue">引き継ぎコードを発行する</string>
+    <!-- settings.backup.code.issuing: 引き継ぎコードを発行している間の表示 -->
+    <string name="settings_backup_code_issuing">発行中...</string>
+    <!-- settings.backup.code.restore_android: Android の文言。入力した引き継ぎコードで復元するボタン。iOS の backup.code.restore と ja が違う -->
+    <string name="settings_backup_code_restore_android">引き継ぎコードで復元する</string>
+    <!-- settings.backup.code.restoring: 引き継ぎコードで復元している間のボタンの表示 -->
+    <string name="settings_backup_code_restoring">復元中...</string>
+    <!-- settings.backup.error.bad_data: サーバーが送ったデータを不正と判断したとき (400) -->
+    <string name="settings_backup_error_bad_data">データが不正です</string>
+    <!-- settings.backup.error.bad_response: サーバーの応答が読めなかったとき -->
+    <string name="settings_backup_error_bad_response">サーバーからの応答が不正です</string>
+    <!-- settings.backup.error.checksum_android: Android の文言。iOS の backup.error.checksum と ja が違う -->
+    <string name="settings_backup_error_checksum_android">データが破損しているか改ざんされている可能性があります</string>
+    <!-- settings.backup.error.http: ほかの HTTP エラー。status = HTTP の状態コード (int) -->
+    <string name="settings_backup_error_http">通信に失敗しました (HTTP %1$d)</string>
+    <!-- settings.backup.error.invalid_code: 引き継ぎコードが無いか期限切れ (404) -->
+    <string name="settings_backup_error_invalid_code">コードが無効か期限切れです</string>
+    <!-- settings.backup.error.login_required: 引き継ぎコードの発行・復元にログインが要るとき (401) -->
+    <string name="settings_backup_error_login_required">ログインが必要です</string>
+    <!-- settings.backup.error.malformed_android: Android の文言。iOS の backup.error.malformed と ja が違う -->
+    <string name="settings_backup_error_malformed_android">壊れたファイルです</string>
+    <!-- settings.backup.error.rate_limited: 引き継ぎコードの操作がレート制限 (429) に当たったとき -->
+    <string name="settings_backup_error_rate_limited">しばらく待ってから再試行してください</string>
+    <!-- settings.backup.error.transport: 引き継ぎコードの通信が失敗したとき -->
+    <string name="settings_backup_error_transport">通信に失敗しました</string>
+    <!-- settings.backup.error.unsupported_schema_android: Android の文言。iOS の backup.error.unsupported_schema と ja が違う -->
+    <string name="settings_backup_error_unsupported_schema_android">新しいバージョンのアプリで作成されたファイルです</string>
+    <!-- settings.backup.file.export_failed: バックアップをファイルに書き出せなかったとき (復元失敗のダイアログに出る) -->
+    <string name="settings_backup_file_export_failed">書き出しに失敗しました</string>
+    <!-- settings.backup.file.loading: バックアップファイルを読んでいる間のボタンの表示 -->
+    <string name="settings_backup_file_loading">読み込み中...</string>
+    <!-- settings.backup.file.restore: バックアップファイルを選んで復元するボタン -->
+    <string name="settings_backup_file_restore">ファイルから復元する</string>
+    <!-- settings.backup.file.save: バックアップをファイルに書き出すボタン -->
+    <string name="settings_backup_file_save">ファイルに保存する</string>
+    <!-- settings.backup.file.saving: バックアップをファイルに書き出している間のボタンの表示 -->
+    <string name="settings_backup_file_saving">書き出し中...</string>
+    <!-- settings.backup.file.unreadable: 選んだバックアップファイルを開けなかったとき -->
+    <string name="settings_backup_file_unreadable">ファイルを読み込めませんでした</string>
+    <!-- settings.backup.header: バックアップ (引き継ぎコード・ファイル) の節の見出し -->
+    <string name="settings_backup_header">バックアップ</string>
+    <!-- settings.backup.intro: バックアップの節の先頭の説明 -->
+    <string name="settings_backup_intro">機種変更やアプリの再インストール時に、お気に入り・担当・投票履歴を引き継げます</string>
+    <!-- settings.backup.restore.done_title_android: Android の文言。iOS の backup.restore.done_title と ja が違う -->
+    <string name="settings_backup_restore_done_title_android">復元が完了しました</string>
+    <!-- settings.backup.restore.failed_message: 復元できなかったときのダイアログの本文 (理由が分からないとき) -->
+    <string name="settings_backup_restore_failed_message">読み込みに失敗しました</string>
+    <!-- settings.backup.restore.failed_title: 復元できなかったときのダイアログの見出し -->
+    <string name="settings_backup_restore_failed_title">復元に失敗しました</string>
+    <!-- settings.backup.restore_device_id_android: Android の文言。iOS の backup.restore_device_id と空白と OFF / オフが違う -->
+    <string name="settings_backup_restore_device_id_android">復元時に端末IDも引き継ぐ (上級者向け・通常はオフ)</string>
+    <!-- settings.collection.footer_android: Android の文言。iOS の collection.footer と括弧の前後の空白だけ違う -->
+    <string name="settings_collection_footer_android">回収はリアルライブ (ライブ/フェス) の現地参加のみが対象です。配信でしか観られない方は、配信参加も回収に含められます。</string>
+    <!-- settings.collection.header: 回収 (ライブで曲を生で聴いたこと) の数え方の節の見出し -->
+    <string name="settings_collection_header">披露回収</string>
+    <!-- settings.collection.include_stream: 配信で観たライブの曲も回収済みにするかのスイッチ -->
+    <string name="settings_collection_include_stream">配信参加も回収に含める</string>
+    <!-- settings.credits.app_version: アプリの版の行の見出し (右に 1.2.3 など) -->
+    <string name="settings_credits_app_version">アプリバージョン</string>
+    <!-- settings.credits.header: クレジット (データの出どころ・非公式の断り) の節の見出し -->
+    <string name="settings_credits_header">クレジット</string>
+    <!-- settings.credits.note: データの出どころの注記 -->
+    <string name="settings_credits_note">※各情報源のデータは独自に集計・整形して利用しています</string>
+    <!-- settings.credits.source.imas_db: データの出どころ。アイマスDB はサイト名 (ko は読みを音写) -->
+    <string name="settings_credits_source_imas_db">楽曲・ライブ等のデータ参照元: アイマスDB (https://imas-db.jp/)</string>
+    <!-- settings.credits.source.music765plus: データの出どころ。music765plus はサイト名なので訳さない -->
+    <string name="settings_credits_source_music765plus">楽曲・ライブセトリのデータ参照元: music765plus (https://music765plus.com/)</string>
+    <!-- settings.credits.source.palette: データの出どころ。imas-palette はリポジトリ名なので訳さない -->
+    <string name="settings_credits_source_palette">アイドルのイメージカラー: imas-palette (https://github.com/arrow2nd/imas-palette)</string>
+    <!-- settings.credits.source.sparql: データの出どころ。im@sparql はサービス名なので訳さない -->
+    <string name="settings_credits_source_sparql">アイドルのプロフィール(CV/カラー等): im@sparql (https://sparql.crssnky.xyz/imas/)</string>
+    <!-- settings.credits.unofficial_android: Android の文言。非公式のアプリである断り書き (権利元と無関係であることを明記)。会社名は訳さず公式の英字表記にする -->
+    <string name="settings_credits_unofficial_android">本アプリは株式会社バンダイナムコエンターテインメント様とは一切関係のない非公式ファンメイドアプリです。</string>
+    <!-- settings.data.data_version: 端末に入っているデータの版 -->
+    <string name="settings_data_data_version">データバージョン</string>
+    <!-- settings.data.header: データのバージョンと同期の節の見出し -->
+    <string name="settings_data_header">データ</string>
+    <!-- settings.data.schema_version: 端末のデータベースの形の版 -->
+    <string name="settings_data_schema_version">スキーマバージョン</string>
+    <!-- settings.data.unknown: データベースの版が読めなかったときの値 -->
+    <string name="settings_data_unknown">不明</string>
+    <!-- settings.default_brand.all: デフォルトブランドの選択肢: 絞り込まない -->
+    <string name="settings_default_brand_all">すべて</string>
+    <!-- settings.default_brand.label: 一覧を開いたときに最初に絞り込むブランドの選択 -->
+    <string name="settings_default_brand_label">デフォルトブランド</string>
+    <!-- settings.developer.header: 開発者と公開リポジトリの節の見出し -->
+    <string name="settings_developer_header">開発者</string>
+    <!-- settings.developer.label: 開発者の行の見出し (右に開発者名 fuga-if) -->
+    <string name="settings_developer_label">開発</string>
+    <!-- settings.developer.note: 開発者の節の説明 -->
+    <string name="settings_developer_note">非公式のファンメイドアプリです。データの誤りや要望は GitHub Issue からお知らせください。</string>
+    <!-- settings.display.header: 文字サイズ・歌唱者の名前・ライブ名の省略の節の見出し -->
+    <string name="settings_display_header">表示</string>
+    <!-- settings.event_name_abbreviate.label: ライブ名の頭の作品名 (THE IDOLM@STER … など) を省くかのスイッチ -->
+    <string name="settings_event_name_abbreviate_label">ライブ名を省略表示</string>
+    <!-- settings.filter.header: デフォルトブランドの節の見出し -->
+    <string name="settings_filter_header">フィルタ設定</string>
+    <!-- settings.header.version: 設定の先頭のアプリ名の下の版の表示。version = 1.2.3 など -->
+    <string name="settings_header_version">バージョン %1$s</string>
+    <!-- settings.header.version_build: 設定の先頭のアプリ名の下の版の表示 (ビルド番号つき)。build = ビルド番号 (int。桁区切りなし) -->
+    <string name="settings_header_version_build">バージョン %1$s (Build %2$d)</string>
+    <!-- settings.image_import.brand.button: ブランドのアイコン画像を一括で取り込むボタン -->
+    <string name="settings_image_import_brand_button">ブランド画像をインポート</string>
+    <!-- settings.image_import.brand.dialog_title_android: Android の文言。iOS の image_import.brand.dialog_title と ja が違う -->
+    <string name="settings_image_import_brand_dialog_title_android">ブランド画像の一括インポート</string>
+    <!-- settings.image_import.clear_android: Android の文言。取り込んだ画像をすべて消すボタン (確認ダイアログが出る)。iOS の image_import.clear と ja が違う -->
+    <string name="settings_image_import_clear_android">カスタム画像をすべて削除</string>
+    <!-- settings.image_import.clear_confirm.action: 取り込んだ画像をすべて消す確認ダイアログの実行ボタン (赤) -->
+    <string name="settings_image_import_clear_confirm_action">削除</string>
+    <!-- settings.image_import.clear_confirm.message: 取り込んだ画像をすべて消す前の確認ダイアログの本文 -->
+    <string name="settings_image_import_clear_confirm_message">取り込んだアイドル・ユニット・ブランドの画像をすべて消します。元に戻せません。</string>
+    <!-- settings.image_import.clear_confirm.title: 取り込んだ画像をすべて消す前の確認ダイアログの見出し -->
+    <string name="settings_image_import_clear_confirm_title">カスタム画像をすべて削除</string>
+    <!-- settings.image_import.dialog_message: 画像の取り込みダイアログの説明 (JSON の書き方の例つき) -->
+    <string name="settings_image_import_dialog_message">{ \"名前\": \"画像URL\" } 形式の JSON を置いた URL を入力してください。</string>
+    <!-- settings.image_import.failure.brand_not_found: 失敗内訳の理由: JSON のキーの名前に当たるブランドが無い -->
+    <string name="settings_image_import_failure_brand_not_found">ブランド ID が見つからない</string>
+    <!-- settings.image_import.failure.decode_failed: 失敗内訳の理由: 取ってきたデータを画像として読めない -->
+    <string name="settings_image_import_failure_decode_failed">画像デコード失敗</string>
+    <!-- settings.image_import.failure.fetch_failed: 失敗内訳の理由: 画像を取りに行けなかった (エラー文が無い場合) -->
+    <string name="settings_image_import_failure_fetch_failed">取得失敗</string>
+    <!-- settings.image_import.failure.idol_not_found: 失敗内訳の理由: JSON のキーの名前に当たるアイドルがいない -->
+    <string name="settings_image_import_failure_idol_not_found">アイドル ID が見つからない</string>
+    <!-- settings.image_import.failure.invalid_url: 失敗内訳の理由: 画像の URL が URL として読めない -->
+    <string name="settings_image_import_failure_invalid_url">URL が不正</string>
+    <!-- settings.image_import.failure.unit_not_found: 失敗内訳の理由: JSON のキーの名前に当たるユニットが無い -->
+    <string name="settings_image_import_failure_unit_not_found">ユニット ID が見つからない</string>
+    <!-- settings.image_import.failures: 取り込めなかった名前の一覧の見出し。1000 以上は桁区切りが付く -->
+    <plurals name="settings_image_import_failures">
+        <item quantity="other">失敗内訳 (%1$,d 件)</item>
+    </plurals>
+    <!-- settings.image_import.failures_more: 失敗内訳を 20 件まで出したあとに残りの件数をまとめる行。1000 以上は桁区切りが付く -->
+    <plurals name="settings_image_import_failures_more">
+        <item quantity="other">ほか %1$,d 件</item>
+    </plurals>
+    <!-- settings.image_import.header_android: Android の文言。アイコン画像の一括取り込みの節の見出し。iOS の image_import.header と ja が違う -->
+    <string name="settings_image_import_header_android">キャラクター画像</string>
+    <!-- settings.image_import.idol.button_android: Android の文言。iOS の image_import.idol.button と ja が違う -->
+    <string name="settings_image_import_idol_button_android">アイドル画像をインポート</string>
+    <!-- settings.image_import.idol.dialog_title_android: Android の文言。iOS の image_import.idol.dialog_title と ja が違う -->
+    <string name="settings_image_import_idol_dialog_title_android">アイドル画像の一括インポート</string>
+    <!-- settings.image_import.intro: 画像の一括取り込みの節の先頭の説明 -->
+    <string name="settings_image_import_intro">「名前 → 画像URL」の JSON を指定すると、アイコン画像をまとめて取り込めます。画像はこの端末の中だけに保存され、サーバーには送信されません。</string>
+    <!-- settings.image_import.status.cleared: 取り込んだ画像をすべて消したあとの状態の表示 -->
+    <string name="settings_image_import_status_cleared">カスタム画像を全削除しました</string>
+    <!-- settings.image_import.status.done: 取り込みが終わったときの結果。件数は 2 つあり count は 1 キーに 1 つまでなので、どちらも int (今と同じく桁区切りなし) -->
+    <string name="settings_image_import_status_done">完了: %1$d件成功, %2$d件失敗</string>
+    <!-- settings.image_import.status.error: 取り込みの途中で失敗したとき。detail = OS のエラー文 -->
+    <string name="settings_image_import_status_error">エラー: %1$s</string>
+    <!-- settings.image_import.status.fetching: JSON を取りに行っている間の状態の表示 -->
+    <string name="settings_image_import_status_fetching">データ取得中...</string>
+    <!-- settings.image_import.status.invalid_json: 取ってきた JSON が「名前: URL」の 1 階層のオブジェクトでないとき -->
+    <string name="settings_image_import_status_invalid_json">JSONの形式が正しくありません</string>
+    <!-- settings.image_import.status.invalid_url: 入力された JSON の URL が URL として読めないとき -->
+    <string name="settings_image_import_status_invalid_url">無効なURLです</string>
+    <!-- settings.image_import.status.progress: 画像を 1 枚ずつ落としている間の進み具合。進捗の分数なので桁区切りは付けない (int) -->
+    <string name="settings_image_import_status_progress">%1$d/%2$d ダウンロード中...</string>
+    <!-- settings.image_import.status.resolve_failed: 名前と ID の対応表を作れなかったとき (エラー文が無い場合) -->
+    <string name="settings_image_import_status_resolve_failed">エラー: 名前の解決に失敗しました</string>
+    <!-- settings.image_import.template: 取り込みボタンの右の、名前だけ埋めた JSON (型紙) を保存するボタン -->
+    <string name="settings_image_import_template">型紙</string>
+    <!-- settings.image_import.unit.button: ユニットのアイコン画像を一括で取り込むボタン -->
+    <string name="settings_image_import_unit_button">ユニット画像をインポート</string>
+    <!-- settings.image_import.unit.dialog_title_android: Android の文言。iOS の image_import.unit.dialog_title と ja が違う -->
+    <string name="settings_image_import_unit_dialog_title_android">ユニット画像の一括インポート</string>
+    <!-- settings.image_import.url_label: 画像の取り込みダイアログの入力欄のラベル -->
+    <string name="settings_image_import_url_label">JSON の URL</string>
+    <!-- settings.inbox.mark_all_read: お知らせを全部読んだことにするボタン -->
+    <string name="settings_inbox_mark_all_read">すべて既読</string>
+    <!-- settings.inbox.title: お知らせ (アプリの更新情報) の一覧・詳細の画面タイトル -->
+    <string name="settings_inbox_title">お知らせ</string>
+    <!-- settings.inbox.widget_how_to_android: Android の文言。iOS の inbox.widget_how_to と ja が違う -->
+    <string name="settings_inbox_widget_how_to_android">ウィジェットの使い方を見る</string>
+    <!-- settings.mastery.add_level: 習熟度の段を 1 つ増やすボタン -->
+    <string name="settings_mastery_add_level">段を追加</string>
+    <!-- settings.mastery.apply: 編集した習熟度の段を保存するボタン -->
+    <string name="settings_mastery_apply">この段階にする</string>
+    <!-- settings.mastery.header: 習熟度 (曲をどれだけ覚えたかの段階) の節の見出し -->
+    <string name="settings_mastery_header">習熟度</string>
+    <!-- settings.mastery.help: 習熟度の段の編集欄の下の説明 -->
+    <string name="settings_mastery_help">下から順に積み上がります。段を減らすと、その段の曲は 1 つ下に移ります (記録は消えません)。どのラベルも 4 文字以内にしておくと一覧で切れません。</string>
+    <!-- settings.mastery.remove_level: 習熟度の一番上の段を消すボタン -->
+    <string name="settings_mastery_remove_level">削除</string>
+    <!-- settings.notifications.channel.live_week.description: OS の通知設定に出る通知チャンネルの説明 -->
+    <string name="settings_notifications_channel_live_week_description">お気に入り/参加マークしたライブの初日 1 週間前に 10:00 にお知らせします。</string>
+    <!-- settings.notifications.channel.live_week.name: OS の通知設定に出る通知チャンネルの名前 -->
+    <string name="settings_notifications_channel_live_week_name">ライブ1週間前</string>
+    <!-- settings.notifications.channel.monday.description: OS の通知設定に出る通知チャンネルの説明 -->
+    <string name="settings_notifications_channel_monday_description">日曜 20:00 に月曜が近いことをお知らせします。</string>
+    <!-- settings.notifications.channel.monday.name: OS の通知設定に出る通知チャンネルの名前 (ファンの間のネタ) -->
+    <string name="settings_notifications_channel_monday_name">月曜が近いよ</string>
+    <!-- settings.notifications.channel.oshi_birthday.description: OS の通知設定に出る通知チャンネルの説明 -->
+    <string name="settings_notifications_channel_oshi_birthday_description">担当マークしたアイドルの誕生日に 9:00 にお知らせします。</string>
+    <!-- settings.notifications.channel.oshi_birthday.name: OS の通知設定に出る通知チャンネルの名前 -->
+    <string name="settings_notifications_channel_oshi_birthday_name">担当アイドルの誕生日</string>
+    <!-- settings.notifications.channel.ticket.description: OS の通知設定に出る通知チャンネルの説明 -->
+    <string name="settings_notifications_channel_ticket_description">チケット申込締切の前日 18:00 と、当落発表日の 9:00 にお知らせします。</string>
+    <!-- settings.notifications.channel.ticket.name: OS の通知設定に出る通知チャンネルの名前 -->
+    <string name="settings_notifications_channel_ticket_name">チケット締切・当落</string>
+    <!-- settings.notifications.denied_android: Android の文言。iOS の notifications.denied と ja が違う -->
+    <string name="settings_notifications_denied_android">通知が拒否されています。システムの通知設定から許可してください。</string>
+    <!-- settings.notifications.footer: 通知の節の説明 -->
+    <string name="settings_notifications_footer">お気に入りまたは参加マークしたイベントにライブ前・チケット通知を送ります。</string>
+    <!-- settings.notifications.header: 通知の設定の節の見出し -->
+    <string name="settings_notifications_header">通知</string>
+    <!-- settings.notifications.live_week: 通知の種類のスイッチ: ライブの 1 週間前 -->
+    <string name="settings_notifications_live_week">ライブ1週間前</string>
+    <!-- settings.notifications.monday: 通知の種類のスイッチ: 日曜の夜に「月曜が近いよ」と知らせる (ファンの間のネタ) -->
+    <string name="settings_notifications_monday">月曜が近いことを知らせる (日曜 20:00)</string>
+    <!-- settings.notifications.open_system_settings: このアプリの OS の通知設定を開く行 -->
+    <string name="settings_notifications_open_system_settings">システムの通知設定を開く</string>
+    <!-- settings.notifications.oshi_birthday: 通知の種類のスイッチ: 担当アイドルの誕生日 -->
+    <string name="settings_notifications_oshi_birthday">担当アイドルの誕生日</string>
+    <!-- settings.notifications.request: 通知の許可を求めるボタン (まだ許可していないとき) -->
+    <string name="settings_notifications_request">通知を許可する</string>
+    <!-- settings.notifications.ticket: 通知の種類のスイッチ: チケットの申込締切と当落発表 -->
+    <string name="settings_notifications_ticket">チケット締切・当落通知</string>
+    <!-- settings.performer_name.label: セトリの歌唱者をアイドル名・声優名のどちらで出すかの選択。選択肢はコアの語彙 -->
+    <string name="settings_performer_name_label">セトリの歌唱者</string>
+    <!-- settings.screen.title: 設定画面のタイトル (iOS はシートのナビゲーションタイトル、Android はタブの上のバー) -->
+    <string name="settings_screen_title">設定</string>
+    <!-- settings.stats.events.label: データ統計: イベント (ライブ) の数の行の見出し -->
+    <string name="settings_stats_events_label">イベント数</string>
+    <!-- settings.stats.events.value: データ統計: イベントの件数。1000 以上は桁区切りが付く -->
+    <plurals name="settings_stats_events_value">
+        <item quantity="other">%1$,d件</item>
+    </plurals>
+    <!-- settings.stats.header: 端末に入っているデータの件数の節の見出し -->
+    <string name="settings_stats_header">データ統計</string>
+    <!-- settings.stats.idols.label: データ統計: アイドルの人数の行の見出し -->
+    <string name="settings_stats_idols_label">アイドル数</string>
+    <!-- settings.stats.idols.value: データ統計: アイドルの人数。1000 以上は桁区切りが付く -->
+    <plurals name="settings_stats_idols_value">
+        <item quantity="other">%1$,d人</item>
+    </plurals>
+    <!-- settings.stats.shows.label: データ統計: 公演の数の行の見出し -->
+    <string name="settings_stats_shows_label">公演数</string>
+    <!-- settings.stats.shows.value: データ統計: 公演の数。1000 以上は桁区切りが付く (公演は 1000 を超えうる) -->
+    <plurals name="settings_stats_shows_value">
+        <item quantity="other">%1$,d公演</item>
+    </plurals>
+    <!-- settings.stats.songs.label: データ統計: 曲の数の行の見出し -->
+    <string name="settings_stats_songs_label">楽曲数</string>
+    <!-- settings.stats.songs.value: データ統計: 曲の数。1000 以上は桁区切りが付く (今は付いていない。曲は 1000 を超えるので表示が 1,234曲 に変わる) -->
+    <plurals name="settings_stats_songs_value">
+        <item quantity="other">%1$,d曲</item>
+    </plurals>
+    <!-- settings.sync.full: データをすべて取り直すボタン -->
+    <string name="settings_sync_full">全データ同期</string>
+    <!-- settings.sync.incremental: 前回から変わったデータだけ取り直すボタン -->
+    <string name="settings_sync_incremental">差分更新</string>
+    <!-- settings.sync.state.completed: 同期の状態: 終わった。count = 取ってきた件数。1000 以上は桁区切りが付く -->
+    <plurals name="settings_sync_state_completed">
+        <item quantity="other">完了 (%1$,d件)</item>
+    </plurals>
+    <!-- settings.sync.state.error: 同期の状態: 失敗した。message = エラー文 -->
+    <string name="settings_sync_state_error">失敗: %1$s</string>
+    <!-- settings.sync.state.idle: 同期の状態: 何もしていない -->
+    <string name="settings_sync_state_idle">待機中</string>
+    <!-- settings.sync.state.syncing: 同期の状態: 取っている途中。step/total = 何段目か、label = 取っているデータの種類 (コアの語) -->
+    <string name="settings_sync_state_syncing">同期中 (%1$d/%2$d) %3$s</string>
+    <!-- settings.text_scale.caption: 文字サイズの説明 (端末の文字の大きさの設定とかけ合わせる) -->
+    <string name="settings_text_scale_caption">OS のフォントサイズ設定に掛け合わせた倍率です。</string>
+    <!-- settings.text_scale.label: アプリ内の文字の大きさの選択 -->
+    <string name="settings_text_scale_label">文字サイズ</string>
+    <!-- settings.text_scale.large: 文字サイズの選択肢 (5 段の 4 番目) -->
+    <string name="settings_text_scale_large">大</string>
+    <!-- settings.text_scale.medium: 文字サイズの選択肢 (5 段の真ん中 = 既定) -->
+    <string name="settings_text_scale_medium">中</string>
+    <!-- settings.text_scale.preview: 文字サイズの下の見本 (曲名と歌唱者の行) の見出し -->
+    <string name="settings_text_scale_preview">プレビュー</string>
+    <!-- settings.text_scale.small: 文字サイズの選択肢 (5 段の 2 番目) -->
+    <string name="settings_text_scale_small">小</string>
+    <!-- settings.text_scale.xlarge: 文字サイズの選択肢 (5 段の 1 番大きい)。セグメントに 5 つ並ぶので短く -->
+    <string name="settings_text_scale_xlarge">特大</string>
+    <!-- settings.text_scale.xsmall: 文字サイズの選択肢 (5 段の 1 番小さい)。セグメントに 5 つ並ぶので短く -->
+    <string name="settings_text_scale_xsmall">極小</string>
+    <!-- settings.theme.footer_android: Android の文言。iOS の theme.footer と ON の後ろの空白だけ違う -->
+    <string name="settings_theme_footer_android">ON にすると、選んだ担当のイメージカラーがアプリ全体のアクセントカラーになります。</string>
+    <!-- settings.theme.header: 担当の色をアプリのテーマに使う設定の節の見出し -->
+    <string name="settings_theme_header">テーマ</string>
+    <!-- settings.theme.no_picks_android: Android の文言。iOS の theme.no_picks と括弧の前後の空白だけ違う -->
+    <string name="settings_theme_no_picks_android">アイドル詳細で担当 (推し) に設定すると、ここで色を選べます。</string>
+    <!-- settings.theme.not_selected: テーマにする担当がまだ選ばれていないときの表示 -->
+    <string name="settings_theme_not_selected">未選択</string>
+    <!-- settings.theme.picker_label: テーマの色にする担当アイドルの選択 -->
+    <string name="settings_theme_picker_label">テーマにする担当</string>
+    <!-- settings.theme.use_oshi_color: 担当アイドルのイメージカラーをアプリ全体のアクセントにするスイッチ -->
+    <string name="settings_theme_use_oshi_color">担当の色をテーマに使う</string>
+</resources>

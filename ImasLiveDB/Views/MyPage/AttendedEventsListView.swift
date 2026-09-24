@@ -20,9 +20,10 @@ struct AttendedEventsListView: View {
     /// LV参加が1件もなければLVタブは出さない (データ駆動)。
     private var showsLiveViewingTab: Bool { !liveViewingSet.isEmpty }
 
+    /// 先頭の「すべて」はアプリの文言、形態の語 (現地・配信・LV) はコアの語彙をそのまま出す。
     private var segmentLabels: [String] {
         let types: [AttendanceType] = showsLiveViewingTab ? [.live, .stream, .liveViewing] : [.live, .stream]
-        return ["すべて"] + types.map(\.label)
+        return [String(localized: L10n.Mypage.attendedFilterAll)] + types.map(\.label)
     }
 
     private var filteredEvents: [EventWithDate] {
@@ -42,11 +43,11 @@ struct AttendedEventsListView: View {
         }
     }
 
-    private var emptyStateTitle: String {
+    private var emptyStateTitle: LocalizedStringResource {
         switch filter {
-        case .stream:      return "配信参加のライブがありません"
-        case .liveViewing: return "ライブビューイング参加のライブがありません"
-        default:           return "現地参加のライブがありません"
+        case .stream:      return L10n.Mypage.attendedEmptyStream
+        case .liveViewing: return L10n.Mypage.attendedEmptyLiveViewing
+        default:           return L10n.Mypage.attendedEmptyLive
         }
     }
 
@@ -66,7 +67,7 @@ struct AttendedEventsListView: View {
                         .listRowSeparatorTint(DS.sep)
                     }
                 } header: {
-                    Text("\(filteredEvents.count)件")
+                    Text(L10n.Mypage.attendedCount(count: filteredEvents.count))
                         .font(.imasCaption)
                         .foregroundStyle(DS.ink2)
                 }
@@ -77,13 +78,13 @@ struct AttendedEventsListView: View {
                 if filteredEvents.isEmpty {
                     ImasEmptyState(
                         systemImage: emptyStateIcon,
-                        title: emptyStateTitle
+                        title: String(localized: emptyStateTitle)
                     )
                 }
             }
         }
         .background(DS.bg)
-        .navigationTitle("参加したライブ")
+        .navigationTitle(L10n.Mypage.attendedTitle)
         .navigationBarTitleDisplayMode(.inline)
         .task {
             let sets = (try? await AppContainer.shared.eventReading.attendedEventTypeSets()) ?? (live: [], stream: [], liveViewing: [])

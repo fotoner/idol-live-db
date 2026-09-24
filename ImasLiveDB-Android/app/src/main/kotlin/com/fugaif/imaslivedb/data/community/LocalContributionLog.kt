@@ -1,6 +1,8 @@
 package com.fugaif.imaslivedb.data.community
 
 import android.content.Context
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,10 +15,11 @@ import org.json.JSONObject
  */
 class LocalContributionLog(context: Context) {
 
-    enum class Kind(val label: String) {
-        SETLIST_EDIT("セトリ編集"),
-        VIDEO("動画"),
-        TAG("タグ"),
+    /** 投稿の種類。保存は [name] (英字) で行い、[label] は画面に出す文言。 */
+    enum class Kind(val label: DisplayText) {
+        SETLIST_EDIT(L10n.Mypage.contributionsKindSetlistEdit),
+        VIDEO(L10n.Mypage.contributionsKindVideo),
+        TAG(L10n.Mypage.contributionsKindTag),
     }
 
     private val prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

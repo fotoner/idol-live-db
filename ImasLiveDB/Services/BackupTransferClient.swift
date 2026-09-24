@@ -6,14 +6,16 @@ enum BackupTransferError: LocalizedError {
     case network(Error)
     case server(String)
 
+    /// 画面に出す文言 (カタログ)。errorDescription は OS への出口なのでここで一度だけ解決する。
+    /// `.server` の文言はサーバ (APIClient) が作ったものなのでそのまま出す。
     var errorDescription: String? {
         switch self {
         case .notFoundOrExpired:
-            return "コードが無効か期限切れです"
+            return String(localized: L10n.Settings.backupErrorInvalidCode)
         case .notAuthorized:
-            return "ログインが必要です"
+            return String(localized: L10n.Settings.backupErrorLoginRequired)
         case .network:
-            return "通信エラーが発生しました"
+            return String(localized: L10n.Settings.backupErrorNetwork)
         case .server(let message):
             return message
         }
@@ -77,7 +79,7 @@ enum BackupTransferClient {
         case .notAuthorized:
             return .notAuthorized
         default:
-            return .server(error.errorDescription ?? "サーバーエラー")
+            return .server(error.errorDescription ?? String(localized: L10n.Settings.backupErrorServer))
         }
     }
 }

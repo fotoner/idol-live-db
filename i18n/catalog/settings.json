@@ -1,0 +1,1675 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "settings",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/data/auth/AuthService.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/data/backup/BackupExportImportService.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/data/backup/BackupTransferApi.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/data/image/BulkImageImporter.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/data/notification/NotificationPrefs.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/settings/AccountViewModel.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/settings/BackupViewModel.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/settings/ImageImportViewModel.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/settings/InboxScreen.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/settings/SettingsScreen.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/settings/SettingsViewModel.kt"
+    ],
+    "ios": [
+      "ImasLiveDB/Services/BackupExportImportService.swift",
+      "ImasLiveDB/Services/BackupTransferClient.swift",
+      "ImasLiveDB/Services/BulkImageImporter.swift",
+      "ImasLiveDB/Views/MyPage/MyPageView.swift",
+      "ImasLiveDB/Views/MyPage/MyPageViewModel.swift",
+      "ImasLiveDB/Views/Settings/InboxView.swift"
+    ]
+  },
+  "strings": {
+    "account.delete.button": {
+      "ja": "アカウントを削除",
+      "ko": "계정 삭제",
+      "note": "アカウントを削除するボタン (確認ダイアログが出る)"
+    },
+    "account.delete.confirm": {
+      "ja": "削除する",
+      "ko": "삭제",
+      "note": "アカウント削除の確認ダイアログの実行ボタン (赤)"
+    },
+    "account.delete.confirm_message": {
+      "ja": "サーバー上のあなたの編集・Good・予想・ユーザー情報がすべて削除され、サインアウトされます。この操作は取り消せません。",
+      "ko": "서버에 있는 내 편집·Good·예상·사용자 정보가 모두 삭제되고 로그아웃돼요. 이 작업은 되돌릴 수 없어요.",
+      "note": "アカウント削除の確認ダイアログの本文 (iOS)。Good = 編集への「いいね」(機能名なので訳さない)。予想 = セトリ予想",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "account.delete.confirm_message_android": {
+      "ja": "サーバー上のあなたの編集・Good・投票・ユーザー情報がすべて削除され、サインアウトされます。この操作は取り消せません。",
+      "ko": "서버에 있는 내 편집·Good·투표·사용자 정보가 모두 삭제되고 로그아웃돼요. 이 작업은 되돌릴 수 없어요.",
+      "note": "Android の文言。iOS の account.delete.confirm_message と ja が違う (予想 / 投票。統一はオーナーが別 PR で)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "account.delete.confirm_title": {
+      "ja": "アカウントを削除しますか?",
+      "ko": "계정을 삭제할까요?",
+      "note": "アカウント削除の確認ダイアログの見出し"
+    },
+    "account.delete.deleting": {
+      "ja": "削除中...",
+      "ko": "삭제 중...",
+      "note": "アカウントを削除している間のボタンの表示",
+      "platforms": [
+        "android"
+      ]
+    },
+    "account.delete.error_message": {
+      "ja": "削除に失敗しました",
+      "ko": "삭제하지 못했어요",
+      "note": "アカウントを削除できなかったときのダイアログの本文",
+      "platforms": [
+        "android"
+      ]
+    },
+    "account.delete.error_title": {
+      "ja": "削除に失敗しました",
+      "ko": "삭제하지 못했어요",
+      "note": "アカウントを削除できなかったときのダイアログの見出し"
+    },
+    "account.edit_name.a11y": {
+      "ja": "表示名を変更",
+      "ko": "표시 이름 변경",
+      "note": "名前の右の鉛筆ボタンの読み上げ"
+    },
+    "account.edit_name.error_message": {
+      "ja": "表示名の保存に失敗しました",
+      "ko": "표시 이름을 저장하지 못했어요",
+      "note": "表示名を保存できなかったときのダイアログの本文",
+      "platforms": [
+        "android"
+      ]
+    },
+    "account.edit_name.error_rate_limited": {
+      "ja": "今日はこれ以上、表示名を変更できません。明日また試してください",
+      "ko": "오늘은 더 이상 표시 이름을 바꿀 수 없어요. 내일 다시 시도해 주세요",
+      "note": "表示名の変更が 1 日の上限に達したとき (429)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "account.edit_name.error_title": {
+      "ja": "表示名の保存に失敗",
+      "ko": "표시 이름 저장 실패",
+      "note": "表示名を保存できなかったときのダイアログの見出し"
+    },
+    "account.edit_name.message": {
+      "args": [
+        {
+          "name": "max",
+          "type": "count"
+        }
+      ],
+      "ja": "コミュニティ投稿で表示される名前です ({max}文字以内)",
+      "ko": "커뮤니티 게시물에 표시되는 이름이에요 ({max}자 이내)",
+      "note": "表示名の変更ダイアログの説明。max = 上限の文字数 (コアが決める。今は 40 なので桁区切りは付かない)"
+    },
+    "account.edit_name.placeholder": {
+      "ja": "表示名",
+      "ko": "표시 이름",
+      "note": "表示名の入力欄のプレースホルダ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "account.edit_name.title": {
+      "ja": "表示名を変更",
+      "ko": "표시 이름 변경",
+      "note": "表示名の変更ダイアログの見出し"
+    },
+    "account.google_sign_in": {
+      "ja": "Googleでログイン",
+      "ko": "Google로 로그인",
+      "note": "Google アカウントでログインするボタン",
+      "platforms": [
+        "android"
+      ]
+    },
+    "account.header": {
+      "ja": "アカウント",
+      "ko": "계정",
+      "note": "設定のアカウントの節の見出し"
+    },
+    "account.sign_in_prompt": {
+      "ja": "ログインするとライブ・セトリ・楽曲データの編集や Good ができます",
+      "ko": "로그인하면 라이브·세트리스트·곡 데이터를 편집하거나 Good을 누를 수 있어요",
+      "note": "未ログインのときのアカウントの節の案内 (下に Apple でサインインのボタン)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "account.sign_in_prompt_android": {
+      "ja": "投票 (お題) にはログインが必要です",
+      "ko": "투표 (주제)에는 로그인이 필요해요",
+      "note": "Android の文言。未ログインのときのアカウントの節の案内。iOS の account.sign_in_prompt と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "account.sign_out": {
+      "ja": "ログアウト",
+      "ko": "로그아웃",
+      "note": "ログアウトボタン"
+    },
+    "account.signed_in_fallback": {
+      "ja": "ログイン済み",
+      "ko": "로그인됨",
+      "note": "表示名がまだ無いときに名前の代わりに出す語",
+      "platforms": [
+        "android"
+      ]
+    },
+    "account.user_fallback": {
+      "ja": "ユーザー",
+      "ko": "사용자",
+      "note": "表示名がまだ無いときに名前の代わりに出す語",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "action.cancel": {
+      "ja": "キャンセル",
+      "ko": "취소",
+      "note": "設定画面のダイアログを閉じるボタン (表示名の変更・画像の取り込み・削除の確認など)"
+    },
+    "action.close": {
+      "ja": "閉じる",
+      "ko": "닫기",
+      "note": "設定・お知らせのシートを閉じるボタン (右上)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "action.copy": {
+      "ja": "コピー",
+      "ko": "복사",
+      "note": "発行した引き継ぎコードをコピーするボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "action.import": {
+      "ja": "インポート",
+      "ko": "가져오기",
+      "note": "画像の一括取り込みダイアログの実行ボタン"
+    },
+    "action.save": {
+      "ja": "保存",
+      "ko": "저장",
+      "note": "表示名の変更ダイアログの保存ボタン"
+    },
+    "app_info.about": {
+      "ja": "アプリについて",
+      "ko": "이 앱에 대해",
+      "note": "アプリの紹介の画面へ進む行",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "app_info.donate": {
+      "ja": "開発をサポートする",
+      "ko": "개발 후원하기",
+      "note": "開発者への寄付 (Ko-fi) を開く行",
+      "platforms": [
+        "android"
+      ]
+    },
+    "app_info.header": {
+      "ja": "アプリ情報",
+      "ko": "앱 정보",
+      "note": "アプリについて・規約などの節の見出し"
+    },
+    "app_info.help": {
+      "ja": "使い方",
+      "ko": "사용법",
+      "note": "使い方 (ヘルプ) の画面を開く行",
+      "platforms": [
+        "android"
+      ]
+    },
+    "app_info.inbox": {
+      "ja": "お知らせ",
+      "ko": "공지",
+      "note": "お知らせ (アプリの更新情報) の一覧を開く行",
+      "platforms": [
+        "android"
+      ]
+    },
+    "app_info.licenses": {
+      "ja": "オープンソースライセンス",
+      "ko": "오픈 소스 라이선스",
+      "note": "使っているオープンソースのライセンス一覧を開く行",
+      "platforms": [
+        "android"
+      ]
+    },
+    "app_info.privacy": {
+      "ja": "プライバシーポリシー",
+      "ko": "개인정보 처리방침",
+      "note": "プライバシーポリシーの画面へ進む行"
+    },
+    "app_info.rate": {
+      "ja": "アプリを評価する",
+      "ko": "앱 평가하기",
+      "note": "ストアのアプリのページを開いて評価してもらう行",
+      "platforms": [
+        "android"
+      ]
+    },
+    "app_info.support": {
+      "ja": "サポート",
+      "ko": "지원",
+      "note": "サポート (問い合わせ) の画面へ進む行"
+    },
+    "app_info.terms": {
+      "ja": "利用規約",
+      "ko": "이용약관",
+      "note": "利用規約の画面へ進む行"
+    },
+    "backup.code.error_message": {
+      "ja": "発行に失敗しました",
+      "ko": "발급하지 못했어요",
+      "note": "引き継ぎコードを発行できなかったときのダイアログの本文 (理由が分からないとき)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.code.error_title": {
+      "ja": "引き継ぎコードの発行に失敗しました",
+      "ko": "이전 코드를 발급하지 못했어요",
+      "note": "引き継ぎコードを発行できなかったときのアラートの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "backup.code.error_title_android": {
+      "ja": "発行に失敗しました",
+      "ko": "발급하지 못했어요",
+      "note": "Android の文言。引き継ぎコードを発行できなかったときのダイアログの見出し。iOS の backup.code.error_title と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.code.expiry": {
+      "args": [
+        {
+          "name": "expires",
+          "type": "string"
+        }
+      ],
+      "ja": "24時間有効・1回のみ使用可能です (期限: {expires})",
+      "ko": "24시간 유효·1회만 사용할 수 있어요 (기한: {expires})",
+      "note": "発行した引き継ぎコードの下の説明。expires = 期限の日時 (表示言語で書式済み)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "backup.code.field": {
+      "ja": "引き継ぎコード",
+      "ko": "이전 코드",
+      "note": "引き継ぎコードの入力欄のプレースホルダ・ラベル"
+    },
+    "backup.code.hint": {
+      "ja": "長押しでコピー・24時間有効・1回のみ使用可能です",
+      "ko": "길게 눌러 복사·24시간 유효·1회만 사용할 수 있어요",
+      "note": "発行した引き継ぎコードの下の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.code.issue": {
+      "ja": "引き継ぎコードを発行する",
+      "ko": "이전 코드 발급",
+      "note": "引き継ぎコード (機種変更用のワンタイムコード) を発行するボタン"
+    },
+    "backup.code.issuing": {
+      "ja": "発行中...",
+      "ko": "발급 중...",
+      "note": "引き継ぎコードを発行している間の表示"
+    },
+    "backup.code.restore": {
+      "ja": "復元",
+      "ko": "복원",
+      "note": "入力した引き継ぎコードで復元するボタン (入力欄の右)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "backup.code.restore_android": {
+      "ja": "引き継ぎコードで復元する",
+      "ko": "이전 코드로 복원",
+      "note": "Android の文言。入力した引き継ぎコードで復元するボタン。iOS の backup.code.restore と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.code.restoring": {
+      "ja": "復元中...",
+      "ko": "복원 중...",
+      "note": "引き継ぎコードで復元している間のボタンの表示",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.error.bad_data": {
+      "ja": "データが不正です",
+      "ko": "데이터가 올바르지 않아요",
+      "note": "サーバーが送ったデータを不正と判断したとき (400)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.error.bad_response": {
+      "ja": "サーバーからの応答が不正です",
+      "ko": "서버 응답이 올바르지 않아요",
+      "note": "サーバーの応答が読めなかったとき",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.error.checksum": {
+      "ja": "データが破損しています",
+      "ko": "데이터가 손상되었어요",
+      "note": "バックアップのチェックサムが合わないとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "backup.error.checksum_android": {
+      "ja": "データが破損しているか改ざんされている可能性があります",
+      "ko": "데이터가 손상되었거나 변조되었을 수 있어요",
+      "note": "Android の文言。iOS の backup.error.checksum と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.error.http": {
+      "args": [
+        {
+          "name": "status",
+          "type": "int"
+        }
+      ],
+      "ja": "通信に失敗しました (HTTP {status})",
+      "ko": "통신하지 못했어요 (HTTP {status})",
+      "note": "ほかの HTTP エラー。status = HTTP の状態コード (int)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.error.invalid_code": {
+      "ja": "コードが無効か期限切れです",
+      "ko": "코드가 잘못되었거나 만료되었어요",
+      "note": "引き継ぎコードが無いか期限切れ (404)"
+    },
+    "backup.error.login_required": {
+      "ja": "ログインが必要です",
+      "ko": "로그인이 필요해요",
+      "note": "引き継ぎコードの発行・復元にログインが要るとき (401)"
+    },
+    "backup.error.malformed": {
+      "ja": "ファイルの形式が正しくありません",
+      "ko": "파일 형식이 올바르지 않아요",
+      "note": "バックアップの中身が読めないとき (壊れた・別の形式)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "backup.error.malformed_android": {
+      "ja": "壊れたファイルです",
+      "ko": "손상된 파일이에요",
+      "note": "Android の文言。iOS の backup.error.malformed と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.error.network": {
+      "ja": "通信エラーが発生しました",
+      "ko": "통신 오류가 발생했어요",
+      "note": "引き継ぎコードの通信が失敗したとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "backup.error.rate_limited": {
+      "ja": "しばらく待ってから再試行してください",
+      "ko": "잠시 기다린 뒤 다시 시도해 주세요",
+      "note": "引き継ぎコードの操作がレート制限 (429) に当たったとき",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.error.server": {
+      "ja": "サーバーエラー",
+      "ko": "서버 오류",
+      "note": "サーバーがエラー文を返さなかったときの代わりの文言",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "backup.error.transport": {
+      "ja": "通信に失敗しました",
+      "ko": "통신하지 못했어요",
+      "note": "引き継ぎコードの通信が失敗したとき",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.error.unsupported_schema": {
+      "args": [
+        {
+          "name": "version",
+          "type": "int"
+        }
+      ],
+      "ja": "対応していないバックアップ形式です (schemaVersion: {version})",
+      "ko": "지원하지 않는 백업 형식이에요 (schemaVersion: {version})",
+      "note": "バックアップの形式の版が新しすぎて読めないとき。version = ファイルの版 (整数)。schemaVersion は項目名なので訳さない",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "backup.error.unsupported_schema_android": {
+      "ja": "新しいバージョンのアプリで作成されたファイルです",
+      "ko": "더 새로운 버전의 앱에서 만든 파일이에요",
+      "note": "Android の文言。iOS の backup.error.unsupported_schema と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.export.error_title": {
+      "ja": "バックアップの保存に失敗しました",
+      "ko": "백업을 저장하지 못했어요",
+      "note": "バックアップをファイルに書き出せなかったときのアラートの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "backup.file.export_failed": {
+      "ja": "書き出しに失敗しました",
+      "ko": "내보내지 못했어요",
+      "note": "バックアップをファイルに書き出せなかったとき (復元失敗のダイアログに出る)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.file.loading": {
+      "ja": "読み込み中...",
+      "ko": "불러오는 중...",
+      "note": "バックアップファイルを読んでいる間のボタンの表示",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.file.restore": {
+      "ja": "ファイルから復元する",
+      "ko": "파일에서 복원",
+      "note": "バックアップファイルを選んで復元するボタン"
+    },
+    "backup.file.save": {
+      "ja": "ファイルに保存する",
+      "ko": "파일로 저장",
+      "note": "バックアップをファイルに書き出すボタン"
+    },
+    "backup.file.saving": {
+      "ja": "書き出し中...",
+      "ko": "내보내는 중...",
+      "note": "バックアップをファイルに書き出している間のボタンの表示",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.file.share": {
+      "ja": "バックアップファイルを共有",
+      "ko": "백업 파일 공유",
+      "note": "書き出したバックアップファイルを共有するボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "backup.file.unreadable": {
+      "ja": "ファイルを読み込めませんでした",
+      "ko": "파일을 읽지 못했어요",
+      "note": "選んだバックアップファイルを開けなかったとき",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.footer": {
+      "ja": "担当/お気に入りはiCloudで自動バックアップされていますが、これは投票履歴・端末IDも含めた手動バックアップです。機種変更やAndroid版への移行、iCloudが使えない場合にご利用ください。同一端末からの復元でない場合は「端末IDも引き継ぐ」はオフのままにしてください。引き継ぎコードの発行・復元にはログインが必要です。ファイル保存はログイン不要です。",
+      "ko": "담당/즐겨찾기는 iCloud에 자동으로 백업되지만, 이 기능은 투표 기록·기기 ID까지 포함한 수동 백업이에요. 기종 변경이나 Android 버전으로 옮길 때, iCloud를 쓸 수 없을 때 이용해 주세요. 같은 기기에서 복원하는 경우가 아니면 “기기 ID도 이전”은 꺼 둔 채로 두세요. 이전 코드 발급·복원에는 로그인이 필요해요. 파일 저장은 로그인하지 않아도 돼요.",
+      "note": "バックアップの節の下の説明。「端末IDも引き継ぐ」は同じ節のスイッチ (backup.restore_device_id) の名前",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "backup.header": {
+      "ja": "バックアップ",
+      "ko": "백업",
+      "note": "バックアップ (引き継ぎコード・ファイル) の節の見出し"
+    },
+    "backup.intro": {
+      "ja": "機種変更やアプリの再インストール時に、お気に入り・担当・投票履歴を引き継げます",
+      "ko": "기종 변경이나 앱을 다시 설치할 때 즐겨찾기·담당·투표 기록을 이전할 수 있어요",
+      "note": "バックアップの節の先頭の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.restore.done_title": {
+      "ja": "復元しました",
+      "ko": "복원했어요",
+      "note": "復元が終わったときのアラートの見出し (本文は入った件数。コアが作る)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "backup.restore.done_title_android": {
+      "ja": "復元が完了しました",
+      "ko": "복원을 완료했어요",
+      "note": "Android の文言。iOS の backup.restore.done_title と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.restore.failed_message": {
+      "ja": "読み込みに失敗しました",
+      "ko": "불러오지 못했어요",
+      "note": "復元できなかったときのダイアログの本文 (理由が分からないとき)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "backup.restore.failed_title": {
+      "ja": "復元に失敗しました",
+      "ko": "복원하지 못했어요",
+      "note": "復元できなかったときのダイアログの見出し"
+    },
+    "backup.restore_device_id": {
+      "ja": "復元時に端末IDも引き継ぐ(上級者向け・通常はOFF)",
+      "ko": "복원할 때 기기 ID도 이전 (고급 사용자용·보통은 끔)",
+      "note": "復元のときに端末 ID も書き戻すかのスイッチ。同じ端末に戻すとき以外は OFF",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "backup.restore_device_id_android": {
+      "ja": "復元時に端末IDも引き継ぐ (上級者向け・通常はオフ)",
+      "ko": "복원할 때 기기 ID도 이전 (고급 사용자용·보통은 끔)",
+      "note": "Android の文言。iOS の backup.restore_device_id と空白と OFF / オフが違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "collection.footer": {
+      "ja": "回収はリアルライブ(ライブ/フェス)の現地参加のみが対象です。配信でしか観られない方は、配信参加も回収に含められます。",
+      "ko": "회수는 리얼 라이브 (라이브/페스) 현장 참가만 대상이에요. 스트리밍으로만 볼 수 있는 분은 스트리밍 참가도 회수에 포함할 수 있어요.",
+      "note": "回収の節の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "collection.footer_android": {
+      "ja": "回収はリアルライブ (ライブ/フェス) の現地参加のみが対象です。配信でしか観られない方は、配信参加も回収に含められます。",
+      "ko": "회수는 리얼 라이브 (라이브/페스) 현장 참가만 대상이에요. 스트리밍으로만 볼 수 있는 분은 스트리밍 참가도 회수에 포함할 수 있어요.",
+      "note": "Android の文言。iOS の collection.footer と括弧の前後の空白だけ違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "collection.header": {
+      "ja": "披露回収",
+      "ko": "공연 회수",
+      "note": "回収 (ライブで曲を生で聴いたこと) の数え方の節の見出し"
+    },
+    "collection.include_stream": {
+      "ja": "配信参加も回収に含める",
+      "ko": "스트리밍 참가도 회수에 포함",
+      "note": "配信で観たライブの曲も回収済みにするかのスイッチ"
+    },
+    "credits.app_version": {
+      "ja": "アプリバージョン",
+      "ko": "앱 버전",
+      "note": "アプリの版の行の見出し (右に 1.2.3 など)"
+    },
+    "credits.header": {
+      "ja": "クレジット",
+      "ko": "크레딧",
+      "note": "クレジット (データの出どころ・非公式の断り) の節の見出し"
+    },
+    "credits.note": {
+      "ja": "※各情報源のデータは独自に集計・整形して利用しています",
+      "ko": "※각 출처의 데이터는 자체적으로 집계·정리해서 사용하고 있어요",
+      "note": "データの出どころの注記",
+      "platforms": [
+        "android"
+      ]
+    },
+    "credits.source.imas_db": {
+      "ja": "楽曲・ライブ等のデータ参照元: アイマスDB (https://imas-db.jp/)",
+      "ko": "곡·라이브 등 데이터 출처: 아이마스DB (https://imas-db.jp/)",
+      "note": "データの出どころ。アイマスDB はサイト名 (ko は読みを音写)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "credits.source.music765plus": {
+      "ja": "楽曲・ライブセトリのデータ参照元: music765plus (https://music765plus.com/)",
+      "ko": "곡·라이브 세트리스트 데이터 출처: music765plus (https://music765plus.com/)",
+      "note": "データの出どころ。music765plus はサイト名なので訳さない",
+      "platforms": [
+        "android"
+      ]
+    },
+    "credits.source.palette": {
+      "ja": "アイドルのイメージカラー: imas-palette (https://github.com/arrow2nd/imas-palette)",
+      "ko": "아이돌 이미지 컬러: imas-palette (https://github.com/arrow2nd/imas-palette)",
+      "note": "データの出どころ。imas-palette はリポジトリ名なので訳さない",
+      "platforms": [
+        "android"
+      ]
+    },
+    "credits.source.sparql": {
+      "ja": "アイドルのプロフィール(CV/カラー等): im@sparql (https://sparql.crssnky.xyz/imas/)",
+      "ko": "아이돌 프로필(CV/컬러 등): im@sparql (https://sparql.crssnky.xyz/imas/)",
+      "note": "データの出どころ。im@sparql はサービス名なので訳さない",
+      "platforms": [
+        "android"
+      ]
+    },
+    "credits.unofficial": {
+      "ja": "本アプリは非公式のファンメイドアプリです。",
+      "ko": "이 앱은 비공식 팬 메이드 앱이에요.",
+      "note": "非公式のアプリである断り書き",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "credits.unofficial_android": {
+      "ja": "本アプリは株式会社バンダイナムコエンターテインメント様とは一切関係のない非公式ファンメイドアプリです。",
+      "ko": "이 앱은 BANDAI NAMCO Entertainment Inc.와는 전혀 관계없는 비공식 팬 메이드 앱이에요.",
+      "note": "Android の文言。非公式のアプリである断り書き (権利元と無関係であることを明記)。会社名は訳さず公式の英字表記にする",
+      "platforms": [
+        "android"
+      ]
+    },
+    "data.data_version": {
+      "ja": "データバージョン",
+      "ko": "데이터 버전",
+      "note": "端末に入っているデータの版",
+      "platforms": [
+        "android"
+      ]
+    },
+    "data.header": {
+      "ja": "データ",
+      "ko": "데이터",
+      "note": "データのバージョンと同期の節の見出し",
+      "platforms": [
+        "android"
+      ]
+    },
+    "data.schema_version": {
+      "ja": "スキーマバージョン",
+      "ko": "스키마 버전",
+      "note": "端末のデータベースの形の版",
+      "platforms": [
+        "android"
+      ]
+    },
+    "data.unknown": {
+      "ja": "不明",
+      "ko": "알 수 없음",
+      "note": "データベースの版が読めなかったときの値",
+      "platforms": [
+        "android"
+      ]
+    },
+    "default_brand.all": {
+      "ja": "すべて",
+      "ko": "전체",
+      "note": "デフォルトブランドの選択肢: 絞り込まない"
+    },
+    "default_brand.label": {
+      "ja": "デフォルトブランド",
+      "ko": "기본 브랜드",
+      "note": "一覧を開いたときに最初に絞り込むブランドの選択"
+    },
+    "developer.header": {
+      "ja": "開発者",
+      "ko": "개발자",
+      "note": "開発者と公開リポジトリの節の見出し",
+      "platforms": [
+        "android"
+      ]
+    },
+    "developer.label": {
+      "ja": "開発",
+      "ko": "개발",
+      "note": "開発者の行の見出し (右に開発者名 fuga-if)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "developer.note": {
+      "ja": "非公式のファンメイドアプリです。データの誤りや要望は GitHub Issue からお知らせください。",
+      "ko": "비공식 팬 메이드 앱이에요. 데이터 오류나 요청은 GitHub Issue로 알려 주세요.",
+      "note": "開発者の節の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "display.header": {
+      "ja": "表示",
+      "ko": "표시",
+      "note": "文字サイズ・歌唱者の名前・ライブ名の省略の節の見出し",
+      "platforms": [
+        "android"
+      ]
+    },
+    "event_name_abbreviate.label": {
+      "ja": "ライブ名を省略表示",
+      "ko": "라이브 이름 줄여서 표시",
+      "note": "ライブ名の頭の作品名 (THE IDOLM@STER … など) を省くかのスイッチ"
+    },
+    "filter.header": {
+      "ja": "フィルタ設定",
+      "ko": "필터 설정",
+      "note": "デフォルトブランドの節の見出し",
+      "platforms": [
+        "android"
+      ]
+    },
+    "general.header": {
+      "ja": "設定",
+      "ko": "설정",
+      "note": "表示などの一般設定の節の見出し (デフォルトブランド・文字サイズ・歌唱者の名前…)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "header.version": {
+      "args": [
+        {
+          "name": "version",
+          "type": "string"
+        }
+      ],
+      "ja": "バージョン {version}",
+      "ko": "버전 {version}",
+      "note": "設定の先頭のアプリ名の下の版の表示。version = 1.2.3 など",
+      "platforms": [
+        "android"
+      ]
+    },
+    "header.version_build": {
+      "args": [
+        {
+          "name": "version",
+          "type": "string"
+        },
+        {
+          "name": "build",
+          "type": "int"
+        }
+      ],
+      "ja": "バージョン {version} (Build {build})",
+      "ko": "버전 {version} (Build {build})",
+      "note": "設定の先頭のアプリ名の下の版の表示 (ビルド番号つき)。build = ビルド番号 (int。桁区切りなし)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "help.open": {
+      "ja": "使い方を見る",
+      "ko": "사용법 보기",
+      "note": "設定の先頭の、使い方 (ヘルプ) を開くボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "image_import.brand.button": {
+      "ja": "ブランド画像をインポート",
+      "ko": "브랜드 이미지 가져오기",
+      "note": "ブランドのアイコン画像を一括で取り込むボタン"
+    },
+    "image_import.brand.dialog_message": {
+      "ja": "ブランド名(または short_name / id)と画像URLのJSONファイルのURLを入力してください。\n形式: {{\"765AS\": \"画像URL\", ...}}",
+      "ko": "브랜드 이름(또는 short_name / id)과 이미지 URL을 담은 JSON 파일의 URL을 입력해 주세요.\n형식: {{\"765AS\": \"이미지 URL\", ...}}",
+      "note": "ブランド画像の取り込みダイアログの説明。short_name / id は JSON のキーに使える項目名なので訳さない。765AS はブランドの略称の例",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "image_import.brand.dialog_title": {
+      "ja": "ブランド画像インポート",
+      "ko": "브랜드 이미지 가져오기",
+      "note": "ブランド画像の取り込みで JSON の URL を入れるダイアログの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "image_import.brand.dialog_title_android": {
+      "ja": "ブランド画像の一括インポート",
+      "ko": "브랜드 이미지 일괄 가져오기",
+      "note": "Android の文言。iOS の image_import.brand.dialog_title と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "image_import.brand.template": {
+      "ja": "型紙 JSON をダウンロード (ブランド)",
+      "ko": "템플릿 JSON 다운로드 (브랜드)",
+      "note": "ブランド名だけ埋めた JSON (型紙) を書き出すボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "image_import.clear": {
+      "ja": "カスタム画像を全削除",
+      "ko": "커스텀 이미지 모두 삭제",
+      "note": "取り込んだ画像をすべて消すボタン (赤)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "image_import.clear_android": {
+      "ja": "カスタム画像をすべて削除",
+      "ko": "커스텀 이미지 모두 삭제",
+      "note": "Android の文言。取り込んだ画像をすべて消すボタン (確認ダイアログが出る)。iOS の image_import.clear と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "image_import.clear_confirm.action": {
+      "ja": "削除",
+      "ko": "삭제",
+      "note": "取り込んだ画像をすべて消す確認ダイアログの実行ボタン (赤)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "image_import.clear_confirm.message": {
+      "ja": "取り込んだアイドル・ユニット・ブランドの画像をすべて消します。元に戻せません。",
+      "ko": "가져온 아이돌·유닛·브랜드 이미지를 모두 지워요. 되돌릴 수 없어요.",
+      "note": "取り込んだ画像をすべて消す前の確認ダイアログの本文",
+      "platforms": [
+        "android"
+      ]
+    },
+    "image_import.clear_confirm.title": {
+      "ja": "カスタム画像をすべて削除",
+      "ko": "커스텀 이미지 모두 삭제",
+      "note": "取り込んだ画像をすべて消す前の確認ダイアログの見出し",
+      "platforms": [
+        "android"
+      ]
+    },
+    "image_import.dialog_message": {
+      "ja": "{{ \"名前\": \"画像URL\" }} 形式の JSON を置いた URL を入力してください。",
+      "ko": "{{ \"이름\": \"이미지 URL\" }} 형식의 JSON을 올려 둔 URL을 입력해 주세요.",
+      "note": "画像の取り込みダイアログの説明 (JSON の書き方の例つき)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "image_import.failure.brand_not_found": {
+      "ja": "ブランド ID が見つからない",
+      "ko": "브랜드 ID를 찾을 수 없음",
+      "note": "失敗内訳の理由: JSON のキーの名前に当たるブランドが無い"
+    },
+    "image_import.failure.decode_failed": {
+      "ja": "画像デコード失敗",
+      "ko": "이미지 디코딩 실패",
+      "note": "失敗内訳の理由: 取ってきたデータを画像として読めない"
+    },
+    "image_import.failure.fetch_failed": {
+      "ja": "取得失敗",
+      "ko": "다운로드 실패",
+      "note": "失敗内訳の理由: 画像を取りに行けなかった (エラー文が無い場合)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "image_import.failure.idol_not_found": {
+      "ja": "アイドル ID が見つからない",
+      "ko": "아이돌 ID를 찾을 수 없음",
+      "note": "失敗内訳の理由: JSON のキーの名前に当たるアイドルがいない"
+    },
+    "image_import.failure.invalid_url": {
+      "ja": "URL が不正",
+      "ko": "잘못된 URL",
+      "note": "失敗内訳の理由: 画像の URL が URL として読めない"
+    },
+    "image_import.failure.unit_not_found": {
+      "ja": "ユニット ID が見つからない",
+      "ko": "유닛 ID를 찾을 수 없음",
+      "note": "失敗内訳の理由: JSON のキーの名前に当たるユニットが無い"
+    },
+    "image_import.failures": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "失敗内訳 ({count} 件)",
+      "ko": "실패 내역 ({count}건)",
+      "note": "取り込めなかった名前の一覧の見出し。1000 以上は桁区切りが付く"
+    },
+    "image_import.failures_more": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "ほか {count} 件",
+      "ko": "외 {count}건",
+      "note": "失敗内訳を 20 件まで出したあとに残りの件数をまとめる行。1000 以上は桁区切りが付く",
+      "platforms": [
+        "android"
+      ]
+    },
+    "image_import.footer": {
+      "ja": "型紙 JSON をダウンロード → URL を埋めて GitHub Gist 等にアップ → そのファイル URL をインポートに貼り付け。既存画像は上書きされます。",
+      "ko": "템플릿 JSON 다운로드 → URL을 채워 GitHub Gist 등에 업로드 → 그 파일 URL을 가져오기에 붙여 넣기. 기존 이미지는 덮어쓰게 돼요.",
+      "note": "画像の取り込みの手順の説明 (節の下)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "image_import.header": {
+      "ja": "画像インポート",
+      "ko": "이미지 가져오기",
+      "note": "アイコン画像の一括取り込みの節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "image_import.header_android": {
+      "ja": "キャラクター画像",
+      "ko": "캐릭터 이미지",
+      "note": "Android の文言。アイコン画像の一括取り込みの節の見出し。iOS の image_import.header と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "image_import.idol.button": {
+      "ja": "キャラクター画像をインポート",
+      "ko": "캐릭터 이미지 가져오기",
+      "note": "アイドルのアイコン画像を一括で取り込むボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "image_import.idol.button_android": {
+      "ja": "アイドル画像をインポート",
+      "ko": "아이돌 이미지 가져오기",
+      "note": "Android の文言。iOS の image_import.idol.button と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "image_import.idol.dialog_message": {
+      "ja": "アイドル名と画像URLのJSONファイルのURLを入力してください。\n形式: {{\"アイドル名\": \"画像URL\", ...}}",
+      "ko": "아이돌 이름과 이미지 URL을 담은 JSON 파일의 URL을 입력해 주세요.\n형식: {{\"아이돌 이름\": \"이미지 URL\", ...}}",
+      "note": "アイドル画像の取り込みダイアログの説明。2 行目は JSON の書き方の例 (キーの説明語は訳す)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "image_import.idol.dialog_title": {
+      "ja": "画像一括インポート",
+      "ko": "이미지 일괄 가져오기",
+      "note": "アイドル画像の取り込みで JSON の URL を入れるダイアログの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "image_import.idol.dialog_title_android": {
+      "ja": "アイドル画像の一括インポート",
+      "ko": "아이돌 이미지 일괄 가져오기",
+      "note": "Android の文言。iOS の image_import.idol.dialog_title と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "image_import.idol.template": {
+      "ja": "型紙 JSON をダウンロード (アイドル)",
+      "ko": "템플릿 JSON 다운로드 (아이돌)",
+      "note": "名前だけ埋めた JSON (型紙) を書き出すボタン。型紙 = URL を埋めて使う雛形",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "image_import.intro": {
+      "ja": "「名前 → 画像URL」の JSON を指定すると、アイコン画像をまとめて取り込めます。画像はこの端末の中だけに保存され、サーバーには送信されません。",
+      "ko": "“이름 → 이미지 URL” JSON을 지정하면 아이콘 이미지를 한꺼번에 가져올 수 있어요. 이미지는 이 기기에만 저장되고 서버로 보내지 않아요.",
+      "note": "画像の一括取り込みの節の先頭の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "image_import.status.clear_failed": {
+      "args": [
+        {
+          "name": "detail",
+          "type": "string"
+        }
+      ],
+      "ja": "削除エラー: {detail}",
+      "ko": "삭제 오류: {detail}",
+      "note": "取り込んだ画像を消せなかったときの状態の表示。detail = OS のエラー文",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "image_import.status.cleared": {
+      "ja": "カスタム画像を全削除しました",
+      "ko": "커스텀 이미지를 모두 삭제했어요",
+      "note": "取り込んだ画像をすべて消したあとの状態の表示"
+    },
+    "image_import.status.done": {
+      "args": [
+        {
+          "name": "succeeded",
+          "type": "int"
+        },
+        {
+          "name": "failed",
+          "type": "int"
+        }
+      ],
+      "ja": "完了: {succeeded}件成功, {failed}件失敗",
+      "ko": "완료: {succeeded}건 성공, {failed}건 실패",
+      "note": "取り込みが終わったときの結果。件数は 2 つあり count は 1 キーに 1 つまでなので、どちらも int (今と同じく桁区切りなし)"
+    },
+    "image_import.status.error": {
+      "args": [
+        {
+          "name": "detail",
+          "type": "string"
+        }
+      ],
+      "ja": "エラー: {detail}",
+      "ko": "오류: {detail}",
+      "note": "取り込みの途中で失敗したとき。detail = OS のエラー文"
+    },
+    "image_import.status.fetching": {
+      "ja": "データ取得中...",
+      "ko": "데이터 받는 중...",
+      "note": "JSON を取りに行っている間の状態の表示"
+    },
+    "image_import.status.invalid_json": {
+      "ja": "JSONの形式が正しくありません",
+      "ko": "JSON 형식이 올바르지 않아요",
+      "note": "取ってきた JSON が「名前: URL」の 1 階層のオブジェクトでないとき"
+    },
+    "image_import.status.invalid_url": {
+      "ja": "無効なURLです",
+      "ko": "잘못된 URL이에요",
+      "note": "入力された JSON の URL が URL として読めないとき"
+    },
+    "image_import.status.progress": {
+      "args": [
+        {
+          "name": "imported",
+          "type": "int"
+        },
+        {
+          "name": "total",
+          "type": "int"
+        }
+      ],
+      "ja": "{imported}/{total} ダウンロード中...",
+      "ko": "{imported}/{total} 다운로드 중...",
+      "note": "画像を 1 枚ずつ落としている間の進み具合。進捗の分数なので桁区切りは付けない (int)"
+    },
+    "image_import.status.resolve_failed": {
+      "ja": "エラー: 名前の解決に失敗しました",
+      "ko": "오류: 이름을 확인하지 못했어요",
+      "note": "名前と ID の対応表を作れなかったとき (エラー文が無い場合)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "image_import.template": {
+      "ja": "型紙",
+      "ko": "템플릿",
+      "note": "取り込みボタンの右の、名前だけ埋めた JSON (型紙) を保存するボタン",
+      "platforms": [
+        "android"
+      ]
+    },
+    "image_import.unit.button": {
+      "ja": "ユニット画像をインポート",
+      "ko": "유닛 이미지 가져오기",
+      "note": "ユニットのアイコン画像を一括で取り込むボタン"
+    },
+    "image_import.unit.dialog_message": {
+      "ja": "ユニット名(または id)と画像URLのJSONファイルのURLを入力してください。\n形式: {{\"S.E.M\": \"画像URL\", ...}}",
+      "ko": "유닛 이름(또는 id)과 이미지 URL을 담은 JSON 파일의 URL을 입력해 주세요.\n형식: {{\"S.E.M\": \"이미지 URL\", ...}}",
+      "note": "ユニット画像の取り込みダイアログの説明。S.E.M はユニット名の例 (固有名詞)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "image_import.unit.dialog_title": {
+      "ja": "ユニット画像インポート",
+      "ko": "유닛 이미지 가져오기",
+      "note": "ユニット画像の取り込みで JSON の URL を入れるダイアログの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "image_import.unit.dialog_title_android": {
+      "ja": "ユニット画像の一括インポート",
+      "ko": "유닛 이미지 일괄 가져오기",
+      "note": "Android の文言。iOS の image_import.unit.dialog_title と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "image_import.unit.template": {
+      "ja": "型紙 JSON をダウンロード (ユニット)",
+      "ko": "템플릿 JSON 다운로드 (유닛)",
+      "note": "ユニット名だけ埋めた JSON (型紙) を書き出すボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "image_import.url_label": {
+      "ja": "JSON の URL",
+      "ko": "JSON URL",
+      "note": "画像の取り込みダイアログの入力欄のラベル",
+      "platforms": [
+        "android"
+      ]
+    },
+    "inbox.empty": {
+      "ja": "お知らせはありません",
+      "ko": "공지가 없어요",
+      "note": "お知らせが 1 件も無いときの空状態",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "inbox.mark_all_read": {
+      "ja": "すべて既読",
+      "ko": "모두 읽음",
+      "note": "お知らせを全部読んだことにするボタン"
+    },
+    "inbox.title": {
+      "ja": "お知らせ",
+      "ko": "공지",
+      "note": "お知らせ (アプリの更新情報) の一覧・詳細の画面タイトル"
+    },
+    "inbox.widget_how_to": {
+      "ja": "使い方を見る",
+      "ko": "사용법 보기",
+      "note": "ウィジェットのお知らせの下の、ウィジェットの使い方を開くボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "inbox.widget_how_to_android": {
+      "ja": "ウィジェットの使い方を見る",
+      "ko": "위젯 사용법 보기",
+      "note": "Android の文言。iOS の inbox.widget_how_to と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "introdon_bar.label": {
+      "ja": "曲一覧にイントロドン導線を表示",
+      "ko": "곡 목록에 인트로돈 바로가기 표시",
+      "note": "曲一覧の下に出る「この絞り込みでイントロドン」の帯を出すかのスイッチ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "mastery.add_level": {
+      "ja": "段を追加",
+      "ko": "단계 추가",
+      "note": "習熟度の段を 1 つ増やすボタン",
+      "platforms": [
+        "android"
+      ]
+    },
+    "mastery.apply": {
+      "ja": "この段階にする",
+      "ko": "이 단계로 설정",
+      "note": "編集した習熟度の段を保存するボタン",
+      "platforms": [
+        "android"
+      ]
+    },
+    "mastery.footer": {
+      "ja": "段の数と名前を変えられます。段を減らすと、その段の曲は 1 つ下に移ります (記録は消えません)。",
+      "ko": "단계의 수와 이름을 바꿀 수 있어요. 단계를 줄이면 그 단계의 곡은 한 단계 아래로 옮겨져요 (기록은 지워지지 않아요).",
+      "note": "習熟度の節の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "mastery.header": {
+      "ja": "習熟度",
+      "ko": "숙련도",
+      "note": "習熟度 (曲をどれだけ覚えたかの段階) の節の見出し"
+    },
+    "mastery.help": {
+      "ja": "下から順に積み上がります。段を減らすと、その段の曲は 1 つ下に移ります (記録は消えません)。どのラベルも 4 文字以内にしておくと一覧で切れません。",
+      "ko": "아래부터 차례로 쌓여요. 단계를 줄이면 그 단계의 곡은 한 단계 아래로 옮겨져요 (기록은 지워지지 않아요). 라벨을 모두 4자 이내로 하면 목록에서 잘리지 않아요.",
+      "note": "習熟度の段の編集欄の下の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "mastery.link": {
+      "ja": "習熟度の段階",
+      "ko": "숙련도 단계",
+      "note": "習熟度の段階の設定画面へ進む行 (右に今の段階の名前が並ぶ)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "mastery.remove_level": {
+      "ja": "削除",
+      "ko": "삭제",
+      "note": "習熟度の一番上の段を消すボタン",
+      "platforms": [
+        "android"
+      ]
+    },
+    "notifications.channel.live_week.description": {
+      "ja": "お気に入り/参加マークしたライブの初日 1 週間前に 10:00 にお知らせします。",
+      "ko": "즐겨찾기/참가 표시한 라이브 첫날 1주 전 10:00에 알려 드려요.",
+      "note": "OS の通知設定に出る通知チャンネルの説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "notifications.channel.live_week.name": {
+      "ja": "ライブ1週間前",
+      "ko": "라이브 1주 전",
+      "note": "OS の通知設定に出る通知チャンネルの名前",
+      "platforms": [
+        "android"
+      ]
+    },
+    "notifications.channel.monday.description": {
+      "ja": "日曜 20:00 に月曜が近いことをお知らせします。",
+      "ko": "일요일 20:00에 월요일이 다가온다고 알려 드려요.",
+      "note": "OS の通知設定に出る通知チャンネルの説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "notifications.channel.monday.name": {
+      "ja": "月曜が近いよ",
+      "ko": "월요일이 다가와요",
+      "note": "OS の通知設定に出る通知チャンネルの名前 (ファンの間のネタ)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "notifications.channel.oshi_birthday.description": {
+      "ja": "担当マークしたアイドルの誕生日に 9:00 にお知らせします。",
+      "ko": "담당 표시한 아이돌의 생일 9:00에 알려 드려요.",
+      "note": "OS の通知設定に出る通知チャンネルの説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "notifications.channel.oshi_birthday.name": {
+      "ja": "担当アイドルの誕生日",
+      "ko": "담당 아이돌 생일",
+      "note": "OS の通知設定に出る通知チャンネルの名前",
+      "platforms": [
+        "android"
+      ]
+    },
+    "notifications.channel.ticket.description": {
+      "ja": "チケット申込締切の前日 18:00 と、当落発表日の 9:00 にお知らせします。",
+      "ko": "티켓 신청 마감 전날 18:00과 추첨 결과 발표일 9:00에 알려 드려요.",
+      "note": "OS の通知設定に出る通知チャンネルの説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "notifications.channel.ticket.name": {
+      "ja": "チケット締切・当落",
+      "ko": "티켓 마감·추첨 결과",
+      "note": "OS の通知設定に出る通知チャンネルの名前",
+      "platforms": [
+        "android"
+      ]
+    },
+    "notifications.denied": {
+      "ja": "通知が拒否されています。設定アプリから許可してください。",
+      "ko": "알림이 거부되어 있어요. 설정 앱에서 허용해 주세요.",
+      "note": "通知が OS で拒否されているときの案内",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "notifications.denied_android": {
+      "ja": "通知が拒否されています。システムの通知設定から許可してください。",
+      "ko": "알림이 거부되어 있어요. 시스템 알림 설정에서 허용해 주세요.",
+      "note": "Android の文言。iOS の notifications.denied と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "notifications.footer": {
+      "ja": "お気に入りまたは参加マークしたイベントにライブ前・チケット通知を送ります。",
+      "ko": "즐겨찾기하거나 참가 표시한 이벤트의 라이브 전·티켓 알림을 보내요.",
+      "note": "通知の節の説明"
+    },
+    "notifications.header": {
+      "ja": "通知",
+      "ko": "알림",
+      "note": "通知の設定の節の見出し"
+    },
+    "notifications.live_week": {
+      "ja": "ライブ1週間前",
+      "ko": "라이브 1주 전",
+      "note": "通知の種類のスイッチ: ライブの 1 週間前"
+    },
+    "notifications.monday": {
+      "ja": "月曜が近いことを知らせる (日曜 20:00)",
+      "ko": "월요일이 다가온다고 알리기 (일요일 20:00)",
+      "note": "通知の種類のスイッチ: 日曜の夜に「月曜が近いよ」と知らせる (ファンの間のネタ)"
+    },
+    "notifications.open_system_settings": {
+      "ja": "システムの通知設定を開く",
+      "ko": "시스템 알림 설정 열기",
+      "note": "このアプリの OS の通知設定を開く行",
+      "platforms": [
+        "android"
+      ]
+    },
+    "notifications.oshi_birthday": {
+      "ja": "担当アイドルの誕生日",
+      "ko": "담당 아이돌 생일",
+      "note": "通知の種類のスイッチ: 担当アイドルの誕生日"
+    },
+    "notifications.request": {
+      "ja": "通知を許可する",
+      "ko": "알림 허용",
+      "note": "通知の許可を求めるボタン (まだ許可していないとき)"
+    },
+    "notifications.ticket": {
+      "ja": "チケット締切・当落通知",
+      "ko": "티켓 마감·추첨 결과 알림",
+      "note": "通知の種類のスイッチ: チケットの申込締切と当落発表"
+    },
+    "performer_name.label": {
+      "ja": "セトリの歌唱者",
+      "ko": "세트리스트 가창자",
+      "note": "セトリの歌唱者をアイドル名・声優名のどちらで出すかの選択。選択肢はコアの語彙"
+    },
+    "screen.title": {
+      "ja": "設定",
+      "ko": "설정",
+      "note": "設定画面のタイトル (iOS はシートのナビゲーションタイトル、Android はタブの上のバー)"
+    },
+    "stats.events.label": {
+      "ja": "イベント数",
+      "ko": "이벤트 수",
+      "note": "データ統計: イベント (ライブ) の数の行の見出し"
+    },
+    "stats.events.value": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}件",
+      "ko": "{count}건",
+      "note": "データ統計: イベントの件数。1000 以上は桁区切りが付く"
+    },
+    "stats.header": {
+      "ja": "データ統計",
+      "ko": "데이터 통계",
+      "note": "端末に入っているデータの件数の節の見出し"
+    },
+    "stats.idols.label": {
+      "ja": "アイドル数",
+      "ko": "아이돌 수",
+      "note": "データ統計: アイドルの人数の行の見出し"
+    },
+    "stats.idols.value": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}人",
+      "ko": "{count}명",
+      "note": "データ統計: アイドルの人数。1000 以上は桁区切りが付く"
+    },
+    "stats.shows.label": {
+      "ja": "公演数",
+      "ko": "공연 수",
+      "note": "データ統計: 公演の数の行の見出し"
+    },
+    "stats.shows.value": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}公演",
+      "ko": "공연 {count}회",
+      "note": "データ統計: 公演の数。1000 以上は桁区切りが付く (公演は 1000 を超えうる)"
+    },
+    "stats.songs.label": {
+      "ja": "楽曲数",
+      "ko": "곡 수",
+      "note": "データ統計: 曲の数の行の見出し"
+    },
+    "stats.songs.value": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}曲",
+      "ko": "{count}곡",
+      "note": "データ統計: 曲の数。1000 以上は桁区切りが付く (今は付いていない。曲は 1000 を超えるので表示が 1,234曲 に変わる)"
+    },
+    "sync.full": {
+      "ja": "全データ同期",
+      "ko": "전체 데이터 동기화",
+      "note": "データをすべて取り直すボタン"
+    },
+    "sync.header": {
+      "ja": "データ同期",
+      "ko": "데이터 동기화",
+      "note": "データ同期の節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "sync.incremental": {
+      "ja": "差分更新",
+      "ko": "변경분 업데이트",
+      "note": "前回から変わったデータだけ取り直すボタン"
+    },
+    "sync.state.completed": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "完了 ({count}件)",
+      "ko": "완료 ({count}건)",
+      "note": "同期の状態: 終わった。count = 取ってきた件数。1000 以上は桁区切りが付く",
+      "platforms": [
+        "android"
+      ]
+    },
+    "sync.state.error": {
+      "args": [
+        {
+          "name": "message",
+          "type": "string"
+        }
+      ],
+      "ja": "失敗: {message}",
+      "ko": "실패: {message}",
+      "note": "同期の状態: 失敗した。message = エラー文",
+      "platforms": [
+        "android"
+      ]
+    },
+    "sync.state.idle": {
+      "ja": "待機中",
+      "ko": "대기 중",
+      "note": "同期の状態: 何もしていない",
+      "platforms": [
+        "android"
+      ]
+    },
+    "sync.state.syncing": {
+      "args": [
+        {
+          "name": "step",
+          "type": "int"
+        },
+        {
+          "name": "total",
+          "type": "int"
+        },
+        {
+          "name": "label",
+          "type": "core"
+        }
+      ],
+      "ja": "同期中 ({step}/{total}) {label}",
+      "ko": "동기화 중 ({step}/{total}) {label}",
+      "note": "同期の状態: 取っている途中。step/total = 何段目か、label = 取っているデータの種類 (コアの語)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "text_scale.caption": {
+      "ja": "OS のフォントサイズ設定に掛け合わせた倍率です。",
+      "ko": "OS의 글꼴 크기 설정에 곱해지는 배율이에요.",
+      "note": "文字サイズの説明 (端末の文字の大きさの設定とかけ合わせる)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "text_scale.label": {
+      "ja": "文字サイズ",
+      "ko": "글자 크기",
+      "note": "アプリ内の文字の大きさの選択"
+    },
+    "text_scale.large": {
+      "ja": "大",
+      "ko": "크게",
+      "note": "文字サイズの選択肢 (5 段の 4 番目)"
+    },
+    "text_scale.medium": {
+      "ja": "中",
+      "ko": "보통",
+      "note": "文字サイズの選択肢 (5 段の真ん中 = 既定)"
+    },
+    "text_scale.preview": {
+      "ja": "プレビュー",
+      "ko": "미리보기",
+      "note": "文字サイズの下の見本 (曲名と歌唱者の行) の見出し"
+    },
+    "text_scale.small": {
+      "ja": "小",
+      "ko": "작게",
+      "note": "文字サイズの選択肢 (5 段の 2 番目)"
+    },
+    "text_scale.xlarge": {
+      "ja": "特大",
+      "ko": "최대",
+      "note": "文字サイズの選択肢 (5 段の 1 番大きい)。セグメントに 5 つ並ぶので短く"
+    },
+    "text_scale.xsmall": {
+      "ja": "極小",
+      "ko": "최소",
+      "note": "文字サイズの選択肢 (5 段の 1 番小さい)。セグメントに 5 つ並ぶので短く"
+    },
+    "theme.footer": {
+      "ja": "ONにすると、選んだ担当のイメージカラーがアプリ全体のアクセントカラーになります。",
+      "ko": "켜면 고른 담당의 이미지 컬러가 앱 전체의 강조 색이 돼요.",
+      "note": "テーマの節の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "theme.footer_android": {
+      "ja": "ON にすると、選んだ担当のイメージカラーがアプリ全体のアクセントカラーになります。",
+      "ko": "켜면 고른 담당의 이미지 컬러가 앱 전체의 강조 색이 돼요.",
+      "note": "Android の文言。iOS の theme.footer と ON の後ろの空白だけ違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "theme.header": {
+      "ja": "テーマ",
+      "ko": "테마",
+      "note": "担当の色をアプリのテーマに使う設定の節の見出し"
+    },
+    "theme.no_picks": {
+      "ja": "アイドル詳細で担当(推し)に設定すると、ここで色を選べます。",
+      "ko": "아이돌 상세에서 담당(최애)으로 설정하면 여기서 색을 고를 수 있어요.",
+      "note": "担当のアイドルがまだいないときの案内",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "theme.no_picks_android": {
+      "ja": "アイドル詳細で担当 (推し) に設定すると、ここで色を選べます。",
+      "ko": "아이돌 상세에서 담당(최애)으로 설정하면 여기서 색을 고를 수 있어요.",
+      "note": "Android の文言。iOS の theme.no_picks と括弧の前後の空白だけ違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "theme.not_selected": {
+      "ja": "未選択",
+      "ko": "선택 안 함",
+      "note": "テーマにする担当がまだ選ばれていないときの表示",
+      "platforms": [
+        "android"
+      ]
+    },
+    "theme.picker_label": {
+      "ja": "テーマにする担当",
+      "ko": "테마로 쓸 담당",
+      "note": "テーマの色にする担当アイドルの選択"
+    },
+    "theme.use_oshi_color": {
+      "ja": "担当の色をテーマに使う",
+      "ko": "담당 색을 테마로 사용",
+      "note": "担当アイドルのイメージカラーをアプリ全体のアクセントにするスイッチ"
+    }
+  }
+}

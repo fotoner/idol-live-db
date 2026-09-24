@@ -3,6 +3,8 @@ package com.fugaif.imaslivedb.ui.settings
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,9 +17,11 @@ data class AccountUiState(
     /** 表示名の変更ダイアログ。null = 閉じている。 */
     val editingName: String? = null,
     val isSavingName: Boolean = false,
-    val nameError: String? = null,
+    /** 表示名を保存できなかったときの本文。画面で resolve する (言語を切り替えても旧言語が残らない)。 */
+    val nameError: DisplayText? = null,
     val isDeleting: Boolean = false,
-    val deleteError: String? = null
+    /** アカウントを削除できなかったときの本文。 */
+    val deleteError: DisplayText? = null
 )
 
 /**
@@ -56,7 +60,7 @@ class AccountViewModel(app: Application) : AndroidViewModel(app) {
             _uiState.update { state ->
                 result.fold(
                     onSuccess = { state.copy(isSavingName = false, editingName = null) },
-                    onFailure = { state.copy(isSavingName = false, nameError = "表示名の保存に失敗しました") }
+                    onFailure = { state.copy(isSavingName = false, nameError = L10n.Settings.accountEditNameErrorMessage) }
                 )
             }
         }
@@ -69,7 +73,7 @@ class AccountViewModel(app: Application) : AndroidViewModel(app) {
         module.appScope.launch {
             val result = authService.deleteAccount()
             _uiState.update { state ->
-                state.copy(isDeleting = false, deleteError = if (result.isFailure) "削除に失敗しました" else null)
+                state.copy(isDeleting = false, deleteError = if (result.isFailure) L10n.Settings.accountDeleteErrorMessage else null)
             }
         }
     }

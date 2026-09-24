@@ -15,11 +15,22 @@ struct MyPageView: View {
     /// 歌唱者の表示サンプル (実データの 1 人)。設定を切り替えた見え方をその場で見せる。
     private static let performerNameSample = PerformerRow(
         id: "sample",
+        // i18n-ignore(sample): 声優名の見本 (固有名詞。訳さない)
         name: "下田麻美",
         idolColor: nil,
+        // i18n-ignore(sample): アイドル名の見本 (固有名詞。訳さない)
         idolName: "双海亜美"
     )
-    private static let textScaleLabels = ["極小", "小", "中", "大", "特大"]
+    /// 文字サイズの選択肢の名前 (textScaleOptions と同じ順)。表示言語で引き直すので static let にしない。
+    private var textScaleLabels: [String] {
+        [
+            String(localized: L10n.Settings.textScaleXsmall),
+            String(localized: L10n.Settings.textScaleSmall),
+            String(localized: L10n.Settings.textScaleMedium),
+            String(localized: L10n.Settings.textScaleLarge),
+            String(localized: L10n.Settings.textScaleXlarge),
+        ]
+    }
     private var textScaleIndex: Binding<Int> {
         Binding(
             // 既存ユーザーの保存値 (0.7/0.85/1.0) はそのまま該当インデックスに載る。
@@ -68,7 +79,8 @@ struct MyPageView: View {
     @State private var showEditName = false
     @State private var editingName = ""
     @State private var isSavingName = false
-    @State private var nameErrorMessage: String?
+    /// 表示名の保存に失敗したときの本文 (アプリの文言か、サーバ・OS のエラー文)。
+    @State private var nameErrorMessage: DisplayText?
 
     // MARK: - バックアップ/引き継ぎコード
     /// 復元時に端末IDも引き継ぐか (上級者向け・既定OFF)。同一端末からの復元でない限りOFFのままにすべき。
@@ -129,10 +141,10 @@ struct MyPageView: View {
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .background(DS.bg)
-        .navigationTitle("設定")
+        .navigationTitle(L10n.Settings.screenTitle)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("閉じる") { dismiss() }
+                Button { dismiss() } label: { Text(L10n.Settings.actionClose) }
             }
         }
         .task { await loadAll() }
@@ -146,71 +158,72 @@ struct MyPageView: View {
     var body: some View {
         NavigationStack {
             decoratedList
-            .alert("画像一括インポート", isPresented: $showImageImport) {
+            .alert(Text(L10n.Settings.imageImportIdolDialogTitle), isPresented: $showImageImport) {
                 TextField("JSON URL", text: $imageURL)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                Button("インポート") {
+                Button {
                     Task {
                         await importer.importFromURL(imageURL, database: database)
                     }
-                }
-                Button("キャンセル", role: .cancel) {}
+                } label: { Text(L10n.Settings.actionImport) }
+                Button(role: .cancel) {} label: { Text(L10n.Settings.actionCancel) }
             } message: {
-                Text("アイドル名と画像URLのJSONファイルのURLを入力してください。\n形式: {\"アイドル名\": \"画像URL\", ...}")
+                Text(L10n.Settings.imageImportIdolDialogMessage)
             }
-            .alert("ブランド画像インポート", isPresented: $showBrandImageImport) {
+            .alert(Text(L10n.Settings.imageImportBrandDialogTitle), isPresented: $showBrandImageImport) {
                 TextField("JSON URL", text: $brandImageURL)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                Button("インポート") {
+                Button {
                     Task {
                         await importer.importBrandImagesFromURL(brandImageURL, database: database)
                     }
-                }
-                Button("キャンセル", role: .cancel) {}
+                } label: { Text(L10n.Settings.actionImport) }
+                Button(role: .cancel) {} label: { Text(L10n.Settings.actionCancel) }
             } message: {
-                Text("ブランド名(または short_name / id)と画像URLのJSONファイルのURLを入力してください。\n形式: {\"765AS\": \"画像URL\", ...}")
+                Text(L10n.Settings.imageImportBrandDialogMessage)
             }
-            .alert("ユニット画像インポート", isPresented: $showUnitImageImport) {
+            .alert(Text(L10n.Settings.imageImportUnitDialogTitle), isPresented: $showUnitImageImport) {
                 TextField("JSON URL", text: $unitImageURL)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                Button("インポート") {
+                Button {
                     Task {
                         await importer.importUnitImagesFromURL(unitImageURL, database: database)
                     }
-                }
-                Button("キャンセル", role: .cancel) {}
+                } label: { Text(L10n.Settings.actionImport) }
+                Button(role: .cancel) {} label: { Text(L10n.Settings.actionCancel) }
             } message: {
-                Text("ユニット名(または id)と画像URLのJSONファイルのURLを入力してください。\n形式: {\"S.E.M\": \"画像URL\", ...}")
+                Text(L10n.Settings.imageImportUnitDialogMessage)
             }
             .sheet(isPresented: $showHelp) {
                 HelpView()
             }
-            .alert("表示名を変更", isPresented: $showEditName) {
-                TextField("表示名", text: $editingName)
+            .alert(Text(L10n.Settings.accountEditNameTitle), isPresented: $showEditName) {
+                // LocalizedStringResource を受ける TextField(_:text:) は iOS 26 からなので、prompt: 付きの版 (iOS 16) を使う
+                TextField(L10n.Settings.accountEditNamePlaceholder, text: $editingName, prompt: nil)
                     .textInputAutocapitalization(.never)
                     .onChange(of: editingName) { _, new in
                         // 上限と数え方 (コードポイント) はコア。無制限に打てるとサーバ側で弾かれる。
                         let clamped = InputLimits.clamp(.displayName, new)
                         if clamped != new { editingName = clamped }
                     }
-                Button("保存") {
+                Button {
                     Task { await saveDisplayName() }
-                }
+                } label: { Text(L10n.Settings.actionSave) }
                 .disabled(!InputLimits.isAcceptable(.displayName, editingName) || isSavingName)
-                Button("キャンセル", role: .cancel) {}
+                Button(role: .cancel) {} label: { Text(L10n.Settings.actionCancel) }
             } message: {
-                Text("コミュニティ投稿で表示される名前です (\(InputLimits.max(.displayName))文字以内)")
+                Text(L10n.Settings.accountEditNameMessage(max: InputLimits.max(.displayName)))
             }
-            .alert("表示名の保存に失敗", isPresented: Binding(
+            .alert(Text(L10n.Settings.accountEditNameErrorTitle), isPresented: Binding(
                 get: { nameErrorMessage != nil },
                 set: { if !$0 { nameErrorMessage = nil } }
             )) {
                 Button("OK", role: .cancel) { nameErrorMessage = nil }
             } message: {
-                Text(nameErrorMessage ?? "")
+                Text(display: nameErrorMessage ?? .verbatim(""))
             }
             .alert("ユーザーをモデレーション", isPresented: $showModerationPrompt) {
                 TextField("ユーザー ID", text: $moderationUserIdInput)
@@ -233,15 +246,15 @@ struct MyPageView: View {
                     UserModerationView(userId: target.id)
                 }
             }
-            .alert("アカウントを削除しますか?", isPresented: $showDeleteAccountConfirm) {
-                Button("削除する", role: .destructive) {
+            .alert(Text(L10n.Settings.accountDeleteConfirmTitle), isPresented: $showDeleteAccountConfirm) {
+                Button(role: .destructive) {
                     Task { await performAccountDeletion() }
-                }
-                Button("キャンセル", role: .cancel) {}
+                } label: { Text(L10n.Settings.accountDeleteConfirm) }
+                Button(role: .cancel) {} label: { Text(L10n.Settings.actionCancel) }
             } message: {
-                Text("サーバー上のあなたの編集・Good・予想・ユーザー情報がすべて削除され、サインアウトされます。この操作は取り消せません。")
+                Text(L10n.Settings.accountDeleteConfirmMessage)
             }
-            .alert("削除に失敗しました", isPresented: Binding(
+            .alert(Text(L10n.Settings.accountDeleteErrorTitle), isPresented: Binding(
                 get: { deleteAccountErrorMessage != nil },
                 set: { if !$0 { deleteAccountErrorMessage = nil } }
             )) {
@@ -249,7 +262,7 @@ struct MyPageView: View {
             } message: {
                 Text(deleteAccountErrorMessage ?? "")
             }
-            .alert("引き継ぎコードの発行に失敗しました", isPresented: Binding(
+            .alert(Text(L10n.Settings.backupCodeErrorTitle), isPresented: Binding(
                 get: { transferCodeErrorMessage != nil },
                 set: { if !$0 { transferCodeErrorMessage = nil } }
             )) {
@@ -257,7 +270,7 @@ struct MyPageView: View {
             } message: {
                 Text(transferCodeErrorMessage ?? "")
             }
-            .alert("バックアップの保存に失敗しました", isPresented: Binding(
+            .alert(Text(L10n.Settings.backupExportErrorTitle), isPresented: Binding(
                 get: { exportErrorMessage != nil },
                 set: { if !$0 { exportErrorMessage = nil } }
             )) {
@@ -274,7 +287,7 @@ struct MyPageView: View {
                 }
             }
             .alert(
-                importErrorMessage != nil ? "復元に失敗しました" : "復元しました",
+                Text(importErrorMessage != nil ? L10n.Settings.backupRestoreFailedTitle : L10n.Settings.backupRestoreDoneTitle),
                 isPresented: Binding(
                     get: { importResultMessage != nil || importErrorMessage != nil },
                     set: { if !$0 { importResultMessage = nil; importErrorMessage = nil } }
@@ -292,7 +305,7 @@ struct MyPageView: View {
                     VStack(spacing: DS.sp5) {
                         ProgressView(value: importer.progress)
                             .frame(width: 200)
-                        Text(importer.statusMessage)
+                        Text(display: importer.statusMessage)
                             .font(.imasCaption)
                     }
                     .padding(DS.sp7)
@@ -307,7 +320,7 @@ struct MyPageView: View {
 
     @ViewBuilder
     private var accountSection: some View {
-        Section("アカウント") {
+        Section {
             if AuthService.shared.isSignedIn {
                 HStack {
                     Image(systemName: "person.crop.circle.fill")
@@ -315,7 +328,8 @@ struct MyPageView: View {
                         .foregroundStyle(DS.ink2)
                     VStack(alignment: .leading, spacing: DS.sp1) {
                         HStack(spacing: 6) {
-                            Text(AuthService.shared.userName ?? "ユーザー")
+                            Text(display: AuthService.shared.userName.map(DisplayText.verbatim)
+                                ?? .key(L10n.Settings.accountUserFallback))
                                 .font(.imasHeadline)
                             Button {
                                 AppAnalytics.tap("my_page.edit_name")
@@ -326,7 +340,7 @@ struct MyPageView: View {
                                     .font(.imasCallout)
                             }
                             .buttonStyle(.borderless)
-                            .accessibilityLabel("表示名を変更")
+                            .accessibilityLabel(L10n.Settings.accountEditNameA11y)
                         }
                         if let email = AuthService.shared.userEmail {
                             Text(email)
@@ -345,24 +359,26 @@ struct MyPageView: View {
                         #endif
                     }
                 }
-                Button("ログアウト", role: .destructive) {
+                Button(role: .destructive) {
                     AppAnalytics.tap("my_page.logout")
                     AuthService.shared.signOut()
-                }
-                Button("アカウントを削除", role: .destructive) {
+                } label: { Text(L10n.Settings.accountSignOut) }
+                Button(role: .destructive) {
                     AppAnalytics.tap("my_page.delete_account")
                     showDeleteAccountConfirm = true
-                }
+                } label: { Text(L10n.Settings.accountDeleteButton) }
                 .disabled(isDeletingAccount)
             } else {
                 VStack(spacing: DS.sp3) {
-                    Text("ログインするとライブ・セトリ・楽曲データの編集や Good ができます")
+                    Text(L10n.Settings.accountSignInPrompt)
                         .font(.imasCaption)
                         .foregroundStyle(DS.ink2)
                     AppleSignInButton()
                 }
                 .padding(.vertical, DS.sp2)
             }
+        } header: {
+            Text(L10n.Settings.accountHeader)
         }
         .listRowBackground(DS.surface)
         .listRowSeparatorTint(DS.sep)
@@ -416,7 +432,7 @@ struct MyPageView: View {
                 AppAnalytics.tap("my_page.open_help")
                 showHelp = true
             } label: {
-                Label("使い方を見る", systemImage: "questionmark.circle.fill")
+                Label(L10n.Settings.helpOpen, systemImage: "questionmark.circle.fill")
             }
         }
         .listRowBackground(DS.surface)
@@ -425,26 +441,29 @@ struct MyPageView: View {
 
     @ViewBuilder
     private var generalSettingsSection: some View {
-        Section("設定") {
-            Picker("デフォルトブランド", selection: $defaultBrandId) {
-                Text("すべて").tag("")
+        Section {
+            Picker(selection: $defaultBrandId) {
+                Text(L10n.Settings.defaultBrandAll).tag("")
                 ForEach(vm.brands) { brand in
                     Text(brand.shortName).tag(brand.id)
                 }
+            } label: {
+                Text(L10n.Settings.defaultBrandLabel)
             }
             VStack(alignment: .leading, spacing: DS.sp2) {
-                Text("文字サイズ")
-                ImasSegmented(labels: Self.textScaleLabels, selection: textScaleIndex)
+                Text(L10n.Settings.textScaleLabel)
+                ImasSegmented(labels: textScaleLabels, selection: textScaleIndex)
             }
             // プレビュー: 選んだサイズで実際の見え方を即確認できる (設定画面のラベル自体は
             // システム既定フォントなので変化しないため、ここで反映後の文字を見せる)。
             VStack(alignment: .leading, spacing: 3) {
-                Text("プレビュー")
+                Text(L10n.Settings.textScalePreview)
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink2)
                 Text("Timeless Shooting Star")
                     .font(.imasScaled(16, weight: .semibold))
                     .foregroundStyle(DS.ink)
+                // i18n-ignore(sample): 文字サイズの見本 (ユニット名と、コアが出す歌唱者の語を模したセトリの行)
                 Text("ストレイライト ・ 全員")
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink2)
@@ -452,10 +471,12 @@ struct MyPageView: View {
             .padding(.vertical, DS.sp1)
 
             // 選択肢はコアが出す (順も文言もアプリ 1 本)。
-            Picker("セトリの歌唱者", selection: $performerNameRaw) {
+            Picker(selection: $performerNameRaw) {
                 ForEach(PerformerNamePref.options, id: \.raw) { option in
                     Text(option.label).tag(option.raw)
                 }
+            } label: {
+                Text(L10n.Settings.performerNameLabel)
             }
             // 設定値で見え方が変わるサンプル。声優ライブの 1 人分をそのまま出す。
             Text(
@@ -466,17 +487,21 @@ struct MyPageView: View {
                 .font(.imasCaption)
                 .foregroundStyle(DS.ink2)
 
-            Toggle("ライブ名を省略表示", isOn: $abbreviateEventNames)
+            Toggle(isOn: $abbreviateEventNames) { Text(L10n.Settings.eventNameAbbreviateLabel) }
             // 設定値で見え方が変わるサンプル。ON なら作品名プレフィックスを省く。
             Text(eventDisplayName("THE IDOLM@STER SHINY COLORS 3rdLIVE TOUR"))
                 .font(.imasCaption)
                 .foregroundStyle(DS.ink2)
 
             // 曲一覧の「この絞り込みでイントロドン」導線の表示/非表示 (×で隠した後ここで戻せる)。
-            Toggle("曲一覧にイントロドン導線を表示", isOn: Binding(
+            Toggle(isOn: Binding(
                 get: { !introDonBarHidden },
                 set: { introDonBarHidden = !$0 }
-            ))
+            )) {
+                Text(L10n.Settings.introdonBarLabel)
+            }
+        } header: {
+            Text(L10n.Settings.generalHeader)
         }
         .listRowBackground(DS.surface)
         .listRowSeparatorTint(DS.sep)
@@ -485,14 +510,14 @@ struct MyPageView: View {
     @ViewBuilder
     private var collectionSettingsSection: some View {
         Section {
-            Toggle("配信参加も回収に含める", isOn: $includeStreamInCollection)
+            Toggle(isOn: $includeStreamInCollection) { Text(L10n.Settings.collectionIncludeStream) }
                 .onChange(of: includeStreamInCollection) {
                     UserMarkService.shared.refreshAutoCollected()
                 }
         } header: {
-            Text("披露回収")
+            Text(L10n.Settings.collectionHeader)
         } footer: {
-            Text("回収はリアルライブ(ライブ/フェス)の現地参加のみが対象です。配信でしか観られない方は、配信参加も回収に含められます。")
+            Text(L10n.Settings.collectionFooter)
         }
         .listRowBackground(DS.surface)
         .listRowSeparatorTint(DS.sep)
@@ -507,16 +532,16 @@ struct MyPageView: View {
                 MasteryScaleSettingsView()
             } label: {
                 HStack {
-                    Label("習熟度の段階", systemImage: "chart.bar")
+                    Label(L10n.Settings.masteryLink, systemImage: "chart.bar")
                     Spacer()
                     Text(UserMarkService.shared.scale.labels.joined(separator: " / "))
                         .font(.imasCaption).foregroundStyle(DS.ink3).lineLimit(1)
                 }
             }
         } header: {
-            Text("習熟度")
+            Text(L10n.Settings.masteryHeader)
         } footer: {
-            Text("段の数と名前を変えられます。段を減らすと、その段の曲は 1 つ下に移ります (記録は消えません)。")
+            Text(L10n.Settings.masteryFooter)
         }
         .listRowBackground(DS.surface)
         .listRowSeparatorTint(DS.sep)
@@ -525,14 +550,14 @@ struct MyPageView: View {
     @ViewBuilder
     private var themeSection: some View {
         Section {
-            Toggle("担当の色をテーマに使う", isOn: $useOshiColor)
+            Toggle(isOn: $useOshiColor) { Text(L10n.Settings.themeUseOshiColor) }
             if useOshiColor {
                 if vm.pickIdols.isEmpty {
-                    Text("アイドル詳細で担当(推し)に設定すると、ここで色を選べます。")
+                    Text(L10n.Settings.themeNoPicks)
                         .font(.imasCaption)
                         .foregroundStyle(DS.ink2)
                 } else {
-                    Picker("テーマにする担当", selection: $themeOshiIdolId) {
+                    Picker(selection: $themeOshiIdolId) {
                         ForEach(vm.pickIdols) { idol in
                             HStack(spacing: DS.sp3) {
                                 Circle()
@@ -542,13 +567,15 @@ struct MyPageView: View {
                             }
                             .tag(idol.id)
                         }
+                    } label: {
+                        Text(L10n.Settings.themePickerLabel)
                     }
                 }
             }
         } header: {
-            Text("テーマ")
+            Text(L10n.Settings.themeHeader)
         } footer: {
-            Text("ONにすると、選んだ担当のイメージカラーがアプリ全体のアクセントカラーになります。")
+            Text(L10n.Settings.themeFooter)
         }
         .listRowBackground(DS.surface)
         .listRowSeparatorTint(DS.sep)
@@ -563,11 +590,11 @@ struct MyPageView: View {
                 AppAnalytics.tap("my_page.image_import")
                 showImageImport = true
             } label: {
-                Label("キャラクター画像をインポート", systemImage: "photo.on.rectangle.angled")
+                Label(L10n.Settings.imageImportIdolButton, systemImage: "photo.on.rectangle.angled")
             }
             if let url = vm.idolTemplateURL {
                 ShareLink(item: url) {
-                    Label("型紙 JSON をダウンロード (アイドル)", systemImage: "square.and.arrow.down")
+                    Label(L10n.Settings.imageImportIdolTemplate, systemImage: "square.and.arrow.down")
                         .font(.imasCaption)
                         .foregroundStyle(DS.ink2)
                 }
@@ -577,11 +604,11 @@ struct MyPageView: View {
                 AppAnalytics.tap("my_page.brand_image_import")
                 showBrandImageImport = true
             } label: {
-                Label("ブランド画像をインポート", systemImage: "tag")
+                Label(L10n.Settings.imageImportBrandButton, systemImage: "tag")
             }
             if let url = vm.brandTemplateURL {
                 ShareLink(item: url) {
-                    Label("型紙 JSON をダウンロード (ブランド)", systemImage: "square.and.arrow.down")
+                    Label(L10n.Settings.imageImportBrandTemplate, systemImage: "square.and.arrow.down")
                         .font(.imasCaption)
                         .foregroundStyle(DS.ink2)
                 }
@@ -591,18 +618,18 @@ struct MyPageView: View {
                 AppAnalytics.tap("my_page.unit_image_import")
                 showUnitImageImport = true
             } label: {
-                Label("ユニット画像をインポート", systemImage: "person.3")
+                Label(L10n.Settings.imageImportUnitButton, systemImage: "person.3")
             }
             if let url = vm.unitTemplateURL {
                 ShareLink(item: url) {
-                    Label("型紙 JSON をダウンロード (ユニット)", systemImage: "square.and.arrow.down")
+                    Label(L10n.Settings.imageImportUnitTemplate, systemImage: "square.and.arrow.down")
                         .font(.imasCaption)
                         .foregroundStyle(DS.ink2)
                 }
             }
 
             if importer.importedCount > 0 || importer.failedCount > 0 {
-                Text(importer.statusMessage)
+                Text(display: importer.statusMessage)
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink2)
             }
@@ -611,11 +638,11 @@ struct MyPageView: View {
                     ForEach(importer.failures) { f in
                         VStack(alignment: .leading, spacing: 1) {
                             Text(f.key).font(.imasCaption).bold()
-                            Text(f.reason).font(.imasCaption2).foregroundStyle(DS.ink2)
+                            Text(display: f.reason).font(.imasCaption2).foregroundStyle(DS.ink2)
                         }
                     }
                 } label: {
-                    Label("失敗内訳 (\(importer.failures.count) 件)", systemImage: "exclamationmark.triangle")
+                    Label(L10n.Settings.imageImportFailures(count: importer.failures.count), systemImage: "exclamationmark.triangle")
                         .font(.imasCaption)
                         .foregroundStyle(DS.warning)
                 }
@@ -625,12 +652,12 @@ struct MyPageView: View {
                 AppAnalytics.tap("my_page.clear_images")
                 Task { await importer.clearAllImages() }
             } label: {
-                Label("カスタム画像を全削除", systemImage: "trash")
+                Label(L10n.Settings.imageImportClear, systemImage: "trash")
             }
         } header: {
-            Text("画像インポート")
+            Text(L10n.Settings.imageImportHeader)
         } footer: {
-            Text("型紙 JSON をダウンロード → URL を埋めて GitHub Gist 等にアップ → そのファイル URL をインポートに貼り付け。既存画像は上書きされます。")
+            Text(L10n.Settings.imageImportFooter)
         }
         .listRowBackground(DS.surface)
         .listRowSeparatorTint(DS.sep)
@@ -662,28 +689,28 @@ struct MyPageView: View {
                         }
                     }
                 } label: {
-                    Label("通知を許可する", systemImage: "bell.badge")
+                    Label(L10n.Settings.notificationsRequest, systemImage: "bell.badge")
                 }
                 if notifAuthStatus == .denied {
-                    Text("通知が拒否されています。設定アプリから許可してください。")
+                    Text(L10n.Settings.notificationsDenied)
                         .font(.imasCaption)
                         .foregroundStyle(DS.warning)
                 }
             default:
-                Toggle("担当アイドルの誕生日", isOn: $notifOshiBirthday)
+                Toggle(isOn: $notifOshiBirthday) { Text(L10n.Settings.notificationsOshiBirthday) }
                     .onChange(of: notifOshiBirthday) { _, isOn in rescheduleNotifications(turnedOn: isOn) }
-                Toggle("ライブ1週間前", isOn: $notifLiveWeek)
+                Toggle(isOn: $notifLiveWeek) { Text(L10n.Settings.notificationsLiveWeek) }
                     .onChange(of: notifLiveWeek) { _, isOn in rescheduleNotifications(turnedOn: isOn) }
-                Toggle("チケット締切・当落通知", isOn: $notifTicket)
+                Toggle(isOn: $notifTicket) { Text(L10n.Settings.notificationsTicket) }
                     .onChange(of: notifTicket) { _, isOn in rescheduleNotifications(turnedOn: isOn) }
-                Toggle("月曜が近いことを知らせる (日曜 20:00)", isOn: $notifMonday)
+                Toggle(isOn: $notifMonday) { Text(L10n.Settings.notificationsMonday) }
                     .onChange(of: notifMonday) { _, isOn in rescheduleNotifications(turnedOn: isOn) }
             }
         } header: {
-            Text("通知")
+            Text(L10n.Settings.notificationsHeader)
         } footer: {
             if notifAuthStatus == .authorized || notifAuthStatus == .provisional {
-                Text("お気に入りまたは参加マークしたイベントにライブ前・チケット通知を送ります。")
+                Text(L10n.Settings.notificationsFooter)
             }
         }
         .listRowBackground(DS.surface)
@@ -697,7 +724,7 @@ struct MyPageView: View {
 
     @ViewBuilder
     private var dataSyncSection: some View {
-        Section("データ同期") {
+        Section {
             HStack {
                 Image(systemName: syncStateIcon)
                     .foregroundStyle(syncStateColor)
@@ -713,7 +740,7 @@ struct MyPageView: View {
                 AppAnalytics.tap("my_page.sync_incremental")
                 Task { await syncEngine.performIncrementalSync(database: database) }
             } label: {
-                Label("差分更新", systemImage: "arrow.triangle.2.circlepath")
+                Label(L10n.Settings.syncIncremental, systemImage: "arrow.triangle.2.circlepath")
             }
             .disabled(isSyncing)
 
@@ -721,7 +748,7 @@ struct MyPageView: View {
                 AppAnalytics.tap("my_page.sync_full")
                 Task { await syncEngine.performFullSync(database: database) }
             } label: {
-                Label("全データ同期", systemImage: "arrow.clockwise.icloud")
+                Label(L10n.Settings.syncFull, systemImage: "arrow.clockwise.icloud")
             }
             .disabled(isSyncing)
 
@@ -769,6 +796,8 @@ struct MyPageView: View {
                     .font(.imasCaption)
             }
             #endif
+        } header: {
+            Text(L10n.Settings.syncHeader)
         }
         .listRowBackground(DS.surface)
         .listRowSeparatorTint(DS.sep)
@@ -785,14 +814,18 @@ struct MyPageView: View {
                         .font(.imasScaled(28, weight: .bold, design: .monospaced))
                         .textSelection(.enabled)
                     if let expiresAt = transferCodeExpiresAt {
-                        Text("24時間有効・1回のみ使用可能です (期限: \(expiresAt.formatted(date: .abbreviated, time: .shortened)))")
+                        // 期限の日時は表示言語で書式を作り、文言には書式済みの文字列を渡す
+                        let expires = expiresAt.formatted(
+                            Date.FormatStyle(date: .abbreviated, time: .shortened,
+                                             locale: DisplayLocale.current.formattingLocale))
+                        Text(L10n.Settings.backupCodeExpiry(expires: expires))
                             .font(.imasCaption)
                             .foregroundStyle(DS.ink2)
                     }
                     Button {
                         UIPasteboard.general.string = code
                     } label: {
-                        Label("コピー", systemImage: "doc.on.doc")
+                        Label(L10n.Settings.actionCopy, systemImage: "doc.on.doc")
                     }
                     .font(.imasCaption)
                 }
@@ -805,16 +838,17 @@ struct MyPageView: View {
                 if isCreatingTransferCode {
                     HStack {
                         ProgressView()
-                        Text("発行中...")
+                        Text(L10n.Settings.backupCodeIssuing)
                     }
                 } else {
-                    Label("引き継ぎコードを発行する", systemImage: "arrow.up.doc")
+                    Label(L10n.Settings.backupCodeIssue, systemImage: "arrow.up.doc")
                 }
             }
             .disabled(isCreatingTransferCode)
 
             HStack {
-                TextField("引き継ぎコード", text: $importCodeInput)
+                // LocalizedStringResource を受ける TextField(_:text:) は iOS 26 からなので、prompt: 付きの版 (iOS 16) を使う
+                TextField(L10n.Settings.backupCodeField, text: $importCodeInput, prompt: nil)
                     .textInputAutocapitalization(.characters)
                     .autocorrectionDisabled()
                 Button {
@@ -824,7 +858,7 @@ struct MyPageView: View {
                     if isImportingByCode {
                         ProgressView()
                     } else {
-                        Text("復元")
+                        Text(L10n.Settings.backupCodeRestore)
                     }
                 }
                 .disabled(isImportingByCode || importCodeInput.trimmingCharacters(in: .whitespaces).isEmpty)
@@ -834,11 +868,11 @@ struct MyPageView: View {
                 AppAnalytics.tap("my_page.backup_export_file")
                 exportBackupFile()
             } label: {
-                Label("ファイルに保存する", systemImage: "square.and.arrow.up")
+                Label(L10n.Settings.backupFileSave, systemImage: "square.and.arrow.up")
             }
             if let url = backupFileURL {
                 ShareLink(item: url) {
-                    Label("バックアップファイルを共有", systemImage: "square.and.arrow.up.on.square")
+                    Label(L10n.Settings.backupFileShare, systemImage: "square.and.arrow.up.on.square")
                         .font(.imasCaption)
                         .foregroundStyle(DS.ink2)
                 }
@@ -848,14 +882,14 @@ struct MyPageView: View {
                 AppAnalytics.tap("my_page.backup_import_file")
                 showBackupFileImporter = true
             } label: {
-                Label("ファイルから復元する", systemImage: "square.and.arrow.down")
+                Label(L10n.Settings.backupFileRestore, systemImage: "square.and.arrow.down")
             }
 
-            Toggle("復元時に端末IDも引き継ぐ(上級者向け・通常はOFF)", isOn: $restoreDeviceIdOnImport)
+            Toggle(isOn: $restoreDeviceIdOnImport) { Text(L10n.Settings.backupRestoreDeviceId) }
         } header: {
-            Text("バックアップ")
+            Text(L10n.Settings.backupHeader)
         } footer: {
-            Text("担当/お気に入りはiCloudで自動バックアップされていますが、これは投票履歴・端末IDも含めた手動バックアップです。機種変更やAndroid版への移行、iCloudが使えない場合にご利用ください。同一端末からの復元でない場合は「端末IDも引き継ぐ」はオフのままにしてください。引き継ぎコードの発行・復元にはログインが必要です。ファイル保存はログイン不要です。")
+            Text(L10n.Settings.backupFooter)
         }
         .listRowBackground(DS.surface)
         .listRowSeparatorTint(DS.sep)
@@ -865,11 +899,18 @@ struct MyPageView: View {
 
     @ViewBuilder
     private func dataStatsSection(_ stats: DatabaseStats) -> some View {
-        Section("データ統計") {
-            LabeledContent("楽曲数", value: "\(stats.songCount)曲")
-            LabeledContent("アイドル数", value: "\(stats.idolCount)人")
-            LabeledContent("イベント数", value: "\(stats.eventCount)件")
-            LabeledContent("公演数", value: "\(stats.showCount)公演")
+        // LabeledContent には LocalizedStringResource の入口が無いので、文字列にしてから渡す
+        Section {
+            LabeledContent(String(localized: L10n.Settings.statsSongsLabel),
+                           value: String(localized: L10n.Settings.statsSongsValue(count: stats.songCount)))
+            LabeledContent(String(localized: L10n.Settings.statsIdolsLabel),
+                           value: String(localized: L10n.Settings.statsIdolsValue(count: stats.idolCount)))
+            LabeledContent(String(localized: L10n.Settings.statsEventsLabel),
+                           value: String(localized: L10n.Settings.statsEventsValue(count: stats.eventCount)))
+            LabeledContent(String(localized: L10n.Settings.statsShowsLabel),
+                           value: String(localized: L10n.Settings.statsShowsValue(count: stats.showCount)))
+        } header: {
+            Text(L10n.Settings.statsHeader)
         }
         .listRowBackground(DS.surface)
         .listRowSeparatorTint(DS.sep)
@@ -879,19 +920,29 @@ struct MyPageView: View {
 
     @ViewBuilder
     private var appInfoSection: some View {
-        Section("アプリ情報") {
-            NavigationLink("アプリについて") {
+        Section {
+            NavigationLink {
                 AboutView()
+            } label: {
+                Text(L10n.Settings.appInfoAbout)
             }
-            NavigationLink("プライバシーポリシー") {
+            NavigationLink {
                 PrivacyPolicyView()
+            } label: {
+                Text(L10n.Settings.appInfoPrivacy)
             }
-            NavigationLink("利用規約") {
+            NavigationLink {
                 TermsOfServiceView()
+            } label: {
+                Text(L10n.Settings.appInfoTerms)
             }
-            NavigationLink("サポート") {
+            NavigationLink {
                 SupportView()
+            } label: {
+                Text(L10n.Settings.appInfoSupport)
             }
+        } header: {
+            Text(L10n.Settings.appInfoHeader)
         }
         .listRowBackground(DS.surface)
         .listRowSeparatorTint(DS.sep)
@@ -901,13 +952,15 @@ struct MyPageView: View {
 
     @ViewBuilder
     private var creditsSection: some View {
-        Section("クレジット") {
-            Text("本アプリは非公式のファンメイドアプリです。")
+        Section {
+            Text(L10n.Settings.creditsUnofficial)
                 .font(.imasCaption)
                 .foregroundStyle(DS.ink2)
             if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
-                LabeledContent("アプリバージョン", value: version)
+                LabeledContent(String(localized: L10n.Settings.creditsAppVersion), value: version)
             }
+        } header: {
+            Text(L10n.Settings.creditsHeader)
         }
         .listRowBackground(DS.surface)
         .listRowSeparatorTint(DS.sep)
@@ -952,9 +1005,9 @@ struct MyPageView: View {
             // レート制限 (429) は「失敗」というより日次上限なので、表示名専用の文言に差し替える。
             // グローバルな APIClientError.rateLimited 文言は他エンドポイントと共有なので触らない。
             if case APIClientError.rateLimited = error {
-                nameErrorMessage = "今日はこれ以上、表示名を変更できません。明日また試してください"
+                nameErrorMessage = .key(L10n.Settings.accountEditNameErrorRateLimited)
             } else {
-                nameErrorMessage = error.localizedDescription
+                nameErrorMessage = .verbatim(error.localizedDescription)
             }
         }
     }

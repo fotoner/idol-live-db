@@ -16,7 +16,8 @@ struct MyEditsView: View {
     @State private var hasMore = true
     @State private var isLoading = false
     @State private var isLoadingMore = false
-    @State private var errorMessage: String?
+    /// アラートに出す失敗の文言 (アプリの文言。OS・サーバのエラー文は引数で埋める)。
+    @State private var errorMessage: DisplayText?
 
     /// revert 確認中の対象 batch。
     @State private var revertTarget: EditFeedEntry?
@@ -50,19 +51,19 @@ struct MyEditsView: View {
             .padding(.vertical, DS.sp4)
         }
         .background(DS.bg)
-        .navigationTitle("自分の編集")
+        .navigationTitle(L10n.Mypage.editsTitle)
         .navigationBarTitleDisplayMode(.inline)
         .trackScreen("my_edits")
         .overlay {
             if isLoading && entries.isEmpty {
-                ProgressView("読み込み中...")
+                ProgressView { Text(L10n.Mypage.editsLoading) }
                     .padding(DS.sp7)
                     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
             } else if entries.isEmpty && !isLoading {
                 ImasEmptyState(
                     systemImage: "square.and.pencil",
-                    title: "まだ編集がありません",
-                    message: "ライブ・楽曲・セトリを編集すると、ここに履歴が残り、後から取り消せます。"
+                    title: String(localized: L10n.Mypage.editsEmptyTitle),
+                    message: String(localized: L10n.Mypage.editsEmptyMessage)
                 )
             }
         }
@@ -71,7 +72,7 @@ struct MyEditsView: View {
             if entries.isEmpty { await reload() }
         }
         .confirmationDialog(
-            "この編集を取り消しますか？",
+            Text(L10n.Mypage.editsRevertConfirmTitle),
             isPresented: Binding(
                 get: { revertTarget != nil },
                 set: { if !$0 { revertTarget = nil } }
@@ -79,20 +80,22 @@ struct MyEditsView: View {
             titleVisibility: .visible,
             presenting: revertTarget
         ) { target in
-            Button("取り消す", role: .destructive) {
+            Button(role: .destructive) {
                 Task { await revert(target) }
+            } label: {
+                Text(L10n.Mypage.editsActionRevert)
             }
-            Button("やめる", role: .cancel) { revertTarget = nil }
+            Button(role: .cancel) { revertTarget = nil } label: { Text(L10n.Mypage.editsRevertCancel) }
         } message: { target in
             Text(revertMessage(for: target))
         }
-        .alert("エラー", isPresented: Binding(
+        .alert(Text(L10n.Mypage.editsErrorTitle), isPresented: Binding(
             get: { errorMessage != nil },
             set: { if !$0 { errorMessage = nil } }
         )) {
             Button("OK") { errorMessage = nil }
         } message: {
-            Text(errorMessage ?? "")
+            Text(display: errorMessage ?? .verbatim(""))
         }
     }
 
@@ -102,9 +105,9 @@ struct MyEditsView: View {
         entry.reverted || locallyReverted.contains(entry.id)
     }
 
-    private func revertMessage(for entry: EditFeedEntry) -> String {
-        let label = EditFeedFormat.recordTypeLabel(entry.recordType)
-        return "「\(entry.summary ?? label)」を編集前の状態に戻します。この操作も履歴に記録されます。"
+    private func revertMessage(for entry: EditFeedEntry) -> LocalizedStringResource {
+        let label = editFeedText(EditFeedFormat.recordTypeLabel(entry.recordType)).resolved
+        return L10n.Mypage.editsRevertConfirmMessage(summary: entry.summary ?? label)
     }
 
     // MARK: - Loading
@@ -167,24 +170,25 @@ struct MyEditsView: View {
                 locallyReverted.insert(entry.id)
             case .skippedConflict:
                 // 後続編集があり巻き戻せなかった (本人 revert は競合スキップ固定)。状態は変えない。
-                errorMessage = "別のユーザーがこの後に編集したため取り消せませんでした。"
+                errorMessage = .key(L10n.Mypage.editsErrorConflict)
             default:
-                errorMessage = "取り消せませんでした (\(outcome.label))。"
+                // outcome の表示名は管理者画面 (AdminModerationService) と共用の語で、まだ訳さない
+                errorMessage = .key(L10n.Mypage.editsErrorRevertOutcome(outcome: outcome.label))
             }
         } catch {
             if case APIClientError.notAuthorized = error {
-                errorMessage = "認証の有効期限が切れています。再度サインインしてください。"
+                errorMessage = .key(L10n.Mypage.editsErrorAuthExpired)
             } else {
-                errorMessage = "取り消しに失敗しました: \(error.localizedDescription)"
+                errorMessage = .key(L10n.Mypage.editsErrorRevertFailed(detail: error.localizedDescription))
             }
         }
     }
 
-    private func errorText(_ error: Error) -> String {
+    private func errorText(_ error: Error) -> DisplayText {
         if case APIClientError.rateLimited = error {
-            return "操作が多すぎます。しばらく待ってからお試しください。"
+            return .key(L10n.Mypage.editsErrorRateLimited)
         }
-        return "読み込みに失敗しました: \(error.localizedDescription)"
+        return .key(L10n.Mypage.editsErrorLoadFailed(detail: error.localizedDescription))
     }
 }
 
@@ -206,7 +210,7 @@ private struct MyEditRow: View {
                 HStack(spacing: 6) {
                     OpBadge(op: entry.op)
                     if isReverted {
-                        Text("差戻し済み")
+                        Text(L10n.Mypage.editsRowReverted)
                             .font(.imasCaption2.weight(.semibold))
                             .foregroundStyle(DS.ink2)
                             .padding(.horizontal, 7)
@@ -219,7 +223,8 @@ private struct MyEditRow: View {
                         .foregroundStyle(DS.ink2)
                 }
 
-                Text(entry.summary ?? EditFeedFormat.recordTypeLabel(entry.recordType))
+                Text(display: entry.summary.map(DisplayText.verbatim)
+                     ?? editFeedText(EditFeedFormat.recordTypeLabel(entry.recordType)))
                     .font(.imasSubhead)
                     .foregroundStyle(isReverted ? AnyShapeStyle(DS.ink2) : AnyShapeStyle(DS.ink))
                     .strikethrough(isReverted, color: DS.ink2)
@@ -248,7 +253,7 @@ private struct MyEditRow: View {
                     AppAnalytics.tap("my_edits.revert")
                     onRevert()
                 } label: {
-                    Label("取り消す", systemImage: "arrow.uturn.backward")
+                    Label(L10n.Mypage.editsActionRevert, systemImage: "arrow.uturn.backward")
                         .font(.imasCaption.weight(.semibold))
                 }
                 .buttonStyle(.bordered)
@@ -287,7 +292,7 @@ struct OpBadge: View {
 
     var body: some View {
         let (label, color) = EditFeedFormat.opDesign(op)
-        Text(label)
+        Text(display: editFeedText(label))
             .font(.imasCaption2.weight(.semibold))
             .foregroundStyle(color)
             .padding(.horizontal, 7)
@@ -295,3 +300,12 @@ struct OpBadge: View {
             .background(color.opacity(0.15), in: Capsule())
     }
 }
+
+// MARK: - 編集フィードの語の受け口
+
+// EditFeedFormat (edit_feed の持ち物) が返す語 (記録の種類名・操作名) を表示文言にする。
+// 語の型は edit_feed 側の移行で String → LocalizedStringResource / DisplayText に変わりうるので、
+// どれになってもこの画面がそのまま組めるように、受け口を型ごとに用意しておく。
+private func editFeedText(_ text: String) -> DisplayText { .verbatim(text) }
+private func editFeedText(_ text: LocalizedStringResource) -> DisplayText { .key(text) }
+private func editFeedText(_ text: DisplayText) -> DisplayText { text }

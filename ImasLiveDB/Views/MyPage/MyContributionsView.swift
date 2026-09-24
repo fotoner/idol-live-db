@@ -17,7 +17,7 @@ struct MyContributionsView: View {
             .padding(DS.sp5)
         }
         .background(DS.bg.ignoresSafeArea())
-        .navigationTitle("マイ投稿")
+        .navigationTitle(L10n.Mypage.contributionsTitle)
         .navigationBarTitleDisplayMode(.inline)
         .trackScreen("my_contributions")
     }
@@ -35,8 +35,8 @@ struct MyContributionsView: View {
                     .frame(width: 36, height: 36)
                     .background(DS.fill, in: RoundedRectangle(cornerRadius: DS.rSM, style: .continuous))
                 VStack(alignment: .leading, spacing: DS.sp1) {
-                    Text("自分の編集を確認・取り消す").font(.imasSubhead.weight(.semibold)).foregroundStyle(DS.ink)
-                    Text("ライブ・楽曲・セトリの編集履歴").font(.imasCaption).foregroundStyle(DS.ink3)
+                    Text(L10n.Mypage.contributionsEditsLinkTitle).font(.imasSubhead.weight(.semibold)).foregroundStyle(DS.ink)
+                    Text(L10n.Mypage.contributionsEditsLinkCaption).font(.imasCaption).foregroundStyle(DS.ink3)
                 }
                 Spacer(minLength: 0)
                 ImasRowChevron()
@@ -55,9 +55,9 @@ struct MyContributionsView: View {
                 .padding(.top, DS.sp3)
             HStack(alignment: .firstTextBaseline, spacing: DS.sp2) {
                 Text("\(log.total)").font(.imasDisplay(36, weight: .bold)).foregroundStyle(DS.ink)
-                Text("件").font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink3)
+                Text(L10n.Mypage.contributionsUnit).font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink3)
             }
-            Text("コミュニティへの投稿累計").font(.imasFootnote).foregroundStyle(DS.ink3)
+            Text(L10n.Mypage.contributionsTotalCaption).font(.imasFootnote).foregroundStyle(DS.ink3)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, DS.sp4)
@@ -66,7 +66,7 @@ struct MyContributionsView: View {
 
     private var breakdown: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
-            ImasSectionHeader(title: "内訳", tight: true)
+            ImasSectionHeader(title: .key(L10n.Mypage.contributionsBreakdownHeader), tight: true)
             LazyVStack(spacing: DS.sp2) {
                 ForEach(LocalContributionLog.Kind.allCases, id: \.rawValue) { kind in
                     HStack(spacing: DS.sp3) {
@@ -80,7 +80,7 @@ struct MyContributionsView: View {
                         Text("\(log.count(of: kind))")
                             .font(.imasTitle3.weight(.bold).monospacedDigit())
                             .foregroundStyle(DS.ink)
-                        Text("件").font(.imasCaption).foregroundStyle(DS.ink3)
+                        Text(L10n.Mypage.contributionsUnit).font(.imasCaption).foregroundStyle(DS.ink3)
                     }
                     .padding(.horizontal, DS.sp4).padding(.vertical, DS.sp3)
                     .background(DS.surface, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
@@ -90,7 +90,7 @@ struct MyContributionsView: View {
     }
 
     private var helpText: some View {
-        Text("セトリ編集・動画追加・タグ追加が累計に含まれます。再インストールするとカウントはリセットされます (端末ローカル記録)。")
+        Text(L10n.Mypage.contributionsHelp)
             .font(.imasCaption).foregroundStyle(DS.ink3)
             .padding(.top, DS.sp2)
     }

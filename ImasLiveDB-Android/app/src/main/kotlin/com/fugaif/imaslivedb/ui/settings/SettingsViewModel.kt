@@ -8,6 +8,8 @@ import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.DatabaseStats
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import com.fugaif.imaslivedb.ui.theme.AppPreferences
 import uniffi.imas_core.OshiThemePickIdol
 import uniffi.imas_core.resolveOshiTheme
@@ -17,8 +19,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 data class SettingsUiState(
-    val schemaVersion: String = "...",
-    val dataVersion: String = "...",
+    /** データベースの版 (読めた値は Verbatim、読めなければ「不明」の文言)。画面で resolve する。 */
+    val schemaVersion: DisplayText = DisplayText.Verbatim("..."),
+    val dataVersion: DisplayText = DisplayText.Verbatim("..."),
     val databaseStats: DatabaseStats? = null,
     val brands: List<Brand> = emptyList(),
     /** iOS `@AppStorage("defaultBrandId")` に相当。空文字は「すべて」。 */
@@ -43,8 +46,10 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun load() {
         viewModelScope.launch {
-            val schemaVersion = statsRepo.fetchMetaValue("schema_version") ?: "不明"
-            val dataVersion = statsRepo.fetchMetaValue("data_version") ?: "不明"
+            val schemaVersion = statsRepo.fetchMetaValue("schema_version")?.let { DisplayText.Verbatim(it) }
+                ?: L10n.Settings.dataUnknown
+            val dataVersion = statsRepo.fetchMetaValue("data_version")?.let { DisplayText.Verbatim(it) }
+                ?: L10n.Settings.dataUnknown
             val databaseStats = statsRepo.fetchDatabaseStats()
             val brands = statsRepo.fetchBrands()
             val pickIdols = module.userMarkRepository.pickedIdols()

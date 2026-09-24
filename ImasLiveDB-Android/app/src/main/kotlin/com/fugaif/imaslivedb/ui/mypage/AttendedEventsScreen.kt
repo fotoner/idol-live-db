@@ -45,6 +45,9 @@ import com.fugaif.imaslivedb.data.model.AttendanceType
 import com.fugaif.imaslivedb.data.model.EventWithDateRange
 import com.fugaif.imaslivedb.data.repository.AttendedEventTypeSets
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.ImasLeadBar
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
@@ -88,8 +91,8 @@ class AttendedEventsViewModel(app: Application) : AndroidViewModel(app) {
 private enum class AttendanceFilter(private val type: AttendanceType?) {
     ALL(null), LIVE(AttendanceType.LIVE), STREAM(AttendanceType.STREAM), LIVE_VIEWING(AttendanceType.LIVE_VIEWING);
 
-    /** 形態の語はコアの vocabulary ([AttendanceType.label])。 */
-    val label: String get() = type?.label ?: "すべて"
+    /** 形態の語はコアの vocabulary ([AttendanceType.label])。「すべて」だけアプリの文言。 */
+    val label: DisplayText get() = type?.let { DisplayText.Core(it.label) } ?: L10n.Mypage.attendedFilterAll
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -127,10 +130,10 @@ fun AttendedEventsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("参加したライブ", fontWeight = FontWeight.Bold) },
+                title = { Text(L10n.Mypage.attendedTitle.resolve(), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 }
             )
@@ -138,7 +141,7 @@ fun AttendedEventsScreen(
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding).background(DS.bg)) {
             ImasSegmented(
-                labels = filters.map { it.label },
+                labels = filters.map { it.label.resolve() },
                 selection = safeIndex,
                 onSelect = { filterIndex = it },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)
@@ -153,10 +156,10 @@ fun AttendedEventsScreen(
                     ImasEmptyState(
                         icon = Icons.Filled.EventBusy,
                         title = when (filter) {
-                            AttendanceFilter.STREAM -> "配信参加のライブがありません"
-                            AttendanceFilter.LIVE_VIEWING -> "ライブビューイング参加のライブがありません"
-                            else -> "現地参加のライブがありません"
-                        }
+                            AttendanceFilter.STREAM -> L10n.Mypage.attendedEmptyStream
+                            AttendanceFilter.LIVE_VIEWING -> L10n.Mypage.attendedEmptyLiveViewing
+                            else -> L10n.Mypage.attendedEmptyLive
+                        }.resolve()
                     )
                 }
             } else {

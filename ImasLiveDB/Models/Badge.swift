@@ -5,13 +5,14 @@ import SwiftUI
 enum BadgeTier: String, Codable, Sendable, CaseIterable {
     case none, bronze, silver, gold, platinum
 
-    var label: String {
+    /// 段階の表示名 (カタログの文言)。保存・判定は rawValue (英字) で行う。
+    var label: LocalizedStringResource {
         switch self {
-        case .none: return "なし"
-        case .bronze: return "ブロンズ"
-        case .silver: return "シルバー"
-        case .gold: return "ゴールド"
-        case .platinum: return "プラチナ"
+        case .none: return L10n.Mypage.badgeTierNone
+        case .bronze: return L10n.Mypage.badgeTierBronze
+        case .silver: return L10n.Mypage.badgeTierSilver
+        case .gold: return L10n.Mypage.badgeTierGold
+        case .platinum: return L10n.Mypage.badgeTierPlatinum
         }
     }
 

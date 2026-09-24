@@ -32,14 +32,15 @@ enum BackupError: LocalizedError {
         }
     }
 
+    /// 画面に出す文言 (カタログ)。errorDescription は OS への出口なのでここで一度だけ解決する。
     var errorDescription: String? {
         switch self {
         case .malformedFile:
-            return "ファイルの形式が正しくありません"
+            return String(localized: L10n.Settings.backupErrorMalformed)
         case .checksumMismatch:
-            return "データが破損しています"
+            return String(localized: L10n.Settings.backupErrorChecksum)
         case .unsupportedSchemaVersion(let v):
-            return "対応していないバックアップ形式です (schemaVersion: \(v))"
+            return String(localized: L10n.Settings.backupErrorUnsupportedSchema(version: v))
         }
     }
 }

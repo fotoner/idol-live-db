@@ -9,7 +9,7 @@ struct InboxView: View {
         NavigationStack {
             Group {
                 if AnnouncementCatalog.all.isEmpty {
-                    ImasEmptyState(systemImage: "bell.slash", title: "お知らせはありません")
+                    ImasEmptyState(systemImage: "bell.slash", title: String(localized: L10n.Settings.inboxEmpty))
                 } else {
                     List {
                         ForEach(AnnouncementCatalog.all) { a in
@@ -27,18 +27,20 @@ struct InboxView: View {
                 }
             }
             .background(DS.bg)
-            .navigationTitle("お知らせ")
+            .navigationTitle(L10n.Settings.inboxTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("すべて既読") {
+                    Button {
                         AppAnalytics.tap("inbox.mark_all_read")
                         store.markAllRead()
+                    } label: {
+                        Text(L10n.Settings.inboxMarkAllRead)
                     }
                     .disabled(store.unreadCount == 0)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("閉じる") { dismiss() }
+                    Button { dismiss() } label: { Text(L10n.Settings.actionClose) }
                 }
             }
             .trackScreen("inbox")
@@ -104,7 +106,7 @@ private struct AnnouncementDetailView: View {
                     NavigationLink {
                         WidgetHowToView()
                     } label: {
-                        Label("使い方を見る", systemImage: "arrow.right.circle.fill")
+                        Label(L10n.Settings.inboxWidgetHowTo, systemImage: "arrow.right.circle.fill")
                             .font(.imasHeadline)
                             .frame(maxWidth: .infinity)
                             .padding()
@@ -118,7 +120,7 @@ private struct AnnouncementDetailView: View {
         }
         .scrollContentBackground(.hidden)
         .background(DS.bg)
-        .navigationTitle("お知らせ")
+        .navigationTitle(L10n.Settings.inboxTitle)
         .navigationBarTitleDisplayMode(.inline)
         .task { store.markRead(announcement.id) }
     }

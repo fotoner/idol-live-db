@@ -1,0 +1,387 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "mypage",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/data/community/LocalContributionLog.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/mypage/"
+    ],
+    "ios": [
+      "ImasLiveDB/Models/Badge.swift",
+      "ImasLiveDB/Services/LocalContributionLog.swift",
+      "ImasLiveDB/Views/MyPage/AttendedEventsListView.swift",
+      "ImasLiveDB/Views/MyPage/FavoritesListView.swift",
+      "ImasLiveDB/Views/MyPage/MyContributionsView.swift",
+      "ImasLiveDB/Views/MyPage/MyEditsView.swift"
+    ]
+  },
+  "strings": {
+    "attended.count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}件",
+      "ko": "{count}건",
+      "note": "参加したライブ一覧の件数 (リストの節の見出し)。1000 以上は桁区切りが付く (1,234件)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "attended.empty.live": {
+      "ja": "現地参加のライブがありません",
+      "ko": "현장에서 참가한 라이브가 없어요",
+      "note": "参加したライブ一覧で「現地」(または「すべて」) に 1 件も無いときの空状態"
+    },
+    "attended.empty.live_viewing": {
+      "ja": "ライブビューイング参加のライブがありません",
+      "ko": "라이브 뷰잉으로 참가한 라이브가 없어요",
+      "note": "参加したライブ一覧で「ライブビューイング」(映画館での中継) に 1 件も無いときの空状態"
+    },
+    "attended.empty.stream": {
+      "ja": "配信参加のライブがありません",
+      "ko": "스트리밍으로 참가한 라이브가 없어요",
+      "note": "参加したライブ一覧で「配信」に 1 件も無いときの空状態"
+    },
+    "attended.filter.all": {
+      "ja": "すべて",
+      "ko": "전체",
+      "note": "参加したライブ一覧の絞り込みセグメントの先頭 (形態で絞らない)。ほかの選択肢 (現地・配信・LV) はコアの語彙をそのまま出す"
+    },
+    "attended.title": {
+      "ja": "参加したライブ",
+      "ko": "참가한 라이브",
+      "note": "参加したライブ一覧の画面タイトル (プロデュースの「参加したライブ すべて見る」から開く)"
+    },
+    "badge.tier.bronze": {
+      "ja": "ブロンズ",
+      "ko": "브론즈",
+      "note": "貢献バッジの段階: 銅",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "badge.tier.gold": {
+      "ja": "ゴールド",
+      "ko": "골드",
+      "note": "貢献バッジの段階: 金",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "badge.tier.none": {
+      "ja": "なし",
+      "ko": "없음",
+      "note": "貢献バッジの段階: まだ無い",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "badge.tier.platinum": {
+      "ja": "プラチナ",
+      "ko": "플래티넘",
+      "note": "貢献バッジの段階: 最上位",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "badge.tier.silver": {
+      "ja": "シルバー",
+      "ko": "실버",
+      "note": "貢献バッジの段階: 銀",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "contributions.breakdown.header": {
+      "ja": "内訳",
+      "ko": "내역",
+      "note": "投稿の種類ごとの件数を並べる節の見出し"
+    },
+    "contributions.edits_link.caption": {
+      "ja": "ライブ・楽曲・セトリの編集履歴",
+      "ko": "라이브·곡·세트리스트 편집 기록",
+      "note": "上の行の補足 (何の編集が並ぶか)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "contributions.edits_link.title": {
+      "ja": "自分の編集を確認・取り消す",
+      "ko": "내 편집 확인·되돌리기",
+      "note": "マイ投稿の画面から自分の編集一覧へ進む行の見出し。取り消す = サーバに記録された編集を元に戻す",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "contributions.help": {
+      "ja": "セトリ編集・動画追加・タグ追加が累計に含まれます。再インストールするとカウントはリセットされます (端末ローカル記録)。",
+      "ko": "세트리스트 편집·영상 추가·태그 추가가 누적 횟수에 포함돼요. 다시 설치하면 횟수가 초기화돼요 (기기에만 기록).",
+      "note": "マイ投稿の画面の下の注意書き。数は端末にだけ記録している"
+    },
+    "contributions.kind.setlist_edit": {
+      "ja": "セトリ編集",
+      "ko": "세트리스트 편집",
+      "note": "投稿の種類: セットリストの編集"
+    },
+    "contributions.kind.tag": {
+      "ja": "タグ",
+      "ko": "태그",
+      "note": "投稿の種類: タグの追加"
+    },
+    "contributions.kind.video": {
+      "ja": "動画",
+      "ko": "영상",
+      "note": "投稿の種類: 参考動画の追加"
+    },
+    "contributions.title": {
+      "ja": "マイ投稿",
+      "ko": "내 게시물",
+      "note": "自分の投稿累計の画面タイトル (プロデュースの「投稿」タイルから開く)。投稿 = セトリ編集・動画追加・タグ追加"
+    },
+    "contributions.total_caption": {
+      "ja": "コミュニティへの投稿累計",
+      "ko": "커뮤니티에 올린 누적 게시물",
+      "note": "累計の大きな数字の下の説明"
+    },
+    "contributions.unit": {
+      "ja": "件",
+      "ko": "건",
+      "note": "投稿の件数の右に添える単位。数字は大きく別に出すので単位だけの文言 (累計のカードと内訳の各行)"
+    },
+    "edits.action.revert": {
+      "ja": "取り消す",
+      "ko": "되돌리기",
+      "note": "編集を取り消す (編集前に戻す) ボタン。各行のボタンと確認ダイアログの実行ボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "edits.empty.message": {
+      "ja": "ライブ・楽曲・セトリを編集すると、ここに履歴が残り、後から取り消せます。",
+      "ko": "라이브·곡·세트리스트를 편집하면 여기에 기록이 남고, 나중에 되돌릴 수 있어요.",
+      "note": "自分の編集が 1 件も無いときの空状態の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "edits.empty.title": {
+      "ja": "まだ編集がありません",
+      "ko": "아직 편집이 없어요",
+      "note": "自分の編集が 1 件も無いときの空状態の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "edits.error.auth_expired": {
+      "ja": "認証の有効期限が切れています。再度サインインしてください。",
+      "ko": "인증이 만료됐어요. 다시 로그인해 주세요.",
+      "note": "取り消しでログインの期限切れが分かったとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "edits.error.conflict": {
+      "ja": "別のユーザーがこの後に編集したため取り消せませんでした。",
+      "ko": "다른 사용자가 그 뒤에 편집해서 되돌리지 못했어요.",
+      "note": "取り消そうとした編集の後に別の人の編集があって、取り消せなかったとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "edits.error.load_failed": {
+      "args": [
+        {
+          "name": "detail",
+          "type": "string"
+        }
+      ],
+      "ja": "読み込みに失敗しました: {detail}",
+      "ko": "불러오지 못했어요: {detail}",
+      "note": "自分の編集一覧の読み込みが失敗したとき。detail = OS やサーバのエラー文",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "edits.error.rate_limited": {
+      "ja": "操作が多すぎます。しばらく待ってからお試しください。",
+      "ko": "요청이 너무 많아요. 잠시 기다린 뒤 다시 시도해 주세요.",
+      "note": "自分の編集一覧の読み込みがレート制限 (429) に当たったとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "edits.error.revert_failed": {
+      "args": [
+        {
+          "name": "detail",
+          "type": "string"
+        }
+      ],
+      "ja": "取り消しに失敗しました: {detail}",
+      "ko": "되돌리지 못했어요: {detail}",
+      "note": "取り消しの通信が失敗したとき。detail = OS やサーバのエラー文",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "edits.error.revert_outcome": {
+      "args": [
+        {
+          "name": "outcome",
+          "type": "string"
+        }
+      ],
+      "ja": "取り消せませんでした ({outcome})。",
+      "ko": "되돌리지 못했어요 ({outcome}).",
+      "note": "取り消しがほかの理由で行われなかったとき。outcome = サーバの結果の表示名 (管理者画面と共用の語。今は訳さずそのまま出る)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "edits.error.title": {
+      "ja": "エラー",
+      "ko": "오류",
+      "note": "自分の編集一覧で失敗したときのアラートの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "edits.loading": {
+      "ja": "読み込み中...",
+      "ko": "불러오는 중...",
+      "note": "自分の編集一覧の最初の読み込み中の表示",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "edits.revert.cancel": {
+      "ja": "やめる",
+      "ko": "취소",
+      "note": "取り消しの確認ダイアログで何もしないで閉じるボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "edits.revert.confirm_message": {
+      "args": [
+        {
+          "name": "summary",
+          "type": "string"
+        }
+      ],
+      "ja": "「{summary}」を編集前の状態に戻します。この操作も履歴に記録されます。",
+      "ko": "“{summary}” 항목을 편집 전 상태로 되돌려요. 이 작업도 기록에 남아요.",
+      "note": "取り消しの確認ダイアログの本文。summary = 編集の要約 (サーバの文言) か、無ければ記録の種類名",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "edits.revert.confirm_title": {
+      "ja": "この編集を取り消しますか？",
+      "ko": "이 편집을 되돌릴까요?",
+      "note": "編集を取り消す前の確認ダイアログの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "edits.row.reverted": {
+      "ja": "差戻し済み",
+      "ko": "되돌림 완료",
+      "note": "取り消し済みの編集の行に付く小さなバッジ。編集履歴のバッジ (edit_feed.badge.reverted) と訳をそろえる",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "edits.title": {
+      "ja": "自分の編集",
+      "ko": "내 편집",
+      "note": "自分の編集一覧の画面タイトル。サーバに記録された編集を後から取り消せる",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "favorites.events.count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}件",
+      "ko": "{count}건",
+      "note": "お気に入りのライブの件数 (リストの節の見出し)。1000 以上は桁区切りが付く",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "favorites.events.empty": {
+      "ja": "お気に入りのライブがありません",
+      "ko": "즐겨찾기한 라이브가 없어요",
+      "note": "お気に入りのライブが 1 つも無いときの空状態"
+    },
+    "favorites.idols.count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}人",
+      "ko": "{count}명",
+      "note": "お気に入りのアイドルの人数 (リストの節の見出し)。1000 以上は桁区切りが付く",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "favorites.idols.empty": {
+      "ja": "お気に入りのアイドルがいません",
+      "ko": "즐겨찾기한 아이돌이 없어요",
+      "note": "お気に入りのアイドルが 1 人もいないときの空状態"
+    },
+    "favorites.songs.count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}曲",
+      "ko": "{count}곡",
+      "note": "お気に入りの曲の数 (リストの節の見出し)。1000 以上は桁区切りが付く (1,234曲)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "favorites.songs.empty": {
+      "ja": "お気に入りの曲がありません",
+      "ko": "즐겨찾기한 곡이 없어요",
+      "note": "お気に入りの曲が 1 つも無いときの空状態"
+    },
+    "favorites.tab.events": {
+      "ja": "ライブ",
+      "ko": "라이브",
+      "note": "お気に入り一覧のセグメント: ライブ (イベント)"
+    },
+    "favorites.tab.idols": {
+      "ja": "アイドル",
+      "ko": "아이돌",
+      "note": "お気に入り一覧のセグメント: アイドル"
+    },
+    "favorites.tab.songs": {
+      "ja": "曲",
+      "ko": "곡",
+      "note": "お気に入り一覧のセグメント: 曲"
+    },
+    "favorites.title": {
+      "ja": "お気に入り",
+      "ko": "즐겨찾기",
+      "note": "お気に入り一覧の画面タイトル (プロデュースの「お気に入り」タイルから開く)"
+    }
+  }
+}

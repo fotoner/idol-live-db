@@ -5,19 +5,27 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import com.fugaif.imaslivedb.data.image.BulkImageImporter
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** 一括インポート/型紙の対象。UI 文言・ファイル名・呼ぶ API がこれで決まる。 */
+/**
+ * 一括インポート/型紙の対象。UI 文言・ファイル名・呼ぶ API がこれで決まる。
+ * 文言は対象ごとに文全体をカタログに置く (「{対象}画像を…」と語をつなげない)。
+ */
 enum class ImageImportTarget(
-    val label: String,
+    /** 取り込みボタン (「アイドル画像をインポート」など)。 */
+    val importButton: DisplayText,
+    /** URL を入れるダイアログの見出し (「アイドル画像の一括インポート」など)。 */
+    val dialogTitle: DisplayText,
     val templateFileName: String,
 ) {
-    IDOL("アイドル", "idol_images_template.json"),
-    BRAND("ブランド", "brand_images_template.json"),
-    UNIT("ユニット", "unit_images_template.json"),
+    IDOL(L10n.Settings.imageImportIdolButtonAndroid, L10n.Settings.imageImportIdolDialogTitleAndroid, "idol_images_template.json"),
+    BRAND(L10n.Settings.imageImportBrandButton, L10n.Settings.imageImportBrandDialogTitleAndroid, "brand_images_template.json"),
+    UNIT(L10n.Settings.imageImportUnitButton, L10n.Settings.imageImportUnitDialogTitleAndroid, "unit_images_template.json"),
 }
 
 /**

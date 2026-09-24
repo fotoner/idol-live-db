@@ -40,6 +40,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
 
@@ -65,14 +67,14 @@ fun InboxScreen(onBack: () -> Unit, onOpenWidgetHowTo: (() -> Unit)? = null) {
         containerColor = DS.bg,
         topBar = {
             TopAppBar(
-                title = { Text("お知らせ", fontWeight = FontWeight.Bold) },
+                title = { Text(L10n.Settings.inboxTitle.resolve(), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 },
                 actions = {
-                    TextButton(onClick = { store.markAllRead(); generation++ }) { Text("すべて既読") }
+                    TextButton(onClick = { store.markAllRead(); generation++ }) { Text(L10n.Settings.inboxMarkAllRead.resolve()) }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = DS.bg, titleContentColor = DS.ink,
@@ -153,7 +155,7 @@ private fun AnnouncementDetail(
                     title = { Text(item.title, fontWeight = FontWeight.Bold, fontSize = 17.sp) },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -173,7 +175,7 @@ private fun AnnouncementDetail(
                     Text(paragraph, fontSize = 14.sp, color = DS.ink, lineHeight = 22.sp)
                 }
                 if (item.link == AnnouncementLink.WIDGET_HOW_TO && onOpenWidgetHowTo != null) {
-                    TextButton(onClick = onOpenWidgetHowTo) { Text("ウィジェットの使い方を見る") }
+                    TextButton(onClick = onOpenWidgetHowTo) { Text(L10n.Settings.inboxWidgetHowToAndroid.resolve()) }
                 }
             }
         }

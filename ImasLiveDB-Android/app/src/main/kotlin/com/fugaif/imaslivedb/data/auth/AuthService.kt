@@ -335,6 +335,7 @@ class AuthService(
         withContext(Dispatchers.IO) {
             // 保存先が開けない端末では、セッションを持てないのでサインインを完了させない。
             val prefs = prefs ?: return@withContext Result.failure(
+                // i18n-ignore(log): 例外メッセージ (診断用)。signIn() の呼び出し側は Result を捨てるので画面に出ない
                 IllegalStateException("この端末ではサインイン情報を保存できません")
             )
             try {

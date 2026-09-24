@@ -79,6 +79,10 @@ import com.fugaif.imaslivedb.data.notification.NotificationPrefs
 import com.fugaif.imaslivedb.data.notification.NotificationScheduler
 import com.fugaif.imaslivedb.data.sync.CloudKitSyncEngine
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.coreText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import coil3.compose.AsyncImage
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
 import com.fugaif.imaslivedb.ui.theme.AppPreferences
@@ -111,7 +115,7 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("設定") })
+            TopAppBar(title = { Text(L10n.Settings.screenTitle.resolve()) })
         }
     ) { innerPadding ->
         if (state.isLoading) {
@@ -137,14 +141,14 @@ fun SettingsScreen(
 
             // アカウント (投票に必要)
             item {
-                SettingsSectionTitle("アカウント")
+                SettingsSectionTitle(L10n.Settings.accountHeader)
                 AccountSection()
                 HorizontalDivider()
             }
 
             // フィルタ設定
             item {
-                SettingsSectionTitle("フィルタ設定")
+                SettingsSectionTitle(L10n.Settings.filterHeader)
                 DefaultBrandPicker(
                     brands = state.brands,
                     selectedBrandId = state.defaultBrandId,
@@ -155,58 +159,58 @@ fun SettingsScreen(
 
             // 表示 (文字サイズ・ライブ名の省略)
             item {
-                SettingsSectionTitle("表示")
+                SettingsSectionTitle(L10n.Settings.displayHeader)
                 DisplaySettingsSection()
                 HorizontalDivider()
             }
 
             // 習熟度の段階 (ラベルの好みは人によるので触れるようにする)
             item {
-                SettingsSectionTitle("習熟度")
+                SettingsSectionTitle(L10n.Settings.masteryHeader)
                 MasteryScaleSection()
                 HorizontalDivider()
             }
 
             // 披露回収の対象
             item {
-                SettingsSectionTitle("披露回収")
+                SettingsSectionTitle(L10n.Settings.collectionHeader)
                 CollectionSettingsSection()
                 HorizontalDivider()
             }
 
             // テーマ (担当カラー)
             item {
-                SettingsSectionTitle("テーマ")
+                SettingsSectionTitle(L10n.Settings.themeHeader)
                 OshiThemeSection(viewModel, state)
                 HorizontalDivider()
             }
 
             // 通知
             item {
-                SettingsSectionTitle("通知")
+                SettingsSectionTitle(L10n.Settings.notificationsHeader)
                 NotificationSection()
                 HorizontalDivider()
             }
 
             // データ
             item {
-                SettingsSectionTitle("データ")
-                SettingsInfoRow("スキーマバージョン", state.schemaVersion)
-                SettingsInfoRow("データバージョン", state.dataVersion)
+                SettingsSectionTitle(L10n.Settings.dataHeader)
+                SettingsInfoRow(L10n.Settings.dataSchemaVersion.resolve(), state.schemaVersion.resolve())
+                SettingsInfoRow(L10n.Settings.dataDataVersion.resolve(), state.dataVersion.resolve())
                 DataSyncSection()
                 HorizontalDivider()
             }
 
             // バックアップ
             item {
-                SettingsSectionTitle("バックアップ")
+                SettingsSectionTitle(L10n.Settings.backupHeader)
                 BackupSection()
                 HorizontalDivider()
             }
 
             // キャラクター画像 (端末ローカル)
             item {
-                SettingsSectionTitle("キャラクター画像")
+                SettingsSectionTitle(L10n.Settings.imageImportHeaderAndroid)
                 ImageImportSection()
                 HorizontalDivider()
             }
@@ -214,46 +218,46 @@ fun SettingsScreen(
             // データ統計
             state.databaseStats?.let { stats ->
                 item {
-                    SettingsSectionTitle("データ統計")
-                    SettingsInfoRow("楽曲数", "${stats.songCount}曲")
-                    SettingsInfoRow("アイドル数", "${stats.idolCount}人")
-                    SettingsInfoRow("イベント数", "${stats.eventCount}件")
-                    SettingsInfoRow("公演数", "${stats.showCount}公演")
+                    SettingsSectionTitle(L10n.Settings.statsHeader)
+                    SettingsInfoRow(L10n.Settings.statsSongsLabel.resolve(), L10n.Settings.statsSongsValue(count = stats.songCount).resolve())
+                    SettingsInfoRow(L10n.Settings.statsIdolsLabel.resolve(), L10n.Settings.statsIdolsValue(count = stats.idolCount).resolve())
+                    SettingsInfoRow(L10n.Settings.statsEventsLabel.resolve(), L10n.Settings.statsEventsValue(count = stats.eventCount).resolve())
+                    SettingsInfoRow(L10n.Settings.statsShowsLabel.resolve(), L10n.Settings.statsShowsValue(count = stats.showCount).resolve())
                     HorizontalDivider()
                 }
             }
 
             // クレジット
             item {
-                SettingsSectionTitle("クレジット")
-                CreditText("本アプリは株式会社バンダイナムコエンターテインメント様とは一切関係のない非公式ファンメイドアプリです。")
-                CreditText("アイドルのプロフィール(CV/カラー等): im@sparql (https://sparql.crssnky.xyz/imas/)")
-                CreditText("楽曲・ライブ等のデータ参照元: アイマスDB (https://imas-db.jp/)")
-                CreditText("楽曲・ライブセトリのデータ参照元: music765plus (https://music765plus.com/)")
-                CreditText("アイドルのイメージカラー: imas-palette (https://github.com/arrow2nd/imas-palette)")
-                CreditText("※各情報源のデータは独自に集計・整形して利用しています")
+                SettingsSectionTitle(L10n.Settings.creditsHeader)
+                CreditText(L10n.Settings.creditsUnofficialAndroid.resolve())
+                CreditText(L10n.Settings.creditsSourceSparql.resolve())
+                CreditText(L10n.Settings.creditsSourceImasDb.resolve())
+                CreditText(L10n.Settings.creditsSourceMusic765plus.resolve())
+                CreditText(L10n.Settings.creditsSourcePalette.resolve())
+                CreditText(L10n.Settings.creditsNote.resolve())
                 val version = try {
                     context.packageManager.getPackageInfo(context.packageName, 0).versionName
                 } catch (_: PackageManager.NameNotFoundException) {
                     null
                 }
-                version?.let { SettingsInfoRow("アプリバージョン", it) }
+                version?.let { SettingsInfoRow(L10n.Settings.creditsAppVersion.resolve(), it) }
                 HorizontalDivider()
             }
 
             // アプリ情報
             item {
-                SettingsSectionTitle("アプリ情報")
-                SettingsNavRow("使い方") { infoScreen = SettingsInfoScreen.HELP }
-                SettingsNavRow("お知らせ") { infoScreen = SettingsInfoScreen.INBOX }
-                SettingsNavRow("プライバシーポリシー") { infoScreen = SettingsInfoScreen.PRIVACY }
-                SettingsNavRow("利用規約") { infoScreen = SettingsInfoScreen.TERMS }
-                SettingsNavRow("サポート") { infoScreen = SettingsInfoScreen.SUPPORT }
-                SettingsNavRow("オープンソースライセンス") { infoScreen = SettingsInfoScreen.LICENSES }
-                SettingsNavRow("開発をサポートする") {
+                SettingsSectionTitle(L10n.Settings.appInfoHeader)
+                SettingsNavRow(L10n.Settings.appInfoHelp.resolve()) { infoScreen = SettingsInfoScreen.HELP }
+                SettingsNavRow(L10n.Settings.appInfoInbox.resolve()) { infoScreen = SettingsInfoScreen.INBOX }
+                SettingsNavRow(L10n.Settings.appInfoPrivacy.resolve()) { infoScreen = SettingsInfoScreen.PRIVACY }
+                SettingsNavRow(L10n.Settings.appInfoTerms.resolve()) { infoScreen = SettingsInfoScreen.TERMS }
+                SettingsNavRow(L10n.Settings.appInfoSupport.resolve()) { infoScreen = SettingsInfoScreen.SUPPORT }
+                SettingsNavRow(L10n.Settings.appInfoLicenses.resolve()) { infoScreen = SettingsInfoScreen.LICENSES }
+                SettingsNavRow(L10n.Settings.appInfoDonate.resolve()) {
                     context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://ko-fi.com/fugaapp")))
                 }
-                SettingsNavRow("アプリを評価する") {
+                SettingsNavRow(L10n.Settings.appInfoRate.resolve()) {
                     val marketIntent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${context.packageName}")).apply {
                         setPackage("com.android.vending")
                     }
@@ -273,7 +277,7 @@ fun SettingsScreen(
 
             // 開発者
             item {
-                SettingsSectionTitle("開発者")
+                SettingsSectionTitle(L10n.Settings.developerHeader)
                 DeveloperSection()
                 HorizontalDivider()
             }
@@ -330,8 +334,9 @@ private fun DefaultBrandPicker(
     onBrandSelected: (String?) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val allItems = listOf(null to "すべて") + brands.map { it.id to it.shortName }
-    val selectedLabel = brands.find { it.id == selectedBrandId }?.shortName ?: "すべて"
+    val allLabel = L10n.Settings.defaultBrandAll.resolve()
+    val allItems = listOf(null to allLabel) + brands.map { it.id to it.shortName }
+    val selectedLabel = brands.find { it.id == selectedBrandId }?.shortName ?: allLabel
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -344,7 +349,7 @@ private fun DefaultBrandPicker(
             value = selectedLabel,
             onValueChange = {},
             readOnly = true,
-            label = { Text("デフォルトブランド") },
+            label = { Text(L10n.Settings.defaultBrandLabel.resolve()) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
@@ -408,11 +413,12 @@ private fun DataSyncSection() {
     ) {
         Text(
             text = when (val s = state) {
-                is CloudKitSyncEngine.SyncState.Idle -> "待機中"
-                is CloudKitSyncEngine.SyncState.Syncing -> "同期中 (${s.step}/${s.total}) ${s.label}"
-                is CloudKitSyncEngine.SyncState.Completed -> "完了 (${s.fetched}件)"
-                is CloudKitSyncEngine.SyncState.Error -> "失敗: ${s.message}"
-            },
+                is CloudKitSyncEngine.SyncState.Idle -> L10n.Settings.syncStateIdle
+                // label は取っているデータの種類 (コアの語)
+                is CloudKitSyncEngine.SyncState.Syncing -> L10n.Settings.syncStateSyncing(step = s.step, total = s.total, label = s.label)
+                is CloudKitSyncEngine.SyncState.Completed -> L10n.Settings.syncStateCompleted(count = s.fetched)
+                is CloudKitSyncEngine.SyncState.Error -> L10n.Settings.syncStateError(message = s.message)
+            }.resolve(),
             fontSize = 13.sp, color = DS.ink2, modifier = Modifier.weight(1f)
         )
         if (syncing) CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = DS.sys)
@@ -422,16 +428,16 @@ private fun DataSyncSection() {
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         TextButton(onClick = { engine.requestSync() }, enabled = !syncing) {
-            Text("差分更新")
+            Text(L10n.Settings.syncIncremental.resolve())
         }
         TextButton(onClick = { engine.requestFullSync() }, enabled = !syncing) {
-            Text("全データ同期")
+            Text(L10n.Settings.syncFull.resolve())
         }
     }
 }
 
 @Composable
-private fun SettingsSectionTitle(title: String) {
+private fun SettingsSectionTitle(title: DisplayText) {
     com.fugaif.imaslivedb.ui.components.ImasSectionHeader(title = title, tight = true)
 }
 
@@ -454,45 +460,45 @@ private fun AccountSection(viewModel: AccountViewModel = viewModel()) {
         if (authState.isSignedIn) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    authState.displayName?.takeIf { it.isNotBlank() } ?: "ログイン済み",
+                    authState.displayName?.takeIf { it.isNotBlank() } ?: L10n.Settings.accountSignedInFallback.resolve(),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.weight(1f, fill = false)
                 )
                 IconButton(onClick = viewModel::startEditingName) {
-                    Icon(Icons.Filled.Edit, contentDescription = "表示名を変更", modifier = Modifier.size(18.dp))
+                    Icon(Icons.Filled.Edit, contentDescription = L10n.Settings.accountEditNameA11y.resolve(), modifier = Modifier.size(18.dp))
                 }
             }
             OutlinedButton(
                 onClick = viewModel::signOut,
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-            ) { Text("ログアウト") }
+            ) { Text(L10n.Settings.accountSignOut.resolve()) }
             Button(
                 onClick = { showDeleteConfirm = true },
                 enabled = !state.isDeleting,
                 colors = ButtonDefaults.buttonColors(containerColor = DS.danger),
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-            ) { Text(if (state.isDeleting) "削除中..." else "アカウントを削除") }
+            ) { Text((if (state.isDeleting) L10n.Settings.accountDeleteDeleting else L10n.Settings.accountDeleteButton).resolve()) }
         } else {
             Text(
-                "投票 (お題) にはログインが必要です",
+                L10n.Settings.accountSignInPromptAndroid.resolve(),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Button(
                 onClick = { scope.launch { authService.signIn(context) } },
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-            ) { Text("Googleでログイン") }
+            ) { Text(L10n.Settings.accountGoogleSignIn.resolve()) }
         }
     }
 
     state.editingName?.let { editingName ->
         AlertDialog(
             onDismissRequest = viewModel::cancelEditingName,
-            title = { Text("表示名を変更") },
+            title = { Text(L10n.Settings.accountEditNameTitle.resolve()) },
             text = {
                 Column {
                     Text(
-                        "コミュニティ投稿で表示される名前です (${inputLimitMax(InputField.DISPLAY_NAME)}文字以内)",
+                        L10n.Settings.accountEditNameMessage(max = inputLimitMax(InputField.DISPLAY_NAME).toInt()).resolve(),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -508,10 +514,12 @@ private fun AccountSection(viewModel: AccountViewModel = viewModel()) {
                 TextButton(
                     enabled = inputIsAcceptable(InputField.DISPLAY_NAME, editingName) && !state.isSavingName,
                     onClick = viewModel::saveName
-                ) { Text("保存") }
+                ) { Text(L10n.Settings.actionSave.resolve()) }
             },
             dismissButton = {
-                TextButton(onClick = viewModel::cancelEditingName, enabled = !state.isSavingName) { Text("キャンセル") }
+                TextButton(onClick = viewModel::cancelEditingName, enabled = !state.isSavingName) {
+                    Text(L10n.Settings.actionCancel.resolve())
+                }
             }
         )
     }
@@ -519,8 +527,8 @@ private fun AccountSection(viewModel: AccountViewModel = viewModel()) {
     state.nameError?.let { message ->
         AlertDialog(
             onDismissRequest = viewModel::dismissNameError,
-            title = { Text("表示名の保存に失敗") },
-            text = { Text(message) },
+            title = { Text(L10n.Settings.accountEditNameErrorTitle.resolve()) },
+            text = { Text(message.resolve()) },
             confirmButton = { TextButton(onClick = viewModel::dismissNameError) { Text("OK") } }
         )
     }
@@ -528,23 +536,23 @@ private fun AccountSection(viewModel: AccountViewModel = viewModel()) {
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("アカウントを削除しますか?") },
-            text = { Text("サーバー上のあなたの編集・Good・投票・ユーザー情報がすべて削除され、サインアウトされます。この操作は取り消せません。") },
+            title = { Text(L10n.Settings.accountDeleteConfirmTitle.resolve()) },
+            text = { Text(L10n.Settings.accountDeleteConfirmMessageAndroid.resolve()) },
             confirmButton = {
                 TextButton(onClick = {
                     showDeleteConfirm = false
                     viewModel.deleteAccount()
-                }) { Text("削除する", color = DS.danger) }
+                }) { Text(L10n.Settings.accountDeleteConfirm.resolve(), color = DS.danger) }
             },
-            dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text("キャンセル") } }
+            dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text(L10n.Settings.actionCancel.resolve()) } }
         )
     }
 
     state.deleteError?.let { message ->
         AlertDialog(
             onDismissRequest = viewModel::dismissDeleteError,
-            title = { Text("削除に失敗しました") },
-            text = { Text(message) },
+            title = { Text(L10n.Settings.accountDeleteErrorTitle.resolve()) },
+            text = { Text(message.resolve()) },
             confirmButton = { TextButton(onClick = viewModel::dismissDeleteError) { Text("OK") } }
         )
     }
@@ -595,8 +603,7 @@ private fun ImageImportSection(viewModel: ImageImportViewModel = viewModel()) {
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
         Text(
-            "「名前 → 画像URL」の JSON を指定すると、アイコン画像をまとめて取り込めます。" +
-                "画像はこの端末の中だけに保存され、サーバーには送信されません。",
+            L10n.Settings.imageImportIntro.resolve(),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -611,13 +618,13 @@ private fun ImageImportSection(viewModel: ImageImportViewModel = viewModel()) {
                     onClick = { urlTarget = target; urlText = "" },
                     enabled = !state.isImporting,
                     modifier = Modifier.weight(1f)
-                ) { Text("${target.label}画像をインポート") }
+                ) { Text(target.importButton.resolve()) }
                 TextButton(
                     onClick = {
                         templateTarget = target
                         saveTemplateLauncher.launch(target.templateFileName)
                     }
-                ) { Text("型紙", fontSize = 13.sp) }
+                ) { Text(L10n.Settings.imageImportTemplate.resolve(), fontSize = 13.sp) }
             }
         }
 
@@ -627,22 +634,25 @@ private fun ImageImportSection(viewModel: ImageImportViewModel = viewModel()) {
                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
             )
         }
-        if (state.statusMessage.isNotEmpty()) {
+        state.statusMessage?.let { status ->
             Text(
-                state.statusMessage, fontSize = 13.sp, color = DS.ink2,
+                status.resolve(), fontSize = 13.sp, color = DS.ink2,
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
         // 失敗内訳は「名前が DB に無い」等ユーザーが型紙を直せる情報なので、件数だけでなく中身も出す。
         if (state.failures.isNotEmpty()) {
             Column(modifier = Modifier.padding(top = 4.dp)) {
-                Text("失敗内訳 (${state.failures.size} 件)", fontSize = 12.sp,
+                Text(L10n.Settings.imageImportFailures(count = state.failures.size).resolve(), fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold, color = DS.warning)
                 state.failures.take(MAX_SHOWN_FAILURES).forEach { failure ->
-                    Text("${failure.key}: ${failure.reason}", fontSize = 11.sp, color = DS.ink3)
+                    Text("${failure.key}: ${failure.reason.resolve()}", fontSize = 11.sp, color = DS.ink3)
                 }
                 if (state.failures.size > MAX_SHOWN_FAILURES) {
-                    Text("ほか ${state.failures.size - MAX_SHOWN_FAILURES} 件", fontSize = 11.sp, color = DS.ink3)
+                    Text(
+                        L10n.Settings.imageImportFailuresMore(count = state.failures.size - MAX_SHOWN_FAILURES).resolve(),
+                        fontSize = 11.sp, color = DS.ink3
+                    )
                 }
             }
         }
@@ -651,24 +661,24 @@ private fun ImageImportSection(viewModel: ImageImportViewModel = viewModel()) {
             onClick = { showClearConfirm = true },
             enabled = !state.isImporting,
             modifier = Modifier.padding(top = 4.dp)
-        ) { Text("カスタム画像をすべて削除", color = DS.danger) }
+        ) { Text(L10n.Settings.imageImportClearAndroid.resolve(), color = DS.danger) }
     }
 
     urlTarget?.let { target ->
         AlertDialog(
             onDismissRequest = { urlTarget = null },
-            title = { Text("${target.label}画像の一括インポート") },
+            title = { Text(target.dialogTitle.resolve()) },
             text = {
                 Column {
                     Text(
-                        "{ \"名前\": \"画像URL\" } 形式の JSON を置いた URL を入力してください。",
+                        L10n.Settings.imageImportDialogMessage.resolve(),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     OutlinedTextField(
                         value = urlText,
                         onValueChange = { urlText = it },
-                        label = { Text("JSON の URL") },
+                        label = { Text(L10n.Settings.imageImportUrlLabel.resolve()) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                     )
@@ -681,24 +691,24 @@ private fun ImageImportSection(viewModel: ImageImportViewModel = viewModel()) {
                         urlTarget = null
                     },
                     enabled = urlText.isNotBlank()
-                ) { Text("インポート") }
+                ) { Text(L10n.Settings.actionImport.resolve()) }
             },
-            dismissButton = { TextButton(onClick = { urlTarget = null }) { Text("キャンセル") } }
+            dismissButton = { TextButton(onClick = { urlTarget = null }) { Text(L10n.Settings.actionCancel.resolve()) } }
         )
     }
 
     if (showClearConfirm) {
         AlertDialog(
             onDismissRequest = { showClearConfirm = false },
-            title = { Text("カスタム画像をすべて削除") },
-            text = { Text("取り込んだアイドル・ユニット・ブランドの画像をすべて消します。元に戻せません。") },
+            title = { Text(L10n.Settings.imageImportClearConfirmTitle.resolve()) },
+            text = { Text(L10n.Settings.imageImportClearConfirmMessage.resolve()) },
             confirmButton = {
                 TextButton(onClick = {
                     showClearConfirm = false
                     viewModel.clearAll()
-                }) { Text("削除", color = DS.danger) }
+                }) { Text(L10n.Settings.imageImportClearConfirmAction.resolve(), color = DS.danger) }
             },
-            dismissButton = { TextButton(onClick = { showClearConfirm = false }) { Text("キャンセル") } }
+            dismissButton = { TextButton(onClick = { showClearConfirm = false }) { Text(L10n.Settings.actionCancel.resolve()) } }
         )
     }
 }
@@ -743,7 +753,7 @@ private fun BackupSection(viewModel: BackupViewModel = viewModel()) {
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
         Text(
-            "機種変更やアプリの再インストール時に、お気に入り・担当・投票履歴を引き継げます",
+            L10n.Settings.backupIntro.resolve(),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -753,7 +763,7 @@ private fun BackupSection(viewModel: BackupViewModel = viewModel()) {
             onClick = { viewModel.createTransferCode() },
             enabled = !state.isCreatingCode,
             modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
-        ) { Text(if (state.isCreatingCode) "発行中..." else "引き継ぎコードを発行する") }
+        ) { Text((if (state.isCreatingCode) L10n.Settings.backupCodeIssuing else L10n.Settings.backupCodeIssue).resolve()) }
 
         state.transferCode?.let { result ->
             val clipboardManager = remember(context) {
@@ -777,7 +787,7 @@ private fun BackupSection(viewModel: BackupViewModel = viewModel()) {
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
                 Text(
-                    "長押しでコピー・24時間有効・1回のみ使用可能です",
+                    L10n.Settings.backupCodeHint.resolve(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
@@ -791,14 +801,14 @@ private fun BackupSection(viewModel: BackupViewModel = viewModel()) {
             value = state.codeInput,
             onValueChange = viewModel::setCodeInput,
             singleLine = true,
-            label = { Text("引き継ぎコード") },
+            label = { Text(L10n.Settings.backupCodeField.resolve()) },
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
         )
         Button(
             onClick = { viewModel.restoreFromTransferCode(restoreDeviceId) },
             enabled = !state.isRestoringCode && state.codeInput.isNotBlank(),
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-        ) { Text(if (state.isRestoringCode) "復元中..." else "引き継ぎコードで復元する") }
+        ) { Text((if (state.isRestoringCode) L10n.Settings.backupCodeRestoring else L10n.Settings.backupCodeRestoreAndroid).resolve()) }
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
 
@@ -807,12 +817,12 @@ private fun BackupSection(viewModel: BackupViewModel = viewModel()) {
             onClick = { exportLauncher.launch("imas-live-backup.json") },
             enabled = !state.isExporting,
             modifier = Modifier.fillMaxWidth()
-        ) { Text(if (state.isExporting) "書き出し中..." else "ファイルに保存する") }
+        ) { Text((if (state.isExporting) L10n.Settings.backupFileSaving else L10n.Settings.backupFileSave).resolve()) }
         OutlinedButton(
             onClick = { importLauncher.launch(arrayOf("application/json", "text/plain", "*/*")) },
             enabled = !state.isImportingFile,
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-        ) { Text(if (state.isImportingFile) "読み込み中..." else "ファイルから復元する") }
+        ) { Text((if (state.isImportingFile) L10n.Settings.backupFileLoading else L10n.Settings.backupFileRestore).resolve()) }
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -820,7 +830,7 @@ private fun BackupSection(viewModel: BackupViewModel = viewModel()) {
         ) {
             Checkbox(checked = restoreDeviceId, onCheckedChange = { restoreDeviceId = it })
             Text(
-                "復元時に端末IDも引き継ぐ (上級者向け・通常はオフ)",
+                L10n.Settings.backupRestoreDeviceIdAndroid.resolve(),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -830,8 +840,8 @@ private fun BackupSection(viewModel: BackupViewModel = viewModel()) {
     state.transferError?.let { message ->
         AlertDialog(
             onDismissRequest = viewModel::dismissTransferError,
-            title = { Text("発行に失敗しました") },
-            text = { Text(message) },
+            title = { Text(L10n.Settings.backupCodeErrorTitleAndroid.resolve()) },
+            text = { Text(message.resolve()) },
             confirmButton = { TextButton(onClick = viewModel::dismissTransferError) { Text("OK") } }
         )
     }
@@ -839,8 +849,9 @@ private fun BackupSection(viewModel: BackupViewModel = viewModel()) {
     state.importSummary?.let { summary ->
         AlertDialog(
             onDismissRequest = viewModel::dismissImportResult,
-            title = { Text("復元が完了しました") },
-            text = { Text(summary) },
+            title = { Text(L10n.Settings.backupRestoreDoneTitleAndroid.resolve()) },
+            // 本文 (何がどれだけ入ったか) はコアが組み立てる
+            text = { Text(coreText(summary)) },
             confirmButton = { TextButton(onClick = viewModel::dismissImportResult) { Text("OK") } }
         )
     }
@@ -848,8 +859,8 @@ private fun BackupSection(viewModel: BackupViewModel = viewModel()) {
     state.importError?.let { message ->
         AlertDialog(
             onDismissRequest = viewModel::dismissImportError,
-            title = { Text("復元に失敗しました") },
-            text = { Text(message) },
+            title = { Text(L10n.Settings.backupRestoreFailedTitle.resolve()) },
+            text = { Text(message.resolve()) },
             confirmButton = { TextButton(onClick = viewModel::dismissImportError) { Text("OK") } }
         )
     }
@@ -894,7 +905,7 @@ private fun NotificationSection() {
     }
 
     if (!enabled) {
-        SettingsNavRow("通知を許可する") {
+        SettingsNavRow(L10n.Settings.notificationsRequest.resolve()) {
             // Android 13+ はランタイム権限のダイアログ。ただし 2 回拒否済みだと
             // ダイアログが出ずに即 denied で返るので、その場合は下の導線に切り替える。
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -906,24 +917,24 @@ private fun NotificationSection() {
         }
         if (permissionDenied) {
             Text(
-                "通知が拒否されています。システムの通知設定から許可してください。",
+                L10n.Settings.notificationsDeniedAndroid.resolve(),
                 style = MaterialTheme.typography.bodySmall,
                 color = DS.warning,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
-            SettingsNavRow("システムの通知設定を開く") {
+            SettingsNavRow(L10n.Settings.notificationsOpenSystemSettings.resolve()) {
                 context.startActivity(appNotificationSettingsIntent(context))
             }
         }
         return
     }
 
-    NotificationToggleRow("担当アイドルの誕生日", prefs, NotificationCategory.OSHI_BIRTHDAY, scope)
-    NotificationToggleRow("ライブ1週間前", prefs, NotificationCategory.LIVE_WEEK, scope)
-    NotificationToggleRow("チケット締切・当落通知", prefs, NotificationCategory.TICKET, scope)
-    NotificationToggleRow("月曜が近いことを知らせる (日曜 20:00)", prefs, NotificationCategory.MONDAY, scope)
+    NotificationToggleRow(L10n.Settings.notificationsOshiBirthday.resolve(), prefs, NotificationCategory.OSHI_BIRTHDAY, scope)
+    NotificationToggleRow(L10n.Settings.notificationsLiveWeek.resolve(), prefs, NotificationCategory.LIVE_WEEK, scope)
+    NotificationToggleRow(L10n.Settings.notificationsTicket.resolve(), prefs, NotificationCategory.TICKET, scope)
+    NotificationToggleRow(L10n.Settings.notificationsMonday.resolve(), prefs, NotificationCategory.MONDAY, scope)
     Text(
-        "お気に入りまたは参加マークしたイベントにライブ前・チケット通知を送ります。",
+        L10n.Settings.notificationsFooter.resolve(),
         style = MaterialTheme.typography.bodySmall,
         color = DS.ink2,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -1004,9 +1015,14 @@ private fun AppHeader() {
             modifier = Modifier.size(56.dp).clip(RoundedCornerShape(14.dp))
         )
         Column {
-            Text("アイドルライブDB", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+            // アプリ名はランチャーの名前と同じ文言 (system.app.display_name)
+            Text(L10n.System.appDisplayName.resolve(), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DS.ink)
             Text(
-                if (versionCode != null) "バージョン $versionName (Build $versionCode)" else "バージョン $versionName",
+                (if (versionCode != null) {
+                    L10n.Settings.headerVersionBuild(version = versionName, build = versionCode.toInt())
+                } else {
+                    L10n.Settings.headerVersion(version = versionName)
+                }).resolve(),
                 fontSize = 12.sp,
                 color = DS.ink2
             )
@@ -1017,8 +1033,10 @@ private fun AppHeader() {
 /** 歌唱者の表示サンプル (実データの 1 人)。設定を切り替えた見え方をその場で見せる。 */
 private val performerNameSample = PerformerRow(
     id = "sample",
+    // i18n-ignore(sample): 声優名の見本 (固有名詞。訳さない)
     name = "下田麻美",
     idolColor = null,
+    // i18n-ignore(sample): アイドル名の見本 (固有名詞。訳さない)
     idolName = "双海亜美",
     idolId = null
 )
@@ -1027,9 +1045,13 @@ private val performerNameSample = PerformerRow(
 @Composable
 private fun DisplaySettingsSection() {
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("文字サイズ", style = MaterialTheme.typography.bodyMedium, color = DS.ink)
+        Text(L10n.Settings.textScaleLabel.resolve(), style = MaterialTheme.typography.bodyMedium, color = DS.ink)
         ImasSegmented(
-            labels = AppPreferences.textScaleLabels,
+            // 選択肢の名前は AppPreferences.textScaleOptions と同じ順 (極小 / 小 / 中 / 大 / 特大)
+            labels = listOf(
+                L10n.Settings.textScaleXsmall, L10n.Settings.textScaleSmall, L10n.Settings.textScaleMedium,
+                L10n.Settings.textScaleLarge, L10n.Settings.textScaleXlarge
+            ).map { it.resolve() },
             // 保存値が選択肢に無い (将来値を足した/減らした) 場合は「中」に倒す。
             selection = AppPreferences.textScaleOptions.indexOf(AppPreferences.textScale)
                 .takeIf { it >= 0 } ?: AppPreferences.textScaleOptions.indexOf(1.0f),
@@ -1039,12 +1061,13 @@ private fun DisplaySettingsSection() {
         // プレビュー: この設定画面の文字自体も倍率が効くので、実データ風の文字で
         // 「一覧がどう見えるか」を確かめられるようにする。
         Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.padding(top = 4.dp)) {
-            Text("プレビュー", fontSize = 11.sp, color = DS.ink2)
+            Text(L10n.Settings.textScalePreview.resolve(), fontSize = 11.sp, color = DS.ink2)
             Text("Timeless Shooting Star", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
+            // i18n-ignore(sample): 文字サイズの見本 (ユニット名と、コアが出す歌唱者の語を模したセトリの行)
             Text("ストレイライト ・ 全員", fontSize = 11.sp, color = DS.ink2)
         }
         Text(
-            "OS のフォントサイズ設定に掛け合わせた倍率です。",
+            L10n.Settings.textScaleCaption.resolve(),
             style = MaterialTheme.typography.bodySmall,
             color = DS.ink2
         )
@@ -1052,7 +1075,7 @@ private fun DisplaySettingsSection() {
     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("セトリの歌唱者", style = MaterialTheme.typography.bodyMedium, color = DS.ink)
+        Text(L10n.Settings.performerNameLabel.resolve(), style = MaterialTheme.typography.bodyMedium, color = DS.ink)
         // 選択肢はコアが出す (順も文言もアプリ 1 本)。
         val options = PerformerNamePref.options
         ImasSegmented(
@@ -1072,7 +1095,7 @@ private fun DisplaySettingsSection() {
     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
     SettingsToggleRow(
-        label = "ライブ名を省略表示",
+        label = L10n.Settings.eventNameAbbreviateLabel.resolve(),
         checked = AppPreferences.abbreviateEventNames,
         onCheckedChange = { AppPreferences.setAbbreviateEventNames(it) }
     )
@@ -1090,13 +1113,12 @@ private fun DisplaySettingsSection() {
 private fun CollectionSettingsSection() {
     val context = LocalContext.current
     SettingsToggleRow(
-        label = "配信参加も回収に含める",
+        label = L10n.Settings.collectionIncludeStream.resolve(),
         checked = AppPreferences.includeStreamInCollection,
         onCheckedChange = { AppPreferences.setIncludeStreamInCollection(context, it) }
     )
     Text(
-        "回収はリアルライブ (ライブ/フェス) の現地参加のみが対象です。" +
-            "配信でしか観られない方は、配信参加も回収に含められます。",
+        L10n.Settings.collectionFooterAndroid.resolve(),
         style = MaterialTheme.typography.bodySmall,
         color = DS.ink2,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -1108,7 +1130,7 @@ private fun CollectionSettingsSection() {
 @Composable
 private fun OshiThemeSection(viewModel: SettingsViewModel, state: SettingsUiState) {
     SettingsToggleRow(
-        label = "担当の色をテーマに使う",
+        label = L10n.Settings.themeUseOshiColor.resolve(),
         checked = AppPreferences.useOshiColor,
         onCheckedChange = {
             AppPreferences.setUseOshiColor(it)
@@ -1120,7 +1142,7 @@ private fun OshiThemeSection(viewModel: SettingsViewModel, state: SettingsUiStat
     if (AppPreferences.useOshiColor) {
         if (state.pickIdols.isEmpty()) {
             Text(
-                "アイドル詳細で担当 (推し) に設定すると、ここで色を選べます。",
+                L10n.Settings.themeNoPicksAndroid.resolve(),
                 style = MaterialTheme.typography.bodySmall,
                 color = DS.ink2,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -1134,10 +1156,10 @@ private fun OshiThemeSection(viewModel: SettingsViewModel, state: SettingsUiStat
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 OutlinedTextField(
-                    value = selected?.name ?: "未選択",
+                    value = selected?.name ?: L10n.Settings.themeNotSelected.resolve(),
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("テーマにする担当") },
+                    label = { Text(L10n.Settings.themePickerLabel.resolve()) },
                     leadingIcon = {
                         Box(
                             modifier = Modifier
@@ -1175,7 +1197,7 @@ private fun OshiThemeSection(viewModel: SettingsViewModel, state: SettingsUiStat
         }
     }
     Text(
-        "ON にすると、選んだ担当のイメージカラーがアプリ全体のアクセントカラーになります。",
+        L10n.Settings.themeFooterAndroid.resolve(),
         style = MaterialTheme.typography.bodySmall,
         color = DS.ink2,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -1186,12 +1208,12 @@ private fun OshiThemeSection(viewModel: SettingsViewModel, state: SettingsUiStat
 @Composable
 private fun DeveloperSection() {
     val context = LocalContext.current
-    SettingsInfoRow("開発", "fuga-if")
+    SettingsInfoRow(L10n.Settings.developerLabel.resolve(), "fuga-if")
     SettingsNavRow("GitHub (fuga-if)") {
         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/fuga-if")))
     }
     Text(
-        "非公式のファンメイドアプリです。データの誤りや要望は GitHub Issue からお知らせください。",
+        L10n.Settings.developerNote.resolve(),
         style = MaterialTheme.typography.bodySmall,
         color = DS.ink2,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -1264,13 +1286,13 @@ private fun MasteryScaleSection() {
                     TextButton(onClick = {
                         labels = labels.dropLast(1)
                         AppPreferences.setMasteryLabels(labels)
-                    }) { Text("削除") }
+                    }) { Text(L10n.Settings.masteryRemoveLevel.resolve()) }
                 }
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (labels.size < 8) {
-                TextButton(onClick = { labels = labels + "" }) { Text("段を追加") }
+                TextButton(onClick = { labels = labels + "" }) { Text(L10n.Settings.masteryAddLevel.resolve()) }
             }
             Spacer(Modifier.weight(1f))
             TextButton(
@@ -1278,11 +1300,10 @@ private fun MasteryScaleSection() {
                 enabled = labels.all { it.isNotBlank() } &&
                     labels.map { it.trim() }.toSet().size == labels.size &&
                     labels != AppPreferences.masteryScale.labels,
-            ) { Text("この段階にする") }
+            ) { Text(L10n.Settings.masteryApply.resolve()) }
         }
         Text(
-            "下から順に積み上がります。段を減らすと、その段の曲は 1 つ下に移ります (記録は消えません)。" +
-                "どのラベルも 4 文字以内にしておくと一覧で切れません。",
+            L10n.Settings.masteryHelp.resolve(),
             style = MaterialTheme.typography.bodySmall,
             color = DS.ink2
         )

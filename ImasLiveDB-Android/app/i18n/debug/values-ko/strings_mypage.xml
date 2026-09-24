@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/mypage.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources>
+    <string name="mypage_attended_empty_live">현장에서 참가한 라이브가 없어요</string>
+    <string name="mypage_attended_empty_live_viewing">라이브 뷰잉으로 참가한 라이브가 없어요</string>
+    <string name="mypage_attended_empty_stream">스트리밍으로 참가한 라이브가 없어요</string>
+    <string name="mypage_attended_filter_all">전체</string>
+    <string name="mypage_attended_title">참가한 라이브</string>
+    <string name="mypage_contributions_breakdown_header">내역</string>
+    <string name="mypage_contributions_help">세트리스트 편집·영상 추가·태그 추가가 누적 횟수에 포함돼요. 다시 설치하면 횟수가 초기화돼요 (기기에만 기록).</string>
+    <string name="mypage_contributions_kind_setlist_edit">세트리스트 편집</string>
+    <string name="mypage_contributions_kind_tag">태그</string>
+    <string name="mypage_contributions_kind_video">영상</string>
+    <string name="mypage_contributions_title">내 게시물</string>
+    <string name="mypage_contributions_total_caption">커뮤니티에 올린 누적 게시물</string>
+    <string name="mypage_contributions_unit">건</string>
+    <string name="mypage_favorites_events_empty">즐겨찾기한 라이브가 없어요</string>
+    <string name="mypage_favorites_idols_empty">즐겨찾기한 아이돌이 없어요</string>
+    <string name="mypage_favorites_songs_empty">즐겨찾기한 곡이 없어요</string>
+    <string name="mypage_favorites_tab_events">라이브</string>
+    <string name="mypage_favorites_tab_idols">아이돌</string>
+    <string name="mypage_favorites_tab_songs">곡</string>
+    <string name="mypage_favorites_title">즐겨찾기</string>
+</resources>

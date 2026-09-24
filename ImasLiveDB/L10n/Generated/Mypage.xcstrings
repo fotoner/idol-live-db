@@ -1,0 +1,980 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "mypage.attended.count" : {
+      "comment" : "参加したライブ一覧の件数 (リストの節の見出し)。1000 以上は桁区切りが付く (1,234件) (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg件"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg건"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mypage.attended.empty.live" : {
+      "comment" : "参加したライブ一覧で「現地」(または「すべて」) に 1 件も無いときの空状態 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現地参加のライブがありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "현장에서 참가한 라이브가 없어요"
+          }
+        }
+      }
+    },
+    "mypage.attended.empty.live_viewing" : {
+      "comment" : "参加したライブ一覧で「ライブビューイング」(映画館での中継) に 1 件も無いときの空状態 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブビューイング参加のライブがありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브 뷰잉으로 참가한 라이브가 없어요"
+          }
+        }
+      }
+    },
+    "mypage.attended.empty.stream" : {
+      "comment" : "参加したライブ一覧で「配信」に 1 件も無いときの空状態 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配信参加のライブがありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "스트리밍으로 참가한 라이브가 없어요"
+          }
+        }
+      }
+    },
+    "mypage.attended.filter.all" : {
+      "comment" : "参加したライブ一覧の絞り込みセグメントの先頭 (形態で絞らない)。ほかの選択肢 (現地・配信・LV) はコアの語彙をそのまま出す (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "mypage.attended.title" : {
+      "comment" : "参加したライブ一覧の画面タイトル (プロデュースの「参加したライブ すべて見る」から開く) (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加したライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가한 라이브"
+          }
+        }
+      }
+    },
+    "mypage.badge.tier.bronze" : {
+      "comment" : "貢献バッジの段階: 銅 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブロンズ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브론즈"
+          }
+        }
+      }
+    },
+    "mypage.badge.tier.gold" : {
+      "comment" : "貢献バッジの段階: 金 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゴールド"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "골드"
+          }
+        }
+      }
+    },
+    "mypage.badge.tier.none" : {
+      "comment" : "貢献バッジの段階: まだ無い (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "なし"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "없음"
+          }
+        }
+      }
+    },
+    "mypage.badge.tier.platinum" : {
+      "comment" : "貢献バッジの段階: 最上位 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プラチナ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "플래티넘"
+          }
+        }
+      }
+    },
+    "mypage.badge.tier.silver" : {
+      "comment" : "貢献バッジの段階: 銀 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シルバー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "실버"
+          }
+        }
+      }
+    },
+    "mypage.contributions.breakdown.header" : {
+      "comment" : "投稿の種類ごとの件数を並べる節の見出し (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "内訳"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "내역"
+          }
+        }
+      }
+    },
+    "mypage.contributions.edits_link.caption" : {
+      "comment" : "上の行の補足 (何の編集が並ぶか) (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ・楽曲・セトリの編集履歴"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브·곡·세트리스트 편집 기록"
+          }
+        }
+      }
+    },
+    "mypage.contributions.edits_link.title" : {
+      "comment" : "マイ投稿の画面から自分の編集一覧へ進む行の見出し。取り消す = サーバに記録された編集を元に戻す (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分の編集を確認・取り消す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "내 편집 확인·되돌리기"
+          }
+        }
+      }
+    },
+    "mypage.contributions.help" : {
+      "comment" : "マイ投稿の画面の下の注意書き。数は端末にだけ記録している (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリ編集・動画追加・タグ追加が累計に含まれます。再インストールするとカウントはリセットされます (端末ローカル記録)。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 편집·영상 추가·태그 추가가 누적 횟수에 포함돼요. 다시 설치하면 횟수가 초기화돼요 (기기에만 기록)."
+          }
+        }
+      }
+    },
+    "mypage.contributions.kind.setlist_edit" : {
+      "comment" : "投稿の種類: セットリストの編集 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリ編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 편집"
+          }
+        }
+      }
+    },
+    "mypage.contributions.kind.tag" : {
+      "comment" : "投稿の種類: タグの追加 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그"
+          }
+        }
+      }
+    },
+    "mypage.contributions.kind.video" : {
+      "comment" : "投稿の種類: 参考動画の追加 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "動画"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "영상"
+          }
+        }
+      }
+    },
+    "mypage.contributions.title" : {
+      "comment" : "自分の投稿累計の画面タイトル (プロデュースの「投稿」タイルから開く)。投稿 = セトリ編集・動画追加・タグ追加 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイ投稿"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "내 게시물"
+          }
+        }
+      }
+    },
+    "mypage.contributions.total_caption" : {
+      "comment" : "累計の大きな数字の下の説明 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コミュニティへの投稿累計"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "커뮤니티에 올린 누적 게시물"
+          }
+        }
+      }
+    },
+    "mypage.contributions.unit" : {
+      "comment" : "投稿の件数の右に添える単位。数字は大きく別に出すので単位だけの文言 (累計のカードと内訳の各行) (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "件"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "건"
+          }
+        }
+      }
+    },
+    "mypage.edits.action.revert" : {
+      "comment" : "編集を取り消す (編集前に戻す) ボタン。各行のボタンと確認ダイアログの実行ボタン (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取り消す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "되돌리기"
+          }
+        }
+      }
+    },
+    "mypage.edits.empty.message" : {
+      "comment" : "自分の編集が 1 件も無いときの空状態の説明 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ・楽曲・セトリを編集すると、ここに履歴が残り、後から取り消せます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브·곡·세트리스트를 편집하면 여기에 기록이 남고, 나중에 되돌릴 수 있어요."
+          }
+        }
+      }
+    },
+    "mypage.edits.empty.title" : {
+      "comment" : "自分の編集が 1 件も無いときの空状態の見出し (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだ編集がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 편집이 없어요"
+          }
+        }
+      }
+    },
+    "mypage.edits.error.auth_expired" : {
+      "comment" : "取り消しでログインの期限切れが分かったとき (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "認証の有効期限が切れています。再度サインインしてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "인증이 만료됐어요. 다시 로그인해 주세요."
+          }
+        }
+      }
+    },
+    "mypage.edits.error.conflict" : {
+      "comment" : "取り消そうとした編集の後に別の人の編集があって、取り消せなかったとき (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "別のユーザーがこの後に編集したため取り消せませんでした。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다른 사용자가 그 뒤에 편집해서 되돌리지 못했어요."
+          }
+        }
+      }
+    },
+    "mypage.edits.error.load_failed" : {
+      "comment" : "自分の編集一覧の読み込みが失敗したとき。detail = OS やサーバのエラー文 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "読み込みに失敗しました: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "불러오지 못했어요: %1$@"
+          }
+        }
+      }
+    },
+    "mypage.edits.error.rate_limited" : {
+      "comment" : "自分の編集一覧の読み込みがレート制限 (429) に当たったとき (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "操作が多すぎます。しばらく待ってからお試しください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "요청이 너무 많아요. 잠시 기다린 뒤 다시 시도해 주세요."
+          }
+        }
+      }
+    },
+    "mypage.edits.error.revert_failed" : {
+      "comment" : "取り消しの通信が失敗したとき。detail = OS やサーバのエラー文 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取り消しに失敗しました: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "되돌리지 못했어요: %1$@"
+          }
+        }
+      }
+    },
+    "mypage.edits.error.revert_outcome" : {
+      "comment" : "取り消しがほかの理由で行われなかったとき。outcome = サーバの結果の表示名 (管理者画面と共用の語。今は訳さずそのまま出る) (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取り消せませんでした (%1$@)。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "되돌리지 못했어요 (%1$@)."
+          }
+        }
+      }
+    },
+    "mypage.edits.error.title" : {
+      "comment" : "自分の編集一覧で失敗したときのアラートの見出し (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エラー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오류"
+          }
+        }
+      }
+    },
+    "mypage.edits.loading" : {
+      "comment" : "自分の編集一覧の最初の読み込み中の表示 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "読み込み中..."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "불러오는 중..."
+          }
+        }
+      }
+    },
+    "mypage.edits.revert.cancel" : {
+      "comment" : "取り消しの確認ダイアログで何もしないで閉じるボタン (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "やめる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "취소"
+          }
+        }
+      }
+    },
+    "mypage.edits.revert.confirm_message" : {
+      "comment" : "取り消しの確認ダイアログの本文。summary = 編集の要約 (サーバの文言) か、無ければ記録の種類名 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」を編集前の状態に戻します。この操作も履歴に記録されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@” 항목을 편집 전 상태로 되돌려요. 이 작업도 기록에 남아요."
+          }
+        }
+      }
+    },
+    "mypage.edits.revert.confirm_title" : {
+      "comment" : "編集を取り消す前の確認ダイアログの見出し (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この編集を取り消しますか？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 편집을 되돌릴까요?"
+          }
+        }
+      }
+    },
+    "mypage.edits.row.reverted" : {
+      "comment" : "取り消し済みの編集の行に付く小さなバッジ。編集履歴のバッジ (edit_feed.badge.reverted) と訳をそろえる (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "差戻し済み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "되돌림 완료"
+          }
+        }
+      }
+    },
+    "mypage.edits.title" : {
+      "comment" : "自分の編集一覧の画面タイトル。サーバに記録された編集を後から取り消せる (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分の編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "내 편집"
+          }
+        }
+      }
+    },
+    "mypage.favorites.events.count" : {
+      "comment" : "お気に入りのライブの件数 (リストの節の見出し)。1000 以上は桁区切りが付く (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg件"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg건"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mypage.favorites.events.empty" : {
+      "comment" : "お気に入りのライブが 1 つも無いときの空状態 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入りのライブがありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기한 라이브가 없어요"
+          }
+        }
+      }
+    },
+    "mypage.favorites.idols.count" : {
+      "comment" : "お気に入りのアイドルの人数 (リストの節の見出し)。1000 以上は桁区切りが付く (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg人"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg명"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mypage.favorites.idols.empty" : {
+      "comment" : "お気に入りのアイドルが 1 人もいないときの空状態 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入りのアイドルがいません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기한 아이돌이 없어요"
+          }
+        }
+      }
+    },
+    "mypage.favorites.songs.count" : {
+      "comment" : "お気に入りの曲の数 (リストの節の見出し)。1000 以上は桁区切りが付く (1,234曲) (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mypage.favorites.songs.empty" : {
+      "comment" : "お気に入りの曲が 1 つも無いときの空状態 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入りの曲がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기한 곡이 없어요"
+          }
+        }
+      }
+    },
+    "mypage.favorites.tab.events" : {
+      "comment" : "お気に入り一覧のセグメント: ライブ (イベント) (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브"
+          }
+        }
+      }
+    },
+    "mypage.favorites.tab.idols" : {
+      "comment" : "お気に入り一覧のセグメント: アイドル (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌"
+          }
+        }
+      }
+    },
+    "mypage.favorites.tab.songs" : {
+      "comment" : "お気に入り一覧のセグメント: 曲 (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡"
+          }
+        }
+      }
+    },
+    "mypage.favorites.title" : {
+      "comment" : "お気に入り一覧の画面タイトル (プロデュースの「お気に入り」タイルから開く) (i18n/catalog/mypage.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入り"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -9,6 +9,8 @@ import com.fugaif.imaslivedb.data.backup.BackupImportResult
 import com.fugaif.imaslivedb.data.backup.BackupTransferException
 import com.fugaif.imaslivedb.data.backup.TransferCodeResult
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,14 +23,16 @@ import uniffi.imas_core.backupImportSummary
 data class BackupUiState(
     val isCreatingCode: Boolean = false,
     val transferCode: TransferCodeResult? = null,
-    val transferError: String? = null,
+    /** 引き継ぎコードを発行できなかったときの本文。画面で resolve する。 */
+    val transferError: DisplayText? = null,
     val codeInput: String = "",
     val isRestoringCode: Boolean = false,
     val isExporting: Boolean = false,
     val isImportingFile: Boolean = false,
     /** 復元の結果の文面 (何がどれだけ入ったか。組み立てはコア)。null = 出していない。 */
     val importSummary: String? = null,
-    val importError: String? = null
+    /** 復元 (と書き出し) に失敗したときの本文。画面で resolve する。 */
+    val importError: DisplayText? = null
 )
 
 /**
@@ -56,9 +60,9 @@ class BackupViewModel(app: Application) : AndroidViewModel(app) {
                 val code = module.backupTransferApi.createTransferCode(exportJson())
                 _uiState.update { it.copy(transferCode = code) }
             } catch (e: BackupTransferException) {
-                _uiState.update { it.copy(transferError = e.message) }
+                _uiState.update { it.copy(transferError = e.userMessage) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(transferError = "発行に失敗しました") }
+                _uiState.update { it.copy(transferError = L10n.Settings.backupCodeErrorMessage) }
             } finally {
                 _uiState.update { it.copy(isCreatingCode = false) }
             }
@@ -94,7 +98,7 @@ class BackupViewModel(app: Application) : AndroidViewModel(app) {
                     }
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(importError = "書き出しに失敗しました") }
+                _uiState.update { it.copy(importError = L10n.Settings.backupFileExportFailed) }
             } finally {
                 _uiState.update { it.copy(isExporting = false) }
             }
@@ -109,7 +113,7 @@ class BackupViewModel(app: Application) : AndroidViewModel(app) {
                 val json = withContext(Dispatchers.IO) {
                     getApplication<Application>().contentResolver.openInputStream(uri)
                         ?.bufferedReader()?.use { it.readText() }
-                } ?: throw BackupFormatException("ファイルを読み込めませんでした")
+                } ?: throw BackupFormatException(BackupFormatException.Reason.UNREADABLE_FILE)
                 val result = importJson(json, restoreDeviceId)
                 _uiState.update { it.copy(importSummary = summaryOf(result)) }
             } catch (e: Exception) {
@@ -128,10 +132,10 @@ class BackupViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun reportImportFailure(e: Exception) {
         val message = when (e) {
-            is BackupFormatException -> e.message
-            is BackupTransferException -> e.message
-            else -> null
-        } ?: "読み込みに失敗しました"
+            is BackupFormatException -> e.userMessage
+            is BackupTransferException -> e.userMessage
+            else -> L10n.Settings.backupRestoreFailedMessage
+        }
         _uiState.update { it.copy(importError = message) }
     }
 

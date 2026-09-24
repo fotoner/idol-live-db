@@ -15,11 +15,12 @@ final class LocalContributionLog {
         case video          // 動画
         case tag            // タグ追加
 
-        var label: String {
+        /// 種類の表示名 (カタログの文言)。保存は rawValue (英字) で行う。
+        var label: LocalizedStringResource {
             switch self {
-            case .setlistEdit:  return "セトリ編集"
-            case .video:        return "動画"
-            case .tag:          return "タグ"
+            case .setlistEdit:  return L10n.Mypage.contributionsKindSetlistEdit
+            case .video:        return L10n.Mypage.contributionsKindVideo
+            case .tag:          return L10n.Mypage.contributionsKindTag
             }
         }
         var systemImage: String {

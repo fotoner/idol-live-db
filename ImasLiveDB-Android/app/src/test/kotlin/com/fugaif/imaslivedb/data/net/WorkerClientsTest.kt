@@ -8,6 +8,7 @@ import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.data.community.DeviceIdentity
 import com.fugaif.imaslivedb.data.community.SetlistLikeService
 import com.fugaif.imaslivedb.data.edit.EditApi
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.testing.FakeWorkerTransport
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -82,13 +83,17 @@ class WorkerClientsTest {
         }
     }
 
+    /**
+     * 例外は理由だけを持ち、利用者に見せる文言は userMessage (カタログ) から引く。
+     * 既定の言語 (ja) で引いた文言が、カタログに移す前の文言と 1 バイトも違わないこと。
+     */
     @Test
     fun backupTransferKeepsItsMessages() = runBlocking {
         suspend fun message(transport: FakeWorkerTransport): String? = try {
             BackupTransferApi(http(transport)).fetchTransferCode("abcd")
             null
         } catch (e: BackupTransferException) {
-            e.message
+            e.userMessage.resolve(context)
         }
         assertEquals("コードが無効か期限切れです", message(FakeWorkerTransport { WorkerResponse(404, null) }))
         assertEquals("通信に失敗しました (HTTP 500)", message(FakeWorkerTransport { WorkerResponse(500, null) }))

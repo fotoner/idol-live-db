@@ -39,6 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.community.LocalContributionLog
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasSectionHeader
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
@@ -58,9 +60,9 @@ fun MyContributionsScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("マイ投稿", fontWeight = FontWeight.Bold) },
+                title = { Text(L10n.Mypage.contributionsTitle.resolve(), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "戻る") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, L10n.Common.actionBack.resolve()) }
                 }
             )
         }
@@ -72,7 +74,7 @@ fun MyContributionsScreen(onBack: () -> Unit) {
             SummaryCard(total = total)
             Breakdown(counts = counts)
             Text(
-                "セトリ編集・動画追加・タグ追加が累計に含まれます。再インストールするとカウントはリセットされます (端末ローカル記録)。",
+                L10n.Mypage.contributionsHelp.resolve(),
                 fontSize = 12.sp, color = DS.ink3
             )
         }
@@ -92,16 +94,17 @@ private fun SummaryCard(total: Int) {
         Spacer(Modifier.height(12.dp))
         Row(verticalAlignment = Alignment.Bottom) {
             Text("$total", fontSize = 36.sp, fontWeight = FontWeight.Bold, color = DS.ink)
-            Text("件", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink3, modifier = Modifier.padding(start = 4.dp, bottom = 4.dp))
+            Text(L10n.Mypage.contributionsUnit.resolve(), fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink3,
+                modifier = Modifier.padding(start = 4.dp, bottom = 4.dp))
         }
-        Text("コミュニティへの投稿累計", fontSize = 13.sp, color = DS.ink3, modifier = Modifier.padding(top = 4.dp))
+        Text(L10n.Mypage.contributionsTotalCaption.resolve(), fontSize = 13.sp, color = DS.ink3, modifier = Modifier.padding(top = 4.dp))
     }
 }
 
 @Composable
 private fun Breakdown(counts: Map<LocalContributionLog.Kind, Int>) {
     Column {
-        ImasSectionHeader(title = "内訳", tight = true)
+        ImasSectionHeader(title = L10n.Mypage.contributionsBreakdownHeader, tight = true)
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             LocalContributionLog.Kind.entries.forEach { kind ->
                 BreakdownRow(kind = kind, count = counts[kind] ?: 0)
@@ -125,9 +128,10 @@ private fun BreakdownRow(kind: LocalContributionLog.Kind, count: Int) {
         ) {
             Icon(kind.icon(), contentDescription = null, tint = t.accent, modifier = Modifier.size(18.dp))
         }
-        Text(kind.label, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink, modifier = Modifier.padding(start = 12.dp).weight(1f))
+        Text(kind.label.resolve(), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink,
+            modifier = Modifier.padding(start = 12.dp).weight(1f))
         Text("$count", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink)
-        Text("件", fontSize = 12.sp, color = DS.ink3, modifier = Modifier.padding(start = 2.dp))
+        Text(L10n.Mypage.contributionsUnit.resolve(), fontSize = 12.sp, color = DS.ink3, modifier = Modifier.padding(start = 2.dp))
     }
 }
 

@@ -1,0 +1,2520 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "settings.account.delete.button" : {
+      "comment" : "アカウントを削除するボタン (確認ダイアログが出る) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アカウントを削除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "계정 삭제"
+          }
+        }
+      }
+    },
+    "settings.account.delete.confirm" : {
+      "comment" : "アカウント削除の確認ダイアログの実行ボタン (赤) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "삭제"
+          }
+        }
+      }
+    },
+    "settings.account.delete.confirm_message" : {
+      "comment" : "アカウント削除の確認ダイアログの本文 (iOS)。Good = 編集への「いいね」(機能名なので訳さない)。予想 = セトリ予想 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバー上のあなたの編集・Good・予想・ユーザー情報がすべて削除され、サインアウトされます。この操作は取り消せません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "서버에 있는 내 편집·Good·예상·사용자 정보가 모두 삭제되고 로그아웃돼요. 이 작업은 되돌릴 수 없어요."
+          }
+        }
+      }
+    },
+    "settings.account.delete.confirm_title" : {
+      "comment" : "アカウント削除の確認ダイアログの見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アカウントを削除しますか?"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "계정을 삭제할까요?"
+          }
+        }
+      }
+    },
+    "settings.account.delete.error_title" : {
+      "comment" : "アカウントを削除できなかったときのダイアログの見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除に失敗しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "삭제하지 못했어요"
+          }
+        }
+      }
+    },
+    "settings.account.edit_name.a11y" : {
+      "comment" : "名前の右の鉛筆ボタンの読み上げ (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "表示名を変更"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "표시 이름 변경"
+          }
+        }
+      }
+    },
+    "settings.account.edit_name.error_rate_limited" : {
+      "comment" : "表示名の変更が 1 日の上限に達したとき (429) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日はこれ以上、表示名を変更できません。明日また試してください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오늘은 더 이상 표시 이름을 바꿀 수 없어요. 내일 다시 시도해 주세요"
+          }
+        }
+      }
+    },
+    "settings.account.edit_name.error_title" : {
+      "comment" : "表示名を保存できなかったときのダイアログの見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "表示名の保存に失敗"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "표시 이름 저장 실패"
+          }
+        }
+      }
+    },
+    "settings.account.edit_name.message" : {
+      "comment" : "表示名の変更ダイアログの説明。max = 上限の文字数 (コアが決める。今は 40 なので桁区切りは付かない) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@max@"
+          },
+          "substitutions" : {
+            "max" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "コミュニティ投稿で表示される名前です (%arg文字以内)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@max@"
+          },
+          "substitutions" : {
+            "max" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "커뮤니티 게시물에 표시되는 이름이에요 (%arg자 이내)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings.account.edit_name.placeholder" : {
+      "comment" : "表示名の入力欄のプレースホルダ (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "表示名"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "표시 이름"
+          }
+        }
+      }
+    },
+    "settings.account.edit_name.title" : {
+      "comment" : "表示名の変更ダイアログの見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "表示名を変更"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "표시 이름 변경"
+          }
+        }
+      }
+    },
+    "settings.account.header" : {
+      "comment" : "設定のアカウントの節の見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アカウント"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "계정"
+          }
+        }
+      }
+    },
+    "settings.account.sign_in_prompt" : {
+      "comment" : "未ログインのときのアカウントの節の案内 (下に Apple でサインインのボタン) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ログインするとライブ・セトリ・楽曲データの編集や Good ができます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "로그인하면 라이브·세트리스트·곡 데이터를 편집하거나 Good을 누를 수 있어요"
+          }
+        }
+      }
+    },
+    "settings.account.sign_out" : {
+      "comment" : "ログアウトボタン (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ログアウト"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "로그아웃"
+          }
+        }
+      }
+    },
+    "settings.account.user_fallback" : {
+      "comment" : "表示名がまだ無いときに名前の代わりに出す語 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユーザー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "사용자"
+          }
+        }
+      }
+    },
+    "settings.action.cancel" : {
+      "comment" : "設定画面のダイアログを閉じるボタン (表示名の変更・画像の取り込み・削除の確認など) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャンセル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "취소"
+          }
+        }
+      }
+    },
+    "settings.action.close" : {
+      "comment" : "設定・お知らせのシートを閉じるボタン (右上) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "閉じる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "닫기"
+          }
+        }
+      }
+    },
+    "settings.action.copy" : {
+      "comment" : "発行した引き継ぎコードをコピーするボタン (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "복사"
+          }
+        }
+      }
+    },
+    "settings.action.import" : {
+      "comment" : "画像の一括取り込みダイアログの実行ボタン (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インポート"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가져오기"
+          }
+        }
+      }
+    },
+    "settings.action.save" : {
+      "comment" : "表示名の変更ダイアログの保存ボタン (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "저장"
+          }
+        }
+      }
+    },
+    "settings.app_info.about" : {
+      "comment" : "アプリの紹介の画面へ進む行 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリについて"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 앱에 대해"
+          }
+        }
+      }
+    },
+    "settings.app_info.header" : {
+      "comment" : "アプリについて・規約などの節の見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリ情報"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "앱 정보"
+          }
+        }
+      }
+    },
+    "settings.app_info.privacy" : {
+      "comment" : "プライバシーポリシーの画面へ進む行 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プライバシーポリシー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "개인정보 처리방침"
+          }
+        }
+      }
+    },
+    "settings.app_info.support" : {
+      "comment" : "サポート (問い合わせ) の画面へ進む行 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サポート"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "지원"
+          }
+        }
+      }
+    },
+    "settings.app_info.terms" : {
+      "comment" : "利用規約の画面へ進む行 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "利用規約"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이용약관"
+          }
+        }
+      }
+    },
+    "settings.backup.code.error_title" : {
+      "comment" : "引き継ぎコードを発行できなかったときのアラートの見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "引き継ぎコードの発行に失敗しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이전 코드를 발급하지 못했어요"
+          }
+        }
+      }
+    },
+    "settings.backup.code.expiry" : {
+      "comment" : "発行した引き継ぎコードの下の説明。expires = 期限の日時 (表示言語で書式済み) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24時間有効・1回のみ使用可能です (期限: %1$@)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "24시간 유효·1회만 사용할 수 있어요 (기한: %1$@)"
+          }
+        }
+      }
+    },
+    "settings.backup.code.field" : {
+      "comment" : "引き継ぎコードの入力欄のプレースホルダ・ラベル (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "引き継ぎコード"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이전 코드"
+          }
+        }
+      }
+    },
+    "settings.backup.code.issue" : {
+      "comment" : "引き継ぎコード (機種変更用のワンタイムコード) を発行するボタン (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "引き継ぎコードを発行する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이전 코드 발급"
+          }
+        }
+      }
+    },
+    "settings.backup.code.issuing" : {
+      "comment" : "引き継ぎコードを発行している間の表示 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発行中..."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "발급 중..."
+          }
+        }
+      }
+    },
+    "settings.backup.code.restore" : {
+      "comment" : "入力した引き継ぎコードで復元するボタン (入力欄の右) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "復元"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "복원"
+          }
+        }
+      }
+    },
+    "settings.backup.error.checksum" : {
+      "comment" : "バックアップのチェックサムが合わないとき (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データが破損しています"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "데이터가 손상되었어요"
+          }
+        }
+      }
+    },
+    "settings.backup.error.invalid_code" : {
+      "comment" : "引き継ぎコードが無いか期限切れ (404) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コードが無効か期限切れです"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "코드가 잘못되었거나 만료되었어요"
+          }
+        }
+      }
+    },
+    "settings.backup.error.login_required" : {
+      "comment" : "引き継ぎコードの発行・復元にログインが要るとき (401) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ログインが必要です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "로그인이 필요해요"
+          }
+        }
+      }
+    },
+    "settings.backup.error.malformed" : {
+      "comment" : "バックアップの中身が読めないとき (壊れた・別の形式) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ファイルの形式が正しくありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "파일 형식이 올바르지 않아요"
+          }
+        }
+      }
+    },
+    "settings.backup.error.network" : {
+      "comment" : "引き継ぎコードの通信が失敗したとき (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通信エラーが発生しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "통신 오류가 발생했어요"
+          }
+        }
+      }
+    },
+    "settings.backup.error.server" : {
+      "comment" : "サーバーがエラー文を返さなかったときの代わりの文言 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーエラー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "서버 오류"
+          }
+        }
+      }
+    },
+    "settings.backup.error.unsupported_schema" : {
+      "comment" : "バックアップの形式の版が新しすぎて読めないとき。version = ファイルの版 (整数)。schemaVersion は項目名なので訳さない (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "対応していないバックアップ形式です (schemaVersion: %1$@)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "지원하지 않는 백업 형식이에요 (schemaVersion: %1$@)"
+          }
+        }
+      }
+    },
+    "settings.backup.export.error_title" : {
+      "comment" : "バックアップをファイルに書き出せなかったときのアラートの見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バックアップの保存に失敗しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "백업을 저장하지 못했어요"
+          }
+        }
+      }
+    },
+    "settings.backup.file.restore" : {
+      "comment" : "バックアップファイルを選んで復元するボタン (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ファイルから復元する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "파일에서 복원"
+          }
+        }
+      }
+    },
+    "settings.backup.file.save" : {
+      "comment" : "バックアップをファイルに書き出すボタン (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ファイルに保存する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "파일로 저장"
+          }
+        }
+      }
+    },
+    "settings.backup.file.share" : {
+      "comment" : "書き出したバックアップファイルを共有するボタン (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バックアップファイルを共有"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "백업 파일 공유"
+          }
+        }
+      }
+    },
+    "settings.backup.footer" : {
+      "comment" : "バックアップの節の下の説明。「端末IDも引き継ぐ」は同じ節のスイッチ (backup.restore_device_id) の名前 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当/お気に入りはiCloudで自動バックアップされていますが、これは投票履歴・端末IDも含めた手動バックアップです。機種変更やAndroid版への移行、iCloudが使えない場合にご利用ください。同一端末からの復元でない場合は「端末IDも引き継ぐ」はオフのままにしてください。引き継ぎコードの発行・復元にはログインが必要です。ファイル保存はログイン不要です。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당/즐겨찾기는 iCloud에 자동으로 백업되지만, 이 기능은 투표 기록·기기 ID까지 포함한 수동 백업이에요. 기종 변경이나 Android 버전으로 옮길 때, iCloud를 쓸 수 없을 때 이용해 주세요. 같은 기기에서 복원하는 경우가 아니면 “기기 ID도 이전”은 꺼 둔 채로 두세요. 이전 코드 발급·복원에는 로그인이 필요해요. 파일 저장은 로그인하지 않아도 돼요."
+          }
+        }
+      }
+    },
+    "settings.backup.header" : {
+      "comment" : "バックアップ (引き継ぎコード・ファイル) の節の見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バックアップ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "백업"
+          }
+        }
+      }
+    },
+    "settings.backup.restore.done_title" : {
+      "comment" : "復元が終わったときのアラートの見出し (本文は入った件数。コアが作る) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "復元しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "복원했어요"
+          }
+        }
+      }
+    },
+    "settings.backup.restore.failed_title" : {
+      "comment" : "復元できなかったときのダイアログの見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "復元に失敗しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "복원하지 못했어요"
+          }
+        }
+      }
+    },
+    "settings.backup.restore_device_id" : {
+      "comment" : "復元のときに端末 ID も書き戻すかのスイッチ。同じ端末に戻すとき以外は OFF (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "復元時に端末IDも引き継ぐ(上級者向け・通常はOFF)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "복원할 때 기기 ID도 이전 (고급 사용자용·보통은 끔)"
+          }
+        }
+      }
+    },
+    "settings.collection.footer" : {
+      "comment" : "回収の節の説明 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回収はリアルライブ(ライブ/フェス)の現地参加のみが対象です。配信でしか観られない方は、配信参加も回収に含められます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "회수는 리얼 라이브 (라이브/페스) 현장 참가만 대상이에요. 스트리밍으로만 볼 수 있는 분은 스트리밍 참가도 회수에 포함할 수 있어요."
+          }
+        }
+      }
+    },
+    "settings.collection.header" : {
+      "comment" : "回収 (ライブで曲を生で聴いたこと) の数え方の節の見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "披露回収"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 회수"
+          }
+        }
+      }
+    },
+    "settings.collection.include_stream" : {
+      "comment" : "配信で観たライブの曲も回収済みにするかのスイッチ (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配信参加も回収に含める"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "스트리밍 참가도 회수에 포함"
+          }
+        }
+      }
+    },
+    "settings.credits.app_version" : {
+      "comment" : "アプリの版の行の見出し (右に 1.2.3 など) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリバージョン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "앱 버전"
+          }
+        }
+      }
+    },
+    "settings.credits.header" : {
+      "comment" : "クレジット (データの出どころ・非公式の断り) の節の見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クレジット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "크레딧"
+          }
+        }
+      }
+    },
+    "settings.credits.unofficial" : {
+      "comment" : "非公式のアプリである断り書き (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本アプリは非公式のファンメイドアプリです。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 앱은 비공식 팬 메이드 앱이에요."
+          }
+        }
+      }
+    },
+    "settings.default_brand.all" : {
+      "comment" : "デフォルトブランドの選択肢: 絞り込まない (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "settings.default_brand.label" : {
+      "comment" : "一覧を開いたときに最初に絞り込むブランドの選択 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "デフォルトブランド"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "기본 브랜드"
+          }
+        }
+      }
+    },
+    "settings.event_name_abbreviate.label" : {
+      "comment" : "ライブ名の頭の作品名 (THE IDOLM@STER … など) を省くかのスイッチ (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ名を省略表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브 이름 줄여서 표시"
+          }
+        }
+      }
+    },
+    "settings.general.header" : {
+      "comment" : "表示などの一般設定の節の見出し (デフォルトブランド・文字サイズ・歌唱者の名前…) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "설정"
+          }
+        }
+      }
+    },
+    "settings.help.open" : {
+      "comment" : "設定の先頭の、使い方 (ヘルプ) を開くボタン (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使い方を見る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "사용법 보기"
+          }
+        }
+      }
+    },
+    "settings.image_import.brand.button" : {
+      "comment" : "ブランドのアイコン画像を一括で取り込むボタン (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランド画像をインポート"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드 이미지 가져오기"
+          }
+        }
+      }
+    },
+    "settings.image_import.brand.dialog_message" : {
+      "comment" : "ブランド画像の取り込みダイアログの説明。short_name / id は JSON のキーに使える項目名なので訳さない。765AS はブランドの略称の例 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランド名(または short_name / id)と画像URLのJSONファイルのURLを入力してください。\n形式: {\"765AS\": \"画像URL\", ...}"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드 이름(또는 short_name / id)과 이미지 URL을 담은 JSON 파일의 URL을 입력해 주세요.\n형식: {\"765AS\": \"이미지 URL\", ...}"
+          }
+        }
+      }
+    },
+    "settings.image_import.brand.dialog_title" : {
+      "comment" : "ブランド画像の取り込みで JSON の URL を入れるダイアログの見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランド画像インポート"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드 이미지 가져오기"
+          }
+        }
+      }
+    },
+    "settings.image_import.brand.template" : {
+      "comment" : "ブランド名だけ埋めた JSON (型紙) を書き出すボタン (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "型紙 JSON をダウンロード (ブランド)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "템플릿 JSON 다운로드 (브랜드)"
+          }
+        }
+      }
+    },
+    "settings.image_import.clear" : {
+      "comment" : "取り込んだ画像をすべて消すボタン (赤) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カスタム画像を全削除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "커스텀 이미지 모두 삭제"
+          }
+        }
+      }
+    },
+    "settings.image_import.failure.brand_not_found" : {
+      "comment" : "失敗内訳の理由: JSON のキーの名前に当たるブランドが無い (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランド ID が見つからない"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드 ID를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "settings.image_import.failure.decode_failed" : {
+      "comment" : "失敗内訳の理由: 取ってきたデータを画像として読めない (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像デコード失敗"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이미지 디코딩 실패"
+          }
+        }
+      }
+    },
+    "settings.image_import.failure.idol_not_found" : {
+      "comment" : "失敗内訳の理由: JSON のキーの名前に当たるアイドルがいない (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル ID が見つからない"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 ID를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "settings.image_import.failure.invalid_url" : {
+      "comment" : "失敗内訳の理由: 画像の URL が URL として読めない (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "URL が不正"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "잘못된 URL"
+          }
+        }
+      }
+    },
+    "settings.image_import.failure.unit_not_found" : {
+      "comment" : "失敗内訳の理由: JSON のキーの名前に当たるユニットが無い (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニット ID が見つからない"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛 ID를 찾을 수 없음"
+          }
+        }
+      }
+    },
+    "settings.image_import.failures" : {
+      "comment" : "取り込めなかった名前の一覧の見出し。1000 以上は桁区切りが付く (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "失敗内訳 (%arg 件)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "실패 내역 (%arg건)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings.image_import.footer" : {
+      "comment" : "画像の取り込みの手順の説明 (節の下) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "型紙 JSON をダウンロード → URL を埋めて GitHub Gist 等にアップ → そのファイル URL をインポートに貼り付け。既存画像は上書きされます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "템플릿 JSON 다운로드 → URL을 채워 GitHub Gist 등에 업로드 → 그 파일 URL을 가져오기에 붙여 넣기. 기존 이미지는 덮어쓰게 돼요."
+          }
+        }
+      }
+    },
+    "settings.image_import.header" : {
+      "comment" : "アイコン画像の一括取り込みの節の見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像インポート"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이미지 가져오기"
+          }
+        }
+      }
+    },
+    "settings.image_import.idol.button" : {
+      "comment" : "アイドルのアイコン画像を一括で取り込むボタン (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャラクター画像をインポート"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "캐릭터 이미지 가져오기"
+          }
+        }
+      }
+    },
+    "settings.image_import.idol.dialog_message" : {
+      "comment" : "アイドル画像の取り込みダイアログの説明。2 行目は JSON の書き方の例 (キーの説明語は訳す) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル名と画像URLのJSONファイルのURLを入力してください。\n形式: {\"アイドル名\": \"画像URL\", ...}"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 이름과 이미지 URL을 담은 JSON 파일의 URL을 입력해 주세요.\n형식: {\"아이돌 이름\": \"이미지 URL\", ...}"
+          }
+        }
+      }
+    },
+    "settings.image_import.idol.dialog_title" : {
+      "comment" : "アイドル画像の取り込みで JSON の URL を入れるダイアログの見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像一括インポート"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이미지 일괄 가져오기"
+          }
+        }
+      }
+    },
+    "settings.image_import.idol.template" : {
+      "comment" : "名前だけ埋めた JSON (型紙) を書き出すボタン。型紙 = URL を埋めて使う雛形 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "型紙 JSON をダウンロード (アイドル)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "템플릿 JSON 다운로드 (아이돌)"
+          }
+        }
+      }
+    },
+    "settings.image_import.status.clear_failed" : {
+      "comment" : "取り込んだ画像を消せなかったときの状態の表示。detail = OS のエラー文 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除エラー: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "삭제 오류: %1$@"
+          }
+        }
+      }
+    },
+    "settings.image_import.status.cleared" : {
+      "comment" : "取り込んだ画像をすべて消したあとの状態の表示 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カスタム画像を全削除しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "커스텀 이미지를 모두 삭제했어요"
+          }
+        }
+      }
+    },
+    "settings.image_import.status.done" : {
+      "comment" : "取り込みが終わったときの結果。件数は 2 つあり count は 1 キーに 1 つまでなので、どちらも int (今と同じく桁区切りなし) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完了: %1$@件成功, %2$@件失敗"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "완료: %1$@건 성공, %2$@건 실패"
+          }
+        }
+      }
+    },
+    "settings.image_import.status.error" : {
+      "comment" : "取り込みの途中で失敗したとき。detail = OS のエラー文 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エラー: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오류: %1$@"
+          }
+        }
+      }
+    },
+    "settings.image_import.status.fetching" : {
+      "comment" : "JSON を取りに行っている間の状態の表示 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データ取得中..."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "데이터 받는 중..."
+          }
+        }
+      }
+    },
+    "settings.image_import.status.invalid_json" : {
+      "comment" : "取ってきた JSON が「名前: URL」の 1 階層のオブジェクトでないとき (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "JSONの形式が正しくありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "JSON 형식이 올바르지 않아요"
+          }
+        }
+      }
+    },
+    "settings.image_import.status.invalid_url" : {
+      "comment" : "入力された JSON の URL が URL として読めないとき (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無効なURLです"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "잘못된 URL이에요"
+          }
+        }
+      }
+    },
+    "settings.image_import.status.progress" : {
+      "comment" : "画像を 1 枚ずつ落としている間の進み具合。進捗の分数なので桁区切りは付けない (int) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@/%2$@ ダウンロード中..."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@/%2$@ 다운로드 중..."
+          }
+        }
+      }
+    },
+    "settings.image_import.unit.button" : {
+      "comment" : "ユニットのアイコン画像を一括で取り込むボタン (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニット画像をインポート"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛 이미지 가져오기"
+          }
+        }
+      }
+    },
+    "settings.image_import.unit.dialog_message" : {
+      "comment" : "ユニット画像の取り込みダイアログの説明。S.E.M はユニット名の例 (固有名詞) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニット名(または id)と画像URLのJSONファイルのURLを入力してください。\n形式: {\"S.E.M\": \"画像URL\", ...}"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛 이름(또는 id)과 이미지 URL을 담은 JSON 파일의 URL을 입력해 주세요.\n형식: {\"S.E.M\": \"이미지 URL\", ...}"
+          }
+        }
+      }
+    },
+    "settings.image_import.unit.dialog_title" : {
+      "comment" : "ユニット画像の取り込みで JSON の URL を入れるダイアログの見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニット画像インポート"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛 이미지 가져오기"
+          }
+        }
+      }
+    },
+    "settings.image_import.unit.template" : {
+      "comment" : "ユニット名だけ埋めた JSON (型紙) を書き出すボタン (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "型紙 JSON をダウンロード (ユニット)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "템플릿 JSON 다운로드 (유닛)"
+          }
+        }
+      }
+    },
+    "settings.inbox.empty" : {
+      "comment" : "お知らせが 1 件も無いときの空状態 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お知らせはありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공지가 없어요"
+          }
+        }
+      }
+    },
+    "settings.inbox.mark_all_read" : {
+      "comment" : "お知らせを全部読んだことにするボタン (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて既読"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모두 읽음"
+          }
+        }
+      }
+    },
+    "settings.inbox.title" : {
+      "comment" : "お知らせ (アプリの更新情報) の一覧・詳細の画面タイトル (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お知らせ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공지"
+          }
+        }
+      }
+    },
+    "settings.inbox.widget_how_to" : {
+      "comment" : "ウィジェットのお知らせの下の、ウィジェットの使い方を開くボタン (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使い方を見る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "사용법 보기"
+          }
+        }
+      }
+    },
+    "settings.introdon_bar.label" : {
+      "comment" : "曲一覧の下に出る「この絞り込みでイントロドン」の帯を出すかのスイッチ (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲一覧にイントロドン導線を表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 목록에 인트로돈 바로가기 표시"
+          }
+        }
+      }
+    },
+    "settings.mastery.footer" : {
+      "comment" : "習熟度の節の説明 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "段の数と名前を変えられます。段を減らすと、その段の曲は 1 つ下に移ります (記録は消えません)。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "단계의 수와 이름을 바꿀 수 있어요. 단계를 줄이면 그 단계의 곡은 한 단계 아래로 옮겨져요 (기록은 지워지지 않아요)."
+          }
+        }
+      }
+    },
+    "settings.mastery.header" : {
+      "comment" : "習熟度 (曲をどれだけ覚えたかの段階) の節の見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "習熟度"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "숙련도"
+          }
+        }
+      }
+    },
+    "settings.mastery.link" : {
+      "comment" : "習熟度の段階の設定画面へ進む行 (右に今の段階の名前が並ぶ) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "習熟度の段階"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "숙련도 단계"
+          }
+        }
+      }
+    },
+    "settings.notifications.denied" : {
+      "comment" : "通知が OS で拒否されているときの案内 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知が拒否されています。設定アプリから許可してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "알림이 거부되어 있어요. 설정 앱에서 허용해 주세요."
+          }
+        }
+      }
+    },
+    "settings.notifications.footer" : {
+      "comment" : "通知の節の説明 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入りまたは参加マークしたイベントにライブ前・チケット通知を送ります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기하거나 참가 표시한 이벤트의 라이브 전·티켓 알림을 보내요."
+          }
+        }
+      }
+    },
+    "settings.notifications.header" : {
+      "comment" : "通知の設定の節の見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "알림"
+          }
+        }
+      }
+    },
+    "settings.notifications.live_week" : {
+      "comment" : "通知の種類のスイッチ: ライブの 1 週間前 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ1週間前"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브 1주 전"
+          }
+        }
+      }
+    },
+    "settings.notifications.monday" : {
+      "comment" : "通知の種類のスイッチ: 日曜の夜に「月曜が近いよ」と知らせる (ファンの間のネタ) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月曜が近いことを知らせる (日曜 20:00)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "월요일이 다가온다고 알리기 (일요일 20:00)"
+          }
+        }
+      }
+    },
+    "settings.notifications.oshi_birthday" : {
+      "comment" : "通知の種類のスイッチ: 担当アイドルの誕生日 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当アイドルの誕生日"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 아이돌 생일"
+          }
+        }
+      }
+    },
+    "settings.notifications.request" : {
+      "comment" : "通知の許可を求めるボタン (まだ許可していないとき) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知を許可する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "알림 허용"
+          }
+        }
+      }
+    },
+    "settings.notifications.ticket" : {
+      "comment" : "通知の種類のスイッチ: チケットの申込締切と当落発表 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チケット締切・当落通知"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "티켓 마감·추첨 결과 알림"
+          }
+        }
+      }
+    },
+    "settings.performer_name.label" : {
+      "comment" : "セトリの歌唱者をアイドル名・声優名のどちらで出すかの選択。選択肢はコアの語彙 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリの歌唱者"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 가창자"
+          }
+        }
+      }
+    },
+    "settings.screen.title" : {
+      "comment" : "設定画面のタイトル (iOS はシートのナビゲーションタイトル、Android はタブの上のバー) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "설정"
+          }
+        }
+      }
+    },
+    "settings.stats.events.label" : {
+      "comment" : "データ統計: イベント (ライブ) の数の行の見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イベント数"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이벤트 수"
+          }
+        }
+      }
+    },
+    "settings.stats.events.value" : {
+      "comment" : "データ統計: イベントの件数。1000 以上は桁区切りが付く (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg件"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg건"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings.stats.header" : {
+      "comment" : "端末に入っているデータの件数の節の見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データ統計"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "데이터 통계"
+          }
+        }
+      }
+    },
+    "settings.stats.idols.label" : {
+      "comment" : "データ統計: アイドルの人数の行の見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル数"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 수"
+          }
+        }
+      }
+    },
+    "settings.stats.idols.value" : {
+      "comment" : "データ統計: アイドルの人数。1000 以上は桁区切りが付く (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg人"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg명"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings.stats.shows.label" : {
+      "comment" : "データ統計: 公演の数の行の見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演数"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 수"
+          }
+        }
+      }
+    },
+    "settings.stats.shows.value" : {
+      "comment" : "データ統計: 公演の数。1000 以上は桁区切りが付く (公演は 1000 を超えうる) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg公演"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "공연 %arg회"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings.stats.songs.label" : {
+      "comment" : "データ統計: 曲の数の行の見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲数"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 수"
+          }
+        }
+      }
+    },
+    "settings.stats.songs.value" : {
+      "comment" : "データ統計: 曲の数。1000 以上は桁区切りが付く (今は付いていない。曲は 1000 を超えるので表示が 1,234曲 に変わる) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings.sync.full" : {
+      "comment" : "データをすべて取り直すボタン (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全データ同期"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체 데이터 동기화"
+          }
+        }
+      }
+    },
+    "settings.sync.header" : {
+      "comment" : "データ同期の節の見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データ同期"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "데이터 동기화"
+          }
+        }
+      }
+    },
+    "settings.sync.incremental" : {
+      "comment" : "前回から変わったデータだけ取り直すボタン (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "差分更新"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "변경분 업데이트"
+          }
+        }
+      }
+    },
+    "settings.text_scale.label" : {
+      "comment" : "アプリ内の文字の大きさの選択 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文字サイズ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "글자 크기"
+          }
+        }
+      }
+    },
+    "settings.text_scale.large" : {
+      "comment" : "文字サイズの選択肢 (5 段の 4 番目) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "크게"
+          }
+        }
+      }
+    },
+    "settings.text_scale.medium" : {
+      "comment" : "文字サイズの選択肢 (5 段の真ん中 = 既定) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "中"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "보통"
+          }
+        }
+      }
+    },
+    "settings.text_scale.preview" : {
+      "comment" : "文字サイズの下の見本 (曲名と歌唱者の行) の見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プレビュー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "미리보기"
+          }
+        }
+      }
+    },
+    "settings.text_scale.small" : {
+      "comment" : "文字サイズの選択肢 (5 段の 2 番目) (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "小"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "작게"
+          }
+        }
+      }
+    },
+    "settings.text_scale.xlarge" : {
+      "comment" : "文字サイズの選択肢 (5 段の 1 番大きい)。セグメントに 5 つ並ぶので短く (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "特大"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최대"
+          }
+        }
+      }
+    },
+    "settings.text_scale.xsmall" : {
+      "comment" : "文字サイズの選択肢 (5 段の 1 番小さい)。セグメントに 5 つ並ぶので短く (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "極小"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최소"
+          }
+        }
+      }
+    },
+    "settings.theme.footer" : {
+      "comment" : "テーマの節の説明 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ONにすると、選んだ担当のイメージカラーがアプリ全体のアクセントカラーになります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "켜면 고른 담당의 이미지 컬러가 앱 전체의 강조 색이 돼요."
+          }
+        }
+      }
+    },
+    "settings.theme.header" : {
+      "comment" : "担当の色をアプリのテーマに使う設定の節の見出し (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テーマ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "테마"
+          }
+        }
+      }
+    },
+    "settings.theme.no_picks" : {
+      "comment" : "担当のアイドルがまだいないときの案内 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル詳細で担当(推し)に設定すると、ここで色を選べます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 상세에서 담당(최애)으로 설정하면 여기서 색을 고를 수 있어요."
+          }
+        }
+      }
+    },
+    "settings.theme.picker_label" : {
+      "comment" : "テーマの色にする担当アイドルの選択 (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テーマにする担当"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "테마로 쓸 담당"
+          }
+        }
+      }
+    },
+    "settings.theme.use_oshi_color" : {
+      "comment" : "担当アイドルのイメージカラーをアプリ全体のアクセントにするスイッチ (i18n/catalog/settings.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当の色をテーマに使う"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 색을 테마로 사용"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

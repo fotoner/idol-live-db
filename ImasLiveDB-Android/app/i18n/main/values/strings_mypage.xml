@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/mypage.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- mypage.attended.empty.live: 参加したライブ一覧で「現地」(または「すべて」) に 1 件も無いときの空状態 -->
+    <string name="mypage_attended_empty_live">現地参加のライブがありません</string>
+    <!-- mypage.attended.empty.live_viewing: 参加したライブ一覧で「ライブビューイング」(映画館での中継) に 1 件も無いときの空状態 -->
+    <string name="mypage_attended_empty_live_viewing">ライブビューイング参加のライブがありません</string>
+    <!-- mypage.attended.empty.stream: 参加したライブ一覧で「配信」に 1 件も無いときの空状態 -->
+    <string name="mypage_attended_empty_stream">配信参加のライブがありません</string>
+    <!-- mypage.attended.filter.all: 参加したライブ一覧の絞り込みセグメントの先頭 (形態で絞らない)。ほかの選択肢 (現地・配信・LV) はコアの語彙をそのまま出す -->
+    <string name="mypage_attended_filter_all">すべて</string>
+    <!-- mypage.attended.title: 参加したライブ一覧の画面タイトル (プロデュースの「参加したライブ すべて見る」から開く) -->
+    <string name="mypage_attended_title">参加したライブ</string>
+    <!-- mypage.contributions.breakdown.header: 投稿の種類ごとの件数を並べる節の見出し -->
+    <string name="mypage_contributions_breakdown_header">内訳</string>
+    <!-- mypage.contributions.help: マイ投稿の画面の下の注意書き。数は端末にだけ記録している -->
+    <string name="mypage_contributions_help">セトリ編集・動画追加・タグ追加が累計に含まれます。再インストールするとカウントはリセットされます (端末ローカル記録)。</string>
+    <!-- mypage.contributions.kind.setlist_edit: 投稿の種類: セットリストの編集 -->
+    <string name="mypage_contributions_kind_setlist_edit">セトリ編集</string>
+    <!-- mypage.contributions.kind.tag: 投稿の種類: タグの追加 -->
+    <string name="mypage_contributions_kind_tag">タグ</string>
+    <!-- mypage.contributions.kind.video: 投稿の種類: 参考動画の追加 -->
+    <string name="mypage_contributions_kind_video">動画</string>
+    <!-- mypage.contributions.title: 自分の投稿累計の画面タイトル (プロデュースの「投稿」タイルから開く)。投稿 = セトリ編集・動画追加・タグ追加 -->
+    <string name="mypage_contributions_title">マイ投稿</string>
+    <!-- mypage.contributions.total_caption: 累計の大きな数字の下の説明 -->
+    <string name="mypage_contributions_total_caption">コミュニティへの投稿累計</string>
+    <!-- mypage.contributions.unit: 投稿の件数の右に添える単位。数字は大きく別に出すので単位だけの文言 (累計のカードと内訳の各行) -->
+    <string name="mypage_contributions_unit">件</string>
+    <!-- mypage.favorites.events.empty: お気に入りのライブが 1 つも無いときの空状態 -->
+    <string name="mypage_favorites_events_empty">お気に入りのライブがありません</string>
+    <!-- mypage.favorites.idols.empty: お気に入りのアイドルが 1 人もいないときの空状態 -->
+    <string name="mypage_favorites_idols_empty">お気に入りのアイドルがいません</string>
+    <!-- mypage.favorites.songs.empty: お気に入りの曲が 1 つも無いときの空状態 -->
+    <string name="mypage_favorites_songs_empty">お気に入りの曲がありません</string>
+    <!-- mypage.favorites.tab.events: お気に入り一覧のセグメント: ライブ (イベント) -->
+    <string name="mypage_favorites_tab_events">ライブ</string>
+    <!-- mypage.favorites.tab.idols: お気に入り一覧のセグメント: アイドル -->
+    <string name="mypage_favorites_tab_idols">アイドル</string>
+    <!-- mypage.favorites.tab.songs: お気に入り一覧のセグメント: 曲 -->
+    <string name="mypage_favorites_tab_songs">曲</string>
+    <!-- mypage.favorites.title: お気に入り一覧の画面タイトル (プロデュースの「お気に入り」タイルから開く) -->
+    <string name="mypage_favorites_title">お気に入り</string>
+</resources>

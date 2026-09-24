@@ -5,6 +5,8 @@ import com.fugaif.imaslivedb.data.core.SnapshotStoreProvider
 import com.fugaif.imaslivedb.data.model.ImasUnit
 import com.fugaif.imaslivedb.data.repository.IdolRepository
 import com.fugaif.imaslivedb.data.repository.StatsRepository
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,14 +41,15 @@ class BulkImageImporter(
     private val snapshots: SnapshotStoreProvider,
 ) {
 
-    /** 失敗内訳 1 件 (キー名, 理由)。最後のインポート分のみ保持する。 */
-    data class Failure(val key: String, val reason: String)
+    /** 失敗内訳 1 件 (キー名, 理由)。最後のインポート分のみ保持する。理由はアプリの文言か、エラー文 (Verbatim)。 */
+    data class Failure(val key: String, val reason: DisplayText)
 
     data class State(
         val isImporting: Boolean = false,
         /** 0.0〜1.0。プログレスバーにそのまま渡せる。 */
         val progress: Float = 0f,
-        val statusMessage: String = "",
+        /** 進み具合・結果の表示。null = 何も出さない。画面の言語で描くため解決前の値で持つ。 */
+        val statusMessage: DisplayText? = null,
         val importedCount: Int = 0,
         val failedCount: Int = 0,
         val failures: List<Failure> = emptyList(),
@@ -61,7 +64,7 @@ class BulkImageImporter(
      * アイドル画像 JSON を取得して一括ダウンロード。既存画像は上書きする。
      * JSON のキーは 名前 / よみ / ニックネーム / 別名 / idol_id のいずれかで引ける。
      */
-    suspend fun importIdolImages(urlString: String) = runImport(urlString, "アイドル") {
+    suspend fun importIdolImages(urlString: String) = runImport(urlString, L10n.Settings.imageImportFailureIdolNotFound) {
         val nameToId = mutableMapOf<String, String>()
         idolRepository.fetchIdols().forEach { idol ->
             register(nameToId, idol.id, idol.id)
@@ -81,7 +84,7 @@ class BulkImageImporter(
     }
 
     /** ブランド画像 JSON を取得。キーは ブランド名 / 略称 / brand_id。 */
-    suspend fun importBrandImages(urlString: String) = runImport(urlString, "ブランド") {
+    suspend fun importBrandImages(urlString: String) = runImport(urlString, L10n.Settings.imageImportFailureBrandNotFound) {
         val nameToId = mutableMapOf<String, String>()
         statsRepository.fetchBrands().forEach { brand ->
             register(nameToId, brand.id, brand.id)
@@ -102,7 +105,7 @@ class BulkImageImporter(
      * どちらに入るか不定になる。常設ユニット (is_permanent) を優先して登録し、
      * 非常設の重複エントリで上書きされないようにする。
      */
-    suspend fun importUnitImages(urlString: String) = runImport(urlString, "ユニット") {
+    suspend fun importUnitImages(urlString: String) = runImport(urlString, L10n.Settings.imageImportFailureUnitNotFound) {
         val nameToId = mutableMapOf<String, String>()
         val units = fetchAllUnits()
         // 非常設 → 常設 の順に入れ、常設が最後に勝つようにする。
@@ -120,7 +123,7 @@ class BulkImageImporter(
         store.clearAllIdolImages()
         store.clearAllUnitImages()
         store.clearAllBrandImages()
-        _state.value = State(statusMessage = "カスタム画像を全削除しました")
+        _state.value = State(statusMessage = L10n.Settings.imageImportStatusCleared)
     }
 
     // MARK: - 型紙 JSON
@@ -192,26 +195,30 @@ class BulkImageImporter(
 
     private suspend fun runImport(
         urlString: String,
-        label: String,
+        /** 名前に当たる ID が無かったときの失敗の理由 (対象ごとの文言)。 */
+        notFound: DisplayText,
         resolve: suspend () -> Resolution,
     ) {
         val url = runCatching { URL(urlString.trim()) }.getOrNull()
         if (url == null) {
-            _state.value = State(statusMessage = "無効なURLです")
+            _state.value = State(statusMessage = L10n.Settings.imageImportStatusInvalidUrl)
             return
         }
 
-        _state.value = State(isImporting = true, statusMessage = "データ取得中...")
+        _state.value = State(isImporting = true, statusMessage = L10n.Settings.imageImportStatusFetching)
 
         val mapping = runCatching { parseMapping(fetchBytes(url)) }.getOrNull()
         if (mapping == null) {
-            _state.value = State(statusMessage = "JSONの形式が正しくありません")
+            _state.value = State(statusMessage = L10n.Settings.imageImportStatusInvalidJson)
             return
         }
 
         val resolution = runCatching { resolve() }.getOrElse {
             Log.w(TAG, "名前解決に失敗", it)
-            _state.value = State(statusMessage = "エラー: ${it.message ?: "名前の解決に失敗しました"}")
+            _state.value = State(
+                statusMessage = it.message?.let { message -> L10n.Settings.imageImportStatusError(detail = message) }
+                    ?: L10n.Settings.imageImportStatusResolveFailed
+            )
             return
         }
 
@@ -228,15 +235,19 @@ class BulkImageImporter(
                 val id = resolution.nameToId[key] ?: resolution.nameToId[normalizeName(key)]
                 val imageUrl = runCatching { URL(trimmed) }.getOrNull()
                 when {
-                    id == null -> failures += Failure(key, "$label ID が見つからない")
-                    imageUrl == null -> failures += Failure(key, "URL が不正")
+                    id == null -> failures += Failure(key, notFound)
+                    imageUrl == null -> failures += Failure(key, L10n.Settings.imageImportFailureInvalidUrl)
                     else -> {
                         val result = runCatching { fetchBytes(imageUrl) }
                         val bytes = result.getOrNull()
                         when {
                             bytes == null ->
-                                failures += Failure(key, result.exceptionOrNull()?.message ?: "取得失敗")
-                            !resolution.save(id, bytes) -> failures += Failure(key, "画像デコード失敗")
+                                failures += Failure(
+                                    key,
+                                    result.exceptionOrNull()?.message?.let { DisplayText.Verbatim(it) }
+                                        ?: L10n.Settings.imageImportFailureFetchFailed
+                                )
+                            !resolution.save(id, bytes) -> failures += Failure(key, L10n.Settings.imageImportFailureDecodeFailed)
                             else -> imported += 1
                         }
                     }
@@ -246,7 +257,7 @@ class BulkImageImporter(
                 progress = current.toFloat() / total,
                 importedCount = imported,
                 failedCount = failures.size,
-                statusMessage = "$imported/$total ダウンロード中...",
+                statusMessage = L10n.Settings.imageImportStatusProgress(imported = imported, total = total),
             )
             // 配布元 (GitHub 等) を叩き過ぎないよう間隔を空ける (iOS と同じ 100ms)。
             delay(REQUEST_INTERVAL_MS)
@@ -255,7 +266,7 @@ class BulkImageImporter(
         _state.value = State(
             isImporting = false,
             progress = 1f,
-            statusMessage = "完了: ${imported}件成功, ${failures.size}件失敗",
+            statusMessage = L10n.Settings.imageImportStatusDone(succeeded = imported, failed = failures.size),
             importedCount = imported,
             failedCount = failures.size,
             failures = failures,
@@ -297,6 +308,7 @@ class BulkImageImporter(
             return nfkc.filterNot { it in SEPARATORS }.lowercase()
         }
 
+        // i18n-ignore(data): 名前の照合用の区切り文字 (表示しない)
         private val SEPARATORS = setOf(' ', '　', '・', '/', '／', '=', '＝')
     }
 }

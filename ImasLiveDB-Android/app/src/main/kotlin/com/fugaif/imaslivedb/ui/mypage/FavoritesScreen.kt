@@ -43,6 +43,9 @@ import com.fugaif.imaslivedb.data.model.EventWithDateRange
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.ImasLeadBar
@@ -85,8 +88,8 @@ class FavoritesViewModel(app: Application) : AndroidViewModel(app) {
     }
 }
 
-private enum class FavoritesTab(val label: String) {
-    SONG("曲"), IDOL("アイドル"), EVENT("ライブ")
+private enum class FavoritesTab(val label: DisplayText) {
+    SONG(L10n.Mypage.favoritesTabSongs), IDOL(L10n.Mypage.favoritesTabIdols), EVENT(L10n.Mypage.favoritesTabEvents)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -104,10 +107,10 @@ fun FavoritesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("お気に入り", fontWeight = FontWeight.Bold) },
+                title = { Text(L10n.Mypage.favoritesTitle.resolve(), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Common.actionBack.resolve())
                     }
                 }
             )
@@ -115,7 +118,7 @@ fun FavoritesScreen(
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding).background(DS.bg)) {
             ImasSegmented(
-                labels = tabs.map { it.label },
+                labels = tabs.map { it.label.resolve() },
                 selection = tabIndex,
                 onSelect = { tabIndex = it },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)
@@ -139,7 +142,7 @@ fun FavoritesScreen(
 @Composable
 private fun SongsTab(songs: List<Song>, onClick: (String) -> Unit) {
     if (songs.isEmpty()) {
-        EmptyBox { ImasEmptyState(icon = Icons.Filled.MusicNote, title = "お気に入りの曲がありません") }
+        EmptyBox { ImasEmptyState(icon = Icons.Filled.MusicNote, title = L10n.Mypage.favoritesSongsEmpty.resolve()) }
         return
     }
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(vertical = 4.dp)) {
@@ -161,7 +164,7 @@ private fun SongsTab(songs: List<Song>, onClick: (String) -> Unit) {
 @Composable
 private fun IdolsTab(idols: List<Idol>, onClick: (String) -> Unit) {
     if (idols.isEmpty()) {
-        EmptyBox { ImasEmptyState(icon = Icons.Filled.Person, title = "お気に入りのアイドルがいません") }
+        EmptyBox { ImasEmptyState(icon = Icons.Filled.Person, title = L10n.Mypage.favoritesIdolsEmpty.resolve()) }
         return
     }
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(vertical = 4.dp)) {
@@ -189,7 +192,7 @@ private fun IdolsTab(idols: List<Idol>, onClick: (String) -> Unit) {
 @Composable
 private fun EventsTab(events: List<EventWithDateRange>) {
     if (events.isEmpty()) {
-        EmptyBox { ImasEmptyState(icon = Icons.Filled.MusicNote, title = "お気に入りのライブがありません") }
+        EmptyBox { ImasEmptyState(icon = Icons.Filled.MusicNote, title = L10n.Mypage.favoritesEventsEmpty.resolve()) }
         return
     }
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(vertical = 4.dp)) {

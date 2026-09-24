@@ -7,11 +7,11 @@ struct FavoritesListView: View {
 
     enum Tab: Int, CaseIterable {
         case song, idol, event
-        var label: String {
+        var label: LocalizedStringResource {
             switch self {
-            case .song:  return "曲"
-            case .idol:  return "アイドル"
-            case .event: return "ライブ"
+            case .song:  return L10n.Mypage.favoritesTabSongs
+            case .idol:  return L10n.Mypage.favoritesTabIdols
+            case .event: return L10n.Mypage.favoritesTabEvents
             }
         }
     }
@@ -27,14 +27,14 @@ struct FavoritesListView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ImasSegmented(labels: Tab.allCases.map(\.label), selection: $section)
+            ImasSegmented(labels: Tab.allCases.map { String(localized: $0.label) }, selection: $section)
                 .padding(.horizontal, DS.sp5)
                 .padding(.vertical, DS.sp3)
 
             content
         }
         .background(DS.bg.ignoresSafeArea())
-        .navigationTitle("お気に入り")
+        .navigationTitle(L10n.Mypage.favoritesTitle)
         .navigationBarTitleDisplayMode(.inline)
         .task { if !loaded { await load() } }
         .sheet(item: $sheetDestination) { dest in
@@ -48,7 +48,7 @@ struct FavoritesListView: View {
         switch currentTab {
         case .song:
             if songs.isEmpty {
-                emptyState(icon: "music.note", title: "お気に入りの曲がありません")
+                emptyState(icon: "music.note", title: L10n.Mypage.favoritesSongsEmpty)
             } else {
                 List {
                     Section {
@@ -62,7 +62,7 @@ struct FavoritesListView: View {
                                 .listRowSeparatorTint(DS.sep)
                         }
                     } header: {
-                        Text("\(songs.count)曲").font(.imasCaption).foregroundStyle(DS.ink2)
+                        Text(L10n.Mypage.favoritesSongsCount(count: songs.count)).font(.imasCaption).foregroundStyle(DS.ink2)
                     }
                 }
                 .listStyle(.plain)
@@ -70,7 +70,7 @@ struct FavoritesListView: View {
             }
         case .idol:
             if idols.isEmpty {
-                emptyState(icon: "person.fill", title: "お気に入りのアイドルがいません")
+                emptyState(icon: "person.fill", title: L10n.Mypage.favoritesIdolsEmpty)
             } else {
                 List {
                     Section {
@@ -93,7 +93,7 @@ struct FavoritesListView: View {
                             .listRowSeparatorTint(DS.sep)
                         }
                     } header: {
-                        Text("\(idols.count)人").font(.imasCaption).foregroundStyle(DS.ink2)
+                        Text(L10n.Mypage.favoritesIdolsCount(count: idols.count)).font(.imasCaption).foregroundStyle(DS.ink2)
                     }
                 }
                 .listStyle(.plain)
@@ -101,7 +101,7 @@ struct FavoritesListView: View {
             }
         case .event:
             if events.isEmpty {
-                emptyState(icon: "music.mic", title: "お気に入りのライブがありません")
+                emptyState(icon: "music.mic", title: L10n.Mypage.favoritesEventsEmpty)
             } else {
                 List {
                     Section {
@@ -113,7 +113,7 @@ struct FavoritesListView: View {
                             .listRowSeparatorTint(DS.sep)
                         }
                     } header: {
-                        Text("\(events.count)件").font(.imasCaption).foregroundStyle(DS.ink2)
+                        Text(L10n.Mypage.favoritesEventsCount(count: events.count)).font(.imasCaption).foregroundStyle(DS.ink2)
                     }
                 }
                 .listStyle(.plain)
@@ -122,8 +122,8 @@ struct FavoritesListView: View {
         }
     }
 
-    private func emptyState(icon: String, title: String) -> some View {
-        VStack { Spacer(); ImasEmptyState(systemImage: icon, title: title); Spacer() }
+    private func emptyState(icon: String, title: LocalizedStringResource) -> some View {
+        VStack { Spacer(); ImasEmptyState(systemImage: icon, title: String(localized: title)); Spacer() }
     }
 
     private func load() async {
