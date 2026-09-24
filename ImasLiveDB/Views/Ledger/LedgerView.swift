@@ -30,7 +30,10 @@ struct LedgerView: View {
     /// 再集計が走らない** (件数が変わらないので `.task(id:)` が発火しない)。
     @State private var changeToken = 0
 
-    private static let periodLabels = ["月別", "年別", "全期間"]
+    /// 集計の期間のセグメント (並びは period の 0 / 1 / 2)。文言は作った時点の言語で固まるので static let にしない。
+    private var periodLabels: [LocalizedStringResource] {
+        [L10n.Ledger.listPeriodMonth, L10n.Ledger.listPeriodYear, L10n.Ledger.listPeriodAll]
+    }
     private var period: LedgerPeriod {
         switch periodIndex {
         case 1: return .year
@@ -51,8 +54,8 @@ struct LedgerView: View {
                 if expenses.isEmpty {
                     ImasEmptyState(
                         systemImage: "yensign.circle",
-                        title: "まだ記録がありません",
-                        message: "右上の + から、チケット代や遠征費を足してください。"
+                        title: String(localized: L10n.Ledger.listEmptyTitle),
+                        message: String(localized: L10n.Ledger.listEmptyMessage)
                     )
                     .plainRow(background: DS.bg)
                 } else {
@@ -65,7 +68,7 @@ struct LedgerView: View {
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .background(DS.bg.ignoresSafeArea())
-        .navigationTitle("収支")
+        .navigationTitle(L10n.Ledger.listTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -74,7 +77,7 @@ struct LedgerView: View {
                 } label: {
                     Image(systemName: "plus")
                 }
-                .accessibilityLabel("支出を足す")
+                .accessibilityLabel(L10n.Ledger.listAddA11y)
             }
         }
         .sheet(item: $editing) { target in
@@ -96,19 +99,19 @@ struct LedgerView: View {
 
     private var summarySection: some View {
         VStack(alignment: .leading, spacing: DS.sp4) {
-            ImasSectionHeader(title: "使った額", tight: true)
+            ImasSectionHeader(title: .key(L10n.Ledger.listSummaryHeader), tight: true)
             VStack(alignment: .leading, spacing: DS.sp3) {
                 HStack(alignment: .firstTextBaseline, spacing: DS.sp2) {
                     Text(formatYen(amount: summary.total))
                         .font(.imasDisplay(30, weight: .bold)).foregroundStyle(DS.ink)
-                    Text("\(summary.count)件")
+                    Text(L10n.Ledger.listSummaryCount(count: Int(summary.count)))
                         .font(.imasDisplay(15)).foregroundStyle(DS.ink2)
                 }
                 HStack(spacing: DS.sp5) {
-                    metric("遠征費", formatYen(amount: summary.travelTotal))
+                    metric(L10n.Ledger.listSummaryTravel, formatYen(amount: summary.travelTotal))
                     if summary.showCount > 0 {
-                        metric("1公演あたり", formatYen(amount: summary.averagePerShow))
-                        metric("公演数", "\(summary.showCount)")
+                        metric(L10n.Ledger.listSummaryPerShow, formatYen(amount: summary.averagePerShow))
+                        metric(L10n.Ledger.listSummaryShowCount, "\(summary.showCount)")
                     }
                 }
             }
@@ -131,7 +134,7 @@ struct LedgerView: View {
         }
     }
 
-    private func metric(_ label: String, _ value: String) -> some View {
+    private func metric(_ label: LocalizedStringResource, _ value: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(label).font(.imasCaption).foregroundStyle(DS.ink3)
             Text(value).font(.imasFootnote.weight(.bold)).foregroundStyle(DS.ink)
@@ -142,12 +145,14 @@ struct LedgerView: View {
 
     private var controlSection: some View {
         VStack(alignment: .leading, spacing: DS.sp4) {
-            ImasSegmented(labels: Self.periodLabels, selection: $periodIndex)
+            ImasSegmented(labels: periodLabels.map { String(localized: $0) }, selection: $periodIndex)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: DS.sp3) {
-                    ImasFilterChip(text: "全期間", isSelected: yearFilter.isEmpty) { yearFilter = "" }
+                    ImasFilterChip(text: String(localized: L10n.Ledger.listYearFilterAll), isSelected: yearFilter.isEmpty) {
+                        yearFilter = ""
+                    }
                     ForEach(years, id: \.self) { year in
-                        ImasFilterChip(text: "\(year)年", isSelected: yearFilter == year) {
+                        ImasFilterChip(text: yearChipLabel(year), isSelected: yearFilter == year) {
                             yearFilter = yearFilter == year ? "" : year
                         }
                     }
@@ -156,17 +161,24 @@ struct LedgerView: View {
             }
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: DS.sp3) {
-                    ImasFilterChip(text: "すべて", isSelected: linkage == .all) { linkage = .all }
-                    ImasFilterChip(text: "公演あり", isSelected: linkage == .linkedOnly) {
+                    ImasFilterChip(text: String(localized: L10n.Ledger.listLinkageAll), isSelected: linkage == .all) {
+                        linkage = .all
+                    }
+                    ImasFilterChip(text: String(localized: L10n.Ledger.listLinkageLinked), isSelected: linkage == .linkedOnly) {
                         linkage = linkage == .linkedOnly ? .all : .linkedOnly
                     }
-                    ImasFilterChip(text: "公演なし", isSelected: linkage == .unlinkedOnly) {
+                    ImasFilterChip(text: String(localized: L10n.Ledger.listLinkageUnlinked), isSelected: linkage == .unlinkedOnly) {
                         linkage = linkage == .unlinkedOnly ? .all : .unlinkedOnly
                     }
                 }
                 .padding(.vertical, DS.sp1)
             }
         }
+    }
+
+    /// 年のチップの文言 (2026年)。年は日付の先頭 4 文字をそのまま渡す (数字に直さない)。
+    private func yearChipLabel(_ year: String) -> String {
+        String(localized: L10n.Ledger.listYearFilterYear(year: year))
     }
 
     /// 記録のある年だけ、新しい順。**無い年のチップは出さない**。
@@ -190,7 +202,7 @@ struct LedgerView: View {
                         .listRowSeparatorTint(DS.sep)
                         .swipeActions(edge: .trailing) {
                             Button(role: .destructive) { Task { await delete(expense) } } label: {
-                                Label("削除", systemImage: "trash")
+                                Label(L10n.Ledger.listRowDelete, systemImage: "trash")
                             }
                         }
                 }
@@ -295,7 +307,7 @@ struct LedgerView: View {
         do {
             try await AppContainer.shared.ledgerWriting.save(expense)
         } catch {
-            LocalWriteFailure.report(error, action: "家計簿の保存")
+            LocalWriteFailure.report(error, action: String(localized: L10n.Ledger.writeActionSave))
             return false
         }
         if let index = expenses.firstIndex(where: { $0.id == expense.id }) {
@@ -312,7 +324,7 @@ struct LedgerView: View {
         do {
             try await AppContainer.shared.ledgerWriting.delete(id: expense.id)
         } catch {
-            LocalWriteFailure.report(error, action: "家計簿の削除")
+            LocalWriteFailure.report(error, action: String(localized: L10n.Ledger.writeActionDelete))
             return
         }
         expenses.removeAll { $0.id == expense.id }

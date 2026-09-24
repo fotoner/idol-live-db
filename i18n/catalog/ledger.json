@@ -1,0 +1,361 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "ledger",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/ledger/"
+    ],
+    "ios": [
+      "ImasLiveDB/Views/Ledger/"
+    ]
+  },
+  "strings": {
+    "editor.action.cancel": {
+      "ja": "キャンセル",
+      "ko": "취소",
+      "note": "入力シートを閉じるボタン"
+    },
+    "editor.action.save": {
+      "ja": "保存",
+      "ko": "저장",
+      "note": "入力シートの保存ボタン"
+    },
+    "editor.amount.header": {
+      "ja": "金額",
+      "ko": "금액",
+      "note": "入力シートの節: 金額"
+    },
+    "editor.category.header": {
+      "ja": "費目",
+      "ko": "항목",
+      "note": "入力シートの節: 費目 (チケット代・交通費…)"
+    },
+    "editor.date.confirm": {
+      "ja": "決定",
+      "ko": "확인",
+      "note": "日付の選択ダイアログの決定ボタン (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "editor.date.header": {
+      "ja": "日付",
+      "ko": "날짜",
+      "note": "入力シートの節: 日付"
+    },
+    "editor.date.picker": {
+      "ja": "日付",
+      "ko": "날짜",
+      "note": "日付の選択欄のラベル",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "editor.error.bad_date": {
+      "ja": "日付を選んでください",
+      "ko": "날짜를 골라 주세요",
+      "note": "入力の検査 (コア) で日付が不正なとき"
+    },
+    "editor.error.not_positive": {
+      "ja": "金額を入れてください",
+      "ko": "금액을 입력해 주세요",
+      "note": "入力の検査 (コア) で金額が 0 以下のとき"
+    },
+    "editor.error.too_large": {
+      "ja": "桁が多すぎます (1 億円未満)",
+      "ko": "자릿수가 너무 많아요 (1억 엔 미만)",
+      "note": "入力の検査 (コア) で金額が 1 億円以上のとき"
+    },
+    "editor.note.header": {
+      "ja": "メモ",
+      "ko": "메모",
+      "note": "入力シートの節: メモ"
+    },
+    "editor.note.placeholder": {
+      "ja": "任意",
+      "ko": "선택 사항",
+      "note": "メモ欄のプレースホルダ (書かなくてよい)"
+    },
+    "editor.show.footer": {
+      "ja": "紐づけると「この遠征でいくら使ったか」が出ます。課金やグッズの通販は紐づけなくて構いません。",
+      "ko": "연결하면 “이 원정에 얼마를 썼는지”가 나와요. 과금이나 굿즈 통판은 연결하지 않아도 돼요.",
+      "note": "公演の節の下の説明"
+    },
+    "editor.show.header": {
+      "ja": "公演",
+      "ko": "공연",
+      "note": "入力シートの節: 紐づける公演"
+    },
+    "editor.show.linked_fallback": {
+      "ja": "紐づけた公演",
+      "ko": "연결한 공연",
+      "note": "公演の欄: 紐づけた公演の名前が引けなかったときの代わり",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "editor.show.none": {
+      "ja": "公演に紐づけない",
+      "ko": "공연에 연결하지 않음",
+      "note": "公演の欄: 紐づけていないとき"
+    },
+    "editor.show.unlink": {
+      "ja": "公演との紐づけを外す",
+      "ko": "공연 연결 해제",
+      "note": "公演の紐づけを外すボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "editor.title.add": {
+      "ja": "支出を足す",
+      "ko": "지출 추가",
+      "note": "支出の入力シートの題 (新規)"
+    },
+    "editor.title.edit": {
+      "ja": "支出を直す",
+      "ko": "지출 수정",
+      "note": "支出の入力シートの題 (編集)"
+    },
+    "list.add.a11y": {
+      "ja": "支出を足す",
+      "ko": "지출 추가",
+      "note": "右上の ＋ ボタンの読み上げ"
+    },
+    "list.empty.message": {
+      "ja": "右上の + から、チケット代や遠征費を足してください。",
+      "ko": "오른쪽 위의 +에서 티켓값이나 원정비를 추가해 주세요.",
+      "note": "支出が 1 件も無いときの説明"
+    },
+    "list.empty.title": {
+      "ja": "まだ記録がありません",
+      "ko": "아직 기록이 없어요",
+      "note": "支出が 1 件も無いときの見出し"
+    },
+    "list.linkage.all": {
+      "ja": "すべて",
+      "ko": "전체",
+      "note": "公演との紐づけの絞り込み: 絞らない"
+    },
+    "list.linkage.linked": {
+      "ja": "公演あり",
+      "ko": "공연 있음",
+      "note": "公演との紐づけの絞り込み: 公演に紐づいた支出だけ"
+    },
+    "list.linkage.unlinked": {
+      "ja": "公演なし",
+      "ko": "공연 없음",
+      "note": "公演との紐づけの絞り込み: 公演に紐づかない支出 (課金・通販など) だけ"
+    },
+    "list.period.all": {
+      "ja": "全期間",
+      "ko": "전체 기간",
+      "note": "集計の期間のセグメント"
+    },
+    "list.period.month": {
+      "ja": "月別",
+      "ko": "월별",
+      "note": "集計の期間のセグメント"
+    },
+    "list.period.year": {
+      "ja": "年別",
+      "ko": "연도별",
+      "note": "集計の期間のセグメント"
+    },
+    "list.row.delete": {
+      "ja": "削除",
+      "ko": "삭제",
+      "note": "支出の行をスワイプすると出る削除"
+    },
+    "list.summary.count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}件",
+      "ko": "{count}건",
+      "note": "合計金額の右の件数。1000 以上は桁区切りが付く (1,234件)"
+    },
+    "list.summary.header": {
+      "ja": "使った額",
+      "ko": "쓴 금액",
+      "note": "合計の節の見出し"
+    },
+    "list.summary.per_show": {
+      "ja": "1公演あたり",
+      "ko": "공연당",
+      "note": "合計の内訳: 公演 1 つあたりの額"
+    },
+    "list.summary.show_count": {
+      "ja": "公演数",
+      "ko": "공연 수",
+      "note": "合計の内訳: 紐づいた公演の数"
+    },
+    "list.summary.travel": {
+      "ja": "遠征費",
+      "ko": "원정비",
+      "note": "合計の内訳: 遠征費 (チケット・交通・宿)"
+    },
+    "list.title": {
+      "ja": "収支",
+      "ko": "가계부",
+      "note": "家計簿の画面の題。ko は機能名 (家計簿) に合わせる"
+    },
+    "list.year_filter.all": {
+      "ja": "全期間",
+      "ko": "전체 기간",
+      "note": "年の絞り込みチップの先頭 (絞らない)"
+    },
+    "list.year_filter.year": {
+      "args": [
+        {
+          "name": "year",
+          "type": "string"
+        }
+      ],
+      "ja": "{year}年",
+      "ko": "{year}년",
+      "note": "年の絞り込みチップ (記録のある年だけ)。year は支出の日付の先頭 4 桁 (2026 など) をそのまま渡す"
+    },
+    "show_picker.action.close": {
+      "ja": "閉じる",
+      "ko": "닫기",
+      "note": "公演を選ぶシートを閉じるボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "show_picker.empty.message": {
+      "ja": "ライブに「参加」を付けると、ここに並びます。",
+      "ko": "라이브에 “참가”를 표시하면 여기에 나와요.",
+      "note": "参加を付けた公演が 1 つも無いときの説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "show_picker.empty.message_android": {
+      "ja": "参加した公演がありません。ライブに「参加」を付けると、ここに並びます。",
+      "ko": "참가한 공연이 없어요. 라이브에 “참가”를 표시하면 여기에 나와요.",
+      "note": "Android の文言 (見出しと説明が 1 文)。iOS は show_picker.empty.title と .message に分かれる",
+      "platforms": [
+        "android"
+      ]
+    },
+    "show_picker.empty.title": {
+      "ja": "参加した公演がありません",
+      "ko": "참가한 공연이 없어요",
+      "note": "参加を付けた公演が 1 つも無いときの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "show_picker.none": {
+      "ja": "公演に紐づけない",
+      "ko": "공연에 연결하지 않음",
+      "note": "公演を選ぶシートの先頭の選択肢"
+    },
+    "show_picker.search_prompt": {
+      "ja": "公演を探す",
+      "ko": "공연 검색",
+      "note": "公演を選ぶシートの検索欄のプレースホルダ"
+    },
+    "show_picker.title": {
+      "ja": "公演を選ぶ",
+      "ko": "공연 고르기",
+      "note": "紐づける公演を選ぶシートの題"
+    },
+    "ticket_prompt.action.later": {
+      "ja": "あとで",
+      "ko": "나중에",
+      "note": "確認シートを記録せずに閉じるボタン"
+    },
+    "ticket_prompt.action.record": {
+      "ja": "記録する",
+      "ko": "기록",
+      "note": "確認シートの記録ボタン"
+    },
+    "ticket_prompt.amount.footer": {
+      "ja": "手数料や先行の差額を含めたいときは、ここで直してください。",
+      "ko": "수수료나 선행 차액을 포함하려면 여기서 고쳐 주세요.",
+      "note": "金額の節の下の説明"
+    },
+    "ticket_prompt.amount.header": {
+      "ja": "記録する金額",
+      "ko": "기록할 금액",
+      "note": "確認シートの節: 記録する金額"
+    },
+    "ticket_prompt.estimate": {
+      "ja": "推定",
+      "ko": "추정",
+      "note": "券の値段が公式発表ではなく推定のときの印"
+    },
+    "ticket_prompt.kind": {
+      "args": [
+        {
+          "name": "kind",
+          "type": "core"
+        }
+      ],
+      "ja": "{kind}で参加",
+      "ko": "{kind} 참가",
+      "note": "参加の形態。kind はコアが返す形態の名前 (現地 / 配信 / ライブビューイング)"
+    },
+    "ticket_prompt.show_fallback": {
+      "ja": "この公演",
+      "ko": "이 공연",
+      "note": "確認シートの公演名が引けなかったときの代わり"
+    },
+    "ticket_prompt.tickets.header": {
+      "ja": "券種",
+      "ko": "티켓 종류",
+      "note": "確認シートの節: 券種"
+    },
+    "ticket_prompt.title": {
+      "ja": "チケット代を記録",
+      "ko": "티켓값 기록",
+      "note": "参加を付けた直後に出る、チケット代を家計簿に記録するかの確認シートの題"
+    },
+    "write_action.delete": {
+      "ja": "家計簿の削除",
+      "ko": "가계부 삭제",
+      "note": "書き込みに失敗したときの知らせに入る操作の名前",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "write_action.delete_android": {
+      "ja": "支出の削除",
+      "ko": "지출 삭제",
+      "note": "Android の文言。iOS の write_action.delete と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "write_action.save": {
+      "ja": "家計簿の保存",
+      "ko": "가계부 저장",
+      "note": "書き込みに失敗したときの知らせに入る操作の名前 (「〜に失敗しました」の〜)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "write_action.save_android": {
+      "ja": "支出の保存",
+      "ko": "지출 저장",
+      "note": "Android の文言。iOS の write_action.save と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "write_action.ticket": {
+      "ja": "チケット代の記録",
+      "ko": "티켓값 기록",
+      "note": "参加を付けた直後のチケット代の記録に失敗したときの知らせに入る操作の名前"
+    }
+  }
+}

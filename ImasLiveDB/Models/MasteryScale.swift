@@ -18,26 +18,68 @@ struct MasteryScale: Codable, Equatable, Sendable {
     /// 「耳に馴染んだ」が実機で読んだときに言い方として微妙で、さらに**スワイプの
     /// ボタン幅に収まらず途中で切れる** (「耳に馴染」になる)。短く言い切れる 3 段にした。
     /// 語彙の好みは人によるので、設定 (`MasteryScaleSettingsView`) で変えられる。
-    static let defaultLabels = ["聞いた", "覚えた", "完璧"]
+    ///
+    /// **保存される語彙** (`mastery_scale_labels_v1`)。訳さない・変えない。表示は `displayLabels` /
+    /// `label(_:)` を通すと、編集していないプリセットは表示言語の訳 (カタログの mastery.preset.*) になる。
+    static let defaultLabels = ["聞いた", "覚えた", "完璧"]  // i18n-ignore(storage): 保存する語彙。表示は mastery.preset.steps3.*
 
     static let standard = MasteryScale(labels: defaultLabels)
 
+    /// 2 段・4 段のプリセットの保存する語彙 (defaultLabels と同じく ja のまま保存する)。
+    private static let twoStepLabels = ["聞いた", "覚えた"]  // i18n-ignore(storage): 保存する語彙。表示は mastery.preset.steps2.*
+    private static let fourStepLabels = ["聞いた", "だいたい", "覚えた", "完璧"]  // i18n-ignore(storage): 保存する語彙。表示は mastery.preset.steps4.*
+
     /// 段数を変えるときの出発点。どのラベルも 4 文字以内にして、
-    /// スワイプのボタンが切れないようにしてある。
-    static let presets: [(name: String, scale: MasteryScale)] = [
-        ("2段", MasteryScale(labels: ["聞いた", "覚えた"])),
-        ("3段", MasteryScale(labels: defaultLabels)),
-        ("4段", MasteryScale(labels: ["聞いた", "だいたい", "覚えた", "完璧"])),
+    /// スワイプのボタンが切れないようにしてある (訳もカタログの max_len で 4 文字以内)。
+    /// チップの名前は `L10n.Mastery.presetName(steps:)`。
+    static let presets: [MasteryScale] = [
+        MasteryScale(labels: twoStepLabels),
+        MasteryScale(labels: defaultLabels),
+        MasteryScale(labels: fourStepLabels),
     ]
 
     /// 段数。core に渡す `steps`。
     var steps: UInt8 { UInt8(clamping: max(1, min(labels.count, 8))) }
 
+    /// 保存値がプリセットの語彙と完全に同じなら、そのプリセットの表示用の文言 (下から順)。
+    /// 利用者が 1 つでも書き換えたラベルは nil (そのまま出す)。
+    ///
+    /// LocalizedStringResource は作った時点の言語で固まるので、static let に置かず毎回作る。
+    private static func presetDisplayKeys(for labels: [String]) -> [LocalizedStringResource]? {
+        if labels == twoStepLabels {
+            return [L10n.Mastery.presetSteps2Level1, L10n.Mastery.presetSteps2Level2]
+        }
+        if labels == defaultLabels {
+            return [L10n.Mastery.presetSteps3Level1, L10n.Mastery.presetSteps3Level2,
+                    L10n.Mastery.presetSteps3Level3]
+        }
+        if labels == fourStepLabels {
+            return [L10n.Mastery.presetSteps4Level1, L10n.Mastery.presetSteps4Level2,
+                    L10n.Mastery.presetSteps4Level3, L10n.Mastery.presetSteps4Level4]
+        }
+        return nil
+    }
+
+    /// 表示するラベル (下から順)。編集していないプリセットは表示言語の訳、それ以外は保存値のまま。
+    /// ja では常に `labels` と同じ。
+    var displayLabels: [String] {
+        guard let keys = Self.presetDisplayKeys(for: labels) else { return labels }
+        return keys.map { String(localized: $0) }
+    }
+
+    /// 表示中のラベル (設定画面の入力) から保存する段階を作る。
+    /// 訳したプリセットのままなら、そのプリセットの語彙 (ja) で保存する (保存値を言語で変えない)。
+    static func storing(displayLabels: [String]) -> MasteryScale {
+        presets.first { $0.displayLabels == displayLabels } ?? MasteryScale(labels: displayLabels)
+    }
+
     /// 表示名。`0` は未設定。
     func label(_ level: UInt8) -> String {
-        guard level > 0 else { return "未設定" }
+        guard level > 0 else { return String(localized: L10n.Mastery.levelUnset) }
         let i = Int(level) - 1
-        return i < labels.count ? labels[i] : "LV.\(level)"
+        guard i < labels.count else { return "LV.\(level)" }
+        if let keys = Self.presetDisplayKeys(for: labels) { return String(localized: keys[i]) }
+        return labels[i]
     }
 
     /// 一覧のチップに出す短い名前。長いラベルは頭から詰める。

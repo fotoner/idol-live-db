@@ -1,0 +1,679 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "mastery",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/mastery/"
+    ],
+    "ios": [
+      "ImasLiveDB/Models/MasteryScale.swift",
+      "ImasLiveDB/Views/Components/MasterySwipe.swift",
+      "ImasLiveDB/Views/Mastery/"
+    ]
+  },
+  "strings": {
+    "bulk.all_set": {
+      "ja": "全部に段階が付いています",
+      "ko": "모든 곡에 단계가 매겨져 있어요",
+      "note": "群の長押しで出るシートで、未設定の曲が無いとき (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "bulk.all_songs": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "この {count} 曲すべて",
+      "ko": "이 {count}곡 전부",
+      "note": "一括更新のメニューの節: 群の曲すべての段階を変える"
+    },
+    "bulk.reset": {
+      "ja": "未設定に戻す",
+      "ko": "미설정으로 되돌리기",
+      "note": "一括更新のメニュー: 群の曲すべてを未設定に戻す"
+    },
+    "bulk.unset_only": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "未設定の {count} 曲だけ",
+      "ko": "미설정 {count}곡만",
+      "note": "一括更新のメニューの節: 未設定の曲だけに段階を付ける"
+    },
+    "chip.a11y": {
+      "args": [
+        {
+          "name": "level",
+          "type": "string"
+        }
+      ],
+      "ja": "習熟度 {level}",
+      "ko": "숙련도 {level}",
+      "note": "行の段階チップの読み上げ。level は段の名前 (利用者が付けたラベルのこともある)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter.action.reset": {
+      "ja": "リセット",
+      "ko": "초기화",
+      "note": "絞り込みシートの条件を戻すボタン (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.progress.all": {
+      "ja": "すべて",
+      "ko": "전체",
+      "note": "進み具合の絞り込み: 絞らない"
+    },
+    "filter.progress.complete": {
+      "ja": "完了",
+      "ko": "완료",
+      "note": "進み具合の絞り込み: 全曲が最上段の群"
+    },
+    "filter.progress.has_unset": {
+      "ja": "未設定あり",
+      "ko": "미설정 있음",
+      "note": "進み具合の絞り込み: 未設定の曲がある群"
+    },
+    "filter.progress.heard_but_unset": {
+      "ja": "聴いたのに未設定",
+      "ko": "들었는데 미설정",
+      "note": "進み具合の絞り込み: 現地で聴いたのに段階を付けていない曲がある群"
+    },
+    "filter.progress.untouched": {
+      "ja": "手つかず",
+      "ko": "손대지 않음",
+      "note": "進み具合の絞り込み: まだ 1 曲も段階を付けていない群"
+    },
+    "filter.section.progress": {
+      "ja": "進み具合",
+      "ko": "진행도",
+      "note": "絞り込みシートの節: 進み具合"
+    },
+    "filter.section.sort": {
+      "ja": "並び",
+      "ko": "정렬",
+      "note": "絞り込みシートの節: 並び順"
+    },
+    "filter.sort.name": {
+      "ja": "名前順",
+      "ko": "이름순",
+      "note": "群の並び"
+    },
+    "filter.sort.progress_asc": {
+      "ja": "進み具合が低い順",
+      "ko": "진행도 낮은 순",
+      "note": "群の並び"
+    },
+    "filter.sort.progress_desc": {
+      "ja": "進み具合が高い順",
+      "ko": "진행도 높은 순",
+      "note": "群の並び"
+    },
+    "filter.sort.song_count": {
+      "ja": "曲数順",
+      "ko": "곡 많은 순",
+      "note": "群の並び: 曲の多い順"
+    },
+    "filter.title": {
+      "ja": "フィルタ",
+      "ko": "필터",
+      "note": "絞り込みシートの題 (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "group.bulk.a11y": {
+      "ja": "まとめて変える",
+      "ko": "한꺼번에 바꾸기",
+      "note": "群の詳細の右上の ⋯ ボタン (一括更新のメニュー) の読み上げ"
+    },
+    "group.empty.message": {
+      "ja": "段階の絞り込みを外してください。",
+      "ko": "단계 필터를 해제해 주세요.",
+      "note": "段階で絞った結果、曲が無いときの説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "group.empty.title": {
+      "ja": "該当する曲がありません",
+      "ko": "해당하는 곡이 없어요",
+      "note": "段階で絞った結果、曲が無いときの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "group.filter.heard_but_unset": {
+      "args": [
+        {
+          "name": "songs",
+          "type": "int"
+        }
+      ],
+      "ja": "聴いたのに未設定 {songs}",
+      "ko": "들었는데 미설정 {songs}",
+      "note": "段階の絞り込みチップ: 現地で聴いたのに段階を付けていない曲だけ"
+    },
+    "group.row.heard.a11y": {
+      "ja": "現地で聴いた",
+      "ko": "현장에서 들음",
+      "note": "曲の行の ✓ (現地で聴いた曲) の読み上げ"
+    },
+    "group.songs.count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}曲",
+      "ko": "{count}곡",
+      "note": "曲一覧の見出しの右の曲数 (絞っていないとき)"
+    },
+    "group.songs.count_filtered": {
+      "args": [
+        {
+          "name": "shown",
+          "type": "int"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{shown} / {count}曲",
+      "ko": "{shown} / {count}곡",
+      "note": "曲一覧の見出しの右: 絞り込んで見えている曲数 / 群の曲数。群は最大でも数百曲"
+    },
+    "group.songs.header": {
+      "ja": "収録曲",
+      "ko": "수록곡",
+      "note": "群の詳細の曲一覧の見出し"
+    },
+    "group.stage_chip.a11y_hint": {
+      "ja": "押すと 1 段上がります。行を左スワイプすると段を選べます",
+      "ko": "누르면 한 단계 올라가요. 행을 왼쪽으로 스와이프하면 단계를 고를 수 있어요",
+      "note": "行末の段階チップの操作の説明 (VoiceOver のヒント)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "group.summary.header": {
+      "ja": "このグループの習熟度",
+      "ko": "이 그룹의 숙련도",
+      "note": "群の詳細の先頭の進み具合の節の見出し"
+    },
+    "group.undo.action": {
+      "ja": "元に戻す",
+      "ko": "되돌리기",
+      "note": "一括更新の帯の取り消しボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "group.undo.label": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        },
+        {
+          "name": "level",
+          "type": "string"
+        }
+      ],
+      "ja": "{count}曲を「{level}」に",
+      "ko": "{count}곡 → “{level}”",
+      "note": "一括更新の直後に下に出る帯の文。level は付けた段の名前",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "level.unset": {
+      "ja": "未設定",
+      "ko": "미설정",
+      "note": "習熟度の段階が付いていない状態 (0 段) の名前。行のチップ・段階の絞り込み・a11y に出る",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.axis.series": {
+      "ja": "CDシリーズ",
+      "ko": "CD 시리즈",
+      "note": "群の分け方のセグメント: CD シリーズごと"
+    },
+    "list.axis.unit": {
+      "ja": "ユニット",
+      "ko": "유닛",
+      "note": "群の分け方のセグメント: ユニット (歌唱名義) ごと"
+    },
+    "list.axis.year": {
+      "ja": "年代",
+      "ko": "연도",
+      "note": "群の分け方のセグメント: 発売年ごと"
+    },
+    "list.brand.all": {
+      "ja": "全て",
+      "ko": "전체",
+      "note": "ブランドの絞り込みチップの先頭 (絞らない)"
+    },
+    "list.empty.message": {
+      "ja": "絞り込みを緩めてください。",
+      "ko": "필터 조건을 줄여 주세요.",
+      "note": "絞り込みの結果、群が 1 つも無いときの説明"
+    },
+    "list.empty.title": {
+      "ja": "該当するグループがありません",
+      "ko": "해당하는 그룹이 없어요",
+      "note": "絞り込みの結果、群が 1 つも無いときの見出し"
+    },
+    "list.filter.a11y": {
+      "ja": "フィルタ",
+      "ko": "필터",
+      "note": "右上の絞り込みボタンの読み上げ"
+    },
+    "list.group.bulk_swipe": {
+      "ja": "まとめて付ける",
+      "ko": "한꺼번에 매기기",
+      "note": "群の行を右へスワイプしたときに出る文字 (未設定の曲にまとめて段階を付ける)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.group.discs": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}枚",
+      "ko": "{count}장",
+      "note": "群の行の副題: その群の CD の枚数。副題は「 ・ 」で並ぶ"
+    },
+    "list.group.heard": {
+      "args": [
+        {
+          "name": "songs",
+          "type": "int"
+        }
+      ],
+      "ja": "聴いた {songs}",
+      "ko": "들음 {songs}",
+      "note": "群の行の副題: 現地で聴いた (回収した) 曲の数"
+    },
+    "list.group.heard_but_unset": {
+      "args": [
+        {
+          "name": "songs",
+          "type": "int"
+        }
+      ],
+      "ja": "聴いたのに未設定 {songs}",
+      "ko": "들었는데 미설정 {songs}",
+      "note": "群の行の副題: 現地で聴いた (回収した) のに段階を付けていない曲の数"
+    },
+    "list.group.separator": {
+      "ja": " ・ ",
+      "keep_whitespace": true,
+      "ko": " · ",
+      "note": "群の行の副題の区切り (前後に空白)"
+    },
+    "list.group.songs": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}曲",
+      "ko": "{count}곡",
+      "note": "群の行の副題: その群の曲数。1000 以上は桁区切りが付く"
+    },
+    "list.group.unset": {
+      "args": [
+        {
+          "name": "songs",
+          "type": "int"
+        }
+      ],
+      "ja": "未設定 {songs}",
+      "ko": "미설정 {songs}",
+      "note": "群の行の副題: 段階が未設定の曲の数 (Android だけ)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.groups.count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count} 件",
+      "ko": "{count}건",
+      "note": "群の一覧の件数。1000 以上は桁区切りが付く (1,047 件)"
+    },
+    "list.groups.header": {
+      "ja": "グループ別",
+      "ko": "그룹별",
+      "note": "群 (CD シリーズ / ユニット / 年代) の一覧の見出し"
+    },
+    "list.name_filter.series": {
+      "ja": "CDシリーズ名で絞り込み",
+      "ko": "CD 시리즈 이름으로 찾기",
+      "note": "群の名前の絞り込み欄のプレースホルダ (CD シリーズで分けているとき)"
+    },
+    "list.name_filter.unit": {
+      "ja": "ユニット名で絞り込み",
+      "ko": "유닛 이름으로 찾기",
+      "note": "群の名前の絞り込み欄のプレースホルダ (ユニットで分けているとき)"
+    },
+    "list.name_filter.year": {
+      "ja": "年代名で絞り込み",
+      "ko": "연도로 찾기",
+      "note": "群の名前の絞り込み欄のプレースホルダ (年代で分けているとき。群の名前は 2023年 など)"
+    },
+    "list.summary.header": {
+      "ja": "あなたの習熟度",
+      "ko": "나의 숙련도",
+      "note": "一覧の先頭の全体の進み具合の節の見出し"
+    },
+    "list.title": {
+      "ja": "習熟度",
+      "ko": "숙련도",
+      "note": "習熟度ダッシュボードの画面の題"
+    },
+    "preset.name": {
+      "args": [
+        {
+          "name": "steps",
+          "type": "int"
+        }
+      ],
+      "ja": "{steps}段",
+      "ko": "{steps}단계",
+      "note": "段階の設定のプリセットのチップ (2段 / 3段 / 4段)。steps は段の数",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "preset.steps2.level1": {
+      "ja": "聞いた",
+      "ko": "들었음",
+      "max_len": 4,
+      "note": "2 段のプリセットの 1 段目 (いちばん下)。保存値は ja のままで、表示だけ訳す。スワイプのボタンに収まるよう 4 文字以内",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "preset.steps2.level2": {
+      "ja": "覚えた",
+      "ko": "외웠음",
+      "max_len": 4,
+      "note": "2 段のプリセットの 2 段目 (最上段)。4 文字以内",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "preset.steps3.level1": {
+      "ja": "聞いた",
+      "ko": "들었음",
+      "max_len": 4,
+      "note": "3 段のプリセット (既定) の 1 段目。4 文字以内",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "preset.steps3.level2": {
+      "ja": "覚えた",
+      "ko": "외웠음",
+      "max_len": 4,
+      "note": "3 段のプリセット (既定) の 2 段目。4 文字以内",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "preset.steps3.level3": {
+      "ja": "完璧",
+      "ko": "완벽",
+      "max_len": 4,
+      "note": "3 段のプリセット (既定) の 3 段目 (最上段)。4 文字以内",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "preset.steps4.level1": {
+      "ja": "聞いた",
+      "ko": "들었음",
+      "max_len": 4,
+      "note": "4 段のプリセットの 1 段目。4 文字以内",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "preset.steps4.level2": {
+      "ja": "だいたい",
+      "ko": "거의",
+      "max_len": 4,
+      "note": "4 段のプリセットの 2 段目 (だいたい覚えた、の意)。4 文字以内",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "preset.steps4.level3": {
+      "ja": "覚えた",
+      "ko": "외웠음",
+      "max_len": 4,
+      "note": "4 段のプリセットの 3 段目。4 文字以内",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "preset.steps4.level4": {
+      "ja": "完璧",
+      "ko": "완벽",
+      "max_len": 4,
+      "note": "4 段のプリセットの 4 段目 (最上段)。4 文字以内",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "settings.action.apply": {
+      "ja": "この段階にする",
+      "ko": "이 단계로 설정",
+      "note": "段階の設定を反映するボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "settings.action.revert": {
+      "ja": "元に戻す",
+      "ko": "되돌리기",
+      "note": "編集中の段階を保存済みの状態に戻すボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "settings.invalid": {
+      "ja": "空の段と同じ名前の段は置けません。",
+      "ko": "비어 있는 단계나 같은 이름의 단계는 둘 수 없어요.",
+      "note": "段の名前が空か重複しているときの注意",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "settings.preset.footer": {
+      "ja": "どのラベルも 4 文字以内にしておくと、一覧のスワイプで切れずに出ます。",
+      "ko": "라벨을 모두 4글자 이내로 하면 목록에서 스와이프할 때 잘리지 않아요.",
+      "note": "プリセットの節の下の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "settings.preset.header": {
+      "ja": "プリセット",
+      "ko": "프리셋",
+      "note": "プリセットの節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "settings.shrink.top_stage": {
+      "ja": "最上段",
+      "ko": "최상단",
+      "note": "段を減らすときの注意の移り先の名前が引けなかったときの代わり。settings.shrink.warning の stage に入る (ko は後ろに「단계로」が続くので「단계」を付けない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "settings.shrink.warning": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        },
+        {
+          "name": "stage",
+          "type": "string"
+        }
+      ],
+      "ja": "{count} 曲が「{stage}」に移ります。記録は消えません。",
+      "ko": "{count}곡이 “{stage}” 단계로 옮겨져요. 기록은 지워지지 않아요.",
+      "note": "段を減らすときの注意。stage は移り先の段の名前 (利用者が付けたラベル。引けないときは settings.shrink.top_stage)。1000 以上は桁区切りが付く (1,234 曲が…)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "settings.stage.add": {
+      "ja": "段を追加",
+      "ko": "단계 추가",
+      "note": "段を 1 つ足すボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "settings.stage.footer": {
+      "ja": "右の数字はいまその段にある曲数。削除できるのは最上段だけです。",
+      "ko": "오른쪽 숫자는 지금 그 단계에 있는 곡 수예요. 삭제할 수 있는 건 최상단 단계뿐이에요.",
+      "note": "段の一覧の節の下の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "settings.stage.header": {
+      "ja": "下から順に積み上がる",
+      "ko": "아래부터 차례로 쌓임",
+      "note": "段の一覧の節の見出し (上の段ほど進んでいる)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "settings.stage.placeholder": {
+      "ja": "段の名前",
+      "ko": "단계 이름",
+      "note": "段の名前の入力欄のプレースホルダ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "settings.stage.remove.a11y": {
+      "ja": "最上段を削除",
+      "ko": "최상단 단계 삭제",
+      "note": "最上段の右の − ボタンの読み上げ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "settings.title": {
+      "ja": "習熟度の段階",
+      "ko": "숙련도 단계",
+      "note": "段階の設定の画面の題",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "summary.done_songs": {
+      "args": [
+        {
+          "name": "level",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{level} {count} 曲",
+      "ko": "{level} {count}곡",
+      "note": "最上段 (例: 完璧) にある曲数。level は最上段の名前 (利用者が付けたラベルのこともある)。1000 以上は桁区切りが付く (完璧 1,234 曲)"
+    },
+    "summary.set_songs": {
+      "ja": "段階を付けた曲",
+      "ko": "단계를 매긴 곡",
+      "note": "進み具合の大きな数字の説明"
+    },
+    "summary.total_songs": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "/ {count}曲",
+      "ko": "/ {count}곡",
+      "note": "進み具合の大きな数字 (段階を付けた曲数) の右に出る分母。1000 以上は桁区切りが付く (/ 3,012曲)"
+    },
+    "swipe.action.unset": {
+      "ja": "未設定",
+      "ko": "미설정",
+      "note": "曲の行を右へスワイプすると出る、段階を未設定に戻すボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "write_action.record": {
+      "ja": "習熟度の記録",
+      "ko": "숙련도 기록",
+      "note": "書き込みに失敗したときの知らせに入る操作の名前 (「〜に失敗しました」の〜の部分)"
+    },
+    "write_action.record_bulk": {
+      "ja": "習熟度のまとめての記録",
+      "ko": "숙련도 일괄 기록",
+      "note": "まとめて段階を付けるのに失敗したときの知らせに入る操作の名前",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "write_action.scale_save": {
+      "ja": "習熟度の段階の保存",
+      "ko": "숙련도 단계 저장",
+      "note": "段階の設定の保存に失敗したときの知らせに入る操作の名前",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "write_action.undo": {
+      "ja": "習熟度の取り消し",
+      "ko": "숙련도 되돌리기",
+      "note": "一括更新の取り消しに失敗したときの知らせに入る操作の名前",
+      "platforms": [
+        "ios"
+      ]
+    }
+  }
+}

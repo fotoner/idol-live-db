@@ -1,0 +1,696 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "stats.brand_progress.header" : {
+      "comment" : "ブランド別の回収率の節の見出し (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランド別の回収率"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드별 회수율"
+          }
+        }
+      }
+    },
+    "stats.brand_songs.header" : {
+      "comment" : "ブランドごとの登録曲数の見出し。マスタはアプリのマスタデータ (データベース) のこと (ko の「마스터」は作品名 (아이돌마스터) や称号に読めるので DB と訳す) (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスタ規模 ・ ブランド別楽曲数"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "DB 규모 · 브랜드별 곡 수"
+          }
+        }
+      }
+    },
+    "stats.cast_show.header" : {
+      "comment" : "出演回数の多い人のランキングの見出し (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "活動量 ・ 出演回数"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "활동량 · 출연 횟수"
+          }
+        }
+      }
+    },
+    "stats.cast_show.unit" : {
+      "comment" : "出演回数のランキングの数字の単位。数字は各アイドルの出演公演数なので ko は「회」(37회)。ja の「人」は移行前の表示をそのまま残したもので、回 (または 公演) に直すのはオーナーの承認を得て別の PR で行う (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "人"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "회"
+          }
+        }
+      }
+    },
+    "stats.catch_chance.caption" : {
+      "comment" : "公演カードの右の数字の説明 (その曲が過去の公演で歌われた) (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "過去に披露"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "과거에 공연됨"
+          }
+        }
+      }
+    },
+    "stats.catch_chance.date_event" : {
+      "comment" : "公演カードの上の行。date は 6/4 のような月日、event はイベント名 (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ ・ %2$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "stats.catch_chance.header" : {
+      "comment" : "これからの公演で未回収の曲が聴けそうなものの節の見出し (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この公演で聴けるかも"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 공연에서 들을 수 있을지도"
+          }
+        }
+      }
+    },
+    "stats.catch_chance.unit" : {
+      "comment" : "公演カードの右の数字の単位 (聴けそうな未回収の曲数) (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡"
+          }
+        }
+      }
+    },
+    "stats.dashboard.title" : {
+      "comment" : "統計タブ (回収ダッシュボード) の画面の題。回収 = ライブで曲を生で聴くこと (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回収ダッシュボード"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "회수 대시보드"
+          }
+        }
+      }
+    },
+    "stats.heat.brand.all" : {
+      "comment" : "ランキングのブランドの絞り込みチップの先頭 (絞らない) (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "stats.heat.empty.message" : {
+      "comment" : "ランキングが空のときの説明 (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入り登録が増えるとここにランキングが表示されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기 등록이 늘어나면 여기에 랭킹이 표시돼요."
+          }
+        }
+      }
+    },
+    "stats.heat.empty.title" : {
+      "comment" : "ランキングが空のときの見出し (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだデータがありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 데이터가 없어요"
+          }
+        }
+      }
+    },
+    "stats.heat.header" : {
+      "comment" : "みんなのお気に入り登録の多い曲のランキングの節の見出し (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コミュニティの熱量"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "커뮤니티 열기"
+          }
+        }
+      }
+    },
+    "stats.latest.date" : {
+      "comment" : "最新の公演カードの上の行。date は 6/4 のような月日 (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最新公演 ・ %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최신 공연 · %1$@"
+          }
+        }
+      }
+    },
+    "stats.latest.header" : {
+      "comment" : "いちばん新しい公演の節の見出し (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最新の動き"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최신 소식"
+          }
+        }
+      }
+    },
+    "stats.latest.open_setlist" : {
+      "comment" : "最新の公演カードのセトリを開く導線 (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリを見る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 보기"
+          }
+        }
+      }
+    },
+    "stats.latest.separator" : {
+      "comment" : "最新の公演カードの会場とセトリの曲数の区切り (前後に空白) (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " ・ "
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : " · "
+          }
+        }
+      }
+    },
+    "stats.latest.setlist_songs" : {
+      "comment" : "最新の公演カードの会場の行に続く、セトリの曲数 (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "セトリ %arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "세트리스트 %arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "stats.song_play.header" : {
+      "comment" : "ライブで歌われた回数の多い曲のランキングの見出し (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "活動量 ・ 披露回数"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "활동량 · 공연 횟수"
+          }
+        }
+      }
+    },
+    "stats.song_play.unit" : {
+      "comment" : "披露回数のランキングの数字の単位 (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "회"
+          }
+        }
+      }
+    },
+    "stats.summary.caption" : {
+      "comment" : "回収した曲数の説明 (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現地ライブで聴けた曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "현장 라이브에서 들은 곡"
+          }
+        }
+      }
+    },
+    "stats.summary.header" : {
+      "comment" : "全体の回収率の節の見出し (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あなたの回収率"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "나의 회수율"
+          }
+        }
+      }
+    },
+    "stats.summary.share" : {
+      "comment" : "回収率のシェアカードを開くボタン (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カードでシェア"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "카드로 공유"
+          }
+        }
+      }
+    },
+    "stats.summary.total_songs" : {
+      "comment" : "回収した曲数の右の分母 (全曲数)。1000 以上は桁区切りが付く (/ 3,012曲) (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "/ %arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "/ %arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "stats.uncollected.empty_all.message" : {
+      "comment" : "未回収の曲が無いときの説明 (全体) (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加ライブを記録すると、未回収曲がここに並びます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가한 라이브를 기록하면 미회수 곡이 여기에 나와요."
+          }
+        }
+      }
+    },
+    "stats.uncollected.empty_all.title" : {
+      "comment" : "未回収の曲が無いときの見出し (全体) (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未回収曲はありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "미회수 곡이 없어요"
+          }
+        }
+      }
+    },
+    "stats.uncollected.empty_pick.message" : {
+      "comment" : "担当のオリ曲に未回収が無いときの説明 (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加ライブを記録すると、担当のオリ曲の回収状況がここに出ます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가한 라이브를 기록하면 담당 오리지널 곡의 회수 현황이 여기에 나와요."
+          }
+        }
+      }
+    },
+    "stats.uncollected.empty_pick.title" : {
+      "comment" : "担当のオリ曲に未回収が無いときの見出し (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当曲はコンプリート！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 곡 컴플리트!"
+          }
+        }
+      }
+    },
+    "stats.uncollected.header" : {
+      "comment" : "未回収の曲の一覧の見出し (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだ生で聴けていない曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 라이브로 듣지 못한 곡"
+          }
+        }
+      }
+    },
+    "stats.uncollected.my_pick_progress" : {
+      "comment" : "担当のオリ曲の回収数 / 曲数 (見出しの右) (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当 %1$@/%2$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 %1$@/%2$@"
+          }
+        }
+      }
+    },
+    "stats.uncollected.play_count" : {
+      "comment" : "未回収の曲の行の右: これまでにライブで歌われた回数 (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg回披露"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg회 공연"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "stats.uncollected.scope.all" : {
+      "comment" : "未回収の曲の範囲のセグメント: すべての曲 (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全体"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "stats.uncollected.scope.my_pick" : {
+      "comment" : "未回収の曲の範囲のセグメント: 担当アイドルのオリジナル曲 (i18n/catalog/stats.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当のオリ曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 오리지널 곡"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

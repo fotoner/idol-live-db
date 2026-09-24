@@ -45,12 +45,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fugaif.imaslivedb.i18n.DisplayLocale
+import com.fugaif.imaslivedb.i18n.coreText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.BrandFilterChips
 import com.fugaif.imaslivedb.ui.components.BrandFilterItem
 import com.fugaif.imaslivedb.ui.components.ImasArtwork
@@ -73,6 +78,7 @@ import com.fugaif.imaslivedb.ui.theme.ImasTheme
 import uniffi.imas_core.CatchChanceRecord
 import uniffi.imas_core.PlayFrequency
 import uniffi.imas_core.UncollectedSongRecord
+import java.text.NumberFormat
 
 /**
  * 統計 = 回収ダッシュボード。iOS Views/Stats/StatsView.swift の 1:1 移植。
@@ -89,7 +95,7 @@ fun StatsScreen(viewModel: StatsViewModel = viewModel()) {
     var selectedSongId by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedShowId by rememberSaveable { mutableStateOf<String?>(null) }
 
-    Scaffold(topBar = { TopAppBar(title = { Text("回収ダッシュボード", fontWeight = FontWeight.Bold) }) }) { padding ->
+    Scaffold(topBar = { TopAppBar(title = { Text(L10n.Stats.dashboardTitle.resolve(), fontWeight = FontWeight.Bold) }) }) { padding ->
         if (state.isLoading) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
         } else {
@@ -97,7 +103,7 @@ fun StatsScreen(viewModel: StatsViewModel = viewModel()) {
                 CollectionSummarySection(state.overallCollected, state.overallTotal)
 
                 if (state.brandProgress.any { it.total > 0u }) {
-                    ImasSectionHeader("ブランド別の回収率", tight = true)
+                    ImasSectionHeader(L10n.Stats.brandProgressHeader, tight = true)
                     ImasListContainer {
                         state.brandProgress.filter { it.total > 0u }.forEach { item ->
                             ImasStatBar(item.shortName, "${item.collected}/${item.total}", item.collected.toDouble() / item.total.toDouble() * 100, seed = item.color)
@@ -107,7 +113,7 @@ fun StatsScreen(viewModel: StatsViewModel = viewModel()) {
                 }
 
                 if (state.catchChances.isNotEmpty()) {
-                    ImasSectionHeader("この公演で聴けるかも", tight = true)
+                    ImasSectionHeader(L10n.Stats.catchChanceHeader, tight = true)
                     Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         state.catchChances.forEach { chance ->
                             CatchChanceCard(chance, onClick = { selectedShowId = chance.show.id })
@@ -127,7 +133,7 @@ fun StatsScreen(viewModel: StatsViewModel = viewModel()) {
                 )
 
                 state.latestShow?.let { show ->
-                    ImasSectionHeader("最新の動き", tight = true)
+                    ImasSectionHeader(L10n.Stats.latestHeader, tight = true)
                     Box(Modifier.padding(horizontal = 16.dp)) {
                         LatestShowCard(
                             show = show,
@@ -150,20 +156,25 @@ fun StatsScreen(viewModel: StatsViewModel = viewModel()) {
 
                 state.databaseStats?.let { db ->
                     Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        ImasStatTile(Icons.Filled.LibraryMusic, "${db.songCount}", "楽曲", modifier = Modifier.weight(1f))
-                        ImasStatTile(Icons.Filled.Groups, "${db.idolCount}", "アイドル", modifier = Modifier.weight(1f))
+                        ImasStatTile(Icons.Filled.LibraryMusic, "${db.songCount}", L10n.Stats.dbSongs.resolve(),
+                                     modifier = Modifier.weight(1f))
+                        ImasStatTile(Icons.Filled.Groups, "${db.idolCount}", L10n.Stats.dbIdols.resolve(),
+                                     modifier = Modifier.weight(1f))
                     }
                     Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        ImasStatTile(Icons.Filled.CalendarMonth, "${db.eventCount}", "イベント", modifier = Modifier.weight(1f))
-                        ImasStatTile(Icons.Filled.Mic, "${db.showCount}", "公演", modifier = Modifier.weight(1f))
+                        ImasStatTile(Icons.Filled.CalendarMonth, "${db.eventCount}", L10n.Stats.dbEvents.resolve(),
+                                     modifier = Modifier.weight(1f))
+                        ImasStatTile(Icons.Filled.Mic, "${db.showCount}", L10n.Stats.dbShows.resolve(),
+                                     modifier = Modifier.weight(1f))
                     }
                 }
 
                 if (state.songPlayCounts.isNotEmpty()) {
-                    ImasSectionHeader("活動量 ・ 披露回数", tight = true)
+                    ImasSectionHeader(L10n.Stats.songPlayHeader, tight = true)
                     ImasListContainer {
                         state.songPlayCounts.forEachIndexed { i, s ->
-                            ImasRankingRow(rank = i + 1, title = s.title, metric = "${s.playCount}", brand = s.brandId,
+                            ImasRankingRow(rank = i + 1, title = s.title, metric = "${s.playCount}",
+                                unit = L10n.Stats.songPlayUnit.resolve(), brand = s.brandId,
                                 onClick = { selectedSongId = s.id }) {
                                 ImasArtwork(title = s.title, brand = s.brandId, size = 44.dp, imageUrl = s.artworkUrl)
                             }
@@ -174,10 +185,11 @@ fun StatsScreen(viewModel: StatsViewModel = viewModel()) {
                 }
 
                 if (state.castShowCounts.isNotEmpty()) {
-                    ImasSectionHeader("活動量 ・ 出演回数", tight = true)
+                    ImasSectionHeader(L10n.Stats.castShowHeader, tight = true)
                     ImasListContainer {
                         state.castShowCounts.forEachIndexed { i, c ->
-                            ImasRankingRow(rank = i + 1, title = c.name, metric = "${c.showCount}", unit = "人") {
+                            ImasRankingRow(rank = i + 1, title = c.name, metric = "${c.showCount}",
+                                           unit = L10n.Stats.castShowUnit.resolve()) {
                                 ImasAvatar(label = c.name, size = 44.dp)
                             }
                             if (i < state.castShowCounts.size - 1) Divider(color = DS.sep)
@@ -188,7 +200,7 @@ fun StatsScreen(viewModel: StatsViewModel = viewModel()) {
 
                 if (state.brandSongCounts.isNotEmpty()) {
                     val max = state.brandSongCounts.maxOf { it.songCount }.coerceAtLeast(1)
-                    ImasSectionHeader("マスタ規模 ・ ブランド別楽曲数", tight = true)
+                    ImasSectionHeader(L10n.Stats.brandSongsHeader, tight = true)
                     ImasListContainer {
                         state.brandSongCounts.forEach { b ->
                             ImasStatBar(b.shortName, "${b.songCount}", b.songCount * 100.0 / max, seed = b.color, brand = b.id)
@@ -199,7 +211,7 @@ fun StatsScreen(viewModel: StatsViewModel = viewModel()) {
 
                 if (state.yearlyShowCounts.isNotEmpty()) {
                     val max = state.yearlyShowCounts.maxOf { it.showCount }.coerceAtLeast(1)
-                    ImasSectionHeader("年別 公演数")
+                    ImasSectionHeader(L10n.Stats.yearlyHeader)
                     state.yearlyShowCounts.forEach { y ->
                         ImasStatBar(y.year, "${y.showCount}", y.showCount * 100.0 / max)
                     }
@@ -239,7 +251,7 @@ private fun CollectionSummarySection(collected: Int, total: Int) {
     // 回収率カードのシェアシート (iOS StatsView の showCollectionShare と同じ導線)。
     var showShareCard by rememberSaveable { mutableStateOf(false) }
 
-    ImasSectionHeader("あなたの回収率", tight = true)
+    ImasSectionHeader(L10n.Stats.summaryHeader, tight = true)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -253,10 +265,10 @@ private fun CollectionSummarySection(collected: Int, total: Int) {
         CollectionRing(fraction = if (total > 0) collected.toDouble() / total else 0.0, modifier = Modifier.size(92.dp))
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("$collected", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = DS.ink)
-                Text("/ ${total}曲", fontSize = 15.sp, color = DS.ink2)
+                Text(groupedCount(collected), fontSize = 30.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+                Text(L10n.Stats.summaryTotalSongs(count = total).resolve(), fontSize = 15.sp, color = DS.ink2)
             }
-            Text("現地ライブで聴けた曲", fontSize = 13.sp, color = DS.ink2)
+            Text(L10n.Stats.summaryCaption.resolve(), fontSize = 13.sp, color = DS.ink2)
         }
     }
 
@@ -274,7 +286,7 @@ private fun CollectionSummarySection(collected: Int, total: Int) {
     ) {
         androidx.compose.material3.Icon(Icons.Filled.Share, null, tint = DS.ink, modifier = Modifier.size(15.dp))
         Text(
-            "カードでシェア",
+            L10n.Stats.summaryShare.resolve(),
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             color = DS.ink,
@@ -319,7 +331,8 @@ private fun CatchChanceCard(chance: CatchChanceRecord, onClick: () -> Unit) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             // 設定「イベント名を省略」が ON なら省略形 (省略の規則はコア)。
             val eventLabel = if (AppPreferences.abbreviateEventNames) chance.eventShortName else chance.eventName
-            Text("${displayDate(chance.show.date)} ・ $eventLabel", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3, maxLines = 1)
+            Text(L10n.Stats.catchChanceDateEvent(date = displayDate(chance.show.date), event = eventLabel).resolve(),
+                 fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3, maxLines = 1)
             Text(chance.show.name, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink, maxLines = 2)
             chance.show.venue?.takeIf { it.isNotEmpty() }?.let { venue ->
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -329,8 +342,9 @@ private fun CatchChanceCard(chance: CatchChanceRecord, onClick: () -> Unit) {
             }
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            ImasMetricBadge(value = "${chance.likelyCount}", unit = "曲", seed = chance.brandColor)
-            Text("過去に披露", fontSize = 10.sp, color = DS.ink3)
+            ImasMetricBadge(value = "${chance.likelyCount}", unit = L10n.Stats.catchChanceUnit.resolve(),
+                            seed = chance.brandColor)
+            Text(L10n.Stats.catchChanceCaption.resolve(), fontSize = 10.sp, color = DS.ink3)
         }
     }
 }
@@ -351,16 +365,17 @@ private fun UncollectedSection(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("まだ生で聴けていない曲", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
+        Text(L10n.Stats.uncollectedHeader.resolve(), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
         Box(Modifier.weight(1f))
         if (scope == UncollectedScope.MY_PICK && myPickTotal > 0) {
-            Text("担当 $myPickCollected/$myPickTotal", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3)
+            Text(L10n.Stats.uncollectedMyPickProgress(collected = myPickCollected, total = myPickTotal).resolve(),
+                 fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3)
         }
     }
     Spacer(Modifier.height(8.dp))
     Box(Modifier.padding(horizontal = 16.dp)) {
         ImasSegmented(
-            labels = listOf("担当のオリ曲", "全体"),
+            labels = listOf(L10n.Stats.uncollectedScopeMyPick.resolve(), L10n.Stats.uncollectedScopeAll.resolve()),
             selection = scope.ordinal,
             onSelect = { onScopeChange(if (it == 0) UncollectedScope.MY_PICK else UncollectedScope.ALL) }
         )
@@ -371,9 +386,10 @@ private fun UncollectedSection(
         isLoading -> Box(Modifier.fillMaxWidth().padding(vertical = 30.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
         songs.isEmpty() -> ImasEmptyState(
             icon = Icons.Filled.CheckCircle,
-            title = if (scope == UncollectedScope.MY_PICK) "担当曲はコンプリート！" else "未回収曲はありません",
-            message = if (scope == UncollectedScope.MY_PICK) "参加ライブを記録すると、担当のオリ曲の回収状況がここに出ます。"
-                else "参加ライブを記録すると、未回収曲がここに並びます。"
+            title = (if (scope == UncollectedScope.MY_PICK) L10n.Stats.uncollectedEmptyPickTitle
+                     else L10n.Stats.uncollectedEmptyAllTitle).resolve(),
+            message = (if (scope == UncollectedScope.MY_PICK) L10n.Stats.uncollectedEmptyPickMessage
+                       else L10n.Stats.uncollectedEmptyAllMessage).resolve()
         )
         else -> ImasListContainer {
             val shown = songs.take(30)
@@ -411,9 +427,12 @@ private fun FrequencyBadge(item: UncollectedSongRecord) {
     val bg = if (item.frequency == PlayFrequency.STAPLE) DS.warning.copy(alpha = 0.14f) else DS.fill
     Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Box(Modifier.clip(RoundedCornerShape(50)).background(bg).padding(horizontal = 8.dp, vertical = 2.dp)) {
-            Text(item.frequencyLabel, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = fg)
+            Text(coreText(item.frequencyLabel), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = fg)
         }
-        if (item.playCount > 0u) Text("${item.playCount}回披露", fontSize = 10.sp, color = DS.ink3)
+        if (item.playCount > 0u) {
+            Text(L10n.Stats.uncollectedPlayCount(count = item.playCount.toInt()).resolve(), fontSize = 10.sp,
+                 color = DS.ink3)
+        }
     }
 }
 
@@ -421,10 +440,11 @@ private fun FrequencyBadge(item: UncollectedSongRecord) {
 
 @Composable
 private fun LatestShowCard(show: com.fugaif.imaslivedb.data.model.Show, songCount: Int, brandColor: String?, onClick: () -> Unit) {
+    val setlistSongs = if (songCount > 0) L10n.Stats.latestSetlistSongs(count = songCount).resolve() else null
     val venueLine = buildList {
         show.venue?.takeIf { it.isNotEmpty() }?.let { add(it) }
-        if (songCount > 0) add("セトリ ${songCount}曲")
-    }.joinToString(" ・ ")
+        setlistSongs?.let { add(it) }
+    }.joinToString(L10n.Stats.latestSeparator.resolve())
 
     Row(
         modifier = Modifier
@@ -437,7 +457,8 @@ private fun LatestShowCard(show: com.fugaif.imaslivedb.data.model.Show, songCoun
     ) {
         ImasLeadBar(seedHex = brandColor, height = 64.dp)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("最新公演 ・ ${displayDate(show.date)}", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3)
+            Text(L10n.Stats.latestDate(date = displayDate(show.date)).resolve(), fontSize = 12.sp,
+                 fontWeight = FontWeight.SemiBold, color = DS.ink3)
             Text(show.name, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink, maxLines = 2)
             if (venueLine.isNotEmpty()) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -447,7 +468,8 @@ private fun LatestShowCard(show: com.fugaif.imaslivedb.data.model.Show, songCoun
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 androidx.compose.material3.Icon(Icons.Filled.MusicNote, null, tint = DS.ink2, modifier = Modifier.size(13.dp))
-                Text("セトリを見る", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
+                Text(L10n.Stats.latestOpenSetlist.resolve(), fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
+                     color = DS.ink2)
             }
         }
     }
@@ -464,7 +486,7 @@ private fun HeatSection(
     isLoading: Boolean,
     onSongClick: (String) -> Unit
 ) {
-    ImasSectionHeader("コミュニティの熱量", tight = true)
+    ImasSectionHeader(L10n.Stats.heatHeader, tight = true)
     BrandFilterChips(
         brands = brands.map { BrandFilterItem(it.id, it.shortName) },
         selectedBrandId = selectedBrandId,
@@ -474,8 +496,8 @@ private fun HeatSection(
         isLoading -> Box(Modifier.fillMaxWidth().padding(vertical = 30.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
         ranking.isEmpty() -> ImasEmptyState(
             icon = Icons.Filled.Favorite,
-            title = "まだデータがありません",
-            message = "お気に入り登録が増えるとここにランキングが表示されます。"
+            title = L10n.Stats.heatEmptyTitle.resolve(),
+            message = L10n.Stats.heatEmptyMessage.resolve()
         )
         else -> ImasListContainer {
             ranking.forEachIndexed { index, entry ->
@@ -495,6 +517,15 @@ private fun HeatSection(
 /** "1280" → "1,280" のような桁区切り。 */
 private fun heatMetric(count: Int): String =
     "%,d".format(count)
+
+/**
+ * 回収サマリーの大きな数字。隣の「/ N曲」(count 引数なので 1,234 のように桁区切りが付く) と
+ * 書式を揃える (iOS の Text("\(n)") も桁区切りが付く)。
+ */
+@Composable
+private fun groupedCount(value: Int): String =
+    NumberFormat.getIntegerInstance(DisplayLocale.of(LocalContext.current).formattingLocale)
+        .format(value.toLong())
 
 /** "2026-06-04" → "6/4" 表示用。失敗時は元文字列。 */
 private fun displayDate(raw: String): String {

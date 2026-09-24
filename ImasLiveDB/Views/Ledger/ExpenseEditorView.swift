@@ -3,7 +3,7 @@ import SwiftUI
 /// 支出 1 件の入力。追加も編集も同じ画面。
 ///
 /// 入力の検査 (日付の形・金額の範囲) は**共有コア** (`validateExpense`) 一本。
-/// ここは弾かれた理由を日本語に直して出すだけで、条件を Swift に書かない。
+/// ここは弾かれた理由を文言 (カタログ) に直して出すだけで、条件を Swift に書かない。
 struct ExpenseEditorView: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -37,7 +37,7 @@ struct ExpenseEditorView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("金額") {
+                Section(L10n.Ledger.editorAmountHeader) {
                     HStack {
                         Text("¥").foregroundStyle(DS.ink2)
                         TextField("0", text: $amountText)
@@ -51,7 +51,7 @@ struct ExpenseEditorView: View {
                     }
                 }
 
-                Section("費目") {
+                Section(L10n.Ledger.editorCategoryHeader) {
                     // 並びはコアが決める。画面ごとに並べ替えない。
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: DS.sp2), count: 3),
                               spacing: DS.sp2) {
@@ -64,8 +64,8 @@ struct ExpenseEditorView: View {
                     .padding(.vertical, DS.sp2)
                 }
 
-                Section("日付") {
-                    DatePicker("日付", selection: $date, displayedComponents: .date)
+                Section(L10n.Ledger.editorDateHeader) {
+                    DatePicker(L10n.Ledger.editorDatePicker, selection: $date, displayedComponents: .date)
                         .datePickerStyle(.compact)
                 }
 
@@ -74,37 +74,37 @@ struct ExpenseEditorView: View {
                         showPicker = true
                     } label: {
                         HStack {
-                            Text(linkedLabel).foregroundStyle(showId == nil ? DS.ink2 : DS.ink)
+                            Text(display: linkedLabel).foregroundStyle(showId == nil ? DS.ink2 : DS.ink)
                             Spacer()
                             ImasRowChevron()
                         }
                     }
                     if showId != nil {
-                        Button("公演との紐づけを外す", role: .destructive) {
+                        Button(L10n.Ledger.editorShowUnlink, role: .destructive) {
                             showId = nil
                             eventId = nil
                         }
                     }
                 } header: {
-                    Text("公演")
+                    Text(L10n.Ledger.editorShowHeader)
                 } footer: {
-                    Text("紐づけると「この遠征でいくら使ったか」が出ます。課金やグッズの通販は紐づけなくて構いません。")
+                    Text(L10n.Ledger.editorShowFooter)
                 }
 
-                Section("メモ") {
-                    TextField("任意", text: $note, axis: .vertical).lineLimit(1...3)
+                Section(L10n.Ledger.editorNoteHeader) {
+                    TextField(L10n.Ledger.editorNotePlaceholder, text: $note, axis: .vertical).lineLimit(1...3)
                 }
             }
             .scrollContentBackground(.hidden)
             .background(DS.bg.ignoresSafeArea())
-            .navigationTitle(expense == nil ? "支出を足す" : "支出を直す")
+            .navigationTitle(expense == nil ? L10n.Ledger.editorTitleAdd : L10n.Ledger.editorTitleEdit)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("キャンセル") { dismiss() }
+                    Button(L10n.Ledger.editorActionCancel) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") { Task { await save() } }.disabled(validation != nil || isSaving)
+                    Button(L10n.Ledger.editorActionSave) { Task { await save() } }.disabled(validation != nil || isSaving)
                 }
             }
             .sheet(isPresented: $showPicker) {
@@ -124,16 +124,18 @@ struct ExpenseEditorView: View {
         .onAppear(perform: fill)
     }
 
-    private var linkedLabel: String {
-        guard let showId else { return "公演に紐づけない" }
-        return showOptions.first { $0.id == showId }?.label ?? "紐づけた公演"
+    /// 公演の欄。文言 (紐づけていない / 名前が引けない) か、公演の名前 (データ)。
+    private var linkedLabel: DisplayText {
+        guard let showId else { return .key(L10n.Ledger.editorShowNone) }
+        return showOptions.first { $0.id == showId }.map { DisplayText.verbatim($0.label) }
+            ?? .key(L10n.Ledger.editorShowLinkedFallback)
     }
 
-    private func message(for error: ExpenseInputError) -> String {
+    private func message(for error: ExpenseInputError) -> LocalizedStringResource {
         switch error {
-        case .badDate: return "日付を選んでください"
-        case .notPositive: return "金額を入れてください"
-        case .tooLarge: return "桁が多すぎます (1 億円未満)"
+        case .badDate: return L10n.Ledger.editorErrorBadDate
+        case .notPositive: return L10n.Ledger.editorErrorNotPositive
+        case .tooLarge: return L10n.Ledger.editorErrorTooLarge
         }
     }
 
@@ -187,13 +189,13 @@ private struct LedgerShowPicker: View {
     var body: some View {
         NavigationStack {
             List {
-                Button("公演に紐づけない") { onPick(nil) }
+                Button(L10n.Ledger.showPickerNone) { onPick(nil) }
                     .plainRow(background: DS.surface)
                 if options.isEmpty {
                     ImasEmptyState(
                         systemImage: "music.mic",
-                        title: "参加した公演がありません",
-                        message: "ライブに「参加」を付けると、ここに並びます。"
+                        title: String(localized: L10n.Ledger.showPickerEmptyTitle),
+                        message: String(localized: L10n.Ledger.showPickerEmptyMessage)
                     )
                     .plainRow(background: DS.bg)
                 }
@@ -215,12 +217,12 @@ private struct LedgerShowPicker: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .background(DS.bg.ignoresSafeArea())
-            .searchable(text: $query, prompt: "公演を探す")
-            .navigationTitle("公演を選ぶ")
+            .searchable(text: $query, prompt: Text(L10n.Ledger.showPickerSearchPrompt))
+            .navigationTitle(L10n.Ledger.showPickerTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("閉じる") { dismiss() }
+                    Button(L10n.Ledger.showPickerActionClose) { dismiss() }
                 }
             }
         }

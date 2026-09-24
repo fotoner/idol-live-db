@@ -34,7 +34,14 @@ struct MasteryView: View {
     /// 名前絞り込みは即時 (シートを開かずに効かせる)。
     @State private var nameFilter = ""
 
-    private static let axisLabels = ["CDシリーズ", "ユニット", "年代"]
+    /// 群の分け方のセグメント (並びは axis の 0 / 1 / 2)。文言は作った時点の言語で固まるので static let にしない。
+    private var axisLabels: [LocalizedStringResource] {
+        [L10n.Mastery.listAxisSeries, L10n.Mastery.listAxisUnit, L10n.Mastery.listAxisYear]
+    }
+    /// 名前の絞り込み欄のプレースホルダ (axisLabels と同じ並び)。
+    private var nameFilterPrompts: [LocalizedStringResource] {
+        [L10n.Mastery.listNameFilterSeries, L10n.Mastery.listNameFilterUnit, L10n.Mastery.listNameFilterYear]
+    }
     private var axis: MasteryAxis {
         switch axisIndex {
         case 1: return .unit
@@ -55,7 +62,7 @@ struct MasteryView: View {
         .scrollContentBackground(.hidden)
         .background(DS.bg.ignoresSafeArea())
         .scrollDismissesKeyboard(.immediately)
-        .navigationTitle("習熟度")
+        .navigationTitle(L10n.Mastery.listTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -67,7 +74,7 @@ struct MasteryView: View {
                           ? "line.3.horizontal.decrease.circle.fill"
                           : "line.3.horizontal.decrease.circle")
                 }
-                .accessibilityLabel("フィルタ")
+                .accessibilityLabel(L10n.Mastery.listFilterA11y)
             }
         }
         .sheet(isPresented: $showFilter) {
@@ -145,7 +152,7 @@ struct MasteryView: View {
     private var summarySection: some View {
         let s = summary
         return VStack(alignment: .leading, spacing: DS.sp4) {
-            ImasSectionHeader(title: "あなたの習熟度", tight: true)
+            ImasSectionHeader(title: .key(L10n.Mastery.listSummaryHeader), tight: true)
             HStack(spacing: DS.sp5) {
                 MasteryRing(fraction: Double(s.percent) / 100)
                     .frame(width: 92, height: 92)
@@ -155,14 +162,15 @@ struct MasteryView: View {
                         Text("\(s.setCount)")
                             .font(.imasDisplay(30, weight: .bold))
                             .foregroundStyle(DS.ink)
-                        Text("/ \(s.total)曲")
+                        Text(L10n.Mastery.summaryTotalSongs(count: Int(s.total)))
                             .font(.imasDisplay(15))
                             .foregroundStyle(DS.ink2)
                     }
-                    Text("段階を付けた曲")
+                    Text(L10n.Mastery.summarySetSongs)
                         .font(.imasFootnote)
                         .foregroundStyle(DS.ink2)
-                    Text("\(marks.scale.label(marks.scale.steps)) \(s.doneCount) 曲")
+                    Text(L10n.Mastery.summaryDoneSongs(level: marks.scale.label(marks.scale.steps),
+                                                       count: Int(s.doneCount)))
                         .font(.imasCaption.weight(.semibold))
                         .foregroundStyle(DS.ink3)
                 }
@@ -196,9 +204,9 @@ struct MasteryView: View {
     private var groupHeader: some View {
         VStack(alignment: .leading, spacing: DS.sp4) {
             HStack(alignment: .firstTextBaseline) {
-                ImasSectionHeader(title: "グループ別", tight: true)
+                ImasSectionHeader(title: .key(L10n.Mastery.listGroupsHeader), tight: true)
                 Spacer(minLength: 12)
-                Text("\(groups.count) 件")
+                Text(L10n.Mastery.listGroupsCount(count: groups.count))
                     .font(.imasCaption.weight(.semibold))
                     .foregroundStyle(DS.ink3)
             }
@@ -207,9 +215,9 @@ struct MasteryView: View {
             // 群が数百件並んで用を成さないので、シートの中に畳んではいけない。
             brandChips
 
-            ImasSegmented(labels: Self.axisLabels, selection: $axisIndex)
+            ImasSegmented(labels: axisLabels.map { String(localized: $0) }, selection: $axisIndex)
 
-            NameFilterField(prompt: "\(Self.axisLabels[axisIndex])名で絞り込み", text: $nameFilter)
+            NameFilterField(prompt: String(localized: nameFilterPrompts[axisIndex]), text: $nameFilter)
 
             if filter.progress != .all || filter.sort != .songCount {
                 activeFilterChips
@@ -225,8 +233,8 @@ struct MasteryView: View {
         } else if groups.isEmpty {
             ImasEmptyState(
                 systemImage: "line.3.horizontal.decrease",
-                title: "該当するグループがありません",
-                message: "絞り込みを緩めてください。"
+                title: String(localized: L10n.Mastery.listEmptyTitle),
+                message: String(localized: L10n.Mastery.listEmptyMessage)
             )
             .plainRow(background: DS.bg)
         } else {
@@ -279,14 +287,14 @@ struct MasteryView: View {
         guard !targets.isEmpty else { return }
         // 失敗しても一覧は前の値のまま。書けなかったことは知らせる。
         do { try marks.setMastery(songIds: targets, level: level) }
-        catch { LocalWriteFailure.report(error, action: "習熟度のまとめての記録") }
+        catch { LocalWriteFailure.report(error, action: String(localized: L10n.Mastery.writeActionRecordBulk)) }
     }
 
     /// ブランド絞り込み。複数選択は OR、空集合は全ブランド (既存の絞り込みと同じ意味)。
     private var brandChips: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: DS.sp3) {
-                ImasFilterChip(text: "全て", isSelected: filter.brandIds.isEmpty) {
+                ImasFilterChip(text: String(localized: L10n.Mastery.listBrandAll), isSelected: filter.brandIds.isEmpty) {
                     filter.brandIds = []
                 }
                 ForEach(brands) { brand in
@@ -310,12 +318,12 @@ struct MasteryView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: DS.sp3) {
                 if filter.progress != .all {
-                    ImasRemovableChip(text: MasteryFilter.progressLabel(filter.progress)) {
+                    ImasRemovableChip(text: String(localized: MasteryFilter.progressLabel(filter.progress))) {
                         filter.progress = .all
                     }
                 }
                 if filter.sort != .songCount {
-                    ImasRemovableChip(text: MasteryFilter.sortLabel(filter.sort)) {
+                    ImasRemovableChip(text: String(localized: MasteryFilter.sortLabel(filter.sort))) {
                         filter.sort = .songCount
                     }
                 }
@@ -339,16 +347,16 @@ struct MasteryView: View {
 
     private func subtitle(_ g: MasteryGroup) -> String {
         var parts: [String] = []
-        if g.discCount > 1 { parts.append("\(g.discCount)枚") }
-        parts.append("\(g.total)曲")
+        if g.discCount > 1 { parts.append(String(localized: L10n.Mastery.listGroupDiscs(count: Int(g.discCount)))) }
+        parts.append(String(localized: L10n.Mastery.listGroupSongs(count: Int(g.total))))
         // 「聴いたのにまだ未設定」は覚える優先度が高いので、そこだけ名指しで出す。
         if g.heardButUnsetCount > 0 {
-            parts.append("聴いたのに未設定 \(g.heardButUnsetCount)")
+            parts.append(String(localized: L10n.Mastery.listGroupHeardButUnset(songs: Int(g.heardButUnsetCount))))
         } else if g.collectedCount > 0 {
-            parts.append("聴いた \(g.collectedCount)")
+            parts.append(String(localized: L10n.Mastery.listGroupHeard(songs: Int(g.collectedCount))))
         }
         if g.doneCount > 0 { parts.append("\(marks.scale.label(marks.scale.steps)) \(g.doneCount)") }
-        return parts.joined(separator: " ・ ")
+        return parts.joined(separator: String(localized: L10n.Mastery.listGroupSeparator))
     }
 
     // MARK: - 読み込み
@@ -372,22 +380,22 @@ struct MasteryFilter: Equatable {
 
     var isActive: Bool { !brandIds.isEmpty || progress != .all || sort != .songCount }
 
-    static func progressLabel(_ v: MasteryProgressFilter) -> String {
+    static func progressLabel(_ v: MasteryProgressFilter) -> LocalizedStringResource {
         switch v {
-        case .all:       return "すべて"
-        case .hasUnset:  return "未設定あり"
-        case .untouched: return "手つかず"
-        case .complete:  return "完了"
-        case .heardButUnset: return "聴いたのに未設定"
+        case .all:       return L10n.Mastery.filterProgressAll
+        case .hasUnset:  return L10n.Mastery.filterProgressHasUnset
+        case .untouched: return L10n.Mastery.filterProgressUntouched
+        case .complete:  return L10n.Mastery.filterProgressComplete
+        case .heardButUnset: return L10n.Mastery.filterProgressHeardButUnset
         }
     }
 
-    static func sortLabel(_ v: MasteryGroupSort) -> String {
+    static func sortLabel(_ v: MasteryGroupSort) -> LocalizedStringResource {
         switch v {
-        case .songCount:    return "曲数順"
-        case .progressAsc:  return "進み具合が低い順"
-        case .progressDesc: return "進み具合が高い順"
-        case .name:         return "名前順"
+        case .songCount:    return L10n.Mastery.filterSortSongCount
+        case .progressAsc:  return L10n.Mastery.filterSortProgressAsc
+        case .progressDesc: return L10n.Mastery.filterSortProgressDesc
+        case .name:         return L10n.Mastery.filterSortName
         }
     }
 }
@@ -407,7 +415,7 @@ struct MasteryFilterSheet: View {
             List {
                 BrandFilterSection(brands: brands, selectedBrandIds: $draft.brandIds)
 
-                Section("進み具合") {
+                Section(L10n.Mastery.filterSectionProgress) {
                     ForEach([MasteryProgressFilter.all, .heardButUnset, .hasUnset,
                              .untouched, .complete], id: \.self) { value in
                         Button {
@@ -424,7 +432,7 @@ struct MasteryFilterSheet: View {
                     }
                 }
 
-                Section("並び") {
+                Section(L10n.Mastery.filterSectionSort) {
                     ForEach([MasteryGroupSort.songCount, .progressAsc, .progressDesc, .name],
                             id: \.self) { value in
                         Button {

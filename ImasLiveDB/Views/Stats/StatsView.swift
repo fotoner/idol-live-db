@@ -63,7 +63,7 @@ struct StatsView: View {
                 .padding(.vertical, DS.sp6)
             }
             .background(DS.bg.ignoresSafeArea())
-            .navigationTitle("回収ダッシュボード")
+            .navigationTitle(L10n.Stats.dashboardTitle)
             .task { await loadStats() }
             .sheet(item: $selectedSong) { song in
                 DetailSheetView(destination: .song(song))
@@ -85,7 +85,7 @@ struct StatsView: View {
 
     private var collectionSummarySection: some View {
         VStack(alignment: .leading, spacing: DS.sp4) {
-            ImasSectionHeader(title: "あなたの回収率", tight: true)
+            ImasSectionHeader(title: .key(L10n.Stats.summaryHeader), tight: true)
             HStack(spacing: DS.sp5) {
                 CollectionRing(
                     fraction: overallTotal > 0 ? Double(overallCollected) / Double(overallTotal) : 0,
@@ -98,17 +98,18 @@ struct StatsView: View {
                         Text("\(overallCollected)")
                             .font(.imasDisplay(30, weight: .bold))
                             .foregroundStyle(DS.ink)
-                        Text("/ \(overallTotal)曲")
+                        Text(L10n.Stats.summaryTotalSongs(count: overallTotal))
                             .font(.imasDisplay(15))
                             .foregroundStyle(DS.ink2)
                     }
-                    Text("現地ライブで聴けた曲")
+                    Text(L10n.Stats.summaryCaption)
                         .font(.imasFootnote)
                         .foregroundStyle(DS.ink2)
                     Button {
                         showCollectionShare = true
                     } label: {
-                        ImasChip(text: "カードでシェア", systemImage: "square.and.arrow.up", style: .selected)
+                        ImasChip(text: String(localized: L10n.Stats.summaryShare), systemImage: "square.and.arrow.up",
+                                 style: .selected)
                     }
                     .buttonStyle(.plain)
                     .padding(.top, DS.sp1)
@@ -127,7 +128,7 @@ struct StatsView: View {
         let rows = brandProgress.filter { $0.total > 0 }
         if !rows.isEmpty {
             VStack(alignment: .leading, spacing: DS.sp4) {
-                ImasSectionHeader(title: "ブランド別の回収率", tight: true)
+                ImasSectionHeader(title: .key(L10n.Stats.brandProgressHeader), tight: true)
                 VStack(spacing: 0) {
                     ForEach(rows) { item in
                         ImasStatBar(
@@ -150,7 +151,7 @@ struct StatsView: View {
     private var catchChanceSection: some View {
         if !catchChances.isEmpty {
             VStack(alignment: .leading, spacing: DS.sp4) {
-                ImasSectionHeader(title: "この公演で聴けるかも", tight: true)
+                ImasSectionHeader(title: .key(L10n.Stats.catchChanceHeader), tight: true)
                 VStack(spacing: DS.sp3) {
                     ForEach(catchChances) { chance in
                         Button {
@@ -170,7 +171,9 @@ struct StatsView: View {
             ImasLeadBar(seed: chance.brandColor)
                 .frame(maxHeight: .infinity)
             VStack(alignment: .leading, spacing: DS.sp2) {
-                Text("\(displayDate(chance.show.date)) ・ \(abbreviateEventNames ? chance.eventShortName : chance.eventName)")
+                Text(L10n.Stats.catchChanceDateEvent(
+                    date: displayDate(chance.show.date),
+                    event: abbreviateEventNames ? chance.eventShortName : chance.eventName))
                     .font(.imasDisplay(12, weight: .semibold))
                     .foregroundStyle(DS.ink3)
                     .lineLimit(1)
@@ -191,8 +194,9 @@ struct StatsView: View {
             }
             Spacer(minLength: 0)
             VStack(spacing: DS.sp1) {
-                ImasMetricBadge(value: "\(chance.likelyCount)", unit: "曲", seed: chance.brandColor)
-                Text("過去に披露")
+                ImasMetricBadge(value: "\(chance.likelyCount)", unit: String(localized: L10n.Stats.catchChanceUnit),
+                                seed: chance.brandColor)
+                Text(L10n.Stats.catchChanceCaption)
                     .font(.imasScaled( 10, weight: .medium))
                     .foregroundStyle(DS.ink3)
             }
@@ -207,10 +211,10 @@ struct StatsView: View {
     private var uncollectedSection: some View {
         VStack(alignment: .leading, spacing: DS.sp4) {
             HStack(alignment: .firstTextBaseline) {
-                ImasSectionHeader(title: "まだ生で聴けていない曲", tight: true)
+                ImasSectionHeader(title: .key(L10n.Stats.uncollectedHeader), tight: true)
                 Spacer(minLength: 12)
                 if uncollectedScope == .myPick && myPickTotal > 0 {
-                    Text("担当 \(myPickCollected)/\(myPickTotal)")
+                    Text(L10n.Stats.uncollectedMyPickProgress(collected: myPickCollected, total: myPickTotal))
                         .font(.imasCaption.weight(.semibold))
                         .foregroundStyle(DS.ink3)
                 }
@@ -225,10 +229,10 @@ struct StatsView: View {
             } else if uncollectedSongs.isEmpty {
                 ImasEmptyState(
                     systemImage: "checkmark.seal",
-                    title: uncollectedScope == .myPick ? "担当曲はコンプリート！" : "未回収曲はありません",
-                    message: uncollectedScope == .myPick
-                        ? "参加ライブを記録すると、担当のオリ曲の回収状況がここに出ます。"
-                        : "参加ライブを記録すると、未回収曲がここに並びます。"
+                    title: String(localized: uncollectedScope == .myPick
+                        ? L10n.Stats.uncollectedEmptyPickTitle : L10n.Stats.uncollectedEmptyAllTitle),
+                    message: String(localized: uncollectedScope == .myPick
+                        ? L10n.Stats.uncollectedEmptyPickMessage : L10n.Stats.uncollectedEmptyAllMessage)
                 )
                 .background(DS.surface, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
             } else {
@@ -255,7 +259,8 @@ struct StatsView: View {
             get: { uncollectedScope.rawValue },
             set: { uncollectedScope = UncollectedScope(rawValue: $0) ?? .myPick }
         )
-        return ImasSegmented(labels: ["担当のオリ曲", "全体"], selection: binding)
+        return ImasSegmented(labels: [String(localized: L10n.Stats.uncollectedScopeMyPick),
+                                      String(localized: L10n.Stats.uncollectedScopeAll)], selection: binding)
     }
 
     private func uncollectedRow(_ item: UncollectedSong) -> some View {
@@ -299,13 +304,13 @@ struct StatsView: View {
             bg = DS.fill
         }
         return VStack(alignment: .trailing, spacing: DS.sp1) {
-            Text(item.frequencyLabel)
+            Text(core: item.frequencyLabel)
                 .font(.imasScaled( 11, weight: .semibold))
                 .padding(.horizontal, DS.sp3).padding(.vertical, DS.sp1)
                 .foregroundStyle(fg)
                 .background(bg, in: Capsule())
             if item.playCount > 0 {
-                Text("\(item.playCount)回披露")
+                Text(L10n.Stats.uncollectedPlayCount(count: item.playCount))
                     .font(.imasScaled( 10, weight: .medium))
                     .foregroundStyle(DS.ink3)
             }
@@ -318,7 +323,7 @@ struct StatsView: View {
     private var latestSection: some View {
         if let show = latestShow {
             VStack(alignment: .leading, spacing: DS.sp4) {
-                ImasSectionHeader(title: "最新の動き", tight: true)
+                ImasSectionHeader(title: .key(L10n.Stats.latestHeader), tight: true)
                 NavigationLink {
                     SetlistView(show: show)
                 } label: {
@@ -333,14 +338,16 @@ struct StatsView: View {
         let venueLine: String = {
             var parts: [String] = []
             if let venue = show.venue, !venue.isEmpty { parts.append(venue) }
-            if latestShowSongCount > 0 { parts.append("セトリ \(latestShowSongCount)曲") }
-            return parts.joined(separator: " ・ ")
+            if latestShowSongCount > 0 {
+                parts.append(String(localized: L10n.Stats.latestSetlistSongs(count: latestShowSongCount)))
+            }
+            return parts.joined(separator: String(localized: L10n.Stats.latestSeparator))
         }()
         return HStack(spacing: DS.sp4) {
             ImasLeadBar(seed: latestShowBrandColor)
                 .frame(maxHeight: .infinity)
             VStack(alignment: .leading, spacing: DS.sp2) {
-                Text("最新公演 ・ \(displayDate(show.date))")
+                Text(L10n.Stats.latestDate(date: displayDate(show.date)))
                     .font(.imasDisplay(12, weight: .semibold))
                     .foregroundStyle(DS.ink3)
                 Text(show.name)
@@ -358,7 +365,7 @@ struct StatsView: View {
                     .labelStyle(.titleAndIcon)
                 }
                 HStack {
-                    ImasChip(text: "セトリを見る", systemImage: "music.note.list",
+                    ImasChip(text: String(localized: L10n.Stats.latestOpenSetlist), systemImage: "music.note.list",
                              style: .themed, seed: latestShowBrandColor)
                 }
                 .padding(.top, DS.sp1)
@@ -374,11 +381,11 @@ struct StatsView: View {
     @ViewBuilder
     private var heatSection: some View {
         VStack(alignment: .leading, spacing: DS.sp4) {
-            ImasSectionHeader(title: "コミュニティの熱量", tight: true)
+            ImasSectionHeader(title: .key(L10n.Stats.heatHeader), tight: true)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: DS.sp3) {
-                    brandFilterChip(label: "すべて", brandId: nil)
+                    brandFilterChip(label: String(localized: L10n.Stats.heatBrandAll), brandId: nil)
                     ForEach(brands) { brand in
                         brandFilterChip(label: brand.shortName, brandId: brand.id, seed: brand.color)
                     }
@@ -394,8 +401,8 @@ struct StatsView: View {
             } else if favoritesRanking.isEmpty {
                 ImasEmptyState(
                     systemImage: "heart",
-                    title: "まだデータがありません",
-                    message: "お気に入り登録が増えるとここにランキングが表示されます。"
+                    title: String(localized: L10n.Stats.heatEmptyTitle),
+                    message: String(localized: L10n.Stats.heatEmptyMessage)
                 )
                 .background(DS.surface, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
             } else {
@@ -431,7 +438,7 @@ struct StatsView: View {
     private var songPlayRankingSection: some View {
         if !songPlayCounts.isEmpty {
             VStack(alignment: .leading, spacing: DS.sp4) {
-                ImasSectionHeader(title: "活動量 ・ 披露回数", tight: true)
+                ImasSectionHeader(title: .key(L10n.Stats.songPlayHeader), tight: true)
                 ImasListContainer {
                     ForEach(Array(songPlayCounts.enumerated()), id: \.offset) { index, item in
                         ImasRankingRow(
@@ -440,7 +447,7 @@ struct StatsView: View {
                             title: item.title,
                             sub: brandShortName(for: item.brandId),
                             metric: "\(item.playCount)",
-                            unit: "回",
+                            unit: String(localized: L10n.Stats.songPlayUnit),
                             brand: brandHex(for: item.brandId)
                         )
                         if index < songPlayCounts.count - 1 {
@@ -458,7 +465,7 @@ struct StatsView: View {
     private var castShowRankingSection: some View {
         if !castShowCounts.isEmpty {
             VStack(alignment: .leading, spacing: DS.sp4) {
-                ImasSectionHeader(title: "活動量 ・ 出演回数", tight: true)
+                ImasSectionHeader(title: .key(L10n.Stats.castShowHeader), tight: true)
                 ImasListContainer {
                     ForEach(Array(castShowCounts.enumerated()), id: \.offset) { index, item in
                         ImasRankingRow(
@@ -466,7 +473,7 @@ struct StatsView: View {
                             lead: .avatar(label: monogram(item.name), imageURL: nil),
                             title: item.name,
                             metric: "\(item.showCount)",
-                            unit: "人"
+                            unit: String(localized: L10n.Stats.castShowUnit)
                         )
                         if index < castShowCounts.count - 1 {
                             ImasRowDivider(inset: 52)
@@ -484,7 +491,7 @@ struct StatsView: View {
         if !brandCounts.isEmpty {
             let maxCount = brandCounts.map(\.songCount).max() ?? 1
             VStack(alignment: .leading, spacing: DS.sp4) {
-                ImasSectionHeader(title: "マスタ規模 ・ ブランド別楽曲数", tight: true)
+                ImasSectionHeader(title: .key(L10n.Stats.brandSongsHeader), tight: true)
                 VStack(spacing: 0) {
                     ForEach(brandCounts) { item in
                         ImasStatBar(

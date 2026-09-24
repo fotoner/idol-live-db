@@ -7,6 +7,8 @@ import com.fugaif.imaslivedb.data.local.localWrite
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.AppPreferences
 import com.fugaif.imaslivedb.ui.theme.MasteryScale
 import kotlinx.coroutines.Job
@@ -118,17 +120,23 @@ class MasteryViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             val targets = masteryBulkTargets(group.songIds, group.levels, scope)
             if (targets.isEmpty()) return@launch
-            localWrite("習熟度の記録") { marks.setMastery(targets, level) } ?: return@launch
+            localWrite(writeActionRecord()) { marks.setMastery(targets, level) } ?: return@launch
             onMarksChanged()
         }
     }
 
     fun setMastery(songId: String, level: UByte) {
         viewModelScope.launch {
-            localWrite("習熟度の記録") { marks.setMastery(songId, level) } ?: return@launch
+            localWrite(writeActionRecord()) { marks.setMastery(songId, level) } ?: return@launch
             onMarksChanged()
         }
     }
+
+    /**
+     * 書き込みに失敗したときの知らせに入る操作の名前。localWrite が String を受けるので、
+     * 知らせを出すその場でアプリの言語の文字列にする (UiState には持たない)。
+     */
+    private fun writeActionRecord(): String = L10n.Mastery.writeActionRecord.resolve(getApplication<Application>())
 
     /** 段階を書き換えた後の後始末 (再集計 + 開いていれば詳細も差し替え)。 */
     private suspend fun onMarksChanged() {

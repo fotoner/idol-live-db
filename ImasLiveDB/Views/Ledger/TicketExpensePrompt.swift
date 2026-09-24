@@ -68,7 +68,7 @@ struct TicketExpensePromptModifier: ViewModifier {
         let option = options.first { $0.id == showId }
         request = TicketExpensePromptRequest(
             showId: showId,
-            showLabel: option?.label ?? "この公演",
+            showLabel: option.map { DisplayText.verbatim($0.label) } ?? .key(L10n.Ledger.ticketPromptShowFallback),
             eventId: option?.eventId,
             date: option?.date ?? "",
             kind: prompt.kind,
@@ -89,7 +89,7 @@ struct TicketExpensePromptModifier: ViewModifier {
         do {
             try await ledgerWriting.save(expense)
         } catch {
-            LocalWriteFailure.report(error, action: "チケット代の記録")
+            LocalWriteFailure.report(error, action: String(localized: L10n.Ledger.writeActionTicket))
         }
     }
 }
@@ -121,13 +121,13 @@ private struct TicketExpenseSheet: View {
         NavigationStack {
             List {
                 Section {
-                    Text(request.showLabel)
+                    Text(display: request.showLabel)
                         .font(.imasSubhead.weight(.semibold)).foregroundStyle(DS.ink)
-                    Text("\(ticketKindLabel(kind: request.kind))で参加")
+                    Text(L10n.Ledger.ticketPromptKind(kind: ticketKindLabel(kind: request.kind)))
                         .font(.imasCaption).foregroundStyle(DS.ink2)
                 }
 
-                Section("券種") {
+                Section(L10n.Ledger.ticketPromptTicketsHeader) {
                     ForEach(request.tickets, id: \.id) { candidate in
                         Button {
                             selected = candidate
@@ -137,7 +137,7 @@ private struct TicketExpenseSheet: View {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(candidate.name).foregroundStyle(DS.ink)
                                     if candidate.isEstimate {
-                                        Text("推定").font(.imasCaption).foregroundStyle(DS.ink3)
+                                        Text(L10n.Ledger.ticketPromptEstimate).font(.imasCaption).foregroundStyle(DS.ink3)
                                     }
                                 }
                                 Spacer()
@@ -163,21 +163,21 @@ private struct TicketExpenseSheet: View {
                             .monospacedDigit()
                     }
                 } header: {
-                    Text("記録する金額")
+                    Text(L10n.Ledger.ticketPromptAmountHeader)
                 } footer: {
-                    Text("手数料や先行の差額を含めたいときは、ここで直してください。")
+                    Text(L10n.Ledger.ticketPromptAmountFooter)
                 }
             }
             .scrollContentBackground(.hidden)
             .background(DS.bg.ignoresSafeArea())
-            .navigationTitle("チケット代を記録")
+            .navigationTitle(L10n.Ledger.ticketPromptTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("あとで") { dismiss() }
+                    Button(L10n.Ledger.ticketPromptActionLater) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("記録する") {
+                    Button(L10n.Ledger.ticketPromptActionRecord) {
                         if let ticket { onSave(ticket, amount) }
                         dismiss()
                     }
@@ -199,7 +199,8 @@ private struct TicketExpenseSheet: View {
 /// シートに渡す内容 (modifier の private 型をそのまま使えないので別に持つ)。
 struct TicketExpensePromptRequest: Identifiable {
     let showId: String
-    let showLabel: String
+    /// 公演の名前 (データ) か、引けなかったときの文言。
+    let showLabel: DisplayText
     let eventId: String?
     let date: String
     let kind: TicketKind

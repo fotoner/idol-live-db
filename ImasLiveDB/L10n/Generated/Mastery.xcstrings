@@ -1,0 +1,1762 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "mastery.bulk.all_songs" : {
+      "comment" : "一括更新のメニューの節: 群の曲すべての段階を変える (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "この %arg 曲すべて"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "이 %arg곡 전부"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mastery.bulk.reset" : {
+      "comment" : "一括更新のメニュー: 群の曲すべてを未設定に戻す (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未設定に戻す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "미설정으로 되돌리기"
+          }
+        }
+      }
+    },
+    "mastery.bulk.unset_only" : {
+      "comment" : "一括更新のメニューの節: 未設定の曲だけに段階を付ける (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "未設定の %arg 曲だけ"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "미설정 %arg곡만"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mastery.chip.a11y" : {
+      "comment" : "行の段階チップの読み上げ。level は段の名前 (利用者が付けたラベルのこともある) (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "習熟度 %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "숙련도 %1$@"
+          }
+        }
+      }
+    },
+    "mastery.filter.progress.all" : {
+      "comment" : "進み具合の絞り込み: 絞らない (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "mastery.filter.progress.complete" : {
+      "comment" : "進み具合の絞り込み: 全曲が最上段の群 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完了"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "완료"
+          }
+        }
+      }
+    },
+    "mastery.filter.progress.has_unset" : {
+      "comment" : "進み具合の絞り込み: 未設定の曲がある群 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未設定あり"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "미설정 있음"
+          }
+        }
+      }
+    },
+    "mastery.filter.progress.heard_but_unset" : {
+      "comment" : "進み具合の絞り込み: 現地で聴いたのに段階を付けていない曲がある群 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聴いたのに未設定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "들었는데 미설정"
+          }
+        }
+      }
+    },
+    "mastery.filter.progress.untouched" : {
+      "comment" : "進み具合の絞り込み: まだ 1 曲も段階を付けていない群 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手つかず"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "손대지 않음"
+          }
+        }
+      }
+    },
+    "mastery.filter.section.progress" : {
+      "comment" : "絞り込みシートの節: 進み具合 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "進み具合"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "진행도"
+          }
+        }
+      }
+    },
+    "mastery.filter.section.sort" : {
+      "comment" : "絞り込みシートの節: 並び順 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "並び"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정렬"
+          }
+        }
+      }
+    },
+    "mastery.filter.sort.name" : {
+      "comment" : "群の並び (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이름순"
+          }
+        }
+      }
+    },
+    "mastery.filter.sort.progress_asc" : {
+      "comment" : "群の並び (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "進み具合が低い順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "진행도 낮은 순"
+          }
+        }
+      }
+    },
+    "mastery.filter.sort.progress_desc" : {
+      "comment" : "群の並び (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "進み具合が高い順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "진행도 높은 순"
+          }
+        }
+      }
+    },
+    "mastery.filter.sort.song_count" : {
+      "comment" : "群の並び: 曲の多い順 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲数順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 많은 순"
+          }
+        }
+      }
+    },
+    "mastery.group.bulk.a11y" : {
+      "comment" : "群の詳細の右上の ⋯ ボタン (一括更新のメニュー) の読み上げ (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まとめて変える"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "한꺼번에 바꾸기"
+          }
+        }
+      }
+    },
+    "mastery.group.empty.message" : {
+      "comment" : "段階で絞った結果、曲が無いときの説明 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "段階の絞り込みを外してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "단계 필터를 해제해 주세요."
+          }
+        }
+      }
+    },
+    "mastery.group.empty.title" : {
+      "comment" : "段階で絞った結果、曲が無いときの見出し (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "該当する曲がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "해당하는 곡이 없어요"
+          }
+        }
+      }
+    },
+    "mastery.group.filter.heard_but_unset" : {
+      "comment" : "段階の絞り込みチップ: 現地で聴いたのに段階を付けていない曲だけ (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聴いたのに未設定 %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "들었는데 미설정 %1$@"
+          }
+        }
+      }
+    },
+    "mastery.group.row.heard.a11y" : {
+      "comment" : "曲の行の ✓ (現地で聴いた曲) の読み上げ (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現地で聴いた"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "현장에서 들음"
+          }
+        }
+      }
+    },
+    "mastery.group.songs.count" : {
+      "comment" : "曲一覧の見出しの右の曲数 (絞っていないとき) (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mastery.group.songs.count_filtered" : {
+      "comment" : "曲一覧の見出しの右: 絞り込んで見えている曲数 / 群の曲数。群は最大でも数百曲 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%1$@ / %arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%1$@ / %arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mastery.group.songs.header" : {
+      "comment" : "群の詳細の曲一覧の見出し (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "収録曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "수록곡"
+          }
+        }
+      }
+    },
+    "mastery.group.stage_chip.a11y_hint" : {
+      "comment" : "行末の段階チップの操作の説明 (VoiceOver のヒント) (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "押すと 1 段上がります。行を左スワイプすると段を選べます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "누르면 한 단계 올라가요. 행을 왼쪽으로 스와이프하면 단계를 고를 수 있어요"
+          }
+        }
+      }
+    },
+    "mastery.group.summary.header" : {
+      "comment" : "群の詳細の先頭の進み具合の節の見出し (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このグループの習熟度"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 그룹의 숙련도"
+          }
+        }
+      }
+    },
+    "mastery.group.undo.action" : {
+      "comment" : "一括更新の帯の取り消しボタン (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "元に戻す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "되돌리기"
+          }
+        }
+      }
+    },
+    "mastery.group.undo.label" : {
+      "comment" : "一括更新の直後に下に出る帯の文。level は付けた段の名前 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg曲を「%2$@」に"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg곡 → “%2$@”"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mastery.level.unset" : {
+      "comment" : "習熟度の段階が付いていない状態 (0 段) の名前。行のチップ・段階の絞り込み・a11y に出る (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未設定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "미설정"
+          }
+        }
+      }
+    },
+    "mastery.list.axis.series" : {
+      "comment" : "群の分け方のセグメント: CD シリーズごと (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CDシリーズ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "CD 시리즈"
+          }
+        }
+      }
+    },
+    "mastery.list.axis.unit" : {
+      "comment" : "群の分け方のセグメント: ユニット (歌唱名義) ごと (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛"
+          }
+        }
+      }
+    },
+    "mastery.list.axis.year" : {
+      "comment" : "群の分け方のセグメント: 発売年ごと (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "年代"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "연도"
+          }
+        }
+      }
+    },
+    "mastery.list.brand.all" : {
+      "comment" : "ブランドの絞り込みチップの先頭 (絞らない) (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全て"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "mastery.list.empty.message" : {
+      "comment" : "絞り込みの結果、群が 1 つも無いときの説明 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "絞り込みを緩めてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터 조건을 줄여 주세요."
+          }
+        }
+      }
+    },
+    "mastery.list.empty.title" : {
+      "comment" : "絞り込みの結果、群が 1 つも無いときの見出し (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "該当するグループがありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "해당하는 그룹이 없어요"
+          }
+        }
+      }
+    },
+    "mastery.list.filter.a11y" : {
+      "comment" : "右上の絞り込みボタンの読み上げ (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フィルタ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터"
+          }
+        }
+      }
+    },
+    "mastery.list.group.discs" : {
+      "comment" : "群の行の副題: その群の CD の枚数。副題は「 ・ 」で並ぶ (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg枚"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg장"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mastery.list.group.heard" : {
+      "comment" : "群の行の副題: 現地で聴いた (回収した) 曲の数 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聴いた %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "들음 %1$@"
+          }
+        }
+      }
+    },
+    "mastery.list.group.heard_but_unset" : {
+      "comment" : "群の行の副題: 現地で聴いた (回収した) のに段階を付けていない曲の数 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聴いたのに未設定 %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "들었는데 미설정 %1$@"
+          }
+        }
+      }
+    },
+    "mastery.list.group.separator" : {
+      "comment" : "群の行の副題の区切り (前後に空白) (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " ・ "
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : " · "
+          }
+        }
+      }
+    },
+    "mastery.list.group.songs" : {
+      "comment" : "群の行の副題: その群の曲数。1000 以上は桁区切りが付く (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mastery.list.groups.count" : {
+      "comment" : "群の一覧の件数。1000 以上は桁区切りが付く (1,047 件) (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg 件"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg건"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mastery.list.groups.header" : {
+      "comment" : "群 (CD シリーズ / ユニット / 年代) の一覧の見出し (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "グループ別"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "그룹별"
+          }
+        }
+      }
+    },
+    "mastery.list.name_filter.series" : {
+      "comment" : "群の名前の絞り込み欄のプレースホルダ (CD シリーズで分けているとき) (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CDシリーズ名で絞り込み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "CD 시리즈 이름으로 찾기"
+          }
+        }
+      }
+    },
+    "mastery.list.name_filter.unit" : {
+      "comment" : "群の名前の絞り込み欄のプレースホルダ (ユニットで分けているとき) (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニット名で絞り込み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛 이름으로 찾기"
+          }
+        }
+      }
+    },
+    "mastery.list.name_filter.year" : {
+      "comment" : "群の名前の絞り込み欄のプレースホルダ (年代で分けているとき。群の名前は 2023年 など) (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "年代名で絞り込み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "연도로 찾기"
+          }
+        }
+      }
+    },
+    "mastery.list.summary.header" : {
+      "comment" : "一覧の先頭の全体の進み具合の節の見出し (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あなたの習熟度"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "나의 숙련도"
+          }
+        }
+      }
+    },
+    "mastery.list.title" : {
+      "comment" : "習熟度ダッシュボードの画面の題 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "習熟度"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "숙련도"
+          }
+        }
+      }
+    },
+    "mastery.preset.name" : {
+      "comment" : "段階の設定のプリセットのチップ (2段 / 3段 / 4段)。steps は段の数 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@段"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@단계"
+          }
+        }
+      }
+    },
+    "mastery.preset.steps2.level1" : {
+      "comment" : "2 段のプリセットの 1 段目 (いちばん下)。保存値は ja のままで、表示だけ訳す。スワイプのボタンに収まるよう 4 文字以内 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聞いた"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "들었음"
+          }
+        }
+      }
+    },
+    "mastery.preset.steps2.level2" : {
+      "comment" : "2 段のプリセットの 2 段目 (最上段)。4 文字以内 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "覚えた"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "외웠음"
+          }
+        }
+      }
+    },
+    "mastery.preset.steps3.level1" : {
+      "comment" : "3 段のプリセット (既定) の 1 段目。4 文字以内 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聞いた"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "들었음"
+          }
+        }
+      }
+    },
+    "mastery.preset.steps3.level2" : {
+      "comment" : "3 段のプリセット (既定) の 2 段目。4 文字以内 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "覚えた"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "외웠음"
+          }
+        }
+      }
+    },
+    "mastery.preset.steps3.level3" : {
+      "comment" : "3 段のプリセット (既定) の 3 段目 (最上段)。4 文字以内 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完璧"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "완벽"
+          }
+        }
+      }
+    },
+    "mastery.preset.steps4.level1" : {
+      "comment" : "4 段のプリセットの 1 段目。4 文字以内 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "聞いた"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "들었음"
+          }
+        }
+      }
+    },
+    "mastery.preset.steps4.level2" : {
+      "comment" : "4 段のプリセットの 2 段目 (だいたい覚えた、の意)。4 文字以内 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "だいたい"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "거의"
+          }
+        }
+      }
+    },
+    "mastery.preset.steps4.level3" : {
+      "comment" : "4 段のプリセットの 3 段目。4 文字以内 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "覚えた"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "외웠음"
+          }
+        }
+      }
+    },
+    "mastery.preset.steps4.level4" : {
+      "comment" : "4 段のプリセットの 4 段目 (最上段)。4 文字以内 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完璧"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "완벽"
+          }
+        }
+      }
+    },
+    "mastery.settings.action.apply" : {
+      "comment" : "段階の設定を反映するボタン (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この段階にする"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 단계로 설정"
+          }
+        }
+      }
+    },
+    "mastery.settings.action.revert" : {
+      "comment" : "編集中の段階を保存済みの状態に戻すボタン (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "元に戻す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "되돌리기"
+          }
+        }
+      }
+    },
+    "mastery.settings.invalid" : {
+      "comment" : "段の名前が空か重複しているときの注意 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "空の段と同じ名前の段は置けません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "비어 있는 단계나 같은 이름의 단계는 둘 수 없어요."
+          }
+        }
+      }
+    },
+    "mastery.settings.preset.footer" : {
+      "comment" : "プリセットの節の下の説明 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "どのラベルも 4 文字以内にしておくと、一覧のスワイプで切れずに出ます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라벨을 모두 4글자 이내로 하면 목록에서 스와이프할 때 잘리지 않아요."
+          }
+        }
+      }
+    },
+    "mastery.settings.preset.header" : {
+      "comment" : "プリセットの節の見出し (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プリセット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "프리셋"
+          }
+        }
+      }
+    },
+    "mastery.settings.shrink.top_stage" : {
+      "comment" : "段を減らすときの注意の移り先の名前が引けなかったときの代わり。settings.shrink.warning の stage に入る (ko は後ろに「단계로」が続くので「단계」を付けない) (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最上段"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최상단"
+          }
+        }
+      }
+    },
+    "mastery.settings.shrink.warning" : {
+      "comment" : "段を減らすときの注意。stage は移り先の段の名前 (利用者が付けたラベル。引けないときは settings.shrink.top_stage)。1000 以上は桁区切りが付く (1,234 曲が…) (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg 曲が「%2$@」に移ります。記録は消えません。"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg곡이 “%2$@” 단계로 옮겨져요. 기록은 지워지지 않아요."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mastery.settings.stage.add" : {
+      "comment" : "段を 1 つ足すボタン (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "段を追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "단계 추가"
+          }
+        }
+      }
+    },
+    "mastery.settings.stage.footer" : {
+      "comment" : "段の一覧の節の下の説明 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "右の数字はいまその段にある曲数。削除できるのは最上段だけです。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오른쪽 숫자는 지금 그 단계에 있는 곡 수예요. 삭제할 수 있는 건 최상단 단계뿐이에요."
+          }
+        }
+      }
+    },
+    "mastery.settings.stage.header" : {
+      "comment" : "段の一覧の節の見出し (上の段ほど進んでいる) (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下から順に積み上がる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아래부터 차례로 쌓임"
+          }
+        }
+      }
+    },
+    "mastery.settings.stage.placeholder" : {
+      "comment" : "段の名前の入力欄のプレースホルダ (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "段の名前"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "단계 이름"
+          }
+        }
+      }
+    },
+    "mastery.settings.stage.remove.a11y" : {
+      "comment" : "最上段の右の − ボタンの読み上げ (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最上段を削除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최상단 단계 삭제"
+          }
+        }
+      }
+    },
+    "mastery.settings.title" : {
+      "comment" : "段階の設定の画面の題 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "習熟度の段階"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "숙련도 단계"
+          }
+        }
+      }
+    },
+    "mastery.summary.done_songs" : {
+      "comment" : "最上段 (例: 完璧) にある曲数。level は最上段の名前 (利用者が付けたラベルのこともある)。1000 以上は桁区切りが付く (完璧 1,234 曲) (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%1$@ %arg 曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%1$@ %arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mastery.summary.set_songs" : {
+      "comment" : "進み具合の大きな数字の説明 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "段階を付けた曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "단계를 매긴 곡"
+          }
+        }
+      }
+    },
+    "mastery.summary.total_songs" : {
+      "comment" : "進み具合の大きな数字 (段階を付けた曲数) の右に出る分母。1000 以上は桁区切りが付く (/ 3,012曲) (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "/ %arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "/ %arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mastery.swipe.action.unset" : {
+      "comment" : "曲の行を右へスワイプすると出る、段階を未設定に戻すボタン (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未設定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "미설정"
+          }
+        }
+      }
+    },
+    "mastery.write_action.record" : {
+      "comment" : "書き込みに失敗したときの知らせに入る操作の名前 (「〜に失敗しました」の〜の部分) (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "習熟度の記録"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "숙련도 기록"
+          }
+        }
+      }
+    },
+    "mastery.write_action.record_bulk" : {
+      "comment" : "まとめて段階を付けるのに失敗したときの知らせに入る操作の名前 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "習熟度のまとめての記録"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "숙련도 일괄 기록"
+          }
+        }
+      }
+    },
+    "mastery.write_action.scale_save" : {
+      "comment" : "段階の設定の保存に失敗したときの知らせに入る操作の名前 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "習熟度の段階の保存"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "숙련도 단계 저장"
+          }
+        }
+      }
+    },
+    "mastery.write_action.undo" : {
+      "comment" : "一括更新の取り消しに失敗したときの知らせに入る操作の名前 (i18n/catalog/mastery.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "習熟度の取り消し"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "숙련도 되돌리기"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/stats.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources>
+    <string name="stats_brand_progress_header">브랜드별 회수율</string>
+    <string name="stats_brand_songs_header">DB 규모 · 브랜드별 곡 수</string>
+    <string name="stats_cast_show_header">활동량 · 출연 횟수</string>
+    <string name="stats_cast_show_unit">회</string>
+    <string name="stats_catch_chance_caption">과거에 공연됨</string>
+    <string name="stats_catch_chance_date_event">%1$s · %2$s</string>
+    <string name="stats_catch_chance_header">이 공연에서 들을 수 있을지도</string>
+    <string name="stats_catch_chance_unit">곡</string>
+    <string name="stats_dashboard_title">회수 대시보드</string>
+    <string name="stats_db_events">이벤트</string>
+    <string name="stats_db_idols">아이돌</string>
+    <string name="stats_db_shows">공연</string>
+    <string name="stats_db_songs">곡</string>
+    <string name="stats_heat_empty_message">즐겨찾기 등록이 늘어나면 여기에 랭킹이 표시돼요.</string>
+    <string name="stats_heat_empty_title">아직 데이터가 없어요</string>
+    <string name="stats_heat_header">커뮤니티 열기</string>
+    <string name="stats_latest_date">최신 공연 · %1$s</string>
+    <string name="stats_latest_header">최신 소식</string>
+    <string name="stats_latest_open_setlist">세트리스트 보기</string>
+    <string name="stats_latest_separator">" · "</string>
+    <plurals name="stats_latest_setlist_songs">
+        <item quantity="other">세트리스트 %1$,d곡</item>
+    </plurals>
+    <string name="stats_song_play_header">활동량 · 공연 횟수</string>
+    <string name="stats_song_play_unit">회</string>
+    <string name="stats_summary_caption">현장 라이브에서 들은 곡</string>
+    <string name="stats_summary_header">나의 회수율</string>
+    <string name="stats_summary_share">카드로 공유</string>
+    <plurals name="stats_summary_total_songs">
+        <item quantity="other">/ %1$,d곡</item>
+    </plurals>
+    <string name="stats_uncollected_empty_all_message">참가한 라이브를 기록하면 미회수 곡이 여기에 나와요.</string>
+    <string name="stats_uncollected_empty_all_title">미회수 곡이 없어요</string>
+    <string name="stats_uncollected_empty_pick_message">참가한 라이브를 기록하면 담당 오리지널 곡의 회수 현황이 여기에 나와요.</string>
+    <string name="stats_uncollected_empty_pick_title">담당 곡 컴플리트!</string>
+    <string name="stats_uncollected_header">아직 라이브로 듣지 못한 곡</string>
+    <string name="stats_uncollected_my_pick_progress">담당 %1$d/%2$d</string>
+    <plurals name="stats_uncollected_play_count">
+        <item quantity="other">%1$,d회 공연</item>
+    </plurals>
+    <string name="stats_uncollected_scope_all">전체</string>
+    <string name="stats_uncollected_scope_my_pick">담당 오리지널 곡</string>
+    <string name="stats_yearly_header">연도별 공연 수</string>
+</resources>

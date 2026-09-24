@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/stats.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- stats.brand_progress.header: ブランド別の回収率の節の見出し -->
+    <string name="stats_brand_progress_header">ブランド別の回収率</string>
+    <!-- stats.brand_songs.header: ブランドごとの登録曲数の見出し。マスタはアプリのマスタデータ (データベース) のこと (ko の「마스터」は作品名 (아이돌마스터) や称号に読めるので DB と訳す) -->
+    <string name="stats_brand_songs_header">マスタ規模 ・ ブランド別楽曲数</string>
+    <!-- stats.cast_show.header: 出演回数の多い人のランキングの見出し -->
+    <string name="stats_cast_show_header">活動量 ・ 出演回数</string>
+    <!-- stats.cast_show.unit: 出演回数のランキングの数字の単位。数字は各アイドルの出演公演数なので ko は「회」(37회)。ja の「人」は移行前の表示をそのまま残したもので、回 (または 公演) に直すのはオーナーの承認を得て別の PR で行う -->
+    <string name="stats_cast_show_unit">人</string>
+    <!-- stats.catch_chance.caption: 公演カードの右の数字の説明 (その曲が過去の公演で歌われた) -->
+    <string name="stats_catch_chance_caption">過去に披露</string>
+    <!-- stats.catch_chance.date_event: 公演カードの上の行。date は 6/4 のような月日、event はイベント名 -->
+    <string name="stats_catch_chance_date_event">%1$s ・ %2$s</string>
+    <!-- stats.catch_chance.header: これからの公演で未回収の曲が聴けそうなものの節の見出し -->
+    <string name="stats_catch_chance_header">この公演で聴けるかも</string>
+    <!-- stats.catch_chance.unit: 公演カードの右の数字の単位 (聴けそうな未回収の曲数) -->
+    <string name="stats_catch_chance_unit">曲</string>
+    <!-- stats.dashboard.title: 統計タブ (回収ダッシュボード) の画面の題。回収 = ライブで曲を生で聴くこと -->
+    <string name="stats_dashboard_title">回収ダッシュボード</string>
+    <!-- stats.db.events: データベースの規模のタイル: イベント数 (Android) -->
+    <string name="stats_db_events">イベント</string>
+    <!-- stats.db.idols: データベースの規模のタイル: アイドル数 (Android) -->
+    <string name="stats_db_idols">アイドル</string>
+    <!-- stats.db.shows: データベースの規模のタイル: 公演数 (Android) -->
+    <string name="stats_db_shows">公演</string>
+    <!-- stats.db.songs: データベースの規模のタイル: 曲数 (Android) -->
+    <string name="stats_db_songs">楽曲</string>
+    <!-- stats.heat.empty.message: ランキングが空のときの説明 -->
+    <string name="stats_heat_empty_message">お気に入り登録が増えるとここにランキングが表示されます。</string>
+    <!-- stats.heat.empty.title: ランキングが空のときの見出し -->
+    <string name="stats_heat_empty_title">まだデータがありません</string>
+    <!-- stats.heat.header: みんなのお気に入り登録の多い曲のランキングの節の見出し -->
+    <string name="stats_heat_header">コミュニティの熱量</string>
+    <!-- stats.latest.date: 最新の公演カードの上の行。date は 6/4 のような月日 -->
+    <string name="stats_latest_date">最新公演 ・ %1$s</string>
+    <!-- stats.latest.header: いちばん新しい公演の節の見出し -->
+    <string name="stats_latest_header">最新の動き</string>
+    <!-- stats.latest.open_setlist: 最新の公演カードのセトリを開く導線 -->
+    <string name="stats_latest_open_setlist">セトリを見る</string>
+    <!-- stats.latest.separator: 最新の公演カードの会場とセトリの曲数の区切り (前後に空白) -->
+    <string name="stats_latest_separator">" ・ "</string>
+    <!-- stats.latest.setlist_songs: 最新の公演カードの会場の行に続く、セトリの曲数 -->
+    <plurals name="stats_latest_setlist_songs">
+        <item quantity="other">セトリ %1$,d曲</item>
+    </plurals>
+    <!-- stats.song_play.header: ライブで歌われた回数の多い曲のランキングの見出し -->
+    <string name="stats_song_play_header">活動量 ・ 披露回数</string>
+    <!-- stats.song_play.unit: 披露回数のランキングの数字の単位 -->
+    <string name="stats_song_play_unit">回</string>
+    <!-- stats.summary.caption: 回収した曲数の説明 -->
+    <string name="stats_summary_caption">現地ライブで聴けた曲</string>
+    <!-- stats.summary.header: 全体の回収率の節の見出し -->
+    <string name="stats_summary_header">あなたの回収率</string>
+    <!-- stats.summary.share: 回収率のシェアカードを開くボタン -->
+    <string name="stats_summary_share">カードでシェア</string>
+    <!-- stats.summary.total_songs: 回収した曲数の右の分母 (全曲数)。1000 以上は桁区切りが付く (/ 3,012曲) -->
+    <plurals name="stats_summary_total_songs">
+        <item quantity="other">/ %1$,d曲</item>
+    </plurals>
+    <!-- stats.uncollected.empty_all.message: 未回収の曲が無いときの説明 (全体) -->
+    <string name="stats_uncollected_empty_all_message">参加ライブを記録すると、未回収曲がここに並びます。</string>
+    <!-- stats.uncollected.empty_all.title: 未回収の曲が無いときの見出し (全体) -->
+    <string name="stats_uncollected_empty_all_title">未回収曲はありません</string>
+    <!-- stats.uncollected.empty_pick.message: 担当のオリ曲に未回収が無いときの説明 -->
+    <string name="stats_uncollected_empty_pick_message">参加ライブを記録すると、担当のオリ曲の回収状況がここに出ます。</string>
+    <!-- stats.uncollected.empty_pick.title: 担当のオリ曲に未回収が無いときの見出し -->
+    <string name="stats_uncollected_empty_pick_title">担当曲はコンプリート！</string>
+    <!-- stats.uncollected.header: 未回収の曲の一覧の見出し -->
+    <string name="stats_uncollected_header">まだ生で聴けていない曲</string>
+    <!-- stats.uncollected.my_pick_progress: 担当のオリ曲の回収数 / 曲数 (見出しの右) -->
+    <string name="stats_uncollected_my_pick_progress">担当 %1$d/%2$d</string>
+    <!-- stats.uncollected.play_count: 未回収の曲の行の右: これまでにライブで歌われた回数 -->
+    <plurals name="stats_uncollected_play_count">
+        <item quantity="other">%1$,d回披露</item>
+    </plurals>
+    <!-- stats.uncollected.scope.all: 未回収の曲の範囲のセグメント: すべての曲 -->
+    <string name="stats_uncollected_scope_all">全体</string>
+    <!-- stats.uncollected.scope.my_pick: 未回収の曲の範囲のセグメント: 担当アイドルのオリジナル曲 -->
+    <string name="stats_uncollected_scope_my_pick">担当のオリ曲</string>
+    <!-- stats.yearly.header: 年ごとの公演数の見出し (Android) -->
+    <string name="stats_yearly_header">年別 公演数</string>
+</resources>

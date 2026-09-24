@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/ledger.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- ledger.editor.action.cancel: 入力シートを閉じるボタン -->
+    <string name="ledger_editor_action_cancel">キャンセル</string>
+    <!-- ledger.editor.action.save: 入力シートの保存ボタン -->
+    <string name="ledger_editor_action_save">保存</string>
+    <!-- ledger.editor.amount.header: 入力シートの節: 金額 -->
+    <string name="ledger_editor_amount_header">金額</string>
+    <!-- ledger.editor.category.header: 入力シートの節: 費目 (チケット代・交通費…) -->
+    <string name="ledger_editor_category_header">費目</string>
+    <!-- ledger.editor.date.confirm: 日付の選択ダイアログの決定ボタン (Android) -->
+    <string name="ledger_editor_date_confirm">決定</string>
+    <!-- ledger.editor.date.header: 入力シートの節: 日付 -->
+    <string name="ledger_editor_date_header">日付</string>
+    <!-- ledger.editor.error.bad_date: 入力の検査 (コア) で日付が不正なとき -->
+    <string name="ledger_editor_error_bad_date">日付を選んでください</string>
+    <!-- ledger.editor.error.not_positive: 入力の検査 (コア) で金額が 0 以下のとき -->
+    <string name="ledger_editor_error_not_positive">金額を入れてください</string>
+    <!-- ledger.editor.error.too_large: 入力の検査 (コア) で金額が 1 億円以上のとき -->
+    <string name="ledger_editor_error_too_large">桁が多すぎます (1 億円未満)</string>
+    <!-- ledger.editor.note.header: 入力シートの節: メモ -->
+    <string name="ledger_editor_note_header">メモ</string>
+    <!-- ledger.editor.note.placeholder: メモ欄のプレースホルダ (書かなくてよい) -->
+    <string name="ledger_editor_note_placeholder">任意</string>
+    <!-- ledger.editor.show.footer: 公演の節の下の説明 -->
+    <string name="ledger_editor_show_footer">紐づけると「この遠征でいくら使ったか」が出ます。課金やグッズの通販は紐づけなくて構いません。</string>
+    <!-- ledger.editor.show.header: 入力シートの節: 紐づける公演 -->
+    <string name="ledger_editor_show_header">公演</string>
+    <!-- ledger.editor.show.none: 公演の欄: 紐づけていないとき -->
+    <string name="ledger_editor_show_none">公演に紐づけない</string>
+    <!-- ledger.editor.title.add: 支出の入力シートの題 (新規) -->
+    <string name="ledger_editor_title_add">支出を足す</string>
+    <!-- ledger.editor.title.edit: 支出の入力シートの題 (編集) -->
+    <string name="ledger_editor_title_edit">支出を直す</string>
+    <!-- ledger.list.add.a11y: 右上の ＋ ボタンの読み上げ -->
+    <string name="ledger_list_add_a11y">支出を足す</string>
+    <!-- ledger.list.empty.message: 支出が 1 件も無いときの説明 -->
+    <string name="ledger_list_empty_message">右上の + から、チケット代や遠征費を足してください。</string>
+    <!-- ledger.list.empty.title: 支出が 1 件も無いときの見出し -->
+    <string name="ledger_list_empty_title">まだ記録がありません</string>
+    <!-- ledger.list.linkage.all: 公演との紐づけの絞り込み: 絞らない -->
+    <string name="ledger_list_linkage_all">すべて</string>
+    <!-- ledger.list.linkage.linked: 公演との紐づけの絞り込み: 公演に紐づいた支出だけ -->
+    <string name="ledger_list_linkage_linked">公演あり</string>
+    <!-- ledger.list.linkage.unlinked: 公演との紐づけの絞り込み: 公演に紐づかない支出 (課金・通販など) だけ -->
+    <string name="ledger_list_linkage_unlinked">公演なし</string>
+    <!-- ledger.list.period.all: 集計の期間のセグメント -->
+    <string name="ledger_list_period_all">全期間</string>
+    <!-- ledger.list.period.month: 集計の期間のセグメント -->
+    <string name="ledger_list_period_month">月別</string>
+    <!-- ledger.list.period.year: 集計の期間のセグメント -->
+    <string name="ledger_list_period_year">年別</string>
+    <!-- ledger.list.row.delete: 支出の行をスワイプすると出る削除 -->
+    <string name="ledger_list_row_delete">削除</string>
+    <!-- ledger.list.summary.count: 合計金額の右の件数。1000 以上は桁区切りが付く (1,234件) -->
+    <plurals name="ledger_list_summary_count">
+        <item quantity="other">%1$,d件</item>
+    </plurals>
+    <!-- ledger.list.summary.header: 合計の節の見出し -->
+    <string name="ledger_list_summary_header">使った額</string>
+    <!-- ledger.list.summary.per_show: 合計の内訳: 公演 1 つあたりの額 -->
+    <string name="ledger_list_summary_per_show">1公演あたり</string>
+    <!-- ledger.list.summary.show_count: 合計の内訳: 紐づいた公演の数 -->
+    <string name="ledger_list_summary_show_count">公演数</string>
+    <!-- ledger.list.summary.travel: 合計の内訳: 遠征費 (チケット・交通・宿) -->
+    <string name="ledger_list_summary_travel">遠征費</string>
+    <!-- ledger.list.title: 家計簿の画面の題。ko は機能名 (家計簿) に合わせる -->
+    <string name="ledger_list_title">収支</string>
+    <!-- ledger.list.year_filter.all: 年の絞り込みチップの先頭 (絞らない) -->
+    <string name="ledger_list_year_filter_all">全期間</string>
+    <!-- ledger.list.year_filter.year: 年の絞り込みチップ (記録のある年だけ)。year は支出の日付の先頭 4 桁 (2026 など) をそのまま渡す -->
+    <string name="ledger_list_year_filter_year">%1$s年</string>
+    <!-- ledger.show_picker.empty.message_android: Android の文言 (見出しと説明が 1 文)。iOS は show_picker.empty.title と .message に分かれる -->
+    <string name="ledger_show_picker_empty_message_android">参加した公演がありません。ライブに「参加」を付けると、ここに並びます。</string>
+    <!-- ledger.show_picker.none: 公演を選ぶシートの先頭の選択肢 -->
+    <string name="ledger_show_picker_none">公演に紐づけない</string>
+    <!-- ledger.show_picker.search_prompt: 公演を選ぶシートの検索欄のプレースホルダ -->
+    <string name="ledger_show_picker_search_prompt">公演を探す</string>
+    <!-- ledger.show_picker.title: 紐づける公演を選ぶシートの題 -->
+    <string name="ledger_show_picker_title">公演を選ぶ</string>
+    <!-- ledger.ticket_prompt.action.later: 確認シートを記録せずに閉じるボタン -->
+    <string name="ledger_ticket_prompt_action_later">あとで</string>
+    <!-- ledger.ticket_prompt.action.record: 確認シートの記録ボタン -->
+    <string name="ledger_ticket_prompt_action_record">記録する</string>
+    <!-- ledger.ticket_prompt.amount.footer: 金額の節の下の説明 -->
+    <string name="ledger_ticket_prompt_amount_footer">手数料や先行の差額を含めたいときは、ここで直してください。</string>
+    <!-- ledger.ticket_prompt.amount.header: 確認シートの節: 記録する金額 -->
+    <string name="ledger_ticket_prompt_amount_header">記録する金額</string>
+    <!-- ledger.ticket_prompt.estimate: 券の値段が公式発表ではなく推定のときの印 -->
+    <string name="ledger_ticket_prompt_estimate">推定</string>
+    <!-- ledger.ticket_prompt.kind: 参加の形態。kind はコアが返す形態の名前 (現地 / 配信 / ライブビューイング) -->
+    <string name="ledger_ticket_prompt_kind">%1$sで参加</string>
+    <!-- ledger.ticket_prompt.show_fallback: 確認シートの公演名が引けなかったときの代わり -->
+    <string name="ledger_ticket_prompt_show_fallback">この公演</string>
+    <!-- ledger.ticket_prompt.tickets.header: 確認シートの節: 券種 -->
+    <string name="ledger_ticket_prompt_tickets_header">券種</string>
+    <!-- ledger.ticket_prompt.title: 参加を付けた直後に出る、チケット代を家計簿に記録するかの確認シートの題 -->
+    <string name="ledger_ticket_prompt_title">チケット代を記録</string>
+    <!-- ledger.write_action.delete_android: Android の文言。iOS の write_action.delete と ja が違う -->
+    <string name="ledger_write_action_delete_android">支出の削除</string>
+    <!-- ledger.write_action.save_android: Android の文言。iOS の write_action.save と ja が違う -->
+    <string name="ledger_write_action_save_android">支出の保存</string>
+    <!-- ledger.write_action.ticket: 参加を付けた直後のチケット代の記録に失敗したときの知らせに入る操作の名前 -->
+    <string name="ledger_write_action_ticket">チケット代の記録</string>
+</resources>

@@ -40,6 +40,9 @@ import com.fugaif.imaslivedb.data.local.localWrite
 import com.fugaif.imaslivedb.data.model.Expense
 import com.fugaif.imaslivedb.data.repository.AttendanceMarkedEvent
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import java.time.Instant
 import java.time.ZoneOffset
@@ -94,7 +97,9 @@ fun TicketExpensePrompt() {
                         note = note
                     )
                     // 保存できたときだけ閉じる (書けなかったら知らせて、シートは残す)。
-                    localWrite("チケット代の記録") { module.expenseRepository.save(expense) } ?: return@launch
+                    localWrite(L10n.Ledger.writeActionTicket.resolve(context)) {
+                        module.expenseRepository.save(expense)
+                    } ?: return@launch
                     request = null
                 }
             },
@@ -117,7 +122,7 @@ private suspend fun prepare(module: AppModule, event: AttendanceMarkedEvent): Ti
     val option = module.expenseRepository.attendedShowOptions().firstOrNull { it.id == event.showId }
     return TicketExpenseRequest(
         showId = event.showId,
-        showLabel = option?.label ?: "この公演",
+        showLabel = option?.label?.let { DisplayText.Verbatim(it) } ?: L10n.Ledger.ticketPromptShowFallback,
         eventId = option?.eventId,
         date = option?.date.orEmpty(),
         kind = prompt.kind,
@@ -128,7 +133,8 @@ private suspend fun prepare(module: AppModule, event: AttendanceMarkedEvent): Ti
 /** シートに渡す内容。 */
 private data class TicketExpenseRequest(
     val showId: String,
-    val showLabel: String,
+    /** 公演の名前 (データ) か、引けなかったときの文言。シートで resolve() する。 */
+    val showLabel: DisplayText,
     val eventId: String?,
     val date: String,
     val kind: TicketKind,
@@ -155,16 +161,17 @@ private fun TicketExpenseSheet(
 
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = DS.bg) {
         Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
-            Text("チケット代を記録", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+            Text(L10n.Ledger.ticketPromptTitle.resolve(), fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink)
             Spacer(Modifier.height(4.dp))
-            Text(request.showLabel, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink, maxLines = 2)
+            Text(request.showLabel.resolve(), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink,
+                 maxLines = 2)
             Text(
-                "${ticketKindLabel(request.kind)}で参加",
+                L10n.Ledger.ticketPromptKind(kind = ticketKindLabel(request.kind)).resolve(),
                 fontSize = 12.sp, color = DS.ink2, modifier = Modifier.padding(top = 2.dp)
             )
             Spacer(Modifier.height(16.dp))
 
-            Text("券種", fontSize = 12.sp, color = DS.ink2)
+            Text(L10n.Ledger.ticketPromptTicketsHeader.resolve(), fontSize = 12.sp, color = DS.ink2)
             Column(
                 Modifier.padding(top = 6.dp).fillMaxWidth()
                     .background(DS.fill, RoundedCornerShape(10.dp))
@@ -183,7 +190,7 @@ private fun TicketExpenseSheet(
                         Column(Modifier.weight(1f)) {
                             Text(candidate.name, fontSize = 15.sp, color = DS.ink)
                             if (candidate.isEstimate) {
-                                Text("推定", fontSize = 11.sp, color = DS.ink3)
+                                Text(L10n.Ledger.ticketPromptEstimate.resolve(), fontSize = 11.sp, color = DS.ink3)
                             }
                         }
                         Text(
@@ -198,7 +205,7 @@ private fun TicketExpenseSheet(
             }
             Spacer(Modifier.height(16.dp))
 
-            Text("記録する金額", fontSize = 12.sp, color = DS.ink2)
+            Text(L10n.Ledger.ticketPromptAmountHeader.resolve(), fontSize = 12.sp, color = DS.ink2)
             Spacer(Modifier.height(6.dp))
             OutlinedTextField(
                 value = amountText,
@@ -210,20 +217,20 @@ private fun TicketExpenseSheet(
                 modifier = Modifier.fillMaxWidth()
             )
             Text(
-                "手数料や先行の差額を含めたいときは、ここで直してください。",
+                L10n.Ledger.ticketPromptAmountFooter.resolve(),
                 fontSize = 11.sp, color = DS.ink3, modifier = Modifier.padding(top = 6.dp)
             )
             Spacer(Modifier.height(20.dp))
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                TextButton(onClick = onDismiss) { Text("あとで") }
+                TextButton(onClick = onDismiss) { Text(L10n.Ledger.ticketPromptActionLater.resolve()) }
                 Spacer(Modifier.width(8.dp))
                 Button(
                     onClick = {
                         ticket?.let { onSave(it, amount) }
                     },
                     enabled = ticket != null && amount > 0
-                ) { Text("記録する") }
+                ) { Text(L10n.Ledger.ticketPromptActionRecord.resolve()) }
             }
         }
     }

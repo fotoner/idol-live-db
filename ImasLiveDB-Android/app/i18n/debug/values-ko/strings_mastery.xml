@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/mastery.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources>
+    <string name="mastery_bulk_all_set">모든 곡에 단계가 매겨져 있어요</string>
+    <plurals name="mastery_bulk_all_songs">
+        <item quantity="other">이 %1$,d곡 전부</item>
+    </plurals>
+    <string name="mastery_bulk_reset">미설정으로 되돌리기</string>
+    <plurals name="mastery_bulk_unset_only">
+        <item quantity="other">미설정 %1$,d곡만</item>
+    </plurals>
+    <string name="mastery_filter_action_reset">초기화</string>
+    <string name="mastery_filter_progress_all">전체</string>
+    <string name="mastery_filter_progress_complete">완료</string>
+    <string name="mastery_filter_progress_has_unset">미설정 있음</string>
+    <string name="mastery_filter_progress_heard_but_unset">들었는데 미설정</string>
+    <string name="mastery_filter_progress_untouched">손대지 않음</string>
+    <string name="mastery_filter_section_progress">진행도</string>
+    <string name="mastery_filter_section_sort">정렬</string>
+    <string name="mastery_filter_sort_name">이름순</string>
+    <string name="mastery_filter_sort_progress_asc">진행도 낮은 순</string>
+    <string name="mastery_filter_sort_progress_desc">진행도 높은 순</string>
+    <string name="mastery_filter_sort_song_count">곡 많은 순</string>
+    <string name="mastery_filter_title">필터</string>
+    <string name="mastery_group_bulk_a11y">한꺼번에 바꾸기</string>
+    <string name="mastery_group_filter_heard_but_unset">들었는데 미설정 %1$d</string>
+    <string name="mastery_group_row_heard_a11y">현장에서 들음</string>
+    <plurals name="mastery_group_songs_count">
+        <item quantity="other">%1$,d곡</item>
+    </plurals>
+    <plurals name="mastery_group_songs_count_filtered">
+        <item quantity="other">%1$d / %2$,d곡</item>
+    </plurals>
+    <string name="mastery_group_songs_header">수록곡</string>
+    <string name="mastery_group_summary_header">이 그룹의 숙련도</string>
+    <string name="mastery_list_axis_series">CD 시리즈</string>
+    <string name="mastery_list_axis_unit">유닛</string>
+    <string name="mastery_list_axis_year">연도</string>
+    <string name="mastery_list_brand_all">전체</string>
+    <string name="mastery_list_empty_message">필터 조건을 줄여 주세요.</string>
+    <string name="mastery_list_empty_title">해당하는 그룹이 없어요</string>
+    <string name="mastery_list_filter_a11y">필터</string>
+    <string name="mastery_list_group_bulk_swipe">한꺼번에 매기기</string>
+    <plurals name="mastery_list_group_discs">
+        <item quantity="other">%1$,d장</item>
+    </plurals>
+    <string name="mastery_list_group_heard">들음 %1$d</string>
+    <string name="mastery_list_group_heard_but_unset">들었는데 미설정 %1$d</string>
+    <string name="mastery_list_group_separator">" · "</string>
+    <plurals name="mastery_list_group_songs">
+        <item quantity="other">%1$,d곡</item>
+    </plurals>
+    <string name="mastery_list_group_unset">미설정 %1$d</string>
+    <plurals name="mastery_list_groups_count">
+        <item quantity="other">%1$,d건</item>
+    </plurals>
+    <string name="mastery_list_groups_header">그룹별</string>
+    <string name="mastery_list_name_filter_series">CD 시리즈 이름으로 찾기</string>
+    <string name="mastery_list_name_filter_unit">유닛 이름으로 찾기</string>
+    <string name="mastery_list_name_filter_year">연도로 찾기</string>
+    <string name="mastery_list_summary_header">나의 숙련도</string>
+    <string name="mastery_list_title">숙련도</string>
+    <plurals name="mastery_summary_done_songs">
+        <item quantity="other">%1$s %2$,d곡</item>
+    </plurals>
+    <string name="mastery_summary_set_songs">단계를 매긴 곡</string>
+    <plurals name="mastery_summary_total_songs">
+        <item quantity="other">/ %1$,d곡</item>
+    </plurals>
+    <string name="mastery_write_action_record">숙련도 기록</string>
+</resources>

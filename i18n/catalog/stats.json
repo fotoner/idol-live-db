@@ -1,0 +1,270 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "stats",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/stats/"
+    ],
+    "ios": [
+      "ImasLiveDB/Views/Stats/"
+    ]
+  },
+  "strings": {
+    "brand_progress.header": {
+      "ja": "ブランド別の回収率",
+      "ko": "브랜드별 회수율",
+      "note": "ブランド別の回収率の節の見出し"
+    },
+    "brand_songs.header": {
+      "ja": "マスタ規模 ・ ブランド別楽曲数",
+      "ko": "DB 규모 · 브랜드별 곡 수",
+      "note": "ブランドごとの登録曲数の見出し。マスタはアプリのマスタデータ (データベース) のこと (ko の「마스터」は作品名 (아이돌마스터) や称号に読めるので DB と訳す)"
+    },
+    "cast_show.header": {
+      "ja": "活動量 ・ 出演回数",
+      "ko": "활동량 · 출연 횟수",
+      "note": "出演回数の多い人のランキングの見出し"
+    },
+    "cast_show.unit": {
+      "ja": "人",
+      "ko": "회",
+      "note": "出演回数のランキングの数字の単位。数字は各アイドルの出演公演数なので ko は「회」(37회)。ja の「人」は移行前の表示をそのまま残したもので、回 (または 公演) に直すのはオーナーの承認を得て別の PR で行う"
+    },
+    "catch_chance.caption": {
+      "ja": "過去に披露",
+      "ko": "과거에 공연됨",
+      "note": "公演カードの右の数字の説明 (その曲が過去の公演で歌われた)"
+    },
+    "catch_chance.date_event": {
+      "args": [
+        {
+          "name": "date",
+          "type": "string"
+        },
+        {
+          "name": "event",
+          "type": "string"
+        }
+      ],
+      "ja": "{date} ・ {event}",
+      "ko": "{date} · {event}",
+      "note": "公演カードの上の行。date は 6/4 のような月日、event はイベント名"
+    },
+    "catch_chance.header": {
+      "ja": "この公演で聴けるかも",
+      "ko": "이 공연에서 들을 수 있을지도",
+      "note": "これからの公演で未回収の曲が聴けそうなものの節の見出し"
+    },
+    "catch_chance.unit": {
+      "ja": "曲",
+      "ko": "곡",
+      "note": "公演カードの右の数字の単位 (聴けそうな未回収の曲数)"
+    },
+    "dashboard.title": {
+      "ja": "回収ダッシュボード",
+      "ko": "회수 대시보드",
+      "note": "統計タブ (回収ダッシュボード) の画面の題。回収 = ライブで曲を生で聴くこと"
+    },
+    "db.events": {
+      "ja": "イベント",
+      "ko": "이벤트",
+      "note": "データベースの規模のタイル: イベント数 (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "db.idols": {
+      "ja": "アイドル",
+      "ko": "아이돌",
+      "note": "データベースの規模のタイル: アイドル数 (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "db.shows": {
+      "ja": "公演",
+      "ko": "공연",
+      "note": "データベースの規模のタイル: 公演数 (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "db.songs": {
+      "ja": "楽曲",
+      "ko": "곡",
+      "note": "データベースの規模のタイル: 曲数 (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "heat.brand.all": {
+      "ja": "すべて",
+      "ko": "전체",
+      "note": "ランキングのブランドの絞り込みチップの先頭 (絞らない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "heat.empty.message": {
+      "ja": "お気に入り登録が増えるとここにランキングが表示されます。",
+      "ko": "즐겨찾기 등록이 늘어나면 여기에 랭킹이 표시돼요.",
+      "note": "ランキングが空のときの説明"
+    },
+    "heat.empty.title": {
+      "ja": "まだデータがありません",
+      "ko": "아직 데이터가 없어요",
+      "note": "ランキングが空のときの見出し"
+    },
+    "heat.header": {
+      "ja": "コミュニティの熱量",
+      "ko": "커뮤니티 열기",
+      "note": "みんなのお気に入り登録の多い曲のランキングの節の見出し"
+    },
+    "latest.date": {
+      "args": [
+        {
+          "name": "date",
+          "type": "string"
+        }
+      ],
+      "ja": "最新公演 ・ {date}",
+      "ko": "최신 공연 · {date}",
+      "note": "最新の公演カードの上の行。date は 6/4 のような月日"
+    },
+    "latest.header": {
+      "ja": "最新の動き",
+      "ko": "최신 소식",
+      "note": "いちばん新しい公演の節の見出し"
+    },
+    "latest.open_setlist": {
+      "ja": "セトリを見る",
+      "ko": "세트리스트 보기",
+      "note": "最新の公演カードのセトリを開く導線"
+    },
+    "latest.separator": {
+      "ja": " ・ ",
+      "keep_whitespace": true,
+      "ko": " · ",
+      "note": "最新の公演カードの会場とセトリの曲数の区切り (前後に空白)"
+    },
+    "latest.setlist_songs": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "セトリ {count}曲",
+      "ko": "세트리스트 {count}곡",
+      "note": "最新の公演カードの会場の行に続く、セトリの曲数"
+    },
+    "song_play.header": {
+      "ja": "活動量 ・ 披露回数",
+      "ko": "활동량 · 공연 횟수",
+      "note": "ライブで歌われた回数の多い曲のランキングの見出し"
+    },
+    "song_play.unit": {
+      "ja": "回",
+      "ko": "회",
+      "note": "披露回数のランキングの数字の単位"
+    },
+    "summary.caption": {
+      "ja": "現地ライブで聴けた曲",
+      "ko": "현장 라이브에서 들은 곡",
+      "note": "回収した曲数の説明"
+    },
+    "summary.header": {
+      "ja": "あなたの回収率",
+      "ko": "나의 회수율",
+      "note": "全体の回収率の節の見出し"
+    },
+    "summary.share": {
+      "ja": "カードでシェア",
+      "ko": "카드로 공유",
+      "note": "回収率のシェアカードを開くボタン"
+    },
+    "summary.total_songs": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "/ {count}曲",
+      "ko": "/ {count}곡",
+      "note": "回収した曲数の右の分母 (全曲数)。1000 以上は桁区切りが付く (/ 3,012曲)"
+    },
+    "uncollected.empty_all.message": {
+      "ja": "参加ライブを記録すると、未回収曲がここに並びます。",
+      "ko": "참가한 라이브를 기록하면 미회수 곡이 여기에 나와요.",
+      "note": "未回収の曲が無いときの説明 (全体)"
+    },
+    "uncollected.empty_all.title": {
+      "ja": "未回収曲はありません",
+      "ko": "미회수 곡이 없어요",
+      "note": "未回収の曲が無いときの見出し (全体)"
+    },
+    "uncollected.empty_pick.message": {
+      "ja": "参加ライブを記録すると、担当のオリ曲の回収状況がここに出ます。",
+      "ko": "참가한 라이브를 기록하면 담당 오리지널 곡의 회수 현황이 여기에 나와요.",
+      "note": "担当のオリ曲に未回収が無いときの説明"
+    },
+    "uncollected.empty_pick.title": {
+      "ja": "担当曲はコンプリート！",
+      "ko": "담당 곡 컴플리트!",
+      "note": "担当のオリ曲に未回収が無いときの見出し"
+    },
+    "uncollected.header": {
+      "ja": "まだ生で聴けていない曲",
+      "ko": "아직 라이브로 듣지 못한 곡",
+      "note": "未回収の曲の一覧の見出し"
+    },
+    "uncollected.my_pick_progress": {
+      "args": [
+        {
+          "name": "collected",
+          "type": "int"
+        },
+        {
+          "name": "total",
+          "type": "int"
+        }
+      ],
+      "ja": "担当 {collected}/{total}",
+      "ko": "담당 {collected}/{total}",
+      "note": "担当のオリ曲の回収数 / 曲数 (見出しの右)"
+    },
+    "uncollected.play_count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}回披露",
+      "ko": "{count}회 공연",
+      "note": "未回収の曲の行の右: これまでにライブで歌われた回数"
+    },
+    "uncollected.scope.all": {
+      "ja": "全体",
+      "ko": "전체",
+      "note": "未回収の曲の範囲のセグメント: すべての曲"
+    },
+    "uncollected.scope.my_pick": {
+      "ja": "担当のオリ曲",
+      "ko": "담당 오리지널 곡",
+      "note": "未回収の曲の範囲のセグメント: 担当アイドルのオリジナル曲"
+    },
+    "yearly.header": {
+      "ja": "年別 公演数",
+      "ko": "연도별 공연 수",
+      "note": "年ごとの公演数の見出し (Android)",
+      "platforms": [
+        "android"
+      ]
+    }
+  }
+}

@@ -38,6 +38,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.model.Expense
 import com.fugaif.imaslivedb.data.repository.LedgerShowOption
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasFilterChip
 import com.fugaif.imaslivedb.ui.theme.DS
 import java.time.Instant
@@ -56,7 +59,7 @@ private val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
  * 支出 1 件の入力。追加も編集も同じシート。iOS `ExpenseEditorView` の移植。
  *
  * 入力の検査 (日付の形・金額の範囲) は**共有コア** (`validateExpense`) 一本。
- * ここは弾かれた理由を日本語に直して出すだけで、条件は Kotlin に書かない。
+ * ここは弾かれた理由を文言 (カタログ) に直して出すだけで、条件は Kotlin に書かない。
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,12 +84,12 @@ fun ExpenseEditorSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = DS.bg) {
         Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
             Text(
-                if (expense == null) "支出を足す" else "支出を直す",
+                (if (expense == null) L10n.Ledger.editorTitleAdd else L10n.Ledger.editorTitleEdit).resolve(),
                 fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink
             )
             Spacer(Modifier.height(16.dp))
 
-            Text("金額", fontSize = 12.sp, color = DS.ink2)
+            Text(L10n.Ledger.editorAmountHeader.resolve(), fontSize = 12.sp, color = DS.ink2)
             Spacer(Modifier.height(6.dp))
             OutlinedTextField(
                 value = amountText,
@@ -98,16 +101,17 @@ fun ExpenseEditorSheet(
                 modifier = Modifier.fillMaxWidth()
             )
             if (validation == ExpenseInputError.NOT_POSITIVE || validation == ExpenseInputError.TOO_LARGE) {
-                Text(message(validation), fontSize = 12.sp, color = DS.danger, modifier = Modifier.padding(top = 4.dp))
+                Text(message(validation).resolve(), fontSize = 12.sp, color = DS.danger,
+                     modifier = Modifier.padding(top = 4.dp))
             }
             Spacer(Modifier.height(16.dp))
 
-            Text("費目", fontSize = 12.sp, color = DS.ink2)
+            Text(L10n.Ledger.editorCategoryHeader.resolve(), fontSize = 12.sp, color = DS.ink2)
             Spacer(Modifier.height(6.dp))
             CategoryGrid(selected = category, onSelect = { category = it })
             Spacer(Modifier.height(16.dp))
 
-            Text("日付", fontSize = 12.sp, color = DS.ink2)
+            Text(L10n.Ledger.editorDateHeader.resolve(), fontSize = 12.sp, color = DS.ink2)
             Spacer(Modifier.height(6.dp))
             Row(
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(DS.fill)
@@ -117,32 +121,33 @@ fun ExpenseEditorSheet(
             }
             Spacer(Modifier.height(16.dp))
 
-            Text("公演", fontSize = 12.sp, color = DS.ink2)
+            Text(L10n.Ledger.editorShowHeader.resolve(), fontSize = 12.sp, color = DS.ink2)
             Spacer(Modifier.height(6.dp))
             Row(
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(DS.fill)
                     .clickable { showShowPicker = true }.padding(horizontal = 14.dp, vertical = 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                val label = showOptions.firstOrNull { it.id == showId }?.label ?: "公演に紐づけない"
+                val label = showOptions.firstOrNull { it.id == showId }?.label ?: L10n.Ledger.editorShowNone.resolve()
                 Text(label, fontSize = 15.sp, color = if (showId == null) DS.ink2 else DS.ink)
             }
             Text(
-                "紐づけると「この遠征でいくら使ったか」が出ます。課金やグッズの通販は紐づけなくて構いません。",
+                L10n.Ledger.editorShowFooter.resolve(),
                 fontSize = 11.sp, color = DS.ink3, modifier = Modifier.padding(top = 6.dp)
             )
             Spacer(Modifier.height(16.dp))
 
-            Text("メモ", fontSize = 12.sp, color = DS.ink2)
+            Text(L10n.Ledger.editorNoteHeader.resolve(), fontSize = 12.sp, color = DS.ink2)
             Spacer(Modifier.height(6.dp))
             OutlinedTextField(
-                value = note, onValueChange = { note = it }, placeholder = { Text("任意") },
+                value = note, onValueChange = { note = it },
+                placeholder = { Text(L10n.Ledger.editorNotePlaceholder.resolve()) },
                 singleLine = true, modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(20.dp))
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                TextButton(onClick = onDismiss) { Text("キャンセル") }
+                TextButton(onClick = onDismiss) { Text(L10n.Ledger.editorActionCancel.resolve()) }
                 Spacer(Modifier.width(8.dp))
                 Button(
                     onClick = {
@@ -153,7 +158,7 @@ fun ExpenseEditorSheet(
                         onSave(saved)
                     },
                     enabled = validation == null
-                ) { Text("保存") }
+                ) { Text(L10n.Ledger.editorActionSave.resolve()) }
             }
         }
     }
@@ -171,9 +176,11 @@ fun ExpenseEditorSheet(
                         dateText = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).format(DATE_FORMAT)
                     }
                     showDatePicker = false
-                }) { Text("決定") }
+                }) { Text(L10n.Ledger.editorDateConfirm.resolve()) }
             },
-            dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("キャンセル") } }
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text(L10n.Ledger.editorActionCancel.resolve()) }
+            }
         ) { DatePicker(state = pickerState) }
     }
 
@@ -207,11 +214,11 @@ private fun CategoryGrid(selected: ExpenseCategory, onSelect: (ExpenseCategory) 
     }
 }
 
-private fun message(error: ExpenseInputError?): String = when (error) {
-    ExpenseInputError.BAD_DATE -> "日付を選んでください"
-    ExpenseInputError.NOT_POSITIVE -> "金額を入れてください"
-    ExpenseInputError.TOO_LARGE -> "桁が多すぎます (1 億円未満)"
-    null -> ""
+private fun message(error: ExpenseInputError?): DisplayText = when (error) {
+    ExpenseInputError.BAD_DATE -> L10n.Ledger.editorErrorBadDate
+    ExpenseInputError.NOT_POSITIVE -> L10n.Ledger.editorErrorNotPositive
+    ExpenseInputError.TOO_LARGE -> L10n.Ledger.editorErrorTooLarge
+    null -> DisplayText.Verbatim("")
 }
 
 /** 紐づける公演を選ぶ。参加を付けた公演だけが並ぶ。iOS `LedgerShowPicker` の移植。 */
@@ -230,24 +237,25 @@ private fun LedgerShowPickerSheet(
 
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = DS.bg) {
         Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
-            Text("公演を選ぶ", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+            Text(L10n.Ledger.showPickerTitle.resolve(), fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink)
             Spacer(Modifier.height(12.dp))
             OutlinedTextField(
-                value = query, onValueChange = { query = it }, placeholder = { Text("公演を探す") },
+                value = query, onValueChange = { query = it },
+                placeholder = { Text(L10n.Ledger.showPickerSearchPrompt.resolve()) },
                 singleLine = true, modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(8.dp))
             LazyColumn(Modifier.height(360.dp)) {
                 item {
                     Text(
-                        "公演に紐づけない", fontSize = 15.sp, color = DS.ink,
+                        L10n.Ledger.showPickerNone.resolve(), fontSize = 15.sp, color = DS.ink,
                         modifier = Modifier.fillMaxWidth().clickable { onPick(null) }.padding(vertical = 12.dp)
                     )
                 }
                 if (options.isEmpty()) {
                     item {
                         Text(
-                            "参加した公演がありません。ライブに「参加」を付けると、ここに並びます。",
+                            L10n.Ledger.showPickerEmptyMessageAndroid.resolve(),
                             fontSize = 13.sp, color = DS.ink3, modifier = Modifier.padding(vertical = 12.dp)
                         )
                     }

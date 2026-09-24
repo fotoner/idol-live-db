@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/ledger.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources>
+    <string name="ledger_editor_action_cancel">취소</string>
+    <string name="ledger_editor_action_save">저장</string>
+    <string name="ledger_editor_amount_header">금액</string>
+    <string name="ledger_editor_category_header">항목</string>
+    <string name="ledger_editor_date_confirm">확인</string>
+    <string name="ledger_editor_date_header">날짜</string>
+    <string name="ledger_editor_error_bad_date">날짜를 골라 주세요</string>
+    <string name="ledger_editor_error_not_positive">금액을 입력해 주세요</string>
+    <string name="ledger_editor_error_too_large">자릿수가 너무 많아요 (1억 엔 미만)</string>
+    <string name="ledger_editor_note_header">메모</string>
+    <string name="ledger_editor_note_placeholder">선택 사항</string>
+    <string name="ledger_editor_show_footer">연결하면 “이 원정에 얼마를 썼는지”가 나와요. 과금이나 굿즈 통판은 연결하지 않아도 돼요.</string>
+    <string name="ledger_editor_show_header">공연</string>
+    <string name="ledger_editor_show_none">공연에 연결하지 않음</string>
+    <string name="ledger_editor_title_add">지출 추가</string>
+    <string name="ledger_editor_title_edit">지출 수정</string>
+    <string name="ledger_list_add_a11y">지출 추가</string>
+    <string name="ledger_list_empty_message">오른쪽 위의 +에서 티켓값이나 원정비를 추가해 주세요.</string>
+    <string name="ledger_list_empty_title">아직 기록이 없어요</string>
+    <string name="ledger_list_linkage_all">전체</string>
+    <string name="ledger_list_linkage_linked">공연 있음</string>
+    <string name="ledger_list_linkage_unlinked">공연 없음</string>
+    <string name="ledger_list_period_all">전체 기간</string>
+    <string name="ledger_list_period_month">월별</string>
+    <string name="ledger_list_period_year">연도별</string>
+    <string name="ledger_list_row_delete">삭제</string>
+    <plurals name="ledger_list_summary_count">
+        <item quantity="other">%1$,d건</item>
+    </plurals>
+    <string name="ledger_list_summary_header">쓴 금액</string>
+    <string name="ledger_list_summary_per_show">공연당</string>
+    <string name="ledger_list_summary_show_count">공연 수</string>
+    <string name="ledger_list_summary_travel">원정비</string>
+    <string name="ledger_list_title">가계부</string>
+    <string name="ledger_list_year_filter_all">전체 기간</string>
+    <string name="ledger_list_year_filter_year">%1$s년</string>
+    <string name="ledger_show_picker_empty_message_android">참가한 공연이 없어요. 라이브에 “참가”를 표시하면 여기에 나와요.</string>
+    <string name="ledger_show_picker_none">공연에 연결하지 않음</string>
+    <string name="ledger_show_picker_search_prompt">공연 검색</string>
+    <string name="ledger_show_picker_title">공연 고르기</string>
+    <string name="ledger_ticket_prompt_action_later">나중에</string>
+    <string name="ledger_ticket_prompt_action_record">기록</string>
+    <string name="ledger_ticket_prompt_amount_footer">수수료나 선행 차액을 포함하려면 여기서 고쳐 주세요.</string>
+    <string name="ledger_ticket_prompt_amount_header">기록할 금액</string>
+    <string name="ledger_ticket_prompt_estimate">추정</string>
+    <string name="ledger_ticket_prompt_kind">%1$s 참가</string>
+    <string name="ledger_ticket_prompt_show_fallback">이 공연</string>
+    <string name="ledger_ticket_prompt_tickets_header">티켓 종류</string>
+    <string name="ledger_ticket_prompt_title">티켓값 기록</string>
+    <string name="ledger_write_action_delete_android">지출 삭제</string>
+    <string name="ledger_write_action_save_android">지출 저장</string>
+    <string name="ledger_write_action_ticket">티켓값 기록</string>
+</resources>

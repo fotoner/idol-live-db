@@ -1,0 +1,1010 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "ledger.editor.action.cancel" : {
+      "comment" : "入力シートを閉じるボタン (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャンセル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "취소"
+          }
+        }
+      }
+    },
+    "ledger.editor.action.save" : {
+      "comment" : "入力シートの保存ボタン (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "저장"
+          }
+        }
+      }
+    },
+    "ledger.editor.amount.header" : {
+      "comment" : "入力シートの節: 金額 (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金額"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "금액"
+          }
+        }
+      }
+    },
+    "ledger.editor.category.header" : {
+      "comment" : "入力シートの節: 費目 (チケット代・交通費…) (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "費目"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "항목"
+          }
+        }
+      }
+    },
+    "ledger.editor.date.header" : {
+      "comment" : "入力シートの節: 日付 (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日付"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "날짜"
+          }
+        }
+      }
+    },
+    "ledger.editor.date.picker" : {
+      "comment" : "日付の選択欄のラベル (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日付"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "날짜"
+          }
+        }
+      }
+    },
+    "ledger.editor.error.bad_date" : {
+      "comment" : "入力の検査 (コア) で日付が不正なとき (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日付を選んでください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "날짜를 골라 주세요"
+          }
+        }
+      }
+    },
+    "ledger.editor.error.not_positive" : {
+      "comment" : "入力の検査 (コア) で金額が 0 以下のとき (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "金額を入れてください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "금액을 입력해 주세요"
+          }
+        }
+      }
+    },
+    "ledger.editor.error.too_large" : {
+      "comment" : "入力の検査 (コア) で金額が 1 億円以上のとき (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "桁が多すぎます (1 億円未満)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "자릿수가 너무 많아요 (1억 엔 미만)"
+          }
+        }
+      }
+    },
+    "ledger.editor.note.header" : {
+      "comment" : "入力シートの節: メモ (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メモ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "메모"
+          }
+        }
+      }
+    },
+    "ledger.editor.note.placeholder" : {
+      "comment" : "メモ欄のプレースホルダ (書かなくてよい) (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "任意"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "선택 사항"
+          }
+        }
+      }
+    },
+    "ledger.editor.show.footer" : {
+      "comment" : "公演の節の下の説明 (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "紐づけると「この遠征でいくら使ったか」が出ます。課金やグッズの通販は紐づけなくて構いません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "연결하면 “이 원정에 얼마를 썼는지”가 나와요. 과금이나 굿즈 통판은 연결하지 않아도 돼요."
+          }
+        }
+      }
+    },
+    "ledger.editor.show.header" : {
+      "comment" : "入力シートの節: 紐づける公演 (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연"
+          }
+        }
+      }
+    },
+    "ledger.editor.show.linked_fallback" : {
+      "comment" : "公演の欄: 紐づけた公演の名前が引けなかったときの代わり (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "紐づけた公演"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "연결한 공연"
+          }
+        }
+      }
+    },
+    "ledger.editor.show.none" : {
+      "comment" : "公演の欄: 紐づけていないとき (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演に紐づけない"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연에 연결하지 않음"
+          }
+        }
+      }
+    },
+    "ledger.editor.show.unlink" : {
+      "comment" : "公演の紐づけを外すボタン (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演との紐づけを外す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 연결 해제"
+          }
+        }
+      }
+    },
+    "ledger.editor.title.add" : {
+      "comment" : "支出の入力シートの題 (新規) (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "支出を足す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "지출 추가"
+          }
+        }
+      }
+    },
+    "ledger.editor.title.edit" : {
+      "comment" : "支出の入力シートの題 (編集) (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "支出を直す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "지출 수정"
+          }
+        }
+      }
+    },
+    "ledger.list.add.a11y" : {
+      "comment" : "右上の ＋ ボタンの読み上げ (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "支出を足す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "지출 추가"
+          }
+        }
+      }
+    },
+    "ledger.list.empty.message" : {
+      "comment" : "支出が 1 件も無いときの説明 (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "右上の + から、チケット代や遠征費を足してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오른쪽 위의 +에서 티켓값이나 원정비를 추가해 주세요."
+          }
+        }
+      }
+    },
+    "ledger.list.empty.title" : {
+      "comment" : "支出が 1 件も無いときの見出し (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだ記録がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 기록이 없어요"
+          }
+        }
+      }
+    },
+    "ledger.list.linkage.all" : {
+      "comment" : "公演との紐づけの絞り込み: 絞らない (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "ledger.list.linkage.linked" : {
+      "comment" : "公演との紐づけの絞り込み: 公演に紐づいた支出だけ (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演あり"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 있음"
+          }
+        }
+      }
+    },
+    "ledger.list.linkage.unlinked" : {
+      "comment" : "公演との紐づけの絞り込み: 公演に紐づかない支出 (課金・通販など) だけ (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演なし"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 없음"
+          }
+        }
+      }
+    },
+    "ledger.list.period.all" : {
+      "comment" : "集計の期間のセグメント (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全期間"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체 기간"
+          }
+        }
+      }
+    },
+    "ledger.list.period.month" : {
+      "comment" : "集計の期間のセグメント (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月別"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "월별"
+          }
+        }
+      }
+    },
+    "ledger.list.period.year" : {
+      "comment" : "集計の期間のセグメント (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "年別"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "연도별"
+          }
+        }
+      }
+    },
+    "ledger.list.row.delete" : {
+      "comment" : "支出の行をスワイプすると出る削除 (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "삭제"
+          }
+        }
+      }
+    },
+    "ledger.list.summary.count" : {
+      "comment" : "合計金額の右の件数。1000 以上は桁区切りが付く (1,234件) (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg件"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg건"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ledger.list.summary.header" : {
+      "comment" : "合計の節の見出し (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使った額"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "쓴 금액"
+          }
+        }
+      }
+    },
+    "ledger.list.summary.per_show" : {
+      "comment" : "合計の内訳: 公演 1 つあたりの額 (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1公演あたり"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연당"
+          }
+        }
+      }
+    },
+    "ledger.list.summary.show_count" : {
+      "comment" : "合計の内訳: 紐づいた公演の数 (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演数"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 수"
+          }
+        }
+      }
+    },
+    "ledger.list.summary.travel" : {
+      "comment" : "合計の内訳: 遠征費 (チケット・交通・宿) (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遠征費"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "원정비"
+          }
+        }
+      }
+    },
+    "ledger.list.title" : {
+      "comment" : "家計簿の画面の題。ko は機能名 (家計簿) に合わせる (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "収支"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가계부"
+          }
+        }
+      }
+    },
+    "ledger.list.year_filter.all" : {
+      "comment" : "年の絞り込みチップの先頭 (絞らない) (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全期間"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체 기간"
+          }
+        }
+      }
+    },
+    "ledger.list.year_filter.year" : {
+      "comment" : "年の絞り込みチップ (記録のある年だけ)。year は支出の日付の先頭 4 桁 (2026 など) をそのまま渡す (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@年"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@년"
+          }
+        }
+      }
+    },
+    "ledger.show_picker.action.close" : {
+      "comment" : "公演を選ぶシートを閉じるボタン (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "閉じる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "닫기"
+          }
+        }
+      }
+    },
+    "ledger.show_picker.empty.message" : {
+      "comment" : "参加を付けた公演が 1 つも無いときの説明 (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブに「参加」を付けると、ここに並びます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브에 “참가”를 표시하면 여기에 나와요."
+          }
+        }
+      }
+    },
+    "ledger.show_picker.empty.title" : {
+      "comment" : "参加を付けた公演が 1 つも無いときの見出し (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加した公演がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가한 공연이 없어요"
+          }
+        }
+      }
+    },
+    "ledger.show_picker.none" : {
+      "comment" : "公演を選ぶシートの先頭の選択肢 (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演に紐づけない"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연에 연결하지 않음"
+          }
+        }
+      }
+    },
+    "ledger.show_picker.search_prompt" : {
+      "comment" : "公演を選ぶシートの検索欄のプレースホルダ (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演を探す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 검색"
+          }
+        }
+      }
+    },
+    "ledger.show_picker.title" : {
+      "comment" : "紐づける公演を選ぶシートの題 (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演を選ぶ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 고르기"
+          }
+        }
+      }
+    },
+    "ledger.ticket_prompt.action.later" : {
+      "comment" : "確認シートを記録せずに閉じるボタン (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あとで"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "나중에"
+          }
+        }
+      }
+    },
+    "ledger.ticket_prompt.action.record" : {
+      "comment" : "確認シートの記録ボタン (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "기록"
+          }
+        }
+      }
+    },
+    "ledger.ticket_prompt.amount.footer" : {
+      "comment" : "金額の節の下の説明 (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手数料や先行の差額を含めたいときは、ここで直してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "수수료나 선행 차액을 포함하려면 여기서 고쳐 주세요."
+          }
+        }
+      }
+    },
+    "ledger.ticket_prompt.amount.header" : {
+      "comment" : "確認シートの節: 記録する金額 (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録する金額"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "기록할 금액"
+          }
+        }
+      }
+    },
+    "ledger.ticket_prompt.estimate" : {
+      "comment" : "券の値段が公式発表ではなく推定のときの印 (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "推定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "추정"
+          }
+        }
+      }
+    },
+    "ledger.ticket_prompt.kind" : {
+      "comment" : "参加の形態。kind はコアが返す形態の名前 (現地 / 配信 / ライブビューイング) (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@で参加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@ 참가"
+          }
+        }
+      }
+    },
+    "ledger.ticket_prompt.show_fallback" : {
+      "comment" : "確認シートの公演名が引けなかったときの代わり (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この公演"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 공연"
+          }
+        }
+      }
+    },
+    "ledger.ticket_prompt.tickets.header" : {
+      "comment" : "確認シートの節: 券種 (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "券種"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "티켓 종류"
+          }
+        }
+      }
+    },
+    "ledger.ticket_prompt.title" : {
+      "comment" : "参加を付けた直後に出る、チケット代を家計簿に記録するかの確認シートの題 (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チケット代を記録"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "티켓값 기록"
+          }
+        }
+      }
+    },
+    "ledger.write_action.delete" : {
+      "comment" : "書き込みに失敗したときの知らせに入る操作の名前 (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家計簿の削除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가계부 삭제"
+          }
+        }
+      }
+    },
+    "ledger.write_action.save" : {
+      "comment" : "書き込みに失敗したときの知らせに入る操作の名前 (「〜に失敗しました」の〜) (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家計簿の保存"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가계부 저장"
+          }
+        }
+      }
+    },
+    "ledger.write_action.ticket" : {
+      "comment" : "参加を付けた直後のチケット代の記録に失敗したときの知らせに入る操作の名前 (i18n/catalog/ledger.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チケット代の記録"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "티켓값 기록"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

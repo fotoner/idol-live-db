@@ -22,6 +22,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.model.Song
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.*
 import com.fugaif.imaslivedb.ui.theme.*
 import uniffi.imas_core.MasteryBulkScope
@@ -70,11 +72,13 @@ fun MasteryGroupDetailScreen(
             TopAppBar(
                 title = { Text(group.label, fontWeight = FontWeight.Bold, maxLines = 1) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "戻る") }
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, L10n.Common.actionBack.resolve())
+                    }
                 },
                 actions = {
                     IconButton(onClick = { showBulk = true }) {
-                        Icon(Icons.Filled.MoreHoriz, "まとめて変える")
+                        Icon(Icons.Filled.MoreHoriz, L10n.Mastery.groupBulkA11y.resolve())
                     }
                 }
             )
@@ -83,7 +87,7 @@ fun MasteryGroupDetailScreen(
         LazyColumn(Modifier.fillMaxSize().padding(padding)) {
             item {
                 Column {
-                    ImasSectionHeader("このグループの習熟度", tight = true)
+                    ImasSectionHeader(L10n.Mastery.groupSummaryHeader, tight = true)
                     Row(
                         Modifier.padding(horizontal = 16.dp).fillMaxWidth()
                             .clip(RoundedCornerShape(14.dp)).background(DS.surface).padding(16.dp),
@@ -93,12 +97,15 @@ fun MasteryGroupDetailScreen(
                         MasteryRing(group.percent.toInt() / 100.0, Modifier.size(92.dp))
                         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Row(verticalAlignment = Alignment.Bottom) {
-                                Text("${group.setCount}",
+                                Text(groupedCount(group.setCount),
                                      fontSize = 30.sp, fontWeight = FontWeight.Bold, color = DS.ink)
-                                Text(" / ${group.total}曲", fontSize = 15.sp, color = DS.ink2)
+                                // 先頭の空白は大きな数字との間隔 (文言の外に置く)
+                                Text(" " + L10n.Mastery.summaryTotalSongs(count = group.total.toInt()).resolve(),
+                                     fontSize = 15.sp, color = DS.ink2)
                             }
-                            Text("段階を付けた曲", fontSize = 13.sp, color = DS.ink2)
-                            Text("${scale.label(scale.steps)} ${group.doneCount} 曲",
+                            Text(L10n.Mastery.summarySetSongs.resolve(), fontSize = 13.sp, color = DS.ink2)
+                            Text(L10n.Mastery.summaryDoneSongs(level = scale.label(scale.steps),
+                                                               count = group.doneCount.toInt()).resolve(),
                                  fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink3)
                         }
                     }
@@ -109,7 +116,7 @@ fun MasteryGroupDetailScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         if (heardUnset > 0) {
-                            ImasFilterChip("聴いたのに未設定 $heardUnset", heardOnly, {
+                            ImasFilterChip(L10n.Mastery.groupFilterHeardButUnset(songs = heardUnset).resolve(), heardOnly, {
                                 heardOnly = !heardOnly
                                 if (heardOnly) levelFilter = null
                             }, icon = Icons.Filled.Check)
@@ -125,9 +132,9 @@ fun MasteryGroupDetailScreen(
                         }
                     }
                     Spacer(Modifier.height(12.dp))
-                    ImasSectionHeader("収録曲",
-                        count = if (levelFilter == null && !heardOnly) "${songs.size}曲"
-                                else "${shown.size} / ${songs.size}曲",
+                    ImasSectionHeader(L10n.Mastery.groupSongsHeader,
+                        count = if (levelFilter == null && !heardOnly) L10n.Mastery.groupSongsCount(count = songs.size)
+                                else L10n.Mastery.groupSongsCountFiltered(shown = shown.size, count = songs.size),
                         tight = true)
                 }
             }
@@ -198,7 +205,8 @@ private fun SongMasteryRow(
         }
         if (collected) {
             // 現地で聴いた曲。既存の一覧と同じ ✓ の意味で揃える。
-            Icon(Icons.Filled.Check, "現地で聴いた", tint = DS.success, modifier = Modifier.size(14.dp))
+            Icon(Icons.Filled.Check, L10n.Mastery.groupRowHeardA11y.resolve(), tint = DS.success,
+                 modifier = Modifier.size(14.dp))
         }
         // チップだけを別の的にする。最上段では上がらない (連打で記録が飛ばないのはコアの規則)。
         Box(
@@ -244,7 +252,7 @@ private fun BulkSheet(group: MasteryGroup, scale: MasteryScale,
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = DS.bg) {
         Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
             if (unset > 0) {
-                Text("未設定の $unset 曲だけ", fontSize = 12.sp, color = DS.ink2)
+                Text(L10n.Mastery.bulkUnsetOnly(count = unset).resolve(), fontSize = 12.sp, color = DS.ink2)
                 Spacer(Modifier.height(6.dp))
                 Row(Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -255,7 +263,7 @@ private fun BulkSheet(group: MasteryGroup, scale: MasteryScale,
                 }
                 Spacer(Modifier.height(16.dp))
             }
-            Text("この ${group.total} 曲すべて", fontSize = 12.sp, color = DS.ink2)
+            Text(L10n.Mastery.bulkAllSongs(count = group.total.toInt()).resolve(), fontSize = 12.sp, color = DS.ink2)
             Spacer(Modifier.height(6.dp))
             Row(Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -263,7 +271,7 @@ private fun BulkSheet(group: MasteryGroup, scale: MasteryScale,
                     ImasFilterChip(scale.label(i.toUByte()), false,
                         { onPick(MasteryBulkScope.ALL, i.toUByte()) })
                 }
-                ImasFilterChip("未設定に戻す", false, { onPick(MasteryBulkScope.ALL, 0u) })
+                ImasFilterChip(L10n.Mastery.bulkReset.resolve(), false, { onPick(MasteryBulkScope.ALL, 0u) })
             }
         }
     }

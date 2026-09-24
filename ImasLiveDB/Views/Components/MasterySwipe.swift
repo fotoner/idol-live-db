@@ -39,7 +39,7 @@ struct MasterySwipeActions: ViewModifier {
                 // 「未設定に戻す」は常に出す。出し分けのために現在値を読むと、
                 // 行ごとにマークへ依存して一覧全体が再評価される。
                 Button(role: .destructive) { set(0) } label: {
-                    Label("未設定", systemImage: "minus.circle")
+                    Label(L10n.Mastery.swipeActionUnset, systemImage: "minus.circle")
                 }
             }
     }
@@ -62,7 +62,7 @@ struct MasterySwipeActions: ViewModifier {
     private func set(_ level: UInt8) {
         // 失敗しても一覧は前の値のまま (壊れた値を見せない)。書けなかったことは知らせる。
         do { try marks.setMastery(songId: songId, level: level) }
-        catch { LocalWriteFailure.report(error, action: "習熟度の記録") }
+        catch { LocalWriteFailure.report(error, action: String(localized: L10n.Mastery.writeActionRecord)) }
     }
 }
 
@@ -103,7 +103,7 @@ struct MasteryChip: View {
                             .fill(MasteryPalette.fill(level: level, steps: scale.steps))
                     }
                 }
-                .accessibilityLabel("習熟度 \(scale.label(level))")
+                .accessibilityLabel(L10n.Mastery.chipA11y(level: scale.label(level)))
         }
     }
 }

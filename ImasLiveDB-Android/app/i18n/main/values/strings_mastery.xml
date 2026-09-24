@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/mastery.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- mastery.bulk.all_set: 群の長押しで出るシートで、未設定の曲が無いとき (Android) -->
+    <string name="mastery_bulk_all_set">全部に段階が付いています</string>
+    <!-- mastery.bulk.all_songs: 一括更新のメニューの節: 群の曲すべての段階を変える -->
+    <plurals name="mastery_bulk_all_songs">
+        <item quantity="other">この %1$,d 曲すべて</item>
+    </plurals>
+    <!-- mastery.bulk.reset: 一括更新のメニュー: 群の曲すべてを未設定に戻す -->
+    <string name="mastery_bulk_reset">未設定に戻す</string>
+    <!-- mastery.bulk.unset_only: 一括更新のメニューの節: 未設定の曲だけに段階を付ける -->
+    <plurals name="mastery_bulk_unset_only">
+        <item quantity="other">未設定の %1$,d 曲だけ</item>
+    </plurals>
+    <!-- mastery.filter.action.reset: 絞り込みシートの条件を戻すボタン (Android) -->
+    <string name="mastery_filter_action_reset">リセット</string>
+    <!-- mastery.filter.progress.all: 進み具合の絞り込み: 絞らない -->
+    <string name="mastery_filter_progress_all">すべて</string>
+    <!-- mastery.filter.progress.complete: 進み具合の絞り込み: 全曲が最上段の群 -->
+    <string name="mastery_filter_progress_complete">完了</string>
+    <!-- mastery.filter.progress.has_unset: 進み具合の絞り込み: 未設定の曲がある群 -->
+    <string name="mastery_filter_progress_has_unset">未設定あり</string>
+    <!-- mastery.filter.progress.heard_but_unset: 進み具合の絞り込み: 現地で聴いたのに段階を付けていない曲がある群 -->
+    <string name="mastery_filter_progress_heard_but_unset">聴いたのに未設定</string>
+    <!-- mastery.filter.progress.untouched: 進み具合の絞り込み: まだ 1 曲も段階を付けていない群 -->
+    <string name="mastery_filter_progress_untouched">手つかず</string>
+    <!-- mastery.filter.section.progress: 絞り込みシートの節: 進み具合 -->
+    <string name="mastery_filter_section_progress">進み具合</string>
+    <!-- mastery.filter.section.sort: 絞り込みシートの節: 並び順 -->
+    <string name="mastery_filter_section_sort">並び</string>
+    <!-- mastery.filter.sort.name: 群の並び -->
+    <string name="mastery_filter_sort_name">名前順</string>
+    <!-- mastery.filter.sort.progress_asc: 群の並び -->
+    <string name="mastery_filter_sort_progress_asc">進み具合が低い順</string>
+    <!-- mastery.filter.sort.progress_desc: 群の並び -->
+    <string name="mastery_filter_sort_progress_desc">進み具合が高い順</string>
+    <!-- mastery.filter.sort.song_count: 群の並び: 曲の多い順 -->
+    <string name="mastery_filter_sort_song_count">曲数順</string>
+    <!-- mastery.filter.title: 絞り込みシートの題 (Android) -->
+    <string name="mastery_filter_title">フィルタ</string>
+    <!-- mastery.group.bulk.a11y: 群の詳細の右上の ⋯ ボタン (一括更新のメニュー) の読み上げ -->
+    <string name="mastery_group_bulk_a11y">まとめて変える</string>
+    <!-- mastery.group.filter.heard_but_unset: 段階の絞り込みチップ: 現地で聴いたのに段階を付けていない曲だけ -->
+    <string name="mastery_group_filter_heard_but_unset">聴いたのに未設定 %1$d</string>
+    <!-- mastery.group.row.heard.a11y: 曲の行の ✓ (現地で聴いた曲) の読み上げ -->
+    <string name="mastery_group_row_heard_a11y">現地で聴いた</string>
+    <!-- mastery.group.songs.count: 曲一覧の見出しの右の曲数 (絞っていないとき) -->
+    <plurals name="mastery_group_songs_count">
+        <item quantity="other">%1$,d曲</item>
+    </plurals>
+    <!-- mastery.group.songs.count_filtered: 曲一覧の見出しの右: 絞り込んで見えている曲数 / 群の曲数。群は最大でも数百曲 -->
+    <plurals name="mastery_group_songs_count_filtered">
+        <item quantity="other">%1$d / %2$,d曲</item>
+    </plurals>
+    <!-- mastery.group.songs.header: 群の詳細の曲一覧の見出し -->
+    <string name="mastery_group_songs_header">収録曲</string>
+    <!-- mastery.group.summary.header: 群の詳細の先頭の進み具合の節の見出し -->
+    <string name="mastery_group_summary_header">このグループの習熟度</string>
+    <!-- mastery.list.axis.series: 群の分け方のセグメント: CD シリーズごと -->
+    <string name="mastery_list_axis_series">CDシリーズ</string>
+    <!-- mastery.list.axis.unit: 群の分け方のセグメント: ユニット (歌唱名義) ごと -->
+    <string name="mastery_list_axis_unit">ユニット</string>
+    <!-- mastery.list.axis.year: 群の分け方のセグメント: 発売年ごと -->
+    <string name="mastery_list_axis_year">年代</string>
+    <!-- mastery.list.brand.all: ブランドの絞り込みチップの先頭 (絞らない) -->
+    <string name="mastery_list_brand_all">全て</string>
+    <!-- mastery.list.empty.message: 絞り込みの結果、群が 1 つも無いときの説明 -->
+    <string name="mastery_list_empty_message">絞り込みを緩めてください。</string>
+    <!-- mastery.list.empty.title: 絞り込みの結果、群が 1 つも無いときの見出し -->
+    <string name="mastery_list_empty_title">該当するグループがありません</string>
+    <!-- mastery.list.filter.a11y: 右上の絞り込みボタンの読み上げ -->
+    <string name="mastery_list_filter_a11y">フィルタ</string>
+    <!-- mastery.list.group.bulk_swipe: 群の行を右へスワイプしたときに出る文字 (未設定の曲にまとめて段階を付ける) -->
+    <string name="mastery_list_group_bulk_swipe">まとめて付ける</string>
+    <!-- mastery.list.group.discs: 群の行の副題: その群の CD の枚数。副題は「 ・ 」で並ぶ -->
+    <plurals name="mastery_list_group_discs">
+        <item quantity="other">%1$,d枚</item>
+    </plurals>
+    <!-- mastery.list.group.heard: 群の行の副題: 現地で聴いた (回収した) 曲の数 -->
+    <string name="mastery_list_group_heard">聴いた %1$d</string>
+    <!-- mastery.list.group.heard_but_unset: 群の行の副題: 現地で聴いた (回収した) のに段階を付けていない曲の数 -->
+    <string name="mastery_list_group_heard_but_unset">聴いたのに未設定 %1$d</string>
+    <!-- mastery.list.group.separator: 群の行の副題の区切り (前後に空白) -->
+    <string name="mastery_list_group_separator">" ・ "</string>
+    <!-- mastery.list.group.songs: 群の行の副題: その群の曲数。1000 以上は桁区切りが付く -->
+    <plurals name="mastery_list_group_songs">
+        <item quantity="other">%1$,d曲</item>
+    </plurals>
+    <!-- mastery.list.group.unset: 群の行の副題: 段階が未設定の曲の数 (Android だけ) -->
+    <string name="mastery_list_group_unset">未設定 %1$d</string>
+    <!-- mastery.list.groups.count: 群の一覧の件数。1000 以上は桁区切りが付く (1,047 件) -->
+    <plurals name="mastery_list_groups_count">
+        <item quantity="other">%1$,d 件</item>
+    </plurals>
+    <!-- mastery.list.groups.header: 群 (CD シリーズ / ユニット / 年代) の一覧の見出し -->
+    <string name="mastery_list_groups_header">グループ別</string>
+    <!-- mastery.list.name_filter.series: 群の名前の絞り込み欄のプレースホルダ (CD シリーズで分けているとき) -->
+    <string name="mastery_list_name_filter_series">CDシリーズ名で絞り込み</string>
+    <!-- mastery.list.name_filter.unit: 群の名前の絞り込み欄のプレースホルダ (ユニットで分けているとき) -->
+    <string name="mastery_list_name_filter_unit">ユニット名で絞り込み</string>
+    <!-- mastery.list.name_filter.year: 群の名前の絞り込み欄のプレースホルダ (年代で分けているとき。群の名前は 2023年 など) -->
+    <string name="mastery_list_name_filter_year">年代名で絞り込み</string>
+    <!-- mastery.list.summary.header: 一覧の先頭の全体の進み具合の節の見出し -->
+    <string name="mastery_list_summary_header">あなたの習熟度</string>
+    <!-- mastery.list.title: 習熟度ダッシュボードの画面の題 -->
+    <string name="mastery_list_title">習熟度</string>
+    <!-- mastery.summary.done_songs: 最上段 (例: 完璧) にある曲数。level は最上段の名前 (利用者が付けたラベルのこともある)。1000 以上は桁区切りが付く (完璧 1,234 曲) -->
+    <plurals name="mastery_summary_done_songs">
+        <item quantity="other">%1$s %2$,d 曲</item>
+    </plurals>
+    <!-- mastery.summary.set_songs: 進み具合の大きな数字の説明 -->
+    <string name="mastery_summary_set_songs">段階を付けた曲</string>
+    <!-- mastery.summary.total_songs: 進み具合の大きな数字 (段階を付けた曲数) の右に出る分母。1000 以上は桁区切りが付く (/ 3,012曲) -->
+    <plurals name="mastery_summary_total_songs">
+        <item quantity="other">/ %1$,d曲</item>
+    </plurals>
+    <!-- mastery.write_action.record: 書き込みに失敗したときの知らせに入る操作の名前 (「〜に失敗しました」の〜の部分) -->
+    <string name="mastery_write_action_record">習熟度の記録</string>
+</resources>

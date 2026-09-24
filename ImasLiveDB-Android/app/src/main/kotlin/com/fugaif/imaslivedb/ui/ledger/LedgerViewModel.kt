@@ -7,6 +7,8 @@ import com.fugaif.imaslivedb.data.local.localWrite
 import com.fugaif.imaslivedb.data.model.Expense
 import com.fugaif.imaslivedb.data.repository.LedgerShowOption
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -109,10 +111,15 @@ class LedgerViewModel(app: Application) : AndroidViewModel(app) {
         recompute()
     }
 
-    /** 保存できたときだけ [onSaved] (編集を閉じる)。書けなかったら入力を捨てない。 */
+    /**
+     * 保存できたときだけ [onSaved] (編集を閉じる)。書けなかったら入力を捨てない。
+     * localWrite の操作の名前は String なので、知らせを出すその場でアプリの言語の文字列にする。
+     */
     fun save(expense: Expense, onSaved: () -> Unit) {
         viewModelScope.launch {
-            localWrite("支出の保存") { repository.save(expense) } ?: return@launch
+            localWrite(L10n.Ledger.writeActionSaveAndroid.resolve(getApplication<Application>())) {
+                repository.save(expense)
+            } ?: return@launch
             onSaved()
             val state = _uiState.value
             val updated = if (state.expenses.any { it.id == expense.id }) {
@@ -127,7 +134,9 @@ class LedgerViewModel(app: Application) : AndroidViewModel(app) {
 
     fun delete(expense: Expense) {
         viewModelScope.launch {
-            localWrite("支出の削除") { repository.delete(expense.id) } ?: return@launch
+            localWrite(L10n.Ledger.writeActionDeleteAndroid.resolve(getApplication<Application>())) {
+                repository.delete(expense.id)
+            } ?: return@launch
             val state = _uiState.value
             _uiState.value = state.copy(expenses = state.expenses.filterNot { it.id == expense.id })
             recompute()

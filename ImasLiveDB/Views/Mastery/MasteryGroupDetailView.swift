@@ -42,7 +42,8 @@ struct MasteryGroupDetailView: View {
     }
 
     private struct UndoState {
-        let label: String
+        /// 帯の文。解決済みの String ではなく文言の値で持ち、表示するときに引く。
+        let label: LocalizedStringResource
         let previous: [String: UInt8]
     }
 
@@ -64,8 +65,8 @@ struct MasteryGroupDetailView: View {
                 songHeader(shown).plainRow(background: DS.bg)
                 if shown.isEmpty {
                     ImasEmptyState(systemImage: "line.3.horizontal.decrease",
-                                   title: "該当する曲がありません",
-                                   message: "段階の絞り込みを外してください。")
+                                   title: String(localized: L10n.Mastery.groupEmptyTitle),
+                                   message: String(localized: L10n.Mastery.groupEmptyMessage))
                         .plainRow(background: DS.bg)
                 } else {
                     ForEach(shown, id: \.element.id) { pair in
@@ -88,7 +89,7 @@ struct MasteryGroupDetailView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu { bulkMenu(levels) } label: { Image(systemName: "ellipsis.circle") }
-                    .accessibilityLabel("まとめて変える")
+                    .accessibilityLabel(L10n.Mastery.groupBulkA11y)
             }
         }
         .overlay(alignment: .bottom) { undoBar }
@@ -146,7 +147,7 @@ struct MasteryGroupDetailView: View {
         let total = max(Int(group?.total ?? 0), 1)
         let steps = marks.scale.steps
         return VStack(alignment: .leading, spacing: DS.sp4) {
-            ImasSectionHeader(title: "このグループの習熟度", tight: true)
+            ImasSectionHeader(title: .key(L10n.Mastery.groupSummaryHeader), tight: true)
             HStack(spacing: DS.sp5) {
                 MasteryRing(fraction: Double(group?.percent ?? 0) / 100)
                     .frame(width: 92, height: 92)
@@ -154,11 +155,12 @@ struct MasteryGroupDetailView: View {
                     HStack(alignment: .firstTextBaseline, spacing: DS.sp2) {
                         Text("\(group?.setCount ?? 0)")
                             .font(.imasDisplay(30, weight: .bold)).foregroundStyle(DS.ink)
-                        Text("/ \(group?.total ?? 0)曲")
+                        Text(L10n.Mastery.summaryTotalSongs(count: Int(group?.total ?? 0)))
                             .font(.imasDisplay(15)).foregroundStyle(DS.ink2)
                     }
-                    Text("段階を付けた曲").font(.imasFootnote).foregroundStyle(DS.ink2)
-                    Text("\(marks.scale.label(steps)) \(group?.doneCount ?? 0) 曲")
+                    Text(L10n.Mastery.summarySetSongs).font(.imasFootnote).foregroundStyle(DS.ink2)
+                    Text(L10n.Mastery.summaryDoneSongs(level: marks.scale.label(steps),
+                                                       count: Int(group?.doneCount ?? 0)))
                         .font(.imasCaption.weight(.semibold)).foregroundStyle(DS.ink3)
                 }
                 Spacer(minLength: 0)
@@ -184,10 +186,11 @@ struct MasteryGroupDetailView: View {
     private func songHeader(_ shown: [(offset: Int, element: Song)]) -> some View {
         VStack(alignment: .leading, spacing: DS.sp4) {
             HStack(alignment: .firstTextBaseline) {
-                ImasSectionHeader(title: "収録曲", tight: true)
+                ImasSectionHeader(title: .key(L10n.Mastery.groupSongsHeader), tight: true)
                 Spacer(minLength: 12)
                 Text(levelFilter == nil && !heardOnly
-                     ? "\(songs.count)曲" : "\(shown.count) / \(songs.count)曲")
+                     ? L10n.Mastery.groupSongsCount(count: songs.count)
+                     : L10n.Mastery.groupSongsCountFiltered(shown: shown.count, count: songs.count))
                     .font(.imasCaption.weight(.semibold)).foregroundStyle(DS.ink3)
             }
             filterChips
@@ -203,7 +206,7 @@ struct MasteryGroupDetailView: View {
         return ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: DS.sp3) {
                 if heardUnset > 0 {
-                    ImasFilterChip(text: "聴いたのに未設定 \(heardUnset)",
+                    ImasFilterChip(text: String(localized: L10n.Mastery.groupFilterHeardButUnset(songs: heardUnset)),
                                    systemImage: "checkmark",
                                    isSelected: heardOnly) {
                         heardOnly.toggle()
@@ -243,7 +246,7 @@ struct MasteryGroupDetailView: View {
                 Image(systemName: "checkmark")
                     .font(.imasScaled(11, weight: .semibold))
                     .foregroundStyle(DS.success)
-                    .accessibilityLabel("現地で聴いた")
+                    .accessibilityLabel(L10n.Mastery.groupRowHeardA11y)
             }
             stageChip(song: song, level: level)
         }
@@ -265,13 +268,13 @@ struct MasteryGroupDetailView: View {
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.increase, trigger: level)
-        .accessibilityHint("押すと 1 段上がります。行を左スワイプすると段を選べます")
+        .accessibilityHint(L10n.Mastery.groupStageChipA11yHint)
     }
 
     private func setLevel(_ songId: String, to level: UInt8) {
         // 失敗しても一覧は前の値のまま (壊れた値を見せない)。書けなかったことは知らせる。
         do { try marks.setMastery(songId: songId, level: level) }
-        catch { LocalWriteFailure.report(error, action: "習熟度の記録") }
+        catch { LocalWriteFailure.report(error, action: String(localized: L10n.Mastery.writeActionRecord)) }
     }
 
     // MARK: - 一括更新
@@ -280,7 +283,7 @@ struct MasteryGroupDetailView: View {
     private func bulkMenu(_ levels: [UInt8]) -> some View {
         let unsetCount = levels.filter { $0 == 0 }.count
         if unsetCount > 0 {
-            Section("未設定の \(unsetCount) 曲だけ") {
+            Section(L10n.Mastery.bulkUnsetOnly(count: unsetCount)) {
                 ForEach(1...Int(marks.scale.steps), id: \.self) { level in
                     Button(marks.scale.label(UInt8(level))) {
                         applyBulk(levels, scope: .unsetOnly, level: UInt8(level))
@@ -288,13 +291,13 @@ struct MasteryGroupDetailView: View {
                 }
             }
         }
-        Section("この \(songs.count) 曲すべて") {
+        Section(L10n.Mastery.bulkAllSongs(count: songs.count)) {
             ForEach(1...Int(marks.scale.steps), id: \.self) { level in
                 Button(marks.scale.label(UInt8(level))) {
                     applyBulk(levels, scope: .all, level: UInt8(level))
                 }
             }
-            Button("未設定に戻す", role: .destructive) {
+            Button(L10n.Mastery.bulkReset, role: .destructive) {
                 applyBulk(levels, scope: .all, level: 0)
             }
         }
@@ -309,13 +312,14 @@ struct MasteryGroupDetailView: View {
         do {
             try marks.setMastery(songIds: targets, level: level)
             withAnimation {
-                undo = UndoState(label: "\(targets.count)曲を「\(marks.scale.label(level))」に",
+                undo = UndoState(label: L10n.Mastery.groupUndoLabel(count: targets.count,
+                                                                    level: marks.scale.label(level)),
                                  previous: before)
             }
         } catch {
             // 取り消しの帯は出さない (半端に反映された表示を残さない)。書けなかったことは知らせる。
             undo = nil
-            LocalWriteFailure.report(error, action: "習熟度のまとめての記録")
+            LocalWriteFailure.report(error, action: String(localized: L10n.Mastery.writeActionRecordBulk))
         }
     }
 
@@ -325,7 +329,7 @@ struct MasteryGroupDetailView: View {
             HStack(spacing: DS.sp4) {
                 Text(u.label).font(.imasFootnote).lineLimit(1)
                 Spacer()
-                Button("元に戻す") { revert(u) }.font(.imasFootnote.weight(.bold))
+                Button(L10n.Mastery.groupUndoAction) { revert(u) }.font(.imasFootnote.weight(.bold))
             }
             .padding(.horizontal, DS.sp5)
             .padding(.vertical, DS.sp4)
@@ -346,7 +350,7 @@ struct MasteryGroupDetailView: View {
             do {
                 try marks.setMastery(songId: id, level: level)
             } catch {
-                LocalWriteFailure.report(error, action: "習熟度の取り消し")
+                LocalWriteFailure.report(error, action: String(localized: L10n.Mastery.writeActionUndo))
             }
         }
         withAnimation { undo = nil }

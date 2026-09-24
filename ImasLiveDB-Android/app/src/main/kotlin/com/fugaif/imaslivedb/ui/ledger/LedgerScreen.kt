@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.model.Expense
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.ImasFilterChip
 import com.fugaif.imaslivedb.ui.components.ImasSectionHeader
@@ -53,7 +55,8 @@ import uniffi.imas_core.LedgerLinkage
 import uniffi.imas_core.expenseCategoryLabel
 import uniffi.imas_core.formatYen
 
-private val PERIOD_LABELS = listOf("月別", "年別", "全期間")
+/** 集計の期間のセグメント (LedgerUiState.period の 0 / 1 / 2)。文言は画面で resolve() する。 */
+private val PERIOD_LABELS = listOf(L10n.Ledger.listPeriodMonth, L10n.Ledger.listPeriodYear, L10n.Ledger.listPeriodAll)
 
 /**
  * アイマス関連の収支 (家計簿)。iOS `LedgerView` の移植。
@@ -74,10 +77,10 @@ fun LedgerScreen(viewModel: LedgerViewModel = viewModel()) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("収支", fontWeight = FontWeight.Bold) },
+                title = { Text(L10n.Ledger.listTitle.resolve(), fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = { editorTarget = EditorTarget(null) }) {
-                        Icon(Icons.Filled.Add, "支出を足す")
+                        Icon(Icons.Filled.Add, L10n.Ledger.listAddA11y.resolve())
                     }
                 }
             )
@@ -94,8 +97,8 @@ fun LedgerScreen(viewModel: LedgerViewModel = viewModel()) {
                 if (state.expenses.isEmpty()) {
                     item {
                         ImasEmptyState(
-                            Icons.Filled.AttachMoney, "まだ記録がありません",
-                            "右上の + から、チケット代や遠征費を足してください。"
+                            Icons.Filled.AttachMoney, L10n.Ledger.listEmptyTitle.resolve(),
+                            L10n.Ledger.listEmptyMessage.resolve()
                         )
                     }
                 } else {
@@ -106,7 +109,7 @@ fun LedgerScreen(viewModel: LedgerViewModel = viewModel()) {
                             item(key = expense.id) {
                                 MasterySwipeRow(
                                     onStart = { viewModel.delete(expense) },
-                                    startLabel = "削除",
+                                    startLabel = L10n.Ledger.listRowDelete.resolve(),
                                     startColor = DS.danger,
                                 ) {
                                     ExpenseRow(
@@ -146,7 +149,7 @@ private data class EditorTarget(val expense: Expense?)
 private fun SummarySection(state: LedgerUiState) {
     val s = state.summary
     Column {
-        ImasSectionHeader("使った額", tight = true)
+        ImasSectionHeader(L10n.Ledger.listSummaryHeader, tight = true)
         Column(
             Modifier.padding(horizontal = 16.dp).fillMaxWidth()
                 .clip(RoundedCornerShape(14.dp)).background(DS.surface).padding(16.dp),
@@ -154,16 +157,17 @@ private fun SummarySection(state: LedgerUiState) {
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(formatYen(s.total), fontSize = 30.sp, fontWeight = FontWeight.Bold, color = DS.ink)
                 Text(
-                    "  ${s.count}件", fontSize = 15.sp, color = DS.ink2,
+                    // 先頭の空白は金額との間隔 (文言の外に置く)
+                    "  " + L10n.Ledger.listSummaryCount(count = s.count.toInt()).resolve(), fontSize = 15.sp, color = DS.ink2,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
             }
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                Metric("遠征費", formatYen(s.travelTotal))
+                Metric(L10n.Ledger.listSummaryTravel.resolve(), formatYen(s.travelTotal))
                 if (s.showCount > 0u) {
-                    Metric("1公演あたり", formatYen(s.averagePerShow))
-                    Metric("公演数", "${s.showCount}")
+                    Metric(L10n.Ledger.listSummaryPerShow.resolve(), formatYen(s.averagePerShow))
+                    Metric(L10n.Ledger.listSummaryShowCount.resolve(), "${s.showCount}")
                 }
             }
         }
@@ -193,15 +197,17 @@ private fun Metric(label: String, value: String) {
 @Composable
 private fun ControlsSection(state: LedgerUiState, vm: LedgerViewModel) {
     Column {
-        ImasSegmented(PERIOD_LABELS, state.periodIndex, vm::setPeriodIndex, Modifier.padding(horizontal = 16.dp))
+        ImasSegmented(PERIOD_LABELS.map { it.resolve() }, state.periodIndex, vm::setPeriodIndex,
+                      Modifier.padding(horizontal = 16.dp))
         Spacer(Modifier.height(10.dp))
         Row(
             Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            ImasFilterChip("全期間", state.yearFilter.isEmpty(), { vm.setYearFilter("") })
+            ImasFilterChip(L10n.Ledger.listYearFilterAll.resolve(), state.yearFilter.isEmpty(), { vm.setYearFilter("") })
             state.years.forEach { year ->
-                ImasFilterChip("${year}年", state.yearFilter == year, { vm.setYearFilter(year) })
+                ImasFilterChip(L10n.Ledger.listYearFilterYear(year = year).resolve(), state.yearFilter == year,
+                               { vm.setYearFilter(year) })
             }
         }
         Spacer(Modifier.height(8.dp))
@@ -209,9 +215,12 @@ private fun ControlsSection(state: LedgerUiState, vm: LedgerViewModel) {
             Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            ImasFilterChip("すべて", state.linkage == LedgerLinkage.ALL, { vm.setLinkage(LedgerLinkage.ALL) })
-            ImasFilterChip("公演あり", state.linkage == LedgerLinkage.LINKED_ONLY, { vm.setLinkage(LedgerLinkage.LINKED_ONLY) })
-            ImasFilterChip("公演なし", state.linkage == LedgerLinkage.UNLINKED_ONLY, { vm.setLinkage(LedgerLinkage.UNLINKED_ONLY) })
+            ImasFilterChip(L10n.Ledger.listLinkageAll.resolve(), state.linkage == LedgerLinkage.ALL,
+                           { vm.setLinkage(LedgerLinkage.ALL) })
+            ImasFilterChip(L10n.Ledger.listLinkageLinked.resolve(), state.linkage == LedgerLinkage.LINKED_ONLY,
+                           { vm.setLinkage(LedgerLinkage.LINKED_ONLY) })
+            ImasFilterChip(L10n.Ledger.listLinkageUnlinked.resolve(), state.linkage == LedgerLinkage.UNLINKED_ONLY,
+                           { vm.setLinkage(LedgerLinkage.UNLINKED_ONLY) })
         }
         Spacer(Modifier.height(4.dp))
     }
