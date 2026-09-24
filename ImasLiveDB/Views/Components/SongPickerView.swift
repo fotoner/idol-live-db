@@ -46,14 +46,14 @@ struct SongPickerView: View {
                     }
                 }
             }
-            .navigationTitle("曲を選択")
+            .navigationTitle(L10n.Songs.pickerTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("閉じる") { dismiss() }
+                    Button { dismiss() } label: { Text(L10n.Songs.pickerClose) }
                 }
             }
-            .searchable(text: $query, prompt: "曲名で検索")
+            .searchable(text: $query, prompt: Text(L10n.Songs.pickerSearchPrompt))
             .task {
                 do {
                     allSongs = try await AppContainer.shared.songReading.allSongsForPicker()

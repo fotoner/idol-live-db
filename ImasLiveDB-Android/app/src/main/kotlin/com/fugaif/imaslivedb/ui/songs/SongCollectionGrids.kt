@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.model.AlbumSummary
 import com.fugaif.imaslivedb.data.model.SeriesSummary
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasArtwork
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.theme.DS
@@ -34,13 +36,14 @@ import com.fugaif.imaslivedb.ui.theme.DS
 @Composable
 fun AlbumGrid(albums: List<AlbumSummary>, onSelect: (AlbumSummary) -> Unit) {
     if (albums.isEmpty()) {
-        ImasEmptyState(icon = Icons.Filled.LibraryMusic, title = "アルバムが見つかりません")
+        ImasEmptyState(icon = Icons.Filled.LibraryMusic, title = L10n.Songs.gridAlbumsEmpty.resolve())
         return
     }
     SummaryGrid(items = albums, key = { it.cdSeries }) { album ->
         SummaryCard(
             title = album.cdSeries,
-            subtitle = listOfNotNull("${album.songCount}曲", album.yearDisplay).joinToString(" / "),
+            subtitle = listOfNotNull(L10n.Songs.gridSongCount(count = album.songCount).resolve(), album.yearDisplay)
+                .joinToString(" / "),
             artworkUrl = album.artworkUrl,
             brandId = album.brandIds.firstOrNull(),
             onClick = { onSelect(album) }
@@ -54,13 +57,18 @@ fun AlbumGrid(albums: List<AlbumSummary>, onSelect: (AlbumSummary) -> Unit) {
 @Composable
 fun SeriesGrid(series: List<SeriesSummary>, onSelect: (SeriesSummary) -> Unit) {
     if (series.isEmpty()) {
-        ImasEmptyState(icon = Icons.Filled.LibraryMusic, title = "シリーズが見つかりません")
+        ImasEmptyState(icon = Icons.Filled.LibraryMusic, title = L10n.Songs.gridSeriesEmpty.resolve())
         return
     }
     SummaryGrid(items = series, key = { it.name }) { s ->
         SummaryCard(
             title = s.name,
-            subtitle = listOfNotNull("${s.cdCount}枚 / ${s.songCount}曲", s.yearDisplay).joinToString(" · "),
+            // 枚数と曲数は別々の数量なので 1 つずつ引き、区切りの " / " はそのまま (記号は言語で変わらない)。
+            subtitle = listOfNotNull(
+                L10n.Songs.gridCdCount(count = s.cdCount).resolve() + " / " +
+                    L10n.Songs.gridSongCount(count = s.songCount).resolve(),
+                s.yearDisplay
+            ).joinToString(" · "),
             artworkUrl = s.artworkUrl,
             brandId = s.brandIds.firstOrNull(),
             onClick = { onSelect(s) }

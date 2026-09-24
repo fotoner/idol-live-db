@@ -98,7 +98,7 @@ struct NowPlayingBarView: View {
                         .frame(width: 44, height: 44)
                         .contentShape(Rectangle())
                 }
-                .accessibilityLabel(bar.isPlaying ? "一時停止" : "再生")
+                .accessibilityLabel(bar.isPlaying ? L10n.Songs.nowPlayingPauseA11y : L10n.Songs.nowPlayingPlayA11y)
             }
             .padding(.horizontal, DS.sp4)
             .padding(.vertical, 6)
@@ -113,8 +113,8 @@ struct NowPlayingBarView: View {
                 .onEnded { if $0.translation.height > 24 { MusicKitService.shared.stop() } }
         )
         .accessibilityElement(children: .combine)
-        .accessibilityHint("曲の詳細を開く。下に払うと閉じる")
-        .accessibilityAction(named: "閉じる") { MusicKitService.shared.stop() }
+        .accessibilityHint(Text(L10n.Songs.nowPlayingOpenA11yHint))
+        .accessibilityAction(named: Text(L10n.Songs.nowPlayingCloseA11y)) { MusicKitService.shared.stop() }
     }
 
     /// 2 行目。名義と「試聴」の印を別の `Text` にする。

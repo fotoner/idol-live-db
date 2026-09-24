@@ -14,6 +14,8 @@ import com.fugaif.imaslivedb.data.model.SongVideo
 import com.fugaif.imaslivedb.data.model.UserMark
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -65,9 +67,12 @@ class SongDetailViewModel : ViewModel() {
     private var api: CommunityApi? = null
     private var currentSongId: String? = null
     private var appModule: AppModule? = null
+    /** 書き込み失敗の知らせに入れる操作の名前を、失敗した時点の言語で文字列にするために持つ。 */
+    private var appContext: Context? = null
 
     fun load(context: Context, songId: String) {
         currentSongId = songId
+        appContext = context.applicationContext
         viewModelScope.launch {
             val module = AppModule.from(context)
             appModule = module
@@ -183,8 +188,10 @@ class SongDetailViewModel : ViewModel() {
     fun toggleFavorite() {
         val songId = currentSongId ?: return
         val module = appModule ?: return
+        val ctx = appContext ?: return
         viewModelScope.launch {
-            val now = localWrite("お気に入りの切り替え") {
+            // localWrite は今 String しか受けないので、書き込む時点の言語で文字列にする。
+            val now = localWrite(L10n.Songs.detailWriteActionFavorite.resolve(ctx)) {
                 module.userMarkRepository.toggle(UserMark.SONG, songId, UserMark.FAVORITE)
             } ?: return@launch
             _uiState.value = _uiState.value.copy(isFavorite = now)
@@ -201,9 +208,10 @@ class SongDetailViewModel : ViewModel() {
     fun toggleCardOwned() {
         val songId = currentSongId ?: return
         val module = appModule ?: return
+        val ctx = appContext ?: return
         val brandId = _uiState.value.song?.brandId
         viewModelScope.launch {
-            val now = localWrite("カード所持の記録") {
+            val now = localWrite(L10n.Songs.detailWriteActionCardOwned.resolve(ctx)) {
                 module.userMarkRepository.toggle(UserMark.SONG, songId, UserMark.OWNED)
             } ?: return@launch
             val ownedIds = module.userMarkRepository.ownedSongIds()

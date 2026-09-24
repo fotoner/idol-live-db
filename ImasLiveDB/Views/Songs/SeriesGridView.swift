@@ -14,7 +14,7 @@ struct SeriesGridView: View {
         GenericGridView(
             items: series,
             isLoading: isLoading,
-            emptyTitle: "シリーズが見つかりません",
+            emptyTitle: String(localized: L10n.Songs.gridSeriesEmpty),
             emptySystemImage: "rectangle.stack",
             onSelect: onSelect
         )

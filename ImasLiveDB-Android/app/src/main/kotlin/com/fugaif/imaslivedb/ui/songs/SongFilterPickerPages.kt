@@ -31,6 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.model.Brand
 import com.fugaif.imaslivedb.data.model.Idol
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasFilterChip
 import com.fugaif.imaslivedb.ui.components.NameFilterField
 import com.fugaif.imaslivedb.ui.theme.DS
@@ -57,7 +60,7 @@ fun FilterPickerPage(
             modifier = Modifier.fillMaxWidth().padding(end = 16.dp)
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "フィルタに戻る", tint = DS.ink)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = L10n.Songs.filterPickerBackA11y.resolve(), tint = DS.ink)
             }
             Text(title, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink)
         }
@@ -70,11 +73,12 @@ fun FilterPickerPage(
  * 候補から 1 つだけ選ぶページ (シリーズ / CD シリーズ / ライブ名)。
  * 候補が数百件あるので、頭に名前絞り込みを置く。
  *
+ * @param title ページの名前 (絞り込み欄のプレースホルダにも入る)。
  * @param selected いま選ばれている値。null = 選択なし。
  */
 @Composable
 fun SingleValuePickerPage(
-    title: String,
+    title: DisplayText,
     items: List<String>,
     selected: String?,
     onBack: () -> Unit,
@@ -83,11 +87,15 @@ fun SingleValuePickerPage(
     var query by remember { mutableStateOf("") }
     val visible = rememberSearchFiltered(items, query) { listOf(it) }
 
-    FilterPickerPage(title = title, onBack = onBack) {
-        NameFilterField(prompt = "${title}で絞り込み", value = query, onValueChange = { query = it })
+    FilterPickerPage(title = title.resolve(), onBack = onBack) {
+        NameFilterField(
+            prompt = L10n.Songs.filterPickerSearchPrompt(title = title).resolve(),
+            value = query,
+            onValueChange = { query = it }
+        )
         LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 420.dp)) {
             item(key = "__none__") {
-                PickerRow(label = "選択なし", checked = selected == null, muted = true) { onSelect(null) }
+                PickerRow(label = L10n.Songs.filterNone.resolve(), checked = selected == null, muted = true) { onSelect(null) }
             }
             items(visible, key = { it }) { value ->
                 PickerRow(label = value, checked = selected == value) { onSelect(value) }
@@ -120,13 +128,13 @@ fun IdolMultiPickerPage(
         matched.filter { brandId == null || it.brandId == brandId }
     }
 
-    FilterPickerPage(title = "アイドル (${selected.size})", onBack = onBack) {
+    FilterPickerPage(title = L10n.Songs.filterPickerIdolsTitle(count = selected.size).resolve(), onBack = onBack) {
         FlowRow(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            ImasFilterChip(label = "全て", selected = brandId == null, onClick = { brandId = null })
+            ImasFilterChip(label = L10n.Songs.filterAll.resolve(), selected = brandId == null, onClick = { brandId = null })
             brands.forEach { brand ->
                 ImasFilterChip(
                     label = brand.shortName,
@@ -136,9 +144,9 @@ fun IdolMultiPickerPage(
                 )
             }
         }
-        NameFilterField(prompt = "アイドル名で絞り込み", value = query, onValueChange = { query = it })
+        NameFilterField(prompt = L10n.Songs.filterPickerIdolSearchPrompt.resolve(), value = query, onValueChange = { query = it })
         if (selected.isNotEmpty()) {
-            PickerRow(label = "選択をすべて解除", checked = false, muted = true, onClick = onClear)
+            PickerRow(label = L10n.Songs.filterPickerClearAll.resolve(), checked = false, muted = true, onClick = onClear)
         }
         LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 420.dp)) {
             items(visible, key = { it.id }) { idol ->

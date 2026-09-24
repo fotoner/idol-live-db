@@ -37,7 +37,7 @@ struct PerformerDetailSheet: View {
                     .buttonStyle(.plain)
                 }
             }
-            .navigationTitle("\(songTitle) / 出演者 \(performers.count)名")
+            .navigationTitle(L10n.Songs.performerTitle(title: songTitle, count: performers.count))
             .navigationBarTitleDisplayMode(.inline)
         }
         .presentationDetents([.medium, .large])

@@ -43,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.data.community.CommunityApi
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.hexToColor
 import kotlinx.coroutines.launch
@@ -78,8 +80,8 @@ fun PenlightVoteSheet(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("ペンライトカラーを投票", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = DS.ink)
-            Text("ペンライトの色を選んで投票してください。複数選択できます。", fontSize = 13.sp, color = DS.ink2)
+            Text(L10n.Songs.penlightTitle.resolve(), fontSize = 20.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+            Text(L10n.Songs.penlightInstructions.resolve(), fontSize = 13.sp, color = DS.ink2)
 
             if (isLoading) {
                 Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
@@ -124,7 +126,7 @@ fun PenlightVoteSheet(
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("取消") }
+                TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text(L10n.Songs.penlightCancel.resolve()) }
                 Button(
                     onClick = {
                         isSending = true
@@ -142,7 +144,7 @@ fun PenlightVoteSheet(
                     if (isSending) {
                         CircularProgressIndicator(modifier = Modifier.size(18.dp))
                     } else {
-                        Text("投票する")
+                        Text(L10n.Songs.penlightSubmit.resolve())
                     }
                 }
             }

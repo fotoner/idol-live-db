@@ -19,8 +19,8 @@ struct SongHistoryTab: View {
             if vm.history.isEmpty {
                 ImasEmptyState(
                     systemImage: "mic",
-                    title: "披露履歴はまだありません",
-                    message: "この曲がライブで披露されると、ここに記録されます。",
+                    title: String(localized: L10n.Songs.historyEmptyTitle),
+                    message: String(localized: L10n.Songs.historyEmptyMessage),
                     seed: seed
                 )
             } else {
@@ -42,9 +42,13 @@ struct SongHistoryTab: View {
     private var summaryTiles: some View {
         if let first = vm.history.last?.date, let last = vm.history.first?.date {
             HStack(spacing: DS.sp3) {
-                ImasStatTile(systemImage: "mic.fill", value: "\(vm.history.count)", unit: "回", label: "総披露", seed: seed)
-                ImasStatTile(systemImage: "calendar", value: ShortYearMonth.format(first), label: "初披露", seed: seed)
-                ImasStatTile(systemImage: "calendar.badge.clock", value: ShortYearMonth.format(last), label: "最終披露", seed: seed)
+                ImasStatTile(systemImage: "mic.fill", value: "\(vm.history.count)",
+                             unit: String(localized: L10n.Songs.detailStatUnitTimes),
+                             label: String(localized: L10n.Songs.historyStatTotal), seed: seed)
+                ImasStatTile(systemImage: "calendar", value: ShortYearMonth.format(first),
+                             label: String(localized: L10n.Songs.historyStatFirst), seed: seed)
+                ImasStatTile(systemImage: "calendar.badge.clock", value: ShortYearMonth.format(last),
+                             label: String(localized: L10n.Songs.historyStatLast), seed: seed)
             }
         }
     }
@@ -57,10 +61,10 @@ struct SongHistoryTab: View {
         let rows = vm.performanceEvidence.singers
         if !rows.isEmpty {
             VStack(alignment: .leading, spacing: DS.sp3) {
-                ImasSectionHeader(title: "この曲を歌った人", tight: true)
+                ImasSectionHeader(title: .key(L10n.Songs.historySingersHeader), tight: true)
                 // 分母 (全 N 回) は上のサマリタイル「総披露」と同じ数え方。同じ画面に
                 // 単位の違う数字 (共起節は公演数) が並ぶので、どちらなのかを言っておく。
-                evidenceNote("セトリに残っている歌唱の集計です。分母は上の「総披露」と同じ回数です。")
+                evidenceNote(L10n.Songs.historySingersNote)
                 ImasListContainer {
                     ForEach(Array(rows.enumerated()), id: \.element.id) { idx, row in
                         if idx > 0 { ImasRowDivider(inset: DS.sp5 + 36) }
@@ -69,7 +73,9 @@ struct SongHistoryTab: View {
                             navigate(.idolSongHistory(row.idol, song))
                         } label: {
                             // 副題が根拠。「よく歌う人」ではなく「何回歌ったか」を出す。
-                            IdolNameRow(idol: row.idol, subtitle: "\(row.times)回 ／ 全\(row.total)回")
+                            IdolNameRow(idol: row.idol,
+                                        subtitle: String(localized: L10n.Songs.historySingersTimes(
+                                            times: row.times, total: row.total)))
                                 .padding(.horizontal, DS.sp5)
                                 .padding(.vertical, 9)
                         }
@@ -88,12 +94,12 @@ struct SongHistoryTab: View {
         let rows = vm.performanceEvidence.coOccurring
         if !rows.isEmpty {
             VStack(alignment: .leading, spacing: DS.sp3) {
-                ImasSectionHeader(title: "同じ公演で歌われた曲", tight: true)
+                ImasSectionHeader(title: .key(L10n.Songs.historyCoOccurringHeader), tight: true)
                 // ⚠️ ここだけ単位が「公演」。1 公演で 2 回演奏されても 1 と数えるため、
                 // 相手の曲を開いた先の「総披露 N 回」(セトリ行数) より小さい数になる
                 // (同梱 master で 48 曲がこのズレを持つ。例: 初 = 39 公演 / 64 回)。
                 // 単位を書かないと「どちらが本当の回数か」が読み手に判断できない。
-                evidenceNote("同じ公演に両方あった公演数です (1 公演で 2 回歌っても 1 公演)。次のライブで一緒に来るとは限りません。")
+                evidenceNote(L10n.Songs.historyCoOccurringNote)
                 ImasListContainer {
                     ForEach(Array(rows.enumerated()), id: \.element.id) { idx, row in
                         if idx > 0 { ImasRowDivider(inset: DS.sp5 + 44) }
@@ -124,7 +130,7 @@ struct SongHistoryTab: View {
                 // 分母まで出す。12/15 (ほぼ必ず一緒) と 12/300 (たまたま) は別物で、
                 // 回数だけだと読み手が区別できない。単位は「回」ではなく「公演」
                 // (歌唱者行の「全 N 回」= セトリ行数とは別の数え方なので語を分ける)。
-                Text("いっしょに\(row.together)公演 ／ 全\(row.performances)公演")
+                Text(L10n.Songs.historyCoOccurringRow(together: row.together, performances: row.performances))
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink2)
                     .lineLimit(1)
@@ -140,7 +146,8 @@ struct SongHistoryTab: View {
 
     private var historySection: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
-            ImasSectionHeader(title: "ライブ披露履歴", count: "\(vm.history.count)回", tight: true)
+            ImasSectionHeader(title: .key(L10n.Songs.historyLogHeader),
+                              count: .key(L10n.Songs.historyLogCount(count: vm.history.count)), tight: true)
             ImasListContainer {
                 ForEach(Array(vm.history.enumerated()), id: \.offset) { idx, row in
                     if idx > 0 { ImasRowDivider(inset: DS.sp4) }
@@ -151,7 +158,7 @@ struct SongHistoryTab: View {
     }
 
     /// 集計の但し書き。回数だけ並べると「予想」と読まれうるので、過去の実績だと明示する。
-    private func evidenceNote(_ text: String) -> some View {
+    private func evidenceNote(_ text: LocalizedStringResource) -> some View {
         Text(text)
             .font(.imasCaption)
             .foregroundStyle(DS.ink3)

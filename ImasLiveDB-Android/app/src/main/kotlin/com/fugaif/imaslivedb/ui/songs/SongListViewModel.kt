@@ -15,6 +15,9 @@ import com.fugaif.imaslivedb.data.model.SongSortOrder
 import com.fugaif.imaslivedb.data.model.SongWithArtists
 import com.fugaif.imaslivedb.data.model.UserMark
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.AppPreferences
 import com.fugaif.imaslivedb.ui.theme.MasteryScale
 import kotlinx.coroutines.Job
@@ -33,12 +36,12 @@ import uniffi.imas_core.filterSongList
 enum class SongListMode {
     SONGS, ALBUMS, SERIES;
 
-    /** 名前絞り込みが実際に絞る対象。検索欄の頭のチップに出す。 */
-    val nameFilterLabel: String
+    /** 名前絞り込みが実際に絞る対象。検索欄の頭のチップに出す (画面で resolve する)。 */
+    val nameFilterLabel: DisplayText
         get() = when (this) {
-            SONGS -> "曲名"
-            ALBUMS -> "アルバム名"
-            SERIES -> "シリーズ名"
+            SONGS -> L10n.Songs.listNameFilterSongs
+            ALBUMS -> L10n.Songs.listNameFilterAlbums
+            SERIES -> L10n.Songs.listNameFilterSeries
         }
 }
 
@@ -52,15 +55,15 @@ enum class SongListMode {
 enum class SongSearchMode {
     TITLE, PERFORMER, CREATOR;
 
-    fun label(listMode: SongListMode): String = when (this) {
+    fun label(listMode: SongListMode): DisplayText = when (this) {
         // 曲名スコープだけは表示形式で絞る対象が変わる (曲 / アルバム / シリーズ)。
         TITLE -> listMode.nameFilterLabel
         // 「アイドル」ではなく「歌唱」。ほかの 2 つ (曲名 / 作詞作曲) が
         // **何と照合するか**を指すのに、ここだけ実体の名前だった。
         // タブ移動のチップも「アイドルに N」を出すので、同じ列に「アイドル」が
         // 2 つ並んで、別の動作が同じ語に見えてしまう。
-        PERFORMER -> "歌唱"
-        CREATOR -> "作詞作曲"
+        PERFORMER -> L10n.Songs.listScopePerformer
+        CREATOR -> L10n.Songs.listScopeCreator
     }
 }
 
@@ -270,7 +273,10 @@ class SongListViewModel : ViewModel() {
     fun setMastery(songId: String, level: UByte) {
         val ctx = appContext ?: return
         viewModelScope.launch {
-            localWrite("習熟度の記録") { AppModule.from(ctx).userMarkRepository.setMastery(songId, level) }
+            // 失敗の知らせに入る操作の名前。localWrite は今 String しか受けないので、書き込む時点の言語で文字列にする。
+            localWrite(L10n.Songs.listMasteryWriteAction.resolve(ctx)) {
+                AppModule.from(ctx).userMarkRepository.setMastery(songId, level)
+            }
                 ?: return@launch
             _uiState.value = _uiState.value.copy(
                 masteryLevels = _uiState.value.masteryLevels + (songId to level)

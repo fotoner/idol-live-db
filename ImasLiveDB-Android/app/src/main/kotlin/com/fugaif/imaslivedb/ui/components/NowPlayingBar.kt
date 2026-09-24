@@ -31,6 +31,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.player.AudioPreviewManager
 import com.fugaif.imaslivedb.ui.theme.DS
 import uniffi.imas_core.NowPlayingBar as NowPlayingBarData
@@ -98,7 +100,9 @@ fun NowPlayingBar(onSongClick: (String) -> Unit) {
             }) {
                 Icon(
                     if (current.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                    contentDescription = if (current.isPlaying) "一時停止" else "再生",
+                    contentDescription = (
+                        if (current.isPlaying) L10n.Songs.nowPlayingPauseA11y else L10n.Songs.nowPlayingPlayA11y
+                    ).resolve(),
                     tint = DS.ink,
                     modifier = Modifier.size(24.dp)
                 )

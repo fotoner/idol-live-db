@@ -48,6 +48,9 @@ import com.fugaif.imaslivedb.data.model.SongSearchFilter
 import com.fugaif.imaslivedb.data.model.SongSortOrder
 import com.fugaif.imaslivedb.data.model.Vocab
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasFilterChip
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
 import com.fugaif.imaslivedb.ui.components.NameFilterField
@@ -156,21 +159,21 @@ fun SongFilterSheet(
                 onClear = { idolIds = emptySet() }
             )
             FilterPage.SERIES -> SingleValuePickerPage(
-                title = "シリーズ",
+                title = L10n.Songs.filterSeriesHeader,
                 items = options.seriesGroups,
                 selected = seriesGroup,
                 onBack = { page = FilterPage.MAIN },
                 onSelect = { seriesGroup = it; page = FilterPage.MAIN }
             )
             FilterPage.CD_SERIES -> SingleValuePickerPage(
-                title = "CDシリーズ",
+                title = L10n.Songs.filterCdSeriesHeader,
                 items = options.cdSeries,
                 selected = cdSeries,
                 onBack = { page = FilterPage.MAIN },
                 onSelect = { cdSeries = it; page = FilterPage.MAIN }
             )
             FilterPage.LIVE -> SingleValuePickerPage(
-                title = "ライブ",
+                title = L10n.Songs.filterLivePickerTitle,
                 items = options.eventNames,
                 selected = liveName,
                 onBack = { page = FilterPage.MAIN },
@@ -183,7 +186,7 @@ fun SongFilterSheet(
                     .padding(bottom = 32.dp)
             ) {
                 Text(
-                    text = "フィルター・並び替え",
+                    text = L10n.Songs.filterTitle.resolve(),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
                 )
@@ -191,9 +194,13 @@ fun SongFilterSheet(
                 HorizontalDivider()
 
                 // 表示形式
-                SectionLabel("表示形式")
+                SectionLabel(L10n.Songs.filterListModeHeader.resolve())
                 ImasSegmented(
-                    labels = listOf("楽曲", "アルバム", "シリーズ"),
+                    labels = listOf(
+                        L10n.Songs.filterListModeSongs.resolve(),
+                        L10n.Songs.filterListModeAlbums.resolve(),
+                        L10n.Songs.filterListModeSeries.resolve()
+                    ),
                     selection = SongListMode.entries.indexOf(listMode),
                     onSelect = { listMode = SongListMode.entries[it] },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
@@ -208,11 +215,11 @@ fun SongFilterSheet(
                     HorizontalDivider()
 
                     // 現地回収
-                    SectionLabel("現地回収")
+                    SectionLabel(L10n.Songs.filterCollectHeader.resolve())
                     ChipRow {
                         SongCollectFilter.entries.forEach { cf ->
                             ImasFilterChip(
-                                label = cf.label,
+                                label = cf.label.resolve(),
                                 selected = collectFilter == cf,
                                 onClick = { collectFilter = cf }
                             )
@@ -222,22 +229,22 @@ fun SongFilterSheet(
                     HorizontalDivider()
 
                     // マイマーク (AND 条件)
-                    SectionLabel("マイマーク")
+                    SectionLabel(L10n.Songs.filterMyMarkHeader.resolve())
                     SwitchRow(
-                        title = "担当アイドルの曲のみ",
-                        subtitle = "担当アイドルが歌唱者にいる曲だけ表示",
+                        title = L10n.Songs.filterMyMarkMyPick.resolve(),
+                        subtitle = L10n.Songs.filterMyMarkMyPickCaption.resolve(),
                         checked = myMarkFilter.requireMyPick,
                         tint = DS.pick,
                         onCheckedChange = { myMarkFilter = myMarkFilter.copy(requireMyPick = it) }
                     )
                     SwitchRow(
-                        title = "お気に入りのみ",
+                        title = L10n.Songs.filterMyMarkFavorite.resolve(),
                         checked = myMarkFilter.requireFavorite,
                         tint = DS.favorite,
                         onCheckedChange = { myMarkFilter = myMarkFilter.copy(requireFavorite = it) }
                     )
                     SwitchRow(
-                        title = "メモがある曲のみ",
+                        title = L10n.Songs.filterMyMarkNote.resolve(),
                         checked = myMarkFilter.requireNote,
                         tint = DS.warning,
                         onCheckedChange = { myMarkFilter = myMarkFilter.copy(requireNote = it) }
@@ -245,7 +252,7 @@ fun SongFilterSheet(
                     // 上の 3 つ全体にかかる注記。1 つのトグルの subtitle に置くと
                     // 「その項目だけが AND」と読めてしまう (iOS はセクションの footer)。
                     Text(
-                        "チェック ON で AND 条件絞り込み",
+                        L10n.Songs.filterMyMarkFooter.resolve(),
                         fontSize = 11.sp,
                         color = DS.ink3,
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
@@ -254,11 +261,11 @@ fun SongFilterSheet(
                     HorizontalDivider()
 
                     // 並び順
-                    SectionLabel("並び順")
+                    SectionLabel(L10n.Songs.filterSortHeader.resolve())
                     ChipRow {
                         SongSortOrder.entries.forEach { order ->
                             ImasFilterChip(
-                                label = order.label,
+                                label = order.label.resolve(),
                                 selected = selectedSort == order,
                                 onClick = {
                                     // 並び順を変えたら方向は新しい並び順の既定へ戻す
@@ -271,9 +278,21 @@ fun SongFilterSheet(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     ChipRow {
-                        ImasFilterChip(label = "既定", selected = sortAscending == null, onClick = { sortAscending = null })
-                        ImasFilterChip(label = "昇順", selected = sortAscending == true, onClick = { sortAscending = true })
-                        ImasFilterChip(label = "降順", selected = sortAscending == false, onClick = { sortAscending = false })
+                        ImasFilterChip(
+                            label = L10n.Songs.sortDefault.resolve(),
+                            selected = sortAscending == null,
+                            onClick = { sortAscending = null }
+                        )
+                        ImasFilterChip(
+                            label = L10n.Songs.sortAscending.resolve(),
+                            selected = sortAscending == true,
+                            onClick = { sortAscending = true }
+                        )
+                        ImasFilterChip(
+                            label = L10n.Songs.sortDescending.resolve(),
+                            selected = sortAscending == false,
+                            onClick = { sortAscending = false }
+                        )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -281,13 +300,13 @@ fun SongFilterSheet(
                 HorizontalDivider()
 
                 // ブランド (複数選択 = OR)
-                SectionLabel("ブランド")
+                SectionLabel(L10n.Songs.filterBrandHeader.resolve())
                 FlowRow(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    ImasFilterChip(label = "全て", selected = brandIds.isEmpty(), onClick = { brandIds = emptySet() })
+                    ImasFilterChip(label = L10n.Songs.filterAll.resolve(), selected = brandIds.isEmpty(), onClick = { brandIds = emptySet() })
                     options.brands.forEach { brand ->
                         ImasFilterChip(
                             label = brand.shortName,
@@ -306,26 +325,26 @@ fun SongFilterSheet(
                     HorizontalDivider()
 
                     SwitchRow(
-                        title = "ライブ限定曲を隠す",
-                        subtitle = "セトリにしか無い曲(カバー等)を一覧から隠します。既定 ON",
+                        title = L10n.Songs.filterLiveOnlyTitle.resolve(),
+                        subtitle = L10n.Songs.filterLiveOnlyCaption.resolve(),
                         checked = excludeLiveOnly,
                         onCheckedChange = { excludeLiveOnly = it }
                     )
                     SwitchRow(
-                        title = "「その他」を表示",
-                        subtitle = "歌枠で歌っただけのカバー等。既定では隠しています",
+                        title = L10n.Songs.filterOtherBrandTitle.resolve(),
+                        subtitle = L10n.Songs.filterOtherBrandCaption.resolve(),
                         checked = showOtherBrand,
                         onCheckedChange = { showOtherBrand = it }
                     )
                     SwitchRow(
-                        title = "リミックスを含む",
-                        subtitle = "アレンジ・リミックス曲を表示",
+                        title = L10n.Songs.filterRemixTitle.resolve(),
+                        subtitle = L10n.Songs.filterRemixCaption.resolve(),
                         checked = includeRemixes,
                         onCheckedChange = { includeRemixes = it }
                     )
                     SwitchRow(
-                        title = "KAMISABI収録のみ",
-                        subtitle = "音楽カードゲーム KAMISABI にカードがある曲だけ表示",
+                        title = L10n.Songs.filterKamisabiToggleAndroid.resolve(),
+                        subtitle = L10n.Songs.filterKamisabiCaptionAndroid.resolve(),
                         checked = kamisabiOnly,
                         onCheckedChange = { kamisabiOnly = it }
                     )
@@ -333,9 +352,9 @@ fun SongFilterSheet(
                     HorizontalDivider()
 
                     // 曲タイプ
-                    SectionLabel("曲タイプ")
+                    SectionLabel(L10n.Songs.filterSongTypeHeader.resolve())
                     ChipRow {
-                        ImasFilterChip(label = "全て", selected = songType == null, onClick = { songType = null })
+                        ImasFilterChip(label = L10n.Songs.filterAll.resolve(), selected = songType == null, onClick = { songType = null })
                         SONG_TYPES.forEach { (value, label) ->
                             ImasFilterChip(
                                 label = label,
@@ -350,7 +369,7 @@ fun SongFilterSheet(
 
                     // アイドル (複数選択)
                     PickerRow(
-                        label = "アイドル",
+                        label = L10n.Songs.filterIdolHeader.resolve(),
                         value = if (selectedIdolNames.isEmpty()) {
                             null
                         } else {
@@ -358,25 +377,28 @@ fun SongFilterSheet(
                             if (selectedIdolNames.size <= 3) {
                                 selectedIdolNames.joinToString("・")
                             } else {
-                                "${selectedIdolNames.take(2).joinToString("・")} 他${selectedIdolNames.size - 2}人"
+                                L10n.Songs.filterIdolSummaryMore(
+                                    names = selectedIdolNames.take(2).joinToString("・"),
+                                    count = selectedIdolNames.size - 2
+                                ).resolve()
                             }
                         },
                         onClick = { page = FilterPage.IDOLS }
                     )
 
                     // 作詞 / 作曲 / 編曲
-                    SectionLabel("作詞 / 作曲 / 編曲者")
+                    SectionLabel(L10n.Songs.filterCreatorHeader.resolve())
                     NameFilterField(
-                        prompt = "名前を入力",
+                        prompt = L10n.Songs.filterCreatorPlaceholder.resolve(),
                         value = songwriter,
                         onValueChange = { songwriter = it }
                     )
 
                     HorizontalDivider()
 
-                    PickerRow(label = "シリーズ", value = seriesGroup, onClick = { page = FilterPage.SERIES })
-                    PickerRow(label = "CDシリーズ", value = cdSeries, onClick = { page = FilterPage.CD_SERIES })
-                    PickerRow(label = "ライブで絞込", value = liveName, onClick = { page = FilterPage.LIVE })
+                    PickerRow(label = L10n.Songs.filterSeriesHeader.resolve(), value = seriesGroup, onClick = { page = FilterPage.SERIES })
+                    PickerRow(label = L10n.Songs.filterCdSeriesHeader.resolve(), value = cdSeries, onClick = { page = FilterPage.CD_SERIES })
+                    PickerRow(label = L10n.Songs.filterLiveHeader.resolve(), value = liveName, onClick = { page = FilterPage.LIVE })
                 }
 
                 HorizontalDivider()
@@ -408,7 +430,7 @@ fun SongFilterSheet(
                         },
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("リセット")
+                        Text(L10n.Songs.filterResetAndroid.resolve())
                     }
                     Button(
                         onClick = {
@@ -435,7 +457,7 @@ fun SongFilterSheet(
                         },
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("適用")
+                        Text(L10n.Songs.filterApply.resolve())
                     }
                 }
             }
@@ -485,7 +507,7 @@ private fun PickerRow(label: String, value: String?, onClick: () -> Unit) {
         Text(text = label, style = MaterialTheme.typography.bodyMedium, color = DS.ink)
         Spacer(modifier = Modifier.weight(1f))
         Text(
-            text = value ?: "選択なし",
+            text = value ?: L10n.Songs.filterNone.resolve(),
             style = MaterialTheme.typography.bodyMedium,
             color = if (value == null) DS.ink3 else DS.ink2,
             maxLines = 1
@@ -527,18 +549,18 @@ private fun SwitchRow(
     }
 }
 
-private val SongSortOrder.label: String
+private val SongSortOrder.label: DisplayText
     get() = when (this) {
-        SongSortOrder.TITLE_KANA -> "五十音順"
-        SongSortOrder.RELEASE_DATE -> "リリース日順"
-        SongSortOrder.PERFORMANCE_COUNT -> "披露回数順"
-        SongSortOrder.COLLECTED_COUNT -> "現地回収回数順"
-        SongSortOrder.COLLECTED_RATE -> "回収率順"
+        SongSortOrder.TITLE_KANA -> L10n.Songs.sortTitleKana
+        SongSortOrder.RELEASE_DATE -> L10n.Songs.sortReleaseDate
+        SongSortOrder.PERFORMANCE_COUNT -> L10n.Songs.sortPerformanceCount
+        SongSortOrder.COLLECTED_COUNT -> L10n.Songs.sortCollectedCount
+        SongSortOrder.COLLECTED_RATE -> L10n.Songs.sortCollectedRate
     }
 
-private val SongCollectFilter.label: String
+private val SongCollectFilter.label: DisplayText
     get() = when (this) {
-        SongCollectFilter.ALL -> "すべて"
-        SongCollectFilter.COLLECTED -> "回収済のみ"
-        SongCollectFilter.UNCOLLECTED -> "未回収のみ"
+        SongCollectFilter.ALL -> L10n.Songs.filterCollectAll
+        SongCollectFilter.COLLECTED -> L10n.Songs.filterCollectCollected
+        SongCollectFilter.UNCOLLECTED -> L10n.Songs.filterCollectUncollected
     }

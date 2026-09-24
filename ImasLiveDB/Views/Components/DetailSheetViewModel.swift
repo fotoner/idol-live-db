@@ -233,49 +233,50 @@ final class DetailSheetViewModel {
         // 「この曲が出てこない」としか思われず直しようがない (機械生成ぶんが混ざっている)。
         // 曲名のすぐ下に置いて、誤りに気づけるようにする。
         if let kana = song.titleKana, !kana.isEmpty {
-            rows.append(SongInfoRow(key: "よみ", kind: .plain(value: kana, mono: false)))
+            rows.append(SongInfoRow(key: L10n.Songs.infoRowKana, kind: .plain(value: kana, mono: false)))
         }
         if let artistLine = artistLine(for: song) {
-            rows.append(SongInfoRow(key: "アーティスト", kind: .plain(value: artistLine, mono: false)))
+            rows.append(SongInfoRow(key: L10n.Songs.infoRowArtist, kind: .plain(value: artistLine, mono: false)))
         }
         if let brand {
-            rows.append(SongInfoRow(key: "ブランド",
+            rows.append(SongInfoRow(key: L10n.Songs.infoRowBrand,
                                     kind: .navigate(value: brand.shortName,
                                                     destination: .filteredSongs(.brand(id: brand.id, label: brand.shortName)))))
         }
         if !song.songType.isEmpty, song.songType != "unknown" {
-            rows.append(SongInfoRow(key: "タイプ",
+            rows.append(SongInfoRow(key: L10n.Songs.infoRowType,
                                     kind: .navigate(value: song.songTypeLabel,
                                                     destination: .filteredSongs(.songType(song.songType)))))
         }
         if let composer = song.composer {
-            rows.append(SongInfoRow(key: composer == song.arranger ? "作曲 / 編曲" : "作曲",
+            rows.append(SongInfoRow(key: composer == song.arranger ? L10n.Songs.infoRowComposerArranger
+                                                                   : L10n.Songs.infoRowComposer,
                                     kind: .credit(names: splitCredits(composer))))
         }
         if let arranger = song.arranger, arranger != song.composer {
-            rows.append(SongInfoRow(key: "編曲", kind: .credit(names: splitCredits(arranger))))
+            rows.append(SongInfoRow(key: L10n.Songs.infoRowArranger, kind: .credit(names: splitCredits(arranger))))
         }
         if let lyricist = song.lyricist {
-            rows.append(SongInfoRow(key: "作詞", kind: .credit(names: splitCredits(lyricist))))
+            rows.append(SongInfoRow(key: L10n.Songs.infoRowLyricist, kind: .credit(names: splitCredits(lyricist))))
         }
         if let cdSeries = song.cdSeries {
-            rows.append(SongInfoRow(key: "CDシリーズ",
+            rows.append(SongInfoRow(key: L10n.Songs.infoRowCdSeries,
                                     kind: .navigate(value: cdSeries, destination: .filteredSongs(.cdSeries(cdSeries)))))
         }
         if let date = song.releaseDate {
             let year = String(date.prefix(4))
             if year.count == 4, Int(year) != nil {
-                rows.append(SongInfoRow(key: "リリース日",
+                rows.append(SongInfoRow(key: L10n.Songs.infoRowReleaseDate,
                                         kind: .navigate(value: date, destination: .filteredSongs(.releaseYear(year)))))
             } else {
-                rows.append(SongInfoRow(key: "リリース日", kind: .plain(value: date, mono: false)))
+                rows.append(SongInfoRow(key: L10n.Songs.infoRowReleaseDate, kind: .plain(value: date, mono: false)))
             }
         }
         if let dur = durationValue(for: song) {
-            rows.append(SongInfoRow(key: "再生時間", kind: .plain(value: dur, mono: true)))
+            rows.append(SongInfoRow(key: L10n.Songs.infoRowDuration, kind: .plain(value: dur, mono: true)))
         }
         if let unitId = song.unitId, let unitName = song.unitName {
-            rows.append(SongInfoRow(key: "ユニット", kind: .unit(value: unitName, unitId: unitId)))
+            rows.append(SongInfoRow(key: L10n.Songs.infoRowUnit, kind: .unit(value: unitName, unitId: unitId)))
         }
         return rows
     }
@@ -299,7 +300,8 @@ final class DetailSheetViewModel {
 /// 「楽曲情報」行の宣言的モデル。View はこの kind に応じて行を描画する。
 struct SongInfoRow: Identifiable {
     let id = UUID()
-    let key: String
+    /// 行の見出し。解決済みの String ではなく文言の値で持ち、描くときに文字列にする。
+    let key: LocalizedStringResource
     let kind: Kind
 
     enum Kind {

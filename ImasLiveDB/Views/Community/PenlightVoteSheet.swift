@@ -15,12 +15,12 @@ struct PenlightVoteSheet: View {
         NavigationStack {
             Group {
                 if isLoading {
-                    ProgressView("読み込み中…")
+                    ProgressView { Text(L10n.Songs.penlightLoading) }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     List {
                         Section {
-                            Text("ペンライトの色を選んで投票してください。複数選択できます。")
+                            Text(L10n.Songs.penlightInstructions)
                                 .font(.imasCaption)
                                 .foregroundStyle(DS.ink2)
                         }
@@ -31,15 +31,15 @@ struct PenlightVoteSheet: View {
                             Section {
                                 ImasEmptyState(
                                     systemImage: "exclamationmark.triangle",
-                                    title: "カラーを取得できません",
-                                    message: "通信状況を確認して再度お試しください"
+                                    title: String(localized: L10n.Songs.penlightPaletteErrorTitle),
+                                    message: String(localized: L10n.Songs.penlightPaletteErrorMessage)
                                 )
                             }
                             .listRowBackground(DS.surface)
                             .listRowSeparatorTint(DS.sep)
                         }
 
-                        Section("カラーを選択") {
+                        Section {
                             LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))], spacing: DS.sp4) {
                                 ForEach(palette.filter { $0.colorHex != nil }) { entry in
                                     if let hex = entry.colorHex {
@@ -58,15 +58,19 @@ struct PenlightVoteSheet: View {
                                 }
                             }
                             .padding(.vertical, DS.sp3)
+                        } header: {
+                            Text(L10n.Songs.penlightPaletteHeader)
                         }
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                         .listRowBackground(DS.surface)
                         .listRowSeparatorTint(DS.sep)
 
                         if !selectedColors.isEmpty {
-                            Section("選択中のセット") {
+                            Section {
                                 PenlightColorBar(colors: Array(selectedColors).map(\.rawValue).sorted(), height: 32)
                                     .cornerRadius(6)
+                            } header: {
+                                Text(L10n.Songs.penlightSelectedHeader)
                             }
                             .listRowBackground(DS.surface)
                             .listRowSeparatorTint(DS.sep)
@@ -77,11 +81,11 @@ struct PenlightVoteSheet: View {
                     .background(DS.bg)
                 }
             }
-            .navigationTitle("ペンライトカラーを投票")
+            .navigationTitle(L10n.Songs.penlightTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("取消") { dismiss() }
+                    Button { dismiss() } label: { Text(L10n.Songs.penlightCancel) }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -91,7 +95,7 @@ struct PenlightVoteSheet: View {
                         if isSending {
                             ProgressView()
                         } else {
-                            Text("投票する")
+                            Text(L10n.Songs.penlightSubmit)
                                 .fontWeight(.semibold)
                         }
                     }
@@ -99,14 +103,14 @@ struct PenlightVoteSheet: View {
                 }
             }
             .task { await loadPalette() }
-            .alert("投票エラー", isPresented: Binding(
+            .alert(Text(L10n.Songs.penlightErrorTitle), isPresented: Binding(
                 get: { alertError != nil },
                 set: { if !$0 { alertError = nil } }
             )) {
                 Button("OK") { alertError = nil }
             } message: {
                 if let err = alertError {
-                    Text(err.errorDescription ?? "不明なエラーが発生しました")
+                    Text(err.errorDescription ?? String(localized: L10n.Songs.penlightErrorUnknown))
                 }
             }
             .trackScreen("penlight_vote")
@@ -192,7 +196,7 @@ private struct PenlightColorChip: View {
             }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("色: \(entry.name)")
+        .accessibilityLabel(L10n.Songs.penlightColorA11y(name: entry.name))
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
         .popover(isPresented: $showNote) {
             if let note = entry.note {

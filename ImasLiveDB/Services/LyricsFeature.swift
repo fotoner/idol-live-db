@@ -28,5 +28,6 @@ enum JASRACLicense {
     static let number = "J260943703"
 
     /// 掲示に使う表記。許諾書の指定は「JASRAC許諾第****************号」。
+    // i18n-ignore(data): 許諾条件が表記の字面を指定している。どの言語でもこのまま出す (訳さない)
     static let notice = "JASRAC許諾第\(number)号"
 }

@@ -152,9 +152,9 @@ struct SongRowView: View {
         .padding(.vertical, 6)
         .contentShape(Rectangle())
         .imasCopyable([
-            CopyItem("曲名をコピー", song.title, key: "song_title"),
-            CopyItem("よみをコピー", song.titleKana, key: "kana"),
-            CopyItem("歌唱者をコピー", item.artistNames, key: "artists"),
+            CopyItem(String(localized: L10n.Songs.copyTitle), song.title, key: "song_title"),
+            CopyItem(String(localized: L10n.Songs.copyKana), song.titleKana, key: "kana"),
+            CopyItem(String(localized: L10n.Songs.copyArtists), item.artistNames, key: "artists"),
         ])
     }
 
@@ -225,7 +225,7 @@ struct SongRowView: View {
                         .foregroundStyle(DS.ink3)
                 }
                 if isMyPick {
-                    Label("担当", systemImage: "heart.fill")
+                    Label(L10n.Songs.rowMyPick, systemImage: "heart.fill")
                         .labelStyle(.titleAndIcon)
                         .font(.imasScaled( 11, weight: .semibold))
                         .foregroundStyle(DS.pick)
@@ -270,17 +270,17 @@ struct SongRowView: View {
     /// 率だけだと「1回のうち1回」も「12回のうち12回」も 100% で並んでしまい、
     /// どちらが重いのか読めない。
     private func metricBadge(_ metric: SongRowMetric) -> some View {
-        let text: String
+        let text: LocalizedStringResource
         switch metric {
         case .performances(let count):
-            text = "\(count)回"
+            text = L10n.Songs.rowMetricPerformances(count: count)
         case .collectRate(_, 0):
             // 一度も披露されていない曲の「0%」は率ではなく分母が無いだけ。
             // 率として出すと 0% で回収し損ねたように読める。
-            text = "0回"
+            text = L10n.Songs.rowMetricPerformances(count: 0)
         case .collectRate(let collected, let total):
             let rate = Int((Double(collected) / Double(total) * 100).rounded())
-            text = "\(rate)% / \(total)回"
+            text = L10n.Songs.rowMetricCollectRate(rate: rate, total: total)
         }
         return Label(text, systemImage: "music.mic")
             .labelStyle(.titleAndIcon)

@@ -158,12 +158,12 @@ enum SongDetailTab: Int, CaseIterable, Hashable {
     case history
     case community
 
-    var label: String {
+    var label: LocalizedStringResource {
         switch self {
-        case .info: return "情報・歌唱"
-        case .lyrics: return "歌詞"
-        case .history: return "披露履歴"
-        case .community: return "コミュニティ"
+        case .info: return L10n.Songs.detailTabInfo
+        case .lyrics: return L10n.Songs.detailTabLyrics
+        case .history: return L10n.Songs.detailTabHistory
+        case .community: return L10n.Songs.detailTabCommunity
         }
     }
 
@@ -262,23 +262,23 @@ struct SongSheetContent: View {
                                 showLoginPrompt = true
                             }
                         } label: {
-                            Label("この楽曲を編集", systemImage: "pencil")
+                            Label(L10n.Songs.detailMenuEdit, systemImage: "pencil")
                         }
                     }
                     NavigationLink {
                         EditHistoryView(recordType: "Song", recordName: song.id, title: song.title)
                     } label: {
-                        Label("編集履歴", systemImage: "clock.arrow.circlepath")
+                        Label(L10n.Songs.detailMenuEditHistory, systemImage: "clock.arrow.circlepath")
                     }
                     Divider()
                     // アプリ内の歌詞は「歌詞」タブへ移した (束ね取得に同梱されるので常時表示できる)。
                     // ここに残すのは外部の歌詞サイト検索だけ。
                     Button { openURL(lyricsURL) } label: {
-                        Label("歌詞サイトで探す", systemImage: "safari")
+                        Label(L10n.Songs.detailMenuLyricsSiteIos, systemImage: "safari")
                     }
                     if let appleMusicURL = vm.artworkInfo?.appleMusicURL {
                         Button { openURL(appleMusicURL) } label: {
-                            Label("Apple Musicで開く", systemImage: "music.note")
+                            Label(L10n.Songs.detailMenuAppleMusic, systemImage: "music.note")
                         }
                     }
                 } label: {
@@ -338,9 +338,9 @@ struct SongSheetContent: View {
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                     .imasCopyable([
-                        CopyItem("曲名をコピー", song.title, key: "song_title"),
-                        CopyItem("よみをコピー", song.titleKana, key: "kana"),
-                        CopyItem("歌唱者をコピー", vm.artistLine(for: song), key: "artists"),
+                        CopyItem(String(localized: L10n.Songs.copyTitle), song.title, key: "song_title"),
+                        CopyItem(String(localized: L10n.Songs.copyKana), song.titleKana, key: "kana"),
+                        CopyItem(String(localized: L10n.Songs.copyArtists), vm.artistLine(for: song), key: "artists"),
                     ])
                 if let artistLine = vm.artistLine(for: song) {
                     Text(artistLine)
@@ -394,7 +394,8 @@ struct SongSheetContent: View {
                 MusicKitService.shared.togglePreview(url: previewURL, songId: song.id)
             }
         } label: {
-            Label(isPreviewing ? "停止" : "再生", systemImage: isPreviewing ? "stop.fill" : "play.fill")
+            Label(isPreviewing ? L10n.Songs.detailStop : L10n.Songs.detailPlay,
+                  systemImage: isPreviewing ? "stop.fill" : "play.fill")
                 .font(.imasSubhead.weight(.semibold))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 11)
@@ -433,7 +434,8 @@ struct SongSheetContent: View {
             AppAnalytics.tap("song_detail.toggle_favorite")
             toggleFavorite()
         } label: {
-            Label(isFav ? "お気に入り済み" : "お気に入り", systemImage: isFav ? "star.fill" : "star")
+            Label(isFav ? L10n.Songs.detailFavoriteOn : L10n.Songs.detailFavoriteOff,
+                  systemImage: isFav ? "star.fill" : "star")
                 .font(.imasSubhead.weight(.semibold))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 11)
@@ -449,7 +451,7 @@ struct SongSheetContent: View {
             try markService.toggle(.favorite, entity: .song, id: song.id)
             markVersion += 1
         } catch {
-            LocalWriteFailure.report(error, action: "お気に入りの切り替え")
+            LocalWriteFailure.report(error, action: String(localized: L10n.Songs.detailWriteActionFavorite))
         }
     }
 
@@ -464,7 +466,7 @@ struct SongSheetContent: View {
             AppAnalytics.tap("song_detail.toggle_kamisabi_owned")
             toggleKamisabiOwned()
         } label: {
-            Label(owned ? "カード所持済み" : "カード所持を記録",
+            Label(owned ? L10n.Songs.detailKamisabiOwned : L10n.Songs.detailKamisabiRecord,
                   systemImage: owned ? UserMarkKind.owned.activeIcon : UserMarkKind.owned.icon)
                 .font(.imasSubhead.weight(.semibold))
                 .frame(maxWidth: .infinity)
@@ -482,14 +484,14 @@ struct SongSheetContent: View {
             try markService.toggle(.owned, entity: .song, id: song.id)
             markVersion += 1
         } catch {
-            LocalWriteFailure.report(error, action: "カード所持の記録")
+            LocalWriteFailure.report(error, action: String(localized: L10n.Songs.detailWriteActionCardOwned))
         }
     }
 
     // MARK: - Segmented
 
     private var segmentBar: some View {
-        ImasSegmented(options: SongDetailTab.available, selection: $tab, seed: songSeed) { $0.label }
+        ImasSegmented(options: SongDetailTab.available, selection: $tab, seed: songSeed) { String(localized: $0.label) }
     }
 
     // MARK: - Tab: 情報・歌唱

@@ -14,7 +14,7 @@ struct AlbumGridView: View {
         GenericGridView(
             items: albums,
             isLoading: isLoading,
-            emptyTitle: "アルバムが見つかりません",
+            emptyTitle: String(localized: L10n.Songs.gridAlbumsEmpty),
             emptySystemImage: "square.grid.2x2",
             onSelect: onSelect
         )

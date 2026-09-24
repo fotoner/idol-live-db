@@ -52,7 +52,7 @@ struct SongLyricsTab: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: DS.sp4) {
-            InlineLoginPrompt(message: "歌詞の表示にはログインが必要です", seed: seed)
+            InlineLoginPrompt(message: String(localized: L10n.Songs.lyricsLoginRequired), seed: seed)
             content
             // 歌詞が実際に出ているときだけ掲示する。読み込み中やエラーの画面に
             // 許諾番号だけが残っていると、何に対する許諾なのか分からなくなる。
@@ -74,7 +74,7 @@ struct SongLyricsTab: View {
                 }
             )
         }
-        .alert("保存できませんでした", isPresented: saveErrorBinding) {
+        .alert(Text(L10n.Songs.lyricsSaveErrorTitle), isPresented: saveErrorBinding) {
             Button("OK", role: .cancel) { saveErrorMessage = nil }
         } message: {
             Text(saveErrorMessage ?? "")
@@ -99,9 +99,9 @@ struct SongLyricsTab: View {
             ImasInlineLoading()
         case .failed(let message):
             ImasEmptyState(systemImage: "exclamationmark.triangle",
-                           title: "歌詞を表示できません",
+                           title: String(localized: L10n.Songs.lyricsLoadErrorTitle),
                            message: message,
-                           actionTitle: "再試行",
+                           actionTitle: String(localized: L10n.Common.actionRetry),
                            action: reload,
                            seed: seed)
         case .loaded:
@@ -128,7 +128,7 @@ struct SongLyricsTab: View {
                     card { viewingBody(lyrics) }
                 }
                 if let source = lyrics.source, !source.isEmpty {
-                    Text("出典: \(source)")
+                    Text(L10n.Songs.lyricsSource(source: source))
                         .font(.imasCaption)
                         .foregroundStyle(DS.ink3)
                         .padding(.horizontal, DS.sp1)
@@ -145,13 +145,13 @@ struct SongLyricsTab: View {
     private var emptyState: some View {
         if AuthService.shared.isSignedIn {
             ImasEmptyState(systemImage: "text.quote",
-                           title: "歌詞はまだありません",
-                           message: "この曲の歌詞はまだ登録されていません。",
+                           title: String(localized: L10n.Songs.lyricsEmptyTitle),
+                           message: String(localized: L10n.Songs.lyricsEmptyMessage),
                            seed: seed)
         } else {
             ImasEmptyState(systemImage: "text.quote",
-                           title: "歌詞の表示にはログインが必要です",
-                           message: "ログインすると、登録済みの曲の歌詞を表示できます。",
+                           title: String(localized: L10n.Songs.lyricsLoginRequired),
+                           message: String(localized: L10n.Songs.lyricsLoginRequiredMessage),
                            seed: seed)
         }
     }
@@ -247,7 +247,7 @@ struct SongLyricsTab: View {
             rule
         }
         .padding(.vertical, DS.sp3)
-        .accessibilityLabel("セクション: \(text)")
+        .accessibilityLabel(L10n.Songs.lyricsMarkerA11y(name: text))
     }
 
     private var rule: some View {
@@ -280,9 +280,11 @@ struct SongLyricsTab: View {
             HStack(spacing: DS.sp3) {
                 Spacer(minLength: 0)
                 if let editor {
-                    Button("編集を終了") {
+                    Button {
                         self.editor = nil
                         reanchorTarget = nil
+                    } label: {
+                        Text(L10n.Songs.lyricsEditFinish)
                     }
                     .font(.imasSubhead)
                     .foregroundStyle(DS.ink2)
@@ -292,7 +294,7 @@ struct SongLyricsTab: View {
                         AppAnalytics.tap("call_guide.begin_edit")
                         editor = CallGuideEditorModel(lyrics: lyrics, songId: song.id)
                     } label: {
-                        Label(lyrics.hasCalls ? "コールを編集" : "コールを付ける",
+                        Label(lyrics.hasCalls ? L10n.Songs.lyricsEditBeginEdit : L10n.Songs.lyricsEditBeginAdd,
                               systemImage: "square.and.pencil")
                             .font(.imasSubhead.weight(.semibold))
                     }
@@ -312,7 +314,7 @@ struct SongLyricsTab: View {
                 if editor.saveState == .saving {
                     ProgressView().controlSize(.small).tint(t.onAccent)
                 } else {
-                    Text("保存").font(.imasSubhead.weight(.semibold))
+                    Text(L10n.Songs.lyricsEditSave).font(.imasSubhead.weight(.semibold))
                 }
             }
             .frame(minWidth: 56)
@@ -347,11 +349,11 @@ struct SongLyricsTab: View {
         if let target = reanchorTarget {
             HStack(spacing: DS.sp3) {
                 Image(systemName: "scope").font(.imasCaption)
-                Text("「\(target.text)」の掛かる範囲を選び直しています。語をタップ、または長押しからなぞる。")
+                Text(L10n.Songs.lyricsReanchorBanner(text: target.text))
                     .font(.imasCaption)
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 0)
-                Button("やめる") { reanchorTarget = nil }
+                Button { reanchorTarget = nil } label: { Text(L10n.Songs.lyricsReanchorCancel) }
                     .font(.imasCaption.weight(.semibold))
             }
             .foregroundStyle(DS.warning)
@@ -360,8 +362,7 @@ struct SongLyricsTab: View {
                         in: RoundedRectangle(cornerRadius: DS.rSM, style: .continuous))
         } else {
             // 多数派 (追っかけ) の導線を先に書く。被せるコールの範囲選択はその次。
-            Label("歌詞の語をタップすると、その語に被せるコールを付けられます。行末の ＋ は追っかけ、行頭の記号は手拍子。語をまたぐ範囲は長押しからなぞって選びます。",
-                  systemImage: "hand.tap")
+            Label(L10n.Songs.lyricsEditHint, systemImage: "hand.tap")
                 .font(.imasCaption)
                 .foregroundStyle(DS.ink2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -377,7 +378,7 @@ struct SongLyricsTab: View {
         let theme = ImasTheme.derive(seed: seed, scheme: scheme)
         if !stale.isEmpty {
             VStack(alignment: .leading, spacing: DS.sp3) {
-                Label("アンカーがズレたコール（\(stale.count) 件）", systemImage: "exclamationmark.triangle.fill")
+                Label(L10n.Songs.lyricsStaleHeader(count: stale.count), systemImage: "exclamationmark.triangle.fill")
                     .font(.imasFootnote.weight(.bold))
                     .foregroundStyle(DS.warning)
                 ForEach(stale, id: \.call.id) { entry in
@@ -386,16 +387,20 @@ struct SongLyricsTab: View {
                             Text(entry.call.text)
                                 .font(.imasFootnote.weight(.semibold))
                                 .foregroundStyle(entry.call.emphasis.color(accent: theme.accent))
-                            Text("元のアンカー: \(entry.call.anchorText.isEmpty ? "（なし）" : entry.call.anchorText)")
+                            Text(entry.call.anchorText.isEmpty
+                                 ? L10n.Songs.lyricsStaleAnchorNone
+                                 : L10n.Songs.lyricsStaleAnchor(anchor: entry.call.anchorText))
                                 .font(.imasCaption2)
                                 .foregroundStyle(DS.ink3)
                         }
                         Spacer(minLength: 0)
-                        Button("選び直す") {
+                        Button {
                             reanchorTarget = ReanchorTarget(lineId: entry.line.id,
                                                             callId: entry.call.id,
                                                             text: entry.call.text)
                             selectionResetToken += 1
+                        } label: {
+                            Text(L10n.Songs.lyricsStaleReanchor)
                         }
                         .font(.imasCaption.weight(.semibold))
                     }
@@ -462,9 +467,12 @@ struct SongLyricsTab: View {
 
     private func clapMenu(_ editor: CallGuideEditorModel, _ line: LyricLine) -> some View {
         Menu {
-            Button("指定なし") { editor.setClap(lineId: line.id, clap: nil) }
+            Button { editor.setClap(lineId: line.id, clap: nil) } label: { Text(L10n.Songs.lyricsClapUnset) }
             ForEach(LyricClap.allCases, id: \.self) { clap in
-                Button("\(clap.symbol) \(clap.label)") { editor.setClap(lineId: line.id, clap: clap) }
+                // 記号はコール表の慣習 (訳さない)、名前は LyricClap.label が引いた文言。
+                Button { editor.setClap(lineId: line.id, clap: clap) } label: {
+                    Text(verbatim: "\(clap.symbol) \(clap.label)")
+                }
             }
         } label: {
             CallGuideClapGlyph(clap: line.clap, isPlaceholderVisible: true)

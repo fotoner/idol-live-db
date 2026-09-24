@@ -51,22 +51,29 @@ struct SongFilterView: View {
         NavigationStack {
             List {
                 // 表示形式
-                Section("表示形式") {
-                    Picker("表示", selection: $listMode) {
-                        Label("楽曲", systemImage: "music.note.list").tag(SongListMode.songs)
-                        Label("アルバム", systemImage: "square.grid.2x2").tag(SongListMode.albums)
-                        Label("シリーズ", systemImage: "rectangle.stack").tag(SongListMode.series)
+                Section {
+                    Picker(selection: $listMode) {
+                        Label(L10n.Songs.filterListModeSongs, systemImage: "music.note.list").tag(SongListMode.songs)
+                        Label(L10n.Songs.filterListModeAlbums, systemImage: "square.grid.2x2").tag(SongListMode.albums)
+                        Label(L10n.Songs.filterListModeSeries, systemImage: "rectangle.stack").tag(SongListMode.series)
+                    } label: {
+                        Text(L10n.Songs.filterListModePicker)
                     }
                     .pickerStyle(.segmented)
 
                     if listMode == .songs {
-                        Picker("現地回収", selection: $collectFilter) {
+                        Picker(selection: $collectFilter) {
+                            // 表示は songsListLabel。rawValue は @AppStorage に保存される値なので画面に出さない。
                             ForEach(SongCollectFilter.allCases, id: \.rawValue) { c in
-                                Text(c.rawValue).tag(c)
+                                Text(c.songsListLabel).tag(c)
                             }
+                        } label: {
+                            Text(L10n.Songs.filterCollectHeader)
                         }
                         .pickerStyle(.segmented)
                     }
+                } header: {
+                    Text(L10n.Songs.filterListModeHeader)
                 }
                 .listRowBackground(DS.surface)
                 .listRowSeparatorTint(DS.sep)
@@ -74,21 +81,21 @@ struct SongFilterView: View {
                 if listMode == .songs {
                     Section {
                         Toggle(isOn: $myMarkFilter.requireMyPick) {
-                            Label("担当アイドルの曲のみ", systemImage: "heart.fill")
+                            Label(L10n.Songs.filterMyMarkMyPick, systemImage: "heart.fill")
                                 .foregroundStyle(DS.pick)
                         }
                         Toggle(isOn: $myMarkFilter.requireFavorite) {
-                            Label("お気に入りのみ", systemImage: "star.fill")
+                            Label(L10n.Songs.filterMyMarkFavorite, systemImage: "star.fill")
                                 .foregroundStyle(DS.favorite)
                         }
                         Toggle(isOn: $myMarkFilter.requireNote) {
-                            Label("メモがある曲のみ", systemImage: "note.text")
+                            Label(L10n.Songs.filterMyMarkNote, systemImage: "note.text")
                                 .foregroundStyle(DS.warning)
                         }
                     } header: {
-                        Text("マイマーク")
+                        Text(L10n.Songs.filterMyMarkHeader)
                     } footer: {
-                        Text("チェック ON で AND 条件絞り込み")
+                        Text(L10n.Songs.filterMyMarkFooter)
                             .font(.imasCaption)
                             .foregroundStyle(DS.ink3)
                     }
@@ -99,12 +106,12 @@ struct SongFilterView: View {
                 if listMode == .songs, LyricsFeature.isAvailable {
                     Section {
                         Toggle(isOn: $callGuideOnly) {
-                            Label("コールガイドがある曲のみ", systemImage: "hands.clap.fill")
+                            Label(L10n.Songs.filterCallGuideToggle, systemImage: "hands.clap.fill")
                         }
                     } header: {
-                        Text("コールガイド")
+                        Text(L10n.Songs.filterCallGuideHeader)
                     } footer: {
-                        Text("歌詞の行にコール・手拍子が書き込まれている曲だけを表示します (通信が必要)。")
+                        Text(L10n.Songs.filterCallGuideFooter)
                             .font(.imasCaption)
                             .foregroundStyle(DS.ink3)
                     }
@@ -113,23 +120,29 @@ struct SongFilterView: View {
                 }
 
                 // ソート
-                Section("並び順") {
-                    Picker("ソート", selection: $sortOrder) {
+                Section {
+                    Picker(selection: $sortOrder) {
                         ForEach(SongSortOrder.allCases, id: \.rawValue) { order in
-                            Text(order.rawValue).tag(order)
+                            Text(order.songsListLabel).tag(order)
                         }
+                    } label: {
+                        Text(L10n.Songs.filterSortPicker)
                     }
                     .pickerStyle(.menu)
 
                     // 方向 toggle (Binding<Bool> に橋渡し: nil なら sortOrder の default を表示値とする)
-                    Picker("方向", selection: Binding(
+                    Picker(selection: Binding(
                         get: { sortAscending ?? sortOrder.defaultAscending },
                         set: { sortAscending = $0 }
                     )) {
-                        Label("昇順", systemImage: "arrow.up").tag(true)
-                        Label("降順", systemImage: "arrow.down").tag(false)
+                        Label(L10n.Songs.sortAscending, systemImage: "arrow.up").tag(true)
+                        Label(L10n.Songs.sortDescending, systemImage: "arrow.down").tag(false)
+                    } label: {
+                        Text(L10n.Songs.filterSortDirection)
                     }
                     .pickerStyle(.segmented)
+                } header: {
+                    Text(L10n.Songs.filterSortHeader)
                 }
                 .listRowBackground(DS.surface)
                 .listRowSeparatorTint(DS.sep)
@@ -140,8 +153,8 @@ struct SongFilterView: View {
                 Section {
                     Toggle(isOn: $excludeLiveOnly) {
                         VStack(alignment: .leading, spacing: DS.sp1) {
-                            Text("ライブ限定曲を隠す")
-                            Text("セトリにしか無い曲(カバー等)を一覧から隠します。既定 ON")
+                            Text(L10n.Songs.filterLiveOnlyTitle)
+                            Text(L10n.Songs.filterLiveOnlyCaption)
                                 .font(.imasCaption).foregroundStyle(DS.ink3)
                         }
                     }
@@ -149,8 +162,8 @@ struct SongFilterView: View {
 
                     Toggle(isOn: $showOtherBrand) {
                         VStack(alignment: .leading, spacing: DS.sp1) {
-                            Text("「その他」を表示")
-                            Text("歌枠で歌っただけのカバー等。既定では隠しています")
+                            Text(L10n.Songs.filterOtherBrandTitle)
+                            Text(L10n.Songs.filterOtherBrandCaption)
                                 .font(.imasCaption).foregroundStyle(DS.ink3)
                         }
                     }
@@ -162,12 +175,12 @@ struct SongFilterView: View {
                         Toggle(isOn: $kamisabiOnly) {
                             // 収録はカタログの事実、所持 (UserMarkKind.owned) はユーザーのマーク。
                             // 別物なので同じ記号 (shippingbox) を流用しない。
-                            Label("KAMISABI収録曲のみ", systemImage: "suit.club.fill")
+                            Label(L10n.Songs.filterKamisabiToggleIos, systemImage: "suit.club.fill")
                         }
                     } header: {
                         Text("KAMISABI")
                     } footer: {
-                        Text("音楽カードゲーム「KAMISABI」にカードが収録されている曲だけを表示します。")
+                        Text(L10n.Songs.filterKamisabiCaptionIos)
                             .font(.imasCaption)
                             .foregroundStyle(DS.ink3)
                     }
@@ -176,21 +189,23 @@ struct SongFilterView: View {
                 }
 
                 // 曲タイプ
-                Section("曲タイプ") {
+                Section {
                     songTypePicker
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                } header: {
+                    Text(L10n.Songs.filterSongTypeHeader)
                 }
                 .listRowBackground(DS.surface)
                 .listRowSeparatorTint(DS.sep)
 
                 // アイドル選択
-                Section("アイドル") {
+                Section {
                     Button {
                         showIdolPicker = true
                     } label: {
                         HStack {
                             if selectedIdolIds.isEmpty {
-                                Text("選択なし")
+                                Text(L10n.Songs.filterNone)
                                     .foregroundStyle(DS.ink2)
                             } else {
                                 let names = selectedIdolNames
@@ -209,50 +224,61 @@ struct SongFilterView: View {
                             ImasRowChevron()
                         }
                     }
+                } header: {
+                    Text(L10n.Songs.filterIdolHeader)
                 }
                 .listRowBackground(DS.surface)
                 .listRowSeparatorTint(DS.sep)
 
                 // 作詞・作曲・編曲
-                Section("作詞 / 作曲 / 編曲者") {
-                    TextField("名前を入力", text: $songwriterText)
+                Section {
+                    // LocalizedStringResource を受ける TextField(_:text:) は iOS 26 からなので、prompt: 付きの版 (iOS 16) を使う
+                    TextField(L10n.Songs.filterCreatorPlaceholder, text: $songwriterText, prompt: nil)
                         .textFieldStyle(.plain)
+                } header: {
+                    Text(L10n.Songs.filterCreatorHeader)
                 }
                 .listRowBackground(DS.surface)
                 .listRowSeparatorTint(DS.sep)
 
                 // シリーズ (series_group: LTF / BRILLI@NT WING 等)
-                Section("シリーズ") {
+                Section {
                     NavigationLink {
-                        ListPickerView(title: "シリーズ", items: seriesGroupList, selected: $selectedSeriesGroup)
+                        ListPickerView(title: String(localized: L10n.Songs.filterSeriesHeader),
+                                       items: seriesGroupList, selected: $selectedSeriesGroup)
                     } label: {
-                        Text(selectedSeriesGroup ?? "選択なし")
-                            .foregroundStyle(selectedSeriesGroup == nil ? DS.ink2 : DS.ink)
+                        pickedValue(selectedSeriesGroup)
                     }
+                } header: {
+                    Text(L10n.Songs.filterSeriesHeader)
                 }
                 .listRowBackground(DS.surface)
                 .listRowSeparatorTint(DS.sep)
 
                 // CDシリーズ
-                Section("CDシリーズ") {
+                Section {
                     NavigationLink {
-                        ListPickerView(title: "CDシリーズ", items: cdSeriesList, selected: $selectedCdSeries)
+                        ListPickerView(title: String(localized: L10n.Songs.filterCdSeriesHeader),
+                                       items: cdSeriesList, selected: $selectedCdSeries)
                     } label: {
-                        Text(selectedCdSeries ?? "選択なし")
-                            .foregroundStyle(selectedCdSeries == nil ? DS.ink2 : DS.ink)
+                        pickedValue(selectedCdSeries)
                     }
+                } header: {
+                    Text(L10n.Songs.filterCdSeriesHeader)
                 }
                 .listRowBackground(DS.surface)
                 .listRowSeparatorTint(DS.sep)
 
                 // ライブ名
-                Section("ライブで絞込") {
+                Section {
                     NavigationLink {
-                        ListPickerView(title: "ライブ", items: eventNames, selected: $selectedEventName)
+                        ListPickerView(title: String(localized: L10n.Songs.filterLivePickerTitle),
+                                       items: eventNames, selected: $selectedEventName)
                     } label: {
-                        Text(selectedEventName ?? "選択なし")
-                            .foregroundStyle(selectedEventName == nil ? DS.ink2 : DS.ink)
+                        pickedValue(selectedEventName)
                     }
+                } header: {
+                    Text(L10n.Songs.filterLiveHeader)
                 }
                 .listRowBackground(DS.surface)
                 .listRowSeparatorTint(DS.sep)
@@ -263,7 +289,7 @@ struct SongFilterView: View {
                         Button(role: .destructive) {
                             resetAll()
                         } label: {
-                            Label("すべてリセット", systemImage: "arrow.counterclockwise")
+                            Label(L10n.Songs.filterResetIos, systemImage: "arrow.counterclockwise")
                         }
                     }
                     .listRowBackground(DS.surface)
@@ -284,7 +310,7 @@ struct SongFilterView: View {
             }
             .sheet(isPresented: $showIdolPicker) {
                 IdolPickerView(
-                    title: "アイドル",
+                    title: String(localized: L10n.Songs.filterIdolHeader),
                     idols: idols,
                     selected: selectedIdolIds
                 ) { selectedIdolIds = $0 }
@@ -301,7 +327,7 @@ struct SongFilterView: View {
     private var songTypePicker: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 6) {
-                songTypeChip(value: nil, label: "全て")
+                songTypeChip(value: nil, label: String(localized: L10n.Songs.filterAll))
                 // 絞り込みは今までどおり先頭の 3 種 (ソロ / ユニット / 全体曲)。語はコアの vocabulary。
                 ForEach(Vocab.table.songTypes.prefix(3), id: \.value) { term in
                     songTypeChip(value: term.value, label: term.shortLabel)
@@ -321,6 +347,16 @@ struct SongFilterView: View {
     }
 
     // MARK: - Helpers
+
+    /// 選択ページへ降りる行の値。選んだ値はデータなのでそのまま、未選択は「選択なし」。
+    @ViewBuilder
+    private func pickedValue(_ value: String?) -> some View {
+        if let value {
+            Text(value).foregroundStyle(DS.ink)
+        } else {
+            Text(L10n.Songs.filterNone).foregroundStyle(DS.ink2)
+        }
+    }
 
     private var selectedIdolNames: [String] {
         idols.filter { selectedIdolIds.contains($0.id) }.map(\.name)

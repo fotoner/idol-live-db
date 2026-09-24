@@ -19,10 +19,12 @@ struct SongInfoTab: View {
             performanceStats
             songInfoSection
             if !vm.originalArtists.isEmpty {
-                IdolGridSection(title: "歌唱アイドル", idols: vm.originalArtists, navigate: navigate)
+                IdolGridSection(title: String(localized: L10n.Songs.infoSingersHeader), idols: vm.originalArtists,
+                                navigate: navigate)
             }
             if !vm.performerArtists.isEmpty {
-                IdolGridSection(title: "ライブ歌唱歴", idols: vm.performerArtists, navigate: navigate)
+                IdolGridSection(title: String(localized: L10n.Songs.infoLiveSingersHeader), idols: vm.performerArtists,
+                                navigate: navigate)
             }
             if !vm.variantSongs.isEmpty { variantSongsSection }
             if !vm.relatedSongs.isEmpty { relatedSongsSection }
@@ -36,14 +38,18 @@ struct SongInfoTab: View {
     private var performanceStats: some View {
         VStack(spacing: DS.sp4) {
             HStack(spacing: DS.sp3) {
-                ImasStatTile(systemImage: "mic.fill", value: "\(vm.history.count)", unit: "回", label: "披露回数", seed: seed)
-                ImasStatTile(systemImage: "checkmark.seal.fill", value: "\(vm.collectedShows.count)", unit: "公演", label: "現地回収", seed: seed)
+                ImasStatTile(systemImage: "mic.fill", value: "\(vm.history.count)",
+                             unit: String(localized: L10n.Songs.detailStatUnitTimes),
+                             label: String(localized: L10n.Songs.infoStatPerformances), seed: seed)
+                ImasStatTile(systemImage: "checkmark.seal.fill", value: "\(vm.collectedShows.count)",
+                             unit: String(localized: L10n.Songs.detailStatUnitShows),
+                             label: String(localized: L10n.Songs.infoStatCollected), seed: seed)
             }
             Button {
                 AppAnalytics.tap("song_detail.register_attendance")
                 onRequestAttendPicker()
             } label: {
-                Label("参加ライブを登録して現地回収", systemImage: "plus")
+                Label(L10n.Songs.infoRegisterAttendance, systemImage: "plus")
                     .font(.imasSubhead.weight(.semibold))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, DS.sp4)
@@ -87,7 +93,7 @@ struct SongInfoTab: View {
 
     private var songInfoSection: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
-            ImasSectionHeader(title: "楽曲情報", tight: true)
+            ImasSectionHeader(title: .key(L10n.Songs.infoSectionHeader), tight: true)
             ImasListContainer {
                 infoRows
             }
@@ -108,10 +114,10 @@ struct SongInfoTab: View {
     private func infoRow(_ row: SongInfoRow) -> some View {
         switch row.kind {
         case .plain(let value, let mono):
-            ImasLabeledRow(key: row.key, value: value, mono: mono, seed: seed)
+            ImasLabeledRow(key: String(localized: row.key), value: value, mono: mono, seed: seed)
         case .navigate(let value, let destination):
             Button { navigate(destination) } label: {
-                ImasLabeledRow(key: row.key, value: value, showChevron: true, tappable: true, seed: seed)
+                ImasLabeledRow(key: String(localized: row.key), value: value, showChevron: true, tappable: true, seed: seed)
             }
             .buttonStyle(.plain)
         case .credit(let names):
@@ -120,14 +126,14 @@ struct SongInfoTab: View {
             Button {
                 Task { if let unit = await vm.resolveUnit(id: unitId) { navigate(.unit(unit)) } }
             } label: {
-                ImasLabeledRow(key: row.key, value: value, showChevron: true, tappable: true, seed: seed)
+                ImasLabeledRow(key: String(localized: row.key), value: value, showChevron: true, tappable: true, seed: seed)
             }
             .buttonStyle(.plain)
         }
     }
 
     /// クレジット行: 分割済みの名前を各クリエイター絞り込みへタップ可能に表示する。
-    private func creditRow(key: String, names: [String]) -> some View {
+    private func creditRow(key: LocalizedStringResource, names: [String]) -> some View {
         HStack(spacing: DS.sp4) {
             Text(key).font(.imasSubhead).foregroundStyle(DS.ink2)
             Spacer(minLength: 12)
@@ -155,7 +161,7 @@ struct SongInfoTab: View {
     /// ここが**唯一の到達手段**になる。関連楽曲 (別の曲) とは意味が違うので節を分ける。
     private var variantSongsSection: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
-            ImasSectionHeader(title: "別バージョン", count: "\(vm.variantSongs.count)")
+            ImasSectionHeader(title: .key(L10n.Songs.infoVariantsHeader), count: .verbatim("\(vm.variantSongs.count)"))
             ImasListContainer {
                 ForEach(Array(vm.variantSongs.enumerated()), id: \.element.id) { idx, s in
                     if idx > 0 { ImasRowDivider(inset: DS.sp5 + 44) }
@@ -171,7 +177,7 @@ struct SongInfoTab: View {
     /// 同じシリーズ・ユニット・歌唱アイドルでつながる曲 (ローカル算出)。
     private var relatedSongsSection: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
-            ImasSectionHeader(title: "関連楽曲", count: "\(vm.relatedSongs.count)")
+            ImasSectionHeader(title: .key(L10n.Songs.infoRelatedHeader), count: .verbatim("\(vm.relatedSongs.count)"))
             ImasListContainer {
                 ForEach(Array(vm.relatedSongs.enumerated()), id: \.element.id) { idx, s in
                     if idx > 0 { ImasRowDivider(inset: DS.sp5 + 44) }

@@ -64,12 +64,14 @@ enum LyricClap: String, Sendable, Hashable, CaseIterable {
         }
     }
 
+    /// 表示名。呼んだ時点の言語で文字列にする (凡例・メニュー・読み上げはどれも String を受けるため)。
+    /// PPPH はコール表の記法そのもので、どの言語でも同じ綴り。
     var label: String {
         switch self {
-        case .backBeat:    return "裏拍"
-        case .fourOnFloor: return "4つ打ち"
+        case .backBeat:    return String(localized: L10n.Songs.lyricsClapBackBeat)
+        case .fourOnFloor: return String(localized: L10n.Songs.lyricsClapFourOnFloor)
         case .ppph:        return "PPPH"
-        case .noCall:      return "コールなし"
+        case .noCall:      return String(localized: L10n.Songs.lyricsClapNoCall)
         }
     }
 }
@@ -83,11 +85,12 @@ enum CallEmphasis: String, Sendable, Hashable, CaseIterable {
     /// 演者要望 (赤)。
     case performerRequest = "performer_request"
 
+    /// 表示名。呼んだ時点の言語で文字列にする。
     var label: String {
         switch self {
-        case .normal:           return "通常"
-        case .optional:         return "おこのみで"
-        case .performerRequest: return "演者要望"
+        case .normal:           return String(localized: L10n.Songs.lyricsEmphasisNormal)
+        case .optional:         return String(localized: L10n.Songs.lyricsEmphasisOptional)
+        case .performerRequest: return String(localized: L10n.Songs.lyricsEmphasisPerformerRequest)
         }
     }
 }
@@ -114,18 +117,19 @@ enum CallTiming: String, Sendable, Hashable, CaseIterable {
     /// 追っかけ。歌い終わってから返す。
     case after
 
+    /// 表示名。呼んだ時点の言語で文字列にする。
     var label: String {
         switch self {
-        case .over:  return "同時"
-        case .after: return "追っかけ"
+        case .over:  return String(localized: L10n.Songs.lyricsTimingOver)
+        case .after: return String(localized: L10n.Songs.lyricsTimingAfter)
         }
     }
 
     /// 編集シートの説明文。どちらを選ぶべきかの判断材料。
     var hint: String {
         switch self {
-        case .over:  return "歌に被せて叫ぶ。歌詞と同じタイミング。"
-        case .after: return "フレーズを聞いてから返す。アイマスではこちらが主。"
+        case .over:  return String(localized: L10n.Songs.lyricsTimingOverHint)
+        case .after: return String(localized: L10n.Songs.lyricsTimingAfterHint)
         }
     }
 }

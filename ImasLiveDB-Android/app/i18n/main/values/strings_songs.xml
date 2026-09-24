@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/songs.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- songs.community.penlight.empty.message: ペンライト投票が無いときの誘い文句 -->
+    <string name="songs_community_penlight_empty_message">あなたが思うこの曲のペンライト色を投票しませんか？</string>
+    <!-- songs.community.penlight.empty.title: ペンライト投票が 1 票も無いとき -->
+    <string name="songs_community_penlight_empty_title">まだ投票がありません</string>
+    <!-- songs.community.penlight.header_android: コミュニティタブの節の見出し。Android の文言。iOS の community.penlight.header_ios と ja が違う -->
+    <string name="songs_community_penlight_header_android">ペンライト</string>
+    <!-- songs.community.penlight.vote: ペンライト投票の節の見出し右のボタン (iOS) / ＋ ボタンの読み上げ (Android) -->
+    <string name="songs_community_penlight_vote">投票する</string>
+    <!-- songs.community.penlight.votes: ペンライトの色の組ごとの票数 (iOS) / 節の見出しの右の票の合計 (Android)。1000 以上は桁区切りが付く -->
+    <plurals name="songs_community_penlight_votes">
+        <item quantity="other">%1$,d票</item>
+    </plurals>
+    <!-- songs.community.similar.header: タグが似ている曲 (サーバ算出のおすすめ) の節の見出し -->
+    <string name="songs_community_similar_header">この曲が好きな人にはこれも</string>
+    <!-- songs.community.similar.shared_tags: おすすめの曲の行に出す、共通するタグの数。1000 以上は桁区切りが付く (実際には届かない) -->
+    <plurals name="songs_community_similar_shared_tags">
+        <item quantity="other">タグ%1$,d個一致</item>
+    </plurals>
+    <!-- songs.community.tags.add: タグを付ける操作。iOS はタグが無いときの空状態のボタン、Android は ＋ ボタンの読み上げ -->
+    <string name="songs_community_tags_add">タグを追加</string>
+    <!-- songs.community.tags.empty.title: タグが 1 つも無いとき -->
+    <string name="songs_community_tags_empty_title">タグはまだありません</string>
+    <!-- songs.community.tags.header: コミュニティタブの節の見出し -->
+    <string name="songs_community_tags_header">タグ</string>
+    <!-- songs.community.videos.add.a11y: 参考動画の ＋ ボタンの読み上げ -->
+    <string name="songs_community_videos_add_a11y">参考動画を追加</string>
+    <!-- songs.community.videos.author: 参考動画を投稿した人。name は表示名 -->
+    <string name="songs_community_videos_author">投稿者: %1$s</string>
+    <!-- songs.community.videos.edit.a11y: 参考動画の行の ✎ ボタンの読み上げ -->
+    <string name="songs_community_videos_edit_a11y">参考動画を編集</string>
+    <!-- songs.community.videos.empty.message_android: 参考動画が無いときの誘い文句。Android の文言。iOS の community.videos.empty.message_ios と ja が違う -->
+    <string name="songs_community_videos_empty_message_android">ライブ映像などの参考動画を共有しませんか？</string>
+    <!-- songs.community.videos.empty.title: 参考動画が 1 本も無いとき -->
+    <string name="songs_community_videos_empty_title">参考動画はまだありません</string>
+    <!-- songs.community.videos.header: コミュニティタブの節の見出し -->
+    <string name="songs_community_videos_header">参考動画</string>
+    <!-- songs.copy.artists: 曲の長押しメニュー。歌唱者の表記をコピーする -->
+    <string name="songs_copy_artists">歌唱者をコピー</string>
+    <!-- songs.copy.title: 曲の行・曲詳細の曲名を長押ししたときのメニュー -->
+    <string name="songs_copy_title">曲名をコピー</string>
+    <!-- songs.detail.favorite.off: 曲詳細のお気に入りボタン (入っていないとき) -->
+    <string name="songs_detail_favorite_off">お気に入り</string>
+    <!-- songs.detail.favorite.on: 曲詳細のお気に入りボタン (お気に入りに入っているとき) -->
+    <string name="songs_detail_favorite_on">お気に入り済み</string>
+    <!-- songs.detail.kamisabi.header: 曲詳細の KAMISABI カードの節の見出し -->
+    <string name="songs_detail_kamisabi_header">KAMISABIカード</string>
+    <!-- songs.detail.kamisabi.toggle: KAMISABI のカードを持っているかのスイッチ -->
+    <string name="songs_detail_kamisabi_toggle">カード所持</string>
+    <!-- songs.detail.login.dialog: 未ログインでタグ・動画・投票をしようとしたときのダイアログの本文 -->
+    <string name="songs_detail_login_dialog">タグ・動画・投票にはログインが必要です。</string>
+    <!-- songs.detail.login.prompt: コミュニティタブの先頭に出す、未ログインの人への案内 -->
+    <string name="songs_detail_login_prompt">タグ・動画・投票にはログインが必要です</string>
+    <!-- songs.detail.menu.apple_music: 曲詳細の … メニュー (Apple Music は固有名詞) -->
+    <string name="songs_detail_menu_apple_music">Apple Musicで開く</string>
+    <!-- songs.detail.menu.edit: 曲詳細の … メニュー -->
+    <string name="songs_detail_menu_edit">この楽曲を編集</string>
+    <!-- songs.detail.menu.edit_history: 曲詳細の … メニュー -->
+    <string name="songs_detail_menu_edit_history">編集履歴</string>
+    <!-- songs.detail.menu.lyrics_site_android: 曲詳細の … メニュー。外部の歌詞サイトを開く。Android の文言。iOS の detail.menu.lyrics_site_ios と ja が違う -->
+    <string name="songs_detail_menu_lyrics_site_android">歌詞を見る</string>
+    <!-- songs.detail.menu.more.a11y: 曲詳細の … ボタンの読み上げ -->
+    <string name="songs_detail_menu_more_a11y">その他</string>
+    <!-- songs.detail.play: 曲詳細の再生ボタン -->
+    <string name="songs_detail_play">再生</string>
+    <!-- songs.detail.stat.unit_shows: 統計タイルの数字の単位 (現地回収した公演の数) -->
+    <string name="songs_detail_stat_unit_shows">公演</string>
+    <!-- songs.detail.stat.unit_times: 統計タイルの数字の単位 (披露回数など) -->
+    <string name="songs_detail_stat_unit_times">回</string>
+    <!-- songs.detail.stop: 曲詳細の再生ボタン (再生中) -->
+    <string name="songs_detail_stop">停止</string>
+    <!-- songs.detail.tab.community: 曲詳細のタブ (タグ・参考動画・ペンライト投票) -->
+    <string name="songs_detail_tab_community">コミュニティ</string>
+    <!-- songs.detail.tab.history: 曲詳細のタブ (ライブで歌われた記録) -->
+    <string name="songs_detail_tab_history">披露履歴</string>
+    <!-- songs.detail.tab.info: 曲詳細のタブ (曲の情報と歌唱アイドル) -->
+    <string name="songs_detail_tab_info">情報・歌唱</string>
+    <!-- songs.detail.write_action.card_owned: 端末への保存に失敗したときの知らせに入る操作の名前 (KAMISABI のカード所持) -->
+    <string name="songs_detail_write_action_card_owned">カード所持の記録</string>
+    <!-- songs.detail.write_action.favorite: 端末への保存に失敗したときの知らせに入る操作の名前 (「{操作}に失敗しました」の {操作}) -->
+    <string name="songs_detail_write_action_favorite">お気に入りの切り替え</string>
+    <!-- songs.filter.all: フィルタシートのチップ。絞り込まない (曲タイプ・ブランド・アイドル選択のブランド) -->
+    <string name="songs_filter_all">全て</string>
+    <!-- songs.filter.apply: フィルタシートの条件を一覧に反映するボタン -->
+    <string name="songs_filter_apply">適用</string>
+    <!-- songs.filter.brand.header: フィルタシートの節の見出し -->
+    <string name="songs_filter_brand_header">ブランド</string>
+    <!-- songs.filter.cd_series.header: フィルタシートの CD シリーズ選択の行・節の見出しと、選択画面のタイトル -->
+    <string name="songs_filter_cd_series_header">CDシリーズ</string>
+    <!-- songs.filter.collect.all: 現地回収の絞り込みの選択肢。iOS は SongCollectFilter の rawValue (保存値。変えない) を表示に使っていたもの -->
+    <string name="songs_filter_collect_all">すべて</string>
+    <!-- songs.filter.collect.collected: 現地回収の絞り込みの選択肢。現地で聴いた曲だけ -->
+    <string name="songs_filter_collect_collected">回収済のみ</string>
+    <!-- songs.filter.collect.header: フィルタシートの節の見出し (現地で聴いたかどうかで絞る) -->
+    <string name="songs_filter_collect_header">現地回収</string>
+    <!-- songs.filter.collect.uncollected: 現地回収の絞り込みの選択肢。まだ現地で聴いていない曲だけ -->
+    <string name="songs_filter_collect_uncollected">未回収のみ</string>
+    <!-- songs.filter.creator.header: フィルタシートの節の見出し (作家の名前で絞る) -->
+    <string name="songs_filter_creator_header">作詞 / 作曲 / 編曲者</string>
+    <!-- songs.filter.creator.placeholder: 作家の名前の入力欄のプレースホルダ -->
+    <string name="songs_filter_creator_placeholder">名前を入力</string>
+    <!-- songs.filter.idol.header: フィルタシートのアイドル選択の行 (iOS は節の見出しとアイドル選択画面のタイトルにも使う) -->
+    <string name="songs_filter_idol_header">アイドル</string>
+    <!-- songs.filter.idol.summary_more: 選んだアイドルが 4 人以上のときの表示。names は先頭 2 人の名前 (・ で連結済み)、count は残りの人数 -->
+    <plurals name="songs_filter_idol_summary_more">
+        <item quantity="other">%1$s 他%2$,d人</item>
+    </plurals>
+    <!-- songs.filter.kamisabi.caption_android: KAMISABI のスイッチの説明。Android の文言。iOS の filter.kamisabi.caption_ios と ja が違う -->
+    <string name="songs_filter_kamisabi_caption_android">音楽カードゲーム KAMISABI にカードがある曲だけ表示</string>
+    <!-- songs.filter.kamisabi.toggle_android: KAMISABI の絞り込みのスイッチ。Android の文言。iOS の filter.kamisabi.toggle_ios と ja が違う -->
+    <string name="songs_filter_kamisabi_toggle_android">KAMISABI収録のみ</string>
+    <!-- songs.filter.list_mode.albums: 表示形式のセグメント。CD 単位のカードで並べる -->
+    <string name="songs_filter_list_mode_albums">アルバム</string>
+    <!-- songs.filter.list_mode.header: フィルタシートの節の見出し (曲 / アルバム / シリーズ) -->
+    <string name="songs_filter_list_mode_header">表示形式</string>
+    <!-- songs.filter.list_mode.series: 表示形式のセグメント。シリーズ単位のカードで並べる -->
+    <string name="songs_filter_list_mode_series">シリーズ</string>
+    <!-- songs.filter.list_mode.songs: 表示形式のセグメント。曲を 1 行ずつ並べる -->
+    <string name="songs_filter_list_mode_songs">楽曲</string>
+    <!-- songs.filter.live.header: フィルタシートのライブ選択の行・節の見出し -->
+    <string name="songs_filter_live_header">ライブで絞込</string>
+    <!-- songs.filter.live.picker_title: ライブを選ぶ画面のタイトル -->
+    <string name="songs_filter_live_picker_title">ライブ</string>
+    <!-- songs.filter.live_only.caption: ライブ限定曲を隠す のスイッチの説明 -->
+    <string name="songs_filter_live_only_caption">セトリにしか無い曲(カバー等)を一覧から隠します。既定 ON</string>
+    <!-- songs.filter.live_only.title: フィルタシートのスイッチ -->
+    <string name="songs_filter_live_only_title">ライブ限定曲を隠す</string>
+    <!-- songs.filter.my_mark.favorite: マイマークの絞り込みのスイッチ -->
+    <string name="songs_filter_my_mark_favorite">お気に入りのみ</string>
+    <!-- songs.filter.my_mark.footer: マイマークの節の注記。ON にした条件すべてに当てはまる曲だけ残る -->
+    <string name="songs_filter_my_mark_footer">チェック ON で AND 条件絞り込み</string>
+    <!-- songs.filter.my_mark.header: フィルタシートの節の見出し (担当・お気に入り・メモで絞る) -->
+    <string name="songs_filter_my_mark_header">マイマーク</string>
+    <!-- songs.filter.my_mark.my_pick: マイマークの絞り込みのスイッチ -->
+    <string name="songs_filter_my_mark_my_pick">担当アイドルの曲のみ</string>
+    <!-- songs.filter.my_mark.my_pick_caption: 担当アイドルの曲のみ のスイッチの説明 -->
+    <string name="songs_filter_my_mark_my_pick_caption">担当アイドルが歌唱者にいる曲だけ表示</string>
+    <!-- songs.filter.my_mark.note: マイマークの絞り込みのスイッチ -->
+    <string name="songs_filter_my_mark_note">メモがある曲のみ</string>
+    <!-- songs.filter.none: シリーズ・CD シリーズ・ライブ・アイドルを選んでいないときの表示 / 選択を外す行 -->
+    <string name="songs_filter_none">選択なし</string>
+    <!-- songs.filter.other_brand.caption: 「その他」を表示 のスイッチの説明。歌枠 = 歌の配信 -->
+    <string name="songs_filter_other_brand_caption">歌枠で歌っただけのカバー等。既定では隠しています</string>
+    <!-- songs.filter.other_brand.title: フィルタシートのスイッチ。「その他」はどのブランドにも属さない曲の分類 -->
+    <string name="songs_filter_other_brand_title">「その他」を表示</string>
+    <!-- songs.filter.picker.back.a11y: 選択ページの ← の読み上げ -->
+    <string name="songs_filter_picker_back_a11y">フィルタに戻る</string>
+    <!-- songs.filter.picker.clear_all: アイドル選択ページで選択をすべて外す行 -->
+    <string name="songs_filter_picker_clear_all">選択をすべて解除</string>
+    <!-- songs.filter.picker.idol_search_prompt: アイドル選択ページの絞り込み欄のプレースホルダ -->
+    <string name="songs_filter_picker_idol_search_prompt">アイドル名で絞り込み</string>
+    <!-- songs.filter.picker.idols_title: アイドル選択ページのタイトル。count は選んだ人数 -->
+    <plurals name="songs_filter_picker_idols_title">
+        <item quantity="other">アイドル (%1$,d)</item>
+    </plurals>
+    <!-- songs.filter.picker.search_prompt: 選択ページの絞り込み欄のプレースホルダ。title はページの名前 (シリーズ / CDシリーズ / ライブ) -->
+    <string name="songs_filter_picker_search_prompt">%1$sで絞り込み</string>
+    <!-- songs.filter.remix.caption: リミックスを含む のスイッチの説明 -->
+    <string name="songs_filter_remix_caption">アレンジ・リミックス曲を表示</string>
+    <!-- songs.filter.remix.title: フィルタシートのスイッチ -->
+    <string name="songs_filter_remix_title">リミックスを含む</string>
+    <!-- songs.filter.reset_android: フィルタシートの条件をすべて戻すボタン。Android の文言。iOS の filter.reset_ios と ja が違う -->
+    <string name="songs_filter_reset_android">リセット</string>
+    <!-- songs.filter.series.header: フィルタシートのシリーズ選択の行・節の見出しと、選択画面のタイトル -->
+    <string name="songs_filter_series_header">シリーズ</string>
+    <!-- songs.filter.song_type.header: フィルタシートの節の見出し (ソロ / ユニット / 全体曲。語はコアの vocabulary) -->
+    <string name="songs_filter_song_type_header">曲タイプ</string>
+    <!-- songs.filter.sort.header: フィルタシートの節の見出し -->
+    <string name="songs_filter_sort_header">並び順</string>
+    <!-- songs.filter.title: 曲一覧のフィルタシートの見出し -->
+    <string name="songs_filter_title">フィルター・並び替え</string>
+    <!-- songs.grid.albums.empty: 表示形式がアルバムで 1 件も無いとき -->
+    <string name="songs_grid_albums_empty">アルバムが見つかりません</string>
+    <!-- songs.grid.cd_count: シリーズのカードの CD の枚数。1000 以上は桁区切りが付く -->
+    <plurals name="songs_grid_cd_count">
+        <item quantity="other">%1$,d枚</item>
+    </plurals>
+    <!-- songs.grid.series.empty: 表示形式がシリーズで 1 件も無いとき -->
+    <string name="songs_grid_series_empty">シリーズが見つかりません</string>
+    <!-- songs.grid.song_count: アルバム・シリーズのカードの曲数。1000 以上は桁区切りが付く -->
+    <plurals name="songs_grid_song_count">
+        <item quantity="other">%1$,d曲</item>
+    </plurals>
+    <!-- songs.history.co_occurring.header: 披露履歴タブの節の見出し -->
+    <string name="songs_history_co_occurring_header">同じ公演で歌われた曲</string>
+    <!-- songs.history.co_occurring.note: 同じ公演で歌われた曲 の節の注記 -->
+    <string name="songs_history_co_occurring_note">同じ公演に両方あった公演数です (1 公演で 2 回歌っても 1 公演)。次のライブで一緒に来るとは限りません。</string>
+    <!-- songs.history.co_occurring.row: 同じ公演で歌われた曲の行の副題。together は一緒に歌われた公演数、performances はその曲が歌われた公演数。together は 1000 以上は桁区切りが付く (実際には届かない) -->
+    <plurals name="songs_history_co_occurring_row">
+        <item quantity="other">いっしょに%1$,d公演 ／ 全%2$d公演</item>
+    </plurals>
+    <!-- songs.history.empty.message: ライブで一度も歌われていないときの説明 -->
+    <string name="songs_history_empty_message">この曲がライブで披露されると、ここに記録されます。</string>
+    <!-- songs.history.empty.title: ライブで一度も歌われていないとき -->
+    <string name="songs_history_empty_title">披露履歴はまだありません</string>
+    <!-- songs.history.log.count: ライブ披露履歴 の見出しの右の回数。1000 以上は桁区切りが付く -->
+    <plurals name="songs_history_log_count">
+        <item quantity="other">%1$,d回</item>
+    </plurals>
+    <!-- songs.history.log.header: 披露履歴タブの節の見出し (公演ごとの一覧) -->
+    <string name="songs_history_log_header">ライブ披露履歴</string>
+    <!-- songs.history.singers.header: 披露履歴タブの節の見出し (歌った回数の多い順) -->
+    <string name="songs_history_singers_header">この曲を歌った人</string>
+    <!-- songs.history.singers.note: この曲を歌った人 の節の注記 -->
+    <string name="songs_history_singers_note">セトリに残っている歌唱の集計です。分母は上の「総披露」と同じ回数です。</string>
+    <!-- songs.history.singers.times: 歌った人の行の副題。times はその人が歌った回数、total は全体の披露回数。times は 1000 以上は桁区切りが付く (実際には届かない) -->
+    <plurals name="songs_history_singers_times">
+        <item quantity="other">%1$,d回 ／ 全%2$d回</item>
+    </plurals>
+    <!-- songs.history.stat.first: 統計タイルのラベル。初めて歌われた年月 -->
+    <string name="songs_history_stat_first">初披露</string>
+    <!-- songs.history.stat.last: 統計タイルのラベル。最後に歌われた年月 -->
+    <string name="songs_history_stat_last">最終披露</string>
+    <!-- songs.history.stat.total: 統計タイルのラベル。ライブで歌われた回数の合計 -->
+    <string name="songs_history_stat_total">総披露</string>
+    <!-- songs.info.live_singers.header: 情報タブの節の見出し (ライブで歌ったことがあるアイドル) -->
+    <string name="songs_info_live_singers_header">ライブ歌唱歴</string>
+    <!-- songs.info.register_attendance: 参加したライブを登録する導線 (登録すると現地回収に数えられる) -->
+    <string name="songs_info_register_attendance">参加ライブを登録して現地回収</string>
+    <!-- songs.info.related.header: 情報タブの節の見出し (同じシリーズ・ユニット・歌唱者の曲) -->
+    <string name="songs_info_related_header">関連楽曲</string>
+    <!-- songs.info.row.arranger: 楽曲情報の行 -->
+    <string name="songs_info_row_arranger">編曲</string>
+    <!-- songs.info.row.artist: 楽曲情報の行 -->
+    <string name="songs_info_row_artist">アーティスト</string>
+    <!-- songs.info.row.brand: 楽曲情報の行 (アイマスのシリーズ) -->
+    <string name="songs_info_row_brand">ブランド</string>
+    <!-- songs.info.row.cd_series: 楽曲情報の行 -->
+    <string name="songs_info_row_cd_series">CDシリーズ</string>
+    <!-- songs.info.row.cd_title: 楽曲情報の行。収録されている CD の名前 -->
+    <string name="songs_info_row_cd_title">収録</string>
+    <!-- songs.info.row.composer: 楽曲情報の行 -->
+    <string name="songs_info_row_composer">作曲</string>
+    <!-- songs.info.row.duration: 楽曲情報の行 (曲の長さ) -->
+    <string name="songs_info_row_duration">再生時間</string>
+    <!-- songs.info.row.kana: 楽曲情報の行。曲名の読み仮名 -->
+    <string name="songs_info_row_kana">よみ</string>
+    <!-- songs.info.row.lyricist: 楽曲情報の行 -->
+    <string name="songs_info_row_lyricist">作詞</string>
+    <!-- songs.info.row.release_date: 楽曲情報の行 -->
+    <string name="songs_info_row_release_date">リリース日</string>
+    <!-- songs.info.row.series: 楽曲情報の行 -->
+    <string name="songs_info_row_series">シリーズ</string>
+    <!-- songs.info.row.type: 楽曲情報の行 (ソロ / ユニット / 全体曲) -->
+    <string name="songs_info_row_type">タイプ</string>
+    <!-- songs.info.row.unit: 楽曲情報の行 -->
+    <string name="songs_info_row_unit">ユニット</string>
+    <!-- songs.info.section.header: 情報タブの節の見出し -->
+    <string name="songs_info_section_header">楽曲情報</string>
+    <!-- songs.info.singers.header: 情報タブの節の見出し (オリジナルの歌唱メンバー) -->
+    <string name="songs_info_singers_header">歌唱アイドル</string>
+    <!-- songs.info.stat.collected: 統計タイルのラベル。自分が現地で聴いた公演の数 -->
+    <string name="songs_info_stat_collected">現地回収</string>
+    <!-- songs.info.stat.performances: 統計タイルのラベル。ライブで歌われた回数 -->
+    <string name="songs_info_stat_performances">披露回数</string>
+    <!-- songs.list.action.add: 曲を新しく登録するボタン (iOS はメニューの項目、Android は ＋ の読み上げ) -->
+    <string name="songs_list_action_add">曲を追加</string>
+    <!-- songs.list.action.filter.a11y: フィルタシートを開くボタンの読み上げ -->
+    <string name="songs_list_action_filter_a11y">フィルター</string>
+    <!-- songs.list.action.tag_filter: タグを選んで絞り込むボタン (iOS はメニューの項目、Android はボタンの読み上げ) -->
+    <string name="songs_list_action_tag_filter">タグで絞り込み</string>
+    <!-- songs.list.chip.collected: 適用中の絞り込みのチップ。現地で聴いた (回収した) 曲だけ -->
+    <string name="songs_list_chip_collected">現地回収済</string>
+    <!-- songs.list.chip.favorite: 適用中の絞り込みのチップ。お気に入りの曲だけ -->
+    <string name="songs_list_chip_favorite">お気に入り</string>
+    <!-- songs.list.chip.idols: 適用中の絞り込みのチップ。選んだアイドルの人数 -->
+    <plurals name="songs_list_chip_idols">
+        <item quantity="other">アイドル %1$,d人</item>
+    </plurals>
+    <!-- songs.list.chip.kamisabi: 適用中の絞り込みのチップ。音楽カードゲーム KAMISABI に収録された曲だけ (KAMISABI は固有名詞) -->
+    <string name="songs_list_chip_kamisabi">KAMISABI収録</string>
+    <!-- songs.list.chip.my_pick: 適用中の絞り込みのチップ (× で外す)。担当アイドルの曲だけ -->
+    <string name="songs_list_chip_my_pick">担当</string>
+    <!-- songs.list.chip.note: 適用中の絞り込みのチップ。メモがある曲だけ -->
+    <string name="songs_list_chip_note">メモあり</string>
+    <!-- songs.list.chip.tag_count: 適用中のタグのチップ (タグ 1 つのとき)。name はタグ名、count はそのタグの曲数。1000 以上は桁区切りが付く -->
+    <plurals name="songs_list_chip_tag_count">
+        <item quantity="other">%1$s %2$,d曲</item>
+    </plurals>
+    <!-- songs.list.chip.uncollected: 適用中の絞り込みのチップ。まだ現地で聴いていない曲だけ -->
+    <string name="songs_list_chip_uncollected">未回収</string>
+    <!-- songs.list.count.albums: 表示形式がアルバムのときの件数 (CD の枚数)。1000 以上は桁区切りが付く -->
+    <plurals name="songs_list_count_albums">
+        <item quantity="other">%1$,d枚</item>
+    </plurals>
+    <!-- songs.list.count.series: 表示形式がシリーズのときの件数。1000 以上は桁区切りが付く -->
+    <plurals name="songs_list_count_series">
+        <item quantity="other">%1$,dシリーズ</item>
+    </plurals>
+    <!-- songs.list.count.songs_android: 一覧の上の件数。Android の文言。iOS の list.count.songs_ios と ja が違う。1000 以上は桁区切りが付く (以前の Android は付かなかった) -->
+    <plurals name="songs_list_count_songs_android">
+        <item quantity="other">%1$,d件</item>
+    </plurals>
+    <!-- songs.list.empty_filter.message: フィルタで 1 曲も残らなかったときの説明 -->
+    <string name="songs_list_empty_filter_message">フィルタ条件を変更するか、フィルタを解除してください。</string>
+    <!-- songs.list.empty_filter.title: フィルタで 1 曲も残らなかったときの空状態の見出し -->
+    <string name="songs_list_empty_filter_title">条件に一致する楽曲がありません</string>
+    <!-- songs.list.empty_search.message: 検索欄の語で 1 曲も残らなかったときの説明。query は利用者が打った語 -->
+    <string name="songs_list_empty_search_message">「%1$s」に一致する楽曲がありません</string>
+    <!-- songs.list.empty_search.title: 検索欄の語で 1 曲も残らなかったときの空状態の見出し -->
+    <string name="songs_list_empty_search_title">絞り込み結果がありません</string>
+    <!-- songs.list.fuzzy.header: 打った語に完全には一致しないが近い曲 (あいまい検索の候補) の節の見出し -->
+    <string name="songs_list_fuzzy_header">もしかして</string>
+    <!-- songs.list.login.dialog: 未ログインで曲を追加しようとしたときのダイアログの本文 -->
+    <string name="songs_list_login_dialog">楽曲の追加にはログインが必要です。</string>
+    <!-- songs.list.mastery.write_action: 端末への保存に失敗したときの知らせに入る操作の名前 (「{操作}に失敗しました」の {操作})。長押しで習熟度を付けたとき -->
+    <string name="songs_list_mastery_write_action">習熟度の記録</string>
+    <!-- songs.list.name_filter.albums: 検索欄の頭のチップ。表示形式がアルバムのとき -->
+    <string name="songs_list_name_filter_albums">アルバム名</string>
+    <!-- songs.list.name_filter.series: 検索欄の頭のチップ。表示形式がシリーズのとき -->
+    <string name="songs_list_name_filter_series">シリーズ名</string>
+    <!-- songs.list.name_filter.songs: 検索欄の頭のチップ (何で絞るか)。表示形式が曲のとき -->
+    <string name="songs_list_name_filter_songs">曲名</string>
+    <!-- songs.list.scope.creator: 検索対象の切り替え。作詞・作曲・編曲者の名前で探す -->
+    <string name="songs_list_scope_creator">作詞作曲</string>
+    <!-- songs.list.scope.performer: 検索対象の切り替え。歌唱したアイドルの名前で探す -->
+    <string name="songs_list_scope_performer">歌唱</string>
+    <!-- songs.list.scope_suggestion.count: 別の検索対象に切り替えると何件当たるかのチップ。scope は検索対象の名前 (list.name_filter.* / list.scope.*)。1000 以上は桁区切りが付く -->
+    <plurals name="songs_list_scope_suggestion_count">
+        <item quantity="other">%1$s %2$,d件</item>
+    </plurals>
+    <!-- songs.list.scope_suggestion.lead: 検索欄の下の行の頭。続けて「歌唱 3件」のような別の検索対象のチップが並ぶ -->
+    <string name="songs_list_scope_suggestion_lead">ほかに</string>
+    <!-- songs.list.search.prompt: 曲一覧の検索欄のプレースホルダ (何で絞るかは頭のチップが示すので動詞だけ) -->
+    <string name="songs_list_search_prompt">絞り込み</string>
+    <!-- songs.list.search_mode.switch.a11y: 検索対象のチップの ▼ の読み上げ -->
+    <string name="songs_list_search_mode_switch_a11y">検索対象を切り替え</string>
+    <!-- songs.list.sort.menu.a11y: 並び替えメニューの ▼ の読み上げ -->
+    <string name="songs_list_sort_menu_a11y">並び替え</string>
+    <!-- songs.list.sort.selected.a11y: 並び替えメニューで選ばれている項目のチェックの読み上げ -->
+    <string name="songs_list_sort_selected_a11y">選択中</string>
+    <!-- songs.list.tag_filter.error: タグで絞り込むための情報を取れなかった (オフライン等) ときのバナー。一覧は絞られていない -->
+    <string name="songs_list_tag_filter_error">タグ絞り込みの取得に失敗しました。表示中の一覧にはタグ条件が反映されていません。</string>
+    <!-- songs.list.title: 曲一覧 (楽曲タブ) のナビゲーションタイトル -->
+    <string name="songs_list_title">楽曲</string>
+    <!-- songs.now_playing.pause.a11y: 再生中バーの ‖ ボタンの読み上げ -->
+    <string name="songs_now_playing_pause_a11y">一時停止</string>
+    <!-- songs.now_playing.play.a11y: 再生中バーの ▶ ボタンの読み上げ -->
+    <string name="songs_now_playing_play_a11y">再生</string>
+    <!-- songs.penlight.cancel: ペンライト投票シートを閉じるボタン -->
+    <string name="songs_penlight_cancel">取消</string>
+    <!-- songs.penlight.instructions: ペンライト投票シートの説明 -->
+    <string name="songs_penlight_instructions">ペンライトの色を選んで投票してください。複数選択できます。</string>
+    <!-- songs.penlight.submit: ペンライト投票シートの送信ボタン -->
+    <string name="songs_penlight_submit">投票する</string>
+    <!-- songs.penlight.title: ペンライト投票シートの見出し -->
+    <string name="songs_penlight_title">ペンライトカラーを投票</string>
+    <!-- songs.row.edit_mastery: 曲の行の長押しメニュー。習熟度の段階を付け替える -->
+    <string name="songs_row_edit_mastery">習熟度を変える</string>
+    <!-- songs.row.my_pick: 曲の行の印。担当アイドルが歌っている曲 -->
+    <string name="songs_row_my_pick">担当</string>
+    <!-- songs.sort.ascending: 並びの方向 (小さい順・古い順) -->
+    <string name="songs_sort_ascending">昇順</string>
+    <!-- songs.sort.collected_count: 曲の並び順。自分が現地で聴いた (回収した) 回数の順 -->
+    <string name="songs_sort_collected_count">現地回収回数順</string>
+    <!-- songs.sort.collected_rate: 曲の並び順。披露回数のうち自分が現地で聴いた割合の順 -->
+    <string name="songs_sort_collected_rate">回収率順</string>
+    <!-- songs.sort.default: フィルタシートの並びの方向で「並び順ごとの既定の向き」を選ぶチップ -->
+    <string name="songs_sort_default">既定</string>
+    <!-- songs.sort.descending: 並びの方向 (大きい順・新しい順) -->
+    <string name="songs_sort_descending">降順</string>
+    <!-- songs.sort.performance_count: 曲の並び順。ライブで歌われた回数の順 -->
+    <string name="songs_sort_performance_count">披露回数順</string>
+    <!-- songs.sort.release_date: 曲の並び順。発売日の順 -->
+    <string name="songs_sort_release_date">リリース日順</string>
+    <!-- songs.sort.title_kana: 曲の並び順。曲名の読み (日本語の仮名) の順。iOS は SongSortOrder の rawValue (保存値ではない) を表示に使っていたもの -->
+    <string name="songs_sort_title_kana">五十音順</string>
+</resources>

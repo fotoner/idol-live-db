@@ -60,6 +60,10 @@ import com.fugaif.imaslivedb.data.model.SongCollectFilter
 import com.fugaif.imaslivedb.data.model.SongSortOrder
 import com.fugaif.imaslivedb.data.model.SongWithArtists
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.coreText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.CommunityLoginPromptDialog
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.ImasFilterChip
@@ -104,7 +108,7 @@ fun SongListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("楽曲") },
+                title = { Text(L10n.Songs.listTitle.resolve()) },
                 actions = {
                     // BAN 済みには導線自体を出さない。未ログインはゲートがログイン誘導へ回す。
                     if (canEditHere) {
@@ -114,7 +118,7 @@ fun SongListScreen(
                                 present = { showSongCreate = true }
                             )
                         }) {
-                            Icon(Icons.Filled.Add, contentDescription = "曲を追加")
+                            Icon(Icons.Filled.Add, contentDescription = L10n.Songs.listActionAdd.resolve())
                         }
                     }
                     BadgedBox(
@@ -128,7 +132,7 @@ fun SongListScreen(
                         IconButton(onClick = { showTagFilter = true }) {
                             Icon(
                                 imageVector = Icons.Filled.Sell,
-                                contentDescription = "タグで絞り込み"
+                                contentDescription = L10n.Songs.listActionTagFilter.resolve()
                             )
                         }
                     }
@@ -143,7 +147,7 @@ fun SongListScreen(
                         IconButton(onClick = { showFilter = true }) {
                             Icon(
                                 imageVector = Icons.Filled.FilterList,
-                                contentDescription = "フィルター"
+                                contentDescription = L10n.Songs.listActionFilterA11y.resolve()
                             )
                         }
                     }
@@ -167,7 +171,7 @@ fun SongListScreen(
                         onExpandedChange = {},
                         // 何を絞るかは頭のチップが示すので、プレースホルダは動詞だけでいい。
                         // 「曲名 曲名で検索」と二重に書くと狭い欄が余計に読みにくくなる。
-                        placeholder = { Text("絞り込み") },
+                        placeholder = { Text(L10n.Songs.listSearchPrompt.resolve()) },
                         leadingIcon = { SearchModeChip(uiState = uiState, viewModel = viewModel) }
                     )
                 },
@@ -203,10 +207,10 @@ fun SongListScreen(
                 Text(
                     // 画面に並んでいる行数。あいまい候補も見えている以上、数から外さない。
                     text = when (uiState.listMode) {
-                        SongListMode.SONGS -> "${uiState.songs.size + uiState.fuzzySongs.size}件"
-                        SongListMode.ALBUMS -> "${uiState.albums.size}枚"
-                        SongListMode.SERIES -> "${uiState.series.size}シリーズ"
-                    },
+                        SongListMode.SONGS -> L10n.Songs.listCountSongsAndroid(count = uiState.songs.size + uiState.fuzzySongs.size)
+                        SongListMode.ALBUMS -> L10n.Songs.listCountAlbums(count = uiState.albums.size)
+                        SongListMode.SERIES -> L10n.Songs.listCountSeries(count = uiState.series.size)
+                    }.resolve(),
                     style = MaterialTheme.typography.bodySmall,
                     color = DS.ink2
                 )
@@ -229,16 +233,20 @@ fun SongListScreen(
             } else if (uiState.songs.isEmpty() && uiState.fuzzySongs.isEmpty()) {
                 ImasEmptyState(
                     icon = Icons.Filled.FilterList,
-                    title = if (uiState.searchText.isEmpty()) {
-                        "条件に一致する楽曲がありません"
-                    } else {
-                        "絞り込み結果がありません"
-                    },
-                    message = if (uiState.searchText.isEmpty()) {
-                        "フィルタ条件を変更するか、フィルタを解除してください。"
-                    } else {
-                        "「${uiState.searchText}」に一致する楽曲がありません"
-                    }
+                    title = (
+                        if (uiState.searchText.isEmpty()) {
+                            L10n.Songs.listEmptyFilterTitle
+                        } else {
+                            L10n.Songs.listEmptySearchTitle
+                        }
+                    ).resolve(),
+                    message = (
+                        if (uiState.searchText.isEmpty()) {
+                            L10n.Songs.listEmptyFilterMessage
+                        } else {
+                            L10n.Songs.listEmptySearchMessage(query = uiState.searchText)
+                        }
+                    ).resolve()
                 )
             } else {
                 // 歌唱・作詞作曲で絞っているときの「なぜ出ているか」の説明は、画面の行ぶんを
@@ -254,7 +262,7 @@ fun SongListScreen(
                         item {
                             // 打った通りではない候補なので、区切って理由を書く。黙って下に足すと
                             // 「なぜこの曲が出ているのか」が読めず、一致の精度を疑わせる。
-                            ImasSectionHeader(title = "もしかして", tight = true)
+                            ImasSectionHeader(title = L10n.Songs.listFuzzyHeader, tight = true)
                         }
                         // key を分けるのは、同じ曲が両方に出た時に LazyColumn が落ちないため
                         // (VM 側で重複は除いているが、key の衝突は例外になるので保険をかける)。
@@ -330,7 +338,7 @@ fun SongListScreen(
 
     if (showLoginPrompt) {
         CommunityLoginPromptDialog(
-            message = "楽曲の追加にはログインが必要です。",
+            message = L10n.Songs.listLoginDialog.resolve(),
             onDismiss = { showLoginPrompt = false }
         )
     }
@@ -400,7 +408,7 @@ private fun SearchModeChip(uiState: SongListUiState, viewModel: SongListViewMode
                 .padding(start = 10.dp, end = if (switchable) 2.dp else 10.dp, top = 4.dp, bottom = 4.dp)
         ) {
             Text(
-                text = uiState.searchMode.label(uiState.listMode),
+                text = uiState.searchMode.label(uiState.listMode).resolve(),
                 style = MaterialTheme.typography.labelMedium,
                 color = DS.ink2,
                 maxLines = 1
@@ -408,7 +416,7 @@ private fun SearchModeChip(uiState: SongListUiState, viewModel: SongListViewMode
             if (switchable) {
                 Icon(
                     imageVector = Icons.Filled.ArrowDropDown,
-                    contentDescription = "検索対象を切り替え",
+                    contentDescription = L10n.Songs.listSearchModeSwitchA11y.resolve(),
                     tint = DS.ink2,
                     modifier = Modifier.size(18.dp)
                 )
@@ -417,7 +425,7 @@ private fun SearchModeChip(uiState: SongListUiState, viewModel: SongListViewMode
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             SongSearchMode.entries.forEach { mode ->
                 DropdownMenuItem(
-                    text = { Text(mode.label(uiState.listMode)) },
+                    text = { Text(mode.label(uiState.listMode).resolve()) },
                     onClick = {
                         viewModel.setSearchMode(mode)
                         expanded = false
@@ -446,12 +454,12 @@ private fun ScopeSuggestionBar(uiState: SongListUiState, viewModel: SongListView
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("ほかに", style = MaterialTheme.typography.bodySmall, color = DS.ink3)
+        Text(L10n.Songs.listScopeSuggestionLead.resolve(), style = MaterialTheme.typography.bodySmall, color = DS.ink3)
         // 並びは enum の宣言順で固定する。件数順にすると打鍵のたびにチップが入れ替わって押し損ねる。
         SongSearchMode.entries.forEach { mode ->
             val count = uiState.otherScopeCounts[mode] ?: return@forEach
             ImasFilterChip(
-                label = "${mode.label(uiState.listMode)} ${count}件",
+                label = L10n.Songs.listScopeSuggestionCount(scope = mode.label(uiState.listMode), count = count).resolve(),
                 selected = false,
                 onClick = { viewModel.setSearchMode(mode) }
             )
@@ -480,7 +488,7 @@ private fun TagFilterErrorBanner(visible: Boolean) {
             modifier = Modifier.size(16.dp)
         )
         Text(
-            text = "タグ絞り込みの取得に失敗しました。表示中の一覧にはタグ条件が反映されていません。",
+            text = L10n.Songs.listTagFilterError.resolve(),
             style = MaterialTheme.typography.bodySmall,
             color = DS.ink2
         )
@@ -548,35 +556,37 @@ private fun RemovableFilterChipRow(uiState: SongListUiState, viewModel: SongList
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         if (uiState.myMarkFilter.requireMyPick) {
-            ImasRemovableChip(text = "担当", onRemove = viewModel::clearMyPickFilter)
+            ImasRemovableChip(text = L10n.Songs.listChipMyPick.resolve(), onRemove = viewModel::clearMyPickFilter)
         }
         if (uiState.myMarkFilter.requireFavorite) {
-            ImasRemovableChip(text = "お気に入り", onRemove = viewModel::clearFavoriteFilter)
+            ImasRemovableChip(text = L10n.Songs.listChipFavorite.resolve(), onRemove = viewModel::clearFavoriteFilter)
         }
         if (uiState.myMarkFilter.requireNote) {
-            ImasRemovableChip(text = "メモあり", onRemove = viewModel::clearNoteFilter)
+            ImasRemovableChip(text = L10n.Songs.listChipNote.resolve(), onRemove = viewModel::clearNoteFilter)
         }
         when (uiState.collectFilter) {
-            SongCollectFilter.COLLECTED -> ImasRemovableChip(text = "現地回収済", onRemove = viewModel::clearCollectFilter)
-            SongCollectFilter.UNCOLLECTED -> ImasRemovableChip(text = "未回収", onRemove = viewModel::clearCollectFilter)
+            SongCollectFilter.COLLECTED ->
+                ImasRemovableChip(text = L10n.Songs.listChipCollected.resolve(), onRemove = viewModel::clearCollectFilter)
+            SongCollectFilter.UNCOLLECTED ->
+                ImasRemovableChip(text = L10n.Songs.listChipUncollected.resolve(), onRemove = viewModel::clearCollectFilter)
             SongCollectFilter.ALL -> {}
         }
         filter.idolIds?.takeIf { it.isNotEmpty() && !idolOverridden }?.let { ids ->
             // 名前の引き当てはフィルタシート側にしか無いので、チップは人数で出す。
             ImasRemovableChip(
-                text = "アイドル ${ids.size}人",
+                text = L10n.Songs.listChipIdols(count = ids.size).resolve(),
                 onRemove = { viewModel.clearFilterField { f -> f.copy(idolIds = null) } }
             )
         }
         filter.songType?.let { type ->
             ImasRemovableChip(
-                text = songTypeLabel(type),
+                text = coreText(songTypeLabel(type)),
                 onRemove = { viewModel.clearFilterField { f -> f.copy(songType = null) } }
             )
         }
         if (filter.kamisabiOnly) {
             ImasRemovableChip(
-                text = "KAMISABI収録",
+                text = L10n.Songs.listChipKamisabi.resolve(),
                 onRemove = { viewModel.clearFilterField { f -> f.copy(kamisabiOnly = false) } }
             )
         }
@@ -607,7 +617,7 @@ private fun RemovableFilterChipRow(uiState: SongListUiState, viewModel: SongList
         uiState.selectedTags.forEach { tag ->
             val label = if (uiState.selectedTags.size == 1) {
                 val count = uiState.tagVoteCounts.keys.size
-                if (count > 0) "${tag.name} ${count}曲" else tag.name
+                if (count > 0) L10n.Songs.listChipTagCount(name = tag.name, count = count).resolve() else tag.name
             } else {
                 tag.name
             }
@@ -639,19 +649,21 @@ private fun SortMenu(
                 tint = DS.ink2,
                 modifier = Modifier.size(16.dp)
             )
-            Text(text = sortOrder.label, style = MaterialTheme.typography.bodySmall, color = DS.ink)
+            Text(text = sortOrder.label.resolve(), style = MaterialTheme.typography.bodySmall, color = DS.ink)
             Icon(
                 imageVector = Icons.Filled.ArrowDropDown,
-                contentDescription = "並び替え",
+                contentDescription = L10n.Songs.listSortMenuA11y.resolve(),
                 tint = DS.ink2
             )
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             SongSortOrder.entries.forEach { order ->
                 DropdownMenuItem(
-                    text = { Text(order.label) },
+                    text = { Text(order.label.resolve()) },
                     leadingIcon = {
-                        if (order == sortOrder) Icon(Icons.Filled.Check, contentDescription = "選択中")
+                        if (order == sortOrder) {
+                            Icon(Icons.Filled.Check, contentDescription = L10n.Songs.listSortSelectedA11y.resolve())
+                        }
                     },
                     onClick = {
                         expanded = false
@@ -660,11 +672,13 @@ private fun SortMenu(
                 )
             }
             HorizontalDivider()
-            listOf(true to "昇順", false to "降順").forEach { (value, label) ->
+            listOf(true to L10n.Songs.sortAscending, false to L10n.Songs.sortDescending).forEach { (value, label) ->
                 DropdownMenuItem(
-                    text = { Text(label) },
+                    text = { Text(label.resolve()) },
                     leadingIcon = {
-                        if (value == ascending) Icon(Icons.Filled.Check, contentDescription = "選択中")
+                        if (value == ascending) {
+                            Icon(Icons.Filled.Check, contentDescription = L10n.Songs.listSortSelectedA11y.resolve())
+                        }
                     },
                     onClick = {
                         expanded = false
@@ -676,13 +690,13 @@ private fun SortMenu(
     }
 }
 
-private val SongSortOrder.label: String
+private val SongSortOrder.label: DisplayText
     get() = when (this) {
-        SongSortOrder.TITLE_KANA -> "五十音順"
-        SongSortOrder.RELEASE_DATE -> "リリース日順"
-        SongSortOrder.PERFORMANCE_COUNT -> "披露回数順"
-        SongSortOrder.COLLECTED_COUNT -> "現地回収回数順"
-        SongSortOrder.COLLECTED_RATE -> "回収率順"
+        SongSortOrder.TITLE_KANA -> L10n.Songs.sortTitleKana
+        SongSortOrder.RELEASE_DATE -> L10n.Songs.sortReleaseDate
+        SongSortOrder.PERFORMANCE_COUNT -> L10n.Songs.sortPerformanceCount
+        SongSortOrder.COLLECTED_COUNT -> L10n.Songs.sortCollectedCount
+        SongSortOrder.COLLECTED_RATE -> L10n.Songs.sortCollectedRate
     }
 
 /**

@@ -20,6 +20,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.songs.SongSearchMode
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.MasteryScale
@@ -80,10 +82,10 @@ fun SongRow(
     // 長押しで曲名などをコピーできるようにする (正式な曲名で外部検索したい用途)。
     Copyable(
         items = listOf(
-            CopyItem("曲名をコピー", title),
-            CopyItem("歌唱者をコピー", artistNames.ifEmpty { unitName }),
+            CopyItem(L10n.Songs.copyTitle.resolve(), title),
+            CopyItem(L10n.Songs.copyArtists.resolve(), artistNames.ifEmpty { unitName }),
         ),
-        actions = onEditMastery?.let { listOf(RowAction("習熟度を変える", it)) } ?: emptyList(),
+        actions = onEditMastery?.let { listOf(RowAction(L10n.Songs.rowEditMastery.resolve(), it)) } ?: emptyList(),
         modifier = modifier.fillMaxWidth()
     ) {
     Row(
@@ -175,7 +177,7 @@ private fun MarkRow(
         if (isMyPick) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                 Icon(imageVector = Icons.Filled.Favorite, contentDescription = null, tint = DS.pick, modifier = Modifier.size(11.dp))
-                Text(text = "担当", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = DS.pick)
+                Text(text = L10n.Songs.rowMyPick.resolve(), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = DS.pick)
             }
         }
         if (masteryLevel > 0u) {

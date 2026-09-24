@@ -35,7 +35,7 @@ struct SongCommunityTab: View {
     var body: some View {
         VStack(spacing: DS.sp5) {
             PollAchievementBadges(entityId: song.id)
-            InlineLoginPrompt(message: "タグ・動画・投票にはログインが必要です", seed: seed)
+            InlineLoginPrompt(message: String(localized: L10n.Songs.detailLoginPrompt), seed: seed)
             tags
             if !vm.similarTagSongs.isEmpty { similarByTags }
             videos
@@ -50,7 +50,8 @@ struct SongCommunityTab: View {
     @ViewBuilder
     private var tags: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
-            header(title: "タグ", actionLabel: "タグ", systemImage: "plus") {
+            header(title: L10n.Songs.communityTagsHeader, actionLabel: L10n.Songs.communityTagsAddButton,
+                   systemImage: "plus") {
                 AppAnalytics.tap("song_detail.tag_action")
                 onIntent(.addTag)
             }
@@ -62,9 +63,10 @@ struct SongCommunityTab: View {
                     }
                 }
             } else {
-                ImasEmptyState(systemImage: "tag", title: "タグはまだありません",
-                               message: "この曲を一言で表すタグを付けてみませんか？",
-                               actionTitle: permission.showEditAffordance ? "タグを追加" : nil,
+                ImasEmptyState(systemImage: "tag", title: String(localized: L10n.Songs.communityTagsEmptyTitle),
+                               message: String(localized: L10n.Songs.communityTagsEmptyMessage),
+                               actionTitle: permission.showEditAffordance
+                                   ? String(localized: L10n.Songs.communityTagsAdd) : nil,
                                action: permission.showEditAffordance ? { onIntent(.addTag) } : nil,
                                seed: seed)
             }
@@ -83,9 +85,9 @@ struct SongCommunityTab: View {
             if isMine {
                 Button(role: .destructive) {
                     onIntent(.removeTag(id: tag.id))
-                } label: { Label("タグを外す", systemImage: "tag.slash") }
+                } label: { Label(L10n.Songs.communityTagsRemove, systemImage: "tag.slash") }
             }
-            Button { navigate(.tagDetail(tag)) } label: { Label("タグ詳細を見る", systemImage: "tag") }
+            Button { navigate(.tagDetail(tag)) } label: { Label(L10n.Songs.communityTagsShowDetail, systemImage: "tag") }
         }
     }
 
@@ -93,9 +95,9 @@ struct SongCommunityTab: View {
     private var similarByTags: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
             VStack(alignment: .leading, spacing: DS.sp1) {
-                Text("この曲が好きな人にはこれも")
+                Text(L10n.Songs.communitySimilarHeader)
                     .font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
-                Text("つけられたタグが似ている楽曲")
+                Text(L10n.Songs.communitySimilarCaption)
                     .font(.imasCaption).foregroundStyle(DS.ink2)
             }
             ImasListContainer {
@@ -103,7 +105,9 @@ struct SongCommunityTab: View {
                     if idx > 0 { ImasRowDivider(inset: DS.sp5 + 44) }
                     Button { navigate(.song(s)) } label: {
                         RelatedSongRow(song: s, seed: seed,
-                                       badge: vm.similarSharedTags[s.id].map { "タグ\($0)個一致" })
+                                       badge: vm.similarSharedTags[s.id].map {
+                                           String(localized: L10n.Songs.communitySimilarSharedTags(count: $0))
+                                       })
                     }
                     .buttonStyle(.plain)
                 }
@@ -116,14 +120,16 @@ struct SongCommunityTab: View {
     @ViewBuilder
     private var videos: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
-            header(title: "参考動画", actionLabel: "動画", systemImage: "play.fill") {
+            header(title: L10n.Songs.communityVideosHeader, actionLabel: L10n.Songs.communityVideosAddButton,
+                   systemImage: "play.fill") {
                 AppAnalytics.tap("song_detail.video_action")
                 onIntent(.createVideo)
             }
             if vm.songVideos.isEmpty {
-                ImasEmptyState(systemImage: "play.rectangle", title: "参考動画はまだありません",
-                               message: "最初の1本を投稿しませんか？",
-                               actionTitle: permission.showEditAffordance ? "動画を投稿" : nil,
+                ImasEmptyState(systemImage: "play.rectangle", title: String(localized: L10n.Songs.communityVideosEmptyTitle),
+                               message: String(localized: L10n.Songs.communityVideosEmptyMessageIos),
+                               actionTitle: permission.showEditAffordance
+                                   ? String(localized: L10n.Songs.communityVideosPost) : nil,
                                action: permission.showEditAffordance ? { onIntent(.createVideo) } : nil,
                                seed: seed)
             } else {
@@ -167,7 +173,7 @@ struct SongCommunityTab: View {
             }
             HStack(spacing: DS.sp3) {
                 if let author = video.authorDisplayName {
-                    Text("投稿者: \(author)").font(.imasCaption).foregroundStyle(DS.ink3)
+                    Text(L10n.Songs.communityVideosAuthor(name: author)).font(.imasCaption).foregroundStyle(DS.ink3)
                 }
                 Spacer(minLength: 4)
                 if permission.showEditAffordance {
@@ -215,7 +221,8 @@ struct SongCommunityTab: View {
     @ViewBuilder
     private var penlight: some View {
         VStack(alignment: .leading, spacing: DS.sp3) {
-            header(title: "ペンライト投票", actionLabel: "投票する", systemImage: "sparkles") {
+            header(title: L10n.Songs.communityPenlightHeaderIos, actionLabel: L10n.Songs.communityPenlightVote,
+                   systemImage: "sparkles") {
                 AppAnalytics.tap("song_detail.penlight_action")
                 onIntent(.votePenlight)
             }
@@ -226,13 +233,15 @@ struct SongCommunityTab: View {
                         penlightRow(set, myKey: votes.myColorSet?.key, total: max(votes.totalVotes, 1))
                     }
                 }
-                Text("この曲のペンライト色 ・ \(votes.totalVotes)票")
+                Text(L10n.Songs.communityPenlightSummary(count: votes.totalVotes))
                     .font(.imasCaption).foregroundStyle(DS.ink2)
                     .padding(.leading, DS.sp1)
             } else {
-                ImasEmptyState(systemImage: "lightspectrum.horizontal", title: "まだ投票がありません",
-                               message: "あなたが思うこの曲のペンライト色を投票しませんか？",
-                               actionTitle: permission.showEditAffordance ? "ペンライト色を投票" : nil,
+                ImasEmptyState(systemImage: "lightspectrum.horizontal",
+                               title: String(localized: L10n.Songs.communityPenlightEmptyTitle),
+                               message: String(localized: L10n.Songs.communityPenlightEmptyMessage),
+                               actionTitle: permission.showEditAffordance
+                                   ? String(localized: L10n.Songs.communityPenlightVoteAction) : nil,
                                action: permission.showEditAffordance ? { onIntent(.votePenlight) } : nil,
                                seed: seed)
             }
@@ -247,10 +256,11 @@ struct SongCommunityTab: View {
                     .clipShape(RoundedRectangle(cornerRadius: DS.rXS, style: .continuous))
                     .frame(maxWidth: 120)
                 if isMine {
-                    Text("自分の投票").font(.imasCaption.weight(.semibold)).foregroundStyle(DS.pick)
+                    Text(L10n.Songs.communityPenlightMine).font(.imasCaption.weight(.semibold)).foregroundStyle(DS.pick)
                 }
                 Spacer(minLength: 4)
-                Text("\(set.count)票").font(.imasDisplay(13, weight: .semibold)).foregroundStyle(DS.ink2)
+                Text(L10n.Songs.communityPenlightVotes(count: set.count)).font(.imasDisplay(13, weight: .semibold))
+                    .foregroundStyle(DS.ink2)
             }
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
@@ -266,7 +276,8 @@ struct SongCommunityTab: View {
 
     /// セクション見出し + 文脈投稿導線 (＋タグ / ▶動画 / ✦投票)。
     @ViewBuilder
-    private func header(title: String, actionLabel: String, systemImage: String, action: @escaping () -> Void) -> some View {
+    private func header(title: LocalizedStringResource, actionLabel: LocalizedStringResource, systemImage: String,
+                        action: @escaping () -> Void) -> some View {
         let t = ImasTheme.derive(seed: seed, scheme: scheme)
         HStack(alignment: .firstTextBaseline) {
             Text(title).font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)

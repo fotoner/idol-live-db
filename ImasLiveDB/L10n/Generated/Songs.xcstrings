@@ -1,0 +1,4500 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "songs.community.penlight.empty.message" : {
+      "comment" : "ペンライト投票が無いときの誘い文句 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あなたが思うこの曲のペンライト色を投票しませんか？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 곡에 어울리는 펜라이트 색에 투표해 볼까요?"
+          }
+        }
+      }
+    },
+    "songs.community.penlight.empty.title" : {
+      "comment" : "ペンライト投票が 1 票も無いとき (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだ投票がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 투표가 없어요"
+          }
+        }
+      }
+    },
+    "songs.community.penlight.header_ios" : {
+      "comment" : "コミュニティタブの節の見出し。iOS の文言。Android の community.penlight.header_android と ja が違う (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ペンライト投票"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "펜라이트 투표"
+          }
+        }
+      }
+    },
+    "songs.community.penlight.mine" : {
+      "comment" : "自分が投票した色の組に付ける印 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分の投票"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "내 투표"
+          }
+        }
+      }
+    },
+    "songs.community.penlight.summary" : {
+      "comment" : "ペンライト投票の結果の下の注記。count は票の合計。1000 以上は桁区切りが付く (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "この曲のペンライト色 ・ %arg票"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "이 곡의 펜라이트 색 · %arg표"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "songs.community.penlight.vote" : {
+      "comment" : "ペンライト投票の節の見出し右のボタン (iOS) / ＋ ボタンの読み上げ (Android) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표하기"
+          }
+        }
+      }
+    },
+    "songs.community.penlight.vote_action" : {
+      "comment" : "ペンライト投票が無いときの空状態のボタン (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ペンライト色を投票"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "펜라이트 색 투표"
+          }
+        }
+      }
+    },
+    "songs.community.penlight.votes" : {
+      "comment" : "ペンライトの色の組ごとの票数 (iOS) / 節の見出しの右の票の合計 (Android)。1000 以上は桁区切りが付く (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg票"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg표"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "songs.community.similar.caption" : {
+      "comment" : "おすすめの節の見出しの下の説明 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "つけられたタグが似ている楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "달린 태그가 비슷한 곡"
+          }
+        }
+      }
+    },
+    "songs.community.similar.header" : {
+      "comment" : "タグが似ている曲 (サーバ算出のおすすめ) の節の見出し (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この曲が好きな人にはこれも"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 곡을 좋아한다면 이것도"
+          }
+        }
+      }
+    },
+    "songs.community.similar.shared_tags" : {
+      "comment" : "おすすめの曲の行に出す、共通するタグの数。1000 以上は桁区切りが付く (実際には届かない) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "タグ%arg個一致"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "태그 %arg개 일치"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "songs.community.tags.add" : {
+      "comment" : "タグを付ける操作。iOS はタグが無いときの空状態のボタン、Android は ＋ ボタンの読み上げ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグを追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 추가"
+          }
+        }
+      }
+    },
+    "songs.community.tags.add_button" : {
+      "comment" : "タグの節の見出し右の ＋ 付きボタン (短い形) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그"
+          }
+        }
+      }
+    },
+    "songs.community.tags.empty.message" : {
+      "comment" : "タグが 1 つも無いときの誘い文句 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この曲を一言で表すタグを付けてみませんか？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 곡을 한마디로 표현하는 태그를 달아 볼까요?"
+          }
+        }
+      }
+    },
+    "songs.community.tags.empty.title" : {
+      "comment" : "タグが 1 つも無いとき (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグはまだありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 태그가 없어요"
+          }
+        }
+      }
+    },
+    "songs.community.tags.header" : {
+      "comment" : "コミュニティタブの節の見出し (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그"
+          }
+        }
+      }
+    },
+    "songs.community.tags.remove" : {
+      "comment" : "自分が付けたタグの長押しメニュー (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグを外す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 해제"
+          }
+        }
+      }
+    },
+    "songs.community.tags.show_detail" : {
+      "comment" : "タグの長押しメニュー (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ詳細を見る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 상세 보기"
+          }
+        }
+      }
+    },
+    "songs.community.videos.add_button" : {
+      "comment" : "参考動画の節の見出し右の ▶ 付きボタン (短い形) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "動画"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "영상"
+          }
+        }
+      }
+    },
+    "songs.community.videos.author" : {
+      "comment" : "参考動画を投稿した人。name は表示名 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投稿者: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "게시자: %1$@"
+          }
+        }
+      }
+    },
+    "songs.community.videos.empty.message_ios" : {
+      "comment" : "参考動画が無いときの誘い文句。iOS の文言。Android の community.videos.empty.message_android と ja が違う (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最初の1本を投稿しませんか？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "첫 영상을 게시해 볼까요?"
+          }
+        }
+      }
+    },
+    "songs.community.videos.empty.title" : {
+      "comment" : "参考動画が 1 本も無いとき (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参考動画はまだありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 참고 영상이 없어요"
+          }
+        }
+      }
+    },
+    "songs.community.videos.header" : {
+      "comment" : "コミュニティタブの節の見出し (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参考動画"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참고 영상"
+          }
+        }
+      }
+    },
+    "songs.community.videos.post" : {
+      "comment" : "参考動画が無いときの空状態のボタン (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "動画を投稿"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "영상 올리기"
+          }
+        }
+      }
+    },
+    "songs.copy.artists" : {
+      "comment" : "曲の長押しメニュー。歌唱者の表記をコピーする (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌唱者をコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가창자 복사"
+          }
+        }
+      }
+    },
+    "songs.copy.kana" : {
+      "comment" : "曲の長押しメニュー。よみ = 曲名の読み仮名 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "よみをコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "읽는 법 복사"
+          }
+        }
+      }
+    },
+    "songs.copy.title" : {
+      "comment" : "曲の行・曲詳細の曲名を長押ししたときのメニュー (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲名をコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡명 복사"
+          }
+        }
+      }
+    },
+    "songs.detail.favorite.off" : {
+      "comment" : "曲詳細のお気に入りボタン (入っていないとき) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入り"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기"
+          }
+        }
+      }
+    },
+    "songs.detail.favorite.on" : {
+      "comment" : "曲詳細のお気に入りボタン (お気に入りに入っているとき) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入り済み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기됨"
+          }
+        }
+      }
+    },
+    "songs.detail.kamisabi.owned" : {
+      "comment" : "KAMISABI (音楽カードゲーム) のカードを持っていると記録済みのときのボタン (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カード所持済み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "카드 보유 중"
+          }
+        }
+      }
+    },
+    "songs.detail.kamisabi.record" : {
+      "comment" : "KAMISABI のカードを持っていると記録するボタン (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カード所持を記録"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "카드 보유 기록"
+          }
+        }
+      }
+    },
+    "songs.detail.login.prompt" : {
+      "comment" : "コミュニティタブの先頭に出す、未ログインの人への案内 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ・動画・投票にはログインが必要です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그·영상·투표를 이용하려면 로그인해야 해요"
+          }
+        }
+      }
+    },
+    "songs.detail.menu.apple_music" : {
+      "comment" : "曲詳細の … メニュー (Apple Music は固有名詞) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Musicで開く"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Apple Music에서 열기"
+          }
+        }
+      }
+    },
+    "songs.detail.menu.edit" : {
+      "comment" : "曲詳細の … メニュー (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この楽曲を編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 곡 편집"
+          }
+        }
+      }
+    },
+    "songs.detail.menu.edit_history" : {
+      "comment" : "曲詳細の … メニュー (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編集履歴"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "편집 기록"
+          }
+        }
+      }
+    },
+    "songs.detail.menu.lyrics_site_ios" : {
+      "comment" : "曲詳細の … メニュー。外部の歌詞サイトを開く。iOS の文言。Android の detail.menu.lyrics_site_android と ja が違う (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌詞サイトで探す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가사 사이트에서 찾기"
+          }
+        }
+      }
+    },
+    "songs.detail.play" : {
+      "comment" : "曲詳細の再生ボタン (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "재생"
+          }
+        }
+      }
+    },
+    "songs.detail.stat.unit_shows" : {
+      "comment" : "統計タイルの数字の単位 (現地回収した公演の数) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연"
+          }
+        }
+      }
+    },
+    "songs.detail.stat.unit_times" : {
+      "comment" : "統計タイルの数字の単位 (披露回数など) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "회"
+          }
+        }
+      }
+    },
+    "songs.detail.stop" : {
+      "comment" : "曲詳細の再生ボタン (再生中) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "停止"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정지"
+          }
+        }
+      }
+    },
+    "songs.detail.tab.community" : {
+      "comment" : "曲詳細のタブ (タグ・参考動画・ペンライト投票) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コミュニティ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "커뮤니티"
+          }
+        }
+      }
+    },
+    "songs.detail.tab.history" : {
+      "comment" : "曲詳細のタブ (ライブで歌われた記録) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "披露履歴"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 기록"
+          }
+        }
+      }
+    },
+    "songs.detail.tab.info" : {
+      "comment" : "曲詳細のタブ (曲の情報と歌唱アイドル) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "情報・歌唱"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정보·가창"
+          }
+        }
+      }
+    },
+    "songs.detail.tab.lyrics" : {
+      "comment" : "曲詳細のタブ (歌詞とコールガイド) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌詞"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가사"
+          }
+        }
+      }
+    },
+    "songs.detail.write_action.card_owned" : {
+      "comment" : "端末への保存に失敗したときの知らせに入る操作の名前 (KAMISABI のカード所持) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カード所持の記録"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "카드 보유 기록"
+          }
+        }
+      }
+    },
+    "songs.detail.write_action.favorite" : {
+      "comment" : "端末への保存に失敗したときの知らせに入る操作の名前 (「{操作}に失敗しました」の {操作}) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入りの切り替え"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기 전환"
+          }
+        }
+      }
+    },
+    "songs.filter.all" : {
+      "comment" : "フィルタシートのチップ。絞り込まない (曲タイプ・ブランド・アイドル選択のブランド) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全て"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "songs.filter.call_guide.footer" : {
+      "comment" : "コールガイドの節の注記 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌詞の行にコール・手拍子が書き込まれている曲だけを表示します (通信が必要)。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가사 줄에 콜·박수가 적혀 있는 곡만 보여 줘요 (통신 필요)."
+          }
+        }
+      }
+    },
+    "songs.filter.call_guide.header" : {
+      "comment" : "フィルタシートの節の見出し (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コールガイド"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜 가이드"
+          }
+        }
+      }
+    },
+    "songs.filter.call_guide.toggle" : {
+      "comment" : "コールガイドの絞り込みのスイッチ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コールガイドがある曲のみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜 가이드가 있는 곡만"
+          }
+        }
+      }
+    },
+    "songs.filter.cd_series.header" : {
+      "comment" : "フィルタシートの CD シリーズ選択の行・節の見出しと、選択画面のタイトル (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CDシリーズ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "CD 시리즈"
+          }
+        }
+      }
+    },
+    "songs.filter.collect.all" : {
+      "comment" : "現地回収の絞り込みの選択肢。iOS は SongCollectFilter の rawValue (保存値。変えない) を表示に使っていたもの (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "songs.filter.collect.collected" : {
+      "comment" : "現地回収の絞り込みの選択肢。現地で聴いた曲だけ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回収済のみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "회수한 곡만"
+          }
+        }
+      }
+    },
+    "songs.filter.collect.header" : {
+      "comment" : "フィルタシートの節の見出し (現地で聴いたかどうかで絞る) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現地回収"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "현장 회수"
+          }
+        }
+      }
+    },
+    "songs.filter.collect.uncollected" : {
+      "comment" : "現地回収の絞り込みの選択肢。まだ現地で聴いていない曲だけ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未回収のみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "미회수 곡만"
+          }
+        }
+      }
+    },
+    "songs.filter.creator.header" : {
+      "comment" : "フィルタシートの節の見出し (作家の名前で絞る) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作詞 / 作曲 / 編曲者"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "작사 / 작곡 / 편곡자"
+          }
+        }
+      }
+    },
+    "songs.filter.creator.placeholder" : {
+      "comment" : "作家の名前の入力欄のプレースホルダ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前を入力"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이름 입력"
+          }
+        }
+      }
+    },
+    "songs.filter.idol.header" : {
+      "comment" : "フィルタシートのアイドル選択の行 (iOS は節の見出しとアイドル選択画面のタイトルにも使う) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌"
+          }
+        }
+      }
+    },
+    "songs.filter.kamisabi.caption_ios" : {
+      "comment" : "KAMISABI の節の注記。iOS の文言。Android の filter.kamisabi.caption_android と ja が違う (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音楽カードゲーム「KAMISABI」にカードが収録されている曲だけを表示します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "음악 카드 게임 “KAMISABI”에 카드가 수록된 곡만 보여 줘요."
+          }
+        }
+      }
+    },
+    "songs.filter.kamisabi.toggle_ios" : {
+      "comment" : "KAMISABI (音楽カードゲーム。固有名詞) の絞り込みのスイッチ。iOS の文言。Android の filter.kamisabi.toggle_android と ja が違う (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KAMISABI収録曲のみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "KAMISABI 수록곡만"
+          }
+        }
+      }
+    },
+    "songs.filter.list_mode.albums" : {
+      "comment" : "表示形式のセグメント。CD 単位のカードで並べる (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アルバム"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "앨범"
+          }
+        }
+      }
+    },
+    "songs.filter.list_mode.header" : {
+      "comment" : "フィルタシートの節の見出し (曲 / アルバム / シリーズ) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "表示形式"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "표시 형식"
+          }
+        }
+      }
+    },
+    "songs.filter.list_mode.picker" : {
+      "comment" : "表示形式を選ぶセグメントの名前 (読み上げに使う) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "표시"
+          }
+        }
+      }
+    },
+    "songs.filter.list_mode.series" : {
+      "comment" : "表示形式のセグメント。シリーズ単位のカードで並べる (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シリーズ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "시리즈"
+          }
+        }
+      }
+    },
+    "songs.filter.list_mode.songs" : {
+      "comment" : "表示形式のセグメント。曲を 1 行ずつ並べる (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡"
+          }
+        }
+      }
+    },
+    "songs.filter.live.header" : {
+      "comment" : "フィルタシートのライブ選択の行・節の見出し (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブで絞込"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브로 필터"
+          }
+        }
+      }
+    },
+    "songs.filter.live.picker_title" : {
+      "comment" : "ライブを選ぶ画面のタイトル (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브"
+          }
+        }
+      }
+    },
+    "songs.filter.live_only.caption" : {
+      "comment" : "ライブ限定曲を隠す のスイッチの説明 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリにしか無い曲(カバー等)を一覧から隠します。既定 ON"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트에만 있는 곡(커버 등)을 목록에서 숨겨요. 기본값 ON"
+          }
+        }
+      }
+    },
+    "songs.filter.live_only.title" : {
+      "comment" : "フィルタシートのスイッチ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ限定曲を隠す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브 한정곡 숨기기"
+          }
+        }
+      }
+    },
+    "songs.filter.my_mark.favorite" : {
+      "comment" : "マイマークの絞り込みのスイッチ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入りのみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기만"
+          }
+        }
+      }
+    },
+    "songs.filter.my_mark.footer" : {
+      "comment" : "マイマークの節の注記。ON にした条件すべてに当てはまる曲だけ残る (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チェック ON で AND 条件絞り込み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "켜면 AND 조건으로 필터해요"
+          }
+        }
+      }
+    },
+    "songs.filter.my_mark.header" : {
+      "comment" : "フィルタシートの節の見出し (担当・お気に入り・メモで絞る) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイマーク"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이 마크"
+          }
+        }
+      }
+    },
+    "songs.filter.my_mark.my_pick" : {
+      "comment" : "マイマークの絞り込みのスイッチ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当アイドルの曲のみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 아이돌의 곡만"
+          }
+        }
+      }
+    },
+    "songs.filter.my_mark.note" : {
+      "comment" : "マイマークの絞り込みのスイッチ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メモがある曲のみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "메모가 있는 곡만"
+          }
+        }
+      }
+    },
+    "songs.filter.none" : {
+      "comment" : "シリーズ・CD シリーズ・ライブ・アイドルを選んでいないときの表示 / 選択を外す行 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択なし"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "선택 안 함"
+          }
+        }
+      }
+    },
+    "songs.filter.other_brand.caption" : {
+      "comment" : "「その他」を表示 のスイッチの説明。歌枠 = 歌の配信 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌枠で歌っただけのカバー等。既定では隠しています"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "노래 방송에서 부르기만 한 커버 등이에요. 기본으로는 숨겨요"
+          }
+        }
+      }
+    },
+    "songs.filter.other_brand.title" : {
+      "comment" : "フィルタシートのスイッチ。「その他」はどのブランドにも属さない曲の分類 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「その他」を表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“기타” 표시"
+          }
+        }
+      }
+    },
+    "songs.filter.reset_ios" : {
+      "comment" : "フィルタシートの条件をすべて戻すボタン。iOS の文言。Android の filter.reset_android と ja が違う (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべてリセット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모두 초기화"
+          }
+        }
+      }
+    },
+    "songs.filter.series.header" : {
+      "comment" : "フィルタシートのシリーズ選択の行・節の見出しと、選択画面のタイトル (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シリーズ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "시리즈"
+          }
+        }
+      }
+    },
+    "songs.filter.song_type.header" : {
+      "comment" : "フィルタシートの節の見出し (ソロ / ユニット / 全体曲。語はコアの vocabulary) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲タイプ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 타입"
+          }
+        }
+      }
+    },
+    "songs.filter.sort.direction" : {
+      "comment" : "昇順/降順を選ぶセグメントの名前 (読み上げに使う) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "方向"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "방향"
+          }
+        }
+      }
+    },
+    "songs.filter.sort.header" : {
+      "comment" : "フィルタシートの節の見出し (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "並び順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정렬 순서"
+          }
+        }
+      }
+    },
+    "songs.filter.sort.picker" : {
+      "comment" : "並び順を選ぶメニューの名前 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ソート"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정렬"
+          }
+        }
+      }
+    },
+    "songs.grid.albums.empty" : {
+      "comment" : "表示形式がアルバムで 1 件も無いとき (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アルバムが見つかりません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "앨범을 찾을 수 없어요"
+          }
+        }
+      }
+    },
+    "songs.grid.series.empty" : {
+      "comment" : "表示形式がシリーズで 1 件も無いとき (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シリーズが見つかりません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "시리즈를 찾을 수 없어요"
+          }
+        }
+      }
+    },
+    "songs.history.co_occurring.header" : {
+      "comment" : "披露履歴タブの節の見出し (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同じ公演で歌われた曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "같은 공연에서 불린 곡"
+          }
+        }
+      }
+    },
+    "songs.history.co_occurring.note" : {
+      "comment" : "同じ公演で歌われた曲 の節の注記 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同じ公演に両方あった公演数です (1 公演で 2 回歌っても 1 公演)。次のライブで一緒に来るとは限りません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "두 곡이 함께 있었던 공연 수예요 (한 공연에서 2번 불러도 공연 1회로 세요). 다음 라이브에서 함께 나온다는 보장은 없어요."
+          }
+        }
+      }
+    },
+    "songs.history.co_occurring.row" : {
+      "comment" : "同じ公演で歌われた曲の行の副題。together は一緒に歌われた公演数、performances はその曲が歌われた公演数。together は 1000 以上は桁区切りが付く (実際には届かない) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@together@"
+          },
+          "substitutions" : {
+            "together" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "いっしょに%arg公演 ／ 全%2$@公演"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@together@"
+          },
+          "substitutions" : {
+            "together" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "함께 공연 %arg회 / 총 공연 %2$@회"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "songs.history.empty.message" : {
+      "comment" : "ライブで一度も歌われていないときの説明 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この曲がライブで披露されると、ここに記録されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 곡이 라이브에서 공연되면 여기에 기록돼요."
+          }
+        }
+      }
+    },
+    "songs.history.empty.title" : {
+      "comment" : "ライブで一度も歌われていないとき (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "披露履歴はまだありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 공연 기록이 없어요"
+          }
+        }
+      }
+    },
+    "songs.history.log.count" : {
+      "comment" : "ライブ披露履歴 の見出しの右の回数。1000 以上は桁区切りが付く (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg回"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg회"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "songs.history.log.header" : {
+      "comment" : "披露履歴タブの節の見出し (公演ごとの一覧) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ披露履歴"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브 공연 기록"
+          }
+        }
+      }
+    },
+    "songs.history.singers.header" : {
+      "comment" : "披露履歴タブの節の見出し (歌った回数の多い順) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この曲を歌った人"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 곡을 부른 사람"
+          }
+        }
+      }
+    },
+    "songs.history.singers.note" : {
+      "comment" : "この曲を歌った人 の節の注記 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリに残っている歌唱の集計です。分母は上の「総披露」と同じ回数です。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트에 남아 있는 가창을 집계했어요. 분모는 위의 “총 공연”과 같은 횟수예요."
+          }
+        }
+      }
+    },
+    "songs.history.singers.times" : {
+      "comment" : "歌った人の行の副題。times はその人が歌った回数、total は全体の披露回数。times は 1000 以上は桁区切りが付く (実際には届かない) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@times@"
+          },
+          "substitutions" : {
+            "times" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg回 ／ 全%2$@回"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@times@"
+          },
+          "substitutions" : {
+            "times" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg회 / 총 %2$@회"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "songs.history.stat.first" : {
+      "comment" : "統計タイルのラベル。初めて歌われた年月 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "初披露"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "첫 공연"
+          }
+        }
+      }
+    },
+    "songs.history.stat.last" : {
+      "comment" : "統計タイルのラベル。最後に歌われた年月 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最終披露"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마지막 공연"
+          }
+        }
+      }
+    },
+    "songs.history.stat.total" : {
+      "comment" : "統計タイルのラベル。ライブで歌われた回数の合計 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "総披露"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "총 공연"
+          }
+        }
+      }
+    },
+    "songs.info.live_singers.header" : {
+      "comment" : "情報タブの節の見出し (ライブで歌ったことがあるアイドル) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ歌唱歴"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브 가창 이력"
+          }
+        }
+      }
+    },
+    "songs.info.register_attendance" : {
+      "comment" : "参加したライブを登録する導線 (登録すると現地回収に数えられる) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参加ライブを登録して現地回収"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "참가한 라이브를 등록해 현장 회수"
+          }
+        }
+      }
+    },
+    "songs.info.related.header" : {
+      "comment" : "情報タブの節の見出し (同じシリーズ・ユニット・歌唱者の曲) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "関連楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "관련 곡"
+          }
+        }
+      }
+    },
+    "songs.info.row.arranger" : {
+      "comment" : "楽曲情報の行 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "편곡"
+          }
+        }
+      }
+    },
+    "songs.info.row.artist" : {
+      "comment" : "楽曲情報の行 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アーティスト"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아티스트"
+          }
+        }
+      }
+    },
+    "songs.info.row.brand" : {
+      "comment" : "楽曲情報の行 (アイマスのシリーズ) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランド"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드"
+          }
+        }
+      }
+    },
+    "songs.info.row.cd_series" : {
+      "comment" : "楽曲情報の行 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CDシリーズ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "CD 시리즈"
+          }
+        }
+      }
+    },
+    "songs.info.row.composer" : {
+      "comment" : "楽曲情報の行 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "작곡"
+          }
+        }
+      }
+    },
+    "songs.info.row.composer_arranger" : {
+      "comment" : "楽曲情報の行。作曲者と編曲者が同じとき (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作曲 / 編曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "작곡 / 편곡"
+          }
+        }
+      }
+    },
+    "songs.info.row.duration" : {
+      "comment" : "楽曲情報の行 (曲の長さ) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生時間"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "재생 시간"
+          }
+        }
+      }
+    },
+    "songs.info.row.kana" : {
+      "comment" : "楽曲情報の行。曲名の読み仮名 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "よみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "읽는 법"
+          }
+        }
+      }
+    },
+    "songs.info.row.lyricist" : {
+      "comment" : "楽曲情報の行 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作詞"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "작사"
+          }
+        }
+      }
+    },
+    "songs.info.row.release_date" : {
+      "comment" : "楽曲情報の行 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リリース日"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "발매일"
+          }
+        }
+      }
+    },
+    "songs.info.row.type" : {
+      "comment" : "楽曲情報の行 (ソロ / ユニット / 全体曲) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイプ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "타입"
+          }
+        }
+      }
+    },
+    "songs.info.row.unit" : {
+      "comment" : "楽曲情報の行 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛"
+          }
+        }
+      }
+    },
+    "songs.info.section.header" : {
+      "comment" : "情報タブの節の見出し (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲情報"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 정보"
+          }
+        }
+      }
+    },
+    "songs.info.singers.header" : {
+      "comment" : "情報タブの節の見出し (オリジナルの歌唱メンバー) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌唱アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가창 아이돌"
+          }
+        }
+      }
+    },
+    "songs.info.stat.collected" : {
+      "comment" : "統計タイルのラベル。自分が現地で聴いた公演の数 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現地回収"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "현장 회수"
+          }
+        }
+      }
+    },
+    "songs.info.stat.performances" : {
+      "comment" : "統計タイルのラベル。ライブで歌われた回数 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "披露回数"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 횟수"
+          }
+        }
+      }
+    },
+    "songs.info.variants.header" : {
+      "comment" : "情報タブの節の見出し (同じ曲のソロ Ver. / Remix など) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "別バージョン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다른 버전"
+          }
+        }
+      }
+    },
+    "songs.list.action.add" : {
+      "comment" : "曲を新しく登録するボタン (iOS はメニューの項目、Android は ＋ の読み上げ) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲を追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 추가"
+          }
+        }
+      }
+    },
+    "songs.list.action.clear_filters" : {
+      "comment" : "絞り込みをすべて外すメニュー項目 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フィルタを解除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터 해제"
+          }
+        }
+      }
+    },
+    "songs.list.action.tag_filter" : {
+      "comment" : "タグを選んで絞り込むボタン (iOS はメニューの項目、Android はボタンの読み上げ) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグで絞り込み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그로 필터"
+          }
+        }
+      }
+    },
+    "songs.list.action.tag_filter_count" : {
+      "comment" : "タグで絞り込み中のメニュー項目。count は選んだタグの数 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "タグ: %arg件"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "태그: %arg건"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "songs.list.call_guide.error" : {
+      "comment" : "コールガイドの有無で絞る情報を取れなかったときのバナー。一覧は絞られていない (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コールガイドの情報を取得できませんでした。表示中の一覧にはコールガイド条件が反映されていません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜 가이드 정보를 불러오지 못했어요. 지금 보이는 목록에는 콜 가이드 조건이 반영되지 않았어요."
+          }
+        }
+      }
+    },
+    "songs.list.call_guide.truncated" : {
+      "comment" : "コールガイドありで絞ると、サーバが 200 曲で打ち切るのでそれを知らせる (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最近更新された 200 曲で絞り込んでいます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최근 업데이트된 200곡으로 필터링하고 있어요."
+          }
+        }
+      }
+    },
+    "songs.list.chip.call_guide" : {
+      "comment" : "適用中の絞り込みのチップ。コールガイドがある曲だけ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コールガイドあり"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜 가이드 있음"
+          }
+        }
+      }
+    },
+    "songs.list.chip.collected" : {
+      "comment" : "適用中の絞り込みのチップ。現地で聴いた (回収した) 曲だけ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現地回収済"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "현장 회수함"
+          }
+        }
+      }
+    },
+    "songs.list.chip.favorite" : {
+      "comment" : "適用中の絞り込みのチップ。お気に入りの曲だけ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入り"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기"
+          }
+        }
+      }
+    },
+    "songs.list.chip.kamisabi" : {
+      "comment" : "適用中の絞り込みのチップ。音楽カードゲーム KAMISABI に収録された曲だけ (KAMISABI は固有名詞) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KAMISABI収録"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "KAMISABI 수록"
+          }
+        }
+      }
+    },
+    "songs.list.chip.my_pick" : {
+      "comment" : "適用中の絞り込みのチップ (× で外す)。担当アイドルの曲だけ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당"
+          }
+        }
+      }
+    },
+    "songs.list.chip.note" : {
+      "comment" : "適用中の絞り込みのチップ。メモがある曲だけ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メモあり"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "메모 있음"
+          }
+        }
+      }
+    },
+    "songs.list.chip.tag_count" : {
+      "comment" : "適用中のタグのチップ (タグ 1 つのとき)。name はタグ名、count はそのタグの曲数。1000 以上は桁区切りが付く (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%1$@ %arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%1$@ %arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "songs.list.chip.uncollected" : {
+      "comment" : "適用中の絞り込みのチップ。まだ現地で聴いていない曲だけ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未回収"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "미회수"
+          }
+        }
+      }
+    },
+    "songs.list.count.songs_ios" : {
+      "comment" : "一覧の上の件数 (数字だけ太字にする)。iOS の文言。Android の list.count.songs_android と ja が違う (空白の有無)。1000 以上は桁区切りが付く (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg 件"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg건"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "songs.list.empty_filter.message" : {
+      "comment" : "フィルタで 1 曲も残らなかったときの説明 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フィルタ条件を変更するか、フィルタを解除してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터 조건을 바꾸거나 필터를 해제해 주세요."
+          }
+        }
+      }
+    },
+    "songs.list.empty_filter.title" : {
+      "comment" : "フィルタで 1 曲も残らなかったときの空状態の見出し (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "条件に一致する楽曲がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "조건에 맞는 곡이 없어요"
+          }
+        }
+      }
+    },
+    "songs.list.empty_search.message" : {
+      "comment" : "検索欄の語で 1 曲も残らなかったときの説明。query は利用者が打った語 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」に一致する楽曲がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@”에 해당하는 곡이 없어요"
+          }
+        }
+      }
+    },
+    "songs.list.empty_search.title" : {
+      "comment" : "検索欄の語で 1 曲も残らなかったときの空状態の見出し (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "絞り込み結果がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "필터 결과가 없어요"
+          }
+        }
+      }
+    },
+    "songs.list.fuzzy.header" : {
+      "comment" : "打った語に完全には一致しないが近い曲 (あいまい検索の候補) の節の見出し (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もしかして"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "혹시 이 곡인가요?"
+          }
+        }
+      }
+    },
+    "songs.list.introdon.hide.a11y" : {
+      "comment" : "イントロドン導線の × の読み上げ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イントロドン導線を隠す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "인트로돈 바로가기 숨기기"
+          }
+        }
+      }
+    },
+    "songs.list.introdon.min_songs" : {
+      "comment" : "出題に必要な曲数に足りないときの注記 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4曲以上必要"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "4곡 이상 필요"
+          }
+        }
+      }
+    },
+    "songs.list.introdon.playable" : {
+      "comment" : "イントロドンに出せる曲数 (ボタンの横)。1000 以上は桁区切りが付く (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg曲"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg곡"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "songs.list.introdon.range_default" : {
+      "comment" : "イントロドンの設定に出す出題範囲の名前 (曲一覧で絞り込んだ曲) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲一覧の絞り込み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 목록 필터"
+          }
+        }
+      }
+    },
+    "songs.list.introdon.range_search" : {
+      "comment" : "イントロドンの設定に返す出題範囲の名前 (検索語で絞ったとき)。query は利用者が打った語 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」検索"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@” 검색"
+          }
+        }
+      }
+    },
+    "songs.list.introdon.select" : {
+      "comment" : "イントロドンの設定から「絞り込んで出題」で来たときの確定ボタン (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この範囲で出題"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 범위로 출제"
+          }
+        }
+      }
+    },
+    "songs.list.introdon.start" : {
+      "comment" : "絞り込み中の曲でイントロドン (イントロ当て) を始める導線 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この絞り込みでイントロドン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 필터로 인트로돈"
+          }
+        }
+      }
+    },
+    "songs.list.name_filter.albums" : {
+      "comment" : "検索欄の頭のチップ。表示形式がアルバムのとき (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アルバム名"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "앨범명"
+          }
+        }
+      }
+    },
+    "songs.list.name_filter.series" : {
+      "comment" : "検索欄の頭のチップ。表示形式がシリーズのとき (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シリーズ名"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "시리즈명"
+          }
+        }
+      }
+    },
+    "songs.list.name_filter.songs" : {
+      "comment" : "検索欄の頭のチップ (何で絞るか)。表示形式が曲のとき (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲名"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡명"
+          }
+        }
+      }
+    },
+    "songs.list.scope.creator" : {
+      "comment" : "検索対象の切り替え。作詞・作曲・編曲者の名前で探す (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作詞作曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "작사·작곡"
+          }
+        }
+      }
+    },
+    "songs.list.scope.lyrics" : {
+      "comment" : "検索対象の切り替え。歌詞の本文で探す (サーバに問い合わせる) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌詞"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가사"
+          }
+        }
+      }
+    },
+    "songs.list.scope.performer" : {
+      "comment" : "検索対象の切り替え。歌唱したアイドルの名前で探す (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌唱"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가창"
+          }
+        }
+      }
+    },
+    "songs.list.scope_suggestion.count" : {
+      "comment" : "別の検索対象に切り替えると何件当たるかのチップ。scope は検索対象の名前 (list.name_filter.* / list.scope.*)。1000 以上は桁区切りが付く (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%1$@ %arg件"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%1$@ %arg건"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "songs.list.scope_suggestion.lead" : {
+      "comment" : "検索欄の下の行の頭。続けて「歌唱 3件」のような別の検索対象のチップが並ぶ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ほかに"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "그 밖에"
+          }
+        }
+      }
+    },
+    "songs.list.scope_suggestion.lyrics" : {
+      "comment" : "打った語を歌詞で探すチップ (件数は出さない) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌詞で探す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가사로 찾기"
+          }
+        }
+      }
+    },
+    "songs.list.search.prompt" : {
+      "comment" : "曲一覧の検索欄のプレースホルダ (何で絞るかは頭のチップが示すので動詞だけ) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "絞り込み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "찾기"
+          }
+        }
+      }
+    },
+    "songs.list.search.prompt_lyrics" : {
+      "comment" : "検索対象が歌詞のときの検索欄のプレースホルダ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一節を入力"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가사 한 구절 입력"
+          }
+        }
+      }
+    },
+    "songs.list.search_mode.a11y" : {
+      "comment" : "検索対象のチップの読み上げ。scope は今の検索対象の名前 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "検索対象: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "검색 대상: %1$@"
+          }
+        }
+      }
+    },
+    "songs.list.search_mode.picker" : {
+      "comment" : "検索対象を選ぶメニューの見出し (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "検索対象"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "검색 대상"
+          }
+        }
+      }
+    },
+    "songs.list.sort.a11y" : {
+      "comment" : "並び替えメニューの読み上げ。order は並び順 (sort.*)、direction は昇順/降順 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "並び替え: %1$@、%2$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정렬: %1$@, %2$@"
+          }
+        }
+      }
+    },
+    "songs.list.sort.direction" : {
+      "comment" : "件数の横の並び替えメニューの中の、昇順/降順を選ぶ欄の見出し (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "方向"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "방향"
+          }
+        }
+      }
+    },
+    "songs.list.sort.picker" : {
+      "comment" : "件数の横の並び替えメニューの中の、並び順を選ぶ欄の見出し (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "並び順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정렬 순서"
+          }
+        }
+      }
+    },
+    "songs.list.tag_filter.error" : {
+      "comment" : "タグで絞り込むための情報を取れなかった (オフライン等) ときのバナー。一覧は絞られていない (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ絞り込みの取得に失敗しました。表示中の一覧にはタグ条件が反映されていません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "태그 필터를 불러오지 못했어요. 지금 보이는 목록에는 태그 조건이 반영되지 않았어요."
+          }
+        }
+      }
+    },
+    "songs.list.title" : {
+      "comment" : "曲一覧 (楽曲タブ) のナビゲーションタイトル (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡"
+          }
+        }
+      }
+    },
+    "songs.lyrics.clap.back_beat" : {
+      "comment" : "手拍子の指示 (★)。裏拍で手拍子する (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "裏拍"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "엇박"
+          }
+        }
+      }
+    },
+    "songs.lyrics.clap.four_on_floor" : {
+      "comment" : "手拍子の指示 (■)。1 拍ごとに手拍子する (4 つ打ち) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4つ打ち"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정박"
+          }
+        }
+      }
+    },
+    "songs.lyrics.clap.no_call" : {
+      "comment" : "手拍子の指示 (♥)。声を出さないという積極的な指示 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コールなし"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜 없음"
+          }
+        }
+      }
+    },
+    "songs.lyrics.clap.unset" : {
+      "comment" : "行頭の手拍子の指示を外すメニュー項目 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "指定なし"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "지정 안 함"
+          }
+        }
+      }
+    },
+    "songs.lyrics.edit.begin_add" : {
+      "comment" : "コールガイドの編集を始めるボタン (コールがまだ無いとき) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コールを付ける"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜 달기"
+          }
+        }
+      }
+    },
+    "songs.lyrics.edit.begin_edit" : {
+      "comment" : "コールガイドの編集を始めるボタン (コールがあるとき) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コールを編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜 편집"
+          }
+        }
+      }
+    },
+    "songs.lyrics.edit.finish" : {
+      "comment" : "コールガイドの編集モードを抜けるボタン (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編集を終了"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "편집 끝내기"
+          }
+        }
+      }
+    },
+    "songs.lyrics.edit.hint" : {
+      "comment" : "編集モードの先頭の操作説明。追っかけ = 歌の後に客席が返すコール (ko は 후창) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌詞の語をタップすると、その語に被せるコールを付けられます。行末の ＋ は追っかけ、行頭の記号は手拍子。語をまたぐ範囲は長押しからなぞって選びます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가사의 단어를 탭하면 그 단어에 겹치는 콜을 달 수 있어요. 줄 끝의 ＋는 후창, 줄 앞의 기호는 박수예요. 여러 단어에 걸친 범위는 길게 눌러 드래그해서 골라요."
+          }
+        }
+      }
+    },
+    "songs.lyrics.edit.save" : {
+      "comment" : "コールガイドの保存ボタン (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "저장"
+          }
+        }
+      }
+    },
+    "songs.lyrics.emphasis.normal" : {
+      "comment" : "コールの強調度。通常 (凡例には出さない) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通常"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "일반"
+          }
+        }
+      }
+    },
+    "songs.lyrics.emphasis.optional" : {
+      "comment" : "コールの強調度 (緑)。入れても入れなくてもよいコール (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "おこのみで"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "자유롭게"
+          }
+        }
+      }
+    },
+    "songs.lyrics.emphasis.performer_request" : {
+      "comment" : "コールの強調度 (赤)。出演者が入れてほしいと言ったコール (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "演者要望"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출연자 요청"
+          }
+        }
+      }
+    },
+    "songs.lyrics.empty.message" : {
+      "comment" : "歌詞が登録されていないときの説明 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この曲の歌詞はまだ登録されていません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 곡의 가사가 아직 등록되지 않았어요."
+          }
+        }
+      }
+    },
+    "songs.lyrics.empty.title" : {
+      "comment" : "歌詞が登録されていないとき (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌詞はまだありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 가사가 없어요"
+          }
+        }
+      }
+    },
+    "songs.lyrics.load_error.title" : {
+      "comment" : "歌詞の取得に失敗したときの見出し (説明はサーバ・通信のエラー文) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌詞を表示できません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가사를 표시할 수 없어요"
+          }
+        }
+      }
+    },
+    "songs.lyrics.login_required" : {
+      "comment" : "未ログインの人への案内 (歌詞タブの先頭の導線と、歌詞の代わりに出す空状態の見出し) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌詞の表示にはログインが必要です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가사를 보려면 로그인해야 해요"
+          }
+        }
+      }
+    },
+    "songs.lyrics.login_required_message" : {
+      "comment" : "未ログインで歌詞が出ないときの説明 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ログインすると、登録済みの曲の歌詞を表示できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "로그인하면 등록된 곡의 가사를 볼 수 있어요."
+          }
+        }
+      }
+    },
+    "songs.lyrics.marker.a11y" : {
+      "comment" : "歌詞の構成マーカー (イントロ・サビ等) の読み上げ。name は歌詞データの語 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セクション: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "섹션: %1$@"
+          }
+        }
+      }
+    },
+    "songs.lyrics.reanchor.banner" : {
+      "comment" : "コールの掛かる範囲 (アンカー) を選び直している間のバナー。text はコールの文言 (利用者の入力) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%1$@」の掛かる範囲を選び直しています。語をタップ、または長押しからなぞる。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“%1$@” 콜이 걸리는 범위를 다시 고르는 중이에요. 단어를 탭하거나 길게 눌러 드래그해 주세요."
+          }
+        }
+      }
+    },
+    "songs.lyrics.reanchor.cancel" : {
+      "comment" : "範囲の選び直しをやめるボタン (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "やめる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "그만두기"
+          }
+        }
+      }
+    },
+    "songs.lyrics.save_error.title" : {
+      "comment" : "コールガイドの保存に失敗したときのアラートの見出し (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存できませんでした"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "저장하지 못했어요"
+          }
+        }
+      }
+    },
+    "songs.lyrics.source" : {
+      "comment" : "歌詞の出典の表記。source はサーバのデータ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出典: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출처: %1$@"
+          }
+        }
+      }
+    },
+    "songs.lyrics.stale.anchor" : {
+      "comment" : "ズレたコールの元の範囲の歌詞。anchor は歌詞の一部 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "元のアンカー: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "원래 앵커: %1$@"
+          }
+        }
+      }
+    },
+    "songs.lyrics.stale.anchor_none" : {
+      "comment" : "ズレたコールの元の範囲が空だったとき (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "元のアンカー: （なし）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "원래 앵커: (없음)"
+          }
+        }
+      }
+    },
+    "songs.lyrics.stale.header" : {
+      "comment" : "歌詞が直されて掛かる範囲がズレたコールの一覧の見出し。アンカー = コールが掛かる歌詞の範囲。1000 以上は桁区切りが付く (実際には届かない) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "アンカーがズレたコール（%arg 件）"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "앵커가 어긋난 콜 (%arg건)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "songs.lyrics.stale.reanchor" : {
+      "comment" : "ズレたコールの範囲を選び直すボタン (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選び直す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "다시 고르기"
+          }
+        }
+      }
+    },
+    "songs.lyrics.timing.after" : {
+      "comment" : "コールのタイミング。歌い終わってから返す (アイマスではこちらが主) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "追っかけ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "후창"
+          }
+        }
+      }
+    },
+    "songs.lyrics.timing.after_hint" : {
+      "comment" : "コールの編集シートで 追っかけ を選んだときの説明 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フレーズを聞いてから返す。アイマスではこちらが主。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "프레이즈를 듣고 나서 받아쳐요. 아이마스에서는 이쪽이 주류예요."
+          }
+        }
+      }
+    },
+    "songs.lyrics.timing.over" : {
+      "comment" : "コールのタイミング。歌に被せて叫ぶ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同時"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "동시"
+          }
+        }
+      }
+    },
+    "songs.lyrics.timing.over_hint" : {
+      "comment" : "コールの編集シートで 同時 を選んだときの説明 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌に被せて叫ぶ。歌詞と同じタイミング。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "노래에 겹쳐서 외쳐요. 가사와 같은 타이밍이에요."
+          }
+        }
+      }
+    },
+    "songs.now_playing.close.a11y" : {
+      "comment" : "再生中バーの読み上げの操作 (再生をやめてバーを消す) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "閉じる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "닫기"
+          }
+        }
+      }
+    },
+    "songs.now_playing.open.a11y_hint" : {
+      "comment" : "再生中バーの読み上げのヒント (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲の詳細を開く。下に払うと閉じる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 상세를 열어요. 아래로 쓸어내리면 닫혀요"
+          }
+        }
+      }
+    },
+    "songs.now_playing.pause.a11y" : {
+      "comment" : "再生中バーの ‖ ボタンの読み上げ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一時停止"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "일시 정지"
+          }
+        }
+      }
+    },
+    "songs.now_playing.play.a11y" : {
+      "comment" : "再生中バーの ▶ ボタンの読み上げ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再生"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "재생"
+          }
+        }
+      }
+    },
+    "songs.penlight.cancel" : {
+      "comment" : "ペンライト投票シートを閉じるボタン (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "취소"
+          }
+        }
+      }
+    },
+    "songs.penlight.color.a11y" : {
+      "comment" : "色の候補の読み上げ。name はサーバの色の名前 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "色: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "색: %1$@"
+          }
+        }
+      }
+    },
+    "songs.penlight.error.title" : {
+      "comment" : "投票に失敗したときのアラートの見出し (本文はサーバ・通信のエラー文) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票エラー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표 오류"
+          }
+        }
+      }
+    },
+    "songs.penlight.error.unknown" : {
+      "comment" : "エラー文が無いときのアラートの本文 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不明なエラーが発生しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "알 수 없는 오류가 발생했어요"
+          }
+        }
+      }
+    },
+    "songs.penlight.instructions" : {
+      "comment" : "ペンライト投票シートの説明 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ペンライトの色を選んで投票してください。複数選択できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "펜라이트 색을 골라 투표해 주세요. 여러 개 고를 수 있어요."
+          }
+        }
+      }
+    },
+    "songs.penlight.loading" : {
+      "comment" : "色の候補を読み込んでいる間 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "読み込み中…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "불러오는 중…"
+          }
+        }
+      }
+    },
+    "songs.penlight.palette.header" : {
+      "comment" : "色の候補の節の見出し (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カラーを選択"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "색 선택"
+          }
+        }
+      }
+    },
+    "songs.penlight.palette_error.message" : {
+      "comment" : "色の候補を取れなかったときの説明 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通信状況を確認して再度お試しください"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "통신 상태를 확인하고 다시 시도해 주세요"
+          }
+        }
+      }
+    },
+    "songs.penlight.palette_error.title" : {
+      "comment" : "色の候補を取れなかったとき (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カラーを取得できません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "색을 불러올 수 없어요"
+          }
+        }
+      }
+    },
+    "songs.penlight.selected.header" : {
+      "comment" : "選んだ色の組の節の見出し (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択中のセット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "선택한 세트"
+          }
+        }
+      }
+    },
+    "songs.penlight.submit" : {
+      "comment" : "ペンライト投票シートの送信ボタン (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표하기"
+          }
+        }
+      }
+    },
+    "songs.penlight.title" : {
+      "comment" : "ペンライト投票シートの見出し (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ペンライトカラーを投票"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "펜라이트 색 투표"
+          }
+        }
+      }
+    },
+    "songs.performer.title" : {
+      "comment" : "セトリの行から開く出演者一覧のタイトル。title は曲名、count は人数。1000 以上は桁区切りが付く (実際には届かない) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%1$@ / 出演者 %arg名"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%1$@ / 출연자 %arg명"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "songs.picker.close" : {
+      "comment" : "曲を選ぶ画面を閉じるボタン (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "閉じる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "닫기"
+          }
+        }
+      }
+    },
+    "songs.picker.search_prompt" : {
+      "comment" : "曲を選ぶ画面の検索欄のプレースホルダ (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲名で検索"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡명으로 검색"
+          }
+        }
+      }
+    },
+    "songs.picker.title" : {
+      "comment" : "セトリ編集などで曲を 1 つ選ぶ画面のタイトル (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲を選択"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 선택"
+          }
+        }
+      }
+    },
+    "songs.row.metric.collect_rate" : {
+      "comment" : "回収率順で並べたときに行に出す回収率と披露回数。rate は 0〜100 の整数 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@total@"
+          },
+          "substitutions" : {
+            "total" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%1$@%% / %arg回"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@total@"
+          },
+          "substitutions" : {
+            "total" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%1$@%% / %arg회"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "songs.row.metric.performances" : {
+      "comment" : "披露回数順・回収率順で並べたときに行に出す披露回数。1000 以上は桁区切りが付く (実際には届かない) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg回"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg회"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "songs.row.my_pick" : {
+      "comment" : "曲の行の印。担当アイドルが歌っている曲 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당"
+          }
+        }
+      }
+    },
+    "songs.sort.ascending" : {
+      "comment" : "並びの方向 (小さい順・古い順) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "昇順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오름차순"
+          }
+        }
+      }
+    },
+    "songs.sort.collected_count" : {
+      "comment" : "曲の並び順。自分が現地で聴いた (回収した) 回数の順 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現地回収回数順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "현장 회수 횟수순"
+          }
+        }
+      }
+    },
+    "songs.sort.collected_rate" : {
+      "comment" : "曲の並び順。披露回数のうち自分が現地で聴いた割合の順 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回収率順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "회수율순"
+          }
+        }
+      }
+    },
+    "songs.sort.descending" : {
+      "comment" : "並びの方向 (大きい順・新しい順) (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "降順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "내림차순"
+          }
+        }
+      }
+    },
+    "songs.sort.performance_count" : {
+      "comment" : "曲の並び順。ライブで歌われた回数の順 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "披露回数順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 횟수순"
+          }
+        }
+      }
+    },
+    "songs.sort.release_date" : {
+      "comment" : "曲の並び順。発売日の順 (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リリース日順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "발매일순"
+          }
+        }
+      }
+    },
+    "songs.sort.title_kana" : {
+      "comment" : "曲の並び順。曲名の読み (日本語の仮名) の順。iOS は SongSortOrder の rawValue (保存値ではない) を表示に使っていたもの (i18n/catalog/songs.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "五十音順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오십음순"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

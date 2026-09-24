@@ -10,6 +10,7 @@ object L10n {
     val I18n: L10nI18n get() = L10nI18n
     val Nav: L10nNav get() = L10nNav
     val Search: L10nSearch get() = L10nSearch
+    val Songs: L10nSongs get() = L10nSongs
     val System: L10nSystem get() = L10nSystem
     val Units: L10nUnits get() = L10nUnits
     val Widget: L10nWidget get() = L10nWidget

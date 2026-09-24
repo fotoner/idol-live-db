@@ -1,0 +1,1993 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "songs",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/data/repository/SongRepository.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/components/NowPlayingBar.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/components/SongRow.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/songs/"
+    ],
+    "ios": [
+      "ImasLiveDB/Models/Lyrics.swift",
+      "ImasLiveDB/Services/LyricsAPI.swift",
+      "ImasLiveDB/Services/LyricsFeature.swift",
+      "ImasLiveDB/Views/Community/PenlightVoteSheet.swift",
+      "ImasLiveDB/Views/Components/DetailSheet.swift",
+      "ImasLiveDB/Views/Components/DetailSheetViewModel.swift",
+      "ImasLiveDB/Views/Components/NowPlayingBarView.swift",
+      "ImasLiveDB/Views/Components/PerformerDetailSheet.swift",
+      "ImasLiveDB/Views/Components/SongCommunityTab.swift",
+      "ImasLiveDB/Views/Components/SongHistoryTab.swift",
+      "ImasLiveDB/Views/Components/SongInfoTab.swift",
+      "ImasLiveDB/Views/Components/SongLyricsTab.swift",
+      "ImasLiveDB/Views/Components/SongPickerView.swift",
+      "ImasLiveDB/Views/Songs/AlbumGridView.swift",
+      "ImasLiveDB/Views/Songs/SeriesGridView.swift",
+      "ImasLiveDB/Views/Songs/SongFilterView.swift",
+      "ImasLiveDB/Views/Songs/SongListView.swift",
+      "ImasLiveDB/Views/Songs/SongRowView.swift"
+    ]
+  },
+  "strings": {
+    "community.penlight.empty.message": {
+      "ja": "あなたが思うこの曲のペンライト色を投票しませんか？",
+      "ko": "이 곡에 어울리는 펜라이트 색에 투표해 볼까요?",
+      "note": "ペンライト投票が無いときの誘い文句"
+    },
+    "community.penlight.empty.title": {
+      "ja": "まだ投票がありません",
+      "ko": "아직 투표가 없어요",
+      "note": "ペンライト投票が 1 票も無いとき"
+    },
+    "community.penlight.header_android": {
+      "ja": "ペンライト",
+      "ko": "펜라이트",
+      "note": "コミュニティタブの節の見出し。Android の文言。iOS の community.penlight.header_ios と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "community.penlight.header_ios": {
+      "ja": "ペンライト投票",
+      "ko": "펜라이트 투표",
+      "note": "コミュニティタブの節の見出し。iOS の文言。Android の community.penlight.header_android と ja が違う",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "community.penlight.mine": {
+      "ja": "自分の投票",
+      "ko": "내 투표",
+      "note": "自分が投票した色の組に付ける印",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "community.penlight.summary": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "この曲のペンライト色 ・ {count}票",
+      "ko": "이 곡의 펜라이트 색 · {count}표",
+      "note": "ペンライト投票の結果の下の注記。count は票の合計。1000 以上は桁区切りが付く",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "community.penlight.vote": {
+      "ja": "投票する",
+      "ko": "투표하기",
+      "note": "ペンライト投票の節の見出し右のボタン (iOS) / ＋ ボタンの読み上げ (Android)"
+    },
+    "community.penlight.vote_action": {
+      "ja": "ペンライト色を投票",
+      "ko": "펜라이트 색 투표",
+      "note": "ペンライト投票が無いときの空状態のボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "community.penlight.votes": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}票",
+      "ko": "{count}표",
+      "note": "ペンライトの色の組ごとの票数 (iOS) / 節の見出しの右の票の合計 (Android)。1000 以上は桁区切りが付く"
+    },
+    "community.similar.caption": {
+      "ja": "つけられたタグが似ている楽曲",
+      "ko": "달린 태그가 비슷한 곡",
+      "note": "おすすめの節の見出しの下の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "community.similar.header": {
+      "ja": "この曲が好きな人にはこれも",
+      "ko": "이 곡을 좋아한다면 이것도",
+      "note": "タグが似ている曲 (サーバ算出のおすすめ) の節の見出し"
+    },
+    "community.similar.shared_tags": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "タグ{count}個一致",
+      "ko": "태그 {count}개 일치",
+      "note": "おすすめの曲の行に出す、共通するタグの数。1000 以上は桁区切りが付く (実際には届かない)"
+    },
+    "community.tags.add": {
+      "ja": "タグを追加",
+      "ko": "태그 추가",
+      "note": "タグを付ける操作。iOS はタグが無いときの空状態のボタン、Android は ＋ ボタンの読み上げ"
+    },
+    "community.tags.add_button": {
+      "ja": "タグ",
+      "ko": "태그",
+      "note": "タグの節の見出し右の ＋ 付きボタン (短い形)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "community.tags.empty.message": {
+      "ja": "この曲を一言で表すタグを付けてみませんか？",
+      "ko": "이 곡을 한마디로 표현하는 태그를 달아 볼까요?",
+      "note": "タグが 1 つも無いときの誘い文句",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "community.tags.empty.title": {
+      "ja": "タグはまだありません",
+      "ko": "아직 태그가 없어요",
+      "note": "タグが 1 つも無いとき"
+    },
+    "community.tags.header": {
+      "ja": "タグ",
+      "ko": "태그",
+      "note": "コミュニティタブの節の見出し"
+    },
+    "community.tags.remove": {
+      "ja": "タグを外す",
+      "ko": "태그 해제",
+      "note": "自分が付けたタグの長押しメニュー",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "community.tags.show_detail": {
+      "ja": "タグ詳細を見る",
+      "ko": "태그 상세 보기",
+      "note": "タグの長押しメニュー",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "community.videos.add.a11y": {
+      "ja": "参考動画を追加",
+      "ko": "참고 영상 추가",
+      "note": "参考動画の ＋ ボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "community.videos.add_button": {
+      "ja": "動画",
+      "ko": "영상",
+      "note": "参考動画の節の見出し右の ▶ 付きボタン (短い形)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "community.videos.author": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "ja": "投稿者: {name}",
+      "ko": "게시자: {name}",
+      "note": "参考動画を投稿した人。name は表示名"
+    },
+    "community.videos.edit.a11y": {
+      "ja": "参考動画を編集",
+      "ko": "참고 영상 편집",
+      "note": "参考動画の行の ✎ ボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "community.videos.empty.message_android": {
+      "ja": "ライブ映像などの参考動画を共有しませんか？",
+      "ko": "라이브 영상 같은 참고 영상을 공유해 볼까요?",
+      "note": "参考動画が無いときの誘い文句。Android の文言。iOS の community.videos.empty.message_ios と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "community.videos.empty.message_ios": {
+      "ja": "最初の1本を投稿しませんか？",
+      "ko": "첫 영상을 게시해 볼까요?",
+      "note": "参考動画が無いときの誘い文句。iOS の文言。Android の community.videos.empty.message_android と ja が違う",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "community.videos.empty.title": {
+      "ja": "参考動画はまだありません",
+      "ko": "아직 참고 영상이 없어요",
+      "note": "参考動画が 1 本も無いとき"
+    },
+    "community.videos.header": {
+      "ja": "参考動画",
+      "ko": "참고 영상",
+      "note": "コミュニティタブの節の見出し"
+    },
+    "community.videos.post": {
+      "ja": "動画を投稿",
+      "ko": "영상 올리기",
+      "note": "参考動画が無いときの空状態のボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "copy.artists": {
+      "ja": "歌唱者をコピー",
+      "ko": "가창자 복사",
+      "note": "曲の長押しメニュー。歌唱者の表記をコピーする"
+    },
+    "copy.kana": {
+      "ja": "よみをコピー",
+      "ko": "읽는 법 복사",
+      "note": "曲の長押しメニュー。よみ = 曲名の読み仮名",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "copy.title": {
+      "ja": "曲名をコピー",
+      "ko": "곡명 복사",
+      "note": "曲の行・曲詳細の曲名を長押ししたときのメニュー"
+    },
+    "detail.favorite.off": {
+      "ja": "お気に入り",
+      "ko": "즐겨찾기",
+      "note": "曲詳細のお気に入りボタン (入っていないとき)"
+    },
+    "detail.favorite.on": {
+      "ja": "お気に入り済み",
+      "ko": "즐겨찾기됨",
+      "note": "曲詳細のお気に入りボタン (お気に入りに入っているとき)"
+    },
+    "detail.kamisabi.header": {
+      "ja": "KAMISABIカード",
+      "ko": "KAMISABI 카드",
+      "note": "曲詳細の KAMISABI カードの節の見出し",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.kamisabi.owned": {
+      "ja": "カード所持済み",
+      "ko": "카드 보유 중",
+      "note": "KAMISABI (音楽カードゲーム) のカードを持っていると記録済みのときのボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.kamisabi.record": {
+      "ja": "カード所持を記録",
+      "ko": "카드 보유 기록",
+      "note": "KAMISABI のカードを持っていると記録するボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.kamisabi.toggle": {
+      "ja": "カード所持",
+      "ko": "카드 보유",
+      "note": "KAMISABI のカードを持っているかのスイッチ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.login.dialog": {
+      "ja": "タグ・動画・投票にはログインが必要です。",
+      "ko": "태그·영상·투표를 이용하려면 로그인해야 해요.",
+      "note": "未ログインでタグ・動画・投票をしようとしたときのダイアログの本文",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.login.prompt": {
+      "ja": "タグ・動画・投票にはログインが必要です",
+      "ko": "태그·영상·투표를 이용하려면 로그인해야 해요",
+      "note": "コミュニティタブの先頭に出す、未ログインの人への案内"
+    },
+    "detail.menu.apple_music": {
+      "ja": "Apple Musicで開く",
+      "ko": "Apple Music에서 열기",
+      "note": "曲詳細の … メニュー (Apple Music は固有名詞)"
+    },
+    "detail.menu.edit": {
+      "ja": "この楽曲を編集",
+      "ko": "이 곡 편집",
+      "note": "曲詳細の … メニュー"
+    },
+    "detail.menu.edit_history": {
+      "ja": "編集履歴",
+      "ko": "편집 기록",
+      "note": "曲詳細の … メニュー"
+    },
+    "detail.menu.lyrics_site_android": {
+      "ja": "歌詞を見る",
+      "ko": "가사 보기",
+      "note": "曲詳細の … メニュー。外部の歌詞サイトを開く。Android の文言。iOS の detail.menu.lyrics_site_ios と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.menu.lyrics_site_ios": {
+      "ja": "歌詞サイトで探す",
+      "ko": "가사 사이트에서 찾기",
+      "note": "曲詳細の … メニュー。外部の歌詞サイトを開く。iOS の文言。Android の detail.menu.lyrics_site_android と ja が違う",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.menu.more.a11y": {
+      "ja": "その他",
+      "ko": "더 보기",
+      "note": "曲詳細の … ボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "detail.play": {
+      "ja": "再生",
+      "ko": "재생",
+      "note": "曲詳細の再生ボタン"
+    },
+    "detail.stat.unit_shows": {
+      "ja": "公演",
+      "ko": "공연",
+      "note": "統計タイルの数字の単位 (現地回収した公演の数)"
+    },
+    "detail.stat.unit_times": {
+      "ja": "回",
+      "ko": "회",
+      "note": "統計タイルの数字の単位 (披露回数など)"
+    },
+    "detail.stop": {
+      "ja": "停止",
+      "ko": "정지",
+      "note": "曲詳細の再生ボタン (再生中)"
+    },
+    "detail.tab.community": {
+      "ja": "コミュニティ",
+      "ko": "커뮤니티",
+      "note": "曲詳細のタブ (タグ・参考動画・ペンライト投票)"
+    },
+    "detail.tab.history": {
+      "ja": "披露履歴",
+      "ko": "공연 기록",
+      "note": "曲詳細のタブ (ライブで歌われた記録)"
+    },
+    "detail.tab.info": {
+      "ja": "情報・歌唱",
+      "ko": "정보·가창",
+      "note": "曲詳細のタブ (曲の情報と歌唱アイドル)"
+    },
+    "detail.tab.lyrics": {
+      "ja": "歌詞",
+      "ko": "가사",
+      "note": "曲詳細のタブ (歌詞とコールガイド)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "detail.write_action.card_owned": {
+      "ja": "カード所持の記録",
+      "ko": "카드 보유 기록",
+      "note": "端末への保存に失敗したときの知らせに入る操作の名前 (KAMISABI のカード所持)"
+    },
+    "detail.write_action.favorite": {
+      "ja": "お気に入りの切り替え",
+      "ko": "즐겨찾기 전환",
+      "note": "端末への保存に失敗したときの知らせに入る操作の名前 (「{操作}に失敗しました」の {操作})"
+    },
+    "filter.all": {
+      "ja": "全て",
+      "ko": "전체",
+      "note": "フィルタシートのチップ。絞り込まない (曲タイプ・ブランド・アイドル選択のブランド)"
+    },
+    "filter.apply": {
+      "ja": "適用",
+      "ko": "적용",
+      "note": "フィルタシートの条件を一覧に反映するボタン",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.brand.header": {
+      "ja": "ブランド",
+      "ko": "브랜드",
+      "note": "フィルタシートの節の見出し",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.call_guide.footer": {
+      "ja": "歌詞の行にコール・手拍子が書き込まれている曲だけを表示します (通信が必要)。",
+      "ko": "가사 줄에 콜·박수가 적혀 있는 곡만 보여 줘요 (통신 필요).",
+      "note": "コールガイドの節の注記",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter.call_guide.header": {
+      "ja": "コールガイド",
+      "ko": "콜 가이드",
+      "note": "フィルタシートの節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter.call_guide.toggle": {
+      "ja": "コールガイドがある曲のみ",
+      "ko": "콜 가이드가 있는 곡만",
+      "note": "コールガイドの絞り込みのスイッチ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter.cd_series.header": {
+      "ja": "CDシリーズ",
+      "ko": "CD 시리즈",
+      "note": "フィルタシートの CD シリーズ選択の行・節の見出しと、選択画面のタイトル"
+    },
+    "filter.collect.all": {
+      "ja": "すべて",
+      "ko": "전체",
+      "note": "現地回収の絞り込みの選択肢。iOS は SongCollectFilter の rawValue (保存値。変えない) を表示に使っていたもの"
+    },
+    "filter.collect.collected": {
+      "ja": "回収済のみ",
+      "ko": "회수한 곡만",
+      "note": "現地回収の絞り込みの選択肢。現地で聴いた曲だけ"
+    },
+    "filter.collect.header": {
+      "ja": "現地回収",
+      "ko": "현장 회수",
+      "note": "フィルタシートの節の見出し (現地で聴いたかどうかで絞る)"
+    },
+    "filter.collect.uncollected": {
+      "ja": "未回収のみ",
+      "ko": "미회수 곡만",
+      "note": "現地回収の絞り込みの選択肢。まだ現地で聴いていない曲だけ"
+    },
+    "filter.creator.header": {
+      "ja": "作詞 / 作曲 / 編曲者",
+      "ko": "작사 / 작곡 / 편곡자",
+      "note": "フィルタシートの節の見出し (作家の名前で絞る)"
+    },
+    "filter.creator.placeholder": {
+      "ja": "名前を入力",
+      "ko": "이름 입력",
+      "note": "作家の名前の入力欄のプレースホルダ"
+    },
+    "filter.idol.header": {
+      "ja": "アイドル",
+      "ko": "아이돌",
+      "note": "フィルタシートのアイドル選択の行 (iOS は節の見出しとアイドル選択画面のタイトルにも使う)"
+    },
+    "filter.idol.summary_more": {
+      "args": [
+        {
+          "name": "names",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{names} 他{count}人",
+      "ko": "{names} 외 {count}명",
+      "note": "選んだアイドルが 4 人以上のときの表示。names は先頭 2 人の名前 (・ で連結済み)、count は残りの人数",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.kamisabi.caption_android": {
+      "ja": "音楽カードゲーム KAMISABI にカードがある曲だけ表示",
+      "ko": "음악 카드 게임 KAMISABI에 카드가 있는 곡만 보여 줘요",
+      "note": "KAMISABI のスイッチの説明。Android の文言。iOS の filter.kamisabi.caption_ios と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.kamisabi.caption_ios": {
+      "ja": "音楽カードゲーム「KAMISABI」にカードが収録されている曲だけを表示します。",
+      "ko": "음악 카드 게임 “KAMISABI”에 카드가 수록된 곡만 보여 줘요.",
+      "note": "KAMISABI の節の注記。iOS の文言。Android の filter.kamisabi.caption_android と ja が違う",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter.kamisabi.toggle_android": {
+      "ja": "KAMISABI収録のみ",
+      "ko": "KAMISABI 수록곡만",
+      "note": "KAMISABI の絞り込みのスイッチ。Android の文言。iOS の filter.kamisabi.toggle_ios と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.kamisabi.toggle_ios": {
+      "ja": "KAMISABI収録曲のみ",
+      "ko": "KAMISABI 수록곡만",
+      "note": "KAMISABI (音楽カードゲーム。固有名詞) の絞り込みのスイッチ。iOS の文言。Android の filter.kamisabi.toggle_android と ja が違う",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter.list_mode.albums": {
+      "ja": "アルバム",
+      "ko": "앨범",
+      "note": "表示形式のセグメント。CD 単位のカードで並べる"
+    },
+    "filter.list_mode.header": {
+      "ja": "表示形式",
+      "ko": "표시 형식",
+      "note": "フィルタシートの節の見出し (曲 / アルバム / シリーズ)"
+    },
+    "filter.list_mode.picker": {
+      "ja": "表示",
+      "ko": "표시",
+      "note": "表示形式を選ぶセグメントの名前 (読み上げに使う)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter.list_mode.series": {
+      "ja": "シリーズ",
+      "ko": "시리즈",
+      "note": "表示形式のセグメント。シリーズ単位のカードで並べる"
+    },
+    "filter.list_mode.songs": {
+      "ja": "楽曲",
+      "ko": "곡",
+      "note": "表示形式のセグメント。曲を 1 行ずつ並べる"
+    },
+    "filter.live.header": {
+      "ja": "ライブで絞込",
+      "ko": "라이브로 필터",
+      "note": "フィルタシートのライブ選択の行・節の見出し"
+    },
+    "filter.live.picker_title": {
+      "ja": "ライブ",
+      "ko": "라이브",
+      "note": "ライブを選ぶ画面のタイトル"
+    },
+    "filter.live_only.caption": {
+      "ja": "セトリにしか無い曲(カバー等)を一覧から隠します。既定 ON",
+      "ko": "세트리스트에만 있는 곡(커버 등)을 목록에서 숨겨요. 기본값 ON",
+      "note": "ライブ限定曲を隠す のスイッチの説明"
+    },
+    "filter.live_only.title": {
+      "ja": "ライブ限定曲を隠す",
+      "ko": "라이브 한정곡 숨기기",
+      "note": "フィルタシートのスイッチ"
+    },
+    "filter.my_mark.favorite": {
+      "ja": "お気に入りのみ",
+      "ko": "즐겨찾기만",
+      "note": "マイマークの絞り込みのスイッチ"
+    },
+    "filter.my_mark.footer": {
+      "ja": "チェック ON で AND 条件絞り込み",
+      "ko": "켜면 AND 조건으로 필터해요",
+      "note": "マイマークの節の注記。ON にした条件すべてに当てはまる曲だけ残る"
+    },
+    "filter.my_mark.header": {
+      "ja": "マイマーク",
+      "ko": "마이 마크",
+      "note": "フィルタシートの節の見出し (担当・お気に入り・メモで絞る)"
+    },
+    "filter.my_mark.my_pick": {
+      "ja": "担当アイドルの曲のみ",
+      "ko": "담당 아이돌의 곡만",
+      "note": "マイマークの絞り込みのスイッチ"
+    },
+    "filter.my_mark.my_pick_caption": {
+      "ja": "担当アイドルが歌唱者にいる曲だけ表示",
+      "ko": "담당 아이돌이 가창자에 있는 곡만 보여 줘요",
+      "note": "担当アイドルの曲のみ のスイッチの説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.my_mark.note": {
+      "ja": "メモがある曲のみ",
+      "ko": "메모가 있는 곡만",
+      "note": "マイマークの絞り込みのスイッチ"
+    },
+    "filter.none": {
+      "ja": "選択なし",
+      "ko": "선택 안 함",
+      "note": "シリーズ・CD シリーズ・ライブ・アイドルを選んでいないときの表示 / 選択を外す行"
+    },
+    "filter.other_brand.caption": {
+      "ja": "歌枠で歌っただけのカバー等。既定では隠しています",
+      "ko": "노래 방송에서 부르기만 한 커버 등이에요. 기본으로는 숨겨요",
+      "note": "「その他」を表示 のスイッチの説明。歌枠 = 歌の配信"
+    },
+    "filter.other_brand.title": {
+      "ja": "「その他」を表示",
+      "ko": "“기타” 표시",
+      "note": "フィルタシートのスイッチ。「その他」はどのブランドにも属さない曲の分類"
+    },
+    "filter.picker.back.a11y": {
+      "ja": "フィルタに戻る",
+      "ko": "필터로 돌아가기",
+      "note": "選択ページの ← の読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.picker.clear_all": {
+      "ja": "選択をすべて解除",
+      "ko": "선택 모두 해제",
+      "note": "アイドル選択ページで選択をすべて外す行",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.picker.idol_search_prompt": {
+      "ja": "アイドル名で絞り込み",
+      "ko": "아이돌 이름으로 찾기",
+      "note": "アイドル選択ページの絞り込み欄のプレースホルダ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.picker.idols_title": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "アイドル ({count})",
+      "ko": "아이돌 ({count})",
+      "note": "アイドル選択ページのタイトル。count は選んだ人数",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.picker.search_prompt": {
+      "args": [
+        {
+          "name": "title",
+          "type": "text"
+        }
+      ],
+      "ja": "{title}で絞り込み",
+      "ko": "{title}에서 찾기",
+      "note": "選択ページの絞り込み欄のプレースホルダ。title はページの名前 (シリーズ / CDシリーズ / ライブ)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.remix.caption": {
+      "ja": "アレンジ・リミックス曲を表示",
+      "ko": "어레인지·리믹스 곡을 보여 줘요",
+      "note": "リミックスを含む のスイッチの説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.remix.title": {
+      "ja": "リミックスを含む",
+      "ko": "리믹스 포함",
+      "note": "フィルタシートのスイッチ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.reset_android": {
+      "ja": "リセット",
+      "ko": "초기화",
+      "note": "フィルタシートの条件をすべて戻すボタン。Android の文言。iOS の filter.reset_ios と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "filter.reset_ios": {
+      "ja": "すべてリセット",
+      "ko": "모두 초기화",
+      "note": "フィルタシートの条件をすべて戻すボタン。iOS の文言。Android の filter.reset_android と ja が違う",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter.series.header": {
+      "ja": "シリーズ",
+      "ko": "시리즈",
+      "note": "フィルタシートのシリーズ選択の行・節の見出しと、選択画面のタイトル"
+    },
+    "filter.song_type.header": {
+      "ja": "曲タイプ",
+      "ko": "곡 타입",
+      "note": "フィルタシートの節の見出し (ソロ / ユニット / 全体曲。語はコアの vocabulary)"
+    },
+    "filter.sort.direction": {
+      "ja": "方向",
+      "ko": "방향",
+      "note": "昇順/降順を選ぶセグメントの名前 (読み上げに使う)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter.sort.header": {
+      "ja": "並び順",
+      "ko": "정렬 순서",
+      "note": "フィルタシートの節の見出し"
+    },
+    "filter.sort.picker": {
+      "ja": "ソート",
+      "ko": "정렬",
+      "note": "並び順を選ぶメニューの名前",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "filter.title": {
+      "ja": "フィルター・並び替え",
+      "ko": "필터·정렬",
+      "note": "曲一覧のフィルタシートの見出し",
+      "platforms": [
+        "android"
+      ]
+    },
+    "grid.albums.empty": {
+      "ja": "アルバムが見つかりません",
+      "ko": "앨범을 찾을 수 없어요",
+      "note": "表示形式がアルバムで 1 件も無いとき"
+    },
+    "grid.cd_count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}枚",
+      "ko": "{count}장",
+      "note": "シリーズのカードの CD の枚数。1000 以上は桁区切りが付く",
+      "platforms": [
+        "android"
+      ]
+    },
+    "grid.series.empty": {
+      "ja": "シリーズが見つかりません",
+      "ko": "시리즈를 찾을 수 없어요",
+      "note": "表示形式がシリーズで 1 件も無いとき"
+    },
+    "grid.song_count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}曲",
+      "ko": "{count}곡",
+      "note": "アルバム・シリーズのカードの曲数。1000 以上は桁区切りが付く",
+      "platforms": [
+        "android"
+      ]
+    },
+    "history.co_occurring.header": {
+      "ja": "同じ公演で歌われた曲",
+      "ko": "같은 공연에서 불린 곡",
+      "note": "披露履歴タブの節の見出し"
+    },
+    "history.co_occurring.note": {
+      "ja": "同じ公演に両方あった公演数です (1 公演で 2 回歌っても 1 公演)。次のライブで一緒に来るとは限りません。",
+      "ko": "두 곡이 함께 있었던 공연 수예요 (한 공연에서 2번 불러도 공연 1회로 세요). 다음 라이브에서 함께 나온다는 보장은 없어요.",
+      "note": "同じ公演で歌われた曲 の節の注記"
+    },
+    "history.co_occurring.row": {
+      "args": [
+        {
+          "name": "together",
+          "type": "count"
+        },
+        {
+          "name": "performances",
+          "type": "int"
+        }
+      ],
+      "ja": "いっしょに{together}公演 ／ 全{performances}公演",
+      "ko": "함께 공연 {together}회 / 총 공연 {performances}회",
+      "note": "同じ公演で歌われた曲の行の副題。together は一緒に歌われた公演数、performances はその曲が歌われた公演数。together は 1000 以上は桁区切りが付く (実際には届かない)"
+    },
+    "history.empty.message": {
+      "ja": "この曲がライブで披露されると、ここに記録されます。",
+      "ko": "이 곡이 라이브에서 공연되면 여기에 기록돼요.",
+      "note": "ライブで一度も歌われていないときの説明"
+    },
+    "history.empty.title": {
+      "ja": "披露履歴はまだありません",
+      "ko": "아직 공연 기록이 없어요",
+      "note": "ライブで一度も歌われていないとき"
+    },
+    "history.log.count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}回",
+      "ko": "{count}회",
+      "note": "ライブ披露履歴 の見出しの右の回数。1000 以上は桁区切りが付く"
+    },
+    "history.log.header": {
+      "ja": "ライブ披露履歴",
+      "ko": "라이브 공연 기록",
+      "note": "披露履歴タブの節の見出し (公演ごとの一覧)"
+    },
+    "history.singers.header": {
+      "ja": "この曲を歌った人",
+      "ko": "이 곡을 부른 사람",
+      "note": "披露履歴タブの節の見出し (歌った回数の多い順)"
+    },
+    "history.singers.note": {
+      "ja": "セトリに残っている歌唱の集計です。分母は上の「総披露」と同じ回数です。",
+      "ko": "세트리스트에 남아 있는 가창을 집계했어요. 분모는 위의 “총 공연”과 같은 횟수예요.",
+      "note": "この曲を歌った人 の節の注記"
+    },
+    "history.singers.times": {
+      "args": [
+        {
+          "name": "times",
+          "type": "count"
+        },
+        {
+          "name": "total",
+          "type": "int"
+        }
+      ],
+      "ja": "{times}回 ／ 全{total}回",
+      "ko": "{times}회 / 총 {total}회",
+      "note": "歌った人の行の副題。times はその人が歌った回数、total は全体の披露回数。times は 1000 以上は桁区切りが付く (実際には届かない)"
+    },
+    "history.stat.first": {
+      "ja": "初披露",
+      "ko": "첫 공연",
+      "note": "統計タイルのラベル。初めて歌われた年月"
+    },
+    "history.stat.last": {
+      "ja": "最終披露",
+      "ko": "마지막 공연",
+      "note": "統計タイルのラベル。最後に歌われた年月"
+    },
+    "history.stat.total": {
+      "ja": "総披露",
+      "ko": "총 공연",
+      "note": "統計タイルのラベル。ライブで歌われた回数の合計"
+    },
+    "info.live_singers.header": {
+      "ja": "ライブ歌唱歴",
+      "ko": "라이브 가창 이력",
+      "note": "情報タブの節の見出し (ライブで歌ったことがあるアイドル)"
+    },
+    "info.register_attendance": {
+      "ja": "参加ライブを登録して現地回収",
+      "ko": "참가한 라이브를 등록해 현장 회수",
+      "note": "参加したライブを登録する導線 (登録すると現地回収に数えられる)"
+    },
+    "info.related.header": {
+      "ja": "関連楽曲",
+      "ko": "관련 곡",
+      "note": "情報タブの節の見出し (同じシリーズ・ユニット・歌唱者の曲)"
+    },
+    "info.row.arranger": {
+      "ja": "編曲",
+      "ko": "편곡",
+      "note": "楽曲情報の行"
+    },
+    "info.row.artist": {
+      "ja": "アーティスト",
+      "ko": "아티스트",
+      "note": "楽曲情報の行"
+    },
+    "info.row.brand": {
+      "ja": "ブランド",
+      "ko": "브랜드",
+      "note": "楽曲情報の行 (アイマスのシリーズ)"
+    },
+    "info.row.cd_series": {
+      "ja": "CDシリーズ",
+      "ko": "CD 시리즈",
+      "note": "楽曲情報の行"
+    },
+    "info.row.cd_title": {
+      "ja": "収録",
+      "ko": "수록",
+      "note": "楽曲情報の行。収録されている CD の名前",
+      "platforms": [
+        "android"
+      ]
+    },
+    "info.row.composer": {
+      "ja": "作曲",
+      "ko": "작곡",
+      "note": "楽曲情報の行"
+    },
+    "info.row.composer_arranger": {
+      "ja": "作曲 / 編曲",
+      "ko": "작곡 / 편곡",
+      "note": "楽曲情報の行。作曲者と編曲者が同じとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "info.row.duration": {
+      "ja": "再生時間",
+      "ko": "재생 시간",
+      "note": "楽曲情報の行 (曲の長さ)"
+    },
+    "info.row.kana": {
+      "ja": "よみ",
+      "ko": "읽는 법",
+      "note": "楽曲情報の行。曲名の読み仮名"
+    },
+    "info.row.lyricist": {
+      "ja": "作詞",
+      "ko": "작사",
+      "note": "楽曲情報の行"
+    },
+    "info.row.release_date": {
+      "ja": "リリース日",
+      "ko": "발매일",
+      "note": "楽曲情報の行"
+    },
+    "info.row.series": {
+      "ja": "シリーズ",
+      "ko": "시리즈",
+      "note": "楽曲情報の行",
+      "platforms": [
+        "android"
+      ]
+    },
+    "info.row.type": {
+      "ja": "タイプ",
+      "ko": "타입",
+      "note": "楽曲情報の行 (ソロ / ユニット / 全体曲)"
+    },
+    "info.row.unit": {
+      "ja": "ユニット",
+      "ko": "유닛",
+      "note": "楽曲情報の行"
+    },
+    "info.section.header": {
+      "ja": "楽曲情報",
+      "ko": "곡 정보",
+      "note": "情報タブの節の見出し"
+    },
+    "info.singers.header": {
+      "ja": "歌唱アイドル",
+      "ko": "가창 아이돌",
+      "note": "情報タブの節の見出し (オリジナルの歌唱メンバー)"
+    },
+    "info.stat.collected": {
+      "ja": "現地回収",
+      "ko": "현장 회수",
+      "note": "統計タイルのラベル。自分が現地で聴いた公演の数"
+    },
+    "info.stat.performances": {
+      "ja": "披露回数",
+      "ko": "공연 횟수",
+      "note": "統計タイルのラベル。ライブで歌われた回数"
+    },
+    "info.variants.header": {
+      "ja": "別バージョン",
+      "ko": "다른 버전",
+      "note": "情報タブの節の見出し (同じ曲のソロ Ver. / Remix など)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.action.add": {
+      "ja": "曲を追加",
+      "ko": "곡 추가",
+      "note": "曲を新しく登録するボタン (iOS はメニューの項目、Android は ＋ の読み上げ)"
+    },
+    "list.action.clear_filters": {
+      "ja": "フィルタを解除",
+      "ko": "필터 해제",
+      "note": "絞り込みをすべて外すメニュー項目",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.action.filter.a11y": {
+      "ja": "フィルター",
+      "ko": "필터",
+      "note": "フィルタシートを開くボタンの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.action.tag_filter": {
+      "ja": "タグで絞り込み",
+      "ko": "태그로 필터",
+      "note": "タグを選んで絞り込むボタン (iOS はメニューの項目、Android はボタンの読み上げ)"
+    },
+    "list.action.tag_filter_count": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "タグ: {count}件",
+      "ko": "태그: {count}건",
+      "note": "タグで絞り込み中のメニュー項目。count は選んだタグの数",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.call_guide.error": {
+      "ja": "コールガイドの情報を取得できませんでした。表示中の一覧にはコールガイド条件が反映されていません。",
+      "ko": "콜 가이드 정보를 불러오지 못했어요. 지금 보이는 목록에는 콜 가이드 조건이 반영되지 않았어요.",
+      "note": "コールガイドの有無で絞る情報を取れなかったときのバナー。一覧は絞られていない",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.call_guide.truncated": {
+      "ja": "最近更新された 200 曲で絞り込んでいます。",
+      "ko": "최근 업데이트된 200곡으로 필터링하고 있어요.",
+      "note": "コールガイドありで絞ると、サーバが 200 曲で打ち切るのでそれを知らせる",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.chip.call_guide": {
+      "ja": "コールガイドあり",
+      "ko": "콜 가이드 있음",
+      "note": "適用中の絞り込みのチップ。コールガイドがある曲だけ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.chip.collected": {
+      "ja": "現地回収済",
+      "ko": "현장 회수함",
+      "note": "適用中の絞り込みのチップ。現地で聴いた (回収した) 曲だけ"
+    },
+    "list.chip.favorite": {
+      "ja": "お気に入り",
+      "ko": "즐겨찾기",
+      "note": "適用中の絞り込みのチップ。お気に入りの曲だけ"
+    },
+    "list.chip.idols": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "アイドル {count}人",
+      "ko": "아이돌 {count}명",
+      "note": "適用中の絞り込みのチップ。選んだアイドルの人数",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.chip.kamisabi": {
+      "ja": "KAMISABI収録",
+      "ko": "KAMISABI 수록",
+      "note": "適用中の絞り込みのチップ。音楽カードゲーム KAMISABI に収録された曲だけ (KAMISABI は固有名詞)"
+    },
+    "list.chip.my_pick": {
+      "ja": "担当",
+      "ko": "담당",
+      "note": "適用中の絞り込みのチップ (× で外す)。担当アイドルの曲だけ"
+    },
+    "list.chip.note": {
+      "ja": "メモあり",
+      "ko": "메모 있음",
+      "note": "適用中の絞り込みのチップ。メモがある曲だけ"
+    },
+    "list.chip.tag_count": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{name} {count}曲",
+      "ko": "{name} {count}곡",
+      "note": "適用中のタグのチップ (タグ 1 つのとき)。name はタグ名、count はそのタグの曲数。1000 以上は桁区切りが付く"
+    },
+    "list.chip.uncollected": {
+      "ja": "未回収",
+      "ko": "미회수",
+      "note": "適用中の絞り込みのチップ。まだ現地で聴いていない曲だけ"
+    },
+    "list.count.albums": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}枚",
+      "ko": "{count}장",
+      "note": "表示形式がアルバムのときの件数 (CD の枚数)。1000 以上は桁区切りが付く",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.count.series": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}シリーズ",
+      "ko": "시리즈 {count}개",
+      "note": "表示形式がシリーズのときの件数。1000 以上は桁区切りが付く",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.count.songs_android": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}件",
+      "ko": "{count}건",
+      "note": "一覧の上の件数。Android の文言。iOS の list.count.songs_ios と ja が違う。1000 以上は桁区切りが付く (以前の Android は付かなかった)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.count.songs_ios": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count} 件",
+      "ko": "{count}건",
+      "note": "一覧の上の件数 (数字だけ太字にする)。iOS の文言。Android の list.count.songs_android と ja が違う (空白の有無)。1000 以上は桁区切りが付く",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.empty_filter.message": {
+      "ja": "フィルタ条件を変更するか、フィルタを解除してください。",
+      "ko": "필터 조건을 바꾸거나 필터를 해제해 주세요.",
+      "note": "フィルタで 1 曲も残らなかったときの説明"
+    },
+    "list.empty_filter.title": {
+      "ja": "条件に一致する楽曲がありません",
+      "ko": "조건에 맞는 곡이 없어요",
+      "note": "フィルタで 1 曲も残らなかったときの空状態の見出し"
+    },
+    "list.empty_search.message": {
+      "args": [
+        {
+          "name": "query",
+          "type": "string"
+        }
+      ],
+      "ja": "「{query}」に一致する楽曲がありません",
+      "ko": "“{query}”에 해당하는 곡이 없어요",
+      "note": "検索欄の語で 1 曲も残らなかったときの説明。query は利用者が打った語"
+    },
+    "list.empty_search.title": {
+      "ja": "絞り込み結果がありません",
+      "ko": "필터 결과가 없어요",
+      "note": "検索欄の語で 1 曲も残らなかったときの空状態の見出し"
+    },
+    "list.fuzzy.header": {
+      "ja": "もしかして",
+      "ko": "혹시 이 곡인가요?",
+      "note": "打った語に完全には一致しないが近い曲 (あいまい検索の候補) の節の見出し"
+    },
+    "list.introdon.hide.a11y": {
+      "ja": "イントロドン導線を隠す",
+      "ko": "인트로돈 바로가기 숨기기",
+      "note": "イントロドン導線の × の読み上げ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.introdon.min_songs": {
+      "ja": "4曲以上必要",
+      "ko": "4곡 이상 필요",
+      "note": "出題に必要な曲数に足りないときの注記",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.introdon.playable": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}曲",
+      "ko": "{count}곡",
+      "note": "イントロドンに出せる曲数 (ボタンの横)。1000 以上は桁区切りが付く",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.introdon.range_default": {
+      "ja": "曲一覧の絞り込み",
+      "ko": "곡 목록 필터",
+      "note": "イントロドンの設定に出す出題範囲の名前 (曲一覧で絞り込んだ曲)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.introdon.range_search": {
+      "args": [
+        {
+          "name": "query",
+          "type": "string"
+        }
+      ],
+      "ja": "「{query}」検索",
+      "ko": "“{query}” 검색",
+      "note": "イントロドンの設定に返す出題範囲の名前 (検索語で絞ったとき)。query は利用者が打った語",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.introdon.select": {
+      "ja": "この範囲で出題",
+      "ko": "이 범위로 출제",
+      "note": "イントロドンの設定から「絞り込んで出題」で来たときの確定ボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.introdon.start": {
+      "ja": "この絞り込みでイントロドン",
+      "ko": "이 필터로 인트로돈",
+      "note": "絞り込み中の曲でイントロドン (イントロ当て) を始める導線",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.login.dialog": {
+      "ja": "楽曲の追加にはログインが必要です。",
+      "ko": "곡을 추가하려면 로그인해야 해요.",
+      "note": "未ログインで曲を追加しようとしたときのダイアログの本文",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.mastery.write_action": {
+      "ja": "習熟度の記録",
+      "ko": "숙련도 기록",
+      "note": "端末への保存に失敗したときの知らせに入る操作の名前 (「{操作}に失敗しました」の {操作})。長押しで習熟度を付けたとき",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.name_filter.albums": {
+      "ja": "アルバム名",
+      "ko": "앨범명",
+      "note": "検索欄の頭のチップ。表示形式がアルバムのとき"
+    },
+    "list.name_filter.series": {
+      "ja": "シリーズ名",
+      "ko": "시리즈명",
+      "note": "検索欄の頭のチップ。表示形式がシリーズのとき"
+    },
+    "list.name_filter.songs": {
+      "ja": "曲名",
+      "ko": "곡명",
+      "note": "検索欄の頭のチップ (何で絞るか)。表示形式が曲のとき"
+    },
+    "list.scope.creator": {
+      "ja": "作詞作曲",
+      "ko": "작사·작곡",
+      "note": "検索対象の切り替え。作詞・作曲・編曲者の名前で探す"
+    },
+    "list.scope.lyrics": {
+      "ja": "歌詞",
+      "ko": "가사",
+      "note": "検索対象の切り替え。歌詞の本文で探す (サーバに問い合わせる)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.scope.performer": {
+      "ja": "歌唱",
+      "ko": "가창",
+      "note": "検索対象の切り替え。歌唱したアイドルの名前で探す"
+    },
+    "list.scope_suggestion.count": {
+      "args": [
+        {
+          "name": "scope",
+          "type": "text"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{scope} {count}件",
+      "ko": "{scope} {count}건",
+      "note": "別の検索対象に切り替えると何件当たるかのチップ。scope は検索対象の名前 (list.name_filter.* / list.scope.*)。1000 以上は桁区切りが付く"
+    },
+    "list.scope_suggestion.lead": {
+      "ja": "ほかに",
+      "ko": "그 밖에",
+      "note": "検索欄の下の行の頭。続けて「歌唱 3件」のような別の検索対象のチップが並ぶ"
+    },
+    "list.scope_suggestion.lyrics": {
+      "ja": "歌詞で探す",
+      "ko": "가사로 찾기",
+      "note": "打った語を歌詞で探すチップ (件数は出さない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.search.prompt": {
+      "ja": "絞り込み",
+      "ko": "찾기",
+      "note": "曲一覧の検索欄のプレースホルダ (何で絞るかは頭のチップが示すので動詞だけ)"
+    },
+    "list.search.prompt_lyrics": {
+      "ja": "一節を入力",
+      "ko": "가사 한 구절 입력",
+      "note": "検索対象が歌詞のときの検索欄のプレースホルダ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.search_mode.a11y": {
+      "args": [
+        {
+          "name": "scope",
+          "type": "text"
+        }
+      ],
+      "ja": "検索対象: {scope}",
+      "ko": "검색 대상: {scope}",
+      "note": "検索対象のチップの読み上げ。scope は今の検索対象の名前",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.search_mode.picker": {
+      "ja": "検索対象",
+      "ko": "검색 대상",
+      "note": "検索対象を選ぶメニューの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.search_mode.switch.a11y": {
+      "ja": "検索対象を切り替え",
+      "ko": "검색 대상 바꾸기",
+      "note": "検索対象のチップの ▼ の読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.sort.a11y": {
+      "args": [
+        {
+          "name": "order",
+          "type": "text"
+        },
+        {
+          "name": "direction",
+          "type": "text"
+        }
+      ],
+      "ja": "並び替え: {order}、{direction}",
+      "ko": "정렬: {order}, {direction}",
+      "note": "並び替えメニューの読み上げ。order は並び順 (sort.*)、direction は昇順/降順",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.sort.direction": {
+      "ja": "方向",
+      "ko": "방향",
+      "note": "件数の横の並び替えメニューの中の、昇順/降順を選ぶ欄の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.sort.menu.a11y": {
+      "ja": "並び替え",
+      "ko": "정렬",
+      "note": "並び替えメニューの ▼ の読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.sort.picker": {
+      "ja": "並び順",
+      "ko": "정렬 순서",
+      "note": "件数の横の並び替えメニューの中の、並び順を選ぶ欄の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.sort.selected.a11y": {
+      "ja": "選択中",
+      "ko": "선택됨",
+      "note": "並び替えメニューで選ばれている項目のチェックの読み上げ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "list.tag_filter.error": {
+      "ja": "タグ絞り込みの取得に失敗しました。表示中の一覧にはタグ条件が反映されていません。",
+      "ko": "태그 필터를 불러오지 못했어요. 지금 보이는 목록에는 태그 조건이 반영되지 않았어요.",
+      "note": "タグで絞り込むための情報を取れなかった (オフライン等) ときのバナー。一覧は絞られていない"
+    },
+    "list.title": {
+      "ja": "楽曲",
+      "ko": "곡",
+      "note": "曲一覧 (楽曲タブ) のナビゲーションタイトル"
+    },
+    "lyrics.clap.back_beat": {
+      "ja": "裏拍",
+      "ko": "엇박",
+      "note": "手拍子の指示 (★)。裏拍で手拍子する",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.clap.four_on_floor": {
+      "ja": "4つ打ち",
+      "ko": "정박",
+      "note": "手拍子の指示 (■)。1 拍ごとに手拍子する (4 つ打ち)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.clap.no_call": {
+      "ja": "コールなし",
+      "ko": "콜 없음",
+      "note": "手拍子の指示 (♥)。声を出さないという積極的な指示",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.clap.unset": {
+      "ja": "指定なし",
+      "ko": "지정 안 함",
+      "note": "行頭の手拍子の指示を外すメニュー項目",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.edit.begin_add": {
+      "ja": "コールを付ける",
+      "ko": "콜 달기",
+      "note": "コールガイドの編集を始めるボタン (コールがまだ無いとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.edit.begin_edit": {
+      "ja": "コールを編集",
+      "ko": "콜 편집",
+      "note": "コールガイドの編集を始めるボタン (コールがあるとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.edit.finish": {
+      "ja": "編集を終了",
+      "ko": "편집 끝내기",
+      "note": "コールガイドの編集モードを抜けるボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.edit.hint": {
+      "ja": "歌詞の語をタップすると、その語に被せるコールを付けられます。行末の ＋ は追っかけ、行頭の記号は手拍子。語をまたぐ範囲は長押しからなぞって選びます。",
+      "ko": "가사의 단어를 탭하면 그 단어에 겹치는 콜을 달 수 있어요. 줄 끝의 ＋는 후창, 줄 앞의 기호는 박수예요. 여러 단어에 걸친 범위는 길게 눌러 드래그해서 골라요.",
+      "note": "編集モードの先頭の操作説明。追っかけ = 歌の後に客席が返すコール (ko は 후창)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.edit.save": {
+      "ja": "保存",
+      "ko": "저장",
+      "note": "コールガイドの保存ボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.emphasis.normal": {
+      "ja": "通常",
+      "ko": "일반",
+      "note": "コールの強調度。通常 (凡例には出さない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.emphasis.optional": {
+      "ja": "おこのみで",
+      "ko": "자유롭게",
+      "note": "コールの強調度 (緑)。入れても入れなくてもよいコール",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.emphasis.performer_request": {
+      "ja": "演者要望",
+      "ko": "출연자 요청",
+      "note": "コールの強調度 (赤)。出演者が入れてほしいと言ったコール",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.empty.message": {
+      "ja": "この曲の歌詞はまだ登録されていません。",
+      "ko": "이 곡의 가사가 아직 등록되지 않았어요.",
+      "note": "歌詞が登録されていないときの説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.empty.title": {
+      "ja": "歌詞はまだありません",
+      "ko": "아직 가사가 없어요",
+      "note": "歌詞が登録されていないとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.load_error.title": {
+      "ja": "歌詞を表示できません",
+      "ko": "가사를 표시할 수 없어요",
+      "note": "歌詞の取得に失敗したときの見出し (説明はサーバ・通信のエラー文)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.login_required": {
+      "ja": "歌詞の表示にはログインが必要です",
+      "ko": "가사를 보려면 로그인해야 해요",
+      "note": "未ログインの人への案内 (歌詞タブの先頭の導線と、歌詞の代わりに出す空状態の見出し)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.login_required_message": {
+      "ja": "ログインすると、登録済みの曲の歌詞を表示できます。",
+      "ko": "로그인하면 등록된 곡의 가사를 볼 수 있어요.",
+      "note": "未ログインで歌詞が出ないときの説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.marker.a11y": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "ja": "セクション: {name}",
+      "ko": "섹션: {name}",
+      "note": "歌詞の構成マーカー (イントロ・サビ等) の読み上げ。name は歌詞データの語",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.reanchor.banner": {
+      "args": [
+        {
+          "name": "text",
+          "type": "string"
+        }
+      ],
+      "ja": "「{text}」の掛かる範囲を選び直しています。語をタップ、または長押しからなぞる。",
+      "ko": "“{text}” 콜이 걸리는 범위를 다시 고르는 중이에요. 단어를 탭하거나 길게 눌러 드래그해 주세요.",
+      "note": "コールの掛かる範囲 (アンカー) を選び直している間のバナー。text はコールの文言 (利用者の入力)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.reanchor.cancel": {
+      "ja": "やめる",
+      "ko": "그만두기",
+      "note": "範囲の選び直しをやめるボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.save_error.title": {
+      "ja": "保存できませんでした",
+      "ko": "저장하지 못했어요",
+      "note": "コールガイドの保存に失敗したときのアラートの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.source": {
+      "args": [
+        {
+          "name": "source",
+          "type": "string"
+        }
+      ],
+      "ja": "出典: {source}",
+      "ko": "출처: {source}",
+      "note": "歌詞の出典の表記。source はサーバのデータ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.stale.anchor": {
+      "args": [
+        {
+          "name": "anchor",
+          "type": "string"
+        }
+      ],
+      "ja": "元のアンカー: {anchor}",
+      "ko": "원래 앵커: {anchor}",
+      "note": "ズレたコールの元の範囲の歌詞。anchor は歌詞の一部",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.stale.anchor_none": {
+      "ja": "元のアンカー: （なし）",
+      "ko": "원래 앵커: (없음)",
+      "note": "ズレたコールの元の範囲が空だったとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.stale.header": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "アンカーがズレたコール（{count} 件）",
+      "ko": "앵커가 어긋난 콜 ({count}건)",
+      "note": "歌詞が直されて掛かる範囲がズレたコールの一覧の見出し。アンカー = コールが掛かる歌詞の範囲。1000 以上は桁区切りが付く (実際には届かない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.stale.reanchor": {
+      "ja": "選び直す",
+      "ko": "다시 고르기",
+      "note": "ズレたコールの範囲を選び直すボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.timing.after": {
+      "ja": "追っかけ",
+      "ko": "후창",
+      "note": "コールのタイミング。歌い終わってから返す (アイマスではこちらが主)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.timing.after_hint": {
+      "ja": "フレーズを聞いてから返す。アイマスではこちらが主。",
+      "ko": "프레이즈를 듣고 나서 받아쳐요. 아이마스에서는 이쪽이 주류예요.",
+      "note": "コールの編集シートで 追っかけ を選んだときの説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.timing.over": {
+      "ja": "同時",
+      "ko": "동시",
+      "note": "コールのタイミング。歌に被せて叫ぶ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "lyrics.timing.over_hint": {
+      "ja": "歌に被せて叫ぶ。歌詞と同じタイミング。",
+      "ko": "노래에 겹쳐서 외쳐요. 가사와 같은 타이밍이에요.",
+      "note": "コールの編集シートで 同時 を選んだときの説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "now_playing.close.a11y": {
+      "ja": "閉じる",
+      "ko": "닫기",
+      "note": "再生中バーの読み上げの操作 (再生をやめてバーを消す)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "now_playing.open.a11y_hint": {
+      "ja": "曲の詳細を開く。下に払うと閉じる",
+      "ko": "곡 상세를 열어요. 아래로 쓸어내리면 닫혀요",
+      "note": "再生中バーの読み上げのヒント",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "now_playing.pause.a11y": {
+      "ja": "一時停止",
+      "ko": "일시 정지",
+      "note": "再生中バーの ‖ ボタンの読み上げ"
+    },
+    "now_playing.play.a11y": {
+      "ja": "再生",
+      "ko": "재생",
+      "note": "再生中バーの ▶ ボタンの読み上げ"
+    },
+    "penlight.cancel": {
+      "ja": "取消",
+      "ko": "취소",
+      "note": "ペンライト投票シートを閉じるボタン"
+    },
+    "penlight.color.a11y": {
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "ja": "色: {name}",
+      "ko": "색: {name}",
+      "note": "色の候補の読み上げ。name はサーバの色の名前",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "penlight.error.title": {
+      "ja": "投票エラー",
+      "ko": "투표 오류",
+      "note": "投票に失敗したときのアラートの見出し (本文はサーバ・通信のエラー文)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "penlight.error.unknown": {
+      "ja": "不明なエラーが発生しました",
+      "ko": "알 수 없는 오류가 발생했어요",
+      "note": "エラー文が無いときのアラートの本文",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "penlight.instructions": {
+      "ja": "ペンライトの色を選んで投票してください。複数選択できます。",
+      "ko": "펜라이트 색을 골라 투표해 주세요. 여러 개 고를 수 있어요.",
+      "note": "ペンライト投票シートの説明"
+    },
+    "penlight.loading": {
+      "ja": "読み込み中…",
+      "ko": "불러오는 중…",
+      "note": "色の候補を読み込んでいる間",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "penlight.palette.header": {
+      "ja": "カラーを選択",
+      "ko": "색 선택",
+      "note": "色の候補の節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "penlight.palette_error.message": {
+      "ja": "通信状況を確認して再度お試しください",
+      "ko": "통신 상태를 확인하고 다시 시도해 주세요",
+      "note": "色の候補を取れなかったときの説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "penlight.palette_error.title": {
+      "ja": "カラーを取得できません",
+      "ko": "색을 불러올 수 없어요",
+      "note": "色の候補を取れなかったとき",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "penlight.selected.header": {
+      "ja": "選択中のセット",
+      "ko": "선택한 세트",
+      "note": "選んだ色の組の節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "penlight.submit": {
+      "ja": "投票する",
+      "ko": "투표하기",
+      "note": "ペンライト投票シートの送信ボタン"
+    },
+    "penlight.title": {
+      "ja": "ペンライトカラーを投票",
+      "ko": "펜라이트 색 투표",
+      "note": "ペンライト投票シートの見出し"
+    },
+    "performer.title": {
+      "args": [
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{title} / 出演者 {count}名",
+      "ko": "{title} / 출연자 {count}명",
+      "note": "セトリの行から開く出演者一覧のタイトル。title は曲名、count は人数。1000 以上は桁区切りが付く (実際には届かない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "picker.close": {
+      "ja": "閉じる",
+      "ko": "닫기",
+      "note": "曲を選ぶ画面を閉じるボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "picker.search_prompt": {
+      "ja": "曲名で検索",
+      "ko": "곡명으로 검색",
+      "note": "曲を選ぶ画面の検索欄のプレースホルダ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "picker.title": {
+      "ja": "曲を選択",
+      "ko": "곡 선택",
+      "note": "セトリ編集などで曲を 1 つ選ぶ画面のタイトル",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "row.edit_mastery": {
+      "ja": "習熟度を変える",
+      "ko": "숙련도 바꾸기",
+      "note": "曲の行の長押しメニュー。習熟度の段階を付け替える",
+      "platforms": [
+        "android"
+      ]
+    },
+    "row.metric.collect_rate": {
+      "args": [
+        {
+          "name": "rate",
+          "type": "int"
+        },
+        {
+          "name": "total",
+          "type": "count"
+        }
+      ],
+      "ja": "{rate}% / {total}回",
+      "ko": "{rate}% / {total}회",
+      "note": "回収率順で並べたときに行に出す回収率と披露回数。rate は 0〜100 の整数",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "row.metric.performances": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count}回",
+      "ko": "{count}회",
+      "note": "披露回数順・回収率順で並べたときに行に出す披露回数。1000 以上は桁区切りが付く (実際には届かない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "row.my_pick": {
+      "ja": "担当",
+      "ko": "담당",
+      "note": "曲の行の印。担当アイドルが歌っている曲"
+    },
+    "sort.ascending": {
+      "ja": "昇順",
+      "ko": "오름차순",
+      "note": "並びの方向 (小さい順・古い順)"
+    },
+    "sort.collected_count": {
+      "ja": "現地回収回数順",
+      "ko": "현장 회수 횟수순",
+      "note": "曲の並び順。自分が現地で聴いた (回収した) 回数の順"
+    },
+    "sort.collected_rate": {
+      "ja": "回収率順",
+      "ko": "회수율순",
+      "note": "曲の並び順。披露回数のうち自分が現地で聴いた割合の順"
+    },
+    "sort.default": {
+      "ja": "既定",
+      "ko": "기본",
+      "note": "フィルタシートの並びの方向で「並び順ごとの既定の向き」を選ぶチップ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "sort.descending": {
+      "ja": "降順",
+      "ko": "내림차순",
+      "note": "並びの方向 (大きい順・新しい順)"
+    },
+    "sort.performance_count": {
+      "ja": "披露回数順",
+      "ko": "공연 횟수순",
+      "note": "曲の並び順。ライブで歌われた回数の順"
+    },
+    "sort.release_date": {
+      "ja": "リリース日順",
+      "ko": "발매일순",
+      "note": "曲の並び順。発売日の順"
+    },
+    "sort.title_kana": {
+      "ja": "五十音順",
+      "ko": "오십음순",
+      "note": "曲の並び順。曲名の読み (日本語の仮名) の順。iOS は SongSortOrder の rawValue (保存値ではない) を表示に使っていたもの"
+    }
+  }
+}

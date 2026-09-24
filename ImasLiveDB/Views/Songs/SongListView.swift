@@ -36,16 +36,16 @@ enum SongSearchMode: String, CaseIterable, Hashable {
     /// `.title` は表示形式で実際に絞る対象が変わる (曲 / アルバム / シリーズ) ので、
     /// 固定で「曲名」とは書けない。アルバム表示なのにチップが「曲名」だと、
     /// 何を打てばいいのか分からなくなる。
-    func label(in listMode: SongListMode) -> String {
+    func label(in listMode: SongListMode) -> LocalizedStringResource {
         switch self {
         case .title:     listMode.nameFilterLabel
         // 「アイドル」ではなく「歌唱」。ほかの 3 つ (曲名 / 作詞作曲 / 歌詞) が
         // **何と照合するか**を指すのに、ここだけ実体の名前だった。
         // タブ移動のチップ (`CrossTabCountChips`) も「アイドルに N」を出すので、
         // 同じ列に「アイドル」が 2 つ並んで、別の動作が同じ語に見えていた。
-        case .performer: "歌唱"
-        case .creator:   "作詞作曲"
-        case .lyrics:    "歌詞"
+        case .performer: L10n.Songs.listScopePerformer
+        case .creator:   L10n.Songs.listScopeCreator
+        case .lyrics:    L10n.Songs.listScopeLyrics
         }
     }
 }
@@ -56,11 +56,40 @@ enum SongListMode: String, CaseIterable {
     case series
 
     /// 名前絞り込みが絞る対象。検索欄の頭のチップに出す。
-    var nameFilterLabel: String {
+    var nameFilterLabel: LocalizedStringResource {
         switch self {
-        case .songs:  "曲名"
-        case .albums: "アルバム名"
-        case .series: "シリーズ名"
+        case .songs:  L10n.Songs.listNameFilterSongs
+        case .albums: L10n.Songs.listNameFilterAlbums
+        case .series: L10n.Songs.listNameFilterSeries
+        }
+    }
+}
+
+extension SongSortOrder {
+    /// 画面に出す並び順の名前。rawValue (「五十音順」など) は表示に使わない
+    /// (rawValue は型の識別子で、言語を切り替えても変わらない)。
+    ///
+    /// 名前を `label` / `displayName` にしないのは、QueryTypes.swift (別のスライス) の側で
+    /// 同じ名前の表示名が足されたときに再宣言でぶつからないようにするため。
+    var songsListLabel: LocalizedStringResource {
+        switch self {
+        case .titleKana:        L10n.Songs.sortTitleKana
+        case .releaseDate:      L10n.Songs.sortReleaseDate
+        case .performanceCount: L10n.Songs.sortPerformanceCount
+        case .collectedCount:   L10n.Songs.sortCollectedCount
+        case .collectedRate:    L10n.Songs.sortCollectedRate
+        }
+    }
+}
+
+extension SongCollectFilter {
+    /// 画面に出す選択肢の名前。rawValue (「すべて」など) は `@AppStorage("songs_collect_filter")` に
+    /// 保存される値なので変えない。表示はこちらを使う (名前の付け方は `SongSortOrder.songsListLabel` と同じ理由)。
+    var songsListLabel: LocalizedStringResource {
+        switch self {
+        case .all:         L10n.Songs.filterCollectAll
+        case .collected:   L10n.Songs.filterCollectCollected
+        case .uncollected: L10n.Songs.filterCollectUncollected
         }
     }
 }
@@ -212,7 +241,7 @@ struct SongListView: View {
                     // 打鍵のたびに投げるわけではないので D1 の読み取りは無駄にならない。
                     runLyricsSearchIfNeeded()
                 }
-                .navigationTitle("楽曲")
+                .navigationTitle(L10n.Songs.listTitle)
                 // 絞り込みフィールドをナビバー内に置くので、タイトルは常に inline。
                 // (.large だと大タイトル 52pt + バーの 2 行になり、畳んだ意味が無くなる)
                 .navigationBarTitleDisplayMode(.inline)
@@ -253,7 +282,7 @@ struct SongListView: View {
                     // いま表示中(絞り込み済み)の曲をそのまま出題プールにしてイントロドンへ。
                     IntroGameSetupView(
                         presetPool: vm.displayedSongs.map(\.song),
-                        presetLabel: "曲一覧の絞り込み"
+                        presetLabel: String(localized: L10n.Songs.listIntrodonRangeDefault)
                     )
                     .environment(database)
                 }
@@ -318,15 +347,16 @@ struct SongListView: View {
         if !suggestions.isEmpty || showsLyricsSuggestion {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: DS.sp3) {
-                    Text("ほかに")
+                    Text(L10n.Songs.listScopeSuggestionLead)
                         .font(.imasCaption)
                         .foregroundStyle(DS.ink3)
                     ForEach(suggestions, id: \.scope) { item in
-                        scopeChip(label: "\(item.scope.label(in: listMode)) \(item.count)件",
+                        scopeChip(label: String(localized: L10n.Songs.listScopeSuggestionCount(
+                                      scope: item.scope.label(in: listMode), count: item.count)),
                                   scope: item.scope)
                     }
                     if showsLyricsSuggestion {
-                        scopeChip(label: "歌詞で探す", scope: .lyrics)
+                        scopeChip(label: String(localized: L10n.Songs.listScopeSuggestionLyrics), scope: .lyrics)
                     }
                 }
                 .padding(.horizontal, DS.sp5)
@@ -396,14 +426,14 @@ struct SongListView: View {
             HStack(spacing: DS.sp3) {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.imasScaled(15, weight: .bold))
-                Text("この範囲で出題")
+                Text(L10n.Songs.listIntrodonSelect)
                     .font(.imasSubhead.weight(.bold))
-                Text("\(playable)曲")
+                Text(L10n.Songs.listIntrodonPlayable(count: playable))
                     .font(.imasCaption)
                     .opacity(0.85)
                 Spacer(minLength: 0)
                 if playable < 4 {
-                    Text("4曲以上必要")
+                    Text(L10n.Songs.listIntrodonMinSongs)
                         .font(.imasCaption.weight(.bold))
                 }
                 Image(systemName: "chevron.right")
@@ -434,9 +464,9 @@ struct SongListView: View {
                 HStack(spacing: DS.sp3) {
                     Image(systemName: "music.note.list")
                         .font(.imasScaled( 14, weight: .bold))
-                    Text("この絞り込みでイントロドン")
+                    Text(L10n.Songs.listIntrodonStart)
                         .font(.imasSubhead.weight(.bold))
-                    Text("\(playable)曲")
+                    Text(L10n.Songs.listIntrodonPlayable(count: playable))
                         .font(.imasCaption)
                         .foregroundStyle(DS.ink2)
                     Spacer(minLength: 0)
@@ -457,7 +487,7 @@ struct SongListView: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("イントロドン導線を隠す")
+            .accessibilityLabel(L10n.Songs.listIntrodonHideA11y)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
@@ -466,10 +496,10 @@ struct SongListView: View {
 
     /// 選択モードで呼び元に返す範囲ラベル (適用中フィルタの簡潔な説明)。
     private var selectionRangeLabel: String {
-        if !searchText.isEmpty { return "「\(searchText)」検索" }
+        if !searchText.isEmpty { return String(localized: L10n.Songs.listIntrodonRangeSearch(query: searchText)) }
         let chips = activeFilterChips
         if !chips.isEmpty { return chips.map(\.label).joined(separator: "・") }
-        return "曲一覧の絞り込み"
+        return String(localized: L10n.Songs.listIntrodonRangeDefault)
     }
 
     /// タグ絞り込みの取得に失敗した (オフライン等) ことを知らせるバナー。
@@ -482,7 +512,7 @@ struct SongListView: View {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.imasCaption)
                     .foregroundStyle(DS.warning)
-                Text("タグ絞り込みの取得に失敗しました。表示中の一覧にはタグ条件が反映されていません。")
+                Text(L10n.Songs.listTagFilterError)
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink2)
             }
@@ -496,17 +526,15 @@ struct SongListView: View {
     @ViewBuilder
     private var callGuideFilterErrorBanner: some View {
         if vm.callGuideFilterError {
-            callGuideBanner("exclamationmark.triangle.fill", DS.warning,
-                            "コールガイドの情報を取得できませんでした。表示中の一覧にはコールガイド条件が反映されていません。")
+            callGuideBanner("exclamationmark.triangle.fill", DS.warning, L10n.Songs.listCallGuideError)
         } else if callGuideOnly && listMode == .songs && vm.callGuideFilterTruncated {
             // サーバは 200 件で打ち切る。201 曲目以降が黙って消えるのではなく、
             // 「何で絞っているか」を名乗る。
-            callGuideBanner("info.circle.fill", DS.ink3,
-                            "最近更新された 200 曲で絞り込んでいます。")
+            callGuideBanner("info.circle.fill", DS.ink3, L10n.Songs.listCallGuideTruncated)
         }
     }
 
-    private func callGuideBanner(_ systemImage: String, _ tint: Color, _ text: String) -> some View {
+    private func callGuideBanner(_ systemImage: String, _ tint: Color, _ text: LocalizedStringResource) -> some View {
         HStack(spacing: 6) {
             Image(systemName: systemImage)
                 .font(.imasCaption)
@@ -569,30 +597,44 @@ struct SongListView: View {
     private var activeFilterChips: [ActiveFilterChip] {
         var chips: [ActiveFilterChip] = []
         if myMarkFilter.requireMyPick {
-            chips.append(.init(id: "pick", label: "担当") { myMarkFilter.requireMyPick = false; reload() })
+            chips.append(.init(id: "pick", label: String(localized: L10n.Songs.listChipMyPick)) {
+                myMarkFilter.requireMyPick = false; reload()
+            })
         }
         if myMarkFilter.requireFavorite {
-            chips.append(.init(id: "fav", label: "お気に入り") { myMarkFilter.requireFavorite = false; reload() })
+            chips.append(.init(id: "fav", label: String(localized: L10n.Songs.listChipFavorite)) {
+                myMarkFilter.requireFavorite = false; reload()
+            })
         }
         if myMarkFilter.requireNote {
-            chips.append(.init(id: "note", label: "メモあり") { myMarkFilter.requireNote = false; reload() })
+            chips.append(.init(id: "note", label: String(localized: L10n.Songs.listChipNote)) {
+                myMarkFilter.requireNote = false; reload()
+            })
         }
         switch collectFilter {
         case .all: break
         case .collected:
-            chips.append(.init(id: "collected", label: "現地回収済") { collectFilter = .all; reload() })
+            chips.append(.init(id: "collected", label: String(localized: L10n.Songs.listChipCollected)) {
+                collectFilter = .all; reload()
+            })
         case .uncollected:
-            chips.append(.init(id: "uncollected", label: "未回収") { collectFilter = .all; reload() })
+            chips.append(.init(id: "uncollected", label: String(localized: L10n.Songs.listChipUncollected)) {
+                collectFilter = .all; reload()
+            })
         }
         // アルバム/シリーズ表示ではこの絞り込みは効かない (曲行を絞る条件なので)。
         // 効いていない条件をチップに出すと、外しても件数が変わらず理由が分からなくなる。
         if callGuideOnly, listMode == .songs {
             // 解除の後始末 (集合を捨てて引き直す) は `onChange(of: callGuideOnly)` が担う。
-            chips.append(.init(id: "call_guide", label: "コールガイドあり") { callGuideOnly = false })
+            chips.append(.init(id: "call_guide", label: String(localized: L10n.Songs.listChipCallGuide)) {
+                callGuideOnly = false
+            })
         }
         if kamisabiOnly, listMode == .songs {
             // 解除の後始末 (再読み込み) は `onChange(of: kamisabiOnly)` が担う。
-            chips.append(.init(id: "kamisabi", label: "KAMISABI収録") { kamisabiOnly = false })
+            chips.append(.init(id: "kamisabi", label: String(localized: L10n.Songs.listChipKamisabi)) {
+                kamisabiOnly = false
+            })
         }
         if let series = filter.seriesGroup, !series.isEmpty {
             chips.append(.init(id: "series", label: series) { filter.seriesGroup = nil; reload() })
@@ -602,7 +644,7 @@ struct SongListView: View {
             // 単一タグ時は取得済みの該当曲数、複数タグ時は名前のみ。
             let label: String
             if selectedTags.count == 1, !vm.tagVoteCounts.isEmpty {
-                label = "\(tag.name) \(vm.tagVoteCounts.count)曲"
+                label = String(localized: L10n.Songs.listChipTagCount(name: tag.name, count: vm.tagVoteCounts.count))
             } else {
                 label = tag.name
             }
@@ -653,7 +695,8 @@ struct SongListView: View {
             // 何を絞るかはチップが示すので、プレースホルダは動詞だけでいい。
             // 「曲名⌄ 曲名で絞り込み」と二重に書くと、狭い欄が更に読みにくくなる。
             ListSearchField(
-                prompt: searchMode == .lyrics ? "一節を入力" : "絞り込み",
+                prompt: String(localized: searchMode == .lyrics
+                               ? L10n.Songs.listSearchPromptLyrics : L10n.Songs.listSearchPrompt),
                 text: $searchText,
                 onSubmit: runLyricsSearchIfNeeded
             ) {
@@ -669,10 +712,12 @@ struct SongListView: View {
     ///
     private var searchModeChip: some View {
         Menu {
-            Picker("検索対象", selection: $searchMode) {
+            Picker(selection: $searchMode) {
                 ForEach(SongSearchMode.available, id: \.self) {
                     Text($0.label(in: listMode)).tag($0)
                 }
+            } label: {
+                Text(L10n.Songs.listSearchModePicker)
             }
         } label: {
             HStack(spacing: 1) {
@@ -688,27 +733,30 @@ struct SongListView: View {
             .lineLimit(1)
             .fixedSize()
         }
-        .accessibilityLabel("検索対象: \(searchMode.label(in: listMode))")
+        .accessibilityLabel(L10n.Songs.listSearchModeA11y(scope: searchMode.label(in: listMode)))
     }
 
     private var songMenuActions: [ListToolbarAction] {
         var actions: [ListToolbarAction] = []
         if EditPermission.showEditAffordance {
-            actions.append(ListToolbarAction(id: "add", title: "曲を追加", systemImage: "plus") {
+            actions.append(ListToolbarAction(id: "add", title: String(localized: L10n.Songs.listActionAdd),
+                                             systemImage: "plus") {
                 AppAnalytics.tap("song_list.add")
                 startCreate()
             })
         }
         actions.append(ListToolbarAction(
             id: "tag",
-            title: selectedTags.isEmpty ? "タグで絞り込み" : "タグ: \(selectedTags.count)件",
+            title: String(localized: selectedTags.isEmpty
+                          ? L10n.Songs.listActionTagFilter
+                          : L10n.Songs.listActionTagFilterCount(count: selectedTags.count)),
             systemImage: selectedTags.isEmpty ? "tag" : "tag.fill"
         ) {
             AppAnalytics.tap("song_list.tag_filter")
             showTagPicker = true
         })
         if filterBadgeCount > 0 {
-            actions.append(ListToolbarAction(id: "clear", title: "フィルタを解除",
+            actions.append(ListToolbarAction(id: "clear", title: String(localized: L10n.Songs.listActionClearFilters),
                                              systemImage: "xmark.circle", isDestructive: true) {
                 AppAnalytics.tap("song_list.filter_clear")
                 resetAllFilters()
@@ -775,8 +823,8 @@ struct SongListView: View {
             } else if vm.songs.isEmpty && filter.activeFilterCount > 0 {
                 ImasEmptyState(
                     systemImage: "line.3.horizontal.decrease",
-                    title: "条件に一致する楽曲がありません",
-                    message: "フィルタ条件を変更するか、フィルタを解除してください。"
+                    title: String(localized: L10n.Songs.listEmptyFilterTitle),
+                    message: String(localized: L10n.Songs.listEmptyFilterMessage)
                 )
             } else {
                 let display = vm.displayedSongs
@@ -790,8 +838,8 @@ struct SongListView: View {
                 if !searchText.isEmpty && display.isEmpty && fuzzy.isEmpty {
                     ImasEmptyState(
                         systemImage: "line.3.horizontal.decrease",
-                        title: "絞り込み結果がありません",
-                        message: "「\(searchText)」に一致する楽曲がありません"
+                        title: String(localized: L10n.Songs.listEmptySearchTitle),
+                        message: String(localized: L10n.Songs.listEmptySearchMessage(query: searchText))
                     )
                 } else {
                     VStack(spacing: 0) {
@@ -812,31 +860,34 @@ struct SongListView: View {
     /// 変えたい時に絞り込み全体を掻き分けることになる (シート側にも同じ項目は残す)。
     private func countSortBar(count: Int) -> some View {
         HStack {
-            (Text("\(count)").font(.imasDisplay(15, weight: .bold)).foregroundStyle(DS.ink)
-                + Text(" 件").font(.imasFootnote).foregroundStyle(DS.ink2))
+            Text(countLabel(count))
             Spacer()
             Menu {
-                Picker("並び順", selection: Binding(
+                Picker(selection: Binding(
                     get: { sortOrder },
                     set: { changeSortOrder($0) }
                 )) {
                     ForEach(SongSortOrder.allCases, id: \.rawValue) { order in
-                        Text(order.rawValue).tag(order)
+                        Text(order.songsListLabel).tag(order)
                     }
+                } label: {
+                    Text(L10n.Songs.listSortPicker)
                 }
-                Picker("方向", selection: Binding(
+                Picker(selection: Binding(
                     get: { effectiveSortAscending },
                     set: { changeSortAscending($0) }
                 )) {
-                    Label("昇順", systemImage: "arrow.up").tag(true)
-                    Label("降順", systemImage: "arrow.down").tag(false)
+                    Label(L10n.Songs.sortAscending, systemImage: "arrow.up").tag(true)
+                    Label(L10n.Songs.sortDescending, systemImage: "arrow.down").tag(false)
+                } label: {
+                    Text(L10n.Songs.listSortDirection)
                 }
             } label: {
                 HStack(spacing: 5) {
                     Image(systemName: effectiveSortAscending ? "arrow.up" : "arrow.down")
                         .font(.imasScaled( 13, weight: .semibold))
                         .foregroundStyle(DS.ink2)
-                    Text(sortOrder.rawValue)
+                    Text(sortOrder.songsListLabel)
                         .font(.imasScaled( 13.5, weight: .semibold))
                         .foregroundStyle(DS.ink)
                     Image(systemName: "chevron.down")
@@ -847,11 +898,27 @@ struct SongListView: View {
                 .background(DS.fill, in: RoundedRectangle(cornerRadius: DS.rSM, style: .continuous))
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("並び替え: \(sortOrder.rawValue)、\(effectiveSortAscending ? "昇順" : "降順")")
+            .accessibilityLabel(L10n.Songs.listSortA11y(
+                order: sortOrder.songsListLabel,
+                direction: effectiveSortAscending ? L10n.Songs.sortAscending : L10n.Songs.sortDescending))
         }
         .padding(.horizontal, DS.sp5)
         .padding(.top, DS.sp2)
         .padding(.bottom, DS.sp2)
+    }
+
+    /// 件数の表記。文は 1 つのキーにして、数字の部分だけ太く大きくする
+    /// (数字と「件」を別の Text に分けると、語順の違う言語で並べ替えられない)。
+    /// 数字は文の書式 (`%lld`) と同じロケールの桁区切りで探す。
+    private func countLabel(_ count: Int) -> AttributedString {
+        var text = AttributedString(String(localized: L10n.Songs.listCountSongsIos(count: count)))
+        text.font = .imasFootnote
+        text.foregroundColor = DS.ink2
+        if let range = text.range(of: count.formatted()) {
+            text[range].font = .imasDisplay(15, weight: .bold)
+            text[range].foregroundColor = DS.ink
+        }
+        return text
     }
 
     private var effectiveSortAscending: Bool { sortAscending ?? sortOrder.defaultAscending }
@@ -896,7 +963,7 @@ struct SongListView: View {
             if !fuzzy.isEmpty {
                 // 打った通りではない候補なので、区切って理由を書く。黙って下に足すと
                 // 「なぜこの曲が出ているのか」が読めず、一致の精度を疑わせる。
-                ImasSectionHeader(title: "もしかして", tight: true)
+                ImasSectionHeader(title: .key(L10n.Songs.listFuzzyHeader), tight: true)
                     .padding(.top, DS.sp4)
                     .padding(.bottom, DS.sp2)
                     .listRowInsets(EdgeInsets(top: 0, leading: DS.sp5, bottom: 0, trailing: DS.sp5))
