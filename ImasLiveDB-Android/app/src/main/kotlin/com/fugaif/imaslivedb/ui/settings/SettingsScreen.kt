@@ -529,7 +529,7 @@ private fun AccountSection(viewModel: AccountViewModel = viewModel()) {
             onDismissRequest = viewModel::dismissNameError,
             title = { Text(L10n.Settings.accountEditNameErrorTitle.resolve()) },
             text = { Text(message.resolve()) },
-            confirmButton = { TextButton(onClick = viewModel::dismissNameError) { Text("OK") } }
+            confirmButton = { TextButton(onClick = viewModel::dismissNameError) { Text(L10n.Common.actionOk.resolve()) } }
         )
     }
 
@@ -553,7 +553,7 @@ private fun AccountSection(viewModel: AccountViewModel = viewModel()) {
             onDismissRequest = viewModel::dismissDeleteError,
             title = { Text(L10n.Settings.accountDeleteErrorTitle.resolve()) },
             text = { Text(message.resolve()) },
-            confirmButton = { TextButton(onClick = viewModel::dismissDeleteError) { Text("OK") } }
+            confirmButton = { TextButton(onClick = viewModel::dismissDeleteError) { Text(L10n.Common.actionOk.resolve()) } }
         )
     }
 }
@@ -842,7 +842,7 @@ private fun BackupSection(viewModel: BackupViewModel = viewModel()) {
             onDismissRequest = viewModel::dismissTransferError,
             title = { Text(L10n.Settings.backupCodeErrorTitleAndroid.resolve()) },
             text = { Text(message.resolve()) },
-            confirmButton = { TextButton(onClick = viewModel::dismissTransferError) { Text("OK") } }
+            confirmButton = { TextButton(onClick = viewModel::dismissTransferError) { Text(L10n.Common.actionOk.resolve()) } }
         )
     }
 
@@ -852,7 +852,7 @@ private fun BackupSection(viewModel: BackupViewModel = viewModel()) {
             title = { Text(L10n.Settings.backupRestoreDoneTitleAndroid.resolve()) },
             // 本文 (何がどれだけ入ったか) はコアが組み立てる
             text = { Text(coreText(summary)) },
-            confirmButton = { TextButton(onClick = viewModel::dismissImportResult) { Text("OK") } }
+            confirmButton = { TextButton(onClick = viewModel::dismissImportResult) { Text(L10n.Common.actionOk.resolve()) } }
         )
     }
 
@@ -861,7 +861,7 @@ private fun BackupSection(viewModel: BackupViewModel = viewModel()) {
             onDismissRequest = viewModel::dismissImportError,
             title = { Text(L10n.Settings.backupRestoreFailedTitle.resolve()) },
             text = { Text(message.resolve()) },
-            confirmButton = { TextButton(onClick = viewModel::dismissImportError) { Text("OK") } }
+            confirmButton = { TextButton(onClick = viewModel::dismissImportError) { Text(L10n.Common.actionOk.resolve()) } }
         )
     }
 }
@@ -1248,16 +1248,20 @@ private fun SettingsToggleRow(label: String, checked: Boolean, onCheckedChange: 
  */
 @Composable
 private fun MasteryScaleSection() {
-    var labels by remember { mutableStateOf(AppPreferences.masteryScale.labels) }
+    // 入力欄に出すのは表示用のラベル (編集していないプリセットは画面の言語の訳)。
+    // 保存するときは MasteryScale.storing で保存用の語彙に戻す (保存値を言語で変えない)。
+    val res = LocalContext.current.resources
+    var labels by remember { mutableStateOf(AppPreferences.masteryScale.displayLabels(res)) }
 
     Column(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MasteryScale.presets.forEach { (name, preset) ->
-                ImasFilterChip(name, labels == preset.labels, {
-                    labels = preset.labels
+            MasteryScale.presets.forEach { preset ->
+                val shown = preset.displayLabels(res)
+                ImasFilterChip(MasteryScale.presetNameText(preset.labels.size).resolve(), labels == shown, {
+                    labels = shown
                     AppPreferences.setMasteryLabels(preset.labels)
                 })
             }
@@ -1285,7 +1289,7 @@ private fun MasteryScaleSection() {
                 if (index == labels.lastIndex && labels.size > 1) {
                     TextButton(onClick = {
                         labels = labels.dropLast(1)
-                        AppPreferences.setMasteryLabels(labels)
+                        AppPreferences.setMasteryLabels(MasteryScale.storing(labels, res).labels)
                     }) { Text(L10n.Settings.masteryRemoveLevel.resolve()) }
                 }
             }
@@ -1296,10 +1300,10 @@ private fun MasteryScaleSection() {
             }
             Spacer(Modifier.weight(1f))
             TextButton(
-                onClick = { AppPreferences.setMasteryLabels(labels) },
+                onClick = { AppPreferences.setMasteryLabels(MasteryScale.storing(labels, res).labels) },
                 enabled = labels.all { it.isNotBlank() } &&
                     labels.map { it.trim() }.toSet().size == labels.size &&
-                    labels != AppPreferences.masteryScale.labels,
+                    labels != AppPreferences.masteryScale.displayLabels(res),
             ) { Text(L10n.Settings.masteryApply.resolve()) }
         }
         Text(

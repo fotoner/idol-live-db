@@ -54,6 +54,8 @@ object L10nMastery {
     val groupSongsHeader: DisplayText get() = DisplayText.Res(R.string.mastery_group_songs_header)
     /** このグループの習熟度 — 群の詳細の先頭の進み具合の節の見出し */
     val groupSummaryHeader: DisplayText get() = DisplayText.Res(R.string.mastery_group_summary_header)
+    /** 未設定 — 習熟度の段階が付いていない状態 (0 段) の名前。行のチップ・段階の絞り込み・a11y に出る */
+    val levelUnset: DisplayText get() = DisplayText.Res(R.string.mastery_level_unset)
     /** CDシリーズ — 群の分け方のセグメント: CD シリーズごと */
     val listAxisSeries: DisplayText get() = DisplayText.Res(R.string.mastery_list_axis_series)
     /** ユニット — 群の分け方のセグメント: ユニット (歌唱名義) ごと */
@@ -96,6 +98,26 @@ object L10nMastery {
     val listSummaryHeader: DisplayText get() = DisplayText.Res(R.string.mastery_list_summary_header)
     /** 習熟度 — 習熟度ダッシュボードの画面の題 */
     val listTitle: DisplayText get() = DisplayText.Res(R.string.mastery_list_title)
+    /** {steps}段 — 段階の設定のプリセットのチップ (2段 / 3段 / 4段)。steps は段の数 — 引数: steps (int) */
+    fun presetName(steps: Int): DisplayText = DisplayText.Res(R.string.mastery_preset_name, listOf(steps))
+    /** 聞いた — 2 段のプリセットの 1 段目 (いちばん下)。保存値は ja のままで、表示だけ訳す。スワイプのボタンに収まるよう 4 文字以内 */
+    val presetSteps2Level1: DisplayText get() = DisplayText.Res(R.string.mastery_preset_steps2_level1)
+    /** 覚えた — 2 段のプリセットの 2 段目 (最上段)。4 文字以内 */
+    val presetSteps2Level2: DisplayText get() = DisplayText.Res(R.string.mastery_preset_steps2_level2)
+    /** 聞いた — 3 段のプリセット (既定) の 1 段目。4 文字以内 */
+    val presetSteps3Level1: DisplayText get() = DisplayText.Res(R.string.mastery_preset_steps3_level1)
+    /** 覚えた — 3 段のプリセット (既定) の 2 段目。4 文字以内 */
+    val presetSteps3Level2: DisplayText get() = DisplayText.Res(R.string.mastery_preset_steps3_level2)
+    /** 完璧 — 3 段のプリセット (既定) の 3 段目 (最上段)。4 文字以内 */
+    val presetSteps3Level3: DisplayText get() = DisplayText.Res(R.string.mastery_preset_steps3_level3)
+    /** 聞いた — 4 段のプリセットの 1 段目。4 文字以内 */
+    val presetSteps4Level1: DisplayText get() = DisplayText.Res(R.string.mastery_preset_steps4_level1)
+    /** だいたい — 4 段のプリセットの 2 段目 (だいたい覚えた、の意)。4 文字以内 */
+    val presetSteps4Level2: DisplayText get() = DisplayText.Res(R.string.mastery_preset_steps4_level2)
+    /** 覚えた — 4 段のプリセットの 3 段目。4 文字以内 */
+    val presetSteps4Level3: DisplayText get() = DisplayText.Res(R.string.mastery_preset_steps4_level3)
+    /** 完璧 — 4 段のプリセットの 4 段目 (最上段)。4 文字以内 */
+    val presetSteps4Level4: DisplayText get() = DisplayText.Res(R.string.mastery_preset_steps4_level4)
     /** {level} {count} 曲 — 最上段 (例: 完璧) にある曲数。level は最上段の名前 (利用者が付けたラベルのこともある)。1000 以上は桁区切りが付く (完璧 1,234 曲) — 引数: level (string), count (count) */
     fun summaryDoneSongs(level: String, count: Int): DisplayText = DisplayText.Plural(R.plurals.mastery_summary_done_songs, count, listOf(level, count))
     /** 段階を付けた曲 — 進み具合の大きな数字の説明 */

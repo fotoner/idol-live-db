@@ -14,10 +14,6 @@ object L10nUnits {
     val detailLoadErrorMessage: DisplayText get() = DisplayText.Res(R.string.units_detail_load_error_message)
     /** 読み込みに失敗しました — 詳細の読み込みに失敗したときの空状態の見出し */
     val detailLoadErrorTitle: DisplayText get() = DisplayText.Res(R.string.units_detail_load_error_title)
-    /** マイタグの追加 — 端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (ユニット詳細のマイタグを足す) */
-    val detailLocalWriteAddTag: DisplayText get() = DisplayText.Res(R.string.units_detail_local_write_add_tag)
-    /** マイタグの削除 — 端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (ユニット詳細のマイタグを消す) */
-    val detailLocalWriteRemoveTag: DisplayText get() = DisplayText.Res(R.string.units_detail_local_write_remove_tag)
     /** メンバー情報がありません — Android の文言。iOS の detail.members.empty.title と ja が違う (統一はオーナーが別 PR で) */
     val detailMembersEmptyTitleAndroid: DisplayText get() = DisplayText.Res(R.string.units_detail_members_empty_title_android)
     /** メンバー — メンバーの節の見出し (右に人数) */

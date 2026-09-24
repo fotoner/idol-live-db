@@ -213,7 +213,7 @@ fun RecentEditsScreen(onBack: () -> Unit, viewModel: RecentEditsViewModel = view
     if (state.errorMessage != null) {
         AlertDialog(
             onDismissRequest = { viewModel.clearError() },
-            confirmButton = { TextButton(onClick = { viewModel.clearError() }) { Text("OK") } },
+            confirmButton = { TextButton(onClick = { viewModel.clearError() }) { Text(L10n.Common.actionOk.resolve()) } },
             title = { Text(L10n.EditFeed.feedErrorTitle.resolve()) },
             text = { Text(state.errorMessage?.resolve() ?: "") }
         )

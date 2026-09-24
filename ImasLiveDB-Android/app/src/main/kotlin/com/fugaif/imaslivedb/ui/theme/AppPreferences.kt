@@ -2,15 +2,11 @@ package com.fugaif.imaslivedb.ui.theme
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.fugaif.imaslivedb.di.AppModule
-import com.fugaif.imaslivedb.i18n.DisplayText
-import com.fugaif.imaslivedb.i18n.generated.L10n
-import com.fugaif.imaslivedb.i18n.resolve
 import uniffi.imas_core.PerformerNameMode
 import uniffi.imas_core.eventShortName
 
@@ -48,17 +44,6 @@ object AppPreferences {
      * 中 (1.0) を境に縮小・拡大の両方向へ振れる。
      */
     val textScaleOptions = listOf(0.7f, 0.85f, 1.0f, 1.15f, 1.3f)
-
-    /** 文字サイズの選択肢の名前 (文言の値)。並びは [textScaleOptions] と同じ。 */
-    val textScaleLabelTexts: List<DisplayText>
-        get() = listOf(
-            L10n.App.textScaleXsmall, L10n.App.textScaleSmall, L10n.App.textScaleMedium,
-            L10n.App.textScaleLarge, L10n.App.textScaleXlarge,
-        )
-
-    /** 文字サイズの選択肢の名前を画面の言語で解決したもの (Composable の中で読む)。 */
-    val textScaleLabels: List<String>
-        @Composable get() = textScaleLabelTexts.map { it.resolve() }
 
     private var prefs: SharedPreferences? = null
 

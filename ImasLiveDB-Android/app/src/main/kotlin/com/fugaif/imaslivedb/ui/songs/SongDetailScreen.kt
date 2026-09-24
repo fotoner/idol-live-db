@@ -551,7 +551,7 @@ private fun InfoTab(
                             Column(Modifier.weight(1f).padding(start = 10.dp)) {
                                 Text(AppPreferences.eventDisplayName(show.eventName), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink,
                                     maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                Text(listOf(show.name, show.date).filter { it.isNotEmpty() }.joinToString(" ・ "),
+                                Text(listOf(show.name, show.date).filter { it.isNotEmpty() }.joinToString(L10n.Common.listMiddotSpaced.resolve()),
                                     fontSize = 12.sp, color = DS.ink2, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             }
                         }
@@ -992,7 +992,7 @@ private fun HistoryTab(
                 Column(Modifier.weight(1f).padding(start = 12.dp)) {
                     Text(AppPreferences.eventDisplayName(row.eventName), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink,
                         maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(listOf(row.showName, row.date).filter { it.isNotEmpty() }.joinToString(" ・ "),
+                    Text(listOf(row.showName, row.date).filter { it.isNotEmpty() }.joinToString(L10n.Common.listMiddotSpaced.resolve()),
                         fontSize = 12.sp, color = DS.ink2, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }

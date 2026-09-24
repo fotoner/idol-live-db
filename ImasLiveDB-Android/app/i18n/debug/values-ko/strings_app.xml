@@ -10,9 +10,4 @@
     <string name="app_boot_recovery_title">데이터를 열지 못했어요</string>
     <string name="app_boot_sync_error_title">데이터를 가져오지 못했어요</string>
     <string name="app_boot_sync_progress">%1$s 가져오는 중… (%2$d/%3$d)</string>
-    <string name="app_text_scale_large">크게</string>
-    <string name="app_text_scale_medium">보통</string>
-    <string name="app_text_scale_small">작게</string>
-    <string name="app_text_scale_xlarge">최대</string>
-    <string name="app_text_scale_xsmall">최소</string>
 </resources>

@@ -167,46 +167,6 @@
         "ios"
       ]
     },
-    "text_scale.large": {
-      "ja": "大",
-      "ko": "크게",
-      "note": "設定の文字サイズの選択肢 (2 番目に大きい) (Android)",
-      "platforms": [
-        "android"
-      ]
-    },
-    "text_scale.medium": {
-      "ja": "中",
-      "ko": "보통",
-      "note": "設定の文字サイズの選択肢 (標準) (Android)",
-      "platforms": [
-        "android"
-      ]
-    },
-    "text_scale.small": {
-      "ja": "小",
-      "ko": "작게",
-      "note": "設定の文字サイズの選択肢 (2 番目に小さい) (Android)",
-      "platforms": [
-        "android"
-      ]
-    },
-    "text_scale.xlarge": {
-      "ja": "特大",
-      "ko": "최대",
-      "note": "設定の文字サイズの選択肢 (いちばん大きい) (Android)",
-      "platforms": [
-        "android"
-      ]
-    },
-    "text_scale.xsmall": {
-      "ja": "極小",
-      "ko": "최소",
-      "note": "設定の文字サイズの選択肢 (5 段のいちばん小さい)。セグメントに並ぶので短く (Android。iOS は mypage 側)",
-      "platforms": [
-        "android"
-      ]
-    },
     "update.action.later": {
       "ja": "後で",
       "ko": "나중에",

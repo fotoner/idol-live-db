@@ -104,8 +104,6 @@
     <string name="idols_sort_order_name_kana">50음순</string>
     <string name="idols_sort_order_official">공식순</string>
     <string name="idols_sort_order_weight">몸무게순</string>
-    <string name="idols_write_action_add_personal_tag">마이 태그 추가</string>
-    <string name="idols_write_action_remove_personal_tag">마이 태그 삭제</string>
     <string name="idols_write_action_toggle_favorite">즐겨찾기 전환</string>
     <string name="idols_write_action_toggle_pick">담당 전환</string>
 </resources>

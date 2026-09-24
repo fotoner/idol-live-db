@@ -24,46 +24,31 @@ enum class NotificationCategory(
     /** システムの通知設定に出るチャンネル名 (カタログの文言)。 */
     val channelNameText: DisplayText,
     /** システムの通知設定に出るチャンネルの説明 (カタログの文言)。 */
-    val channelDescriptionText: DisplayText,
-    /**
-     * i18n 移行中だけ残す ja 固定のチャンネル名。NotificationScheduler.ensureChannels (このスライスの外)
-     * がまだ String で受けているため。ensureChannels を [channelNameText] に切り替えたら消す。
-     */
-    val channelName: String,
-    /** i18n 移行中だけ残す ja 固定のチャンネルの説明 ([channelName] と同じ理由)。 */
-    val channelDescription: String
+    val channelDescriptionText: DisplayText
 ) {
     OSHI_BIRTHDAY(
         prefKey = "notif_oshi_birthday",
         channelId = "imas_oshi_birthday",
         channelNameText = L10n.Settings.notificationsChannelOshiBirthdayName,
-        channelDescriptionText = L10n.Settings.notificationsChannelOshiBirthdayDescription,
-        channelName = "担当アイドルの誕生日",
-        channelDescription = "担当マークしたアイドルの誕生日に 9:00 にお知らせします。"
+        channelDescriptionText = L10n.Settings.notificationsChannelOshiBirthdayDescription
     ),
     LIVE_WEEK(
         prefKey = "notif_live_week",
         channelId = "imas_live_week",
         channelNameText = L10n.Settings.notificationsChannelLiveWeekName,
-        channelDescriptionText = L10n.Settings.notificationsChannelLiveWeekDescription,
-        channelName = "ライブ1週間前",
-        channelDescription = "お気に入り/参加マークしたライブの初日 1 週間前に 10:00 にお知らせします。"
+        channelDescriptionText = L10n.Settings.notificationsChannelLiveWeekDescription
     ),
     TICKET(
         prefKey = "notif_ticket",
         channelId = "imas_ticket",
         channelNameText = L10n.Settings.notificationsChannelTicketName,
-        channelDescriptionText = L10n.Settings.notificationsChannelTicketDescription,
-        channelName = "チケット締切・当落",
-        channelDescription = "チケット申込締切の前日 18:00 と、当落発表日の 9:00 にお知らせします。"
+        channelDescriptionText = L10n.Settings.notificationsChannelTicketDescription
     ),
     MONDAY(
         prefKey = "notif_monday",
         channelId = "imas_monday",
         channelNameText = L10n.Settings.notificationsChannelMondayName,
-        channelDescriptionText = L10n.Settings.notificationsChannelMondayDescription,
-        channelName = "月曜が近いよ",
-        channelDescription = "日曜 20:00 に月曜が近いことをお知らせします。"
+        channelDescriptionText = L10n.Settings.notificationsChannelMondayDescription
     )
 }
 

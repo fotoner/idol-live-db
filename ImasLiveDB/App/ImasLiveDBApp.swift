@@ -190,7 +190,7 @@ struct ImasLiveDBApp: App {
                 Text(L10n.App.updateMessage(version: updateService.availableVersion ?? ""))
             }
             .alert(Text(L10n.App.reseedFailedTitle), isPresented: $showReseedAlert) {
-                Button("OK", role: .cancel) {}
+                Button(L10n.Common.actionOk, role: .cancel) {}
             } message: {
                 Text(display: appDatabase.reseedFailureMessage ?? .verbatim(""))
             }

@@ -98,7 +98,7 @@ struct SongRowView: View {
                 }
             }
         }
-        return item.performerIdols.map(\.name).joined(separator: "・")
+        return item.performerIdols.map(\.name).joined(separator: String(localized: L10n.Common.listMiddot))
     }
 
     var body: some View {

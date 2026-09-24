@@ -14,6 +14,7 @@ import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.resolve
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -187,10 +188,12 @@ object NotificationScheduler {
         NotificationCategory.entries.forEach { category ->
             val channel = NotificationChannel(
                 category.channelId,
-                category.channelName,
+                // 名前と説明はカタログの文言。同じ id で作り直すと名前と説明だけ更新されるので、
+                // アプリの言語を変えたあとも次の呼び出しで今の言語になる。
+                category.channelNameText.resolve(context),
                 // 音は鳴らすが画面を占有しない。ファン向けのリマインドであって緊急ではない。
                 NotificationManager.IMPORTANCE_DEFAULT
-            ).apply { description = category.channelDescription }
+            ).apply { description = category.channelDescriptionText.resolve(context) }
             manager.createNotificationChannel(channel)
         }
     }

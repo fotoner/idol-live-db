@@ -138,12 +138,12 @@ struct ContentView: View {
                 .onAppear { pendingDeeplinkDestination = nil }
         }
         .alert(Text(L10n.App.deeplinkNotFoundTitle), isPresented: $showDeeplinkNotFound) {
-            Button("OK", role: .cancel) {}
+            Button(L10n.Common.actionOk, role: .cancel) {}
         } message: {
             Text(L10n.App.deeplinkNotFoundMessage)
         }
         .alert(Text(L10n.App.deeplinkLoadFailedTitle), isPresented: $showDeeplinkLoadFailed) {
-            Button("OK", role: .cancel) {}
+            Button(L10n.Common.actionOk, role: .cancel) {}
         } message: {
             Text(L10n.App.deeplinkLoadFailedMessage)
         }

@@ -183,7 +183,7 @@ private fun LocalWriteFailureAlert() {
             onDismissRequest = { notice = null },
             title = { Text(shown.title) },
             text = { Text(shown.message) },
-            confirmButton = { TextButton(onClick = { notice = null }) { Text("OK") } }
+            confirmButton = { TextButton(onClick = { notice = null }) { Text(L10n.Common.actionOk.resolve()) } }
         )
     }
 }

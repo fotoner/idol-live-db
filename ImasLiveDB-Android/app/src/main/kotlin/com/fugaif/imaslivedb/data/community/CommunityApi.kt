@@ -39,11 +39,6 @@ class CommunityApi(private val http: WorkerHttpClient) {
 
         /** iOS Poll.statusLabel の移植 (文言の値。画面で resolve する)。 */
         val statusText: DisplayText get() = pollStatusText(isActive, endsAtMs)
-
-        /** iOS Poll.statusLabel の移植。移行中の互換 (ja の文字列)。画面は [statusText] を使う。 */
-        // i18n-ignore(log): 非推奨の案内 (コンパイラの警告。画面には出ない)
-        @Deprecated("statusText を使う (i18n 移行中)", ReplaceWith("statusText"))
-        val statusLabel: String get() = pollStatusLabel(isActive, endsAtMs)
     }
     data class PollEntry(val entityId: String, val voteCount: Int, val mine: Boolean)
     /** 終了お題の優勝者 1 件 (殿堂)。iOS PollResult の移植。 */
@@ -63,12 +58,8 @@ class CommunityApi(private val http: WorkerHttpClient) {
     sealed class PollCreateResult {
         data class Success(val poll: PollSummary) : PollCreateResult()
         object RateLimited : PollCreateResult()
-        /**
-         * [userMessage] が画面に出す文言 (null なら呼び出し側の既定の文言)。
-         * [message] は移行中の互換 (ja の文字列)。呼び出し側が userMessage に移ったら消す。
-         */
-        data class Error(val message: String?, val userMessage: DisplayText? = message?.let { DisplayText.Verbatim(it) }) :
-            PollCreateResult()
+        /** [userMessage] が画面に出す文言 (null なら呼び出し側の既定の文言)。 */
+        data class Error(val userMessage: DisplayText?) : PollCreateResult()
     }
     /**
      * 投票候補の絞り込みスコープ。
@@ -115,11 +106,6 @@ class CommunityApi(private val http: WorkerHttpClient) {
 
         /** iOS Poll.statusLabel の移植 (文言の値。画面で resolve する)。 */
         val statusText: DisplayText get() = pollStatusText(isActive, endsAtMs)
-
-        /** iOS Poll.statusLabel の移植。移行中の互換 (ja の文字列)。画面は [statusText] を使う。 */
-        // i18n-ignore(log): 非推奨の案内 (コンパイラの警告。画面には出ない)
-        @Deprecated("statusText を使う (i18n 移行中)", ReplaceWith("statusText"))
-        val statusLabel: String get() = pollStatusLabel(isActive, endsAtMs)
     }
     /** 投票/取消のレスポンス (対象 entity の確定票数 + 自分の合計投票数)。 */
     data class PollVoteResult(val entityId: String, val voteCount: Int, val myVoteCount: Int)
@@ -759,10 +745,8 @@ class CommunityApi(private val http: WorkerHttpClient) {
                     ?: PollCreateResult.Error(null)
             // 401/403 は「作れない理由」が利用者側にある唯一のケースなので個別に案内する。
             // それ以外 (通信断・5xx) はサーバが本文を返さないこともあるので呼び出し側の既定文言に任せる。
-            code == 401 -> PollCreateResult.Error(
-                "お題の作成にはサインインが必要です", L10n.Model.pollCreateErrorSigninRequired)
-            code == 403 -> PollCreateResult.Error(
-                "この操作は制限されています。", L10n.Model.pollCreateErrorRestricted)
+            code == 401 -> PollCreateResult.Error(L10n.Model.pollCreateErrorSigninRequired)
+            code == 403 -> PollCreateResult.Error(L10n.Model.pollCreateErrorRestricted)
             else -> PollCreateResult.Error(null)
         }
     }
@@ -926,21 +910,14 @@ class CommunityApi(private val http: WorkerHttpClient) {
     }
 }
 
-/** お題の状態の札 (iOS Poll.statusLabel の移植)。一覧と詳細で同じ文言にする。 */
+/**
+ * お題の状態の札 (iOS Poll.statusLabel の移植)。一覧と詳細で同じ文言にする。
+ * 文言は投票の画面 (ui/polls の pollStatusText) と同じ polls.status.* を引く。
+ */
 private fun pollStatusText(isActive: Boolean, endsAtMs: Long): DisplayText {
-    if (!isActive) return L10n.Model.pollStatusEnded
+    if (!isActive) return L10n.Polls.statusEnded
     val days = ((endsAtMs - System.currentTimeMillis()) / 86_400_000L)
     // 締切が不明 (Long.MAX_VALUE) だと日数が Int に収まらないので丸める (表示は元から意味を持たない値)。
-    return if (days <= 0) L10n.Model.pollStatusClosingToday
-    else L10n.Model.pollStatusDaysLeft(days = days.coerceAtMost(Int.MAX_VALUE.toLong()).toInt())
-}
-
-/**
- * 移行中の互換: [pollStatusText] の ja を文字列で返す (Context を持たない呼び出し側向け)。
- * 呼び出し側 (お題の一覧・詳細・マイ投票・プロデュースのカード) が statusText に移ったら消す。
- */
-private fun pollStatusLabel(isActive: Boolean, endsAtMs: Long): String {
-    if (!isActive) return "終了"
-    val days = ((endsAtMs - System.currentTimeMillis()) / 86_400_000L)
-    return if (days <= 0) "本日締切" else "残り${days}日"
+    return if (days <= 0) L10n.Polls.statusClosesToday
+    else L10n.Polls.statusDaysLeft(days = days.coerceAtMost(Int.MAX_VALUE.toLong()).toInt())
 }

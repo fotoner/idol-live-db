@@ -50,7 +50,7 @@ struct TagCreateSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: DS.sp6) {
-                    fieldSection(header: L10n.Tags.createNameHeader, counter: InputLimits.counter(.tagName, name), counterIsError: !isNameValid && !name.isEmpty) {
+                    fieldSection(header: L10n.Tags.createNameHeader, counter: String(localized: InputLimits.counterText(.tagName, name)), counterIsError: !isNameValid && !name.isEmpty) {
                         // LocalizedStringResource を受ける TextField(_:text:) は iOS 26 からなので、prompt: 付きの版 (iOS 16) を使う
                         TextField(L10n.Tags.createNamePlaceholder, text: $name, prompt: nil)
                             .font(.imasSubhead)
@@ -63,7 +63,7 @@ struct TagCreateSheet: View {
                             }
                     }
 
-                    fieldSection(header: L10n.Tags.createDescriptionHeader, counter: InputLimits.counter(.tagDescription, description), counterIsError: false) {
+                    fieldSection(header: L10n.Tags.createDescriptionHeader, counter: String(localized: InputLimits.counterText(.tagDescription, description)), counterIsError: false) {
                         TextField(L10n.Tags.createDescriptionPlaceholder, text: $description, axis: .vertical)
                             .font(.imasSubhead)
                             .foregroundStyle(DS.ink)

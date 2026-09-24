@@ -106,8 +106,8 @@ class PollCreateViewModel(app: Application) : AndroidViewModel(app) {
                 )
                 is CommunityApi.PollCreateResult.Error -> _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
-                    // CommunityApi (data 層) が作った説明 (401/403 の案内) は文字列のまま受け取るので、そのまま出す
-                    errorMessage = result.message?.let { DisplayText.Verbatim(it) } ?: L10n.Polls.createErrorFailed
+                    // CommunityApi (data 層) が作った説明 (401/403 の案内)。無ければ既定の文言
+                    errorMessage = result.userMessage ?: L10n.Polls.createErrorFailed
                 )
             }
         }

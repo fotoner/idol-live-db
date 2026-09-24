@@ -6,7 +6,7 @@ extension View {
     /// 送信完了を明示して期待値を揃える (OK で onDismiss = 通常は画面を閉じる)。
     func editRequestSentAlert(isPresented: Binding<Bool>, onDismiss: @escaping () -> Void) -> some View {
         alert(Text(L10n.EditFeed.editRequestSentTitle), isPresented: isPresented) {
-            Button("OK", action: onDismiss)
+            Button(L10n.Common.actionOk, action: onDismiss)
         } message: {
             Text(L10n.EditFeed.editRequestSentMessage)
         }

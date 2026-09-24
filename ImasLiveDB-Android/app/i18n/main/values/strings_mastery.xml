@@ -57,6 +57,8 @@
     <string name="mastery_group_songs_header">収録曲</string>
     <!-- mastery.group.summary.header: 群の詳細の先頭の進み具合の節の見出し -->
     <string name="mastery_group_summary_header">このグループの習熟度</string>
+    <!-- mastery.level.unset: 習熟度の段階が付いていない状態 (0 段) の名前。行のチップ・段階の絞り込み・a11y に出る -->
+    <string name="mastery_level_unset">未設定</string>
     <!-- mastery.list.axis.series: 群の分け方のセグメント: CD シリーズごと -->
     <string name="mastery_list_axis_series">CDシリーズ</string>
     <!-- mastery.list.axis.unit: 群の分け方のセグメント: ユニット (歌唱名義) ごと -->
@@ -105,6 +107,26 @@
     <string name="mastery_list_summary_header">あなたの習熟度</string>
     <!-- mastery.list.title: 習熟度ダッシュボードの画面の題 -->
     <string name="mastery_list_title">習熟度</string>
+    <!-- mastery.preset.name: 段階の設定のプリセットのチップ (2段 / 3段 / 4段)。steps は段の数 -->
+    <string name="mastery_preset_name">%1$d段</string>
+    <!-- mastery.preset.steps2.level1: 2 段のプリセットの 1 段目 (いちばん下)。保存値は ja のままで、表示だけ訳す。スワイプのボタンに収まるよう 4 文字以内 -->
+    <string name="mastery_preset_steps2_level1">聞いた</string>
+    <!-- mastery.preset.steps2.level2: 2 段のプリセットの 2 段目 (最上段)。4 文字以内 -->
+    <string name="mastery_preset_steps2_level2">覚えた</string>
+    <!-- mastery.preset.steps3.level1: 3 段のプリセット (既定) の 1 段目。4 文字以内 -->
+    <string name="mastery_preset_steps3_level1">聞いた</string>
+    <!-- mastery.preset.steps3.level2: 3 段のプリセット (既定) の 2 段目。4 文字以内 -->
+    <string name="mastery_preset_steps3_level2">覚えた</string>
+    <!-- mastery.preset.steps3.level3: 3 段のプリセット (既定) の 3 段目 (最上段)。4 文字以内 -->
+    <string name="mastery_preset_steps3_level3">完璧</string>
+    <!-- mastery.preset.steps4.level1: 4 段のプリセットの 1 段目。4 文字以内 -->
+    <string name="mastery_preset_steps4_level1">聞いた</string>
+    <!-- mastery.preset.steps4.level2: 4 段のプリセットの 2 段目 (だいたい覚えた、の意)。4 文字以内 -->
+    <string name="mastery_preset_steps4_level2">だいたい</string>
+    <!-- mastery.preset.steps4.level3: 4 段のプリセットの 3 段目。4 文字以内 -->
+    <string name="mastery_preset_steps4_level3">覚えた</string>
+    <!-- mastery.preset.steps4.level4: 4 段のプリセットの 4 段目 (最上段)。4 文字以内 -->
+    <string name="mastery_preset_steps4_level4">完璧</string>
     <!-- mastery.summary.done_songs: 最上段 (例: 完璧) にある曲数。level は最上段の名前 (利用者が付けたラベルのこともある)。1000 以上は桁区切りが付く (完璧 1,234 曲) -->
     <plurals name="mastery_summary_done_songs">
         <item quantity="other">%1$s %2$,d 曲</item>

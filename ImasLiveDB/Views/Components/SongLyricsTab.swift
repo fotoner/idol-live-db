@@ -75,7 +75,7 @@ struct SongLyricsTab: View {
             )
         }
         .alert(Text(L10n.Songs.lyricsSaveErrorTitle), isPresented: saveErrorBinding) {
-            Button("OK", role: .cancel) { saveErrorMessage = nil }
+            Button(L10n.Common.actionOk, role: .cancel) { saveErrorMessage = nil }
         } message: {
             Text(saveErrorMessage ?? "")
         }

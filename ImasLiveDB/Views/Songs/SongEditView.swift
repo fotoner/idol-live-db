@@ -194,7 +194,7 @@ struct SongEditView: View {
                 get: { errorMessage != nil },
                 set: { if !$0 { errorMessage = nil } }
             )) {
-                Button("OK") {}
+                Button(L10n.Common.actionOk) {}
             } message: { if let errorMessage { Text(errorMessage) } }
             .editRequestSentAlert(isPresented: $requestSent, onDismiss: { dismiss() })
             .sheet(isPresented: $showArtistPicker) {

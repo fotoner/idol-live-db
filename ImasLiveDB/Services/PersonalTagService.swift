@@ -39,7 +39,7 @@ final class PersonalTagService {
             version &+= 1
             return true
         } catch {
-            LocalWriteFailure.report(error, action: "マイタグの追加")
+            LocalWriteFailure.report(error, action: .key(L10n.Common.localWriteAddPersonalTag))
             return false
         }
     }
@@ -49,7 +49,7 @@ final class PersonalTagService {
             try db.removePersonalTag(entityType: entityType, entityId: entityId, tagName: name)
             version &+= 1
         } catch {
-            LocalWriteFailure.report(error, action: "マイタグの削除")
+            LocalWriteFailure.report(error, action: .key(L10n.Common.localWriteRemovePersonalTag))
         }
     }
 }

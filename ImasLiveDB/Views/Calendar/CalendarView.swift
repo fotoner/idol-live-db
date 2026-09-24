@@ -225,7 +225,7 @@ struct CalendarView: View {
                     set: { if !$0 { personalErrorMessage = nil } }
                 )
             ) {
-                Button("OK", role: .cancel) {}
+                Button(L10n.Common.actionOk, role: .cancel) {}
             } message: {
                 Text(personalErrorMessage ?? "")
             }

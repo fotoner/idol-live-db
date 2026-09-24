@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.fugaif.imaslivedb.data.auth.AuthService
 import com.fugaif.imaslivedb.data.auth.shouldPromptLogin
 import com.fugaif.imaslivedb.data.edit.EditApi
-import com.fugaif.imaslivedb.data.edit.friendlyMessage
 import com.fugaif.imaslivedb.di.AppModule
 import com.fugaif.imaslivedb.i18n.DisplayText
 import com.fugaif.imaslivedb.i18n.generated.L10n
@@ -166,8 +165,7 @@ class RecentEditsViewModel(app: Application) : AndroidViewModel(app) {
                     else -> {}
                 }
             } catch (e: EditApi.ApiException) {
-                // friendlyMessage は data 層が作る日本語の文字列 (まだ文言の値を返さない)。今はそのまま出す
-                _uiState.value = _uiState.value.copy(errorMessage = DisplayText.Verbatim(e.friendlyMessage()))
+                _uiState.value = _uiState.value.copy(errorMessage = e.userMessage)
                 if (e is EditApi.ApiException.NotAuthorized) {
                     _uiState.value = _uiState.value.copy(showLoginPrompt = true)
                 }

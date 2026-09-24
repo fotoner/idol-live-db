@@ -486,7 +486,7 @@ fun SetlistEditScreen(
     if (state.errorMessage != null) {
         AlertDialog(
             onDismissRequest = { viewModel.clearError() },
-            confirmButton = { TextButton(onClick = { viewModel.clearError() }) { Text("OK") } },
+            confirmButton = { TextButton(onClick = { viewModel.clearError() }) { Text(L10n.Common.actionOk.resolve()) } },
             title = { Text(L10n.Edit.formErrorTitle.resolve()) },
             text = { Text(state.errorMessage?.resolve() ?: "") }
         )
@@ -512,7 +512,7 @@ fun SetlistEditScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { requestedOutcome = null; onSaved() }) { Text("OK") }
+                TextButton(onClick = { requestedOutcome = null; onSaved() }) { Text(L10n.Common.actionOk.resolve()) }
             }
         )
     }

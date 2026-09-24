@@ -27,7 +27,7 @@ enum LocalWriteFailureAlert {
         window = overlay
 
         let alert = UIAlertController(title: notice.title, message: notice.message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+        alert.addAction(UIAlertAction(title: String(localized: L10n.Common.actionOk), style: .default) { _ in
             MainActor.assumeIsolated {
                 window?.isHidden = true
                 window = nil

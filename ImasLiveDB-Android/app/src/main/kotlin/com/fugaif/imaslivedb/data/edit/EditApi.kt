@@ -97,20 +97,6 @@ class EditApi(private val http: WorkerHttpClient, private val authService: AuthS
                 return DisplayText.Verbatim(name)
             }
 
-        /**
-         * 投稿者表示名 (解決済み)。まだ [editorDisplayText] に移していない画面のために残す。
-         * 最近の編集 (edit_feed の RecentEditsScreen) が `entry.editorDisplayText.resolve()` に移ったら消す
-         * (代わりの名前は edit_feed.editor.anonymous。iOS の EditFeedService も同じキーを引く)。
-         */
-        @Deprecated("i18n 移行中: editorDisplayText を画面で resolve() する", ReplaceWith("editorDisplayText"))
-        val editorDisplayLabel: String
-            get() {
-                val name = editorDisplayName
-                if (name.isNullOrEmpty()) return "名無しのプロデューサー"
-                if (name.contains("@")) return "名無しのプロデューサー"
-                return name
-            }
-
         /** 本人 / admin が revert 可能か。既に revert 済み、もしくは revert 操作自体の batch は不可。 */
         val isRevertable: Boolean
             get() = !reverted && source != "revert"
@@ -360,16 +346,3 @@ fun MutableMap<String, Any?>.putClearable(key: String, raw: String, original: St
     }
 }
 
-/**
- * [EditApi.ApiException] をユーザー向け文言 (日本語の解決済み文字列) に変換する旧ヘルパー。
- * 文言は [EditApi.ApiException.userMessage] に移した。まだ String の状態を持つ画面のために残す
- * (最近の編集 (edit_feed の RecentEditsViewModel) が userMessage を持つようになり、呼び出しが無くなったら消す)。
- */
-@Deprecated("i18n 移行中: userMessage (DisplayText) を持ち、出口で resolve() する", ReplaceWith("userMessage"))
-fun EditApi.ApiException.friendlyMessage(): String = when (this) {
-    is EditApi.ApiException.NotAuthorized -> "認証の有効期限が切れています。再度サインインしてください。"
-    is EditApi.ApiException.Banned -> "この操作は制限されています。"
-    is EditApi.ApiException.RateLimited -> "投稿が多すぎます。しばらく待ってからお試しください。"
-    is EditApi.ApiException.Server -> "保存に失敗しました (${status})"
-    is EditApi.ApiException.Transport -> "通信に失敗しました: ${message}"
-}

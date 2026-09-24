@@ -221,7 +221,7 @@ struct MyPageView: View {
                 get: { nameErrorMessage != nil },
                 set: { if !$0 { nameErrorMessage = nil } }
             )) {
-                Button("OK", role: .cancel) { nameErrorMessage = nil }
+                Button(L10n.Common.actionOk, role: .cancel) { nameErrorMessage = nil }
             } message: {
                 Text(display: nameErrorMessage ?? .verbatim(""))
             }
@@ -258,7 +258,7 @@ struct MyPageView: View {
                 get: { deleteAccountErrorMessage != nil },
                 set: { if !$0 { deleteAccountErrorMessage = nil } }
             )) {
-                Button("OK", role: .cancel) { deleteAccountErrorMessage = nil }
+                Button(L10n.Common.actionOk, role: .cancel) { deleteAccountErrorMessage = nil }
             } message: {
                 Text(deleteAccountErrorMessage ?? "")
             }
@@ -266,7 +266,7 @@ struct MyPageView: View {
                 get: { transferCodeErrorMessage != nil },
                 set: { if !$0 { transferCodeErrorMessage = nil } }
             )) {
-                Button("OK", role: .cancel) { transferCodeErrorMessage = nil }
+                Button(L10n.Common.actionOk, role: .cancel) { transferCodeErrorMessage = nil }
             } message: {
                 Text(transferCodeErrorMessage ?? "")
             }
@@ -274,7 +274,7 @@ struct MyPageView: View {
                 get: { exportErrorMessage != nil },
                 set: { if !$0 { exportErrorMessage = nil } }
             )) {
-                Button("OK", role: .cancel) { exportErrorMessage = nil }
+                Button(L10n.Common.actionOk, role: .cancel) { exportErrorMessage = nil }
             } message: {
                 Text(exportErrorMessage ?? "")
             }
@@ -293,7 +293,7 @@ struct MyPageView: View {
                     set: { if !$0 { importResultMessage = nil; importErrorMessage = nil } }
                 )
             ) {
-                Button("OK", role: .cancel) {
+                Button(L10n.Common.actionOk, role: .cancel) {
                     importResultMessage = nil
                     importErrorMessage = nil
                 }

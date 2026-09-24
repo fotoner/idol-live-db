@@ -8,6 +8,7 @@ import com.fugaif.imaslivedb.data.model.EventWithDateRange
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.data.model.Song
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,7 +30,8 @@ data class FeaturedPoll(
     val title: String,
     val totalVotes: Int,
     val entryCount: Int,
-    val remainingLabel: String
+    /** 残り時間の札 (終了 / 本日締切 / 残りN日)。画面で resolve する。 */
+    val remainingLabel: DisplayText
 )
 
 data class ProduceUiState(
@@ -151,7 +153,7 @@ class ProduceViewModel(app: Application) : AndroidViewModel(app) {
         title = title.ifEmpty { summary.title },
         totalVotes = totalVotes,
         entryCount = entries.size,
-        remainingLabel = statusLabel
+        remainingLabel = statusText
     )
 
     companion object {

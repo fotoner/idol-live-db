@@ -93,7 +93,7 @@ struct MyEditsView: View {
             get: { errorMessage != nil },
             set: { if !$0 { errorMessage = nil } }
         )) {
-            Button("OK") { errorMessage = nil }
+            Button(L10n.Common.actionOk) { errorMessage = nil }
         } message: {
             Text(display: errorMessage ?? .verbatim(""))
         }

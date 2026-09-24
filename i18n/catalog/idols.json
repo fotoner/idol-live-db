@@ -1130,22 +1130,6 @@
         "ios"
       ]
     },
-    "write_action.add_personal_tag": {
-      "ja": "マイタグの追加",
-      "ko": "마이 태그 추가",
-      "note": "端末への書き込みに失敗したときの知らせに入る操作の名前 (LocalWriteFailure の action。知らせの本文は「{action}に失敗しました。…」)。名詞句で訳す。Android のマイタグの追加",
-      "platforms": [
-        "android"
-      ]
-    },
-    "write_action.remove_personal_tag": {
-      "ja": "マイタグの削除",
-      "ko": "마이 태그 삭제",
-      "note": "端末への書き込みに失敗したときの知らせに入る操作の名前 (LocalWriteFailure の action。知らせの本文は「{action}に失敗しました。…」)。名詞句で訳す。Android のマイタグの削除",
-      "platforms": [
-        "android"
-      ]
-    },
     "write_action.toggle_favorite": {
       "ja": "お気に入りの切り替え",
       "ko": "즐겨찾기 전환",

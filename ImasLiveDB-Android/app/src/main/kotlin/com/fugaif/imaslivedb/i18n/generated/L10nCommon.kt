@@ -14,6 +14,8 @@ object L10nCommon {
     val actionCollapse: DisplayText get() = DisplayText.Res(R.string.common_action_collapse)
     /** 展開 — 閉じている節を開くボタンの読み上げ */
     val actionExpand: DisplayText get() = DisplayText.Res(R.string.common_action_expand)
+    /** OK — アラートの了解ボタン (エラーや完了の知らせを閉じる)。ko は韓国語の UI で普通の 확인 */
+    val actionOk: DisplayText get() = DisplayText.Res(R.string.common_action_ok)
     /** 再試行 — 読み込み失敗などの空状態に出す再試行ボタン */
     val actionRetry: DisplayText get() = DisplayText.Res(R.string.common_action_retry)
     /** すべて見る — セクション見出し右の導線 */
@@ -46,10 +48,16 @@ object L10nCommon {
     fun copyLabeled(label: String): DisplayText = DisplayText.Res(R.string.common_copy_labeled, listOf(label))
     /** タグ{count}個一致 — アイドルの格子 (タグが似ているアイドル) の名前の下に出す、共通するタグの数。1000 以上は桁区切りが付く (実際には出ない値) — 引数: count (count) */
     fun idolGridSharedTags(count: Int): DisplayText = DisplayText.Plural(R.plurals.common_idol_grid_shared_tags, count, listOf(count))
-    /** ・ — 名前を並べるときの区切り (シェアカードの原唱者名「A・B・C」)。前後に空白は入れない */
+    /** ・ — 名前や項目を並べるときの区切り (シェアカードの原唱者名「A・B・C」、曲の行の歌唱アイドル、絞り込みの要約)。前後に空白は入れない */
     val listMiddot: DisplayText get() = DisplayText.Res(R.string.common_list_middot)
+    /**  ・  — 前後に空白を入れた区切り (公演名 ・ 日付 のように、長めの項目を 1 行に並べるとき) */
+    val listMiddotSpaced: DisplayText get() = DisplayText.Res(R.string.common_list_middot_spaced)
+    /** マイタグの追加 — 端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (アイドル・ユニット・曲の詳細でマイタグを足す) */
+    val localWriteAddPersonalTag: DisplayText get() = DisplayText.Res(R.string.common_local_write_add_personal_tag)
     /** 参加の記録 — 端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (公演の行のスワイプで参加を登録・取り消す) */
     val localWriteRecordAttendance: DisplayText get() = DisplayText.Res(R.string.common_local_write_record_attendance)
+    /** マイタグの削除 — 端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (マイタグを外す) */
+    val localWriteRemovePersonalTag: DisplayText get() = DisplayText.Res(R.string.common_local_write_remove_personal_tag)
     /** マークの切り替え — 端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (画面上部のボタンで担当・お気に入りなどを付け外しする) */
     val localWriteToggleMark: DisplayText get() = DisplayText.Res(R.string.common_local_write_toggle_mark)
     /** 絞り込みを解除 — 名前の絞り込み欄の右の × ボタンの読み上げ (入力を消す)。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ) */

@@ -175,7 +175,7 @@ struct SongHistoryTab: View {
                     .padding(.trailing, DS.sp4)
                 VStack(alignment: .leading, spacing: DS.sp1) {
                     Text(eventDisplayName(row.eventName)).font(.imasSubhead.weight(.semibold)).foregroundStyle(DS.ink).lineLimit(1)
-                    Text([row.showName, row.date].joined(separator: " ・ "))
+                    Text([row.showName, row.date].joined(separator: String(localized: L10n.Common.listMiddotSpaced)))
                         .font(.imasCaption).foregroundStyle(DS.ink2).lineLimit(1)
                 }
                 Spacer(minLength: 8)

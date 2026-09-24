@@ -379,7 +379,7 @@ struct CalendarDayDetailView: View {
             return Alert(
                 title: Text(result.title),
                 message: Text(display: result.message),
-                dismissButton: .default(Text("OK"))
+                dismissButton: .default(Text(L10n.Common.actionOk))
             )
         }
         // 権限拒否 → 設定アプリへ誘導

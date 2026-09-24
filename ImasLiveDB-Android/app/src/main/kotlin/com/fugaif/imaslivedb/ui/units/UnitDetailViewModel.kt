@@ -107,7 +107,7 @@ class UnitDetailViewModel(app: Application, private val unitId: String) : Androi
     /** 個人用タグを追加。サーバーには送信しない。足せたときだけ [onAdded] (入力欄を空にする)。 */
     fun addPersonalTag(name: String, onAdded: () -> Unit) {
         viewModelScope.launch {
-            localWrite(L10n.Units.detailLocalWriteAddTag.resolve(getApplication<Application>())) {
+            localWrite(L10n.Common.localWriteAddPersonalTag) {
                 personalTagRepo.addTag(PersonalTag.UNIT, unitId, name)
             } ?: return@launch
             onAdded()
@@ -118,7 +118,7 @@ class UnitDetailViewModel(app: Application, private val unitId: String) : Androi
     /** 個人用タグを削除。 */
     fun removePersonalTag(name: String) {
         viewModelScope.launch {
-            localWrite(L10n.Units.detailLocalWriteRemoveTag.resolve(getApplication<Application>())) {
+            localWrite(L10n.Common.localWriteRemovePersonalTag) {
                 personalTagRepo.removeTag(PersonalTag.UNIT, unitId, name)
             }
             loadPersonalTags()

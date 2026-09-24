@@ -38,7 +38,7 @@
       }
     },
     "common.action.ok" : {
-      "comment" : "アラートの了解ボタン (シェア画像の生成に失敗したとき) (i18n/catalog/common.json)",
+      "comment" : "アラートの了解ボタン (エラーや完了の知らせを閉じる)。ko は韓国語の UI で普通の 확인 (i18n/catalog/common.json)",
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
@@ -1185,6 +1185,42 @@
         }
       }
     },
+    "common.list.middot" : {
+      "comment" : "名前や項目を並べるときの区切り (シェアカードの原唱者名「A・B・C」、曲の行の歌唱アイドル、絞り込みの要約)。前後に空白は入れない (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "・"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "·"
+          }
+        }
+      }
+    },
+    "common.list.middot_spaced" : {
+      "comment" : "前後に空白を入れた区切り (公演名 ・ 日付 のように、長めの項目を 1 行に並べるとき) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " ・ "
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : " · "
+          }
+        }
+      }
+    },
     "common.list_picker.empty.message" : {
       "comment" : "候補ピッカーで検索語に合う候補が無いときの説明。query は利用者が打った語 (i18n/catalog/common.json)",
       "extractionState" : "manual",
@@ -1275,6 +1311,24 @@
         }
       }
     },
+    "common.local_write.add_personal_tag" : {
+      "comment" : "端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (アイドル・ユニット・曲の詳細でマイタグを足す) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイタグの追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이 태그 추가"
+          }
+        }
+      }
+    },
     "common.local_write.record_attendance" : {
       "comment" : "端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (公演の行のスワイプで参加を登録・取り消す) (i18n/catalog/common.json)",
       "extractionState" : "manual",
@@ -1289,6 +1343,24 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "참가 기록"
+          }
+        }
+      }
+    },
+    "common.local_write.remove_personal_tag" : {
+      "comment" : "端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (マイタグを外す) (i18n/catalog/common.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マイタグの削除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "마이 태그 삭제"
           }
         }
       }

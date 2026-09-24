@@ -375,10 +375,10 @@ fun SongFilterSheet(
                         } else {
                             // 全員ぶん並べると行が伸びるので、3 人までは名前・それ以上は人数。
                             if (selectedIdolNames.size <= 3) {
-                                selectedIdolNames.joinToString("・")
+                                selectedIdolNames.joinToString(L10n.Common.listMiddot.resolve())
                             } else {
                                 L10n.Songs.filterIdolSummaryMore(
-                                    names = selectedIdolNames.take(2).joinToString("・"),
+                                    names = selectedIdolNames.take(2).joinToString(L10n.Common.listMiddot.resolve()),
                                     count = selectedIdolNames.size - 2
                                 ).resolve()
                             }

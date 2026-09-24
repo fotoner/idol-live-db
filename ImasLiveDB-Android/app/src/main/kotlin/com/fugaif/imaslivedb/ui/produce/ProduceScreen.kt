@@ -260,7 +260,7 @@ private fun FeaturedPollCard(poll: FeaturedPoll, onClick: () -> Unit) {
                 modifier = Modifier.padding(start = 6.dp)
             )
             Spacer(Modifier.weight(1f))
-            Text(poll.remainingLabel, fontSize = 12.sp, color = Color.White.copy(alpha = 0.95f))
+            Text(poll.remainingLabel.resolve(), fontSize = 12.sp, color = Color.White.copy(alpha = 0.95f))
         }
         Text(
             poll.title, fontSize = 19.sp, fontWeight = FontWeight.Bold, color = Color.White,

@@ -6,28 +6,6 @@ import com.fugaif.imaslivedb.i18n.DisplayText
 
 /** i18n/catalog/model.json の文言。L10n.Model から引く (iOS の L10n.Model と同じ名前)。 */
 object L10nModel {
-    /** {steps}段 — 習熟度の段数のプリセットの名前 (2段 / 3段 / 4段) (Android) — 引数: steps (int) */
-    fun masteryPresetName(steps: Int): DisplayText = DisplayText.Res(R.string.model_mastery_preset_name, listOf(steps))
-    /** 聞いた — 習熟度 2 段のプリセットの 1 段目 (Android)。スワイプのボタンに収まるよう 4 文字以内 */
-    val masteryPresetSteps2Level1: DisplayText get() = DisplayText.Res(R.string.model_mastery_preset_steps2_level1)
-    /** 覚えた — 習熟度 2 段のプリセットの 2 段目 (Android)。4 文字以内 */
-    val masteryPresetSteps2Level2: DisplayText get() = DisplayText.Res(R.string.model_mastery_preset_steps2_level2)
-    /** 聞いた — 習熟度 3 段 (既定) のプリセットの 1 段目 (Android)。4 文字以内 */
-    val masteryPresetSteps3Level1: DisplayText get() = DisplayText.Res(R.string.model_mastery_preset_steps3_level1)
-    /** 覚えた — 習熟度 3 段 (既定) のプリセットの 2 段目 (Android)。4 文字以内 */
-    val masteryPresetSteps3Level2: DisplayText get() = DisplayText.Res(R.string.model_mastery_preset_steps3_level2)
-    /** 完璧 — 習熟度 3 段 (既定) のプリセットの 3 段目 (Android)。4 文字以内 */
-    val masteryPresetSteps3Level3: DisplayText get() = DisplayText.Res(R.string.model_mastery_preset_steps3_level3)
-    /** 聞いた — 習熟度 4 段のプリセットの 1 段目 (Android)。4 文字以内 */
-    val masteryPresetSteps4Level1: DisplayText get() = DisplayText.Res(R.string.model_mastery_preset_steps4_level1)
-    /** だいたい — 習熟度 4 段のプリセットの 2 段目 (だいたい覚えた) (Android)。4 文字以内 */
-    val masteryPresetSteps4Level2: DisplayText get() = DisplayText.Res(R.string.model_mastery_preset_steps4_level2)
-    /** 覚えた — 習熟度 4 段のプリセットの 3 段目 (Android)。4 文字以内 */
-    val masteryPresetSteps4Level3: DisplayText get() = DisplayText.Res(R.string.model_mastery_preset_steps4_level3)
-    /** 完璧 — 習熟度 4 段のプリセットの 4 段目 (Android)。4 文字以内 */
-    val masteryPresetSteps4Level4: DisplayText get() = DisplayText.Res(R.string.model_mastery_preset_steps4_level4)
-    /** 未設定 — 習熟度の段がまだ付いていない曲 (Android。iOS は mastery 側) */
-    val masteryUnset: DisplayText get() = DisplayText.Res(R.string.model_mastery_unset)
     /** 第{rank}位 — 終了したお題での順位 (2 位・3 位)。rank は順位 — 引数: rank (int) */
     fun pollAchievementRank(rank: Int): DisplayText = DisplayText.Res(R.string.model_poll_achievement_rank, listOf(rank))
     /** 優勝 — 終了したお題で 1 位を取ったことを示す札 */
@@ -36,12 +14,6 @@ object L10nModel {
     val pollCreateErrorRestricted: DisplayText get() = DisplayText.Res(R.string.model_poll_create_error_restricted)
     /** お題の作成にはサインインが必要です — お題を作ろうとしてサーバが 401 を返したとき (Android) */
     val pollCreateErrorSigninRequired: DisplayText get() = DisplayText.Res(R.string.model_poll_create_error_signin_required)
-    /** 本日締切 — お題の状態の札。今日締め切るお題 (Android) */
-    val pollStatusClosingToday: DisplayText get() = DisplayText.Res(R.string.model_poll_status_closing_today)
-    /** 残り{days}日 — お題の状態の札。締め切りまでの日数 (Android)。1000 以上は桁区切りが付くが、お題の期間は長くても数十日 — 引数: days (count) */
-    fun pollStatusDaysLeft(days: Int): DisplayText = DisplayText.Plural(R.plurals.model_poll_status_days_left, days, listOf(days))
-    /** 終了 — お題の状態の札。締め切ったお題 (Android。iOS は polls 側) */
-    val pollStatusEnded: DisplayText get() = DisplayText.Res(R.string.model_poll_status_ended)
     /** 項目 — 検索結果が無いときの文に入れる名詞 (全種類) (Android) */
     val searchScopeEmptyNounAll: DisplayText get() = DisplayText.Res(R.string.model_search_scope_empty_noun_all)
     /** ライブ — 検索結果が無いときの文に入れる名詞 (ライブ) (Android) */

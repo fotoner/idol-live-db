@@ -41,6 +41,7 @@ data class SongWithRoles(
     /** ["作曲", "編曲"] のような役割ラベル。並びは 作曲 → 作詞 → 編曲。 */
     val roles: List<String>
 ) {
+    // i18n-ignore(core): 役割名はコアの日本語なので区切りも日本語のまま (iOS SongWithRoles.rolesLabel と同じ)
     val rolesLabel: String get() = roles.joinToString("・")
 }
 

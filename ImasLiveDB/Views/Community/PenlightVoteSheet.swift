@@ -107,7 +107,7 @@ struct PenlightVoteSheet: View {
                 get: { alertError != nil },
                 set: { if !$0 { alertError = nil } }
             )) {
-                Button("OK") { alertError = nil }
+                Button(L10n.Common.actionOk) { alertError = nil }
             } message: {
                 if let err = alertError {
                     Text(err.errorDescription ?? String(localized: L10n.Songs.penlightErrorUnknown))

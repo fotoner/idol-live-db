@@ -200,10 +200,6 @@ object L10nIdols {
     val sortOrderOfficial: DisplayText get() = DisplayText.Res(R.string.idols_sort_order_official)
     /** 体重 — アイドル一覧の並び順の名前。表示用で、保存値 (iOS の rawValue・Android の enum 名) とは別。ja は今の表示 (コアの表示名と同じ) のまま。ko は「〜순」まで含める (ja は見出し list.flat_header の側で「順」を足す)。体重順 */
     val sortOrderWeight: DisplayText get() = DisplayText.Res(R.string.idols_sort_order_weight)
-    /** マイタグの追加 — 端末への書き込みに失敗したときの知らせに入る操作の名前 (LocalWriteFailure の action。知らせの本文は「{action}に失敗しました。…」)。名詞句で訳す。Android のマイタグの追加 */
-    val writeActionAddPersonalTag: DisplayText get() = DisplayText.Res(R.string.idols_write_action_add_personal_tag)
-    /** マイタグの削除 — 端末への書き込みに失敗したときの知らせに入る操作の名前 (LocalWriteFailure の action。知らせの本文は「{action}に失敗しました。…」)。名詞句で訳す。Android のマイタグの削除 */
-    val writeActionRemovePersonalTag: DisplayText get() = DisplayText.Res(R.string.idols_write_action_remove_personal_tag)
     /** お気に入りの切り替え — 端末への書き込みに失敗したときの知らせに入る操作の名前 (LocalWriteFailure の action。知らせの本文は「{action}に失敗しました。…」)。名詞句で訳す。お気に入りにする/外す */
     val writeActionToggleFavorite: DisplayText get() = DisplayText.Res(R.string.idols_write_action_toggle_favorite)
     /** 担当の切り替え — 端末への書き込みに失敗したときの知らせに入る操作の名前 (LocalWriteFailure の action。知らせの本文は「{action}に失敗しました。…」)。名詞句で訳す。担当にする/外す */

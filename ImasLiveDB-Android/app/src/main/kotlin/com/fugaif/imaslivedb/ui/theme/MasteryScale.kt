@@ -1,8 +1,11 @@
 package com.fugaif.imaslivedb.ui.theme
 
+import android.content.res.Resources
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.fugaif.imaslivedb.i18n.DisplayText
 import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 
 /**
  * 習熟度の段階の定義 (ラベルと数)。iOS `Models/MasteryScale.swift` の移植。
@@ -17,15 +20,20 @@ data class MasteryScale(val labels: List<String>) {
     /** 段数。コアに渡す `steps`。 */
     val steps: UByte get() = labels.size.coerceIn(1, 8).toUByte()
 
-    /** 表示名。`0` は未設定。移行中の互換 (ja の文字列)。画面は [labelText] を使う。 */
-    fun label(level: UByte): String {
-        if (level.toInt() == 0) return "未設定"
-        val i = level.toInt() - 1
-        return labels.getOrNull(i) ?: "LV.$level"
-    }
+    /** 表示名を画面の言語で文字列にしたもの ([labelText] を解決する)。`0` は未設定。 */
+    @Composable
+    fun label(level: UByte): String = labelText(level).resolve()
 
-    /** 一覧のチップに出す短い名前。移行中の互換 (ja の文字列)。画面は [labelText] を [shorten] して使う。 */
+    /** 一覧のチップに出す短い名前 (長いラベルは頭から詰める)。 */
+    @Composable
     fun shortLabel(level: UByte): String = shorten(label(level))
+
+    /**
+     * 表示するラベル (下から順)。編集していないプリセットは画面の言語の訳、それ以外は保存値のまま。
+     * ja では常に [labels] と同じ。設定画面の入力欄に出す (iOS `MasteryScale.displayLabels`)。
+     */
+    fun displayLabels(res: Resources): List<String> =
+        presetLabelTexts(labels)?.map { it.resolve(res) } ?: labels
 
     /**
      * 表示名 (文言の値)。`0` は未設定。
@@ -35,7 +43,7 @@ data class MasteryScale(val labels: List<String>) {
      * 利用者の入力なのでそのまま出す (設計 §9.3。保存の形は変えない)。
      */
     fun labelText(level: UByte): DisplayText {
-        if (level.toInt() == 0) return L10n.Model.masteryUnset
+        if (level.toInt() == 0) return L10n.Mastery.levelUnset
         val i = level.toInt() - 1
         val stored = labels.getOrNull(i) ?: return DisplayText.Verbatim("LV.$level")
         return presetLabelTexts(labels)?.getOrNull(i) ?: DisplayText.Verbatim(stored)
@@ -60,31 +68,38 @@ data class MasteryScale(val labels: List<String>) {
         private val fourStepLabels = listOf("聞いた", "だいたい", "覚えた", "完璧")
 
         /**
-         * 段数を変えるときの出発点。どれも 4 文字以内にして操作面で切れないようにする。
-         * 名前 (2段…) は移行中の互換 (ja の文字列)。画面は [presetNameText] を使う。
+         * 段数を変えるときの出発点。どれも 4 文字以内にして操作面で切れないようにする
+         * (訳もカタログの max_len で 4 文字以内)。チップの名前は [presetNameText]。
          */
-        val presets: List<Pair<String, MasteryScale>> = listOf(
-            "2段" to MasteryScale(twoStepLabels),
-            "3段" to MasteryScale(defaultLabels),
-            "4段" to MasteryScale(fourStepLabels),
+        val presets: List<MasteryScale> = listOf(
+            MasteryScale(twoStepLabels),
+            MasteryScale(defaultLabels),
+            MasteryScale(fourStepLabels),
         )
 
         /** プリセットの名前 (2段 / 3段 / 4段) の文言。steps は段数。 */
-        fun presetNameText(steps: Int): DisplayText = L10n.Model.masteryPresetName(steps = steps)
+        fun presetNameText(steps: Int): DisplayText = L10n.Mastery.presetName(steps = steps)
+
+        /**
+         * 表示中のラベル (設定画面の入力) から保存する段階を作る。訳したプリセットのままなら、
+         * そのプリセットの語彙 (ja) で保存する (保存値を言語で変えない。iOS `MasteryScale.storing`)。
+         */
+        fun storing(displayLabels: List<String>, res: Resources): MasteryScale =
+            presets.firstOrNull { it.displayLabels(res) == displayLabels } ?: MasteryScale(displayLabels)
 
         /** 一覧のチップに出す短い名前 (長いラベルは頭から詰める)。 */
         fun shorten(full: String): String = if (full.length <= 6) full else full.take(5) + "…"
 
         /** 保存しているラベルが ja のプリセットと一致するとき、その段ごとの文言。一致しなければ null。 */
         private fun presetLabelTexts(stored: List<String>): List<DisplayText>? = when (stored) {
-            twoStepLabels -> listOf(L10n.Model.masteryPresetSteps2Level1, L10n.Model.masteryPresetSteps2Level2)
+            twoStepLabels -> listOf(L10n.Mastery.presetSteps2Level1, L10n.Mastery.presetSteps2Level2)
             defaultLabels -> listOf(
-                L10n.Model.masteryPresetSteps3Level1, L10n.Model.masteryPresetSteps3Level2,
-                L10n.Model.masteryPresetSteps3Level3,
+                L10n.Mastery.presetSteps3Level1, L10n.Mastery.presetSteps3Level2,
+                L10n.Mastery.presetSteps3Level3,
             )
             fourStepLabels -> listOf(
-                L10n.Model.masteryPresetSteps4Level1, L10n.Model.masteryPresetSteps4Level2,
-                L10n.Model.masteryPresetSteps4Level3, L10n.Model.masteryPresetSteps4Level4,
+                L10n.Mastery.presetSteps4Level1, L10n.Mastery.presetSteps4Level2,
+                L10n.Mastery.presetSteps4Level3, L10n.Mastery.presetSteps4Level4,
             )
             else -> null
         }

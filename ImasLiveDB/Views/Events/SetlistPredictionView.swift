@@ -124,7 +124,7 @@ struct SetlistPredictionView: View {
         }
         .animation(.easeInOut(duration: 0.15), value: isCreatingPlaylist)
         .alert(Text(L10n.Events.playlistAlertTitle), isPresented: $showAlert) {
-            Button("OK") {}
+            Button(L10n.Common.actionOk) {}
         } message: {
             Text(alertMessage)
         }

@@ -120,7 +120,7 @@ struct VideoEditView: View {
                 get: { errorMessage != nil },
                 set: { if !$0 { errorMessage = nil } }
             )) {
-                Button("OK") {}
+                Button(L10n.Common.actionOk) {}
             } message: { if let errorMessage { Text(errorMessage) } }
             .trackScreen("video_edit")
         }

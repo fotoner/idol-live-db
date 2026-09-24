@@ -51,8 +51,7 @@ fun LoginPromptBanner(onSignIn: () -> Unit) {
 
 /**
  * お題の状態の札 (終了 / 本日締切 / 残りN日)。iOS Poll.statusLabel と同じ文言をカタログから引く。
- * data 層の `CommunityApi.PollSummary/PollDetail.statusLabel` (日本語の String) はプロデュースタブも
- * 使っているので残し、投票の画面はこちらを使う。日数の数え方は CommunityApi の pollStatusLabel と同じ
+ * data 層の `CommunityApi.PollSummary/PollDetail.statusText` (プロデュースタブのカード) と同じキー・同じ数え方
  * (締切が不明で Long.MAX_VALUE のときだけ、Int に収まるよう頭打ちにする)。
  */
 fun pollStatusText(isActive: Boolean, endsAtMs: Long): DisplayText {

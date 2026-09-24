@@ -5,6 +5,7 @@
     <string name="common_action_close">닫기</string>
     <string name="common_action_collapse">접기</string>
     <string name="common_action_expand">펼치기</string>
+    <string name="common_action_ok">확인</string>
     <string name="common_action_retry">다시 시도</string>
     <string name="common_action_see_all">모두 보기</string>
     <string name="common_artwork_preview_play_a11y">미리 듣기</string>
@@ -24,7 +25,10 @@
         <item quantity="other">태그 %1$,d개 일치</item>
     </plurals>
     <string name="common_list_middot">·</string>
+    <string name="common_list_middot_spaced">" · "</string>
+    <string name="common_local_write_add_personal_tag">마이 태그 추가</string>
     <string name="common_local_write_record_attendance">참가 기록</string>
+    <string name="common_local_write_remove_personal_tag">마이 태그 삭제</string>
     <string name="common_local_write_toggle_mark">마크 전환</string>
     <string name="common_name_filter_clear_a11y">찾기 해제</string>
     <string name="common_personal_tags_add_a11y">마이 태그 추가</string>

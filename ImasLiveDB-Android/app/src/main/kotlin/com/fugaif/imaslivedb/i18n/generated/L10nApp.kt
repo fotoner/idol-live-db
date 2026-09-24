@@ -24,14 +24,4 @@ object L10nApp {
     val bootSyncErrorTitle: DisplayText get() = DisplayText.Res(R.string.app_boot_sync_error_title)
     /** {label} を取得中… ({step}/{total}) — 起動時の同期の進み具合 (Android)。label は同期している段の名前 (コア由来)、step / total は何段目か — 引数: label (core), step (int), total (int) */
     fun bootSyncProgress(label: String, step: Int, total: Int): DisplayText = DisplayText.Res(R.string.app_boot_sync_progress, listOf(label, step, total))
-    /** 大 — 設定の文字サイズの選択肢 (2 番目に大きい) (Android) */
-    val textScaleLarge: DisplayText get() = DisplayText.Res(R.string.app_text_scale_large)
-    /** 中 — 設定の文字サイズの選択肢 (標準) (Android) */
-    val textScaleMedium: DisplayText get() = DisplayText.Res(R.string.app_text_scale_medium)
-    /** 小 — 設定の文字サイズの選択肢 (2 番目に小さい) (Android) */
-    val textScaleSmall: DisplayText get() = DisplayText.Res(R.string.app_text_scale_small)
-    /** 特大 — 設定の文字サイズの選択肢 (いちばん大きい) (Android) */
-    val textScaleXlarge: DisplayText get() = DisplayText.Res(R.string.app_text_scale_xlarge)
-    /** 極小 — 設定の文字サイズの選択肢 (5 段のいちばん小さい)。セグメントに並ぶので短く (Android。iOS は mypage 側) */
-    val textScaleXsmall: DisplayText get() = DisplayText.Res(R.string.app_text_scale_xsmall)
 }

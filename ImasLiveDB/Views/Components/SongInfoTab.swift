@@ -79,7 +79,7 @@ struct SongInfoTab: View {
                 .foregroundStyle(DS.success)
             VStack(alignment: .leading, spacing: DS.sp1) {
                 Text(eventDisplayName(show.eventName)).font(.imasSubhead.weight(.semibold)).foregroundStyle(DS.ink).lineLimit(1)
-                Text([show.name, show.date].joined(separator: " ・ "))
+                Text([show.name, show.date].joined(separator: String(localized: L10n.Common.listMiddotSpaced)))
                     .font(.imasCaption).foregroundStyle(DS.ink2).lineLimit(1)
             }
             Spacer(minLength: 8)

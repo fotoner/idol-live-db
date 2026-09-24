@@ -12,7 +12,7 @@ extension L10n {
         static var actionLogin: LocalizedStringResource {
             LocalizedStringResource("common.action.login", defaultValue: "ログイン", table: "Common", bundle: L10n.bundle)
         }
-        /// OK — アラートの了解ボタン (シェア画像の生成に失敗したとき)
+        /// OK — アラートの了解ボタン (エラーや完了の知らせを閉じる)。ko は韓国語の UI で普通の 확인
         static var actionOk: LocalizedStringResource {
             LocalizedStringResource("common.action.ok", defaultValue: "OK", table: "Common", bundle: L10n.bundle)
         }
@@ -260,6 +260,14 @@ extension L10n {
         static var gridEmptyTitle: LocalizedStringResource {
             LocalizedStringResource("common.grid.empty.title", defaultValue: "アイテムが見つかりません", table: "Common", bundle: L10n.bundle)
         }
+        /// ・ — 名前や項目を並べるときの区切り (シェアカードの原唱者名「A・B・C」、曲の行の歌唱アイドル、絞り込みの要約)。前後に空白は入れない
+        static var listMiddot: LocalizedStringResource {
+            LocalizedStringResource("common.list.middot", defaultValue: "・", table: "Common", bundle: L10n.bundle)
+        }
+        ///  ・  — 前後に空白を入れた区切り (公演名 ・ 日付 のように、長めの項目を 1 行に並べるとき)
+        static var listMiddotSpaced: LocalizedStringResource {
+            LocalizedStringResource("common.list.middot_spaced", defaultValue: " ・ ", table: "Common", bundle: L10n.bundle)
+        }
         /// 「{query}」に一致する項目がありません — 候補ピッカーで検索語に合う候補が無いときの説明。query は利用者が打った語 — 引数: query (string)
         static func listPickerEmptyMessage(query: String) -> LocalizedStringResource {
             LocalizedStringResource("common.list_picker.empty.message", defaultValue: "「\(query)」に一致する項目がありません", table: "Common", bundle: L10n.bundle)
@@ -280,9 +288,17 @@ extension L10n {
         static var listToolbarMoreA11y: LocalizedStringResource {
             LocalizedStringResource("common.list_toolbar.more.a11y", defaultValue: "その他の操作", table: "Common", bundle: L10n.bundle)
         }
+        /// マイタグの追加 — 端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (アイドル・ユニット・曲の詳細でマイタグを足す)
+        static var localWriteAddPersonalTag: LocalizedStringResource {
+            LocalizedStringResource("common.local_write.add_personal_tag", defaultValue: "マイタグの追加", table: "Common", bundle: L10n.bundle)
+        }
         /// 参加の記録 — 端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (公演の行のスワイプで参加を登録・取り消す)
         static var localWriteRecordAttendance: LocalizedStringResource {
             LocalizedStringResource("common.local_write.record_attendance", defaultValue: "参加の記録", table: "Common", bundle: L10n.bundle)
+        }
+        /// マイタグの削除 — 端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (マイタグを外す)
+        static var localWriteRemovePersonalTag: LocalizedStringResource {
+            LocalizedStringResource("common.local_write.remove_personal_tag", defaultValue: "マイタグの削除", table: "Common", bundle: L10n.bundle)
         }
         /// 担当の切り替え — 端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (一覧の行のハートで担当を付け外しする)
         static var localWriteToggleMyPick: LocalizedStringResource {

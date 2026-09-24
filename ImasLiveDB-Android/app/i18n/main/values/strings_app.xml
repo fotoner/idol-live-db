@@ -19,14 +19,4 @@
     <string name="app_boot_sync_error_title">データの取得に失敗しました</string>
     <!-- app.boot.sync_progress: 起動時の同期の進み具合 (Android)。label は同期している段の名前 (コア由来)、step / total は何段目か -->
     <string name="app_boot_sync_progress">%1$s を取得中… (%2$d/%3$d)</string>
-    <!-- app.text_scale.large: 設定の文字サイズの選択肢 (2 番目に大きい) (Android) -->
-    <string name="app_text_scale_large">大</string>
-    <!-- app.text_scale.medium: 設定の文字サイズの選択肢 (標準) (Android) -->
-    <string name="app_text_scale_medium">中</string>
-    <!-- app.text_scale.small: 設定の文字サイズの選択肢 (2 番目に小さい) (Android) -->
-    <string name="app_text_scale_small">小</string>
-    <!-- app.text_scale.xlarge: 設定の文字サイズの選択肢 (いちばん大きい) (Android) -->
-    <string name="app_text_scale_xlarge">特大</string>
-    <!-- app.text_scale.xsmall: 設定の文字サイズの選択肢 (5 段のいちばん小さい)。セグメントに並ぶので短く (Android。iOS は mypage 側) -->
-    <string name="app_text_scale_xsmall">極小</string>
 </resources>

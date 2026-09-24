@@ -262,7 +262,7 @@ fun EditReadonlyRow(label: String, value: String) {
 fun EditErrorDialog(message: DisplayText, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = onDismiss) { Text("OK") } },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(L10n.Common.actionOk.resolve()) } },
         title = { Text(L10n.Edit.formErrorTitle.resolve()) },
         text = { Text(message.resolve()) }
     )
@@ -291,7 +291,7 @@ fun EditRequestSentDialog(issueUrl: String?, onDismiss: () -> Unit) {
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("OK") } }
+        confirmButton = { TextButton(onClick = onDismiss) { Text(L10n.Common.actionOk.resolve()) } }
     )
 }
 

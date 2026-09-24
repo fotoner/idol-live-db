@@ -469,7 +469,7 @@ struct SongListView: View {
     private var selectionRangeLabel: String {
         if !searchText.isEmpty { return String(localized: L10n.Songs.listIntrodonRangeSearch(query: searchText)) }
         let chips = activeFilterChips
-        if !chips.isEmpty { return chips.map(\.label).joined(separator: "・") }
+        if !chips.isEmpty { return chips.map(\.label).joined(separator: String(localized: L10n.Common.listMiddot)) }
         return String(localized: L10n.Songs.listIntrodonRangeDefault)
     }
 

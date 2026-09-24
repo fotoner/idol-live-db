@@ -574,7 +574,7 @@ struct SetlistView: View {
             }
         }
         .alert(Text(L10n.Events.playlistAlertTitle), isPresented: $showPlaylistAlert) {
-            Button("OK") {}
+            Button(L10n.Common.actionOk) {}
         } message: {
             Text(playlistMessage)
         }

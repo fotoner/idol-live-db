@@ -95,7 +95,7 @@ class IdolDetailViewModel(app: Application, private val idolId: String) : Androi
     fun addPersonalTag(name: String, onAdded: () -> Unit) {
         viewModelScope.launch {
             // 知らせの操作名 (localWrite の action は String) はこの時点の言語で文字列にする
-            localWrite(L10n.Idols.writeActionAddPersonalTag.resolve(getApplication<Application>())) {
+            localWrite(L10n.Common.localWriteAddPersonalTag) {
                 personalTagRepo.addTag(PersonalTag.IDOL, idolId, name)
             }
                 ?: return@launch
@@ -107,7 +107,7 @@ class IdolDetailViewModel(app: Application, private val idolId: String) : Androi
     /** 個人用タグを削除。 */
     fun removePersonalTag(name: String) {
         viewModelScope.launch {
-            localWrite(L10n.Idols.writeActionRemovePersonalTag.resolve(getApplication<Application>())) {
+            localWrite(L10n.Common.localWriteRemovePersonalTag) {
                 personalTagRepo.removeTag(PersonalTag.IDOL, idolId, name)
             }
             loadPersonalTags()
