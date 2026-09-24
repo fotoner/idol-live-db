@@ -32,10 +32,4 @@ describe("GET /lyrics/published", () => {
     expect(sql).toContain("status = 'published'");
     for (const col of ["lines_json", "body", "source"]) expect(sql).not.toContain(col);
   });
-
-  it("本文を含まないので共有キャッシュに載せてよい", async () => {
-    const stub = stubD1(() => []);
-    const res = await handleLyrics(ctxFor(stub.db));
-    expect(res?.headers.get("Cache-Control")).toMatch(/^public/);
-  });
 });

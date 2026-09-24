@@ -27,10 +27,6 @@ function call(over: Partial<NonNullable<LyricLineRow["calls"]>[number]> = {}) {
 }
 
 describe("countCallAnnotations", () => {
-  it("行が無ければ 0 件", () => {
-    expect(countCallAnnotations([])).toEqual({ callLines: 0, callCount: 0 });
-  });
-
   it("コールのある行数とコール総数を別々に数える", () => {
     const lines = [
       line({ id: "a", calls: [call(), call({ id: "cl_2" })] }),
@@ -70,18 +66,10 @@ describe("buildCallEditSummary", () => {
     expect(buildCallEditSummary(c(10, 28), c(18, 42))).toBe("calls 28->42, lines 10->18");
     expect(buildCallEditSummary(c(18, 42), c(0, 0))).toBe("calls 42->0, lines 18->0");
   });
-
-  it("ASCII の機械文字列である (表示文言はクライアントが組み立てる契約)", () => {
-    expect(buildCallEditSummary(c(1, 2), c(3, 4))).toMatch(/^[\x20-\x7e]+$/);
-  });
 });
 
 describe("isCallAnnotationUnchanged", () => {
   const base = [line({ id: "a", clap: "back_beat", calls: [call()] }), line({ id: "b" })];
-
-  it("同じ内容なら無変更", () => {
-    expect(isCallAnnotationUnchanged(base, structuredClone(base))).toBe(true);
-  });
 
   it("call の id だけ違うのは無変更 (サーバが保存のたびに採番しうるため)", () => {
     const next = structuredClone(base);

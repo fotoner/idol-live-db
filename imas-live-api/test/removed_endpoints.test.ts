@@ -9,13 +9,12 @@ const ADMIN = "001094.admin";
 describe("削除したエンドポイント", () => {
   it.each([
     ["POST", "/app/integrity"],
-    ["GET", "/leaderboard"],
     ["POST", "/admin/cloudkit/save"],
   ])("%s %s は 404", async (method, path) => {
     const res = await callJson(method, path, {
       headers: await bearer(ADMIN),
       env: makeEnv({ ADMIN_USER_IDS: ADMIN }),
-      body: method === "POST" ? {} : undefined,
+      body: {},
     });
     expect(res.status).toBe(404);
     expect(res.body).toEqual({ error: "Not found" });

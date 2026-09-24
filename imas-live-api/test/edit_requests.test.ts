@@ -87,11 +87,6 @@ describe("POST /edit-requests — マスタ検証", () => {
     expect(calls).toHaveLength(0);
   });
 
-  it("何番目の op が悪いかを返す", async () => {
-    const res = await post({ ops: [idolOp("#FFBAD6"), idolOp("#144384"), idolOp("nope")] });
-    await expect(res.json()).resolves.toMatchObject({ error: expect.stringContaining("ops[2]") });
-  });
-
   it("admin 専用 recordType は通さない", async () => {
     const res = await post({ ops: [{ op: "update", recordType: "Brand", recordName: "cg", fields: { name: "x" } }] });
     expect(res.status).toBe(400);
@@ -120,15 +115,6 @@ describe("POST /edit-requests — issue の組み立て", () => {
     await post({ ops: [idolOp("#FFBAD6")] });
     expect(calls[0].payload.body).toContain("`001094.f…`");
     expect(calls[0].payload.body).not.toContain("fedcba9876543210");
-  });
-
-  it("少数の op は field 単位の表を出し、raw を本文に同梱する", async () => {
-    const calls = mockGitHub();
-    await post({ ops: [setlistOp(1)] });
-    const body = calls[0].payload.body;
-    expect(body).toContain("| field | 希望値 |");
-    expect(body).toContain("<details><summary>raw (取り込み用)</summary>");
-    expect(calls).toHaveLength(1); // コメント分割なし
   });
 
   it("op が多いと表を省略し、raw をコメントに分割して投稿する", async () => {

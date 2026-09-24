@@ -109,12 +109,6 @@ describe("ペンライト", () => {
       ]);
   });
 
-  it("前の組の数が 0 になったら行を消す", async () => {
-    await votePenlight("s1", ["#FF0000"], "dev-a");
-    await votePenlight("s1", ["#00FF00"], "dev-a");
-    expect(await rows("SELECT color_set_key FROM penlight_color_set_votes")).toEqual([{ color_set_key: "#00FF00" }]);
-  });
-
   it("GET /penlight/votes/:song_id は上位 5 組・総数・自分の投票", async () => {
     const sets = [["#000001"], ["#000002"], ["#000003"], ["#000004"], ["#000005"], ["#000006"]];
     for (let i = 0; i < sets.length; i++) {

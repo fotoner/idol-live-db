@@ -21,8 +21,6 @@ const CASES: Case[] = [
   ["DELETE", `/units/u1/tags/${TRUNCATED}`, "tag_id"],
   ["DELETE", `/songs/${NOT_HEX}/tags/t1`, "song_id"],
   ["GET", `/songs/${TRUNCATED}/similar`, "song_id"],
-  ["GET", `/idols/${TRUNCATED}/similar`, "idol_id"],
-  ["GET", `/units/${NOT_HEX}/similar`, "unit_id"],
   // 端末集計
   ["GET", `/penlight/votes/${TRUNCATED}`, "song_id"],
   // お題

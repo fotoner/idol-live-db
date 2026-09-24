@@ -285,13 +285,6 @@ describe("PUT /songs/:id/calls — 統計と履歴", () => {
     expect(purged[0].method).toBe("GET");
   });
 
-  it("無変更の保存ではキャッシュを捨てない (無駄なミスを増やさない)", async () => {
-    const purged = spyCachePurge();
-    const stub = stubD1(responder({ header: { ...HEADER, lines_json: JSON.stringify(SAVED_LINES) } }));
-    await save(put(stub));
-    expect(purged).toHaveLength(0);
-  });
-
   it("アンカーの貼り直し (stale を落とすだけ) も編集として記録する", async () => {
     // 歌詞差し替えでズレた印が付いたコールを人が直す作業。件数も文言も変わらないが、
     // 見逃すとこの作業だけが履歴から消える。

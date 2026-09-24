@@ -11,7 +11,6 @@ import { exec, meterD1, row } from "./support/d1";
 const POOLS = [
   { label: "曲", master: "tags", entity: "/songs", link: "song_tags", key: "song_id" },
   { label: "アイドル", master: "idol_tag_master", entity: "/idols", link: "idol_tags", key: "idol_id" },
-  { label: "ユニット", master: "unit_tag_master", entity: "/units", link: "unit_tags", key: "unit_id" },
 ] as const;
 
 type Pool = (typeof POOLS)[number];
@@ -36,7 +35,9 @@ const apply = (pool: Pool, entityId: string, tagIds: string[], deviceId: string,
 const remove = (pool: Pool, entityId: string, tagId: string, deviceId: string, env = makeEnv()) =>
   callJson("DELETE", `${pool.entity}/${entityId}/tags/${tagId}`, { headers: device(deviceId), env });
 
-describe.each(POOLS)("$label タグの票", (pool) => {
+describe("タグの票 (ハンドラは 3 プール共通なので曲で代表)", () => {
+  const pool = POOLS[0];
+
   it("同じ端末の再送では増えない", async () => {
     await seedTag(pool, "t1");
     expect((await apply(pool, "e1", ["t1"], "dev-a")).body.applied_tag_ids).toEqual(["t1"]);
@@ -58,7 +59,10 @@ describe.each(POOLS)("$label タグの票", (pool) => {
     expect(res.body).toEqual({ [pool.key]: "e1", tag_id: "t1", removed: false });
     expect(await votes(pool, "e1", "t1")).toBe(1);
   });
+});
 
+// 読み取り行数は曲とアイドル・ユニットで違う。アイドルとユニットは同じ文なのでアイドルで代表する。
+describe.each(POOLS)("$label タグの票", (pool) => {
   it("D1 の読み取り行数は変更前を超えない", async () => {
     await seedTag(pool, "t1");
     await seedTag(pool, "t2");
@@ -78,15 +82,6 @@ describe.each(POOLS)("$label タグの票", (pool) => {
     expect(await measure(() => apply(pool, "e1", ["t1"], "dev-a", env))).toBeLessThanOrEqual(budget.again);
     expect(await measure(() => remove(pool, "e1", "t2", "dev-a", env))).toBeLessThanOrEqual(budget.stranger);
     expect(await measure(() => remove(pool, "e1", "t1", "dev-a", env))).toBeLessThanOrEqual(budget.remove);
-  });
-});
-
-describe("曲タグの song_tag_counts", () => {
-  it("再送しても有効タグ数は変わらない", async () => {
-    await seedTag(POOLS[0], "t1");
-    await apply(POOLS[0], "s1", ["t1"], "dev-a");
-    await apply(POOLS[0], "s1", ["t1"], "dev-a");
-    expect(await row("SELECT tag_count FROM song_tag_counts WHERE song_id = 's1'")).toEqual({ tag_count: 1 });
   });
 });
 

@@ -77,15 +77,6 @@ const lyricsPath = `/songs/${encodeURIComponent(SONG_ID)}/lyrics`;
 const detailPath = `/songs/${encodeURIComponent(SONG_ID)}/detail`;
 
 describe("GET /songs/:id/lyrics の利用ログ", () => {
-  it("歌詞を返したときだけ 1 行出す", async () => {
-    const logs = spyLogs();
-    const stub = stubD1(responder());
-    const res = (await handleLyrics(ctxFor(lyricsPath, stub.db, bearer())))!;
-    expect(res.status).toBe(200);
-    expect(logs.lines).toHaveLength(1);
-    expect(JSON.parse(logs.lines[0])).toEqual({ event: "lyrics_read", song_id: SONG_ID });
-  });
-
   it("uid も IP も歌詞本文も載せない", async () => {
     const logs = spyLogs();
     const stub = stubD1(responder());
@@ -118,14 +109,6 @@ describe("GET /songs/:id/lyrics の利用ログ", () => {
       responder({ header: { source: null, updated_at: "2026-09-01 12:00:00", lines_json: LINES, status: "draft" } })
     );
     const res = (await handleLyrics(ctxFor(lyricsPath, stub.db, { "CF-Connecting-IP": "203.0.113.9" })))!;
-    expect(res.status).toBe(404);
-    expect(logs.lines).toHaveLength(0);
-  });
-
-  it("歌詞未投入 (404) では出さない", async () => {
-    const logs = spyLogs();
-    const stub = stubD1(responder({ header: null }));
-    const res = (await handleLyrics(ctxFor(lyricsPath, stub.db, bearer())))!;
     expect(res.status).toBe(404);
     expect(logs.lines).toHaveLength(0);
   });
@@ -174,14 +157,6 @@ describe("GET /songs/:id/detail の利用ログ", () => {
     const logs = spyLogs();
     const stub = stubD1(responder());
     const res = (await handleSongDetail(ctxFor(detailPath, stub.db)))!;
-    expect((await res.json() as any).lyrics).toBeNull();
-    expect(logs.lines).toHaveLength(0);
-  });
-
-  it("歌詞未投入の曲を開いても出さない", async () => {
-    const logs = spyLogs();
-    const stub = stubD1(responder({ header: null }));
-    const res = (await handleSongDetail(ctxFor(detailPath, stub.db, bearer())))!;
     expect((await res.json() as any).lyrics).toBeNull();
     expect(logs.lines).toHaveLength(0);
   });

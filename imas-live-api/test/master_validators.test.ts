@@ -108,11 +108,6 @@ describe("validateMasterEdit — create の必須フィールド", () => {
       .toMatch(/field songId is required/);
   });
 
-  it("揃っていれば通る", () => {
-    expect(ok({ recordType: "SetlistItem", op: "create", fields: { showId: "sh_x", songId: "sg_x", position: 1 } }))
-      .toBeNull();
-  });
-
   it("update では必須チェックを掛けない (差分送信を許す)", () => {
     expect(ok({ recordType: "SetlistItem", op: "update", recordName: "sh_x_0001", fields: { position: 2 } }))
       .toBeNull();

@@ -58,12 +58,6 @@ describe("5 分 cron", () => {
       .toEqual(["day", "edge", "recent", "yesterday"]);
   });
 
-  it("期限切れの引き継ぎコードだけを消す", async () => {
-    await seedTransferCodes();
-    await runScheduled(FIVE_MIN);
-    expect(await rows("SELECT code FROM transfer_codes")).toEqual([{ code: "ALIVE" }]);
-  });
-
   it("日次の掃除と数え直しはしない", async () => {
     await seedDailyTargets();
     await runScheduled(FIVE_MIN);

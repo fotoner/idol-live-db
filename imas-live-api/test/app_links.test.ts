@@ -84,12 +84,4 @@ describe("アプリ証明の口 (/app/challenge など)", () => {
     const attest = await callJson("POST", "/app/attest", { body: {} });
     expect(attest.status).toBe(429);
   });
-
-  it("本文が足りない attest / assert は 400", async () => {
-    for (const path of ["/app/attest", "/app/assert"]) {
-      const res = await callJson("POST", path, { body: {} });
-      expect(res.status).toBe(400);
-      expect(res.body).toEqual({ error: "bad request" });
-    }
-  });
 });

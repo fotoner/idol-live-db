@@ -93,7 +93,9 @@ async function voteCount(pool: Pool, entityId: string, tagId: string): Promise<n
   return r?.vote_count ?? null;
 }
 
-describe.each(POOLS)("$label タグ: 語彙の作成 (POST $master)", (pool) => {
+describe("曲タグ: 語彙の作成 (POST /tags。ハンドラは 3 プール共通なので曲で代表)", () => {
+  const pool = POOLS[0];
+
   it("X-Device-Id が無ければ 400", async () => {
     const res = await callJson("POST", pool.master, { body: { name: "x" } });
     expect(res.status).toBe(400);
@@ -183,7 +185,9 @@ describe("タグ作成の上限 (1 端末 1 日 10 件、3 プール共有)", ()
   });
 });
 
-describe.each(POOLS)("$label タグ: 一覧と詳細", (pool) => {
+describe("曲タグ: 一覧と詳細 (ハンドラは 3 プール共通なので曲で代表)", () => {
+  const pool = POOLS[0];
+
   it("一覧は削除済みを除き、付与数の多い順。公開キャッシュ", async () => {
     await createTag(pool, "alpha", "dev-a", { description: "d".repeat(50), category: "mood" });
     await createTag(pool, "beta", "dev-a", { category: "scene" });
@@ -257,24 +261,6 @@ describe.each(POOLS)("$label タグ: 説明の編集 (PUT $master/:id) と履歴
     });
     expect(banned.status).toBe(403);
     expect(banned.body).toEqual({ error: "Banned" });
-  });
-
-  it("無いタグは 404、削除済みは 403、不正な JSON は 400", async () => {
-    await insertUser(UID);
-    const auth = await bearer(UID);
-    await createTag(pool, "tt", "dev-a");
-    await exec(`UPDATE ${pool.table} SET status = 'removed' WHERE id = 'tt'`);
-
-    expect((await callJson("PUT", `${pool.master}/missing`, { headers: auth, body: {} })).body)
-      .toEqual({ error: "Tag not found" });
-    const removed = await callJson("PUT", `${pool.master}/tt`, { headers: auth, body: {} });
-    expect(removed.status).toBe(403);
-    expect(removed.body).toEqual({ error: "Tag has been removed" });
-
-    await exec(`UPDATE ${pool.table} SET status = 'active' WHERE id = 'tt'`);
-    const invalid = await callJson("PUT", `${pool.master}/tt`, { headers: auth, body: "{" });
-    expect(invalid.status).toBe(400);
-    expect(invalid.body).toEqual({ error: "invalid JSON body" });
   });
 
   it("更新したタグを返し、説明が変わったら前後を履歴に積む。編集者は端末 ID (無ければ uid) で、応答では先頭 8 文字", async () => {
@@ -353,16 +339,6 @@ describe.each(POOLS)("$label タグ: 削除 (DELETE $master/:id、admin のみ)"
 });
 
 describe.each(POOLS)("$label タグ: 通報 (POST $master/:id/report)", (pool) => {
-  it("端末 ID 必須。無いタグは 404", async () => {
-    await createTag(pool, "tt", "dev-a");
-    expect((await callJson("POST", `${pool.master}/tt/report`, { body: {} })).status).toBe(400);
-    const missing = await callJson("POST", `${pool.master}/missing/report`, {
-      headers: device("dev-r"), body: {},
-    });
-    expect(missing.status).toBe(404);
-    expect(missing.body).toEqual({ error: "Tag not found" });
-  });
-
   it("同じ端末は 1 日 1 回。3 件で under_review になる", async () => {
     await createTag(pool, "tt", "dev-a");
     const first = await callJson("POST", `${pool.master}/tt/report`, {
@@ -390,6 +366,54 @@ describe.each(POOLS)("$label タグ: 通報 (POST $master/:id/report)", (pool) =
 });
 
 describe.each(POOLS)("$label タグ: 付与と取り外し ($entity/:id/tags)", (pool) => {
+  it("付けた端末が外すと票が減り、0 になった行は消える", async () => {
+    await createTag(pool, "t1", "dev-a");
+    await applyTags(pool, "e1", ["t1"], "dev-a");
+    await applyTags(pool, "e1", ["t1"], "dev-b");
+
+    const first = await callJson("DELETE", `${pool.entity}/e1/tags/t1`, { headers: device("dev-a") });
+    expect(first.status).toBe(200);
+    expect(first.body).toEqual({ [pool.entityKey]: "e1", tag_id: "t1", removed: true });
+    expect(await voteCount(pool, "e1", "t1")).toBe(1);
+
+    await callJson("DELETE", `${pool.entity}/e1/tags/t1`, { headers: device("dev-b") });
+    expect(await voteCount(pool, "e1", "t1")).toBeNull();
+    expect(await rows(`SELECT * FROM ${pool.deviceTable}`)).toEqual([]);
+  });
+});
+
+describe("曲タグ: 入力の検証と付与 (ハンドラは 3 プール共通なので曲で代表)", () => {
+  const pool = POOLS[0];
+  const UID = "001094.edit-user";
+
+  it("説明の編集: 無いタグは 404、削除済みは 403、不正な JSON は 400", async () => {
+    await insertUser(UID);
+    const auth = await bearer(UID);
+    await createTag(pool, "tt", "dev-a");
+    await exec(`UPDATE ${pool.table} SET status = 'removed' WHERE id = 'tt'`);
+
+    expect((await callJson("PUT", `${pool.master}/missing`, { headers: auth, body: {} })).body)
+      .toEqual({ error: "Tag not found" });
+    const removed = await callJson("PUT", `${pool.master}/tt`, { headers: auth, body: {} });
+    expect(removed.status).toBe(403);
+    expect(removed.body).toEqual({ error: "Tag has been removed" });
+
+    await exec(`UPDATE ${pool.table} SET status = 'active' WHERE id = 'tt'`);
+    const invalid = await callJson("PUT", `${pool.master}/tt`, { headers: auth, body: "{" });
+    expect(invalid.status).toBe(400);
+    expect(invalid.body).toEqual({ error: "invalid JSON body" });
+  });
+
+  it("通報: 端末 ID 必須。無いタグは 404", async () => {
+    await createTag(pool, "tt", "dev-a");
+    expect((await callJson("POST", `${pool.master}/tt/report`, { body: {} })).status).toBe(400);
+    const missing = await callJson("POST", `${pool.master}/missing/report`, {
+      headers: device("dev-r"), body: {},
+    });
+    expect(missing.status).toBe(404);
+    expect(missing.body).toEqual({ error: "Tag not found" });
+  });
+
   it("端末 ID 必須。tag_ids は空でない配列", async () => {
     const path = `${pool.entity}/e1/tags`;
     expect((await callJson("POST", path, { body: { tag_ids: ["x"] } })).status).toBe(400);
@@ -437,21 +461,6 @@ describe.each(POOLS)("$label タグ: 付与と取り外し ($entity/:id/tags)", 
 
     const anon = await callJson("GET", `${pool.entity}/e1/tags?anon=1`);
     expect(anon.body.my_tag_ids).toEqual([]);
-  });
-
-  it("付けた端末が外すと票が減り、0 になった行は消える", async () => {
-    await createTag(pool, "t1", "dev-a");
-    await applyTags(pool, "e1", ["t1"], "dev-a");
-    await applyTags(pool, "e1", ["t1"], "dev-b");
-
-    const first = await callJson("DELETE", `${pool.entity}/e1/tags/t1`, { headers: device("dev-a") });
-    expect(first.status).toBe(200);
-    expect(first.body).toEqual({ [pool.entityKey]: "e1", tag_id: "t1", removed: true });
-    expect(await voteCount(pool, "e1", "t1")).toBe(1);
-
-    await callJson("DELETE", `${pool.entity}/e1/tags/t1`, { headers: device("dev-b") });
-    expect(await voteCount(pool, "e1", "t1")).toBeNull();
-    expect(await rows(`SELECT * FROM ${pool.deviceTable}`)).toEqual([]);
   });
 
   it("取り外しも端末 ID 必須", async () => {

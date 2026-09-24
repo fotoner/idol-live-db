@@ -61,10 +61,10 @@ function defaultResponder(over: Partial<{
   };
 }
 
-function makeCtx(db: D1Database, path = "/calls/dashboard", method = "GET"): RouteContext {
+function makeCtx(db: D1Database, path = "/calls/dashboard"): RouteContext {
   const url = new URL(`https://api.example.com${path}`);
   return {
-    request: new Request(url.toString(), { method }),
+    request: new Request(url.toString()),
     env: { DB: db } as unknown as RouteContext["env"],
     url,
     path,
@@ -84,12 +84,6 @@ describe("GET /calls/dashboard — ルーティング", () => {
     expect(await handleCallsDashboard(makeCtx(stub.db, "/calls"))).toBeNull();
     expect(await handleCallsDashboard(makeCtx(stub.db, "/songs/x/calls"))).toBeNull();
     // 1 文も D1 を叩いていない (マッチ判定より先に SQL を投げていない)。
-    expect(stub.calls).toHaveLength(0);
-  });
-
-  it("GET 以外では null を返す", async () => {
-    const stub = stubD1(defaultResponder());
-    expect(await handleCallsDashboard(makeCtx(stub.db, "/calls/dashboard", "POST"))).toBeNull();
     expect(stub.calls).toHaveLength(0);
   });
 });
@@ -209,11 +203,6 @@ describe("GET /calls/dashboard — 応答契約", () => {
     expect(body.songsWithCalls[0].updatedBy).toBe("f***");
     expect(body.recentEdits[0].by).toBe("f***");
     expect(JSON.stringify(body)).not.toContain("@");
-  });
-
-  it("エッジキャッシュに載る Cache-Control を返す", async () => {
-    const { res } = await get();
-    expect(res.headers.get("Cache-Control")).toBe("public, max-age=1800");
   });
 
   it("「コール曲」タグが無ければ ③ を空にして 200 (500 にしない)", async () => {

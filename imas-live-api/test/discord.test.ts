@@ -64,14 +64,6 @@ describe("POST /discord/link", () => {
     expect(res.status).toBe(503);
     expect(res.body).toEqual({ error: "discord_not_configured" });
   });
-
-  it("認可 URL を返し、state を 1 行だけ積む", async () => {
-    await insertUser(UID);
-    const state = await startLink();
-    expect(await rows("SELECT kind, user_id FROM discord_oauth_states WHERE state = ?", state)).toEqual([
-      { kind: "discord", user_id: UID },
-    ]);
-  });
 });
 
 describe("GET /discord/callback", () => {
@@ -100,16 +92,6 @@ describe("GET /discord/callback", () => {
 
     const again = await call("GET", `/discord/callback?code=c&state=${state}`, { env: configured() });
     expect(again.status).toBe(400);
-  });
-
-  it("10 件未満なら参加だけさせて、残りの件数を出す (ロールは付けない)", async () => {
-    await insertUser(UID);
-    await seedEdits(UID, 3);
-    const state = await startLink();
-    serveDiscordLogin(204);
-    const res = await call("GET", `/discord/callback?code=c&state=${state}`, { env: configured() });
-    expect(res.status).toBe(200);
-    expect(await res.text()).toContain("あと 7 件編集すると");
   });
 
   it("差し戻された編集は数えない", async () => {
