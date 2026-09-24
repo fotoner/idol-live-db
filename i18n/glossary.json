@@ -109,7 +109,7 @@
       "en": "favorite",
       "ja": "お気に入り",
       "ko": "즐겨찾기",
-      "note": "アプリのお気に入り機能。お気に入り済 → 즐겨찾기됨。「好きな」の意味の「お気に入りの」は機能名ではないので 즐겨찾기 にしない。en: お気に入り済 → Favorited。zh-Hans: 已收藏",
+      "note": "アプリのお気に入り機能。「好きな」の意味の「お気に入りの」は機能名ではないので、機能名の語にしない。ko: お気に入り済 → 즐겨찾기됨 (「お気に入りの」を 즐겨찾기 にしない)。en: お気に入り済 → Favorited。zh-Hans: お気に入り済 → 已收藏",
       "zh-Hans": "收藏"
     },
     {
@@ -126,14 +126,14 @@
       ],
       "ja": "回収",
       "ko": "회수",
-      "note": "ライブでその曲を生で聴くこと (現地回収)。回収済み → 회수함、未回収 → 미회수、回収率 → 회수율。表記はオーナー確定待ち。en: 回収済み → Heard live、未回収 → Not heard live、回収率 → Heard-live rate。zh-Hans: 已回收・未回收・回收率 (中国のファンにも通じる語)",
+      "note": "ライブでその曲を生で聴くこと (現地回収)。表記はオーナー確定待ち。ko: 回収済み → 회수함、未回収 → 미회수、回収率 → 회수율。en: 回収済み → Heard live、未回収 → Not heard live、回収率 → Heard-live rate。zh-Hans: 已回收・未回收・回收率 (中国のファンにも通じる語)",
       "zh-Hans": "回收"
     },
     {
       "en": "perform",
       "ja": "披露",
       "ko": "공연",
-      "note": "曲をライブで歌うこと。披露回数 → 공연 횟수、初披露 → 첫 공연、披露履歴 → 공연 기록。en: 披露回数 → Times performed、初披露 → First performance、披露履歴 → Performance history。zh-Hans: 演出次数・初披露・演出记录",
+      "note": "曲をライブで歌うこと。ko: 披露回数 → 공연 횟수、初披露 → 첫 공연、披露履歴 → 공연 기록。en: 披露回数 → Times performed、初披露 → First performance、披露履歴 → Performance history。zh-Hans: 演出次数・初披露・演出记录",
       "zh-Hans": [
         "演出",
         "披露"
@@ -316,7 +316,7 @@
       "en": "prediction",
       "ja": "予想",
       "ko": "예상",
-      "note": "セトリ予想 → 세트리스트 예상。en: セトリ予想 → Setlist prediction。zh-Hans: 歌单预测",
+      "note": "セトリ予想 (ライブのセトリを予想する機能) など。ko: セトリ予想 → 세트리스트 예상。en: セトリ予想 → Setlist prediction。zh-Hans: セトリ予想 → 歌单预测",
       "zh-Hans": [
         "预测",
         "预想"
@@ -353,7 +353,7 @@
       "en": "call",
       "ja": "コール",
       "ko": "콜",
-      "note": "ライブで客席が入れる掛け声。コールのパレットの「発声」の群 → 구호。en: 「発声」の群 → Chants。zh-Hans: 喊话",
+      "note": "ライブで客席が入れる掛け声。ko: コールのパレットの「発声」の群 → 구호。en: 「発声」の群 → Chants。zh-Hans: 「発声」の群 → 喊话",
       "zh-Hans": [
         "应援",
         "Call"
@@ -436,7 +436,7 @@
       ],
       "ja": "現地",
       "ko": "현장",
-      "note": "現地参加 → 현장 참가。ライブの配信参加 → 스트리밍 참가、ライブビューイング → 라이브 뷰잉。配信 は意味で訳し分ける (曲が配信ストアにある → 음원、番組 → 방송、データの差分配信 → 받아 오다)。en: 現地参加 → Attended in person、配信参加 → Watched the stream、ライブビューイング → Live viewing。zh-Hans: 现场参加・线上观看・影院直播",
+      "note": "会場に行って参加すること (配信・ライブビューイングと対)。配信 は意味で訳し分ける (ライブの配信参加・曲が配信ストアにある・番組・データの差分配信)。ko: 現地参加 → 현장 참가、配信参加 → 스트리밍 참가、ライブビューイング → 라이브 뷰잉、曲の配信 → 음원、番組 → 방송、データの差分配信 → 받아 오다。en: 現地参加 → Attended in person、配信参加 → Watched the stream、ライブビューイング → Live viewing。zh-Hans: 现场参加・线上观看・影院直播",
       "zh-Hans": "现场"
     },
     {
@@ -531,7 +531,7 @@
       "en": "transfer",
       "ja": "引き継ぎ",
       "ko": "이전",
-      "note": "機種変更のときのデータ移行。引き継ぎコード → 이전 코드。en: 引き継ぎコード → Transfer code。zh-Hans: 引继码 (中国のゲーム利用者に通じる語)",
+      "note": "機種変更のときのデータ移行。ko: 引き継ぎコード → 이전 코드。en: 引き継ぎコード → Transfer code。zh-Hans: 引继码 (中国のゲーム利用者に通じる語)",
       "zh-Hans": [
         "引继",
         "转移"
@@ -749,7 +749,7 @@
       "en": "add",
       "ja": "追加",
       "ko": "추가",
-      "note": "所有の記録のような「〜に加える」でない意味のときは 표시 などにしてよい (events.releases.add.a11y)",
+      "note": "所有の記録のような「〜に加える」でない意味のときは、その意味の語にしてよい (events.releases.add.a11y)。ko: 표시 など",
       "zh-Hans": [
         "添加",
         "加入"
@@ -855,7 +855,7 @@
       "en": "encore",
       "ja": "アンコール",
       "ko": "앙코르",
-      "note": "ダブルアンコール → 더블 앙코르。中の「コール」は数えない (check は長い語を先に見る)。en: Double encore。zh-Hans: 双安可",
+      "note": "中の「コール」は数えない (check は長い語を先に見る)。ko: ダブルアンコール → 더블 앙코르。en: ダブルアンコール → Double encore。zh-Hans: ダブルアンコール → 双安可",
       "zh-Hans": "安可"
     },
     {
@@ -865,7 +865,7 @@
       ],
       "ja": "本編",
       "ko": "본편",
-      "note": "セトリの区切り。アンコール → 앙코르 と対",
+      "note": "セトリの区切り。アンコール と対 (ko: 본편 ↔ 앙코르)",
       "zh-Hans": [
         "本篇",
         "正篇"
@@ -901,14 +901,14 @@
       ],
       "ja": "主演",
       "ko": "주연",
-      "note": "出演者パネルの役割。ゲスト → 게스트。en: ゲスト → Guest。zh-Hans: 嘉宾",
+      "note": "出演者パネルの役割。ゲスト と対。ko: ゲスト → 게스트。en: ゲスト → Guest。zh-Hans: ゲスト → 嘉宾",
       "zh-Hans": "主演"
     },
     {
       "en": "capacity",
       "ja": "キャパ",
       "ko": "수용 인원",
-      "note": "会場の収容人数。助数詞 人 → 명。en: {count} people。zh-Hans: {count}人",
+      "note": "会場の収容人数。ko: 助数詞 人 → 명。en: {count} people。zh-Hans: {count}人",
       "zh-Hans": [
         "容纳人数",
         "容纳"
@@ -921,7 +921,7 @@
       ],
       "ja": "衣装",
       "ko": "의상",
-      "note": "助数詞 着 → 벌。en: {count} outfits (one / other)。zh-Hans: {count}套",
+      "note": "ko: 助数詞 着 → 벌。en: {count} outfits (one / other)。zh-Hans: {count}套",
       "zh-Hans": [
         "服装",
         "衣装"
@@ -931,7 +931,7 @@
       "en": "vote",
       "ja": "票",
       "ko": "표",
-      "note": "票数の助数詞 ({count}票 → {count}표)。en: {count} votes (one / other)。zh-Hans: {count}票",
+      "note": "票数の助数詞。ko: {count}票 → {count}표。en: {count} votes (one / other)。zh-Hans: {count}票",
       "zh-Hans": "票"
     },
     {
@@ -954,7 +954,7 @@
       ],
       "ja": "受付",
       "ko": "접수",
-      "note": "チケットの申込期間。受付期間 → 접수 기간。en: 受付期間 → Application period。zh-Hans: 申请期",
+      "note": "チケットの申込期間。ko: 受付期間 → 접수 기간。en: 受付期間 → Application period。zh-Hans: 受付期間 → 申请期",
       "zh-Hans": [
         "申请",
         "受理"
@@ -1017,7 +1017,7 @@
       ],
       "ja": "収支",
       "ko": "가계부",
-      "note": "家計簿の画面名。直訳の 수지 は使わない",
+      "note": "家計簿の画面名。ko: 直訳の 수지 は使わない (가계부 にする)",
       "zh-Hans": [
         "账本",
         "收支"
@@ -1051,14 +1051,14 @@
       "en": "kana order",
       "ja": "五十音順",
       "ko": "50음순",
-      "note": "かなの読みで並べる順。韓国語の字母順ではないので 가나다순 は使わない。en・zh-Hans でも A–Z 順・拼音順ではない (かなの読み順) と分かる語にする",
+      "note": "かなの読みで並べる順。その言語の字母順・A–Z 順・拼音順ではない (かなの読み順) と分かる語にする。ko: 가나다순 は使わない",
       "zh-Hans": "五十音"
     },
     {
       "en": "reading",
       "ja": "よみ",
       "ko": "읽는 법",
-      "note": "曲名・名前のかなの読み。よみをコピー → 읽는 법 복사。en: よみをコピー → Copy reading。zh-Hans: 复制读音",
+      "note": "曲名・名前のかなの読み。ko: よみをコピー → 읽는 법 복사。en: よみをコピー → Copy reading。zh-Hans: よみをコピー → 复制读音",
       "zh-Hans": [
         "读音",
         "读法"
@@ -1080,7 +1080,7 @@
       ],
       "ja": "歌唱",
       "ko": "가창",
-      "note": "歌唱者 → 가창자、歌唱アイドル → 가창 아이돌。en: 歌唱者 → Singers、歌唱アイドル → Idols who sing it。zh-Hans: 演唱者・演唱偶像",
+      "note": "ko: 歌唱者 → 가창자、歌唱アイドル → 가창 아이돌。en: 歌唱者 → Singers、歌唱アイドル → Idols who sing it。zh-Hans: 演唱者・演唱偶像",
       "zh-Hans": "演唱"
     },
     {
@@ -1129,7 +1129,7 @@
       "en": "echo",
       "ja": "追っかけ",
       "ko": "후창",
-      "note": "コールのタイミング。歌のあとで客席が返す。同時 → 동시 と対 (선창 / 후창)。en: 追っかけ → Echo、同時 → With the vocals。zh-Hans: 跟喊 / 同步 (訳語はオーナー確定待ち)",
+      "note": "コールのタイミング。歌のあとで客席が返す。同時 と対。ko: 同時 → 동시 (선창 / 후창)。en: 追っかけ → Echo、同時 → With the vocals。zh-Hans: 跟喊 / 同步 (訳語はオーナー確定待ち)",
       "zh-Hans": "跟喊"
     },
     {
@@ -1142,7 +1142,7 @@
         "겹치",
         "겹쳐"
       ],
-      "note": "歌にコールを被せる → 겹치는 콜 / 겹치기。en: 被せるコール → Call over the vocals。zh-Hans: 叠喊 (訳語はオーナー確定待ち)",
+      "note": "歌にコールを被せること。ko: 被せるコール → 겹치는 콜 / 겹치기。en: 被せるコール → Call over the vocals。zh-Hans: 叠喊 (訳語はオーナー確定待ち)",
       "zh-Hans": [
         "叠喊",
         "重叠"
@@ -1205,7 +1205,7 @@
       "en": "call song",
       "ja": "コール曲",
       "ko": "콜 곡",
-      "note": "サーバのタグ名。本文でタグそのものを指すときは “コール曲”(콜 곡) のように ja の名前を残す",
+      "note": "サーバのタグ名。本文でタグそのものを指すときは ja の名前を残し、訳を添える (ko: “コール曲”(콜 곡))",
       "zh-Hans": "应援曲"
     },
     {
@@ -1215,7 +1215,7 @@
       ],
       "ja": "推し",
       "ko": "최애",
-      "note": "ファンの用語。担当 → 담당 とは別の語 (担当は機能名)。en は oshi (アニメ・アイドルのファンに通じる) か fave。zh-Hans は 本命",
+      "note": "ファンの用語。担当 とは別の語 (担当は機能名。ko: 担当 → 담당、推し → 최애)。en は oshi (アニメ・アイドルのファンに通じる) か fave。zh-Hans は 本命",
       "zh-Hans": "本命"
     },
     {
@@ -1271,7 +1271,7 @@
       "en": "Cute",
       "ja": "キュート",
       "ko": "큐트",
-      "note": "シンデレラガールズの属性。クール → 쿨、パッション → 패션 (オーナー未確定)。en・zh-Hans はゲームの英字表記 Cute / Cool / Passion のまま",
+      "note": "シンデレラガールズの属性。ko: クール → 쿨、パッション → 패션 (オーナー未確定)。en・zh-Hans はゲームの英字表記 Cute / Cool / Passion のまま",
       "zh-Hans": "Cute"
     },
     {
@@ -1284,7 +1284,7 @@
       "en": "Princess",
       "ja": "プリンセス",
       "ko": "프린세스",
-      "note": "ミリオンライブの属性。フェアリー → 페어리、エンジェル → 엔젤。en・zh-Hans はゲームの英字表記 Princess / Fairy / Angel のまま",
+      "note": "ミリオンライブの属性。ko: フェアリー → 페어리、エンジェル → 엔젤。en・zh-Hans はゲームの英字表記 Princess / Fairy / Angel のまま",
       "zh-Hans": [
         "Princess",
         "公主"
@@ -1312,7 +1312,7 @@
       "en": "Intelli",
       "ja": "インテリ",
       "ko": "인텔리",
-      "note": "SideM の属性。フィジカル → 피지컬、メンタル → 멘탈。en・zh-Hans は英字表記 Intelli / Physical / Mental (公式の英字表記は要確認)",
+      "note": "SideM の属性。ko: フィジカル → 피지컬、メンタル → 멘탈。en・zh-Hans は英字表記 Intelli / Physical / Mental (公式の英字表記は要確認)",
       "zh-Hans": "Intelli"
     },
     {
@@ -1341,7 +1341,7 @@
       ],
       "ja": "段階",
       "ko": "단계",
-      "note": "習熟度の段。{steps}段 → {steps}단계。en: {steps} levels。zh-Hans: {steps}级",
+      "note": "習熟度の段。ko: {steps}段 → {steps}단계。en: {steps} levels。zh-Hans: {steps}级",
       "zh-Hans": [
         "级",
         "阶段"
@@ -1370,7 +1370,7 @@
       "en": "link",
       "ja": "紐づけ",
       "ko": "연결",
-      "note": "支出を公演に紐づける → 공연에 연결。紐付け も同じ",
+      "note": "支出を公演に紐づけること。紐付け も同じ。ko: 公演に紐づける → 공연에 연결",
       "zh-Hans": "关联"
     },
     {
@@ -1386,7 +1386,7 @@
       ],
       "ja": "感想",
       "ko": "감상",
-      "note": "セトリの感想 → 세트리스트 감상",
+      "note": "セトリなどへの感想。ko: セトリの感想 → 세트리스트 감상",
       "zh-Hans": "感想"
     },
     {
@@ -1402,7 +1402,7 @@
       "en": "optional",
       "ja": "任意",
       "ko": "선택",
-      "note": "入力欄の（任意）→ (선택)。en: (optional)。zh-Hans: （选填）",
+      "note": "入力欄の（任意）。ko: (선택)。en: (optional)。zh-Hans: （选填）",
       "zh-Hans": [
         "选填",
         "可选"
@@ -1451,7 +1451,7 @@
       ],
       "ja": "優勝",
       "ko": "우승",
-      "note": "お題の順位。第N位 → N위。en: 第N位 → #N。zh-Hans: 第N名",
+      "note": "お題の順位。ko: 第N位 → N위。en: 第N位 → #N。zh-Hans: 第N名",
       "zh-Hans": "冠军"
     },
     {
@@ -1474,7 +1474,7 @@
         "되돌리기",
         "되돌림"
       ],
-      "note": "編集の取り消し (revert)。差戻し済み → 되돌림 완료、取り消す (編集を) → 되돌리기。キャンセル (취소) と分ける。en: Revert / Reverted。zh-Hans: 撤回 / 已撤回",
+      "note": "編集の取り消し (revert)。キャンセル と分ける。ko: 差戻し済み → 되돌림 완료、取り消す (編集を) → 되돌리기 (キャンセル = 취소 と分ける)。en: Revert / Reverted。zh-Hans: 撤回 / 已撤回",
       "zh-Hans": [
         "撤回",
         "还原"
@@ -1487,14 +1487,14 @@
       ],
       "ja": "変更履歴",
       "ko": "변경 기록",
-      "note": "編集履歴 → 편집 기록 と分ける",
+      "note": "編集履歴 と分ける (ko: 編集履歴 → 편집 기록)",
       "zh-Hans": "变更记录"
     },
     {
       "en": "correction request",
       "ja": "修正リクエスト",
       "ko": "수정 요청",
-      "note": "運営に送る修正の依頼。修正提案 (수정 제안) と分ける",
+      "note": "運営に送る修正の依頼。修正提案 と分ける (ko: 修正提案 → 수정 제안)",
       "zh-Hans": [
         "修正请求",
         "纠错"
@@ -1542,7 +1542,7 @@
       "en": "personal best",
       "ja": "自己ベスト",
       "ko": "최고 기록",
-      "note": "自己ベスト更新 → 최고 기록 경신。en: New personal best。zh-Hans: 刷新个人最佳",
+      "note": "ko: 自己ベスト更新 → 최고 기록 경신。en: 自己ベスト更新 → New personal best。zh-Hans: 自己ベスト更新 → 刷新个人最佳",
       "zh-Hans": [
         "个人最佳",
         "最佳纪录"
@@ -1579,7 +1579,7 @@
       ],
       "ja": "超イントロ",
       "ko": "초단 인트로",
-      "note": "1 秒未満のイントロ。초인트로 は 초 (秒) と紛れるので避ける",
+      "note": "1 秒未満のイントロ。ko: 초인트로 は 초 (秒) と紛れるので避ける",
       "zh-Hans": "超短前奏"
     },
     {
@@ -1592,7 +1592,7 @@
         "먼저 누르기",
         "먼저"
       ],
-      "note": "パーティ対戦で先に押すこと (먼저 탭하세요 / 먼저 눌렀어요)。en: Buzz in。zh-Hans: 抢答",
+      "note": "パーティ対戦で先に押すこと。ko: 먼저 탭하세요 / 먼저 눌렀어요。en: Buzz in。zh-Hans: 抢答",
       "zh-Hans": "抢答"
     },
     {
@@ -1606,7 +1606,7 @@
         "공지",
         "알려"
       ],
-      "note": "アプリ内の受信箱は 공지 (通知 → 알림 と分ける)。動詞の「お知らせします」は 알려 드려요。en: 受信箱は News、動詞は let you know。zh-Hans: 公告 (通知 と分ける)",
+      "note": "アプリ内の受信箱 (通知 と分ける) と、動詞の「お知らせします」。ko: 受信箱は 공지 (通知 → 알림 と分ける)、動詞は 알려 드려요。en: 受信箱は News、動詞は let you know。zh-Hans: 受信箱は 公告 (通知 と分ける)",
       "zh-Hans": [
         "公告",
         "告知"
@@ -1645,7 +1645,7 @@
       "en": "text size",
       "ja": "文字サイズ",
       "ko": "글자 크기",
-      "note": "極小 / 小 / 中 / 大 / 特大 → 최소 / 작게 / 보통 / 크게 / 최대。en: Extra small / Small / Medium / Large / Extra large。zh-Hans: 最小 / 小 / 中 / 大 / 最大",
+      "note": "極小 / 小 / 中 / 大 / 特大 の段。ko: 최소 / 작게 / 보통 / 크게 / 최대。en: Extra small / Small / Medium / Large / Extra large。zh-Hans: 最小 / 小 / 中 / 大 / 最大",
       "zh-Hans": [
         "字号",
         "文字大小"
@@ -1658,7 +1658,7 @@
       ],
       "ja": "ファンメイド",
       "ko": "팬 메이드",
-      "note": "非公式ファンメイドアプリ → 비공식 팬 메이드 앱。en: Unofficial fan-made app。zh-Hans: 非官方粉丝自制应用",
+      "note": "ko: 非公式ファンメイドアプリ → 비공식 팬 메이드 앱。en: 非公式ファンメイドアプリ → Unofficial fan-made app。zh-Hans: 非公式ファンメイドアプリ → 非官方粉丝自制应用",
       "zh-Hans": [
         "粉丝自制",
         "饭制"
@@ -1690,7 +1690,7 @@
       ],
       "ja": "許諾",
       "ko": "이용 허락",
-      "note": "JASRAC の許諾を受けて → JASRAC의 이용 허락을 받아。許諾番号の表記 (JASRAC許諾第…号) は訳さない。en: licensed by JASRAC。zh-Hans: 经JASRAC许可",
+      "note": "許諾番号の表記 (JASRAC許諾第…号) は訳さない。ko: JASRAC の許諾を受けて → JASRAC의 이용 허락을 받아。en: licensed by JASRAC。zh-Hans: 经JASRAC许可",
       "zh-Hans": [
         "许可",
         "授权"
@@ -1716,7 +1716,7 @@
         "아이돌 라이브 DB",
         "アイドルライブDB"
       ],
-      "note": "アプリ名。ko のアプリ名 (system.app.display_name) はオーナー確定待ち。本文は 아이돌 라이브 DB、ハッシュタグ・Apple Music のプレイリストの説明など外に出る識別子は ja のまま。en / zh-Hans のアプリ名もオーナー確定待ち (案: Idol Live DB / 偶像Live DB)。どの言語でもアイマス・アイドルマスター (iM@S・THE IDOLM@STER・偶像大师) は入れない",
+      "note": "アプリ名。ハッシュタグ・Apple Music のプレイリストの説明など外に出る識別子は ja のまま。ko: アプリ名 (system.app.display_name) はオーナー確定待ち。本文は 아이돌 라이브 DB。en / zh-Hans のアプリ名もオーナー確定待ち (案: Idol Live DB / 偶像Live DB)。どの言語でもアイマス・アイドルマスター (iM@S・THE IDOLM@STER・偶像大师) は入れない",
       "zh-Hans": [
         "偶像Live DB",
         "アイドルライブDB"
