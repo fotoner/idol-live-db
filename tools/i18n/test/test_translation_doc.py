@@ -53,7 +53,7 @@ class ContentTest(unittest.TestCase):
 
     def test_general_rules(self):
         for needle in ("## 共通の規則", "プレースホルダ `{名前}` はそのまま残す", "データと固有名詞は訳さない",
-                       "../CONTRIBUTING.md#2-非公式版権の遵守-絶対", "「アイマス」「アイドルマスター」",
+                       "../CONTRIBUTING.md#2-非公式版権の遵守-絶対", "「アプリ名・表示に『アイマス』『アイドルマスター』等の固有名称を入れない」",
                        "`max_len` を超えない", "`note`", "**AI は `stamp` しない。**"):
             self.assertIn(needle, self.doc)
 
