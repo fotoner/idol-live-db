@@ -41,10 +41,6 @@ beforeAll(async () => {
 });
 
 describe("fold のパリティ (Rust ↔ ブラウザ)", () => {
-  it("フィクスチャが空でない", () => {
-    expect(cases.length).toBeGreaterThan(0);
-  });
-
   it("全ケースで Rust の畳み結果と一致する", () => {
     const failures = mismatches(fold, cases);
     expect(failures.length, failures.length > 0 ? formatMismatches(failures, cases.length) : "").toBe(

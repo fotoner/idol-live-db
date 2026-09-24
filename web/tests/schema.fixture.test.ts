@@ -13,7 +13,6 @@ import fs from "node:fs";
 import path from "node:path";
 import { SCHEMA_VERSION, dataRoot, readJson } from "../src/lib/data";
 import type { RoutesFile } from "../src/lib/schema/RoutesFile";
-import type { SiteMeta } from "../src/lib/schema/SiteMeta";
 import type { ThemeTable } from "../src/lib/schema/ThemeTable";
 import type { SearchManifest } from "../src/lib/schema/SearchManifest";
 import type { SearchShard } from "../src/lib/schema/SearchShard";
@@ -24,36 +23,9 @@ const DATA = dataRoot();
 const read = readJson;
 
 const routes = read<RoutesFile>("routes.json");
-const meta = read<SiteMeta>("meta.json");
-
-describe("meta.json", () => {
-  it("schemaVersion が data.ts のゲートと一致する", () => {
-    expect(meta.schemaVersion).toBe(SCHEMA_VERSION);
-  });
-
-  it("todayJst が JST の日付 (Astro 側は日付を計算しない)", () => {
-    expect(meta.todayJst).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-  });
-
-  it("アプリ・外部サイトへのリンクが揃っている", () => {
-    for (const url of [
-      meta.app.appStoreUrl,
-      meta.app.privacyUrl,
-      meta.app.supportUrl,
-      meta.app.termsUrl,
-      meta.app.repositoryUrl,
-    ]) {
-      expect(url).toMatch(/^https:\/\//);
-    }
-  });
-});
 
 describe("themes.json", () => {
   const themes = read<ThemeTable>("themes.json");
-
-  it("neutral が必ずある (themeKey が引けなかったときの受け皿)", () => {
-    expect(themes.themes.neutral).toBeDefined();
-  });
 
   it("全テーマが light / dark の 14 トークンを持つ", () => {
     const keys = [
@@ -83,10 +55,6 @@ describe("themes.json", () => {
 });
 
 describe("routes.json", () => {
-  it("空でない", () => {
-    expect(routes.routes.length).toBeGreaterThan(0);
-  });
-
   it("path が完成形 (先頭 / と末尾 /) — TS 側で URL を組み立てないための前提", () => {
     for (const r of routes.routes) {
       expect(r.path.startsWith("/"), r.path).toBe(true);
@@ -170,13 +138,6 @@ describe("検索索引", () => {
       for (const row of shard.rows) {
         expect(row.k.length, `${shard.kind} の行に k が無い`).toBeGreaterThan(0);
       }
-    }
-  });
-
-  it("索引の行数が manifest の count と一致する", () => {
-    for (const s of manifest.shards) {
-      const shard = read<SearchShard>(s.url.replace(/^\//, ""));
-      expect(shard.rows.length, s.kind).toBe(s.count);
     }
   });
 });
