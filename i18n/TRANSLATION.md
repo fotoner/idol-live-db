@@ -70,8 +70,11 @@ python3 tools/i18n/i18n.py stats      # 言語ごとの 確定 / 未検収 / sta
 1. 訳を書いて PR にする (人でも AI でもよい)。この時点の状態は「未検収」。
 2. その言語が分かる人がレビューする。用語集と文体に合っているか、画面で切れないか (Debug ビルド・
    疑似言語で見る。やり方は i18n/README.md)。直す点は PR の上で直す。
-3. レビューした人が自分の名前で stamp する。`lock/<言語>.json` に 原文のハッシュ・訳のハッシュ・レビュアーが残り、
-   xcstrings の state も変わるので、生成物と一緒に commit する。
+   - planned の言語 (上の「言語」の表で channel が planned のもの) はビルドに入らないので、画面では見られない
+     (疑似言語で見えるのは飾った ja で、その言語の訳ではない)。画面で確かめるのは、config.json の channel を
+     dev に上げる PR のあと。planned のうちに stamp すると lock だけが変わる (xcstrings は変わらない)。
+3. レビューした人が自分の名前で stamp する。`lock/<言語>.json` に 原文のハッシュ・訳のハッシュ・レビュアーが残る。
+   dev 以上の言語は xcstrings の state も変わる (stamp が生成物を作り直す) ので、生成物と一緒に commit する。
 
    ```sh
    python3 tools/i18n/i18n.py stamp ko --reviewer <名前> --ns songs            # 名前空間ごと
