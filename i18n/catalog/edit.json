@@ -232,14 +232,6 @@
         "ios"
       ]
     },
-    "feed.editor_anonymous": {
-      "ja": "名無しのプロデューサー",
-      "ko": "이름 없는 프로듀서",
-      "note": "最近の編集で、編集者の表示名が無い・メールアドレスの形のときに代わりに出す名前。最近の編集 (edit_feed) の画面と iOS の EditFeedService もこのキーを使う (同じ文言の別キーを作らない)。iOS から引くようになったら platforms を外す",
-      "platforms": [
-        "android"
-      ]
-    },
     "form.error.id_unresolved": {
       "ja": "保存に失敗しました (ID 未確定)",
       "ko": "저장하지 못했어요 (ID 미확정)",

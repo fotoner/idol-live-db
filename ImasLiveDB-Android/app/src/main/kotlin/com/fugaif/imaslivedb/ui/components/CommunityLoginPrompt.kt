@@ -7,6 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import kotlinx.coroutines.launch
 
 /**
@@ -19,17 +21,19 @@ import kotlinx.coroutines.launch
  *
  * 表示するかどうかは呼び出し側が決めない。必ず `AuthState.startCommunityEdit` の
  * promptLogin コールバックから立てること (未ログイン / BAN の優先順はコアが持っている)。
+ *
+ * @param message 本文 (呼び出し側の文言を resolve() した文字列)。省略時はタグ・動画・投票の案内。
  */
 @Composable
 fun CommunityLoginPromptDialog(
-    message: String = "タグ・動画・投票にはログインが必要です。",
+    message: String = L10n.EditFeed.loginDialogDefaultMessage.resolve(),
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("ログインが必要です") },
+        title = { Text(L10n.EditFeed.loginDialogTitle.resolve()) },
         text = { Text(message) },
         confirmButton = {
             TextButton(onClick = {
@@ -37,8 +41,8 @@ fun CommunityLoginPromptDialog(
                 // signIn はアカウント選択シートを出すため Activity context が要る
                 // (AppModule が握る application context ではなく LocalContext を渡す)。
                 scope.launch { AppModule.from(context).authService.signIn(context) }
-            }) { Text("Googleでログイン") }
+            }) { Text(L10n.EditFeed.loginGoogle.resolve()) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("キャンセル") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(L10n.EditFeed.loginDialogCancel.resolve()) } }
     )
 }

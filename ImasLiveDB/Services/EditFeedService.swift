@@ -74,10 +74,11 @@ struct EditFeedEntry: Decodable, Identifiable, Sendable {
 
     /// 投稿者表示名。privaterelay 系 / メール形式は「名無しのプロデューサー」へマスク
     /// (SubmissionService.authorDisplayName と同等のクライアント側マスク)。
-    var editorDisplayLabel: String {
-        guard let name = editorDisplayName, !name.isEmpty else { return "名無しのプロデューサー" }
-        if name.contains("@") { return "名無しのプロデューサー" }
-        return name
+    /// 名前はデータ (verbatim)、名無しは文言 (カタログ)。
+    var editorDisplayLabel: DisplayText {
+        guard let name = editorDisplayName, !name.isEmpty else { return .key(L10n.EditFeed.editorAnonymous) }
+        if name.contains("@") { return .key(L10n.EditFeed.editorAnonymous) }
+        return .verbatim(name)
     }
 
     var createdDate: Date {
@@ -149,10 +150,11 @@ struct RecordHistoryEntry: Decodable, Identifiable, Sendable {
     }
 
     /// 投稿者表示名。メール形式 / 空は「名無しのプロデューサー」へマスク。
-    var editorDisplayLabel: String {
-        guard let name = editorName, !name.isEmpty else { return "名無しのプロデューサー" }
-        if name.contains("@") { return "名無しのプロデューサー" }
-        return name
+    /// 名前はデータ (verbatim)、名無しは文言 (カタログ)。
+    var editorDisplayLabel: DisplayText {
+        guard let name = editorName, !name.isEmpty else { return .key(L10n.EditFeed.editorAnonymous) }
+        if name.contains("@") { return .key(L10n.EditFeed.editorAnonymous) }
+        return .verbatim(name)
     }
 
     var createdDate: Date {
@@ -194,17 +196,18 @@ enum JSONValue: Decodable, Sendable, Equatable {
     }
 
     /// 履歴 diff の 1 セル向けの簡潔な人間可読表現。
-    var displayString: String {
+    /// 値そのもの (文字列・数値) はデータ (verbatim)、空・真偽・null・件数は文言 (カタログ)。
+    var displayText: DisplayText {
         switch self {
-        case .string(let s): return s.isEmpty ? "(空)" : s
+        case .string(let s): return s.isEmpty ? .key(L10n.EditFeed.historyValueEmpty) : .verbatim(s)
         case .number(let n):
             // 整数なら小数点を出さない (例: 158.0 → "158")。
-            if n.rounded() == n, abs(n) < 1e15 { return String(Int64(n)) }
-            return String(n)
-        case .bool(let b): return b ? "あり" : "なし"
-        case .null: return "(なし)"
-        case .array(let a): return "\(a.count) 件"
-        case .object: return "{…}"
+            if n.rounded() == n, abs(n) < 1e15 { return .verbatim(String(Int64(n))) }
+            return .verbatim(String(n))
+        case .bool(let b): return .key(b ? L10n.EditFeed.historyValueYes : L10n.EditFeed.historyValueNo)
+        case .null: return .key(L10n.EditFeed.historyValueNone)
+        case .array(let a): return .key(L10n.EditFeed.historyValueItems(count: a.count))
+        case .object: return .verbatim("{…}")
         }
     }
 }

@@ -19,19 +19,19 @@ struct LoginToEditSheet: View {
                     .foregroundStyle(.tint)
                     .padding(.top, DS.sp8)
 
-                Text("ログインして編集に参加")
+                Text(L10n.EditFeed.loginSheetTitle)
                     .font(.imasTitle3.bold())
 
-                Text("ライブ・公演・セトリ・楽曲の情報は、ログインしたユーザーみんなで編集できます。誤りの修正や新しいライブの追加に、ぜひ協力してください。")
+                Text(L10n.EditFeed.loginSheetMessage)
                     .font(.imasSubhead)
                     .foregroundStyle(DS.ink2)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, DS.sp3)
 
                 VStack(alignment: .leading, spacing: 10) {
-                    pointRow("bolt.fill", "編集は承認待ちなし。すぐ全員に反映されます")
-                    pointRow("clock.arrow.circlepath", "変更履歴が残り、間違えてもいつでも戻せます")
-                    pointRow("eye", "閲覧はログイン不要。編集する時だけログインします")
+                    pointRow("bolt.fill", L10n.EditFeed.loginSheetPointInstant)
+                    pointRow("clock.arrow.circlepath", L10n.EditFeed.loginSheetPointHistory)
+                    pointRow("eye", L10n.EditFeed.loginSheetPointBrowse)
                 }
                 .font(.imasFootnote)
                 .padding(.horizontal)
@@ -47,7 +47,7 @@ struct LoginToEditSheet: View {
             .trackScreen("login_sheet")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("閉じる") { dismiss() }
+                    Button(L10n.EditFeed.loginSheetClose) { dismiss() }
                 }
             }
             // ログイン完了を監視。サインインすると即 dismiss → 呼び出し側が編集対象を再 present。
@@ -61,7 +61,7 @@ struct LoginToEditSheet: View {
         .presentationDetents([.medium, .large])
     }
 
-    private func pointRow(_ icon: String, _ text: String) -> some View {
+    private func pointRow(_ icon: String, _ text: LocalizedStringResource) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: icon)
                 .foregroundStyle(.tint)
@@ -77,7 +77,8 @@ struct LoginToEditSheet: View {
 /// 未ログイン (セッション失効を含む) のときだけ表示し、タップで LoginToEditSheet を開く。
 /// セッションが自動リフレッシュ不能になると AuthService.isSignedIn=false になり、ここが現れる。
 struct InlineLoginPrompt: View {
-    var message: String = "投稿・投票にはログインが必要です"
+    /// 呼び出し側の文言 (`String(localized: L10n.<Ns>.<key>)`)。省略時は投稿・投票の案内。
+    var message: String = String(localized: L10n.EditFeed.inlineLoginDefaultMessage)
     var seed: String? = nil
     @Environment(\.colorScheme) private var scheme
     @State private var showLogin = false

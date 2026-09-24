@@ -19,7 +19,8 @@ struct RecentEditsView: View {
     @State private var hasMore = true
     @State private var isLoading = false
     @State private var isLoadingMore = false
-    @State private var errorMessage: String?
+    /// アラートに出す失敗の文言 (解決済みの String ではなく値で持つ)。
+    @State private var errorMessage: DisplayText?
     @State private var showLoginPrompt = false
 
     @Environment(AppDatabase.self) private var database
@@ -71,19 +72,17 @@ struct RecentEditsView: View {
             .padding(.vertical, DS.sp4)
         }
         .background(DS.bg)
-        .navigationTitle(mineOnly ? "自分の編集" : "最近の編集")
+        .navigationTitle(mineOnly ? L10n.EditFeed.feedTitleMine : L10n.EditFeed.feedTitle)
         .overlay {
             if isLoading && entries.isEmpty {
-                ProgressView("読み込み中...")
+                ProgressView(L10n.EditFeed.listLoading)
                     .padding(DS.sp7)
                     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
             } else if entries.isEmpty && !isLoading {
                 ImasEmptyState(
                     systemImage: "square.and.pencil",
-                    title: "まだ編集がありません",
-                    message: mineOnly
-                        ? "ライブ・楽曲・セトリを編集すると、ここに履歴が残ります。"
-                        : "誰かがデータを編集すると、ここに新着順で表示されます。"
+                    title: String(localized: L10n.EditFeed.feedEmptyTitle),
+                    message: String(localized: mineOnly ? L10n.EditFeed.feedEmptyMessageMine : L10n.EditFeed.feedEmptyMessage)
                 )
             }
         }
@@ -100,13 +99,13 @@ struct RecentEditsView: View {
         .navigationDestination(item: $historyTarget) { target in
             EditHistoryView(recordType: target.recordType, recordName: target.recordName, title: target.title)
         }
-        .alert("エラー", isPresented: Binding(
+        .alert(Text(L10n.EditFeed.feedErrorTitle), isPresented: Binding(
             get: { errorMessage != nil },
             set: { if !$0 { errorMessage = nil } }
         )) {
             Button("OK") { errorMessage = nil }
         } message: {
-            Text(errorMessage ?? "")
+            Text(display: errorMessage ?? .verbatim(""))
         }
         .trackScreen("recent_edits")
     }
@@ -278,11 +277,12 @@ struct RecentEditsView: View {
         }
     }
 
-    private func errorText(_ error: Error) -> String {
+    private func errorText(_ error: Error) -> DisplayText {
         if case APIClientError.rateLimited = error {
-            return "操作が多すぎます。しばらく待ってからお試しください。"
+            return .key(L10n.EditFeed.feedErrorRateLimited)
         }
-        return "読み込みに失敗しました: \(error.localizedDescription)"
+        // エラーの説明 (OS・サーバの文言) はデータとして差し込む
+        return .key(L10n.EditFeed.feedErrorLoadFailedIos(detail: error.localizedDescription))
     }
 }
 
@@ -315,7 +315,7 @@ private struct EditFeedCard: View {
                     VStack(alignment: .leading, spacing: 6) {
                         // editor + op バッジ + 相対時刻
                         HStack(spacing: 6) {
-                            Text(entry.editorDisplayLabel)
+                            Text(display: entry.editorDisplayLabel)
                                 .font(.imasSubhead.weight(.semibold))
                                 .lineLimit(1)
                             EditOpBadge(op: entry.op)
@@ -327,7 +327,7 @@ private struct EditFeedCard: View {
 
                         // 対象タイトル(何を) — どの曲/公演かを明示。
                         HStack(spacing: 6) {
-                            Text(recordTitle ?? EditFeedFormat.recordTypeLabel(entry.recordType))
+                            Text(display: recordTitle.map(DisplayText.verbatim) ?? EditFeedFormat.recordTypeText(entry.recordType))
                                 .font(.imasSubhead.weight(.semibold))
                                 .foregroundStyle(DS.ink)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -361,7 +361,7 @@ private struct EditFeedCard: View {
     private var goodRow: some View {
         HStack(spacing: 10) {
             if isOwn {
-                Label("あなたの編集", systemImage: "person.fill")
+                Label(L10n.EditFeed.feedCardOwn, systemImage: "person.fill")
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink2)
             } else {
@@ -383,7 +383,7 @@ private struct EditFeedCard: View {
                     )
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(gooded ? "Good を取り消す" : "Good を付ける")
+                .accessibilityLabel(gooded ? L10n.EditFeed.feedGoodRemoveA11y : L10n.EditFeed.feedGoodAddA11y)
             }
 
             if isOwn, goodCount > 0 {
@@ -400,7 +400,7 @@ private struct EditFeedCard: View {
                     AppAnalytics.tap("recent_edits.open_history")
                     onOpenHistory()
                 } label: {
-                    Label("変更履歴", systemImage: "clock.arrow.circlepath")
+                    Label(L10n.EditFeed.feedCardHistory, systemImage: "clock.arrow.circlepath")
                         .font(.imasCaption.weight(.semibold))
                         .foregroundStyle(DS.ink2)
                 }
@@ -452,8 +452,8 @@ private struct EditOpBadge: View {
     let op: String
 
     var body: some View {
-        let (label, color) = EditFeedFormat.opDesign(op)
-        Text(label)
+        let color = EditFeedFormat.opColor(op)
+        Text(display: EditFeedFormat.opText(op))
             .font(.imasCaption2.weight(.semibold))
             .foregroundStyle(color)
             .padding(.horizontal, 7)
@@ -488,32 +488,57 @@ enum EditFeedFormat {
         }
     }
 
-    static func recordTypeLabel(_ type: String) -> String {
+    /// record_type の表示名。未知の型は型名をそのまま (データとして) 出す。
+    static func recordTypeText(_ type: String) -> DisplayText {
         switch type {
-        case "Event":            return "ライブ・イベント"
-        case "Show":             return "公演"
-        case "Song":             return "楽曲"
-        case "Idol":             return "アイドル"
+        case "Event":            return .key(L10n.EditFeed.recordTypeEvent)
+        case "Show":             return .key(L10n.EditFeed.recordTypeShow)
+        case "Song":             return .key(L10n.EditFeed.recordTypeSong)
+        case "Idol":             return .key(L10n.EditFeed.recordTypeIdol)
         case "SetlistItem", "ShowSetlist":
-            return "セットリスト"
-        case "SetlistPerformer": return "セトリ出演者"
-        case "SongArtist":       return "楽曲アーティスト"
-        case "ShowCast":         return "出演キャスト"
+            return .key(L10n.EditFeed.recordTypeSetlist)
+        case "SetlistPerformer": return .key(L10n.EditFeed.recordTypeSetlistPerformer)
+        case "SongArtist":       return .key(L10n.EditFeed.recordTypeSongArtist)
+        case "ShowCast":         return .key(L10n.EditFeed.recordTypeShowCast)
         // 2026-09-06 に廃止した投稿型。過去の履歴だけが残る。
-        case "SongCall":         return "コーレス (終了)"
-        default:                 return type
+        case "SongCall":         return .key(L10n.EditFeed.recordTypeSongCall)
+        default:                 return .verbatim(type)
         }
     }
 
-    static func opDesign(_ op: String) -> (label: String, color: Color) {
+    /// recordTypeText を文字列にしたもの。String で受けている画面 (MyEditsView・UserModerationView) 向け。
+    /// 描く時点で解決する (状態に持たない)。呼び出し側が DisplayText に移ったら消す。
+    static func recordTypeLabel(_ type: String) -> String {
+        recordTypeText(type).resolved
+    }
+
+    /// op バッジの文言。未知の op はそのまま (データとして) 出す。
+    static func opText(_ op: String) -> DisplayText {
         switch op {
-        case "create":            return ("追加", DS.success)
-        case "update", "replace": return ("更新", DS.sys2)
-        case "delete":            return ("削除", DS.danger)
-        case "revert":            return ("差戻し", DS.warning)
-        case "snapshot":          return ("セトリ更新", .teal)
-        default:                  return (op, DS.ink3)
+        case "create":            return .key(L10n.EditFeed.opCreate)
+        case "update", "replace": return .key(L10n.EditFeed.opUpdate)
+        case "delete":            return .key(L10n.EditFeed.opDelete)
+        case "revert":            return .key(L10n.EditFeed.opRevert)
+        case "snapshot":          return .key(L10n.EditFeed.opSnapshot)
+        default:                  return .verbatim(op)
         }
+    }
+
+    static func opColor(_ op: String) -> Color {
+        switch op {
+        case "create":            return DS.success
+        case "update", "replace": return DS.sys2
+        case "delete":            return DS.danger
+        case "revert":            return DS.warning
+        case "snapshot":          return .teal
+        default:                  return DS.ink3
+        }
+    }
+
+    /// op バッジの文言 (文字列) と色。String で受けている画面 (MyEditsView の OpBadge) 向け。
+    /// 描く時点で解決する。呼び出し側が opText / opColor に移ったら消す。
+    static func opDesign(_ op: String) -> (label: String, color: Color) {
+        (opText(op).resolved, opColor(op))
     }
 
     /// 「たった今」「N分前」「N時間前」「N日前」、1 か月以上前は JST の日付。言い回しはコアの

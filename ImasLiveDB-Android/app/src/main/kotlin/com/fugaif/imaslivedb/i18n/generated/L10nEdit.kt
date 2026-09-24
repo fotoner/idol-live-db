@@ -38,8 +38,6 @@ object L10nEdit {
     val eventTitleCreateAndroid: DisplayText get() = DisplayText.Res(R.string.edit_event_title_create_android)
     /** ライブ編集 — ライブの編集フォームの見出し (Android の文言。iOS は edit_ios) */
     val eventTitleEditAndroid: DisplayText get() = DisplayText.Res(R.string.edit_event_title_edit_android)
-    /** 名無しのプロデューサー — 最近の編集で、編集者の表示名が無い・メールアドレスの形のときに代わりに出す名前。最近の編集 (edit_feed) の画面と iOS の EditFeedService もこのキーを使う (同じ文言の別キーを作らない)。iOS から引くようになったら platforms を外す */
-    val feedEditorAnonymous: DisplayText get() = DisplayText.Res(R.string.edit_feed_editor_anonymous)
     /** 保存に失敗しました (ID 未確定) — 管理者の即時反映でサーバが確定 ID を返さなかったとき (ライブ・公演・マスタ編集) */
     val formErrorIdUnresolved: DisplayText get() = DisplayText.Res(R.string.edit_form_error_id_unresolved)
     /** 保存失敗: {detail} — 編集フォームの保存が例外で失敗したとき。detail は OS / 通信ライブラリが返すエラーの説明 (訳さない) — 引数: detail (string) */

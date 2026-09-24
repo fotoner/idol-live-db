@@ -1,0 +1,1658 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "edit_feed.badge.reverted" : {
+      "comment" : "差し戻された (取り消された) 編集に付けるバッジ。iOS は編集履歴の行、Android は「最近の編集」の自分の編集タブのカード (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "差戻し済み"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "되돌림 완료"
+          }
+        }
+      }
+    },
+    "edit_feed.edit_request.sent.message" : {
+      "comment" : "修正リクエストを送ったあとのアラートの本文 (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "運営の確認後に反映されます。ご協力ありがとうございます！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "운영팀이 확인한 뒤 반영돼요. 도와주셔서 감사해요!"
+          }
+        }
+      }
+    },
+    "edit_feed.edit_request.sent.title" : {
+      "comment" : "ライブ・公演・セトリ・曲・アイドルの修正を送った (運営が確認して反映する) あとのアラートの見出し (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "修正リクエストを送信しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "수정 요청을 보냈어요"
+          }
+        }
+      }
+    },
+    "edit_feed.editor.anonymous" : {
+      "comment" : "編集者の表示名。名前が無いか、メールアドレスの形のとき (匿名にする) に代わりに出す (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名無しのプロデューサー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이름 없는 프로듀서"
+          }
+        }
+      }
+    },
+    "edit_feed.feed.card.history" : {
+      "comment" : "各カードの下の導線。その編集の差分 (変更履歴) を開く (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "変更履歴"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "변경 기록"
+          }
+        }
+      }
+    },
+    "edit_feed.feed.card.own" : {
+      "comment" : "自分の編集のカードに、Good ボタンの代わりに出すラベル (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あなたの編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "내 편집"
+          }
+        }
+      }
+    },
+    "edit_feed.feed.empty.message" : {
+      "comment" : "「最近の編集」(みんなの編集) が空のときの説明 (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "誰かがデータを編集すると、ここに新着順で表示されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "누군가 데이터를 편집하면 여기에 최신순으로 표시돼요."
+          }
+        }
+      }
+    },
+    "edit_feed.feed.empty.message_mine" : {
+      "comment" : "自分の編集が空のときの説明 (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ・楽曲・セトリを編集すると、ここに履歴が残ります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브·곡·세트리스트를 편집하면 여기에 기록이 남아요."
+          }
+        }
+      }
+    },
+    "edit_feed.feed.empty.title" : {
+      "comment" : "「最近の編集」に 1 件も無いときの空状態の見出し (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだ編集がありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아직 편집이 없어요"
+          }
+        }
+      }
+    },
+    "edit_feed.feed.error.load_failed_ios" : {
+      "comment" : "「最近の編集」の読み込み・Good の失敗 (iOS。Android の同じ所は説明を付けない feed.error.load_failed_android)。detail はエラーの説明 (OS・サーバの文言。訳さない) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "読み込みに失敗しました: %1$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "불러오지 못했어요: %1$@"
+          }
+        }
+      }
+    },
+    "edit_feed.feed.error.rate_limited" : {
+      "comment" : "サーバに短時間に何度も送った (429) ときのエラー (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "操作が多すぎます。しばらく待ってからお試しください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "요청이 너무 많아요. 잠시 기다린 뒤 다시 시도해 주세요."
+          }
+        }
+      }
+    },
+    "edit_feed.feed.error.title" : {
+      "comment" : "「最近の編集」で読み込みや Good に失敗したときのアラートの見出し (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エラー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "오류"
+          }
+        }
+      }
+    },
+    "edit_feed.feed.good.add.a11y" : {
+      "comment" : "Good (編集へのいいね) ボタンの読み上げ。まだ付けていないとき。Good は機能名なのでそのまま (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Good を付ける"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Good 누르기"
+          }
+        }
+      }
+    },
+    "edit_feed.feed.good.remove.a11y" : {
+      "comment" : "Good (編集へのいいね) ボタンの読み上げ。もう付けているとき (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Good を取り消す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Good 취소"
+          }
+        }
+      }
+    },
+    "edit_feed.feed.title" : {
+      "comment" : "「最近の編集」画面のタイトル (みんなの編集) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最近の編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "최근 편집"
+          }
+        }
+      }
+    },
+    "edit_feed.feed.title_mine" : {
+      "comment" : "「最近の編集」画面を自分の編集だけにしたときのタイトル (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自分の編集"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "내 편집"
+          }
+        }
+      }
+    },
+    "edit_feed.history.diff.created" : {
+      "comment" : "編集履歴の行: レコードが作られた (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新規追加されました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "새로 추가됐어요"
+          }
+        }
+      }
+    },
+    "edit_feed.history.diff.deleted" : {
+      "comment" : "編集履歴の行: レコードが削除された (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除されました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "삭제됐어요"
+          }
+        }
+      }
+    },
+    "edit_feed.history.diff.snapshot" : {
+      "comment" : "編集履歴の行: 公演のセトリがまとめて更新された (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セットリスト全体が更新されました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 전체가 수정됐어요"
+          }
+        }
+      }
+    },
+    "edit_feed.history.diff.updated" : {
+      "comment" : "編集履歴の行: 更新されたが、変わった項目が分からない (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "内容が更新されました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "내용이 수정됐어요"
+          }
+        }
+      }
+    },
+    "edit_feed.history.empty.message" : {
+      "comment" : "編集履歴が 1 件も無いときの説明 (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このデータがまだ一度も編集されていないか、編集が反映待ちです。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 데이터는 아직 한 번도 편집되지 않았거나, 편집이 반영되기를 기다리고 있어요."
+          }
+        }
+      }
+    },
+    "edit_feed.history.empty.title_ios" : {
+      "comment" : "編集履歴が 1 件も無いときの見出し (iOS。説明は history.empty.message。Android の同じ所は history.empty.title_android) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編集履歴はありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "편집 기록이 없어요"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.age" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド age (アイドル)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "年齢"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "나이"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.artwork_url" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド artworkUrl (曲)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ジャケット画像"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "재킷 이미지"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.birthday" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド birthday (アイドル)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "誕生日"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "생일"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.block_label" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド blockLabel (セトリのブロック)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブロック"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "블록"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.blood_type" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド bloodType (アイドル)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "血液型"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "혈액형"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.brand_id" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド brandId) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランド"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.cast_id" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド castId) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャスト"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "캐스트"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.city" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド city (ライブ)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "都市"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "도시"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.color" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド color (アイドル)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イメージカラー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이미지 컬러"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.day_label" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド dayLabel (DAY1 など)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演ラベル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 라벨"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.deleted_at" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド deletedAt) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除フラグ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "삭제 플래그"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.end_date" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド endDate (ライブ)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終了日"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "종료일"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.event_id" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド eventId (公演が属するライブ)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.event_type" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド eventType (ライブの種類)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "種別"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "종류"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.height" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド height (アイドル)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "身長"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "키"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.idol_id" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド idolId) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.is_encore" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド isEncore)。用語集の検査が「アンコール」の中の「コール」(콜) に反応して警告を出すが、別の語 (앙코르 でよい) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アンコール"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "앙코르"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.kana" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド kana (曲) / kanaName (アイドル)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "読み (かな)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "읽는 법 (가나)"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.modified_at" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド modifiedAt) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新日時"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "수정 일시"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.name" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド name) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名称"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이름"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.note" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド note) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メモ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "메모"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.official_url" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド officialUrl (ライブ)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公式URL"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공식 URL"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.open_time" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド openTime (開場の時刻)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開場"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "입장"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.position" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド position) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "順番"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "순서"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.release_date" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド releaseDate (曲)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発売日"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "발매일"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.romaji" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド romaji) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ローマ字"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "로마자"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.setlist_item_id" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド setlistItemId) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリ項目"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 항목"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.show_date" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド showDate) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演日"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연일"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.show_id" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド showId) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.song_id" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド songId (セトリの曲)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.sort_order" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド sortOrder) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "並び順"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "정렬 순서"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.start_date" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド startDate (ライブ)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開始日"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "시작일"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.start_time" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド startTime (開演の時刻)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開演"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연 시작"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.title" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド title) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイトル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "제목"
+          }
+        }
+      }
+    },
+    "edit_feed.history.field.venue" : {
+      "comment" : "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド venue (ライブ)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会場"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연장"
+          }
+        }
+      }
+    },
+    "edit_feed.history.load_failed_ios" : {
+      "comment" : "編集履歴の読み込みに失敗したときの見出し。説明はエラーの文言 (iOS。Android の同じ所は history.load_failed_android) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "読み込みに失敗しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "불러오지 못했어요"
+          }
+        }
+      }
+    },
+    "edit_feed.history.source.admin" : {
+      "comment" : "編集履歴の行のバッジ。運営 (管理者) による編集 (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "運営"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "운영"
+          }
+        }
+      }
+    },
+    "edit_feed.history.source.revert" : {
+      "comment" : "編集履歴の行のバッジ。差し戻しの操作で作られた編集 (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "巻き戻し"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "되돌리기"
+          }
+        }
+      }
+    },
+    "edit_feed.history.title_ios" : {
+      "comment" : "レコードの編集履歴の画面のタイトル (iOS。Android の同じ画面は「変更履歴」の history.title_android) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編集履歴"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "편집 기록"
+          }
+        }
+      }
+    },
+    "edit_feed.history.value.empty" : {
+      "comment" : "編集履歴の差分の値: 空の文字列 (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(空)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "(비어 있음)"
+          }
+        }
+      }
+    },
+    "edit_feed.history.value.items" : {
+      "comment" : "編集履歴の差分の値: 配列の要素の数。1000 以上は桁区切りが付く (1,234 件) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg 件"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%#@count@"
+          },
+          "substitutions" : {
+            "count" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "needs_review",
+                      "value" : "%arg건"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "edit_feed.history.value.no" : {
+      "comment" : "編集履歴の差分の値: 真偽値の偽 (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "なし"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "없음"
+          }
+        }
+      }
+    },
+    "edit_feed.history.value.none" : {
+      "comment" : "編集履歴の差分 (旧 → 新) の値: 値が無い (null・項目なし) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(なし)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "(없음)"
+          }
+        }
+      }
+    },
+    "edit_feed.history.value.yes" : {
+      "comment" : "編集履歴の差分の値: 真偽値の真 (例: アンコール あり) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あり"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "있음"
+          }
+        }
+      }
+    },
+    "edit_feed.inline_login.default_message" : {
+      "comment" : "未ログインの人に出すインライン導線 (InlineLoginPrompt) の文の既定値 (呼び出し側が渡さないとき) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投稿・投票にはログインが必要です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "게시하거나 투표하려면 로그인해야 해요"
+          }
+        }
+      }
+    },
+    "edit_feed.list.loading" : {
+      "comment" : "最近の編集・編集履歴の一覧を読み込んでいる間、中央に出す表示 (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "読み込み中..."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "불러오는 중..."
+          }
+        }
+      }
+    },
+    "edit_feed.local_write.failed.message" : {
+      "comment" : "端末ローカルの書き込み失敗のアラートの本文。action は操作名 (例: メモの保存)。呼び出し側の文言を同じ言語で文字列にしてから差し込む (まだ日本語の文字列のまま渡す画面もある) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@に失敗しました。変更は保存されていません。もう一度お試しください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%1$@에 실패했어요. 변경 내용은 저장되지 않았어요. 다시 시도해 주세요."
+          }
+        }
+      }
+    },
+    "edit_feed.local_write.failed.title" : {
+      "comment" : "端末にだけ保存するデータ (担当・参加・メモ・座席・習熟度・家計簿・マイタグ) の書き込みに失敗したときのアラートの見出し (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存できませんでした"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "저장하지 못했어요"
+          }
+        }
+      }
+    },
+    "edit_feed.login_sheet.close" : {
+      "comment" : "ログインの誘導シートの左上のボタン (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "閉じる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "닫기"
+          }
+        }
+      }
+    },
+    "edit_feed.login_sheet.message" : {
+      "comment" : "ログインの誘導シートの説明 (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ・公演・セトリ・楽曲の情報は、ログインしたユーザーみんなで編集できます。誤りの修正や新しいライブの追加に、ぜひ協力してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브·공연·세트리스트·곡 정보는 로그인한 사용자 모두가 함께 편집할 수 있어요. 잘못된 정보를 고치거나 새 라이브를 추가하는 데 꼭 힘을 보태 주세요."
+          }
+        }
+      }
+    },
+    "edit_feed.login_sheet.point.browse" : {
+      "comment" : "ログインの誘導シートの箇条書き (3 つ目) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "閲覧はログイン不要。編集する時だけログインします"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "보기만 할 때는 로그인하지 않아도 돼요. 편집할 때만 로그인해요"
+          }
+        }
+      }
+    },
+    "edit_feed.login_sheet.point.history" : {
+      "comment" : "ログインの誘導シートの箇条書き (2 つ目) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "変更履歴が残り、間違えてもいつでも戻せます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "변경 기록이 남아서 잘못해도 언제든 되돌릴 수 있어요"
+          }
+        }
+      }
+    },
+    "edit_feed.login_sheet.point.instant" : {
+      "comment" : "ログインの誘導シートの箇条書き (1 つ目) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編集は承認待ちなし。すぐ全員に反映されます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "편집은 승인을 기다리지 않아요. 바로 모두에게 반영돼요"
+          }
+        }
+      }
+    },
+    "edit_feed.login_sheet.title" : {
+      "comment" : "未ログインで編集の導線を押したときのシートの見出し (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ログインして編集に参加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "로그인하고 편집에 참여"
+          }
+        }
+      }
+    },
+    "edit_feed.op.create" : {
+      "comment" : "編集の操作のバッジ (create) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "追加"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "추가"
+          }
+        }
+      }
+    },
+    "edit_feed.op.delete" : {
+      "comment" : "編集の操作のバッジ (delete) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "삭제"
+          }
+        }
+      }
+    },
+    "edit_feed.op.revert" : {
+      "comment" : "編集の操作のバッジ (revert) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "差戻し"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "되돌리기"
+          }
+        }
+      }
+    },
+    "edit_feed.op.snapshot" : {
+      "comment" : "編集の操作のバッジ (snapshot (公演のセトリをまとめて更新)) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリ更新"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 수정"
+          }
+        }
+      }
+    },
+    "edit_feed.op.update" : {
+      "comment" : "編集の操作のバッジ (update / replace) (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "수정"
+          }
+        }
+      }
+    },
+    "edit_feed.record_type.event" : {
+      "comment" : "編集されたレコードの種類 (Event)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ・イベント"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브·이벤트"
+          }
+        }
+      }
+    },
+    "edit_feed.record_type.idol" : {
+      "comment" : "編集されたレコードの種類 (Idol)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌"
+          }
+        }
+      }
+    },
+    "edit_feed.record_type.setlist" : {
+      "comment" : "編集されたレコードの種類 (SetlistItem / ShowSetlist)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セットリスト"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트"
+          }
+        }
+      }
+    },
+    "edit_feed.record_type.setlist_performer" : {
+      "comment" : "編集されたレコードの種類 (SetlistPerformer)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリ出演者"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 출연자"
+          }
+        }
+      }
+    },
+    "edit_feed.record_type.show" : {
+      "comment" : "編集されたレコードの種類 (Show)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "公演"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연"
+          }
+        }
+      }
+    },
+    "edit_feed.record_type.show_cast" : {
+      "comment" : "編集されたレコードの種類 (ShowCast)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出演キャスト"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "출연 캐스트"
+          }
+        }
+      }
+    },
+    "edit_feed.record_type.song" : {
+      "comment" : "編集されたレコードの種類 (Song)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡"
+          }
+        }
+      }
+    },
+    "edit_feed.record_type.song_artist" : {
+      "comment" : "編集されたレコードの種類 (SongArtist)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲アーティスト"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 아티스트"
+          }
+        }
+      }
+    },
+    "edit_feed.record_type.song_call" : {
+      "comment" : "編集されたレコードの種類 (SongCall)。2026-09-06 に終わった投稿の種類で、過去の履歴だけに出る (i18n/catalog/edit_feed.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コーレス (終了)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜 앤 리스폰스 (종료)"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

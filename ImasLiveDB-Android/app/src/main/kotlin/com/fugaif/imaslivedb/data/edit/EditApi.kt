@@ -93,14 +93,14 @@ class EditApi(private val http: WorkerHttpClient, private val authService: AuthS
         val editorDisplayText: DisplayText
             get() {
                 val name = editorDisplayName
-                if (name.isNullOrEmpty() || name.contains("@")) return L10n.Edit.feedEditorAnonymous
+                if (name.isNullOrEmpty() || name.contains("@")) return L10n.EditFeed.editorAnonymous
                 return DisplayText.Verbatim(name)
             }
 
         /**
          * 投稿者表示名 (解決済み)。まだ [editorDisplayText] に移していない画面のために残す。
          * 最近の編集 (edit_feed の RecentEditsScreen) が `entry.editorDisplayText.resolve()` に移ったら消す
-         * (代わりの名前は edit.feed.editor_anonymous。edit_feed に同じ文言の別キーを作らない)。
+         * (代わりの名前は edit_feed.editor.anonymous。iOS の EditFeedService も同じキーを引く)。
          */
         @Deprecated("i18n 移行中: editorDisplayText を画面で resolve() する", ReplaceWith("editorDisplayText"))
         val editorDisplayLabel: String

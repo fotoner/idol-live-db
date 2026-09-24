@@ -34,25 +34,25 @@ struct EditHistoryView: View {
             .padding(.vertical, DS.sp4)
         }
         .background(DS.bg)
-        .navigationTitle("編集履歴")
+        .navigationTitle(L10n.EditFeed.historyTitleIos)
         .navigationBarTitleDisplayMode(.inline)
         .overlay {
             if isLoading && entries.isEmpty {
-                ProgressView("読み込み中...")
+                ProgressView(L10n.EditFeed.listLoading)
                     .padding(DS.sp7)
                     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
             } else if entries.isEmpty && !isLoading && errorMessage == nil {
                 ImasEmptyState(
                     systemImage: "clock.arrow.circlepath",
-                    title: "編集履歴はありません",
-                    message: "このデータがまだ一度も編集されていないか、編集が反映待ちです。"
+                    title: String(localized: L10n.EditFeed.historyEmptyTitleIos),
+                    message: String(localized: L10n.EditFeed.historyEmptyMessage)
                 )
             } else if let errorMessage, entries.isEmpty {
                 ImasEmptyState(
                     systemImage: "exclamationmark.triangle",
-                    title: "読み込みに失敗しました",
+                    title: String(localized: L10n.EditFeed.historyLoadFailedIos),
                     message: errorMessage,
-                    actionTitle: "再試行",
+                    actionTitle: String(localized: L10n.Common.actionRetry),
                     action: { Task { await reload() } }
                 )
             }
@@ -92,7 +92,7 @@ private struct HistoryRow: View {
         VStack(alignment: .leading, spacing: DS.sp3) {
             // 編集者 + op バッジ + 相対時刻
             HStack(spacing: 6) {
-                Text(entry.editorDisplayLabel)
+                Text(display: entry.editorDisplayLabel)
                     .font(.imasSubhead.weight(.semibold))
                     .lineLimit(1)
                 OpBadge(op: entry.op)
@@ -100,7 +100,7 @@ private struct HistoryRow: View {
                     sourceBadge
                 }
                 if entry.reverted {
-                    Text("差戻し済み")
+                    Text(L10n.EditFeed.badgeReverted)
                         .font(.imasCaption2.weight(.semibold))
                         .foregroundStyle(DS.ink2)
                         .padding(.horizontal, 7)
@@ -120,7 +120,7 @@ private struct HistoryRow: View {
     }
 
     private var sourceBadge: some View {
-        Text(entry.source == "admin" ? "運営" : "巻き戻し")
+        Text(entry.source == "admin" ? L10n.EditFeed.historySourceAdmin : L10n.EditFeed.historySourceRevert)
             .font(.imasCaption2.weight(.semibold))
             .foregroundStyle(DS.warning)
             .padding(.horizontal, 7)
@@ -132,15 +132,15 @@ private struct HistoryRow: View {
     private var diffBody: some View {
         switch entry.op {
         case "create":
-            Text("新規追加されました")
+            Text(L10n.EditFeed.historyDiffCreated)
                 .font(.imasSubhead)
                 .foregroundStyle(DS.ink2)
         case "delete":
-            Text("削除されました")
+            Text(L10n.EditFeed.historyDiffDeleted)
                 .font(.imasSubhead)
                 .foregroundStyle(DS.ink2)
         case "snapshot":
-            Text("セットリスト全体が更新されました")
+            Text(L10n.EditFeed.historyDiffSnapshot)
                 .font(.imasSubhead)
                 .foregroundStyle(DS.ink2)
         default:
@@ -153,7 +153,7 @@ private struct HistoryRow: View {
     private var updateDiff: some View {
         let fields = entry.changedFields
         if fields.isEmpty {
-            Text("内容が更新されました")
+            Text(L10n.EditFeed.historyDiffUpdated)
                 .font(.imasSubhead)
                 .foregroundStyle(DS.ink2)
         } else {
@@ -173,17 +173,17 @@ private struct HistoryRow: View {
 // MARK: - Field diff row
 
 private struct FieldDiffRow: View {
-    let label: String
+    let label: DisplayText
     let before: JSONValue?
     let after: JSONValue?
 
     var body: some View {
         VStack(alignment: .leading, spacing: DS.sp1) {
-            Text(label)
+            Text(display: label)
                 .font(.imasCaption.weight(.semibold))
                 .foregroundStyle(DS.ink2)
             HStack(alignment: .top, spacing: 6) {
-                Text(before?.displayString ?? "(なし)")
+                Text(display: before?.displayText ?? .key(L10n.EditFeed.historyValueNone))
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink2)
                     .strikethrough(true, color: DS.ink3)
@@ -191,7 +191,7 @@ private struct FieldDiffRow: View {
                 Image(systemName: "arrow.right")
                     .font(.imasCaption2)
                     .foregroundStyle(DS.ink3)
-                Text(after?.displayString ?? "(なし)")
+                Text(display: after?.displayText ?? .key(L10n.EditFeed.historyValueNone))
                     .font(.imasCaption.weight(.medium))
                     .foregroundStyle(DS.ink)
                     .lineLimit(2)
@@ -205,60 +205,60 @@ private struct FieldDiffRow: View {
 
 // MARK: - Field label mapping
 
-/// CloudKit フィールド名 (camelCase) → 日本語ラベル。履歴 diff の見出しに使う。
+/// CloudKit フィールド名 (camelCase) → 表示ラベル。履歴 diff の見出しに使う。
 /// オープン編集で実際に編集対象になるフィールド (各 *EditView の fields) を網羅する。
 /// 未知のフィールドはキー名をそのまま見せる (網羅漏れでも壊れない)。
+/// 文言は static let の表に置かない (LocalizedStringResource は作った時点の言語で固まる)。
 enum EditFieldLabel {
-    private static let map: [String: String] = [
+    static func label(for field: String) -> DisplayText {
+        switch field {
         // 共通
-        "modifiedAt": "更新日時",
-        "deletedAt": "削除フラグ",
-        "brandId": "ブランド",
-        "name": "名称",
-        "title": "タイトル",
-        "sortOrder": "並び順",
-        "position": "順番",
+        case "modifiedAt": return .key(L10n.EditFeed.historyFieldModifiedAt)
+        case "deletedAt": return .key(L10n.EditFeed.historyFieldDeletedAt)
+        case "brandId": return .key(L10n.EditFeed.historyFieldBrandId)
+        case "name": return .key(L10n.EditFeed.historyFieldName)
+        case "title": return .key(L10n.EditFeed.historyFieldTitle)
+        case "sortOrder": return .key(L10n.EditFeed.historyFieldSortOrder)
+        case "position": return .key(L10n.EditFeed.historyFieldPosition)
         // Event
-        "startDate": "開始日",
-        "endDate": "終了日",
-        "venue": "会場",
-        "city": "都市",
-        "officialUrl": "公式URL",
-        "eventType": "種別",
+        case "startDate": return .key(L10n.EditFeed.historyFieldStartDate)
+        case "endDate": return .key(L10n.EditFeed.historyFieldEndDate)
+        case "venue": return .key(L10n.EditFeed.historyFieldVenue)
+        case "city": return .key(L10n.EditFeed.historyFieldCity)
+        case "officialUrl": return .key(L10n.EditFeed.historyFieldOfficialUrl)
+        case "eventType": return .key(L10n.EditFeed.historyFieldEventType)
         // Show
-        "eventId": "ライブ",
-        "showDate": "公演日",
-        "openTime": "開場",
-        "startTime": "開演",
-        "dayLabel": "公演ラベル",
+        case "eventId": return .key(L10n.EditFeed.historyFieldEventId)
+        case "showDate": return .key(L10n.EditFeed.historyFieldShowDate)
+        case "openTime": return .key(L10n.EditFeed.historyFieldOpenTime)
+        case "startTime": return .key(L10n.EditFeed.historyFieldStartTime)
+        case "dayLabel": return .key(L10n.EditFeed.historyFieldDayLabel)
         // Song
-        "appleMusicId": "Apple Music ID",
-        "artworkUrl": "ジャケット画像",
-        "releaseDate": "発売日",
-        "kana": "読み (かな)",
-        "romaji": "ローマ字",
+        case "appleMusicId": return .verbatim("Apple Music ID")  // サービス名なので訳さない
+        case "artworkUrl": return .key(L10n.EditFeed.historyFieldArtworkUrl)
+        case "releaseDate": return .key(L10n.EditFeed.historyFieldReleaseDate)
+        case "kana": return .key(L10n.EditFeed.historyFieldKana)
+        case "romaji": return .key(L10n.EditFeed.historyFieldRomaji)
         // SetlistItem
-        "songId": "曲",
-        "showId": "公演",
-        "blockLabel": "ブロック",
-        "note": "メモ",
-        "isEncore": "アンコール",
-        "isMc": "MC",
+        case "songId": return .key(L10n.EditFeed.historyFieldSongId)
+        case "showId": return .key(L10n.EditFeed.historyFieldShowId)
+        case "blockLabel": return .key(L10n.EditFeed.historyFieldBlockLabel)
+        case "note": return .key(L10n.EditFeed.historyFieldNote)
+        case "isEncore": return .key(L10n.EditFeed.historyFieldIsEncore)
+        case "isMc": return .verbatim("MC")
         // SetlistPerformer / ShowCast
-        "idolId": "アイドル",
-        "castId": "キャスト",
-        "setlistItemId": "セトリ項目",
+        case "idolId": return .key(L10n.EditFeed.historyFieldIdolId)
+        case "castId": return .key(L10n.EditFeed.historyFieldCastId)
+        case "setlistItemId": return .key(L10n.EditFeed.historyFieldSetlistItemId)
         // Idol
-        "kanaName": "読み (かな)",
-        "color": "イメージカラー",
-        "height": "身長",
-        "birthday": "誕生日",
-        "bloodType": "血液型",
-        "age": "年齢",
-        "cv": "CV",
-    ]
-
-    static func label(for field: String) -> String {
-        map[field] ?? field
+        case "kanaName": return .key(L10n.EditFeed.historyFieldKana)
+        case "color": return .key(L10n.EditFeed.historyFieldColor)
+        case "height": return .key(L10n.EditFeed.historyFieldHeight)
+        case "birthday": return .key(L10n.EditFeed.historyFieldBirthday)
+        case "bloodType": return .key(L10n.EditFeed.historyFieldBloodType)
+        case "age": return .key(L10n.EditFeed.historyFieldAge)
+        case "cv": return .verbatim("CV")
+        default: return .verbatim(field)
+        }
     }
 }

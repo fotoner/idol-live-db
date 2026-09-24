@@ -11,6 +11,7 @@ object L10n {
     val App: L10nApp get() = L10nApp
     val Common: L10nCommon get() = L10nCommon
     val Edit: L10nEdit get() = L10nEdit
+    val EditFeed: L10nEditFeed get() = L10nEditFeed
     val Events: L10nEvents get() = L10nEvents
     val Filtered: L10nFiltered get() = L10nFiltered
     val Games: L10nGames get() = L10nGames

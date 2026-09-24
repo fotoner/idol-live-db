@@ -69,6 +69,9 @@ import com.fugaif.imaslivedb.data.auth.startCommunityEdit
 import com.fugaif.imaslivedb.data.edit.EditApi
 import com.fugaif.imaslivedb.data.model.ShowWithEventName
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.components.ImasEmptyState
 import com.fugaif.imaslivedb.ui.components.ImasSegmented
 import com.fugaif.imaslivedb.ui.theme.DS
@@ -115,13 +118,20 @@ fun RecentEditsScreen(onBack: () -> Unit, viewModel: RecentEditsViewModel = view
         topBar = {
             Column {
                 TopAppBar(
-                    title = { Text(if (tab == 1) "自分の編集" else "最近の編集", fontWeight = FontWeight.Bold) },
+                    title = {
+                        Text(
+                            (if (tab == 1) L10n.EditFeed.feedTitleMine else L10n.EditFeed.feedTitle).resolve(),
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
                     navigationIcon = {
-                        IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "戻る") }
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, L10n.Common.actionBack.resolve())
+                        }
                     }
                 )
                 ImasSegmented(
-                    labels = listOf("みんなの編集", "自分の編集"),
+                    labels = listOf(L10n.EditFeed.feedTabAll.resolve(), L10n.EditFeed.feedTabMine.resolve()),
                     selection = tab,
                     onSelect = { tab = it },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)
@@ -137,7 +147,7 @@ fun RecentEditsScreen(onBack: () -> Unit, viewModel: RecentEditsViewModel = view
                     }
                 }) {
                     Icon(Icons.Filled.Add, contentDescription = null)
-                    Text("編集を提案", modifier = Modifier.padding(start = 6.dp))
+                    Text(L10n.EditFeed.feedProposeFab.resolve(), modifier = Modifier.padding(start = 6.dp))
                 }
             }
         }
@@ -146,8 +156,12 @@ fun RecentEditsScreen(onBack: () -> Unit, viewModel: RecentEditsViewModel = view
             if (tab == 1 && needsLogin) {
                 Column(Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Spacer(Modifier.height(40.dp))
-                    ImasEmptyState(Icons.Filled.Person, "ログインが必要です", "自分の編集履歴を見るにはログインしてください。")
-                    Button(onClick = ::signIn, modifier = Modifier.fillMaxWidth()) { Text("Googleでログイン") }
+                    ImasEmptyState(
+                        Icons.Filled.Person,
+                        L10n.EditFeed.feedMineLoginTitle.resolve(),
+                        L10n.EditFeed.feedMineLoginMessage.resolve()
+                    )
+                    Button(onClick = ::signIn, modifier = Modifier.fillMaxWidth()) { Text(L10n.EditFeed.loginGoogle.resolve()) }
                 }
             } else if (state.isLoading && state.entries.isEmpty()) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
@@ -155,9 +169,8 @@ fun RecentEditsScreen(onBack: () -> Unit, viewModel: RecentEditsViewModel = view
                 Column(Modifier.fillMaxSize()) {
                     ImasEmptyState(
                         icon = Icons.Filled.EditNote,
-                        title = "まだ編集がありません",
-                        message = if (tab == 1) "ライブ・楽曲・セトリを編集すると、ここに履歴が残ります。"
-                        else "誰かがデータを編集すると、ここに新着順で表示されます。"
+                        title = L10n.EditFeed.feedEmptyTitle.resolve(),
+                        message = (if (tab == 1) L10n.EditFeed.feedEmptyMessageMine else L10n.EditFeed.feedEmptyMessage).resolve()
                     )
                 }
             } else {
@@ -201,20 +214,22 @@ fun RecentEditsScreen(onBack: () -> Unit, viewModel: RecentEditsViewModel = view
         AlertDialog(
             onDismissRequest = { viewModel.clearError() },
             confirmButton = { TextButton(onClick = { viewModel.clearError() }) { Text("OK") } },
-            title = { Text("エラー") },
-            text = { Text(state.errorMessage ?: "") }
+            title = { Text(L10n.EditFeed.feedErrorTitle.resolve()) },
+            text = { Text(state.errorMessage?.resolve() ?: "") }
         )
     }
 
     if (state.showLoginPrompt) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissLoginPrompt() },
-            title = { Text("ログインが必要です") },
-            text = { Text("編集の提案や Good にはログインが必要です。") },
+            title = { Text(L10n.EditFeed.loginDialogTitle.resolve()) },
+            text = { Text(L10n.EditFeed.feedLoginMessage.resolve()) },
             confirmButton = {
-                TextButton(onClick = { viewModel.dismissLoginPrompt(); signIn() }) { Text("Googleでログイン") }
+                TextButton(onClick = { viewModel.dismissLoginPrompt(); signIn() }) { Text(L10n.EditFeed.loginGoogle.resolve()) }
             },
-            dismissButton = { TextButton(onClick = { viewModel.dismissLoginPrompt() }) { Text("キャンセル") } }
+            dismissButton = {
+                TextButton(onClick = { viewModel.dismissLoginPrompt() }) { Text(L10n.EditFeed.loginDialogCancel.resolve()) }
+            }
         )
     }
 
@@ -291,20 +306,21 @@ fun RecentEditsScreen(onBack: () -> Unit, viewModel: RecentEditsViewModel = view
     if (currentRevertTarget != null) {
         AlertDialog(
             onDismissRequest = { revertTarget = null },
-            title = { Text("この編集を取り消しますか？") },
+            title = { Text(L10n.EditFeed.feedRevertConfirmTitle.resolve()) },
             text = {
-                val label = currentRevertTarget.summary
+                // 概要はサーバの文言 (データ)。無ければレコードの種類の文言
+                val label = currentRevertTarget.summary?.let { DisplayText.Verbatim(it) }
                     ?: EditFeedFormat.recordTypeLabel(currentRevertTarget.recordType)
-                Text("「$label」を編集前の状態に戻します。この操作も履歴に記録されます。")
+                Text(L10n.EditFeed.feedRevertConfirmMessage(label = label).resolve())
             },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.revert(currentRevertTarget)
                     revertTarget = null
-                }) { Text("取り消す", color = DS.danger) }
+                }) { Text(L10n.EditFeed.feedRevertConfirmAction.resolve(), color = DS.danger) }
             },
             dismissButton = {
-                TextButton(onClick = { revertTarget = null }) { Text("やめる") }
+                TextButton(onClick = { revertTarget = null }) { Text(L10n.EditFeed.feedRevertConfirmCancel.resolve()) }
             }
         )
     }
@@ -322,31 +338,31 @@ private fun ProposeEditTypeSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
             Text(
-                "編集の種類を選択", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink,
+                L10n.EditFeed.proposeTitle.resolve(), fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)
             )
             ProposeEditTypeRow(
                 icon = Icons.Filled.QueueMusic,
-                title = "セトリを編集",
-                subtitle = "公演の楽曲・出演者の追加/修正/削除",
+                title = L10n.EditFeed.proposeSetlistTitle,
+                subtitle = L10n.EditFeed.proposeSetlistSubtitle,
                 onClick = onPickSetlist
             )
             ProposeEditTypeRow(
                 icon = Icons.Filled.MusicNote,
-                title = "曲を追加",
-                subtitle = "まだ登録されていない楽曲を作る",
+                title = L10n.EditFeed.proposeSongTitle,
+                subtitle = L10n.EditFeed.proposeSongSubtitle,
                 onClick = onPickNewSong
             )
             ProposeEditTypeRow(
                 icon = Icons.Filled.Event,
-                title = "ライブを追加",
-                subtitle = "まだ登録されていないライブ・イベントを作る",
+                title = L10n.EditFeed.proposeEventTitle,
+                subtitle = L10n.EditFeed.proposeEventSubtitle,
                 onClick = onPickNewEvent
             )
             // 既存レコードの修正はそれぞれの詳細画面が入口 (どれを直すのか選ばせる画面を
             // ここに二重で作らない)。公演の追加も親ライブが決まっていないと作れない。
             Text(
-                "既存の楽曲・アイドル・ライブの修正、公演の追加は、それぞれの詳細画面から行えます。",
+                L10n.EditFeed.proposeFootnote.resolve(),
                 fontSize = 11.sp, color = DS.ink3,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
             )
@@ -357,8 +373,8 @@ private fun ProposeEditTypeSheet(
 @Composable
 private fun ProposeEditTypeRow(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    subtitle: String,
+    title: DisplayText,
+    subtitle: DisplayText,
     onClick: () -> Unit
 ) {
     Row(
@@ -373,8 +389,8 @@ private fun ProposeEditTypeRow(
             contentAlignment = Alignment.Center
         ) { Icon(icon, contentDescription = null, tint = DS.ink2) }
         Column {
-            Text(title, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
-            Text(subtitle, fontSize = 12.sp, color = DS.ink2)
+            Text(title.resolve(), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
+            Text(subtitle.resolve(), fontSize = 12.sp, color = DS.ink2)
         }
     }
 }
@@ -392,30 +408,34 @@ fun RecordHistorySheet(recordType: String, recordName: String, onDismiss: () -> 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = LocalContext.current
     var history by remember { mutableStateOf<List<EditApi.RecordHistoryEntry>?>(null) }
-    var error by remember { mutableStateOf<String?>(null) }
+    // 文言の値で持ち、描くときに resolve() する (LaunchedEffect の中は Composable ではない)
+    var error by remember { mutableStateOf<DisplayText?>(null) }
 
     LaunchedEffect(recordType, recordName) {
         val editApi = AppModule.from(context).editApi
         try {
             history = editApi.recordHistory(recordType, recordName)
         } catch (e: Exception) {
-            error = "変更履歴の取得に失敗しました"
+            error = L10n.EditFeed.historyLoadFailedAndroid
         }
     }
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-            Text("変更履歴", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+            Text(L10n.EditFeed.historyTitleAndroid.resolve(), fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink)
             Text(
-                EditFeedFormat.recordTypeLabel(recordType),
+                EditFeedFormat.recordTypeLabel(recordType).resolve(),
                 fontSize = 12.sp, color = DS.ink2, modifier = Modifier.padding(bottom = 8.dp)
             )
             when {
-                error != null -> Text(error ?: "", color = DS.danger, fontSize = 13.sp)
+                error != null -> Text(error?.resolve() ?: "", color = DS.danger, fontSize = 13.sp)
                 history == null -> Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
-                history!!.isEmpty() -> Text("履歴がありません", fontSize = 13.sp, color = DS.ink2, modifier = Modifier.padding(16.dp))
+                history!!.isEmpty() -> Text(
+                    L10n.EditFeed.historyEmptyTitleAndroid.resolve(), fontSize = 13.sp, color = DS.ink2,
+                    modifier = Modifier.padding(16.dp)
+                )
                 else -> {
                     // 相対時刻の言い回しはコア。一覧ぶんを 1 回で引き、一覧が変わるまで使い回す。
                     val times = remember(history) { relativeTimes(history!!.map { it.createdAt }, System.currentTimeMillis()) }
@@ -423,9 +443,9 @@ fun RecordHistorySheet(recordType: String, recordName: String, onDismiss: () -> 
                         Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 val (label, color) = EditFeedFormat.opDesign(h.op)
-                                Text(label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = color)
+                                Text(label.resolve(), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = color)
                                 Text(times[i], fontSize = 11.sp, color = DS.ink3)
-                                if (h.reverted) Text("(差戻し済み)", fontSize = 11.sp, color = DS.ink3)
+                                if (h.reverted) Text(L10n.EditFeed.historyRevertedParen.resolve(), fontSize = 11.sp, color = DS.ink3)
                             }
                             if (h.changedFields.isNotEmpty()) {
                                 Text(h.changedFields.joinToString(", "), fontSize = 12.sp, color = DS.ink2)
@@ -471,12 +491,12 @@ private fun EditFeedCard(
 
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(entry.editorDisplayLabel, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = DS.ink,
+                    Text(entry.editorDisplayText.resolve(), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = DS.ink,
                         maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
                     OpBadge(entry.op)
                     if (showRevertAction && isReverted) {
                         Text(
-                            "差戻し済み", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2,
+                            L10n.EditFeed.badgeReverted.resolve(), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2,
                             modifier = Modifier.clip(RoundedCornerShape(50)).background(DS.fill)
                                 .padding(horizontal = 7.dp, vertical = 2.dp)
                         )
@@ -485,7 +505,7 @@ private fun EditFeedCard(
                     Text(timeText, fontSize = 11.sp, color = DS.ink2)
                 }
                 Text(
-                    recordTitle ?: EditFeedFormat.recordTypeLabel(entry.recordType),
+                    recordTitle ?: EditFeedFormat.recordTypeLabel(entry.recordType).resolve(),
                     fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
                     color = if (showRevertAction && isReverted) DS.ink2 else DS.ink,
                     textDecoration = if (showRevertAction && isReverted) TextDecoration.LineThrough else null,
@@ -521,7 +541,7 @@ private fun EditFeedCard(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(Icons.Filled.Undo, contentDescription = null, tint = DS.danger, modifier = Modifier.size(14.dp))
-                            Text("取り消す", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.danger,
+                            Text(L10n.EditFeed.feedCardRevert.resolve(), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.danger,
                                 modifier = Modifier.padding(start = 5.dp))
                         }
                     }
@@ -530,7 +550,7 @@ private fun EditFeedCard(
                 if (entry.isOwnEdit) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Filled.Person, contentDescription = null, tint = DS.ink2, modifier = Modifier.size(14.dp))
-                        Text("あなたの編集", fontSize = 12.sp, color = DS.ink2, modifier = Modifier.padding(start = 4.dp))
+                        Text(L10n.EditFeed.feedCardOwn.resolve(), fontSize = 12.sp, color = DS.ink2, modifier = Modifier.padding(start = 4.dp))
                     }
                 } else {
                     Row(
@@ -542,7 +562,7 @@ private fun EditFeedCard(
                     ) {
                         Icon(
                             if (gooded) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                            contentDescription = if (gooded) "Good を取り消す" else "Good を付ける",
+                            contentDescription = (if (gooded) L10n.EditFeed.feedGoodRemoveA11y else L10n.EditFeed.feedGoodAddA11y).resolve(),
                             tint = if (gooded) DS.pick else DS.ink2,
                             modifier = Modifier.size(16.dp)
                         )
@@ -557,7 +577,10 @@ private fun EditFeedCard(
                 Spacer(Modifier.weight(1f))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Filled.History, contentDescription = null, tint = DS.ink3, modifier = Modifier.size(13.dp))
-                    Text("変更履歴", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2, modifier = Modifier.padding(start = 4.dp))
+                    Text(
+                        L10n.EditFeed.feedCardHistory.resolve(), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
                 }
             }
         }
@@ -568,7 +591,7 @@ private fun EditFeedCard(
 private fun OpBadge(op: String) {
     val (label, color) = EditFeedFormat.opDesign(op)
     Text(
-        label, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = color,
+        label.resolve(), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = color,
         modifier = Modifier.clip(RoundedCornerShape(50)).background(color.copy(alpha = 0.15f))
             .padding(horizontal = 7.dp, vertical = 2.dp)
     )
@@ -588,26 +611,28 @@ private object EditFeedFormat {
         else -> Icons.Filled.EditNote to DS.ink3
     }
 
-    fun recordTypeLabel(type: String): String = when (type) {
-        "Event" -> "ライブ・イベント"
-        "Show" -> "公演"
-        "Song" -> "楽曲"
-        "Idol" -> "アイドル"
-        "SetlistItem", "ShowSetlist" -> "セットリスト"
-        "SetlistPerformer" -> "セトリ出演者"
-        "SongArtist" -> "楽曲アーティスト"
-        "ShowCast" -> "出演キャスト"
+    /** record_type の表示名。未知の型は型名をそのまま (データとして) 出す。 */
+    fun recordTypeLabel(type: String): DisplayText = when (type) {
+        "Event" -> L10n.EditFeed.recordTypeEvent
+        "Show" -> L10n.EditFeed.recordTypeShow
+        "Song" -> L10n.EditFeed.recordTypeSong
+        "Idol" -> L10n.EditFeed.recordTypeIdol
+        "SetlistItem", "ShowSetlist" -> L10n.EditFeed.recordTypeSetlist
+        "SetlistPerformer" -> L10n.EditFeed.recordTypeSetlistPerformer
+        "SongArtist" -> L10n.EditFeed.recordTypeSongArtist
+        "ShowCast" -> L10n.EditFeed.recordTypeShowCast
         // 2026-09-06 に廃止した投稿型。過去の履歴だけが残る。
-        "SongCall" -> "コーレス (終了)"
-        else -> type
+        "SongCall" -> L10n.EditFeed.recordTypeSongCall
+        else -> DisplayText.Verbatim(type)
     }
 
-    fun opDesign(op: String): Pair<String, Color> = when (op) {
-        "create" -> "追加" to DS.success
-        "update", "replace" -> "更新" to Color(0xFF4A90D9)
-        "delete" -> "削除" to DS.danger
-        "revert" -> "差戻し" to DS.warning
-        "snapshot" -> "セトリ更新" to Color(0xFF2FB8A8)
-        else -> op to DS.ink3
+    /** op バッジの文言と色。未知の op はそのまま (データとして) 出す。 */
+    fun opDesign(op: String): Pair<DisplayText, Color> = when (op) {
+        "create" -> L10n.EditFeed.opCreate to DS.success
+        "update", "replace" -> L10n.EditFeed.opUpdate to Color(0xFF4A90D9)
+        "delete" -> L10n.EditFeed.opDelete to DS.danger
+        "revert" -> L10n.EditFeed.opRevert to DS.warning
+        "snapshot" -> L10n.EditFeed.opSnapshot to Color(0xFF2FB8A8)
+        else -> DisplayText.Verbatim(op) to DS.ink3
     }
 }

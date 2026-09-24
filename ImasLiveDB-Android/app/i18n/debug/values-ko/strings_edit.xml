@@ -17,7 +17,6 @@
     <string name="edit_event_section_ticket">티켓</string>
     <string name="edit_event_title_create_android">라이브 추가</string>
     <string name="edit_event_title_edit_android">라이브 편집</string>
-    <string name="edit_feed_editor_anonymous">이름 없는 프로듀서</string>
     <string name="edit_form_error_id_unresolved">저장하지 못했어요 (ID 미확정)</string>
     <string name="edit_form_error_save_failed">저장 실패: %1$s</string>
     <string name="edit_form_error_title">오류</string>

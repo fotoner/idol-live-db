@@ -8,6 +8,8 @@ import com.fugaif.imaslivedb.data.auth.shouldPromptLogin
 import com.fugaif.imaslivedb.data.edit.EditApi
 import com.fugaif.imaslivedb.data.edit.friendlyMessage
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,7 +24,8 @@ data class RecentEditsUiState(
     val hasMore: Boolean = true,
     val isLoading: Boolean = false,
     val isLoadingMore: Boolean = false,
-    val errorMessage: String? = null,
+    /** アラートに出す失敗の文言。解決済みの String ではなく文言の値で持ち、画面で resolve() する。 */
+    val errorMessage: DisplayText? = null,
     val mineOnly: Boolean = false,
     val showLoginPrompt: Boolean = false,
     /** revert 実行中の batchId (二度押し防止 + スピナー表示)。 */
@@ -158,12 +161,13 @@ class RecentEditsViewModel(app: Application) : AndroidViewModel(app) {
                         )
                     EditApi.RevertOutcome.SKIPPED_CONFLICT ->
                         _uiState.value = _uiState.value.copy(
-                            errorMessage = "別のユーザーがこの後に編集したため取り消せませんでした。"
+                            errorMessage = L10n.EditFeed.feedRevertErrorConflict
                         )
                     else -> {}
                 }
             } catch (e: EditApi.ApiException) {
-                _uiState.value = _uiState.value.copy(errorMessage = e.friendlyMessage())
+                // friendlyMessage は data 層が作る日本語の文字列 (まだ文言の値を返さない)。今はそのまま出す
+                _uiState.value = _uiState.value.copy(errorMessage = DisplayText.Verbatim(e.friendlyMessage()))
                 if (e is EditApi.ApiException.NotAuthorized) {
                     _uiState.value = _uiState.value.copy(showLoginPrompt = true)
                 }
@@ -194,10 +198,10 @@ class RecentEditsViewModel(app: Application) : AndroidViewModel(app) {
         return map
     }
 
-    private fun errorText(e: Exception): String = when (e) {
-        is EditApi.ApiException.RateLimited -> "操作が多すぎます。しばらく待ってからお試しください。"
-        is EditApi.ApiException.NotAuthorized -> "ログインが必要です。"
-        is EditApi.ApiException.Banned -> "この操作は利用できません。"
-        else -> "読み込みに失敗しました。"
+    private fun errorText(e: Exception): DisplayText = when (e) {
+        is EditApi.ApiException.RateLimited -> L10n.EditFeed.feedErrorRateLimited
+        is EditApi.ApiException.NotAuthorized -> L10n.EditFeed.feedErrorLoginRequired
+        is EditApi.ApiException.Banned -> L10n.EditFeed.feedErrorBanned
+        else -> L10n.EditFeed.feedErrorLoadFailedAndroid
     }
 }

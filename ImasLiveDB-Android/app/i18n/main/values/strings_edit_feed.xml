@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/edit_feed.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- edit_feed.badge.reverted: 差し戻された (取り消された) 編集に付けるバッジ。iOS は編集履歴の行、Android は「最近の編集」の自分の編集タブのカード -->
+    <string name="edit_feed_badge_reverted">差戻し済み</string>
+    <!-- edit_feed.editor.anonymous: 編集者の表示名。名前が無いか、メールアドレスの形のとき (匿名にする) に代わりに出す -->
+    <string name="edit_feed_editor_anonymous">名無しのプロデューサー</string>
+    <!-- edit_feed.feed.card.history: 各カードの下の導線。その編集の差分 (変更履歴) を開く -->
+    <string name="edit_feed_feed_card_history">変更履歴</string>
+    <!-- edit_feed.feed.card.own: 自分の編集のカードに、Good ボタンの代わりに出すラベル -->
+    <string name="edit_feed_feed_card_own">あなたの編集</string>
+    <!-- edit_feed.feed.card.revert: 自分の編集タブのカードのボタン。その編集を差し戻す確認を開く -->
+    <string name="edit_feed_feed_card_revert">取り消す</string>
+    <!-- edit_feed.feed.empty.message: 「最近の編集」(みんなの編集) が空のときの説明 -->
+    <string name="edit_feed_feed_empty_message">誰かがデータを編集すると、ここに新着順で表示されます。</string>
+    <!-- edit_feed.feed.empty.message_mine: 自分の編集が空のときの説明 -->
+    <string name="edit_feed_feed_empty_message_mine">ライブ・楽曲・セトリを編集すると、ここに履歴が残ります。</string>
+    <!-- edit_feed.feed.empty.title: 「最近の編集」に 1 件も無いときの空状態の見出し -->
+    <string name="edit_feed_feed_empty_title">まだ編集がありません</string>
+    <!-- edit_feed.feed.error.banned: 編集を制限されている利用者が操作したときのエラー -->
+    <string name="edit_feed_feed_error_banned">この操作は利用できません。</string>
+    <!-- edit_feed.feed.error.load_failed_android: 「最近の編集」の読み込み・Good の失敗 (Android。iOS の同じ所はエラーの説明を後ろに付ける feed.error.load_failed_ios) -->
+    <string name="edit_feed_feed_error_load_failed_android">読み込みに失敗しました。</string>
+    <!-- edit_feed.feed.error.login_required: 「最近の編集」で認証が切れていたときのエラー -->
+    <string name="edit_feed_feed_error_login_required">ログインが必要です。</string>
+    <!-- edit_feed.feed.error.rate_limited: サーバに短時間に何度も送った (429) ときのエラー -->
+    <string name="edit_feed_feed_error_rate_limited">操作が多すぎます。しばらく待ってからお試しください。</string>
+    <!-- edit_feed.feed.error.title: 「最近の編集」で読み込みや Good に失敗したときのアラートの見出し -->
+    <string name="edit_feed_feed_error_title">エラー</string>
+    <!-- edit_feed.feed.good.add.a11y: Good (編集へのいいね) ボタンの読み上げ。まだ付けていないとき。Good は機能名なのでそのまま -->
+    <string name="edit_feed_feed_good_add_a11y">Good を付ける</string>
+    <!-- edit_feed.feed.good.remove.a11y: Good (編集へのいいね) ボタンの読み上げ。もう付けているとき -->
+    <string name="edit_feed_feed_good_remove_a11y">Good を取り消す</string>
+    <!-- edit_feed.feed.login.message: 未ログインで編集の提案・Good を押したときのダイアログの本文 -->
+    <string name="edit_feed_feed_login_message">編集の提案や Good にはログインが必要です。</string>
+    <!-- edit_feed.feed.mine_login.message: 未ログインで自分の編集タブを開いたときの説明 -->
+    <string name="edit_feed_feed_mine_login_message">自分の編集履歴を見るにはログインしてください。</string>
+    <!-- edit_feed.feed.mine_login.title: 未ログインで自分の編集タブを開いたときの空状態の見出し -->
+    <string name="edit_feed_feed_mine_login_title">ログインが必要です</string>
+    <!-- edit_feed.feed.propose.fab: 「最近の編集」右下のボタン。編集の種類を選ぶシートを開く -->
+    <string name="edit_feed_feed_propose_fab">編集を提案</string>
+    <!-- edit_feed.feed.revert.confirm.action: 差し戻しの確認ダイアログの実行ボタン -->
+    <string name="edit_feed_feed_revert_confirm_action">取り消す</string>
+    <!-- edit_feed.feed.revert.confirm.cancel: 差し戻しの確認ダイアログの中止ボタン -->
+    <string name="edit_feed_feed_revert_confirm_cancel">やめる</string>
+    <!-- edit_feed.feed.revert.confirm.message: 差し戻しの確認の本文。label は編集の概要 (サーバの文言) か、無いときはレコードの種類 (record_type.*) -->
+    <string name="edit_feed_feed_revert_confirm_message">「%1$s」を編集前の状態に戻します。この操作も履歴に記録されます。</string>
+    <!-- edit_feed.feed.revert.confirm.title: 自分の編集を差し戻す前の確認ダイアログの見出し -->
+    <string name="edit_feed_feed_revert_confirm_title">この編集を取り消しますか？</string>
+    <!-- edit_feed.feed.revert.error.conflict: 差し戻そうとした編集のあとに別の人の編集があって差し戻せなかったとき -->
+    <string name="edit_feed_feed_revert_error_conflict">別のユーザーがこの後に編集したため取り消せませんでした。</string>
+    <!-- edit_feed.feed.tab.all: 「最近の編集」画面上部の切り替え。全員の編集 -->
+    <string name="edit_feed_feed_tab_all">みんなの編集</string>
+    <!-- edit_feed.feed.tab.mine: 「最近の編集」画面上部の切り替え。自分の編集だけ -->
+    <string name="edit_feed_feed_tab_mine">自分の編集</string>
+    <!-- edit_feed.feed.title: 「最近の編集」画面のタイトル (みんなの編集) -->
+    <string name="edit_feed_feed_title">最近の編集</string>
+    <!-- edit_feed.feed.title_mine: 「最近の編集」画面を自分の編集だけにしたときのタイトル -->
+    <string name="edit_feed_feed_title_mine">自分の編集</string>
+    <!-- edit_feed.history.empty.title_android: 変更履歴のシートで 1 件も無いとき (Android。iOS の同じ所は history.empty.title_ios) -->
+    <string name="edit_feed_history_empty_title_android">履歴がありません</string>
+    <!-- edit_feed.history.load_failed_android: 変更履歴のシート (レコード・セトリ) の読み込みに失敗したとき (Android。iOS の同じ所は history.load_failed_ios) -->
+    <string name="edit_feed_history_load_failed_android">変更履歴の取得に失敗しました</string>
+    <!-- edit_feed.history.reverted_paren: 変更履歴のシートの行で、差し戻された編集に添える注記 -->
+    <string name="edit_feed_history_reverted_paren">(差戻し済み)</string>
+    <!-- edit_feed.history.setlist.empty: セトリの編集履歴が 1 件も無いとき -->
+    <string name="edit_feed_history_setlist_empty">まだ編集されていません</string>
+    <!-- edit_feed.history.setlist.title: 公演のセトリの編集履歴のシートの見出し (下に公演名) -->
+    <string name="edit_feed_history_setlist_title">セトリの編集履歴</string>
+    <!-- edit_feed.history.title_android: 1 レコードの変更履歴のシートの見出し (Android。iOS の同じ画面は「編集履歴」の history.title_ios) -->
+    <string name="edit_feed_history_title_android">変更履歴</string>
+    <!-- edit_feed.local_write.failed.message: 端末ローカルの書き込み失敗のアラートの本文。action は操作名 (例: メモの保存)。呼び出し側の文言を同じ言語で文字列にしてから差し込む (まだ日本語の文字列のまま渡す画面もある) -->
+    <string name="edit_feed_local_write_failed_message">%1$sに失敗しました。変更は保存されていません。もう一度お試しください。</string>
+    <!-- edit_feed.local_write.failed.title: 端末にだけ保存するデータ (担当・参加・メモ・座席・習熟度・家計簿・マイタグ) の書き込みに失敗したときのアラートの見出し -->
+    <string name="edit_feed_local_write_failed_title">保存できませんでした</string>
+    <!-- edit_feed.login.dialog.cancel: ログインのダイアログの閉じるボタン -->
+    <string name="edit_feed_login_dialog_cancel">キャンセル</string>
+    <!-- edit_feed.login.dialog.default_message: ログインのダイアログ (CommunityLoginPromptDialog) の本文の既定値 (呼び出し側が渡さないとき) -->
+    <string name="edit_feed_login_dialog_default_message">タグ・動画・投票にはログインが必要です。</string>
+    <!-- edit_feed.login.dialog.title: 未ログインで投稿・編集・Good を押したときのダイアログの見出し -->
+    <string name="edit_feed_login_dialog_title">ログインが必要です</string>
+    <!-- edit_feed.login.google: Google アカウントでログインするボタン (ログインのダイアログと、自分の編集タブの未ログイン表示) -->
+    <string name="edit_feed_login_google">Googleでログイン</string>
+    <!-- edit_feed.op.create: 編集の操作のバッジ (create) -->
+    <string name="edit_feed_op_create">追加</string>
+    <!-- edit_feed.op.delete: 編集の操作のバッジ (delete) -->
+    <string name="edit_feed_op_delete">削除</string>
+    <!-- edit_feed.op.revert: 編集の操作のバッジ (revert) -->
+    <string name="edit_feed_op_revert">差戻し</string>
+    <!-- edit_feed.op.snapshot: 編集の操作のバッジ (snapshot (公演のセトリをまとめて更新)) -->
+    <string name="edit_feed_op_snapshot">セトリ更新</string>
+    <!-- edit_feed.op.update: 編集の操作のバッジ (update / replace) -->
+    <string name="edit_feed_op_update">更新</string>
+    <!-- edit_feed.propose.event.subtitle: 「ライブを追加」の説明 -->
+    <string name="edit_feed_propose_event_subtitle">まだ登録されていないライブ・イベントを作る</string>
+    <!-- edit_feed.propose.event.title: 編集の種類: 新しいライブを作る -->
+    <string name="edit_feed_propose_event_title">ライブを追加</string>
+    <!-- edit_feed.propose.footnote: 編集の種類のシートの下の注意書き -->
+    <string name="edit_feed_propose_footnote">既存の楽曲・アイドル・ライブの修正、公演の追加は、それぞれの詳細画面から行えます。</string>
+    <!-- edit_feed.propose.setlist.subtitle: 「セトリを編集」の説明 -->
+    <string name="edit_feed_propose_setlist_subtitle">公演の楽曲・出演者の追加/修正/削除</string>
+    <!-- edit_feed.propose.setlist.title: 編集の種類: 公演のセトリを直す -->
+    <string name="edit_feed_propose_setlist_title">セトリを編集</string>
+    <!-- edit_feed.propose.song.subtitle: 「曲を追加」の説明 -->
+    <string name="edit_feed_propose_song_subtitle">まだ登録されていない楽曲を作る</string>
+    <!-- edit_feed.propose.song.title: 編集の種類: 新しい曲を作る -->
+    <string name="edit_feed_propose_song_title">曲を追加</string>
+    <!-- edit_feed.propose.title: 「編集を提案」で開くシートの見出し -->
+    <string name="edit_feed_propose_title">編集の種類を選択</string>
+    <!-- edit_feed.record_type.event: 編集されたレコードの種類 (Event)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う -->
+    <string name="edit_feed_record_type_event">ライブ・イベント</string>
+    <!-- edit_feed.record_type.idol: 編集されたレコードの種類 (Idol)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う -->
+    <string name="edit_feed_record_type_idol">アイドル</string>
+    <!-- edit_feed.record_type.setlist: 編集されたレコードの種類 (SetlistItem / ShowSetlist)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う -->
+    <string name="edit_feed_record_type_setlist">セットリスト</string>
+    <!-- edit_feed.record_type.setlist_performer: 編集されたレコードの種類 (SetlistPerformer)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う -->
+    <string name="edit_feed_record_type_setlist_performer">セトリ出演者</string>
+    <!-- edit_feed.record_type.show: 編集されたレコードの種類 (Show)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う -->
+    <string name="edit_feed_record_type_show">公演</string>
+    <!-- edit_feed.record_type.show_cast: 編集されたレコードの種類 (ShowCast)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う -->
+    <string name="edit_feed_record_type_show_cast">出演キャスト</string>
+    <!-- edit_feed.record_type.song: 編集されたレコードの種類 (Song)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う -->
+    <string name="edit_feed_record_type_song">楽曲</string>
+    <!-- edit_feed.record_type.song_artist: 編集されたレコードの種類 (SongArtist)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う -->
+    <string name="edit_feed_record_type_song_artist">楽曲アーティスト</string>
+    <!-- edit_feed.record_type.song_call: 編集されたレコードの種類 (SongCall)。2026-09-06 に終わった投稿の種類で、過去の履歴だけに出る -->
+    <string name="edit_feed_record_type_song_call">コーレス (終了)</string>
+</resources>

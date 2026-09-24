@@ -1,0 +1,947 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "edit_feed",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/data/local/LocalWriteFailure.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/components/CommunityLoginPrompt.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/edit/RecentEditsScreen.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/edit/RecentEditsViewModel.kt",
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/events/SetlistEditHistorySheet.kt"
+    ],
+    "ios": [
+      "ImasLiveDB/Services/EditFeedService.swift",
+      "ImasLiveDB/Services/LocalWriteFailure.swift",
+      "ImasLiveDB/Views/Community/RecentEditsView.swift",
+      "ImasLiveDB/Views/Components/EditHistoryView.swift",
+      "ImasLiveDB/Views/Components/EditRequestAlert.swift",
+      "ImasLiveDB/Views/Components/LoginToEditSheet.swift"
+    ]
+  },
+  "strings": {
+    "badge.reverted": {
+      "ja": "差戻し済み",
+      "ko": "되돌림 완료",
+      "note": "差し戻された (取り消された) 編集に付けるバッジ。iOS は編集履歴の行、Android は「最近の編集」の自分の編集タブのカード"
+    },
+    "edit_request.sent.message": {
+      "ja": "運営の確認後に反映されます。ご協力ありがとうございます！",
+      "ko": "운영팀이 확인한 뒤 반영돼요. 도와주셔서 감사해요!",
+      "note": "修正リクエストを送ったあとのアラートの本文",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "edit_request.sent.title": {
+      "ja": "修正リクエストを送信しました",
+      "ko": "수정 요청을 보냈어요",
+      "note": "ライブ・公演・セトリ・曲・アイドルの修正を送った (運営が確認して反映する) あとのアラートの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "editor.anonymous": {
+      "ja": "名無しのプロデューサー",
+      "ko": "이름 없는 프로듀서",
+      "note": "編集者の表示名。名前が無いか、メールアドレスの形のとき (匿名にする) に代わりに出す"
+    },
+    "feed.card.history": {
+      "ja": "変更履歴",
+      "ko": "변경 기록",
+      "note": "各カードの下の導線。その編集の差分 (変更履歴) を開く"
+    },
+    "feed.card.own": {
+      "ja": "あなたの編集",
+      "ko": "내 편집",
+      "note": "自分の編集のカードに、Good ボタンの代わりに出すラベル"
+    },
+    "feed.card.revert": {
+      "ja": "取り消す",
+      "ko": "되돌리기",
+      "note": "自分の編集タブのカードのボタン。その編集を差し戻す確認を開く",
+      "platforms": [
+        "android"
+      ]
+    },
+    "feed.empty.message": {
+      "ja": "誰かがデータを編集すると、ここに新着順で表示されます。",
+      "ko": "누군가 데이터를 편집하면 여기에 최신순으로 표시돼요.",
+      "note": "「最近の編集」(みんなの編集) が空のときの説明"
+    },
+    "feed.empty.message_mine": {
+      "ja": "ライブ・楽曲・セトリを編集すると、ここに履歴が残ります。",
+      "ko": "라이브·곡·세트리스트를 편집하면 여기에 기록이 남아요.",
+      "note": "自分の編集が空のときの説明"
+    },
+    "feed.empty.title": {
+      "ja": "まだ編集がありません",
+      "ko": "아직 편집이 없어요",
+      "note": "「最近の編集」に 1 件も無いときの空状態の見出し"
+    },
+    "feed.error.banned": {
+      "ja": "この操作は利用できません。",
+      "ko": "이 작업은 사용할 수 없어요.",
+      "note": "編集を制限されている利用者が操作したときのエラー",
+      "platforms": [
+        "android"
+      ]
+    },
+    "feed.error.load_failed_android": {
+      "ja": "読み込みに失敗しました。",
+      "ko": "불러오지 못했어요.",
+      "note": "「最近の編集」の読み込み・Good の失敗 (Android。iOS の同じ所はエラーの説明を後ろに付ける feed.error.load_failed_ios)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "feed.error.load_failed_ios": {
+      "args": [
+        {
+          "name": "detail",
+          "type": "string"
+        }
+      ],
+      "ja": "読み込みに失敗しました: {detail}",
+      "ko": "불러오지 못했어요: {detail}",
+      "note": "「最近の編集」の読み込み・Good の失敗 (iOS。Android の同じ所は説明を付けない feed.error.load_failed_android)。detail はエラーの説明 (OS・サーバの文言。訳さない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "feed.error.login_required": {
+      "ja": "ログインが必要です。",
+      "ko": "로그인이 필요해요.",
+      "note": "「最近の編集」で認証が切れていたときのエラー",
+      "platforms": [
+        "android"
+      ]
+    },
+    "feed.error.rate_limited": {
+      "ja": "操作が多すぎます。しばらく待ってからお試しください。",
+      "ko": "요청이 너무 많아요. 잠시 기다린 뒤 다시 시도해 주세요.",
+      "note": "サーバに短時間に何度も送った (429) ときのエラー"
+    },
+    "feed.error.title": {
+      "ja": "エラー",
+      "ko": "오류",
+      "note": "「最近の編集」で読み込みや Good に失敗したときのアラートの見出し"
+    },
+    "feed.good.add.a11y": {
+      "ja": "Good を付ける",
+      "ko": "Good 누르기",
+      "note": "Good (編集へのいいね) ボタンの読み上げ。まだ付けていないとき。Good は機能名なのでそのまま"
+    },
+    "feed.good.remove.a11y": {
+      "ja": "Good を取り消す",
+      "ko": "Good 취소",
+      "note": "Good (編集へのいいね) ボタンの読み上げ。もう付けているとき"
+    },
+    "feed.login.message": {
+      "ja": "編集の提案や Good にはログインが必要です。",
+      "ko": "편집을 제안하거나 Good을 누르려면 로그인해야 해요.",
+      "note": "未ログインで編集の提案・Good を押したときのダイアログの本文",
+      "platforms": [
+        "android"
+      ]
+    },
+    "feed.mine_login.message": {
+      "ja": "自分の編集履歴を見るにはログインしてください。",
+      "ko": "내 편집 기록을 보려면 로그인해 주세요.",
+      "note": "未ログインで自分の編集タブを開いたときの説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "feed.mine_login.title": {
+      "ja": "ログインが必要です",
+      "ko": "로그인이 필요해요",
+      "note": "未ログインで自分の編集タブを開いたときの空状態の見出し",
+      "platforms": [
+        "android"
+      ]
+    },
+    "feed.propose.fab": {
+      "ja": "編集を提案",
+      "ko": "편집 제안",
+      "note": "「最近の編集」右下のボタン。編集の種類を選ぶシートを開く",
+      "platforms": [
+        "android"
+      ]
+    },
+    "feed.revert.confirm.action": {
+      "ja": "取り消す",
+      "ko": "되돌리기",
+      "note": "差し戻しの確認ダイアログの実行ボタン",
+      "platforms": [
+        "android"
+      ]
+    },
+    "feed.revert.confirm.cancel": {
+      "ja": "やめる",
+      "ko": "취소",
+      "note": "差し戻しの確認ダイアログの中止ボタン",
+      "platforms": [
+        "android"
+      ]
+    },
+    "feed.revert.confirm.message": {
+      "args": [
+        {
+          "name": "label",
+          "type": "text"
+        }
+      ],
+      "ja": "「{label}」を編集前の状態に戻します。この操作も履歴に記録されます。",
+      "ko": "“{label}”을(를) 편집 전 상태로 되돌려요. 이 작업도 기록에 남아요.",
+      "note": "差し戻しの確認の本文。label は編集の概要 (サーバの文言) か、無いときはレコードの種類 (record_type.*)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "feed.revert.confirm.title": {
+      "ja": "この編集を取り消しますか？",
+      "ko": "이 편집을 되돌릴까요?",
+      "note": "自分の編集を差し戻す前の確認ダイアログの見出し",
+      "platforms": [
+        "android"
+      ]
+    },
+    "feed.revert.error.conflict": {
+      "ja": "別のユーザーがこの後に編集したため取り消せませんでした。",
+      "ko": "다른 사용자가 그 뒤에 편집해서 되돌리지 못했어요.",
+      "note": "差し戻そうとした編集のあとに別の人の編集があって差し戻せなかったとき",
+      "platforms": [
+        "android"
+      ]
+    },
+    "feed.tab.all": {
+      "ja": "みんなの編集",
+      "ko": "모두의 편집",
+      "note": "「最近の編集」画面上部の切り替え。全員の編集",
+      "platforms": [
+        "android"
+      ]
+    },
+    "feed.tab.mine": {
+      "ja": "自分の編集",
+      "ko": "내 편집",
+      "note": "「最近の編集」画面上部の切り替え。自分の編集だけ",
+      "platforms": [
+        "android"
+      ]
+    },
+    "feed.title": {
+      "ja": "最近の編集",
+      "ko": "최근 편집",
+      "note": "「最近の編集」画面のタイトル (みんなの編集)"
+    },
+    "feed.title_mine": {
+      "ja": "自分の編集",
+      "ko": "내 편집",
+      "note": "「最近の編集」画面を自分の編集だけにしたときのタイトル"
+    },
+    "history.diff.created": {
+      "ja": "新規追加されました",
+      "ko": "새로 추가됐어요",
+      "note": "編集履歴の行: レコードが作られた",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.diff.deleted": {
+      "ja": "削除されました",
+      "ko": "삭제됐어요",
+      "note": "編集履歴の行: レコードが削除された",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.diff.snapshot": {
+      "ja": "セットリスト全体が更新されました",
+      "ko": "세트리스트 전체가 수정됐어요",
+      "note": "編集履歴の行: 公演のセトリがまとめて更新された",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.diff.updated": {
+      "ja": "内容が更新されました",
+      "ko": "내용이 수정됐어요",
+      "note": "編集履歴の行: 更新されたが、変わった項目が分からない",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.empty.message": {
+      "ja": "このデータがまだ一度も編集されていないか、編集が反映待ちです。",
+      "ko": "이 데이터는 아직 한 번도 편집되지 않았거나, 편집이 반영되기를 기다리고 있어요.",
+      "note": "編集履歴が 1 件も無いときの説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.empty.title_android": {
+      "ja": "履歴がありません",
+      "ko": "기록이 없어요",
+      "note": "変更履歴のシートで 1 件も無いとき (Android。iOS の同じ所は history.empty.title_ios)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "history.empty.title_ios": {
+      "ja": "編集履歴はありません",
+      "ko": "편집 기록이 없어요",
+      "note": "編集履歴が 1 件も無いときの見出し (iOS。説明は history.empty.message。Android の同じ所は history.empty.title_android)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.age": {
+      "ja": "年齢",
+      "ko": "나이",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド age (アイドル))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.artwork_url": {
+      "ja": "ジャケット画像",
+      "ko": "재킷 이미지",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド artworkUrl (曲))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.birthday": {
+      "ja": "誕生日",
+      "ko": "생일",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド birthday (アイドル))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.block_label": {
+      "ja": "ブロック",
+      "ko": "블록",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド blockLabel (セトリのブロック))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.blood_type": {
+      "ja": "血液型",
+      "ko": "혈액형",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド bloodType (アイドル))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.brand_id": {
+      "ja": "ブランド",
+      "ko": "브랜드",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド brandId)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.cast_id": {
+      "ja": "キャスト",
+      "ko": "캐스트",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド castId)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.city": {
+      "ja": "都市",
+      "ko": "도시",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド city (ライブ))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.color": {
+      "ja": "イメージカラー",
+      "ko": "이미지 컬러",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド color (アイドル))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.day_label": {
+      "ja": "公演ラベル",
+      "ko": "공연 라벨",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド dayLabel (DAY1 など))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.deleted_at": {
+      "ja": "削除フラグ",
+      "ko": "삭제 플래그",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド deletedAt)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.end_date": {
+      "ja": "終了日",
+      "ko": "종료일",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド endDate (ライブ))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.event_id": {
+      "ja": "ライブ",
+      "ko": "라이브",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド eventId (公演が属するライブ))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.event_type": {
+      "ja": "種別",
+      "ko": "종류",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド eventType (ライブの種類))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.height": {
+      "ja": "身長",
+      "ko": "키",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド height (アイドル))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.idol_id": {
+      "ja": "アイドル",
+      "ko": "아이돌",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド idolId)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.is_encore": {
+      "ja": "アンコール",
+      "ko": "앙코르",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド isEncore)。用語集の検査が「アンコール」の中の「コール」(콜) に反応して警告を出すが、別の語 (앙코르 でよい)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.kana": {
+      "ja": "読み (かな)",
+      "ko": "읽는 법 (가나)",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド kana (曲) / kanaName (アイドル))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.modified_at": {
+      "ja": "更新日時",
+      "ko": "수정 일시",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド modifiedAt)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.name": {
+      "ja": "名称",
+      "ko": "이름",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド name)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.note": {
+      "ja": "メモ",
+      "ko": "메모",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド note)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.official_url": {
+      "ja": "公式URL",
+      "ko": "공식 URL",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド officialUrl (ライブ))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.open_time": {
+      "ja": "開場",
+      "ko": "입장",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド openTime (開場の時刻))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.position": {
+      "ja": "順番",
+      "ko": "순서",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド position)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.release_date": {
+      "ja": "発売日",
+      "ko": "발매일",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド releaseDate (曲))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.romaji": {
+      "ja": "ローマ字",
+      "ko": "로마자",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド romaji)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.setlist_item_id": {
+      "ja": "セトリ項目",
+      "ko": "세트리스트 항목",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド setlistItemId)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.show_date": {
+      "ja": "公演日",
+      "ko": "공연일",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド showDate)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.show_id": {
+      "ja": "公演",
+      "ko": "공연",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド showId)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.song_id": {
+      "ja": "曲",
+      "ko": "곡",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド songId (セトリの曲))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.sort_order": {
+      "ja": "並び順",
+      "ko": "정렬 순서",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド sortOrder)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.start_date": {
+      "ja": "開始日",
+      "ko": "시작일",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド startDate (ライブ))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.start_time": {
+      "ja": "開演",
+      "ko": "공연 시작",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド startTime (開演の時刻))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.title": {
+      "ja": "タイトル",
+      "ko": "제목",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド title)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.field.venue": {
+      "ja": "会場",
+      "ko": "공연장",
+      "note": "編集履歴の差分の見出し: 変わった項目の名前 (CloudKit のフィールド venue (ライブ))",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.load_failed_android": {
+      "ja": "変更履歴の取得に失敗しました",
+      "ko": "변경 기록을 불러오지 못했어요",
+      "note": "変更履歴のシート (レコード・セトリ) の読み込みに失敗したとき (Android。iOS の同じ所は history.load_failed_ios)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "history.load_failed_ios": {
+      "ja": "読み込みに失敗しました",
+      "ko": "불러오지 못했어요",
+      "note": "編集履歴の読み込みに失敗したときの見出し。説明はエラーの文言 (iOS。Android の同じ所は history.load_failed_android)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.reverted_paren": {
+      "ja": "(差戻し済み)",
+      "ko": "(되돌림 완료)",
+      "note": "変更履歴のシートの行で、差し戻された編集に添える注記",
+      "platforms": [
+        "android"
+      ]
+    },
+    "history.setlist.empty": {
+      "ja": "まだ編集されていません",
+      "ko": "아직 편집되지 않았어요",
+      "note": "セトリの編集履歴が 1 件も無いとき",
+      "platforms": [
+        "android"
+      ]
+    },
+    "history.setlist.title": {
+      "ja": "セトリの編集履歴",
+      "ko": "세트리스트 편집 기록",
+      "note": "公演のセトリの編集履歴のシートの見出し (下に公演名)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "history.source.admin": {
+      "ja": "運営",
+      "ko": "운영",
+      "note": "編集履歴の行のバッジ。運営 (管理者) による編集",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.source.revert": {
+      "ja": "巻き戻し",
+      "ko": "되돌리기",
+      "note": "編集履歴の行のバッジ。差し戻しの操作で作られた編集",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.title_android": {
+      "ja": "変更履歴",
+      "ko": "변경 기록",
+      "note": "1 レコードの変更履歴のシートの見出し (Android。iOS の同じ画面は「編集履歴」の history.title_ios)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "history.title_ios": {
+      "ja": "編集履歴",
+      "ko": "편집 기록",
+      "note": "レコードの編集履歴の画面のタイトル (iOS。Android の同じ画面は「変更履歴」の history.title_android)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.value.empty": {
+      "ja": "(空)",
+      "ko": "(비어 있음)",
+      "note": "編集履歴の差分の値: 空の文字列",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.value.items": {
+      "args": [
+        {
+          "name": "count",
+          "type": "count"
+        }
+      ],
+      "ja": "{count} 件",
+      "ko": "{count}건",
+      "note": "編集履歴の差分の値: 配列の要素の数。1000 以上は桁区切りが付く (1,234 件)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.value.no": {
+      "ja": "なし",
+      "ko": "없음",
+      "note": "編集履歴の差分の値: 真偽値の偽",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.value.none": {
+      "ja": "(なし)",
+      "ko": "(없음)",
+      "note": "編集履歴の差分 (旧 → 新) の値: 値が無い (null・項目なし)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "history.value.yes": {
+      "ja": "あり",
+      "ko": "있음",
+      "note": "編集履歴の差分の値: 真偽値の真 (例: アンコール あり)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "inline_login.default_message": {
+      "ja": "投稿・投票にはログインが必要です",
+      "ko": "게시하거나 투표하려면 로그인해야 해요",
+      "note": "未ログインの人に出すインライン導線 (InlineLoginPrompt) の文の既定値 (呼び出し側が渡さないとき)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "list.loading": {
+      "ja": "読み込み中...",
+      "ko": "불러오는 중...",
+      "note": "最近の編集・編集履歴の一覧を読み込んでいる間、中央に出す表示",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "local_write.failed.message": {
+      "args": [
+        {
+          "name": "action",
+          "type": "string"
+        }
+      ],
+      "ja": "{action}に失敗しました。変更は保存されていません。もう一度お試しください。",
+      "ko": "{action}에 실패했어요. 변경 내용은 저장되지 않았어요. 다시 시도해 주세요.",
+      "note": "端末ローカルの書き込み失敗のアラートの本文。action は操作名 (例: メモの保存)。呼び出し側の文言を同じ言語で文字列にしてから差し込む (まだ日本語の文字列のまま渡す画面もある)"
+    },
+    "local_write.failed.title": {
+      "ja": "保存できませんでした",
+      "ko": "저장하지 못했어요",
+      "note": "端末にだけ保存するデータ (担当・参加・メモ・座席・習熟度・家計簿・マイタグ) の書き込みに失敗したときのアラートの見出し"
+    },
+    "login.dialog.cancel": {
+      "ja": "キャンセル",
+      "ko": "취소",
+      "note": "ログインのダイアログの閉じるボタン",
+      "platforms": [
+        "android"
+      ]
+    },
+    "login.dialog.default_message": {
+      "ja": "タグ・動画・投票にはログインが必要です。",
+      "ko": "태그·영상·투표를 이용하려면 로그인해야 해요.",
+      "note": "ログインのダイアログ (CommunityLoginPromptDialog) の本文の既定値 (呼び出し側が渡さないとき)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "login.dialog.title": {
+      "ja": "ログインが必要です",
+      "ko": "로그인이 필요해요",
+      "note": "未ログインで投稿・編集・Good を押したときのダイアログの見出し",
+      "platforms": [
+        "android"
+      ]
+    },
+    "login.google": {
+      "ja": "Googleでログイン",
+      "ko": "Google로 로그인",
+      "note": "Google アカウントでログインするボタン (ログインのダイアログと、自分の編集タブの未ログイン表示)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "login_sheet.close": {
+      "ja": "閉じる",
+      "ko": "닫기",
+      "note": "ログインの誘導シートの左上のボタン",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "login_sheet.message": {
+      "ja": "ライブ・公演・セトリ・楽曲の情報は、ログインしたユーザーみんなで編集できます。誤りの修正や新しいライブの追加に、ぜひ協力してください。",
+      "ko": "라이브·공연·세트리스트·곡 정보는 로그인한 사용자 모두가 함께 편집할 수 있어요. 잘못된 정보를 고치거나 새 라이브를 추가하는 데 꼭 힘을 보태 주세요.",
+      "note": "ログインの誘導シートの説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "login_sheet.point.browse": {
+      "ja": "閲覧はログイン不要。編集する時だけログインします",
+      "ko": "보기만 할 때는 로그인하지 않아도 돼요. 편집할 때만 로그인해요",
+      "note": "ログインの誘導シートの箇条書き (3 つ目)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "login_sheet.point.history": {
+      "ja": "変更履歴が残り、間違えてもいつでも戻せます",
+      "ko": "변경 기록이 남아서 잘못해도 언제든 되돌릴 수 있어요",
+      "note": "ログインの誘導シートの箇条書き (2 つ目)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "login_sheet.point.instant": {
+      "ja": "編集は承認待ちなし。すぐ全員に反映されます",
+      "ko": "편집은 승인을 기다리지 않아요. 바로 모두에게 반영돼요",
+      "note": "ログインの誘導シートの箇条書き (1 つ目)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "login_sheet.title": {
+      "ja": "ログインして編集に参加",
+      "ko": "로그인하고 편집에 참여",
+      "note": "未ログインで編集の導線を押したときのシートの見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "op.create": {
+      "ja": "追加",
+      "ko": "추가",
+      "note": "編集の操作のバッジ (create)"
+    },
+    "op.delete": {
+      "ja": "削除",
+      "ko": "삭제",
+      "note": "編集の操作のバッジ (delete)"
+    },
+    "op.revert": {
+      "ja": "差戻し",
+      "ko": "되돌리기",
+      "note": "編集の操作のバッジ (revert)"
+    },
+    "op.snapshot": {
+      "ja": "セトリ更新",
+      "ko": "세트리스트 수정",
+      "note": "編集の操作のバッジ (snapshot (公演のセトリをまとめて更新))"
+    },
+    "op.update": {
+      "ja": "更新",
+      "ko": "수정",
+      "note": "編集の操作のバッジ (update / replace)"
+    },
+    "propose.event.subtitle": {
+      "ja": "まだ登録されていないライブ・イベントを作る",
+      "ko": "아직 등록되지 않은 라이브·이벤트 만들기",
+      "note": "「ライブを追加」の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "propose.event.title": {
+      "ja": "ライブを追加",
+      "ko": "라이브 추가",
+      "note": "編集の種類: 新しいライブを作る",
+      "platforms": [
+        "android"
+      ]
+    },
+    "propose.footnote": {
+      "ja": "既存の楽曲・アイドル・ライブの修正、公演の追加は、それぞれの詳細画面から行えます。",
+      "ko": "이미 있는 곡·아이돌·라이브의 수정과 공연 추가는 각 상세 화면에서 할 수 있어요.",
+      "note": "編集の種類のシートの下の注意書き",
+      "platforms": [
+        "android"
+      ]
+    },
+    "propose.setlist.subtitle": {
+      "ja": "公演の楽曲・出演者の追加/修正/削除",
+      "ko": "공연의 곡·출연자 추가/수정/삭제",
+      "note": "「セトリを編集」の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "propose.setlist.title": {
+      "ja": "セトリを編集",
+      "ko": "세트리스트 편집",
+      "note": "編集の種類: 公演のセトリを直す",
+      "platforms": [
+        "android"
+      ]
+    },
+    "propose.song.subtitle": {
+      "ja": "まだ登録されていない楽曲を作る",
+      "ko": "아직 등록되지 않은 곡 만들기",
+      "note": "「曲を追加」の説明",
+      "platforms": [
+        "android"
+      ]
+    },
+    "propose.song.title": {
+      "ja": "曲を追加",
+      "ko": "곡 추가",
+      "note": "編集の種類: 新しい曲を作る",
+      "platforms": [
+        "android"
+      ]
+    },
+    "propose.title": {
+      "ja": "編集の種類を選択",
+      "ko": "편집 종류 선택",
+      "note": "「編集を提案」で開くシートの見出し",
+      "platforms": [
+        "android"
+      ]
+    },
+    "record_type.event": {
+      "ja": "ライブ・イベント",
+      "ko": "라이브·이벤트",
+      "note": "編集されたレコードの種類 (Event)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う"
+    },
+    "record_type.idol": {
+      "ja": "アイドル",
+      "ko": "아이돌",
+      "note": "編集されたレコードの種類 (Idol)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う"
+    },
+    "record_type.setlist": {
+      "ja": "セットリスト",
+      "ko": "세트리스트",
+      "note": "編集されたレコードの種類 (SetlistItem / ShowSetlist)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う"
+    },
+    "record_type.setlist_performer": {
+      "ja": "セトリ出演者",
+      "ko": "세트리스트 출연자",
+      "note": "編集されたレコードの種類 (SetlistPerformer)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う"
+    },
+    "record_type.show": {
+      "ja": "公演",
+      "ko": "공연",
+      "note": "編集されたレコードの種類 (Show)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う"
+    },
+    "record_type.show_cast": {
+      "ja": "出演キャスト",
+      "ko": "출연 캐스트",
+      "note": "編集されたレコードの種類 (ShowCast)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う"
+    },
+    "record_type.song": {
+      "ja": "楽曲",
+      "ko": "곡",
+      "note": "編集されたレコードの種類 (Song)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う"
+    },
+    "record_type.song_artist": {
+      "ja": "楽曲アーティスト",
+      "ko": "곡 아티스트",
+      "note": "編集されたレコードの種類 (SongArtist)。対象の名前が引けないときにカードの題に出す。変更履歴のシートの副題にも使う"
+    },
+    "record_type.song_call": {
+      "ja": "コーレス (終了)",
+      "ko": "콜 앤 리스폰스 (종료)",
+      "note": "編集されたレコードの種類 (SongCall)。2026-09-06 に終わった投稿の種類で、過去の履歴だけに出る"
+    }
+  }
+}

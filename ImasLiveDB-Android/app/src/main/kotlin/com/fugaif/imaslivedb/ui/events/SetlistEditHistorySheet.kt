@@ -31,6 +31,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
 import com.fugaif.imaslivedb.data.edit.EditApi
 import com.fugaif.imaslivedb.di.AppModule
+import com.fugaif.imaslivedb.i18n.DisplayText
+import com.fugaif.imaslivedb.i18n.generated.L10n
+import com.fugaif.imaslivedb.i18n.resolve
 import com.fugaif.imaslivedb.ui.theme.DS
 import uniffi.imas_core.relativeTimes
 
@@ -47,13 +50,14 @@ fun SetlistEditHistorySheet(showId: String, showName: String, onDismiss: () -> U
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = LocalContext.current
     var history by remember { mutableStateOf<List<EditApi.RecordHistoryEntry>?>(null) }
-    var error by remember { mutableStateOf<String?>(null) }
+    // 文言の値で持ち、描くときに resolve() する (LaunchedEffect の中は Composable ではない)
+    var error by remember { mutableStateOf<DisplayText?>(null) }
 
     LaunchedEffect(showId) {
         try {
             history = AppModule.from(context).editApi.recordHistory("ShowSetlist", showId)
         } catch (e: Exception) {
-            error = "変更履歴の取得に失敗しました"
+            error = L10n.EditFeed.historyLoadFailedAndroid
         }
     }
 
@@ -62,7 +66,7 @@ fun SetlistEditHistorySheet(showId: String, showName: String, onDismiss: () -> U
             Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            Text("セトリの編集履歴", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+            Text(L10n.EditFeed.historySetlistTitle.resolve(), fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink)
             Text(
                 showName, fontSize = 12.sp, color = DS.ink2,
                 maxLines = 2, overflow = TextOverflow.Ellipsis,
@@ -70,13 +74,13 @@ fun SetlistEditHistorySheet(showId: String, showName: String, onDismiss: () -> U
             )
             val entries = history
             when {
-                error != null -> Text(error.orEmpty(), fontSize = 13.sp, color = DS.danger)
+                error != null -> Text(error?.resolve().orEmpty(), fontSize = 13.sp, color = DS.danger)
                 entries == null -> Box(
                     Modifier.fillMaxWidth().padding(24.dp),
                     contentAlignment = Alignment.Center
                 ) { CircularProgressIndicator() }
                 entries.isEmpty() -> Text(
-                    "まだ編集されていません", fontSize = 13.sp, color = DS.ink2,
+                    L10n.EditFeed.historySetlistEmpty.resolve(), fontSize = 13.sp, color = DS.ink2,
                     modifier = Modifier.padding(16.dp)
                 )
                 else -> {
@@ -89,9 +93,9 @@ fun SetlistEditHistorySheet(showId: String, showName: String, onDismiss: () -> U
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 val (label, color) = opDesign(h.op)
-                                Text(label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = color)
+                                Text(label.resolve(), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = color)
                                 Text(times[i], fontSize = 11.sp, color = DS.ink3)
-                                if (h.reverted) Text("(差戻し済み)", fontSize = 11.sp, color = DS.ink3)
+                                if (h.reverted) Text(L10n.EditFeed.historyRevertedParen.resolve(), fontSize = 11.sp, color = DS.ink3)
                             }
                             if (h.changedFields.isNotEmpty()) {
                                 Text(h.changedFields.joinToString(", "), fontSize = 12.sp, color = DS.ink2)
@@ -110,12 +114,12 @@ fun SetlistEditHistorySheet(showId: String, showName: String, onDismiss: () -> U
  * 操作種別のラベルと色。「最近の編集」画面の同名の表と同じ対応にしてある
  * (向こうは private なので参照できない — 表を足すときは両方直すこと)。
  */
-private fun opDesign(op: String): Pair<String, Color> = when (op) {
-    "create" -> "追加" to DS.success
-    "update", "replace" -> "更新" to Color(0xFF4A90D9)
-    "delete" -> "削除" to DS.danger
-    "revert" -> "差戻し" to DS.warning
-    "snapshot" -> "セトリ更新" to Color(0xFF2FB8A8)
-    else -> op to DS.ink3
+private fun opDesign(op: String): Pair<DisplayText, Color> = when (op) {
+    "create" -> L10n.EditFeed.opCreate to DS.success
+    "update", "replace" -> L10n.EditFeed.opUpdate to Color(0xFF4A90D9)
+    "delete" -> L10n.EditFeed.opDelete to DS.danger
+    "revert" -> L10n.EditFeed.opRevert to DS.warning
+    "snapshot" -> L10n.EditFeed.opSnapshot to Color(0xFF2FB8A8)
+    else -> DisplayText.Verbatim(op) to DS.ink3
 }
 
