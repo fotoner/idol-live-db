@@ -13,7 +13,7 @@ import type { DateBadge as DateBadgeData } from "../lib/schema/DateBadge";
  */
 interface Props {
   badge: DateBadgeData;
-  size?: "sm" | "lg";
+  size?: "sm" | "lg" | "inline";
   showYear?: boolean;
 }
 const { badge, size = "sm", showYear = true } = Astro.props;
@@ -22,7 +22,7 @@ const Tag = badge.weekday ? "time" : "span";
 
 {/* 見た目の 3 分割は耳では「9/19 土 2026」と聞こえる。読み上げには Rust が組んだ 1 本を渡す。 */}
 <Tag
-  class:list={["date-badge", size === "lg" && "date-badge--lg"]}
+  class:list={["date-badge", size === "lg" && "date-badge--lg", size === "inline" && "date-badge--inline"]}
   datetime={badge.weekday ? badge.iso : undefined}
 >
   <span class="u-visually-hidden">{badge.spoken}</span>

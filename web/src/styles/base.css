@@ -203,7 +203,8 @@ hr {
   -webkit-backdrop-filter: saturate(160%) blur(16px);
 }
 .site-nav__inner {
-  max-width: var(--page-wide);
+  /* 本文 (.page) と同じ幅・同じ左端。ロゴと見出しの頭が縦に揃う。 */
+  max-width: var(--page-max);
   margin-inline: auto;
   padding-inline: var(--sp5);
   min-height: var(--header-h);
@@ -548,22 +549,19 @@ hr {
    行そのものがリンクの場所 (行・チップ・タイル) は形で分かるが、文の中の 1 語は
    下線が無いと地の文と見分けが付かない。 */
 .facts__value a,
-.hero__eyebrow a,
-.hero__title a,
 .lede a,
 .u-muted a {
   text-decoration: underline;
   text-decoration-color: var(--ds-ink3);
   text-underline-offset: 3px;
 }
-/* 見出し (大きい字) の下線は細く、薄く。太い字に既定の太さの線を引くと見出しが切れて見える。 */
-.hero__title a {
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.18em;
+/* 見出し (大きい字) のリンクは普段は線を引かない (表紙の題字が切れて見える)。触れたときだけ細く。 */
+.hero__title a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.14em;
 }
 .facts__value a:hover,
-.hero__eyebrow a:hover,
-.hero__title a:hover,
 .lede a:hover,
 .u-muted a:hover {
   text-decoration-color: currentColor;

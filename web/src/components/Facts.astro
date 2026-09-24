@@ -9,13 +9,15 @@ import type { ProfileRow } from "../lib/schema/ProfileRow";
  */
 interface Props {
   rows: readonly ProfileRow[];
+  /** `inline`: 見出しの下の 1 行 (`開演 17:30  会場 …`)。ラベルを値の前に小さく置く。 */
+  variant?: "stack" | "inline";
 }
-const { rows } = Astro.props;
+const { rows, variant = "stack" } = Astro.props;
 ---
 
 {
   rows.length > 0 && (
-    <dl class="facts">
+    <dl class:list={["facts", variant === "inline" && "facts--inline"]}>
       {rows.map((r) => (
         <div class="facts__item">
           <dt class="facts__label">{r.label}</dt>
