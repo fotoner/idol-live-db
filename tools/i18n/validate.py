@@ -4,6 +4,9 @@
 規則 1〜10, 13 を当てる。規則 12 (生成物の不変式) は emit_android.invariant_problems、
 規則 11 (移行マニフェスト) はまだ無い。
 
+機械で白黒が付くもの (プレースホルダの組・max_len・出荷ゲート) はエラー、判断の要るもの
+(用語集・仮名の混じり・複数形の範疇の不足) は警告にする。
+
 外部の入力 (project.yml の本文、ソースの参照) は呼び出し側が渡す。ここではファイルを読まない。
 """
 
@@ -37,6 +40,7 @@ def validate(catalog, project_yml=None, refs=None, external=True):
     """問題の一覧を返す。external=False なら project.yml とソース参照の規則 (8, 13 の後半) を飛ばす。"""
     out = []
     _names(catalog, out)
+    _glossary_shape(catalog, out)
     glossary_terms = _glossary_terms(catalog.glossary)
     infoplist_seen = {}
     for ns in catalog.namespaces:
@@ -137,7 +141,9 @@ def _values(catalog, ns, e, out):
         if count is not None:
             missing = [c for c in cldr.categories(lang) if c not in forms]
             if missing:
-                out.append(warning(ns.path, e.key, "%s の複数形に %s が無い (other で出る)" % (lang, ", ".join(missing))))
+                out.append(warning(ns.path, e.key, "%s の複数形に %s が無い (other で出る)" % (lang, ", ".join(missing)),
+                                   "%s の範疇は %s。例: {%s}" % (lang, " / ".join(cldr.categories(lang)), ", ".join(
+                                       '"%s": "…"' % c for c in cldr.categories(lang)))))
         for cat, text in forms.items():
             label = lang if isinstance(value, str) else "%s.%s" % (lang, cat)
             _text_rules(ns, e, label, text, out)
@@ -211,7 +217,79 @@ def _platform_rules(catalog, ns, e, out, infoplist_seen):
             out.append(error(ns.path, e.key, "AppIntent / AppEntity のメタデータは引数を持てない"))
 
 
-# ---------------------------------------------------------------- 規則 9: 品質 (警告)
+# ---------------------------------------------------------------- 規則 9: 品質 (max_len はエラー、ほかは警告)
+
+def _glossary_shape(catalog, out):
+    """用語集 (i18n/glossary.json) の形。草案なので崩れていても警告だけにする (check は落とさない)。"""
+    g = catalog.glossary
+    where = model.GLOSSARY_PATH
+    if not g:
+        return
+    config = catalog.config
+    for k in g:
+        if k not in model.GLOSSARY_FIELDS:
+            out.append(warning(where, None, "未知のフィールド %s (使えるのは %s)" % (k, ", ".join(model.GLOSSARY_FIELDS))))
+    style = g.get("style", {})
+    if not isinstance(style, dict):
+        out.append(warning(where, None, "style は {言語: 文体の決まり} にする"))
+    else:
+        for lang, rule in style.items():
+            if lang not in config.others():
+                out.append(warning(where, None, "style.%s: %s" % (lang, _unknown_language(config, lang))))
+            elif not isinstance(rule, str) or not rule:
+                out.append(warning(where, None, "style.%s は文字列にする" % lang))
+    terms = g.get("terms", [])
+    if not isinstance(terms, list):
+        out.append(warning(where, None, "terms は [{ja, <言語>…, note, keep}] の配列にする"))
+        return
+    seen = {}
+    for i, t in enumerate(terms):
+        label = "terms[%d]" % i
+        # 用語集は ja の語で引く (カタログの原文が ja なので)
+        if not isinstance(t, dict) or not isinstance(t.get("ja"), str) or not t["ja"]:
+            out.append(warning(where, None, "%s: ja (基準言語の語) が無い" % label))
+            continue
+        label = "terms[%d] (%s)" % (i, t["ja"])
+        if t["ja"] in seen:
+            out.append(warning(where, None, "%s: 同じ語が terms[%d] にもある" % (label, seen[t["ja"]])))
+        seen.setdefault(t["ja"], i)
+        for k, v in t.items():
+            if k in model.GLOSSARY_TERM_FIELDS:
+                continue
+            if k not in config.others():
+                out.append(warning(where, None, "%s: %s" % (label, _unknown_language(config, k))))
+            elif not _term_forms(v):
+                out.append(warning(where, None, "%s: %s は空でない文字列か、その配列にする" % (label, k)))
+        if "note" in t and not isinstance(t["note"], str):
+            out.append(warning(where, None, "%s: note は文字列にする" % label))
+        if "keep" in t and not isinstance(t["keep"], bool):
+            out.append(warning(where, None, "%s: keep は true / false にする" % label))
+
+
+def _unknown_language(config, key):
+    if model.LANG_LIKE_RE.match(key):
+        hint = " (中国語の簡体字は zh-Hans、繁体字は zh-Hant)" if key.lower() in ("cn", "zh", "zh-cn", "zh-tw", "tw") else ""
+        return "言語 %s は config.json の languages (基準言語以外) に無い%s" % (key, hint)
+    return "未知のフィールド %s (使えるのは %s と言語コード)" % (key, ", ".join(model.GLOSSARY_TERM_FIELDS))
+
+
+def _term_forms(v):
+    """用語集の 1 言語の値 → 候補の並び (文字列か文字列の配列。読めなければ空)。"""
+    if isinstance(v, str):
+        return [v] if v else []
+    if isinstance(v, list) and v and all(isinstance(x, str) and x for x in v):
+        return list(v)
+    return []
+
+
+def glossary_forms(term, lang):
+    """用語集の語 term を lang で書くときの候補。keep: true なら ja の語そのものが先頭に入る。"""
+    forms = _term_forms(term.get(lang))
+    if term.get("keep") is True:
+        ja = term["ja"]
+        forms = [ja] + [f for f in forms if f != ja]
+    return forms
+
 
 def _glossary_terms(glossary):
     """用語集の項目と、その語を中に含む長い語 (アンコール ⊃ コール など) の組。
@@ -220,6 +298,7 @@ def _glossary_terms(glossary):
     長い語の訳は長い語の項目が見る。
     """
     terms = glossary.get("terms", []) if isinstance(glossary, dict) else []
+    terms = terms if isinstance(terms, list) else []
     terms = [t for t in terms if isinstance(t, dict) and isinstance(t.get("ja"), str) and t["ja"]]
     return [(t, sorted({u["ja"] for u in terms if t["ja"] in u["ja"] and u["ja"] != t["ja"]}, key=len, reverse=True))
             for t in terms]
@@ -239,7 +318,8 @@ def _quality(catalog, ns, e, terms, out):
             lit = _literal(e, lang, cat)
             label = lang if isinstance(e.values[lang], str) else "%s.%s" % (lang, cat)
             if e.max_len is not None and len(lit) > e.max_len:
-                out.append(warning(ns.path, e.key, "%s が %d 文字で max_len %d を超える" % (label, len(lit), e.max_len)))
+                out.append(error(ns.path, e.key, "%s が %d 文字で max_len %d を超える" % (label, len(lit), e.max_len),
+                                 "max_len は引数を除いた長さの上限 (画面に収まる長さ)。短い言い方にする"))
             if lang == src:
                 continue
             if not e.verbatim_ok and _KANA.search(lit):
@@ -254,14 +334,20 @@ def _quality(catalog, ns, e, terms, out):
             masked = masked.replace(u, "\0")
         if t["ja"] not in masked:
             continue
-        for lang, want in t.items():
-            if lang in ("ja", "note") or lang not in e.values:
+        # 訳のある言語 (基準言語以外) のそれぞれで、用語集のその言語の語 (候補のどれか) があるか。
+        # 英字は大文字小文字を区別しない (文頭の Sentence case)
+        for lang in e.values:
+            if lang == src:
                 continue
-            wants = [want] if isinstance(want, str) else [w for w in want if isinstance(w, str)] if isinstance(want, list) else []
+            wants = glossary_forms(t, lang)
             if not wants:
                 continue
-            lits = [_literal(e, lang, c) for c in e.forms(lang)]
-            if not any(w in lit for w in wants for lit in lits):
+            lits = [_literal(e, lang, c).casefold() for c in e.forms(lang)]
+            if any(w.casefold() in lit for w in wants for lit in lits):
+                continue
+            if t.get("keep") is True and wants == [t["ja"]]:
+                out.append(warning(ns.path, e.key, "用語集では %s は訳さない (%s の値に %s が無い)" % (t["ja"], lang, t["ja"])))
+            else:
                 out.append(warning(ns.path, e.key, "用語集では %s → %s (%s の値に無い)" % (t["ja"], " / ".join(wants), lang)))
 
 
@@ -283,11 +369,12 @@ def _text_sample(catalog, out):
 # ---------------------------------------------------------------- 規則 10: 出荷ゲート
 
 def _gate(catalog, out):
+    """beta / release の言語だけを見る (dev と planned は出荷しないので止めない)。"""
     config = catalog.config
     for lang, channel in config.languages.items():
-        if lang == config.source_language or channel == "dev":
+        if lang == config.source_language or channel not in ("beta", "release"):
             continue
-        counts = {"missing": 0, "unreviewed": 0, "stale": 0}
+        counts = {"missing": 0, "unreviewed": 0, "stale": 0, "edited": 0}
         where = {}
         for ns in catalog.namespaces:
             if ns.kind not in ("ui", "system"):
@@ -299,9 +386,10 @@ def _gate(catalog, out):
                     where.setdefault(ns.name, 0)
                     where[ns.name] += 1
         if any(counts.values()):
-            out.append(error(model.CONFIG_PATH, None, "%s が %s なのに 欠落 %d 件 / 未検収 %d 件 / stale %d 件 (%s)" % (
-                lang, channel, counts["missing"], counts["unreviewed"], counts["stale"], ", ".join(sorted(where))),
-                "python3 tools/i18n/i18n.py stats で一覧。検収したら stamp %s --ns …" % lang))
+            out.append(error(model.CONFIG_PATH, None, "%s が %s なのに 欠落 %d 件 / 未検収 %d 件 / stale %d 件 / edited %d 件 (%s)" % (
+                lang, channel, counts["missing"], counts["unreviewed"], counts["stale"], counts["edited"],
+                ", ".join(sorted(where))),
+                "python3 tools/i18n/i18n.py stats で一覧。人が確かめたら stamp %s --reviewer <名前> --ns …" % lang))
 
 
 # ---------------------------------------------------------------- lock

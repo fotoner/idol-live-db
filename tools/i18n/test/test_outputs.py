@@ -36,13 +36,14 @@ class OutputsTest(unittest.TestCase):
                 "ImasLiveDB-Android/app/i18n",
                 "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/i18n/generated",
                 "ImasLiveDB-Android/app/src/test/kotlin/com/fugaif/imaslivedb/i18n/generated",
+                "i18n/TRANSLATION.md",
             ])
 
     def test_all_roots_for_rich_catalog(self):
         with Fixture(rich(), support.RICH_LANGUAGES) as fx:
             fx.run("generate")
             _, out = fx.run("outputs")
-            self.assertEqual(out.split(), list(support.CLI.OWNED_ROOTS))
+            self.assertEqual(out.split(), list(support.CLI.OWNED_ROOTS) + ["i18n/TRANSLATION.md"])
 
     @unittest.skipUnless(HAS_GIT, "git が無い")
     def test_deleted_root_still_listed_while_in_index(self):

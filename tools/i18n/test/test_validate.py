@@ -167,6 +167,29 @@ class ValueTest(unittest.TestCase):
         self.check({"args": [{"name": "n", "type": "count"}], "ja": "{n}曲", "en": "{n} songs"},
                    "one が無い", languages={"ja": "release", "en": "dev"}, level="warning")
 
+    def test_en_count_without_one_is_warning_even_when_planned(self):
+        entry = {"args": [{"name": "n", "type": "count"}], "ja": "{n}曲", "en": {"other": "{n} songs"}}
+        with Fixture({"songs": ns("songs", {"x": entry})}, {"ja": "release", "en": "planned"}) as fx:
+            problems = fx.problems()
+            self.assertEqual(messages(problems, "error"), [])
+            warned = messages(problems, "warning")
+            self.assertTrue(any("en の複数形に one が無い (other で出る)" in w and '{"one": "…", "other": "…"}' in w
+                                for w in warned), warned)
+        # ko / zh-Hans は範疇が other だけなので警告しない
+        entry = {"args": [{"name": "n", "type": "count"}], "ja": "{n}曲", "ko": "{n}곡", "zh-Hans": "{n}首"}
+        with Fixture({"songs": ns("songs", {"x": entry})}, {"ja": "release", "ko": "dev", "zh-Hans": "planned"}) as fx:
+            self.assertEqual(messages(fx.problems()), [])
+
+    def test_translation_placeholder_set_must_match_args(self):
+        # 翻訳の値が args と違う組の {…} を使うのはエラー (planned の言語も同じ)
+        langs = {"ja": "release", "ko": "dev", "en": "planned", "zh-Hans": "planned"}
+        args = [{"name": "name", "type": "string"}, {"name": "year", "type": "int"}]
+        for lang, value, needle in (("en", "{name} in {yr}", "args に無い {yr}"),
+                                    ("zh-Hans", "{name}的年份", "{year} がない"),
+                                    ("ko", "{year}년", "{name} がない")):
+            with self.subTest(lang=lang):
+                self.check({"args": args, "ja": "{name}の{year}年", lang: value}, needle, languages=langs)
+
     def test_edge_whitespace(self):
         self.check({"ja": " 前"}, "前後に空白")
         self.check({"ja": "後\u3000"}, "前後に空白")
@@ -302,12 +325,96 @@ class QualityWarningTest(unittest.TestCase):
         # 長い語の外に短い語があれば、短い語の訳も求める
         self.assertTrue(any("コール → 콜" in w for w in self.warnings({"ja": "アンコールのコール", "ko": "앙코르의 함성"}, g)))
 
-    def test_max_len(self):
-        self.assertTrue(any("max_len" in w for w in self.warnings({"ja": "まる", "ko": "다섯글자다", "max_len": 4})))
+    def test_max_len_is_error_for_every_language(self):
+        with Fixture({"songs": ns("songs", {"x": {"ja": "まる", "ko": "다섯글자다", "max_len": 4}})}) as fx:
+            errors = messages(fx.problems(), "error")
+            self.assertTrue(any("ko が 5 文字で max_len 4 を超える" in e for e in errors), errors)
+        with Fixture({"songs": ns("songs", {"x": {"ja": "いつつのじ", "max_len": 4}})}) as fx:
+            errors = messages(fx.problems(), "error")
+            self.assertTrue(any("ja が 5 文字で max_len 4 を超える" in e for e in errors), errors)
+        # 引数は数えない。planned の言語の値も同じ規則
+        entry = {"args": [{"name": "name", "type": "string"}], "ja": "{name}まる", "en": "{name} ok", "max_len": 3}
+        with Fixture({"songs": ns("songs", {"x": entry})}, {"ja": "release", "en": "planned"}) as fx:
+            self.assertEqual(messages(fx.problems(), "error"), [])
+            fx.write_json("i18n/catalog/songs.json", ns("songs", {"x": dict(entry, en="{name} long")}))
+            errors = messages(fx.problems(), "error")
+            self.assertTrue(any("en が 5 文字で max_len 3 を超える" in e for e in errors), errors)
+
+
+class GlossaryTest(unittest.TestCase):
+    """用語集 (i18n/glossary.json) の多言語の警告。失敗はしない。"""
+
+    LANGS = {"ja": "release", "ko": "dev", "en": "planned", "zh-Hans": "planned"}
+    GLOSSARY = {
+        "style": {"ko": "해요체", "en": "US English", "zh-Hans": "简体"},
+        "terms": [
+            {"ja": "担当", "ko": "담당", "en": ["my idol", "your idol"], "zh-Hans": "担当"},
+            {"ja": "イントロクイズ", "keep": True},
+            {"ja": "アイドルマスター", "keep": True, "en": "THE IDOLM@STER"},
+        ],
+    }
+
+    def problems(self, entry, glossary=None):
+        with Fixture({"songs": ns("songs", {"x": entry})}, self.LANGS) as fx:
+            fx.write_json("i18n/glossary.json", self.GLOSSARY if glossary is None else glossary)
+            problems = fx.problems()
+        self.assertEqual(messages(problems, "error"), [])
+        return messages(problems, "warning")
+
+    def test_every_translated_language_is_checked(self):
+        warned = self.problems({"ja": "担当を選ぶ", "ko": "최애 고르기", "en": "Choose an oshi", "zh-Hans": "选择本命"})
+        self.assertEqual(sorted(w.split(": x: ")[1] for w in warned), [
+            "用語集では 担当 → my idol / your idol (en の値に無い)",
+            "用語集では 担当 → 担当 (zh-Hans の値に無い)",
+            "用語集では 担当 → 담당 (ko の値に無い)",
+        ])
+
+    def test_matching_translations_and_case(self):
+        self.assertEqual(self.problems({"ja": "担当を選ぶ", "ko": "담당 고르기", "en": "Choose your idol",
+                                        "zh-Hans": "选择担当"}), [])
+        # 英字は大文字小文字を区別しない (sentence case の文頭)
+        self.assertEqual(self.problems({"ja": "担当", "en": "My idol"}), [])
+
+    def test_only_languages_present_on_the_entry(self):
+        self.assertEqual(self.problems({"ja": "担当を選ぶ", "en": "Choose your idol"}), [])
+
+    def test_keep_requires_the_ja_term(self):
+        warned = self.problems({"ja": "イントロクイズで遊ぶ", "ko": "인트로 퀴즈 하기", "en": "Play Intro Quiz"})
+        self.assertIn("用語集では イントロクイズ は訳さない (ko の値に イントロクイズ が無い)", "\n".join(warned))
+        self.assertIn("用語集では イントロクイズ は訳さない (en の値に イントロクイズ が無い)", "\n".join(warned))
+        self.assertEqual(self.problems({"ja": "イントロクイズで遊ぶ", "ko": "イントロクイズ 하기",
+                                        "en": "Play イントロクイズ", "verbatim_ok": True}), [])
+
+    def test_keep_accepts_listed_forms_too(self):
+        self.assertEqual(self.problems({"ja": "アイドルマスターの曲", "en": "Songs of THE IDOLM@STER"}), [])
+        self.assertEqual(self.problems({"ja": "アイドルマスターの曲", "en": "Songs of アイドルマスター",
+                                        "verbatim_ok": True}), [])
+        warned = self.problems({"ja": "アイドルマスターの曲", "en": "Songs of the series"})
+        self.assertTrue(any("アイドルマスター → アイドルマスター / THE IDOLM@STER (en の値に無い)" in w for w in warned), warned)
+
+    def test_unknown_language_keys_warn(self):
+        g = {"terms": [{"ja": "担当", "cn": "担当", "fr": "idole", "comment": "x"}],
+             "style": {"fr": "x", "ja": "y"}, "extra": 1}
+        warned = "\n".join(self.problems({"ja": "曲"}, g))
+        self.assertIn("terms[0] (担当): 言語 cn は config.json の languages (基準言語以外) に無い (中国語の簡体字は zh-Hans", warned)
+        self.assertIn("terms[0] (担当): 言語 fr は", warned)
+        self.assertIn("terms[0] (担当): 未知のフィールド comment", warned)
+        self.assertIn("style.fr: 言語 fr は", warned)
+        self.assertIn("style.ja: 言語 ja は", warned)
+        self.assertIn("未知のフィールド extra", warned)
+
+    def test_shape_problems_warn(self):
+        g = {"terms": [{"ko": "담당"}, {"ja": "担当", "en": [], "keep": "yes"}, {"ja": "担当", "ko": 3}]}
+        warned = "\n".join(self.problems({"ja": "曲"}, g))
+        self.assertIn("terms[0]: ja (基準言語の語) が無い", warned)
+        self.assertIn("terms[1] (担当): en は空でない文字列か、その配列にする", warned)
+        self.assertIn("terms[1] (担当): keep は true / false にする", warned)
+        self.assertIn("terms[2] (担当): 同じ語が terms[1] にもある", warned)
+        self.assertIn("terms[2] (担当): ko は空でない文字列か、その配列にする", warned)
 
 
 class GateTest(unittest.TestCase):
-    """規則 10: beta / release の言語は ui / system に欠落・未検収・stale を残さない。"""
+    """規則 10: beta / release の言語は ui / system に欠落・未検収・stale・edited を残さない。"""
 
     def test_dev_is_not_gated(self):
         with Fixture({"songs": ns("songs", {"x": {"ja": "曲"}})}) as fx:
@@ -326,12 +433,27 @@ class GateTest(unittest.TestCase):
     def test_stamp_then_stale(self):
         catalog = {"songs": ns("songs", {"x": {"ja": "曲", "ko": "곡"}})}
         with Fixture(catalog, {"ja": "release", "ko": "beta"}) as fx:
-            code, out = fx.run("stamp", "ko")
+            code, out = fx.run("stamp", "ko", "--reviewer", "hana")
             self.assertEqual(code, 0, out)
             self.assertEqual(messages(fx.problems(), "error"), [])
             fx.write_json("i18n/catalog/songs.json", ns("songs", {"x": {"ja": "楽曲", "ko": "곡"}}))
             errors = messages(fx.problems(), "error")
             self.assertTrue(any("stale 1 件" in e for e in errors), errors)
+
+    def test_edited_blocks_gate(self):
+        catalog = {"songs": ns("songs", {"x": {"ja": "曲", "ko": "곡"}})}
+        with Fixture(catalog, {"ja": "release", "ko": "beta"}) as fx:
+            self.assertEqual(fx.run("stamp", "ko", "--reviewer", "hana")[0], 0)
+            self.assertEqual(messages(fx.problems(), "error"), [])
+            fx.write_json("i18n/catalog/songs.json", ns("songs", {"x": {"ja": "曲", "ko": "노래"}}))
+            errors = messages(fx.problems(), "error")
+            self.assertTrue(any("ko が beta なのに 欠落 0 件 / 未検収 0 件 / stale 0 件 / edited 1 件" in e
+                                for e in errors), errors)
+
+    def test_planned_is_not_gated(self):
+        catalog = {"songs": ns("songs", {"x": {"ja": "曲", "en": "Song"}, "y": {"ja": "歌"}})}
+        with Fixture(catalog, {"ja": "release", "ko": "dev", "en": "planned", "zh-Hans": "planned"}) as fx:
+            self.assertEqual(messages(fx.problems(), "error"), [])
 
 
 class ConfigTest(unittest.TestCase):

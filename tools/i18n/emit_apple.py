@@ -6,6 +6,8 @@
 - system 名前空間の ios.infoplist の項目は、ターゲットごとの InfoPlist.xcstrings に出す
   (キーは Info.plist のキー名)。
 - テスト用に ImasLiveDBTests/L10n/Generated/L10nCatalogKeys.generated.swift (全キーの見本と期待値)。
+- 出すのはビルドに入る言語 (Config.built_languages) だけ。channel が planned の言語は、カタログに
+  訳があっても表にも Info.plist の表にも期待値にも出さない (基準言語へのフォールバックも出さない)。
 
 書式 (「引数の型と数の書式」(i18n/README.md)): int は String(n) にして %N$@ (桁区切りなし)、count は Int のまま %lld で
 複数形の置換 (substitutions) に入れる (ロケールの桁区切りあり)、string / core / text は %N$@。
@@ -140,9 +142,10 @@ def _localizations(catalog, entry):
     ただし引数のある項目は、訳の無い言語にも基準言語の値を state new で出す。Xcode 27.0 の
     xcstringstool は、引数のある項目で訳の無い言語の表に「キーそのもの」を値として書き、
     実行時にキーが画面に出てしまう (26.0.1 は書かなかった)。明示しておけば版によらず基準言語に落ちる。
+    どちらもビルドに入る言語だけ (planned は訳があっても出さない。出すと Xcode がその言語の lproj を作る)。
     """
     out = {}
-    for lang in catalog.config.languages:
+    for lang in catalog.config.built_languages():
         if entry.has(lang):
             out[lang] = localization(catalog, entry, lang)
         elif entry.args:
@@ -265,7 +268,7 @@ def _swift_dict(pairs):
 
 
 def test_keys_swift(catalog):
-    langs = list(catalog.config.languages)
+    langs = catalog.config.built_languages()
     namespaces = [ns for ns in catalog.namespaces if ns.ios_entries()]
     infoplist = [(t, ns, e) for t in ("app", "widget") for ns, e in infoplist_entries(catalog, t)]
     if not namespaces and not infoplist:
