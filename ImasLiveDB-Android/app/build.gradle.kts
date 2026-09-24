@@ -81,6 +81,10 @@ android {
         }
         debug {
             isMinifyEnabled = false
+            // 疑似言語 en-XA (文字を飾って長くする) と ar-XB (右から左) を Debug にだけ入れる。
+            // 端末の言語をこれにすると、カタログを通っていない文字列 (飾られない) と、長い訳での切れ・
+            // RTL の崩れが見える (手順は i18n/README.md の「疑似言語で確かめる」)。Release には入らない。
+            isPseudoLocalesEnabled = true
         }
     }
 
