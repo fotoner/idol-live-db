@@ -56,6 +56,9 @@ const LIMITS = {
   // lyrics_calls: PUT /songs/:id/calls。コール編集は 1 曲を何度も保存し直す作業なので
   // 歌詞投入より試行回数が多い。admin しか叩けないため広く取る。
   lyrics_calls: 5000,
+  // discord_link: POST /discord/link (Discord の認可 URL の発行)。条件を満たしたあとの
+  // 押し直しや、認可画面での戻る・やり直しを見込んで少し余裕を持たせる。
+  discord_link: 20,
 } as const satisfies Record<string, number>;
 
 /** 日次枠の種類。LIMITS に無い名前は型で弾く (知らない名前に黙って既定値を当てない)。 */
