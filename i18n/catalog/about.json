@@ -1,0 +1,346 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "ui",
+  "namespace": "about",
+  "slices": {
+    "android": [
+      "ImasLiveDB-Android/app/src/main/kotlin/com/fugaif/imaslivedb/ui/settings/InfoScreens.kt"
+    ],
+    "ios": [
+      "ImasLiveDB/Views/About/"
+    ]
+  },
+  "strings": {
+    "jasrac.caption": {
+      "ja": "歌詞は JASRAC の許諾を受けて掲載しています。",
+      "ko": "가사는 JASRAC의 이용 허락을 받아 싣고 있어요.",
+      "note": "「アプリについて」のライセンス情報の節。JASRAC の許諾番号 (JASRAC許諾第…号。許諾書の指定の表記なので訳さない) の下の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "main.app_info.header": {
+      "ja": "アプリ情報",
+      "ko": "앱 정보",
+      "note": "iOS の「アプリについて」画面 (AboutView)の節の見出し。プライバシーポリシー・利用規約・サポート・評価",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "main.app_info.rate": {
+      "ja": "アプリを評価する",
+      "ko": "앱 평가하기",
+      "note": "iOS の「アプリについて」画面 (AboutView)。App Store のレビュー投稿画面を開くリンク",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "main.backup_note": {
+      "ja": "担当・お気に入り・メモは iCloud に自動バックアップされ、再インストールや機種変更でも復元されます (同じ Apple ID でのサインインが必要)。",
+      "ko": "담당·즐겨찾기·메모는 iCloud에 자동으로 백업되어, 재설치하거나 기기를 바꿔도 복원돼요 (같은 Apple ID로 로그인해야 해요).",
+      "note": "iOS の「アプリについて」画面 (AboutView)の下の方の注記",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "main.developer.github": {
+      "ja": "GitHub プロフィール",
+      "ko": "GitHub 프로필",
+      "note": "iOS の「アプリについて」画面 (AboutView)の開発者の節。開発者の GitHub のページを開くリンク",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "main.developer.header": {
+      "ja": "開発者",
+      "ko": "개발자",
+      "note": "iOS の「アプリについて」画面 (AboutView)の節の見出し",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "main.developer.label": {
+      "ja": "開発者",
+      "ko": "개발자",
+      "note": "iOS の「アプリについて」画面 (AboutView)の行の左の項目名。右に開発者名 (fuga-if) が出る",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "main.disclaimer": {
+      "ja": "本アプリはアイドルマスターシリーズの非公式ファンメイドアプリです。バンダイナムコエンターテインメント等の権利者とは一切関係ありません。",
+      "ko": "이 앱은 아이돌마스터 시리즈의 비공식 팬메이드 앱이에요. BANDAI NAMCO Entertainment 등의 권리자와는 아무런 관계가 없어요.",
+      "note": "iOS の「アプリについて」画面 (AboutView)の最下部の権利表記。会社名は訳さず、ko では各社の正式な英字表記を使う (カタカナは韓国語の利用者が読めないため。訳ではなく自社名の表記。この読み方はオーナーの確認待ち)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "main.donate.action": {
+      "ja": "開発をサポートする",
+      "ko": "개발 후원하기",
+      "note": "iOS の「アプリについて」画面 (AboutView)。寄付 (Ko-fi) のページを開くリンク",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "main.donate.footer": {
+      "ja": "サーバー運用費等の足しにさせていただきます。任意のご支援です。",
+      "ko": "서버 운영비 등에 보태 쓸게요. 후원은 선택 사항이에요.",
+      "note": "iOS の「アプリについて」画面 (AboutView)。寄付のリンクの下の注記",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "main.licenses.header": {
+      "ja": "ライセンス情報",
+      "ko": "라이선스 정보",
+      "note": "iOS の「アプリについて」画面 (AboutView)の節の見出し。JASRAC の許諾と使っているライブラリ",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "main.sources.footer": {
+      "ja": "各情報源のデータはそのままの複製ではなく、独自の集計・整形を加えて利用しています。",
+      "ko": "각 출처의 데이터는 그대로 복제하지 않고, 자체적으로 집계·정리해서 이용하고 있어요.",
+      "note": "iOS の「アプリについて」画面 (AboutView)のデータ提供の節の下の注記",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "main.sources.header": {
+      "ja": "データ提供",
+      "ko": "데이터 제공",
+      "note": "iOS の「アプリについて」画面 (AboutView)の節の見出し。データの参照元サイトの一覧",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "main.sources.imas_db": {
+      "ja": "楽曲・ライブ等のデータ参照元",
+      "ko": "곡·라이브 등의 데이터 출처",
+      "note": "iOS の「アプリについて」画面 (AboutView)のデータ提供の節。サイト「アイマスDB」の説明 (サイト名は訳さない)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "main.sources.imas_palette": {
+      "ja": "アイドルのイメージカラー",
+      "ko": "아이돌 이미지 컬러",
+      "note": "iOS の「アプリについて」画面 (AboutView)のデータ提供の節。imas-palette の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "main.sources.imasparql": {
+      "ja": "アイドルのプロフィール (CV・カラー等)",
+      "ko": "아이돌 프로필 (CV·컬러 등)",
+      "note": "iOS の「アプリについて」画面 (AboutView)のデータ提供の節。im@sparql の説明。CV = 声優",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "main.sources.music765plus": {
+      "ja": "楽曲・ライブセトリのデータ参照元",
+      "ko": "곡·라이브 세트리스트의 데이터 출처",
+      "note": "iOS の「アプリについて」画面 (AboutView)のデータ提供の節。サイト music765plus の説明",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "main.tagline": {
+      "ja": "非公式ファンメイドアプリ",
+      "ko": "비공식 팬메이드 앱",
+      "note": "iOS の「アプリについて」画面 (AboutView)の先頭、アプリ名 (ImasLiveDB) の下の一言",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "main.title": {
+      "ja": "アプリについて",
+      "ko": "이 앱에 대해",
+      "note": "iOS の「アプリについて」画面 (AboutView)のナビゲーションタイトル",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "oss.core.license": {
+      "ja": "iOS 版と共有する自作のコアライブラリです。外部ライセンスはありません。",
+      "ko": "iOS 버전과 공유하는 자체 제작 코어 라이브러리예요. 외부 라이선스는 없어요.",
+      "note": "オープンソースライセンス画面。imas-core のライセンス欄 (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "oss.core.owner": {
+      "ja": "本アプリの一部 (Rust)",
+      "ko": "이 앱의 일부 (Rust)",
+      "note": "オープンソースライセンス画面。imas-core (自作のコアライブラリ) の作者欄 (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "oss.intro": {
+      "ja": "本アプリは以下のオープンソースソフトウェアを利用しています。各ライセンスの全文はそれぞれのプロジェクトの配布物に含まれます。",
+      "ko": "이 앱은 다음 오픈 소스 소프트웨어를 이용하고 있어요. 각 라이선스의 전문은 각 프로젝트의 배포물에 포함되어 있어요.",
+      "note": "オープンソースライセンス画面の先頭の説明 (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "oss.item.meta": {
+      "args": [
+        {
+          "name": "owner",
+          "type": "text"
+        },
+        {
+          "name": "license",
+          "type": "text"
+        }
+      ],
+      "ja": "{owner} ・ {license}",
+      "ko": "{owner} · {license}",
+      "note": "オープンソースライセンス画面の各行の 2 行目 (Android)。owner = 作者 (Google など)、license = ライセンス名。どちらも訳さない名前か、上の oss.core.* の文言",
+      "platforms": [
+        "android"
+      ]
+    },
+    "oss.jna_license": {
+      "ja": "Apache License 2.0 / LGPL 2.1 のデュアルライセンス",
+      "ko": "Apache License 2.0 / LGPL 2.1 듀얼 라이선스",
+      "note": "オープンソースライセンス画面。JNA のライセンスの種類 (Android)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "oss.title": {
+      "ja": "オープンソースライセンス",
+      "ko": "오픈 소스 라이선스",
+      "note": "オープンソースライセンスの画面名 (Android。iOS は MyPage の節にある)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "privacy.title": {
+      "ja": "プライバシーポリシー",
+      "ko": "개인정보 처리방침",
+      "note": "プライバシーポリシーの画面名。iOS は「アプリについて」の行とナビゲーションタイトル、Android は上のバー"
+    },
+    "support.faq.artwork.answer_android": {
+      "ja": "配信ストアのデータベースに登録されていない楽曲は画像が表示されません。",
+      "ko": "음원 스토어 데이터베이스에 등록되지 않은 곡은 이미지가 표시되지 않아요.",
+      "note": "サポート画面のよくある質問の答え (Android)。前に「A. 」が付く。iOS の answer_ios と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "support.faq.artwork.answer_ios": {
+      "ja": "Apple Music のデータベースに登録されていない楽曲は画像が表示されません。また、MusicKit の利用には Apple Music サブスクリプションまたは無料トライアルが必要な場合があります。",
+      "ko": "Apple Music 데이터베이스에 등록되지 않은 곡은 이미지가 표시되지 않아요. 또한 MusicKit을 이용하려면 Apple Music 구독 또는 무료 체험이 필요할 수 있어요.",
+      "note": "サポート画面のよくある質問の答え (iOS)。前に「A. 」が付く。Android は answer_android",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "support.faq.artwork.question": {
+      "ja": "ジャケット画像が表示されない",
+      "ko": "재킷 이미지가 표시되지 않아요",
+      "note": "サポート画面のよくある質問。前に「Q. 」が付く"
+    },
+    "support.faq.header": {
+      "ja": "よくある質問",
+      "ko": "자주 묻는 질문",
+      "note": "サポート画面の節の見出し (Q&A)"
+    },
+    "support.faq.scanner.answer": {
+      "ja": "設定 > プライバシーとセキュリティ > 音声認識・カメラ で本アプリへのアクセスを許可してください。",
+      "ko": "설정 > 개인정보 보호 및 보안 > 음성 인식·카메라에서 이 앱의 접근을 허용해 주세요.",
+      "note": "サポート画面のよくある質問の答え (iOS だけ)。前に「A. 」が付く。「設定 > …」は iOS の設定アプリの道順 (ko は韓国語の iOS の表示に合わせる)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "support.faq.scanner.question": {
+      "ja": "セットリストスキャナーが認識しない",
+      "ko": "세트리스트 스캐너가 인식하지 못해요",
+      "note": "サポート画面のよくある質問 (iOS だけ)。前に「Q. 」が付く",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "support.faq.stale_data.answer": {
+      "ja": "GitHub Issue または コミュニティ機能の「修正提案」からご報告ください。確認後に反映します。",
+      "ko": "GitHub Issue 또는 커뮤니티 기능의 “수정 제안”으로 알려 주세요. 확인한 뒤 반영할게요.",
+      "note": "サポート画面のよくある質問の答え。前に「A. 」が付く"
+    },
+    "support.faq.stale_data.question": {
+      "ja": "データが古い・間違っている",
+      "ko": "데이터가 오래됐거나 틀렸어요",
+      "note": "サポート画面のよくある質問。前に「Q. 」が付く"
+    },
+    "support.faq.sync.answer_android": {
+      "ja": "通信環境をご確認のうえ、設定画面から「全データ同期」をお試しください。",
+      "ko": "통신 환경을 확인한 뒤, 설정 화면에서 “전체 데이터 동기화”를 시도해 주세요.",
+      "note": "サポート画面のよくある質問の答え (Android)。前に「A. 」が付く。「全データ同期」は設定画面のボタンの名前 (settings スライスの訳と揃える)",
+      "platforms": [
+        "android"
+      ]
+    },
+    "support.faq.sync.answer_ios": {
+      "ja": "iCloud にサインインしているか、設定 > Apple ID > iCloud で「ImasLiveDB」が有効になっているかご確認ください。",
+      "ko": "iCloud에 로그인했는지, 설정 > Apple ID > iCloud에서 “ImasLiveDB”가 켜져 있는지 확인해 주세요.",
+      "note": "サポート画面のよくある質問の答え (iOS)。前に「A. 」が付く。「設定 > …」は iOS の設定アプリの道順 (ko は韓国語の iOS の表示に合わせる)",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "support.faq.sync.question_android": {
+      "ja": "同期に失敗する",
+      "ko": "동기화가 안 돼요",
+      "note": "サポート画面のよくある質問 (Android)。前に「Q. 」が付く。iOS の question_ios と ja が違う",
+      "platforms": [
+        "android"
+      ]
+    },
+    "support.faq.sync.question_ios": {
+      "ja": "CloudKit 同期に失敗する",
+      "ko": "CloudKit 동기화가 안 돼요",
+      "note": "サポート画面のよくある質問 (iOS)。前に「Q. 」が付く。Android は question_android",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "support.faq.unofficial.answer": {
+      "ja": "はい、本アプリは非公式のファンメイドアプリです。バンダイナムコエンターテインメント等とは一切関係ありません。",
+      "ko": "네, 이 앱은 비공식 팬메이드 앱이에요. BANDAI NAMCO Entertainment 등과는 아무런 관계가 없어요.",
+      "note": "サポート画面のよくある質問の答え。前に「A. 」が付く。会社名は訳さず、ko では各社の正式な英字表記を使う (カタカナは韓国語の利用者が読めないため。訳ではなく自社名の表記。この読み方はオーナーの確認待ち)"
+    },
+    "support.faq.unofficial.question": {
+      "ja": "アプリが公式アプリではないのですか?",
+      "ko": "이 앱은 공식 앱이 아닌가요?",
+      "note": "サポート画面のよくある質問。前に「Q. 」が付く"
+    },
+    "support.feedback.github": {
+      "ja": "GitHub Issue で報告する",
+      "ko": "GitHub Issue로 제보하기",
+      "note": "サポート画面。GitHub の Issue 作成ページを開くリンク"
+    },
+    "support.feedback.header": {
+      "ja": "フィードバック・バグ報告",
+      "ko": "피드백·버그 제보",
+      "note": "サポート画面の節の見出し"
+    },
+    "support.title": {
+      "ja": "サポート",
+      "ko": "지원",
+      "note": "サポート (問い合わせ・よくある質問) の画面名。iOS は「アプリについて」の行とナビゲーションタイトル、Android は上のバー"
+    },
+    "terms.title": {
+      "ja": "利用規約",
+      "ko": "이용약관",
+      "note": "利用規約の画面名。iOS は「アプリについて」の行とナビゲーションタイトル、Android は上のバー"
+    }
+  }
+}

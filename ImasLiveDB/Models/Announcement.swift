@@ -1,12 +1,15 @@
 import SwiftUI
 
 /// アプリ内蔵のお知らせ (新機能告知など)。サーバー不要・アプデで増える (ゼロコスト)。
+///
+/// 見出し・要約・本文は i18n/catalog/announcements.json の文言 (Android と同じキーを引く)。
+/// お知らせを足すときは、先にカタログへ `<slug>.title` / `.summary` / `.body.p<n>` を足してから参照する。
 struct Announcement: Identifiable {
-    let id: String        // リリースをまたいで安定させる
+    let id: String        // リリースをまたいで安定させる (既読の記録キー。訳さない)
     let date: String      // "2026-06-17"
-    let title: String
-    let summary: String
-    let body: [String]    // 段落
+    let title: LocalizedStringResource
+    let summary: LocalizedStringResource
+    let body: [LocalizedStringResource]    // 段落
     let icon: String      // SF Symbol
     let tint: Color
     let link: AnnouncementLink?
@@ -19,17 +22,19 @@ enum AnnouncementLink {
 
 enum AnnouncementCatalog {
     /// 新しいものほど上 (表示順)。
-    static let all: [Announcement] = [
+    ///
+    /// 文言 (LocalizedStringResource) は作った時点の言語で固まるので static let に置かず、読むたびに作る。
+    static var all: [Announcement] { [
         Announcement(
             id: "v2.3.0_setlist_gap",
             date: "2026-09-20",
-            title: "セトリに「何年ぶり」が出るようになりました",
-            summary: "その曲が前にいつ歌われたかを、セットリストの行にそのまま出します。",
+            title: L10n.Announcements.setlistGapTitle,
+            summary: L10n.Announcements.setlistGapSummary,
             body: [
-                "セットリストの各行に「初披露」「3 年 10 か月ぶり」が出るようになりました。久しぶりに来た曲がその場で分かります。",
-                "数えるのは「その公演の時点で何年ぶりだったか」です。昔のライブを開いたときも、当時の間隔が出ます。1 年未満の間隔は出しません (ほとんどの曲が当てはまってしまい、かえって読みにくいため)。",
-                "歌った人の名義の出し方も直しました。これまでは歌った顔ぶれがユニットの人数とぴったり合うと、その曲がユニット名義でなくてもユニット名を出していました。ユニットとして歌った曲と、たまたま同じ顔ぶれで歌った曲を取り違えなくなります。ユニット名の表記の誤り (「315 ALLSTARS」→「315 STARS」など) もあわせて直しています。",
-                "ライブに種別が付きました。周年ライブ・オーケストラ・他社イベント・リリースイベント・バースデーライブなどで見分けられます。",
+                L10n.Announcements.setlistGapBodyP1,
+                L10n.Announcements.setlistGapBodyP2,
+                L10n.Announcements.setlistGapBodyP3,
+                L10n.Announcements.setlistGapBodyP4,
             ],
             icon: "clock.arrow.circlepath",
             tint: Color(red: 0.38, green: 0.60, blue: 0.92),
@@ -38,12 +43,12 @@ enum AnnouncementCatalog {
         Announcement(
             id: "20260906_call_response_retired",
             date: "2026-09-06",
-            title: "「コーレス」の投稿を終了しました",
-            summary: "曲ごとに文章で書くコールは、歌詞の行につけるコールガイドに一本化しました。",
+            title: L10n.Announcements.callResponseRetiredTitle,
+            summary: L10n.Announcements.callResponseRetiredSummary,
             body: [
-                "曲の「コミュニティ」にあった「コーレス」(曲ごとにコールを文章で書く欄) をなくしました。歌詞の行ごとに「ここでこう叫ぶ」を付けられるコールガイドができて、役目が重なっていたためです。",
-                "コールを書きたいときは、曲の歌詞タブで語をタップして付けてください。書いたコールは歌詞の下にそのまま出るので、読む側もどこで叫ぶかで迷いません。",
-                "これまでのコーレス投稿はアプリに表示されなくなります (データは残していますが、コールガイドへの自動の移し替えはしていません)。マイページの投稿累計にもコーレスは数えなくなります。",
+                L10n.Announcements.callResponseRetiredBodyP1,
+                L10n.Announcements.callResponseRetiredBodyP2,
+                L10n.Announcements.callResponseRetiredBodyP3,
             ],
             icon: "hands.clap.fill",
             tint: Color(red: 0.95, green: 0.55, blue: 0.30),
@@ -52,13 +57,13 @@ enum AnnouncementCatalog {
         Announcement(
             id: "v2.3.0_call_guide_dashboard",
             date: "2026-09-04",
-            title: "コールガイドを、みんなで書けるように",
-            summary: "コールが入っている曲・最近の編集・まだ書かれていない曲を 1 枚にまとめました。",
+            title: L10n.Announcements.callGuideDashboardTitle,
+            summary: L10n.Announcements.callGuideDashboardSummary,
             body: [
-                "プロデュースに「コールガイド」を追加しました。コールが入っている曲、最近誰がどの曲を書いたか、「コール曲」タグが付いているのにまだ書かれていない曲が、1 つの画面で見られます。",
-                "書かれていない曲の行から「書く」を押すと、その曲の歌詞タブがそのまま開きます。歌詞の語をタップしてコールを付けて保存するだけです。ログインしていれば誰でも書けます。",
-                "曲一覧の絞り込みに「コールガイドがある曲のみ」を追加しました。ライブ前に、コールのある曲だけを並べて予習できます。",
-                "コールの編集には履歴が残るようになりました。誰がいつどの曲を書いたかが「最近の編集」に出ます (歌詞やコールの中身は履歴に残しません)。",
+                L10n.Announcements.callGuideDashboardBodyP1,
+                L10n.Announcements.callGuideDashboardBodyP2,
+                L10n.Announcements.callGuideDashboardBodyP3,
+                L10n.Announcements.callGuideDashboardBodyP4,
             ],
             icon: "hands.clap.fill",
             tint: Color(red: 0.95, green: 0.55, blue: 0.30),
@@ -67,14 +72,14 @@ enum AnnouncementCatalog {
         Announcement(
             id: "v2.2.0_lyrics",
             date: "2026-09-03",
-            title: "歌詞が読めるようになりました",
-            summary: "JASRAC の許諾を受けて、2,128 曲の歌詞を掲載しました。歌詞の中の言葉から曲を探すこともできます。",
+            title: L10n.Announcements.lyricsTitle,
+            summary: L10n.Announcements.lyricsSummary,
             body: [
-                "曲の詳細に「歌詞」が増えました。2,128 曲ぶんあります。JASRAC の許諾 (第J260943703号) を受けて掲載しています。",
-                "歌詞の中の言葉で曲を探せます。曲一覧の検索で「歌詞」に切り替えると、うろ覚えのフレーズから曲にたどり着けます。当たった箇所の前後が抜き出して表示されます。",
-                "歌詞の表示にはログインが必要です。許諾の条件で「まとめてダウンロードできない形」で配信することになっているため、1 曲ずつの取得になっていて、端末にも残りません。",
-                "カバー曲と、アイマス以外の曲 (合同ライブで披露されたもの) には歌詞を付けていません。",
-                "アルストロメリアの「Bloomy!」が曲一覧に出てこない不具合を直しました。電音部の同名曲の別バージョンとして登録されてしまい、派生曲として隠されていました。「Fly High!」も同じ形で隠れていたので直しています。",
+                L10n.Announcements.lyricsBodyP1,
+                L10n.Announcements.lyricsBodyP2,
+                L10n.Announcements.lyricsBodyP3,
+                L10n.Announcements.lyricsBodyP4,
+                L10n.Announcements.lyricsBodyP5,
             ],
             icon: "text.quote",
             tint: Color(red: 0.82, green: 0.55, blue: 0.35),
@@ -83,17 +88,17 @@ enum AnnouncementCatalog {
         Announcement(
             id: "v2.1.0_cross_tab_search",
             date: "2026-09-01",
-            title: "探すのがもっと速く、まっすぐに",
-            summary: "検索を作り直して 7 倍速くしました。虫眼鏡を畳んで、各一覧が「他のタブに何件あるか」を出します。",
+            title: L10n.Announcements.crossTabSearchTitle,
+            summary: L10n.Announcements.crossTabSearchSummary,
             body: [
-                "検索の絞り込みを 7 倍速くしました。曲名で絞る処理が 8.8ms から 1.2ms、ライブ検索が 11.9ms から 2.2ms です。読み込み時に一度だけ下ごしらえしておく形に変えたので、打つたびに計算し直さなくなりました。",
-                "虫眼鏡を畳みました。検索は各一覧の中にあり、そちらの方が強い (ブランド絞り込みや並び順と組み合わせられる) ので、別画面で完結する横断検索の役目が終わっていました。",
-                "代わりに、各一覧が「別のタブ ライブに 8」のように他のタブの件数を出します。押すとそのタブへ移って同じ語で絞り込みます。当たりが開催済みのライブしか無いときは、開催済み側に着地するので空振りしません。",
-                "ユニット名も かなで探せるようになりました。「あたらよづき」で「可惜夜月」、「はごろもこまち」で「羽衣小町」が出ます。読みが素直でないものが多いので、1 件ずつ出典を当たっています (凸レーション=でこれーしょん、夕星灯=ゆうづつひ、≡君彩≡=きみどり)。",
-                "会場を選ぶ画面が読みを見ていない、曲を選ぶ画面が曲名しか見ていない、といった取りこぼしも塞ぎました。同じ語を打てば、どの画面でも同じように当たります。",
-                "曲の分類の誤りを直しました。MILLIONSTARS の Team 曲 8 曲が全体曲扱いに、Dreaming! や 初 が逆にユニット曲扱いになっていました。Cookie Dough の二重登録も統合し、Alice or Guilty の別バージョンを原曲に紐付けました。",
-                "同期のたびに曲のユニット版が無印へ戻る不具合も直しました。",
-                "秋月涼が 2 人に分かれていたのを 1 人にまとめました。ブランドを兼任しているだけなので、画像を入れた側と入れていない側で別人のように見えていました。姫野かのんの新しい声優 (伊能幸輝さん) と、初星学園の根緒亜紗里先生も登録しました。",
+                L10n.Announcements.crossTabSearchBodyP1,
+                L10n.Announcements.crossTabSearchBodyP2,
+                L10n.Announcements.crossTabSearchBodyP3,
+                L10n.Announcements.crossTabSearchBodyP4,
+                L10n.Announcements.crossTabSearchBodyP5,
+                L10n.Announcements.crossTabSearchBodyP6,
+                L10n.Announcements.crossTabSearchBodyP7,
+                L10n.Announcements.crossTabSearchBodyP8,
             ],
             icon: "magnifyingglass",
             tint: Color(red: 0.36, green: 0.60, blue: 0.90),
@@ -102,18 +107,18 @@ enum AnnouncementCatalog {
         Announcement(
             id: "v2.0.0_readings_android_parity",
             date: "2026-08-28",
-            title: "かなで引けるようになりました",
-            summary: "曲・会場・ライブ名・作詞作曲の読み仮名を全部入れました。Android 版も iOS に大きく追いつきました。",
+            title: L10n.Announcements.readingsAndroidParityTitle,
+            summary: L10n.Announcements.readingsAndroidParitySummary,
             body: [
-                "曲名・会場名・ライブ名・作詞作曲の読み仮名を全件そろえました。漢字の曲名をひらがなで打っても見つかります。「おねがいしんでれら」で「お願い！シンデレラ」が出ます。",
-                "読みは 1 件ずつ裏取りしました。当て字が多く、素直に読むと外れます。独奏歌=アリア、前奏曲=プレリュード、木苺=ラズベリー、283体操=ツバサ体操、Get lol! Get lol! SONG=げろげろそんぐ。熟語の読み違いも直しました (泥濘=でいねい、傀儡=かいらい、雪月風花=せつげつふうか)。",
-                "外部の読み仮名データベースとも全曲を突き合わせました。向こうが正しかったぶんは直し、こちらが正しかったぶんは残しています。",
-                "ユニット名も かなで探せるようになりました。「あたらよづき」で「可惜夜月」、「はごろもこまち」で「羽衣小町」が出ます。読みが素直でないものが多いので、1 件ずつ出典を当たっています (凸レーション=でこれーしょん、夕星灯=ゆうづつひ、≡君彩≡=きみどり)。",
-                "検索の当たり方を全部そろえました。これまでは一覧・ピッカー・ウィジェット設定で当たり方がまちまちで、同じ語を打っても場所によって出たり出なかったりしていました。会場を選ぶ画面が読みを見ていない、曲を選ぶ画面が曲名しか見ていない、といった取りこぼしも塞いでいます。",
-                "起動時の「今日の1曲」を日替わりにし、奇数日は「今日のアイドル」を出すようにしました。アイドルにもタグを付けてもらえます。",
-                "Android 版に通知 (担当の誕生日・ライブ1週間前・チケット締切・月曜予告)、ホーム画面ウィジェット5種、キャラクター画像の取り込み、画像シェアカードを追加しました。",
-                "Android 版の絞り込みを iOS と同じところまで広げました。曲は表示形式・アイドル・作詞作曲・シリーズ・CDシリーズ・曲タイプで、ライブは種別・参加状態・お気に入り・メモで絞れます。検索も曲名/アイドル/作詞作曲を切り替えられ、当たった箇所に色が付きます。",
-                "セトリの曲が 9 件、統合で消えた曲を指したままになっていたのを直しました。同じ壊れ方を次から検査で捕まえます。",
+                L10n.Announcements.readingsAndroidParityBodyP1,
+                L10n.Announcements.readingsAndroidParityBodyP2,
+                L10n.Announcements.readingsAndroidParityBodyP3,
+                L10n.Announcements.readingsAndroidParityBodyP4,
+                L10n.Announcements.readingsAndroidParityBodyP5,
+                L10n.Announcements.readingsAndroidParityBodyP6,
+                L10n.Announcements.readingsAndroidParityBodyP7,
+                L10n.Announcements.readingsAndroidParityBodyP8,
+                L10n.Announcements.readingsAndroidParityBodyP9,
             ],
             icon: "textformat.abc.dottedunderline",
             tint: Color(red: 0.45, green: 0.78, blue: 0.55),
@@ -122,17 +127,17 @@ enum AnnouncementCatalog {
         Announcement(
             id: "v1.11.0_search_timeline",
             date: "2026-08-24",
-            title: "探しかたが変わりました",
-            summary: "検索が各一覧の中に入り、絞り込みや並び順とそのまま組み合わせられるようになりました。年表も追加。",
+            title: L10n.Announcements.searchTimelineTitle,
+            summary: L10n.Announcements.searchTimelineSummary,
             body: [
-                "ライブ・楽曲・アイドルの各一覧に検索欄が付きました。これまでは虫眼鏡を押すと別画面に飛んで、そこで結果が完結してしまい、ブランド絞り込みや並び順と組み合わせられませんでした。今は同じ画面で絞れるので、「シャニマスの曲を配信日順に並べて、そこから名前で絞る」がそのままできます。",
-                "曲は曲名だけでなく、アイドル名や作詞・作曲でも探せます。ほかの対象に何件あるかも出るので、「曲名では見つからないけどアイドル名なら97件」がひと目で分かり、そのまま切り替えられます。",
-                "検索結果の各行が「なぜ出てきたか」を見せます。当たった箇所に色が付き、アイドルで探したときは当たった名前が、作詞作曲で探したときはその名前が行に出ます。並び順を披露回数順や回収率順にすると、その数字も行に並びます。",
-                "見出しと検索欄で2行あったヘッダーを1行に畳みました。一覧が見え始めるまでが近くなっています。絞り込みの動作そのものも12倍速くしました。",
-                "プロデュースタブに「年表」を追加。ライブ・楽曲シリーズ・節目を1枚で俯瞰できます。周年やアニメ放映などの節目を34件収録しました。",
-                "声優さんの情報を「いつからいつまでが誰」の形に作り直しました。交代のあったアイドルは、歴代のキャストが期間付きで見られます。",
-                "週替わりでソロCDが出ていた「SPECIAL SOLO RECORDS」を全468曲そろえました。ギネス世界記録に認定された52週連続リリースの企画です。",
-                "アプリアイコンを新しくしました。",
+                L10n.Announcements.searchTimelineBodyP1,
+                L10n.Announcements.searchTimelineBodyP2,
+                L10n.Announcements.searchTimelineBodyP3,
+                L10n.Announcements.searchTimelineBodyP4,
+                L10n.Announcements.searchTimelineBodyP5,
+                L10n.Announcements.searchTimelineBodyP6,
+                L10n.Announcements.searchTimelineBodyP7,
+                L10n.Announcements.searchTimelineBodyP8,
             ],
             icon: "magnifyingglass",
             tint: Color(red: 0.42, green: 0.6, blue: 0.88),
@@ -141,15 +146,15 @@ enum AnnouncementCatalog {
         Announcement(
             id: "v1.10.0_venues_setlist_copy",
             date: "2026-07-27",
-            title: "会場から探せる・セトリが見やすく",
-            summary: "ライブを会場で絞り込めるように。セトリのシンプル表示と、画面の文字をコピーする機能も追加しました。",
+            title: L10n.Announcements.venuesSetlistCopyTitle,
+            summary: L10n.Announcements.venuesSetlistCopySummary,
             body: [
-                "会場マスタを追加しました。ライブ一覧を会場で絞り込めるほか、公演の会場名やキャパシティが見られます。改名した会場は、その公演当時の名前で表示します。",
-                "セトリに「シンプル表示」を追加。曲名だけを詰めて並べるので、現地でさっと確認したり、そのまま共有したりしやすくなりました。",
-                "曲名・アイドル名・よみ・CV名などを長押しでコピーできるようになりました。コーレスやタグの説明は、文字を選んで一部だけコピーできます。",
-                "ユニット詳細を大幅に拡張。タグ付けや投票の対象になり、画像も登録できます。アイドル一覧はアイドル/ユニットの2タブになりました。",
-                "「この曲が好きな人にはこれも」のおすすめを作り直しました。タグがたくさん付いた有名曲ばかり出ていたのを、本当にタグの傾向が近い曲が出るように。開くたびに顔ぶれが変わります。",
-                "お気に入り・担当・投票履歴の引き継ぎコードとバックアップに対応しました。機種変更時にご利用ください。",
+                L10n.Announcements.venuesSetlistCopyBodyP1,
+                L10n.Announcements.venuesSetlistCopyBodyP2,
+                L10n.Announcements.venuesSetlistCopyBodyP3,
+                L10n.Announcements.venuesSetlistCopyBodyP4,
+                L10n.Announcements.venuesSetlistCopyBodyP5,
+                L10n.Announcements.venuesSetlistCopyBodyP6,
             ],
             icon: "building.2",
             tint: Color(red: 0.45, green: 0.75, blue: 0.6),
@@ -158,13 +163,13 @@ enum AnnouncementCatalog {
         Announcement(
             id: "v1.9.0_idol_tags_community",
             date: "2026-07-10",
-            title: "アイドルにもタグ付けできるように",
-            summary: "アイドル詳細に「コミュニティ」タブが登場。タグ付けや投票の実績がまとめて見られます。",
+            title: L10n.Announcements.idolTagsCommunityTitle,
+            summary: L10n.Announcements.idolTagsCommunitySummary,
             body: [
-                "曲だけでなく、アイドルにもみんなでタグを付けられるようになりました。タグはタップで自分の一票をオン/オフ、長押しでそのタグが付いた他の曲・アイドルのランキングが見られます。",
-                "アイドル詳細に「コミュニティ」タブを追加。タグ一覧に加えて、「みんなの投票」で過去に獲得した順位 (優勝/第N位) バッジもここにまとまりました。",
-                "投票お題への曲候補ピッカーを大幅強化。作詞作曲者やタグ、CDシリーズ、アイドルからも曲を探せるようになり、通常の楽曲一覧と同じ絞り込みが使えます。",
-                "プロデュースタブに「タグの動き」を追加。伸びてるタグ・タグが急上昇中の曲やアイドル・最近つけられたタグをまとめてチェックできます。",
+                L10n.Announcements.idolTagsCommunityBodyP1,
+                L10n.Announcements.idolTagsCommunityBodyP2,
+                L10n.Announcements.idolTagsCommunityBodyP3,
+                L10n.Announcements.idolTagsCommunityBodyP4,
             ],
             icon: "tag.circle",
             tint: Color(red: 0.4, green: 0.65, blue: 0.85),
@@ -173,15 +178,15 @@ enum AnnouncementCatalog {
         Announcement(
             id: "v1.8.1_polls_scope",
             date: "2026-06-29",
-            title: "投票の候補を絞り込める",
-            summary: "ブランド限定や候補リスト指定で、企画ものの「お題」が立てやすくなりました。",
+            title: L10n.Announcements.pollsScopeTitle,
+            summary: L10n.Announcements.pollsScopeSummary,
             body: [
-                "「お題を投稿」で、投票候補を「全て」「ブランド限定」「候補指定」から選べるようになりました。",
-                "ブランド限定: 選んだブランドの曲/アイドルだけが候補。「シャニ限定で好きな曲は？」のような企画に。複数ブランド選択で合同ライブの予想にも。",
-                "候補指定: 作成者が候補を直接ピック。「この5曲のうちどれが好き？」のような企画に。最低2件あれば作成可能。",
-                "曲のピッカーがリフレッシュ。右上のフィルターから並び順 (五十音 / リリース日 / 披露回数)、ライブ履歴のみ曲を隠す、リミックスを含める、などを切り替えられます。",
-                "セトリ予想画面の行間と「歌唱メンバー予想」ボタンの見た目を整理しました。",
-                "アイドル詳細のタブを切り替えるとスクロール位置がリセットされるように。",
+                L10n.Announcements.pollsScopeBodyP1,
+                L10n.Announcements.pollsScopeBodyP2,
+                L10n.Announcements.pollsScopeBodyP3,
+                L10n.Announcements.pollsScopeBodyP4,
+                L10n.Announcements.pollsScopeBodyP5,
+                L10n.Announcements.pollsScopeBodyP6,
             ],
             icon: "list.bullet.rectangle.portrait",
             tint: Color(red: 0.85, green: 0.4, blue: 0.65),
@@ -190,14 +195,14 @@ enum AnnouncementCatalog {
         Announcement(
             id: "v1.8.0_polls_polish",
             date: "2026-06-27",
-            title: "みんなの投票がもっと便利に",
-            summary: "ランキングから曲・アイドル詳細へ。優勝した曲には王冠バッジが付きます。",
+            title: L10n.Announcements.pollsPolishTitle,
+            summary: L10n.Announcements.pollsPolishSummary,
             body: [
-                "「みんなの投票」のランキングから、曲やアイドルをタップして詳細を開けるようになりました。投票受付中のお題は、まだ投票していないものが選ばれて表示されます。",
-                "終了したお題で1位になった曲・アイドルには、詳細画面に「優勝」バッジが付くように。タップでそのお題の最終結果も見られます。",
-                "楽曲の歌唱メンバー情報を、実際のCD編成に合わせて正確に直しました。",
-                "担当・お気に入り・メモを iCloud に自動バックアップ。再インストールや機種変更でも復元されます。",
-                "一覧の読み込み表示をスケルトンに変更し、検索・ツールバーの操作感も整えました。",
+                L10n.Announcements.pollsPolishBodyP1,
+                L10n.Announcements.pollsPolishBodyP2,
+                L10n.Announcements.pollsPolishBodyP3,
+                L10n.Announcements.pollsPolishBodyP4,
+                L10n.Announcements.pollsPolishBodyP5,
             ],
             icon: "chart.bar.doc.horizontal",
             tint: Color(red: 0.95, green: 0.62, blue: 0.12),
@@ -206,12 +211,12 @@ enum AnnouncementCatalog {
         Announcement(
             id: "v1.7.1_widget_polish",
             date: "2026-06-19",
-            title: "スライドショーの画像を選べるように",
-            summary: "ウィジェットに出す画像を選べるようになり、アイドル選択も探しやすくなりました。",
+            title: L10n.Announcements.widgetPolishTitle,
+            summary: L10n.Announcements.widgetPolishSummary,
             body: [
-                "ウィジェットのスライドショーに出す画像を、ギャラリーで1枚ずつ選べるようになりました。サムネを長押しして「スライドショーから外す/入れる」を切り替えられます。お気に入りだけを回すこともできます。",
-                "ウィジェット編集でアイドルを選ぶとき、検索で絞り込めるようになり、ブランド名も表示されるようになりました。",
-                "ギャラリーの表示や、画像まわりの細かな不具合を修正しました。",
+                L10n.Announcements.widgetPolishBodyP1,
+                L10n.Announcements.widgetPolishBodyP2,
+                L10n.Announcements.widgetPolishBodyP3,
             ],
             icon: "rectangle.stack.badge.play",
             tint: Color(red: 0.4, green: 0.5, blue: 1),
@@ -220,18 +225,18 @@ enum AnnouncementCatalog {
         Announcement(
             id: "v1.7_oshi_widget",
             date: "2026-06-17",
-            title: "担当の画像をホーム画面に",
-            summary: "ホーム画面ウィジェットに、自分で入れた推しの画像を表示できるようになりました。",
+            title: L10n.Announcements.oshiWidgetTitle,
+            summary: L10n.Announcements.oshiWidgetSummary,
             body: [
-                "アイドル詳細の「ギャラリー」に画像を何枚でも追加できるようになりました。先頭の1枚がアイコンになります。",
-                "ホーム画面ウィジェット「担当の画像」を追加すると、選んだアイドルの画像を表示。タップで次の画像に切り替わり、放っておいても自動でローテーションします。",
-                "「タップでアプリ」版もあるので、お気に入りの起動ショートカットとしても使えます。",
+                L10n.Announcements.oshiWidgetBodyP1,
+                L10n.Announcements.oshiWidgetBodyP2,
+                L10n.Announcements.oshiWidgetBodyP3,
             ],
             icon: "person.crop.square.badge.camera",
             tint: Color(red: 1, green: 0.3, blue: 0.55),
             link: .widgetHowTo
         ),
-    ]
+    ] }
 }
 
 /// App.init など MainActor 隔離外からも読める軽量ヘルパ (UserDefaults 直読み)。

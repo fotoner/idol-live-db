@@ -7,53 +7,54 @@ struct SupportView: View {
 
     var body: some View {
         List {
-            Section("フィードバック・バグ報告") {
+            Section(L10n.About.supportFeedbackHeader) {
                 Button {
                     AppAnalytics.tap("support.github_issue")
                     openURL(githubIssueURL)
                 } label: {
-                    Label("GitHub Issue で報告する", systemImage: "arrow.up.right.square")
+                    Label(L10n.About.supportFeedbackGithub, systemImage: "arrow.up.right.square")
                 }
             }
 
-            Section("よくある質問") {
+            Section(L10n.About.supportFaqHeader) {
                 faqItem(
-                    question: "データが古い・間違っている",
-                    answer: "GitHub Issue または コミュニティ機能の「修正提案」からご報告ください。確認後に反映します。"
+                    question: L10n.About.supportFaqStaleDataQuestion,
+                    answer: L10n.About.supportFaqStaleDataAnswer
                 )
 
                 faqItem(
-                    question: "ジャケット画像が表示されない",
-                    answer: "Apple Music のデータベースに登録されていない楽曲は画像が表示されません。また、MusicKit の利用には Apple Music サブスクリプションまたは無料トライアルが必要な場合があります。"
+                    question: L10n.About.supportFaqArtworkQuestion,
+                    answer: L10n.About.supportFaqArtworkAnswerIos
                 )
 
                 faqItem(
-                    question: "CloudKit 同期に失敗する",
-                    answer: "iCloud にサインインしているか、設定 > Apple ID > iCloud で「ImasLiveDB」が有効になっているかご確認ください。"
+                    question: L10n.About.supportFaqSyncQuestionIos,
+                    answer: L10n.About.supportFaqSyncAnswerIos
                 )
 
                 faqItem(
-                    question: "セットリストスキャナーが認識しない",
-                    answer: "設定 > プライバシーとセキュリティ > 音声認識・カメラ で本アプリへのアクセスを許可してください。"
+                    question: L10n.About.supportFaqScannerQuestion,
+                    answer: L10n.About.supportFaqScannerAnswer
                 )
 
                 faqItem(
-                    question: "アプリが公式アプリではないのですか?",
-                    answer: "はい、本アプリは非公式のファンメイドアプリです。バンダイナムコエンターテインメント等とは一切関係ありません。"
+                    question: L10n.About.supportFaqUnofficialQuestion,
+                    answer: L10n.About.supportFaqUnofficialAnswer
                 )
             }
         }
-        .navigationTitle("サポート")
+        .navigationTitle(L10n.About.supportTitle)
         .navigationBarTitleDisplayMode(.inline)
         .trackScreen("support")
     }
 
-    private func faqItem(question: String, answer: String) -> some View {
+    /// 「Q. 」「A. 」はどの言語でも同じ記号なのでカタログに入れず、訳した問いと答えの前に付ける。
+    private func faqItem(question: LocalizedStringResource, answer: LocalizedStringResource) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Q. \(question)")
+            Text(verbatim: "Q. \(String(localized: question))")
                 .font(.imasSubhead)
                 .fontWeight(.semibold)
-            Text("A. \(answer)")
+            Text(verbatim: "A. \(String(localized: answer))")
                 .font(.imasSubhead)
                 .foregroundStyle(DS.ink2)
                 .fixedSize(horizontal: false, vertical: true)

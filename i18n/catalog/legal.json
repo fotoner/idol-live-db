@@ -1,0 +1,258 @@
+{
+  "ios_bundles": [
+    "app"
+  ],
+  "kind": "content",
+  "namespace": "legal",
+  "slices": {
+    "ios": [
+      "ImasLiveDB/Views/About/PrivacyPolicyView.swift",
+      "ImasLiveDB/Views/About/TermsOfServiceView.swift"
+    ]
+  },
+  "strings": {
+    "privacy.collected.body_android": {
+      "ja": "・端末識別子（UUID）: 端末内にのみ保存される匿名の識別子です。個人情報と紐付けることはありません。\n・アプリ設定: デフォルトブランドなどの設定は端末内のみに保存されます。\n・アカウント情報: コミュニティ機能を利用する場合、Google アカウントによるログインが必要です。投稿したセットリスト・修正提案などのコンテンツはサーバーに保存・公開されます。",
+      "ko": "· 기기 식별자 (UUID): 기기 안에만 저장되는 익명 식별자예요. 개인정보와 연결하지 않아요.\n· 앱 설정: 기본 브랜드 등의 설정은 기기 안에만 저장돼요.\n· 계정 정보: 커뮤니티 기능을 이용하려면 Google 계정으로 로그인해야 해요. 게시한 세트리스트·수정 제안 등의 콘텐츠는 서버에 저장·공개돼요.",
+      "note": "プライバシーポリシー「収集するデータ」の本文 (Android。箇条書き 3 行)。iOS の body_ios と ja が違う。参考訳。release に上げる前にオーナーの確認が要る",
+      "platforms": [
+        "android"
+      ]
+    },
+    "privacy.collected.body_ios": {
+      "ja": "• 端末識別子（UUID）: Keychain に保存される匿名の識別子です。個人情報と紐付けることはありません。\n• アプリ設定: お気に入りブランドなどの設定は UserDefaults に端末内のみ保存されます。\n• CloudKit 投稿内容: コミュニティ機能を利用する場合、Apple ID による認証が必要です。投稿したセットリスト・修正提案などのコンテンツは CloudKit Public Database に保存・公開されます。",
+      "ko": "• 기기 식별자 (UUID): Keychain에 저장되는 익명 식별자예요. 개인정보와 연결하지 않아요.\n• 앱 설정: 즐겨찾기 브랜드 등의 설정은 UserDefaults를 사용해 기기 안에만 저장돼요.\n• CloudKit 게시 내용: 커뮤니티 기능을 이용하려면 Apple ID 인증이 필요해요. 게시한 세트리스트·수정 제안 등의 콘텐츠는 CloudKit Public Database에 저장·공개돼요.",
+      "note": "プライバシーポリシー「収集するデータ」の本文 (iOS。箇条書き 3 行)。Android は body_android。参考訳。release に上げる前にオーナーの確認が要る",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "privacy.collected.header": {
+      "ja": "収集するデータ",
+      "ko": "수집하는 데이터",
+      "note": "プライバシーポリシーの節の見出し。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "privacy.contact.body": {
+      "ja": "プライバシーに関するお問い合わせ・データ削除依頼は下記 GitHub Issue からお願いします。\nhttps://github.com/fuga-if/imas-live-privacy/issues/new",
+      "ko": "개인정보 관련 문의·데이터 삭제 요청은 아래 GitHub Issue로 해 주세요.\nhttps://github.com/fuga-if/imas-live-privacy/issues/new",
+      "note": "プライバシーポリシー「連絡先」の本文。2 行目の URL は変えない。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "privacy.contact.header": {
+      "ja": "連絡先",
+      "ko": "연락처",
+      "note": "プライバシーポリシーの節の見出し。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "privacy.frameworks.body": {
+      "ja": "• CloudKit: コミュニティデータの同期・投稿\n• MusicKit: Apple Music からのジャケット画像取得\n• Speech（音声認識）: セットリストスキャン機能\n• Vision: OCR によるセットリスト読み取り",
+      "ko": "• CloudKit: 커뮤니티 데이터 동기화·게시\n• MusicKit: Apple Music에서 재킷 이미지 가져오기\n• Speech (음성 인식): 세트리스트 스캔 기능\n• Vision: OCR로 세트리스트 읽기",
+      "note": "プライバシーポリシー「使用する Apple フレームワーク」の本文 (iOS だけ。箇条書き 4 行。フレームワーク名は訳さない)。参考訳。release に上げる前にオーナーの確認が要る",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "privacy.frameworks.header": {
+      "ja": "使用する Apple フレームワーク",
+      "ko": "사용하는 Apple 프레임워크",
+      "note": "プライバシーポリシーの節の見出し (iOS だけ)。参考訳。release に上げる前にオーナーの確認が要る",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "privacy.last_updated": {
+      "ja": "最終更新日: 2026年4月23日",
+      "ko": "최종 업데이트: 2026년 4월 23일",
+      "note": "プライバシーポリシーの末尾の最終更新日。日付は文書の版の一部なので引数にしない (改訂したら ja ごと直す)。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "privacy.overview.body": {
+      "ja": "本アプリ（ImasLiveDB）は、アイドルマスターシリーズのライブ・セットリスト情報を管理・閲覧するための非公式ファンメイドアプリです。株式会社バンダイナムコエンターテインメントをはじめとする権利者とは一切関係ありません。",
+      "ko": "이 앱 (ImasLiveDB)은 아이돌마스터 시리즈의 라이브·세트리스트 정보를 관리·열람하기 위한 비공식 팬메이드 앱이에요. BANDAI NAMCO Entertainment Inc.를 비롯한 권리자와는 아무런 관계가 없어요.",
+      "note": "プライバシーポリシー「アプリの概要」の本文。会社名は訳さず、ko では各社の正式な英字表記を使う (カタカナは韓国語の利用者が読めないため。訳ではなく自社名の表記。この読み方はオーナーの確認待ち)。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "privacy.overview.header": {
+      "ja": "アプリの概要",
+      "ko": "앱 개요",
+      "note": "プライバシーポリシーの節の見出し。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "privacy.rights.body_android": {
+      "ja": "アカウントおよび投稿データの削除は、設定画面の「アカウントを削除」からいつでも行えます。個別のお問い合わせは GitHub Issue にてご連絡ください。",
+      "ko": "계정과 게시 데이터는 설정 화면의 “계정 삭제”에서 언제든지 삭제할 수 있어요. 개별 문의는 GitHub Issue로 연락해 주세요.",
+      "note": "プライバシーポリシー「ユーザーの権利」の本文 (Android)。iOS の body_ios と ja が違う。「アカウントを削除」は設定画面のボタンの名前 (settings スライスの訳と揃える)。参考訳。release に上げる前にオーナーの確認が要る",
+      "platforms": [
+        "android"
+      ]
+    },
+    "privacy.rights.body_ios": {
+      "ja": "投稿データの削除を希望される場合は、GitHub Issue にてご連絡ください。対応いたします。",
+      "ko": "게시 데이터 삭제를 원하시면 GitHub Issue로 연락해 주세요. 처리해 드릴게요.",
+      "note": "プライバシーポリシー「ユーザーの権利」の本文 (iOS)。Android は body_android。参考訳。release に上げる前にオーナーの確認が要る",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "privacy.rights.header": {
+      "ja": "ユーザーの権利",
+      "ko": "사용자의 권리",
+      "note": "プライバシーポリシーの節の見出し。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "privacy.sharing.body_android": {
+      "ja": "コミュニティ機能で投稿したコンテンツ（セットリスト報告・修正提案など）は他のユーザーに公開されます。投稿内容に個人情報を含めないようご注意ください。",
+      "ko": "커뮤니티 기능으로 게시한 콘텐츠 (세트리스트 보고·수정 제안 등)는 다른 사용자에게 공개돼요. 게시 내용에 개인정보를 넣지 않도록 주의해 주세요.",
+      "note": "プライバシーポリシー「データの共有」の本文 (Android)。iOS の body_ios と ja が違う。参考訳。release に上げる前にオーナーの確認が要る",
+      "platforms": [
+        "android"
+      ]
+    },
+    "privacy.sharing.body_ios": {
+      "ja": "コミュニティ機能で投稿したコンテンツ（セットリスト報告・修正提案など）は CloudKit Public Database を通じて他のユーザーに公開されます。投稿内容に個人情報を含めないようご注意ください。",
+      "ko": "커뮤니티 기능으로 게시한 콘텐츠 (세트리스트 보고·수정 제안 등)는 CloudKit Public Database를 통해 다른 사용자에게 공개돼요. 게시 내용에 개인정보를 넣지 않도록 주의해 주세요.",
+      "note": "プライバシーポリシー「データの共有」の本文 (iOS)。Android は body_android。参考訳。release に上げる前にオーナーの確認が要る",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "privacy.sharing.header": {
+      "ja": "データの共有",
+      "ko": "데이터 공유",
+      "note": "プライバシーポリシーの節の見出し。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "privacy.third_party.body_android": {
+      "ja": "・Cloudflare Workers: アプリの API 通信先として利用しています。\n・Google Sign-In: ログイン認証に利用しています。",
+      "ko": "· Cloudflare Workers: 앱의 API 서버로 이용하고 있어요.\n· Google Sign-In: 로그인 인증에 이용하고 있어요.",
+      "note": "プライバシーポリシー「サードパーティサービス」の本文 (Android。箇条書き 2 行)。iOS の body_ios と ja が違う。参考訳。release に上げる前にオーナーの確認が要る",
+      "platforms": [
+        "android"
+      ]
+    },
+    "privacy.third_party.body_ios": {
+      "ja": "• Cloudflare Workers: アプリの API 通信先として利用しています。\n• Apple Music: ジャケット画像の取得に MusicKit API を利用しています（正式な Apple のサービスです）。",
+      "ko": "• Cloudflare Workers: 앱의 API 서버로 이용하고 있어요.\n• Apple Music: 재킷 이미지를 가져오는 데 MusicKit API를 이용하고 있어요 (Apple의 정식 서비스예요).",
+      "note": "プライバシーポリシー「サードパーティサービス」の本文 (iOS。箇条書き 2 行)。Android は body_android。参考訳。release に上げる前にオーナーの確認が要る",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "privacy.third_party.header": {
+      "ja": "サードパーティサービス",
+      "ko": "서드파티 서비스",
+      "note": "プライバシーポリシーの節の見出し。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "terms.contact.body": {
+      "ja": "ご意見・不具合報告は GitHub Issue にてご連絡ください。\nhttps://github.com/fuga-if/imas-live-privacy/issues/new",
+      "ko": "의견·버그 제보는 GitHub Issue로 연락해 주세요.\nhttps://github.com/fuga-if/imas-live-privacy/issues/new",
+      "note": "利用規約「連絡先」の本文。2 行目の URL は変えない。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "terms.contact.header": {
+      "ja": "連絡先",
+      "ko": "연락처",
+      "note": "利用規約の節の見出し。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "terms.content_license.body_android": {
+      "ja": "ユーザーが投稿したコンテンツはサーバーに保存され、本アプリを利用する他のユーザーに公開されます。投稿することで、当該コンテンツをアプリ内で表示・利用することに同意したものとみなします。",
+      "ko": "사용자가 게시한 콘텐츠는 서버에 저장되어, 이 앱을 이용하는 다른 사용자에게 공개돼요. 게시하면 해당 콘텐츠를 앱 안에서 표시·이용하는 데 동의한 것으로 간주해요.",
+      "note": "利用規約「投稿コンテンツのライセンス」の本文 (Android)。iOS の body_ios と ja が違う。参考訳。release に上げる前にオーナーの確認が要る",
+      "platforms": [
+        "android"
+      ]
+    },
+    "terms.content_license.body_ios": {
+      "ja": "ユーザーが投稿したコンテンツは CloudKit Public Database に保存され、本アプリを利用する他のユーザーに公開されます。投稿することで、当該コンテンツをアプリ内で表示・利用することに同意したものとみなします。",
+      "ko": "사용자가 게시한 콘텐츠는 CloudKit Public Database에 저장되어, 이 앱을 이용하는 다른 사용자에게 공개돼요. 게시하면 해당 콘텐츠를 앱 안에서 표시·이용하는 데 동의한 것으로 간주해요.",
+      "note": "利用規約「投稿コンテンツのライセンス」の本文 (iOS)。Android は body_android。参考訳。release に上げる前にオーナーの確認が要る",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "terms.content_license.header": {
+      "ja": "投稿コンテンツのライセンス",
+      "ko": "게시 콘텐츠의 라이선스",
+      "note": "利用規約の節の見出し。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "terms.disclaimer.body": {
+      "ja": "本アプリは非公式のファン制作アプリです。株式会社バンダイナムコエンターテインメント、株式会社バンダイナムコミュージックライブ、その他アイドルマスターシリーズに関わる権利者とは一切関係ありません。",
+      "ko": "이 앱은 비공식 팬 제작 앱이에요. BANDAI NAMCO Entertainment Inc., BANDAI NAMCO Music Live Inc., 그 밖에 아이돌마스터 시리즈와 관련된 권리자와는 아무런 관계가 없어요.",
+      "note": "利用規約「免責・権利表記」の本文。会社名は訳さず、ko では各社の正式な英字表記を使う (カタカナは韓国語の利用者が読めないため。訳ではなく自社名の表記。社名の中の「ライブ」も訳さない。この読み方はオーナーの確認待ち)。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "terms.disclaimer.header": {
+      "ja": "免責・権利表記",
+      "ko": "면책·권리 표기",
+      "note": "利用規約の節の見出し。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "terms.ip.body": {
+      "ja": "アイドルマスターシリーズおよび関連するキャラクター・楽曲・ロゴ・イラスト等の著作権・商標権はすべて各権利者に帰属します。本アプリはこれらを無断で使用・複製・配布しません。",
+      "ko": "아이돌마스터 시리즈 및 관련 캐릭터·곡·로고·일러스트 등의 저작권·상표권은 모두 각 권리자에게 귀속돼요. 이 앱은 이를 무단으로 사용·복제·배포하지 않아요.",
+      "note": "利用規約「知的財産権」の本文。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "terms.ip.header": {
+      "ja": "知的財産権",
+      "ko": "지식재산권",
+      "note": "利用規約の節の見出し。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "terms.last_updated": {
+      "ja": "最終更新日: 2026年4月23日",
+      "ko": "최종 업데이트: 2026년 4월 23일",
+      "note": "利用規約の末尾の最終更新日。日付は文書の版の一部なので引数にしない (改訂したら ja ごと直す)。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "terms.materials.body_android": {
+      "ja": "・ジャケット画像: 公式配信ストアの正式 API 経由で取得したもののみを表示しています。\n・歌詞: 使用していません。\n・キャラクターイラスト: 使用していません。\n・公式ロゴ: 使用していません。",
+      "ko": "· 재킷 이미지: 공식 음원 스토어의 정식 API를 통해 가져온 것만 표시하고 있어요.\n· 가사: 사용하지 않아요.\n· 캐릭터 일러스트: 사용하지 않아요.\n· 공식 로고: 사용하지 않아요.",
+      "note": "利用規約「使用している素材について」の本文 (Android。箇条書き 4 行)。iOS の body_ios と ja が違う。参考訳。release に上げる前にオーナーの確認が要る",
+      "platforms": [
+        "android"
+      ]
+    },
+    "terms.materials.body_ios": {
+      "ja": "• ジャケット画像: Apple Music の正式 API（MusicKit）経由で取得したもののみを表示しています。\n• 歌詞: 使用していません。\n• キャラクターイラスト: 使用していません。\n• 公式ロゴ: 使用していません。",
+      "ko": "• 재킷 이미지: Apple Music의 정식 API (MusicKit)를 통해 가져온 것만 표시하고 있어요.\n• 가사: 사용하지 않아요.\n• 캐릭터 일러스트: 사용하지 않아요.\n• 공식 로고: 사용하지 않아요.",
+      "note": "利用規約「使用している素材について」の本文 (iOS。箇条書き 4 行)。Android は body_android。「歌詞: 使用していません」は歌詞機能 (JASRAC 許諾) と食い違うが、文面を直すのはオーナー (移行では ja を変えない)。参考訳。release に上げる前にオーナーの確認が要る",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "terms.materials.header": {
+      "ja": "使用している素材について",
+      "ko": "사용하는 소재에 대해",
+      "note": "利用規約の節の見出し。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "terms.prohibited.body_android": {
+      "ja": "以下の行為を禁止します。\n・他者の著作権・商標権・プライバシーを侵害するコンテンツの投稿\n・他のユーザーへの嫌がらせ・誹謗中傷\n・スパムや虚偽情報の投稿\n・本アプリのシステムへの不正アクセス・改ざん",
+      "ko": "다음 행위를 금지해요.\n· 타인의 저작권·상표권·프라이버시를 침해하는 콘텐츠 게시\n· 다른 사용자에 대한 괴롭힘·비방\n· 스팸이나 허위 정보 게시\n· 이 앱의 시스템에 대한 부정 접근·변조",
+      "note": "利用規約「禁止事項」の本文 (Android)。iOS の body_ios と行頭の記号 (・ / •) が違う。参考訳。release に上げる前にオーナーの確認が要る",
+      "platforms": [
+        "android"
+      ]
+    },
+    "terms.prohibited.body_ios": {
+      "ja": "以下の行為を禁止します。\n• 他者の著作権・商標権・プライバシーを侵害するコンテンツの投稿\n• 他のユーザーへの嫌がらせ・誹謗中傷\n• スパムや虚偽情報の投稿\n• 本アプリのシステムへの不正アクセス・改ざん",
+      "ko": "다음 행위를 금지해요.\n• 타인의 저작권·상표권·프라이버시를 침해하는 콘텐츠 게시\n• 다른 사용자에 대한 괴롭힘·비방\n• 스팸이나 허위 정보 게시\n• 이 앱의 시스템에 대한 부정 접근·변조",
+      "note": "利用規約「禁止事項」の本文 (iOS。1 行の前置きと箇条書き 4 行)。Android は body_android (行頭の記号だけ違う)。参考訳。release に上げる前にオーナーの確認が要る",
+      "platforms": [
+        "ios"
+      ]
+    },
+    "terms.prohibited.header": {
+      "ja": "禁止事項",
+      "ko": "금지 사항",
+      "note": "利用規約の節の見出し。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "terms.service_changes.body": {
+      "ja": "開発者は予告なくアプリの機能変更・サービス停止を行う場合があります。これによって生じた損害について開発者は責任を負いません。",
+      "ko": "개발자는 예고 없이 앱의 기능을 바꾸거나 서비스를 중단할 수 있어요. 이로 인해 생긴 손해에 대해 개발자는 책임지지 않아요.",
+      "note": "利用規約「サービスの変更・停止」の本文。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "terms.service_changes.header": {
+      "ja": "サービスの変更・停止",
+      "ko": "서비스 변경·중단",
+      "note": "利用規約の節の見出し。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "terms.user_content.body": {
+      "ja": "コミュニティ機能への投稿（セットリスト情報・修正提案など）は、ユーザー自身の責任において行ってください。投稿コンテンツに起因する問題について、開発者は責任を負いません。",
+      "ko": "커뮤니티 기능에 올리는 게시물 (세트리스트 정보·수정 제안 등)은 사용자 본인의 책임으로 올려 주세요. 게시 콘텐츠로 인해 생긴 문제에 대해 개발자는 책임지지 않아요.",
+      "note": "利用規約「ユーザー投稿コンテンツ」の本文。参考訳。release に上げる前にオーナーの確認が要る"
+    },
+    "terms.user_content.header": {
+      "ja": "ユーザー投稿コンテンツ",
+      "ko": "사용자 게시 콘텐츠",
+      "note": "利用規約の節の見出し。参考訳。release に上げる前にオーナーの確認が要る"
+    }
+  }
+}

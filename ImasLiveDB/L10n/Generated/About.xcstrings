@@ -1,0 +1,636 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "about.jasrac.caption" : {
+      "comment" : "「アプリについて」のライセンス情報の節。JASRAC の許諾番号 (JASRAC許諾第…号。許諾書の指定の表記なので訳さない) の下の説明 (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌詞は JASRAC の許諾を受けて掲載しています。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가사는 JASRAC의 이용 허락을 받아 싣고 있어요."
+          }
+        }
+      }
+    },
+    "about.main.app_info.header" : {
+      "comment" : "iOS の「アプリについて」画面 (AboutView)の節の見出し。プライバシーポリシー・利用規約・サポート・評価 (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリ情報"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "앱 정보"
+          }
+        }
+      }
+    },
+    "about.main.app_info.rate" : {
+      "comment" : "iOS の「アプリについて」画面 (AboutView)。App Store のレビュー投稿画面を開くリンク (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリを評価する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "앱 평가하기"
+          }
+        }
+      }
+    },
+    "about.main.backup_note" : {
+      "comment" : "iOS の「アプリについて」画面 (AboutView)の下の方の注記 (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当・お気に入り・メモは iCloud に自動バックアップされ、再インストールや機種変更でも復元されます (同じ Apple ID でのサインインが必要)。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당·즐겨찾기·메모는 iCloud에 자동으로 백업되어, 재설치하거나 기기를 바꿔도 복원돼요 (같은 Apple ID로 로그인해야 해요)."
+          }
+        }
+      }
+    },
+    "about.main.developer.github" : {
+      "comment" : "iOS の「アプリについて」画面 (AboutView)の開発者の節。開発者の GitHub のページを開くリンク (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub プロフィール"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "GitHub 프로필"
+          }
+        }
+      }
+    },
+    "about.main.developer.header" : {
+      "comment" : "iOS の「アプリについて」画面 (AboutView)の節の見出し (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開発者"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "개발자"
+          }
+        }
+      }
+    },
+    "about.main.developer.label" : {
+      "comment" : "iOS の「アプリについて」画面 (AboutView)の行の左の項目名。右に開発者名 (fuga-if) が出る (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開発者"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "개발자"
+          }
+        }
+      }
+    },
+    "about.main.disclaimer" : {
+      "comment" : "iOS の「アプリについて」画面 (AboutView)の最下部の権利表記。会社名は訳さず、ko では各社の正式な英字表記を使う (カタカナは韓国語の利用者が読めないため。訳ではなく自社名の表記。この読み方はオーナーの確認待ち) (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本アプリはアイドルマスターシリーズの非公式ファンメイドアプリです。バンダイナムコエンターテインメント等の権利者とは一切関係ありません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 앱은 아이돌마스터 시리즈의 비공식 팬메이드 앱이에요. BANDAI NAMCO Entertainment 등의 권리자와는 아무런 관계가 없어요."
+          }
+        }
+      }
+    },
+    "about.main.donate.action" : {
+      "comment" : "iOS の「アプリについて」画面 (AboutView)。寄付 (Ko-fi) のページを開くリンク (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開発をサポートする"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "개발 후원하기"
+          }
+        }
+      }
+    },
+    "about.main.donate.footer" : {
+      "comment" : "iOS の「アプリについて」画面 (AboutView)。寄付のリンクの下の注記 (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバー運用費等の足しにさせていただきます。任意のご支援です。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "서버 운영비 등에 보태 쓸게요. 후원은 선택 사항이에요."
+          }
+        }
+      }
+    },
+    "about.main.licenses.header" : {
+      "comment" : "iOS の「アプリについて」画面 (AboutView)の節の見出し。JASRAC の許諾と使っているライブラリ (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライセンス情報"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이선스 정보"
+          }
+        }
+      }
+    },
+    "about.main.sources.footer" : {
+      "comment" : "iOS の「アプリについて」画面 (AboutView)のデータ提供の節の下の注記 (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "各情報源のデータはそのままの複製ではなく、独自の集計・整形を加えて利用しています。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "각 출처의 데이터는 그대로 복제하지 않고, 자체적으로 집계·정리해서 이용하고 있어요."
+          }
+        }
+      }
+    },
+    "about.main.sources.header" : {
+      "comment" : "iOS の「アプリについて」画面 (AboutView)の節の見出し。データの参照元サイトの一覧 (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データ提供"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "데이터 제공"
+          }
+        }
+      }
+    },
+    "about.main.sources.imas_db" : {
+      "comment" : "iOS の「アプリについて」画面 (AboutView)のデータ提供の節。サイト「アイマスDB」の説明 (サイト名は訳さない) (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲・ライブ等のデータ参照元"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡·라이브 등의 데이터 출처"
+          }
+        }
+      }
+    },
+    "about.main.sources.imas_palette" : {
+      "comment" : "iOS の「アプリについて」画面 (AboutView)のデータ提供の節。imas-palette の説明 (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドルのイメージカラー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 이미지 컬러"
+          }
+        }
+      }
+    },
+    "about.main.sources.imasparql" : {
+      "comment" : "iOS の「アプリについて」画面 (AboutView)のデータ提供の節。im@sparql の説明。CV = 声優 (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドルのプロフィール (CV・カラー等)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 프로필 (CV·컬러 등)"
+          }
+        }
+      }
+    },
+    "about.main.sources.music765plus" : {
+      "comment" : "iOS の「アプリについて」画面 (AboutView)のデータ提供の節。サイト music765plus の説明 (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲・ライブセトリのデータ参照元"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡·라이브 세트리스트의 데이터 출처"
+          }
+        }
+      }
+    },
+    "about.main.tagline" : {
+      "comment" : "iOS の「アプリについて」画面 (AboutView)の先頭、アプリ名 (ImasLiveDB) の下の一言 (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "非公式ファンメイドアプリ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "비공식 팬메이드 앱"
+          }
+        }
+      }
+    },
+    "about.main.title" : {
+      "comment" : "iOS の「アプリについて」画面 (AboutView)のナビゲーションタイトル (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリについて"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 앱에 대해"
+          }
+        }
+      }
+    },
+    "about.privacy.title" : {
+      "comment" : "プライバシーポリシーの画面名。iOS は「アプリについて」の行とナビゲーションタイトル、Android は上のバー (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プライバシーポリシー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "개인정보 처리방침"
+          }
+        }
+      }
+    },
+    "about.support.faq.artwork.answer_ios" : {
+      "comment" : "サポート画面のよくある質問の答え (iOS)。前に「A. 」が付く。Android は answer_android (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Music のデータベースに登録されていない楽曲は画像が表示されません。また、MusicKit の利用には Apple Music サブスクリプションまたは無料トライアルが必要な場合があります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Apple Music 데이터베이스에 등록되지 않은 곡은 이미지가 표시되지 않아요. 또한 MusicKit을 이용하려면 Apple Music 구독 또는 무료 체험이 필요할 수 있어요."
+          }
+        }
+      }
+    },
+    "about.support.faq.artwork.question" : {
+      "comment" : "サポート画面のよくある質問。前に「Q. 」が付く (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ジャケット画像が表示されない"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "재킷 이미지가 표시되지 않아요"
+          }
+        }
+      }
+    },
+    "about.support.faq.header" : {
+      "comment" : "サポート画面の節の見出し (Q&A) (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "よくある質問"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "자주 묻는 질문"
+          }
+        }
+      }
+    },
+    "about.support.faq.scanner.answer" : {
+      "comment" : "サポート画面のよくある質問の答え (iOS だけ)。前に「A. 」が付く。「設定 > …」は iOS の設定アプリの道順 (ko は韓国語の iOS の表示に合わせる) (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定 > プライバシーとセキュリティ > 音声認識・カメラ で本アプリへのアクセスを許可してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "설정 > 개인정보 보호 및 보안 > 음성 인식·카메라에서 이 앱의 접근을 허용해 주세요."
+          }
+        }
+      }
+    },
+    "about.support.faq.scanner.question" : {
+      "comment" : "サポート画面のよくある質問 (iOS だけ)。前に「Q. 」が付く (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セットリストスキャナーが認識しない"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 스캐너가 인식하지 못해요"
+          }
+        }
+      }
+    },
+    "about.support.faq.stale_data.answer" : {
+      "comment" : "サポート画面のよくある質問の答え。前に「A. 」が付く (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub Issue または コミュニティ機能の「修正提案」からご報告ください。確認後に反映します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "GitHub Issue 또는 커뮤니티 기능의 “수정 제안”으로 알려 주세요. 확인한 뒤 반영할게요."
+          }
+        }
+      }
+    },
+    "about.support.faq.stale_data.question" : {
+      "comment" : "サポート画面のよくある質問。前に「Q. 」が付く (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データが古い・間違っている"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "데이터가 오래됐거나 틀렸어요"
+          }
+        }
+      }
+    },
+    "about.support.faq.sync.answer_ios" : {
+      "comment" : "サポート画面のよくある質問の答え (iOS)。前に「A. 」が付く。「設定 > …」は iOS の設定アプリの道順 (ko は韓国語の iOS の表示に合わせる) (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud にサインインしているか、設定 > Apple ID > iCloud で「ImasLiveDB」が有効になっているかご確認ください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "iCloud에 로그인했는지, 설정 > Apple ID > iCloud에서 “ImasLiveDB”가 켜져 있는지 확인해 주세요."
+          }
+        }
+      }
+    },
+    "about.support.faq.sync.question_ios" : {
+      "comment" : "サポート画面のよくある質問 (iOS)。前に「Q. 」が付く。Android は question_android (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CloudKit 同期に失敗する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "CloudKit 동기화가 안 돼요"
+          }
+        }
+      }
+    },
+    "about.support.faq.unofficial.answer" : {
+      "comment" : "サポート画面のよくある質問の答え。前に「A. 」が付く。会社名は訳さず、ko では各社の正式な英字表記を使う (カタカナは韓国語の利用者が読めないため。訳ではなく自社名の表記。この読み方はオーナーの確認待ち) (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "はい、本アプリは非公式のファンメイドアプリです。バンダイナムコエンターテインメント等とは一切関係ありません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "네, 이 앱은 비공식 팬메이드 앱이에요. BANDAI NAMCO Entertainment 등과는 아무런 관계가 없어요."
+          }
+        }
+      }
+    },
+    "about.support.faq.unofficial.question" : {
+      "comment" : "サポート画面のよくある質問。前に「Q. 」が付く (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリが公式アプリではないのですか?"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이 앱은 공식 앱이 아닌가요?"
+          }
+        }
+      }
+    },
+    "about.support.feedback.github" : {
+      "comment" : "サポート画面。GitHub の Issue 作成ページを開くリンク (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub Issue で報告する"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "GitHub Issue로 제보하기"
+          }
+        }
+      }
+    },
+    "about.support.feedback.header" : {
+      "comment" : "サポート画面の節の見出し (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フィードバック・バグ報告"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "피드백·버그 제보"
+          }
+        }
+      }
+    },
+    "about.support.title" : {
+      "comment" : "サポート (問い合わせ・よくある質問) の画面名。iOS は「アプリについて」の行とナビゲーションタイトル、Android は上のバー (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サポート"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "지원"
+          }
+        }
+      }
+    },
+    "about.terms.title" : {
+      "comment" : "利用規約の画面名。iOS は「アプリについて」の行とナビゲーションタイトル、Android は上のバー (i18n/catalog/about.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "利用規約"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "이용약관"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

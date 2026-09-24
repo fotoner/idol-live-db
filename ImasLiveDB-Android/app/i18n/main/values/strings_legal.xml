@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/legal.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- legal.privacy.collected.body_android: プライバシーポリシー「収集するデータ」の本文 (Android。箇条書き 3 行)。iOS の body_ios と ja が違う。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_privacy_collected_body_android">・端末識別子（UUID）: 端末内にのみ保存される匿名の識別子です。個人情報と紐付けることはありません。\n・アプリ設定: デフォルトブランドなどの設定は端末内のみに保存されます。\n・アカウント情報: コミュニティ機能を利用する場合、Google アカウントによるログインが必要です。投稿したセットリスト・修正提案などのコンテンツはサーバーに保存・公開されます。</string>
+    <!-- legal.privacy.collected.header: プライバシーポリシーの節の見出し。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_privacy_collected_header">収集するデータ</string>
+    <!-- legal.privacy.contact.body: プライバシーポリシー「連絡先」の本文。2 行目の URL は変えない。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_privacy_contact_body">プライバシーに関するお問い合わせ・データ削除依頼は下記 GitHub Issue からお願いします。\nhttps://github.com/fuga-if/imas-live-privacy/issues/new</string>
+    <!-- legal.privacy.contact.header: プライバシーポリシーの節の見出し。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_privacy_contact_header">連絡先</string>
+    <!-- legal.privacy.last_updated: プライバシーポリシーの末尾の最終更新日。日付は文書の版の一部なので引数にしない (改訂したら ja ごと直す)。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_privacy_last_updated">最終更新日: 2026年4月23日</string>
+    <!-- legal.privacy.overview.body: プライバシーポリシー「アプリの概要」の本文。会社名は訳さず、ko では各社の正式な英字表記を使う (カタカナは韓国語の利用者が読めないため。訳ではなく自社名の表記。この読み方はオーナーの確認待ち)。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_privacy_overview_body">本アプリ（ImasLiveDB）は、アイドルマスターシリーズのライブ・セットリスト情報を管理・閲覧するための非公式ファンメイドアプリです。株式会社バンダイナムコエンターテインメントをはじめとする権利者とは一切関係ありません。</string>
+    <!-- legal.privacy.overview.header: プライバシーポリシーの節の見出し。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_privacy_overview_header">アプリの概要</string>
+    <!-- legal.privacy.rights.body_android: プライバシーポリシー「ユーザーの権利」の本文 (Android)。iOS の body_ios と ja が違う。「アカウントを削除」は設定画面のボタンの名前 (settings スライスの訳と揃える)。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_privacy_rights_body_android">アカウントおよび投稿データの削除は、設定画面の「アカウントを削除」からいつでも行えます。個別のお問い合わせは GitHub Issue にてご連絡ください。</string>
+    <!-- legal.privacy.rights.header: プライバシーポリシーの節の見出し。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_privacy_rights_header">ユーザーの権利</string>
+    <!-- legal.privacy.sharing.body_android: プライバシーポリシー「データの共有」の本文 (Android)。iOS の body_ios と ja が違う。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_privacy_sharing_body_android">コミュニティ機能で投稿したコンテンツ（セットリスト報告・修正提案など）は他のユーザーに公開されます。投稿内容に個人情報を含めないようご注意ください。</string>
+    <!-- legal.privacy.sharing.header: プライバシーポリシーの節の見出し。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_privacy_sharing_header">データの共有</string>
+    <!-- legal.privacy.third_party.body_android: プライバシーポリシー「サードパーティサービス」の本文 (Android。箇条書き 2 行)。iOS の body_ios と ja が違う。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_privacy_third_party_body_android">・Cloudflare Workers: アプリの API 通信先として利用しています。\n・Google Sign-In: ログイン認証に利用しています。</string>
+    <!-- legal.privacy.third_party.header: プライバシーポリシーの節の見出し。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_privacy_third_party_header">サードパーティサービス</string>
+    <!-- legal.terms.contact.body: 利用規約「連絡先」の本文。2 行目の URL は変えない。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_terms_contact_body">ご意見・不具合報告は GitHub Issue にてご連絡ください。\nhttps://github.com/fuga-if/imas-live-privacy/issues/new</string>
+    <!-- legal.terms.contact.header: 利用規約の節の見出し。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_terms_contact_header">連絡先</string>
+    <!-- legal.terms.content_license.body_android: 利用規約「投稿コンテンツのライセンス」の本文 (Android)。iOS の body_ios と ja が違う。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_terms_content_license_body_android">ユーザーが投稿したコンテンツはサーバーに保存され、本アプリを利用する他のユーザーに公開されます。投稿することで、当該コンテンツをアプリ内で表示・利用することに同意したものとみなします。</string>
+    <!-- legal.terms.content_license.header: 利用規約の節の見出し。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_terms_content_license_header">投稿コンテンツのライセンス</string>
+    <!-- legal.terms.disclaimer.body: 利用規約「免責・権利表記」の本文。会社名は訳さず、ko では各社の正式な英字表記を使う (カタカナは韓国語の利用者が読めないため。訳ではなく自社名の表記。社名の中の「ライブ」も訳さない。この読み方はオーナーの確認待ち)。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_terms_disclaimer_body">本アプリは非公式のファン制作アプリです。株式会社バンダイナムコエンターテインメント、株式会社バンダイナムコミュージックライブ、その他アイドルマスターシリーズに関わる権利者とは一切関係ありません。</string>
+    <!-- legal.terms.disclaimer.header: 利用規約の節の見出し。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_terms_disclaimer_header">免責・権利表記</string>
+    <!-- legal.terms.ip.body: 利用規約「知的財産権」の本文。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_terms_ip_body">アイドルマスターシリーズおよび関連するキャラクター・楽曲・ロゴ・イラスト等の著作権・商標権はすべて各権利者に帰属します。本アプリはこれらを無断で使用・複製・配布しません。</string>
+    <!-- legal.terms.ip.header: 利用規約の節の見出し。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_terms_ip_header">知的財産権</string>
+    <!-- legal.terms.last_updated: 利用規約の末尾の最終更新日。日付は文書の版の一部なので引数にしない (改訂したら ja ごと直す)。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_terms_last_updated">最終更新日: 2026年4月23日</string>
+    <!-- legal.terms.materials.body_android: 利用規約「使用している素材について」の本文 (Android。箇条書き 4 行)。iOS の body_ios と ja が違う。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_terms_materials_body_android">・ジャケット画像: 公式配信ストアの正式 API 経由で取得したもののみを表示しています。\n・歌詞: 使用していません。\n・キャラクターイラスト: 使用していません。\n・公式ロゴ: 使用していません。</string>
+    <!-- legal.terms.materials.header: 利用規約の節の見出し。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_terms_materials_header">使用している素材について</string>
+    <!-- legal.terms.prohibited.body_android: 利用規約「禁止事項」の本文 (Android)。iOS の body_ios と行頭の記号 (・ / •) が違う。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_terms_prohibited_body_android">以下の行為を禁止します。\n・他者の著作権・商標権・プライバシーを侵害するコンテンツの投稿\n・他のユーザーへの嫌がらせ・誹謗中傷\n・スパムや虚偽情報の投稿\n・本アプリのシステムへの不正アクセス・改ざん</string>
+    <!-- legal.terms.prohibited.header: 利用規約の節の見出し。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_terms_prohibited_header">禁止事項</string>
+    <!-- legal.terms.service_changes.body: 利用規約「サービスの変更・停止」の本文。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_terms_service_changes_body">開発者は予告なくアプリの機能変更・サービス停止を行う場合があります。これによって生じた損害について開発者は責任を負いません。</string>
+    <!-- legal.terms.service_changes.header: 利用規約の節の見出し。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_terms_service_changes_header">サービスの変更・停止</string>
+    <!-- legal.terms.user_content.body: 利用規約「ユーザー投稿コンテンツ」の本文。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_terms_user_content_body">コミュニティ機能への投稿（セットリスト情報・修正提案など）は、ユーザー自身の責任において行ってください。投稿コンテンツに起因する問題について、開発者は責任を負いません。</string>
+    <!-- legal.terms.user_content.header: 利用規約の節の見出し。参考訳。release に上げる前にオーナーの確認が要る -->
+    <string name="legal_terms_user_content_header">ユーザー投稿コンテンツ</string>
+</resources>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/about.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ja" tools:ignore="MissingTranslation">
+    <!-- about.oss.core.license: オープンソースライセンス画面。imas-core のライセンス欄 (Android) -->
+    <string name="about_oss_core_license">iOS 版と共有する自作のコアライブラリです。外部ライセンスはありません。</string>
+    <!-- about.oss.core.owner: オープンソースライセンス画面。imas-core (自作のコアライブラリ) の作者欄 (Android) -->
+    <string name="about_oss_core_owner">本アプリの一部 (Rust)</string>
+    <!-- about.oss.intro: オープンソースライセンス画面の先頭の説明 (Android) -->
+    <string name="about_oss_intro">本アプリは以下のオープンソースソフトウェアを利用しています。各ライセンスの全文はそれぞれのプロジェクトの配布物に含まれます。</string>
+    <!-- about.oss.item.meta: オープンソースライセンス画面の各行の 2 行目 (Android)。owner = 作者 (Google など)、license = ライセンス名。どちらも訳さない名前か、上の oss.core.* の文言 -->
+    <string name="about_oss_item_meta">%1$s ・ %2$s</string>
+    <!-- about.oss.jna_license: オープンソースライセンス画面。JNA のライセンスの種類 (Android) -->
+    <string name="about_oss_jna_license">Apache License 2.0 / LGPL 2.1 のデュアルライセンス</string>
+    <!-- about.oss.title: オープンソースライセンスの画面名 (Android。iOS は MyPage の節にある) -->
+    <string name="about_oss_title">オープンソースライセンス</string>
+    <!-- about.privacy.title: プライバシーポリシーの画面名。iOS は「アプリについて」の行とナビゲーションタイトル、Android は上のバー -->
+    <string name="about_privacy_title">プライバシーポリシー</string>
+    <!-- about.support.faq.artwork.answer_android: サポート画面のよくある質問の答え (Android)。前に「A. 」が付く。iOS の answer_ios と ja が違う -->
+    <string name="about_support_faq_artwork_answer_android">配信ストアのデータベースに登録されていない楽曲は画像が表示されません。</string>
+    <!-- about.support.faq.artwork.question: サポート画面のよくある質問。前に「Q. 」が付く -->
+    <string name="about_support_faq_artwork_question">ジャケット画像が表示されない</string>
+    <!-- about.support.faq.header: サポート画面の節の見出し (Q&A) -->
+    <string name="about_support_faq_header">よくある質問</string>
+    <!-- about.support.faq.stale_data.answer: サポート画面のよくある質問の答え。前に「A. 」が付く -->
+    <string name="about_support_faq_stale_data_answer">GitHub Issue または コミュニティ機能の「修正提案」からご報告ください。確認後に反映します。</string>
+    <!-- about.support.faq.stale_data.question: サポート画面のよくある質問。前に「Q. 」が付く -->
+    <string name="about_support_faq_stale_data_question">データが古い・間違っている</string>
+    <!-- about.support.faq.sync.answer_android: サポート画面のよくある質問の答え (Android)。前に「A. 」が付く。「全データ同期」は設定画面のボタンの名前 (settings スライスの訳と揃える) -->
+    <string name="about_support_faq_sync_answer_android">通信環境をご確認のうえ、設定画面から「全データ同期」をお試しください。</string>
+    <!-- about.support.faq.sync.question_android: サポート画面のよくある質問 (Android)。前に「Q. 」が付く。iOS の question_ios と ja が違う -->
+    <string name="about_support_faq_sync_question_android">同期に失敗する</string>
+    <!-- about.support.faq.unofficial.answer: サポート画面のよくある質問の答え。前に「A. 」が付く。会社名は訳さず、ko では各社の正式な英字表記を使う (カタカナは韓国語の利用者が読めないため。訳ではなく自社名の表記。この読み方はオーナーの確認待ち) -->
+    <string name="about_support_faq_unofficial_answer">はい、本アプリは非公式のファンメイドアプリです。バンダイナムコエンターテインメント等とは一切関係ありません。</string>
+    <!-- about.support.faq.unofficial.question: サポート画面のよくある質問。前に「Q. 」が付く -->
+    <string name="about_support_faq_unofficial_question">アプリが公式アプリではないのですか?</string>
+    <!-- about.support.feedback.github: サポート画面。GitHub の Issue 作成ページを開くリンク -->
+    <string name="about_support_feedback_github">GitHub Issue で報告する</string>
+    <!-- about.support.feedback.header: サポート画面の節の見出し -->
+    <string name="about_support_feedback_header">フィードバック・バグ報告</string>
+    <!-- about.support.title: サポート (問い合わせ・よくある質問) の画面名。iOS は「アプリについて」の行とナビゲーションタイトル、Android は上のバー -->
+    <string name="about_support_title">サポート</string>
+    <!-- about.terms.title: 利用規約の画面名。iOS は「アプリについて」の行とナビゲーションタイトル、Android は上のバー -->
+    <string name="about_terms_title">利用規約</string>
+</resources>

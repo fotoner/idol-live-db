@@ -6,10 +6,13 @@ package com.fugaif.imaslivedb.i18n.generated
  * (Kotlin の object は複数ファイルに分けて足せないため)。iOS と同じく L10n.<Ns>.<key> で引く。
  */
 object L10n {
+    val About: L10nAbout get() = L10nAbout
+    val Announcements: L10nAnnouncements get() = L10nAnnouncements
     val Common: L10nCommon get() = L10nCommon
     val Edit: L10nEdit get() = L10nEdit
     val Events: L10nEvents get() = L10nEvents
     val I18n: L10nI18n get() = L10nI18n
+    val Legal: L10nLegal get() = L10nLegal
     val Mypage: L10nMypage get() = L10nMypage
     val Nav: L10nNav get() = L10nNav
     val Search: L10nSearch get() = L10nSearch

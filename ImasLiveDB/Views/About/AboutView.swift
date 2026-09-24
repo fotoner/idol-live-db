@@ -20,7 +20,7 @@ struct AboutView: View {
                         .foregroundStyle(.tint)
                     Text("ImasLiveDB")
                         .font(.imasTitle2.bold())
-                    Text("非公式ファンメイドアプリ")
+                    Text(L10n.About.mainTagline)
                         .font(.imasCaption)
                         .foregroundStyle(DS.ink2)
                     Text("ver. \(appVersion) (\(buildNumber))")
@@ -31,64 +31,66 @@ struct AboutView: View {
                 .padding(.vertical, DS.sp4)
             }
 
-            Section("開発者") {
-                LabeledContent("開発者", value: "fuga-if")
+            Section(L10n.About.mainDeveloperHeader) {
+                // LabeledContent の LocalizedStringResource 版は iOS 26 から。String 版 (そのまま出す) に解決済みを渡す
+                LabeledContent(String(localized: L10n.About.mainDeveloperLabel), value: "fuga-if")
                 Link(destination: URL(string: "https://github.com/fuga-if")!) {
-                    Label("GitHub プロフィール", systemImage: "arrow.up.right.square")
+                    Label(L10n.About.mainDeveloperGithub, systemImage: "arrow.up.right.square")
                 }
             }
 
             Section {
                 Link(destination: URL(string: "https://ko-fi.com/fugaapp")!) {
-                    Label("開発をサポートする", systemImage: "heart.fill")
+                    Label(L10n.About.mainDonateAction, systemImage: "heart.fill")
                 }
             } footer: {
-                Text("サーバー運用費等の足しにさせていただきます。任意のご支援です。")
+                Text(L10n.About.mainDonateFooter)
             }
 
             Section {
                 ossCredit(
+                    // i18n-ignore(data): 参照元サイトの名前 (固有名詞)。訳さない
                     name: "アイマスDB",
-                    license: "楽曲・ライブ等のデータ参照元",
+                    license: .key(L10n.About.mainSourcesImasDb),
                     url: "https://imas-db.jp/"
                 )
                 ossCredit(
                     name: "music765plus",
-                    license: "楽曲・ライブセトリのデータ参照元",
+                    license: .key(L10n.About.mainSourcesMusic765plus),
                     url: "https://music765plus.com/"
                 )
                 ossCredit(
                     name: "im@sparql",
-                    license: "アイドルのプロフィール (CV・カラー等)",
+                    license: .key(L10n.About.mainSourcesImasparql),
                     url: "https://sparql.crssnky.xyz/imas/"
                 )
                 ossCredit(
                     name: "imas-palette",
-                    license: "アイドルのイメージカラー",
+                    license: .key(L10n.About.mainSourcesImasPalette),
                     url: "https://github.com/arrow2nd/imas-palette"
                 )
             } header: {
-                Text("データ提供")
+                Text(L10n.About.mainSourcesHeader)
             } footer: {
-                Text("各情報源のデータはそのままの複製ではなく、独自の集計・整形を加えて利用しています。")
+                Text(L10n.About.mainSourcesFooter)
             }
 
-            Section("ライセンス情報") {
+            Section(L10n.About.mainLicensesHeader) {
                 // 許諾条件で掲示が要る。歌詞タブを畳んでも消さないこと
                 // (許諾期間中は掲載し続けるのが条件)。
                 JASRACLicenseNotice(placement: .about)
-                ossCredit(name: "GRDB.swift", license: "MIT License", url: "https://github.com/groue/GRDB.swift")
-                ossCredit(name: "Nuke", license: "MIT License", url: "https://github.com/kean/Nuke")
+                ossCredit(name: "GRDB.swift", license: .verbatim("MIT License"), url: "https://github.com/groue/GRDB.swift")
+                ossCredit(name: "Nuke", license: .verbatim("MIT License"), url: "https://github.com/kean/Nuke")
             }
 
-            Section("アプリ情報") {
-                NavigationLink("プライバシーポリシー") {
+            Section(L10n.About.mainAppInfoHeader) {
+                NavigationLink(L10n.About.privacyTitle) {
                     PrivacyPolicyView()
                 }
-                NavigationLink("利用規約") {
+                NavigationLink(L10n.About.termsTitle) {
                     TermsOfServiceView()
                 }
-                NavigationLink("サポート") {
+                NavigationLink(L10n.About.supportTitle) {
                     SupportView()
                 }
                 // ⚠️ ここで requestReview() を呼ばないこと。OS の都合 (年3回の上限等) で
@@ -97,7 +99,7 @@ struct AboutView: View {
                 //    requestReview() は「こちらから声を掛ける」側 (ContentView) の担当。
                 if let url = ReviewPrompt.writeReviewURL {
                     Link(destination: url) {
-                        Label("アプリを評価する", systemImage: "star.fill")
+                        Label(L10n.About.mainAppInfoRate, systemImage: "star.fill")
                     }
                     .simultaneousGesture(TapGesture().onEnded {
                         AppAnalytics.tap("about.rate_app")
@@ -106,29 +108,30 @@ struct AboutView: View {
             }
 
             Section {
-                Text("担当・お気に入り・メモは iCloud に自動バックアップされ、再インストールや機種変更でも復元されます (同じ Apple ID でのサインインが必要)。")
+                Text(L10n.About.mainBackupNote)
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink2)
             }
 
             Section {
-                Text("本アプリはアイドルマスターシリーズの非公式ファンメイドアプリです。バンダイナムコエンターテインメント等の権利者とは一切関係ありません。")
+                Text(L10n.About.mainDisclaimer)
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink2)
             }
         }
-        .navigationTitle("アプリについて")
+        .navigationTitle(L10n.About.mainTitle)
         .navigationBarTitleDisplayMode(.inline)
         .trackScreen("about")
     }
 
-    private func ossCredit(name: String, license: String, url: String) -> some View {
+    /// name は固有名詞 (サイト名・ライブラリ名) なのでそのまま出す。license は文言 (.key) か、訳さないライセンス名 (.verbatim)。
+    private func ossCredit(name: String, license: DisplayText, url: String) -> some View {
         Link(destination: URL(string: url)!) {
             VStack(alignment: .leading, spacing: DS.sp1) {
                 Text(name)
                     .font(.imasSubhead)
                     .foregroundStyle(DS.ink)
-                Text(license)
+                Text(display: license)
                     .font(.imasCaption)
                     .foregroundStyle(DS.ink2)
             }

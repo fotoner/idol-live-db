@@ -33,9 +33,10 @@ struct JASRACLicenseNotice: View {
                     mark.resizable().scaledToFit().frame(width: 40, height: 40)
                 }
                 VStack(alignment: .leading, spacing: 2) {
+                    // 許諾番号の表記は許諾書の指定 (JASRAC許諾第…号) なので訳さない
                     Text(JASRACLicense.notice)
                         .font(.footnote)
-                    Text("歌詞は JASRAC の許諾を受けて掲載しています。")
+                    Text(L10n.About.jasracCaption)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

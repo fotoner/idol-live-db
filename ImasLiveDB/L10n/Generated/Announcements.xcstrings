@@ -1,0 +1,1698 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "announcements.call_guide_dashboard.body.p1" : {
+      "comment" : "お知らせ (id: v2.3.0_call_guide_dashboard, 2026-09-04) の本文 1 段落目 (iOS だけにあるお知らせ) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロデュースに「コールガイド」を追加しました。コールが入っている曲、最近誰がどの曲を書いたか、「コール曲」タグが付いているのにまだ書かれていない曲が、1 つの画面で見られます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "프로듀스에 “콜 가이드”를 추가했어요. 콜이 들어간 곡, 최근 누가 어떤 곡을 썼는지, “콜 곡” 태그가 붙어 있는데 아직 작성되지 않은 곡을 한 화면에서 볼 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.call_guide_dashboard.body.p2" : {
+      "comment" : "お知らせ (id: v2.3.0_call_guide_dashboard, 2026-09-04) の本文 2 段落目 (iOS だけにあるお知らせ) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "書かれていない曲の行から「書く」を押すと、その曲の歌詞タブがそのまま開きます。歌詞の語をタップしてコールを付けて保存するだけです。ログインしていれば誰でも書けます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "작성되지 않은 곡의 줄에서 “쓰기”를 누르면 그 곡의 가사 탭이 바로 열려요. 가사의 단어를 탭해서 콜을 달고 저장하기만 하면 돼요. 로그인했다면 누구나 쓸 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.call_guide_dashboard.body.p3" : {
+      "comment" : "お知らせ (id: v2.3.0_call_guide_dashboard, 2026-09-04) の本文 3 段落目 (iOS だけにあるお知らせ) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲一覧の絞り込みに「コールガイドがある曲のみ」を追加しました。ライブ前に、コールのある曲だけを並べて予習できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 목록의 필터에 “콜 가이드가 있는 곡만”을 추가했어요. 라이브 전에 콜이 있는 곡만 늘어놓고 예습할 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.call_guide_dashboard.body.p4" : {
+      "comment" : "お知らせ (id: v2.3.0_call_guide_dashboard, 2026-09-04) の本文 4 段落目 (iOS だけにあるお知らせ) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コールの編集には履歴が残るようになりました。誰がいつどの曲を書いたかが「最近の編集」に出ます (歌詞やコールの中身は履歴に残しません)。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜을 편집하면 기록이 남게 됐어요. 누가 언제 어떤 곡을 썼는지가 “최근 편집”에 나와요 (가사나 콜의 내용은 기록에 남기지 않아요)."
+          }
+        }
+      }
+    },
+    "announcements.call_guide_dashboard.summary" : {
+      "comment" : "お知らせ (id: v2.3.0_call_guide_dashboard, 2026-09-04) の一覧に出す要約 (iOS だけにあるお知らせ) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コールが入っている曲・最近の編集・まだ書かれていない曲を 1 枚にまとめました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜이 들어간 곡·최근 편집·아직 작성되지 않은 곡을 한 화면에 모았어요."
+          }
+        }
+      }
+    },
+    "announcements.call_guide_dashboard.title" : {
+      "comment" : "お知らせ (id: v2.3.0_call_guide_dashboard, 2026-09-04) の見出し (iOS だけにあるお知らせ) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コールガイドを、みんなで書けるように"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜 가이드를 모두 함께 쓸 수 있게"
+          }
+        }
+      }
+    },
+    "announcements.call_response_retired.body.p1" : {
+      "comment" : "お知らせ (id: 20260906_call_response_retired, 2026-09-06) の本文 1 段落目 (iOS。Android は p*_android) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲の「コミュニティ」にあった「コーレス」(曲ごとにコールを文章で書く欄) をなくしました。歌詞の行ごとに「ここでこう叫ぶ」を付けられるコールガイドができて、役目が重なっていたためです。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡의 “커뮤니티”에 있던 “콜 앤 리스폰스” (곡마다 콜을 문장으로 쓰는 란)를 없앴어요. 가사의 줄마다 “여기서 이렇게 외친다”를 달 수 있는 콜 가이드가 생겨서 역할이 겹쳤기 때문이에요."
+          }
+        }
+      }
+    },
+    "announcements.call_response_retired.body.p2" : {
+      "comment" : "お知らせ (id: 20260906_call_response_retired, 2026-09-06) の本文 2 段落目 (iOS。Android は p*_android) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コールを書きたいときは、曲の歌詞タブで語をタップして付けてください。書いたコールは歌詞の下にそのまま出るので、読む側もどこで叫ぶかで迷いません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "콜을 쓰고 싶을 때는 곡의 가사 탭에서 단어를 탭해서 달아 주세요. 쓴 콜은 가사 아래에 그대로 나오기 때문에, 읽는 사람도 어디서 외칠지 헤매지 않아요."
+          }
+        }
+      }
+    },
+    "announcements.call_response_retired.body.p3" : {
+      "comment" : "お知らせ (id: 20260906_call_response_retired, 2026-09-06) の本文 3 段落目 (iOS。Android は p*_android) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "これまでのコーレス投稿はアプリに表示されなくなります (データは残していますが、コールガイドへの自動の移し替えはしていません)。マイページの投稿累計にもコーレスは数えなくなります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "지금까지의 콜 앤 리스폰스 게시물은 앱에 표시되지 않아요 (데이터는 남겨 두었지만, 콜 가이드로 자동으로 옮기지는 않았어요). 마이페이지의 게시 누계에도 콜 앤 리스폰스는 세지 않아요."
+          }
+        }
+      }
+    },
+    "announcements.call_response_retired.summary" : {
+      "comment" : "お知らせ (id: 20260906_call_response_retired, 2026-09-06) の一覧に出す要約 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲ごとに文章で書くコールは、歌詞の行につけるコールガイドに一本化しました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡마다 문장으로 쓰던 콜은 가사의 줄에 다는 콜 가이드로 일원화했어요."
+          }
+        }
+      }
+    },
+    "announcements.call_response_retired.title" : {
+      "comment" : "お知らせ (id: 20260906_call_response_retired, 2026-09-06) の見出し (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「コーレス」の投稿を終了しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“콜 앤 리스폰스” 게시를 종료했어요"
+          }
+        }
+      }
+    },
+    "announcements.cross_tab_search.body.p1" : {
+      "comment" : "お知らせ (id: v2.1.0_cross_tab_search, 2026-09-01) の本文 1 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "検索の絞り込みを 7 倍速くしました。曲名で絞る処理が 8.8ms から 1.2ms、ライブ検索が 11.9ms から 2.2ms です。読み込み時に一度だけ下ごしらえしておく形に変えたので、打つたびに計算し直さなくなりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "검색 필터를 7배 빠르게 했어요. 곡명으로 거르는 처리가 8.8ms에서 1.2ms로, 라이브 검색이 11.9ms에서 2.2ms로 줄었어요. 불러올 때 한 번만 미리 준비해 두는 방식으로 바꿔서, 입력할 때마다 다시 계산하지 않아요."
+          }
+        }
+      }
+    },
+    "announcements.cross_tab_search.body.p2" : {
+      "comment" : "お知らせ (id: v2.1.0_cross_tab_search, 2026-09-01) の本文 2 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "虫眼鏡を畳みました。検索は各一覧の中にあり、そちらの方が強い (ブランド絞り込みや並び順と組み合わせられる) ので、別画面で完結する横断検索の役目が終わっていました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "돋보기 버튼을 없앴어요. 검색은 각 목록 안에 있고 그쪽이 더 강력하기 때문에 (브랜드 필터나 정렬 순서와 함께 쓸 수 있어요), 별도 화면에서 끝나는 통합 검색은 역할을 다했어요."
+          }
+        }
+      }
+    },
+    "announcements.cross_tab_search.body.p3" : {
+      "comment" : "お知らせ (id: v2.1.0_cross_tab_search, 2026-09-01) の本文 3 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "代わりに、各一覧が「別のタブ ライブに 8」のように他のタブの件数を出します。押すとそのタブへ移って同じ語で絞り込みます。当たりが開催済みのライブしか無いときは、開催済み側に着地するので空振りしません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "대신 각 목록이 “다른 탭 라이브에 8”처럼 다른 탭의 건수를 보여 줘요. 누르면 그 탭으로 이동해서 같은 단어로 필터링해요. 일치하는 것이 이미 끝난 라이브뿐일 때는 개최 완료 쪽으로 이동하므로 헛걸음하지 않아요."
+          }
+        }
+      }
+    },
+    "announcements.cross_tab_search.body.p4" : {
+      "comment" : "お知らせ (id: v2.1.0_cross_tab_search, 2026-09-01) の本文 4 段落目。曲名・ユニット名・アイドル名と読み仮名の例は訳さない (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニット名も かなで探せるようになりました。「あたらよづき」で「可惜夜月」、「はごろもこまち」で「羽衣小町」が出ます。読みが素直でないものが多いので、1 件ずつ出典を当たっています (凸レーション=でこれーしょん、夕星灯=ゆうづつひ、≡君彩≡=きみどり)。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛 이름도 가나로 찾을 수 있게 됐어요. “あたらよづき”로 “可惜夜月”, “はごろもこまち”로 “羽衣小町”가 나와요. 읽는 법이 평범하지 않은 것이 많아서 한 건씩 출처를 확인했어요 (凸レーション=でこれーしょん, 夕星灯=ゆうづつひ, ≡君彩≡=きみどり)."
+          }
+        }
+      }
+    },
+    "announcements.cross_tab_search.body.p5" : {
+      "comment" : "お知らせ (id: v2.1.0_cross_tab_search, 2026-09-01) の本文 5 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会場を選ぶ画面が読みを見ていない、曲を選ぶ画面が曲名しか見ていない、といった取りこぼしも塞ぎました。同じ語を打てば、どの画面でも同じように当たります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연장을 고르는 화면이 읽는 법을 보지 않거나, 곡을 고르는 화면이 곡명만 보는 등의 누락도 막았어요. 같은 단어를 입력하면 어느 화면에서든 똑같이 찾아져요."
+          }
+        }
+      }
+    },
+    "announcements.cross_tab_search.body.p6" : {
+      "comment" : "お知らせ (id: v2.1.0_cross_tab_search, 2026-09-01) の本文 6 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲の分類の誤りを直しました。MILLIONSTARS の Team 曲 8 曲が全体曲扱いに、Dreaming! や 初 が逆にユニット曲扱いになっていました。Cookie Dough の二重登録も統合し、Alice or Guilty の別バージョンを原曲に紐付けました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 분류 오류를 고쳤어요. MILLIONSTARS의 Team 곡 8곡이 전체곡으로, Dreaming!과 初는 반대로 유닛곡으로 분류되어 있었어요. Cookie Dough의 중복 등록도 합치고, Alice or Guilty의 다른 버전을 원곡에 연결했어요."
+          }
+        }
+      }
+    },
+    "announcements.cross_tab_search.body.p7" : {
+      "comment" : "お知らせ (id: v2.1.0_cross_tab_search, 2026-09-01) の本文 7 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同期のたびに曲のユニット版が無印へ戻る不具合も直しました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "동기화할 때마다 곡의 유닛 버전이 기본 버전으로 돌아가던 문제도 고쳤어요."
+          }
+        }
+      }
+    },
+    "announcements.cross_tab_search.body.p8" : {
+      "comment" : "お知らせ (id: v2.1.0_cross_tab_search, 2026-09-01) の本文 8 段落目。曲名・ユニット名・アイドル名と読み仮名の例は訳さない (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "秋月涼が 2 人に分かれていたのを 1 人にまとめました。ブランドを兼任しているだけなので、画像を入れた側と入れていない側で別人のように見えていました。姫野かのんの新しい声優 (伊能幸輝さん) と、初星学園の根緒亜紗里先生も登録しました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "秋月涼이 2명으로 나뉘어 있던 것을 1명으로 합쳤어요. 브랜드를 겸하고 있을 뿐이라서, 이미지를 넣은 쪽과 넣지 않은 쪽이 다른 사람처럼 보였어요. 姫野かのん의 새 성우 (伊能幸輝)와 初星学園의 根緒亜紗里 선생님도 등록했어요."
+          }
+        }
+      }
+    },
+    "announcements.cross_tab_search.summary" : {
+      "comment" : "お知らせ (id: v2.1.0_cross_tab_search, 2026-09-01) の一覧に出す要約 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "検索を作り直して 7 倍速くしました。虫眼鏡を畳んで、各一覧が「他のタブに何件あるか」を出します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "검색을 새로 만들어 7배 빠르게 했어요. 돋보기 버튼을 없애고, 각 목록이 “다른 탭에 몇 건 있는지”를 보여 줘요."
+          }
+        }
+      }
+    },
+    "announcements.cross_tab_search.title" : {
+      "comment" : "お知らせ (id: v2.1.0_cross_tab_search, 2026-09-01) の見出し (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "探すのがもっと速く、まっすぐに"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "더 빠르고, 더 곧장 찾을 수 있게"
+          }
+        }
+      }
+    },
+    "announcements.idol_tags_community.body.p1" : {
+      "comment" : "お知らせ (id: v1.9.0_idol_tags_community, 2026-07-10) の本文 1 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲だけでなく、アイドルにもみんなでタグを付けられるようになりました。タグはタップで自分の一票をオン/オフ、長押しでそのタグが付いた他の曲・アイドルのランキングが見られます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡뿐만 아니라 아이돌에도 모두 함께 태그를 달 수 있게 됐어요. 태그는 탭하면 내 한 표를 켜고 끄고, 길게 눌러 그 태그가 붙은 다른 곡·아이돌의 랭킹을 볼 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.idol_tags_community.body.p2" : {
+      "comment" : "お知らせ (id: v1.9.0_idol_tags_community, 2026-07-10) の本文 2 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル詳細に「コミュニティ」タブを追加。タグ一覧に加えて、「みんなの投票」で過去に獲得した順位 (優勝/第N位) バッジもここにまとまりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 상세에 “커뮤니티” 탭을 추가했어요. 태그 목록에 더해 “모두의 투표”에서 과거에 획득한 순위 (우승/제N위) 배지도 여기에 모였어요."
+          }
+        }
+      }
+    },
+    "announcements.idol_tags_community.body.p3" : {
+      "comment" : "お知らせ (id: v1.9.0_idol_tags_community, 2026-07-10) の本文 3 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票お題への曲候補ピッカーを大幅強化。作詞作曲者やタグ、CDシリーズ、アイドルからも曲を探せるようになり、通常の楽曲一覧と同じ絞り込みが使えます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표 주제의 곡 후보 피커를 대폭 강화했어요. 작사·작곡가나 태그, CD 시리즈, 아이돌로도 곡을 찾을 수 있게 되어, 일반 곡 목록과 같은 필터를 쓸 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.idol_tags_community.body.p4" : {
+      "comment" : "お知らせ (id: v1.9.0_idol_tags_community, 2026-07-10) の本文 4 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロデュースタブに「タグの動き」を追加。伸びてるタグ・タグが急上昇中の曲やアイドル・最近つけられたタグをまとめてチェックできます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "프로듀스 탭에 “태그 동향”을 추가했어요. 늘고 있는 태그·태그가 급상승 중인 곡과 아이돌·최근 달린 태그를 한꺼번에 확인할 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.idol_tags_community.summary" : {
+      "comment" : "お知らせ (id: v1.9.0_idol_tags_community, 2026-07-10) の一覧に出す要約 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル詳細に「コミュニティ」タブが登場。タグ付けや投票の実績がまとめて見られます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 상세에 “커뮤니티” 탭이 생겼어요. 태그 달기와 투표 실적을 한꺼번에 볼 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.idol_tags_community.title" : {
+      "comment" : "お知らせ (id: v1.9.0_idol_tags_community, 2026-07-10) の見出し (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドルにもタグ付けできるように"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌에도 태그를 달 수 있게"
+          }
+        }
+      }
+    },
+    "announcements.lyrics.body.p1" : {
+      "comment" : "お知らせ (id: v2.2.0_lyrics, 2026-09-03) の本文 1 段落目 (iOS だけにあるお知らせ) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲の詳細に「歌詞」が増えました。2,128 曲ぶんあります。JASRAC の許諾 (第J260943703号) を受けて掲載しています。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 상세에 “가사”가 생겼어요. 2,128곡 분량이 있어요. JASRAC의 이용 허락 (제J260943703호)을 받아 싣고 있어요."
+          }
+        }
+      }
+    },
+    "announcements.lyrics.body.p2" : {
+      "comment" : "お知らせ (id: v2.2.0_lyrics, 2026-09-03) の本文 2 段落目 (iOS だけにあるお知らせ) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌詞の中の言葉で曲を探せます。曲一覧の検索で「歌詞」に切り替えると、うろ覚えのフレーズから曲にたどり着けます。当たった箇所の前後が抜き出して表示されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가사 속 단어로 곡을 찾을 수 있어요. 곡 목록의 검색에서 “가사”로 바꾸면, 어렴풋이 기억나는 구절로도 곡을 찾아갈 수 있어요. 일치한 부분의 앞뒤를 뽑아서 보여 줘요."
+          }
+        }
+      }
+    },
+    "announcements.lyrics.body.p3" : {
+      "comment" : "お知らせ (id: v2.2.0_lyrics, 2026-09-03) の本文 3 段落目 (iOS だけにあるお知らせ) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌詞の表示にはログインが必要です。許諾の条件で「まとめてダウンロードできない形」で配信することになっているため、1 曲ずつの取得になっていて、端末にも残りません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가사를 보려면 로그인해야 해요. 이용 허락 조건에 따라 “한꺼번에 다운로드할 수 없는 형태”로 제공하게 되어 있어서, 한 곡씩 받아 오며 기기에도 남지 않아요."
+          }
+        }
+      }
+    },
+    "announcements.lyrics.body.p4" : {
+      "comment" : "お知らせ (id: v2.2.0_lyrics, 2026-09-03) の本文 4 段落目 (iOS だけにあるお知らせ) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カバー曲と、アイマス以外の曲 (合同ライブで披露されたもの) には歌詞を付けていません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "커버곡과 아이마스 이외의 곡 (합동 라이브에서 공연된 곡)에는 가사를 달지 않았어요."
+          }
+        }
+      }
+    },
+    "announcements.lyrics.body.p5" : {
+      "comment" : "お知らせ (id: v2.2.0_lyrics, 2026-09-03) の本文 5 段落目 (iOS だけにあるお知らせ)。曲名・ユニット名・アイドル名と読み仮名の例は訳さない (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アルストロメリアの「Bloomy!」が曲一覧に出てこない不具合を直しました。電音部の同名曲の別バージョンとして登録されてしまい、派生曲として隠されていました。「Fly High!」も同じ形で隠れていたので直しています。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "アルストロメリア의 “Bloomy!”가 곡 목록에 나오지 않던 문제를 고쳤어요. 電音部의 같은 이름 곡의 다른 버전으로 등록되어 파생곡으로 숨겨져 있었어요. “Fly High!”도 같은 식으로 숨겨져 있어서 고쳤어요."
+          }
+        }
+      }
+    },
+    "announcements.lyrics.summary" : {
+      "comment" : "お知らせ (id: v2.2.0_lyrics, 2026-09-03) の一覧に出す要約 (iOS だけにあるお知らせ) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "JASRAC の許諾を受けて、2,128 曲の歌詞を掲載しました。歌詞の中の言葉から曲を探すこともできます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "JASRAC의 이용 허락을 받아 2,128곡의 가사를 실었어요. 가사 속 단어로 곡을 찾을 수도 있어요."
+          }
+        }
+      }
+    },
+    "announcements.lyrics.title" : {
+      "comment" : "お知らせ (id: v2.2.0_lyrics, 2026-09-03) の見出し (iOS だけにあるお知らせ) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌詞が読めるようになりました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가사를 읽을 수 있게 됐어요"
+          }
+        }
+      }
+    },
+    "announcements.oshi_widget.body.p1" : {
+      "comment" : "お知らせ (id: v1.7_oshi_widget, 2026-06-17) の本文 1 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル詳細の「ギャラリー」に画像を何枚でも追加できるようになりました。先頭の1枚がアイコンになります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 상세의 “갤러리”에 이미지를 몇 장이든 추가할 수 있게 됐어요. 맨 앞의 한 장이 아이콘이 돼요."
+          }
+        }
+      }
+    },
+    "announcements.oshi_widget.body.p2" : {
+      "comment" : "お知らせ (id: v1.7_oshi_widget, 2026-06-17) の本文 2 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホーム画面ウィジェット「担当の画像」を追加すると、選んだアイドルの画像を表示。タップで次の画像に切り替わり、放っておいても自動でローテーションします。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "홈 화면 위젯 “담당 이미지”를 추가하면 고른 아이돌의 이미지를 표시해요. 탭하면 다음 이미지로 넘어가고, 그냥 두어도 자동으로 바뀌어요."
+          }
+        }
+      }
+    },
+    "announcements.oshi_widget.body.p3" : {
+      "comment" : "お知らせ (id: v1.7_oshi_widget, 2026-06-17) の本文 3 段落目。「お気に入りの」は「自分の好きな」の意味で、アプリのお気に入り機能ではないので ko は 즐겨찾기 を使わない (用語集の警告は承知の上) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「タップでアプリ」版もあるので、お気に入りの起動ショートカットとしても使えます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“탭으로 앱 열기” 버전도 있어서 나만의 앱 실행 바로가기로도 쓸 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.oshi_widget.summary" : {
+      "comment" : "お知らせ (id: v1.7_oshi_widget, 2026-06-17) の一覧に出す要約 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホーム画面ウィジェットに、自分で入れた推しの画像を表示できるようになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "홈 화면 위젯에 직접 넣은 최애의 이미지를 표시할 수 있게 됐어요."
+          }
+        }
+      }
+    },
+    "announcements.oshi_widget.title" : {
+      "comment" : "お知らせ (id: v1.7_oshi_widget, 2026-06-17) の見出し (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当の画像をホーム画面に"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당 이미지를 홈 화면에"
+          }
+        }
+      }
+    },
+    "announcements.polls_polish.body.p1" : {
+      "comment" : "お知らせ (id: v1.8.0_polls_polish, 2026-06-27) の本文 1 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「みんなの投票」のランキングから、曲やアイドルをタップして詳細を開けるようになりました。投票受付中のお題は、まだ投票していないものが選ばれて表示されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“모두의 투표” 랭킹에서 곡이나 아이돌을 탭해서 상세를 열 수 있게 됐어요. 투표 접수 중인 주제는 아직 투표하지 않은 것을 골라서 보여 줘요."
+          }
+        }
+      }
+    },
+    "announcements.polls_polish.body.p2" : {
+      "comment" : "お知らせ (id: v1.8.0_polls_polish, 2026-06-27) の本文 2 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終了したお題で1位になった曲・アイドルには、詳細画面に「優勝」バッジが付くように。タップでそのお題の最終結果も見られます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "종료된 주제에서 1위가 된 곡·아이돌에는 상세 화면에 “우승” 배지가 붙어요. 탭하면 그 주제의 최종 결과도 볼 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.polls_polish.body.p3" : {
+      "comment" : "お知らせ (id: v1.8.0_polls_polish, 2026-06-27) の本文 3 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "楽曲の歌唱メンバー情報を、実際のCD編成に合わせて正確に直しました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡의 가창 멤버 정보를 실제 CD 편성에 맞춰 정확하게 고쳤어요."
+          }
+        }
+      }
+    },
+    "announcements.polls_polish.body.p4" : {
+      "comment" : "お知らせ (id: v1.8.0_polls_polish, 2026-06-27) の本文 4 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "担当・お気に入り・メモを iCloud に自動バックアップ。再インストールや機種変更でも復元されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "담당·즐겨찾기·메모를 iCloud에 자동으로 백업해요. 재설치하거나 기기를 바꿔도 복원돼요."
+          }
+        }
+      }
+    },
+    "announcements.polls_polish.body.p5" : {
+      "comment" : "お知らせ (id: v1.8.0_polls_polish, 2026-06-27) の本文 5 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一覧の読み込み表示をスケルトンに変更し、検索・ツールバーの操作感も整えました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "목록의 로딩 표시를 스켈레톤으로 바꾸고, 검색·툴바의 조작감도 다듬었어요."
+          }
+        }
+      }
+    },
+    "announcements.polls_polish.summary" : {
+      "comment" : "お知らせ (id: v1.8.0_polls_polish, 2026-06-27) の一覧に出す要約 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ランキングから曲・アイドル詳細へ。優勝した曲には王冠バッジが付きます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "랭킹에서 곡·아이돌 상세로 바로 갈 수 있어요. 우승한 곡에는 왕관 배지가 붙어요."
+          }
+        }
+      }
+    },
+    "announcements.polls_polish.title" : {
+      "comment" : "お知らせ (id: v1.8.0_polls_polish, 2026-06-27) の見出し (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "みんなの投票がもっと便利に"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "모두의 투표가 더 편리하게"
+          }
+        }
+      }
+    },
+    "announcements.polls_scope.body.p1" : {
+      "comment" : "お知らせ (id: v1.8.1_polls_scope, 2026-06-29) の本文 1 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「お題を投稿」で、投票候補を「全て」「ブランド限定」「候補指定」から選べるようになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“주제 올리기”에서 투표 후보를 “전체” “브랜드 한정” “후보 지정” 중에서 고를 수 있게 됐어요."
+          }
+        }
+      }
+    },
+    "announcements.polls_scope.body.p2" : {
+      "comment" : "お知らせ (id: v1.8.1_polls_scope, 2026-06-29) の本文 2 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランド限定: 選んだブランドの曲/アイドルだけが候補。「シャニ限定で好きな曲は？」のような企画に。複数ブランド選択で合同ライブの予想にも。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드 한정: 고른 브랜드의 곡/아이돌만 후보가 돼요. “샤니 한정으로 좋아하는 곡은?” 같은 기획에 좋아요. 여러 브랜드를 고르면 합동 라이브 예상에도 쓸 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.polls_scope.body.p3" : {
+      "comment" : "お知らせ (id: v1.8.1_polls_scope, 2026-06-29) の本文 3 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "候補指定: 作成者が候補を直接ピック。「この5曲のうちどれが好き？」のような企画に。最低2件あれば作成可能。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "후보 지정: 만든 사람이 후보를 직접 골라요. “이 5곡 중 어느 게 좋아?” 같은 기획에 좋아요. 최소 2건이면 만들 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.polls_scope.body.p4" : {
+      "comment" : "お知らせ (id: v1.8.1_polls_scope, 2026-06-29) の本文 4 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲のピッカーがリフレッシュ。右上のフィルターから並び順 (五十音 / リリース日 / 披露回数)、ライブ履歴のみ曲を隠す、リミックスを含める、などを切り替えられます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡 피커가 새로워졌어요. 오른쪽 위의 필터에서 정렬 순서 (50음순 / 발매일 / 공연 횟수), 라이브 기록만 있는 곡 숨기기, 리믹스 포함 등을 전환할 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.polls_scope.body.p5" : {
+      "comment" : "お知らせ (id: v1.8.1_polls_scope, 2026-06-29) の本文 5 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリ予想画面の行間と「歌唱メンバー予想」ボタンの見た目を整理しました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트 예상 화면의 줄 간격과 “가창 멤버 예상” 버튼의 모양을 정리했어요."
+          }
+        }
+      }
+    },
+    "announcements.polls_scope.body.p6" : {
+      "comment" : "お知らせ (id: v1.8.1_polls_scope, 2026-06-29) の本文 6 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アイドル詳細のタブを切り替えるとスクロール位置がリセットされるように。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "아이돌 상세의 탭을 전환하면 스크롤 위치가 초기화되도록 했어요."
+          }
+        }
+      }
+    },
+    "announcements.polls_scope.summary" : {
+      "comment" : "お知らせ (id: v1.8.1_polls_scope, 2026-06-29) の一覧に出す要約 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブランド限定や候補リスト指定で、企画ものの「お題」が立てやすくなりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "브랜드 한정이나 후보 목록 지정으로 기획성 “주제”를 세우기 쉬워졌어요."
+          }
+        }
+      }
+    },
+    "announcements.polls_scope.title" : {
+      "comment" : "お知らせ (id: v1.8.1_polls_scope, 2026-06-29) の見出し (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投票の候補を絞り込める"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "투표 후보를 좁힐 수 있어요"
+          }
+        }
+      }
+    },
+    "announcements.readings_android_parity.body.p1" : {
+      "comment" : "お知らせ (id: v2.0.0_readings_android_parity, 2026-08-28) の本文 1 段落目。曲名・ユニット名・アイドル名と読み仮名の例は訳さない (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲名・会場名・ライブ名・作詞作曲の読み仮名を全件そろえました。漢字の曲名をひらがなで打っても見つかります。「おねがいしんでれら」で「お願い！シンデレラ」が出ます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡명·공연장명·라이브명·작사·작곡의 읽는 법을 전부 갖췄어요. 한자 곡명을 히라가나로 입력해도 찾을 수 있어요. “おねがいしんでれら”로 “お願い！シンデレラ”가 나와요."
+          }
+        }
+      }
+    },
+    "announcements.readings_android_parity.body.p2" : {
+      "comment" : "お知らせ (id: v2.0.0_readings_android_parity, 2026-08-28) の本文 2 段落目。曲名・ユニット名・アイドル名と読み仮名の例は訳さない (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "読みは 1 件ずつ裏取りしました。当て字が多く、素直に読むと外れます。独奏歌=アリア、前奏曲=プレリュード、木苺=ラズベリー、283体操=ツバサ体操、Get lol! Get lol! SONG=げろげろそんぐ。熟語の読み違いも直しました (泥濘=でいねい、傀儡=かいらい、雪月風花=せつげつふうか)。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "읽는 법은 한 건씩 확인했어요. 아테지 (当て字)가 많아서 그대로 읽으면 틀려요. 独奏歌=アリア, 前奏曲=プレリュード, 木苺=ラズベリー, 283体操=ツバサ体操, Get lol! Get lol! SONG=げろげろそんぐ. 숙어의 읽기 오류도 고쳤어요 (泥濘=でいねい, 傀儡=かいらい, 雪月風花=せつげつふうか)."
+          }
+        }
+      }
+    },
+    "announcements.readings_android_parity.body.p3" : {
+      "comment" : "お知らせ (id: v2.0.0_readings_android_parity, 2026-08-28) の本文 3 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外部の読み仮名データベースとも全曲を突き合わせました。向こうが正しかったぶんは直し、こちらが正しかったぶんは残しています。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "외부 읽는 법 데이터베이스와도 모든 곡을 대조했어요. 그쪽이 맞았던 것은 고치고, 이쪽이 맞았던 것은 그대로 두었어요."
+          }
+        }
+      }
+    },
+    "announcements.readings_android_parity.body.p4" : {
+      "comment" : "お知らせ (id: v2.0.0_readings_android_parity, 2026-08-28) の本文 4 段落目。曲名・ユニット名・アイドル名と読み仮名の例は訳さない (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニット名も かなで探せるようになりました。「あたらよづき」で「可惜夜月」、「はごろもこまち」で「羽衣小町」が出ます。読みが素直でないものが多いので、1 件ずつ出典を当たっています (凸レーション=でこれーしょん、夕星灯=ゆうづつひ、≡君彩≡=きみどり)。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛 이름도 가나로 찾을 수 있게 됐어요. “あたらよづき”로 “可惜夜月”, “はごろもこまち”로 “羽衣小町”가 나와요. 읽는 법이 평범하지 않은 것이 많아서 한 건씩 출처를 확인했어요 (凸レーション=でこれーしょん, 夕星灯=ゆうづつひ, ≡君彩≡=きみどり)."
+          }
+        }
+      }
+    },
+    "announcements.readings_android_parity.body.p5" : {
+      "comment" : "お知らせ (id: v2.0.0_readings_android_parity, 2026-08-28) の本文 5 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "検索の当たり方を全部そろえました。これまでは一覧・ピッカー・ウィジェット設定で当たり方がまちまちで、同じ語を打っても場所によって出たり出なかったりしていました。会場を選ぶ画面が読みを見ていない、曲を選ぶ画面が曲名しか見ていない、といった取りこぼしも塞いでいます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "검색이 걸리는 방식을 전부 통일했어요. 지금까지는 목록·피커·위젯 설정마다 찾는 방식이 제각각이라, 같은 단어를 입력해도 위치에 따라 나오기도 하고 안 나오기도 했어요. 공연장을 고르는 화면이 읽는 법을 보지 않거나, 곡을 고르는 화면이 곡명만 보는 등의 누락도 막았어요."
+          }
+        }
+      }
+    },
+    "announcements.readings_android_parity.body.p6" : {
+      "comment" : "お知らせ (id: v2.0.0_readings_android_parity, 2026-08-28) の本文 6 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "起動時の「今日の1曲」を日替わりにし、奇数日は「今日のアイドル」を出すようにしました。アイドルにもタグを付けてもらえます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "실행할 때 나오는 “오늘의 한 곡”을 매일 바뀌게 하고, 홀수 날에는 “오늘의 아이돌”을 보여 주도록 했어요. 아이돌에도 태그를 달 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.readings_android_parity.body.p7" : {
+      "comment" : "お知らせ (id: v2.0.0_readings_android_parity, 2026-08-28) の本文 7 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Android 版に通知 (担当の誕生日・ライブ1週間前・チケット締切・月曜予告)、ホーム画面ウィジェット5種、キャラクター画像の取り込み、画像シェアカードを追加しました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Android 버전에 알림 (담당의 생일·라이브 1주일 전·티켓 마감·월요일 예고), 홈 화면 위젯 5종, 캐릭터 이미지 가져오기, 이미지 공유 카드를 추가했어요."
+          }
+        }
+      }
+    },
+    "announcements.readings_android_parity.body.p8" : {
+      "comment" : "お知らせ (id: v2.0.0_readings_android_parity, 2026-08-28) の本文 8 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Android 版の絞り込みを iOS と同じところまで広げました。曲は表示形式・アイドル・作詞作曲・シリーズ・CDシリーズ・曲タイプで、ライブは種別・参加状態・お気に入り・メモで絞れます。検索も曲名/アイドル/作詞作曲を切り替えられ、当たった箇所に色が付きます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Android 버전의 필터를 iOS와 같은 수준까지 넓혔어요. 곡은 표시 형식·아이돌·작사·작곡·시리즈·CD 시리즈·곡 타입으로, 라이브는 종류·참가 상태·즐겨찾기·메모로 걸러 볼 수 있어요. 검색도 곡명/아이돌/작사·작곡을 전환할 수 있고, 일치한 부분에 색이 칠해져요."
+          }
+        }
+      }
+    },
+    "announcements.readings_android_parity.body.p9" : {
+      "comment" : "お知らせ (id: v2.0.0_readings_android_parity, 2026-08-28) の本文 9 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリの曲が 9 件、統合で消えた曲を指したままになっていたのを直しました。同じ壊れ方を次から検査で捕まえます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트의 곡 9건이 통합으로 사라진 곡을 가리킨 채로 있던 것을 고쳤어요. 같은 방식의 문제는 다음부터 검사로 잡아내요."
+          }
+        }
+      }
+    },
+    "announcements.readings_android_parity.summary" : {
+      "comment" : "お知らせ (id: v2.0.0_readings_android_parity, 2026-08-28) の一覧に出す要約 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲・会場・ライブ名・作詞作曲の読み仮名を全部入れました。Android 版も iOS に大きく追いつきました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡·공연장·라이브명·작사·작곡의 읽는 법을 모두 넣었어요. Android 버전도 iOS를 크게 따라잡았어요."
+          }
+        }
+      }
+    },
+    "announcements.readings_android_parity.title" : {
+      "comment" : "お知らせ (id: v2.0.0_readings_android_parity, 2026-08-28) の見出し (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "かなで引けるようになりました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "가나로 찾을 수 있게 됐어요"
+          }
+        }
+      }
+    },
+    "announcements.search_timeline.body.p1" : {
+      "comment" : "お知らせ (id: v1.11.0_search_timeline, 2026-08-24) の本文 1 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブ・楽曲・アイドルの各一覧に検索欄が付きました。これまでは虫眼鏡を押すと別画面に飛んで、そこで結果が完結してしまい、ブランド絞り込みや並び順と組み合わせられませんでした。今は同じ画面で絞れるので、「シャニマスの曲を配信日順に並べて、そこから名前で絞る」がそのままできます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브·곡·아이돌의 각 목록에 검색창이 생겼어요. 지금까지는 돋보기를 누르면 다른 화면으로 넘어가 거기서 결과가 끝나 버려서, 브랜드 필터나 정렬 순서와 함께 쓸 수 없었어요. 이제는 같은 화면에서 걸러 볼 수 있어서 “샤니마스 곡을 발매일순으로 늘어놓고 거기서 이름으로 거르기”를 그대로 할 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.search_timeline.body.p2" : {
+      "comment" : "お知らせ (id: v1.11.0_search_timeline, 2026-08-24) の本文 2 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲は曲名だけでなく、アイドル名や作詞・作曲でも探せます。ほかの対象に何件あるかも出るので、「曲名では見つからないけどアイドル名なら97件」がひと目で分かり、そのまま切り替えられます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡은 곡명뿐 아니라 아이돌 이름이나 작사·작곡으로도 찾을 수 있어요. 다른 대상에 몇 건 있는지도 나오기 때문에 “곡명으로는 못 찾았지만 아이돌 이름이라면 97건”을 한눈에 알 수 있고, 바로 전환할 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.search_timeline.body.p3" : {
+      "comment" : "お知らせ (id: v1.11.0_search_timeline, 2026-08-24) の本文 3 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "検索結果の各行が「なぜ出てきたか」を見せます。当たった箇所に色が付き、アイドルで探したときは当たった名前が、作詞作曲で探したときはその名前が行に出ます。並び順を披露回数順や回収率順にすると、その数字も行に並びます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "검색 결과의 각 줄이 “왜 나왔는지”를 보여 줘요. 일치한 부분에 색이 칠해지고, 아이돌로 찾았을 때는 일치한 이름이, 작사·작곡으로 찾았을 때는 그 이름이 줄에 나와요. 정렬 순서를 공연 횟수순이나 회수율순으로 하면 그 숫자도 줄에 함께 나와요."
+          }
+        }
+      }
+    },
+    "announcements.search_timeline.body.p4" : {
+      "comment" : "お知らせ (id: v1.11.0_search_timeline, 2026-08-24) の本文 4 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "見出しと検索欄で2行あったヘッダーを1行に畳みました。一覧が見え始めるまでが近くなっています。絞り込みの動作そのものも12倍速くしました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "제목과 검색창으로 2줄이던 헤더를 1줄로 줄였어요. 목록이 더 위쪽부터 바로 보여요. 필터 동작 자체도 12배 빠르게 했어요."
+          }
+        }
+      }
+    },
+    "announcements.search_timeline.body.p5" : {
+      "comment" : "お知らせ (id: v1.11.0_search_timeline, 2026-08-24) の本文 5 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロデュースタブに「年表」を追加。ライブ・楽曲シリーズ・節目を1枚で俯瞰できます。周年やアニメ放映などの節目を34件収録しました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "프로듀스 탭에 “연표”를 추가했어요. 라이브·곡 시리즈·주요 이정표를 한 장으로 한눈에 볼 수 있어요. 주년이나 애니메이션 방영 등의 이정표를 34건 수록했어요."
+          }
+        }
+      }
+    },
+    "announcements.search_timeline.body.p6" : {
+      "comment" : "お知らせ (id: v1.11.0_search_timeline, 2026-08-24) の本文 6 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "声優さんの情報を「いつからいつまでが誰」の形に作り直しました。交代のあったアイドルは、歴代のキャストが期間付きで見られます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "성우 정보를 “언제부터 언제까지가 누구”인 형태로 새로 만들었어요. 교체가 있었던 아이돌은 역대 캐스트를 기간과 함께 볼 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.search_timeline.body.p7" : {
+      "comment" : "お知らせ (id: v1.11.0_search_timeline, 2026-08-24) の本文 7 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "週替わりでソロCDが出ていた「SPECIAL SOLO RECORDS」を全468曲そろえました。ギネス世界記録に認定された52週連続リリースの企画です。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "매주 솔로 CD가 나왔던 “SPECIAL SOLO RECORDS”를 전 468곡 모두 갖췄어요. 기네스 세계 기록에 인정된 52주 연속 발매 기획이에요."
+          }
+        }
+      }
+    },
+    "announcements.search_timeline.body.p8" : {
+      "comment" : "お知らせ (id: v1.11.0_search_timeline, 2026-08-24) の本文 8 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリアイコンを新しくしました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "앱 아이콘을 새로 바꿨어요."
+          }
+        }
+      }
+    },
+    "announcements.search_timeline.summary" : {
+      "comment" : "お知らせ (id: v1.11.0_search_timeline, 2026-08-24) の一覧に出す要約 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "検索が各一覧の中に入り、絞り込みや並び順とそのまま組み合わせられるようになりました。年表も追加。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "검색이 각 목록 안으로 들어가서 필터나 정렬 순서와 그대로 함께 쓸 수 있게 됐어요. 연표도 추가했어요."
+          }
+        }
+      }
+    },
+    "announcements.search_timeline.title" : {
+      "comment" : "お知らせ (id: v1.11.0_search_timeline, 2026-08-24) の見出し (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "探しかたが変わりました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "찾는 방식이 바뀌었어요"
+          }
+        }
+      }
+    },
+    "announcements.setlist_gap.body.p1" : {
+      "comment" : "お知らせ (id: v2.3.0_setlist_gap, 2026-09-20) の本文 1 段落目 (iOS だけにあるお知らせ) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セットリストの各行に「初披露」「3 年 10 か月ぶり」が出るようになりました。久しぶりに来た曲がその場で分かります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트의 각 줄에 “첫 공연” “3년 10개월 만”이 나오게 됐어요. 오랜만에 나온 곡을 그 자리에서 알 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.setlist_gap.body.p2" : {
+      "comment" : "お知らせ (id: v2.3.0_setlist_gap, 2026-09-20) の本文 2 段落目 (iOS だけにあるお知らせ) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "数えるのは「その公演の時点で何年ぶりだったか」です。昔のライブを開いたときも、当時の間隔が出ます。1 年未満の間隔は出しません (ほとんどの曲が当てはまってしまい、かえって読みにくいため)。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세는 기준은 “그 공연 시점에서 몇 년 만이었는가”예요. 예전 라이브를 열었을 때도 당시의 간격이 나와요. 1년 미만의 간격은 표시하지 않아요 (대부분의 곡이 해당되어 오히려 읽기 어려워지기 때문이에요)."
+          }
+        }
+      }
+    },
+    "announcements.setlist_gap.body.p3" : {
+      "comment" : "お知らせ (id: v2.3.0_setlist_gap, 2026-09-20) の本文 3 段落目 (iOS だけにあるお知らせ) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歌った人の名義の出し方も直しました。これまでは歌った顔ぶれがユニットの人数とぴったり合うと、その曲がユニット名義でなくてもユニット名を出していました。ユニットとして歌った曲と、たまたま同じ顔ぶれで歌った曲を取り違えなくなります。ユニット名の表記の誤り (「315 ALLSTARS」→「315 STARS」など) もあわせて直しています。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "부른 사람의 명의를 표시하는 방식도 고쳤어요. 지금까지는 부른 멤버 구성이 유닛 인원수와 딱 맞으면, 그 곡이 유닛 명의가 아니어도 유닛 이름을 표시했어요. 이제 유닛으로서 부른 곡과 우연히 같은 멤버 구성으로 부른 곡을 헷갈리지 않아요. 유닛 이름의 표기 오류 (“315 ALLSTARS” → “315 STARS” 등)도 함께 고쳤어요."
+          }
+        }
+      }
+    },
+    "announcements.setlist_gap.body.p4" : {
+      "comment" : "お知らせ (id: v2.3.0_setlist_gap, 2026-09-20) の本文 4 段落目 (iOS だけにあるお知らせ) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブに種別が付きました。周年ライブ・オーケストラ・他社イベント・リリースイベント・バースデーライブなどで見分けられます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브에 종류가 붙었어요. 주년 라이브·오케스트라·타사 이벤트·발매 이벤트·생일 라이브 등으로 구분할 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.setlist_gap.summary" : {
+      "comment" : "お知らせ (id: v2.3.0_setlist_gap, 2026-09-20) の一覧に出す要約 (iOS だけにあるお知らせ) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "その曲が前にいつ歌われたかを、セットリストの行にそのまま出します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "그 곡이 이전에 언제 불렸는지를 세트리스트의 각 줄에 바로 보여 줘요."
+          }
+        }
+      }
+    },
+    "announcements.setlist_gap.title" : {
+      "comment" : "お知らせ (id: v2.3.0_setlist_gap, 2026-09-20) の見出し (iOS だけにあるお知らせ) (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリに「何年ぶり」が出るようになりました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트에 “몇 년 만”이 나오게 됐어요"
+          }
+        }
+      }
+    },
+    "announcements.venues_setlist_copy.body.p1" : {
+      "comment" : "お知らせ (id: v1.10.0_venues_setlist_copy, 2026-07-27) の本文 1 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会場マスタを追加しました。ライブ一覧を会場で絞り込めるほか、公演の会場名やキャパシティが見られます。改名した会場は、その公演当時の名前で表示します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연장 데이터를 추가했어요. 라이브 목록을 공연장으로 걸러 볼 수 있고, 공연의 공연장 이름과 수용 인원도 볼 수 있어요. 이름이 바뀐 공연장은 그 공연 당시의 이름으로 표시해요."
+          }
+        }
+      }
+    },
+    "announcements.venues_setlist_copy.body.p2" : {
+      "comment" : "お知らせ (id: v1.10.0_venues_setlist_copy, 2026-07-27) の本文 2 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セトリに「シンプル表示」を追加。曲名だけを詰めて並べるので、現地でさっと確認したり、そのまま共有したりしやすくなりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "세트리스트에 “심플 표시”를 추가했어요. 곡명만 촘촘하게 늘어놓기 때문에 현장에서 바로 확인하거나 그대로 공유하기 쉬워졌어요."
+          }
+        }
+      }
+    },
+    "announcements.venues_setlist_copy.body.p3" : {
+      "comment" : "お知らせ (id: v1.10.0_venues_setlist_copy, 2026-07-27) の本文 3 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曲名・アイドル名・よみ・CV名などを長押しでコピーできるようになりました。コーレスやタグの説明は、文字を選んで一部だけコピーできます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "곡명·아이돌 이름·읽는 법·CV 이름 등을 길게 눌러 복사할 수 있게 됐어요. 콜 앤 리스폰스나 태그 설명은 글자를 선택해서 일부만 복사할 수 있어요."
+          }
+        }
+      }
+    },
+    "announcements.venues_setlist_copy.body.p4" : {
+      "comment" : "お知らせ (id: v1.10.0_venues_setlist_copy, 2026-07-27) の本文 4 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ユニット詳細を大幅に拡張。タグ付けや投票の対象になり、画像も登録できます。アイドル一覧はアイドル/ユニットの2タブになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "유닛 상세를 대폭 확장했어요. 태그 달기와 투표의 대상이 되고, 이미지도 등록할 수 있어요. 아이돌 목록은 아이돌/유닛 2개 탭으로 바뀌었어요."
+          }
+        }
+      }
+    },
+    "announcements.venues_setlist_copy.body.p5" : {
+      "comment" : "お知らせ (id: v1.10.0_venues_setlist_copy, 2026-07-27) の本文 5 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「この曲が好きな人にはこれも」のおすすめを作り直しました。タグがたくさん付いた有名曲ばかり出ていたのを、本当にタグの傾向が近い曲が出るように。開くたびに顔ぶれが変わります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "“이 곡을 좋아하는 사람에게는 이것도” 추천을 새로 만들었어요. 태그가 많이 붙은 유명곡만 나오던 것을, 정말로 태그 경향이 비슷한 곡이 나오도록 했어요. 열 때마다 구성이 바뀌어요."
+          }
+        }
+      }
+    },
+    "announcements.venues_setlist_copy.body.p6" : {
+      "comment" : "お知らせ (id: v1.10.0_venues_setlist_copy, 2026-07-27) の本文 6 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お気に入り・担当・投票履歴の引き継ぎコードとバックアップに対応しました。機種変更時にご利用ください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "즐겨찾기·담당·투표 기록의 이전 코드와 백업을 지원해요. 기기를 바꿀 때 이용해 주세요."
+          }
+        }
+      }
+    },
+    "announcements.venues_setlist_copy.summary" : {
+      "comment" : "お知らせ (id: v1.10.0_venues_setlist_copy, 2026-07-27) の一覧に出す要約 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブを会場で絞り込めるように。セトリのシンプル表示と、画面の文字をコピーする機能も追加しました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "라이브를 공연장으로 걸러 볼 수 있게 됐어요. 세트리스트의 심플 표시와 화면의 글자를 복사하는 기능도 추가했어요."
+          }
+        }
+      }
+    },
+    "announcements.venues_setlist_copy.title" : {
+      "comment" : "お知らせ (id: v1.10.0_venues_setlist_copy, 2026-07-27) の見出し (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会場から探せる・セトリが見やすく"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "공연장으로 찾기·보기 쉬운 세트리스트"
+          }
+        }
+      }
+    },
+    "announcements.widget_polish.body.p1" : {
+      "comment" : "お知らせ (id: v1.7.1_widget_polish, 2026-06-19) の本文 1 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ウィジェットのスライドショーに出す画像を、ギャラリーで1枚ずつ選べるようになりました。サムネを長押しして「スライドショーから外す/入れる」を切り替えられます。お気に入りだけを回すこともできます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "위젯 슬라이드쇼에 보여 줄 이미지를 갤러리에서 한 장씩 고를 수 있게 됐어요. 썸네일을 길게 눌러 “슬라이드쇼에서 빼기/넣기”를 전환할 수 있어요. 즐겨찾기만 돌릴 수도 있어요."
+          }
+        }
+      }
+    },
+    "announcements.widget_polish.body.p2" : {
+      "comment" : "お知らせ (id: v1.7.1_widget_polish, 2026-06-19) の本文 2 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ウィジェット編集でアイドルを選ぶとき、検索で絞り込めるようになり、ブランド名も表示されるようになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "위젯 편집에서 아이돌을 고를 때 검색으로 좁힐 수 있게 되고, 브랜드 이름도 표시돼요."
+          }
+        }
+      }
+    },
+    "announcements.widget_polish.body.p3" : {
+      "comment" : "お知らせ (id: v1.7.1_widget_polish, 2026-06-19) の本文 3 段落目 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ギャラリーの表示や、画像まわりの細かな不具合を修正しました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "갤러리 표시와 이미지 관련 자잘한 문제를 고쳤어요."
+          }
+        }
+      }
+    },
+    "announcements.widget_polish.summary" : {
+      "comment" : "お知らせ (id: v1.7.1_widget_polish, 2026-06-19) の一覧に出す要約 (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ウィジェットに出す画像を選べるようになり、アイドル選択も探しやすくなりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "위젯에 보여 줄 이미지를 고를 수 있게 되고, 아이돌 선택도 찾기 쉬워졌어요."
+          }
+        }
+      }
+    },
+    "announcements.widget_polish.title" : {
+      "comment" : "お知らせ (id: v1.7.1_widget_polish, 2026-06-19) の見出し (i18n/catalog/announcements.json)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スライドショーの画像を選べるように"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "슬라이드쇼 이미지를 고를 수 있게"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

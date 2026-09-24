@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 生成物: i18n/catalog/legal.json → python3 tools/i18n/i18n.py generate。手で直さない -->
+<resources>
+    <string name="legal_privacy_collected_body_android">· 기기 식별자 (UUID): 기기 안에만 저장되는 익명 식별자예요. 개인정보와 연결하지 않아요.\n· 앱 설정: 기본 브랜드 등의 설정은 기기 안에만 저장돼요.\n· 계정 정보: 커뮤니티 기능을 이용하려면 Google 계정으로 로그인해야 해요. 게시한 세트리스트·수정 제안 등의 콘텐츠는 서버에 저장·공개돼요.</string>
+    <string name="legal_privacy_collected_header">수집하는 데이터</string>
+    <string name="legal_privacy_contact_body">개인정보 관련 문의·데이터 삭제 요청은 아래 GitHub Issue로 해 주세요.\nhttps://github.com/fuga-if/imas-live-privacy/issues/new</string>
+    <string name="legal_privacy_contact_header">연락처</string>
+    <string name="legal_privacy_last_updated">최종 업데이트: 2026년 4월 23일</string>
+    <string name="legal_privacy_overview_body">이 앱 (ImasLiveDB)은 아이돌마스터 시리즈의 라이브·세트리스트 정보를 관리·열람하기 위한 비공식 팬메이드 앱이에요. BANDAI NAMCO Entertainment Inc.를 비롯한 권리자와는 아무런 관계가 없어요.</string>
+    <string name="legal_privacy_overview_header">앱 개요</string>
+    <string name="legal_privacy_rights_body_android">계정과 게시 데이터는 설정 화면의 “계정 삭제”에서 언제든지 삭제할 수 있어요. 개별 문의는 GitHub Issue로 연락해 주세요.</string>
+    <string name="legal_privacy_rights_header">사용자의 권리</string>
+    <string name="legal_privacy_sharing_body_android">커뮤니티 기능으로 게시한 콘텐츠 (세트리스트 보고·수정 제안 등)는 다른 사용자에게 공개돼요. 게시 내용에 개인정보를 넣지 않도록 주의해 주세요.</string>
+    <string name="legal_privacy_sharing_header">데이터 공유</string>
+    <string name="legal_privacy_third_party_body_android">· Cloudflare Workers: 앱의 API 서버로 이용하고 있어요.\n· Google Sign-In: 로그인 인증에 이용하고 있어요.</string>
+    <string name="legal_privacy_third_party_header">서드파티 서비스</string>
+    <string name="legal_terms_contact_body">의견·버그 제보는 GitHub Issue로 연락해 주세요.\nhttps://github.com/fuga-if/imas-live-privacy/issues/new</string>
+    <string name="legal_terms_contact_header">연락처</string>
+    <string name="legal_terms_content_license_body_android">사용자가 게시한 콘텐츠는 서버에 저장되어, 이 앱을 이용하는 다른 사용자에게 공개돼요. 게시하면 해당 콘텐츠를 앱 안에서 표시·이용하는 데 동의한 것으로 간주해요.</string>
+    <string name="legal_terms_content_license_header">게시 콘텐츠의 라이선스</string>
+    <string name="legal_terms_disclaimer_body">이 앱은 비공식 팬 제작 앱이에요. BANDAI NAMCO Entertainment Inc., BANDAI NAMCO Music Live Inc., 그 밖에 아이돌마스터 시리즈와 관련된 권리자와는 아무런 관계가 없어요.</string>
+    <string name="legal_terms_disclaimer_header">면책·권리 표기</string>
+    <string name="legal_terms_ip_body">아이돌마스터 시리즈 및 관련 캐릭터·곡·로고·일러스트 등의 저작권·상표권은 모두 각 권리자에게 귀속돼요. 이 앱은 이를 무단으로 사용·복제·배포하지 않아요.</string>
+    <string name="legal_terms_ip_header">지식재산권</string>
+    <string name="legal_terms_last_updated">최종 업데이트: 2026년 4월 23일</string>
+    <string name="legal_terms_materials_body_android">· 재킷 이미지: 공식 음원 스토어의 정식 API를 통해 가져온 것만 표시하고 있어요.\n· 가사: 사용하지 않아요.\n· 캐릭터 일러스트: 사용하지 않아요.\n· 공식 로고: 사용하지 않아요.</string>
+    <string name="legal_terms_materials_header">사용하는 소재에 대해</string>
+    <string name="legal_terms_prohibited_body_android">다음 행위를 금지해요.\n· 타인의 저작권·상표권·프라이버시를 침해하는 콘텐츠 게시\n· 다른 사용자에 대한 괴롭힘·비방\n· 스팸이나 허위 정보 게시\n· 이 앱의 시스템에 대한 부정 접근·변조</string>
+    <string name="legal_terms_prohibited_header">금지 사항</string>
+    <string name="legal_terms_service_changes_body">개발자는 예고 없이 앱의 기능을 바꾸거나 서비스를 중단할 수 있어요. 이로 인해 생긴 손해에 대해 개발자는 책임지지 않아요.</string>
+    <string name="legal_terms_service_changes_header">서비스 변경·중단</string>
+    <string name="legal_terms_user_content_body">커뮤니티 기능에 올리는 게시물 (세트리스트 정보·수정 제안 등)은 사용자 본인의 책임으로 올려 주세요. 게시 콘텐츠로 인해 생긴 문제에 대해 개발자는 책임지지 않아요.</string>
+    <string name="legal_terms_user_content_header">사용자 게시 콘텐츠</string>
+</resources>
