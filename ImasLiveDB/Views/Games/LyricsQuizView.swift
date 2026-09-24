@@ -57,6 +57,7 @@ struct LyricsQuizView: View {
                     QuizResultView(result: result, kind: .lyricsQuiz, isNewBest: isNewBest,
                                    customHistory: history.isEmpty ? nil
                                        : AnyView(LyricsQuizHistoryList(items: history)),
+                                   onShareImage: { shareResultImage(result) },
                                    onReplay: { startSession() })
                 } else {
                     switch phase {
@@ -391,6 +392,21 @@ struct LyricsQuizView: View {
             isNewBest = update.isNewBest
         }
         withAnimation(.easeInOut(duration: 0.25)) { result = sessionResult }
+    }
+
+    private var modeLabel: String { mode == .title ? "曲名当て" : "続きはどれ" }
+
+    /// 結果カードを画像にしてシェアする (イントロドンと同じ手順)。画像にも文面にも歌詞は載せない。
+    private func shareResultImage(_ result: QuizSessionResult) {
+        AppAnalytics.tap("lyrics_quiz.share_image")
+        let card = LyricsQuizResultShareCard(modeLabel: modeLabel, result: result,
+                                             items: history, isNewBest: isNewBest)
+        let image = IntroShareImageRenderer.render(size: CGSize(width: 1080, height: 1350)) { card }
+        let text = shareQuizResultText(
+            gameDisplayName: "歌詞クイズ（\(modeLabel)）",
+            points: result.points, maxPoints: result.maxPoints, grade: result.grade,
+            correct: result.correct, questions: result.questions)
+        IntroShareImageRenderer.share(image: image, text: text)
     }
 
     private func show(_ p: Prepared) {
