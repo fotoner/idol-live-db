@@ -174,6 +174,12 @@ Android では同じ名前の `L10n.Songs.listSortTitle` (DS 部品にはその�
   (`key`) には付けない (その言語で組む)。
 - 訳した文の中に `string` 引数で差し込んだデータは、文全体の言語で組まれる。部分ごとに言語を付ける
   (AttributedString / AnnotatedString) かは、実装するときに決める。
+- Apple の文書 (`Text.typesettingLanguage(_:isEnabled:)`) にあるのは行の高さ・改行・字間だけで、字形 (フォントの選択)
+  が変わるとは書いていない。実装するときに zh-Hans / ko / en の端末で 直・骨・今・角 などの字形が ja になるかを
+  実測し、効かなければ ja のフォント (Hiragino Sans など) を明示する方法に切り替える。
+- Android のウィジェット (Glance。`widget/InfoWidgets.kt` の `info.eventName` など) は、`androidx.glance.text.TextStyle`
+  に `localeList` が無い (glance 1.1.1) ので、この方法では付けられない。既知の制限として書くか、その部分だけ
+  `AndroidRemoteViews` で `LocaleSpan` を付けた文字列を出す。iOS のウィジェットは SwiftUI なのでアプリと同じ方法で付く。
 - **まだ実装していない。** ko も含め、言語を beta 以上に上げる前に実装する (TRANSLATION.md の「言語を上げる条件」)。
 
 ### キーの使い回し
