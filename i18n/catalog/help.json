@@ -158,7 +158,7 @@
     },
     "category.events.brand_filter.detail": {
       "ja": "右上の絞り込みボタンから、765AS / シンデレラ / ミリオン / SideM / シャニ / 学マス / ヴイアラ など特定ブランドだけに絞れます。",
-      "ko": "오른쪽 위의 필터 버튼에서 765AS / 신데렐라 / 밀리언 / SideM / 샤니 / 학마스 / vα-liv 등 특정 브랜드만 골라 볼 수 있어요.",
+      "ko": "오른쪽 위의 필터 버튼에서 765AS / 신데렐라 / 밀리언 / SideM / 샤니 / 학원 / vα-liv 등 특정 브랜드만 골라 볼 수 있어요.",
       "note": "ヘルプ「ライブを探す」の項目の説明。ブランドの略称は ko のファンが使う呼び方にした (ヴイアラは正式表記の vα-liv)"
     },
     "category.events.brand_filter.label": {
@@ -219,7 +219,7 @@
     },
     "category.idols.attributes.detail": {
       "ja": "キュート/クール/パッション (CG)、 Fairy/Angel/Princess (ML)、 1年/3年 (学マス) などブランドごとの属性で絞れます。",
-      "ko": "큐트/쿨/패션 (CG), Fairy/Angel/Princess (ML), 1학년/3학년 (학마스) 등 브랜드별 속성으로 필터할 수 있어요.",
+      "ko": "큐트/쿨/패션 (CG), Fairy/Angel/Princess (ML), 1학년/3학년 (학원) 등 브랜드별 속성으로 필터할 수 있어요.",
       "note": "ヘルプ「アイドル・CVを探す」の項目の説明。属性の名前は絞り込みパネルの文言 (ko はそちらの訳に合わせる)。CG / ML はブランドの略号"
     },
     "category.idols.attributes.label": {

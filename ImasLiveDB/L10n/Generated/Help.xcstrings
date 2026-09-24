@@ -410,7 +410,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "오른쪽 위의 필터 버튼에서 765AS / 신데렐라 / 밀리언 / SideM / 샤니 / 학마스 / vα-liv 등 특정 브랜드만 골라 볼 수 있어요."
+            "value" : "오른쪽 위의 필터 버튼에서 765AS / 신데렐라 / 밀리언 / SideM / 샤니 / 학원 / vα-liv 등 특정 브랜드만 골라 볼 수 있어요."
           }
         }
       }
@@ -626,7 +626,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "큐트/쿨/패션 (CG), Fairy/Angel/Princess (ML), 1학년/3학년 (학마스) 등 브랜드별 속성으로 필터할 수 있어요."
+            "value" : "큐트/쿨/패션 (CG), Fairy/Angel/Princess (ML), 1학년/3학년 (학원) 등 브랜드별 속성으로 필터할 수 있어요."
           }
         }
       }

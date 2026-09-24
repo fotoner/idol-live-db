@@ -44,7 +44,7 @@ extension L10n {
         static var brandIconCg: LocalizedStringResource {
             LocalizedStringResource("model.brand.icon_cg", defaultValue: "デレ", table: "Model", bundle: L10n.bundle)
         }
-        /// 学マス — ブランドの丸いアイコンに載せる略称 (2〜4 文字。公式ロゴの代わり)。学園アイドルマスターのファンの呼び方で、正式名ではない。ko の表記はオーナー確定待ち
+        /// 学マス — ブランドの丸いアイコンに載せる略称 (2〜4 文字。公式ロゴの代わり)。学園アイドルマスターのファンの呼び方で、正式名ではない。ko は「학원」(学園の読み)
         static var brandIconGakuen: LocalizedStringResource {
             LocalizedStringResource("model.brand.icon_gakuen", defaultValue: "学マス", table: "Model", bundle: L10n.bundle)
         }

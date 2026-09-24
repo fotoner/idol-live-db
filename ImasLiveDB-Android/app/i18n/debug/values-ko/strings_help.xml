@@ -23,7 +23,7 @@
     <string name="help_category_edit_title">다 함께 편집</string>
     <string name="help_category_events_attended_detail">상세 화면에서 “참가함”을 켜면 마이페이지의 참가 횟수에 더해져요.</string>
     <string name="help_category_events_attended_label">참가한 라이브 기록</string>
-    <string name="help_category_events_brand_filter_detail">오른쪽 위의 필터 버튼에서 765AS / 신데렐라 / 밀리언 / SideM / 샤니 / 학마스 / vα-liv 등 특정 브랜드만 골라 볼 수 있어요.</string>
+    <string name="help_category_events_brand_filter_detail">오른쪽 위의 필터 버튼에서 765AS / 신데렐라 / 밀리언 / SideM / 샤니 / 학원 / vα-liv 등 특정 브랜드만 골라 볼 수 있어요.</string>
     <string name="help_category_events_brand_filter_label">브랜드로 필터</string>
     <string name="help_category_events_event_detail_detail">라이브를 탭하면 공연일별 세트리스트, 출연 아이돌, 참고 영상, 티켓 정보까지 확인할 수 있어요.</string>
     <string name="help_category_events_event_detail_label">상세에서 세트리스트·출연자·티켓 정보 확인</string>
@@ -35,7 +35,7 @@
     <string name="help_category_events_year_list_label">연도별 목록으로 시간순 보기</string>
     <string name="help_category_idols_aliases_detail">ロコ ↔ 伴田路子 같은 다른 이름 표기도 내부에서 같은 아이돌로 연결되어 있어요.</string>
     <string name="help_category_idols_aliases_label">다른 이름 (aliases)도 검색 대상</string>
-    <string name="help_category_idols_attributes_detail">큐트/쿨/패션 (CG), Fairy/Angel/Princess (ML), 1학년/3학년 (학마스) 등 브랜드별 속성으로 필터할 수 있어요.</string>
+    <string name="help_category_idols_attributes_detail">큐트/쿨/패션 (CG), Fairy/Angel/Princess (ML), 1학년/3학년 (학원) 등 브랜드별 속성으로 필터할 수 있어요.</string>
     <string name="help_category_idols_attributes_label">속성으로 필터</string>
     <string name="help_category_idols_cv_names_detail">필터 패널에서 “CV 이름으로 표시”로 바꾸면 성우 이름으로 목록이 나와요.</string>
     <string name="help_category_idols_cv_names_label">아이돌 이름 ↔ CV 이름 표시 전환</string>
