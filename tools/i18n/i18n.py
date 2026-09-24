@@ -338,9 +338,9 @@ def cmd_stamp(args):
         if catalog.find(k) is None:
             print("✗ キー %s は無い" % k)
             return 1
-    reviewer = args.reviewer.strip()
-    if not reviewer or reviewer != args.reviewer or any(c in reviewer for c in "\r\n\t"):
-        print("✗ --reviewer には訳を確かめた人の名前を書く (空・前後の空白・改行は不可)")
+    reviewer = args.reviewer
+    if not model.valid_reviewer(reviewer):
+        print("✗ --reviewer には訳を確かめた人の名前を書く (空・前後の空白・改行などの制御文字は不可)")
         return 1
     new_lock, stamped, skipped = lock.stamp(catalog, args.lang, reviewer, args.ns, args.keys)
     lock.write(args.root, args.lang, new_lock)

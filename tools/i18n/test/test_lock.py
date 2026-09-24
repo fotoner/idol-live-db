@@ -103,6 +103,7 @@ class LockShapeTest(unittest.TestCase):
             {"reviewer": "hana", "source": self.GOOD, "target": "xyz"},
             {"reviewer": "", "source": self.GOOD, "target": self.GOOD},
             {"reviewer": " hana", "source": self.GOOD, "target": self.GOOD},
+            {"reviewer": "ha\x01na", "source": self.GOOD, "target": self.GOOD},
             {"reviewer": "hana", "source": self.GOOD, "target": self.GOOD, "date": "2026-09-24"},
             None,
         ]

@@ -71,7 +71,8 @@ class StampTest(unittest.TestCase):
             code, out = fx.run("stamp", "ko", "--ns", "common")
             self.assertEqual(code, 2)
             self.assertIn("--reviewer", out)
-            for bad in ("", " ", " hana", "ha\nna"):
+            # lock の読み込み (model.valid_reviewer) が読めない名前は、書く前に止める
+            for bad in ("", " ", " hana", "ha\nna", "ha\tna", "ha\x01na", "ha\x7fna"):
                 with self.subTest(reviewer=bad):
                     code, out = fx.run("stamp", "ko", "--reviewer", bad)
                     self.assertEqual(code, 1, out)
