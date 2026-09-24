@@ -215,10 +215,39 @@ struct SongSheetContent: View {
     @State private var showCommunityLoginPrompt = false
 
     @State private var tab: SongDetailTab
+    /// 補足シート。補足は利用者の投稿が主な入口なので、楽曲編集とは別の軽い導線にしている。
+    @State private var showNoteEditor = false
+    /// 未ログインで補足の導線を押した時のログイン誘導。
+    @State private var showNoteLoginPrompt = false
+    /// 補足を直接反映したときの値。`song` は親から渡る固定値なので、送信後すぐ画面に出すために持つ。
+    @State private var noteOverride: String??
     /// お気に入りトグル後に依存ビューを再評価させるためのバージョン。
     @State private var markVersion = 0
 
     private var markService: UserMarkService { UserMarkService.shared }
+
+    /// 画面に出す補足 (直接反映した直後はその値)。
+    private var displayNote: String? {
+        let note = noteOverride ?? song.note
+        return (note?.isEmpty ?? true) ? nil : note
+    }
+
+    /// 補足シートに渡す曲 (直接反映した直後の補足を元の値として見せる)。
+    private var songWithDisplayNote: Song {
+        var current = song
+        current.note = displayNote
+        return current
+    }
+
+    /// 補足の導線。ログイン前ならログインを挟んでから開く (楽曲編集と同じ流れ)。
+    private func openNoteEditor() {
+        AppAnalytics.tap("song_detail.edit_note")
+        if EditPermission.canEdit {
+            showNoteEditor = true
+        } else {
+            showNoteLoginPrompt = true
+        }
+    }
 
     /// 配色シード。ソロ曲 (オリジナル歌唱が1人) はそのアイドル個人カラーを使い、
     /// それ以外 (ユニット/全体曲やカラー未設定) はブランド色にフォールバックする。
@@ -265,6 +294,11 @@ struct SongSheetContent: View {
                             Label("この楽曲を編集", systemImage: "pencil")
                         }
                     }
+                    if EditPermission.showEditAffordance {
+                        Button { openNoteEditor() } label: {
+                            Label(displayNote == nil ? "補足を書く" : "補足を直す", systemImage: "text.bubble")
+                        }
+                    }
                     NavigationLink {
                         EditHistoryView(recordType: "Song", recordName: song.id, title: song.title)
                     } label: {
@@ -291,6 +325,12 @@ struct SongSheetContent: View {
         }
         .sheet(isPresented: $showLoginPrompt) {
             LoginToEditSheet(onSignedIn: { if EditPermission.canEdit { editSong = song } })
+        }
+        .sheet(isPresented: $showNoteEditor) {
+            SongNoteEditSheet(song: songWithDisplayNote) { noteOverride = .some($0) }
+        }
+        .sheet(isPresented: $showNoteLoginPrompt) {
+            LoginToEditSheet(onSignedIn: { if EditPermission.canEdit { showNoteEditor = true } })
         }
         .sheet(isPresented: $showPenlightVoteSheet) {
             PenlightVoteSheet(songId: song.id) {
@@ -351,7 +391,7 @@ struct SongSheetContent: View {
                 }
                 // 曲の補足 (「ミリシタ 1 周年記念楽曲」など)。どのタブを開いていても曲の
                 // 位置づけが分かるよう、曲名・歌唱者のすぐ下に 1 文で添える。無い曲は何も出さない。
-                if let note = song.note, !note.isEmpty {
+                if let note = displayNote {
                     Text(note)
                         .font(.imasFootnote)
                         .foregroundStyle(DS.ink2)
@@ -506,7 +546,11 @@ struct SongSheetContent: View {
     // MARK: - Tab: 情報・歌唱
 
     private var infoTab: some View {
-        SongInfoTab(song: song, seed: songSeed, vm: vm, navigate: navigate) {
+        SongInfoTab(
+            song: song, seed: songSeed, vm: vm, navigate: navigate,
+            note: displayNote,
+            onEditNote: EditPermission.showEditAffordance ? { openNoteEditor() } : nil
+        ) {
             // 参加ライブ登録は履歴タブで個別公演を選んでもらう導線。
             tab = .history
         }

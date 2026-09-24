@@ -118,6 +118,9 @@ const FIELD_RULES: Record<string, Record<string, FieldRule>> = {
     releaseDate: { type: "STRING", pattern: ISO_DATE_RE },
     singerLabel: { type: "STRING", maxLen: 300 },
     isrc: { type: "STRING", maxLen: 20 },
+    // 曲の補足 (「ミリシタ 1 周年記念楽曲」など)。曲詳細の曲名の下に 1 文で出す自由文。
+    // 利用者からの投稿が主な入口なので、長文にならないよう短めに切る。
+    note: { type: "STRING", maxLen: 200 },
   },
   SetlistItem: {
     showId: { type: "STRING", required: true, maxLen: 200 },

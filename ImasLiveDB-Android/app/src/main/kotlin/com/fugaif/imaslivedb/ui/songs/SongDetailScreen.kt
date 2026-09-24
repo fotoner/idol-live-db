@@ -83,6 +83,7 @@ import com.fugaif.imaslivedb.ui.components.ArtworkImage
 import com.fugaif.imaslivedb.ui.components.CommunityLoginPromptDialog
 import com.fugaif.imaslivedb.ui.edit.RecordHistorySheet
 import com.fugaif.imaslivedb.ui.edit.SongEditScreen
+import com.fugaif.imaslivedb.ui.edit.SongNoteEditScreen
 import com.fugaif.imaslivedb.ui.edit.VideoEditSheet
 import com.fugaif.imaslivedb.ui.components.ImasArtwork
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
@@ -141,6 +142,8 @@ fun SongDetailScreen(
     var showMenu by remember { mutableStateOf(false) }
     var showLoginPrompt by rememberSaveable { mutableStateOf(false) }
     var showSongEdit by remember { mutableStateOf(false) }
+    // 補足だけを書く軽い画面 (利用者の投稿が主な入口なので、楽曲編集とは別に持つ)。
+    var showNoteEdit by remember { mutableStateOf(false) }
     var showRecordHistory by remember { mutableStateOf(false) }
     var showVideoSheet by remember { mutableStateOf(false) }
     var editingVideo by remember { mutableStateOf<SongVideo?>(null) }
@@ -216,6 +219,15 @@ fun SongDetailScreen(
                                 }
                             )
                         }
+                        if (song != null && canEditHere) {
+                            DropdownMenuItem(
+                                text = { Text(if (song.note.isNullOrBlank()) "補足を書く" else "補足を直す") },
+                                onClick = {
+                                    showMenu = false
+                                    startCommunityEdit { showNoteEdit = true }
+                                }
+                            )
+                        }
                         DropdownMenuItem(
                             text = { Text("編集履歴") },
                             onClick = {
@@ -255,7 +267,8 @@ fun SongDetailScreen(
                 onOpenPenlightVote = { startCommunityEdit { showPenlightSheet = true } },
                 onUnitClick = onUnitClick,
                 onPollClick = onPollClick,
-                onFilteredSongsClick = onFilteredSongsClick
+                onFilteredSongsClick = onFilteredSongsClick,
+                onEditNote = if (canEditHere) ({ startCommunityEdit { showNoteEdit = true } }) else null
             )
         }
     }
@@ -298,6 +311,19 @@ fun SongDetailScreen(
                 original = editingSong,
                 onDismiss = { showSongEdit = false },
                 onSaved = { showSongEdit = false; reloadToken++ }
+            )
+        }
+    }
+
+    if (showNoteEdit && editingSong != null) {
+        Dialog(
+            onDismissRequest = { showNoteEdit = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            SongNoteEditScreen(
+                song = editingSong,
+                onDismiss = { showNoteEdit = false },
+                onSaved = { showNoteEdit = false; reloadToken++ }
             )
         }
     }
@@ -348,7 +374,8 @@ private fun SongSheetContent(
     onOpenPenlightVote: () -> Unit,
     onUnitClick: (String) -> Unit,
     onPollClick: (String) -> Unit,
-    onFilteredSongsClick: (String, String) -> Unit
+    onFilteredSongsClick: (String, String) -> Unit,
+    onEditNote: (() -> Unit)?
 ) {
     // 配色シード: ソロ (歌唱1人) はその個人カラー、それ以外はブランド色。
     val seed = if (state.originalArtists.size == 1) state.originalArtists.first().color else null
@@ -367,7 +394,8 @@ private fun SongSheetContent(
                 song, state, seed, onIdolClick, onUnitClick, onSongClick, onShowClick,
                 onRegisterAttendance = { segment = 1 },
                 onFilteredSongsClick = onFilteredSongsClick,
-                onToggleCardOwned = onToggleCardOwned
+                onToggleCardOwned = onToggleCardOwned,
+                onEditNote = onEditNote
             )
             1 -> HistoryTab(
                 state.performanceHistory, state.performanceEvidence, seed, song.brandId,
@@ -501,7 +529,8 @@ private fun InfoTab(
     onShowClick: (String) -> Unit,
     onRegisterAttendance: () -> Unit,
     onFilteredSongsClick: (String, String) -> Unit,
-    onToggleCardOwned: () -> Unit
+    onToggleCardOwned: () -> Unit,
+    onEditNote: (() -> Unit)?
 ) {
     val artistLine = when {
         state.originalArtists.isNotEmpty() -> state.originalArtists.joinToString(" / ") { it.name }
@@ -622,6 +651,9 @@ private fun InfoTab(
                     onClick = { onUnitClick(state.unit.id) })
                 HorizontalDivider(color = DS.sep, modifier = Modifier.padding(start = 16.dp))
             }
+            // 補足の入口。補足は利用者の投稿で増やしたいので、楽曲情報のすぐ下に置く (iOS と同じ)。
+            // 補足がある曲は本文は Hero に出ているので「直す」だけ、無い曲は何を書くかの例を添える。
+            onEditNote?.let { onClick -> NoteEntry(song.note?.takeIf { it.isNotBlank() }, seed, song.brandId, onClick) }
         }
         // 歌唱アイドル
         if (state.originalArtists.isNotEmpty()) {
@@ -1063,4 +1095,25 @@ private fun CoOccurringSection(
 private fun EvidenceNote(text: String) {
     Text(text, fontSize = 12.sp, color = DS.ink3,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp))
+}
+
+/** 補足を書く・直す入口 (iOS `SongInfoTab.noteEntry` と同じ見た目と文言)。 */
+@Composable
+private fun NoteEntry(note: String?, seed: String?, brandId: String?, onClick: () -> Unit) {
+    val t = ImasTheme.forBrand(seed, brandId)
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp)
+            .clip(RoundedCornerShape(12.dp)).background(DS.fill)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 11.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(Icons.Filled.Edit, contentDescription = null, tint = t.accent, modifier = Modifier.size(16.dp))
+        Column(Modifier.weight(1f).padding(start = 10.dp)) {
+            Text(if (note == null) "補足を書く" else "補足を直す",
+                fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
+            Text(note ?: "「◯周年記念楽曲」「アニメ◯話の挿入歌」など、この曲の由来を 1 文で",
+                fontSize = 12.sp, color = DS.ink2, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        }
+    }
 }

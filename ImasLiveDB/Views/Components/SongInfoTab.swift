@@ -11,6 +11,10 @@ struct SongInfoTab: View {
     let seed: String?
     let vm: DetailSheetViewModel
     let navigate: (DetailDestination) -> Void
+    /// 曲の補足 (直接反映した直後の値を含む、親が決めた表示値)。
+    var note: String? = nil
+    /// 補足を書く・直す導線。編集導線を出さない状態なら nil (ボタンを出さない)。
+    var onEditNote: (() -> Void)? = nil
     /// 「参加ライブを登録して現地回収」を押した。どこへ誘導するかは親が決める。
     let onRequestAttendPicker: () -> Void
 
@@ -91,6 +95,38 @@ struct SongInfoTab: View {
             ImasListContainer {
                 infoRows
             }
+            noteEntry
+        }
+    }
+
+    /// 補足の入口。補足は利用者の投稿で増やしたいので、楽曲情報のすぐ下に置く。
+    /// 補足がある曲は本文は Hero に出ているので「直す」だけ、無い曲は何を書くかの例を添える。
+    @ViewBuilder
+    private var noteEntry: some View {
+        if let onEditNote {
+            Button(action: onEditNote) {
+                HStack(spacing: DS.sp3) {
+                    Image(systemName: "text.bubble")
+                        .font(.imasScaled(15, weight: .semibold))
+                        .foregroundStyle(ImasTheme.derive(seed: seed, scheme: scheme).accent)
+                    VStack(alignment: .leading, spacing: DS.sp1) {
+                        Text(note == nil ? "補足を書く" : "補足を直す")
+                            .font(.imasSubhead.weight(.semibold))
+                            .foregroundStyle(DS.ink)
+                        Text(note ?? "「◯周年記念楽曲」「アニメ◯話の挿入歌」など、この曲の由来を 1 文で")
+                            .font(.imasCaption)
+                            .foregroundStyle(DS.ink2)
+                            .lineLimit(2)
+                    }
+                    Spacer(minLength: 8)
+                    ImasRowChevron()
+                }
+                .padding(.horizontal, DS.sp5).padding(.vertical, 11)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(DS.fill, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
         }
     }
 
