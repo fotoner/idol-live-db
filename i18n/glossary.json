@@ -70,14 +70,28 @@
       "en": "setlist",
       "ja": "セトリ",
       "ko": "세트리스트",
-      "note": "セットリストの略。ko・en・zh-Hans は略さない形 (セットリスト と同じ語) にする",
-      "zh-Hans": "歌单"
+      "note": "セットリストの略。ko・en・zh-Hans は略さない形 (セットリスト と同じ語) にする。zh-Hans の 歌单 はプレイリストとも読める。プレイリスト (播放列表) と並ぶ文脈では setlist / 演出歌单 で区別",
+      "zh-Hans": [
+        "歌单",
+        "setlist"
+      ]
     },
     {
       "en": "setlist",
       "ja": "セットリスト",
       "ko": "세트리스트",
-      "zh-Hans": "歌单"
+      "note": "zh-Hans の 歌单 はプレイリストとも読める。プレイリスト (播放列表) と並ぶ文脈では setlist / 演出歌单 で区別",
+      "zh-Hans": [
+        "歌单",
+        "setlist"
+      ]
+    },
+    {
+      "en": "playlist",
+      "ja": "プレイリスト",
+      "ko": "플레이리스트",
+      "note": "Apple Music のプレイリスト。zh-Hans は Apple の用語 播放列表。歌单 は音楽アプリでは playlist の意味なので使わない",
+      "zh-Hans": "播放列表"
     },
     {
       "en": [
@@ -624,20 +638,23 @@
       "en": "widget",
       "ja": "ウィジェット",
       "ko": "위젯",
-      "zh-Hans": "小组件"
+      "note": "zh-Hans は iOS は 小组件 (Apple)、Android は 微件 (AOSP の zh-CN)",
+      "zh-Hans": [
+        "小组件",
+        "微件"
+      ]
     },
     {
       "en": [
         "touch and hold",
-        "long-press",
-        "long press"
+        "touch & hold"
       ],
       "ja": "長押し",
       "ko": [
         "길게 누르기",
         "길게 눌러"
       ],
-      "note": "en は iOS では touch and hold、Android では long-press (プラットフォームの言い方)",
+      "note": "en は iOS は touch and hold (Apple)、Android は touch & hold (Google の文体・Android 本体の文言。long press は使わない)",
       "zh-Hans": "长按"
     },
     {
@@ -1199,10 +1216,7 @@
       "ja": "推し",
       "ko": "최애",
       "note": "ファンの用語。担当 → 담당 とは別の語 (担当は機能名)。en は oshi (アニメ・アイドルのファンに通じる) か fave。zh-Hans は 本命",
-      "zh-Hans": [
-        "本命",
-        "推"
-      ]
+      "zh-Hans": "本命"
     },
     {
       "en": "CV",
@@ -1717,18 +1731,18 @@
       "en": "Bandai Namco Entertainment",
       "ja": "バンダイナムコエンターテインメント",
       "ko": "BANDAI NAMCO Entertainment",
-      "note": "会社名。ko では各社の英字の正式表記を使う (オーナー確認待ち)。en も英字の正式表記 (大文字小文字は問わない)。zh-Hans は中国語の正式名 万代南梦宫娱乐 か英字表記",
+      "note": "会社名。英字の正式表記は Bandai Namco Entertainment Inc. (公式サイトの ©表記)。en・zh-Hans はこの大文字小文字で書く (check は大文字小文字を区別しない)。zh-Hans は中国語の正式名 万代南梦宫娱乐 か英字の正式表記。ko: 英字の正式表記を使う (今の ko の訳は大文字の BANDAI NAMCO。揃えるかはオーナー確認待ち)",
       "zh-Hans": [
         "万代南梦宫娱乐",
-        "BANDAI NAMCO Entertainment"
+        "Bandai Namco Entertainment"
       ]
     },
     {
       "en": "Bandai Namco Music Live",
       "ja": "バンダイナムコミュージックライブ",
       "ko": "BANDAI NAMCO Music Live",
-      "note": "会社名。上と同じ。zh-Hans は中国語の正式名が無いので英字表記",
-      "zh-Hans": "BANDAI NAMCO Music Live"
+      "note": "会社名。英字の正式表記は Bandai Namco Music Live Inc.。上と同じ扱い。zh-Hans は中国語の正式名が無いので英字の正式表記",
+      "zh-Hans": "Bandai Namco Music Live"
     }
   ]
 }
