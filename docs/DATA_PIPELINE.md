@@ -86,6 +86,8 @@ Production に列が無いうちに push すると弾かれる。
 > Production へ昇格するところだけ (import-schema は production を受け付けない仕様)。
 > 昇格前に songs を push すると弾かれる。
 > この import では、積み残していた `Costume` / `CostumeWear` も一緒に development へ入った。
+>
+> 2026-09-25: `Song` に `note` を足した (曲の注記)。Development へ import → Dashboard で Production へ昇格済み。
 
 **ckdb を編集したら必ず `xcrun cktool validate-schema` を通すこと。**
 鍵の要らない事前検査 (二重定義・削除・型変更・インデックス外し) は
