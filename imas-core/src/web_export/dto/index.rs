@@ -495,8 +495,14 @@ web_dto! {
     pub struct HomePage {
         pub schema_version: u32,
         pub path: String,
+        /// ヒーローの大見出し (改行位置を含む行の列)。
+        pub headline: Vec<String>,
         /// ヒーローの 1 行説明。
         pub tagline: String,
+        /// 見出しの上の日付欄 (`2026.09.24 THU`)。
+        pub today_display: String,
+        /// 次のライブ (今後のライブの先頭) までの残り日数の札。先頭の日付が読めなければ `None`。
+        pub next_countdown: Option<Countdown>,
         /// 今後のライブ (直近 8 件)。
         pub upcoming: Vec<EventListItem>,
         /// 今後のライブが 1 件も無いときの案内。
@@ -515,6 +521,21 @@ web_dto! {
         /// 「最近の公演」の続き先。公演だけの一覧は無いので、開催済みのライブへ送る。
         pub recent_shows_more: NavLink,
         pub seo: SeoBlock,
+    }
+}
+
+web_dto! {
+    /// 残り日数の札 (`あと 2 日` / `今日`)。数字だけを大きく置けるよう 3 つに分ける。
+    #[derive(Eq)]
+    pub struct Countdown {
+        /// 数字の前 (`あと`)。当日は空。
+        pub lead: String,
+        /// 大きく置く部分 (`2` / `今日`)。
+        pub value: String,
+        /// 数字の後 (`日`)。当日は空。
+        pub unit: String,
+        /// 読み上げ用の 1 本 (`あと2日`)。
+        pub spoken: String,
     }
 }
 

@@ -55,6 +55,27 @@ pub fn date_parts(date: &str) -> DateParts {
     }
 }
 
+/// 紙面の日付欄 (`2026.09.24 THU`)。読めない日付は原文のまま。
+pub fn masthead(date: &str) -> String {
+    const EN: [&str; 7] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+    match parse_ymd(date) {
+        Some(d) => format!(
+            "{}.{:02}.{:02} {}",
+            d.year(),
+            d.month(),
+            d.day(),
+            EN[d.weekday().num_days_from_monday() as usize]
+        ),
+        None => date.to_string(),
+    }
+}
+
+/// `today` から `date` まで何日か (どちらも `yyyy-MM-dd`)。過去・読めない日付は `None`。
+pub fn days_until(today: &str, date: &str) -> Option<u32> {
+    let days = (parse_ymd(date)? - parse_ymd(today)?).num_days();
+    u32::try_from(days).ok()
+}
+
 fn is_year(s: &str) -> bool {
     s.len() == 4 && s.bytes().all(|b| b.is_ascii_digit())
 }
@@ -216,5 +237,24 @@ mod tests {
             Some("〜 9/13 (日)".to_string())
         );
         assert_eq!(until_display(Some("2026-09-12"), Some("2026-09-12")), None);
+    }
+}
+
+#[cfg(test)]
+mod masthead_tests {
+    use super::*;
+
+    #[test]
+    fn masthead_formats_with_english_weekday() {
+        assert_eq!(masthead("2026-09-24"), "2026.09.24 THU");
+        assert_eq!(masthead("2026-09"), "2026-09");
+    }
+
+    #[test]
+    fn days_until_counts_forward_only() {
+        assert_eq!(days_until("2026-09-24", "2026-09-26"), Some(2));
+        assert_eq!(days_until("2026-09-24", "2026-09-24"), Some(0));
+        assert_eq!(days_until("2026-09-24", "2026-09-20"), None);
+        assert_eq!(days_until("2026-09-24", "2026-10"), None);
     }
 }

@@ -1401,19 +1401,35 @@ fn site_stat_tiles(counts: Counts, with_links: bool, with_setlist_items: bool) -
     tiles
 }
 
-/// 一覧以外の入口 (検索・このサイトについて)。ヘッダ / フッタが描く。
-pub fn utility_nav() -> Vec<NavLink> {
-    vec![NavLink::new("検索", "/search/"), NavLink::new("このサイトについて", "/about/")]
+/// 一覧以外の入口 (検索・お題・このサイトについて)。フッタとスマホのメニューが描く。
+///
+/// お題はヘッダの 1 段に入れない (項目が 9 つになると 1440px でも詰まる)。
+/// 焼き込んだ集計が無ければページごと出ないので、リンクの有無もここで決める。
+pub fn utility_nav(with_polls: bool) -> Vec<NavLink> {
+    let mut nav = vec![NavLink::new("検索", "/search/")];
+    if with_polls {
+        nav.push(NavLink::new("お題", "/polls/"));
+    }
+    nav.push(NavLink::new("このサイトについて", "/about/"));
+    nav
 }
 
 /// トップページ。
 pub fn home(ctx: &Ctx, upcoming: &[EventListItem], counts: Counts) -> HomePage {
     let path = "/";
     let recent_shows = super::events::recent_shows(ctx, 8);
+    let next_countdown = upcoming
+        .first()
+        .and_then(|e| e.date_badge.as_ref())
+        .and_then(|b| crate::domain::date_display::days_until(&ctx.today, &b.iso))
+        .map(countdown);
     HomePage {
         schema_version: SCHEMA_VERSION,
         path: path.to_string(),
+        headline: content::HOME_HEADLINE.iter().map(|s| (*s).to_string()).collect(),
         tagline: content::SITE_TAGLINE.to_string(),
+        today_display: crate::domain::date_display::masthead(&ctx.today),
+        next_countdown,
         // 先頭 8 件。種別の札は例外 (フェス・リリースイベント) にだけ付く (`content::kind_chip`)。
         upcoming: upcoming.iter().take(8).cloned().collect(),
         upcoming_empty: content::empty_text(
@@ -1444,12 +1460,30 @@ pub fn home(ctx: &Ctx, upcoming: &[EventListItem], counts: Counts) -> HomePage {
     }
 }
 
+/// 残り日数の札。当日は「今日」だけを大きく置く。
+fn countdown(days: u32) -> Countdown {
+    if days == 0 {
+        return Countdown {
+            lead: String::new(),
+            value: "今日".to_string(),
+            unit: String::new(),
+            spoken: "今日".to_string(),
+        };
+    }
+    Countdown {
+        lead: "あと".to_string(),
+        value: days.to_string(),
+        unit: "日".to_string(),
+        spoken: format!("あと{days}日"),
+    }
+}
+
 /// サイト共通ナビ (ヘッダ / フッタ)。
 ///
-/// お題は焼き込んだ集計が 1 件も無いとページごと出ない (`emit::run`) ので、
-/// その判断を知っている側がリンクの有無も決める。TS に手書きの並びを
-/// 持たせると、条件を知らないままリンク切れを出す。
-pub fn primary_nav(with_polls: bool, with_calls: bool) -> Vec<NavLink> {
+/// コールガイドはデータが無いとページごと出ないので、その判断を知っている側が
+/// リンクの有無も決める。TS に手書きの並びを持たせると、条件を知らないままリンク切れを出す。
+/// お題は [`utility_nav`] の側 (ヘッダの 1 段を 8 項目に収める)。
+pub fn primary_nav(with_calls: bool) -> Vec<NavLink> {
     let mut nav: Vec<NavLink> = [
         SiteList::Events,
         // ライブを月の枠で見る入口はライブの隣。
@@ -1463,9 +1497,6 @@ pub fn primary_nav(with_polls: bool, with_calls: bool) -> Vec<NavLink> {
     .into_iter()
     .map(|list| NavLink::new(list.label(), list.path()))
     .collect();
-    if with_polls {
-        nav.push(NavLink::new("お題", "/polls/"));
-    }
     if with_calls {
         // 「コール」だけではアプリの外で意味が取れない (コーレス? 電話?)。
         nav.push(NavLink::new("コールガイド", super::calls::PATH));

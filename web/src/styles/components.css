@@ -28,7 +28,6 @@
   background: var(--ds-surface);
   border-radius: var(--r-md);
   overflow: hidden;
-  box-shadow: var(--ds-shadow1);
   /* 行の中身をカードの幅で切り替える (狭いカードでは末尾の札を落とす)。
      ビューポートでなくカードで測るのは、脇 (aside) の 20rem 幅でも同じ判断が効くように。 */
   container-type: inline-size;
@@ -62,7 +61,7 @@
 .section {
   display: flex;
   flex-direction: column;
-  gap: var(--sp4);
+  gap: var(--sp5);
 }
 .section__head {
   display: flex;
@@ -72,16 +71,16 @@
   padding-inline: var(--sp1);
 }
 .section__title {
-  font-size: var(--fs-title2);
-  font-weight: 700;
-  letter-spacing: -0.005em;
+  font-size: clamp(var(--fs-title3), 1rem + 1vw, 1.875rem);
+  font-weight: var(--fw-heading);
+  letter-spacing: -0.01em;
 }
 /* サイド (aside) のセクションは一段小さい。 */
 .detail-cols__aside .section__title {
-  font-size: var(--fs-callout);
+  font-size: var(--fs-title3);
 }
 .section__count {
-  font-size: var(--fs-footnote);
+  font-size: var(--fs-title3);
   font-weight: 600;
   color: var(--ds-ink2);
   font-family: var(--font-display);
@@ -89,11 +88,14 @@
 }
 .section__more {
   margin-inline-start: auto;
-  font-size: var(--fs-footnote);
-  font-weight: 600;
-  color: var(--ds-ink2);
+  font-size: var(--fs-subhead);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--ds-ink3);
+  text-underline-offset: 4px;
+  color: var(--ds-ink);
   white-space: nowrap;
-  padding: 2px var(--sp3);
+  padding: 4px var(--sp3);
   border-radius: var(--r-pill);
 }
 .section__more:hover {
@@ -103,6 +105,12 @@
 /* 見出しの行の右端に置く操作 (歌唱者の表示切替など)。 */
 .section__tools {
   margin-inline-start: auto;
+}
+.section__more ~ .section__tools {
+  margin-inline-start: var(--sp3);
+}
+.section__tools:empty {
+  display: none;
 }
 /* 一覧の続き (「開催済みをすべて見る」「2025年のライブ」)。見た目は節の「すべて見る」と同じ。 */
 .list-next {
@@ -178,31 +186,32 @@
 /* --- DateBadge (日付ブロック) ---------------------------------------------
    行の左端に置く。月日を大きく、曜日と年を小さく。値の分け方も曜日も Rust が決めた
    `DateBadge` をそのまま置くだけで、ここでは文字列を切らない。 */
+/* 紙面の日付: 箱に入れず、細身の数字を大きく置く。曜日と年は下に小さく。 */
 .date-badge {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-inline-size: 3.5rem;
-  padding: var(--sp2) var(--sp2);
-  border-radius: var(--r-sm);
-  background: var(--tint);
+  min-inline-size: 3.75rem;
+  padding: 0;
   color: var(--ds-ink);
-  line-height: 1.1;
+  line-height: 1;
   text-align: center;
   flex: none;
 }
 .date-badge__md {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
   font-weight: 700;
-  font-size: 1.0625rem;
-  letter-spacing: -0.01em;
+  font-size: 1.625rem;
+  letter-spacing: 0;
   white-space: nowrap;
 }
 .date-badge__wd {
   font-size: var(--fs-caption2);
   font-weight: 700;
   color: var(--ds-ink2);
-  margin-top: 2px;
+  margin-top: 4px;
 }
 .date-badge__wd[data-weekday="日"] {
   color: var(--ds-sunday);
@@ -218,13 +227,10 @@
 }
 /* 大きい版 (注目カード・ヒーロー)。 */
 .date-badge--lg {
-  min-inline-size: 5rem;
-  padding: var(--sp3) var(--sp3);
-  border-radius: var(--r-md);
-  background: color-mix(in srgb, var(--ds-surface) 70%, transparent);
+  min-inline-size: 5.5rem;
 }
 .date-badge--lg .date-badge__md {
-  font-size: 1.75rem;
+  font-size: 2.75rem;
 }
 .date-badge--lg .date-badge__wd {
   font-size: var(--fs-caption);
@@ -247,13 +253,33 @@
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--sp4);
-  padding: var(--sp4) var(--sp5);
+  gap: var(--sp5);
+  padding: var(--sp5) var(--sp6);
   background: var(--ds-surface);
-  min-height: 64px;
+  min-height: 72px;
+}
+@media (max-width: 44rem) {
+  .row {
+    gap: var(--sp4);
+    padding: 14px var(--sp5);
+  }
 }
 a.row:hover {
   background: var(--ds-surface2);
+}
+/* 日付で並ぶ行 (ライブ・公演) は、左端にブランド / ライブの色の帯を立てる。
+   紙面の索引のように、色の並びで「どのブランドのライブが続いているか」が読める。 */
+.row[data-theme]:has(> .row__lead .date-badge) {
+  position: relative;
+}
+.row[data-theme]:has(> .row__lead .date-badge)::before {
+  content: "";
+  position: absolute;
+  inset-block: 12px;
+  inset-inline-start: 0;
+  inline-size: 4px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent);
 }
 /* 先頭に何も置かない行は、色のリードバーで所属を示す。 */
 .row--bar {
@@ -283,8 +309,8 @@ a.row:hover {
   gap: 3px;
 }
 .row__title {
-  font-size: var(--fs-subhead);
-  font-weight: 600;
+  font-size: var(--fs-callout);
+  font-weight: 700;
   line-height: var(--lh-snug);
   color: var(--ds-ink);
 }
@@ -292,8 +318,8 @@ a.row:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--sp1) var(--sp3);
-  font-size: var(--fs-caption);
+  gap: var(--sp1) var(--sp4);
+  font-size: var(--fs-footnote);
   color: var(--ds-ink2);
   line-height: var(--lh-snug);
 }
@@ -351,75 +377,153 @@ details[open] > summary .chevron {
   white-space: nowrap;
 }
 
-/* --- Feature (注目カード: トップの直近ライブ) -------------------------------
-   一覧の行と同じ材料 (日付・名前・ブランド・会場) を、1 件だけ大きく置く。
-   「並べる塊」と「見せる塊」を分けるための部品。 */
+/* --- Feature (次のライブの札: トップのヒーロー右) ---------------------------
+   チケットの半券: 上辺にブランド色の帯、残り日数を大きく、下にミシン目で区切った「見る」。 */
 .feature {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--sp5);
-  align-items: center;
-  padding: var(--sp5);
-  border-radius: var(--r-lg);
-  background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--grad-from) 30%, transparent),
-      color-mix(in srgb, var(--grad-to) 10%, transparent)
-    ),
-    var(--hero-surface);
-  box-shadow: var(--ds-shadow1);
-  transition: box-shadow 160ms ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp4);
+  padding: calc(var(--sp6) + 8px) var(--sp6) 0;
+  border-radius: var(--r-xl);
+  background: var(--ds-surface);
+  box-shadow: var(--ds-shadow2);
+  overflow: hidden;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+.feature::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  block-size: 8px;
+  background: var(--accent);
 }
 .feature:hover {
-  box-shadow: var(--ds-shadow2);
+  transform: translateY(-2px);
 }
 @media (min-width: 44rem) {
   .feature {
-    padding: var(--sp6) var(--sp7);
-    gap: var(--sp7);
+    padding: calc(var(--sp7) + 8px) var(--sp7) 0;
   }
 }
-.feature__date {
+.feature__head {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: var(--sp2);
-}
-.feature__body {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp2);
+  justify-content: space-between;
+  gap: var(--sp3);
 }
 .feature__kicker {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--sp2) var(--sp3);
-  font-size: var(--fs-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-footnote);
   font-weight: 700;
-  color: var(--chip-text);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.16em;
+  color: var(--ds-ink2);
+  white-space: nowrap;
 }
-.feature__title {
+.feature__brand {
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  background: var(--tint);
+}
+.feature__countdown {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp2);
   font-size: var(--fs-title3);
   font-weight: 700;
+}
+.feature__countdown b {
+  font-size: 5.5rem;
+  line-height: 0.9;
+  font-weight: 700;
+}
+.feature__title {
+  font-family: var(--font-heading);
+  font-size: var(--fs-title2);
+  font-weight: var(--fw-heading);
   line-height: var(--lh-snug);
-  letter-spacing: -0.005em;
+}
+.feature__facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--sp2) var(--sp5);
+  font-size: var(--fs-subhead);
+}
+.feature__facts > div {
+  display: contents;
+}
+.feature__facts dt {
+  color: var(--ds-ink2);
+}
+.feature__facts dd {
+  font-weight: 700;
+}
+.feature__shows {
+  margin-inline-start: var(--sp4);
+}
+.feature__go {
+  margin-top: auto;
+  margin-inline: calc(-1 * var(--sp6));
+  padding: var(--sp5) var(--sp6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1.5px dashed var(--ds-line);
+  font-size: var(--fs-subhead);
+  font-weight: 700;
 }
 @media (min-width: 44rem) {
-  .feature__title {
-    font-size: var(--fs-title2);
+  .feature__go {
+    margin-inline: calc(-1 * var(--sp7));
+    padding-inline: var(--sp7);
   }
 }
-.feature__meta {
+
+/* --- トップのヒーロー -----------------------------------------------------
+   左: 日付欄・大見出し・説明・検索・数。右: 次のライブの札。 */
+.home-hero {
+  display: grid;
+  gap: var(--sp8) 56px;
+  align-items: start;
+}
+@media (min-width: 62rem) {
+  .home-hero {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    padding-block-start: var(--sp5);
+  }
+  .home-hero .feature {
+    align-self: stretch;
+  }
+}
+.home-hero__body {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--sp1) var(--sp4);
-  font-size: var(--fs-footnote);
+  flex-direction: column;
+  gap: var(--sp6);
+}
+.home-hero__date {
+  font-size: var(--fs-subhead);
+  font-weight: 700;
+  letter-spacing: 0.16em;
   color: var(--ds-ink2);
+}
+.home-hero__title {
+  font-size: clamp(2rem, 1rem + 3.4vw, 3.5rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.home-hero__title > span {
+  display: block;
+}
+@media (min-width: 30rem) {
+  .home-hero__title > span {
+    white-space: nowrap;
+  }
+}
+/* 数の帯: 上に細い罫、数字を大きく、ラベルは下に小さく。 */
+.home-hero .stat-strip {
+  padding-top: var(--sp6);
+  border-top: 1px solid var(--ds-line);
 }
 
 /* --- Chip (ImasChip) ------------------------------------------------------ */
@@ -773,8 +877,8 @@ a.chip:hover {
 .segmented {
   display: flex;
   gap: var(--sp1);
-  padding: 2px;
-  border-radius: var(--r-sm);
+  padding: 4px;
+  border-radius: var(--r-pill);
   background: var(--ds-fill);
   overflow-x: auto;
   scrollbar-width: none;
@@ -788,10 +892,10 @@ a.chip:hover {
   display: none;
 }
 .segmented a {
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-size: var(--fs-footnote);
-  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-subhead);
+  font-weight: 700;
   color: var(--ds-ink2);
   white-space: nowrap;
 }
@@ -801,6 +905,7 @@ a.chip:hover {
 .segmented a[aria-current="page"] {
   background: var(--ds-surface);
   color: var(--ds-ink);
+  box-shadow: 0 1px 2px rgb(24 23 28 / 0.12);
 }
 /* 選択中の札の中の件数。地の色が反転するので、文字色も地に合わせる (ink2 のままだと消える)。 */
 .segmented a[aria-current="page"] .u-dim,
@@ -822,19 +927,19 @@ a.chip:hover {
   gap: var(--sp2) var(--sp4);
 }
 .list-head__title h1 {
-  font-size: var(--fs-title1);
+  font-size: 1.875rem;
   letter-spacing: -0.01em;
 }
 @media (min-width: 44rem) {
   .list-head__title h1 {
-    font-size: var(--fs-large);
+    font-size: 3.25rem;
   }
 }
 .list-head__count {
   font-family: var(--font-display);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
-  font-size: var(--fs-subhead);
+  font-size: var(--fs-title2);
   color: var(--ds-ink2);
 }
 .list-head__filters {
@@ -853,7 +958,10 @@ a.chip:hover {
   position: relative;
 }
 .fmenu__summary {
-  border-radius: var(--r-sm);
+  border-radius: var(--r-pill);
+  background: var(--ds-surface);
+  box-shadow: inset 0 0 0 1px var(--ds-line);
+  padding: 9px 16px;
   color: var(--ds-ink);
   white-space: nowrap;
 }
@@ -927,8 +1035,8 @@ a.chip:hover {
   display: flex;
   flex-direction: column;
   gap: var(--sp3);
-  padding: 14px;
-  border-radius: var(--r-md);
+  padding: var(--sp5);
+  border-radius: var(--r-lg);
   background: var(--ds-surface);
   box-shadow: var(--ds-shadow1);
 }
@@ -951,9 +1059,9 @@ a.stat-tile:hover {
   gap: 3px;
   font-family: var(--font-display);
   font-variant-numeric: tabular-nums;
-  font-size: 1.625rem;
+  font-size: 2.25rem;
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1;
 }
 .stat-tile__label {
   font-size: var(--fs-caption);
@@ -965,22 +1073,22 @@ a.stat-tile:hover {
 .stat-strip {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sp3) var(--sp6);
+  gap: var(--sp4) var(--sp8);
 }
 .stat-strip__item {
   display: inline-flex;
-  align-items: baseline;
-  gap: var(--sp2);
+  flex-direction: column;
+  gap: 4px;
   color: var(--ds-ink2);
   font-size: var(--fs-footnote);
-  font-weight: 600;
+  font-weight: 500;
 }
 a.stat-strip__item:hover {
   color: var(--ds-ink);
 }
 .stat-strip__value {
   font-weight: 700;
-  font-size: var(--fs-title3);
+  font-size: 2.5rem;
   color: var(--ds-ink);
   line-height: 1;
 }
@@ -1021,37 +1129,30 @@ a.stat-strip__item:hover {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: var(--sp5);
-  border-radius: var(--r-md);
+  gap: var(--sp5);
+  padding: var(--sp5) var(--sp6);
+  border-radius: var(--r-lg);
   background: var(--ds-surface);
   box-shadow: var(--ds-shadow1);
   overflow: hidden;
-}
-/* ブランド色の帯を左端に。カードを並べたときに色で見分けが付く。 */
-.entry-card::before {
-  content: "";
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: 0;
-  inline-size: 4px;
-  background: var(--accent);
+  transition: transform 160ms ease, box-shadow 160ms ease;
 }
 .entry-card:hover {
-  background: var(--ds-surface2);
+  transform: translateY(-2px);
   box-shadow: var(--ds-shadow2);
 }
 /* 中身は短縮名 (`765AS` / `シャニマス`) で、最長 5 文字。
    **正方形に押し込めない。** 44px 角に入れていた頃は 7/9 が枠から溢れ、
    `シャニ / マス` のように折り返して読めなくなっていた。
    横に伸びる錠剤にして、1 行で必ず収める。 */
+/* ブランド色の面そのものを札にする。文字は on-accent (地に対して読める側を Rust が導出済み)。 */
 .entry-card__icon {
-  min-inline-size: 44px;
-  block-size: 44px;
+  min-inline-size: 52px;
+  block-size: 52px;
   padding-inline: var(--sp3);
-  border-radius: 12px;
-  background: var(--chip-bg);
-  color: var(--chip-text);
+  border-radius: 14px;
+  background: var(--accent);
+  color: var(--on-accent);
   display: grid;
   place-items: center;
   font-family: var(--font-display);
@@ -1068,8 +1169,8 @@ a.stat-strip__item:hover {
   gap: 3px;
 }
 .entry-card__title {
-  font-size: var(--fs-callout);
-  font-weight: 700;
+  font-size: var(--fs-body);
+  font-weight: var(--fw-heading);
 }
 /* 件数の羅列。区切り (・) でだけ折り返させる。既定のままだと
    `アイ / ドル 14` のように語の途中で切れる。 */
@@ -1177,39 +1278,32 @@ a.labeled-row .labeled-row__value {
 }
 
 /* --- Hero (詳細ページ共通の頭) -------------------------------------------- */
+/* --- 詳細ページの表紙 (帯) ------------------------------------------------
+   画面幅いっぱいの白い帯に、パンくず・見出し・事実を載せる。上辺にページの主の色。
+   本文 (.main の子) の幅から外へ伸ばすので、左右は 50vw との差で埋める。 */
+.detail-band {
+  margin-inline: calc(50% - 50vw);
+  padding-inline: calc(50vw - 50%);
+  margin-block-start: calc(-1 * var(--main-pad-top));
+  background: var(--ds-surface);
+  border-top: 6px solid var(--accent);
+  border-bottom: 1px solid var(--ds-line);
+}
+.detail-band__inner {
+  padding-block: var(--sp6) var(--sp7);
+}
+@media (min-width: 44rem) {
+  .detail-band__inner {
+    padding-block: var(--sp7) 40px;
+  }
+}
+
 .hero {
-  /* エンティティ色は「差し色」であって主役ではない (DS: 色は常にエンティティ側から来るが、
-     システムクロムはほぼ無彩)。グラデーションを薄く敷き、文字のコントラストは
-     hero-surface (ライト/ダークで別途導出済み) が保証する。 */
-  background:
-    linear-gradient(
-      160deg,
-      color-mix(in srgb, var(--grad-from) 26%, transparent),
-      color-mix(in srgb, var(--grad-to) 8%, transparent)
-    ),
-    var(--hero-surface);
-  border-radius: var(--r-xl);
-  padding: var(--sp6) var(--sp5);
   display: flex;
-  gap: var(--sp6);
+  gap: var(--sp6) var(--sp8);
   align-items: flex-start;
   flex-wrap: wrap;
   position: relative;
-  overflow: hidden;
-}
-/* 上辺にエンティティ色の細い線。ページの主が誰かを色で言う。 */
-.hero::before {
-  content: "";
-  position: absolute;
-  inset-inline: 0;
-  inset-block-start: 0;
-  block-size: 4px;
-  background: var(--accent);
-}
-@media (min-width: 44rem) {
-  .hero {
-    padding: var(--sp8) var(--sp8);
-  }
 }
 .hero__body {
   min-width: min(100%, 18rem);
@@ -1232,10 +1326,10 @@ a.labeled-row .labeled-row__value {
   font-family: var(--font-display);
 }
 .hero__title {
-  font-size: clamp(1.5rem, 1.1rem + 2vw, var(--fs-title1));
-  font-weight: 700;
-  letter-spacing: -0.005em;
-  line-height: 1.25;
+  font-size: clamp(1.75rem, 1rem + 3vw, 3.25rem);
+  font-weight: var(--fw-heading);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
 }
 .hero__kana {
   font-size: var(--fs-footnote);
@@ -1334,24 +1428,6 @@ a.labeled-row .labeled-row__value {
   text-align: end;
 }
 
-/* トップのヒーロー: 名前を 1 回だけ大きく、検索窓、数の帯。 */
-.hero--home {
-  padding: var(--sp7) var(--sp5);
-}
-@media (min-width: 44rem) {
-  .hero--home {
-    padding: 56px var(--sp8) var(--sp8);
-  }
-}
-.hero--home .hero__body {
-  gap: var(--sp4);
-}
-.hero__title--display {
-  font-size: var(--fs-display);
-  letter-spacing: -0.015em;
-  line-height: 1.15;
-}
-
 /* 検索窓。トップは素の GET フォーム (JS 無し)、/search/ では島が横取りする。 */
 .search-box {
   display: flex;
@@ -1368,10 +1444,9 @@ a.labeled-row .labeled-row__value {
   align-items: center;
   gap: var(--sp3);
   padding-inline: var(--sp5);
-  border-radius: var(--r-pill);
-  border: 1px solid var(--ds-sep);
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--ds-ink);
   background: var(--ds-surface);
-  box-shadow: var(--ds-shadow1);
 }
 /* 検索欄の輪郭は base.css の 1 つのフォーカスリング規則が描く (枠の色だけでは 1.9:1 で見えない)。 */
 .search-box__glyph {
@@ -1383,7 +1458,7 @@ a.labeled-row .labeled-row__value {
 .search-box__input {
   flex: 1;
   min-width: 0;
-  padding: 13px 0;
+  padding: 16px 0;
   border: 0;
   background: transparent;
   color: var(--ds-ink);
@@ -1402,9 +1477,10 @@ a.labeled-row .labeled-row__value {
 }
 .search-box__btn {
   flex: none;
-  padding: 0 var(--sp6);
+  min-block-size: 56px;
+  padding: 0 var(--sp7);
   border: 0;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   background: var(--ds-sys);
   color: var(--ds-on-sys);
   font: inherit;
@@ -1583,6 +1659,18 @@ a.labeled-row .labeled-row__value {
   filter: none;
   background: var(--tint-strong);
 }
+/* 暗い帯 (フッタ) の上のボタン。 */
+.btn--inverse {
+  padding: 12px var(--sp6);
+  background: var(--footer-ink);
+  color: var(--footer-bg);
+}
+.btn--ghost-inverse {
+  padding: 11px var(--sp6);
+  background: transparent;
+  color: var(--footer-ink);
+  border: 1px solid var(--footer-line);
+}
 
 /* アプリ紹介 (トップの末尾)。 */
 .cta {
@@ -1590,22 +1678,20 @@ a.labeled-row .labeled-row__value {
   flex-wrap: wrap;
   align-items: center;
   gap: var(--sp5) var(--sp7);
-  padding: var(--sp6) var(--sp5);
-  border-radius: var(--r-lg);
-  background: var(--ds-surface);
-  box-shadow: var(--ds-shadow1);
+  padding: var(--sp7) var(--sp6);
+  border-radius: var(--r-xl);
+  background: var(--footer-bg);
+  color: var(--footer-ink);
 }
 @media (min-width: 44rem) {
   .cta {
-    padding: var(--sp7) var(--sp8);
+    padding: var(--sp8) 40px;
   }
 }
 .cta__icon {
   inline-size: 64px;
   block-size: 64px;
-  border-radius: 16px;
   flex: none;
-  box-shadow: var(--ds-shadow1);
 }
 .cta__body {
   flex: 1 1 18rem;
@@ -1615,14 +1701,27 @@ a.labeled-row .labeled-row__value {
   gap: var(--sp2);
 }
 .cta__title {
-  font-size: var(--fs-title3);
-  font-weight: 700;
+  font-size: var(--fs-title2);
+}
+.cta .lede {
+  color: var(--footer-ink2);
 }
 .cta__actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--sp3);
-  margin-top: var(--sp2);
+  margin-top: var(--sp3);
+}
+.cta .btn {
+  padding: 12px var(--sp6);
+  background: var(--footer-ink);
+  color: var(--footer-bg);
+}
+.cta .btn--ghost {
+  padding: 11px var(--sp6);
+  background: transparent;
+  color: var(--footer-ink);
+  border: 1px solid var(--footer-line);
 }
 
 /* --- セトリ ---------------------------------------------------------------
@@ -1989,19 +2088,21 @@ a.labeled-row .labeled-row__value {
   flex-direction: column;
   gap: var(--sp3);
 }
+/* 年は紙面の柱: 細身の数字を大きく。吸着はしない (大きな字が行に被さる)。 */
 .year-group__title {
-  position: sticky;
-  top: calc(var(--header-h) + var(--sp2));
-  z-index: 5;
   align-self: flex-start;
-  padding: var(--sp1) var(--sp4);
-  border-radius: var(--r-pill);
-  background: var(--ds-sys);
-  color: var(--ds-on-sys);
+  padding-inline: var(--sp1);
+  color: var(--ds-ink);
   font-family: var(--font-display);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-footnote);
+  font-size: 2.5rem;
   font-weight: 700;
+  line-height: 1;
+}
+@media (min-width: 44rem) {
+  .year-group__title {
+    font-size: 3.5rem;
+  }
 }
 
 /* --- 検索 (/search/ の island) -------------------------------------------- */

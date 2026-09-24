@@ -30,6 +30,8 @@ html {
 
 body {
   margin: 0;
+  /* 詳細ページの帯 (.detail-band) が 100vw で伸びるぶん、縦スクロールバーの幅だけ横にはみ出す。 */
+  overflow-x: clip;
   background: var(--ds-bg);
   color: var(--ds-ink);
   font-family: var(--font-body);
@@ -45,9 +47,10 @@ h1,
 h2,
 h3,
 h4 {
+  font-family: var(--font-heading);
   margin: 0;
   line-height: var(--lh-tight);
-  font-weight: 700;
+  font-weight: var(--fw-heading);
   letter-spacing: 0.005em;
 }
 
@@ -172,29 +175,32 @@ hr {
 }
 
 .main {
-  padding-block: var(--sp7) var(--sp9);
+  --main-pad-top: var(--sp6);
+  padding-block: var(--main-pad-top) var(--sp9);
   display: flex;
   flex-direction: column;
-  gap: var(--sp8);
+  gap: 40px;
 }
 @media (min-width: 44rem) {
   .main {
-    padding-block: var(--sp8) 64px;
-    gap: var(--sp9);
+    --main-pad-top: var(--sp8);
+    padding-block: var(--main-pad-top) 80px;
+    gap: 64px;
   }
 }
 
 /* --- サイトナビ (上部バー) -------------------------------------------------
-   ブランド / 一覧へのリンク / 検索。広い画面では 1 段、狭い画面では
-   「ブランド + 検索」の下に横スクロールの一覧が来る 2 段。切替は CSS だけ。 */
+   広い画面: ロゴ / 一覧 (8 項目) / 検索欄 の 1 段。狭い画面: ロゴと虫眼鏡だけ
+   (一覧は下のタブバー)。検索は入力欄の形をした **リンク** (/search/ で本物の入力欄が待つ)。
+   どのページからでも「ここに打てば探せる」と見えることが大事。 */
 .site-nav {
   position: sticky;
   top: 0;
   z-index: 20;
-  border-bottom: 1px solid var(--ds-sep);
-  background: color-mix(in srgb, var(--ds-bg) 86%, transparent);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--ds-line);
+  background: color-mix(in srgb, var(--ds-bg) 90%, transparent);
+  backdrop-filter: saturate(160%) blur(16px);
+  -webkit-backdrop-filter: saturate(160%) blur(16px);
 }
 .site-nav__inner {
   max-width: var(--page-wide);
@@ -203,7 +209,7 @@ hr {
   min-height: var(--header-h);
   display: flex;
   align-items: center;
-  gap: var(--sp5);
+  gap: var(--sp5) 28px;
 }
 @media (min-width: 44rem) {
   .site-nav__inner {
@@ -213,181 +219,276 @@ hr {
 .site-nav__brand {
   display: inline-flex;
   align-items: center;
-  gap: var(--sp3);
-  font-weight: 700;
-  font-size: var(--fs-subhead);
-  letter-spacing: 0.01em;
+  gap: 10px;
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: 1.1875rem;
   white-space: nowrap;
   flex: none;
 }
 .site-nav__mark {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
+  width: 30px;
+  height: 30px;
   flex: none;
 }
 .site-nav__links {
   min-width: 0;
-  flex: 1;
+  flex: none;
 }
 .site-nav__links ul {
   display: flex;
-  gap: var(--sp1);
-  overflow-x: auto;
-  scrollbar-width: none;
-  padding-block: var(--sp1);
-}
-.site-nav__links ul::-webkit-scrollbar {
-  display: none;
+  gap: 2px;
 }
 .site-nav__links a {
   display: block;
-  padding: 6px var(--sp4);
+  padding: 8px 12px;
   border-radius: var(--r-pill);
-  font-size: var(--fs-footnote);
-  font-weight: 600;
-  color: var(--ds-ink2);
+  font-size: var(--fs-subhead);
+  font-weight: 500;
+  color: var(--ds-ink);
   white-space: nowrap;
 }
 .site-nav__links a:hover {
   background: var(--ds-fill);
-  color: var(--ds-ink);
 }
 .site-nav__links a[aria-current="page"] {
   background: var(--ds-sys);
   color: var(--ds-on-sys);
 }
 .site-nav__search {
-  flex: none;
+  margin-inline-start: auto;
+  flex: 0 1 264px;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
-  gap: var(--sp2);
-  padding: 6px var(--sp4);
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 var(--sp5);
   border-radius: var(--r-pill);
-  background: var(--ds-fill);
+  border: 1px solid var(--ds-line);
+  background: var(--ds-surface);
   color: var(--ds-ink2);
   font-size: var(--fs-footnote);
-  font-weight: 600;
   white-space: nowrap;
+  overflow: hidden;
 }
 .site-nav__search:hover {
   color: var(--ds-ink);
-  background: var(--tint-strong);
+  border-color: var(--ds-ink3);
+}
+.site-nav__search[aria-current="page"] {
+  border: 1.5px solid var(--ds-ink);
+  color: var(--ds-ink);
 }
 .site-nav__search-glyph {
-  font-size: 1.05em;
-  line-height: 1;
+  flex: none;
+  color: var(--ds-ink);
+}
+.site-nav__search-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* 狭いとナビが 2 段目に落ちる。1 行に詰めると項目が中途半端に切れて
-   「横に流せる」ことが伝わらない。 */
-@media (max-width: 44rem) {
-  .site-nav__inner {
-    flex-wrap: wrap;
-    gap: var(--sp2) var(--sp3);
-    padding-block: var(--sp3) var(--sp1);
-  }
-  .site-nav__brand {
-    flex: 1;
-    min-width: 0;
-  }
+/* 8 項目 + ロゴ + 検索欄が 1 段に入らない幅では、検索を虫眼鏡の丸に畳む。 */
+@media (max-width: 78rem) {
   .site-nav__search {
-    order: 1;
+    flex: none;
+    inline-size: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+  .site-nav__search-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+/* さらに狭いと一覧は下のタブバーへ。上はロゴと虫眼鏡だけ。 */
+@media (max-width: 62rem) {
+  :root {
+    --header-h: 56px;
   }
   .site-nav__links {
-    order: 2;
-    flex-basis: 100%;
-    margin-inline: calc(-1 * var(--sp5));
-    padding-inline: var(--sp5);
-    /* 右端を透かして「まだ続きがある」と言う (項目が 8 つで、電話の幅には収まらない)。
-       末尾の余白で、いちばん右の項目も透かしの手前まで流し込める。 */
-    mask-image: linear-gradient(to right, currentColor calc(100% - 40px), transparent);
-    -webkit-mask-image: linear-gradient(to right, currentColor calc(100% - 40px), transparent);
+    display: none;
   }
-  .site-nav__links ul {
-    padding-inline-end: 40px;
+  .site-nav__brand {
+    font-size: 1.0625rem;
   }
-  :root {
-    /* ヘッダが 2 段になるぶん、吸着する年見出しの位置も下げる */
-    --header-h: 96px;
+  .site-nav__mark {
+    width: 28px;
+    height: 28px;
+  }
+  .site-nav__search {
+    border: 0;
+    background: transparent;
   }
 }
 
-/* --- サイトフッタ --------------------------------------------------------- */
-.site-footer {
-  border-top: 1px solid var(--ds-sep);
-  background: var(--ds-surface);
-  padding-block: var(--sp8) var(--sp8);
-  font-size: var(--fs-footnote);
+/* --- タブバー (狭い画面の下) ----------------------------------------------
+   アプリと同じ場所に同じ入口。メニューは details で開くシート (JS なし)。 */
+.tabbar {
+  display: none;
+}
+@media (max-width: 62rem) {
+  .tabbar {
+    display: block;
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    z-index: 30;
+    background: color-mix(in srgb, var(--ds-surface) 94%, transparent);
+    backdrop-filter: saturate(160%) blur(16px);
+    -webkit-backdrop-filter: saturate(160%) blur(16px);
+    border-top: 1px solid var(--ds-line);
+    padding-block-end: env(safe-area-inset-bottom);
+  }
+  /* 本文の末尾 (フッタ) がタブバーの下に隠れないように。 */
+  .shell {
+    padding-block-end: calc(64px + env(safe-area-inset-bottom));
+  }
+}
+.tabbar__tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  max-inline-size: 36rem;
+  margin-inline: auto;
+}
+.tabbar__tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 4px 10px;
+  font-size: var(--fs-caption2);
+  font-weight: 700;
   color: var(--ds-ink2);
+  white-space: nowrap;
+}
+.tabbar__tab[aria-current="page"],
+.tabbar__menu[open] > .tabbar__tab {
+  color: var(--ds-ink);
+}
+.tabbar__menu > summary {
+  list-style: none;
+}
+/* メニューのシート: タブバーの上に、下から生える。 */
+.tabbar__sheet {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: calc(60px + env(safe-area-inset-bottom));
+  max-block-size: calc(100dvh - 140px);
+  overflow-y: auto;
+  padding: var(--sp3) var(--sp5) var(--sp5);
+  background: var(--ds-surface);
+  border-top: 1px solid var(--ds-line);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  box-shadow: 0 -12px 32px rgb(0 0 0 / 0.12);
+}
+.tabbar__sheet-list a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-block-size: 52px;
+  font-size: var(--fs-callout);
+  font-weight: 700;
+}
+.tabbar__sheet-list li + li {
+  border-top: 1px solid var(--ds-sep);
+}
+.tabbar__sheet-list a[aria-current="page"] {
+  color: var(--ds-ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* --- サイトフッタ ---------------------------------------------------------
+   紙面の奥付: 墨の帯。明暗どちらのテーマでも暗い地に明るい字。 */
+.site-footer {
+  background: var(--footer-bg);
+  color: var(--footer-ink2);
+  padding-block: 56px var(--sp8);
+  font-size: var(--fs-footnote);
+  line-height: var(--lh-relaxed);
 }
 .site-footer__top {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sp7) var(--sp9);
+  gap: var(--sp8) var(--sp9);
   align-items: flex-start;
-  margin-bottom: var(--sp7);
 }
 .site-footer__brand {
-  flex: 1 1 16rem;
+  flex: 1 1 22rem;
   display: flex;
   flex-direction: column;
-  gap: var(--sp3);
-  color: var(--ds-ink);
+  gap: var(--sp4);
 }
 .site-footer__brand-name {
   display: inline-flex;
   align-items: center;
-  gap: var(--sp3);
-  font-weight: 700;
-  font-size: var(--fs-callout);
+  gap: 10px;
+  font-family: var(--font-heading);
+  font-weight: var(--fw-heading);
+  font-size: var(--fs-title3);
+  color: var(--footer-ink);
 }
 .site-footer__brand-name img {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
+  width: 26px;
+  height: 26px;
+}
+.site-footer__notes {
+  max-inline-size: 36em;
+  font-size: var(--fs-caption);
+}
+.site-footer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp3);
+  margin-top: var(--sp2);
 }
 .site-footer__cols {
-  flex: 2 1 30rem;
+  flex: 1 1 26rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--sp6) var(--sp8);
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  gap: var(--sp6) var(--sp7);
 }
 .site-footer h2 {
+  font-family: var(--font-body);
   font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: var(--ds-ink2);
-  margin-bottom: var(--sp3);
-  text-transform: uppercase;
+  color: var(--footer-ink2);
+  margin-bottom: var(--sp2);
 }
-.site-footer li + li {
-  margin-top: var(--sp2);
+.site-footer li a {
+  display: inline-block;
+  padding-block: 3px;
+  color: var(--footer-ink);
 }
 .site-footer a:hover {
-  color: var(--ds-ink);
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
 }
-.site-footer__note {
-  border-top: 1px solid var(--ds-sep);
-  padding-top: var(--sp5);
-  font-size: var(--fs-caption);
-  color: var(--ds-ink2);
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp2);
-}
-/* 歌詞の許諾表示。マークは原本のまま、大きさだけ 60px (iOS と同じ 3x 原本を等比で)。 */
+/* 歌詞の許諾表示。マークは原本のまま、大きさだけ 60px (iOS と同じ 3x 原本を等比で)。
+   暗い帯の上でも原本の色で見えるよう、白い台紙に載せる。 */
 .site-footer__license {
   display: flex;
   align-items: center;
-  gap: var(--sp3);
+  gap: var(--sp4);
+  margin-top: var(--sp8);
+  padding-top: var(--sp5);
+  border-top: 1px solid var(--footer-line);
+  font-size: var(--fs-caption);
 }
 .site-footer__license img {
   flex: none;
   inline-size: 60px;
   block-size: 60px;
+  padding: 4px;
+  border-radius: var(--r-xs);
+  background: var(--footer-plate);
 }
 
 /* --- ユーティリティ ------------------------------------------------------- */
@@ -402,8 +503,11 @@ hr {
   white-space: nowrap;
   border: 0;
 }
+/* 細身の数字。和文の中で同じ大きさだと痩せて見えるので、ひと回り上げる。 */
 .u-num {
   font-family: var(--font-display);
+  font-size: 1.1em;
+  letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }

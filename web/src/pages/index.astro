@@ -22,31 +22,32 @@ const [featured, ...restUpcoming] = home.upcoming;
 ---
 
 <BaseLayout seo={home.seo}>
-  <section class="hero hero--home" aria-labelledby="home-title">
-    <div class="hero__body">
-      <h1 class="hero__title hero__title--display" id="home-title">{meta().siteName}</h1>
+  <section class="home-hero" aria-labelledby="home-title">
+    <div class="home-hero__body">
+      <p class="home-hero__date u-num">{home.todayDisplay}</p>
+      <h1 class="home-hero__title" id="home-title">
+        {home.headline.map((line) => <span>{line}</span>)}
+      </h1>
       <p class="lede">{home.tagline}</p>
       <SearchBox />
       <StatStrip items={home.statTiles} label="収録データ" />
       {/* 非公式の断りはフッタ (Rust の footerNotes) が全ページで言う。最初の一画面には置かない。 */}
     </div>
+    {featured && <FeatureEvent item={featured} countdown={home.nextCountdown} />}
   </section>
 
-  <Section id="home-upcoming" title="今後のライブ" moreHref="/events/upcoming/">
+  <Section id="home-upcoming" title="これからのライブ" moreHref="/events/upcoming/">
     {
       home.upcomingEmpty ? (
         <EmptyState {...home.upcomingEmpty} />
       ) : (
-        <div class="u-stack">
-          {featured && <FeatureEvent item={featured} />}
-          {restUpcoming.length > 0 && (
-            <ListContainer as="ul">
-              {restUpcoming.map((e) => (
-                <EventRow item={e} />
-              ))}
-            </ListContainer>
-          )}
-        </div>
+        restUpcoming.length > 0 && (
+          <ListContainer as="ul">
+            {restUpcoming.map((e) => (
+              <EventRow item={e} />
+            ))}
+          </ListContainer>
+        )
       )
     }
   </Section>
@@ -89,7 +90,7 @@ const [featured, ...restUpcoming] = home.upcoming;
   <section class="cta" aria-labelledby="home-app">
     <img
       class="cta__icon"
-      src="/icon-192.png"
+      src="/logo-mark.png"
       alt=""
       width="64"
       height="64"

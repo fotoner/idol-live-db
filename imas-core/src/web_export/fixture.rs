@@ -279,8 +279,8 @@ fn site_meta() -> SiteMeta {
         // 代表値でも本番と同じ関数を通す (フィクスチャだけ違う文言が出ない)。
         performer_name_options: super::emit::performer_name_options(),
         // 代表値にはお題が無いので、ナビにも出ない (本番と同じ判断を通す)。
-        primary_nav: super::emit::lists::primary_nav(false, true),
-        utility_nav: super::emit::lists::utility_nav(),
+        primary_nav: super::emit::lists::primary_nav(true),
+        utility_nav: super::emit::lists::utility_nav(false),
         footer_notes: content::footer_notes(),
         lyrics_license_notice: content::lyrics_license_notice(),
         lyrics_search_url: content::lyrics_search_url(),
@@ -1446,7 +1446,15 @@ fn home_page() -> HomePage {
     HomePage {
         schema_version: SCHEMA_VERSION,
         path: "/".to_string(),
+        headline: content::HOME_HEADLINE.iter().map(|s| (*s).to_string()).collect(),
         tagline: content::SITE_TAGLINE.to_string(),
+        today_display: "2026.09.24 THU".to_string(),
+        next_countdown: Some(Countdown {
+            lead: "あと".to_string(),
+            value: "2".to_string(),
+            unit: "日".to_string(),
+            spoken: "あと2日".to_string(),
+        }),
         upcoming: vec![event_list_item(&event_sample(), "live")],
         upcoming_empty: None,
         recent_shows: vec![show_summary(ShowContext::Home)],

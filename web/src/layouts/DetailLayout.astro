@@ -37,9 +37,12 @@ const { seo, themeKey, app, isCharacterLive, asideAfterMain = false } = Astro.pr
   wide={Astro.slots.has("aside")}
   isCharacterLive={isCharacterLive}
 >
-  <div class="u-stack">
-    <Breadcrumbs crumbs={seo.breadcrumbs} />
-    <slot name="hero" />
+  {/* 紙面の表紙: 画面幅いっぱいの白い帯。上辺にページの主の色 (ブランド・アイドル)。 */}
+  <div class="detail-band">
+    <div class="detail-band__inner u-stack">
+      <Breadcrumbs crumbs={seo.breadcrumbs} />
+      <slot name="hero" />
+    </div>
   </div>
   {
     Astro.slots.has("aside") ? (
