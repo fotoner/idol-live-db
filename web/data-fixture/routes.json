@@ -226,6 +226,22 @@
       "inSitemap": true
     },
     {
+      "path": "/timeline/",
+      "kind": "timeline",
+      "key": null,
+      "id": null,
+      "data": "index/timeline.json",
+      "inSitemap": true
+    },
+    {
+      "path": "/timeline/brand/ml/",
+      "kind": "timelineBrand",
+      "key": "ml",
+      "id": null,
+      "data": "index/timeline-brand-ml.json",
+      "inSitemap": true
+    },
+    {
       "path": "/ranking/brand/ml/",
       "kind": "rankingBrand",
       "key": "ml",

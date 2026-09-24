@@ -13,6 +13,7 @@ pub mod idols;
 pub mod lists;
 pub mod places;
 pub mod ranking;
+pub mod timeline;
 pub mod search;
 pub mod songs;
 
@@ -344,6 +345,8 @@ fn write_all(
 
     // ランキング (全体とブランドごと)。
     write_lists!(ranking::ranking_pages(ctx));
+    // 年表 (全体とブランドごと)。
+    write_lists!(timeline::timeline_pages(ctx));
 
     let brands = lists::brand_list(ctx);
     w.write_json("index/brands.json", &brands)?;

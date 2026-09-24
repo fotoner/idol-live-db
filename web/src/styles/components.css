@@ -1442,6 +1442,149 @@ a.rank-row:hover {
   font-size: var(--fs-footnote);
 }
 
+/* --- 年表 (TimelineView) ------------------------------------------------- */
+.timeline-chart {
+  margin: 0;
+  padding: var(--sp6) var(--sp6) var(--sp5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp5);
+}
+.card.timeline-chart > * + * {
+  border-top: 0;
+}
+.timeline-chart__scroll {
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+/* PC では枠に合わせて縮め、狭い画面では最小幅を保って横に流す (文字が潰れない)。 */
+.timeline-chart__svg {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 56rem;
+  block-size: auto;
+  font-family: var(--font-body);
+}
+.tl-year line {
+  stroke: var(--ds-sep);
+  stroke-width: 1;
+}
+.tl-year text {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--ds-ink2);
+}
+.tl-lane line {
+  stroke: var(--ds-line);
+  stroke-width: 1;
+}
+.tl-lane text {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 900;
+  fill: var(--ds-ink);
+}
+.tl-today {
+  stroke: var(--ds-pick);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+.tl-release rect {
+  fill: var(--ds-ink);
+}
+.tl-release text {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--ds-ink2);
+}
+.tl-live {
+  fill: var(--accent);
+  fill-opacity: 0.45;
+}
+.tl-live--featured {
+  fill-opacity: 1;
+  stroke: var(--ds-surface);
+  stroke-width: 1.5;
+}
+a:hover > .tl-live,
+a:focus-visible > .tl-live {
+  fill-opacity: 1;
+  stroke: var(--ds-ink);
+  stroke-width: 1.5;
+}
+.tl-milestone circle {
+  fill: var(--accent);
+  stroke: var(--ds-surface);
+  stroke-width: 1.5;
+}
+.tl-milestone__date {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--ds-ink2);
+}
+.tl-milestone__label {
+  font-size: 12px;
+  font-weight: 700;
+  fill: var(--ds-ink);
+}
+.tl-legend {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp2) var(--sp6);
+  font-size: var(--fs-footnote);
+}
+.tl-legend div {
+  display: flex;
+  gap: var(--sp3);
+}
+.tl-legend dt {
+  flex: none;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.tl-legend dd {
+  margin: 0;
+  color: var(--ds-ink2);
+}
+.tl-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tl-list__row {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--sp4);
+  padding: 12px var(--sp5);
+  background: var(--ds-surface);
+}
+a.tl-list__row:hover {
+  background: var(--ds-surface2);
+}
+.tl-list__date {
+  font-family: var(--font-display);
+  font-size: var(--fs-title3);
+  font-weight: 700;
+}
+.tl-list__name {
+  font-size: var(--fs-subhead);
+  font-weight: 700;
+}
+.tl-list__chip {
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  background: var(--tint);
+  color: var(--chip-text);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 /* --- LabeledRow (ImasLabeledRow) ------------------------------------------ */
 .labeled-row {
   display: flex;

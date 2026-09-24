@@ -43,6 +43,7 @@ pub mod brand;
 pub mod calendar;
 pub mod calls;
 pub mod common;
+pub mod timeline;
 pub mod event;
 pub mod idol;
 pub mod index;
@@ -82,5 +83,9 @@ pub use show::{
     ShowCostume, ShowForecast, ShowPage, SiblingNav,
 };
 pub use song::{CoOccurRow, CreditGroup, PerformanceRow, SingerRow, SongPage};
+pub use timeline::{
+    TimelineChartDto, TimelineLaneBand, TimelineLegend, TimelineLiveDot, TimelineLiveRow, TimelineMilestoneMark,
+    TimelineMilestoneRow, TimelinePage, TimelineReleaseBar, TimelineYearTick,
+};
 pub use unit::UnitPage;
 pub use venue::{HallRow, VenueNameRow, VenuePage};

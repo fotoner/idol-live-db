@@ -1507,6 +1507,79 @@ fn ranking_page(path: &str, title: &str, brand: bool) -> RankingPage {
     }
 }
 
+/// 年表。図は小さな手組み (2 年ぶん・各段 1 つずつ)。
+fn timeline_page(path: &str, title: &str, brand: bool) -> TimelinePage {
+    TimelinePage {
+        schema_version: SCHEMA_VERSION,
+        path: path.to_string(),
+        title: title.to_string(),
+        lede: content::TIMELINE_LEDE.to_string(),
+        scope: FilterAxis::new(
+            content::FILTER_AXIS_BRAND,
+            vec![
+                nav("すべて", "/timeline/", !brand, None, None),
+                nav("ミリオンライブ!", "/timeline/brand/ml/", brand, Some("brand:ml"), None),
+            ],
+        ),
+        chart: TimelineChartDto {
+            width: 1100.0,
+            height: 260.0,
+            gutter: 76.0,
+            ruler_height: 26.0,
+            years: vec![
+                TimelineYearTick { year: 2025, label: "2025".to_string(), x: 76.0, width: 512.0, label_x: 332.0 },
+                TimelineYearTick { year: 2026, label: "2026".to_string(), x: 588.0, width: 512.0, label_x: 844.0 },
+            ],
+            lanes: vec![
+                TimelineLaneBand { label: "節目".to_string(), y: 26.0, height: 60.0, label_y: 48.0 },
+                TimelineLaneBand { label: "ライブ".to_string(), y: 86.0, height: 40.0, label_y: 111.0 },
+                TimelineLaneBand { label: "楽曲".to_string(), y: 126.0, height: 134.0, label_y: 148.0 },
+            ],
+            milestones: vec![TimelineMilestoneMark {
+                x: 600.0,
+                y: 44.0,
+                date_display: "2026.1.10".to_string(),
+                label: "アニメ放映開始".to_string(),
+                theme_key: Some("brand:ml".to_string()),
+                text_x: 608.0,
+                flip: false,
+                date_y: 48.0,
+                label_y: 63.0,
+            }],
+            lives: vec![TimelineLiveDot {
+                x: 900.0,
+                y: 110.0,
+                r: 5.5,
+                path: event_sample().path,
+                title: "サンプル (2026.9.26)".to_string(),
+                featured: true,
+                theme_key: "brand:ml".to_string(),
+            }],
+            releases: vec![TimelineReleaseBar {
+                year: 2025,
+                count: 12,
+                x: 86.0,
+                y: 138.0,
+                width: 492.0,
+                height: 96.0,
+                label_x: 332.0,
+                label_y: 247.0,
+            }],
+            today_x: Some(960.0),
+        },
+        legend: vec![TimelineLegend { label: "節目".to_string(), note: "ゲーム・アニメの始まり。".to_string() }],
+        year_lives_title: "2026年のライブ".to_string(),
+        year_lives: vec![TimelineLiveRow {
+            date_display: "9.26".to_string(),
+            event: event_sample(),
+            chip: Some(content::TIMELINE_FEATURED_CHIP.to_string()),
+        }],
+        year_milestones_title: "2026年の節目".to_string(),
+        year_milestones: vec![],
+        seo: seo(title, "年表。", path, Robots::IndexFollow, &[("ホーム", "/")]),
+    }
+}
+
 fn home_page() -> HomePage {
     HomePage {
         schema_version: SCHEMA_VERSION,
@@ -1690,6 +1763,8 @@ pub fn emit(dir: &Path, pretty: bool) -> Result<Stats> {
     }
     w.write_json("index/brands.json", &brand_list_page())?;
     w.write_json("index/ranking.json", &ranking_page("/ranking/", "ランキング", false))?;
+    w.write_json("index/timeline.json", &timeline_page("/timeline/", "年表", false))?;
+    w.write_json("index/timeline-brand-ml.json", &timeline_page("/timeline/brand/ml/", "ミリオンライブ!の年表", true))?;
     w.write_json("index/ranking-brand-ml.json", &ranking_page("/ranking/brand/ml/", "ミリオンライブ!のランキング", true))?;
 
     // --- 検索 ---
@@ -1808,6 +1883,8 @@ fn routes(broken_key: &str) -> RoutesFile {
         listing(RouteKind::VenueListIndex, "/venues/", "index/venues.json", true),
         listing(RouteKind::BrandList, "/brands/", "index/brands.json", true),
         listing(RouteKind::Ranking, "/ranking/", "index/ranking.json", true),
+        listing(RouteKind::Timeline, "/timeline/", "index/timeline.json", true),
+        param_listing(RouteKind::TimelineBrand, "/timeline/brand/ml/", "ml", "index/timeline-brand-ml.json", true),
         param_listing(RouteKind::RankingBrand, "/ranking/brand/ml/", "ml", "index/ranking-brand-ml.json", true),
         detail(RouteKind::Event, "events", "ev_sample", "ev_sample", true),
         detail(RouteKind::Event, "events", "ev_the_idolm@ster_×_ふたご", "ev_the_idolm@ster_×_ふたご", true),

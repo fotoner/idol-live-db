@@ -26,6 +26,7 @@ pub mod collection_gap;
 pub mod cast_song_matching;
 pub mod stats_queries;
 pub mod timeline_queries;
+pub mod timeline_chart;
 pub mod search_queries;
 pub mod ck_record_mapping;
 pub mod sync_planning;

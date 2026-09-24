@@ -119,6 +119,11 @@ fn epoch_from_date(text: &str) -> Option<i64> {
         .map(|dt| dt.timestamp())
 }
 
+/// [`epoch_from_date`] の公開版 (Web の年表が「今日」の線を引くのに使う)。
+pub fn epoch_of_date(text: &str) -> Option<i64> {
+    epoch_from_date(text)
+}
+
 /// SQLite `STRFTIME('%Y', d)` の一次実装 (oneOff の年グループ用)。
 ///
 /// sqlite3 実測 (2026-08-25) をピン留め:

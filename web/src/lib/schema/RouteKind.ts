@@ -16,4 +16,4 @@
  *
  * で済み、TS 側には規則が 1 つも残らない。
  */
-export type RouteKind = "home" | "about" | "search" | "eventListIndex" | "eventListUpcoming" | "eventListPast" | "eventListPastYear" | "eventListBrand" | "songListIndex" | "songListBrand" | "songListAll" | "tagListIndex" | "tag" | "calendarIndex" | "calendarMonth" | "idolListIndex" | "idolListBrand" | "idolListBirthMonth" | "unitListIndex" | "unitListBrand" | "venueListIndex" | "venueListPref" | "brandList" | "pollList" | "ranking" | "rankingBrand" | "callGuide" | "event" | "show" | "song" | "idol" | "unit" | "venue" | "brand";
+export type RouteKind = "home" | "about" | "search" | "eventListIndex" | "eventListUpcoming" | "eventListPast" | "eventListPastYear" | "eventListBrand" | "songListIndex" | "songListBrand" | "songListAll" | "tagListIndex" | "tag" | "calendarIndex" | "calendarMonth" | "idolListIndex" | "idolListBrand" | "idolListBirthMonth" | "unitListIndex" | "unitListBrand" | "venueListIndex" | "venueListPref" | "brandList" | "pollList" | "ranking" | "rankingBrand" | "timeline" | "timelineBrand" | "callGuide" | "event" | "show" | "song" | "idol" | "unit" | "venue" | "brand";

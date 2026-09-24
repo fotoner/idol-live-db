@@ -1423,12 +1423,16 @@ fn site_stat_tiles(counts: Counts, with_links: bool, with_setlist_items: bool) -
     tiles
 }
 
-/// 一覧以外の入口 (検索・ランキング・お題・このサイトについて)。フッタとスマホのメニューが描く。
+/// 一覧以外の入口 (検索・ランキング・年表・お題・このサイトについて)。フッタとスマホのメニューが描く。
 ///
 /// お題はヘッダの 1 段に入れない (項目が 9 つになると 1440px でも詰まる)。
 /// 焼き込んだ集計が無ければページごと出ないので、リンクの有無もここで決める。
 pub fn utility_nav(with_polls: bool) -> Vec<NavLink> {
-    let mut nav = vec![NavLink::new("検索", "/search/"), NavLink::new("ランキング", super::ranking::PATH)];
+    let mut nav = vec![
+        NavLink::new("検索", "/search/"),
+        NavLink::new("ランキング", super::ranking::PATH),
+        NavLink::new("年表", super::timeline::PATH),
+    ];
     if with_polls {
         nav.push(NavLink::new("お題", "/polls/"));
     }

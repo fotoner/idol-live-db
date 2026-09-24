@@ -806,6 +806,10 @@ web_dto! {
         Ranking,
         /// `/ranking/brand/[brandId]/` — `key` = ブランド id
         RankingBrand,
+        /// `/timeline/`
+        Timeline,
+        /// `/timeline/brand/[brandId]/` — `key` = ブランド id
+        TimelineBrand,
         /// `/calls/` — コールガイドの進捗
         CallGuide,
 

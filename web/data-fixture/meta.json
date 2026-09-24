@@ -109,6 +109,13 @@
       "count": null
     },
     {
+      "label": "年表",
+      "path": "/timeline/",
+      "current": false,
+      "themeKey": null,
+      "count": null
+    },
+    {
       "label": "このサイトについて",
       "path": "/about/",
       "current": false,
