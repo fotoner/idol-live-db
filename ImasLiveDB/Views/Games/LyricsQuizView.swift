@@ -47,6 +47,9 @@ struct LyricsQuizView: View {
     @State private var history: [LyricsQuizHistoryItem] = []
     @State private var result: QuizSessionResult?
     @State private var isNewBest = false
+    /// シェア画像に焼くジャケット。結果が出た時点で読み始め、シェアを押したときに待つ。
+    @State private var shareArtwork: Task<[String: UIImage], Never>?
+    @State private var isPreparingShare = false
     /// 正誤の手触り (sensoryFeedback のトリガ)。次の問題で nil に戻す。
     @State private var lastCorrect: Bool?
 
@@ -356,7 +359,8 @@ struct LyricsQuizView: View {
             pickedTitle: mode == .title && !outcome.isCorrect ? choice.text : nil,
             isCorrect: outcome.isCorrect,
             earnedPoints: Int(outcome.earnedPoints),
-            revealedHints: Int(outcome.revealedHints)
+            revealedHints: Int(outcome.revealedHints),
+            artworkUrl: answerSong?.song.artworkUrl
         ))
         if !outcome.isLastQuestion { startPrefetch(after: p.cursor) }
     }
@@ -391,6 +395,8 @@ struct LyricsQuizView: View {
                 .lyricsQuiz, score: Int(sessionResult.points), outOf: Int(sessionResult.outOf))
             isNewBest = update.isNewBest
         }
+        let urls = Array(Set(history.compactMap(\.artworkUrl)))
+        shareArtwork = Task { await LyricsQuizShareArtwork.load(urls) }
         withAnimation(.easeInOut(duration: 0.25)) { result = sessionResult }
     }
 
@@ -398,15 +404,22 @@ struct LyricsQuizView: View {
 
     /// 結果カードを画像にしてシェアする (イントロドンと同じ手順)。画像にも文面にも歌詞は載せない。
     private func shareResultImage(_ result: QuizSessionResult) {
+        guard !isPreparingShare else { return }
         AppAnalytics.tap("lyrics_quiz.share_image")
-        let card = LyricsQuizResultShareCard(modeLabel: modeLabel, result: result,
-                                             items: history, isNewBest: isNewBest)
-        let image = IntroShareImageRenderer.render(size: CGSize(width: 1080, height: 1350)) { card }
-        let text = shareQuizResultText(
-            gameDisplayName: "歌詞クイズ（\(modeLabel)）",
-            points: result.points, maxPoints: result.maxPoints, grade: result.grade,
-            correct: result.correct, questions: result.questions)
-        IntroShareImageRenderer.share(image: image, text: text)
+        isPreparingShare = true
+        Task {
+            let artworks = await shareArtwork?.value ?? [:]
+            let card = LyricsQuizResultShareCard(modeLabel: modeLabel, result: result,
+                                                 items: history, isNewBest: isNewBest,
+                                                 artworks: artworks)
+            let image = IntroShareImageRenderer.render(size: CGSize(width: 1080, height: 1350)) { card }
+            let text = shareQuizResultText(
+                gameDisplayName: "歌詞クイズ（\(modeLabel)）",
+                points: result.points, maxPoints: result.maxPoints, grade: result.grade,
+                correct: result.correct, questions: result.questions)
+            isPreparingShare = false
+            IntroShareImageRenderer.share(image: image, text: text)
+        }
     }
 
     private func show(_ p: Prepared) {
@@ -434,6 +447,8 @@ struct LyricsQuizView: View {
         history = []
         result = nil
         isNewBest = false
+        shareArtwork?.cancel()
+        shareArtwork = nil
         lastCorrect = nil
         loadFirst()
     }
@@ -576,6 +591,8 @@ struct LyricsQuizHistoryItem: Identifiable, Hashable {
     let isCorrect: Bool
     let earnedPoints: Int
     let revealedHints: Int
+    /// シェア画像の背景と一覧に使うジャケット。
+    let artworkUrl: String?
 }
 
 struct LyricsQuizHistoryList: View {
