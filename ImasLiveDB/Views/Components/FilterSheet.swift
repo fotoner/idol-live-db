@@ -77,6 +77,12 @@ struct BrandIconCell: View {
         color.map { Color(hexString: $0) } ?? DS.sys
     }
 
+    /// 選択中の円の上の文字色。ブランド色の円なら白、色の無い「全て」は円が `DS.sys`
+    /// (ダークモードでは白) なので、その反転の `DS.onSys` にする (白地に白文字で消えていた)。
+    private var selectedForeground: Color {
+        color == nil ? DS.onSys : .white
+    }
+
     private var fontSize: CGFloat {
         switch iconText.count {
         case 0...2: return 18
@@ -134,7 +140,7 @@ struct BrandIconCell: View {
                     )
                 Text(iconText)
                     .font(.imasScaled( fontSize, weight: .heavy, design: .rounded))
-                    .foregroundStyle(isSelected ? .white : background)
+                    .foregroundStyle(isSelected ? selectedForeground : background)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
                     .frame(maxWidth: 42)

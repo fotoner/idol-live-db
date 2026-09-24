@@ -293,6 +293,8 @@ struct QuizResultView: View {
     /// `QuizHistoryItem` に載らない振り返り (歌詞クイズは正解がアイドルではなく曲)。
     /// 渡すと `history` の代わりに同じ位置へ出す。
     var customHistory: AnyView? = nil
+    /// 結果を画像でシェアする処理。渡すとテキストの ShareLink の代わりにこちらを出す。
+    var onShareImage: (() -> Void)? = nil
     let onReplay: () -> Void
 
     @State private var appeared = false
@@ -367,21 +369,28 @@ struct QuizResultView: View {
 
             VStack(spacing: DS.sp3) {
                 QuizPrimaryButton(title: "もう一度", action: onReplay)
-                ShareLink(item: shareText) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "square.and.arrow.up").font(.imasScaled(14, weight: .semibold))
-                        Text("結果をシェア").font(.imasSubhead.weight(.semibold))
-                    }
-                    .foregroundStyle(DS.sys)
-                    .frame(maxWidth: .infinity).padding(.vertical, DS.sp4)
-                    .background(DS.sys.opacity(0.12), in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
+                if let onShareImage {
+                    Button(action: onShareImage) { shareLabel(title: "結果を画像でシェア", systemImage: "photo.on.rectangle.angled") }
+                        .buttonStyle(.plain)
+                } else {
+                    ShareLink(item: shareText) { shareLabel(title: "結果をシェア", systemImage: "square.and.arrow.up") }
+                        .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
             .padding(.top, DS.sp3)
         }
         .frame(maxWidth: .infinity)
         .onAppear { appeared = true }
+    }
+
+    private func shareLabel(title: String, systemImage: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: systemImage).font(.imasScaled(14, weight: .semibold))
+            Text(title).font(.imasSubhead.weight(.semibold))
+        }
+        .foregroundStyle(DS.sys)
+        .frame(maxWidth: .infinity).padding(.vertical, DS.sp4)
+        .background(DS.sys.opacity(0.12), in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
     }
 
     private func resultStat(value: String, label: String) -> some View {
