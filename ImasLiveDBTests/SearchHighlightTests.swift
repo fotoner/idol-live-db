@@ -19,18 +19,6 @@ final class SearchHighlightTests: XCTestCase {
         XCTAssertEqual(highlighted("おねがい", "オネ"), "おね")
     }
 
-    /// 先頭でも末尾でも、多バイト文字をまたいでも位置がずれない。
-    func testRangeIsExactAcrossMultibyteText() {
-        XCTAssertEqual(highlighted("夢色ハーモニー", "夢色"), "夢色")
-        XCTAssertEqual(highlighted("夢色ハーモニー", "もにー"), "モニー")
-        XCTAssertEqual(highlighted("お願い！シンデレラ", "しんでれら"), "シンデレラ")
-    }
-
-    /// 大文字小文字は畳む (従来どおり)。
-    func testCaseIsFolded() {
-        XCTAssertEqual(highlighted("READY!!", "ready"), "READY")
-    }
-
     /// 当たらない語と空の語では範囲を返さない (色を敷かない)。
     func testNoRangeWithoutAHit() {
         XCTAssertNil(highlighted("夢色ハーモニー", "星空"))

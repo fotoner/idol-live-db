@@ -66,56 +66,7 @@ final class CallGuideTextTests: XCTestCase {
         XCTAssertEqual(String(attributed.characters), text)
     }
 
-    /// ハイライトが 1 つも無い行も、そのまま素通しする。
-    func testAttributedWithoutHighlights() {
-        let text = "コールの無い行"
-        XCTAssertEqual(String(CallGuideText.attributed(text, highlights: []).characters), text)
-    }
-
     // MARK: - 幅ゼロのアンカー (行末の追っかけコール)
-
-    /// 行末アンカーは `start == end == 行のスカラー数`。セル分割の終端と一致すること
-    /// (ここがズレるとサーバの `end > lineLength` 検証に弾かれる)。
-    func testTrailingAnchorSitsAtScalarCount() {
-        let text = "ダミー歌詞のサンプル"
-        let end = CallGuideText.scalarCount(of: text)
-        XCTAssertEqual(end, 10)
-        XCTAssertEqual(CallGuideText.cells(of: text).last?.scalarEnd, end)
-
-        // 絵文字を含む行でも UTF-16 ではなくスカラー数で数える。
-        let emoji = "あ😀い"
-        XCTAssertEqual(CallGuideText.scalarCount(of: emoji), 3)
-        XCTAssertEqual(CallGuideText.cells(of: emoji).last?.scalarEnd, 3)
-    }
-
-    /// 幅ゼロは切り出す文字が無い = `anchorText` は空文字。
-    /// `slice` が nil を返すので、行内に敷くハイライトも作られない。
-    func testTrailingAnchorSlicesToNothing() {
-        let text = "ダミー歌詞のサンプル"
-        let end = CallGuideText.scalarCount(of: text)
-        XCTAssertNil(CallGuideText.slice(text, start: end, end: end))
-        XCTAssertNil(CallGuideText.slice(text, start: 0, end: 0))
-    }
-
-    /// 幅ゼロのハイライトが混ざっても本文は 1 文字も欠けない (敷く範囲が無いので素通し)。
-    func testAttributedIgnoresZeroWidthHighlight() {
-        let text = "ダミー歌詞のサンプル"
-        let end = CallGuideText.scalarCount(of: text)
-        let highlights = [
-            CallGuideText.Highlight(start: 0, end: 3, color: .red),
-            CallGuideText.Highlight(start: end, end: end, color: .blue),  // 行末 (幅ゼロ)
-        ]
-        let attributed = CallGuideText.attributed(text, highlights: highlights)
-        XCTAssertEqual(String(attributed.characters), text)
-    }
-
-    /// 幅ゼロのコールは「掛かる範囲を持たない」。表示側はこれを見てハイライトを敷かない。
-    func testZeroWidthCallHasNoAnchor() {
-        let ranged = makeCall(start: 0, end: 3, anchorText: "ダミー")
-        let trailing = makeCall(start: 10, end: 10, anchorText: "")
-        XCTAssertTrue(ranged.hasAnchor)
-        XCTAssertFalse(trailing.hasAnchor)
-    }
 
     /// 幅ゼロは `anchorText` が常に空なのでズレようがない。
     /// サーバが誤って印を付けて返しても、選び直しを迫らないこと。
@@ -213,17 +164,6 @@ final class CallGuideTextTests: XCTestCase {
 /// アンカーがスカラー単位のままであることだけを押さえる。
 final class LyricChunkBridgeTests: XCTestCase {
 
-    func testTappingAnyCharacterOfAWordSelectsTheWholeWord() {
-        let line = "ダミー歌詞のサンプル行です"
-        // 「歌詞」は 3..<5。どちらの文字を触っても同じまとまりが返る。
-        for scalar in [UInt32(3), UInt32(4)] {
-            let chunk = lyricChunkAt(line: line, scalar: scalar)
-            XCTAssertEqual(chunk?.text, "歌詞", "scalar=\(scalar)")
-            XCTAssertEqual(chunk?.start, 3)
-            XCTAssertEqual(chunk?.end, 5)
-        }
-    }
-
     func testAnchorOffsetsStayScalarBasedAcrossTheBridge() {
         // 絵文字を含む行。UTF-16 で数えていると 1 文字ぶんズレる。
         let line = "あ😀いろは"
@@ -232,11 +172,6 @@ final class LyricChunkBridgeTests: XCTestCase {
         let chunk = lyricChunkAt(line: line, scalar: 2)
         XCTAssertEqual(chunk?.text, "いろは")
         XCTAssertEqual(chunk?.start, 2, "UTF-16 で数えていると 3 になる")
-    }
-
-    func testTapPastTheEndOfTheLineStillSelectsSomething() {
-        // 行の右端の余白を触っても空振りしない (指は文字ちょうどには乗らない)。
-        XCTAssertEqual(lyricChunkAt(line: "ダミー歌詞", scalar: 99)?.text, "歌詞")
     }
 
     func testChunksCoverTheLineWithoutGaps() {

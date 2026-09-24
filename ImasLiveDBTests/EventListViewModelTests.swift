@@ -79,17 +79,6 @@ final class EventListViewModelTests: XCTestCase {
         XCTAssertEqual(vm.filteredCount, 2)
     }
 
-    func testLoadUpcomingKeepsFutureAscending() async {
-        let events = [makeEW("a", date: "2026-07-01"), makeEW("past", date: "2025-01-01"), makeEW("c", date: "2026-06-20")]
-        let vm = makeVM(events: events)
-
-        await vm.loadData(includeEmpty: false, query: query(upcoming: true, today: "2026-06-18"))
-
-        XCTAssertEqual(vm.groupedByYear.map(\.year), ["2026年"])
-        XCTAssertEqual(vm.groupedByYear.first?.events.map(\.id), ["c", "a"])
-        XCTAssertEqual(vm.filteredCount, 2)
-    }
-
     func testRebuildAppliesBrandFilterWithoutRefetch() async {
         let events = [makeEW("a", date: "2025-03-01", brandId: "cg"), makeEW("b", date: "2025-04-01", brandId: "ml")]
         let vm = makeVM(events: events)

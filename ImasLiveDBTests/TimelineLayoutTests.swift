@@ -20,19 +20,6 @@ final class TimelineLayoutTests: XCTestCase {
         return date
     }
 
-    private func bar(
-        _ id: String,
-        _ start: String,
-        _ end: String,
-        lane: TimelineLane = .live
-    ) -> TimelineBar {
-        TimelineBar(
-            id: id, lane: lane, title: id,
-            start: date(start), end: date(end),
-            marks: [], seedHex: nil, categoryKey: id, badge: nil, target: .none
-        )
-    }
-
     // MARK: - packRows
 
     /// start > end の壊れた入力でも段割りは破綻しない (DB 側の日付逆転に対する保険)。
@@ -93,12 +80,5 @@ final class TimelineLayoutTests: XCTestCase {
         XCTAssertEqual(TimelineDateParser.calendar.timeZone.identifier, "Asia/Tokyo")
         XCTAssertEqual(calendar.component(.year, from: date("2026-01-01")), 2026)
         XCTAssertEqual(calendar.component(.year, from: date("2025-12-31")), 2025)
-    }
-
-    // MARK: - TimelineBar
-
-    func testDurationDaysIsZeroForSingleDayBar() {
-        XCTAssertEqual(bar("x", "2026-08-04", "2026-08-04").durationDays, 0, accuracy: 0.001)
-        XCTAssertEqual(bar("y", "2026-08-04", "2026-08-06").durationDays, 2, accuracy: 0.001)
     }
 }

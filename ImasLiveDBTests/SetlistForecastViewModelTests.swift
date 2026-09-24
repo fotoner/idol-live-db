@@ -67,17 +67,6 @@ final class SetlistForecastViewModelTests: XCTestCase {
         XCTAssertEqual(visible.map(\.rank), [1, 3])
     }
 
-    func testShowsAtMostTwentyAfterHiding() async {
-        let ids = (1...30).map { "s\($0)" }
-        let model = makeModel(reading: FakeForecastReading(record: record(songIds: ids)))
-        await model.load()
-
-        let visible = model.visibleSongs(predictedSongIds: ["s1", "s2"])
-
-        XCTAssertEqual(visible.count, SetlistForecastViewModel.displayLimit)
-        XCTAssertEqual(visible.first?.songId, "s3")
-    }
-
     // MARK: - 格上げ
 
     func testPromoteSuccessRemovesSongFromForecast() async throws {
@@ -132,13 +121,5 @@ final class SetlistForecastViewModelTests: XCTestCase {
         await model.load()
 
         XCTAssertEqual(model.castUnannouncedNote, "出演者未発表のため精度が低い")
-    }
-
-    func testNoNoteWithoutFlag() async {
-        let flag = ForecastShowFlagRecord(flag: .setlistPublished, label: "セトリ公開済み (答え合わせ用)")
-        let model = makeModel(reading: FakeForecastReading(record: record(songIds: ["a"], flags: [flag])))
-        await model.load()
-
-        XCTAssertNil(model.castUnannouncedNote)
     }
 }

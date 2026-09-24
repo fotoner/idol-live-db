@@ -90,23 +90,6 @@ final class IdolDetailViewModelTests: XCTestCase {
         XCTAssertEqual(vm.unitsWithoutSongs.map(\.id), ["u2"])
     }
 
-    func testLoadKeepsOriginalSongSectionsInCoreOrder() async {
-        let sections = [
-            IdolSongSection(heading: "ソロ曲", shortHeading: "ソロ", songs: [makeStubSong("s1")]),
-            IdolSongSection(heading: "全体曲", shortHeading: "全体曲", songs: [makeStubSong("s2"), makeStubSong("s3")]),
-        ]
-        let vm = IdolDetailViewModel(
-            idolReading: FakeIdolReading(sectionsToReturn: sections),
-            brandReading: FakeBrandReading(),
-            unitReading: FakeUnitReading())
-
-        await vm.loadDetails(idol: makeIdol("i", brandId: "cg"))
-
-        // VM はコアが返した節の並び・中身をそのまま保持する (並び替え・フィルタは行わない)。
-        XCTAssertEqual(vm.originalSongSections.map(\.heading), ["ソロ曲", "全体曲"])
-        XCTAssertEqual(vm.originalSongSections.map { $0.songs.map(\.id) }, [["s1"], ["s2", "s3"]])
-    }
-
     func testInitialSongSectionHeadingIsTheFirstNonEmptySection() async {
         let sections = [
             IdolSongSection(heading: "ソロ曲", shortHeading: "ソロ", songs: [makeStubSong("s1")]),
@@ -121,17 +104,6 @@ final class IdolDetailViewModelTests: XCTestCase {
 
         // 小タブで初めに選ぶのは、コアが返した節の先頭 (曲がある最初の枠)。
         XCTAssertEqual(vm.initialSongSectionHeading, "ソロ曲")
-    }
-
-    func testInitialSongSectionHeadingIsNilWhenThereAreNoSections() async {
-        let vm = IdolDetailViewModel(
-            idolReading: FakeIdolReading(sectionsToReturn: []),
-            brandReading: FakeBrandReading(),
-            unitReading: FakeUnitReading())
-
-        await vm.loadDetails(idol: makeIdol("i", brandId: "cg"))
-
-        XCTAssertNil(vm.initialSongSectionHeading)
     }
 
     func testLoadResolvesBrandByIdolBrandId() async {

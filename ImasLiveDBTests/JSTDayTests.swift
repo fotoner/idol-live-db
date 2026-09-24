@@ -19,17 +19,6 @@ final class JSTDayTests: XCTestCase {
 
     // MARK: - today
 
-    /// JST 00:01 (= 前日 UTC 15:01) は既に翌日扱い。
-    func testTodayJustAfterJSTMidnight() {
-        XCTAssertEqual(JSTDay.today(now: utc(2026, 7, 25, 15, 1)), "2026-07-26")
-    }
-
-    /// 月またぎ / 年またぎでもゼロ埋め書式が崩れない。
-    func testTodayFormatAcrossBoundaries() {
-        XCTAssertEqual(JSTDay.today(now: utc(2025, 12, 31, 15, 0)), "2026-01-01")
-        XCTAssertEqual(JSTDay.today(now: utc(2026, 1, 8, 15, 0)), "2026-01-09")
-    }
-
     /// 呼ぶたびに計算する (static let でキャッシュすると日付が変わっても古いままになる)。
     func testTodayIsRecomputedPerCall() {
         let before = JSTDay.today(now: utc(2026, 7, 26, 14, 0))

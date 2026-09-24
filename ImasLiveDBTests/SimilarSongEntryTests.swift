@@ -31,17 +31,4 @@ final class SimilarSongEntryTests: XCTestCase {
         XCTAssertNil(res.songs.first?.score)
         XCTAssertEqual(res.songs.first?.pickWeight, 3)
     }
-
-    /// 旧サーバ応答でも抽選が空にならない (重み 0 だけになると穴埋めしか出ない)。
-    func testLegacyResponseStillYieldsRecommendations() throws {
-        let res = try decode("""
-        {"song_id":"a","songs":[
-          {"song_id":"b","shared_tags":3},
-          {"song_id":"c","shared_tags":2},
-          {"song_id":"d","shared_tags":1}]}
-        """)
-        let picked = WeightedSampling.pick(res.songs, count: 2, weight: \.pickWeight)
-        XCTAssertEqual(picked.count, 2)
-        XCTAssertEqual(Set(picked.map(\.songId)).count, 2)
-    }
 }

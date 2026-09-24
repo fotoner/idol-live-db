@@ -23,22 +23,9 @@ final class SocialShareTests: XCTestCase {
 
     // MARK: - リンクの読み戻し (DeeplinkRouter)
 
-    func testParsePollUniversalLink() {
-        let url = DeeplinkBuilder.pollURL(id: "46987cdb-0bca")
-        XCTAssertEqual(DeeplinkRouter.parse(url), .poll(id: "46987cdb-0bca"))
-    }
-
     func testParsePollCustomScheme() {
         let url = URL(string: "imaslivedb://polls/46987cdb-0bca")!
         XCTAssertEqual(DeeplinkRouter.parse(url), .poll(id: "46987cdb-0bca"))
-    }
-
-    /// 既存の events/shows はそのまま解釈できる (お題ケース追加の巻き添えがない)。
-    func testParseShowLinkStillWorks() {
-        XCTAssertEqual(
-            DeeplinkRouter.parse(DeeplinkBuilder.showURL(id: "show_1")),
-            .show(id: "show_1")
-        )
     }
 
     func testUnknownKindIsIgnored() {

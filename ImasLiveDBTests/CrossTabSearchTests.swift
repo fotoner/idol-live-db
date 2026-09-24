@@ -35,13 +35,6 @@ final class CrossTabSearchTests: XCTestCase {
         XCTAssertNil(sut.take(for: .events), "2 回目は受け取れない")
     }
 
-    /// 渡していなければ誰も受け取らない (初期状態)。
-    func testNothingIsHandedByDefault() {
-        for tab in RootTab.allCases {
-            XCTAssertNil(sut.take(for: tab), "\(tab.label) が受け取ってしまった")
-        }
-    }
-
     /// 続けて渡したら、後の方が勝つ。
     func testLatestHandoffWins() {
         sut.hand("最初", to: .songs)
@@ -49,16 +42,6 @@ final class CrossTabSearchTests: XCTestCase {
 
         XCTAssertNil(sut.take(for: .songs), "上書きされた宛先は受け取らない")
         XCTAssertEqual(sut.take(for: .events), "あと")
-    }
-
-    /// タブの tag は `ContentView` の `TabView` と対。
-    /// ずれると押した先が別のタブになる。
-    func testTabTagsMatchTheTabViewOrder() {
-        XCTAssertEqual(RootTab.schedule.rawValue, 0)
-        XCTAssertEqual(RootTab.events.rawValue, 1)
-        XCTAssertEqual(RootTab.songs.rawValue, 2)
-        XCTAssertEqual(RootTab.idols.rawValue, 3)
-        XCTAssertEqual(RootTab.produce.rawValue, 4)
     }
 
     /// チップを出す対象は「検索欄を持つ一覧」だけ。

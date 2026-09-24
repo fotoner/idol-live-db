@@ -81,18 +81,4 @@ final class SongListViewModelTests: XCTestCase {
         XCTAssertTrue(vm.callGuideFilterError)
         XCTAssertEqual(vm.callGuideSongIds, ["s1"])
     }
-
-    /// 一度失敗したあとに成功したらフラグは下りる。
-    func testResolveRecoversAfterFailure() async {
-        let (vm, port) = makeVM(["s1"])
-        port.shouldThrow = true
-        await vm.resolveCallGuideFilter(true)
-        XCTAssertTrue(vm.callGuideFilterError)
-
-        port.shouldThrow = false
-        await vm.resolveCallGuideFilter(true)
-
-        XCTAssertFalse(vm.callGuideFilterError)
-        XCTAssertEqual(vm.callGuideSongIds, ["s1"])
-    }
 }

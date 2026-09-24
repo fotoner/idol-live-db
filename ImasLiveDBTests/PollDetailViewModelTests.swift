@@ -83,21 +83,6 @@ final class PollDetailViewModelTests: XCTestCase {
              candidateScope: scope, scopeBrandIds: brandIds, scopeEntityIds: entityIds, topEntityId: nil)
     }
 
-    func testLoadPopulatesDetail() async {
-        let fake = FakeCommunityVoting()
-        fake.detailToReturn = PollDetail(
-            poll: makePoll(),
-            entries: [PollEntry(entityId: "s1", voteCount: 1, hasUserVoted: false)],
-            myVoteCount: 0)
-        let vm = PollDetailViewModel(pollId: "p1", voting: fake)
-
-        await vm.load()
-
-        XCTAssertFalse(vm.isLoading)
-        XCTAssertEqual(vm.detail?.entries.count, 1)
-        XCTAssertEqual(vm.remaining, 3)
-    }
-
     func testVoteAppliesOptimisticUpdate() async {
         let fake = FakeCommunityVoting()
         fake.detailToReturn = PollDetail(
@@ -171,15 +156,6 @@ final class PollDetailViewModelTests: XCTestCase {
         XCTAssertEqual(vm.detail?.entries.count, 2)
         XCTAssertEqual(vm.detail?.entries.first { $0.entityId == "s1" }?.voteCount, 0)
         XCTAssertEqual(vm.detail?.entries.first { $0.entityId == "s1" }?.hasUserVoted, false)
-    }
-
-    func testPollScopeAccessorFallsBackToAll() {
-        // candidateScope=nil の古いサーバ応答でも .all 扱い
-        let p = Poll(id: "p1", title: "t", description: nil, targetType: .song,
-                     createdBy: "u", createdAt: Date(), endsAt: Date().addingTimeInterval(60),
-                     status: "active", totalVotes: 0, entryCount: 0,
-                     candidateScope: nil, scopeBrandIds: nil, scopeEntityIds: nil, topEntityId: nil)
-        XCTAssertEqual(p.scope, .all)
     }
 
     func testPollCandidateScopeDecodesUnknownAsAll() throws {

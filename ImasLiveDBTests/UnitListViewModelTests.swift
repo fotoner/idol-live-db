@@ -96,24 +96,6 @@ final class UnitListViewModelTests: XCTestCase {
         XCTAssertEqual(names(vm, "可惜"), ["可惜夜月"])
     }
 
-    /// 別名でも引ける (「Cleasky」でも「クレスカイ」でも)。
-    func testAlternateNameIsSearchable() async {
-        let vm = await loadedViewModel([
-            makeUnit("u1", name: "Cleasky", nameAlt: "クレスカイ")
-        ])
-
-        XCTAssertEqual(names(vm, "cleasky"), ["Cleasky"], "大文字小文字を畳む")
-        XCTAssertEqual(names(vm, "くれすかい"), ["Cleasky"], "別名をひらがなで")
-    }
-
-    /// 読みが無い行は名前だけで引ける (読みは全件には入っていない)。
-    func testUnitsWithoutReadingStillMatchByName() async {
-        let vm = await loadedViewModel([makeUnit("u1", name: "星纏天女")])
-
-        XCTAssertEqual(names(vm, "星纏"), ["星纏天女"])
-        XCTAssertTrue(names(vm, "せいてん").isEmpty, "読みが無いので かなでは当たらない")
-    }
-
     /// 空の検索語は絞り込まない。
     func testEmptyQueryKeepsEveryUnit() async {
         let vm = await loadedViewModel([

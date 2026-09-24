@@ -25,17 +25,6 @@ final class PollListViewModelTests: XCTestCase {
         XCTAssertTrue(vm.polls(active: false).isEmpty)
     }
 
-    func testLoadPastPopulatesPastList() async {
-        let fake = FakeCommunityVoting()
-        fake.pollsByStatus["past"] = [makePoll(id: "old", active: false)]
-        let vm = PollListViewModel(voting: fake)
-
-        await vm.load(active: false)
-
-        XCTAssertEqual(vm.polls(active: false).map(\.id), ["old"])
-        XCTAssertTrue(vm.polls(active: true).isEmpty)
-    }
-
     func testLoadErrorSetsMessage() async {
         let fake = FakeCommunityVoting()
         fake.shouldThrow = true

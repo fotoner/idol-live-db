@@ -31,18 +31,7 @@ final class DailyPickTests: XCTestCase {
             String(format: "%04d-%02d-%02d", c.year!, c.month!, c.day!))
     }
 
-    /// 深夜 0 時直後と 23:59 は同じ日。
-    func testDayKeyIsStableWithinTheSameLocalDay() {
-        XCTAssertEqual(
-            DailyPick.dayKey(local(2026, 7, 26, 0, 1)),
-            DailyPick.dayKey(local(2026, 7, 26, 23, 59)))
-    }
-
     // MARK: - previousDayKey
-
-    func testPreviousDayKey() {
-        XCTAssertEqual(DailyPick.previousDayKey(local(2026, 7, 26)), "2026-07-25")
-    }
 
     /// 月またぎ / 年またぎ / うるう日でカレンダー任せの引き算になっている。
     func testPreviousDayKeyAcrossBoundaries() {

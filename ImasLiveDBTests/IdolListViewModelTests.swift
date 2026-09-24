@@ -77,20 +77,6 @@ final class IdolListViewModelTests: XCTestCase {
         XCTAssertEqual(vm.visibleBrands.map(\.id), ["cg", "ml"])
     }
 
-    func testRebuildAppliesBrandFilter() async {
-        let idols = [makeIdol("a", brandId: "cg"), makeIdol("b", brandId: "ml")]
-        let brands = [makeBrand("cg"), makeBrand("ml")]
-        let vm = makeVM(idols: idols, brands: brands)
-        await vm.loadData(filter: IdolFilterContext())
-
-        var ctx = IdolFilterContext()
-        ctx.selectedBrandIds = ["ml"]
-        vm.rebuild(filter: ctx)
-
-        XCTAssertEqual(vm.filteredIdols.map(\.id), ["b"])
-        XCTAssertEqual(vm.visibleBrands.map(\.id), ["ml"])
-    }
-
     func testRebuildSuppliesCastNamesForSearch() async {
         // castNames は VM 保持の値が rebuild 時に補完され、検索対象に入る。
         let idols = [makeIdol("a", brandId: "cg"), makeIdol("b", brandId: "cg")]

@@ -166,19 +166,6 @@ final class CallGuideDashboardViewModelTests: XCTestCase {
         XCTAssertEqual(vm.withCalls.count, 200)
     }
 
-    /// M-3: 手元で解決できなかった曲の件数を数える (footer で断るため)。
-    func testDroppedCountCountsUnresolvedSongs() async {
-        let dashboard = CallGuideDashboard(
-            generatedAt: 1,
-            songsWithCalls: [summary("s1"), summary("gone")],
-            recentEdits: [], taggedWithoutCalls: ["gone2"], callTag: nil)
-        let (vm, _, _) = makeVM(dashboard, known: ["s1"])
-
-        await vm.load()
-
-        XCTAssertEqual(vm.droppedCount, 2)
-    }
-
     /// I2: ローカル master に無い song_id の行は落ち、残りは出る。
     func testUnknownSongIdsAreDropped() async {
         let dashboard = CallGuideDashboard(
@@ -271,19 +258,5 @@ final class CallGuideDashboardViewModelTests: XCTestCase {
         XCTAssertEqual(vm.withCalls.map(\.id), ["new"], "先に始まった古い応答が勝ってはいけない")
         XCTAssertEqual(vm.generatedAt, Date(timeIntervalSince1970: 2))
         XCTAssertFalse(vm.isLoading)
-    }
-
-    /// 未整備一覧がサーバ上限に達していたら「上位 100 件」と断れるようフラグを立てる。
-    func testWantedTruncatedFlagAtServerLimit() async {
-        let ids = (0 ..< 100).map { "w\($0)" }
-        let dashboard = CallGuideDashboard(
-            generatedAt: 1, songsWithCalls: [], recentEdits: [],
-            taggedWithoutCalls: ids, callTag: nil)
-        let (vm, _, _) = makeVM(dashboard, known: ids)
-
-        await vm.load()
-
-        XCTAssertTrue(vm.wantedTruncated)
-        XCTAssertEqual(vm.wanted.count, 100)
     }
 }

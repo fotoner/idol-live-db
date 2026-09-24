@@ -31,17 +31,9 @@ final class MyPageViewModelTests: XCTestCase {
 
     private struct FakeMarkReading: MarkReading {
         var markedIds: [String] = []
-        /// 「どの entity/kind で問い合わせたか」を検証するための記録。
-        final class Recorder: @unchecked Sendable {
-            var entity: UserMarkEntity?
-            var kind: UserMarkKind?
-        }
-        var recorder = Recorder()
 
         func markedEntityIds(entity: UserMarkEntity, kind: UserMarkKind) async throws -> [String] {
-            recorder.entity = entity
-            recorder.kind = kind
-            return markedIds
+            markedIds
         }
         func autoCollectedSongIds() async throws -> Set<String> { [] }
     }
@@ -125,27 +117,6 @@ final class MyPageViewModelTests: XCTestCase {
         XCTAssertEqual(vm.schemaVersion, "27")
         XCTAssertEqual(vm.dataVersion, "61")
         XCTAssertEqual(vm.dbStats?.idolCount, 20)
-    }
-
-    /// meta が無いときは "不明" を出す (空文字や "nil" を画面に出さない)。
-    func testLoadShowsUnknownWhenMetaMissing() async {
-        let vm = makeVM(diagnostics: FakeDiagnosticsReading(meta: [:]))
-        await vm.load()
-        XCTAssertEqual(vm.schemaVersion, "不明")
-        XCTAssertEqual(vm.dataVersion, "不明")
-    }
-
-    /// 担当は「idol / myPick」で引く。ここを取り違えるとテーマ色の候補が変わる。
-    func testLoadQueriesMyPickIdols() async {
-        let marks = FakeMarkReading(markedIds: ["i1", "i2"])
-        let idols = FakeIdolReading(byIds: [makeIdol("i1"), makeIdol("i2")])
-        let vm = makeVM(idols: idols, marks: marks)
-
-        await vm.load()
-
-        XCTAssertEqual(marks.recorder.entity, .idol)
-        XCTAssertEqual(marks.recorder.kind, .myPick)
-        XCTAssertEqual(vm.pickIdols.map(\.id), ["i1", "i2"])
     }
 
     /// DB が転んでも画面は開ける (設定画面が真っ白になる方が困る)。

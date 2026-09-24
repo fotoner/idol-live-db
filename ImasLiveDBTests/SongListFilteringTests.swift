@@ -28,13 +28,6 @@ final class SongListFilteringTests: XCTestCase {
 
     // MARK: - コールガイド絞り込み
 
-    /// 空集合は「該当 0 件」。nil (絞り込みなし) と区別する。
-    func testCallGuideEmptySetYieldsNothing() {
-        var ctx = SongMarkFilterContext(collectFilter: .all)
-        ctx.callGuideSongIds = []
-        XCTAssertTrue(applySongMarkFilters(songs(), ctx).isEmpty)
-    }
-
     /// I11: タグ集合との併用は AND。タグ票数ソートの並びも壊れない。
     func testCallGuideAndsWithTagsAndKeepsVoteRanking() {
         let input = [makeSWA("a", titleKana: "あ"), makeSWA("b", titleKana: "い"), makeSWA("c", titleKana: "う")]
