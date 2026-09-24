@@ -232,7 +232,7 @@ extension L10n {
         static var listFilterChipHasNote: LocalizedStringResource {
             LocalizedStringResource("events.list.filter_chip.has_note", defaultValue: "メモあり", table: "Events", bundle: L10n.bundle)
         }
-        /// 絞り込みを解除 — 名前の絞り込みを消すボタン
+        /// 絞り込みを解除 — 名前の絞り込みを消すボタン。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ)
         static var listFilterEmptyAction: LocalizedStringResource {
             LocalizedStringResource("events.list.filter_empty.action", defaultValue: "絞り込みを解除", table: "Events", bundle: L10n.bundle)
         }
@@ -240,7 +240,7 @@ extension L10n {
         static func listFilterEmptyMessage(query: String) -> LocalizedStringResource {
             LocalizedStringResource("events.list.filter_empty.message", defaultValue: "「\(query)」に一致するライブがありません", table: "Events", bundle: L10n.bundle)
         }
-        /// 絞り込み結果がありません — 名前の絞り込みで 1 件も残らなかったときの空状態の見出し
+        /// 絞り込み結果がありません — 名前の絞り込みで 1 件も残らなかったときの空状態の見出し。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ)
         static var listFilterEmptyTitle: LocalizedStringResource {
             LocalizedStringResource("events.list.filter_empty.title", defaultValue: "絞り込み結果がありません", table: "Events", bundle: L10n.bundle)
         }

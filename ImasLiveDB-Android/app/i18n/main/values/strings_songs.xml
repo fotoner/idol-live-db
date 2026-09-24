@@ -299,7 +299,7 @@
     <string name="songs_list_empty_filter_title">条件に一致する楽曲がありません</string>
     <!-- songs.list.empty_search.message: 検索欄の語で 1 曲も残らなかったときの説明。query は利用者が打った語 -->
     <string name="songs_list_empty_search_message">「%1$s」に一致する楽曲がありません</string>
-    <!-- songs.list.empty_search.title: 検索欄の語で 1 曲も残らなかったときの空状態の見出し -->
+    <!-- songs.list.empty_search.title: 検索欄の語で 1 曲も残らなかったときの空状態の見出し。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ) -->
     <string name="songs_list_empty_search_title">絞り込み結果がありません</string>
     <!-- songs.list.fuzzy.header: 打った語に完全には一致しないが近い曲 (あいまい検索の候補) の節の見出し -->
     <string name="songs_list_fuzzy_header">もしかして</string>

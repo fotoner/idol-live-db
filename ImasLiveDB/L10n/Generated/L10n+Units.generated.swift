@@ -136,7 +136,7 @@ extension L10n {
         static var listEmptyTitle: LocalizedStringResource {
             LocalizedStringResource("units.list.empty.title", defaultValue: "ユニットがありません", table: "Units", bundle: L10n.bundle)
         }
-        /// 絞り込みを解除 — 絞り込みの語を消すボタン
+        /// 絞り込みを解除 — 絞り込みの語を消すボタン。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ)
         static var listFilterEmptyActionClear: LocalizedStringResource {
             LocalizedStringResource("units.list.filter_empty.action.clear", defaultValue: "絞り込みを解除", table: "Units", bundle: L10n.bundle)
         }
@@ -144,7 +144,7 @@ extension L10n {
         static func listFilterEmptyMessage(query: String) -> LocalizedStringResource {
             LocalizedStringResource("units.list.filter_empty.message", defaultValue: "「\(query)」に一致するユニットがありません", table: "Units", bundle: L10n.bundle)
         }
-        /// 絞り込み結果がありません — 絞り込みで 1 件も残らなかったときの空状態の見出し
+        /// 絞り込み結果がありません — 絞り込みで 1 件も残らなかったときの空状態の見出し。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ)
         static var listFilterEmptyTitle: LocalizedStringResource {
             LocalizedStringResource("units.list.filter_empty.title", defaultValue: "絞り込み結果がありません", table: "Units", bundle: L10n.bundle)
         }

@@ -332,7 +332,7 @@ extension L10n {
         static var myPickToggleRemoveA11y: LocalizedStringResource {
             LocalizedStringResource("common.my_pick_toggle.remove.a11y", defaultValue: "担当解除", table: "Common", bundle: L10n.bundle)
         }
-        /// 絞り込みを解除 — 名前の絞り込み欄の右の × ボタンの読み上げ (入力を消す)
+        /// 絞り込みを解除 — 名前の絞り込み欄の右の × ボタンの読み上げ (入力を消す)。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ)
         static var nameFilterClearA11y: LocalizedStringResource {
             LocalizedStringResource("common.name_filter.clear.a11y", defaultValue: "絞り込みを解除", table: "Common", bundle: L10n.bundle)
         }

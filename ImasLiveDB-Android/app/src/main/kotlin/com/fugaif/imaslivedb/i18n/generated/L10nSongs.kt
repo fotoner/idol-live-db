@@ -276,7 +276,7 @@ object L10nSongs {
     val listEmptyFilterTitle: DisplayText get() = DisplayText.Res(R.string.songs_list_empty_filter_title)
     /** 「{query}」に一致する楽曲がありません — 検索欄の語で 1 曲も残らなかったときの説明。query は利用者が打った語 — 引数: query (string) */
     fun listEmptySearchMessage(query: String): DisplayText = DisplayText.Res(R.string.songs_list_empty_search_message, listOf(query))
-    /** 絞り込み結果がありません — 検索欄の語で 1 曲も残らなかったときの空状態の見出し */
+    /** 絞り込み結果がありません — 検索欄の語で 1 曲も残らなかったときの空状態の見出し。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ) */
     val listEmptySearchTitle: DisplayText get() = DisplayText.Res(R.string.songs_list_empty_search_title)
     /** もしかして — 打った語に完全には一致しないが近い曲 (あいまい検索の候補) の節の見出し */
     val listFuzzyHeader: DisplayText get() = DisplayText.Res(R.string.songs_list_fuzzy_header)

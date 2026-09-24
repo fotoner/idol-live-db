@@ -1934,7 +1934,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "즐겨찾기 변경"
+            "value" : "즐겨찾기 전환"
           }
         }
       }
@@ -1952,7 +1952,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "담당 변경"
+            "value" : "담당 전환"
           }
         }
       }

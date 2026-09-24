@@ -35,11 +35,11 @@
     </plurals>
     <string name="games_daily_pick_action_close">닫기</string>
     <string name="games_daily_pick_lead_idol">브랜드마다 오늘의 아이돌을 골랐어요. 성격이든 헤어스타일이든 말버릇이든, 떠오르는 태그를 달아 투표해 봐요 (여러 개 가능·같은 태그는 투표한 사람 수가 합산돼요).</string>
-    <string name="games_daily_pick_lead_song">브랜드마다 오늘의 1곡을 골랐어요. 재킷을 탭하면 미리 듣기를 할 수 있어요. 마음에 드는 곡에 태그를 달아 투표해 봐요 (여러 개 가능·같은 태그는 투표한 사람 수가 합산돼요).</string>
+    <string name="games_daily_pick_lead_song">브랜드마다 오늘의 한 곡을 골랐어요. 재킷을 탭하면 미리 듣기를 할 수 있어요. 마음에 드는 곡에 태그를 달아 투표해 봐요 (여러 개 가능·같은 태그는 투표한 사람 수가 합산돼요).</string>
     <string name="games_daily_pick_tag">태그</string>
     <string name="games_daily_pick_title_idol">오늘의 아이돌</string>
-    <string name="games_daily_pick_title_song">오늘의 1곡</string>
-    <string name="games_daily_pick_voted">투표 완료</string>
+    <string name="games_daily_pick_title_song">오늘의 한 곡</string>
+    <string name="games_daily_pick_voted">투표함</string>
     <string name="games_hub_best_percent">최고 %1$d%%</string>
     <plurals name="games_hub_best_points">
         <item quantity="other">최고 %1$,dpt</item>

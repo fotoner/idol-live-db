@@ -15,7 +15,7 @@
     <string name="about_support_faq_stale_data_question">데이터가 오래됐거나 틀렸어요</string>
     <string name="about_support_faq_sync_answer_android">통신 환경을 확인한 뒤, 설정 화면에서 “전체 데이터 동기화”를 시도해 주세요.</string>
     <string name="about_support_faq_sync_question_android">동기화가 안 돼요</string>
-    <string name="about_support_faq_unofficial_answer">네, 이 앱은 비공식 팬메이드 앱이에요. BANDAI NAMCO Entertainment 등과는 아무런 관계가 없어요.</string>
+    <string name="about_support_faq_unofficial_answer">네, 이 앱은 비공식 팬 메이드 앱이에요. BANDAI NAMCO Entertainment 등과는 아무런 관계가 없어요.</string>
     <string name="about_support_faq_unofficial_question">이 앱은 공식 앱이 아닌가요?</string>
     <string name="about_support_feedback_github">GitHub Issue로 제보하기</string>
     <string name="about_support_feedback_header">피드백·버그 제보</string>

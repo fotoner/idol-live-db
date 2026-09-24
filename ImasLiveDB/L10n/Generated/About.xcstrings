@@ -140,7 +140,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "이 앱은 아이돌마스터 시리즈의 비공식 팬메이드 앱이에요. BANDAI NAMCO Entertainment 등의 권리자와는 아무런 관계가 없어요."
+            "value" : "이 앱은 아이돌마스터 시리즈의 비공식 팬 메이드 앱이에요. BANDAI NAMCO Entertainment 등의 권리자와는 아무런 관계가 없어요."
           }
         }
       }
@@ -320,7 +320,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "비공식 팬메이드 앱"
+            "value" : "비공식 팬 메이드 앱"
           }
         }
       }
@@ -536,7 +536,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "네, 이 앱은 비공식 팬메이드 앱이에요. BANDAI NAMCO Entertainment 등과는 아무런 관계가 없어요."
+            "value" : "네, 이 앱은 비공식 팬 메이드 앱이에요. BANDAI NAMCO Entertainment 등과는 아무런 관계가 없어요."
           }
         }
       }

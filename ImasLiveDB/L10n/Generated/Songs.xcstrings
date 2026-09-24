@@ -2738,7 +2738,7 @@
       }
     },
     "songs.list.empty_search.title" : {
-      "comment" : "検索欄の語で 1 曲も残らなかったときの空状態の見出し (i18n/catalog/songs.json)",
+      "comment" : "検索欄の語で 1 曲も残らなかったときの空状態の見出し。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ) (i18n/catalog/songs.json)",
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
@@ -2750,7 +2750,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "필터 결과가 없어요"
+            "value" : "찾기 결과가 없어요"
           }
         }
       }
@@ -4490,7 +4490,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "오십음순"
+            "value" : "50음순"
           }
         }
       }

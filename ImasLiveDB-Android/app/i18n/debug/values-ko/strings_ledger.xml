@@ -5,7 +5,7 @@
     <string name="ledger_editor_action_save">저장</string>
     <string name="ledger_editor_amount_header">금액</string>
     <string name="ledger_editor_category_header">항목</string>
-    <string name="ledger_editor_date_confirm">확인</string>
+    <string name="ledger_editor_date_confirm">완료</string>
     <string name="ledger_editor_date_header">날짜</string>
     <string name="ledger_editor_error_bad_date">날짜를 골라 주세요</string>
     <string name="ledger_editor_error_not_positive">금액을 입력해 주세요</string>

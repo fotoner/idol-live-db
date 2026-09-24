@@ -1598,7 +1598,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "태그 필터"
+            "value" : "태그로 필터"
           }
         }
       }
@@ -1784,7 +1784,7 @@
       }
     },
     "tags.list.filter_empty.title" : {
-      "comment" : "名前で絞り込んで 0 件のときの空状態の見出し (i18n/catalog/tags.json)",
+      "comment" : "名前で絞り込んで 0 件のときの空状態の見出し。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ) (i18n/catalog/tags.json)",
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
@@ -1796,7 +1796,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "필터 결과가 없어요"
+            "value" : "찾기 결과가 없어요"
           }
         }
       }
@@ -1972,7 +1972,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "정렬"
+            "value" : "정렬 순서"
           }
         }
       }

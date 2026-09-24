@@ -40,7 +40,7 @@
     <string name="edit_idol_section_name">이름</string>
     <string name="edit_idol_section_profile">프로필</string>
     <string name="edit_idol_title">아이돌 편집</string>
-    <string name="edit_idol_picker_action_confirm">확인</string>
+    <string name="edit_idol_picker_action_confirm">완료</string>
     <string name="edit_idol_picker_header">%1$s (%2$d)</string>
     <string name="edit_idol_picker_search_prompt">아이돌 이름으로 검색</string>
     <string name="edit_idol_picker_title">출연자 선택</string>
@@ -91,7 +91,7 @@
     <string name="edit_song_artists_placeholder">가창 아이돌 선택</string>
     <string name="edit_song_artists_title">가창 아이돌</string>
     <string name="edit_song_error_artists_required">가창 아이돌을 1명 이상 선택해 주세요</string>
-    <string name="edit_song_error_artwork_required">Apple Music ID를 설정하려면 artwork URL도 필요해요 (목록의 재킷 이미지 표시에 써요)</string>
+    <string name="edit_song_error_artwork_required">Apple Music ID를 설정하려면 artwork URL도 필요해요 (목록의 재킷 사진 표시에 써요)</string>
     <string name="edit_song_error_duration_format">재생 시간은 초 단위 (정수)로 입력해 주세요</string>
     <string name="edit_song_error_release_date_format">발매일은 YYYY-MM-DD 형식으로 입력해 주세요</string>
     <string name="edit_song_error_title_required">제목을 입력해 주세요</string>

@@ -1510,7 +1510,7 @@
       }
     },
     "common.name_filter.clear.a11y" : {
-      "comment" : "名前の絞り込み欄の右の × ボタンの読み上げ (入力を消す) (i18n/catalog/common.json)",
+      "comment" : "名前の絞り込み欄の右の × ボタンの読み上げ (入力を消す)。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ) (i18n/catalog/common.json)",
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
@@ -1522,7 +1522,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "필터 해제"
+            "value" : "찾기 해제"
           }
         }
       }

@@ -334,7 +334,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "회수 완료"
+            "value" : "회수함"
           }
         }
       }
@@ -660,7 +660,7 @@
       }
     },
     "units.list.filter_empty.action.clear" : {
-      "comment" : "絞り込みの語を消すボタン (i18n/catalog/units.json)",
+      "comment" : "絞り込みの語を消すボタン。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ) (i18n/catalog/units.json)",
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
@@ -672,7 +672,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "필터 해제"
+            "value" : "찾기 해제"
           }
         }
       }
@@ -696,7 +696,7 @@
       }
     },
     "units.list.filter_empty.title" : {
-      "comment" : "絞り込みで 1 件も残らなかったときの空状態の見出し (i18n/catalog/units.json)",
+      "comment" : "絞り込みで 1 件も残らなかったときの空状態の見出し。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ) (i18n/catalog/units.json)",
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
@@ -708,7 +708,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "필터 결과가 없어요"
+            "value" : "찾기 결과가 없어요"
           }
         }
       }

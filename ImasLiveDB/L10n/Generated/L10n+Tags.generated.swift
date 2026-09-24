@@ -336,7 +336,7 @@ extension L10n {
         static func listFilterEmptyMessage(query: String) -> LocalizedStringResource {
             LocalizedStringResource("tags.list.filter_empty.message", defaultValue: "「\(query)」に一致するタグがありません", table: "Tags", bundle: L10n.bundle)
         }
-        /// 絞り込み結果がありません — 名前で絞り込んで 0 件のときの空状態の見出し
+        /// 絞り込み結果がありません — 名前で絞り込んで 0 件のときの空状態の見出し。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ)
         static var listFilterEmptyTitle: LocalizedStringResource {
             LocalizedStringResource("tags.list.filter_empty.title", defaultValue: "絞り込み結果がありません", table: "Tags", bundle: L10n.bundle)
         }

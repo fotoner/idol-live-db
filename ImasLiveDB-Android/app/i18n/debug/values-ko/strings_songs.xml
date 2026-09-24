@@ -164,7 +164,7 @@
     <string name="songs_list_empty_filter_message">필터 조건을 바꾸거나 필터를 해제해 주세요.</string>
     <string name="songs_list_empty_filter_title">조건에 맞는 곡이 없어요</string>
     <string name="songs_list_empty_search_message">“%1$s”에 해당하는 곡이 없어요</string>
-    <string name="songs_list_empty_search_title">필터 결과가 없어요</string>
+    <string name="songs_list_empty_search_title">찾기 결과가 없어요</string>
     <string name="songs_list_fuzzy_header">혹시 이 곡인가요?</string>
     <string name="songs_list_login_dialog">곡을 추가하려면 로그인해야 해요.</string>
     <string name="songs_list_mastery_write_action">숙련도 기록</string>
@@ -198,5 +198,5 @@
     <string name="songs_sort_descending">내림차순</string>
     <string name="songs_sort_performance_count">공연 횟수순</string>
     <string name="songs_sort_release_date">발매일순</string>
-    <string name="songs_sort_title_kana">오십음순</string>
+    <string name="songs_sort_title_kana">50음순</string>
 </resources>

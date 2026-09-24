@@ -2,14 +2,14 @@
 <!-- 生成物: i18n/catalog/model.json → python3 tools/i18n/i18n.py generate。手で直さない -->
 <resources>
     <string name="model_mastery_preset_name">%1$d단계</string>
-    <string name="model_mastery_preset_steps2_level1">들음</string>
-    <string name="model_mastery_preset_steps2_level2">외움</string>
-    <string name="model_mastery_preset_steps3_level1">들음</string>
-    <string name="model_mastery_preset_steps3_level2">외움</string>
+    <string name="model_mastery_preset_steps2_level1">들었음</string>
+    <string name="model_mastery_preset_steps2_level2">외웠음</string>
+    <string name="model_mastery_preset_steps3_level1">들었음</string>
+    <string name="model_mastery_preset_steps3_level2">외웠음</string>
     <string name="model_mastery_preset_steps3_level3">완벽</string>
-    <string name="model_mastery_preset_steps4_level1">들음</string>
+    <string name="model_mastery_preset_steps4_level1">들었음</string>
     <string name="model_mastery_preset_steps4_level2">대강</string>
-    <string name="model_mastery_preset_steps4_level3">외움</string>
+    <string name="model_mastery_preset_steps4_level3">외웠음</string>
     <string name="model_mastery_preset_steps4_level4">완벽</string>
     <string name="model_mastery_unset">미설정</string>
     <string name="model_poll_achievement_rank">%1$d위</string>

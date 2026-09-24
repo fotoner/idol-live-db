@@ -35,7 +35,7 @@
     },
     "editor.date.confirm": {
       "ja": "決定",
-      "ko": "확인",
+      "ko": "완료",
       "note": "日付の選択ダイアログの決定ボタン (Android)",
       "platforms": [
         "android"

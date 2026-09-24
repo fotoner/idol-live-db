@@ -108,7 +108,7 @@
         }
       ],
       "ja": "{month}月生まれのアイドル",
-      "ko": "{month}월에 태어난 아이돌",
+      "ko": "{month}월생 아이돌",
       "note": "誕生月で絞ったアイドル一覧の見出し (Android)。month は 1〜12。iOS の同じ画面は FilteredIdolsView (filtered)",
       "platforms": [
         "android"
@@ -1148,12 +1148,12 @@
     },
     "write_action.toggle_favorite": {
       "ja": "お気に入りの切り替え",
-      "ko": "즐겨찾기 변경",
+      "ko": "즐겨찾기 전환",
       "note": "端末への書き込みに失敗したときの知らせに入る操作の名前 (LocalWriteFailure の action。知らせの本文は「{action}に失敗しました。…」)。名詞句で訳す。お気に入りにする/外す"
     },
     "write_action.toggle_pick": {
       "ja": "担当の切り替え",
-      "ko": "담당 변경",
+      "ko": "담당 전환",
       "note": "端末への書き込みに失敗したときの知らせに入る操作の名前 (LocalWriteFailure の action。知らせの本文は「{action}に失敗しました。…」)。名詞句で訳す。担当にする/外す"
     }
   }

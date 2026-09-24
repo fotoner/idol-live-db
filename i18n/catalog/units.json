@@ -168,7 +168,7 @@
     },
     "detail.songs.collected": {
       "ja": "回収済",
-      "ko": "회수 완료",
+      "ko": "회수함",
       "note": "楽曲の行のバッジ。ライブでその曲を聴いた (現地回収した)",
       "platforms": [
         "ios"
@@ -280,8 +280,8 @@
     },
     "list.filter_empty.action.clear": {
       "ja": "絞り込みを解除",
-      "ko": "필터 해제",
-      "note": "絞り込みの語を消すボタン",
+      "ko": "찾기 해제",
+      "note": "絞り込みの語を消すボタン。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ)",
       "platforms": [
         "ios"
       ]
@@ -316,8 +316,8 @@
     },
     "list.filter_empty.title": {
       "ja": "絞り込み結果がありません",
-      "ko": "필터 결과가 없어요",
-      "note": "絞り込みで 1 件も残らなかったときの空状態の見出し",
+      "ko": "찾기 결과가 없어요",
+      "note": "絞り込みで 1 件も残らなかったときの空状態の見出し。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ)",
       "platforms": [
         "ios"
       ]

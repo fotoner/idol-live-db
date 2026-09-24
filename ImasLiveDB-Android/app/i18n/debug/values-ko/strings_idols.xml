@@ -11,7 +11,7 @@
     <string name="idols_attribute_physical">피지컬</string>
     <string name="idols_attribute_princess">프린세스</string>
     <string name="idols_birth_month_empty">아이돌을 찾을 수 없어요</string>
-    <string name="idols_birth_month_title">%1$d월에 태어난 아이돌</string>
+    <string name="idols_birth_month_title">%1$d월생 아이돌</string>
     <string name="idols_detail_cast_shows_header">출연 기록</string>
     <string name="idols_detail_community_login_dialog">태그를 달거나 투표하려면 로그인해야 해요.</string>
     <string name="idols_detail_community_login_prompt">태그를 달거나 투표하려면 로그인해야 해요</string>
@@ -106,6 +106,6 @@
     <string name="idols_sort_order_weight">몸무게순</string>
     <string name="idols_write_action_add_personal_tag">마이 태그 추가</string>
     <string name="idols_write_action_remove_personal_tag">마이 태그 삭제</string>
-    <string name="idols_write_action_toggle_favorite">즐겨찾기 변경</string>
-    <string name="idols_write_action_toggle_pick">담당 변경</string>
+    <string name="idols_write_action_toggle_favorite">즐겨찾기 전환</string>
+    <string name="idols_write_action_toggle_pick">담당 전환</string>
 </resources>

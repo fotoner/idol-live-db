@@ -548,7 +548,7 @@ extension L10n {
         static func listEmptySearchMessage(query: String) -> LocalizedStringResource {
             LocalizedStringResource("songs.list.empty_search.message", defaultValue: "「\(query)」に一致する楽曲がありません", table: "Songs", bundle: L10n.bundle)
         }
-        /// 絞り込み結果がありません — 検索欄の語で 1 曲も残らなかったときの空状態の見出し
+        /// 絞り込み結果がありません — 検索欄の語で 1 曲も残らなかったときの空状態の見出し。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ)
         static var listEmptySearchTitle: LocalizedStringResource {
             LocalizedStringResource("songs.list.empty_search.title", defaultValue: "絞り込み結果がありません", table: "Songs", bundle: L10n.bundle)
         }

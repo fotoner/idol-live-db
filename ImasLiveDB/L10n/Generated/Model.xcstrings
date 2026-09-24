@@ -514,7 +514,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "오십음순"
+            "value" : "50음순"
           }
         }
       }
@@ -744,7 +744,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "%1$@에서 열린 공연"
+            "value" : "%1$@ 공연"
           }
         }
       }
@@ -960,7 +960,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "오십음순"
+            "value" : "50음순"
           }
         }
       }

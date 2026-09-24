@@ -52,7 +52,7 @@ object L10nCommon {
     val localWriteRecordAttendance: DisplayText get() = DisplayText.Res(R.string.common_local_write_record_attendance)
     /** マークの切り替え — 端末への書き込みに失敗したときの知らせ「{操作}に失敗しました…」に入る操作名 (画面上部のボタンで担当・お気に入りなどを付け外しする) */
     val localWriteToggleMark: DisplayText get() = DisplayText.Res(R.string.common_local_write_toggle_mark)
-    /** 絞り込みを解除 — 名前の絞り込み欄の右の × ボタンの読み上げ (入力を消す) */
+    /** 絞り込みを解除 — 名前の絞り込み欄の右の × ボタンの読み上げ (入力を消す)。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ) */
     val nameFilterClearA11y: DisplayText get() = DisplayText.Res(R.string.common_name_filter_clear_a11y)
     /** マイタグを追加 — 共通部品 PersonalTagsSection (アイドル・ユニット詳細のコミュニティ)。入力欄の右の ＋ ボタンの読み上げ */
     val personalTagsAddA11y: DisplayText get() = DisplayText.Res(R.string.common_personal_tags_add_a11y)

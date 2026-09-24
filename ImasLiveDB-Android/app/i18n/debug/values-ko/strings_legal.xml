@@ -6,7 +6,7 @@
     <string name="legal_privacy_contact_body">개인정보 관련 문의·데이터 삭제 요청은 아래 GitHub Issue로 해 주세요.\nhttps://github.com/fuga-if/imas-live-privacy/issues/new</string>
     <string name="legal_privacy_contact_header">연락처</string>
     <string name="legal_privacy_last_updated">최종 업데이트: 2026년 4월 23일</string>
-    <string name="legal_privacy_overview_body">이 앱 (ImasLiveDB)은 아이돌마스터 시리즈의 라이브·세트리스트 정보를 관리·열람하기 위한 비공식 팬메이드 앱이에요. BANDAI NAMCO Entertainment Inc.를 비롯한 권리자와는 아무런 관계가 없어요.</string>
+    <string name="legal_privacy_overview_body">이 앱 (ImasLiveDB)은 아이돌마스터 시리즈의 라이브·세트리스트 정보를 관리·열람하기 위한 비공식 팬 메이드 앱이에요. BANDAI NAMCO Entertainment Inc.를 비롯한 권리자와는 아무런 관계가 없어요.</string>
     <string name="legal_privacy_overview_header">앱 개요</string>
     <string name="legal_privacy_rights_body_android">계정과 게시 데이터는 설정 화면의 “계정 삭제”에서 언제든지 삭제할 수 있어요. 개별 문의는 GitHub Issue로 연락해 주세요.</string>
     <string name="legal_privacy_rights_header">사용자의 권리</string>

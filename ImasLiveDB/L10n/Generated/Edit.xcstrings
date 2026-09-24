@@ -1500,7 +1500,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "Apple Music ID를 설정하려면 artwork URL도 필요해요 (목록의 재킷 이미지 표시에 써요)"
+            "value" : "Apple Music ID를 설정하려면 artwork URL도 필요해요 (목록의 재킷 사진 표시에 써요)"
           }
         }
       }
@@ -2280,7 +2280,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "담당 아이돌 곡만"
+            "value" : "담당 아이돌의 곡만"
           }
         }
       }
@@ -2370,7 +2370,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "곡 유형"
+            "value" : "곡 타입"
           }
         }
       }
@@ -2460,7 +2460,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "정렬"
+            "value" : "정렬 순서"
           }
         }
       }

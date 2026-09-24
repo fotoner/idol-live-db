@@ -83,7 +83,7 @@
     <plurals name="tags_filter_selected_header">
         <item quantity="other">선택됨 (%1$,d) — 모든 태그가 달린 곡만 보기</item>
     </plurals>
-    <string name="tags_filter_title">태그 필터</string>
+    <string name="tags_filter_title">태그로 필터</string>
     <string name="tags_form_category_none">없음</string>
     <string name="tags_form_error_restricted">이 작업은 제한되어 있어요.</string>
     <string name="tags_history_empty">편집 기록이 없어요</string>
@@ -97,7 +97,7 @@
     <plurals name="tags_list_row_songs">
         <item quantity="other">%1$,d곡</item>
     </plurals>
-    <string name="tags_list_sort_label">정렬</string>
+    <string name="tags_list_sort_label">정렬 순서</string>
     <string name="tags_list_sort_name">이름</string>
     <string name="tags_list_sort_popular">인기</string>
     <string name="tags_list_sort_recent">최신</string>

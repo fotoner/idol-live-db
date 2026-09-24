@@ -26,7 +26,7 @@
     <string name="common_list_middot">·</string>
     <string name="common_local_write_record_attendance">참가 기록</string>
     <string name="common_local_write_toggle_mark">마크 전환</string>
-    <string name="common_name_filter_clear_a11y">필터 해제</string>
+    <string name="common_name_filter_clear_a11y">찾기 해제</string>
     <string name="common_personal_tags_add_a11y">마이 태그 추가</string>
     <string name="common_personal_tags_empty">아직 마이 태그가 없어요</string>
     <string name="common_personal_tags_header">마이 태그 (나에게만 보여요)</string>

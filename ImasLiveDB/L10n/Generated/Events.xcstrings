@@ -1252,7 +1252,7 @@
       }
     },
     "events.list.filter_empty.action" : {
-      "comment" : "名前の絞り込みを消すボタン (i18n/catalog/events.json)",
+      "comment" : "名前の絞り込みを消すボタン。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ) (i18n/catalog/events.json)",
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
@@ -1264,7 +1264,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "필터 해제"
+            "value" : "찾기 해제"
           }
         }
       }
@@ -1288,7 +1288,7 @@
       }
     },
     "events.list.filter_empty.title" : {
-      "comment" : "名前の絞り込みで 1 件も残らなかったときの空状態の見出し (i18n/catalog/events.json)",
+      "comment" : "名前の絞り込みで 1 件も残らなかったときの空状態の見出し。ko は名前の絞り込みを「찾기」、フィルタ (条件) を「필터」と分ける (idols.list.filter_empty.* と同じ) (i18n/catalog/events.json)",
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
@@ -1300,7 +1300,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "필터 결과가 없어요"
+            "value" : "찾기 결과가 없어요"
           }
         }
       }

@@ -57,7 +57,7 @@
     <string name="polls_hall_of_fame_row_winner">우승</string>
     <string name="polls_hall_of_fame_title">명예의 전당</string>
     <string name="polls_list_create_a11y">주제 만들기</string>
-    <string name="polls_list_empty_active_message">오른쪽 위의 “+”를 눌러 새 주제를 올릴 수 있어요.</string>
+    <string name="polls_list_empty_active_message">오른쪽 위의 “+”를 눌러 새 주제를 게시할 수 있어요.</string>
     <string name="polls_list_empty_active_title">진행 중인 주제가 없어요</string>
     <string name="polls_list_empty_ended_title">종료된 주제가 없어요</string>
     <string name="polls_list_hall_of_fame_a11y">명예의 전당 보기</string>

@@ -381,7 +381,7 @@
     },
     "idol_picker.action.confirm": {
       "ja": "決定",
-      "ko": "확인",
+      "ko": "완료",
       "note": "アイドルを複数選ぶシートの確定ボタン",
       "platforms": [
         "android"
@@ -805,7 +805,7 @@
     },
     "song.error.artwork_required": {
       "ja": "Apple Music ID を設定する場合は artwork URL も必須です (一覧のジャケ写表示に使います)",
-      "ko": "Apple Music ID를 설정하려면 artwork URL도 필요해요 (목록의 재킷 이미지 표시에 써요)",
+      "ko": "Apple Music ID를 설정하려면 artwork URL도 필요해요 (목록의 재킷 사진 표시에 써요)",
       "note": "Apple Music の ID だけ入れてジャケ写の URL が空のまま保存しようとしたとき"
     },
     "song.error.duration_format": {
@@ -1086,7 +1086,7 @@
     },
     "song_picker.mark.my_pick_only": {
       "ja": "担当アイドルの曲のみ",
-      "ko": "담당 아이돌 곡만",
+      "ko": "담당 아이돌의 곡만",
       "note": "絞り込み: 担当アイドルが歌う曲だけにするスイッチ",
       "platforms": [
         "ios"
@@ -1131,7 +1131,7 @@
     },
     "song_picker.song_type.header": {
       "ja": "曲タイプ",
-      "ko": "곡 유형",
+      "ko": "곡 타입",
       "note": "曲のピッカーの絞り込みシートの曲タイプ (ソロ・ユニット・全体曲) の節の見出し",
       "platforms": [
         "ios"
@@ -1171,7 +1171,7 @@
     },
     "song_picker.sort.title": {
       "ja": "並び順",
-      "ko": "정렬",
+      "ko": "정렬 순서",
       "note": "曲のピッカーの絞り込みシートの並び順の選択欄と、その節の見出し",
       "platforms": [
         "ios"

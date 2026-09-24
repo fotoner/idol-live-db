@@ -57,7 +57,7 @@
     <string name="help_category_image_import_title">이미지 가져오기</string>
     <string name="help_category_intro_best_detail">브랜드별로 자기 최고 기록이 남아요.</string>
     <string name="help_category_intro_best_label">베스트 스코어 기록</string>
-    <string name="help_category_intro_choices_detail">곡명 4지선다 중에서 골라요. 파티 대전에서는 기기 1대를 둘이 나눠 빨리 누르기로 겨룰 수 있어요.</string>
+    <string name="help_category_intro_choices_detail">곡명 4지선다 중에서 골라요. 파티 대전에서는 기기 1대를 둘이 나눠 먼저 누르기로 겨룰 수 있어요.</string>
     <string name="help_category_intro_choices_label">4지선다로 답하기</string>
     <string name="help_category_intro_difficulty_detail">브랜드 필터나 재생 시간으로 난이도를 조절할 수 있어요.</string>
     <string name="help_category_intro_difficulty_label">브랜드·난이도 선택</string>
