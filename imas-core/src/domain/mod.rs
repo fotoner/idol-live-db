@@ -99,3 +99,7 @@ pub mod screen_composition;
 // 人の言葉からエンティティを引き当てる規則。今の呼び手は LLM 向けのツール面
 // (crate::agent::tools) だけだが、JSON を持たない純粋な規則なのでここに置く。
 pub mod entity_resolution;
+
+// ギャラリーの manifest と、お気に入り送信の積み残し (両 OS に同じ規則が書かれていた)。
+pub mod gallery_manifest;
+pub mod pending_favorites;

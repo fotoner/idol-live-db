@@ -39,13 +39,13 @@ class FavoriteAggregationTest {
 
     /**
      * 送れなかったものは積んでおき、前面に出たときに送り直す。同じ曲は最後の値だけ。
-     * 3 回失敗したら諦める (iOS の maxRetries と同じ)。
+     * 3 回失敗したら諦める (規則は imas-core の pending_favorites)。
      */
     @Test
     fun failedReportsAreRetriedUpToThreeTimes() = runBlocking {
         var online = false
         val sent = mutableListOf<Pair<String, Boolean>>()
-        val aggregation = FavoriteAggregation(context, CoroutineScope(Dispatchers.Unconfined)) { id, value ->
+        val aggregation = FavoriteAggregation(context, CoroutineScope(Dispatchers.Unconfined), sleep = {}) { id, value ->
             if (!online && id == "s1") error("offline")
             if (!online && id == "s2") error("offline")
             sent += id to value
@@ -78,7 +78,7 @@ class FavoriteAggregationTest {
     fun aSuccessfulReportDropsTheStalePendingValue() = runBlocking {
         var online = false
         val sent = mutableListOf<Pair<String, Boolean>>()
-        val aggregation = FavoriteAggregation(context, CoroutineScope(Dispatchers.Unconfined)) { id, value ->
+        val aggregation = FavoriteAggregation(context, CoroutineScope(Dispatchers.Unconfined), sleep = {}) { id, value ->
             if (!online) error("offline")
             sent += id to value
         }

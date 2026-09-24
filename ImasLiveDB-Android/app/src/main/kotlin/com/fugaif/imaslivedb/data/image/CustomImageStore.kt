@@ -13,24 +13,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
-import org.json.JSONObject
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-
-/**
- * ギャラリー画像 1 枚分のメタ。`manifest.json` に順序付きで保存する (先頭=プライマリ)。
- *
- * iOS `CustomImageService.GalleryImageMeta` と **フィールド名まで一致** させてある。
- * 端末をまたいで manifest をコピーしても読めるようにするためと、Android のホーム画面
- * ウィジェット (別プロセス) が同じパーサを持てるようにするため。
- */
-data class GalleryImageMeta(
-    val name: String,
-    /** ホーム画面ウィジェットのスライドショー対象に含めるか (既定 true)。 */
-    val inSlideshow: Boolean = true,
-)
+import uniffi.imas_core.GalleryImageMeta
+import uniffi.imas_core.galleryManifestEncode
+import uniffi.imas_core.galleryManifestReconcile
+import uniffi.imas_core.gallerySlideshowEntries
 
 /**
  * 複数画像ギャラリーの対象種別。ディレクトリ分離のみが違いで、内部ロジックは共通。
@@ -151,29 +140,21 @@ class CustomImageStore(context: Context) {
 
     /**
      * ディスクから manifest を読み、フォルダの実体と突き合わせる。
-     * - 消えたファイルのエントリは落とす
-     * - 同名の重複エントリは畳む (過去の不正 manifest 対策)
-     * - manifest に無いがディスクにある画像は末尾に足す (取りこぼし防止)
+     * 突き合わせ・旧形式の読み替え・重複除去の規則は imas-core (`gallery_manifest`)。
      */
     private fun readManifest(entityId: String, kind: GalleryKind): List<GalleryImageMeta> {
         val folder = entityFolder(entityId, kind)
         // 画像を 1 枚も持たないのが大多数。無いフォルダを毎回開きに行かないよう先に切る。
         if (!folder.isDirectory) return emptyList()
-        val onDisk = (folder.list() ?: emptyArray()).filter(::isImageFile).toSet()
-        val saved = runCatching { manifestFile(entityId, kind).readText() }
-            .getOrNull()
-            ?.let(::parseManifest)
-            .orEmpty()
-        val order = dedupedByName(saved.filter { it.name in onDisk }).toMutableList()
-        val known = order.mapTo(mutableSetOf()) { it.name }
-        onDisk.sorted().filterNot { it in known }.forEach { order.add(GalleryImageMeta(it)) }
-        return order
+        val onDisk = (folder.list() ?: emptyArray()).filter(::isImageFile)
+        val saved = runCatching { manifestFile(entityId, kind).readText() }.getOrNull()
+        return galleryManifestReconcile(saved, onDisk)
     }
 
     private fun writeManifest(entries: List<GalleryImageMeta>, entityId: String, kind: GalleryKind) {
         val folder = entityFolder(entityId, kind)
         folder.mkdirs()
-        runCatching { manifestFile(entityId, kind).writeText(encodeManifest(entries)) }
+        runCatching { manifestFile(entityId, kind).writeText(galleryManifestEncode(entries)) }
             .onFailure { Log.w(TAG, "manifest 書き込み失敗: $entityId", it) }
         manifestCache[cacheKey(entityId, kind)] = entries
     }
@@ -201,7 +182,7 @@ class CustomImageStore(context: Context) {
      */
     fun slideshowFiles(entityId: String, kind: GalleryKind = GalleryKind.IDOL): List<File> {
         val folder = entityFolder(entityId, kind)
-        return slideshowFiltered(manifest(entityId, kind)).map { File(folder, it.name) }
+        return gallerySlideshowEntries(manifest(entityId, kind)).map { File(folder, it.name) }
     }
 
     /** 指定画像がスライドショー対象か (manifest に無ければ既定 true)。 */
@@ -479,56 +460,5 @@ class CustomImageStore(context: Context) {
 
         /** 拡張子を除いたファイル名。[isImageFile] を通ったものにだけ使う。 */
         fun stem(name: String): String = name.substringBeforeLast('.')
-
-        /**
-         * 同一ファイル名の重複エントリを除去する (最初の出現 = プライマリ寄りを残す)。
-         * 不正な manifest に同名が複数入っていると、同じ画像が複数セルに描画され、
-         * 片方を消すと両方消える不具合になる。その対策。
-         */
-        fun dedupedByName(entries: List<GalleryImageMeta>): List<GalleryImageMeta> {
-            val seen = mutableSetOf<String>()
-            return entries.filter { seen.add(it.name) }
-        }
-
-        /**
-         * スライドショーに出すエントリを選ぶ。`inSlideshow=true` のものだけ。
-         * 1 枚も選ばれていなければ全件にフォールバックし、ウィジェットが空にならないようにする。
-         * **ウィジェット側もこの規則をそのまま使うこと。**
-         */
-        fun slideshowFiltered(entries: List<GalleryImageMeta>): List<GalleryImageMeta> {
-            val included = entries.filter { it.inSlideshow }
-            return included.ifEmpty { entries }
-        }
-
-        /**
-         * `manifest.json` の中身を [GalleryImageMeta] 列に解釈する。
-         * 新形式 (オブジェクト配列) を優先し、旧形式 (ファイル名だけの配列) は
-         * 全件スライドショー対象として移行する。
-         */
-        fun parseManifest(text: String): List<GalleryImageMeta> = runCatching {
-            val array = JSONArray(text)
-            (0 until array.length()).mapNotNull { i ->
-                when (val element = array.get(i)) {
-                    is JSONObject -> element.optString("name")
-                        .takeIf { it.isNotEmpty() }
-                        ?.let { GalleryImageMeta(it, element.optBoolean("inSlideshow", true)) }
-                    is String -> element.takeIf { it.isNotEmpty() }?.let { GalleryImageMeta(it) }
-                    else -> null
-                }
-            }
-        }.getOrElse { emptyList() }
-
-        /** [parseManifest] の逆。キー名と順序は iOS の `JSONEncoder` 出力に合わせてある。 */
-        fun encodeManifest(entries: List<GalleryImageMeta>): String {
-            val array = JSONArray()
-            entries.forEach { entry ->
-                array.put(
-                    JSONObject()
-                        .put("name", entry.name)
-                        .put("inSlideshow", entry.inSlideshow)
-                )
-            }
-            return array.toString()
-        }
     }
 }

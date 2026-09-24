@@ -1,18 +1,5 @@
 import UIKit
 
-/// ギャラリー画像 1 枚分のメタ。`manifest.json` に順序付きで保存する (先頭=プライマリ)。
-/// 旧仕様では純粋な `[String]` (ファイル名配列) だったため、読み込み時に後方互換で移行する。
-struct GalleryImageMeta: Codable, Equatable {
-    let name: String
-    /// ホーム画面ウィジェットのスライドショー対象に含めるか (既定 true)。
-    var inSlideshow: Bool
-
-    init(name: String, inSlideshow: Bool = true) {
-        self.name = name
-        self.inSlideshow = inSlideshow
-    }
-}
-
 /// 複数画像ギャラリーの対象種別。ディレクトリ分離のみが違いで、内部ロジックは共通。
 enum GalleryKind {
     case idol
@@ -83,54 +70,18 @@ final class CustomImageService {
         idolFolder(entityId, kind: kind).appendingPathComponent("manifest.json")
     }
 
-    /// プライマリを含む順序付きエントリ (先頭=プライマリ)。フォルダ実体と突き合わせて健全化する。
-    /// 旧形式 (`[String]`) は全件スライドショー対象として読み込む。
+    /// プライマリを含む順序付きエントリ (先頭=プライマリ)。フォルダ実体との突き合わせ・
+    /// 旧形式の読み替え・重複除去の規則は imas-core (`gallery_manifest`)。
     private func manifest(_ entityId: String, kind: GalleryKind = .idol) -> [GalleryImageMeta] {
         let folder = idolFolder(entityId, kind: kind)
-        let onDisk = Set(((try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? [])
-            .filter { Self.isImageFile($0) })
-        let saved = (try? Data(contentsOf: manifestURL(entityId, kind: kind))).map(Self.parseManifest) ?? []
-        // 消えたファイルを除外 + 同一ファイル名の重複エントリを除去 (過去の不正 manifest 対策)。
-        var order = Self.dedupedByName(saved.filter { onDisk.contains($0.name) })
-        // manifest に無いがディスクにある画像を末尾に追加 (取りこぼし防止)
-        let known = Set(order.map(\.name))
-        for name in onDisk.sorted() where !known.contains(name) { order.append(GalleryImageMeta(name: name)) }
-        return order
-    }
-
-    /// 同一ファイル名の重複エントリを除去する (最初の出現=プライマリ寄りを残す)。
-    /// 過去の不正な manifest に同名が複数入っていると、同じ画像が複数セルに描画され、
-    /// 片方を消すと両方消える不具合になる。その対策。FS 非依存・純粋なのでテスト可能。
-    nonisolated static func dedupedByName(_ entries: [GalleryImageMeta]) -> [GalleryImageMeta] {
-        var seen = Set<String>()
-        return entries.filter { seen.insert($0.name).inserted }
-    }
-
-    /// `manifest.json` のバイト列を `[GalleryImageMeta]` に解釈する。
-    /// 新形式 (オブジェクト配列) を優先し、旧形式 (`[String]`) は全件スライドショー対象として移行する。
-    /// FS 非依存・純粋なのでテスト可能。
-    nonisolated static func parseManifest(_ data: Data) -> [GalleryImageMeta] {
-        if let saved = try? JSONDecoder().decode([GalleryImageMeta].self, from: data) {
-            return saved
-        }
-        if let legacy = try? JSONDecoder().decode([String].self, from: data) {
-            return legacy.map { GalleryImageMeta(name: $0) }
-        }
-        return []
-    }
-
-    /// スライドショーに出すエントリを選ぶ。inSlideshow=true のものだけ。
-    /// 1 枚も選ばれていなければ全件にフォールバックし、ウィジェットが空にならないようにする。
-    /// FS 非依存・純粋なのでテスト可能。
-    nonisolated static func slideshowFiltered(_ entries: [GalleryImageMeta]) -> [GalleryImageMeta] {
-        let included = entries.filter(\.inSlideshow)
-        return included.isEmpty ? entries : included
+        let onDisk = ((try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? [])
+            .filter { Self.isImageFile($0) }
+        let saved = (try? Data(contentsOf: manifestURL(entityId, kind: kind))).map { String(decoding: $0, as: UTF8.self) }
+        return galleryManifestReconcile(saved: saved, filesOnDisk: onDisk)
     }
 
     private func writeManifest(_ entries: [GalleryImageMeta], for entityId: String, kind: GalleryKind = .idol) {
-        if let data = try? JSONEncoder().encode(entries) {
-            try? data.write(to: manifestURL(entityId, kind: kind))
-        }
+        try? Data(galleryManifestEncode(entries: entries).utf8).write(to: manifestURL(entityId, kind: kind))
     }
 
     /// 代表(プライマリ)画像 URL。アプリ内アバター・通知・ゲームはこれを使う (読み取り互換)。
@@ -151,7 +102,7 @@ final class CustomImageService {
     /// 1 枚も選ばれていなければ全件にフォールバックし、ウィジェットが空にならないようにする。
     func slideshowURLs(for idolId: String) -> [URL] {
         let folder = idolFolder(idolId)
-        return Self.slideshowFiltered(manifest(idolId)).map { folder.appendingPathComponent($0.name) }
+        return gallerySlideshowEntries(entries: manifest(idolId)).map { folder.appendingPathComponent($0.name) }
     }
 
     /// 指定画像がスライドショー対象か (manifest に無ければ既定 true)。

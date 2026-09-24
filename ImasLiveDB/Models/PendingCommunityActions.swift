@@ -4,14 +4,8 @@ import OSLog
 private let logger = Logger(subsystem: "com.fugaif.ImasLiveDB", category: "pending_actions")
 
 /// お気に入りのコミュニティAPI送信に失敗した場合の軽量永続キュー。
-/// UserDefaults ベース・JSON 配列で保持し、再起動後もリトライできる。
-struct PendingFavoriteAction: Codable, Sendable {
-    let songId: String
-    let value: Bool
-    let enqueuedAt: Date
-    var retryCount: Int
-}
-
+/// UserDefaults に置き、再起動後もリトライできる。積む・置き換える・待つ・諦めるの規則と
+/// 保存形式は imas-core (`pending_favorites`)。ここは保存と送信だけ。
 @MainActor
 final class PendingCommunityActions {
     static let shared = PendingCommunityActions()
@@ -22,9 +16,8 @@ final class PendingCommunityActions {
     private let key: String
     private let defaults: UserDefaults
     private let sendFavorite: SendFavorite
-    private(set) var actions: [PendingFavoriteAction] = []
+    private(set) var actions: [PendingFavorite] = []
     private var isFlushing = false
-    private static let maxRetries = 3
 
     private convenience init() {
         self.init(defaults: .standard) { songId, value in
@@ -54,10 +47,8 @@ final class PendingCommunityActions {
     }
 
     func enqueue(songId: String, value: Bool) {
-        // 同じ songId が既にあれば上書き
-        actions.removeAll { $0.songId == songId }
-        let action = PendingFavoriteAction(songId: songId, value: value, enqueuedAt: Date(), retryCount: 0)
-        actions.append(action)
+        actions = pendingFavoritesEnqueue(queue: actions, songId: songId, value: value,
+                                          now: Date().timeIntervalSinceReferenceDate)
         persist()
         logger.info("Enqueued pending favorite: songId=\(songId) value=\(value)")
     }
@@ -79,60 +70,45 @@ final class PendingCommunityActions {
 
     /// この曲の積み残しを捨てる。
     private func discard(songId: String) {
-        let before = actions.count
-        actions.removeAll { $0.songId == songId }
-        if actions.count != before { persist() }
-    }
-
-    /// 列の中でまだ最新の意思として残っているか (送り直しの途中で上書き・破棄されていないか)。
-    private func isStillQueued(_ action: PendingFavoriteAction) -> Bool {
-        actions.contains { $0.songId == action.songId && $0.enqueuedAt == action.enqueuedAt }
+        let next = pendingFavoritesDiscard(queue: actions, songId: songId)
+        if next.count != actions.count {
+            actions = next
+            persist()
+        }
     }
 
     /// 送り直しは、始めた時点の列を順に回す。送信を待つ間に積まれた・捨てられたものを
-    /// 失わないよう、列はまとめて置き換えず 1 件ずつ直す。
+    /// 失わないよう、結果は 1 件ずつ今の列に反映する。
     private func performFlush() async {
         for action in actions {
-            guard isStillQueued(action) else { continue }
+            guard pendingFavoriteIsStillQueued(queue: actions, item: action) else { continue }
 
-            if action.retryCount > 0 {
-                // 指数バックオフ: 最大3回
-                let delay = pow(2.0, Double(action.retryCount))
+            let delay = pendingFavoriteRetryDelaySeconds(retryCount: action.retryCount)
+            if delay > 0 {
                 try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-                guard isStillQueued(action) else { continue }
+                guard pendingFavoriteIsStillQueued(queue: actions, item: action) else { continue }
             }
 
+            let outcome: SendOutcome
             do {
                 try await sendFavorite(action.songId, action.value)
                 logger.info("Flushed pending favorite: songId=\(action.songId) retryCount=\(action.retryCount)")
-                remove(action)
+                outcome = .sent
             } catch {
-                let retryCount = action.retryCount + 1
-                if retryCount < Self.maxRetries {
-                    logger.warning("Pending favorite retry \(retryCount)/\(Self.maxRetries): songId=\(action.songId) error=\(error.localizedDescription)")
-                    if let i = actions.firstIndex(where: { $0.songId == action.songId && $0.enqueuedAt == action.enqueuedAt }) {
-                        actions[i].retryCount = retryCount
-                    }
-                } else {
-                    logger.error("Giving up on pending favorite: songId=\(action.songId) error=\(error.localizedDescription)")
-                    remove(action)
-                }
+                logger.warning("Pending favorite retry failed: songId=\(action.songId) retryCount=\(action.retryCount) error=\(error.localizedDescription)")
+                outcome = .failed
             }
+            actions = pendingFavoritesAfterAttempt(queue: actions, item: action, outcome: outcome)
         }
         persist()
     }
 
-    private func remove(_ action: PendingFavoriteAction) {
-        actions.removeAll { $0.songId == action.songId && $0.enqueuedAt == action.enqueuedAt }
-    }
-
     private func load() {
-        guard let data = defaults.data(forKey: key),
-              let decoded = try? JSONDecoder().decode([PendingFavoriteAction].self, from: data) else {
+        guard let data = defaults.data(forKey: key) else {
             actions = []
             return
         }
-        actions = decoded
+        actions = pendingFavoritesDecode(text: String(decoding: data, as: UTF8.self))
         if !actions.isEmpty {
             let count = actions.count
             logger.info("Loaded \(count) pending favorite actions from UserDefaults")
@@ -140,7 +116,6 @@ final class PendingCommunityActions {
     }
 
     private func persist() {
-        guard let data = try? JSONEncoder().encode(actions) else { return }
-        defaults.set(data, forKey: key)
+        defaults.set(Data(pendingFavoritesEncode(queue: actions).utf8), forKey: key)
     }
 }

@@ -113,7 +113,7 @@ class AppModule private constructor(context: Context) {
     }
     /** 曲のお気に入りをみんなの集計に送る (失敗は端末に積んで送り直す)。 */
     val favoriteAggregation: FavoriteAggregation by lazy {
-        FavoriteAggregation(appContext, appScope, communityApi::toggleFavorite)
+        FavoriteAggregation(appContext, appScope, send = communityApi::toggleFavorite)
     }
     val personalTagRepository: PersonalTagRepository by lazy { PersonalTagRepository(database) }
     val expenseRepository: ExpenseRepository by lazy { ExpenseRepository(database) }
