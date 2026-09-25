@@ -1,0 +1,80 @@
+name: i18n-guard
+
+# 文言カタログ (i18n/) の検査と、生成物のドリフト検査。
+#
+# 文言の正は i18n/catalog。iOS の String Catalog・Android の strings_<ns>.xml・両方の
+# アクセサ (L10n.<Ns>.<key>) は tools/i18n/i18n.py generate が作り、commit 済みのものが正
+# (ts-rs の web/src/lib/schema と同じ扱い)。ここでは作り直して差分が出ないことを見る。
+#
+# ⚠️ secret は一切使わない。読むのはリポジトリの中だけで、外へは出ない。
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'i18n/**'
+      - 'tools/i18n/**'
+      - 'project.yml'
+      - 'ImasLiveDB/Shared/L10n/Generated/**'
+      - 'ImasLiveDB/L10n/Generated/**'
+      - 'ImasLiveDBWidget/L10n/Generated/**'
+      - 'ImasLiveDBTests/L10n/Generated/**'
+      - 'ImasLiveDB-Android/app/i18n/**'
+      - 'ImasLiveDB-Android/app/src/*/kotlin/com/fugaif/imaslivedb/i18n/generated/**'
+      - '.github/workflows/i18n-guard.yml'
+  pull_request:
+    paths:
+      - 'i18n/**'
+      - 'tools/i18n/**'
+      - 'project.yml'
+      - 'ImasLiveDB/Shared/L10n/Generated/**'
+      - 'ImasLiveDB/L10n/Generated/**'
+      - 'ImasLiveDBWidget/L10n/Generated/**'
+      - 'ImasLiveDBTests/L10n/Generated/**'
+      - 'ImasLiveDB-Android/app/i18n/**'
+      - 'ImasLiveDB-Android/app/src/*/kotlin/com/fugaif/imaslivedb/i18n/generated/**'
+      - '.github/workflows/i18n-guard.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # tools-guard / refresh-data と同じ版。手元 (macOS の 3.9) で動くかは tools-guard の構文検査で見る。
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 1. カタログの検査 (規則は tools/i18n/validate.py)。project.yml の出荷ゲート照合は iOS に出す名前空間があるときだけ
+      - name: Check catalog
+        run: python3 tools/i18n/i18n.py check
+
+      # 2. 生成物が commit されているか。生成物ごと commit し忘れると、下のドリフト検査は
+      #    作り直したものどうしを比べて「差分ゼロ」で通ってしまう。カタログが空なら何もしない。
+      - name: Ensure generated files are committed
+        run: python3 tools/i18n/i18n.py outputs --check-committed
+
+      # 3. ドリフト検査。git diff は追跡済みの変更しか見ないので、一度 add してから
+      #    ステージ済みの差分を見る (新規・変更・削除のどれも拾う)。outputs は在る経路だけを出すので
+      #    pathspec が空振りしない。空なら git add -A -- が全体を対象にしてしまうので飛ばす。
+      - name: Generated files drift check
+        run: |
+          python3 tools/i18n/i18n.py generate
+          OUT="$(python3 tools/i18n/i18n.py outputs)"
+          if [ -n "$OUT" ]; then
+            git add -A -- $OUT
+            if ! git diff --cached --quiet -- $OUT; then
+              git diff --cached --stat=200 -- $OUT
+              git diff --cached -- $OUT
+              echo "::error::生成物が古い。python3 tools/i18n/i18n.py generate を実行して commit する"
+              exit 1
+            fi
+          fi
