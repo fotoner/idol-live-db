@@ -293,6 +293,15 @@ class QualityWarningTest(unittest.TestCase):
         self.assertTrue(any("用語集" in w for w in self.warnings({"ja": "担当を選ぶ", "ko": "최애 고르기"}, g)))
         self.assertEqual(self.warnings({"ja": "担当を選ぶ", "ko": "담당 고르기"}, g), [])
 
+    def test_glossary_longer_term_masks_shorter(self):
+        g = {"terms": [{"ja": "コール", "ko": "콜"}, {"ja": "アンコール", "ko": "앙코르"}]}
+        self.assertEqual(self.warnings({"ja": "アンコール", "ko": "앙코르"}, g), [])
+        warned = self.warnings({"ja": "アンコール", "ko": "재청"}, g)
+        self.assertEqual(len(warned), 1)
+        self.assertIn("アンコール", warned[0])
+        # 長い語の外に短い語があれば、短い語の訳も求める
+        self.assertTrue(any("コール → 콜" in w for w in self.warnings({"ja": "アンコールのコール", "ko": "앙코르의 함성"}, g)))
+
     def test_max_len(self):
         self.assertTrue(any("max_len" in w for w in self.warnings({"ja": "まる", "ko": "다섯글자다", "max_len": 4})))
 

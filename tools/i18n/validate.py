@@ -214,8 +214,15 @@ def _platform_rules(catalog, ns, e, out, infoplist_seen):
 # ---------------------------------------------------------------- 規則 9: 品質 (警告)
 
 def _glossary_terms(glossary):
+    """用語集の項目と、その語を中に含む長い語 (アンコール ⊃ コール など) の組。
+
+    長い語の出現の中の短い語は数えない (アンコール の中の コール で「コール → 콜」を求めない)。
+    長い語の訳は長い語の項目が見る。
+    """
     terms = glossary.get("terms", []) if isinstance(glossary, dict) else []
-    return [t for t in terms if isinstance(t, dict) and isinstance(t.get("ja"), str) and t["ja"]]
+    terms = [t for t in terms if isinstance(t, dict) and isinstance(t.get("ja"), str) and t["ja"]]
+    return [(t, sorted({u["ja"] for u in terms if t["ja"] in u["ja"] and u["ja"] != t["ja"]}, key=len, reverse=True))
+            for t in terms]
 
 
 def _literal(e, lang, cat):
@@ -239,8 +246,13 @@ def _quality(catalog, ns, e, terms, out):
                 out.append(warning(ns.path, e.key, "%s の値に仮名が混じる" % label,
                                    "固有名詞をそのまま残すなら verbatim_ok: true"))
     source_lit = _literal(e, src, "other")
-    for t in terms:
+    for t, longer in terms:
         if t["ja"] not in source_lit:
+            continue
+        masked = source_lit
+        for u in longer:
+            masked = masked.replace(u, "\0")
+        if t["ja"] not in masked:
             continue
         for lang, want in t.items():
             if lang in ("ja", "note") or lang not in e.values:
