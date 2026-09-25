@@ -24,6 +24,15 @@ const configured = () =>
     GITHUB_OAUTH_CLIENT_SECRET: "gh-secret",
   });
 
+/** CloudKit の S2S 署名に使う P-256 の鍵 (テスト専用に作る)。 */
+async function testCloudKitKey(): Promise<string> {
+  const pair = (await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"])) as CryptoKeyPair;
+  const der = new Uint8Array((await crypto.subtle.exportKey("pkcs8", pair.privateKey)) as ArrayBuffer);
+  let bin = "";
+  for (const b of der) bin += String.fromCharCode(b);
+  return `-----BEGIN PRIVATE KEY-----\n${btoa(bin)}\n-----END PRIVATE KEY-----`;
+}
+
 afterEach(() => {
   fetchMock.assertNoPendingInterceptors();
 });
@@ -233,6 +242,7 @@ describe("#更新通知 のまとめ投稿 (5 分 cron)", () => {
 
     await seedEdits(UID, 2);
     await exec("INSERT INTO call_edit_history (song_id, user_id, call_lines_before, call_lines_after, call_count_before, call_count_after) VALUES ('s1', ?, 0, 3, 0, 5)", UID);
+    await exec("INSERT INTO tags (id, name, created_by, created_at, updated_at, status) VALUES ('t1', '蒼い', 'd', 1, 1, 'active')");
     await exec("INSERT INTO device_song_tag (device_id, song_id, tag_id, created_at) VALUES ('d1', 's1', 't1', 0)");
     await exec("INSERT INTO polls (id, title, target_type, created_by, ends_at) VALUES ('p1', '@everyone 推し曲は？', 'song', ?, datetime('now', '+1 day'))", UID);
 
@@ -247,14 +257,61 @@ describe("#更新通知 のまとめ投稿 (5 分 cron)", () => {
     expect(posted.allowed_mentions).toEqual({ parse: [] });
     const text: string = posted.content;
     expect(text).toContain("データの編集** 2件（セトリ ×6、曲 ×2）");
-    expect(text).toContain("コールガイド** [s1](https://idollivedb.fugaapp.site/songs/s1/)");
-    expect(text).toContain("タグ付け** 曲に1件");
-    expect(text).toContain("新しいお題** 「@everyone 推し曲は？」");
+    expect(text).toContain("コールガイド** [s1](<https://idollivedb.fugaapp.site/songs/s1/>)");
+    expect(text).toContain("曲にタグ** 1曲");
+    expect(posted.embeds).toEqual([
+      { title: "s1", url: "https://idollivedb.fugaapp.site/songs/s1/", description: "#蒼い", color: 0xe85a9b },
+    ]);
+    expect(text).toContain("新しいお題** 「\\@everyone 推し曲は？」");
     expect(text).not.toContain("クライアントの文字列");
     expect(text).not.toContain(UID);
 
     // 何も増えていなければ投稿しない。
     await runScheduled(cron, digestEnv());
+  });
+
+  it("タグ付けは対象の名前・付いたタグ名・ジャケ写つきで出す (公開中でないタグは出さない)", async () => {
+    const env = makeEnv({ DISCORD_BOT_TOKEN: "bot-token", CLOUDKIT_KEY_ID: "test-key", CLOUDKIT_PRIVATE_KEY: await testCloudKitKey() });
+    await runScheduled(cron, digestEnv()); // 位置を覚えるだけ
+    await exec(
+      `INSERT INTO tags (id, name, created_by, created_at, updated_at, status) VALUES
+       ('t1', '蒼い', 'd', 1, 1, 'active'), ('t2', '*エモい*', 'd', 1, 1, 'active'), ('t3', '消えた', 'd', 1, 1, 'removed')`
+    );
+    await exec("INSERT INTO idol_tag_master (id, name, created_by, created_at, updated_at, status) VALUES ('it1', '歌姫', 'd', 1, 1, 'active')");
+    await exec(
+      `INSERT INTO device_song_tag (device_id, song_id, tag_id, created_at) VALUES
+       ('d1', 'song-a', 't1', 0), ('d2', 'song-a', 't1', 0), ('d1', 'song-a', 't2', 0), ('d1', 'song-b', 't3', 0)`
+    );
+    await exec("INSERT INTO device_idol_tag (device_id, idol_id, tag_id, created_at) VALUES ('d1', 'idol-c', 'it1', 0)");
+
+    fetchMock.get("https://api.apple-cloudkit.com")
+      .intercept({ path: /\/records\/lookup$/, method: "POST" })
+      .reply(200, {
+        records: [
+          { recordName: "song-a", recordType: "Song", fields: { title: { value: "Thank You!" }, artworkUrl: { value: "https://is1-ssl.mzstatic.com/a.jpg" } } },
+          { recordName: "idol-c", recordType: "Idol", fields: { name: { value: "如月千早" } } },
+        ],
+      });
+    let posted: any = null;
+    fetchMock.get(DISCORD).intercept({ path: `/api/v10/channels/${CHANNEL}/messages`, method: "POST" })
+      .reply(200, (opts) => {
+        posted = JSON.parse(String(opts.body));
+        return {};
+      });
+    await runScheduled(cron, env);
+
+    expect(posted.embeds).toEqual([
+      {
+        title: "Thank You!",
+        url: "https://idollivedb.fugaapp.site/songs/song-a/",
+        description: "#蒼い #\\*エモい\\*",
+        color: 0xe85a9b,
+        thumbnail: { url: "https://is1-ssl.mzstatic.com/a.jpg" },
+      },
+    ]);
+    expect(posted.content).toContain("曲にタグ** 1曲");
+    expect(posted.content).toContain("アイドルにタグ** [如月千早](<https://idollivedb.fugaapp.site/idols/idol-c/>) #歌姫");
+    expect(posted.content).not.toContain("消えた");
   });
 
   it("Bot トークンが無ければ何もしない", async () => {

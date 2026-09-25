@@ -9,7 +9,11 @@
 //
 // ⚠️ 編集者は出さない (編集者匿名性: feed.ts の契約 §1)。編集の要約もクライアントが書いた
 //    文字列 (edit_batch.summary の " — " 以降) は使わず、機械生成の部分だけを数える。
-//    タグ名・お題名は利用者が書いた文字列なので、メンションは allowed_mentions で全部止める。
+//    タグ名・お題名は利用者が書いた文字列なので、メンションは allowed_mentions で全部止め、
+//    Markdown の記号は md() で無効にする。
+//
+// 曲へのタグ付けは、曲ごとに埋め込み (ジャケ写つき) で出す。本文のリンクは <URL> で包んで
+// プレビューを出さない (埋め込みを使うので SUPPRESS_EMBEDS は付けられない)。
 
 import { cloudKitLookup } from "./cloudkit";
 import { postChannelMessage } from "./discord";
@@ -20,6 +24,9 @@ const WEB_BASE = "https://idollivedb.fugaapp.site";
 const BATCH_LIMIT = 200;
 /** 本文に名前を並べる上限。超えた分は「ほか N 件」にする。 */
 const LIST_LIMIT = 8;
+/** 曲のタグ付けを埋め込みで出す上限 (Discord は 1 通 10 個まで)。 */
+const EMBED_LIMIT = 9;
+const TAG_EMBED_COLOR = 0xe85a9b;
 
 type DigestEnv = Pick<Env, "DB"> & Partial<Env>;
 
@@ -49,6 +56,70 @@ function source<Row>(name: string, table: string, columns: string, where = ""): 
   };
 }
 
+/** 利用者が書いた文字列を Markdown として解釈させない。 */
+function md(text: string): string {
+  return text.replace(/[\\*_~`|[\]()<>#@:]/g, (c) => `\\${c}`);
+}
+
+function link(label: string, url: string): string {
+  return `[${md(label)}](<${url}>)`;
+}
+
+interface CkInfo {
+  name?: string;
+  artworkUrl?: string;
+}
+
+/** CloudKit から名前 (曲は title、アイドル・ユニットは name) とジャケ写を引く。引けなければ空。 */
+async function lookupNames(env: DigestEnv, ids: string[]): Promise<Map<string, CkInfo>> {
+  const out = new Map<string, CkInfo>();
+  if (ids.length === 0 || !env.CLOUDKIT_KEY_ID || !env.CLOUDKIT_PRIVATE_KEY) return out;
+  try {
+    const res = await cloudKitLookup(ids, env.CLOUDKIT_KEY_ID, env.CLOUDKIT_PRIVATE_KEY);
+    for (const id of ids) {
+      const f = res.records?.get(id)?.fields;
+      if (!f) continue;
+      const name = f.title?.value ?? f.name?.value;
+      const art = f.artworkUrl?.value;
+      out.set(id, {
+        name: typeof name === "string" ? name : undefined,
+        artworkUrl: typeof art === "string" && art.startsWith("https://") ? art : undefined,
+      });
+    }
+  } catch {
+    // 名前が引けなくても通知は出す (ID のまま)。
+  }
+  return out;
+}
+
+/** タグ ID → 表示名 (公開中のものだけ)。 */
+async function tagNames(env: DigestEnv, table: string, ids: string[]): Promise<Map<string, string>> {
+  if (ids.length === 0) return new Map();
+  const res = await env.DB.prepare(
+    `SELECT id, name FROM ${table} WHERE status = 'active' AND id IN (${ids.map(() => "?").join(",")})`
+  )
+    .bind(...ids)
+    .all<{ id: string; name: string }>();
+  return new Map((res.results ?? []).map((r) => [r.id, r.name]));
+}
+
+/** 対象ごとに付いたタグ名をまとめる (同じタグは 1 回、見つからないタグは出さない)。 */
+function groupTags(rows: Array<{ target: string; tag_id: string }>, names: Map<string, string>): Map<string, string[]> {
+  const out = new Map<string, string[]>();
+  for (const r of rows) {
+    const name = names.get(r.tag_id);
+    if (!name) continue;
+    const list = out.get(r.target) ?? [];
+    if (!list.includes(name)) list.push(name);
+    out.set(r.target, list);
+  }
+  return out;
+}
+
+function tagList(names: string[]): string {
+  return names.map((n) => `#${md(n)}`).join(" ");
+}
+
 function moreSuffix(total: number): string {
   return total > LIST_LIMIT ? ` ほか${total - LIST_LIMIT}件` : "";
 }
@@ -61,9 +132,9 @@ export async function postDiscordDigest(env: DigestEnv): Promise<void> {
     "edits", "edit_batch", "summary", "source = 'app' AND cloudkit_ok = 1"
   );
   const calls = source<{ song_id: string }>("calls", "call_edit_history", "song_id");
-  const songTags = source<{ tag_id: string }>("song_tags", "device_song_tag", "tag_id");
-  const idolTags = source<{ tag_id: string }>("idol_tags", "device_idol_tag", "tag_id");
-  const unitTags = source<{ tag_id: string }>("unit_tags", "device_unit_tag", "tag_id");
+  const songTags = source<{ target: string; tag_id: string }>("song_tags", "device_song_tag", "song_id AS target, tag_id");
+  const idolTags = source<{ target: string; tag_id: string }>("idol_tags", "device_idol_tag", "idol_id AS target, tag_id");
+  const unitTags = source<{ target: string; tag_id: string }>("unit_tags", "device_unit_tag", "unit_id AS target, tag_id");
   const newSongTags = source<{ name: string }>("tag_master", "tags", "name", "status = 'active'");
   const newIdolTags = source<{ name: string }>("idol_tag_master", "idol_tag_master", "name", "status = 'active'");
   const newUnitTags = source<{ name: string }>("unit_tag_master", "unit_tag_master", "name", "status = 'active'");
@@ -117,45 +188,83 @@ export async function postDiscordDigest(env: DigestEnv): Promise<void> {
     lines.push(`📝 **データの編集** ${edits.rows.length}件${detail ? `（${detail}）` : ""}`);
   }
 
-  // コールガイド: 曲名 (CloudKit から引く。引けなければ ID) と Web の曲ページ。
-  if (calls.rows?.length) {
-    const songIds = [...new Set(calls.rows.map((r) => r.song_id))];
-    const shown = songIds.slice(0, LIST_LIMIT);
-    const titles = new Map<string, string>();
-    if (env.CLOUDKIT_KEY_ID && env.CLOUDKIT_PRIVATE_KEY) {
-      try {
-        const res = await cloudKitLookup(shown, env.CLOUDKIT_KEY_ID, env.CLOUDKIT_PRIVATE_KEY);
-        for (const id of shown) {
-          const title = res.records?.get(id)?.fields?.title?.value;
-          if (typeof title === "string") titles.set(id, title);
-        }
-      } catch {
-        // 曲名が引けなくても通知は出す (ID のまま)。
-      }
-    }
-    const names = shown.map((id) => `[${titles.get(id) ?? id}](${WEB_BASE}/songs/${encodeURIComponent(id)}/)`);
-    lines.push(`🎤 **コールガイド** ${names.join("、")}${moreSuffix(songIds.length)}`);
+  // タグ付け: 対象ごとに付いたタグ名 (曲は tags、アイドル・ユニットはそれぞれのマスタ)。
+  const [songTagNames, idolTagNames, unitTagNames] = await Promise.all([
+    tagNames(env, "tags", [...new Set((songTags.rows ?? []).map((r) => r.tag_id))]),
+    tagNames(env, "idol_tag_master", [...new Set((idolTags.rows ?? []).map((r) => r.tag_id))]),
+    tagNames(env, "unit_tag_master", [...new Set((unitTags.rows ?? []).map((r) => r.tag_id))]),
+  ]);
+  const songTagged = groupTags(songTags.rows ?? [], songTagNames);
+  const idolTagged = groupTags(idolTags.rows ?? [], idolTagNames);
+  const unitTagged = groupTags(unitTags.rows ?? [], unitTagNames);
+
+  // 名前とジャケ写は CloudKit から 1 回でまとめて引く。
+  const callSongIds = [...new Set((calls.rows ?? []).map((r) => r.song_id))];
+  const taggedSongIds = [...songTagged.keys()];
+  const idolIds = [...idolTagged.keys()];
+  const unitIds = [...unitTagged.keys()];
+  const info = await lookupNames(env, [
+    ...new Set([
+      ...callSongIds.slice(0, LIST_LIMIT),
+      ...taggedSongIds.slice(0, EMBED_LIMIT + LIST_LIMIT),
+      ...idolIds.slice(0, LIST_LIMIT),
+      ...unitIds.slice(0, LIST_LIMIT),
+    ]),
+  ]);
+  const nameOf = (id: string) => info.get(id)?.name ?? id;
+
+  // コールガイド: 曲名と Web の曲ページ。
+  if (callSongIds.length) {
+    const names = callSongIds
+      .slice(0, LIST_LIMIT)
+      .map((id) => link(nameOf(id), `${WEB_BASE}/songs/${encodeURIComponent(id)}/`));
+    lines.push(`🎤 **コールガイド** ${names.join("、")}${moreSuffix(callSongIds.length)}`);
   }
 
-  // タグ付け: 付けた回数 (対象ごと) と、新しく作られたタグの名前。
-  const tagCounts = [
-    ["曲", songTags.rows?.length ?? 0],
-    ["アイドル", idolTags.rows?.length ?? 0],
-    ["ユニット", unitTags.rows?.length ?? 0],
-  ].filter(([, n]) => (n as number) > 0);
-  const newTagNames = [...(newSongTags.rows ?? []), ...(newIdolTags.rows ?? []), ...(newUnitTags.rows ?? [])].map(
-    (r) => `「${r.name}」`
-  );
-  if (tagCounts.length > 0 || newTagNames.length > 0) {
-    const counts = tagCounts.map(([label, n]) => `${label}に${n}件`).join("、");
-    const created = newTagNames.length
-      ? `${counts ? " / " : ""}新しいタグ ${newTagNames.slice(0, LIST_LIMIT).join("")}${moreSuffix(newTagNames.length)}`
+  // 曲のタグ付け: 曲ごとに埋め込み (曲名・付いたタグ・ジャケ写)。入りきらない分は本文に名前だけ。
+  const embeds: unknown[] = [];
+  if (taggedSongIds.length) {
+    for (const id of taggedSongIds.slice(0, EMBED_LIMIT)) {
+      const art = info.get(id)?.artworkUrl;
+      embeds.push({
+        title: nameOf(id).slice(0, 256),
+        url: `${WEB_BASE}/songs/${encodeURIComponent(id)}/`,
+        description: tagList(songTagged.get(id)!).slice(0, 1000),
+        color: TAG_EMBED_COLOR,
+        ...(art ? { thumbnail: { url: art } } : {}),
+      });
+    }
+    const rest = taggedSongIds.slice(EMBED_LIMIT);
+    const restText = rest.length
+      ? `（ほかに ${rest
+          .slice(0, LIST_LIMIT)
+          .map((id) => link(nameOf(id), `${WEB_BASE}/songs/${encodeURIComponent(id)}/`))
+          .join("、")}${moreSuffix(rest.length)}）`
       : "";
-    lines.push(`🏷️ **タグ付け** ${counts}${created}`);
+    lines.push(`🏷️ **曲にタグ** ${taggedSongIds.length}曲${restText}`);
+  }
+
+  // アイドル・ユニットのタグ付け: 「名前 #タグ #タグ」を並べる。
+  const targetLine = (label: string, path: string, tagged: Map<string, string[]>) => {
+    const ids = [...tagged.keys()];
+    if (!ids.length) return;
+    const items = ids
+      .slice(0, LIST_LIMIT)
+      .map((id) => `${link(nameOf(id), `${WEB_BASE}/${path}/${encodeURIComponent(id)}/`)} ${tagList(tagged.get(id)!)}`);
+    lines.push(`🏷️ **${label}にタグ** ${items.join("、")}${moreSuffix(ids.length)}`);
+  };
+  targetLine("アイドル", "idols", idolTagged);
+  targetLine("ユニット", "units", unitTagged);
+
+  const newTagNames = [...(newSongTags.rows ?? []), ...(newIdolTags.rows ?? []), ...(newUnitTags.rows ?? [])].map(
+    (r) => `「${md(r.name)}」`
+  );
+  if (newTagNames.length) {
+    lines.push(`✨ **新しいタグ** ${newTagNames.slice(0, LIST_LIMIT).join("")}${moreSuffix(newTagNames.length)}`);
   }
 
   if (polls.rows?.length) {
-    const titles = polls.rows.map((r) => `「${r.title}」`);
+    const titles = polls.rows.map((r) => `「${md(r.title)}」`);
     lines.push(`🗳️ **新しいお題** ${titles.slice(0, LIST_LIMIT).join("")}${moreSuffix(titles.length)}`);
   }
 
@@ -163,7 +272,7 @@ export async function postDiscordDigest(env: DigestEnv): Promise<void> {
     const ok = await postChannelMessage(env as Env, env.DISCORD_UPDATES_CHANNEL_ID, {
       content: lines.join("\n").slice(0, 2000),
       allowed_mentions: { parse: [] },
-      flags: 4, // SUPPRESS_EMBEDS: リンクのプレビューで埋まらないように
+      ...(embeds.length ? { embeds } : {}),
     });
     if (!ok) throw new Error("discord digest post failed");
   }
