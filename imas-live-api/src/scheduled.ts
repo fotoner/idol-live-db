@@ -10,6 +10,7 @@
 
 import { postDiscordDigest } from "./discord_digest";
 import { postPollResults } from "./discord_poll_results";
+import { createLiveThreads } from "./discord_live_threads";
 import type { Env } from "./env";
 
 /**
@@ -80,6 +81,11 @@ const EVERY_RUN: CronTask[] = [
  * ここに入っているのはいずれも保持期間の掃除と集計で、5 分精度は要らない。
  */
 const DAILY: CronTask[] = [
+  {
+    name: "discord_live_threads",
+    // 今日 (JST) の公演ごとに #ライブ実況・感想 にスレッドを立てる (discord_live_threads.ts)。
+    run: (env) => createLiveThreads(env),
+  },
   {
     name: "api_rate_limits_days",
     // 前の日までの日のバケット (負の鍵 -floor(秒/86400))。今日の行 (-今日) は残す。

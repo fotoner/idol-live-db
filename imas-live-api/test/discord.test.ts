@@ -5,6 +5,7 @@ import { fetchMock } from "cloudflare:test";
 import { afterEach, describe, expect, it } from "vitest";
 import { bearer, BASE, call, callJson, fetchWorker, makeEnv, runScheduled } from "./support/worker";
 import { exec, insertUser, row, rows } from "./support/d1";
+import { createLiveThreads, jstToday } from "../src/discord_live_threads";
 
 const UID = "001094.discorder";
 const DISCORD = "https://discord.com";
@@ -375,3 +376,57 @@ describe("#投票結果 (5 分 cron)", () => {
   });
 });
 
+
+// ---------------------------------------------------------------------------
+// #ライブ実況・感想
+// ---------------------------------------------------------------------------
+
+describe("#ライブ実況・感想 のスレッド (日次 cron)", () => {
+  const LIVE = "1552704776884719676";
+
+  it("JST の日付は UTC 15 時で変わる", () => {
+    expect(jstToday(Date.parse("2026-09-24T14:59:00Z"))).toBe("2026-09-24");
+    expect(jstToday(Date.parse("2026-09-24T15:17:00Z"))).toBe("2026-09-25");
+  });
+
+  it("今日の公演ごとに開演順でスレッドを立て、同じ日は 2 回立てない", async () => {
+    const env = makeEnv({ DISCORD_BOT_TOKEN: "bot-token", CLOUDKIT_KEY_ID: "test-key", CLOUDKIT_PRIVATE_KEY: await testCloudKitKey() });
+    const now = Date.parse("2026-09-24T15:17:00Z");
+    let queried: any = null;
+    fetchMock.get("https://api.apple-cloudkit.com")
+      .intercept({ path: /\/records\/query$/, method: "POST" })
+      .reply(200, (opts) => {
+        queried = JSON.parse(String(opts.body));
+        return {
+          records: [
+            { recordName: "sh_night", recordType: "Show", fields: { name: { value: "M@STERS DAY2 夜公演" }, startTime: { value: "18:00" }, venue: { value: "東京ドーム" } } },
+            { recordName: "sh_day", recordType: "Show", fields: { name: { value: "M@STERS DAY2 昼公演" }, startTime: { value: "13:00" } } },
+          ],
+        };
+      });
+    const threads: any[] = [];
+    const messages: any[] = [];
+    for (const id of ["th1", "th2"]) {
+      fetchMock.get(DISCORD).intercept({ path: `/api/v10/channels/${LIVE}/threads`, method: "POST" })
+        .reply(200, (opts) => {
+          threads.push(JSON.parse(String(opts.body)));
+          return { id };
+        });
+      fetchMock.get(DISCORD).intercept({ path: `/api/v10/channels/${id}/messages`, method: "POST" })
+        .reply(200, (opts) => {
+          messages.push(JSON.parse(String(opts.body)));
+          return {};
+        });
+    }
+    await createLiveThreads(env, now);
+
+    expect(queried.query.filterBy[0].fieldValue.value).toBe("2026-09-25");
+    expect(threads.map((t) => t.name)).toEqual(["9/25 M@STERS DAY2 昼公演", "9/25 M@STERS DAY2 夜公演"]);
+    expect(messages[1].content).toContain("開演 18:00　東京ドーム");
+    expect(messages[1].content).toContain("<https://idollivedb.fugaapp.site/shows/sh_night/>");
+    expect(messages[0].allowed_mentions).toEqual({ parse: [] });
+
+    // 同じ日にもう一度呼んでも何もしない (interceptor が無いので、呼べば落ちる)。
+    await createLiveThreads(env, now);
+  });
+});
