@@ -207,15 +207,27 @@ struct LyricsQuizView: View {
                 }
                 .padding(.vertical, 4)
             }
-            if !p.excerpt.hints.isEmpty {
+            let year = releaseYear(answerSong)
+            if !p.excerpt.hints.isEmpty || (mode == .title && year != nil) {
                 QuizTicketNotch()
                 QuizTicketHintTiles {
+                    // リリース年は最初から開いている無料のヒント (曲名当てだけ。続き当ては曲を明かしている)。
+                    if mode == .title, let year {
+                        QuizTicketHintTile(title: "リリース年", phase: .open(value: year))
+                    }
                     ForEach(Array(p.excerpt.hints.enumerated()), id: \.offset) { i, kind in
                         QuizTicketHintTile(title: hintTitle(kind), phase: tilePhase(i, kind: kind, song: answerSong))
                     }
                 }
             }
         }
+    }
+
+    /// 曲のリリース年 (`release_date` の先頭 4 桁)。
+    private func releaseYear(_ s: SongWithArtists?) -> String? {
+        guard let date = s?.song.releaseDate, date.count >= 4 else { return nil }
+        let year = String(date.prefix(4))
+        return year.allSatisfy(\.isNumber) ? year : nil
     }
 
     /// 歌詞 1 行。出題行は大きく、ヒントで開いた行は控えめに出す。

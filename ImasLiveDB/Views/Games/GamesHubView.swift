@@ -27,7 +27,7 @@ struct GamesHubView: View {
         .init(kind: .introDon, systemImage: "music.note.list", title: "イントロドン",
               blurb: "イントロを聴いて曲を当てる"),
         .init(kind: .colorMatch, systemImage: "paintpalette.fill", title: "メンバーカラー合わせ",
-              blurb: "名前とイメージカラーを結ぶ"),
+              blurb: "名前からイメージカラーを"),
     ]
 
     var body: some View {

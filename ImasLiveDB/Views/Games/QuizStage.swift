@@ -1147,6 +1147,8 @@ struct QuizTicketHintTile: View {
     enum Phase {
         case available(cost: Int, action: () -> Void)
         case open(value: String)
+        /// 開いた色ヒント (イメージカラーなど)。色の帯と名前を出す。
+        case openSwatch(hex: String, label: String)
         case locked(cost: Int)
     }
 
@@ -1177,6 +1179,19 @@ struct QuizTicketHintTile: View {
             .padding(.horizontal, 6)
             .frame(maxWidth: .infinity, minHeight: 56)
             .background(QS.paperTile, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        case .openSwatch(let hex, let label):
+            VStack(spacing: 4) {
+                Text(title).font(QS.text(11, weight: .bold)).foregroundStyle(QS.paperSub)
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .fill(Color(hexString: hex))
+                    .frame(width: 44, height: 14)
+                    .overlay(RoundedRectangle(cornerRadius: 4, style: .continuous).strokeBorder(QS.paperLine, lineWidth: 1))
+            }
+            .padding(.horizontal, 6)
+            .frame(maxWidth: .infinity, minHeight: 56)
+            .background(QS.paperTile, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(title): \(label)")
         case .locked(let cost):
             VStack(spacing: 0) {
                 Text(title).font(QS.text(13, weight: .bold))
@@ -1191,9 +1206,10 @@ struct QuizTicketHintTile: View {
     }
 }
 
-/// ヒントタイルの並び (見出し付き)。
+/// ヒントタイルの並び (見出し付き)。`columns` を渡すとその列数で折り返す (ヒントが多いクイズ用)。
 struct QuizTicketHintTiles<Tiles: View>: View {
     var showsHeading = true
+    var columns: Int? = nil
     @ViewBuilder let tiles: () -> Tiles
 
     var body: some View {
@@ -1202,7 +1218,13 @@ struct QuizTicketHintTiles<Tiles: View>: View {
                 Text("ヒント — 開くほど点が下がる").font(QS.text(11, weight: .bold)).foregroundStyle(QS.paperSub)
                     .padding(.leading, 8)
             }
-            HStack(spacing: 6) { tiles() }
+            if let columns {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: columns), spacing: 6) {
+                    tiles()
+                }
+            } else {
+                HStack(spacing: 6) { tiles() }
+            }
         }
         .padding(.horizontal, 12).padding(.top, 8).padding(.bottom, 14)
     }

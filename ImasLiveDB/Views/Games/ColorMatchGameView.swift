@@ -1,12 +1,15 @@
 import SwiftUI
 
-/// メンバーカラー合わせ。出題対象ブランドをトグルで選び、難易度・問題数を決めて
-/// 全N問のセッションを遊ぶ。各問は色チップをドラッグ&ドロップ(タップ割当も可)で紐づけ、
+/// メンバーカラー合わせ。出題対象ブランドをトグルで選び、遊び方・難易度・問題数を決めて
+/// 全N問のセッションを遊ぶ。遊び方は 2 つ:
+/// - 4択: 名前を見て、その子のイメージカラーを 4 色から選ぶ (ヒントを開くほど点が下がる)。
+/// - 並べる: 色チップをドラッグ&ドロップ(タップ割当も可)で複数人に紐づけ、
 /// 判定で正誤＋正解色を表示。最後に正答率を出す。判定前は本人の色を見せない
 /// (アバターは画像があれば画像・無ければ中立モノグラムで、色をネタバレしない)。
 ///
 /// 出題母集団の決定 (外部演者・コラボ枠・色未設定の除外、色の一意化、ブランド 4 人閾値)、
-/// 難易度ごとの出題の作り方、答え合わせ、正答率は imas-core の `domain/color_match.rs` にあり、
+/// 難易度ごとの出題の作り方、答え合わせ、正答率は imas-core の `domain/color_match.rs`
+/// (4択は `domain/color_quiz.rs`) にあり、
 /// Android と同じ実装を共有する。この画面が担うのは描画・ドラッグ操作・シード調達だけ。
 struct ColorMatchGameView: View {
     /// 途中でやめたセッションの続き (ゲーム一覧の「つづきから」)。nil なら設定画面から。
@@ -30,6 +33,10 @@ struct ColorMatchGameView: View {
 
     // 設定
     @State private var selectedBrandIds: Set<String> = []
+    /// 遊び方: 0=4択 / 1=並べる。
+    @State private var playMode = 0
+    private let playModeLabels = ["4択", "並べる"]
+    private var isChoiceMode: Bool { playMode == 0 }
     /// 難度: 0=やさしい(色を散らす) / 1=ふつう(ランダム) / 2=むずい(最も近い色・人数増)。
     /// セグメントの index はコアの `ColorMatchDifficulty` の並びにそのまま対応する。
     @State private var difficulty = 1
@@ -61,6 +68,19 @@ struct ColorMatchGameView: View {
     /// 各問の記録 (全員当てたらペンライト点灯)。
     @State private var plays: [QuizStagePlay] = []
     @State private var sessionResult: QuizSessionResult?
+
+    // 4択の状態
+    /// 1 ゲーム分の 4 択 (「はじめる」1 回でコアがまとめて生成)。
+    @State private var choiceQuestions: [ColorQuizQuestion] = []
+    /// この問題で開いたヒント。
+    @State private var choiceOpened: [ColorQuizHintKind] = []
+    /// いまの獲得点・色の系統・2択で消した色・まだ開けるヒント (コアが算出)。
+    @State private var choiceHint = ColorQuizHintState(currentValue: 0, baseValue: 0, familyLabel: nil,
+                                                       eliminated: [], hints: [])
+    @State private var choiceTally = QuizTally(asked: 0, correct: 0, points: 0)
+    /// 直前の問題の判定 (解答後に出す大きなカード)。
+    @State private var choiceVerdict: QuizVerdict?
+    @State private var choiceScoreBefore = 0
     @State private var isNewBest = false
     @State private var previousBest: Int?
     @Environment(\.dismiss) private var dismiss
@@ -107,6 +127,14 @@ struct ColorMatchGameView: View {
                 .font(.imasFootnote).foregroundStyle(DS.ink2)
 
             VStack(alignment: .leading, spacing: DS.sp2) {
+                ImasSectionHeader(title: "遊び方", tight: true)
+                ImasSegmented(labels: playModeLabels, selection: $playMode)
+                Text(isChoiceMode ? "名前を見て、その子のイメージカラーを 4 色から選ぶ"
+                                  : "何人かの名前に、色をドラッグで割り当てる")
+                    .font(.imasCaption).foregroundStyle(DS.ink3)
+            }
+
+            VStack(alignment: .leading, spacing: DS.sp2) {
                 ImasSectionHeader(title: "難易度", tight: true)
                 ImasSegmented(labels: levelLabels, selection: $difficulty)
             }
@@ -126,7 +154,7 @@ struct ColorMatchGameView: View {
                 brandGrid
             }
 
-            let canStart = pool.count >= minimumPool
+            let canStart = pool.count >= requiredPool
             primaryButton("はじめる（全\(questionCount)問）") { AppAnalytics.tap("color_match_game.start"); startSession() }
                 .disabled(!canStart)
                 .opacity(canStart ? 1 : 0.5)
@@ -165,6 +193,10 @@ struct ColorMatchGameView: View {
 
     private var header: QuizStageHeader {
         if let sessionResult { return .result(total: Int(sessionResult.questions)) }
+        if isChoiceMode {
+            return .question(current: min(plays.count + (choiceVerdict == nil ? 1 : 0), questionCount),
+                             total: questionCount, points: Int(choiceTally.points))
+        }
         return .question(current: min(plays.count + (judged ? 0 : 1), questionCount),
                          total: questionCount, points: totalCorrect)
     }
@@ -178,6 +210,8 @@ struct ColorMatchGameView: View {
                                     slots: plays.penlights(total: questionCount, answering: false),
                                     longestStreak: plays.longestStreak, misses: plays.misses,
                                     onReplay: { startSession() }, onClose: { dismiss() })
+            } else if isChoiceMode {
+                choiceStage
             } else {
                 QuizStageProgress(slots: plays.penlights(total: questionCount, answering: !judged),
                                   caption: "全員当てると点灯 · \(levelLabels[difficulty])",
@@ -189,6 +223,137 @@ struct ColorMatchGameView: View {
                 footer.padding(.top, 4)
             }
         }
+    }
+
+    // MARK: - 4択
+
+    private var choiceQuestion: ColorQuizQuestion? {
+        choiceQuestions.indices.contains(roundIndex) ? choiceQuestions[roundIndex] : nil
+    }
+
+    @ViewBuilder
+    private var choiceStage: some View {
+        QuizStageProgress(slots: plays.penlights(total: questionCount, answering: choiceVerdict == nil),
+                          caption: plays.setlistCaption(total: questionCount),
+                          streak: plays.streak, streakBrokeAt: plays.streakBrokeAt)
+            .padding(.bottom, 2)
+        if let choiceVerdict {
+            QuizVerdictCard(verdict: choiceVerdict).id(choiceVerdict.number)
+            QuizVerdictStats(before: choiceScoreBefore, after: Int(choiceTally.points), streak: plays.streak)
+            if !choiceVerdict.isCorrect { QuizVerdictFootnote() }
+            QuizStageNextButton(isLastQuestion: roundIndex + 1 >= questionCount, onNext: advance, onFinish: advance)
+                .padding(.top, 4)
+        } else if let q = choiceQuestion {
+            choiceTicket(q)
+            choiceSwatches(q).padding(.top, 4)
+        }
+    }
+
+    private func choiceTicket(_ q: ColorQuizQuestion) -> some View {
+        let idol = idolById[q.answer.id]
+        return QuizTicket {
+            QuizTicketTitleBlock(label: "IMAGE COLOR", question: "この子のイメージカラーはどれ？",
+                                 value: Int(choiceHint.currentValue), base: Int(choiceHint.baseValue)) {
+                HStack(spacing: 14) {
+                    ImasAvatar(label: idol?.shortName ?? "", seed: nil, size: 56,
+                               imageURL: imageService.imageURL(for: q.answer.id))
+                    VStack(alignment: .leading, spacing: 2) {
+                        if isCrossBrand, let b = idol.flatMap({ brandShort($0.brandId) }) {
+                            Text(b).font(QS.text(12, weight: .bold)).foregroundStyle(QS.paperSub)
+                        }
+                        Text(idol?.name ?? "")
+                            .font(QS.text(34, weight: .black))
+                            .lineLimit(2).minimumScaleFactor(0.5)
+                    }
+                }
+                .padding(.top, 2)
+            }
+            QuizTicketNotch()
+            QuizTicketHintTiles {
+                if let family = choiceHint.familyLabel {
+                    QuizTicketHintTile(title: "色の系統", phase: .open(value: family))
+                }
+                ForEach(choiceHint.hints, id: \.kind) { option in
+                    QuizTicketHintTile(title: option.kind == .family ? "色の系統" : "2択にする",
+                                       phase: .available(cost: Int(option.cost), action: { openChoiceHint(option.kind, q) }))
+                }
+                if choiceOpened.contains(.fiftyFifty) {
+                    QuizTicketHintTile(title: "2択にする", phase: .open(value: "2色に"))
+                }
+            }
+        }
+    }
+
+    /// 色の選択肢 (2×2)。2択ヒントで消した色は押せなくして薄くする。
+    private func choiceSwatches(_ q: ColorQuizQuestion) -> some View {
+        let letters = ["A", "B", "C", "D"]
+        let out = Set(choiceHint.eliminated.map(Int.init))
+        return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 2), spacing: 10) {
+            ForEach(Array(q.choices.enumerated()), id: \.offset) { i, hex in
+                let isOut = out.contains(i)
+                Button { pickChoice(hex, q) } label: {
+                    VStack(spacing: 8) {
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color(hexString: hex))
+                            .frame(height: 76)
+                            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(QS.line, lineWidth: 1))
+                        HStack {
+                            Text(letters[i % letters.count]).foregroundStyle(QS.faint)
+                            Spacer(minLength: 2)
+                            Text(hex.uppercased())
+                        }
+                        .font(QS.mono(11))
+                        .foregroundStyle(QS.ink)
+                        .padding(.horizontal, 4)
+                    }
+                    .padding(8)
+                    .background(QS.panel, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(QS.line, lineWidth: 1))
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(QuizPressStyle())
+                .disabled(isOut)
+                .opacity(isOut ? 0.18 : 1)
+                .accessibilityLabel("色 \(letters[i % letters.count]) \(hex)")
+            }
+        }
+    }
+
+    private func openChoiceHint(_ kind: ColorQuizHintKind, _ q: ColorQuizQuestion) {
+        AppAnalytics.tap(kind == .family ? "color_match_game.hint_family" : "color_match_game.hint_fifty")
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+            choiceOpened.append(kind)
+            choiceHint = colorQuizHintState(question: q, opened: choiceOpened, answered: false)
+        }
+    }
+
+    private func pickChoice(_ hex: String, _ q: ColorQuizQuestion) {
+        guard choiceVerdict == nil else { return }
+        AppAnalytics.tap("color_match_game.choose")
+        choiceScoreBefore = Int(choiceTally.points)
+        let outcome = colorQuizAnswer(question: q, opened: choiceOpened, pickedHex: hex,
+                                      before: choiceTally, questionCount: UInt32(clamping: questionCount))
+        let name = idolById[q.answer.id]?.name ?? ""
+        let number = plays.count + 1
+        let family = colorQuizHintState(question: q, opened: choiceOpened, answered: true).familyLabel
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            choiceTally = outcome.tally
+            plays.append(QuizStagePlay(number: number, isCorrect: outcome.isCorrect,
+                                       answerName: name, answerHex: q.answer.color,
+                                       pickedName: outcome.isCorrect ? nil : hex.uppercased()))
+            choiceVerdict = QuizVerdict(isCorrect: outcome.isCorrect, number: number,
+                                        answerName: name, answerHex: q.answer.color,
+                                        earned: Int(outcome.earnedPoints), base: Int(choiceHint.baseValue),
+                                        hints: Int(outcome.revealedHints),
+                                        pickedName: outcome.isCorrect ? nil : hex.uppercased(),
+                                        detail: [q.answer.color?.uppercased(), family].compactMap { $0 }.joined(separator: " · "))
+        }
+        UINotificationFeedbackGenerator().notificationOccurred(outcome.isCorrect ? .success : .error)
+        QuizResumeStore.shared.save(QuizSuspended(
+            kind: .colorMatch, seed: seed, brandIds: Array(selectedBrandIds),
+            nextIndex: roundIndex + 1, asked: Int(choiceTally.asked), correct: Int(choiceTally.correct),
+            points: Int(choiceTally.points), plays: plays, total: questionCount,
+            difficulty: difficulty, colorMode: "choice", savedAt: .now))
     }
 
     /// 答え合わせの一枚。全員当てたら生成りのカード、外したら暗いカード。
@@ -377,6 +542,9 @@ struct ColorMatchGameView: View {
         }
     }
 
+    /// 開始に要る最低人数 (4択は 4 色並べるので 4 人、並べるは 2 人)。
+    private var requiredPool: Int { isChoiceMode ? 4 : minimumPool }
+
     /// ブランドが複数混ざるときだけ行にブランド名を添える (誰の色か絞りにくくなるため)。
     private var isCrossBrand: Bool { selectedBrandIds.count != 1 }
 
@@ -398,6 +566,7 @@ struct ColorMatchGameView: View {
         let saved = didUseResume ? nil : resume
         didUseResume = true
         if let saved {
+            playMode = saved.colorMode == "choice" ? 0 : 1
             difficulty = saved.difficulty ?? difficulty
             questionCount = saved.total
             selectedBrandIds = Set(saved.brandIds)
@@ -408,10 +577,18 @@ struct ColorMatchGameView: View {
             seed = generator.next()
             QuizResumeStore.shared.clear(.colorMatch)
         }
-        guard pool.count >= minimumPool else { return }
-        rounds = colorMatchStartGame(pool: pool, difficulty: coreDifficulty,
-                                     questionCount: UInt32(clamping: questionCount),
-                                     seed: seed)
+        guard pool.count >= requiredPool else { return }
+        if isChoiceMode {
+            choiceQuestions = colorQuizStartGame(pool: pool, difficulty: coreDifficulty,
+                                                 questionCount: UInt32(clamping: questionCount), seed: seed)
+            rounds = []
+            choiceTally = saved?.tally ?? QuizTally(asked: 0, correct: 0, points: 0)
+        } else {
+            rounds = colorMatchStartGame(pool: pool, difficulty: coreDifficulty,
+                                         questionCount: UInt32(clamping: questionCount),
+                                         seed: seed)
+            choiceQuestions = []
+        }
         roundIndex = saved?.nextIndex ?? 0
         totalCorrect = saved?.correct ?? 0
         totalAnswered = saved?.asked ?? 0
@@ -452,7 +629,7 @@ struct ColorMatchGameView: View {
             kind: .colorMatch, seed: seed, brandIds: Array(selectedBrandIds),
             nextIndex: roundIndex + 1, asked: totalAnswered, correct: totalCorrect,
             points: totalCorrect, plays: plays, total: questionCount,
-            difficulty: difficulty, savedAt: .now))
+            difficulty: difficulty, colorMode: "match", savedAt: .now))
     }
 
     private func advance() {
@@ -467,8 +644,19 @@ struct ColorMatchGameView: View {
     private func finishSession() {
         QuizResumeStore.shared.clear(.colorMatch)
         previousBest = GameProgressStore.shared.previousBestScore(for: .colorMatch)
-        let update = GameProgressStore.shared.recordResult(.colorMatch, score: totalCorrect, outOf: totalAnswered)
+        // 4択はヒント込みの点 / 満点、並べるは当てた人数 / 出題人数を記録する。
+        let update = isChoiceMode
+            ? GameProgressStore.shared.recordResult(
+                .colorMatch, score: Int(choiceTally.points),
+                outOf: Int(colorQuizSessionResult(tally: choiceTally, questionCount: UInt32(clamping: questionCount)).outOf))
+            : GameProgressStore.shared.recordResult(.colorMatch, score: totalCorrect, outOf: totalAnswered)
         isNewBest = update.isNewBest
+        if isChoiceMode {
+            sessionResult = colorQuizSessionResult(tally: choiceTally, questionCount: UInt32(clamping: questionCount))
+            choiceVerdict = nil
+            sessionDone = true
+            return
+        }
         // 点 = 色を当てた人数、「n / N 正解」= 全員当てた問題数。グレードの閾値はコア。
         sessionResult = quizAccuracyResult(
             points: UInt32(clamping: totalCorrect), outOf: UInt32(clamping: totalAnswered),
@@ -481,6 +669,10 @@ struct ColorMatchGameView: View {
     /// 1 問ぶんの解答状態を戻す (出題自体は `startSession` で生成済み)。
     private func startRound() {
         judgement = nil; assignments = [:]; selectedHex = nil; dropTargetId = nil
+        choiceVerdict = nil; choiceOpened = []
+        if let q = choiceQuestion {
+            choiceHint = colorQuizHintState(question: q, opened: [], answered: false)
+        }
     }
 
     private func assign(_ hex: String, to idolId: String) {

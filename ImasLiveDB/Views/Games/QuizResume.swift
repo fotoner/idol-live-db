@@ -30,6 +30,8 @@ struct QuizSuspended: Codable, Identifiable {
     var lyricsMode: String? = nil
     /// メンバーカラーの難易度 (0/1/2)。
     var difficulty: Int? = nil
+    /// メンバーカラーの遊び方 ("choice" = 4択 / "match" = 並べる)。古い保存は並べる。
+    var colorMode: String? = nil
     let savedAt: Date
 
     var id: GameKind { kind }
