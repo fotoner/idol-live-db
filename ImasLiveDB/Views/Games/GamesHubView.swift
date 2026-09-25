@@ -7,6 +7,7 @@ import SwiftUI
 /// チケット (ゲーム画面と同じ暗いステージ色) を置いて、ここから先が会場だと分かるようにする。
 struct GamesHubView: View {
     @State private var progress = GameProgressStore.shared
+    @State private var resumeStore = QuizResumeStore.shared
 
     /// ハブに並べるゲーム定義 (表示順)。
     private struct GameEntry {
@@ -46,21 +47,19 @@ struct GamesHubView: View {
 
     // MARK: - QUIZ STAGE チケット
 
-    private var totalPlays: Int {
-        entries.reduce(0) { $0 + Int(progress.record(for: $1.kind).playCount) }
-    }
-
     /// 自己ベストの正答率をグレードにしたもの (未プレイは nil)。
     private func bestGrade(_ kind: GameKind) -> QuizGrade? {
         progress.bestRatePercent(for: kind).map { quizGradeForRate(ratePercent: UInt32(clamping: $0)) }
     }
 
-    /// いちばん自己ベストの正答率が高いゲーム。
-    private var strongest: (entry: GameEntry, grade: QuizGrade)? {
-        entries
-            .compactMap { e in progress.bestRatePercent(for: e.kind).map { (e, $0) } }
-            .max { $0.1 < $1.1 }
-            .map { ($0.0, quizGradeForRate(ratePercent: UInt32(clamping: $0.1))) }
+    /// 全ゲームを通した最高グレード (自己ベストの正答率がいちばん高いもの)。
+    private var topGrade: QuizGrade? {
+        entries.compactMap { progress.bestRatePercent(for: $0.kind) }.max()
+            .map { quizGradeForRate(ratePercent: UInt32(clamping: $0)) }
+    }
+
+    private func title(_ kind: GameKind) -> String {
+        entries.first { $0.kind == kind }?.title ?? ""
     }
 
     private var stageTicket: some View {
@@ -80,23 +79,23 @@ struct GamesHubView: View {
                 }
                 HStack(alignment: .bottom) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("連続プレイ").font(QS.text(12, weight: .bold)).foregroundStyle(QS.dim)
+                        Text("累計ポイント").font(QS.text(12, weight: .bold)).foregroundStyle(QS.dim)
                         HStack(alignment: .lastTextBaseline, spacing: 6) {
-                            Text("\(progress.displayStreak)").font(QS.num(56))
-                            Text("日").font(QS.text(14, weight: .bold)).foregroundStyle(QS.dim)
+                            Text(progress.totalPoints.formatted()).font(QS.num(56))
+                                .contentTransition(.numericText())
+                            Text("pt").font(QS.text(14, weight: .bold)).foregroundStyle(QS.dim)
                         }
                     }
                     Spacer(minLength: 8)
                     VStack(alignment: .trailing, spacing: 4) {
                         HStack(spacing: 4) {
                             Text("プレイ")
-                            Text("\(totalPlays)").fontWeight(.bold).foregroundStyle(QS.ink)
+                            Text("\(progress.totalPlays)").fontWeight(.bold).foregroundStyle(QS.ink)
                             Text("回")
                         }
                         HStack(alignment: .lastTextBaseline, spacing: 4) {
-                            Text("通算")
-                            Text("\(progress.totalDays)").fontWeight(.bold).foregroundStyle(QS.ink)
-                            Text("日")
+                            Text("最高グレード")
+                            Text(topGrade?.label ?? "—").font(QS.num(18)).foregroundStyle(QS.ink)
                         }
                     }
                     .font(QS.text(12))
@@ -117,27 +116,57 @@ struct GamesHubView: View {
             }
             .accessibilityHidden(true)
 
-            HStack(spacing: 12) {
-                if let strongest {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("いちばん得意").font(QS.text(11)).foregroundStyle(QS.dim)
-                        Text(strongest.entry.title).font(QS.text(15, weight: .bold)).lineLimit(1)
-                    }
-                    Spacer(minLength: 8)
-                    Text(strongest.grade.label).font(QS.num(34))
-                } else {
-                    Text("まずは 1 ゲーム遊んでみよう").font(QS.text(15, weight: .bold))
-                    Spacer(minLength: 0)
-                }
-            }
-            .foregroundStyle(QS.ink)
-            .padding(.leading, 20).padding(.trailing, 20)
-            .frame(minHeight: 64)
+            resumeRow
         }
         .foregroundStyle(QS.ink)
         .background(QS.bg, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .accessibilityElement(children: .combine)
+    }
+
+    /// チケットの下半分。中断したクイズがあれば「つづきから」、無ければ連続プレイ日数。
+    @ViewBuilder
+    private var resumeRow: some View {
+        HStack(spacing: 12) {
+            if let s = resumeStore.latest {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("つづきから").font(QS.text(11)).foregroundStyle(QS.dim)
+                    Text("\(title(s.kind)) · " + String(format: "Q.%02d / %d", min(s.plays.count + 1, s.total), s.total))
+                        .font(QS.text(15, weight: .bold)).lineLimit(1).minimumScaleFactor(0.8)
+                }
+                Spacer(minLength: 8)
+                NavigationLink {
+                    resumeDestination(s)
+                } label: {
+                    Text("再開").font(QS.text(15, weight: .bold)).foregroundStyle(QS.bg)
+                        .padding(.horizontal, 20).frame(height: 44)
+                        .background(QS.ink, in: Capsule())
+                }
+                .buttonStyle(QuizPressStyle())
+                .simultaneousGesture(TapGesture().onEnded { AppAnalytics.tap("games_hub.resume") })
+            } else {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("連続プレイ").font(QS.text(11)).foregroundStyle(QS.dim)
+                    Text(progress.displayStreak > 0 ? "\(progress.displayStreak) 日つづけて遊んでいます"
+                                                    : "今日の 1 ゲームで連続記録が始まります")
+                        .font(QS.text(15, weight: .bold)).lineLimit(1).minimumScaleFactor(0.8)
+                }
+                Spacer(minLength: 0)
+            }
+        }
+        .foregroundStyle(QS.ink)
+        .padding(.leading, 20).padding(.trailing, 12)
+        .frame(minHeight: 68)
+    }
+
+    @ViewBuilder
+    private func resumeDestination(_ s: QuizSuspended) -> some View {
+        switch s.kind {
+        case .idolQuiz: IdolQuizView(selectedBrandIds: Set(s.brandIds), resume: s)
+        case .songSingerQuiz: SongSingerQuizView(selectedBrandIds: Set(s.brandIds), resume: s)
+        case .lyricsQuiz: LyricsQuizResumeView(suspended: s)
+        case .colorMatch: ColorMatchGameView(resume: s)
+        case .introDon: IntroDonHomeView()
+        }
     }
 
     private struct Line: Shape {
@@ -179,7 +208,10 @@ struct GamesHubView: View {
             }
             Spacer(minLength: 8)
             VStack(alignment: .trailing, spacing: 1) {
-                if rec.hasPlayed, let grade = bestGrade(entry.kind) {
+                if let s = resumeStore.suspended(entry.kind) {
+                    Text("プレイ中").font(.imasCaption.weight(.semibold)).foregroundStyle(DS.ink2)
+                    Text(String(format: "Q.%02d", min(s.plays.count + 1, s.total))).font(.imasCaption2).foregroundStyle(DS.ink3)
+                } else if rec.hasPlayed, let grade = bestGrade(entry.kind) {
                     Text(grade.label).font(QS.num(22)).foregroundStyle(DS.ink)
                     Text(bestLabel(entry.kind, rec)).font(.imasCaption2).foregroundStyle(DS.ink3)
                 } else {

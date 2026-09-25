@@ -16,6 +16,8 @@ struct LyricsQuizView: View {
     let songs: [SongWithArtists]
     let publishedSongIds: [String]
     let selectedBrandIds: Set<String>
+    /// 途中でやめたセッションの続き (ゲーム一覧の「つづきから」)。nil なら新しく始める。
+    var resume: QuizSuspended? = nil
 
     /// 歌詞が届いて出題できる状態になった 1 問。
     private struct Prepared {
@@ -60,6 +62,10 @@ struct LyricsQuizView: View {
     @State private var previousBest: Int?
     /// ヒントの段階ごとの獲得点。
     @State private var stageValues: [Int] = []
+    /// このセッションの出題シード (つづきからで同じ出題順を作り直す)。
+    @State private var seed: UInt64 = 0
+    /// `resume` は最初の 1 回だけ使う (「もう一度」は新しいセッション)。
+    @State private var didUseResume = false
     @Environment(\.dismiss) private var dismiss
 
     private var header: QuizStageHeader {
@@ -333,6 +339,13 @@ struct LyricsQuizView: View {
             artworkUrl: answerSong?.song.artworkUrl
         ))
         if !outcome.isLastQuestion { startPrefetch(after: p.cursor) }
+        // 1 問答えるたびに途中経過を残す。保存するのは出題順の位置と曲名だけ (歌詞は残さない)。
+        QuizResumeStore.shared.save(QuizSuspended(
+            kind: .lyricsQuiz, seed: seed, brandIds: Array(selectedBrandIds),
+            nextIndex: p.cursor + 1, asked: Int(tally.asked), correct: Int(tally.correct),
+            points: Int(tally.points), plays: plays, total: sessionLength,
+            lyricsMode: (mode == .title ? LyricsQuizModeSetting.title : .nextLine).rawValue,
+            savedAt: .now))
     }
 
     private func nextQuestion() {
@@ -360,6 +373,7 @@ struct LyricsQuizView: View {
         prefetch?.cancel()
         prefetch = nil
         let sessionResult = lyricsQuizSessionResult(tally: tally)
+        QuizResumeStore.shared.clear(.lyricsQuiz)
         previousBest = GameProgressStore.shared.previousBestScore(for: .lyricsQuiz)
         if tally.asked > 0 {
             let update = GameProgressStore.shared.recordResult(
@@ -409,18 +423,27 @@ struct LyricsQuizView: View {
     private func startSession() {
         prefetch?.cancel()
         prefetch = nil
-        var generator = SystemRandomNumberGenerator()
+        // つづきからは保存したシードで同じ出題順を作り直し、続きの位置から歌詞を取りに行く。
+        let saved = didUseResume ? nil : resume
+        didUseResume = true
+        if let saved {
+            seed = saved.seed
+        } else {
+            var generator = SystemRandomNumberGenerator()
+            seed = generator.next()
+            QuizResumeStore.shared.clear(.lyricsQuiz)
+        }
         questions = lyricsQuizSession(songs: lyricsQuizSongRefs(songs),
                                       publishedSongIds: publishedSongIds,
                                       selectedBrandIds: Array(selectedBrandIds),
-                                      seed: generator.next())
+                                      seed: seed)
         current = nil
         selectedKey = nil
         revealed = 0
-        tally = QuizTally(asked: 0, correct: 0, points: 0)
+        tally = saved?.tally ?? QuizTally(asked: 0, correct: 0, points: 0)
         isLastQuestion = false
         history = []
-        plays = []
+        plays = saved?.plays ?? []
         verdict = nil
         result = nil
         isNewBest = false
@@ -428,16 +451,19 @@ struct LyricsQuizView: View {
         shareArtwork?.cancel()
         shareArtwork = nil
         lastCorrect = nil
-        loadFirst()
+        loadFirst(from: saved?.nextIndex ?? 0, resuming: saved != nil)
     }
 
-    private func loadFirst() {
+    private func loadFirst(from start: Int = 0, resuming: Bool = false) {
         phase = .loading
-        let task = makePrepareTask(from: 0)
+        let task = makePrepareTask(from: start)
         Task {
             do {
                 if let p = try await task.value {
                     show(p)
+                } else if resuming && tally.asked > 0 {
+                    // 続きの曲が残っていない (最後まで答えてから閉じていた)。ここまでの成績で結果へ。
+                    finish()
                 } else {
                     phase = .exhausted
                 }
@@ -519,4 +545,48 @@ struct LyricsQuizHistoryItem: Identifiable, Hashable {
     let revealedHints: Int
     /// シェア画像の背景と一覧に使うジャケット。
     let artworkUrl: String?
+}
+
+// MARK: - つづきから
+
+/// ゲーム一覧の「つづきから」で歌詞クイズを再開する入口。出題に要る曲一覧と
+/// 歌詞の公開曲 id を設定画面と同じ手順で読んでから、続きの問題を出す。
+struct LyricsQuizResumeView: View {
+    let suspended: QuizSuspended
+
+    @State private var songs: [SongWithArtists] = []
+    @State private var publishedIds: [String]?
+    @State private var failed = false
+
+    var body: some View {
+        Group {
+            if let publishedIds {
+                LyricsQuizView(
+                    mode: (LyricsQuizModeSetting(rawValue: suspended.lyricsMode ?? "") ?? .title).core,
+                    songs: songs, publishedSongIds: publishedIds,
+                    selectedBrandIds: Set(suspended.brandIds), resume: suspended)
+            } else if failed {
+                ImasEmptyState(systemImage: "wifi.exclamationmark",
+                               title: "歌詞を読み込めませんでした",
+                               message: "通信状態を確認して、もう一度お試しください。",
+                               actionTitle: "再試行", action: { Task { await load() } })
+            } else {
+                ImasInlineLoading(tint: DS.sys)
+            }
+        }
+        .task { await load() }
+    }
+
+    private func load() async {
+        failed = false
+        if songs.isEmpty {
+            songs = (try? await AppContainer.shared.songReading.songs(
+                filter: SongSearchFilter(), sortOrder: .titleKana, ascending: nil)) ?? []
+        }
+        do {
+            publishedIds = try await AppContainer.shared.lyricsQuizReading.publishedSongIds()
+        } catch {
+            failed = true
+        }
+    }
 }

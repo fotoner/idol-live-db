@@ -9,7 +9,18 @@ import SwiftUI
 /// 難易度ごとの出題の作り方、答え合わせ、正答率は imas-core の `domain/color_match.rs` にあり、
 /// Android と同じ実装を共有する。この画面が担うのは描画・ドラッグ操作・シード調達だけ。
 struct ColorMatchGameView: View {
+    /// 途中でやめたセッションの続き (ゲーム一覧の「つづきから」)。nil なら設定画面から。
+    private let resume: QuizSuspended?
+
+    init(resume: QuizSuspended? = nil) {
+        self.resume = resume
+    }
+
     @State private var imageService = CustomImageService.shared
+    /// このセッションの出題シード (つづきからで同じ出題を作り直す)。
+    @State private var seed: UInt64 = 0
+    /// `resume` は最初の 1 回だけ使う (「もう一度」は新しいセッション)。
+    @State private var didUseResume = false
 
     /// 画面ロード時に 1 回だけ組む母集団一式 (コア)。
     @State private var pools = ColorMatchPools(allColored: [], brandPools: [], selectableBrandIds: [])
@@ -383,15 +394,32 @@ struct ColorMatchGameView: View {
 
     /// 「はじめる」1 回で全問まとめて生成する (問題ごとに FFI を呼ばない)。
     private func startSession() {
+        // つづきからは保存した設定とシードで同じ出題を作り直し、答えた問題の次から始める。
+        let saved = didUseResume ? nil : resume
+        didUseResume = true
+        if let saved {
+            difficulty = saved.difficulty ?? difficulty
+            questionCount = saved.total
+            selectedBrandIds = Set(saved.brandIds)
+            refreshPool()
+            seed = saved.seed
+        } else {
+            var generator = SystemRandomNumberGenerator()
+            seed = generator.next()
+            QuizResumeStore.shared.clear(.colorMatch)
+        }
         guard pool.count >= minimumPool else { return }
-        var generator = SystemRandomNumberGenerator()
         rounds = colorMatchStartGame(pool: pool, difficulty: coreDifficulty,
                                      questionCount: UInt32(clamping: questionCount),
-                                     seed: generator.next())
-        roundIndex = 0; totalCorrect = 0; totalAnswered = 0
-        plays = []; sessionResult = nil; isNewBest = false; previousBest = nil
+                                     seed: seed)
+        roundIndex = saved?.nextIndex ?? 0
+        totalCorrect = saved?.correct ?? 0
+        totalAnswered = saved?.asked ?? 0
+        plays = saved?.plays ?? []; sessionResult = nil; isNewBest = false; previousBest = nil
         sessionDone = false; inGame = true
         startRound()
+        // 最後の問題まで答えてから閉じていたら、そのまま結果へ。
+        if saved != nil && roundIndex >= questionCount { finishSession() }
     }
 
     private func resetToSetup() {
@@ -419,6 +447,12 @@ struct ColorMatchGameView: View {
                 pickedName: nil))
         }
         UINotificationFeedbackGenerator().notificationOccurred(cleared ? .success : .warning)
+        // 1 問答えるたびに途中経過を残す (× で閉じても「つづきから」で戻れる)。
+        QuizResumeStore.shared.save(QuizSuspended(
+            kind: .colorMatch, seed: seed, brandIds: Array(selectedBrandIds),
+            nextIndex: roundIndex + 1, asked: totalAnswered, correct: totalCorrect,
+            points: totalCorrect, plays: plays, total: questionCount,
+            difficulty: difficulty, savedAt: .now))
     }
 
     private func advance() {
@@ -426,17 +460,22 @@ struct ColorMatchGameView: View {
             roundIndex += 1
             startRound()
         } else {
-            previousBest = GameProgressStore.shared.previousBestScore(for: .colorMatch)
-            let update = GameProgressStore.shared.recordResult(.colorMatch, score: totalCorrect, outOf: totalAnswered)
-            isNewBest = update.isNewBest
-            // 点 = 色を当てた人数、「n / N 正解」= 全員当てた問題数。グレードの閾値はコア。
-            sessionResult = quizAccuracyResult(
-                points: UInt32(clamping: totalCorrect), outOf: UInt32(clamping: totalAnswered),
-                correct: UInt32(clamping: plays.filter(\.isCorrect).count),
-                questions: UInt32(clamping: questionCount))
-            judgement = nil
-            sessionDone = true
+            finishSession()
         }
+    }
+
+    private func finishSession() {
+        QuizResumeStore.shared.clear(.colorMatch)
+        previousBest = GameProgressStore.shared.previousBestScore(for: .colorMatch)
+        let update = GameProgressStore.shared.recordResult(.colorMatch, score: totalCorrect, outOf: totalAnswered)
+        isNewBest = update.isNewBest
+        // 点 = 色を当てた人数、「n / N 正解」= 全員当てた問題数。グレードの閾値はコア。
+        sessionResult = quizAccuracyResult(
+            points: UInt32(clamping: totalCorrect), outOf: UInt32(clamping: totalAnswered),
+            correct: UInt32(clamping: plays.filter(\.isCorrect).count),
+            questions: UInt32(clamping: questionCount))
+        judgement = nil
+        sessionDone = true
     }
 
     /// 1 問ぶんの解答状態を戻す (出題自体は `startSession` で生成済み)。
@@ -469,5 +508,6 @@ struct ColorMatchGameView: View {
         let selectable = Set(pools.selectableBrandIds)
         brands = allBrands.filter { selectable.contains($0.id) }
         refreshPool()
+        if resume != nil && !didUseResume { startSession() }
     }
 }

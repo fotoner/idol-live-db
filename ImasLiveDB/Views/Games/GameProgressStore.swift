@@ -70,9 +70,15 @@ final class GameProgressStore {
 
     /// 未プレイのゲームの初期値 (コアの `GameRecord::default()` と同じゼロ値)。
     private static let emptyRecord = GameRecord(lastScore: 0, lastOutOf: 0, bestScore: 0,
-                                                bestOutOf: 0, playCount: 0)
+                                                bestOutOf: 0, playCount: 0, totalPoints: 0)
 
     func record(for kind: GameKind) -> GameRecord { records[kind] ?? Self.emptyRecord }
+
+    /// 全ゲームの累計ポイント (ゲーム一覧の QUIZ STAGE に出す)。
+    var totalPoints: Int { records.values.reduce(0) { $0 + Int($1.totalPoints) } }
+
+    /// 全ゲームの通算プレイ回数。
+    var totalPlays: Int { records.values.reduce(0) { $0 + Int($1.playCount) } }
 
     /// 自己ベストの正答率 (0–100)。まだ記録が無ければ nil
     /// (「—」を出すか今回の率で代用するかは画面ごとに違うので、文言には落とさない)。
@@ -137,6 +143,8 @@ final class GameProgressStore {
         var bestScore: Int
         var bestOutOf: Int
         var playCount: Int
+        /// 後から足した項目。これより前の保存値には無いので Optional で読む (欠けていたら 0)。
+        var totalPoints: Int?
 
         init(_ r: GameRecord) {
             lastScore = Int(r.lastScore)
@@ -144,12 +152,14 @@ final class GameProgressStore {
             bestScore = Int(r.bestScore)
             bestOutOf = Int(r.bestOutOf)
             playCount = Int(r.playCount)
+            totalPoints = Int(r.totalPoints)
         }
 
         var record: GameRecord {
             GameRecord(lastScore: Int32(clamping: lastScore), lastOutOf: Int32(clamping: lastOutOf),
                        bestScore: Int32(clamping: bestScore), bestOutOf: Int32(clamping: bestOutOf),
-                       playCount: Int32(clamping: playCount))
+                       playCount: Int32(clamping: playCount),
+                       totalPoints: Int32(clamping: totalPoints ?? 0))
         }
     }
 

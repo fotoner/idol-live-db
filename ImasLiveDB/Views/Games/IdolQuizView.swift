@@ -15,8 +15,12 @@ struct IdolQuizView: View {
     /// 出題ブランド絞り込み（空集合 = 全ブランド対象）。IdolQuizSetupView から渡す。
     let selectedBrandIds: Set<String>
 
-    init(selectedBrandIds: Set<String> = []) {
+    /// 途中でやめたセッションの続き (ゲーム一覧の「つづきから」)。nil なら新しく始める。
+    let resume: QuizSuspended?
+
+    init(selectedBrandIds: Set<String> = [], resume: QuizSuspended? = nil) {
         self.selectedBrandIds = selectedBrandIds
+        self.resume = resume
     }
 
     /// 1 セッションの出題数 (規則本体はコア。UI は総問数の表示にだけ使う)。
@@ -45,6 +49,10 @@ struct IdolQuizView: View {
     @State private var isNewBest = false
     @State private var previousBest: Int?
     @State private var isLoading = true
+    /// このセッションの出題シード (つづきからで同じ出題を作り直す)。
+    @State private var seed: UInt64 = 0
+    /// `resume` は最初の 1 回だけ使う (「もう一度」は新しいセッション)。
+    @State private var didUseResume = false
     @Environment(\.dismiss) private var dismiss
 
     private var question: IdolQuizQuestion? {
@@ -198,6 +206,15 @@ struct IdolQuizView: View {
         }
         if outcome.isCorrect { UINotificationFeedbackGenerator().notificationOccurred(.success) }
         else { UINotificationFeedbackGenerator().notificationOccurred(.error) }
+        saveProgress()
+    }
+
+    /// 1 問答えるたびに途中経過を残す (× で閉じても「つづきから」で戻れる)。
+    private func saveProgress() {
+        QuizResumeStore.shared.save(QuizSuspended(
+            kind: .idolQuiz, seed: seed, brandIds: Array(selectedBrandIds),
+            nextIndex: index + 1, asked: Int(tally.asked), correct: Int(tally.correct),
+            points: Int(tally.points), plays: plays, total: sessionLength, savedAt: .now))
     }
 
     private func nextQuestion() {
@@ -220,6 +237,7 @@ struct IdolQuizView: View {
         let update = GameProgressStore.shared.recordResult(
             .idolQuiz, score: Int(sessionResult.points), outOf: Int(sessionResult.outOf))
         isNewBest = update.isNewBest
+        QuizResumeStore.shared.clear(.idolQuiz)
         verdict = nil
         result = sessionResult
     }
@@ -237,22 +255,33 @@ struct IdolQuizView: View {
     /// 母集団の条件は IdolQuizSetupView の見積りと同じ関数が持つので、
     /// 「開始できるのに候補不足」というズレが起きない。
     private func startSession() {
-        var generator = SystemRandomNumberGenerator()
+        // つづきからは保存したシードで同じ出題を作り直し、答えた所まで進める。
+        let saved = didUseResume ? nil : resume
+        didUseResume = true
+        if let saved {
+            seed = saved.seed
+        } else {
+            var generator = SystemRandomNumberGenerator()
+            seed = generator.next()
+            QuizResumeStore.shared.clear(.idolQuiz)
+        }
         questions = idolQuizSession(idols: idolQuizRefs(idols),
                                     selectedBrandIds: Array(selectedBrandIds),
-                                    seed: generator.next())
-        index = 0
+                                    seed: seed)
+        index = saved?.nextIndex ?? 0
         selectedId = nil
         opened = []
-        tally = QuizTally(asked: 0, correct: 0, points: 0)
+        tally = saved?.tally ?? QuizTally(asked: 0, correct: 0, points: 0)
         isLastQuestion = false
-        plays = []
+        plays = saved?.plays ?? []
         verdict = nil
         result = nil
         isNewBest = false
         previousBest = nil
         refreshHint()
         baseValue = Int(hint.currentValue)
+        // 最後の問題まで答えてから閉じていたら、そのまま結果へ。
+        if saved != nil && index >= questions.count && !questions.isEmpty { finish() }
     }
 
     /// 開示範囲と残りヒントを引き直す (出題が変わった / ヒントを開いた / 解答した とき)。

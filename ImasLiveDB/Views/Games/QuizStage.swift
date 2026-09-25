@@ -1049,7 +1049,7 @@ extension QuizStageScaffold where Trailing == EmptyView {
 // MARK: - 1 問ごとの記録
 
 /// 解答済みの 1 問。ペンライト・連続正解・結果画面の「見直す」の元になる。
-struct QuizStagePlay {
+struct QuizStagePlay: Codable {
     let number: Int
     let isCorrect: Bool
     let answerName: String

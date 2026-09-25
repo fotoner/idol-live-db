@@ -27,7 +27,7 @@ enum class GameKind(val displayName: String, val scoreIsPercent: Boolean) {
  * (uniffi 生成なので Kotlin の既定引数を持てず、初期値をここで名付ける)。
  */
 fun emptyGameRecord(): GameRecord =
-    GameRecord(lastScore = 0, lastOutOf = 0, bestScore = 0, bestOutOf = 0, playCount = 0)
+    GameRecord(lastScore = 0, lastOutOf = 0, bestScore = 0, bestOutOf = 0, playCount = 0, totalPoints = 0)
 
 /** 未達成の初期値。理由は [emptyGameRecord] と同じ。 */
 private fun emptyStreakState(): GameStreakState =
@@ -131,7 +131,9 @@ class GameProgressStore(context: Context) {
                     lastOutOf = o.optInt("lastOutOf"),
                     bestScore = o.optInt("bestScore"),
                     bestOutOf = o.optInt("bestOutOf"),
-                    playCount = o.optInt("playCount")
+                    playCount = o.optInt("playCount"),
+                    // 後から足した項目。古い保存値には無いので 0 で読む。
+                    totalPoints = o.optInt("totalPoints")
                 )
             }.toMap()
         } catch (e: Exception) {
@@ -148,6 +150,7 @@ class GameProgressStore(context: Context) {
                 put("bestScore", rec.bestScore)
                 put("bestOutOf", rec.bestOutOf)
                 put("playCount", rec.playCount)
+                put("totalPoints", rec.totalPoints)
             })
         }
         prefs.edit().putString(KEY_RECORDS, json.toString()).apply()

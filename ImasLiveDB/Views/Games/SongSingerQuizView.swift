@@ -13,8 +13,12 @@ struct SongSingerQuizView: View {
     /// 出題ブランド絞り込み（空集合 = 全ブランド対象）。SongSingerQuizSetupView から渡す。
     let selectedBrandIds: Set<String>
 
-    init(selectedBrandIds: Set<String> = []) {
+    /// 途中でやめたセッションの続き (ゲーム一覧の「つづきから」)。nil なら新しく始める。
+    let resume: QuizSuspended?
+
+    init(selectedBrandIds: Set<String> = [], resume: QuizSuspended? = nil) {
         self.selectedBrandIds = selectedBrandIds
+        self.resume = resume
     }
 
     /// 1 セッションの出題数 (規則本体はコア。UI は総問数の表示にだけ使う)。
@@ -49,6 +53,10 @@ struct SongSingerQuizView: View {
     @State private var isNewBest = false
     @State private var previousBest: Int?
     @State private var isLoading = true
+    /// このセッションの出題シード (つづきからで同じ出題を作り直す)。
+    @State private var seed: UInt64 = 0
+    /// `resume` は最初の 1 回だけ使う (「もう一度」は新しいセッション)。
+    @State private var didUseResume = false
     @Environment(\.dismiss) private var dismiss
 
     private var question: SongSingerQuizQuestion? {
@@ -196,6 +204,11 @@ struct SongSingerQuizView: View {
                                   detail: "「\(song.title)」" + (song.cdTitle.map { " · \($0)" } ?? ""))
         }
         UINotificationFeedbackGenerator().notificationOccurred(outcome.isCorrect ? .success : .error)
+        // 1 問答えるたびに途中経過を残す (× で閉じても「つづきから」で戻れる)。
+        QuizResumeStore.shared.save(QuizSuspended(
+            kind: .songSingerQuiz, seed: seed, brandIds: Array(selectedBrandIds),
+            nextIndex: index + 1, asked: Int(tally.asked), correct: Int(tally.correct),
+            points: Int(tally.points), plays: plays, total: sessionLength, savedAt: .now))
     }
 
     private func nextQuestion() {
@@ -218,6 +231,7 @@ struct SongSingerQuizView: View {
         let update = GameProgressStore.shared.recordResult(
             .songSingerQuiz, score: Int(sessionResult.points), outOf: Int(sessionResult.outOf))
         isNewBest = update.isNewBest
+        QuizResumeStore.shared.clear(.songSingerQuiz)
         verdict = nil
         result = sessionResult
     }
@@ -239,22 +253,33 @@ struct SongSingerQuizView: View {
 
     /// 1 ゲーム分の出題をコアに一括生成させる (問題ごとに FFI を呼ばない)。
     private func startSession() {
-        var generator = SystemRandomNumberGenerator()
+        // つづきからは保存したシードで同じ出題を作り直し、答えた所まで進める。
+        let saved = didUseResume ? nil : resume
+        didUseResume = true
+        if let saved {
+            seed = saved.seed
+        } else {
+            var generator = SystemRandomNumberGenerator()
+            seed = generator.next()
+            QuizResumeStore.shared.clear(.songSingerQuiz)
+        }
         questions = songSingerQuizSession(rows: rows,
                                           singers: songQuizSingerRefs(singers),
                                           selectedBrandIds: Array(selectedBrandIds),
-                                          seed: generator.next())
-        index = 0
+                                          seed: seed)
+        index = saved?.nextIndex ?? 0
         selectedId = nil
         revealed = 0
-        tally = QuizTally(asked: 0, correct: 0, points: 0)
+        tally = saved?.tally ?? QuizTally(asked: 0, correct: 0, points: 0)
         isLastQuestion = false
-        plays = []
+        plays = saved?.plays ?? []
         verdict = nil
         result = nil
         isNewBest = false
         previousBest = nil
         if let song = question.flatMap({ songById[$0.songId] }) { refreshHint(song) }
+        // 最後の問題まで答えてから閉じていたら、そのまま結果へ。
+        if saved != nil && index >= questions.count && !questions.isEmpty { finish() }
     }
 
     /// 開示段階と次のヒントを引き直す (出題が変わった / ヒントを開いた / 解答した とき)。

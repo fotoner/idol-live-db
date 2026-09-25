@@ -44,6 +44,9 @@ pub struct GameRecord {
     pub best_out_of: i32,
     /// 通算プレイ回数。
     pub play_count: i32,
+    /// 通算の獲得ポイント (遊ぶたびに今回のスコアを足す)。ゲーム一覧の「累計ポイント」。
+    /// この項目が入る前の保存値には無いので、各 OS は欠けていたら 0 として読む。
+    pub total_points: i32,
 }
 
 impl GameRecord {
@@ -191,6 +194,7 @@ pub fn apply_result(
         best_score: if beat_best { score } else { before.best_score },
         best_out_of: if beat_best { out_of } else { before.best_out_of },
         play_count: before.play_count.saturating_add(1),
+        total_points: before.total_points.saturating_add(score.max(0)),
     };
 
     GameProgressUpdate {
@@ -255,10 +259,21 @@ mod tests {
         let got = play(&GameRecord::default(), &GameStreakState::default(), 3, 5);
         assert_eq!(
             got.record,
-            GameRecord { last_score: 3, last_out_of: 5, best_score: 3, best_out_of: 5, play_count: 1 }
+            GameRecord { last_score: 3, last_out_of: 5, best_score: 3, best_out_of: 5, play_count: 1, total_points: 3 }
         );
         assert!(!got.is_new_best, "初回プレイで自己ベスト更新バッジが出ている");
         assert!(got.did_record);
+    }
+
+    /// 累計ポイントは遊ぶたびに今回のスコアを足す (自己ベストかどうかに関係なく)。
+    /// 記録しないセッション (出題 0 問) は足さない。
+    #[test]
+    fn total_points_accumulate_every_recorded_play() {
+        let first = play(&GameRecord::default(), &GameStreakState::default(), 7, 10);
+        let second = play(&first.record, &first.streak, 4, 10);
+        assert_eq!(second.record.total_points, 11);
+        let empty = play(&second.record, &second.streak, 0, 0);
+        assert_eq!(empty.record.total_points, 11);
     }
 
     /// 全問不正解でも初回は自己ベストとして残る (`best_rate` の `-1` センチネル)。
@@ -274,7 +289,7 @@ mod tests {
     /// 自己ベストは生スコアではなく率で比べる: 8/10 (0.8) より 5/5 (1.0) が上。
     #[test]
     fn best_is_compared_by_rate_not_raw_score() {
-        let before = GameRecord { last_score: 8, last_out_of: 10, best_score: 8, best_out_of: 10, play_count: 1 };
+        let before = GameRecord { last_score: 8, last_out_of: 10, best_score: 8, best_out_of: 10, play_count: 1, total_points: 0 };
         let got = play(&before, &GameStreakState::default(), 5, 5);
         assert_eq!((got.record.best_score, got.record.best_out_of), (5, 5));
         assert!(got.is_new_best);
@@ -284,7 +299,7 @@ mod tests {
     /// (生スコアは 9 > 5 だが率は下)。
     #[test]
     fn higher_raw_score_with_lower_rate_does_not_update_best() {
-        let before = GameRecord { last_score: 5, last_out_of: 5, best_score: 5, best_out_of: 5, play_count: 1 };
+        let before = GameRecord { last_score: 5, last_out_of: 5, best_score: 5, best_out_of: 5, play_count: 1, total_points: 0 };
         let got = play(&before, &GameStreakState::default(), 9, 10);
         assert_eq!((got.record.best_score, got.record.best_out_of), (5, 5));
         assert!(!got.is_new_best);
@@ -295,7 +310,7 @@ mod tests {
     /// 同率は更新しない (先に出した記録を残す)。4/5 と 8/10 はどちらも 0.8。
     #[test]
     fn tie_rate_keeps_the_earlier_best() {
-        let before = GameRecord { last_score: 4, last_out_of: 5, best_score: 4, best_out_of: 5, play_count: 1 };
+        let before = GameRecord { last_score: 4, last_out_of: 5, best_score: 4, best_out_of: 5, play_count: 1, total_points: 0 };
         let got = play(&before, &GameStreakState::default(), 8, 10);
         assert_eq!((got.record.best_score, got.record.best_out_of), (4, 5));
         assert!(!got.is_new_best);
@@ -307,7 +322,7 @@ mod tests {
     /// プレイ回数も連続記録も伸びない (遊んでいないので当然)。
     #[test]
     fn zero_out_of_records_nothing() {
-        let before = GameRecord { last_score: 4, last_out_of: 5, best_score: 4, best_out_of: 5, play_count: 3 };
+        let before = GameRecord { last_score: 4, last_out_of: 5, best_score: 4, best_out_of: 5, play_count: 3, total_points: 0 };
         let streak = cleared(YESTERDAY, 2, 9);
         let got = play(&before, &streak, 0, 0);
         assert!(!got.did_record);
@@ -328,7 +343,7 @@ mod tests {
     /// 挙動を「直す」のではなく、出荷済みの式をそのまま固定するためのテスト。
     #[test]
     fn degenerate_record_follows_the_shipped_formula() {
-        let broken = GameRecord { last_score: 0, last_out_of: 0, best_score: 0, best_out_of: 0, play_count: 1 };
+        let broken = GameRecord { last_score: 0, last_out_of: 0, best_score: 0, best_out_of: 0, play_count: 1, total_points: 0 };
         // best_rate は -1 なので、0 点 (率 0) でも「更新」と判定される。
         let got = play(&broken, &GameStreakState::default(), 0, 0);
         assert!(got.is_new_best);
