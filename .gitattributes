@@ -1,0 +1,11 @@
+# 生成物は PR の diff で畳む (見るのは i18n/catalog のカタログと呼び出し側)。
+# 作るのは python3 tools/i18n/i18n.py generate。手で直さない。生成器は LF で書くので、checkout も LF に揃える
+# (Windows の core.autocrlf で生成物が全部「変更あり」に見えないように)。
+# i18n/TRANSLATION.md も生成物だが、用語集・文体の変更を文章の差分として読むので畳まない。
+ImasLiveDB/Shared/L10n/Generated/** linguist-generated=true text eol=lf
+ImasLiveDB/L10n/Generated/** linguist-generated=true text eol=lf
+ImasLiveDBWidget/L10n/Generated/** linguist-generated=true text eol=lf
+ImasLiveDBTests/L10n/Generated/** linguist-generated=true text eol=lf
+ImasLiveDB-Android/app/i18n/** linguist-generated=true text eol=lf
+ImasLiveDB-Android/app/src/*/kotlin/com/fugaif/imaslivedb/i18n/generated/** linguist-generated=true text eol=lf
+i18n/TRANSLATION.md text eol=lf

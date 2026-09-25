@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Debug ビルドにだけ足す設定。main の AndroidManifest.xml に合流する。
+
+  android:localeConfig は Android 13+ の「アプリの言語」に出す言語の一覧。xml/locale_config.xml は
+  i18n/config.json から生成する (app/i18n/debug/xml/)。Release は言語が ja だけなので付けない
+  (付けると、選べる言語が ja しか無いアプリが端末の設定の一覧に出る)。release の言語が 2 つ以上になったら
+  main の AndroidManifest.xml に移す (そのとき生成器は app/i18n/main/xml/ にも出す)。
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application android:localeConfig="@xml/locale_config" />
+
+</manifest>
