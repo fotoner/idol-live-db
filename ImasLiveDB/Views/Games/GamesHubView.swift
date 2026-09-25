@@ -24,6 +24,8 @@ struct GamesHubView: View {
               blurb: "曲名から歌っているアイドルを"),
         .init(kind: .lyricsQuiz, systemImage: "text.quote", title: "歌詞クイズ",
               blurb: "曲名当て／続きの行当て"),
+        .init(kind: .setlistQuiz, systemImage: "list.number", title: "セトリ当て",
+              blurb: "セトリの空欄に入る曲を当てる"),
         .init(kind: .introDon, systemImage: "music.note.list", title: "イントロドン",
               blurb: "イントロを聴いて曲を当てる"),
         .init(kind: .colorMatch, systemImage: "paintpalette.fill", title: "メンバーカラー合わせ",
@@ -164,6 +166,7 @@ struct GamesHubView: View {
         case .idolQuiz: IdolQuizView(selectedBrandIds: Set(s.brandIds), resume: s)
         case .songSingerQuiz: SongSingerQuizView(selectedBrandIds: Set(s.brandIds), resume: s)
         case .lyricsQuiz: LyricsQuizResumeView(suspended: s)
+        case .setlistQuiz: SetlistQuizView(selectedBrandIds: Set(s.brandIds), resume: s)
         case .colorMatch: ColorMatchGameView(resume: s)
         case .introDon: IntroDonHomeView()
         }
@@ -273,6 +276,7 @@ struct GamesHubView: View {
         case .songSingerQuiz: SongSingerQuizSetupView()
         case .colorMatch: ColorMatchGameView()
         case .lyricsQuiz: LyricsQuizSetupView()
+        case .setlistQuiz: SetlistQuizSetupView()
         }
     }
 }

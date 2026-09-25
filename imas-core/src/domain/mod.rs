@@ -35,6 +35,7 @@ pub mod quiz_generation;
 pub mod lyrics_quiz;
 pub mod color_match;
 pub mod color_quiz;
+pub mod setlist_quiz;
 pub mod game_progress;
 pub mod backup_import_summary;
 pub mod daily_pick;

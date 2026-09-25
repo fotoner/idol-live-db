@@ -56,6 +56,9 @@ final class AppContainer: Sendable {
     /// セトリの機械予測の読み取りの実装。
     let setlistForecastReading: any SetlistForecastReading
 
+    /// セトリ当てクイズの出題の実装。
+    let setlistQuizReading: any SetlistQuizReading
+
     private init() {
         let snapshot = CoreSnapshotManager()
         coreSnapshot = snapshot
@@ -72,6 +75,7 @@ final class AppContainer: Sendable {
         globalSearchReading = CoreGlobalSearchRepository(snapshot: snapshot)
         performanceEvidenceReading = CorePerformanceEvidenceRepository(snapshot: snapshot)
         setlistForecastReading = CoreSetlistForecastRepository(snapshot: snapshot)
+        setlistQuizReading = CoreSetlistQuizRepository(snapshot: snapshot)
         editFeedReading = GRDBEditFeedRepository(database: .shared, snapshot: snapshot)
 
         // ローカル編集 (モデレーターの .applied 経路やセトリ取込) は CloudKit sync を通らず

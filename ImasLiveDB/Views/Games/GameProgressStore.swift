@@ -19,6 +19,7 @@ enum GameKind: String, CaseIterable, Codable, Sendable {
     case songSingerQuiz
     case colorMatch
     case lyricsQuiz
+    case setlistQuiz
 
     /// 表示名 (リザルト・シェア文言で使う)。
     var displayName: String {
@@ -28,6 +29,7 @@ enum GameKind: String, CaseIterable, Codable, Sendable {
         case .songSingerQuiz: return "ソロ曲クイズ"
         case .colorMatch:     return "カラーマッチ"
         case .lyricsQuiz:     return "歌詞クイズ"
+        case .setlistQuiz:    return "セトリ当て"
         }
     }
 
@@ -35,7 +37,7 @@ enum GameKind: String, CaseIterable, Codable, Sendable {
     var scoreIsPercent: Bool {
         switch self {
         case .colorMatch: return true
-        case .introDon, .idolQuiz, .songSingerQuiz, .lyricsQuiz: return false
+        case .introDon, .idolQuiz, .songSingerQuiz, .lyricsQuiz, .setlistQuiz: return false
         }
     }
 }
