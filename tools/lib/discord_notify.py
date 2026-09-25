@@ -21,7 +21,7 @@ import urllib.request
 WEB_BASE = "https://idollivedb.fugaapp.site"
 DISCORD_API = "https://discord.com/api/v10"
 # 運営追加のチャンネル。環境変数 DISCORD_DATA_CHANNEL_ID で上書きできる。
-DATA_CHANNEL_ID = ""
+DATA_CHANNEL_ID = "1552847460559364176"  # #新着データ
 KEYCHAIN_SERVICE = "discord-idollivedb-bot"
 LIST_LIMIT = 8
 
