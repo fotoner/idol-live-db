@@ -15,10 +15,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material.icons.filled.QuestionMark
+import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -32,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -94,8 +98,12 @@ data class SongSingerQuizUiState(
     val questions: List<SongQuestion> = emptyList(),
     val index: Int = 0,
     val selectedId: String? = null,
-    /** 0=曲名のみ / 1=ジャケット / 2=プレビュー。 */
-    val revealed: Int = 0,
+    /** この問題で開いたヒント (開いた順)。点数はコアがここから算出する。 */
+    val opened: List<SongQuizHintKind> = emptyList(),
+    /** この問題で出せるヒント (タイルの並び順)。データが無いものは載らない。 */
+    val available: List<SongQuizHintKind> = emptyList(),
+    /** ブランド id → 短縮名 (ブランドヒントの表示用)。 */
+    val brandNames: Map<String, String> = emptyMap(),
     /** 開示範囲・次のヒント・いまの獲得点。コアが返す。 */
     val hintState: SongSingerQuizHintState? = null,
     val tally: QuizTally = QuizTally(asked = 0u, correct = 0u, points = 0u),
@@ -112,6 +120,7 @@ class SongSingerQuizViewModel(app: Application, private val selectedBrandIds: Se
     private val idolRepository = AppModule.from(app).idolRepository
     private val songRepository = AppModule.from(app).songRepository
     private val progressStore = AppModule.from(app).gameProgressStore
+    private val stats = AppModule.from(app).statsRepository
 
     private val _uiState = MutableStateFlow(SongSingerQuizUiState())
     val uiState: StateFlow<SongSingerQuizUiState> = _uiState.asStateFlow()
@@ -119,13 +128,15 @@ class SongSingerQuizViewModel(app: Application, private val selectedBrandIds: Se
     /** 出題生成に渡した並び。コアが返す index はこの配列を指す。 */
     private var singers: List<Idol> = emptyList()
     private var rows: List<SoloOriginalSingerRow> = emptyList()
+    private var brandNames: Map<String, String> = emptyMap()
 
     init {
         viewModelScope.launch {
             singers = idolRepository.fetchIdols()
             rows = songRepository.fetchSoloOriginalSingers()
+            brandNames = stats.fetchBrands().associate { it.id to it.shortName }
             _uiState.value = withHintState(
-                SongSingerQuizUiState(isLoading = false, questions = makeSession())
+                SongSingerQuizUiState(isLoading = false, questions = makeSession(), brandNames = brandNames)
             )
         }
     }
@@ -152,28 +163,46 @@ class SongSingerQuizViewModel(app: Application, private val selectedBrandIds: Se
         }
     }
 
+    /**
+     * この問題で出せるヒント (iOS `availableHints` と同じ条件)。データが無いもの、
+     * 選択肢が全員同じブランドのときのブランドは外す。
+     */
+    private fun availableHints(q: SongQuestion): List<SongQuizHintKind> = buildList {
+        if (!q.song.cdTitle.isNullOrEmpty()) add(SongQuizHintKind.CD)
+        if (brandNames[q.answer.brandId] != null && q.choices.map { it.brandId }.toSet().size > 1) {
+            add(SongQuizHintKind.BRAND)
+        }
+        if (!q.answer.color.isNullOrEmpty()) add(SongQuizHintKind.COLOR)
+        if (!q.song.artworkUrl.isNullOrEmpty()) add(SongQuizHintKind.ARTWORK)
+        if (!q.song.previewUrl.isNullOrEmpty()) add(SongQuizHintKind.PREVIEW)
+    }
+
     /** 開示状態を引き直す。ヒント開封・解答・次問のたびに 1 回だけ呼ぶ。 */
     private fun withHintState(state: SongSingerQuizUiState): SongSingerQuizUiState {
-        val q = state.question ?: return state.copy(hintState = null)
+        val q = state.question ?: return state.copy(hintState = null, available = emptyList())
+        val available = availableHints(q)
         return state.copy(
+            available = available,
             hintState = songSingerQuizHintState(
-                revealed = state.revealed.toUInt(),
-                hasPreview = !q.song.previewUrl.isNullOrEmpty(),
+                opened = state.opened,
+                available = available,
                 answered = state.selectedId != null
             )
         )
     }
 
-    fun revealArtwork() {
-        _uiState.value = withHintState(_uiState.value.copy(revealed = 1))
-    }
-
-    fun revealPreview() {
+    fun openHint(kind: SongQuizHintKind) {
         val s = _uiState.value
         val song = s.question?.song ?: return
-        _uiState.value = withHintState(s.copy(revealed = 2))
-        song.previewUrl?.takeIf { it.isNotEmpty() }?.let {
-            AudioPreviewManager.togglePreview(it, song.id)
+        if (s.selectedId != null || s.opened.contains(kind)) return
+        // 開けるか (試聴はジャケットの後) はコアが返すヒント一覧で決まる。
+        val option = s.hintState?.hints?.firstOrNull { it.kind == kind } ?: return
+        if (option.locked) return
+        _uiState.value = withHintState(s.copy(opened = s.opened + kind))
+        if (kind == SongQuizHintKind.PREVIEW) {
+            song.previewUrl?.takeIf { it.isNotEmpty() }?.let {
+                AudioPreviewManager.togglePreview(it, song.id)
+            }
         }
     }
 
@@ -183,7 +212,7 @@ class SongSingerQuizViewModel(app: Application, private val selectedBrandIds: Se
         if (s.selectedId != null) return
         AudioPreviewManager.stop()
         val outcome = songSingerQuizAnswer(
-            revealed = s.revealed.toUInt(),
+            opened = s.opened,
             pickedIdolId = idol.id,
             answerIdolId = q.answer.id,
             before = s.tally
@@ -209,7 +238,7 @@ class SongSingerQuizViewModel(app: Application, private val selectedBrandIds: Se
     fun nextQuestion() {
         AudioPreviewManager.stop()
         val s = _uiState.value
-        _uiState.value = withHintState(s.copy(index = s.index + 1, selectedId = null, revealed = 0))
+        _uiState.value = withHintState(s.copy(index = s.index + 1, selectedId = null, opened = emptyList()))
     }
 
     fun finish() {
@@ -231,7 +260,7 @@ class SongSingerQuizViewModel(app: Application, private val selectedBrandIds: Se
         AudioPreviewManager.stop()
         viewModelScope.launch {
             _uiState.value = withHintState(
-                SongSingerQuizUiState(isLoading = false, questions = makeSession())
+                SongSingerQuizUiState(isLoading = false, questions = makeSession(), brandNames = brandNames)
             )
         }
     }
@@ -285,7 +314,7 @@ fun SongSingerQuizScreen(
                         total = QUIZ_SESSION_LENGTH, points = state.tally.points.toInt()
                     )
                     SongCard(question, hintState, answered = state.selectedId != null)
-                    if (state.selectedId == null) SongHintArea(hintState, viewModel)
+                    SongHintTiles(question, state.available, hintState, state.brandNames) { viewModel.openHint(it) }
                     IdolChoiceGrid(choices = question.choices, answer = question.answer, selectedId = state.selectedId) { idol, _ ->
                         viewModel.pick(idol)
                     }
@@ -320,8 +349,9 @@ private fun SongCard(q: SongQuestion, hintState: SongSingerQuizHintState, answer
             ) { Icon(Icons.Filled.QuestionMark, null, tint = DS.ink3, modifier = Modifier.size(44.dp)) }
         }
         Text(q.song.title, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = DS.ink, textAlign = TextAlign.Center)
-        q.song.cdTitle?.takeIf { it.isNotEmpty() }?.let { Text(it, fontSize = 12.sp, color = DS.ink3) }
+        // 収録CD はヒントなので、解答前は開くまで出さない。
         if (answered) {
+            q.song.cdTitle?.takeIf { it.isNotEmpty() }?.let { Text(it, fontSize = 12.sp, color = DS.ink3) }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ImasAvatar(label = q.answer.name, seed = q.answer.color, brand = q.answer.brandId, size = 28.dp)
                 Text("正解: ${q.answer.name}", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
@@ -330,16 +360,62 @@ private fun SongCard(q: SongQuestion, hintState: SongSingerQuizHintState, answer
     }
 }
 
+private fun SongQuizHintKind.title(): String = when (this) {
+    SongQuizHintKind.CD -> "収録CD"
+    SongQuizHintKind.BRAND -> "ブランド"
+    SongQuizHintKind.COLOR -> "イメージカラー"
+    SongQuizHintKind.ARTWORK -> "ジャケット"
+    SongQuizHintKind.PREVIEW -> "試聴"
+}
+
+private fun SongQuizHintKind.icon(): ImageVector = when (this) {
+    SongQuizHintKind.CD -> Icons.Filled.Album
+    SongQuizHintKind.BRAND -> Icons.Filled.Sell
+    SongQuizHintKind.COLOR -> Icons.Filled.Palette
+    SongQuizHintKind.ARTWORK -> Icons.Filled.Photo
+    SongQuizHintKind.PREVIEW -> Icons.Filled.PlayCircle
+}
+
+/**
+ * 出せるヒントをタイルで並べる (3 列、はみ出したら折り返す)。
+ * 未開封 = 「名前 −コスト」で開く / ロック中 = 押せない / 開封済み = 中身を表示。
+ * 開いたか・コスト・ロックはすべてコアの [SongSingerQuizHintState] が返す。
+ */
 @Composable
-private fun SongHintArea(hintState: SongSingerQuizHintState, viewModel: SongSingerQuizViewModel) {
-    // 次に開けるヒント (段階と、開いた後の獲得点) はコアが決める。
-    val hint = hintState.nextHint ?: return
-    when (hint.kind) {
-        SongQuizHintKind.ARTWORK -> QuizHintButton(
-            icon = Icons.Filled.Photo, title = "ヒント: ジャケットを見る", nextValue = hint.nextValue.toInt()
-        ) { viewModel.revealArtwork() }
-        SongQuizHintKind.PREVIEW -> QuizHintButton(
-            icon = Icons.Filled.PlayCircle, title = "ヒント: プレビューを再生する", nextValue = hint.nextValue.toInt()
-        ) { viewModel.revealPreview() }
+private fun SongHintTiles(
+    q: SongQuestion,
+    available: List<SongQuizHintKind>,
+    hintState: SongSingerQuizHintState,
+    brandNames: Map<String, String>,
+    onOpen: (SongQuizHintKind) -> Unit
+) {
+    if (available.isEmpty()) return
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        available.chunked(3).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                row.forEach { kind ->
+                    Box(Modifier.weight(1f)) {
+                        if (hintState.shown.contains(kind)) {
+                            when (kind) {
+                                SongQuizHintKind.CD -> QuizHintTile(kind.title(), kind.icon(), value = q.song.cdTitle ?: "—")
+                                SongQuizHintKind.BRAND -> QuizHintTile(kind.title(), kind.icon(), value = brandNames[q.answer.brandId] ?: "—")
+                                SongQuizHintKind.COLOR -> QuizHintTile(kind.title(), kind.icon(), value = q.answer.color ?: "—", swatchHex = q.answer.color)
+                                SongQuizHintKind.ARTWORK -> QuizHintTile(kind.title(), kind.icon(), value = "表示中")
+                                SongQuizHintKind.PREVIEW -> QuizHintTile(kind.title(), kind.icon(), value = "再生中")
+                            }
+                        } else {
+                            val option = hintState.hints.firstOrNull { it.kind == kind }
+                            if (option != null) {
+                                QuizHintTile(
+                                    kind.title(), kind.icon(), value = null, cost = option.cost.toInt(), locked = option.locked,
+                                    onClick = { onOpen(kind) }
+                                )
+                            }
+                        }
+                    }
+                }
+                repeat(3 - row.size) { Box(Modifier.weight(1f)) }
+            }
+        }
     }
 }
