@@ -32,6 +32,8 @@ import com.fugaif.imaslivedb.ui.edit.RecentEditsScreen
 import com.fugaif.imaslivedb.ui.events.EventDetailScreen
 import com.fugaif.imaslivedb.ui.events.EventListScreen
 import com.fugaif.imaslivedb.ui.events.SetlistScreen
+import com.fugaif.imaslivedb.data.games.GameKind
+import com.fugaif.imaslivedb.di.AppModule
 import com.fugaif.imaslivedb.ui.games.ColorMatchGameScreen
 import com.fugaif.imaslivedb.ui.games.GamesHubScreen
 import com.fugaif.imaslivedb.ui.games.IdolQuizScreen
@@ -376,8 +378,27 @@ internal fun NavGraphBuilder.produceNavGraph(navController: NavHostController) {
             onNavigateToColorMatch = { navController.navigate(NavRoutes.GamesColorMatch.route) },
             onNavigateToIdolQuizSetup = { navController.navigate(NavRoutes.GamesIdolQuizSetup.route) },
             onNavigateToSongQuizSetup = { navController.navigate(NavRoutes.GamesSongQuizSetup.route) },
-            onNavigateToSetlistQuizSetup = { navController.navigate(NavRoutes.GamesSetlistQuizSetup.route) }
+            onNavigateToSetlistQuizSetup = { navController.navigate(NavRoutes.GamesSetlistQuizSetup.route) },
+            onResume = { navController.navigate(NavRoutes.GamesResume.createRoute(it)) }
         )
+    }
+    composable(NavRoutes.GamesResume.ROUTE) { backStackEntry ->
+        // 途中経過は開いた時点のものを 1 回だけ読む (遊ぶと上書きされるので、読み直さない)。
+        val context = LocalContext.current
+        val kindName = backStackEntry.arguments?.getString("kind")
+        val suspended = remember(kindName) {
+            GameKind.entries.firstOrNull { it.name == kindName }
+                ?.let { AppModule.from(context).quizResumeStore.suspended(it) }
+        }
+        val onBack: () -> Unit = { navController.popBackStack() }
+        when (suspended?.kind) {
+            GameKind.idolQuiz -> IdolQuizScreen(selectedBrandIds = suspended.brandIds.toSet(), onBack = onBack, resume = suspended)
+            GameKind.songSingerQuiz -> SongSingerQuizScreen(selectedBrandIds = suspended.brandIds.toSet(), onBack = onBack, resume = suspended)
+            GameKind.setlistQuiz -> SetlistQuizScreen(selectedBrandIds = suspended.brandIds.toSet(), onBack = onBack, resume = suspended)
+            GameKind.colorMatch -> ColorMatchGameScreen(onBack = onBack, resume = suspended)
+            // 消えていた (別の画面で遊び終えた等) ときは一覧へ戻す。
+            else -> LaunchedEffect(Unit) { navController.popBackStack() }
+        }
     }
     composable(NavRoutes.IntroDonHome.route) {
         IntroDonHomeScreen(

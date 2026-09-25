@@ -37,6 +37,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.games.GameKind
 import com.fugaif.imaslivedb.data.games.QuizStagePlay
+import com.fugaif.imaslivedb.data.games.QuizSuspended
 import com.fugaif.imaslivedb.data.games.longestStreak
 import com.fugaif.imaslivedb.data.games.setlistCaption
 import com.fugaif.imaslivedb.data.games.streak
@@ -91,9 +92,15 @@ data class SetlistQuizUiState(
     val question: SetlistQuizQuestion? get() = questions.getOrNull(index)
 }
 
-class SetlistQuizViewModel(app: Application, private val selectedBrandIds: Set<String>) : AndroidViewModel(app) {
+class SetlistQuizViewModel(
+    app: Application,
+    private val selectedBrandIds: Set<String>,
+    /** つづきから。最初の 1 回だけ使う (「もう一度」は新しいセッション)。 */
+    private var resume: QuizSuspended? = null
+) : AndroidViewModel(app) {
     private val snapshots = AppModule.from(app).snapshotStoreProvider
     private val progressStore = AppModule.from(app).gameProgressStore
+    private val resumeStore = AppModule.from(app).quizResumeStore
 
     private val _uiState = MutableStateFlow(SetlistQuizUiState())
     val uiState: StateFlow<SetlistQuizUiState> = _uiState.asStateFlow()
@@ -153,6 +160,19 @@ class SetlistQuizViewModel(app: Application, private val selectedBrandIds: Set<S
                 )
             )
         )
+        saveProgress()
+    }
+
+    /** 1 問答えるたびに途中経過を残す (× で閉じても「つづきから」で戻れる)。 */
+    private fun saveProgress() {
+        val s = _uiState.value
+        resumeStore.save(
+            QuizSuspended(
+                kind = GameKind.setlistQuiz, seed = seed, brandIds = selectedBrandIds.toList(),
+                nextIndex = s.index + 1, asked = s.tally.asked.toInt(), correct = s.tally.correct.toInt(),
+                points = s.tally.points.toInt(), plays = s.plays, total = QUIZ_SESSION_LENGTH
+            )
+        )
     }
 
     fun nextQuestion() {
@@ -170,23 +190,46 @@ class SetlistQuizViewModel(app: Application, private val selectedBrandIds: Set<S
         val update = progressStore.recordResult(
             GameKind.setlistQuiz, score = result.points.toInt(), outOf = result.outOf.toInt()
         )
+        resumeStore.clear(GameKind.setlistQuiz)
         _uiState.value = s.copy(result = result, verdict = null, isNewBest = update.isNewBest, previousBest = previousBest)
     }
 
     fun restart() = startSession()
 
     private fun startSession() {
-        viewModelScope.launch {
+        // つづきからは保存したシードで同じ出題を作り直し、答えた所まで進める。
+        val saved = resume
+        resume = null
+        if (saved != null) {
+            seed = saved.seed
+        } else {
             // シードの調達だけがラッパの責務 (抽選そのものはコアの SplitMix64)。
             seed = Random.Default.nextLong().toULong()
-            _uiState.value = withHintState(SetlistQuizUiState(isLoading = false, questions = makeSession(seed)))
+            resumeStore.clear(GameKind.setlistQuiz)
+        }
+        viewModelScope.launch {
+            val questions = makeSession(seed)
+            _uiState.value = withHintState(
+                SetlistQuizUiState(
+                    isLoading = false, questions = questions,
+                    index = saved?.nextIndex ?: 0,
+                    tally = saved?.tally ?: QuizTally(asked = 0u, correct = 0u, points = 0u),
+                    plays = saved?.plays.orEmpty()
+                )
+            )
+            // 最後の問題まで答えてから閉じていたら、そのまま結果へ。
+            if (saved != null && saved.nextIndex >= questions.size && questions.isNotEmpty()) finish()
         }
     }
 
-    class Factory(private val app: Application, private val selectedBrandIds: Set<String>) : ViewModelProvider.Factory {
+    class Factory(
+        private val app: Application,
+        private val selectedBrandIds: Set<String>,
+        private val resume: QuizSuspended? = null
+    ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T =
-            SetlistQuizViewModel(app, selectedBrandIds) as T
+            SetlistQuizViewModel(app, selectedBrandIds, resume) as T
     }
 }
 
@@ -194,9 +237,10 @@ class SetlistQuizViewModel(app: Application, private val selectedBrandIds: Set<S
 fun SetlistQuizScreen(
     selectedBrandIds: Set<String>,
     onBack: () -> Unit,
+    resume: QuizSuspended? = null,
     viewModel: SetlistQuizViewModel = viewModel(
         factory = SetlistQuizViewModel.Factory(
-            LocalContext.current.applicationContext as Application, selectedBrandIds
+            LocalContext.current.applicationContext as Application, selectedBrandIds, resume
         )
     )
 ) {

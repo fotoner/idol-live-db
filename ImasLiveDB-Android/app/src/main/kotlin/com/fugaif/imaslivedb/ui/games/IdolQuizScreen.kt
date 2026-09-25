@@ -24,6 +24,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.games.GameKind
 import com.fugaif.imaslivedb.data.games.QuizStagePlay
+import com.fugaif.imaslivedb.data.games.QuizSuspended
 import com.fugaif.imaslivedb.data.games.longestStreak
 import com.fugaif.imaslivedb.data.games.setlistCaption
 import com.fugaif.imaslivedb.data.games.streak
@@ -88,9 +89,15 @@ data class IdolQuizUiState(
     val question: Question? get() = questions.getOrNull(index)
 }
 
-class IdolQuizViewModel(app: Application, private val selectedBrandIds: Set<String>) : AndroidViewModel(app) {
+class IdolQuizViewModel(
+    app: Application,
+    private val selectedBrandIds: Set<String>,
+    /** つづきから。最初の 1 回だけ使う (「もう一度」は新しいセッション)。 */
+    private var resume: QuizSuspended? = null
+) : AndroidViewModel(app) {
     private val idolRepository = AppModule.from(app).idolRepository
     private val progressStore = AppModule.from(app).gameProgressStore
+    private val resumeStore = AppModule.from(app).quizResumeStore
     private val snapshots = AppModule.from(app).snapshotStoreProvider
 
     private val _uiState = MutableStateFlow(IdolQuizUiState())
@@ -128,12 +135,40 @@ class IdolQuizViewModel(app: Application, private val selectedBrandIds: Set<Stri
     }
 
     private fun startSession(showVoiceActorFact: Boolean) {
-        // シードの調達だけがラッパの責務 (抽選そのものはコアの SplitMix64)。
-        seed = Random.Default.nextLong().toULong()
+        // つづきからは保存したシードで同じ出題を作り直し、答えた所まで進める。
+        val saved = resume
+        resume = null
+        if (saved != null) {
+            seed = saved.seed
+        } else {
+            // シードの調達だけがラッパの責務 (抽選そのものはコアの SplitMix64)。
+            seed = Random.Default.nextLong().toULong()
+            resumeStore.clear(GameKind.idolQuiz)
+        }
+        val questions = makeSession(seed)
         val state = withHintState(
-            IdolQuizUiState(isLoading = false, questions = makeSession(seed), showVoiceActorFact = showVoiceActorFact)
+            IdolQuizUiState(
+                isLoading = false, questions = questions, showVoiceActorFact = showVoiceActorFact,
+                index = saved?.nextIndex ?: 0,
+                tally = saved?.tally ?: QuizTally(asked = 0u, correct = 0u, points = 0u),
+                plays = saved?.plays.orEmpty()
+            )
         )
         _uiState.value = state.copy(baseValue = state.hintState?.currentValue?.toInt() ?: 0)
+        // 最後の問題まで答えてから閉じていたら、そのまま結果へ。
+        if (saved != null && state.index >= questions.size && questions.isNotEmpty()) finish()
+    }
+
+    /** 1 問答えるたびに途中経過を残す (× で閉じても「つづきから」で戻れる)。 */
+    private fun saveProgress() {
+        val s = _uiState.value
+        resumeStore.save(
+            QuizSuspended(
+                kind = GameKind.idolQuiz, seed = seed, brandIds = selectedBrandIds.toList(),
+                nextIndex = s.index + 1, asked = s.tally.asked.toInt(), correct = s.tally.correct.toInt(),
+                points = s.tally.points.toInt(), plays = s.plays, total = QUIZ_SESSION_LENGTH
+            )
+        )
     }
 
     /** 開示状態を引き直す。ヒント開封・解答・次問のたびに 1 回だけ呼ぶ。 */
@@ -184,6 +219,7 @@ class IdolQuizViewModel(app: Application, private val selectedBrandIds: Set<Stri
                 hints = outcome.revealedHints.toInt(), pickedName = picked, detail = summary
             )
         )
+        saveProgress()
     }
 
     fun nextQuestion() {
@@ -200,6 +236,7 @@ class IdolQuizViewModel(app: Application, private val selectedBrandIds: Set<Stri
         val update = progressStore.recordResult(
             GameKind.idolQuiz, score = result.points.toInt(), outOf = result.outOf.toInt()
         )
+        resumeStore.clear(GameKind.idolQuiz)
         _uiState.value = s.copy(result = result, verdict = null, isNewBest = update.isNewBest, previousBest = previousBest)
     }
 
@@ -208,10 +245,14 @@ class IdolQuizViewModel(app: Application, private val selectedBrandIds: Set<Stri
         startSession(_uiState.value.showVoiceActorFact)
     }
 
-    class Factory(private val app: Application, private val selectedBrandIds: Set<String>) : ViewModelProvider.Factory {
+    class Factory(
+        private val app: Application,
+        private val selectedBrandIds: Set<String>,
+        private val resume: QuizSuspended? = null
+    ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T =
-            IdolQuizViewModel(app, selectedBrandIds) as T
+            IdolQuizViewModel(app, selectedBrandIds, resume) as T
     }
 }
 
@@ -219,9 +260,10 @@ class IdolQuizViewModel(app: Application, private val selectedBrandIds: Set<Stri
 fun IdolQuizScreen(
     selectedBrandIds: Set<String>,
     onBack: () -> Unit,
+    resume: QuizSuspended? = null,
     viewModel: IdolQuizViewModel = viewModel(
         factory = IdolQuizViewModel.Factory(
-            LocalContext.current.applicationContext as Application, selectedBrandIds
+            LocalContext.current.applicationContext as Application, selectedBrandIds, resume
         )
     )
 ) {

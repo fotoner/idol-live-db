@@ -54,6 +54,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.games.GameKind
 import com.fugaif.imaslivedb.data.games.QuizStagePlay
+import com.fugaif.imaslivedb.data.games.QuizSuspended
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.ViewModelProvider
 import com.fugaif.imaslivedb.data.games.longestStreak
 import com.fugaif.imaslivedb.data.games.setlistCaption
 import com.fugaif.imaslivedb.data.games.streak
@@ -179,10 +182,15 @@ data class ColorMatchUiState(
     val isLastRound: Boolean get() = roundIndex + 1 >= questionCount
 }
 
-class ColorMatchViewModel(app: Application) : AndroidViewModel(app) {
+class ColorMatchViewModel(
+    app: Application,
+    /** つづきから。最初の 1 回だけ使う (「もう一度」は新しいセッション)。 */
+    private var resume: QuizSuspended? = null
+) : AndroidViewModel(app) {
     private val idolRepository = AppModule.from(app).idolRepository
     private val stats = AppModule.from(app).statsRepository
     private val progressStore = AppModule.from(app).gameProgressStore
+    private val resumeStore = AppModule.from(app).quizResumeStore
 
     private val _uiState = MutableStateFlow(ColorMatchUiState())
     val uiState: StateFlow<ColorMatchUiState> = _uiState.asStateFlow()
@@ -221,6 +229,8 @@ class ColorMatchViewModel(app: Application) : AndroidViewModel(app) {
                 idolsById = all.associateBy { it.id }
             )
             refreshPool()
+            // つづきからは読み込みが済んだらすぐ続きの問題へ。
+            if (resume != null) startSession()
         }
     }
 
@@ -249,17 +259,34 @@ class ColorMatchViewModel(app: Application) : AndroidViewModel(app) {
     fun setQuestionCount(n: Int) { _uiState.value = _uiState.value.copy(questionCount = n) }
 
     fun startSession() {
+        // つづきからは保存した設定とシードで同じ出題を作り直し、答えた問題の次から始める。
+        val saved = resume
+        resume = null
+        if (saved != null) {
+            _uiState.value = _uiState.value.copy(
+                playMode = if (saved.colorMode == "choice") 0 else 1,
+                difficulty = saved.difficulty ?: _uiState.value.difficulty,
+                questionCount = saved.total,
+                selectedBrandIds = saved.brandIds.toSet()
+            )
+            refreshPool()
+            seed = saved.seed
+        } else {
+            // 全問まとめて生成する (問題ごとに FFI を呼ばない)。シードの調達だけがここの責務。
+            seed = Random.Default.nextLong().toULong()
+            resumeStore.clear(GameKind.colorMatch)
+        }
         val s = _uiState.value
         if (pool.size < s.requiredPool) return
-        // 全問まとめて生成する (問題ごとに FFI を呼ばない)。シードの調達だけがここの責務。
-        seed = Random.Default.nextLong().toULong()
         val reset = s.copy(
-            roundIndex = 0, totalCorrect = 0, totalAnswered = 0,
+            roundIndex = saved?.nextIndex ?: 0,
+            totalCorrect = if (saved != null && !s.isChoiceMode) saved.correct else 0,
+            totalAnswered = if (saved != null && !s.isChoiceMode) saved.asked else 0,
             sessionDone = false, inGame = true,
             assignments = emptyMap(), selectedHex = null, judgement = null,
             choiceOpened = emptyList(), choiceVerdict = null,
-            choiceTally = QuizTally(asked = 0u, correct = 0u, points = 0u),
-            plays = emptyList(), sessionResult = null, isNewBest = false, previousBest = null
+            choiceTally = if (saved != null && s.isChoiceMode) saved.tally else QuizTally(asked = 0u, correct = 0u, points = 0u),
+            plays = saved?.plays.orEmpty(), sessionResult = null, isNewBest = false, previousBest = null
         )
         _uiState.value = if (s.isChoiceMode) {
             val questions = colorQuizStartGame(
@@ -278,6 +305,25 @@ class ColorMatchViewModel(app: Application) : AndroidViewModel(app) {
             )
             reset.copy(rounds = rounds, choiceQuestions = emptyList(), choiceHint = null)
         }
+        // 最後の問題まで答えてから閉じていたら、そのまま結果へ。
+        if (saved != null && saved.nextIndex >= s.questionCount) finishSession()
+    }
+
+    /** 1 問答えるたびに途中経過を残す (× で閉じても「つづきから」で戻れる)。 */
+    private fun saveProgress() {
+        val s = _uiState.value
+        resumeStore.save(
+            QuizSuspended(
+                kind = GameKind.colorMatch, seed = seed, brandIds = s.selectedBrandIds.toList(),
+                nextIndex = s.roundIndex + 1,
+                // 並べるは当てた人数 / 答えた人数を積み上げとして持つ。
+                asked = if (s.isChoiceMode) s.choiceTally.asked.toInt() else s.totalAnswered,
+                correct = if (s.isChoiceMode) s.choiceTally.correct.toInt() else s.totalCorrect,
+                points = if (s.isChoiceMode) s.choiceTally.points.toInt() else s.totalCorrect,
+                plays = s.plays, total = s.questionCount,
+                difficulty = s.difficulty, colorMode = if (s.isChoiceMode) "choice" else "match"
+            )
+        )
     }
 
     /** 4択のヒント状態を引き直す (出題が変わった / ヒントを開いた / 解答した とき)。 */
@@ -326,6 +372,7 @@ class ColorMatchViewModel(app: Application) : AndroidViewModel(app) {
                 )
             )
         )
+        saveProgress()
     }
 
     /** × で閉じる (結果前は設定画面へ戻る)。 */
@@ -375,6 +422,7 @@ class ColorMatchViewModel(app: Application) : AndroidViewModel(app) {
                 pickedName = null
             )
         )
+        saveProgress()
     }
 
     fun advance() {
@@ -393,6 +441,7 @@ class ColorMatchViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private fun finishSession() {
+        resumeStore.clear(GameKind.colorMatch)
         val s = _uiState.value
         val previousBest = progressStore.previousBestScore(GameKind.colorMatch)
         val result: QuizSessionResult
@@ -421,11 +470,23 @@ class ColorMatchViewModel(app: Application) : AndroidViewModel(app) {
             previousBest = previousBest
         )
     }
+
+    class Factory(private val app: Application, private val resume: QuizSuspended? = null) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T =
+            ColorMatchViewModel(app, resume) as T
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ColorMatchGameScreen(onBack: () -> Unit, viewModel: ColorMatchViewModel = viewModel()) {
+fun ColorMatchGameScreen(
+    onBack: () -> Unit,
+    resume: QuizSuspended? = null,
+    viewModel: ColorMatchViewModel = viewModel(
+        factory = ColorMatchViewModel.Factory(LocalContext.current.applicationContext as Application, resume)
+    )
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     if (state.inGame || state.sessionDone) {

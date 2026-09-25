@@ -194,6 +194,13 @@ sealed class NavRoutes(val route: String) {
                 "games_songquiz/" + (if (brandIds.isEmpty()) "all" else brandIds.sorted().joinToString(","))
         }
     }
+    /** ゲーム一覧の「つづきから」。途中経過は [com.fugaif.imaslivedb.data.games.QuizResumeStore] から引く。 */
+    data class GamesResume(val kind: String) : NavRoutes("games_resume/{kind}") {
+        companion object {
+            const val ROUTE = "games_resume/{kind}"
+            fun createRoute(kind: com.fugaif.imaslivedb.data.games.GameKind) = "games_resume/${kind.name}"
+        }
+    }
     data object GamesSetlistQuizSetup : NavRoutes("games_setlistquiz_setup")
     data class GamesSetlistQuiz(val brandIds: String) : NavRoutes("games_setlistquiz/{brandIds}") {
         companion object {

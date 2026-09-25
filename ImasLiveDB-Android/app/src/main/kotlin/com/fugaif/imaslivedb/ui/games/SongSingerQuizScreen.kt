@@ -24,6 +24,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.games.GameKind
 import com.fugaif.imaslivedb.data.games.QuizStagePlay
+import com.fugaif.imaslivedb.data.games.QuizSuspended
 import com.fugaif.imaslivedb.data.games.longestStreak
 import com.fugaif.imaslivedb.data.games.setlistCaption
 import com.fugaif.imaslivedb.data.games.streak
@@ -98,10 +99,16 @@ data class SongSingerQuizUiState(
     val question: SongQuestion? get() = questions.getOrNull(index)
 }
 
-class SongSingerQuizViewModel(app: Application, private val selectedBrandIds: Set<String>) : AndroidViewModel(app) {
+class SongSingerQuizViewModel(
+    app: Application,
+    private val selectedBrandIds: Set<String>,
+    /** つづきから。最初の 1 回だけ使う (「もう一度」は新しいセッション)。 */
+    private var resume: QuizSuspended? = null
+) : AndroidViewModel(app) {
     private val idolRepository = AppModule.from(app).idolRepository
     private val songRepository = AppModule.from(app).songRepository
     private val progressStore = AppModule.from(app).gameProgressStore
+    private val resumeStore = AppModule.from(app).quizResumeStore
     private val stats = AppModule.from(app).statsRepository
 
     private val _uiState = MutableStateFlow(SongSingerQuizUiState())
@@ -146,10 +153,38 @@ class SongSingerQuizViewModel(app: Application, private val selectedBrandIds: Se
     }
 
     private suspend fun startSession() {
-        // シードの調達だけがラッパの責務 (抽選そのものはコアの SplitMix64)。
-        seed = Random.Default.nextLong().toULong()
+        // つづきからは保存したシードで同じ出題を作り直し、答えた所まで進める。
+        val saved = resume
+        resume = null
+        if (saved != null) {
+            seed = saved.seed
+        } else {
+            // シードの調達だけがラッパの責務 (抽選そのものはコアの SplitMix64)。
+            seed = Random.Default.nextLong().toULong()
+            resumeStore.clear(GameKind.songSingerQuiz)
+        }
+        val questions = makeSession(seed)
         _uiState.value = withHintState(
-            SongSingerQuizUiState(isLoading = false, questions = makeSession(seed), brandNames = brandNames)
+            SongSingerQuizUiState(
+                isLoading = false, questions = questions, brandNames = brandNames,
+                index = saved?.nextIndex ?: 0,
+                tally = saved?.tally ?: QuizTally(asked = 0u, correct = 0u, points = 0u),
+                plays = saved?.plays.orEmpty()
+            )
+        )
+        // 最後の問題まで答えてから閉じていたら、そのまま結果へ。
+        if (saved != null && saved.nextIndex >= questions.size && questions.isNotEmpty()) finish()
+    }
+
+    /** 1 問答えるたびに途中経過を残す (× で閉じても「つづきから」で戻れる)。 */
+    private fun saveProgress() {
+        val s = _uiState.value
+        resumeStore.save(
+            QuizSuspended(
+                kind = GameKind.songSingerQuiz, seed = seed, brandIds = selectedBrandIds.toList(),
+                nextIndex = s.index + 1, asked = s.tally.asked.toInt(), correct = s.tally.correct.toInt(),
+                points = s.tally.points.toInt(), plays = s.plays, total = QUIZ_SESSION_LENGTH
+            )
         )
     }
 
@@ -230,6 +265,7 @@ class SongSingerQuizViewModel(app: Application, private val selectedBrandIds: Se
                 )
             )
         )
+        saveProgress()
     }
 
     fun nextQuestion() {
@@ -248,6 +284,7 @@ class SongSingerQuizViewModel(app: Application, private val selectedBrandIds: Se
         val update = progressStore.recordResult(
             GameKind.songSingerQuiz, score = result.points.toInt(), outOf = result.outOf.toInt()
         )
+        resumeStore.clear(GameKind.songSingerQuiz)
         _uiState.value = s.copy(result = result, verdict = null, isNewBest = update.isNewBest, previousBest = previousBest)
     }
 
@@ -256,10 +293,14 @@ class SongSingerQuizViewModel(app: Application, private val selectedBrandIds: Se
         viewModelScope.launch { startSession() }
     }
 
-    class Factory(private val app: Application, private val selectedBrandIds: Set<String>) : ViewModelProvider.Factory {
+    class Factory(
+        private val app: Application,
+        private val selectedBrandIds: Set<String>,
+        private val resume: QuizSuspended? = null
+    ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T =
-            SongSingerQuizViewModel(app, selectedBrandIds) as T
+            SongSingerQuizViewModel(app, selectedBrandIds, resume) as T
     }
 }
 
@@ -267,9 +308,10 @@ class SongSingerQuizViewModel(app: Application, private val selectedBrandIds: Se
 fun SongSingerQuizScreen(
     selectedBrandIds: Set<String>,
     onBack: () -> Unit,
+    resume: QuizSuspended? = null,
     viewModel: SongSingerQuizViewModel = viewModel(
         factory = SongSingerQuizViewModel.Factory(
-            LocalContext.current.applicationContext as Application, selectedBrandIds
+            LocalContext.current.applicationContext as Application, selectedBrandIds, resume
         )
     )
 ) {

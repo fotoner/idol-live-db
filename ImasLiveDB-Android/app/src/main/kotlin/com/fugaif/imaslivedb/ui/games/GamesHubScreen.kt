@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -46,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fugaif.imaslivedb.data.games.GameKind
+import com.fugaif.imaslivedb.data.games.QuizSuspended
 import com.fugaif.imaslivedb.data.games.emptyGameRecord
 import com.fugaif.imaslivedb.data.games.hasPlayed
 import com.fugaif.imaslivedb.data.games.totalPlays
@@ -90,7 +92,9 @@ fun GamesHubScreen(
     onNavigateToColorMatch: () -> Unit,
     onNavigateToIdolQuizSetup: () -> Unit,
     onNavigateToSongQuizSetup: () -> Unit,
-    onNavigateToSetlistQuizSetup: () -> Unit
+    onNavigateToSetlistQuizSetup: () -> Unit,
+    /** 「つづきから」。途中でやめたゲームへ直接入る。 */
+    onResume: (GameKind) -> Unit = {}
 ) {
     val context = LocalContext.current
     val store = AppModule.from(context).gameProgressStore
@@ -98,6 +102,8 @@ fun GamesHubScreen(
     // 連続日数は streak を購読して引き直す (購読しないと結果を記録した後も古いまま)。
     val streakState by store.streak.collectAsStateWithLifecycle()
     val displayStreak = remember(streakState) { store.displayStreak }
+    // 途中でやめたクイズ (1 問答えるたびに保存される)。
+    val suspended by AppModule.from(context).quizResumeStore.sessions.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -125,7 +131,9 @@ fun GamesHubScreen(
         ) {
             StageTicket(
                 records = records,
-                displayStreak = displayStreak
+                displayStreak = displayStreak,
+                resume = suspended.values.filter { s -> entries.any { it.kind == s.kind } }.maxByOrNull { it.savedAt },
+                onResume = onResume
             )
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 ImasSectionHeader(title = "ゲーム", count = "${entries.size}")
@@ -136,7 +144,7 @@ fun GamesHubScreen(
                                 Box(Modifier.fillMaxWidth().height(0.5.dp).background(DS.sep))
                             }
                         }
-                        GameRow(entry, records[entry.kind] ?: emptyGameRecord()) {
+                        GameRow(entry, records[entry.kind] ?: emptyGameRecord(), suspended[entry.kind]) {
                             when (entry.kind) {
                                 GameKind.introDon -> onNavigateToIntroDon()
                                 // アイドル当て・ソロ曲・セトリ当てはブランド絞り込み設定画面を先に挟む。
@@ -160,7 +168,12 @@ private fun bestGrade(rec: GameRecord): QuizGrade? =
     gameProgressBestRatePercent(rec)?.let { quizGradeForRate(it.coerceAtLeast(0).toUInt()) }
 
 @Composable
-private fun StageTicket(records: Map<GameKind, GameRecord>, displayStreak: Int) {
+private fun StageTicket(
+    records: Map<GameKind, GameRecord>,
+    displayStreak: Int,
+    resume: QuizSuspended?,
+    onResume: (GameKind) -> Unit
+) {
     // 全ゲームを通した最高グレード (自己ベストの正答率がいちばん高いもの)。
     val topGrade = entries.mapNotNull { e -> records[e.kind]?.let { gameProgressBestRatePercent(it) } }.maxOrNull()
         ?.let { quizGradeForRate(it.coerceAtLeast(0).toUInt()) }
@@ -212,7 +225,39 @@ private fun StageTicket(records: Map<GameKind, GameRecord>, displayStreak: Int) 
         }
         // 切り取り線 (両端は一覧の背景色で欠ける)。
         QuizTicketNotch(cut = DS.bg, line = QS.line, inset = 6.dp)
-        StreakRow(displayStreak)
+        // 途中でやめたクイズがあれば「つづきから」、無ければ連続プレイ日数。
+        if (resume != null) ResumeRow(resume, onResume) else StreakRow(displayStreak)
+    }
+}
+
+/** チケットの下半分 (いちばん最近中断したクイズの「つづきから」)。 */
+@Composable
+private fun ResumeRow(s: QuizSuspended, onResume: (GameKind) -> Unit) {
+    val title = entries.firstOrNull { it.kind == s.kind }?.title.orEmpty()
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 68.dp).padding(start = 20.dp, end = 12.dp)
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.weight(1f)) {
+            Text("つづきから", style = QS.text(11), color = QS.dim)
+            QSFitText(
+                "$title · " + "Q.%02d / %d".format(s.currentNumber, s.total),
+                QS.text(15, FontWeight.Bold), QS.ink, minScale = 0.8f
+            )
+        }
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .height(44.dp)
+                .clip(CircleShape)
+                .background(QS.ink)
+                .quizPress { onResume(s.kind) }
+                .padding(horizontal = 20.dp)
+                .semantics { contentDescription = "$title を再開" }
+        ) {
+            Text("再開", style = QS.text(15, FontWeight.Bold), color = QS.bg)
+        }
     }
 }
 
@@ -236,7 +281,7 @@ private fun StreakRow(displayStreak: Int) {
 // MARK: - ゲーム一覧
 
 @Composable
-private fun GameRow(entry: GameEntry, rec: GameRecord, onClick: () -> Unit) {
+private fun GameRow(entry: GameEntry, rec: GameRecord, suspended: QuizSuspended?, onClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -254,7 +299,10 @@ private fun GameRow(entry: GameEntry, rec: GameRecord, onClick: () -> Unit) {
         }
         Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(1.dp)) {
             val grade = if (rec.hasPlayed) bestGrade(rec) else null
-            if (grade != null) {
+            if (suspended != null) {
+                Text("プレイ中", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2)
+                Text("Q.%02d".format(suspended.currentNumber), fontSize = 11.sp, color = DS.ink3)
+            } else if (grade != null) {
                 Text(grade.label, style = QS.num(22), color = DS.ink)
                 Text(bestLabel(entry.kind, rec), fontSize = 11.sp, color = DS.ink3)
             } else {
