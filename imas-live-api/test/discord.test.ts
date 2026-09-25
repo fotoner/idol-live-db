@@ -315,6 +315,54 @@ describe("#更新通知 のまとめ投稿 (5 分 cron)", () => {
     expect(posted.content).not.toContain("消えた");
   });
 
+  it("編集は項目ごとの変更前→変更後と、セトリの追加・削除・曲順を出す", async () => {
+    await insertUser(UID);
+    await runScheduled(cron, digestEnv()); // 位置を覚えるだけ
+    const addBatch = async (summary: string) => {
+      await exec(
+        "INSERT INTO edit_batch (editor_id, source, op, summary, cloudkit_ok, created_at) VALUES (?, 'app', 'update', ?, 1, ?)",
+        UID, summary, Date.now()
+      );
+      return Number((await row<{ id: number }>("SELECT MAX(id) AS id FROM edit_batch"))!.id);
+    };
+    const hist = (batch: number, type: string, name: string, op: string, before: unknown, after: unknown) =>
+      exec(
+        "INSERT INTO edit_history (batch_id, record_type, record_name, op, before_json, after_json, modified_at, created_at) VALUES (?, ?, ?, ?, ?, ?, 0, 0)",
+        batch, type, name, op, before === null ? null : JSON.stringify(before), after === null ? null : JSON.stringify(after)
+      );
+
+    const b1 = await addBatch("Song.update x1");
+    await hist(b1, "Song", "s1", "update",
+      { title: "Thank You!", composer: "", lyricist: "A", modifiedAt: 1 },
+      { title: "Thank You!", composer: "*作曲者*", lyricist: "A", modifiedAt: 2 });
+
+    const b2 = await addBatch("SetlistItem.create x1, SetlistItem.delete x1");
+    const item = (id: string, pos: number, song: string) => ({ recordName: id, fields: { position: pos, songId: song } });
+    await hist(b2, "SetlistItem", "i9", "create", null, { songId: "s9" });
+    await hist(b2, "ShowSetlist", "sh1", "snapshot",
+      { items: [item("i1", 1, "s1"), item("i2", 2, "s2"), item("i3", 3, "s3")], performers: [] },
+      { items: [item("i1", 1, "s1"), item("i3", 2, "s3"), item("i9", 3, "s9")], performers: [{ recordName: "p1", fields: { setlistItemId: "i9", idolId: "idol1" } }] });
+
+    let posted: any = null;
+    fetchMock.get(DISCORD).intercept({ path: `/api/v10/channels/${CHANNEL}/messages`, method: "POST" })
+      .reply(200, (opts) => {
+        posted = JSON.parse(String(opts.body));
+        return {};
+      });
+    await runScheduled(cron, digestEnv());
+
+    expect(posted.embeds[0]).toEqual({
+      title: "📝 曲「Thank You!」の編集",
+      url: "https://idollivedb.fugaapp.site/songs/s1/",
+      description: "・作曲：（なし） → \\*作曲者\\*",
+      color: 0x4a8fe7,
+    });
+    expect(posted.embeds[1].title).toBe("📝 セトリ「sh1」の編集");
+    expect(posted.embeds[1].url).toBe("https://idollivedb.fugaapp.site/shows/sh1/");
+    expect(posted.embeds[1].description).toBe("・追加：♪s9\n・削除：♪s2\n・出演者：＋1 －0");
+    expect(JSON.stringify(posted)).not.toContain(UID);
+  });
+
   it("Bot トークンが無ければ何もしない", async () => {
     await runScheduled(cron, makeEnv());
     expect(await rows("SELECT * FROM discord_digest_cursors")).toEqual([]);

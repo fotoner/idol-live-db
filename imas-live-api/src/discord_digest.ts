@@ -17,6 +17,7 @@
 
 import { cloudKitLookup } from "./cloudkit";
 import { postChannelMessage } from "./discord";
+import { buildChanges, referencedIds, RECORD_LABELS as EDIT_RECORD_LABELS, type Change, type HistoryRow } from "./discord_edit_diff";
 import type { Env } from "./env";
 
 const WEB_BASE = "https://idollivedb.fugaapp.site";
@@ -24,9 +25,14 @@ const WEB_BASE = "https://idollivedb.fugaapp.site";
 const BATCH_LIMIT = 200;
 /** 本文に名前を並べる上限。超えた分は「ほか N 件」にする。 */
 const LIST_LIMIT = 8;
-/** 曲のタグ付けを埋め込みで出す上限 (Discord は 1 通 10 個まで)。 */
-const EMBED_LIMIT = 9;
+/** 埋め込みの上限 (Discord は 1 通 10 個まで)。編集を先に、残りを曲のタグ付けに使う。 */
+const EMBED_LIMIT = 10;
+/** 中身 (差分) を出す編集の上限。超えた分は件数だけ。 */
+const EDIT_EMBED_LIMIT = 5;
+/** 1 つの編集の中で並べる変更の上限。 */
+const CHANGE_LIMIT = 8;
 const TAG_EMBED_COLOR = 0xe85a9b;
+const EDIT_EMBED_COLOR = 0x4a8fe7;
 
 type DigestEnv = Pick<Env, "DB"> & Partial<Env>;
 
@@ -38,15 +44,7 @@ interface Source<Row> {
   rows?: Array<Row & { rid: number }>;
 }
 
-const RECORD_LABELS: Record<string, string> = {
-  SetlistItem: "セトリ",
-  Song: "曲",
-  Show: "公演",
-  Event: "イベント",
-  Idol: "アイドル",
-  Unit: "ユニット",
-  Venue: "会場",
-};
+const RECORD_LABELS = EDIT_RECORD_LABELS;
 
 function source<Row>(name: string, table: string, columns: string, where = ""): Source<Row> {
   return {
@@ -118,6 +116,56 @@ function groupTags(rows: Array<{ target: string; tag_id: string }>, names: Map<s
 
 function tagList(names: string[]): string {
   return names.map((n) => `#${md(n)}`).join(" ");
+}
+
+function short(text: string, max = 60): string {
+  return text.length > max ? `${text.slice(0, max)}…` : text;
+}
+
+/** 編集 1 つぶん (1 batch) の埋め込み。 */
+function editEmbed(changes: Change[], nameOf: (id: string) => string): unknown {
+  const header = (c: Change) => `${c.label}「${c.name ?? nameOf(c.nameId)}」`;
+  const value = (v: string | null, ref: boolean) => (v === null ? "（なし）" : md(short(ref ? nameOf(v) : v)));
+  const body = (c: Change): string[] => {
+    const lines: string[] = [];
+    for (const f of c.fields) {
+      if ((f.label === "歌唱メンバー" || f.label === "出演者") && (f.before === null || f.after === null)) {
+        lines.push(`・${f.label}：${f.after !== null ? "＋" : "－"} ${value(f.after ?? f.before, f.ref)}`);
+      } else {
+        lines.push(`・${f.label}：${value(f.before, f.ref)} → ${value(f.after, f.ref)}`);
+      }
+    }
+    const songs = (ids: string[]) => ids.slice(0, LIST_LIMIT).map((id) => `♪${md(short(nameOf(id), 40))}`).join("、") + moreSuffix(ids.length);
+    if (c.addedSongs.length) lines.push(`・追加：${songs(c.addedSongs)}`);
+    if (c.removedSongs.length) lines.push(`・削除：${songs(c.removedSongs)}`);
+    if (c.reordered) lines.push("・曲順を入れ替え");
+    const { added, removed } = c.performerDelta;
+    if (added || removed) lines.push(`・出演者：＋${added} －${removed}`);
+    if (!lines.length && c.label === "セトリ") lines.push("・曲の内容を修正");
+    return lines;
+  };
+
+  if (changes.length === 1) {
+    const c = changes[0];
+    const title = c.verb && c.verb !== "更新" && !c.fields.length ? `${header(c)}を${c.verb}` : `${header(c)}の編集`;
+    return {
+      title: `📝 ${title}`.slice(0, 256),
+      ...(c.url ? { url: c.url } : {}),
+      ...(body(c).length ? { description: body(c).join("\n").slice(0, 4000) } : {}),
+      color: EDIT_EMBED_COLOR,
+    };
+  }
+  const blocks = changes.slice(0, CHANGE_LIMIT).map((c) => {
+    const head = c.url ? link(header(c), c.url) : `**${md(header(c))}**`;
+    const verb = c.verb && !c.fields.length ? ` を${c.verb}` : "";
+    return [head + verb, ...body(c)].join("\n");
+  });
+  const more = changes.length > CHANGE_LIMIT ? `\nほか${changes.length - CHANGE_LIMIT}件` : "";
+  return {
+    title: `📝 データの編集（${changes.length}件）`,
+    description: (blocks.join("\n") + more).slice(0, 4000),
+    color: EDIT_EMBED_COLOR,
+  };
 }
 
 function moreSuffix(total: number): string {
@@ -198,6 +246,19 @@ export async function postDiscordDigest(env: DigestEnv): Promise<void> {
   const idolTagged = groupTags(idolTags.rows ?? [], idolTagNames);
   const unitTagged = groupTags(unitTags.rows ?? [], unitTagNames);
 
+  // 編集の中身: 先頭の数件だけ edit_history を読んで差分を組む (batch_id の索引で引く)。
+  const diffBatchIds = (edits.rows ?? []).slice(0, EDIT_EMBED_LIMIT).map((r) => r.rid);
+  let changesByBatch = new Map<number, Change[]>();
+  if (diffBatchIds.length) {
+    const hist = await env.DB.prepare(
+      `SELECT batch_id, record_type, record_name, op, before_json, after_json FROM edit_history
+        WHERE batch_id IN (${diffBatchIds.map(() => "?").join(",")}) ORDER BY id`
+    )
+      .bind(...diffBatchIds)
+      .all<HistoryRow>();
+    changesByBatch = buildChanges(hist.results ?? []);
+  }
+
   // 名前とジャケ写は CloudKit から 1 回でまとめて引く。
   const callSongIds = [...new Set((calls.rows ?? []).map((r) => r.song_id))];
   const taggedSongIds = [...songTagged.keys()];
@@ -209,6 +270,7 @@ export async function postDiscordDigest(env: DigestEnv): Promise<void> {
       ...taggedSongIds.slice(0, EMBED_LIMIT + LIST_LIMIT),
       ...idolIds.slice(0, LIST_LIMIT),
       ...unitIds.slice(0, LIST_LIMIT),
+      ...referencedIds(changesByBatch.values()),
     ]),
   ]);
   const nameOf = (id: string) => info.get(id)?.name ?? id;
@@ -223,8 +285,13 @@ export async function postDiscordDigest(env: DigestEnv): Promise<void> {
 
   // 曲のタグ付け: 曲ごとに埋め込み (曲名・付いたタグ・ジャケ写)。入りきらない分は本文に名前だけ。
   const embeds: unknown[] = [];
+  for (const id of diffBatchIds) {
+    const changes = changesByBatch.get(id);
+    if (changes?.length) embeds.push(editEmbed(changes, nameOf));
+  }
+  const tagEmbedLimit = EMBED_LIMIT - embeds.length;
   if (taggedSongIds.length) {
-    for (const id of taggedSongIds.slice(0, EMBED_LIMIT)) {
+    for (const id of taggedSongIds.slice(0, tagEmbedLimit)) {
       const art = info.get(id)?.artworkUrl;
       embeds.push({
         title: nameOf(id).slice(0, 256),
@@ -234,7 +301,7 @@ export async function postDiscordDigest(env: DigestEnv): Promise<void> {
         ...(art ? { thumbnail: { url: art } } : {}),
       });
     }
-    const rest = taggedSongIds.slice(EMBED_LIMIT);
+    const rest = taggedSongIds.slice(tagEmbedLimit);
     const restText = rest.length
       ? `（ほかに ${rest
           .slice(0, LIST_LIMIT)
