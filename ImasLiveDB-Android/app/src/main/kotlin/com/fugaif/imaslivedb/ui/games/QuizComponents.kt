@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.WorkspacePremium
@@ -43,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -58,6 +60,7 @@ import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.ui.components.ImasAvatar
 import com.fugaif.imaslivedb.ui.theme.DS
 import com.fugaif.imaslivedb.ui.theme.ImasTheme
+import com.fugaif.imaslivedb.ui.theme.hexToColor
 import uniffi.imas_core.IdolQuizIdolRef
 import uniffi.imas_core.QuizGrade
 import uniffi.imas_core.QuizSessionResult
@@ -498,5 +501,55 @@ private fun AnswerChip(label: String, idol: Idol, tone: Color) {
         ImasAvatar(label = idol.shortName, seed = idol.color, brand = idol.brandId, size = 20.dp)
         Text(label, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = tone)
         Text(idol.name, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+/**
+ * ヒントのタイル 1 枚 (ソロ曲クイズ / メンバーカラー 4 択で共通。iOS QuizTicketHintTile 相当)。
+ * value が null なら未開封 (「名前 −コスト」で押せる)、あれば開封済みの中身を出す。
+ * locked は押せない (例: 試聴はジャケットを開くまで)。
+ */
+@Composable
+fun QuizHintTile(
+    title: String,
+    icon: ImageVector,
+    value: String?,
+    swatchHex: String? = null,
+    cost: Int = 0,
+    locked: Boolean = false,
+    onClick: (() -> Unit)? = null
+) {
+    val isOpen = value != null
+    val enabled = !isOpen && !locked && onClick != null
+    val borderColor = if (isOpen) DS.sep else DS.warning.copy(alpha = if (locked) 0.15f else 0.35f)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (isOpen) DS.fill else DS.surface)
+            .border(1.dp, borderColor, RoundedCornerShape(12.dp))
+            .clickable(enabled = enabled) { onClick?.invoke() }
+            .alpha(if (locked) 0.45f else 1f)
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Icon(
+                if (locked) Icons.Filled.Lock else icon, null,
+                tint = if (isOpen) DS.ink3 else DS.warning, modifier = Modifier.size(12.dp)
+            )
+            Text(title, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        if (isOpen) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                swatchHex?.takeIf { it.isNotEmpty() }?.let {
+                    Box(Modifier.size(14.dp).clip(CircleShape).background(hexToColor(it)).border(0.5.dp, DS.sep, CircleShape))
+                }
+                Text(value ?: "", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DS.ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            }
+        } else {
+            Text("−$cost", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = if (locked) DS.ink3 else DS.warning)
+        }
     }
 }

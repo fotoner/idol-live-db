@@ -16,6 +16,8 @@ struct LyricsQuizView: View {
     let songs: [SongWithArtists]
     let publishedSongIds: [String]
     let selectedBrandIds: Set<String>
+    /// 途中でやめたセッションの続き (ゲーム一覧の「つづきから」)。nil なら新しく始める。
+    var resume: QuizSuspended? = nil
 
     /// 歌詞が届いて出題できる状態になった 1 問。
     private struct Prepared {
@@ -52,43 +54,60 @@ struct LyricsQuizView: View {
     @State private var isPreparingShare = false
     /// 正誤の手触り (sensoryFeedback のトリガ)。次の問題で nil に戻す。
     @State private var lastCorrect: Bool?
+    /// 各問の記録 (ペンライト・連続正解・見直す)。歌詞は持たない。
+    @State private var plays: [QuizStagePlay] = []
+    /// 直前の問題の判定 (解答後に出す大きなカード)。
+    @State private var verdict: QuizVerdict?
+    @State private var scoreBefore = 0
+    @State private var previousBest: Int?
+    /// ヒントの段階ごとの獲得点。
+    @State private var stageValues: [Int] = []
+    /// このセッションの出題シード (つづきからで同じ出題順を作り直す)。
+    @State private var seed: UInt64 = 0
+    /// `resume` は最初の 1 回だけ使う (「もう一度」は新しいセッション)。
+    @State private var didUseResume = false
+    @Environment(\.dismiss) private var dismiss
+
+    private var header: QuizStageHeader {
+        if let result { return .result(total: Int(result.questions)) }
+        guard current != nil else { return .none }
+        return .question(current: min(plays.count + (verdict == nil ? 1 : 0), sessionLength),
+                         total: sessionLength, points: Int(tally.points))
+    }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: DS.sp5) {
-                if let result {
-                    QuizResultView(result: result, kind: .lyricsQuiz, isNewBest: isNewBest,
-                                   customHistory: history.isEmpty ? nil
-                                       : AnyView(LyricsQuizHistoryList(items: history)),
-                                   onShareImage: { shareResultImage(result) },
-                                   onReplay: { startSession() })
-                } else {
-                    switch phase {
-                    case .loading where current == nil:
-                        ImasInlineLoading(tint: DS.sys)
-                    case .failed:
-                        ImasEmptyState(systemImage: "wifi.exclamationmark",
-                                       title: "歌詞を読み込めませんでした",
-                                       message: "通信状態を確認して、もう一度お試しください。",
-                                       actionTitle: "再試行", action: { retry() })
-                    case .exhausted where current == nil:
-                        ImasEmptyState(systemImage: "text.quote", title: "出題できる歌詞が不足しています")
-                    default:
-                        if let p = current { questionBody(p) }
-                    }
-                }
-                JASRACLicenseNotice(placement: .lyrics)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, DS.sp3)
+        QuizStageScaffold(title: mode == .title ? "歌詞クイズ" : "歌詞 · 続きはどれ", header: header,
+                          onClose: { dismiss() }, trailing: {
+            if let result {
+                QuizStageRoundButton(systemImage: isPreparingShare ? "hourglass" : "square.and.arrow.up",
+                                     label: "結果を画像でシェア") { shareResultImage(result) }
             }
-            .padding(DS.sp5)
+        }) {
+            if let result {
+                QuizStageResultView(result: result, kind: .lyricsQuiz, isNewBest: isNewBest,
+                                    previousBest: previousBest,
+                                    slots: plays.penlights(total: Int(result.questions), answering: false),
+                                    longestStreak: plays.longestStreak, misses: plays.misses,
+                                    onReplay: { startSession() }, onClose: { dismiss() })
+            } else {
+                switch phase {
+                case .loading where current == nil:
+                    ImasInlineLoading(tint: QS.ink)
+                case .failed:
+                    ImasEmptyState(systemImage: "wifi.exclamationmark",
+                                   title: "歌詞を読み込めませんでした",
+                                   message: "通信状態を確認して、もう一度お試しください。",
+                                   actionTitle: "再試行", action: { retry() })
+                case .exhausted where current == nil:
+                    ImasEmptyState(systemImage: "text.quote", title: "出題できる歌詞が不足しています")
+                default:
+                    if let p = current { questionBody(p) }
+                }
+            }
+            JASRACLicenseNotice(placement: .lyrics)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 12)
         }
-        .background(DS.bg.ignoresSafeArea())
-        .scrollContentBackground(.hidden)
-        .navigationTitle(mode == .title ? "歌詞クイズ · 曲名当て" : "歌詞クイズ · 続きはどれ")
-        .navigationBarTitleDisplayMode(.inline)
-        // 解答後の「次の問題」がタブバーに隠れないよう、遊んでいる間は隠す (イントロドンと同じ)。
-        .toolbar(.hidden, for: .tabBar)
         .sensoryFeedback(trigger: lastCorrect) { _, new in
             guard let new else { return nil }
             return new ? .success : .error
@@ -102,29 +121,40 @@ struct LyricsQuizView: View {
 
     @ViewBuilder
     private func questionBody(_ p: Prepared) -> some View {
-        let answered = selectedKey != nil
-        QuizProgressHeader(current: min(Int(tally.asked) + (answered ? 0 : 1), sessionLength),
-                           total: sessionLength, points: Int(tally.points))
-        Group {
-            lyricCard(p)
-            if !answered { hintArea() }
-            choiceList(p)
-        }
-        .id(p.cursor)
-        .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity),
-                                removal: .opacity))
-        if answered {
+        QuizStageProgress(slots: plays.penlights(total: sessionLength, answering: verdict == nil),
+                          caption: plays.setlistCaption(total: sessionLength),
+                          streak: plays.streak, streakBrokeAt: plays.streakBrokeAt)
+            .padding(.bottom, 2)
+        if let verdict {
+            QuizVerdictCard(verdict: verdict).id(verdict.number)
+            QuizVerdictStats(before: scoreBefore, after: Int(tally.points), streak: plays.streak)
+            if !verdict.isCorrect { QuizVerdictFootnote() }
             if phase == .loading {
                 // 次の曲の歌詞がまだ届いていない (先読みが間に合わなかった)。
-                HStack(spacing: DS.sp3) {
-                    ProgressView().tint(DS.sys)
-                    Text("次の歌詞を読み込み中…").font(.imasSubhead).foregroundStyle(DS.ink3)
+                HStack(spacing: 10) {
+                    ProgressView().tint(QS.ink)
+                    Text("次の歌詞を読み込み中…").font(QS.text(14)).foregroundStyle(QS.dim)
                 }
-                .frame(maxWidth: .infinity).padding(.vertical, 14)
+                .frame(maxWidth: .infinity, minHeight: 58)
             } else {
-                QuizNextButton(isLastQuestion: isLastQuestion || phase == .exhausted,
-                               onNext: nextQuestion, onFinish: finish)
+                QuizStageNextButton(isLastQuestion: isLastQuestion || phase == .exhausted,
+                                    onNext: nextQuestion, onFinish: finish)
+                    .padding(.top, 4)
             }
+        } else {
+            Group {
+                ticket(p)
+                let hidden: Set<String> = Set(hint.shown).contains(.fiftyFifty)
+                    ? Set(p.excerpt.fiftyFiftyHidden.map { String($0) }) : []
+                QuizStageChoiceGrid(choices: choices(p).map { QuizStageChoice(id: $0.id, title: $0.text) },
+                                    columns: mode == .nextLine ? 1 : 2, eliminated: hidden) { picked in
+                    if let choice = choices(p).first(where: { $0.id == picked.id }) { pick(choice, prepared: p) }
+                }
+                .padding(.top, 4)
+            }
+            .id(p.cursor)
+            .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity),
+                                    removal: .opacity))
         }
     }
 
@@ -137,145 +167,109 @@ struct LyricsQuizView: View {
         return label.isEmpty ? s.artistNames : label
     }
 
-    private func lyricCard(_ p: Prepared) -> some View {
-        let answered = selectedKey != nil
+    // MARK: - チケット
+
+    private func ticket(_ p: Prepared) -> some View {
         let shown = Set(hint.shown)
         let answerSong = song(p.question.song)
-        return VStack(alignment: .leading, spacing: DS.sp4) {
-            HStack {
-                Text(mode == .title ? "この歌詞の曲は？" : "この歌詞の続きは？")
-                    .font(.imasHeadline.weight(.bold)).foregroundStyle(DS.ink)
-                Spacer(minLength: 0)
-                if !answered { QuizValueBadge(value: Int(hint.currentValue)) }
-            }
-
-            // 続きはどれは曲を明かして出題する (知っている曲の続きを当てる遊び)。
-            if mode == .nextLine, let s = answerSong {
-                songRow(s, caption: nil)
-            }
-
-            VStack(alignment: .leading, spacing: DS.sp3) {
-                if mode == .nextLine, shown.contains(.previousLine), let prev = p.excerpt.contextLine {
-                    lyricLine(prev, style: .context)
-                        .transition(.move(edge: .top).combined(with: .opacity))
+        return QuizTicket {
+            QuizTicketTitleBlock(label: "LYRIC",
+                                 question: mode == .title ? "この一節はどの曲？" : "この歌詞の続きは？",
+                                 value: Int(hint.currentValue), base: stageValues.first ?? 0) {
+                // 続きはどれは曲を明かして出題する (知っている曲の続きを当てる遊び)。
+                if mode == .nextLine, let s = answerSong {
+                    HStack(spacing: 10) {
+                        ArtworkImageView(url: URL(string: s.song.artworkUrl ?? ""), size: 36,
+                                         songTitle: s.song.title, songId: s.song.id)
+                            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                        Text(s.song.title).font(QS.text(15, weight: .black)).lineLimit(2)
+                    }
                 }
-                lyricLine(p.excerpt.prompt, style: .prompt)
-                if mode == .title, shown.contains(.nextLine), let next = p.excerpt.contextLine {
-                    lyricLine(next, style: .context)
-                        .transition(.move(edge: .top).combined(with: .opacity))
+                HStack(alignment: .top, spacing: 12) {
+                    Text("“").font(QS.num(56, weight: .black)).foregroundStyle(QS.paperDash)
+                        .frame(height: 40, alignment: .top)
+                        .accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: 10) {
+                        if mode == .nextLine, shown.contains(.previousLine), let prev = p.excerpt.contextLine {
+                            lyricLine(prev, emphasized: false)
+                                .transition(.move(edge: .top).combined(with: .opacity))
+                        }
+                        lyricLine(p.excerpt.prompt, emphasized: true)
+                        if mode == .title, shown.contains(.nextLine), let next = p.excerpt.contextLine {
+                            lyricLine(next, emphasized: false)
+                                .transition(.move(edge: .top).combined(with: .opacity))
+                        }
+                        if mode == .nextLine {
+                            Text("？？？").font(QS.text(20, weight: .black)).foregroundStyle(QS.paperMuted)
+                        }
+                    }
+                    .padding(.top, 4)
                 }
-                if mode == .nextLine {
-                    if answered, p.excerpt.choices.indices.contains(Int(p.excerpt.answer)) {
-                        // 解答後は正解の行を歌詞の並びに戻す (曲名当てが続きの行を出すのと揃える)。
-                        lyricLine(p.excerpt.choices[Int(p.excerpt.answer)], style: .answer)
-                            .transition(.opacity)
-                    } else {
-                        lyricLine("？？？", style: .blank)
+                .padding(.vertical, 4)
+            }
+            let year = releaseYear(answerSong)
+            if !p.excerpt.hints.isEmpty || (mode == .title && year != nil) {
+                QuizTicketNotch()
+                QuizTicketHintTiles {
+                    // リリース年は最初から開いている無料のヒント (曲名当てだけ。続き当ては曲を明かしている)。
+                    if mode == .title, let year {
+                        QuizTicketHintTile(title: "リリース年", phase: .open(value: year))
+                    }
+                    ForEach(Array(p.excerpt.hints.enumerated()), id: \.offset) { i, kind in
+                        QuizTicketHintTile(title: hintTitle(kind), phase: tilePhase(i, kind: kind, song: answerSong))
                     }
                 }
             }
-
-            if mode == .title, shown.contains(.singer), !answered, let s = answerSong {
-                Label(singerText(s), systemImage: "music.microphone")
-                    .font(.imasFootnote.weight(.semibold)).foregroundStyle(DS.ink2)
-                    .lineLimit(2)
-                    .padding(.horizontal, DS.sp4).padding(.vertical, DS.sp2)
-                    .background(DS.fill, in: Capsule())
-                    .transition(.scale.combined(with: .opacity))
-            }
-
-            if mode == .title, answered, let s = answerSong {
-                Divider()
-                songRow(s, caption: "正解")
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(DS.sp5)
-        .background(DS.surface, in: RoundedRectangle(cornerRadius: DS.rLG, style: .continuous))
-    }
-
-    private enum LineStyle { case prompt, context, blank, answer }
-
-    /// 歌詞 1 行。出題行は大きく・左に縦線、ヒントで開いた行は控えめに出す。
-    private func lyricLine(_ text: String, style: LineStyle) -> some View {
-        HStack(alignment: .top, spacing: DS.sp4) {
-            Capsule()
-                .fill(barColor(style))
-                .frame(width: 3)
-            Text(text)
-                .font(style == .prompt || style == .answer ? .imasTitle3.weight(.bold) : .imasCallout)
-                .foregroundStyle(textColor(style))
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .fixedSize(horizontal: false, vertical: true)
-    }
-
-    private func barColor(_ style: LineStyle) -> Color {
-        switch style {
-        case .prompt:          return DS.sys
-        case .answer:          return DS.success
-        case .context, .blank: return DS.ink3.opacity(0.5)
         }
     }
 
-    private func textColor(_ style: LineStyle) -> Color {
-        switch style {
-        case .prompt:  return DS.ink
-        case .answer:  return DS.success
-        case .context: return DS.ink2
-        case .blank:   return DS.ink3
-        }
+    /// 曲のリリース年 (`release_date` の先頭 4 桁)。
+    private func releaseYear(_ s: SongWithArtists?) -> String? {
+        guard let date = s?.song.releaseDate, date.count >= 4 else { return nil }
+        let year = String(date.prefix(4))
+        return year.allSatisfy(\.isNumber) ? year : nil
     }
 
-    private func songRow(_ s: SongWithArtists, caption: String?) -> some View {
-        HStack(spacing: DS.sp4) {
-            ArtworkImageView(url: URL(string: s.song.artworkUrl ?? ""), size: 48,
-                             songTitle: s.song.title, songId: s.song.id)
-                .clipShape(RoundedRectangle(cornerRadius: DS.rSM, style: .continuous))
-            VStack(alignment: .leading, spacing: 2) {
-                if let caption {
-                    Text(caption).font(.imasCaption.weight(.bold)).foregroundStyle(DS.success)
-                }
-                Text(s.song.title).font(.imasSubhead.weight(.bold)).foregroundStyle(DS.ink)
-                    .lineLimit(2)
-                Text(singerText(s)).font(.imasCaption).foregroundStyle(DS.ink3).lineLimit(1)
-            }
-            Spacer(minLength: 0)
-        }
+    /// 歌詞 1 行。出題行は大きく、ヒントで開いた行は控えめに出す。
+    private func lyricLine(_ text: String, emphasized: Bool) -> some View {
+        Text(text)
+            .font(QS.text(emphasized ? 22 : 16, weight: emphasized ? .black : .bold))
+            .foregroundStyle(emphasized ? QS.paperInk : QS.paperSub)
+            .lineSpacing(4)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     // MARK: - ヒント
 
-    @ViewBuilder
-    private func hintArea() -> some View {
-        if let next = hint.nextHint {
-            QuizHintButton(systemImage: hintIcon(next.kind), title: hintTitle(next.kind),
-                           nextValue: Int(next.nextValue)) {
-                AppAnalytics.tap("lyrics_quiz.hint_\(hintKey(next.kind))")
-                withAnimation(.easeInOut(duration: 0.25)) {
+    /// ヒントは順番に開く (コアが段階を持つ)。開いたもの / 次に開けるもの / まだ開けないもの。
+    private func tilePhase(_ i: Int, kind: LyricsQuizHintKind, song: SongWithArtists?) -> QuizTicketHintTile.Phase {
+        let cost = stageValues.indices.contains(i + 1) ? stageValues[i] - stageValues[i + 1] : 0
+        if i < Int(revealed) {
+            switch kind {
+            case .singer:       return .open(value: song.map(singerText) ?? "—")
+            case .fiftyFifty:   return .open(value: "2 択に")
+            case .nextLine, .previousLine: return .open(value: "表示中")
+            }
+        }
+        if i == Int(revealed) {
+            return .available(cost: cost, action: {
+                AppAnalytics.tap("lyrics_quiz.hint_\(hintKey(kind))")
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                     revealed += 1
                     refreshHint()
                 }
-            }
+            })
         }
+        return .locked(cost: cost)
     }
 
     private func hintTitle(_ kind: LyricsQuizHintKind) -> String {
         switch kind {
-        case .nextLine:     return "ヒント: 続きの1行を見る"
-        case .singer:       return "ヒント: 歌っているのは？"
-        case .previousLine: return "ヒント: 前の1行を見る"
-        case .fiftyFifty:   return "ヒント: 選択肢を2つに絞る"
-        }
-    }
-
-    private func hintIcon(_ kind: LyricsQuizHintKind) -> String {
-        switch kind {
-        case .nextLine:     return "text.append"
-        case .singer:       return "music.microphone"
-        case .previousLine: return "text.insert"
-        case .fiftyFifty:   return "divide.circle"
+        case .nextLine:     return "次の行"
+        case .singer:       return "歌唱"
+        case .previousLine: return "前の行"
+        case .fiftyFifty:   return "2 択に絞る"
         }
     }
 
@@ -314,28 +308,6 @@ struct LyricsQuizView: View {
         }
     }
 
-    private func choiceList(_ p: Prepared) -> some View {
-        let answered = selectedKey != nil
-        let answer = answerKey(p)
-        let hidden: Set<String> = Set(hint.shown).contains(.fiftyFifty) && !answered
-            ? Set(p.excerpt.fiftyFiftyHidden.map { String($0) }) : []
-        return VStack(spacing: DS.sp3) {
-            ForEach(choices(p)) { choice in
-                LyricsQuizChoiceButton(
-                    text: choice.text,
-                    isLyric: mode == .nextLine,
-                    song: answered ? choice.song : nil,
-                    answered: answered,
-                    isAnswer: choice.id == answer,
-                    isPicked: choice.id == selectedKey,
-                    isEliminated: hidden.contains(choice.id)
-                ) {
-                    pick(choice, prepared: p)
-                }
-            }
-        }
-    }
-
     // MARK: - 進行
 
     private func pick(_ choice: Choice, prepared p: Prepared) {
@@ -343,19 +315,35 @@ struct LyricsQuizView: View {
         AppAnalytics.tap("lyrics_quiz.answer")
         let answer = answerKey(p)
         let outcome = lyricsQuizAnswer(revealed: revealed, picked: choice.id, answer: answer, before: tally)
-        withAnimation(.easeInOut(duration: 0.2)) {
+        let answerSong = song(p.question.song)
+        let number = plays.count + 1
+        scoreBefore = Int(tally.points)
+        // 振り返り・結果は曲名だけで組む (歌詞は載せない)。続きはどれの正しい行は、
+        // いま表示中の問題の判定カードにだけ出す。
+        let correctLine = mode == .nextLine && p.excerpt.choices.indices.contains(Int(p.excerpt.answer))
+            ? p.excerpt.choices[Int(p.excerpt.answer)] : nil
+        let singer = answerSong.map(singerText) ?? ""
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
             selectedKey = choice.id
             tally = outcome.tally
             isLastQuestion = outcome.isLastQuestion
             refreshHint()
+            plays.append(QuizStagePlay(number: number, isCorrect: outcome.isCorrect,
+                                       answerName: answerSong?.song.title ?? "", answerHex: nil,
+                                       pickedName: mode == .title && !outcome.isCorrect ? choice.text : nil))
+            verdict = QuizVerdict(isCorrect: outcome.isCorrect, number: number,
+                                  answerName: answerSong?.song.title ?? "", answerHex: nil,
+                                  earned: Int(outcome.earnedPoints), base: stageValues.first ?? 0,
+                                  hints: Int(outcome.revealedHints),
+                                  pickedName: mode == .title && !outcome.isCorrect ? choice.text : nil,
+                                  detail: correctLine.map { "続き: \($0)" } ?? singer)
         }
         lastCorrect = outcome.isCorrect
-        let answerSong = song(p.question.song)
         history.append(LyricsQuizHistoryItem(
             id: "\(tally.asked)-\(answerSong?.song.id ?? "")",
             index: Int(tally.asked),
             songTitle: answerSong?.song.title ?? "",
-            singer: answerSong.map(singerText) ?? "",
+            singer: singer,
             pickedTitle: mode == .title && !outcome.isCorrect ? choice.text : nil,
             isCorrect: outcome.isCorrect,
             earnedPoints: Int(outcome.earnedPoints),
@@ -363,6 +351,13 @@ struct LyricsQuizView: View {
             artworkUrl: answerSong?.song.artworkUrl
         ))
         if !outcome.isLastQuestion { startPrefetch(after: p.cursor) }
+        // 1 問答えるたびに途中経過を残す。保存するのは出題順の位置と曲名だけ (歌詞は残さない)。
+        QuizResumeStore.shared.save(QuizSuspended(
+            kind: .lyricsQuiz, seed: seed, brandIds: Array(selectedBrandIds),
+            nextIndex: p.cursor + 1, asked: Int(tally.asked), correct: Int(tally.correct),
+            points: Int(tally.points), plays: plays, total: sessionLength,
+            lyricsMode: (mode == .title ? LyricsQuizModeSetting.title : .nextLine).rawValue,
+            savedAt: .now))
     }
 
     private func nextQuestion() {
@@ -390,6 +385,8 @@ struct LyricsQuizView: View {
         prefetch?.cancel()
         prefetch = nil
         let sessionResult = lyricsQuizSessionResult(tally: tally)
+        QuizResumeStore.shared.clear(.lyricsQuiz)
+        previousBest = GameProgressStore.shared.previousBestScore(for: .lyricsQuiz)
         if tally.asked > 0 {
             let update = GameProgressStore.shared.recordResult(
                 .lyricsQuiz, score: Int(sessionResult.points), outOf: Int(sessionResult.outOf))
@@ -397,7 +394,10 @@ struct LyricsQuizView: View {
         }
         let urls = Array(Set(history.compactMap(\.artworkUrl)))
         shareArtwork = Task { await LyricsQuizShareArtwork.load(urls) }
-        withAnimation(.easeInOut(duration: 0.25)) { result = sessionResult }
+        withAnimation(.easeInOut(duration: 0.25)) {
+            verdict = nil
+            result = sessionResult
+        }
     }
 
     private var modeLabel: String { mode == .title ? "曲名当て" : "続きはどれ" }
@@ -425,6 +425,7 @@ struct LyricsQuizView: View {
     private func show(_ p: Prepared) {
         current = p
         selectedKey = nil
+        verdict = nil
         revealed = 0
         lastCorrect = nil
         phase = .playing
@@ -434,32 +435,47 @@ struct LyricsQuizView: View {
     private func startSession() {
         prefetch?.cancel()
         prefetch = nil
-        var generator = SystemRandomNumberGenerator()
+        // つづきからは保存したシードで同じ出題順を作り直し、続きの位置から歌詞を取りに行く。
+        let saved = didUseResume ? nil : resume
+        didUseResume = true
+        if let saved {
+            seed = saved.seed
+        } else {
+            var generator = SystemRandomNumberGenerator()
+            seed = generator.next()
+            QuizResumeStore.shared.clear(.lyricsQuiz)
+        }
         questions = lyricsQuizSession(songs: lyricsQuizSongRefs(songs),
                                       publishedSongIds: publishedSongIds,
                                       selectedBrandIds: Array(selectedBrandIds),
-                                      seed: generator.next())
+                                      seed: seed)
         current = nil
         selectedKey = nil
         revealed = 0
-        tally = QuizTally(asked: 0, correct: 0, points: 0)
+        tally = saved?.tally ?? QuizTally(asked: 0, correct: 0, points: 0)
         isLastQuestion = false
         history = []
+        plays = saved?.plays ?? []
+        verdict = nil
         result = nil
         isNewBest = false
+        previousBest = nil
         shareArtwork?.cancel()
         shareArtwork = nil
         lastCorrect = nil
-        loadFirst()
+        loadFirst(from: saved?.nextIndex ?? 0, resuming: saved != nil)
     }
 
-    private func loadFirst() {
+    private func loadFirst(from start: Int = 0, resuming: Bool = false) {
         phase = .loading
-        let task = makePrepareTask(from: 0)
+        let task = makePrepareTask(from: start)
         Task {
             do {
                 if let p = try await task.value {
                     show(p)
+                } else if resuming && tally.asked > 0 {
+                    // 続きの曲が残っていない (最後まで答えてから閉じていた)。ここまでの成績で結果へ。
+                    finish()
                 } else {
                     phase = .exhausted
                 }
@@ -517,64 +533,12 @@ struct LyricsQuizView: View {
     }
 
     private func refreshHint() {
-        hint = lyricsQuizHintState(hints: current?.excerpt.hints ?? [], revealed: revealed,
-                                   answered: selectedKey != nil)
-    }
-}
-
-// MARK: - 選択肢ボタン
-
-/// 歌詞クイズの 4 択。曲名も歌詞の 1 行も長くなりがちなので 1 列で並べ、折り返して全文を出す。
-private struct LyricsQuizChoiceButton: View {
-    let text: String
-    let isLyric: Bool
-    let song: SongWithArtists?
-    let answered: Bool
-    let isAnswer: Bool
-    let isPicked: Bool
-    /// 50:50 で消した誤答。押せなくし、薄く取り消し線で見せる。
-    let isEliminated: Bool
-    let action: () -> Void
-
-    var body: some View {
-        let bg: Color = {
-            guard answered else { return DS.surface }
-            if isAnswer { return DS.success.opacity(0.18) }
-            if isPicked { return DS.danger.opacity(0.18) }
-            return DS.surface
-        }()
-        let border: Color = answered && (isAnswer || isPicked) ? (isAnswer ? DS.success : DS.danger) : .clear
-        Button(action: action) {
-            HStack(spacing: DS.sp3) {
-                if let song, isAnswer || isPicked {
-                    ArtworkImageView(url: URL(string: song.song.artworkUrl ?? ""), size: 34,
-                                     songTitle: song.song.title, songId: song.song.id)
-                        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                }
-                Text(text)
-                    .font(isLyric ? .imasCallout.weight(.medium) : .imasSubhead.weight(.semibold))
-                    .foregroundStyle(DS.ink)
-                    .strikethrough(isEliminated, color: DS.ink3)
-                    .multilineTextAlignment(.leading)
-                    .lineLimit(3)
-                    .fixedSize(horizontal: false, vertical: true)
-                Spacer(minLength: 0)
-                if answered && isAnswer {
-                    Image(systemName: "checkmark.circle.fill").foregroundStyle(DS.success)
-                } else if answered && isPicked {
-                    Image(systemName: "xmark.circle.fill").foregroundStyle(DS.danger)
-                }
-            }
-            .padding(.horizontal, DS.sp4).padding(.vertical, 14)
-            .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
-            .background(bg, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: DS.rMD, style: .continuous).strokeBorder(border, lineWidth: 1.5))
-            .contentShape(Rectangle())
-            .opacity(isEliminated ? 0.35 : 1)
+        let hints = current?.excerpt.hints ?? []
+        hint = lyricsQuizHintState(hints: hints, revealed: revealed, answered: selectedKey != nil)
+        // 段階ごとの獲得点 (ヒント 0 枚 / 1 枚 / …)。メーターの元値とタイルの「−n」に使う。
+        stageValues = (0...hints.count).map {
+            Int(lyricsQuizHintState(hints: hints, revealed: UInt32($0), answered: false).currentValue)
         }
-        .buttonStyle(.plain)
-        .disabled(answered || isEliminated)
-        .animation(.easeInOut(duration: 0.2), value: isEliminated)
     }
 }
 
@@ -595,56 +559,46 @@ struct LyricsQuizHistoryItem: Identifiable, Hashable {
     let artworkUrl: String?
 }
 
-struct LyricsQuizHistoryList: View {
-    let items: [LyricsQuizHistoryItem]
+// MARK: - つづきから
+
+/// ゲーム一覧の「つづきから」で歌詞クイズを再開する入口。出題に要る曲一覧と
+/// 歌詞の公開曲 id を設定画面と同じ手順で読んでから、続きの問題を出す。
+struct LyricsQuizResumeView: View {
+    let suspended: QuizSuspended
+
+    @State private var songs: [SongWithArtists] = []
+    @State private var publishedIds: [String]?
+    @State private var failed = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DS.sp3) {
-            HStack(spacing: 6) {
-                Image(systemName: "list.bullet.rectangle.portrait")
-                    .font(.imasScaled(13, weight: .semibold)).foregroundStyle(DS.ink2)
-                Text("出題の振り返り").font(.imasSubhead.weight(.bold)).foregroundStyle(DS.ink)
-                Spacer(minLength: 0)
-            }
-            VStack(spacing: DS.sp2) {
-                ForEach(items) { item in row(item) }
+        Group {
+            if let publishedIds {
+                LyricsQuizView(
+                    mode: (LyricsQuizModeSetting(rawValue: suspended.lyricsMode ?? "") ?? .title).core,
+                    songs: songs, publishedSongIds: publishedIds,
+                    selectedBrandIds: Set(suspended.brandIds), resume: suspended)
+            } else if failed {
+                ImasEmptyState(systemImage: "wifi.exclamationmark",
+                               title: "歌詞を読み込めませんでした",
+                               message: "通信状態を確認して、もう一度お試しください。",
+                               actionTitle: "再試行", action: { Task { await load() } })
+            } else {
+                ImasInlineLoading(tint: DS.sys)
             }
         }
+        .task { await load() }
     }
 
-    private func row(_ item: LyricsQuizHistoryItem) -> some View {
-        HStack(alignment: .top, spacing: DS.sp3) {
-            VStack(spacing: DS.sp1) {
-                Text("Q\(item.index)").font(.imasCaption.weight(.bold).monospacedDigit()).foregroundStyle(DS.ink3)
-                Image(systemName: item.isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .font(.imasCallout)
-                    .foregroundStyle(item.isCorrect ? DS.success : DS.danger)
-            }
-            .frame(width: 36)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(item.songTitle).font(.imasSubhead.weight(.semibold)).foregroundStyle(DS.ink).lineLimit(2)
-                if !item.singer.isEmpty {
-                    Text(item.singer).font(.imasCaption).foregroundStyle(DS.ink3).lineLimit(1)
-                }
-                if let picked = item.pickedTitle {
-                    Text("選択: \(picked)").font(.imasCaption.weight(.semibold)).foregroundStyle(DS.danger)
-                        .lineLimit(1)
-                }
-                HStack(spacing: 10) {
-                    Label("\(item.earnedPoints)pt", systemImage: "plus.circle.fill")
-                        .font(.imasCaption.weight(.semibold).monospacedDigit())
-                        .foregroundStyle(item.earnedPoints > 0 ? DS.success : DS.ink3)
-                    if item.revealedHints > 0 {
-                        Label("ヒント\(item.revealedHints)", systemImage: "lightbulb.fill")
-                            .font(.imasCaption.weight(.semibold))
-                            .foregroundStyle(DS.warning)
-                    }
-                }
-                .labelStyle(.titleAndIcon)
-            }
+    private func load() async {
+        failed = false
+        if songs.isEmpty {
+            songs = (try? await AppContainer.shared.songReading.songs(
+                filter: SongSearchFilter(), sortOrder: .titleKana, ascending: nil)) ?? []
         }
-        .padding(DS.sp3)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(DS.surface, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
+        do {
+            publishedIds = try await AppContainer.shared.lyricsQuizReading.publishedSongIds()
+        } catch {
+            failed = true
+        }
     }
 }

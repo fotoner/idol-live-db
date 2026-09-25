@@ -151,7 +151,7 @@ pub fn color_distance(a: Option<&str>, b: Option<&str>) -> f64 {
 /// 表記ゆれを無視した色の同値判定。どちらも読めない hex なら「同じ」とみなす
 /// (原本 Swift の `normalizedHex(a) == normalizedHex(b)` が `nil == nil` になる形)。
 /// 色そのものが無い (`None`) 相手は常に不一致。
-fn same_color(assigned: &str, actual: Option<&str>) -> bool {
+pub(crate) fn same_color(assigned: &str, actual: Option<&str>) -> bool {
     match actual {
         Some(actual) => normalized_hex(assigned) == normalized_hex(actual),
         None => false,
@@ -416,7 +416,7 @@ fn index_of_first_max(scores: &[f64]) -> Option<usize> {
 /// `rest` はアンカーを除いた母集団。むずい / やさしいは色の関係だけで決まり乱数を
 /// 使わないので、規則そのものを単体で固定できる。候補が足りなければその分だけ
 /// 少なく返す (落とさない)。
-fn companions(
+pub(crate) fn companions(
     anchor: &ColorMatchIdol,
     rest: Vec<ColorMatchIdol>,
     take: usize,

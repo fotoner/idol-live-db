@@ -55,8 +55,11 @@ pub const SESSION_LENGTH: u32 = 10;
 /// アイドル当てクイズのノーヒント正解の素点 (iOS `basePoints`)。
 pub const IDOL_QUIZ_BASE_POINTS: u32 = 10;
 
-/// ソロ曲クイズのノーヒント正解の素点 (iOS `QuizScoring.maxPoints`)。
+/// 歌詞クイズのノーヒント正解の素点 (ヒント 1 つごとに 1pt 下がる)。
 pub const SONG_QUIZ_MAX_POINTS: u32 = 3;
+
+/// ソロ曲クイズのノーヒント正解の素点 (ヒントごとのコストは [`SongQuizHintKind::cost`])。
+pub const SONG_SINGER_QUIZ_BASE_POINTS: u32 = 10;
 
 /// 4 択の誤答候補数 (iOS `quizDistractors` の prefix(3))。
 pub const DISTRACTOR_COUNT: u32 = 3;
@@ -641,7 +644,7 @@ pub fn idol_quiz_current_value(
     base_points.saturating_sub(opened_cost(facts, opened_fact_indices)).max(1)
 }
 
-/// ソロ曲クイズの獲得点 (iOS `QuizScoring.points(revealed:)`)。
+/// 歌詞クイズの獲得点 (開いたヒントの数だけ 1pt ずつ下がる)。
 pub fn song_quiz_points(revealed: u32) -> u32 {
     SONG_QUIZ_MAX_POINTS.saturating_sub(revealed).max(1)
 }
@@ -710,57 +713,104 @@ pub fn idol_quiz_hint_state(
     IdolQuizHintState { current_value, shown_fact_indices, hints }
 }
 
-/// ソロ曲クイズのヒント種別。
-#[derive(uniffi::Enum, Clone, Copy, Debug, PartialEq, Eq)]
+/// ソロ曲クイズのヒント種別。並び順がそのままタイルの並び (安い順)。
+#[derive(uniffi::Enum, Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum SongQuizHintKind {
-    /// ジャケットを見る (初手で出すと歌手が割れるので段階開示する)。
+    /// 収録 CD のタイトル。
+    Cd,
+    /// 歌っているアイドルのブランド。
+    Brand,
+    /// 歌っているアイドルのイメージカラー。
+    Color,
+    /// ジャケットを見る (初手で出すと歌手が割れるので有料ヒントにする)。
     Artwork,
-    /// プレビューを再生する。
+    /// プレビューを再生する (ジャケットを開いた後だけ開ける)。
     Preview,
 }
 
-/// 次に開けるヒント。
+impl SongQuizHintKind {
+    /// タイルの並び順。
+    pub const ALL: [SongQuizHintKind; 5] =
+        [Self::Cd, Self::Brand, Self::Color, Self::Artwork, Self::Preview];
+
+    /// 開くと下がる点。
+    pub fn cost(self) -> u32 {
+        match self {
+            Self::Cd => 1,
+            Self::Brand => 2,
+            Self::Color => 3,
+            Self::Artwork => 3,
+            Self::Preview => 4,
+        }
+    }
+}
+
+/// 開けるヒント 1 件。
 #[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
 pub struct SongQuizHintOption {
     pub kind: SongQuizHintKind,
+    /// 開くと下がる点。
+    pub cost: u32,
+    /// 開いた後に正解した場合の獲得点。
     pub next_value: u32,
+    /// まだ開けない (試聴はジャケットを開いてから)。
+    pub locked: bool,
 }
 
 /// 出題カードの開示状態。
 #[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
 pub struct SongSingerQuizHintState {
+    /// いま正解した場合の獲得点。
     pub current_value: u32,
+    /// ノーヒント正解の素点。
+    pub base_value: u32,
     pub show_artwork: bool,
     pub can_preview: bool,
-    /// まだ開けるヒント (無ければ `None`)。
-    pub next_hint: Option<SongQuizHintOption>,
+    /// 見せてよいヒント (開封済み。解答後はこの曲で使えるもの全部)。タイルの並び順。
+    pub shown: Vec<SongQuizHintKind>,
+    /// まだ開いていないヒント (解答後は空)。タイルの並び順。
+    pub hints: Vec<SongQuizHintOption>,
 }
 
-/// `revealed` は 0=曲名のみ / 1=ジャケット / 2=プレビュー。
-/// プレビュー URL が無い曲では 2 段目のヒントを出さない (開いても何も起きないため)。
+/// いま正解した場合の獲得点 (素点 − 開いたヒントのコスト、最低 1pt)。重複は 1 回だけ数える。
+pub fn song_singer_quiz_current_value(opened: &[SongQuizHintKind]) -> u32 {
+    let cost: u32 = opened.iter().copied().collect::<HashSet<_>>().into_iter().map(SongQuizHintKind::cost).sum();
+    SONG_SINGER_QUIZ_BASE_POINTS.saturating_sub(cost).max(1)
+}
+
+/// `available` はこの曲で出せるヒント (CD 名が無い曲・プレビューが無い曲などは呼び出し側が外す)。
+/// `opened` は開いたヒント。どちらも順不同・重複可。
 pub fn song_singer_quiz_hint_state(
-    revealed: u32,
-    has_preview: bool,
+    opened: &[SongQuizHintKind],
+    available: &[SongQuizHintKind],
     answered: bool,
 ) -> SongSingerQuizHintState {
+    let opened: HashSet<SongQuizHintKind> =
+        opened.iter().copied().filter(|k| available.contains(k)).collect();
+    let opened_list: Vec<SongQuizHintKind> =
+        SongQuizHintKind::ALL.into_iter().filter(|k| opened.contains(k)).collect();
+    let current_value = song_singer_quiz_current_value(&opened_list);
+    let usable = SongQuizHintKind::ALL.into_iter().filter(|k| available.contains(k));
+    let is_open = |k: SongQuizHintKind| answered || opened.contains(&k);
     SongSingerQuizHintState {
-        current_value: song_quiz_points(revealed),
-        show_artwork: answered || revealed >= 1,
-        can_preview: answered || revealed >= 2,
-        next_hint: if answered {
-            None
-        } else if revealed == 0 {
-            Some(SongQuizHintOption {
-                kind: SongQuizHintKind::Artwork,
-                next_value: song_quiz_points(1),
-            })
-        } else if revealed == 1 && has_preview {
-            Some(SongQuizHintOption {
-                kind: SongQuizHintKind::Preview,
-                next_value: song_quiz_points(2),
-            })
+        current_value,
+        base_value: SONG_SINGER_QUIZ_BASE_POINTS,
+        show_artwork: is_open(SongQuizHintKind::Artwork),
+        can_preview: is_open(SongQuizHintKind::Preview),
+        shown: if answered { usable.clone().collect() } else { opened_list.clone() },
+        hints: if answered {
+            Vec::new()
         } else {
-            None
+            usable
+                .filter(|k| !opened.contains(k))
+                .map(|kind| SongQuizHintOption {
+                    kind,
+                    cost: kind.cost(),
+                    next_value: current_value.saturating_sub(kind.cost()).max(1),
+                    locked: kind == SongQuizHintKind::Preview
+                        && !opened.contains(&SongQuizHintKind::Artwork),
+                })
+                .collect()
         },
     }
 }
@@ -833,17 +883,17 @@ pub fn idol_quiz_answer(
     )
 }
 
-/// ソロ曲クイズの解答。獲得点は開示段階で決まる。
+/// ソロ曲クイズの解答。獲得点は開いたヒントのコストを引いた値。
 pub fn song_singer_quiz_answer(
-    revealed: u32,
+    opened: &[SongQuizHintKind],
     picked_idol_id: &str,
     answer_idol_id: &str,
     before: &QuizTally,
     session_length: u32,
 ) -> QuizAnswerOutcome {
     quiz_answer(
-        song_quiz_points(revealed),
-        revealed,
+        song_singer_quiz_current_value(opened),
+        opened.iter().copied().collect::<HashSet<_>>().len() as u32,
         picked_idol_id,
         answer_idol_id,
         before,
@@ -941,6 +991,29 @@ pub fn quiz_session_result(
     }
 }
 
+/// 点が「当てた数」そのものの遊び (メンバーカラー合わせ・イントロドン) の結果を、
+/// 4 択クイズと同じ形 (グレード・一言) にまとめる。正答率は `points / out_of`。
+/// `correct` / `questions` は結果画面の「8 / 10 正解」に出す数で、点とは別に渡す
+/// (メンバーカラーは 1 問に複数人いるので、全員当てた問題数を出す)。
+pub fn accuracy_session_result(
+    points: u32,
+    out_of: u32,
+    correct: u32,
+    questions: u32,
+) -> QuizSessionResult {
+    let rate = rate_percent(points, out_of);
+    QuizSessionResult {
+        points,
+        max_points: out_of,
+        out_of,
+        correct,
+        questions,
+        rate_percent: rate,
+        grade: QuizGrade::from_rate(rate),
+        comment: quiz_result_comment(rate).to_string(),
+    }
+}
+
 // ---------------------------------------------------------------------------
 // 出題ブランド設定の保存形式 (値は各 OS のストアに置く。エンコード規則だけ共有)
 // ---------------------------------------------------------------------------
@@ -974,6 +1047,25 @@ mod tests {
     /// 合成テストで `apply_result` に渡すためだけの固定値。
     const TODAY: &str = "2026-08-25";
     const YESTERDAY: &str = "2026-08-24";
+
+    // ---- accuracy_session_result ----
+
+    #[test]
+    fn accuracy_result_grades_by_points_over_out_of() {
+        let r = accuracy_session_result(17, 20, 3, 5);
+        assert_eq!((r.points, r.max_points, r.out_of), (17, 20, 20));
+        assert_eq!((r.correct, r.questions), (3, 5));
+        assert_eq!(r.rate_percent, 85);
+        assert_eq!(r.grade, QuizGrade::A);
+        assert_eq!(r.comment, quiz_result_comment(85));
+    }
+
+    #[test]
+    fn accuracy_result_with_nothing_answered_is_grade_d() {
+        let r = accuracy_session_result(0, 0, 0, 0);
+        assert_eq!(r.rate_percent, 0);
+        assert_eq!(r.grade, QuizGrade::D);
+    }
 
     // ---- テスト用ビルダ ----
 
@@ -1521,30 +1613,52 @@ mod tests {
         assert_eq!(song_quiz_points(3), 1, "下限は 1pt");
     }
 
-    /// ジャケット → プレビューの順に開き、プレビューが無い曲は 2 段目を出さない。
+    /// ヒントごとにコストを引き、試聴はジャケットを開くまで開けない。
     #[test]
-    fn song_hints_are_revealed_in_stages() {
-        let first = song_singer_quiz_hint_state(0, true, false);
-        assert_eq!(first.current_value, 3);
+    fn song_hints_subtract_their_cost() {
+        use SongQuizHintKind::*;
+        let all = SongQuizHintKind::ALL;
+        let first = song_singer_quiz_hint_state(&[], &all, false);
+        assert_eq!(first.current_value, 10);
         assert!(!first.show_artwork && !first.can_preview);
+        assert_eq!(first.hints.iter().map(|h| h.kind).collect::<Vec<_>>(), all.to_vec());
         assert_eq!(
-            first.next_hint,
-            Some(SongQuizHintOption { kind: SongQuizHintKind::Artwork, next_value: 2 })
+            first.hints[4],
+            SongQuizHintOption { kind: Preview, cost: 4, next_value: 6, locked: true }
         );
 
-        let second = song_singer_quiz_hint_state(1, true, false);
-        assert!(second.show_artwork && !second.can_preview);
-        assert_eq!(
-            second.next_hint,
-            Some(SongQuizHintOption { kind: SongQuizHintKind::Preview, next_value: 1 })
-        );
+        let after = song_singer_quiz_hint_state(&[Artwork, Cd, Cd], &all, false);
+        assert_eq!(after.current_value, 6);
+        assert!(after.show_artwork && !after.can_preview);
+        assert_eq!(after.shown, vec![Cd, Artwork]);
+        assert!(!after.hints.iter().any(|h| h.locked), "ジャケットの後は試聴も開ける");
 
-        assert_eq!(song_singer_quiz_hint_state(1, false, false).next_hint, None);
-        assert_eq!(song_singer_quiz_hint_state(2, true, false).next_hint, None);
+        let everything = song_singer_quiz_hint_state(&all, &all, false);
+        assert_eq!(everything.current_value, 1, "下限は 1pt");
+        assert!(everything.hints.is_empty());
+    }
 
-        let answered = song_singer_quiz_hint_state(0, true, true);
+    /// この曲で使えないヒントは並べず、開いたことにもしない。
+    #[test]
+    fn song_hints_follow_availability() {
+        use SongQuizHintKind::*;
+        let state = song_singer_quiz_hint_state(&[Preview], &[Brand, Artwork], false);
+        assert_eq!(state.current_value, 10);
+        assert_eq!(state.hints.iter().map(|h| h.kind).collect::<Vec<_>>(), vec![Brand, Artwork]);
+
+        let answered = song_singer_quiz_hint_state(&[], &[Brand, Artwork, Preview], true);
         assert!(answered.show_artwork && answered.can_preview, "解答後は全部見せる");
-        assert_eq!(answered.next_hint, None);
+        assert_eq!(answered.shown, vec![Brand, Artwork, Preview]);
+        assert!(answered.hints.is_empty());
+    }
+
+    #[test]
+    fn song_answer_scores_by_opened_hints() {
+        use SongQuizHintKind::*;
+        let outcome =
+            song_singer_quiz_answer(&[Brand, Color], "a", "a", &QuizTally::default(), SESSION_LENGTH);
+        assert_eq!(outcome.earned_points, 5);
+        assert_eq!(outcome.revealed_hints, 2);
     }
 
     // =======================================================================
@@ -1589,7 +1703,7 @@ mod tests {
     #[test]
     fn last_question_is_detected_by_session_length() {
         let before = QuizTally { asked: 9, correct: 9, points: 27 };
-        let outcome = song_singer_quiz_answer(0, "a", "a", &before, SESSION_LENGTH);
+        let outcome = song_singer_quiz_answer(&[], "a", "a", &before, SESSION_LENGTH);
         assert_eq!(outcome.tally.asked, 10);
         assert!(outcome.is_last_question);
     }
@@ -1598,7 +1712,7 @@ mod tests {
     #[test]
     fn answer_comparison_is_canonically_equivalent() {
         let outcome = song_singer_quiz_answer(
-            0,
+            &[],
             "cg_ウ\u{3099}ェネツィア", // NFD
             "cg_ヴェネツィア",         // NFC
             &QuizTally::default(),

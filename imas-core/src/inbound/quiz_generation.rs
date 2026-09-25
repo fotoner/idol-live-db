@@ -18,10 +18,10 @@
 use crate::domain::prng::SplitMix64;
 use crate::domain::quiz_generation::{
     self as quiz, IdolQuizFact, IdolQuizHintState, IdolQuizIdolRef, IdolQuizPoolEstimate,
-    IdolQuizQuestion, QuizAnswerOutcome, QuizSessionResult, QuizTally,
-    SongQuizOriginalArtistRow, SongQuizSingerRef, SongSingerQuizHintState,
+    IdolQuizQuestion, QuizAnswerOutcome, QuizGrade, QuizSessionResult, QuizTally,
+    SongQuizHintKind, SongQuizOriginalArtistRow, SongQuizSingerRef, SongSingerQuizHintState,
     SongSingerQuizPoolEstimate, SongSingerQuizQuestion, IDOL_QUIZ_BASE_POINTS, SESSION_LENGTH,
-    SONG_QUIZ_MAX_POINTS,
+    SONG_SINGER_QUIZ_BASE_POINTS,
 };
 
 /// 1 セッションの出題数 (進捗ヘッダの「第 n / N 問」表示用)。
@@ -109,6 +109,24 @@ pub fn idol_quiz_session_result(tally: QuizTally) -> QuizSessionResult {
     quiz::quiz_session_result(&tally, IDOL_QUIZ_BASE_POINTS, SESSION_LENGTH)
 }
 
+/// 点が「当てた数」の遊び (メンバーカラー合わせ・イントロドン) のリザルト。
+/// グレードと一言の閾値は 4 択クイズと同じ。自己ベストは `game_progress_apply_result` 側。
+#[uniffi::export]
+pub fn quiz_accuracy_result(
+    points: u32,
+    out_of: u32,
+    correct: u32,
+    questions: u32,
+) -> QuizSessionResult {
+    quiz::accuracy_session_result(points, out_of, correct, questions)
+}
+
+/// 正答率 (0–100) のグレード。ゲーム一覧で自己ベストの正答率をグレードで見せる。
+#[uniffi::export]
+pub fn quiz_grade_for_rate(rate_percent: u32) -> QuizGrade {
+    QuizGrade::from_rate(rate_percent)
+}
+
 // ---------------------------------------------------------------------------
 // ソロ曲クイズ
 // ---------------------------------------------------------------------------
@@ -140,26 +158,27 @@ pub fn song_singer_quiz_session(
     )
 }
 
-/// ジャケット/プレビューの開示段階と、次に開けるヒント。
+/// 開いたヒントから、いまの獲得点・見せてよいもの・まだ開けるヒントを返す。
+/// `available` はこの曲で出せるヒント (CD 名やプレビューが無い曲は外して渡す)。
 #[uniffi::export]
 pub fn song_singer_quiz_hint_state(
-    revealed: u32,
-    has_preview: bool,
+    opened: Vec<SongQuizHintKind>,
+    available: Vec<SongQuizHintKind>,
     answered: bool,
 ) -> SongSingerQuizHintState {
-    quiz::song_singer_quiz_hint_state(revealed, has_preview, answered)
+    quiz::song_singer_quiz_hint_state(&opened, &available, answered)
 }
 
 /// 選択肢をタップしたときの正誤判定・加点・集計。
 #[uniffi::export]
 pub fn song_singer_quiz_answer(
-    revealed: u32,
+    opened: Vec<SongQuizHintKind>,
     picked_idol_id: String,
     answer_idol_id: String,
     before: QuizTally,
 ) -> QuizAnswerOutcome {
     quiz::song_singer_quiz_answer(
-        revealed,
+        &opened,
         &picked_idol_id,
         &answer_idol_id,
         &before,
@@ -170,7 +189,7 @@ pub fn song_singer_quiz_answer(
 /// セッション終了時のリザルト (今回ぶんだけ。自己ベストは `game_progress_apply_result` 側)。
 #[uniffi::export]
 pub fn song_singer_quiz_session_result(tally: QuizTally) -> QuizSessionResult {
-    quiz::quiz_session_result(&tally, SONG_QUIZ_MAX_POINTS, SESSION_LENGTH)
+    quiz::quiz_session_result(&tally, SONG_SINGER_QUIZ_BASE_POINTS, SESSION_LENGTH)
 }
 
 #[cfg(test)]

@@ -15,8 +15,12 @@ struct IdolQuizView: View {
     /// 出題ブランド絞り込み（空集合 = 全ブランド対象）。IdolQuizSetupView から渡す。
     let selectedBrandIds: Set<String>
 
-    init(selectedBrandIds: Set<String> = []) {
+    /// 途中でやめたセッションの続き (ゲーム一覧の「つづきから」)。nil なら新しく始める。
+    let resume: QuizSuspended?
+
+    init(selectedBrandIds: Set<String> = [], resume: QuizSuspended? = nil) {
         self.selectedBrandIds = selectedBrandIds
+        self.resume = resume
     }
 
     /// 1 セッションの出題数 (規則本体はコア。UI は総問数の表示にだけ使う)。
@@ -31,141 +35,136 @@ struct IdolQuizView: View {
     @State private var opened: [UInt32] = []   // 開いたヒントの facts インデックス (1...)
     /// 開示範囲と残りヒント (コアが算出)。
     @State private var hint = IdolQuizHintState(currentValue: 0, shownFactIndices: [], hints: [])
+    /// ヒントを開く前の獲得点 (出題ごとに記録。メーターの「100」側)。
+    @State private var baseValue = 0
     /// 解答済み問題数・正解数・累計ポイント (コアが積み上げる)。
     @State private var tally = QuizTally(asked: 0, correct: 0, points: 0)
     @State private var isLastQuestion = false
-    @State private var history: [QuizHistoryItem] = []  // 各問の振り返り (リザルトに渡す)
+    /// 各問の記録 (ペンライト・連続正解・見直す)。
+    @State private var plays: [QuizStagePlay] = []
+    /// 直前の問題の判定 (解答後に出す大きなカード)。
+    @State private var verdict: QuizVerdict?
+    @State private var scoreBefore = 0
     @State private var result: QuizSessionResult?
     @State private var isNewBest = false
+    @State private var previousBest: Int?
     @State private var isLoading = true
+    /// このセッションの出題シード (つづきからで同じ出題を作り直す)。
+    @State private var seed: UInt64 = 0
+    /// `resume` は最初の 1 回だけ使う (「もう一度」は新しいセッション)。
+    @State private var didUseResume = false
+    @Environment(\.dismiss) private var dismiss
 
     private var question: IdolQuizQuestion? {
         questions.indices.contains(index) ? questions[index] : nil
     }
 
+    private var header: QuizStageHeader {
+        if let result { return .result(total: Int(result.questions)) }
+        guard question != nil, !isLoading else { return .none }
+        return .question(current: min(plays.count + (verdict == nil ? 1 : 0), sessionLength),
+                         total: sessionLength, points: Int(tally.points))
+    }
+
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: DS.sp5) {
-                if isLoading {
-                    ImasInlineLoading(tint: DS.sys)
-                } else if let result {
-                    QuizResultView(result: result,
-                                   kind: .idolQuiz, isNewBest: isNewBest,
-                                   history: history,
-                                   onReplay: { restart() })
-                } else if let q = question {
-                    QuizProgressHeader(current: min(Int(tally.asked) + (selectedId != nil ? 0 : 1), sessionLength),
-                                       total: sessionLength, points: Int(tally.points))
-                    promptCard(q)
-                    if selectedId == nil { hintList() }
-                    IdolChoiceGrid(choices: choices(q), answer: idols[Int(q.answer)],
-                                   selectedId: selectedId, onPick: pick)
-                    if selectedId != nil {
-                        QuizNextButton(isLastQuestion: isLastQuestion, onNext: nextQuestion, onFinish: finish)
-                    }
-                } else {
-                    ImasEmptyState(systemImage: "person.fill.questionmark", title: "出題できる候補が不足しています")
-                }
-            }
-            .padding(DS.sp5)
+        QuizStageScaffold(title: "アイドル当て", header: header, onClose: { dismiss() }) {
+            content
         }
-        .background(DS.bg.ignoresSafeArea())
-        .scrollContentBackground(.hidden)
-        .navigationTitle("アイドル当てクイズ")
-        .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
         .trackScreen("idol_quiz")
     }
 
-    // MARK: - 出題カード (シルエット + 公開済みプロフィール)
-
-    private func promptCard(_ q: IdolQuizQuestion) -> some View {
-        let answered = selectedId != nil
-        let answer = idols[Int(q.answer)]
-        return VStack(alignment: .leading, spacing: DS.sp4) {
-            HStack(spacing: DS.sp4) {
-                silhouette(answer, revealed: answered)
-                VStack(alignment: .leading, spacing: DS.sp2) {
-                    Text("このプロフィールは誰？").font(.imasHeadline.weight(.bold)).foregroundStyle(DS.ink)
-                    if answered {
-                        Text(answer.name).font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
-                    } else {
-                        // 公開する事実 (無料 facts[0] + 開いたヒント) と獲得点はコアの開示状態から。
-                        QuizValueBadge(value: Int(hint.currentValue))
-                    }
-                }
-                Spacer(minLength: 0)
-            }
-            ImasListContainer {
-                ForEach(Array(hint.shownFactIndices.enumerated()), id: \.element) { pos, idx in
-                    if pos > 0 { ImasRowDivider(inset: DS.sp5) }
-                    let f = q.facts[Int(idx)]
-                    HStack {
-                        Text(f.label).font(.imasSubhead).foregroundStyle(DS.ink2)
-                        Spacer(minLength: 12)
-                        // 色そのものが答えになる項目だけ色チップで見せる (文言ではなく種別で分岐)。
-                        if f.kind == .memberColor {
-                            colorSwatch(f.value)
-                        } else {
-                            Text(f.value).font(.imasSubhead.weight(.medium)).foregroundStyle(DS.ink)
-                                .multilineTextAlignment(.trailing)
-                        }
-                    }
-                    .padding(.horizontal, DS.sp5).padding(.vertical, 11)
-                    .background(DS.surface)
-                }
-            }
-        }
-        .padding(DS.sp5)
-        .background(DS.surface, in: RoundedRectangle(cornerRadius: DS.rLG, style: .continuous))
-    }
-
-    /// メンバーカラーのヒントは色そのものが答えなので、HEX 文字列ではなく色チップで見せる。
-    private func colorSwatch(_ hex: String) -> some View {
-        HStack(spacing: DS.sp3) {
-            RoundedRectangle(cornerRadius: 5, style: .continuous)
-                .fill(Color(hexString: hex))
-                .frame(width: 28, height: 18)
-                .overlay(RoundedRectangle(cornerRadius: 5, style: .continuous).strokeBorder(DS.sep, lineWidth: 1))
-            Text(hex.uppercased()).font(.imasSubhead.weight(.medium).monospaced()).foregroundStyle(DS.ink)
-        }
-    }
-
-    /// 解答前はテーマ色のシルエット、解答後は本人アバター。版権上キャラ絵は使わずモノグラム/カスタム画像のみ。
     @ViewBuilder
-    private func silhouette(_ idol: Idol, revealed: Bool) -> some View {
-        if revealed {
-            IdolAvatarView(idol: idol, size: 56)
-        } else {
-            // メンバーカラーは有料ヒントなので、シルエットのリングに色を漏らさず中立色で描く。
-            ZStack {
-                Circle().fill(DS.fill)
-                Image(systemName: "person.fill")
-                    .font(.imasScaled( 30, weight: .semibold))
-                    .foregroundStyle(DS.ink3)
+    private var content: some View {
+        if isLoading {
+            ImasInlineLoading(tint: QS.ink)
+        } else if let result {
+            QuizStageResultView(result: result, kind: .idolQuiz, isNewBest: isNewBest,
+                                previousBest: previousBest,
+                                slots: plays.penlights(total: Int(result.questions), answering: false),
+                                longestStreak: plays.longestStreak, misses: plays.misses,
+                                onReplay: { restart() }, onClose: { dismiss() })
+        } else if let q = question {
+            QuizStageProgress(slots: plays.penlights(total: sessionLength, answering: verdict == nil),
+                              caption: plays.setlistCaption(total: sessionLength),
+                              streak: plays.streak, streakBrokeAt: plays.streakBrokeAt)
+                .padding(.bottom, 2)
+            if let verdict {
+                QuizVerdictCard(verdict: verdict).id(verdict.number)
+                QuizVerdictStats(before: scoreBefore, after: Int(tally.points), streak: plays.streak)
+                if !verdict.isCorrect { QuizVerdictFootnote() }
+                QuizStageNextButton(isLastQuestion: isLastQuestion, onNext: nextQuestion, onFinish: finish)
+                    .padding(.top, 4)
+            } else {
+                QuizValueMeter(value: Int(hint.currentValue), base: baseValue, note: meterNote)
+                ticket(q)
+                QuizStageChoiceGrid(choices: choices(q).map { QuizStageChoice(id: $0.id, title: $0.name) }) { choice in
+                    if let idol = idols.first(where: { $0.id == choice.id }) { pick(idol) }
+                }
+                .padding(.top, 4)
             }
-            .frame(width: 56, height: 56)
-            .overlay(Circle().strokeBorder(DS.sep, lineWidth: 1.5))
+        } else {
+            ImasEmptyState(systemImage: "person.fill.questionmark", title: "出題できる候補が不足しています")
         }
     }
 
-    // MARK: - ヒント
+    private var meterNote: String {
+        opened.isEmpty ? "ヒントを開くと減ります" : "ヒント \(opened.count) 枚で −\(baseValue - Int(hint.currentValue))"
+    }
 
-    /// 未公開の事実を一覧で並べ、どのヒントを開くかユーザが選べるようにする (戦略性)。
-    /// 並ぶ候補と開封後の獲得点はコアの開示状態がそのまま持っている。CV枠は常設
-    /// (コアの facts が「声優未発表」も含めてスロット化済) なので、CV ラベルの
-    /// 有無で声優未発表キャラの正体がバレることはない。
-    private func hintList() -> some View {
-        VStack(spacing: DS.sp3) {
-            ForEach(hint.hints, id: \.factIndex) { option in
-                IdolHintRow(label: option.label, nextValue: Int(option.nextValue)) {
-                    AppAnalytics.tap("idol_quiz.hint")
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        opened.append(option.factIndex)
-                        refreshHint()
-                    }
+    // MARK: - チケット (無料の事実 + ヒント)
+
+    private func ticket(_ q: IdolQuizQuestion) -> some View {
+        // 最初から見えている事実 = 公開済みのうち、ヒントで開いたもの以外。
+        let free = hint.shownFactIndices.filter { !opened.contains($0) }
+        let hintTotal = opened.count + hint.hints.count
+        return QuizTicket {
+            QuizTicketHeading(label: "PROFILE", question: "このアイドルはだれ？")
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
+                ForEach(free, id: \.self) { idx in
+                    let f = q.facts[Int(idx)]
+                    QuizTicketFactTile(label: f.label, value: f.value)
                 }
             }
+            .padding(.horizontal, 18).padding(.bottom, 12)
+            if hintTotal > 0 {
+                QuizTicketNotch()
+                QuizTicketHintHeader(opened: opened.count, total: hintTotal)
+                // 開いた順 → 未開封 の順に並べる。CV 枠はコアが常設しているので、
+                // ラベルの有無で声優未発表キャラがバレることはない。
+                ForEach(Array(opened.enumerated()), id: \.element) { pos, idx in
+                    let f = q.facts[Int(idx)]
+                    QuizTicketHintRow(number: pos + 1, label: f.label, cost: Int(f.cost), isOpen: true,
+                                      isNew: pos == opened.count - 1, isFirst: pos == 0, onOpen: {}) {
+                        factValue(f)
+                    }
+                }
+                ForEach(Array(hint.hints.enumerated()), id: \.element.factIndex) { pos, option in
+                    QuizTicketHintRow(number: opened.count + pos + 1, label: option.label,
+                                      cost: Int(hint.currentValue) - Int(option.nextValue),
+                                      isOpen: false, isFirst: opened.isEmpty && pos == 0,
+                                      onOpen: { openHint(option) }) { EmptyView() }
+                }
+                Color.clear.frame(height: 6)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func factValue(_ f: IdolQuizFact) -> some View {
+        // 色そのものが答えになる項目だけ色チップで見せる (文言ではなく種別で分岐)。
+        if f.kind == .memberColor {
+            QuizTicketColorValue(hex: f.value)
+        } else {
+            QuizTicketHintValue(text: f.value)
+        }
+    }
+
+    private func openHint(_ option: IdolQuizHintOption) {
+        AppAnalytics.tap("idol_quiz.hint")
+        withAnimation(.easeInOut(duration: 0.2)) {
+            opened.append(option.factIndex)
+            refreshHint()
         }
     }
 
@@ -181,31 +180,50 @@ struct IdolQuizView: View {
         AppAnalytics.tap("idol_quiz.answer")
         selectedId = idol.id
         let answer = idols[Int(q.answer)]
+        scoreBefore = Int(tally.points)
         // 正誤判定・獲得点・積み上げはコアがまとめて返す (加点式なので不正解でも減点しない)。
         let outcome = idolQuizAnswer(facts: q.facts, openedFactIndices: opened,
                                      pickedIdolId: idol.id, answerIdolId: answer.id, before: tally)
-        tally = outcome.tally
         isLastQuestion = outcome.isLastQuestion
         refreshHint()
-        // 振り返り用に1問の記録を残す。題材はアバター無しの抽象 (シルエット出題なので)、
-        // 補助情報として無料公開ぶんの事実を出すと一覧が読みやすい。
-        history.append(QuizHistoryItem(
-            id: "\(tally.asked)-\(answer.id)",
-            index: Int(tally.asked),
-            subjectTitle: "プロフィール問題",
-            subjectSubtitle: q.facts.first.map { "\($0.label): \($0.value)" },
-            answer: answer,
-            picked: idol,
-            earnedPoints: Int(outcome.earnedPoints),
-            revealedHints: Int(outcome.revealedHints)
-        ))
+        let number = plays.count + 1
+        // 解答後は全部の事実が公開されるので、正解の補足としてプロフィールを 1 行で添える。
+        let summary = hint.shownFactIndices
+            .map { q.facts[Int($0)] }
+            .filter { $0.kind != .memberColor }
+            .prefix(4).map(\.value).joined(separator: " · ")
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            tally = outcome.tally
+            plays.append(QuizStagePlay(number: number, isCorrect: outcome.isCorrect,
+                                       answerName: answer.name, answerHex: answer.color,
+                                       pickedName: outcome.isCorrect ? nil : idol.name))
+            verdict = QuizVerdict(isCorrect: outcome.isCorrect, number: number,
+                                  answerName: answer.name, answerHex: answer.color,
+                                  earned: Int(outcome.earnedPoints), base: baseValue,
+                                  hints: Int(outcome.revealedHints),
+                                  pickedName: outcome.isCorrect ? nil : idol.name,
+                                  detail: summary)
+        }
+        if outcome.isCorrect { UINotificationFeedbackGenerator().notificationOccurred(.success) }
+        else { UINotificationFeedbackGenerator().notificationOccurred(.error) }
+        saveProgress()
+    }
+
+    /// 1 問答えるたびに途中経過を残す (× で閉じても「つづきから」で戻れる)。
+    private func saveProgress() {
+        QuizResumeStore.shared.save(QuizSuspended(
+            kind: .idolQuiz, seed: seed, brandIds: Array(selectedBrandIds),
+            nextIndex: index + 1, asked: Int(tally.asked), correct: Int(tally.correct),
+            points: Int(tally.points), plays: plays, total: sessionLength, savedAt: .now))
     }
 
     private func nextQuestion() {
         selectedId = nil
         opened = []
+        verdict = nil
         index += 1
         refreshHint()
+        baseValue = Int(hint.currentValue)
     }
 
     private func restart() {
@@ -214,10 +232,13 @@ struct IdolQuizView: View {
 
     private func finish() {
         let sessionResult = idolQuizSessionResult(tally: tally)
+        previousBest = GameProgressStore.shared.previousBestScore(for: .idolQuiz)
         // 保存と「自己ベスト更新！」の判定は進捗ストア (コアの game_progress) が 1 回で返す。
         let update = GameProgressStore.shared.recordResult(
             .idolQuiz, score: Int(sessionResult.points), outOf: Int(sessionResult.outOf))
         isNewBest = update.isNewBest
+        QuizResumeStore.shared.clear(.idolQuiz)
+        verdict = nil
         result = sessionResult
     }
 
@@ -234,19 +255,33 @@ struct IdolQuizView: View {
     /// 母集団の条件は IdolQuizSetupView の見積りと同じ関数が持つので、
     /// 「開始できるのに候補不足」というズレが起きない。
     private func startSession() {
-        var generator = SystemRandomNumberGenerator()
+        // つづきからは保存したシードで同じ出題を作り直し、答えた所まで進める。
+        let saved = didUseResume ? nil : resume
+        didUseResume = true
+        if let saved {
+            seed = saved.seed
+        } else {
+            var generator = SystemRandomNumberGenerator()
+            seed = generator.next()
+            QuizResumeStore.shared.clear(.idolQuiz)
+        }
         questions = idolQuizSession(idols: idolQuizRefs(idols),
                                     selectedBrandIds: Array(selectedBrandIds),
-                                    seed: generator.next())
-        index = 0
+                                    seed: seed)
+        index = saved?.nextIndex ?? 0
         selectedId = nil
         opened = []
-        tally = QuizTally(asked: 0, correct: 0, points: 0)
+        tally = saved?.tally ?? QuizTally(asked: 0, correct: 0, points: 0)
         isLastQuestion = false
-        history = []
+        plays = saved?.plays ?? []
+        verdict = nil
         result = nil
         isNewBest = false
+        previousBest = nil
         refreshHint()
+        baseValue = Int(hint.currentValue)
+        // 最後の問題まで答えてから閉じていたら、そのまま結果へ。
+        if saved != nil && index >= questions.count && !questions.isEmpty { finish() }
     }
 
     /// 開示範囲と残りヒントを引き直す (出題が変わった / ヒントを開いた / 解答した とき)。
@@ -254,37 +289,5 @@ struct IdolQuizView: View {
         hint = idolQuizHintState(facts: question?.facts ?? [],
                                  openedFactIndices: opened,
                                  answered: selectedId != nil)
-    }
-}
-
-/// アイドル当てクイズ専用のヒント行。属性ラベルを見せ、どれを開くかユーザが選べる戦略性を残す。
-/// CV枠はコアの facts で常設しているため、CV ラベルが並んでも声優未発表キャラの正体は漏れない。
-private struct IdolHintRow: View {
-    let label: String
-    let nextValue: Int
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: DS.sp3) {
-                Image(systemName: "lightbulb.fill")
-                    .font(.imasScaled( 16, weight: .semibold)).foregroundStyle(DS.warning)
-                    .frame(width: 34, height: 34)
-                    .background(DS.warning.opacity(0.14), in: RoundedRectangle(cornerRadius: DS.rSM, style: .continuous))
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("ヒント: \(label)を見る").font(.imasSubhead.weight(.semibold)).foregroundStyle(DS.ink)
-                    Text("開いた後は正解で +\(nextValue)pt").font(.imasCaption).foregroundStyle(DS.ink3)
-                }
-                Spacer(minLength: 0)
-                Image(systemName: "chevron.down").font(.imasScaled( 13, weight: .semibold)).foregroundStyle(DS.ink3)
-            }
-            .padding(.horizontal, DS.sp4).padding(.vertical, DS.sp3)
-            .frame(maxWidth: .infinity)
-            .background(DS.surface, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: DS.rMD, style: .continuous)
-                .strokeBorder(DS.warning.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [5, 4])))
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
     }
 }
