@@ -15,11 +15,6 @@ struct IntroGameResultView: View {
     /// Rush は候補曲(最大300)を全部出せるわけがないので totalCount ではなく回答数で割る。
     private var answered: Int { session.records.count }
 
-    private var percentage: Int {
-        guard answered > 0 else { return 0 }
-        return session.score * 100 / answered
-    }
-
     private func timeString(_ t: TimeInterval) -> String {
         let s = Int(t.rounded())
         return String(format: "%d:%02d", s / 60, s % 60)
@@ -37,20 +32,16 @@ struct IntroGameResultView: View {
     /// 結果カードを画像化してシェア (本家宣伝フッター付き)。
     private func shareResultImage() {
         // 全曲チャレンジは曲数が多すぎて内訳が無意味なのでサマリ+タイムのみ。
-        let lines = session.isAllSongsChallenge
+        let rows = session.isAllSongsChallenge
             ? []
-            : session.records.map { IntroShareLine(title: $0.title, correct: $0.correct) }
-        let card = IntroResultShareCard(
-            modeLabel: modeLabel,
-            score: session.score,
-            total: answered,
-            percentage: percentage,
-            timeText: session.isAllSongsChallenge ? timeString(session.elapsedTime) : nil,
-            bestCombo: session.bestCombo,
-            lines: lines
-        )
-        let image = IntroShareImageRenderer.render(size: CGSize(width: 1080, height: 1350)) { card }
-        IntroShareImageRenderer.share(image: image, text: shareText)
+            : session.records.enumerated().map { i, r in
+                QuizShareRow(number: i + 1, title: r.title, hex: nil, isCorrect: r.correct)
+            }
+        QuizShareCard(title: "イントロドン", subtitle: modeLabel, result: result, rows: rows,
+                      longestStreak: session.bestCombo, isNewBest: session.isNewBest,
+                      extraStat: session.isAllSongsChallenge ? ("タイム", timeString(session.elapsedTime)) : nil,
+                      footer: .introQuiz)
+            .share(text: shareText)
     }
 
     /// シェア用テキスト (本家アプリの宣伝も兼ねる)。文面はコアが作る。

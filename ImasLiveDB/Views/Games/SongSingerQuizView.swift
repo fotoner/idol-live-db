@@ -54,6 +54,9 @@ struct SongSingerQuizView: View {
     @State private var isNewBest = false
     @State private var previousBest: Int?
     @State private var isLoading = true
+    /// 遊んだ曲のジャケット (シェア画像の背景)。結果が出た時点で読み込み始める。
+    @State private var shareArtwork: Task<[String: UIImage], Never>?
+    @State private var isPreparingShare = false
     /// このセッションの出題シード (つづきからで同じ出題を作り直す)。
     @State private var seed: UInt64 = 0
     /// `resume` は最初の 1 回だけ使う (「もう一度」は新しいセッション)。
@@ -72,7 +75,12 @@ struct SongSingerQuizView: View {
     }
 
     var body: some View {
-        QuizStageScaffold(title: "ソロ曲クイズ", header: header, onClose: { dismiss() }) {
+        QuizStageScaffold(title: "ソロ曲クイズ", header: header, onClose: { dismiss() }, trailing: {
+            if let result {
+                QuizStageRoundButton(systemImage: isPreparingShare ? "hourglass" : "square.and.arrow.up",
+                                     label: "結果を画像でシェア") { shareResultImage(result) }
+            }
+        }) {
             content
         }
         .onDisappear { MusicKitService.shared.stop() }
@@ -257,8 +265,25 @@ struct SongSingerQuizView: View {
             .songSingerQuiz, score: Int(sessionResult.points), outOf: Int(sessionResult.outOf))
         isNewBest = update.isNewBest
         QuizResumeStore.shared.clear(.songSingerQuiz)
+        let urls = questions.prefix(plays.count).compactMap { songById[$0.songId]?.artworkUrl }.filter { !$0.isEmpty }
+        shareArtwork = Task { await LyricsQuizShareArtwork.load(Array(Set(urls))) }
         verdict = nil
         result = sessionResult
+    }
+
+    /// 結果を画像にしてシェアする。背景には遊んだ曲のジャケットを敷く。
+    private func shareResultImage(_ result: QuizSessionResult) {
+        guard !isPreparingShare else { return }
+        AppAnalytics.tap("song_singer_quiz.share_image")
+        isPreparingShare = true
+        Task {
+            let artworks = await shareArtwork?.value ?? [:]
+            isPreparingShare = false
+            QuizShareCard(title: "ソロ曲クイズ", result: result, rows: plays.shareRows,
+                          longestStreak: plays.longestStreak, isNewBest: isNewBest,
+                          artworks: Array(artworks.values))
+                .share(text: QuizShareCard.text("ソロ曲クイズ", result))
+        }
     }
 
     // MARK: - Data

@@ -203,7 +203,19 @@ struct ColorMatchGameView: View {
 
     private var stage: some View {
         QuizStageScaffold(title: "メンバーカラー", header: header,
-                          onClose: { if sessionResult == nil { resetToSetup() } else { dismiss() } }) {
+                          onClose: { if sessionResult == nil { resetToSetup() } else { dismiss() } },
+                          trailing: {
+            if let sessionResult {
+                QuizStageRoundButton(systemImage: "square.and.arrow.up", label: "結果を画像でシェア") {
+                    AppAnalytics.tap("color_match_game.share_image")
+                    QuizShareCard(title: "メンバーカラー合わせ",
+                                  subtitle: "\(isChoiceMode ? "4択" : "並べる") · \(levelLabels[difficulty])",
+                                  result: sessionResult, rows: plays.shareRows,
+                                  longestStreak: plays.longestStreak, isNewBest: isNewBest)
+                        .share(text: QuizShareCard.text("メンバーカラー合わせ", sessionResult))
+                }
+            }
+        }) {
             if let sessionResult {
                 QuizStageResultView(result: sessionResult, kind: .colorMatch, isNewBest: isNewBest,
                                     previousBest: previousBest,

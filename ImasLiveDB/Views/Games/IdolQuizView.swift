@@ -67,7 +67,16 @@ struct IdolQuizView: View {
     }
 
     var body: some View {
-        QuizStageScaffold(title: "アイドル当て", header: header, onClose: { dismiss() }) {
+        QuizStageScaffold(title: "アイドル当て", header: header, onClose: { dismiss() }, trailing: {
+            if let result {
+                QuizStageRoundButton(systemImage: "square.and.arrow.up", label: "結果を画像でシェア") {
+                    AppAnalytics.tap("idol_quiz.share_image")
+                    QuizShareCard(title: "アイドル当て", result: result, rows: plays.shareRows,
+                                  longestStreak: plays.longestStreak, isNewBest: isNewBest)
+                        .share(text: QuizShareCard.text("アイドル当てクイズ", result))
+                }
+            }
+        }) {
             content
         }
         .task { await load() }

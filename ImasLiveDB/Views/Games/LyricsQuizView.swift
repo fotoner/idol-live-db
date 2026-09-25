@@ -397,16 +397,16 @@ struct LyricsQuizView: View {
         isPreparingShare = true
         Task {
             let artworks = await shareArtwork?.value ?? [:]
-            let card = LyricsQuizResultShareCard(modeLabel: modeLabel, result: result,
-                                                 items: history, isNewBest: isNewBest,
-                                                 artworks: artworks)
-            let image = IntroShareImageRenderer.render(size: CGSize(width: 1080, height: 1350)) { card }
-            let text = shareQuizResultText(
-                gameDisplayName: "歌詞クイズ（\(modeLabel)）",
-                points: result.points, maxPoints: result.maxPoints, grade: result.grade,
-                correct: result.correct, questions: result.questions)
+            // 背景のジャケットは遊んだ順・重複なし。
+            var seen = Set<String>()
+            let images = history.compactMap { item -> UIImage? in
+                guard let url = item.artworkUrl, seen.insert(url).inserted else { return nil }
+                return artworks[url]
+            }
             isPreparingShare = false
-            IntroShareImageRenderer.share(image: image, text: text)
+            QuizShareCard(title: "歌詞クイズ", subtitle: modeLabel, result: result, rows: plays.shareRows,
+                          longestStreak: plays.longestStreak, isNewBest: isNewBest, artworks: images)
+                .share(text: QuizShareCard.text("歌詞クイズ（\(modeLabel)）", result))
         }
     }
 
