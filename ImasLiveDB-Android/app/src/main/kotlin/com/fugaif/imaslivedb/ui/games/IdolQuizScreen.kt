@@ -1,55 +1,35 @@
 package com.fugaif.imaslivedb.ui.games
 
 import android.app.Application
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonSearch
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.games.GameKind
+import com.fugaif.imaslivedb.data.games.QuizStagePlay
+import com.fugaif.imaslivedb.data.games.longestStreak
+import com.fugaif.imaslivedb.data.games.setlistCaption
+import com.fugaif.imaslivedb.data.games.streak
+import com.fugaif.imaslivedb.data.games.streakBrokeAt
 import com.fugaif.imaslivedb.data.model.Idol
 import com.fugaif.imaslivedb.di.AppModule
-import com.fugaif.imaslivedb.ui.components.ImasAvatar
-import com.fugaif.imaslivedb.ui.components.ImasEmptyState
-import com.fugaif.imaslivedb.ui.theme.DS
-import com.fugaif.imaslivedb.ui.theme.hexToColor
 import kotlin.random.Random
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -61,7 +41,6 @@ import uniffi.imas_core.IdolQuizHintState
 import uniffi.imas_core.IdolQuizIdolRef
 import uniffi.imas_core.QuizSessionResult
 import uniffi.imas_core.QuizTally
-import uniffi.imas_core.gameProgressBestRatePercent
 import uniffi.imas_core.idolQuizAnswer
 import uniffi.imas_core.idolQuizHintState
 import uniffi.imas_core.idolQuizSession
@@ -69,7 +48,8 @@ import uniffi.imas_core.idolQuizSessionResult
 
 // =============================================================================
 // アイドル当てクイズ。iOS IdolQuizView の移植。
-// シルエット + 曖昧なプロフィール1項目から出題し、開くヒントを選ぶ戦略性を持つ。
+// 曖昧なプロフィールから出題し、並んだヒントのどれから開けるかをユーザが選ぶ (戦略性)。
+// ヒントを 1 つ開くごとに獲得点が下がる。見た目は QuizStage.kt の「ステージ + チケット」。
 //
 // 出題の生成規則・事実の並び・採点 (素点とヒントの開封コスト)・グレード判定は
 // imas-core の `domain::quiz_generation` にあり、iOS と同じ実装を共有する。
@@ -86,15 +66,22 @@ data class IdolQuizUiState(
     val questions: List<Question> = emptyList(),
     val index: Int = 0,
     val selectedId: String? = null,
-    val opened: Set<UInt> = emptySet(),
+    /** 開いたヒントの facts インデックス (開いた順)。 */
+    val opened: List<UInt> = emptyList(),
     /** いまの獲得点・公開済み事実・残りヒント。コアが返す。 */
     val hintState: IdolQuizHintState? = null,
+    /** ヒントを開く前の獲得点 (出題ごとに記録。メーターの「100」側)。 */
+    val baseValue: Int = 0,
     val tally: QuizTally = QuizTally(asked = 0u, correct = 0u, points = 0u),
     val isLastQuestion: Boolean = false,
-    val history: List<QuizHistoryItem> = emptyList(),
+    /** 各問の記録 (ペンライト・連続正解・見直す)。 */
+    val plays: List<QuizStagePlay> = emptyList(),
+    /** 直前の問題の判定 (解答後に出す大きなカード)。 */
+    val verdict: QuizVerdict? = null,
+    val scoreBefore: Int = 0,
     val result: QuizSessionResult? = null,
     val isNewBest: Boolean = false,
-    val bestRatePercent: Int = 0,
+    val previousBest: Int? = null,
     /** CV 枠を出してよいか (母集団に現任 CV が 1 人でも居るか)。判定は [hasVoiceActorData]。 */
     val showVoiceActorFact: Boolean = true
 ) {
@@ -115,27 +102,23 @@ class IdolQuizViewModel(app: Application, private val selectedBrandIds: Set<Stri
     /** [idols] と同じ並びの射影。再挑戦でも作り直さない (CV の再取得を避けるため)。 */
     private var refs: List<IdolQuizIdolRef> = emptyList()
 
+    /** このセッションの出題シード。 */
+    private var seed: ULong = 0u
+
     init {
         viewModelScope.launch {
             idols = idolRepository.fetchIdols()
             // 現任 CV は画面につき 1 回だけ引く (問題ごとに FFI を呼ばない)。
             refs = idolQuizRefs(idols, fetchIdolCastNames(snapshots))
-            _uiState.value = withHintState(
-                IdolQuizUiState(
-                    isLoading = false,
-                    questions = makeSession(),
-                    showVoiceActorFact = hasVoiceActorData(refs)
-                )
-            )
+            startSession(showVoiceActorFact = hasVoiceActorData(refs))
         }
     }
 
     /** 1 ゲーム分 (全 [QUIZ_SESSION_LENGTH] 問) をまとめて生成する。候補不足なら空。 */
-    private fun makeSession(): List<Question> = idolQuizSession(
+    private fun makeSession(seed: ULong): List<Question> = idolQuizSession(
         idols = refs,
         selectedBrandIds = selectedBrandIds.toList(),
-        // シードの調達だけがラッパの責務 (抽選そのものはコアの SplitMix64)。
-        seed = Random.Default.nextLong().toULong()
+        seed = seed
     ).map { q ->
         Question(
             answer = idols[q.answer.toInt()],
@@ -144,80 +127,85 @@ class IdolQuizViewModel(app: Application, private val selectedBrandIds: Set<Stri
         )
     }
 
+    private fun startSession(showVoiceActorFact: Boolean) {
+        // シードの調達だけがラッパの責務 (抽選そのものはコアの SplitMix64)。
+        seed = Random.Default.nextLong().toULong()
+        val state = withHintState(
+            IdolQuizUiState(isLoading = false, questions = makeSession(seed), showVoiceActorFact = showVoiceActorFact)
+        )
+        _uiState.value = state.copy(baseValue = state.hintState?.currentValue?.toInt() ?: 0)
+    }
+
     /** 開示状態を引き直す。ヒント開封・解答・次問のたびに 1 回だけ呼ぶ。 */
     private fun withHintState(state: IdolQuizUiState): IdolQuizUiState {
         val q = state.question ?: return state.copy(hintState = null)
-        return state.copy(
-            hintState = idolQuizHintState(q.facts, state.opened.toList(), state.selectedId != null)
-        )
+        return state.copy(hintState = idolQuizHintState(q.facts, state.opened, state.selectedId != null))
     }
 
     fun openHint(factIndex: UInt) {
         val s = _uiState.value
-        if (s.selectedId != null) return
+        if (s.selectedId != null || factIndex in s.opened) return
         _uiState.value = withHintState(s.copy(opened = s.opened + factIndex))
     }
 
-    fun pick(idol: Idol) {
+    fun pick(idolId: String) {
         val s = _uiState.value
         val q = s.question ?: return
         if (s.selectedId != null) return
+        val idol = q.choices.firstOrNull { it.id == idolId } ?: return
+        // 正誤判定・獲得点・積み上げはコアがまとめて返す (加点式なので不正解でも減点しない)。
         val outcome = idolQuizAnswer(
             facts = q.facts,
-            openedFactIndices = s.opened.toList(),
+            openedFactIndices = s.opened,
             pickedIdolId = idol.id,
             answerIdolId = q.answer.id,
             before = s.tally
         )
-        val history = s.history + QuizHistoryItem(
-            id = "${outcome.tally.asked}-${q.answer.id}",
-            index = outcome.tally.asked.toInt(),
-            subjectTitle = "プロフィール問題",
-            subjectSubtitle = q.facts.firstOrNull()?.let { "${it.label}: ${it.value}" },
-            answer = q.answer, picked = idol,
-            earnedPoints = outcome.earnedPoints.toInt(),
-            revealedHints = outcome.revealedHints.toInt()
-        )
-        _uiState.value = withHintState(
-            s.copy(
-                selectedId = idol.id,
-                tally = outcome.tally,
-                isLastQuestion = outcome.isLastQuestion,
-                history = history
+        val answered = withHintState(s.copy(selectedId = idol.id))
+        val number = s.plays.size + 1
+        // 解答後は全部の事実が公開されるので、正解の補足としてプロフィールを 1 行で添える。
+        val summary = answered.hintState?.shownFactIndices.orEmpty()
+            .map { q.facts[it.toInt()] }
+            .filter { it.kind != IdolQuizFactKind.MEMBER_COLOR && !it.isHiddenVoiceActor(s.showVoiceActorFact) }
+            .take(4).joinToString(" · ") { it.value }
+        val picked = if (outcome.isCorrect) null else idol.name
+        _uiState.value = answered.copy(
+            tally = outcome.tally,
+            isLastQuestion = outcome.isLastQuestion,
+            scoreBefore = s.tally.points.toInt(),
+            plays = s.plays + QuizStagePlay(
+                number = number, isCorrect = outcome.isCorrect,
+                answerName = q.answer.name, answerHex = q.answer.color, pickedName = picked
+            ),
+            verdict = QuizVerdict(
+                isCorrect = outcome.isCorrect, number = number,
+                answerName = q.answer.name, answerHex = q.answer.color,
+                earned = outcome.earnedPoints.toInt(), base = s.baseValue,
+                hints = outcome.revealedHints.toInt(), pickedName = picked, detail = summary
             )
         )
     }
 
     fun nextQuestion() {
         val s = _uiState.value
-        _uiState.value = withHintState(s.copy(index = s.index + 1, selectedId = null, opened = emptySet()))
+        val next = withHintState(s.copy(index = s.index + 1, selectedId = null, opened = emptyList(), verdict = null))
+        _uiState.value = next.copy(baseValue = next.hintState?.currentValue?.toInt() ?: 0)
     }
 
     fun finish() {
         val s = _uiState.value
         val result = idolQuizSessionResult(s.tally)
-        // 保存 → 保存後の記録から自己ベスト率を読む、の順で組む (更新判定は保存側の担当)。
+        val previousBest = progressStore.previousBestScore(GameKind.idolQuiz)
+        // 保存と「自己ベスト更新！」の判定は進捗ストア (コアの game_progress) が 1 回で返す。
         val update = progressStore.recordResult(
             GameKind.idolQuiz, score = result.points.toInt(), outOf = result.outOf.toInt()
         )
-        _uiState.value = s.copy(
-            result = result,
-            isNewBest = update.isNewBest,
-            // まだ記録が無ければ今回の率で代用する。
-            bestRatePercent = gameProgressBestRatePercent(update.record) ?: result.ratePercent.toInt()
-        )
+        _uiState.value = s.copy(result = result, verdict = null, isNewBest = update.isNewBest, previousBest = previousBest)
     }
 
     fun restart() {
         // 母集団は変わらないので CV 枠の可否も据え置く (引き直すと FFI が増えるだけ)。
-        val showVoiceActorFact = _uiState.value.showVoiceActorFact
-        _uiState.value = withHintState(
-            IdolQuizUiState(
-                isLoading = false,
-                questions = makeSession(),
-                showVoiceActorFact = showVoiceActorFact
-            )
-        )
+        startSession(_uiState.value.showVoiceActorFact)
     }
 
     class Factory(private val app: Application, private val selectedBrandIds: Set<String>) : ViewModelProvider.Factory {
@@ -227,7 +215,6 @@ class IdolQuizViewModel(app: Application, private val selectedBrandIds: Set<Stri
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IdolQuizScreen(
     selectedBrandIds: Set<String>,
@@ -242,48 +229,58 @@ fun IdolQuizScreen(
     val question = state.question
     val hintState = state.hintState
     val result = state.result
+    val verdict = state.verdict
+    val header = when {
+        result != null -> QuizStageHeader.Result(result.questions.toInt())
+        state.isLoading || question == null -> QuizStageHeader.None
+        else -> QuizStageHeader.Question(
+            current = minOf(state.plays.size + if (verdict == null) 1 else 0, QUIZ_SESSION_LENGTH),
+            total = QUIZ_SESSION_LENGTH, points = state.tally.points.toInt()
+        )
+    }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("アイドル当てクイズ", fontWeight = FontWeight.Bold) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "戻る") } }
+    QuizStageScaffold(
+        title = "アイドル当て",
+        header = header,
+        onClose = onBack,
+        scrollKey = state.plays.size to (verdict == null)
+    ) {
+        when {
+            state.isLoading -> QuizStageLoading()
+            result != null -> QuizStageResultView(
+                result = result, isNewBest = state.isNewBest, previousBest = state.previousBest,
+                slots = state.plays.penlights(total = result.questions.toInt(), answering = false),
+                longestStreak = state.plays.longestStreak, misses = state.plays.misses,
+                onReplay = { viewModel.restart() }, onClose = onBack
             )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(padding).background(DS.bg).verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            when {
-                state.isLoading -> Box(Modifier.fillMaxWidth().padding(top = 60.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-                result != null -> QuizResultView(
-                    result = result, kind = GameKind.idolQuiz,
-                    isNewBest = state.isNewBest, bestRate = state.bestRatePercent,
-                    history = state.history, onReplay = { viewModel.restart() }
+            question != null && hintState != null -> {
+                QuizStageProgress(
+                    slots = state.plays.penlights(total = QUIZ_SESSION_LENGTH, answering = verdict == null),
+                    caption = state.plays.setlistCaption(QUIZ_SESSION_LENGTH),
+                    streak = state.plays.streak, streakBrokeAt = state.plays.streakBrokeAt
                 )
-                question != null && hintState != null -> {
-                    QuizProgressHeader(
-                        current = minOf(state.tally.asked.toInt() + if (state.selectedId != null) 0 else 1, QUIZ_SESSION_LENGTH),
-                        total = QUIZ_SESSION_LENGTH, points = state.tally.points.toInt()
+                if (verdict != null) {
+                    QuizVerdictCard(verdict)
+                    QuizVerdictStats(before = state.scoreBefore, after = state.tally.points.toInt(), streak = state.plays.streak)
+                    if (!verdict.isCorrect) QuizVerdictFootnote()
+                    QuizStageNextButton(
+                        isLastQuestion = state.isLastQuestion,
+                        onNext = { viewModel.nextQuestion() }, onFinish = { viewModel.finish() }
                     )
-                    IdolPromptCard(
-                        q = question, hintState = hintState,
-                        answered = state.selectedId != null,
-                        showVoiceActorFact = state.showVoiceActorFact
+                } else {
+                    val value = hintState.currentValue.toInt()
+                    QuizValueMeter(
+                        value = value, base = state.baseValue,
+                        note = if (state.opened.isEmpty()) "ヒントを開くと減ります"
+                        else "ヒント ${state.opened.size} 枚で −${state.baseValue - value}"
                     )
-                    if (state.selectedId == null) {
-                        IdolHintList(question, hintState, state.showVoiceActorFact, viewModel)
-                    }
-                    IdolChoiceGrid(choices = question.choices, answer = question.answer, selectedId = state.selectedId) { idol, _ ->
-                        viewModel.pick(idol)
-                    }
-                    if (state.selectedId != null) {
-                        QuizNextButton(isLastQuestion = state.isLastQuestion, onNext = { viewModel.nextQuestion() }, onFinish = { viewModel.finish() })
+                    IdolTicket(question, hintState, state.opened, state.showVoiceActorFact) { viewModel.openHint(it) }
+                    QuizStageChoiceGrid(choices = question.choices.map { QuizStageChoice(it.id, it.name) }) {
+                        viewModel.pick(it.id)
                     }
                 }
-                else -> ImasEmptyState(icon = Icons.Filled.PersonSearch, title = "出題できる候補が不足しています")
             }
+            else -> QuizStageEmpty(Icons.Filled.PersonSearch, "出題できる候補が不足しています")
         }
     }
 }
@@ -295,112 +292,64 @@ fun IdolQuizScreen(
 private fun IdolQuizFact.isHiddenVoiceActor(showVoiceActorFact: Boolean): Boolean =
     !showVoiceActorFact && kind == IdolQuizFactKind.VOICE_ACTOR
 
+/** チケット: 最初から見えている事実のタイル + 切り取り線 + ヒントの行。 */
 @Composable
-private fun IdolPromptCard(
+private fun IdolTicket(
     q: Question,
-    hintState: IdolQuizHintState,
-    answered: Boolean,
-    showVoiceActorFact: Boolean
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(DS.surface).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            IdolSilhouette(q.answer, revealed = answered)
-            Column {
-                Text("このプロフィールは誰？", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DS.ink)
-                if (answered) {
-                    Text(q.answer.name, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = DS.ink)
-                } else {
-                    IdolValueBadge(hintState.currentValue.toInt())
-                }
-            }
-        }
-        Column(
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(DS.surface),
-        ) {
-            // 公開する事実とその順序はコアが決める (無料公開の 1 件 + 開封済み、解答後は全件)。
-            val shownFactIndices = hintState.shownFactIndices
-                .filterNot { q.facts[it.toInt()].isHiddenVoiceActor(showVoiceActorFact) }
-            shownFactIndices.forEachIndexed { pos, idx ->
-                if (pos > 0) Box(Modifier.fillMaxWidth().height(1.dp).background(DS.sep).padding(start = 16.dp))
-                val f = q.facts[idx.toInt()]
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 11.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(f.label, fontSize = 15.sp, color = DS.ink2, modifier = Modifier.weight(1f))
-                    // 種別で分岐する (表示ラベルの文字列一致は文言を直した瞬間に壊れる)。
-                    if (f.kind == IdolQuizFactKind.MEMBER_COLOR) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Box(Modifier.size(width = 28.dp, height = 18.dp).clip(RoundedCornerShape(5.dp)).background(hexToColor(f.value)))
-                            Text(f.value.uppercase(), fontSize = 14.sp, fontWeight = FontWeight.Medium, color = DS.ink)
-                        }
-                    } else {
-                        Text(f.value, fontSize = 15.sp, fontWeight = FontWeight.Medium, color = DS.ink)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun IdolValueBadge(points: Int) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
-        modifier = Modifier.clip(CircleShape).background(DS.success.copy(alpha = 0.14f)).padding(horizontal = 11.dp, vertical = 6.dp)
-    ) {
-        Text("正解で +${points}pt", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DS.success)
-    }
-}
-
-@Composable
-private fun IdolSilhouette(idol: Idol, revealed: Boolean) {
-    if (revealed) {
-        ImasAvatar(label = idol.shortName, seed = idol.color, brand = idol.brandId, size = 56.dp)
-    } else {
-        Box(
-            modifier = Modifier.size(56.dp).clip(CircleShape).background(DS.fill),
-            contentAlignment = Alignment.Center
-        ) { Icon(Icons.Filled.Person, null, tint = DS.ink3, modifier = Modifier.size(30.dp)) }
-    }
-}
-
-@Composable
-private fun IdolHintList(
-    q: Question,
-    hintState: IdolQuizHintState,
+    hint: IdolQuizHintState,
+    opened: List<UInt>,
     showVoiceActorFact: Boolean,
-    viewModel: IdolQuizViewModel
+    onOpen: (UInt) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        // 未開封のヒントと「開いた後の獲得点」はコアが返す。
-        val hints = hintState.hints
-            .filterNot { q.facts[it.factIndex.toInt()].isHiddenVoiceActor(showVoiceActorFact) }
-        hints.forEach { hint ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(DS.surface)
-                    .clickable { viewModel.openHint(hint.factIndex) }
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Box(
-                    Modifier.size(34.dp).clip(RoundedCornerShape(10.dp)).background(DS.warning.copy(alpha = 0.14f)),
-                    contentAlignment = Alignment.Center
-                ) { Icon(Icons.Filled.Lightbulb, null, tint = DS.warning, modifier = Modifier.size(16.dp)) }
-                Column(Modifier.weight(1f)) {
-                    Text("ヒント: ${hint.label}を見る", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
-                    Text("開いた後は正解で +${hint.nextValue}pt", fontSize = 12.sp, color = DS.ink3)
+    // 最初から見えている事実 = 公開済みのうち、ヒントで開いたもの以外。
+    val free = hint.shownFactIndices
+        .filter { it !in opened && !q.facts[it.toInt()].isHiddenVoiceActor(showVoiceActorFact) }
+    // 未開封のヒントと「開いた後の獲得点」はコアが返す。
+    val hints = hint.hints.filterNot { q.facts[it.factIndex.toInt()].isHiddenVoiceActor(showVoiceActorFact) }
+    val hintTotal = opened.size + hints.size
+    QuizTicket {
+        QuizTicketHeading(label = "PROFILE", question = "このアイドルはだれ？")
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, bottom = 12.dp)
+        ) {
+            free.chunked(2).forEach { row ->
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)
+                ) {
+                    row.forEach { idx ->
+                        val f = q.facts[idx.toInt()]
+                        QuizTicketFactTile(f.label, f.value, Modifier.weight(1f).fillMaxHeight())
+                    }
+                    if (row.size < 2) Spacer(Modifier.weight(1f))
                 }
-                Icon(Icons.Filled.ExpandMore, null, tint = DS.ink3, modifier = Modifier.size(13.dp))
             }
+        }
+        if (hintTotal > 0) {
+            QuizTicketNotch()
+            QuizTicketHintHeader(opened = opened.size, total = hintTotal)
+            // 開いた順 → 未開封 の順に並べる。CV 枠はコアが常設しているので、
+            // ラベルの有無で声優未発表キャラがバレることはない。
+            opened.forEachIndexed { pos, idx ->
+                val f = q.facts[idx.toInt()]
+                QuizTicketHintRow(
+                    number = pos + 1, label = f.label, cost = f.cost.toInt(), isOpen = true,
+                    isNew = pos == opened.size - 1, isFirst = pos == 0, onOpen = {}
+                ) {
+                    // 色そのものが答えになる項目だけ色チップで見せる (文言ではなく種別で分岐)。
+                    if (f.kind == IdolQuizFactKind.MEMBER_COLOR) QuizTicketColorValue(f.value) else QuizTicketHintValue(f.value)
+                }
+            }
+            hints.forEachIndexed { pos, option ->
+                QuizTicketHintRow(
+                    number = opened.size + pos + 1, label = option.label,
+                    cost = hint.currentValue.toInt() - option.nextValue.toInt(),
+                    isOpen = false, isFirst = opened.isEmpty() && pos == 0,
+                    onOpen = { onOpen(option.factIndex) }
+                ) {}
+            }
+            Spacer(Modifier.height(6.dp))
         }
     }
 }

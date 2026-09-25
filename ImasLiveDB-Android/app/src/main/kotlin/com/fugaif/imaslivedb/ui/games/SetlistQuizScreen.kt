@@ -1,65 +1,47 @@
 package com.fugaif.imaslivedb.ui.games
 
 import android.app.Application
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.FormatListNumbered
-import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.UnfoldMore
-import androidx.compose.material.icons.filled.Filter2
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.material3.Text
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fugaif.imaslivedb.data.games.GameKind
+import com.fugaif.imaslivedb.data.games.QuizStagePlay
+import com.fugaif.imaslivedb.data.games.longestStreak
+import com.fugaif.imaslivedb.data.games.setlistCaption
+import com.fugaif.imaslivedb.data.games.streak
+import com.fugaif.imaslivedb.data.games.streakBrokeAt
 import com.fugaif.imaslivedb.di.AppModule
-import com.fugaif.imaslivedb.ui.components.ImasEmptyState
-import com.fugaif.imaslivedb.ui.theme.DS
-import com.fugaif.imaslivedb.ui.theme.hexToColor
 import kotlin.random.Random
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -71,7 +53,6 @@ import uniffi.imas_core.SetlistQuizHintKind
 import uniffi.imas_core.SetlistQuizHintState
 import uniffi.imas_core.SetlistQuizLine
 import uniffi.imas_core.SetlistQuizQuestion
-import uniffi.imas_core.gameProgressBestRatePercent
 import uniffi.imas_core.setlistQuizAnswer
 import uniffi.imas_core.setlistQuizHintState
 import uniffi.imas_core.setlistQuizSessionResult
@@ -81,19 +62,11 @@ import uniffi.imas_core.setlistSectionLabel
 // セトリ当てクイズ。iOS SetlistQuizView の移植。
 // 公演のセトリの 1 曲を伏せ、そこに入る曲を 4 択で当てる。最初は伏せた曲の前後 2 曲ずつだけ見せ、
 // ヒント (前後をもっと見る / 歌唱メンバー / 2択) を開くほど獲得点が下がる。
+// 見た目は QuizStage.kt の「ステージ + チケット」。
 //
 // 公演の選び方・伏せる曲・誤答の選び方・見せる範囲・採点は imas-core の
 // `domain/setlist_quiz.rs` にあり、iOS と同じ実装を共有する。この画面は描画とシード調達だけ。
 // =============================================================================
-
-/** 解答直後の判定表示 (正誤・獲得点・正解/選んだ曲)。 */
-data class SetlistQuizVerdict(
-    val isCorrect: Boolean,
-    val earnedPoints: Int,
-    val baseValue: Int,
-    val answerTitle: String,
-    val pickedTitle: String?
-)
 
 data class SetlistQuizUiState(
     val isLoading: Boolean = true,
@@ -103,16 +76,19 @@ data class SetlistQuizUiState(
     val opened: List<SetlistQuizHintKind> = emptyList(),
     /** 見せる範囲・次のヒント・いまの獲得点。コアが返す。 */
     val hintState: SetlistQuizHintState? = null,
-    val pickedSongId: String? = null,
-    val verdict: SetlistQuizVerdict? = null,
+    val answered: Boolean = false,
     val tally: QuizTally = QuizTally(asked = 0u, correct = 0u, points = 0u),
     val isLastQuestion: Boolean = false,
+    /** 各問の記録 (ペンライト・連続正解・見直す)。 */
+    val plays: List<QuizStagePlay> = emptyList(),
+    /** 直前の問題の判定 (解答後に出す大きなカード)。 */
+    val verdict: QuizVerdict? = null,
+    val scoreBefore: Int = 0,
     val result: QuizSessionResult? = null,
     val isNewBest: Boolean = false,
-    val bestRatePercent: Int = 0
+    val previousBest: Int? = null
 ) {
     val question: SetlistQuizQuestion? get() = questions.getOrNull(index)
-    val answered: Boolean get() = pickedSongId != null
 }
 
 class SetlistQuizViewModel(app: Application, private val selectedBrandIds: Set<String>) : AndroidViewModel(app) {
@@ -122,14 +98,15 @@ class SetlistQuizViewModel(app: Application, private val selectedBrandIds: Set<S
     private val _uiState = MutableStateFlow(SetlistQuizUiState())
     val uiState: StateFlow<SetlistQuizUiState> = _uiState.asStateFlow()
 
+    /** このセッションの出題シード。 */
+    private var seed: ULong = 0u
+
     init {
         startSession()
     }
 
     /** 1 ゲーム分の出題をコアに一括生成させる。候補不足・読み込み失敗なら空。 */
-    private suspend fun makeSession(): List<SetlistQuizQuestion> {
-        // シードの調達だけがラッパの責務 (抽選そのものはコアの SplitMix64)。
-        val seed = Random.Default.nextLong().toULong()
+    private suspend fun makeSession(seed: ULong): List<SetlistQuizQuestion> {
         val brandIds = selectedBrandIds.toList()
         return runCatching {
             snapshots.query { store -> store.setlistQuizSession(brandIds, seed) }
@@ -153,18 +130,26 @@ class SetlistQuizViewModel(app: Application, private val selectedBrandIds: Set<S
         val q = s.question ?: return
         if (s.answered) return
         val outcome = setlistQuizAnswer(q, s.opened, songId, s.tally)
-        val picked = q.choices.firstOrNull { it.songId == songId }?.title
+        val picked = if (outcome.isCorrect) null else q.choices.firstOrNull { it.songId == songId }?.title
+        val number = s.plays.size + 1
+        val slot = q.lines.getOrNull(q.blankIndex.toInt())?.number?.toInt() ?: 0
         _uiState.value = withHintState(
             s.copy(
-                pickedSongId = songId,
+                answered = true,
                 tally = outcome.tally,
                 isLastQuestion = outcome.isLastQuestion,
-                verdict = SetlistQuizVerdict(
-                    isCorrect = outcome.isCorrect,
-                    earnedPoints = outcome.earnedPoints.toInt(),
-                    baseValue = s.hintState?.baseValue?.toInt() ?: 0,
-                    answerTitle = q.answer.title,
-                    pickedTitle = if (outcome.isCorrect) null else picked
+                scoreBefore = s.tally.points.toInt(),
+                plays = s.plays + QuizStagePlay(
+                    number = number, isCorrect = outcome.isCorrect,
+                    answerName = q.answer.title, answerHex = null, pickedName = picked
+                ),
+                verdict = QuizVerdict(
+                    isCorrect = outcome.isCorrect, number = number,
+                    answerName = q.answer.title, answerHex = null,
+                    earned = outcome.earnedPoints.toInt(), base = s.hintState?.baseValue?.toInt() ?: 0,
+                    hints = outcome.revealedHints.toInt(), pickedName = picked,
+                    detail = "${q.eventName} ${q.showName} · M${twoDigits(slot)}",
+                    artworkUrl = q.answerArtworkUrl?.takeIf { it.isNotEmpty() }
                 )
             )
         )
@@ -173,30 +158,28 @@ class SetlistQuizViewModel(app: Application, private val selectedBrandIds: Set<S
     fun nextQuestion() {
         val s = _uiState.value
         _uiState.value = withHintState(
-            s.copy(index = s.index + 1, opened = emptyList(), pickedSongId = null, verdict = null)
+            s.copy(index = s.index + 1, opened = emptyList(), answered = false, verdict = null)
         )
     }
 
     fun finish() {
         val s = _uiState.value
         val result = setlistQuizSessionResult(s.tally)
-        // 保存 → 保存後の記録から自己ベスト率を読む、の順で組む (更新判定は保存側の担当)。
+        val previousBest = progressStore.previousBestScore(GameKind.setlistQuiz)
+        // 保存と「自己ベスト更新！」の判定は進捗ストア (コアの game_progress) が 1 回で返す。
         val update = progressStore.recordResult(
             GameKind.setlistQuiz, score = result.points.toInt(), outOf = result.outOf.toInt()
         )
-        _uiState.value = s.copy(
-            result = result,
-            verdict = null,
-            isNewBest = update.isNewBest,
-            bestRatePercent = gameProgressBestRatePercent(update.record) ?: result.ratePercent.toInt()
-        )
+        _uiState.value = s.copy(result = result, verdict = null, isNewBest = update.isNewBest, previousBest = previousBest)
     }
 
     fun restart() = startSession()
 
     private fun startSession() {
         viewModelScope.launch {
-            _uiState.value = withHintState(SetlistQuizUiState(isLoading = false, questions = makeSession()))
+            // シードの調達だけがラッパの責務 (抽選そのものはコアの SplitMix64)。
+            seed = Random.Default.nextLong().toULong()
+            _uiState.value = withHintState(SetlistQuizUiState(isLoading = false, questions = makeSession(seed)))
         }
     }
 
@@ -207,7 +190,6 @@ class SetlistQuizViewModel(app: Application, private val selectedBrandIds: Set<S
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SetlistQuizScreen(
     selectedBrandIds: Set<String>,
@@ -223,71 +205,101 @@ fun SetlistQuizScreen(
     val hintState = state.hintState
     val result = state.result
     val verdict = state.verdict
+    val header = when {
+        result != null -> QuizStageHeader.Result(result.questions.toInt())
+        state.isLoading || question == null -> QuizStageHeader.None
+        else -> QuizStageHeader.Question(
+            current = minOf(state.plays.size + if (verdict == null) 1 else 0, QUIZ_SESSION_LENGTH),
+            total = QUIZ_SESSION_LENGTH, points = state.tally.points.toInt()
+        )
+    }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("セトリ当て", fontWeight = FontWeight.Bold) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "戻る") } }
+    QuizStageScaffold(
+        title = "セトリ当て",
+        header = header,
+        onClose = onBack,
+        scrollKey = state.plays.size to (verdict == null)
+    ) {
+        when {
+            state.isLoading -> QuizStageLoading()
+            result != null -> QuizStageResultView(
+                result = result, isNewBest = state.isNewBest, previousBest = state.previousBest,
+                slots = state.plays.penlights(total = result.questions.toInt(), answering = false),
+                longestStreak = state.plays.longestStreak, misses = state.plays.misses,
+                onReplay = { viewModel.restart() }, onClose = onBack
             )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(padding).background(DS.bg).verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            when {
-                state.isLoading -> Box(Modifier.fillMaxWidth().padding(top = 60.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-                result != null -> QuizResultView(
-                    result = result, kind = GameKind.setlistQuiz,
-                    isNewBest = state.isNewBest, bestRate = state.bestRatePercent,
-                    // 振り返り一覧はアイドル前提の行なので、セトリ当てでは出さない。
-                    history = emptyList(), onReplay = { viewModel.restart() }
+            question != null && hintState != null -> {
+                QuizStageProgress(
+                    slots = state.plays.penlights(total = QUIZ_SESSION_LENGTH, answering = verdict == null),
+                    caption = state.plays.setlistCaption(QUIZ_SESSION_LENGTH),
+                    streak = state.plays.streak, streakBrokeAt = state.plays.streakBrokeAt
                 )
-                question != null && hintState != null -> {
-                    QuizProgressHeader(
-                        current = minOf(state.tally.asked.toInt() + if (state.answered) 0 else 1, QUIZ_SESSION_LENGTH),
-                        total = QUIZ_SESSION_LENGTH, points = state.tally.points.toInt()
+                if (verdict != null) {
+                    QuizVerdictCard(verdict)
+                    QuizVerdictStats(before = state.scoreBefore, after = state.tally.points.toInt(), streak = state.plays.streak)
+                    if (!verdict.isCorrect) QuizVerdictFootnote()
+                    QuizStageNextButton(
+                        isLastQuestion = state.isLastQuestion,
+                        onNext = { viewModel.nextQuestion() }, onFinish = { viewModel.finish() }
                     )
-                    SetlistCard(question, hintState, answered = state.answered)
-                    if (verdict != null) {
-                        SetlistVerdictCard(verdict)
-                        QuizNextButton(
-                            isLastQuestion = state.isLastQuestion,
-                            onNext = { viewModel.nextQuestion() }, onFinish = { viewModel.finish() }
-                        )
-                    } else {
-                        SetlistHintTiles(question, state.opened, hintState) { viewModel.openHint(it) }
-                        SetlistChoiceList(question, hintState) { viewModel.pick(it) }
-                    }
+                } else {
+                    SetlistTicket(question, hintState, state.opened) { viewModel.openHint(it) }
+                    val eliminated = hintState.eliminated.mapNotNull { question.choices.getOrNull(it.toInt())?.songId }.toSet()
+                    QuizStageChoiceGrid(
+                        choices = question.choices.map { QuizStageChoice(it.songId, it.title) },
+                        columns = 1, eliminated = eliminated
+                    ) { viewModel.pick(it.id) }
                 }
-                else -> ImasEmptyState(icon = Icons.Filled.FormatListNumbered, title = "出題できる公演がありません")
             }
+            else -> QuizStageEmpty(Icons.Filled.FormatListNumbered, "出題できる公演がありません")
         }
     }
 }
 
-// MARK: - 出題カード
+// MARK: - チケット
 
 @Composable
-private fun SetlistCard(q: SetlistQuizQuestion, hint: SetlistQuizHintState, answered: Boolean) {
-    Column(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(DS.surface).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        if (!answered) QuizValueBadge(points = hint.currentValue.toInt())
-        Text("空欄に入る曲は？", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DS.ink3)
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(
-                q.eventName, fontSize = 20.sp, fontWeight = FontWeight.Black, color = DS.ink,
-                maxLines = 2, overflow = TextOverflow.Ellipsis
-            )
-            val meta = listOfNotNull(q.showName, q.date.replace("-", "."), q.venue)
-                .filter { it.isNotEmpty() }.joinToString(" · ")
-            Text(meta, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DS.ink3, maxLines = 2, overflow = TextOverflow.Ellipsis)
+private fun SetlistTicket(
+    q: SetlistQuizQuestion,
+    hint: SetlistQuizHintState,
+    opened: List<SetlistQuizHintKind>,
+    onOpen: (SetlistQuizHintKind) -> Unit
+) {
+    QuizTicket {
+        QuizTicketTitleBlock(
+            label = "SETLIST", question = "空欄に入る曲は？",
+            value = hint.currentValue.toInt(), base = hint.baseValue.toInt()
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                QSFitText(q.eventName, QS.text(20, FontWeight.Black), QS.paperInk, maxLines = 2, minScale = 0.7f)
+                Text(
+                    listOfNotNull(q.showName, q.date.replace("-", "."), q.venue).filter { it.isNotEmpty() }.joinToString(" · "),
+                    style = QS.text(12, FontWeight.Bold), color = QS.paperSub, maxLines = 2, overflow = TextOverflow.Ellipsis
+                )
+            }
         }
         SetlistLines(q, hint)
-        if (hint.showPerformers && q.performers.isNotEmpty()) SetlistPerformers(q)
+        AnimatedVisibility(
+            visible = hint.showPerformers && q.performers.isNotEmpty(),
+            enter = fadeIn() + expandVertically()
+        ) { SetlistPerformers(q) }
+        val offered = hint.hints.map { it.kind }.toSet()
+        // タイルの並び (開いたものも同じ位置に残す)。
+        val kinds = listOf(SetlistQuizHintKind.WIDER, SetlistQuizHintKind.PERFORMERS, SetlistQuizHintKind.FIFTY_FIFTY)
+            .filter { it in opened || it in offered }
+        if (kinds.isNotEmpty()) {
+            QuizTicketNotch()
+            QuizTicketHintTiles(
+                tiles = kinds.map { kind ->
+                    val option = hint.hints.firstOrNull { it.kind == kind }
+                    QuizHintTileSpec(
+                        key = kind.name, title = kind.title(),
+                        phase = if (option != null) QuizHintPhase.Available(option.cost.toInt()) { onOpen(kind) }
+                        else QuizHintPhase.Open(kind.openedValue(q))
+                    )
+                }
+            )
+        }
     }
 }
 
@@ -297,7 +309,7 @@ private fun SetlistLines(q: SetlistQuizQuestion, hint: SetlistQuizHintState) {
     val from = hint.visibleFrom.toInt()
     val to = hint.visibleTo.toInt()
     val visible = if (from in q.lines.indices && to in q.lines.indices && from <= to) q.lines.subList(from, to + 1) else emptyList()
-    Column {
+    Column(Modifier.fillMaxWidth().animateContentSize().padding(start = 18.dp, end = 18.dp, bottom = 12.dp)) {
         if (hint.hiddenBefore > 0u) HiddenRow("前に ${hint.hiddenBefore} 曲")
         visible.forEachIndexed { offset, line ->
             val i = offset + from
@@ -305,8 +317,8 @@ private fun SetlistLines(q: SetlistQuizQuestion, hint: SetlistQuizHintState) {
             val previous = if (i > 0) setlistSectionLabel(q.lines[i - 1].section) else null
             if (label != null && (i == 0 || previous != label)) {
                 Text(
-                    label, fontSize = 11.sp, fontFamily = FontFamily.Monospace, letterSpacing = 1.2.sp,
-                    color = DS.ink3, modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
+                    label, style = QS.mono(11, 1.2f), color = QS.paperSub,
+                    modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
                 )
             }
             LineRow(line, reveal = hint.revealAnswer)
@@ -322,55 +334,38 @@ private fun HiddenRow(text: String) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Text("⋮", fontSize = 16.sp, fontWeight = FontWeight.Black, color = DS.ink3, modifier = Modifier.width(38.dp))
-        Text(text, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DS.ink3)
+        Text("⋮", style = QS.text(16, FontWeight.Black), color = QS.paperMuted, modifier = Modifier.width(34.dp))
+        Text(text, style = QS.text(12, FontWeight.Bold), color = QS.paperMuted)
     }
 }
 
 @Composable
 private fun LineRow(line: SetlistQuizLine, reveal: Boolean) {
-    val stamp = DS.danger
     Row(
         modifier = Modifier.fillMaxWidth().heightIn(min = 34.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Text(
-            "M%02d".format(line.number.toInt()), fontSize = 12.sp, fontFamily = FontFamily.Monospace,
-            color = if (line.isBlank) stamp else DS.ink3, modifier = Modifier.width(38.dp)
+            "M${twoDigits(line.number.toInt())}", style = QS.mono(12),
+            color = if (line.isBlank) QS.stamp else QS.paperSub, modifier = Modifier.width(34.dp)
         )
         if (line.isBlank) {
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .padding(vertical = 2.dp)
-                    .drawBehind {
-                        val stroke = 2.dp.toPx()
-                        drawRoundRect(
-                            color = stamp,
-                            topLeft = androidx.compose.ui.geometry.Offset(stroke / 2, stroke / 2),
-                            size = androidx.compose.ui.geometry.Size(size.width - stroke, size.height - stroke),
-                            cornerRadius = CornerRadius(10.dp.toPx()),
-                            style = Stroke(
-                                width = stroke,
-                                pathEffect = if (reveal) null else PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx()))
-                            )
-                        )
-                    }
+                    .dashedBorder(QS.stamp, 2.dp, 10.dp, dashed = !reveal)
                     .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .semantics { contentDescription = if (reveal) line.songTitle else "空欄" }
             ) {
-                Text(
-                    if (reveal) line.songTitle else "？？？",
-                    fontSize = 16.sp, fontWeight = FontWeight.Black,
-                    color = if (reveal) DS.ink else stamp,
-                    maxLines = 1, overflow = TextOverflow.Ellipsis
+                QSFitText(
+                    if (reveal) line.songTitle else "？？？", QS.text(16, FontWeight.Black),
+                    if (reveal) QS.paperInk else QS.stamp, minScale = 0.7f
                 )
             }
         } else {
-            Text(
-                line.songTitle, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DS.ink,
-                maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f)
-            )
+            QSFitText(line.songTitle, QS.text(15, FontWeight.Bold), QS.paperInk, minScale = 0.7f, modifier = Modifier.weight(1f))
         }
     }
 }
@@ -378,15 +373,19 @@ private fun LineRow(line: SetlistQuizLine, reveal: Boolean) {
 @Composable
 private fun SetlistPerformers(q: SetlistQuizQuestion) {
     Column(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(DS.fill).padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier
+            .padding(start = 18.dp, end = 18.dp, bottom = 12.dp)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(QS.paperTile)
+            .padding(12.dp)
     ) {
-        Text("歌唱メンバー", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = DS.ink3)
-        Text(q.performers.joinToString("、") { it.name }, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = DS.ink)
+        Text("歌唱メンバー", style = QS.text(11, FontWeight.Bold), color = QS.paperSub)
+        Text(q.performers.joinToString("、") { it.name }, style = QS.text(14, FontWeight.Bold), color = QS.paperInk)
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            q.performers.take(16).forEach { p ->
-                val color = p.color?.takeIf { it.isNotEmpty() }?.let { hexToColor(it) } ?: DS.ink3
-                Box(Modifier.width(8.dp).heightIn(min = 20.dp).clip(RoundedCornerShape(4.dp)).background(color))
+            q.performers.take(16).forEachIndexed { i, p ->
+                Box(Modifier.size(width = 8.dp, height = 20.dp).clip(RoundedCornerShape(4.dp)).background(qsColor(p.color, QS.penlight(i))))
             }
         }
     }
@@ -400,96 +399,8 @@ private fun SetlistQuizHintKind.title(): String = when (this) {
     SetlistQuizHintKind.FIFTY_FIFTY -> "2択にする"
 }
 
-private fun SetlistQuizHintKind.icon(): ImageVector = when (this) {
-    SetlistQuizHintKind.WIDER -> Icons.Filled.UnfoldMore
-    SetlistQuizHintKind.PERFORMERS -> Icons.Filled.Groups
-    SetlistQuizHintKind.FIFTY_FIFTY -> Icons.Filled.Filter2
-}
-
 private fun SetlistQuizHintKind.openedValue(q: SetlistQuizQuestion): String = when (this) {
     SetlistQuizHintKind.WIDER -> "全${q.lines.size}曲"
     SetlistQuizHintKind.PERFORMERS -> "${q.performers.size}人"
     SetlistQuizHintKind.FIFTY_FIFTY -> "2曲に"
-}
-
-/** ヒントのタイル (開いたものも同じ位置に残す)。出せるか・コストはコアの [SetlistQuizHintState] が返す。 */
-@Composable
-private fun SetlistHintTiles(
-    q: SetlistQuizQuestion,
-    opened: List<SetlistQuizHintKind>,
-    hint: SetlistQuizHintState,
-    onOpen: (SetlistQuizHintKind) -> Unit
-) {
-    val offered = hint.hints.map { it.kind }.toSet()
-    val kinds = listOf(SetlistQuizHintKind.WIDER, SetlistQuizHintKind.PERFORMERS, SetlistQuizHintKind.FIFTY_FIFTY)
-        .filter { it in opened || it in offered }
-    if (kinds.isEmpty()) return
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-        kinds.forEach { kind ->
-            Box(Modifier.weight(1f)) {
-                val option = hint.hints.firstOrNull { it.kind == kind }
-                if (option != null) {
-                    QuizHintTile(kind.title(), kind.icon(), value = null, cost = option.cost.toInt(), onClick = { onOpen(kind) })
-                } else {
-                    QuizHintTile(kind.title(), kind.icon(), value = kind.openedValue(q))
-                }
-            }
-        }
-        repeat(3 - kinds.size) { Box(Modifier.weight(1f)) }
-    }
-}
-
-// MARK: - 選択肢・判定
-
-/** 4 択 (1 列)。2 択ヒントで消した選択肢は押せず薄く出す。 */
-@Composable
-private fun SetlistChoiceList(q: SetlistQuizQuestion, hint: SetlistQuizHintState, onPick: (String) -> Unit) {
-    val eliminated = hint.eliminated.map { it.toInt() }.toSet()
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        q.choices.forEachIndexed { i, choice ->
-            val disabled = i in eliminated
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .alpha(if (disabled) 0.35f else 1f)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(DS.surface)
-                    .clickable(enabled = !disabled) { onPick(choice.songId) }
-                    .padding(horizontal = 16.dp, vertical = 14.dp)
-            ) {
-                Text(
-                    choice.title, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink,
-                    maxLines = 2, overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SetlistVerdictCard(v: SetlistQuizVerdict) {
-    val tone: Color = if (v.isCorrect) DS.success else DS.danger
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(tone.copy(alpha = 0.12f))
-            .border(1.5.dp, tone, RoundedCornerShape(16.dp))
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(if (v.isCorrect) Icons.Filled.CheckCircle else Icons.Filled.Cancel, null, tint = tone, modifier = Modifier.size(22.dp))
-            Text(if (v.isCorrect) "正解" else "不正解", fontSize = 20.sp, fontWeight = FontWeight.Black, color = tone)
-            Box(Modifier.weight(1f))
-            Text(
-                "+${v.earnedPoints}pt", fontSize = 16.sp, fontWeight = FontWeight.Bold,
-                color = if (v.earnedPoints > 0) DS.success else DS.ink3
-            )
-        }
-        Text("正解: ${v.answerTitle}", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
-        v.pickedTitle?.let {
-            Text("あなたの解答: $it", fontSize = 13.sp, color = DS.ink3)
-        }
-    }
 }

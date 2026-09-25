@@ -28,6 +28,10 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -109,6 +113,27 @@ fun AppSidebar(
                     )
                 }
             }
+        }
+    }
+}
+
+/**
+ * 下のタブバーを隠している画面の数 (iOS の `.toolbar(.hidden, for: .tabBar)` 相当)。
+ * クイズのステージ画面のように全画面で見せたい画面が、表示中だけ [hide] で数を上げる。
+ * 数で持つのは、画面の出入りのアニメーション中に 2 画面が同時に居ても取り違えないため。
+ */
+object BottomBarVisibility {
+    var hiddenBy by mutableIntStateOf(0)
+        private set
+
+    val isHidden: Boolean get() = hiddenBy > 0
+
+    /** 表示中だけタブバーを隠す。 */
+    @Composable
+    fun Hide() {
+        DisposableEffect(Unit) {
+            hiddenBy += 1
+            onDispose { hiddenBy -= 1 }
         }
     }
 }

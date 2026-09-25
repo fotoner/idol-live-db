@@ -64,6 +64,12 @@ class GameProgressStore(context: Context) {
 
     fun record(kind: GameKind): GameRecord = _records.value[kind] ?: emptyGameRecord()
 
+    /**
+     * 記録する前の自己ベスト点 (未プレイなら null)。結果画面の「700 → 755」に使う。
+     * [recordResult] より**前**に読むこと (後で読むと今回の点が返る)。
+     */
+    fun previousBestScore(kind: GameKind): Int? = record(kind).let { if (it.hasPlayed) it.bestScore else null }
+
     /** ストリークが「今日途切れていないか」。表示用 (今日/昨日までクリアなら継続扱い)。 */
     val displayStreak: Int
         get() = gameProgressDisplayStreak(_streak.value, DailyPick.dayKey(), DailyPick.previousDayKey())
@@ -189,3 +195,9 @@ class GameProgressStore(context: Context) {
         private const val KEY_DAILY_SHEET_DAY = "daily_sheet_last_day"
     }
 }
+
+/** 全ゲームの累計ポイント (ゲーム一覧の QUIZ STAGE に出す)。iOS `GameProgressStore.totalPoints`。 */
+val Map<GameKind, GameRecord>.totalPoints: Int get() = values.sumOf { it.totalPoints }
+
+/** 全ゲームの通算プレイ回数。 */
+val Map<GameKind, GameRecord>.totalPlays: Int get() = values.sumOf { it.playCount }

@@ -135,7 +135,7 @@ fun AppNavigation() {
                         navControllers.getValue(AppDestination.SONGS)
                             .navigate(NavRoutes.SongDetail.createRoute(songId))
                     })
-                    if (!wide) {
+                    if (!wide && !BottomBarVisibility.isHidden) {
                         BottomNavBar(items = tabItems, current = current, onSelect = { current = it })
                     }
                 }
