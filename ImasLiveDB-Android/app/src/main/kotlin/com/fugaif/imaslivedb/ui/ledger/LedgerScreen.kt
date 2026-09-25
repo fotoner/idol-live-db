@@ -17,7 +17,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -70,6 +72,7 @@ private val PERIOD_LABELS = listOf("月別", "年別", "全期間")
 fun LedgerScreen(viewModel: LedgerViewModel = viewModel()) {
     val state by viewModel.uiState.collectAsState()
     var editorTarget by remember { mutableStateOf<EditorTarget?>(null) }
+    var showingBackfill by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -90,6 +93,9 @@ fun LedgerScreen(viewModel: LedgerViewModel = viewModel()) {
         } else {
             LazyColumn(Modifier.fillMaxSize().padding(padding)) {
                 item { SummarySection(state) }
+                if (state.backfillRows.isNotEmpty()) {
+                    item { BackfillBanner(state.backfillRows.size) { showingBackfill = true } }
+                }
                 item { ControlsSection(state, viewModel) }
                 if (state.expenses.isEmpty()) {
                     item {
@@ -136,6 +142,32 @@ fun LedgerScreen(viewModel: LedgerViewModel = viewModel()) {
             onSave = { saved -> viewModel.save(saved) { editorTarget = null } },
             onDismiss = { editorTarget = null }
         )
+    }
+
+    if (showingBackfill) {
+        TicketBackfillSheet(
+            rows = state.backfillRows,
+            onSave = { expenses -> viewModel.saveBackfill(expenses) { showingBackfill = false } },
+            onDismiss = { showingBackfill = false }
+        )
+    }
+}
+
+@Composable
+private fun BackfillBanner(count: Int, onClick: () -> Unit) {
+    Row(
+        Modifier.padding(horizontal = 16.dp).padding(bottom = 12.dp).fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp)).background(DS.surface).clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Icon(Icons.Filled.ConfirmationNumber, contentDescription = null, tint = DS.ink2)
+        Column(Modifier.weight(1f)) {
+            Text("過去の参加からチケット代を取り込む", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
+            Text("チケット代が未記録の公演が${count}件あります", fontSize = 12.sp, color = DS.ink3)
+        }
+        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = DS.ink3)
     }
 }
 

@@ -118,6 +118,54 @@ pub fn ticket_expense_note(ticket: &ShowTicket) -> String {
     }
 }
 
+/// 過去の参加からチケット代を取り込むときの、公演 1 つぶんの材料。
+#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
+pub struct TicketBackfillInput {
+    pub show_id: String,
+    /// 参加形態 (`user_marks.attended` の text_value。空なら現地)。
+    pub attendance_type: String,
+    /// その公演の券種 (全形態)。
+    pub tickets: Vec<ShowTicket>,
+    /// その公演に記録済みの費目キー。
+    pub existing_expense_categories: Vec<String>,
+}
+
+/// 取り込み候補の公演 1 つ。
+#[derive(uniffi::Record, Clone, Debug, PartialEq, Eq)]
+pub struct TicketBackfillItem {
+    pub show_id: String,
+    pub kind: TicketKind,
+    /// 選ばせる券種 ([`tickets_for_kind`] の並び)。
+    pub tickets: Vec<ShowTicket>,
+    /// 最初から選んでおく 1 枚。**券種が 1 つのときだけ**入る ([`default_ticket`])。
+    /// 複数あるのに先頭を入れると、S席と立見の差額が黙って帳簿に乗る。
+    pub preselected: Option<ShowTicket>,
+}
+
+/// 参加を付けてあるのにチケット代がまだ無い公演を、取り込み候補として並べる。
+///
+/// 候補にするかは参加を付けた直後の確認 ([`ticket_expense_prompt`]) と同じ規則
+/// (その形態の券種があり、チケット代をまだ記録していない)。並びは渡された順のまま。
+pub fn ticket_expense_backfill(inputs: &[TicketBackfillInput]) -> Vec<TicketBackfillItem> {
+    inputs
+        .iter()
+        .filter_map(|input| {
+            let prompt = ticket_expense_prompt(
+                &input.tickets,
+                &input.attendance_type,
+                &input.existing_expense_categories,
+            )?;
+            let preselected = default_ticket(&prompt.tickets, prompt.kind);
+            Some(TicketBackfillItem {
+                show_id: input.show_id.clone(),
+                kind: prompt.kind,
+                tickets: prompt.tickets,
+                preselected,
+            })
+        })
+        .collect()
+}
+
 /// 参加を付けたときに既定で提案する 1 枚。
 ///
 /// **候補が 1 つのときだけ決める**。複数あるなら選ばせる — S席と立見で
@@ -239,6 +287,34 @@ mod tests {
         let live_only: Vec<ShowTicket> =
             tickets.iter().filter(|t| t.kind == TicketKind::Live).cloned().collect();
         assert!(ticket_expense_prompt(&live_only, "live_viewing", &[]).is_none());
+    }
+
+    #[test]
+    fn backfill_lists_unrecorded_shows_and_preselects_only_a_single_candidate() {
+        let input = |show: &str, attendance: &str, tickets: Vec<ShowTicket>, existing: &[&str]| {
+            TicketBackfillInput {
+                show_id: show.into(),
+                attendance_type: attendance.into(),
+                tickets,
+                existing_expense_categories: existing.iter().map(|s| s.to_string()).collect(),
+            }
+        };
+        let items = ticket_expense_backfill(&[
+            // 現地の券が 2 種 → 候補に出すが選ばせる。
+            input("multi", "live", sample(), &[]),
+            // LV は 1 種 → 最初から選んでおく。ほかの費目があっても関係ない。
+            input("single", "live_viewing", sample(), &["transport"]),
+            // 記録済み → 出さない。
+            input("done", "live", sample(), &["ticket"]),
+            // 券種が無い → 出さない。
+            input("none", "live", vec![], &[]),
+        ]);
+        let ids: Vec<&str> = items.iter().map(|i| i.show_id.as_str()).collect();
+        assert_eq!(ids, ["multi", "single"]);
+        assert_eq!(items[0].preselected, None);
+        assert_eq!(items[0].tickets.len(), 2);
+        assert_eq!(items[1].kind, TicketKind::LiveViewing);
+        assert_eq!(items[1].preselected.as_ref().map(|t| t.price), Some(4_500));
     }
 
     #[test]

@@ -31,6 +31,8 @@ data class LedgerUiState(
     val showLabels: Map<String, String> = emptyMap(),
     /** 参加を付けた公演だけ。支出を紐づける候補。 */
     val showOptions: List<LedgerShowOption> = emptyList(),
+    /** 過去の参加でチケット代がまだ無い公演 (取り込みの候補)。 */
+    val backfillRows: List<TicketBackfillRow> = emptyList(),
     val summary: LedgerSummary = emptySummary(),
     val periodIndex: Int = 0,
     val yearFilter: String = "",
@@ -68,7 +70,8 @@ data class LedgerUiState(
  */
 class LedgerViewModel(app: Application) : AndroidViewModel(app) {
 
-    private val repository = AppModule.from(app).expenseRepository
+    private val module = AppModule.from(app)
+    private val repository = module.expenseRepository
 
     private val _uiState = MutableStateFlow(LedgerUiState())
     val uiState: StateFlow<LedgerUiState> = _uiState.asStateFlow()
@@ -82,11 +85,13 @@ class LedgerViewModel(app: Application) : AndroidViewModel(app) {
             val expenses = repository.getAll()
             val showOptions = repository.attendedShowOptions()
             val showLabels = showOptions.associate { it.id to it.label }
+            val backfillRows = runCatching { TicketBackfill.candidates(module) }.getOrDefault(emptyList())
             _uiState.value = _uiState.value.copy(
                 isLoading = false,
                 expenses = expenses,
                 showLabels = showLabels,
-                showOptions = showOptions
+                showOptions = showOptions,
+                backfillRows = backfillRows
             )
             recompute()
         }
@@ -121,6 +126,27 @@ class LedgerViewModel(app: Application) : AndroidViewModel(app) {
                 state.expenses + expense
             }.sortedWith(compareByDescending<Expense> { it.date }.thenByDescending { it.id })
             _uiState.value = state.copy(expenses = updated)
+            recompute()
+        }
+    }
+
+    /**
+     * 取り込んだ分を 1 件ずつ書く。書けたものだけ一覧に足し、候補を読み直す
+     * (途中で失敗しても、書けた公演が候補に残って二重に入らないように)。iOS `saveBackfill` と対。
+     */
+    fun saveBackfill(expenses: List<Expense>, onDone: () -> Unit) {
+        viewModelScope.launch {
+            val written = mutableListOf<Expense>()
+            for (expense in expenses) {
+                localWrite("チケット代の記録") { repository.save(expense) } ?: break
+                written += expense
+            }
+            onDone()
+            val state = _uiState.value
+            val updated = (state.expenses + written)
+                .sortedWith(compareByDescending<Expense> { it.date }.thenByDescending { it.id })
+            val backfillRows = runCatching { TicketBackfill.candidates(module) }.getOrDefault(state.backfillRows)
+            _uiState.value = state.copy(expenses = updated, backfillRows = backfillRows)
             recompute()
         }
     }

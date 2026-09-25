@@ -3,7 +3,7 @@
 //! 公演 1 つぶんの券種をまとめて渡して、選んだ結果や価格帯を受け取る。
 
 use crate::domain::ticket_prices::{
-    ShowTicket, TicketExpensePrompt, TicketInputError, TicketKind, TicketPriceRange,
+    ShowTicket, TicketBackfillInput, TicketBackfillItem, TicketExpensePrompt, TicketInputError, TicketKind, TicketPriceRange,
 };
 
 #[uniffi::export]
@@ -54,6 +54,12 @@ pub fn ticket_expense_prompt(
         &attendance_type,
         &existing_expense_categories,
     )
+}
+
+/// 参加を付けてあるのにチケット代がまだ無い公演 (過去の参加の取り込み候補)。
+#[uniffi::export]
+pub fn ticket_expense_backfill(inputs: Vec<TicketBackfillInput>) -> Vec<TicketBackfillItem> {
+    crate::domain::ticket_prices::ticket_expense_backfill(&inputs)
 }
 
 /// 記録する行のメモ (推定値なら `(推定)` を添える)。

@@ -26,6 +26,9 @@ struct LedgerView: View {
     @State private var linkage: LedgerLinkage = .all
 
     @State private var editing: ExpenseEditorTarget?
+    /// 過去の参加でチケット代がまだ無い公演 (取り込みの候補)。
+    @State private var backfillRows: [TicketBackfillRow] = []
+    @State private var showingBackfill = false
     /// 書き換えの版。**件数だけを鍵にすると、金額や紐づけを直しただけのときに
     /// 再集計が走らない** (件数が変わらないので `.task(id:)` が発火しない)。
     @State private var changeToken = 0
@@ -47,6 +50,9 @@ struct LedgerView: View {
         List {
             if loaded {
                 summarySection.plainRow(background: DS.bg)
+                if !backfillRows.isEmpty {
+                    backfillBanner.plainRow(background: DS.bg)
+                }
                 controlSection.plainRow(background: DS.bg)
                 if expenses.isEmpty {
                     ImasEmptyState(
@@ -80,6 +86,11 @@ struct LedgerView: View {
         .sheet(item: $editing) { target in
             ExpenseEditorView(expense: target.expense) { saved in
                 await save(saved)
+            }
+        }
+        .sheet(isPresented: $showingBackfill) {
+            TicketBackfillView(rows: backfillRows) { saved in
+                await saveBackfill(saved)
             }
         }
         .task { if !loaded { await load() } }
@@ -136,6 +147,30 @@ struct LedgerView: View {
             Text(label).font(.imasCaption).foregroundStyle(DS.ink3)
             Text(value).font(.imasFootnote.weight(.bold)).foregroundStyle(DS.ink)
         }
+    }
+
+    // MARK: - 過去の参加の取り込み
+
+    private var backfillBanner: some View {
+        Button {
+            showingBackfill = true
+        } label: {
+            HStack(spacing: DS.sp4) {
+                Image(systemName: "ticket").foregroundStyle(DS.ink2)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("過去の参加からチケット代を取り込む")
+                        .font(.imasFootnote.weight(.semibold)).foregroundStyle(DS.ink)
+                    Text("チケット代が未記録の公演が\(backfillRows.count)件あります")
+                        .font(.imasCaption).foregroundStyle(DS.ink3)
+                }
+                Spacer(minLength: 8)
+                Image(systemName: "chevron.right").font(.imasCaption).foregroundStyle(DS.ink3)
+            }
+            .padding(DS.sp5)
+            .background(DS.surface, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - 絞り込み
@@ -266,7 +301,17 @@ struct LedgerView: View {
         let ledger = AppContainer.shared.ledgerReading
         expenses = (try? await ledger.expenses()) ?? []
         showLabels = (try? await ledger.attendedShowLabels()) ?? [:]
+        backfillRows = (try? await TicketBackfill.candidates()) ?? []
         loaded = true
+    }
+
+    /// 取り込んだ分を 1 件ずつ書く。書けたものだけ一覧に足し、候補を読み直す
+    /// (途中で失敗しても、書けた公演が候補に残って二重に入らないように)。
+    private func saveBackfill(_ saved: [Expense]) async {
+        for expense in saved {
+            guard await save(expense) else { break }
+        }
+        backfillRows = (try? await TicketBackfill.candidates()) ?? []
     }
 
     private func recompute() {
