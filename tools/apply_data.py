@@ -664,6 +664,21 @@ def push_cloudkit(affected, production):
     return 0
 
 
+def notify_discord(db_path):
+    """本番に入れた分を Discord の運営追加チャンネルに知らせる。失敗しても止めない。"""
+    from lib import discord_notify
+
+    conn = sqlite3.connect(db_path)
+    try:
+        lines = discord_notify.build_report(conn, load)
+    finally:
+        conn.close()
+    if discord_notify.post_report(lines):
+        print("✓ Discord に追加のお知らせを投稿")
+    elif lines:
+        print("(Discord へのお知らせは出していません: チャンネル・トークン未設定か投稿失敗)")
+
+
 def main():
     ap = argparse.ArgumentParser(description="コミュニティ提出の新規データを一括投入する")
     ap.add_argument("--check", action="store_true", help="検証のみ (既定・鍵不要)")
@@ -712,6 +727,8 @@ def main():
         if rc != 0:
             sys.exit(rc)
         print("✓ CloudKit push 完了")
+        if args.production:
+            notify_discord(args.db)
     else:
         print("\n(master.sqlite のみ反映。CloudKit へ出すには --push --production)")
     print("\n反映したファイルは data/_applied/<種類>/ へ移す (git mv。apply_data は読まない)。")
