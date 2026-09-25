@@ -19,7 +19,8 @@ enum class GameKind(val displayName: String, val scoreIsPercent: Boolean) {
     introDon("イントロドン", false),
     idolQuiz("アイドル当てクイズ", false),
     songSingerQuiz("ソロ曲クイズ", false),
-    colorMatch("カラーマッチ", true)
+    colorMatch("カラーマッチ", true),
+    setlistQuiz("セトリ当て", false)
 }
 
 /**

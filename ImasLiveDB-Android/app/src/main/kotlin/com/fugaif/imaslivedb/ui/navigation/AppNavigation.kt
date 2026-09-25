@@ -36,6 +36,8 @@ import com.fugaif.imaslivedb.ui.games.ColorMatchGameScreen
 import com.fugaif.imaslivedb.ui.games.GamesHubScreen
 import com.fugaif.imaslivedb.ui.games.IdolQuizScreen
 import com.fugaif.imaslivedb.ui.games.IdolQuizSetupScreen
+import com.fugaif.imaslivedb.ui.games.SetlistQuizScreen
+import com.fugaif.imaslivedb.ui.games.SetlistQuizSetupScreen
 import com.fugaif.imaslivedb.ui.games.SongSingerQuizScreen
 import com.fugaif.imaslivedb.ui.games.SongSingerQuizSetupScreen
 import com.fugaif.imaslivedb.ui.idols.IdolDetailScreen
@@ -373,7 +375,8 @@ internal fun NavGraphBuilder.produceNavGraph(navController: NavHostController) {
             onNavigateToIntroDon = { navController.navigate(NavRoutes.IntroDonHome.route) },
             onNavigateToColorMatch = { navController.navigate(NavRoutes.GamesColorMatch.route) },
             onNavigateToIdolQuizSetup = { navController.navigate(NavRoutes.GamesIdolQuizSetup.route) },
-            onNavigateToSongQuizSetup = { navController.navigate(NavRoutes.GamesSongQuizSetup.route) }
+            onNavigateToSongQuizSetup = { navController.navigate(NavRoutes.GamesSongQuizSetup.route) },
+            onNavigateToSetlistQuizSetup = { navController.navigate(NavRoutes.GamesSetlistQuizSetup.route) }
         )
     }
     composable(NavRoutes.IntroDonHome.route) {
@@ -450,6 +453,16 @@ internal fun NavGraphBuilder.produceNavGraph(navController: NavHostController) {
     composable(NavRoutes.GamesSongQuiz.ROUTE) { backStackEntry ->
         val brandIds = decodeGameBrandIds(backStackEntry.arguments?.getString("brandIds"))
         SongSingerQuizScreen(selectedBrandIds = brandIds, onBack = { navController.popBackStack() })
+    }
+    composable(NavRoutes.GamesSetlistQuizSetup.route) {
+        SetlistQuizSetupScreen(
+            onBack = { navController.popBackStack() },
+            onStart = { brandIds -> navController.navigate(NavRoutes.GamesSetlistQuiz.createRoute(brandIds)) }
+        )
+    }
+    composable(NavRoutes.GamesSetlistQuiz.ROUTE) { backStackEntry ->
+        val brandIds = decodeGameBrandIds(backStackEntry.arguments?.getString("brandIds"))
+        SetlistQuizScreen(selectedBrandIds = brandIds, onBack = { navController.popBackStack() })
     }
     detailRoutes(navController)
 }

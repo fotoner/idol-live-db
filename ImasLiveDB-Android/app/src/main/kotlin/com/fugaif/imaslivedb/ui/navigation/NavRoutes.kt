@@ -194,6 +194,14 @@ sealed class NavRoutes(val route: String) {
                 "games_songquiz/" + (if (brandIds.isEmpty()) "all" else brandIds.sorted().joinToString(","))
         }
     }
+    data object GamesSetlistQuizSetup : NavRoutes("games_setlistquiz_setup")
+    data class GamesSetlistQuiz(val brandIds: String) : NavRoutes("games_setlistquiz/{brandIds}") {
+        companion object {
+            const val ROUTE = "games_setlistquiz/{brandIds}"
+            fun createRoute(brandIds: Set<String>) =
+                "games_setlistquiz/" + (if (brandIds.isEmpty()) "all" else brandIds.sorted().joinToString(","))
+        }
+    }
 }
 
 /** ゲームのブランド絞り込みをルート引数の1文字列にエンコード/デコードする ("all" = 未選択=全ブランド)。 */

@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PersonSearch
@@ -51,7 +52,7 @@ import uniffi.imas_core.gameProgressBestRatePercent
 
 /**
  * クイズ・ゲームのハブ。プロデュース → 「ゲーム」から遷移。
- * イントロドン／アイドル当て／ソロ曲／メンバーカラー合わせを束ねる。iOS GamesHubView の移植。
+ * イントロドン／アイドル当て／ソロ曲／メンバーカラー合わせ／セトリ当てを束ねる。iOS GamesHubView の移植。
  */
 private data class GameEntry(
     val kind: GameKind,
@@ -64,7 +65,8 @@ private val entries = listOf(
     GameEntry(GameKind.introDon, Icons.Filled.MusicNote, "イントロドン", "イントロを聴いて曲名を当てる"),
     GameEntry(GameKind.idolQuiz, Icons.Filled.PersonSearch, "アイドル当てクイズ", "プロフィールから4択で誰かを当てる"),
     GameEntry(GameKind.songSingerQuiz, Icons.Filled.MusicNote, "ソロ曲クイズ", "ソロ曲を歌うアイドルを4択で当てる"),
-    GameEntry(GameKind.colorMatch, Icons.Filled.Palette, "メンバーカラー合わせ", "似た色のメンバーを正しいカラーに紐づける")
+    GameEntry(GameKind.colorMatch, Icons.Filled.Palette, "メンバーカラー合わせ", "似た色のメンバーを正しいカラーに紐づける"),
+    GameEntry(GameKind.setlistQuiz, Icons.Filled.FormatListNumbered, "セトリ当て", "セトリの空欄に入る曲を当てる")
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,7 +76,8 @@ fun GamesHubScreen(
     onNavigateToIntroDon: () -> Unit,
     onNavigateToColorMatch: () -> Unit,
     onNavigateToIdolQuizSetup: () -> Unit,
-    onNavigateToSongQuizSetup: () -> Unit
+    onNavigateToSongQuizSetup: () -> Unit,
+    onNavigateToSetlistQuizSetup: () -> Unit
 ) {
     val context = LocalContext.current
     val store = AppModule.from(context).gameProgressStore
@@ -119,6 +122,7 @@ fun GamesHubScreen(
                             GameKind.idolQuiz -> onNavigateToIdolQuizSetup()
                             GameKind.songSingerQuiz -> onNavigateToSongQuizSetup()
                             GameKind.colorMatch -> onNavigateToColorMatch()
+                            GameKind.setlistQuiz -> onNavigateToSetlistQuizSetup()
                         }
                     }
                 }
