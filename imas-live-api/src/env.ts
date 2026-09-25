@@ -33,6 +33,7 @@ export interface Env {
   DISCORD_DATA_ROLE_ID?: string;          // 「データ協力」
   DISCORD_CONTRIBUTOR_ROLE_ID?: string;   // 「コントリビューター」
   DISCORD_UPDATES_CHANNEL_ID?: string;    // #更新通知
+  DISCORD_POLL_RESULTS_CHANNEL_ID?: string; // #投票結果 (アナウンスチャンネル)
   DISCORD_BOT_TOKEN?: string;      // secret
   DISCORD_CLIENT_SECRET?: string;  // secret
   // コントリビューターの確認 (GitHub OAuth App)。

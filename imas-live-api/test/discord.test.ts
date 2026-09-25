@@ -319,3 +319,59 @@ describe("#更新通知 のまとめ投稿 (5 分 cron)", () => {
     expect(await rows("SELECT * FROM discord_digest_cursors")).toEqual([]);
   });
 });
+
+// ---------------------------------------------------------------------------
+// #投票結果
+// ---------------------------------------------------------------------------
+
+describe("#投票結果 (5 分 cron)", () => {
+  const cron = "*/5 * * * *";
+  const RESULTS = "1541819917370654851";
+  const pollEnv = () =>
+    makeEnv({ DISCORD_BOT_TOKEN: "bot-token", CLOUDKIT_KEY_ID: "", CLOUDKIT_PRIVATE_KEY: "" });
+
+  it("初回は位置を覚えるだけ。その後に締め切ったお題の上位 3 つを出して公開する。票が無いお題と締切前のお題は出さない", async () => {
+    await insertUser(UID);
+    await exec("INSERT INTO polls (id, title, target_type, created_by, ends_at) VALUES ('old', '前のお題', 'song', ?, datetime('now', '-1 day'))", UID);
+    // #更新通知 への投稿は digest 側が位置を覚えるだけなので、ここでは interceptor 不要。
+    await runScheduled(cron, pollEnv());
+
+    // 位置を過去に戻して、「その後に締め切った」お題を作る。
+    await exec("UPDATE discord_digest_cursors SET last_rowid = CAST(strftime('%s', 'now', '-1 hour') AS INTEGER) WHERE source = 'poll_results'");
+    await exec(
+      `INSERT INTO polls (id, title, target_type, created_by, ends_at) VALUES
+       ('p1', '夏に聴きたい曲', 'song', ?, datetime('now', '-10 minutes')),
+       ('p2', '票なし', 'song', ?, datetime('now', '-5 minutes')),
+       ('p3', 'まだ締切前', 'idol', ?, datetime('now', '+1 day'))`,
+      UID, UID, UID
+    );
+    await exec(
+      `INSERT INTO poll_entries (poll_id, entity_id, vote_count, first_voted_at) VALUES
+       ('p1', 's1', 5, '2026-01-01'), ('p1', 's2', 3, '2026-01-01'), ('p1', 's3', 3, '2026-01-02'), ('p1', 's4', 1, '2026-01-01')`
+    );
+    // p2 (票なし) と p3 (締切前) のイベントは digest の「新しいお題」に出るので、それも受ける。
+    fetchMock.get(DISCORD).intercept({ path: `/api/v10/channels/${CHANNEL}/messages`, method: "POST" }).reply(200, {});
+
+    let posted: any = null;
+    fetchMock.get(DISCORD).intercept({ path: `/api/v10/channels/${RESULTS}/messages`, method: "POST" })
+      .reply(200, (opts) => {
+        posted = JSON.parse(String(opts.body));
+        return { id: "m1" };
+      });
+    fetchMock.get(DISCORD).intercept({ path: `/api/v10/channels/${RESULTS}/messages/m1/crosspost`, method: "POST" }).reply(200, {});
+    await runScheduled(cron, pollEnv());
+
+    expect(posted.allowed_mentions).toEqual({ parse: [] });
+    expect(posted.embeds).toHaveLength(1);
+    expect(posted.embeds[0].title).toBe("🗳️ 「夏に聴きたい曲」の結果");
+    expect(posted.embeds[0].description).toBe(
+      "🥇 [s1](<https://idollivedb.fugaapp.site/songs/s1/>)　5票\n" +
+        "🥈 [s2](<https://idollivedb.fugaapp.site/songs/s2/>)　3票\n" +
+        "🥉 [s3](<https://idollivedb.fugaapp.site/songs/s3/>)　3票\n\n合計 12票"
+    );
+
+    // 出し終わったので、次の回は何も出さない。
+    await runScheduled(cron, pollEnv());
+  });
+});
+

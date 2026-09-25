@@ -57,11 +57,11 @@ function source<Row>(name: string, table: string, columns: string, where = ""): 
 }
 
 /** 利用者が書いた文字列を Markdown として解釈させない。 */
-function md(text: string): string {
+export function md(text: string): string {
   return text.replace(/[\\*_~`|[\]()<>#@:]/g, (c) => `\\${c}`);
 }
 
-function link(label: string, url: string): string {
+export function link(label: string, url: string): string {
   return `[${md(label)}](<${url}>)`;
 }
 
@@ -71,7 +71,7 @@ interface CkInfo {
 }
 
 /** CloudKit から名前 (曲は title、アイドル・ユニットは name) とジャケ写を引く。引けなければ空。 */
-async function lookupNames(env: DigestEnv, ids: string[]): Promise<Map<string, CkInfo>> {
+export async function lookupNames(env: DigestEnv, ids: string[]): Promise<Map<string, CkInfo>> {
   const out = new Map<string, CkInfo>();
   if (ids.length === 0 || !env.CLOUDKIT_KEY_ID || !env.CLOUDKIT_PRIVATE_KEY) return out;
   try {

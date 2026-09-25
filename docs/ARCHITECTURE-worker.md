@@ -56,6 +56,7 @@
 | `routes/discord.ts` | Discord のロール受け取り。`POST /discord/link` (アプリから認可 URL を発行) → `GET /discord/callback` (サーバーに参加させ、編集 10 件以上なら「データ協力」)。`POST /discord/interactions` (スラッシュコマンド `/申請`、Ed25519 署名検証) → `GET /github/callback` (マージ済み PR があれば「コントリビューター」) |
 | `discord.ts` | Discord / GitHub OAuth の REST 呼び出し・Interactions の署名検証・OAuth 後の結果ページ |
 | `discord_digest.ts` | 5 分 cron で、前回から増えた編集・コールガイド・タグ・お題を #更新通知 に 1 通にまとめて投稿 (rowid の範囲で新しい行だけ読む。編集者は出さない) |
+| `discord_poll_results.ts` | 5 分 cron で、締め切ったお題の上位 3 つを #投票結果 (アナウンスチャンネル) に出して公開する (位置は discord_digest_cursors の poll_results。投票者は出さない) |
 | `lyrics_calls.ts` | コール (clap / calls) のドメインロジック。ボディ検証・アンカーの数え方 (Unicode スカラー)・歌詞差し替え時の引き継ぎ |
 | `lyrics_index.ts` | 歌詞本文検索の索引 (候補を絞ってから全走査するための補助索引) |
 | `call_stats.ts` | コールの数え方と派生メタデータ (`song_call_stats` / `call_edit_history`, migrations/0032) の書き込み。数え方の定義はここが唯一の正 |

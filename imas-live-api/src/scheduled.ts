@@ -9,6 +9,7 @@
 // cron の実行としても失敗が記録される。
 
 import { postDiscordDigest } from "./discord_digest";
+import { postPollResults } from "./discord_poll_results";
 import type { Env } from "./env";
 
 /**
@@ -61,6 +62,11 @@ const EVERY_RUN: CronTask[] = [
     name: "discord_digest",
     // #更新通知 へのまとめ投稿。rowid の範囲で新しい行だけ読む (discord_digest.ts)。
     run: postDiscordDigest,
+  },
+  {
+    name: "discord_poll_results",
+    // 締め切ったお題の結果を #投票結果 へ。idx_polls_status_ends の範囲で新しく締まった分だけ読む。
+    run: postPollResults,
   },
 ];
 
