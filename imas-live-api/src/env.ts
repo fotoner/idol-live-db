@@ -35,6 +35,8 @@ export interface Env {
   DISCORD_UPDATES_CHANNEL_ID?: string;    // #更新通知
   DISCORD_POLL_RESULTS_CHANNEL_ID?: string; // #投票結果 (アナウンスチャンネル)
   DISCORD_LIVE_CHANNEL_ID?: string;       // #ライブ実況・感想 (その日の公演ごとにスレッド)
+  DISCORD_ANNOUNCE_CHANNEL_ID?: string;   // #お知らせ (App Store のリリース)
+  DISCORD_DEV_CHANNEL_ID?: string;        // #開発中 (毎週月曜の開発まとめ)
   DISCORD_BOT_TOKEN?: string;      // secret
   DISCORD_CLIENT_SECRET?: string;  // secret
   // コントリビューターの確認 (GitHub OAuth App)。

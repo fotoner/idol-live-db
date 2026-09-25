@@ -59,6 +59,7 @@
 | `discord_edit_diff.ts` | edit_history の before/after から「項目: 変更前 → 変更後」と、セトリのスナップショットから追加・削除曲・曲順の入れ替えを組む |
 | `discord_poll_results.ts` | 5 分 cron で、締め切ったお題の上位 3 つを #投票結果 (アナウンスチャンネル) に出して公開する (位置は discord_digest_cursors の poll_results。投票者は出さない) |
 | `discord_live_threads.ts` | 日次 cron (00:17 JST) で、今日の公演ごとに #ライブ実況・感想 に公開スレッドを立てる (Show.date を CloudKit で引く。同じ日は discord_digest_cursors の live_threads で 1 回だけ) |
+| `discord_releases.ts` | 5 分 cron で App Store の新しいバージョンを #お知らせ に (iTunes lookup)、日次 cron の JST 月曜だけ develop に入った feat/fix/perf を場所ごとにまとめて #開発中 に |
 | `lyrics_calls.ts` | コール (clap / calls) のドメインロジック。ボディ検証・アンカーの数え方 (Unicode スカラー)・歌詞差し替え時の引き継ぎ |
 | `lyrics_index.ts` | 歌詞本文検索の索引 (候補を絞ってから全走査するための補助索引) |
 | `call_stats.ts` | コールの数え方と派生メタデータ (`song_call_stats` / `call_edit_history`, migrations/0032) の書き込み。数え方の定義はここが唯一の正 |

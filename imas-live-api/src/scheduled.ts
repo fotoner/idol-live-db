@@ -11,6 +11,7 @@
 import { postDiscordDigest } from "./discord_digest";
 import { postPollResults } from "./discord_poll_results";
 import { createLiveThreads } from "./discord_live_threads";
+import { postAppRelease, postDevWeekly } from "./discord_releases";
 import type { Env } from "./env";
 
 /**
@@ -69,6 +70,11 @@ const EVERY_RUN: CronTask[] = [
     // 締め切ったお題の結果を #投票結果 へ。idx_polls_status_ends の範囲で新しく締まった分だけ読む。
     run: postPollResults,
   },
+  {
+    name: "discord_app_release",
+    // App Store に新しいバージョンが出たら #お知らせ へ (discord_releases.ts)。D1 は位置 1 行だけ。
+    run: postAppRelease,
+  },
 ];
 
 /**
@@ -85,6 +91,11 @@ const DAILY: CronTask[] = [
     name: "discord_live_threads",
     // 今日 (JST) の公演ごとに #ライブ実況・感想 にスレッドを立てる (discord_live_threads.ts)。
     run: (env) => createLiveThreads(env),
+  },
+  {
+    name: "discord_dev_weekly",
+    // JST の月曜だけ、develop に入った変更を #開発中 へまとめる (discord_releases.ts)。
+    run: (env) => postDevWeekly(env),
   },
   {
     name: "api_rate_limits_days",

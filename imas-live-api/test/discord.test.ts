@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { bearer, BASE, call, callJson, fetchWorker, makeEnv, runScheduled } from "./support/worker";
 import { exec, insertUser, row, rows } from "./support/d1";
 import { createLiveThreads, jstToday } from "../src/discord_live_threads";
+import { classifyCommit, postAppRelease, postDevWeekly } from "../src/discord_releases";
 
 const UID = "001094.discorder";
 const DISCORD = "https://discord.com";
@@ -476,5 +477,76 @@ describe("#ライブ実況・感想 のスレッド (日次 cron)", () => {
 
     // 同じ日にもう一度呼んでも何もしない (interceptor が無いので、呼べば落ちる)。
     await createLiveThreads(env, now);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// #お知らせ (リリース) と #開発中 (毎週)
+// ---------------------------------------------------------------------------
+
+describe("リリースと開発中の変更", () => {
+  const ANNOUNCE = "1530435001974526074";
+  const DEV = "1552866674783559751";
+  const env = () => makeEnv({ DISCORD_BOT_TOKEN: "bot-token" });
+  const serveItunes = (version: string, date: string) =>
+    fetchMock.get("https://itunes.apple.com")
+      .intercept({ path: /^\/lookup/, method: "GET" })
+      .reply(200, { results: [{ version, currentVersionReleaseDate: date, releaseNotes: "- 検索を速くしました", trackViewUrl: "https://apps.apple.com/jp/app/id6763342297" }] });
+
+  it("初回は今のバージョンを覚えるだけ。新しいバージョンが出たら #お知らせ に投稿して公開する", async () => {
+    serveItunes("2.2.0", "2026-09-04T06:42:12Z");
+    await postAppRelease(env());
+    serveItunes("2.2.0", "2026-09-04T06:42:12Z");
+    await postAppRelease(env()); // 変わっていないので投稿しない
+
+    serveItunes("2.3.0", "2026-09-30T01:00:00Z");
+    let posted: any = null;
+    fetchMock.get(DISCORD).intercept({ path: `/api/v10/channels/${ANNOUNCE}/messages`, method: "POST" })
+      .reply(200, (opts) => {
+        posted = JSON.parse(String(opts.body));
+        return { id: "r1" };
+      });
+    fetchMock.get(DISCORD).intercept({ path: `/api/v10/channels/${ANNOUNCE}/messages/r1/crosspost`, method: "POST" }).reply(200, {});
+    await postAppRelease(env());
+    expect(posted.embeds[0].title).toBe("📱 iPhone 版 2.3.0 を公開しました");
+    expect(posted.embeds[0].description).toBe("- 検索を速くしました");
+  });
+
+  it("コミットの 1 行目を場所ごとに分け、利用者に関係しないものは外す", () => {
+    expect(classifyCommit("feat(ios): 曲詳細に補足を出す")).toEqual({ area: "📱 iPhone", text: "曲詳細に補足を出す" });
+    expect(classifyCommit("fix(android): 落ちるのを直す")).toEqual({ area: "🤖 Android", text: "落ちるのを直す" });
+    expect(classifyCommit("web: 紙面デザインの土台")).toEqual({ area: "🌐 Web", text: "紙面デザインの土台" });
+    expect(classifyCommit("worker: 投票結果を出す")).toEqual({ area: "☁️ サーバー", text: "投票結果を出す" });
+    expect(classifyCommit("feat: 歌詞クイズ")).toEqual({ area: "🧩 アプリ共通", text: "歌詞クイズ" });
+    expect(classifyCommit("data: UNION!! の補足")).toBeNull();
+    expect(classifyCommit("test(core): 足す")).toBeNull();
+    expect(classifyCommit("Merge pull request #1")).toBeNull();
+  });
+
+  it("月曜だけ、直近 7 日の develop の変更を #開発中 にまとめる", async () => {
+    const monday = Date.parse("2026-09-27T15:17:00Z"); // JST 9/28 (月)
+    await postDevWeekly(env(), Date.parse("2026-09-26T15:17:00Z")); // JST 日曜: 何もしない
+
+    fetchMock.get("https://api.github.com")
+      .intercept({ path: /^\/repos\/fuga-if\/idol-live-db\/commits/, method: "GET" })
+      .reply(200, [
+        { commit: { message: "feat(ios): 曲詳細に補足を出す\n\n本文" } },
+        { commit: { message: "data: 投入" } },
+        { commit: { message: "web: 紙面デザインの土台" } },
+      ]);
+    let posted: any = null;
+    fetchMock.get(DISCORD).intercept({ path: `/api/v10/channels/${DEV}/messages`, method: "POST" })
+      .reply(200, (opts) => {
+        posted = JSON.parse(String(opts.body));
+        return { id: "d1" };
+      });
+    fetchMock.get(DISCORD).intercept({ path: `/api/v10/channels/${DEV}/messages/d1/crosspost`, method: "POST" }).reply(200, {});
+    await postDevWeekly(env(), monday);
+
+    expect(posted.embeds[0].fields).toEqual([
+      { name: "📱 iPhone（1件）", value: "・曲詳細に補足を出す" },
+      { name: "🌐 Web（1件）", value: "・紙面デザインの土台" },
+    ]);
+    await postDevWeekly(env(), monday); // 同じ日は 2 回出さない
   });
 });
