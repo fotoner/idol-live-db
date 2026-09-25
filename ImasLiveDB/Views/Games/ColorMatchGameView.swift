@@ -39,7 +39,6 @@ struct ColorMatchGameView: View {
     @State private var roundIndex = 0          // 0-based
     @State private var totalCorrect = 0
     @State private var totalAnswered = 0
-    @State private var accuracyPercent = 0
 
     // 1問の状態
     @State private var assignments: [String: String] = [:]
@@ -48,6 +47,12 @@ struct ColorMatchGameView: View {
     /// 答え合わせの結果 (nil = まだ判定していない)。行の正誤・正解色の表示文字列も含む。
     @State private var judgement: ColorMatchJudgement?
     @State private var isLoading = true
+    /// 各問の記録 (全員当てたらペンライト点灯)。
+    @State private var plays: [QuizStagePlay] = []
+    @State private var sessionResult: QuizSessionResult?
+    @State private var isNewBest = false
+    @State private var previousBest: Int?
+    @Environment(\.dismiss) private var dismiss
 
     /// 現在の問題 (出題メンバーと色チップの並び)。
     private var round: ColorMatchRound {
@@ -57,27 +62,26 @@ struct ColorMatchGameView: View {
     private var judged: Bool { judgement != nil }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: DS.sp5) {
-                if isLoading {
-                    ImasInlineLoading(tint: DS.sys)
-                } else if sessionDone {
-                    resultView
-                } else if !inGame {
-                    setup
-                } else {
-                    instruction
-                    paletteRow
-                    memberList
-                    footer
+        Group {
+            if inGame || sessionDone {
+                stage
+            } else {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: DS.sp5) {
+                        if isLoading {
+                            ImasInlineLoading(tint: DS.sys)
+                        } else {
+                            setup
+                        }
+                    }
+                    .padding(DS.sp5)
                 }
+                .background(DS.bg.ignoresSafeArea())
+                .scrollContentBackground(.hidden)
+                .navigationTitle("メンバーカラー合わせ")
+                .navigationBarTitleDisplayMode(.inline)
             }
-            .padding(DS.sp5)
         }
-        .background(DS.bg.ignoresSafeArea())
-        .scrollContentBackground(.hidden)
-        .navigationTitle("メンバーカラー合わせ")
-        .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
         // 母集団の引き直しはブランドを切り替えたときだけ (描画のたびには呼ばない)。
         .onChange(of: selectedBrandIds) { _, _ in refreshPool() }
@@ -146,48 +150,115 @@ struct ColorMatchGameView: View {
         }
     }
 
-    // MARK: - ゲーム
+    // MARK: - ゲーム (ステージ)
 
-    private var instruction: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 1) {
-                Text(judged ? "答え合わせ" : "色をドラッグ、またはタップで割当")
-                    .font(.imasHeadline.weight(.bold)).foregroundStyle(DS.ink)
-                Text("第\(roundIndex + 1)問 / 全\(questionCount)問 ・ \(levelLabels[difficulty])")
-                    .font(.imasCaption).foregroundStyle(DS.ink3)
-            }
-            Spacer()
-            Button { resetToSetup() } label: {
-                Text("やめる").font(.imasFootnote.weight(.semibold)).foregroundStyle(DS.ink2)
-            }.buttonStyle(.plain)
-        }
+    private var header: QuizStageHeader {
+        if let sessionResult { return .result(total: Int(sessionResult.questions)) }
+        return .question(current: min(plays.count + (judged ? 0 : 1), questionCount),
+                         total: questionCount, points: totalCorrect)
     }
 
-    private var paletteRow: some View {
-        FlowLayout(spacing: DS.sp3) {
-            ForEach(round.palette, id: \.self) { hex in
-                let used = assignments.values.contains(hex)
-                Circle()
-                    .fill(Color(hexString: hex))
-                    .frame(width: 46, height: 46)
-                    .overlay(Circle().strokeBorder(selectedHex == hex ? DS.ink : .white.opacity(0.5),
-                                                   lineWidth: selectedHex == hex ? 3 : 1))
-                    .overlay(used ? Image(systemName: "checkmark").font(.imasScaled( 14, weight: .bold)).foregroundStyle(.white) : nil)
-                    .opacity(used ? 0.4 : 1)
-                    .draggable(hex) { Circle().fill(Color(hexString: hex)).frame(width: 46, height: 46) }
-                    .onTapGesture {
-                        guard !judged else { return }
-                        selectedHex = (selectedHex == hex) ? nil : hex
-                    }
+    private var stage: some View {
+        QuizStageScaffold(title: "メンバーカラー", header: header,
+                          onClose: { if sessionResult == nil { resetToSetup() } else { dismiss() } }) {
+            if let sessionResult {
+                QuizStageResultView(result: sessionResult, kind: .colorMatch, isNewBest: isNewBest,
+                                    previousBest: previousBest,
+                                    slots: plays.penlights(total: questionCount, answering: false),
+                                    longestStreak: plays.longestStreak, misses: plays.misses,
+                                    onReplay: { startSession() }, onClose: { dismiss() })
+            } else {
+                QuizStageProgress(slots: plays.penlights(total: questionCount, answering: !judged),
+                                  caption: "全員当てると点灯 · \(levelLabels[difficulty])",
+                                  streak: plays.streak, streakBrokeAt: plays.streakBrokeAt)
+                    .padding(.bottom, 2)
+                if let judgement { roundVerdict(judgement) }
+                ticket
+                if !judged { palette }
+                footer.padding(.top, 4)
             }
         }
     }
 
-    private var memberList: some View {
-        ImasListContainer {
+    /// 答え合わせの一枚。全員当てたら生成りのカード、外したら暗いカード。
+    private func roundVerdict(_ j: ColorMatchJudgement) -> some View {
+        let cleared = j.score == j.outOf
+        return HStack(alignment: .lastTextBaseline) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(String(format: "Q.%02d — ", roundIndex + 1) + (cleared ? "PERFECT" : "RESULT"))
+                    .font(QS.mono(12)).tracking(1.4)
+                Text(cleared ? "全員正解！" : "\(j.score) / \(j.outOf) 正解")
+                    .font(QS.text(cleared ? 40 : 34, weight: .black))
+                    .lineLimit(1).minimumScaleFactor(0.6)
+            }
+            Spacer(minLength: 8)
+            Text("+\(j.score)").font(QS.num(64, weight: .black))
+        }
+        .foregroundStyle(cleared ? QS.paperInk : QS.ink)
+        .padding(.horizontal, 22).padding(.vertical, 18)
+        .background(cleared ? QS.paper : QS.panel, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous)
+            .strokeBorder(cleared ? Color.clear : QS.line, lineWidth: 1))
+        .transition(.scale(scale: 0.94).combined(with: .opacity))
+        .accessibilityElement(children: .combine)
+    }
+
+    private var ticket: some View {
+        QuizTicket {
+            QuizTicketHeading(label: "IMAGE COLOR",
+                              question: judged ? "答え合わせ" : "だれのイメージカラー？")
+            Text(judged ? "丸の中が選んだ色、名前の下が本人の色" : "色をドラッグ、またはタップで割り当て")
+                .font(QS.text(12, weight: .bold)).foregroundStyle(QS.paperSub)
+                .padding(.horizontal, 18).padding(.bottom, 8)
+            QuizTicketNotch()
             ForEach(Array(round.members.enumerated()), id: \.element.id) { idx, member in
-                if idx > 0 { ImasRowDivider(inset: DS.sp5) }
                 memberRow(member, at: idx)
+            }
+            Color.clear.frame(height: 6)
+        }
+    }
+
+    /// 色チップ。色見本 + 記号 + HEX。ドラッグでもタップ選択でも割り当てられる。
+    private var palette: some View {
+        let letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
+        return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 10) {
+            ForEach(Array(round.palette.enumerated()), id: \.element) { i, hex in
+                let used = assignments.values.contains(hex)
+                let selected = selectedHex == hex
+                VStack(spacing: 6) {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(Color(hexString: hex))
+                        .frame(height: 56)
+                        .overlay {
+                            if used {
+                                Image(systemName: "checkmark").font(.system(size: 16, weight: .bold))
+                                    .foregroundStyle(ColorMath.onColor(Color(hexString: hex)))
+                            }
+                        }
+                    HStack {
+                        Text(letters[i % letters.count]).foregroundStyle(QS.faint)
+                        Spacer(minLength: 2)
+                        Text(hex.uppercased())
+                    }
+                    .font(QS.mono(10))
+                    .foregroundStyle(QS.ink)
+                    .padding(.horizontal, 2)
+                }
+                .padding(6)
+                .background(QS.panel, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .strokeBorder(selected ? QS.ink : QS.line, lineWidth: selected ? 2.5 : 1))
+                .opacity(used && !selected ? 0.45 : 1)
+                .scaleEffect(selected ? 1.03 : 1)
+                .animation(.spring(response: 0.25, dampingFraction: 0.7), value: selected)
+                .draggable(hex) {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(Color(hexString: hex)).frame(width: 64, height: 44)
+                }
+                .onTapGesture { selectedHex = selected ? nil : hex }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("色 \(letters[i % letters.count]) \(hex)")
+                .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
             }
         }
     }
@@ -198,44 +269,55 @@ struct ColorMatchGameView: View {
         let assigned = assignments[member.id]
         // 行の正誤はコアの答え合わせ結果をそのまま使う (画面側で色を比べ直さない)。
         let correct = judgement.map { $0.correct.indices.contains(position) && $0.correct[position] } ?? false
-        let slotRing: Color = judged ? (correct ? DS.success : DS.danger) : (dropTargetId == member.id ? DS.ink : .white.opacity(0.4))
-        HStack(spacing: DS.sp3) {
+        let isTarget = dropTargetId == member.id
+        HStack(spacing: 12) {
             // アイドル本人 (色はネタバレしないよう中立アバター: 画像があれば画像)
-            ImasAvatar(label: idol?.shortName ?? "", seed: nil, size: 44,
+            ImasAvatar(label: idol?.shortName ?? "", seed: nil, size: 40,
                        imageURL: imageService.imageURL(for: member.id))
-
             VStack(alignment: .leading, spacing: 1) {
-                Text(idol?.name ?? "").font(.imasSubhead.weight(.semibold)).foregroundStyle(DS.ink)
                 if isCrossBrand, let b = idol.flatMap({ brandShort($0.brandId) }) {
-                    Text(b).font(.imasCaption).foregroundStyle(DS.ink3)
+                    Text(b).font(QS.text(11, weight: .bold)).foregroundStyle(QS.paperSub)
                 }
+                Text(idol?.name ?? "").font(QS.text(17, weight: .black)).lineLimit(1).minimumScaleFactor(0.7)
                 if let judgement, judgement.correctHexLabels.indices.contains(position) {
                     // 答え合わせでは本人のメンバーカラーを色見本 + HEX コードで明示する。
-                    HStack(spacing: 5) {
-                        Text(correct ? "メンバーカラー" : "正解").font(.imasCaption).foregroundStyle(DS.ink3)
-                        Circle().fill(Color(hexString: member.color)).frame(width: 12, height: 12)
-                            .overlay(Circle().strokeBorder(DS.sep, lineWidth: 0.5))
-                        Text(judgement.correctHexLabels[position]).font(.imasDisplay(11, weight: .semibold)).foregroundStyle(DS.ink2)
+                    HStack(spacing: 6) {
+                        RoundedRectangle(cornerRadius: 3, style: .continuous)
+                            .fill(Color(hexString: member.color)).frame(width: 28, height: 12)
+                        Text(judgement.correctHexLabels[position]).font(QS.mono(11)).foregroundStyle(QS.paperSub)
                     }
+                    .padding(.top, 2)
                 }
             }
-            Spacer(minLength: 0)
-
+            Spacer(minLength: 6)
             // 割り当てた色スロット (ドロップ/タップ対象)
             ZStack {
-                Circle().fill(assigned.map { Color(hexString: $0) } ?? DS.fill).frame(width: 40, height: 40)
-                if assigned == nil && !judged {
-                    Image(systemName: "questionmark").font(.imasScaled( 14, weight: .bold)).foregroundStyle(DS.ink3)
+                if let assigned {
+                    Circle().fill(Color(hexString: assigned))
+                } else {
+                    Circle().strokeBorder(isTarget ? QS.paperInk : QS.paperMuted,
+                                          style: StrokeStyle(lineWidth: 2, dash: [4, 3]))
+                    Text("?").font(QS.num(18)).foregroundStyle(QS.paperSub)
                 }
             }
-            .overlay(Circle().strokeBorder(slotRing, lineWidth: 2.5))
-            if judged {
-                Image(systemName: correct ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .foregroundStyle(correct ? DS.success : DS.danger)
+            .frame(width: 44, height: 44)
+            .overlay {
+                if judged {
+                    Image(systemName: correct ? "checkmark" : "xmark")
+                        .font(.system(size: 16, weight: .black))
+                        .foregroundStyle(assigned.map { ColorMath.onColor(Color(hexString: $0)) } ?? QS.paperInk)
+                }
             }
+            .scaleEffect(isTarget ? 1.12 : 1)
+            .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isTarget)
         }
-        .padding(.horizontal, DS.sp5).padding(.vertical, DS.sp4)
-        .background(dropTargetId == member.id ? DS.fill : DS.surface)
+        .foregroundStyle(QS.paperInk)
+        .padding(.horizontal, 18).padding(.vertical, 8)
+        .frame(minHeight: 60)
+        .background(isTarget ? QS.paperHighlight : Color.clear)
+        .overlay(alignment: .top) {
+            if position > 0 { Rectangle().fill(QS.paperLine).frame(height: 1) }
+        }
         .contentShape(Rectangle())
         .dropDestination(for: String.self) { items, _ in
             guard !judged, let hex = items.first else { return false }
@@ -245,61 +327,24 @@ struct ColorMatchGameView: View {
         }
         .onTapGesture {
             guard !judged else { return }
-            if assignments[member.id] != nil { assignments[member.id] = nil }
-            else if let sel = selectedHex { assign(sel, to: member.id); selectedHex = nil }
+            if let sel = selectedHex { assign(sel, to: member.id); selectedHex = nil }
+            else if assignments[member.id] != nil { assignments[member.id] = nil }
         }
     }
 
     @ViewBuilder
     private var footer: some View {
-        if let judgement {
-            VStack(spacing: DS.sp3) {
-                Text("\(judgement.score) / \(judgement.outOf) 正解")
-                    .font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
-                primaryButton(roundIndex + 1 < questionCount ? "次へ（第\(roundIndex + 2)問）" : "結果を見る") {
-                    advance()
-                }
-            }
-            .frame(maxWidth: .infinity)
+        if judged {
+            QuizStageNextButton(isLastQuestion: roundIndex + 1 >= questionCount,
+                                onNext: advance, onFinish: advance)
         } else {
             let ready = assignments.count == round.members.count
-            Button { AppAnalytics.tap("color_match_game.judge"); judge() } label: {
-                Text("判定する")
-                    .font(.imasHeadline.weight(.semibold))
-                    .foregroundStyle(ready ? DS.onSys : DS.ink3)
-                    .frame(maxWidth: .infinity).padding(.vertical, 15)
-                    .background(ready ? AnyShapeStyle(DS.sys) : AnyShapeStyle(DS.fill),
-                                in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
+            QuizStagePrimaryButton(title: ready ? "判定する" : "あと \(round.members.count - assignments.count) 人") {
+                AppAnalytics.tap("color_match_game.judge"); judge()
             }
-            .buttonStyle(.plain)
             .disabled(!ready)
+            .opacity(ready ? 1 : 0.45)
         }
-    }
-
-    // MARK: - 結果
-
-    private var resultView: some View {
-        VStack(spacing: DS.sp5) {
-            Spacer().frame(height: DS.sp6)
-            Image(systemName: accuracyPercent >= 80 ? "trophy.fill" : "checkmark.seal.fill")
-                .font(.imasScaled( 52, weight: .semibold))
-                .foregroundStyle(accuracyPercent >= 80 ? DS.favorite : DS.sys)
-            Text("正答率 \(accuracyPercent)%")
-                .font(.imasDisplay(34, weight: .bold)).foregroundStyle(DS.ink)
-            Text("\(totalCorrect) / \(totalAnswered) 正解（全\(questionCount)問）")
-                .font(.imasSubhead).foregroundStyle(DS.ink2)
-
-            VStack(spacing: DS.sp3) {
-                primaryButton("もう一度") { startSession() }
-                Button { resetToSetup() } label: {
-                    Text("設定を変える").font(.imasHeadline.weight(.semibold)).foregroundStyle(DS.ink)
-                        .frame(maxWidth: .infinity).padding(.vertical, 15)
-                        .background(DS.fill, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
-                }.buttonStyle(.plain)
-            }
-            .padding(.top, DS.sp4)
-        }
-        .frame(maxWidth: .infinity)
     }
 
     private func primaryButton(_ title: String, action: @escaping () -> Void) -> some View {
@@ -343,13 +388,14 @@ struct ColorMatchGameView: View {
         rounds = colorMatchStartGame(pool: pool, difficulty: coreDifficulty,
                                      questionCount: UInt32(clamping: questionCount),
                                      seed: generator.next())
-        roundIndex = 0; totalCorrect = 0; totalAnswered = 0; accuracyPercent = 0
+        roundIndex = 0; totalCorrect = 0; totalAnswered = 0
+        plays = []; sessionResult = nil; isNewBest = false; previousBest = nil
         sessionDone = false; inGame = true
         startRound()
     }
 
     private func resetToSetup() {
-        inGame = false; sessionDone = false
+        inGame = false; sessionDone = false; sessionResult = nil
     }
 
     /// 1 問の答え合わせ。行の正誤・正解数・正解色の表示文字列はコアが一括で返す。
@@ -357,9 +403,22 @@ struct ColorMatchGameView: View {
         let result = colorMatchJudgeRound(
             members: round.members,
             assignments: assignments.map { ColorMatchAssignment(idolId: $0.key, hex: $0.value) })
-        judgement = result
-        totalCorrect += Int(result.score)
-        totalAnswered += Int(result.outOf)
+        // 外したメンバーを「見直す」に並べる (全員当てた問題は並べない)。
+        let missed = round.members.indices
+            .filter { !(result.correct.indices.contains($0) && result.correct[$0]) }
+            .map { round.members[$0] }
+        let cleared = result.score == result.outOf
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            judgement = result
+            totalCorrect += Int(result.score)
+            totalAnswered += Int(result.outOf)
+            plays.append(QuizStagePlay(
+                number: roundIndex + 1, isCorrect: cleared,
+                answerName: (cleared ? round.members : missed).compactMap { idolById[$0.id]?.name }.joined(separator: "、"),
+                answerHex: (cleared ? round.members.first : missed.first)?.color,
+                pickedName: nil))
+        }
+        UINotificationFeedbackGenerator().notificationOccurred(cleared ? .success : .warning)
     }
 
     private func advance() {
@@ -367,10 +426,16 @@ struct ColorMatchGameView: View {
             roundIndex += 1
             startRound()
         } else {
-            accuracyPercent = Int(colorMatchAccuracyPercent(totalCorrect: UInt32(clamping: totalCorrect),
-                                                            totalAnswered: UInt32(clamping: totalAnswered)))
+            previousBest = GameProgressStore.shared.previousBestScore(for: .colorMatch)
+            let update = GameProgressStore.shared.recordResult(.colorMatch, score: totalCorrect, outOf: totalAnswered)
+            isNewBest = update.isNewBest
+            // 点 = 色を当てた人数、「n / N 正解」= 全員当てた問題数。グレードの閾値はコア。
+            sessionResult = quizAccuracyResult(
+                points: UInt32(clamping: totalCorrect), outOf: UInt32(clamping: totalAnswered),
+                correct: UInt32(clamping: plays.filter(\.isCorrect).count),
+                questions: UInt32(clamping: questionCount))
+            judgement = nil
             sessionDone = true
-            GameProgressStore.shared.recordResult(.colorMatch, score: totalCorrect, outOf: totalAnswered)
         }
     }
 

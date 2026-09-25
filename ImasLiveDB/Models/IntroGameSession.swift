@@ -430,6 +430,8 @@ final class IntroGameSession {
     /// 今回のプレイが新記録だったか。recordFinishedGame() が更新した**後の** bestScore と比較すると
     /// 同点タイでも常に true になってしまうため、更新前のベストスコアと比較したスナップショットを保持する。
     private(set) var isNewBest: Bool = false
+    /// 記録する前のベストスコア (未記録なら nil)。結果画面の「7 → 9」に使う。
+    private(set) var previousBestScore: Int?
 
     private var bestScoreKey: String {
         // %g で整数は "2"、サブ秒は "0.2" になり、超イントロのベストスコアが別管理される
@@ -452,6 +454,7 @@ final class IntroGameSession {
     private func recordFinishedGame() {
         let key = bestScoreKey
         let previousBest = UserDefaults.standard.integer(forKey: key)
+        previousBestScore = UserDefaults.standard.object(forKey: key) == nil ? nil : previousBest
         // 新記録か (前より多いときだけ) はコア。キーは端末に残る識別子なので変えない。
         isNewBest = introIsNewBestScore(score: UInt32(clamping: score), previousBest: UInt32(clamping: previousBest))
         if isNewBest {

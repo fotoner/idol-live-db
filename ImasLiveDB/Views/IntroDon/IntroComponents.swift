@@ -219,62 +219,6 @@ struct IDModeCard: View {
     }
 }
 
-// MARK: - IDAnswerReveal  (IntroAnswerReveal 相当)
-
-struct IDAnswerReveal: View {
-    let title: String
-    let choices: [String]
-    let correctTitle: String
-    let selectedTitle: String?
-
-    var body: some View {
-        VStack(spacing: DS.sp3) {
-            ForEach(choices, id: \.self) { choice in
-                revealRow(choice)
-            }
-        }
-    }
-
-    private func revealRow(_ choice: String) -> some View {
-        let isCorrect   = choice == correctTitle
-        let wasSelected = choice == selectedTitle
-
-        let tint: Color
-        let bg: Color
-        let icon: String
-        if isCorrect {
-            tint = ID.correct
-            bg   = ID.correct.opacity(0.15)
-            icon = "checkmark.circle.fill"
-        } else if wasSelected {
-            tint = ID.incorrect
-            bg   = ID.incorrect.opacity(0.12)
-            icon = "xmark.circle.fill"
-        } else {
-            tint = ID.t2
-            bg   = ID.surfaceDarkSubtle
-            icon = "circle"
-        }
-
-        return HStack(spacing: 10) {
-            Image(systemName: icon)
-                .font(.imasScaled( 17, weight: .semibold))
-                .foregroundColor(tint)
-
-            Text(choice)
-                .font(.imasScaled( 14, weight: isCorrect ? .semibold : .regular))
-                .foregroundColor(tint)
-                .lineLimit(2)
-
-            Spacer()
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 11)
-        .background(bg)
-        .clipShape(IDCorner(radius: 10))
-    }
-}
-
 // MARK: - IDSectionLabel (SettingsView の sectionHeader 相当)
 
 struct IDSectionLabel: View {

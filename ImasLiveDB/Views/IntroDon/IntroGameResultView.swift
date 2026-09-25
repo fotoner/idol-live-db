@@ -74,244 +74,82 @@ struct IntroGameResultView: View {
         }
     }
 
+    /// 他のクイズと同じ形の結果 (グレード・一言)。点は正解数、分母は回答した数。
+    private var result: QuizSessionResult {
+        quizAccuracyResult(points: UInt32(clamping: session.score), outOf: UInt32(clamping: answered),
+                           correct: UInt32(clamping: session.score), questions: UInt32(clamping: answered))
+    }
+
+    private var slots: [QuizPenlight] {
+        let results: [Color?] = session.records.enumerated().map { i, r in r.correct ? QS.penlight(i) : nil }
+        return QuizPenlight.slots(results: results, total: results.count, answering: false)
+    }
+
+    private var misses: [QuizMissItem] {
+        session.records.enumerated()
+            .filter { !$0.element.correct }
+            .prefix(30)
+            .map { i, r in
+                QuizMissItem(id: r.id + "-\(i)", number: i + 1, title: r.title, hex: nil,
+                             picked: r.selectedTitle ?? "スキップ")
+            }
+    }
+
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                scoreHero
-                    .padding(.horizontal, DS.sp6)
-                    .padding(.top, DS.sp7)
-
-                if session.isAllSongsChallenge && session.newBestTimeAchieved {
-                    banner(icon: "stopwatch.fill", text: "ベストタイム更新！", tag: "NEW TIME")
-                        .padding(.horizontal, DS.sp6)
-                        .padding(.top, DS.sp4)
-                } else if session.isNewBest {
-                    bestBanner
-                        .padding(.horizontal, DS.sp6)
-                        .padding(.top, DS.sp4)
-                }
-
-                Spacer().frame(height: 28)
-
-                IDSectionLabel(text: "全問の結果")
-                    .padding(.horizontal, DS.sp6)
-                Spacer().frame(height: 12)
-                questionsLog
-                    .padding(.horizontal, DS.sp6)
-
-                Spacer().frame(height: 28)
-
-                actionButtons
-                    .padding(.horizontal, DS.sp6)
-
-                Spacer().frame(height: 40)
+        NavigationStack {
+            QuizStageScaffold(title: "イントロドン · \(modeLabel)", header: .result(total: answered),
+                              onClose: {
+                                  AppAnalytics.tap("intro_game_result.go_home")
+                                  // ⚠️ ここで session.reset() を呼ばない (下の画面が空表示に化ける)。
+                                  onHome()
+                              },
+                              trailing: {
+                                  QuizStageRoundButton(systemImage: "square.and.arrow.up", label: "結果を画像でシェア") {
+                                      AppAnalytics.tap("intro_game_result.share")
+                                      shareResultImage()
+                                  }
+                              }) {
+                // 全曲チャレンジはタイムを競う。
+                if session.isAllSongsChallenge { timeTile }
+                QuizStageResultView(
+                    result: result, kind: .introDon,
+                    isNewBest: session.isNewBest, previousBest: session.previousBestScore,
+                    slots: slots, longestStreak: session.bestCombo, misses: misses,
+                    onReplay: {
+                        AppAnalytics.tap("intro_game_result.replay")
+                        // ⚠️ ここで session.reset() を呼んではいけない。
+                        // この結果画面はまだ画面上にあるので、記録が消えた瞬間に 0/0・履歴なしへ
+                        // 描き変わってしまう (「空の結果画面が後から出てくる」の原因)。
+                        // 次の対局の初期化は IntroGameSession.generateQuestions が全部やる。
+                        // Setup画面(積み上げ済み)まで戻すだけ。
+                        onReplay()
+                    },
+                    onClose: {
+                        AppAnalytics.tap("intro_game_result.go_home")
+                        onHome()
+                    })
             }
         }
-        .background(ID.menuBg.ignoresSafeArea())
-        .navigationTitle("結果")
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
         .trackScreen("intro_game_result")
     }
 
-    private var scoreHero: some View {
-        VStack(spacing: DS.sp6) {
-            // Score number
-            VStack(spacing: DS.sp2) {
-                HStack(alignment: .lastTextBaseline, spacing: DS.sp2) {
-                    Text("\(session.score)")
-                        .font(ID.font(64, weight: .black))
-                        .foregroundColor(ID.menuText)
-                    Text("/ \(answered)")
-                        .font(ID.font(22, weight: .bold))
-                        .foregroundColor(ID.menuTextSecondary)
-                        .padding(.bottom, 6)
-                }
-
-                Text("正答率 \(percentage)%")
-                    .font(ID.font(16, weight: .bold))
-                    .foregroundColor(ID.menuTextSecondary)
-
-                // 全曲チャレンジはタイムを競う。
-                if session.isAllSongsChallenge {
-                    Label(timeString(session.elapsedTime), systemImage: "stopwatch")
-                        .font(ID.font(15, weight: .bold))
-                        .foregroundColor(ID.menuText)
-                        .monospacedDigit()
-                        .padding(.top, DS.sp1)
-                }
+    private var timeTile: some View {
+        HStack(alignment: .lastTextBaseline) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("タイム").font(QS.text(12, weight: .bold)).foregroundStyle(QS.dim)
+                Text(timeString(session.elapsedTime)).font(QS.num(40)).foregroundStyle(QS.ink)
             }
-
-            // Grade badge
-            gradeBadge
-        }
-        .frame(maxWidth: .infinity)
-        .padding(DS.sp8)
-        .background(ID.menuCardSubtle)
-        .clipShape(IDCorner())
-        .shadow(color: Color.black.opacity(0.08), radius: 12, y: 6)
-    }
-
-    private var gradeBadge: some View {
-        let (label, color) = gradeInfo
-        return Text(label)
-            .font(ID.font(14, weight: .bold))
-            .foregroundColor(color)
-            .padding(.horizontal, DS.sp6)
-            .padding(.vertical, DS.sp3)
-            .background(color.opacity(0.12))
-            .clipShape(IDCorner(radius: 10))
-    }
-
-    private var gradeInfo: (String, Color) {
-        switch percentage {
-        case 100:   return ("パーフェクト! 🎵", ID.accentGold)
-        case 80...: return ("すごい！",         ID.correct)
-        case 60...: return ("なかなか！",        ID.accentBlue)
-        case 40...: return ("もう少し！",        ID.warning)
-        default:    return ("練習あるのみ！",    ID.incorrect)
-        }
-    }
-
-    private var bestBanner: some View {
-        banner(icon: "star.fill", text: "ベストスコア更新！", tag: "NEW BEST")
-    }
-
-    private func banner(icon: String, text: String, tag: String) -> some View {
-        HStack(spacing: 10) {
-            Image(systemName: icon)
-                .foregroundColor(ID.accentGold)
-                .font(.imasCallout)
-            Text(text)
-                .font(ID.font(14, weight: .bold))
-                .foregroundColor(ID.menuText)
             Spacer()
-            Text(tag)
-                .font(ID.font(10, weight: .bold))
-                .tracking(1.5)
-                .foregroundColor(ID.accentGold)
-        }
-        .padding(.horizontal, DS.sp6)
-        .padding(.vertical, 14)
-        .background(ID.accentGold.opacity(0.10))
-        .clipShape(IDCorner(radius: 14))
-        .overlay(
-            IDCorner(radius: 14)
-                .stroke(ID.accentGold.opacity(0.30), lineWidth: 1)
-        )
-    }
-
-    private var questionsLog: some View {
-        VStack(spacing: 0) {
-            ForEach(Array(session.records.enumerated()), id: \.element.id) { index, record in
-                recordRow(index: index, record: record)
-
-                if index < session.records.count - 1 {
-                    Rectangle()
-                        .fill(ID.menuDivider)
-                        .frame(height: 1)
-                        .padding(.horizontal, DS.sp5)
-                }
+            if session.newBestTimeAchieved {
+                Text("ベストタイム更新")
+                    .font(QS.text(13, weight: .black))
+                    .foregroundStyle(QS.stamp)
+                    .padding(.horizontal, 10).padding(.vertical, 4)
+                    .background(QS.paper, in: RoundedRectangle(cornerRadius: 8))
+                    .rotationEffect(.degrees(-4))
             }
         }
-        .background(ID.menuCardSubtle)
-        .clipShape(IDCorner(radius: 16))
-    }
-
-    private func recordRow(index: Int, record: IntroAnswerRecord) -> some View {
-        HStack(spacing: DS.sp4) {
-            Text("\(index + 1)")
-                .font(ID.font(11, weight: .bold))
-                .monospacedDigit()
-                .foregroundColor(ID.menuTextSecondary)
-                .frame(width: 22, alignment: .trailing)
-
-            Image(systemName: record.correct ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundColor(record.correct ? ID.correct : ID.incorrect)
-                .font(.imasCallout)
-
-            VStack(alignment: .leading, spacing: DS.sp1) {
-                Text(record.title)
-                    .font(ID.font(13, weight: .semibold))
-                    .foregroundColor(ID.menuText)
-                    .lineLimit(1)
-
-                if !record.correct {
-                    Text(record.selectedTitle.map { "回答: \($0)" } ?? "スキップ")
-                        .font(.imasCaption2)
-                        .minimumScaleFactor(0.8)
-                        .foregroundColor(ID.menuTextSecondary)
-                        .lineLimit(1)
-                }
-            }
-
-            Spacer()
-        }
-        .padding(.horizontal, DS.sp5)
-        .padding(.vertical, DS.sp4)
-    }
-
-    private var actionButtons: some View {
-        VStack(spacing: DS.sp4) {
-            Button {
-                AppAnalytics.tap("intro_game_result.share")
-                shareResultImage()
-            } label: {
-                HStack(spacing: DS.sp3) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.imasScaled( 15, weight: .semibold))
-                    Text("結果を画像でシェア")
-                        .font(ID.font(16, weight: .bold))
-                }
-                .foregroundColor(ID.menuText)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 15)
-                .background(ID.menuCardSubtle)
-                .clipShape(IDCorner())
-                .overlay(IDCorner().stroke(ID.menuDivider, lineWidth: 1))
-            }
-            .idPress()
-
-            Button {
-                AppAnalytics.tap("intro_game_result.replay")
-                // ⚠️ ここで session.reset() を呼んではいけない。
-                // この結果画面はまだ画面上にあるので、記録が消えた瞬間に 0/0・履歴なしへ
-                // 描き変わってしまう (「空の結果画面が後から出てくる」の原因)。
-                // 次の対局の初期化は IntroGameSession.generateQuestions が全部やる。
-                // Setup画面(積み上げ済み)まで戻すだけ。IntroGameSetupView() を新規pushしていた
-                // 従来実装は Home→Setup→Game→Result→Setup→Game→Result… とスタックが際限なく
-                // 伸びるバグの原因だったため、既存のSetupを再利用する形に変更。
-                onReplay()
-            } label: {
-                HStack(spacing: DS.sp3) {
-                    Image(systemName: "arrow.counterclockwise")
-                        .font(.imasScaled( 15, weight: .semibold))
-                    Text("もう一度あそぶ")
-                        .font(ID.font(17, weight: .bold))
-                }
-                .foregroundColor(ID.menuCardDarkText)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, DS.sp5)
-                .background(ID.menuCardDark)
-                .clipShape(IDCorner())
-                .shadow(color: Color.black.opacity(0.15), radius: 10, y: 4)
-            }
-            .idPress()
-
-            Button {
-                AppAnalytics.tap("intro_game_result.go_home")
-                // replay と同じ理由でここでも reset しない (下の画面が空表示に化ける)。
-                onHome()
-            } label: {
-                Text("ホームに戻る")
-                    .font(ID.font(14, weight: .semibold))
-                    .foregroundColor(ID.menuTextSecondary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, DS.sp4)
-                    .background(ID.menuCardSubtle)
-                    .clipShape(IDCorner(radius: 14))
-            }
-            .idPress()
-        }
+        .padding(.horizontal, 16).padding(.vertical, 12)
+        .background(QS.panel, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }

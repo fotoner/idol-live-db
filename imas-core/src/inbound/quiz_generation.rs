@@ -18,7 +18,7 @@
 use crate::domain::prng::SplitMix64;
 use crate::domain::quiz_generation::{
     self as quiz, IdolQuizFact, IdolQuizHintState, IdolQuizIdolRef, IdolQuizPoolEstimate,
-    IdolQuizQuestion, QuizAnswerOutcome, QuizSessionResult, QuizTally,
+    IdolQuizQuestion, QuizAnswerOutcome, QuizGrade, QuizSessionResult, QuizTally,
     SongQuizOriginalArtistRow, SongQuizSingerRef, SongSingerQuizHintState,
     SongSingerQuizPoolEstimate, SongSingerQuizQuestion, IDOL_QUIZ_BASE_POINTS, SESSION_LENGTH,
     SONG_QUIZ_MAX_POINTS,
@@ -107,6 +107,24 @@ pub fn idol_quiz_answer(
 #[uniffi::export]
 pub fn idol_quiz_session_result(tally: QuizTally) -> QuizSessionResult {
     quiz::quiz_session_result(&tally, IDOL_QUIZ_BASE_POINTS, SESSION_LENGTH)
+}
+
+/// 点が「当てた数」の遊び (メンバーカラー合わせ・イントロドン) のリザルト。
+/// グレードと一言の閾値は 4 択クイズと同じ。自己ベストは `game_progress_apply_result` 側。
+#[uniffi::export]
+pub fn quiz_accuracy_result(
+    points: u32,
+    out_of: u32,
+    correct: u32,
+    questions: u32,
+) -> QuizSessionResult {
+    quiz::accuracy_session_result(points, out_of, correct, questions)
+}
+
+/// 正答率 (0–100) のグレード。ゲーム一覧で自己ベストの正答率をグレードで見せる。
+#[uniffi::export]
+pub fn quiz_grade_for_rate(rate_percent: u32) -> QuizGrade {
+    QuizGrade::from_rate(rate_percent)
 }
 
 // ---------------------------------------------------------------------------

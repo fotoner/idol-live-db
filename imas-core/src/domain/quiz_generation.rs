@@ -941,6 +941,29 @@ pub fn quiz_session_result(
     }
 }
 
+/// 点が「当てた数」そのものの遊び (メンバーカラー合わせ・イントロドン) の結果を、
+/// 4 択クイズと同じ形 (グレード・一言) にまとめる。正答率は `points / out_of`。
+/// `correct` / `questions` は結果画面の「8 / 10 正解」に出す数で、点とは別に渡す
+/// (メンバーカラーは 1 問に複数人いるので、全員当てた問題数を出す)。
+pub fn accuracy_session_result(
+    points: u32,
+    out_of: u32,
+    correct: u32,
+    questions: u32,
+) -> QuizSessionResult {
+    let rate = rate_percent(points, out_of);
+    QuizSessionResult {
+        points,
+        max_points: out_of,
+        out_of,
+        correct,
+        questions,
+        rate_percent: rate,
+        grade: QuizGrade::from_rate(rate),
+        comment: quiz_result_comment(rate).to_string(),
+    }
+}
+
 // ---------------------------------------------------------------------------
 // 出題ブランド設定の保存形式 (値は各 OS のストアに置く。エンコード規則だけ共有)
 // ---------------------------------------------------------------------------
@@ -974,6 +997,25 @@ mod tests {
     /// 合成テストで `apply_result` に渡すためだけの固定値。
     const TODAY: &str = "2026-08-25";
     const YESTERDAY: &str = "2026-08-24";
+
+    // ---- accuracy_session_result ----
+
+    #[test]
+    fn accuracy_result_grades_by_points_over_out_of() {
+        let r = accuracy_session_result(17, 20, 3, 5);
+        assert_eq!((r.points, r.max_points, r.out_of), (17, 20, 20));
+        assert_eq!((r.correct, r.questions), (3, 5));
+        assert_eq!(r.rate_percent, 85);
+        assert_eq!(r.grade, QuizGrade::A);
+        assert_eq!(r.comment, quiz_result_comment(85));
+    }
+
+    #[test]
+    fn accuracy_result_with_nothing_answered_is_grade_d() {
+        let r = accuracy_session_result(0, 0, 0, 0);
+        assert_eq!(r.rate_percent, 0);
+        assert_eq!(r.grade, QuizGrade::D);
+    }
 
     // ---- テスト用ビルダ ----
 

@@ -35,127 +35,131 @@ struct SongSingerQuizView: View {
     /// ジャケ/プレビューの開示段階と次のヒント (コアが算出)。
     @State private var hint = SongSingerQuizHintState(currentValue: 0, showArtwork: false,
                                                      canPreview: false, nextHint: nil)
+    /// 開示段階ごとの獲得点 ([曲名だけ, ジャケ, 試聴])。
+    @State private var stageValues: [Int] = []
     /// 解答済み問題数・正解数・累計ポイント (コアが積み上げる)。
     @State private var tally = QuizTally(asked: 0, correct: 0, points: 0)
     @State private var isLastQuestion = false
-    @State private var history: [QuizHistoryItem] = [] // 各問の振り返り (リザルトに渡す)
+    /// 各問の記録 (ペンライト・連続正解・見直す)。
+    @State private var plays: [QuizStagePlay] = []
+    /// 直前の問題の判定 (解答後に出す大きなカード)。
+    @State private var verdict: QuizVerdict?
+    @State private var scoreBefore = 0
     @State private var result: QuizSessionResult?
     @State private var isNewBest = false
+    @State private var previousBest: Int?
     @State private var isLoading = true
+    @Environment(\.dismiss) private var dismiss
 
     private var question: SongSingerQuizQuestion? {
         questions.indices.contains(index) ? questions[index] : nil
     }
 
+    private var header: QuizStageHeader {
+        if let result { return .result(total: Int(result.questions)) }
+        guard let q = question, songById[q.songId] != nil, !isLoading else { return .none }
+        return .question(current: min(plays.count + (verdict == nil ? 1 : 0), sessionLength),
+                         total: sessionLength, points: Int(tally.points))
+    }
+
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: DS.sp5) {
-                if isLoading {
-                    ImasInlineLoading(tint: DS.sys)
-                } else if let result {
-                    QuizResultView(result: result,
-                                   kind: .songSingerQuiz, isNewBest: isNewBest,
-                                   history: history,
-                                   onReplay: { restart() })
-                } else if let q = question, let song = songById[q.songId] {
-                    QuizProgressHeader(current: min(Int(tally.asked) + (selectedId != nil ? 0 : 1), sessionLength),
-                                       total: sessionLength, points: Int(tally.points))
-                    songCard(q, song: song)
-                    if selectedId == nil { hintArea(song) }
-                    IdolChoiceGrid(choices: choices(q), answer: singers[Int(q.answer)],
-                                   selectedId: selectedId, onPick: { pick($0, song: song) })
-                    if selectedId != nil {
-                        QuizNextButton(isLastQuestion: isLastQuestion, onNext: nextQuestion, onFinish: finish)
-                    }
-                } else {
-                    ImasEmptyState(systemImage: "music.note", title: "出題できるソロ曲が不足しています")
-                }
-            }
-            .padding(DS.sp5)
+        QuizStageScaffold(title: "ソロ曲クイズ", header: header, onClose: { dismiss() }) {
+            content
         }
-        .background(DS.bg.ignoresSafeArea())
-        .scrollContentBackground(.hidden)
-        .navigationTitle("ソロ曲クイズ")
-        .navigationBarTitleDisplayMode(.inline)
         .onDisappear { MusicKitService.shared.stop() }
         .task { await load() }
         .trackScreen("song_singer_quiz")
     }
 
-    // MARK: - 出題カード
-
-    private func songCard(_ q: SongSingerQuizQuestion, song: Song) -> some View {
-        let answered = selectedId != nil
-        let answer = singers[Int(q.answer)]
-        // ジャケットは「ヒント1以降」または解答後にだけ出す。プレビューは「ヒント2以降」。
-        return VStack(spacing: DS.sp4) {
-            HStack {
-                Text("このソロ曲を歌うのは？").font(.imasHeadline.weight(.bold)).foregroundStyle(DS.ink)
-                Spacer(minLength: 0)
-                if !answered { QuizValueBadge(value: Int(hint.currentValue)) }
-            }
-            if hint.showArtwork {
-                ArtworkImageView(url: URL(string: song.artworkUrl ?? ""), size: 132,
-                                 previewURL: hint.canPreview ? song.previewUrl.flatMap { URL(string: $0) } : nil,
-                                 songTitle: song.title, songId: song.id,
-                                 seed: answered ? answer.color : nil)
-                    .clipShape(RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
+    @ViewBuilder
+    private var content: some View {
+        if isLoading {
+            ImasInlineLoading(tint: QS.ink)
+        } else if let result {
+            QuizStageResultView(result: result, kind: .songSingerQuiz, isNewBest: isNewBest,
+                                previousBest: previousBest,
+                                slots: plays.penlights(total: Int(result.questions), answering: false),
+                                longestStreak: plays.longestStreak, misses: plays.misses,
+                                onReplay: { restart() }, onClose: { dismiss() })
+        } else if let q = question, let song = songById[q.songId] {
+            QuizStageProgress(slots: plays.penlights(total: sessionLength, answering: verdict == nil),
+                              caption: plays.setlistCaption(total: sessionLength),
+                              streak: plays.streak, streakBrokeAt: plays.streakBrokeAt)
+                .padding(.bottom, 2)
+            if let verdict {
+                QuizVerdictCard(verdict: verdict).id(verdict.number)
+                QuizVerdictStats(before: scoreBefore, after: Int(tally.points), streak: plays.streak)
+                if !verdict.isCorrect { QuizVerdictFootnote() }
+                QuizStageNextButton(isLastQuestion: isLastQuestion, onNext: nextQuestion, onFinish: finish)
+                    .padding(.top, 4)
             } else {
-                // 曲名だけのプレースホルダ (ジャケはまだ伏せる)。
-                ZStack {
-                    RoundedRectangle(cornerRadius: DS.rMD, style: .continuous).fill(DS.fill)
-                    Image(systemName: "questionmark")
-                        .font(.imasScaled( 44, weight: .bold)).foregroundStyle(DS.ink3)
+                ticket(song)
+                QuizStageChoiceGrid(choices: choices(q).map { QuizStageChoice(id: $0.id, title: $0.name) }) { choice in
+                    if let idol = singers.first(where: { $0.id == choice.id }) { pick(idol, song: song) }
                 }
-                .frame(width: 132, height: 132)
+                .padding(.top, 4)
             }
-            Text(song.title).font(.imasTitle3.weight(.bold)).foregroundStyle(DS.ink)
-                .multilineTextAlignment(.center)
-            if let cd = song.cdTitle, !cd.isEmpty {
-                Text(cd).font(.imasCaption).foregroundStyle(DS.ink3).lineLimit(1)
+        } else {
+            ImasEmptyState(systemImage: "music.note", title: "出題できるソロ曲が不足しています")
+        }
+    }
+
+    // MARK: - チケット
+
+    /// 曲名を大きく載せ、ジャケット (ヒント1) を開いたら横に出す。プレビューは「ヒント2」。
+    /// ジャケットを初手で出すと答え (歌手) がバレるため、開示はコアの段階に従う。
+    private func ticket(_ song: Song) -> some View {
+        let hasPreview = !(song.previewUrl ?? "").isEmpty
+        return QuizTicket {
+            QuizTicketTitleBlock(label: "SOLO SONG", question: "この曲を歌っているのは？",
+                                 value: Int(hint.currentValue), base: stageValues.first ?? 0) {
+                HStack(alignment: .center, spacing: 14) {
+                    if hint.showArtwork {
+                        ArtworkImageView(url: URL(string: song.artworkUrl ?? ""), size: 84,
+                                         previewURL: hint.canPreview ? song.previewUrl.flatMap { URL(string: $0) } : nil,
+                                         songTitle: song.title, songId: song.id, seed: nil)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .transition(.scale(scale: 0.8).combined(with: .opacity))
+                    }
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(song.title)
+                            .font(QS.text(hint.showArtwork ? 30 : 40, weight: .black))
+                            .lineLimit(3).minimumScaleFactor(0.5)
+                            .fixedSize(horizontal: false, vertical: true)
+                        if let cd = song.cdTitle, !cd.isEmpty {
+                            Text(cd).font(QS.text(12)).foregroundStyle(QS.paperSub).lineLimit(1)
+                        }
+                    }
+                }
+                .padding(.top, 6)
             }
-            if answered {
-                HStack(spacing: DS.sp3) {
-                    IdolAvatarView(idol: answer, size: 28)
-                    Text("正解: \(answer.name)").font(.imasSubhead.weight(.semibold)).foregroundStyle(DS.ink)
+            QuizTicketNotch()
+            QuizTicketHintTiles {
+                QuizTicketHintTile(title: "ジャケット", phase: revealed >= 1 ? .open(value: "表示中")
+                                   : .available(cost: cost(1), action: { openHint(1, song: song) }))
+                if hasPreview {
+                    QuizTicketHintTile(title: "試聴", phase: revealed >= 2 ? .open(value: "再生中")
+                                       : revealed == 1 ? .available(cost: cost(2), action: { openHint(2, song: song) })
+                                       : .locked(cost: cost(2)))
                 }
             }
         }
-        .frame(maxWidth: .infinity)
-        .padding(DS.sp5)
-        .background(DS.surface, in: RoundedRectangle(cornerRadius: DS.rLG, style: .continuous))
     }
 
-    // MARK: - ヒント
+    /// 段階 n のヒントで下がる点 (コアの段階別の獲得点の差)。
+    private func cost(_ stage: Int) -> Int {
+        guard stageValues.indices.contains(stage) else { return 0 }
+        return stageValues[stage - 1] - stageValues[stage]
+    }
 
-    /// 次に開けるヒント (ヒント1: ジャケット / ヒント2: プレビュー) はコアが決める。
-    /// プレビューが無い曲では 2 段目が返らないので、押しても何も起きないボタンは出ない。
-    @ViewBuilder
-    private func hintArea(_ song: Song) -> some View {
-        if let next = hint.nextHint {
-            switch next.kind {
-            case .artwork:
-                QuizHintButton(systemImage: "photo.fill", title: "ヒント: ジャケットを見る",
-                               nextValue: Int(next.nextValue)) {
-                    AppAnalytics.tap("song_singer_quiz.hint_artwork")
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        revealed = 1
-                        refreshHint(song)
-                    }
-                }
-            case .preview:
-                QuizHintButton(systemImage: "play.circle.fill", title: "ヒント: プレビューを再生する",
-                               nextValue: Int(next.nextValue)) {
-                    AppAnalytics.tap("song_singer_quiz.hint_preview")
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        revealed = 2
-                        refreshHint(song)
-                    }
-                    if let url = song.previewUrl.flatMap({ URL(string: $0) }) {
-                        MusicKitService.shared.togglePreview(url: url, songId: song.id)
-                    }
-                }
-            }
+    private func openHint(_ stage: UInt32, song: Song) {
+        AppAnalytics.tap(stage == 1 ? "song_singer_quiz.hint_artwork" : "song_singer_quiz.hint_preview")
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+            revealed = stage
+            refreshHint(song)
+        }
+        if stage == 2, let url = song.previewUrl.flatMap({ URL(string: $0) }) {
+            MusicKitService.shared.togglePreview(url: url, songId: song.id)
         }
     }
 
@@ -172,28 +176,33 @@ struct SongSingerQuizView: View {
         MusicKitService.shared.stop()
         selectedId = idol.id
         let answer = singers[Int(q.answer)]
+        scoreBefore = Int(tally.points)
         // 正誤判定・獲得点 (開示段階で決まる)・積み上げはコアがまとめて返す。
         let outcome = songSingerQuizAnswer(revealed: revealed, pickedIdolId: idol.id,
                                            answerIdolId: answer.id, before: tally)
-        tally = outcome.tally
         isLastQuestion = outcome.isLastQuestion
         refreshHint(song)
-        history.append(QuizHistoryItem(
-            id: "\(tally.asked)-\(song.id)",
-            index: Int(tally.asked),
-            subjectTitle: song.title,
-            subjectSubtitle: song.cdTitle,
-            answer: answer,
-            picked: idol,
-            earnedPoints: Int(outcome.earnedPoints),
-            revealedHints: Int(outcome.revealedHints)
-        ))
+        let number = plays.count + 1
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            tally = outcome.tally
+            plays.append(QuizStagePlay(number: number, isCorrect: outcome.isCorrect,
+                                       answerName: answer.name, answerHex: answer.color,
+                                       pickedName: outcome.isCorrect ? nil : idol.name))
+            verdict = QuizVerdict(isCorrect: outcome.isCorrect, number: number,
+                                  answerName: answer.name, answerHex: answer.color,
+                                  earned: Int(outcome.earnedPoints), base: stageValues.first ?? 0,
+                                  hints: Int(outcome.revealedHints),
+                                  pickedName: outcome.isCorrect ? nil : idol.name,
+                                  detail: "「\(song.title)」" + (song.cdTitle.map { " · \($0)" } ?? ""))
+        }
+        UINotificationFeedbackGenerator().notificationOccurred(outcome.isCorrect ? .success : .error)
     }
 
     private func nextQuestion() {
         MusicKitService.shared.stop()
         selectedId = nil
         revealed = 0
+        verdict = nil
         index += 1
         if let song = question.flatMap({ songById[$0.songId] }) { refreshHint(song) }
     }
@@ -204,10 +213,12 @@ struct SongSingerQuizView: View {
 
     private func finish() {
         let sessionResult = songSingerQuizSessionResult(tally: tally)
+        previousBest = GameProgressStore.shared.previousBestScore(for: .songSingerQuiz)
         // 保存と「自己ベスト更新！」の判定は進捗ストア (コアの game_progress) が 1 回で返す。
         let update = GameProgressStore.shared.recordResult(
             .songSingerQuiz, score: Int(sessionResult.points), outOf: Int(sessionResult.outOf))
         isNewBest = update.isNewBest
+        verdict = nil
         result = sessionResult
     }
 
@@ -238,16 +249,22 @@ struct SongSingerQuizView: View {
         revealed = 0
         tally = QuizTally(asked: 0, correct: 0, points: 0)
         isLastQuestion = false
-        history = []
+        plays = []
+        verdict = nil
         result = nil
         isNewBest = false
+        previousBest = nil
         if let song = question.flatMap({ songById[$0.songId] }) { refreshHint(song) }
     }
 
     /// 開示段階と次のヒントを引き直す (出題が変わった / ヒントを開いた / 解答した とき)。
     private func refreshHint(_ song: Song) {
-        hint = songSingerQuizHintState(revealed: revealed,
-                                       hasPreview: !(song.previewUrl ?? "").isEmpty,
+        let hasPreview = !(song.previewUrl ?? "").isEmpty
+        hint = songSingerQuizHintState(revealed: revealed, hasPreview: hasPreview,
                                        answered: selectedId != nil)
+        // 段階ごとの獲得点 (曲名だけ / ジャケ / 試聴)。メーターの元値とタイルの「−n」に使う。
+        stageValues = (0...2).map {
+            Int(songSingerQuizHintState(revealed: UInt32($0), hasPreview: hasPreview, answered: false).currentValue)
+        }
     }
 }
