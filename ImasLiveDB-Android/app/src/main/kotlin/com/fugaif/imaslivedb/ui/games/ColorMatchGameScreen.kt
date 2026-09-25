@@ -581,7 +581,16 @@ private fun ColorMatchStage(state: ColorMatchUiState, viewModel: ColorMatchViewM
         title = "メンバーカラー",
         header = header,
         onClose = { if (result == null) viewModel.resetToSetup() else onBack() },
-        scrollKey = state.plays.size to answering
+        scrollKey = state.plays.size to answering,
+        trailing = {
+            if (result != null) {
+                QuizStageShareButton(
+                    cardTitle = "メンバーカラー合わせ", shareName = "メンバーカラー合わせ", result = result,
+                    plays = state.plays, isNewBest = state.isNewBest, fileNamePrefix = "color_match",
+                    subtitle = "${if (state.isChoiceMode) "4択" else "並べる"} · ${LEVEL_LABELS[state.difficulty]}"
+                )
+            }
+        }
     ) {
         when {
             result != null -> QuizStageResultView(

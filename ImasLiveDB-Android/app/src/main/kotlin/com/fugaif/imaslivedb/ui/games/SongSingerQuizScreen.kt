@@ -334,7 +334,17 @@ fun SongSingerQuizScreen(
         title = "ソロ曲クイズ",
         header = header,
         onClose = onBack,
-        scrollKey = state.plays.size to (verdict == null)
+        scrollKey = state.plays.size to (verdict == null),
+        trailing = {
+            if (result != null) {
+                // 背景には遊んだ曲のジャケットを敷く。
+                QuizStageShareButton(
+                    cardTitle = "ソロ曲クイズ", shareName = "ソロ曲クイズ", result = result,
+                    plays = state.plays, isNewBest = state.isNewBest, fileNamePrefix = "song_quiz",
+                    artworkUrls = state.questions.take(state.plays.size).mapNotNull { it.song.artworkUrl }
+                )
+            }
+        }
     ) {
         when {
             state.isLoading -> QuizStageLoading()

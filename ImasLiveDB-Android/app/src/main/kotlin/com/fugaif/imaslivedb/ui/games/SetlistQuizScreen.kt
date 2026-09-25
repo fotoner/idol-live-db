@@ -262,7 +262,17 @@ fun SetlistQuizScreen(
         title = "セトリ当て",
         header = header,
         onClose = onBack,
-        scrollKey = state.plays.size to (verdict == null)
+        scrollKey = state.plays.size to (verdict == null),
+        trailing = {
+            if (result != null) {
+                // 背景には答えの曲のジャケットを敷く。
+                QuizStageShareButton(
+                    cardTitle = "セトリ当て", shareName = "セトリ当てクイズ", result = result,
+                    plays = state.plays, isNewBest = state.isNewBest, fileNamePrefix = "setlist_quiz",
+                    artworkUrls = state.questions.take(state.plays.size).mapNotNull { it.answerArtworkUrl }
+                )
+            }
+        }
     ) {
         when {
             state.isLoading -> QuizStageLoading()

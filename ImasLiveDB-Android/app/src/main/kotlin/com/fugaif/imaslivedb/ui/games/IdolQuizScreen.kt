@@ -285,7 +285,15 @@ fun IdolQuizScreen(
         title = "アイドル当て",
         header = header,
         onClose = onBack,
-        scrollKey = state.plays.size to (verdict == null)
+        scrollKey = state.plays.size to (verdict == null),
+        trailing = {
+            if (result != null) {
+                QuizStageShareButton(
+                    cardTitle = "アイドル当て", shareName = "アイドル当てクイズ", result = result,
+                    plays = state.plays, isNewBest = state.isNewBest, fileNamePrefix = "idol_quiz"
+                )
+            }
+        }
     ) {
         when {
             state.isLoading -> QuizStageLoading()
