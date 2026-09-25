@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -653,7 +654,7 @@ private fun InfoTab(
             }
             // 補足の入口。補足は利用者の投稿で増やしたいので、楽曲情報のすぐ下に置く (iOS と同じ)。
             // 補足がある曲は本文は Hero に出ているので「直す」だけ、無い曲は何を書くかの例を添える。
-            onEditNote?.let { onClick -> NoteEntry(song.note?.takeIf { it.isNotBlank() }, seed, song.brandId, onClick) }
+            NoteEntry(song.note?.takeIf { it.isNotBlank() }, seed, song.brandId, onEditNote)
         }
         // 歌唱アイドル
         if (state.originalArtists.isNotEmpty()) {
@@ -1097,22 +1098,44 @@ private fun EvidenceNote(text: String) {
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp))
 }
 
-/** 補足を書く・直す入口 (iOS `SongInfoTab.noteEntry` と同じ見た目と文言)。 */
+/** 楽曲情報の下の補足 (iOS `SongInfoTab.noteEntry` と同じ見た目と文言)。 */
 @Composable
-private fun NoteEntry(note: String?, seed: String?, brandId: String?, onClick: () -> Unit) {
+private fun NoteEntry(note: String?, seed: String?, brandId: String?, onEdit: (() -> Unit)?) {
     val t = ImasTheme.forBrand(seed, brandId)
+    if (note != null) {
+        // ある曲は本文が主役。直す導線は見出しの右に小さく添える (iOS SongInfoTab と同じ)。
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp)
+                .clip(RoundedCornerShape(12.dp)).background(DS.fill)
+                .padding(horizontal = 16.dp, vertical = 11.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("この曲の補足", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DS.ink2,
+                    modifier = Modifier.weight(1f))
+                if (onEdit != null) {
+                    Text("直す", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = t.accent,
+                        modifier = Modifier.clip(RoundedCornerShape(6.dp)).clickable(onClick = onEdit)
+                            .padding(horizontal = 6.dp, vertical = 2.dp))
+                }
+            }
+            SelectionContainer {
+                Text(note, fontSize = 15.sp, color = DS.ink, modifier = Modifier.padding(top = 4.dp))
+            }
+        }
+        return
+    }
+    if (onEdit == null) return
     Row(
         modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp)
             .clip(RoundedCornerShape(12.dp)).background(DS.fill)
-            .clickable(onClick = onClick)
+            .clickable(onClick = onEdit)
             .padding(horizontal = 16.dp, vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(Icons.Filled.Edit, contentDescription = null, tint = t.accent, modifier = Modifier.size(16.dp))
         Column(Modifier.weight(1f).padding(start = 10.dp)) {
-            Text(if (note == null) "補足を書く" else "補足を直す",
-                fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
-            Text(note ?: "「◯周年記念楽曲」「アニメ◯話の挿入歌」など、この曲の由来を 1 文で",
+            Text("補足を書く", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = DS.ink)
+            Text("「◯周年記念楽曲」「アニメ◯話の挿入歌」など、この曲の由来を 1 文で",
                 fontSize = 12.sp, color = DS.ink2, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
     }

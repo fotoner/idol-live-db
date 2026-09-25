@@ -99,21 +99,47 @@ struct SongInfoTab: View {
         }
     }
 
-    /// 補足の入口。補足は利用者の投稿で増やしたいので、楽曲情報のすぐ下に置く。
-    /// 補足がある曲は本文は Hero に出ているので「直す」だけ、無い曲は何を書くかの例を添える。
+    /// 補足。ある曲は「この曲の補足」として本文を主役に見せ、直す導線は右上に小さく添える。
+    /// 無い曲だけ、利用者の投稿で増やしたいので「補足を書く」を例付きで置く。
     @ViewBuilder
     private var noteEntry: some View {
-        if let onEditNote {
+        if let note {
+            VStack(alignment: .leading, spacing: DS.sp2) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text("この曲の補足")
+                        .font(.imasCaption.weight(.semibold))
+                        .foregroundStyle(DS.ink2)
+                    Spacer(minLength: 8)
+                    if let onEditNote {
+                        Button(action: onEditNote) {
+                            Text("直す")
+                                .font(.imasCaption.weight(.semibold))
+                                .foregroundStyle(ImasTheme.derive(seed: seed, scheme: scheme).accent)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("補足を直す")
+                    }
+                }
+                Text(note)
+                    .font(.imasSubhead)
+                    .foregroundStyle(DS.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .textSelection(.enabled)
+            }
+            .padding(.horizontal, DS.sp5).padding(.vertical, 11)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(DS.fill, in: RoundedRectangle(cornerRadius: DS.rMD, style: .continuous))
+        } else if let onEditNote {
             Button(action: onEditNote) {
                 HStack(spacing: DS.sp3) {
                     Image(systemName: "text.bubble")
                         .font(.imasScaled(15, weight: .semibold))
                         .foregroundStyle(ImasTheme.derive(seed: seed, scheme: scheme).accent)
                     VStack(alignment: .leading, spacing: DS.sp1) {
-                        Text(note == nil ? "補足を書く" : "補足を直す")
+                        Text("補足を書く")
                             .font(.imasSubhead.weight(.semibold))
                             .foregroundStyle(DS.ink)
-                        Text(note ?? "「◯周年記念楽曲」「アニメ◯話の挿入歌」など、この曲の由来を 1 文で")
+                        Text("「◯周年記念楽曲」「アニメ◯話の挿入歌」など、この曲の由来を 1 文で")
                             .font(.imasCaption)
                             .foregroundStyle(DS.ink2)
                             .lineLimit(2)
