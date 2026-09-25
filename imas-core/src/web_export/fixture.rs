@@ -278,6 +278,7 @@ fn site_meta() -> SiteMeta {
         app: content::app_links(),
         // 代表値でも本番と同じ関数を通す (フィクスチャだけ違う文言が出ない)。
         performer_name_options: super::emit::performer_name_options(),
+        setlist_display_options: super::emit::setlist_display_options(),
         // 代表値にはお題が無いので、ナビにも出ない (本番と同じ判断を通す)。
         primary_nav: super::emit::lists::primary_nav(true),
         utility_nav: super::emit::lists::utility_nav(false),
@@ -483,6 +484,7 @@ fn show_page() -> ShowPage {
                         }),
                         is_cover: false,
                         first_performance_label: None,
+                        history: Vec::new(),
                         // 共通衣装は「全員」と書かず、着用者の括弧を付けない。
                         costumes: vec![SetlistCostume {
                             id: "cos_sample_common".to_string(),
@@ -507,6 +509,7 @@ fn show_page() -> ShowPage {
                             label: "ソロステージ衣装（春日未来）".to_string(),
                         }],
                         first_performance_label: None,
+                        history: Vec::new(),
                     },
                 ],
             },
@@ -537,6 +540,7 @@ fn show_page() -> ShowPage {
                     }),
                     is_cover: false,
                     first_performance_label: None,
+                        history: Vec::new(),
                     // 衣装の記録が無い行 (実データではこちらが大多数)。
                     costumes: vec![],
                 }],

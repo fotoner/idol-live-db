@@ -2942,6 +2942,68 @@ a.labeled-row .labeled-row__value {
   font-variant-numeric: tabular-nums;
 }
 
+/* --- セトリの詳しさ (data-setlist-display) -----------------------------------
+   行は全モードぶんの中身を持って描かれていて、ここで見せ隠しだけを切り替える。
+   どのモードで何を出すかの判断は imas-core の SetlistDisplayMode と同じ:
+   シンプル = 曲名と歌唱者だけ / 普通 = 既定 (属性なし) / 詳細 = 普通 + 披露の履歴。 */
+.setlist__history {
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  font-size: var(--fs-caption);
+}
+.setlist__history-axis {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp1) var(--sp3);
+}
+.setlist__history dt {
+  min-width: 2.5em;
+  font-weight: 600;
+  color: var(--ds-ink2);
+}
+.setlist__history dd {
+  margin: 0;
+  color: var(--ds-ink);
+  font-variant-numeric: tabular-nums;
+}
+.setlist__history dd[data-tone="detail"] {
+  color: var(--ds-ink2);
+}
+.setlist__history dd[data-tone="debut"] {
+  font-weight: 700;
+  color: var(--accent-ink);
+}
+[data-setlist-display="detailed"] .setlist__history {
+  display: flex;
+}
+/* 詳細表示では「初披露」は履歴の段が言う (札と二重に出さない)。 */
+[data-setlist-display="detailed"] .setlist__row .tag--first {
+  display: none;
+}
+[data-setlist-display="simple"] .setlist__row {
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: var(--sp3);
+  padding-block: var(--sp2);
+}
+[data-setlist-display="simple"] .setlist__row :is(.artwork, .setlist__notes, .setlist__tags, .lineup__missing) {
+  display: none;
+}
+[data-setlist-display="simple"] .setlist__main {
+  gap: var(--sp1);
+}
+[data-setlist-display="simple"] .setlist__rows > li {
+  contain-intrinsic-size: auto 56px;
+}
+.setlist-prefs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp2) var(--sp4);
+}
+
 /* 歌唱者の表示切り替え。絞り込みと同じ入力部品を使うので、器だけ用意する。 */
 .perf-pref {
   display: flex;

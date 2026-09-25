@@ -39,6 +39,9 @@ web_dto! {
         /// **アプリと同じ 1 本** (`domain::event_detail_queries::performer_name_options`)。
         /// 出面が独自にラベルを持つと、アプリの設定画面と文言がズレる。
         pub performer_name_options: Vec<PerformerNameOptionDto>,
+        /// セトリの詳しさ (シンプル / 普通 / 詳細) の選択肢。**アプリと同じ 1 本**
+        /// (`domain::screen_composition::setlist_display_modes`)。順は情報が少ない順。
+        pub setlist_display_options: Vec<SetlistDisplayOptionDto>,
         /// サイト共通ナビの並び (ヘッダとフッタが同じ 1 本を描く)。
         ///
         /// **お題 (`/polls/`) は焼き込んだ集計が空だと書き出されない**ので、
@@ -76,6 +79,18 @@ web_dto! {
         pub label: String,
         /// 既定のモードか (`PerformerNameMode::default_mode`)。1 つだけが真。
         /// サーバが描く HTML はこのモードで出ていて、閲覧者の選択が無ければこれに戻る。
+        pub is_default: bool,
+    }
+}
+
+web_dto! {
+    /// セトリの詳しさ 1 つぶん。
+    #[derive(Eq)]
+    pub struct SetlistDisplayOptionDto {
+        /// localStorage に残す値。iOS/Android の保存値と同じ文字列。
+        pub raw: String,
+        pub label: String,
+        /// 既定のモードか (`SetlistDisplayMode::default_mode`)。1 つだけが真。
         pub is_default: bool,
     }
 }

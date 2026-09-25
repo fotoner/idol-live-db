@@ -62,7 +62,7 @@ pub use calls::{CallGuideEditRow, CallGuidePage, CallGuideSongRow};
 pub use common::{
     mark_current, AppLinks, AppOpen, CallGuideClap, CallGuideEmphasis, CallGuideVocabulary, Counts, Crumb,
     DateBadge, EmptyText, FilterAxis, LinkedNote, LyricsBlock, NavLink, PenlightSetDto,
-    PerformerNameOptionDto, Ref, RefKind, Robots, SeoBlock, SiteMeta, SongCommunity, StatTile,
+    PerformerNameOptionDto, Ref, RefKind, SetlistDisplayOptionDto, Robots, SeoBlock, SiteMeta, SongCommunity, StatTile,
     TagBadge, TagChipDto, ThemePair, ThemeTable, ThemeTokens, SCHEMA_VERSION,
 };
 pub use event::{
@@ -79,7 +79,8 @@ pub use index::{
 };
 pub use search::{FoldCase, FoldParity, SearchManifest, SearchPage, SearchRow, SearchShard, SearchShardMeta};
 pub use show::{
-    ForecastRow, LineupNote, MissingOriginals, PerformerRef, SetlistCostume, SetlistRow, SetlistSection,
+    ForecastRow, LineupNote, MissingOriginals, PerformerRef, SetlistCostume, SetlistNote, SetlistNoteGroup,
+    SetlistNoteTone, SetlistRow, SetlistSection,
     ShowCostume, ShowForecast, ShowPage, SiblingNav,
 };
 pub use song::{CoOccurRow, CreditGroup, PerformanceRow, SingerRow, SongPage};

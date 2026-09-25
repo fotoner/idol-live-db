@@ -174,6 +174,16 @@ pub(crate) fn performer_name_options() -> Vec<PerformerNameOptionDto> {
         .collect()
 }
 
+/// セトリの詳しさの選択肢。規則もラベルも既定も domain が持つ。
+pub(crate) fn setlist_display_options() -> Vec<SetlistDisplayOptionDto> {
+    use crate::domain::screen_composition::{setlist_display_modes, SetlistDisplayMode};
+    let default_mode = SetlistDisplayMode::default_mode();
+    setlist_display_modes()
+        .into_iter()
+        .map(|o| SetlistDisplayOptionDto { is_default: o.mode == default_mode, raw: o.raw, label: o.label })
+        .collect()
+}
+
 /// ブラウザに配ってよい形の生テーブル。
 ///
 /// **出面に出してはいけない列を落とすのはここ 1 箇所。** 生テーブルは
@@ -404,6 +414,7 @@ fn write_all(
             content_hash: ctx.content_hash.clone(),
             app: crate::web_export::content::app_links(),
             performer_name_options: performer_name_options(),
+            setlist_display_options: setlist_display_options(),
             primary_nav: lists::primary_nav(has_calls),
             utility_nav: lists::utility_nav(has_polls),
             footer_notes: crate::web_export::content::footer_notes(),

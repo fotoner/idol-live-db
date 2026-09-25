@@ -3,6 +3,7 @@ import type { AppLinks } from "./AppLinks";
 import type { NavLink } from "./NavLink";
 import type { NotFoundPage } from "./NotFoundPage";
 import type { PerformerNameOptionDto } from "./PerformerNameOptionDto";
+import type { SetlistDisplayOptionDto } from "./SetlistDisplayOptionDto";
 
 /**
  * サイト全体のメタ (`meta.json`)。
@@ -26,6 +27,11 @@ todayJst: string, dataVersion: string | null, contentHash: string | null, app: A
  * 出面が独自にラベルを持つと、アプリの設定画面と文言がズレる。
  */
 performerNameOptions: Array<PerformerNameOptionDto>, 
+/**
+ * セトリの詳しさ (シンプル / 普通 / 詳細) の選択肢。**アプリと同じ 1 本**
+ * (`domain::screen_composition::setlist_display_modes`)。順は情報が少ない順。
+ */
+setlistDisplayOptions: Array<SetlistDisplayOptionDto>, 
 /**
  * サイト共通ナビの並び (ヘッダとフッタが同じ 1 本を描く)。
  *

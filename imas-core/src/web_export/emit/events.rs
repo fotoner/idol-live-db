@@ -4,6 +4,8 @@ use super::context::{simple_json_ld, Ctx};
 use crate::domain::costume_queries as costume;
 use crate::domain::date_display::{range_with_weekday, short_with_weekday};
 use crate::domain::event_detail_queries as detail;
+use crate::domain::performance_gap::{performance_gap, PerformanceGap};
+use crate::domain::screen_composition::{setlist_performance_note_group, RowNoteTone};
 use crate::domain::snapshot::Snapshot;
 use crate::domain::event_grouping::group_events_by_year;
 use crate::domain::setlist_lineup::{row_lineup, LineupSummary, FULL_CAST_LABEL, MISSING_LABEL};
@@ -413,6 +415,7 @@ fn setlist_rows(
                 is_cover: ctx.snap.song(&e.song_id).is_some_and(Snapshot::is_cover),
                 first_performance_label: (ctx.snap.ordinal_by_item[item as usize] == 1)
                     .then(|| FIRST_PERFORMANCE_LABEL.to_string()),
+                history: vec![history_group(&performance_gap(ctx.snap, item))],
                 // チップの文字列は Rust が組んである (着用者の括弧を付けるかも含めて)。
                 costumes: costume::setlist_item_costumes(ctx.snap, &e.id)
                     .into_iter()
@@ -422,6 +425,28 @@ fn setlist_rows(
             Some((section_label(e.section.as_deref()), row))
         })
         .collect()
+}
+
+/// 詳細表示の「披露」の軸。分け方も文言も domain (アプリと同じ)。ここは DTO へ写すだけ。
+fn history_group(gap: &PerformanceGap) -> SetlistNoteGroup {
+    let group = setlist_performance_note_group(gap);
+    SetlistNoteGroup {
+        label: group.label,
+        notes: group
+            .notes
+            .into_iter()
+            .map(|n| SetlistNote {
+                text: n.text,
+                tone: match n.tone {
+                    RowNoteTone::Value => SetlistNoteTone::Value,
+                    RowNoteTone::Detail => SetlistNoteTone::Detail,
+                    RowNoteTone::Debut => SetlistNoteTone::Debut,
+                    RowNoteTone::Mine => SetlistNoteTone::Mine,
+                    RowNoteTone::Missing => SetlistNoteTone::Missing,
+                },
+            })
+            .collect(),
+    }
 }
 
 /// オリメンとの関係の札。規則も文言も `domain::setlist_lineup` (アプリと同じ)。

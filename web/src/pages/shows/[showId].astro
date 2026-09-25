@@ -2,6 +2,7 @@
 import DetailLayout from "../../layouts/DetailLayout.astro";
 import Section from "../../components/Section.astro";
 import PerformerNamePref from "../../components/PerformerNamePref.astro";
+import SetlistDisplayPref from "../../components/SetlistDisplayPref.astro";
 import SetlistRow from "../../components/SetlistRow.astro";
 import RefList from "../../components/RefList.astro";
 import Chip from "../../components/Chip.astro";
@@ -106,7 +107,11 @@ const setlistCount = show.setlistSections.reduce((n, section) => n + section.row
   }
 
   <Section id="show-setlist" title="セットリスト" count={setlistCount}>
-    <PerformerNamePref slot="tools" />
+    {/* セトリがある公演だけ。空のセトリに詳しさの切替を置いても何も変わらない。 */}
+    <div class="setlist-prefs" slot="tools">
+      {!show.setlistEmpty && <SetlistDisplayPref />}
+      <PerformerNamePref />
+    </div>
     {
       show.setlistEmpty ? (
         <EmptyState {...show.setlistEmpty} />

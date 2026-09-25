@@ -138,6 +138,48 @@ web_dto! {
         pub costumes: Vec<SetlistCostume>,
         /// この披露がその曲の初披露 (この DB に載っている範囲で最古) なら「初披露」。
         pub first_performance_label: Option<String>,
+        /// 詳細表示で行に添える**披露の履歴** (`披露  4 回目  2 年 6 か月ぶり`)。
+        ///
+        /// 軸の分け方・文言・主従は `domain::screen_composition` (アプリの詳細表示と同じ 1 本)。
+        /// 出面は参加記録を持たないので「回収」の軸は来ない。どのモードで見せるかは
+        /// 閲覧者の切替で、HTML には常に描いておく。
+        pub history: Vec<SetlistNoteGroup>,
+    }
+}
+
+web_dto! {
+    /// 行に添える事実の軸 1 本 (`披露`)。
+    #[derive(Eq)]
+    pub struct SetlistNoteGroup {
+        /// 行の左に固定幅で出す軸の名前。
+        pub label: String,
+        pub notes: Vec<SetlistNote>,
+    }
+}
+
+web_dto! {
+    /// 軸の中の事実 1 つ。強調は `tone` で出し分ける (文字列を見て決めない)。
+    #[derive(Eq)]
+    pub struct SetlistNote {
+        pub text: String,
+        pub tone: SetlistNoteTone,
+    }
+}
+
+web_dto! {
+    /// `domain::screen_composition::RowNoteTone` の写し。
+    #[derive(Copy, Eq)]
+    pub enum SetlistNoteTone {
+        /// 軸の主な値 (`4 回目`)。
+        Value,
+        /// 主な値の補足 (`3 年ぶり`)。沈める。
+        Detail,
+        /// 初披露。
+        Debut,
+        /// 自分が回収した。出面には来ない (参加記録を持たない)。
+        Mine,
+        /// 自分がまだ持っていない。出面には来ない。
+        Missing,
     }
 }
 

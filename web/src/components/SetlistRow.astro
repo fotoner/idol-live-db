@@ -38,12 +38,27 @@ const { row } = Astro.props;
     </p>
     {
       (row.unitLabel || row.isCover || row.lineup || row.firstPerformanceLabel) && (
-        <p class="u-row" data-lineup={row.lineup?.kind}>
+        <p class="u-row setlist__tags" data-lineup={row.lineup?.kind}>
           {row.unitLabel && <TagChip text={row.unitLabel} kind="unit" />}
           {row.isCover && <TagChip text="カバー" kind="cover" />}
           {row.lineup && <TagChip text={row.lineup.label} kind="lineup" />}
           {row.firstPerformanceLabel && <TagChip text={row.firstPerformanceLabel} kind="first" />}
         </p>
+      )
+    }
+    {/* 詳細表示だけで見える披露の履歴。軸と文言と主従は Rust が決めてある。 */}
+    {
+      row.history.length > 0 && (
+        <dl class="setlist__history">
+          {row.history.map((group) => (
+            <div class="setlist__history-axis">
+              <dt>{group.label}</dt>
+              {group.notes.map((note) => (
+                <dd data-tone={note.tone}>{note.text}</dd>
+              ))}
+            </div>
+          ))}
+        </dl>
       )
     }
     {

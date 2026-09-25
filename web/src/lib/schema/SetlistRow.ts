@@ -3,6 +3,7 @@ import type { LineupNote } from "./LineupNote";
 import type { PerformerRef } from "./PerformerRef";
 import type { Ref } from "./Ref";
 import type { SetlistCostume } from "./SetlistCostume";
+import type { SetlistNoteGroup } from "./SetlistNoteGroup";
 
 /**
  * セトリの 1 行。
@@ -47,4 +48,12 @@ costumes: Array<SetlistCostume>,
 /**
  * この披露がその曲の初披露 (この DB に載っている範囲で最古) なら「初披露」。
  */
-firstPerformanceLabel: string | null, };
+firstPerformanceLabel: string | null, 
+/**
+ * 詳細表示で行に添える**披露の履歴** (`披露  4 回目  2 年 6 か月ぶり`)。
+ *
+ * 軸の分け方・文言・主従は `domain::screen_composition` (アプリの詳細表示と同じ 1 本)。
+ * 出面は参加記録を持たないので「回収」の軸は来ない。どのモードで見せるかは
+ * 閲覧者の切替で、HTML には常に描いておく。
+ */
+history: Array<SetlistNoteGroup>, };

@@ -190,11 +190,7 @@ pub fn setlist_row_note_groups(
     if !mode.shows_performance_history() {
         return Vec::new();
     }
-    let mut groups = Vec::new();
-    groups.push(SetlistRowNoteGroupRecord {
-        label: PERFORMANCE_AXIS.to_string(),
-        notes: performance_notes(performance),
-    });
+    let mut groups = vec![setlist_performance_note_group(performance)];
     let mine_notes = collection_notes(is_real_live, mine);
     if !mine_notes.is_empty() {
         groups.push(SetlistRowNoteGroupRecord {
@@ -203,6 +199,17 @@ pub fn setlist_row_note_groups(
         });
     }
     groups
+}
+
+/// 「披露」の軸 1 本だけ。**自分の参加記録を持たない出面 (Web) はこれだけを出す。**
+///
+/// 回収の軸を空で渡して [`setlist_row_note_groups`] を通すと、「参加記録が無い」と
+/// 「回収対象でない催し」の区別を呼び手が偽装することになるので、軸を分けて出す。
+pub fn setlist_performance_note_group(performance: &PerformanceGap) -> SetlistRowNoteGroupRecord {
+    SetlistRowNoteGroupRecord {
+        label: PERFORMANCE_AXIS.to_string(),
+        notes: performance_notes(performance),
+    }
 }
 
 /// 世の中から見た事実。初披露なら 1 つだけ (「1 回目」は言わない)。
